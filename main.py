@@ -5,26 +5,23 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-# Start the application
-app = FastAPI()
-
 # Read/validate the configuration file
 try:
     with open('sysmanage.yaml', 'r') as file:
         config = yaml.safe_load(file)
         if not 'hostName' in config.keys():
-            print("Missing hostName entry in sysmanage.yaml configuration file")
-            exit(1)
+            config['hostName'] = "localhost"
         if not 'apiPort' in config.keys():
-            print("Missing apiPort entry in sysmanage.yaml configuration file")
-            exit(1)
+            config['apiPort'] = 8000
         if not 'webPort' in config.keys():
-            print("Missing webPort entry in sysmanage.yaml configuration file")
-            exit(1)
+            config['webPort'] = 8080
 except yaml.YAMLError as exc:
     if hasattr(exc, 'problem_mark'):
         mark = exc.problem_mark
         print ("Error reading sysmanage.yaml on line (%s) in column (%s)" % (mark.line+1, mark.column+1))
+
+# Start the application
+app = FastAPI()
 
 # Set up the CORS configuration
 origins = [
@@ -57,4 +54,4 @@ async def login(login_data: UserLogin):
     raise HTTPException(status_code=401, detail="Bad userid or password")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host=config['hostName'], port=config['apiPort'])
