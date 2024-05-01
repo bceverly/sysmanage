@@ -1,3 +1,10 @@
+"""
+This module provides the main setup and entry point for the SysManage server
+process.  It reads and processes the sysmanage.yaml configuration file, sets
+up the CORS configuration in the middleware, includes all of the various
+routers for the system and then launches the application.
+"""
+import sys
 import uvicorn
 import yaml
 
@@ -8,7 +15,7 @@ from api import login
 
 # Read/validate the configuration file
 try:
-    with open('sysmanage.yaml', 'r') as file:
+    with open('sysmanage.yaml', 'r', encoding="utf-8") as file:
         config = yaml.safe_load(file)
         if not 'hostName' in config.keys():
             config['hostName'] = "localhost"
@@ -19,9 +26,8 @@ try:
 except yaml.YAMLError as exc:
     if hasattr(exc, 'problem_mark'):
         mark = exc.problem_mark
-        print ("Error reading sysmanage.yaml on line (%s) in column (%s)" %
-               (mark.line+1, mark.column+1))
-        exit(1)
+        print (f"Error reading sysmanage.yaml on line {mark.line+1} in column {mark.column+1}")
+        sys.exit(1)
 
 # Start the application
 app = FastAPI()
@@ -45,6 +51,10 @@ app.include_router(login.router)
 
 @app.get("/")
 async def root():
+    """
+    This function provides the HTTP response to calls to the root path of
+    the service.
+    """
     return {"message": "Hello World"}
 
 if __name__ == "__main__":
