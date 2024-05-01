@@ -15,6 +15,8 @@ has lost connectivity (i.e. the remote machine might be "down")
 To build this project, you need to be running python 3.12 or higher in a 
 virtual environment with the following items installed:
 
-- pip install 
+- python3 -m pip install -r requirements.txt
+- Install liquibase with JavaJRE 17 per your operating system
+- Install PostgreSQL version 14 or higher 
 
 Please see LICENSE for licensing of this service.
