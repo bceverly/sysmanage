@@ -1,9 +1,10 @@
 import uvicorn
 import yaml
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+
+from api import login
 
 # Read/validate the configuration file
 try:
@@ -18,7 +19,9 @@ try:
 except yaml.YAMLError as exc:
     if hasattr(exc, 'problem_mark'):
         mark = exc.problem_mark
-        print ("Error reading sysmanage.yaml on line (%s) in column (%s)" % (mark.line+1, mark.column+1))
+        print ("Error reading sysmanage.yaml on line (%s) in column (%s)" %
+               (mark.line+1, mark.column+1))
+        exit(1)
 
 # Start the application
 app = FastAPI()
@@ -37,21 +40,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Import the dependencies
+app.include_router(login.router)
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
-
-class UserLogin(BaseModel):
-    userid: str
-    password: str
-
-@app.post("/login")
-async def login(login_data: UserLogin):
-    if login_data.userid == 'user':
-        if login_data.password == 'password':
-            return { "message": "success", "result": "true" }
-
-    raise HTTPException(status_code=401, detail="Bad userid or password")
 
 if __name__ == "__main__":
     uvicorn.run(app, host=config['hostName'], port=config['apiPort'])
