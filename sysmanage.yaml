@@ -1,0 +1,16 @@
+--- 
+#
+# sysmanage.yaml
+#
+# This is the SysManage server (https://sysmanage.org)  configuration file.
+# It allows the user to specify key configuration items for the sysmanage
+# service such as:
+#
+# hostName: "FQDN"
+# webPort: 80
+# tlsCertFile: "TLS_Certificate_File"
+# apiPort: 8000
+
+hostName: "localhost"
+apiPort: 8000
+webPort: 8080
