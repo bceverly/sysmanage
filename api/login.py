@@ -5,11 +5,13 @@ server.
 from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel
 
+from persistence import db
+
 router = APIRouter()
 
 class UserLogin(BaseModel):
     """
-    This class represents the payload to the /login POST request.
+    This class represents the JSON payload to the /login POST request.
     """
     userid: str
     password: str
@@ -19,6 +21,7 @@ async def login(login_data: UserLogin):
     """
     This function provides login ability to the SysManage server.
     """
+    db.get_db()
     if login_data.userid == 'user':
         if login_data.password == 'password':
             return { "message": "success", "result": "true" }
