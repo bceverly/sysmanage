@@ -10,12 +10,12 @@ import yaml
 try:
     with open('sysmanage.yaml', 'r', encoding="utf-8") as file:
         config = yaml.safe_load(file)
-        if not 'hostName' in config.keys():
-            config['hostName'] = "localhost"
-        if not 'apiPort' in config.keys():
-            config['apiPort'] = 8000
-        if not 'webPort' in config.keys():
-            config['webPort'] = 8080
+        if not 'hostName' in config['network'].keys():
+            config['network']['hostName'] = "localhost"
+        if not 'apiPort' in config['network'].keys():
+            config['network']['apiPort'] = 8000
+        if not 'webPort' in config['network'].keys():
+            config['network']['webPort'] = 8080
 except yaml.YAMLError as exc:
     if hasattr(exc, 'problem_mark'):
         mark = exc.problem_mark
