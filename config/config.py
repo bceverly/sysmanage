@@ -23,4 +23,7 @@ except yaml.YAMLError as exc:
         sys.exit(1)
 
 def get_config():
-    return config;
+    """
+    This function allows a caller to retrieve the config object.
+    """
+    return config
