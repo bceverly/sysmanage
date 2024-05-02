@@ -16,7 +16,10 @@ To build this project, you need to be running python 3.12 or higher in a
 virtual environment with the following items installed:
 
 - python3 -m pip install -r requirements.txt
-- Install liquibase with JavaJRE 17 per your operating system
-- Install PostgreSQL version 14 or higher 
-
+- Install PostgreSQL version 14 or higher
+    - Create a database user
+    - Create a new database
+    - Grant the new user permissions on the new database
+    - Store the DB credentials in a file named /etc/sysmanage.yaml
+(See sample file in root directory for an example)
 Please see LICENSE for licensing of this service.
