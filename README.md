@@ -21,5 +21,8 @@ virtual environment with the following items installed:
     - Create a new database
     - Grant the new user permissions on the new database
     - Store the DB credentials in a file named /etc/sysmanage.yaml
+- Generate a new salt value ($ openssl rand -base64 32)
+- Store the salt value created above in the /etc/sysmanage.yaml file as
+password_salt
 (See sample file in root directory for an example)
 Please see LICENSE for licensing of this service.

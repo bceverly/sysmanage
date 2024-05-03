@@ -18,6 +18,9 @@
 #   host: "db_fqdn"
 #   port: "db_service_port"
 #   name: "db_database_name"
+#
+# security:
+#   password_salt: "the salt value"
 
 network:
   hostName: "localhost"
@@ -30,3 +33,6 @@ database:
   host: "localhost"
   port: "5432"
   name: "sysmanage"
+
+security:
+  password_salt: "1d+44eA5DVGvIvA2O6jsem+PTX2fDiBzLAR6ZdQdxVo="
