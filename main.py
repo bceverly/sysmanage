@@ -9,7 +9,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api import login
+from api import login, user
 from config import config
 
 # Parse the /etc/sysmanage.yaml file
@@ -34,6 +34,7 @@ app.add_middleware(
 
 # Import the dependencies
 app.include_router(login.router)
+app.include_router(user.router)
 
 @app.get("/")
 async def root():

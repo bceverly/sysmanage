@@ -2,7 +2,7 @@
 This module manages the "db" object which is the gateway into the SQLAlchemy
 ORM used by SysManage.
 """
-from sqlalchemy import Column, Integer, String, create_engine
+from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -26,6 +26,12 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Get the base model class - we can use this to extend any models
 Base = declarative_base()
+
+def get_engine():
+    """
+    Provide a mechanism to retrieve the engine from within the rest of the application
+    """
+    return engine
 
 def get_db():
     """
