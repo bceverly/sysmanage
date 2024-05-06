@@ -6,7 +6,6 @@ from datetime import datetime, timezone
 from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel
 from pyargon2 import hash as argon2_hash
-from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
 from persistence import db, models
@@ -47,6 +46,11 @@ async def login(login_data: UserLogin):
         records = session.query(models.User).all()
         for record in records:
             if record.userid == login_data.userid and record.hashed_password == hashed_value:
+                # Update the last access datetime
+                session.query(models.User).filter(models.User.id == record.id).update({models.User.last_access: datetime.now(timezone.utc)})
+                session.commit()
+
+                # Return success
                 return { "message": "success", "result": "true" }
 
     # If we got here, then there was no match
