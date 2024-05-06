@@ -2,7 +2,7 @@
 This module contains the API implementation for the user object in the system.
 """
 from datetime import datetime, timezone
-from fastapi import APIRouter
+from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel
 from sqlalchemy import select, delete
 from sqlalchemy.orm import sessionmaker
@@ -22,8 +22,8 @@ class User(BaseModel):
     password: str
     last_access: datetime
 
-@router.delete("/user/{userid}")
-async def delete_user(userid: str):
+@router.delete("/user/{id}")
+async def delete_user(id: int):
     """
     This function deletes a single user given a userid
     """
@@ -32,13 +32,32 @@ async def delete_user(userid: str):
     session_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
 
     with session_local() as session:
-        session.execute(delete(models.User).where(models.User.userid == userid))
+        session.execute(delete(models.User).where(models.User.id == id))
         session.commit()
 
     return { "message": "success", "result": "true" }
 
-@router.get("/user/{userid}")
-async def get_user(userid: str):
+@router.get("/user/{id}")
+async def get_user(id: int):
+    """
+    This function retrieves a single user by its id
+    """
+
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
+
+    with session_local() as session:
+        result = session.execute(select(models.User).where(models.User.id == id))
+        users = result.mappings().all()
+
+        # Check for failure
+        if len(users) != 1:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+    return { "message": "success", "result": users[0] }
+
+@router.get("/user/by_userid/{userid}")
+async def get_user_by_userid(userid: str):
     """
     This function retrieves a single user by userid
     """
@@ -53,7 +72,7 @@ async def get_user(userid: str):
 
     return { "message": "success", "result": "true" }
 
-@router.get("/user")
+@router.get("/users")
 async def get_all_users():
     """
     This function retrieves all users in the system
@@ -63,9 +82,8 @@ async def get_all_users():
     session_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
 
     with session_local() as session:
-        result = session.execute(select(models.User))
-        users = result.mappings().all()
-        return { "message": "success", "result": users }
+        result = session.query(models.User).all()
+        return { "message": "success", "result": result }
 
     return { "message": "success", "result": "true" }
 
@@ -87,4 +105,4 @@ async def add_user(new_user: User):
         session.add(user)
         session.commit()
     
-    return { "message": "success", "result": "true" }
+    return { "message": "success", "result": user }
