@@ -25,6 +25,7 @@ virtual environment with the following items installed:
 - Generate a new salt value ($ openssl rand -base64 32)
 - Store the salt value created above in the /etc/sysmanage.yaml file as
 password_salt (See sample file in root directory for an example)
+- Set up the admin userid and password in the /etc/sysmanage.yaml file
 - Run the web UI via "python3 -m http.server" from the ./website
 directory
 
