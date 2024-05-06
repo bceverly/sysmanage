@@ -25,14 +25,14 @@ async def login(login_data: UserLogin):
     """
     This function provides login ability to the SysManage server.
     """
-    db.get_db()
-    if login_data.userid == 'user':
-        if login_data.password == 'password':
-            return { "message": "success", "result": "true" }
-        raise HTTPException(status_code=401, detail="Bad userid or password")
-
     # Get the /etc/sysmanage.yaml configuration
     the_config = config.get_config()
+
+    db.get_db()
+    if login_data.userid == the_config["security"]["admin_userid"]:
+        if login_data.password == the_config["security"]["admin_password"]:
+            return { "message": "success", "result": "true" }
+        raise HTTPException(status_code=401, detail="Bad userid or password")
 
     # Get the SQLAlchemy session
     session_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
