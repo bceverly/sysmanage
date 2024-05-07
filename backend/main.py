@@ -9,8 +9,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api import login, user
-from config import config
+from backend.api import login, user
+from backend.config import config
 
 # Parse the /etc/sysmanage.yaml file
 app_config = config.get_config()

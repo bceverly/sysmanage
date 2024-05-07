@@ -8,8 +8,8 @@ from sqlalchemy.orm import sessionmaker
 
 from pyargon2 import hash as argon2_hash
 
-from persistence import db, models
-from config import config
+from backend.persistence import db, models
+from backend.config import config
 
 router = APIRouter()
 

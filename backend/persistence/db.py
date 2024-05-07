@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from config import config
+from backend.config import config
 
 # Get the /etc/sysmanage.yaml configuration
 the_config = config.get_config()

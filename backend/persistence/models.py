@@ -4,7 +4,7 @@ PostgreSQL database.
 """
 
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
-from persistence.db import Base
+from backend.persistence.db import Base
 
 class User(Base):
     """
