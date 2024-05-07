@@ -23,20 +23,3 @@
 #   password_salt: "the salt value"
 #   admin_userid: "hardcoded_admin_login"
 #   admin_password: "password_for_above"
-
-network:
-  hostName: "localhost"
-  apiPort: 8000
-  webPort: 8080
-
-database:
-  user: "sysmanage"
-  password: "abc123"
-  host: "localhost"
-  port: "5432"
-  name: "sysmanage"
-
-security:
-  password_salt: "1d+44eA5DVGvIvA2O6jsem+PTX2fDiBzLAR6ZdQdxVo="
-  admin_userid: "admin"
-  admin_password: "password"
