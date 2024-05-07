@@ -20,13 +20,15 @@ virtual environment with the following items installed:
     - Create a database user
     - Create a new database
     - Grant the new user permissions on the new database
+- Using the sysmanage.yaml.example file, create a file called 
+/etc/sysmanage.yaml
     - Store the DB credentials in a file named /etc/sysmanage.yaml
-- Migrate to the latest database schema with "alembic upgrade head"
-- Generate a new salt value ($ openssl rand -base64 32)
-- Store the salt value created above in the /etc/sysmanage.yaml file as
+    - Generate a new salt value ($ openssl rand -base64 32)
+    - Store the salt value created above in the /etc/sysmanage.yaml file as
 password_salt (See sample file in root directory for an example)
-- Set up the admin userid and password in the /etc/sysmanage.yaml file
-- Run the web UI via "python3 -m http.server" from the ./website
+    - Set up the admin userid and password in the /etc/sysmanage.yaml file
+    - Run the web UI via "python3 -m http.server" from the ./website
 directory
+- Migrate to the latest database schema with "alembic upgrade head"
 
 Please see LICENSE for licensing of this service.
