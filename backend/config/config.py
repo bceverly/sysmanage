@@ -8,7 +8,7 @@ import yaml
 
 # Read/validate the configuration file
 try:
-    with open('sysmanage.yaml', 'r', encoding="utf-8") as file:
+    with open('/etc/sysmanage.yaml', 'r', encoding="utf-8") as file:
         config = yaml.safe_load(file)
         if not 'hostName' in config['network'].keys():
             config['network']['hostName'] = "localhost"
