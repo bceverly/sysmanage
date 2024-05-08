@@ -9,10 +9,10 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from persistence.db import Base
-from persistence.db import SQLALCHEMY_DATABASE_URL
+from backend.persistence.db import Base
+from backend.persistence.db import SQLALCHEMY_DATABASE_URL
 
-from persistence.models import User
+from backend.persistence.models import User
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
