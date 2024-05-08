@@ -17,17 +17,12 @@ virtual environment with the following items installed:
 
 - python3 -m pip install -r requirements.txt
 - Install PostgreSQL version 14 or higher
-    - Create a database user
-    - Create a new database
-    - Grant the new user permissions on the new database
-- Using the sysmanage.yaml.example file, create a file called 
-/etc/sysmanage.yaml
-    - Store the DB credentials here
-    - Generate a new salt value ($ openssl rand -base64 32)
-    - Store the salt value created above here
-    - Set up the admin userid and password here
+- Run db_setup.sh to generate the createdb.sh script and the
+sysmanage.yaml file (copy it to /etc)
+- Migrate to the latest database schema with "alembic upgrade head"
 - Run the web UI via "python3 -m http.server" from the ./website
 directory
-- Migrate to the latest database schema with "alembic upgrade head"
+- Run the backend API with "uvicorn backend.main:app"
+- Run the unit tests with "pytest"
 
 Please see LICENSE for licensing of this service.
