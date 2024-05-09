@@ -17,6 +17,7 @@ class User(BaseModel):
     """
     This class represents the JSON payload to the /user POST request.
     """
+    active: bool
     userid: EmailStr
     password: str
 
@@ -134,7 +135,7 @@ async def add_user(new_user: User):
     with session_local() as session:
         hashed_value = argon2_hash(new_user.password, the_config["security"]["password_salt"])
         user = models.User(userid=new_user.userid,
-                           active=True,
+                           active=new_user.active,
                            hashed_password=hashed_value,
                            last_access=datetime.now(timezone.utc))
         session.add(user)
@@ -171,7 +172,8 @@ async def update_user(id: int, user_data: User):
 
         # Update the values
         hashed_value = argon2_hash(user_data.password, the_config["security"]["password_salt"])
-        session.query(models.User).filter(models.User.id == id).update({models.User.userid: user_data.userid, 
+        session.query(models.User).filter(models.User.id == id).update({models.User.active: user_data.active,
+                                                                        models.User.userid: user_data.userid, 
                                                                         models.User.hashed_password: hashed_value, 
                                                                         models.User.last_access: datetime.now(timezone.utc)})
         session.commit()
