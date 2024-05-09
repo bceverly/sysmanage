@@ -3,7 +3,7 @@ This module contains the API implementation for the user object in the system.
 """
 from datetime import datetime, timezone
 from fastapi import HTTPException, APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import sessionmaker
 
 from pyargon2 import hash as argon2_hash
@@ -17,7 +17,7 @@ class User(BaseModel):
     """
     This class represents the JSON payload to the /user POST request.
     """
-    userid: str
+    userid: EmailStr
     password: str
 
 @router.delete("/user/{id}")
@@ -41,7 +41,9 @@ async def delete_user(id: int):
         session.query(models.User).filter(models.User.id == id).delete()
         session.commit()
 
-    return { "message": "success", "result": "true" }
+    return {
+        "result": True
+        }
 
 @router.get("/user/{id}")
 async def get_user(id: int):
@@ -58,8 +60,15 @@ async def get_user(id: int):
         # Check for failure
         if len(users) != 1:
             raise HTTPException(status_code=404, detail="User not found")
-        
-    return { "message": "success", "result": users[0] }
+
+        ret_user = models.User(id=users[0].id,
+                               active=users[0].active,
+                               userid=users[0].userid)
+
+        return {
+            "result": True, 
+            "data": ret_user
+            }
 
 @router.get("/user/by_userid/{userid}")
 async def get_user_by_userid(userid: str):
@@ -74,10 +83,17 @@ async def get_user_by_userid(userid: str):
         users = session.query(models.User).filter(models.User.userid == userid).all()
 
         # Check for failure
-        if len(users) == 0:
+        if len(users) != 1:
             raise HTTPException(status_code=404, detail="User not found")
+        
+        ret_user = models.User(id=users[0].id,
+                               active=users[0].active,
+                               userid=users[0].userid)
 
-        return { "message": "success", "result": users }
+        return {
+            "result": True, 
+            "data": ret_user
+            }
 
 @router.get("/users")
 async def get_all_users():
@@ -90,9 +106,18 @@ async def get_all_users():
 
     with session_local() as session:
         result = session.query(models.User).all()
-        return { "message": "success", "result": result }
 
-    return { "message": "success", "result": "true" }
+        ret_users = []
+        for user in result:
+            the_user = models.User(id=user.id,
+                                   active=user.active,
+                                   userid=user.userid)
+            ret_users.append(the_user)
+
+        return {
+            "result": True,
+            "data": ret_users
+            }
 
 @router.post("/user")
 async def add_user(new_user: User):
@@ -108,11 +133,20 @@ async def add_user(new_user: User):
     # Add the data to the database
     with session_local() as session:
         hashed_value = argon2_hash(new_user.password, the_config["security"]["password_salt"])
-        user = models.User(userid=new_user.userid, active=True, hashed_password=hashed_value, last_access=datetime.now(timezone.utc))
+        user = models.User(userid=new_user.userid,
+                           active=True,
+                           hashed_password=hashed_value,
+                           last_access=datetime.now(timezone.utc))
         session.add(user)
         session.commit()
-    
-    return { "message": "success", "result": user }
+        ret_user = models.User(id = user.id,
+                               active = user.active,
+                               userid = user.userid)
+
+        return {
+            "result": True, 
+            "data": ret_user 
+            }
 
 @router.put("/user/{id}")
 async def update_user(id: int, user_data: User):
@@ -142,4 +176,11 @@ async def update_user(id: int, user_data: User):
                                                                         models.User.last_access: datetime.now(timezone.utc)})
         session.commit()
 
-    return { "message": "success", "result": "true" }
+        ret_user = models.User(id = user_data.id,
+                               active = user_data.active,
+                               userid = user_data.userid)
+
+    return {
+        "result": True,
+        "data": ret_user
+        }
