@@ -20,6 +20,7 @@ echo "SYSMANAGE_DBPASSWORD"
 echo "SYSMANAGE_DATABASE"
 echo "SYSMANAGE_ADMINUSER"
 echo "SYSMANAGE_ADMINPASSWORD"
+echo "SYSMANAGE_JWT_TIMEOUT"
 echo ""
 
 if [[ -z "${SYSMANAGE_WEBHOST}" ]]; then
@@ -102,6 +103,14 @@ if [[ -z "${SYSMANAGE_ADMINPASSWORD}" ]]; then
     exit 1
 fi
 
+if [[ -z "${SYSMANAGE_JWT_TIMEOUT}" ]]; then
+    echo "You must set SYSMANAGE_JWT_TIMEOUT to the name of your SysManage"
+    echo "JWT timeout value in tenths of a second:"
+    echo ""
+    echo "$ export SYSMANAGE_JWT_TIMEOUT='600'"
+    exit 1
+fi
+
 # Made it to here, all of the environment variables are set
 # Test to see if we have psql in our path
 
@@ -140,7 +149,7 @@ echo "database:" >> sysmanage.yaml
 echo "  user: \"${SYSMANAGE_DBUSER}\"" >> sysmanage.yaml
 echo "  password: \"${SYSMANAGE_DBPASSWORD}\"" >> sysmanage.yaml
 echo "  host: \"${SYSMANAGE_DBHOST}\"" >> sysmanage.yaml
-echo "  port: \"${SYSMANAGE_DBPORT}\"" >> sysmanage.yaml
+echo "  port: ${SYSMANAGE_DBPORT}" >> sysmanage.yaml
 echo "  name: \"${SYSMANAGE_DATABASE}\"" >> sysmanage.yaml
 echo "" >> sysmanage.yaml
 echo "security:" >> sysmanage.yaml
@@ -148,3 +157,7 @@ SALT=`openssl rand -base64 32`
 echo "  password_salt: \"${SALT}\"" >> sysmanage.yaml
 echo "  admin_userid: \"${SYSMANAGE_ADMINUSER}\"" >> sysmanage.yaml
 echo "  admin_password: \"${SYSMANAGE_ADMINPASSWORD}\"" >> sysmanage.yaml
+JWTSECRET=`openssl rand -base64 32`
+echo "  jwt_secret: \"${JWTSECRET}\"" >> sysmanage.yaml
+echo "  jwt_algorithm: \"HS256\"" >> sysmanage.yaml
+echo "  jwt_timeout: ${SYSMANAGE_JWT_TIMEOUT}" >> sysmanage.yaml

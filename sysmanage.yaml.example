@@ -16,10 +16,13 @@
 #   user: "db_user"
 #   password: "db_password"
 #   host: "db_fqdn"
-#   port: "db_service_port"
+#   port: db_service_port
 #   name: "db_database_name"
 #
 # security:
 #   password_salt: "the salt value"
 #   admin_userid: "hardcoded_admin_login"
 #   admin_password: "password_for_above"
+#   jwt_secret: "secret_for_jwt_tokens"
+#   jwt_algorithm: "HS256"
+#   jwt_timeout: 600

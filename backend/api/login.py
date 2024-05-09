@@ -4,7 +4,8 @@ server.
 """
 from datetime import datetime, timezone
 from fastapi import HTTPException, APIRouter
-from pydantic import BaseModel
+from typing import Dict
+from pydantic import BaseModel, EmailStr
 from pyargon2 import hash as argon2_hash
 from sqlalchemy.orm import sessionmaker
 
@@ -17,11 +18,11 @@ class UserLogin(BaseModel):
     """
     This class represents the JSON payload to the /login POST request.
     """
-    userid: str
+    userid: EmailStr
     password: str
 
 @router.post("/login")
-async def login(login_data: UserLogin):
+async def login(login_data: UserLogin) -> Dict[str, str]:
     """
     This function provides login ability to the SysManage server.
     """
@@ -31,7 +32,9 @@ async def login(login_data: UserLogin):
     db.get_db()
     if login_data.userid == the_config["security"]["admin_userid"]:
         if login_data.password == the_config["security"]["admin_password"]:
-            return { "message": "success", "result": "true" }
+            return { 
+                "result": "true" 
+                }
         raise HTTPException(status_code=401, detail="Bad userid or password")
 
     # Get the SQLAlchemy session
@@ -51,7 +54,9 @@ async def login(login_data: UserLogin):
                 session.commit()
 
                 # Return success
-                return { "message": "success", "result": "true" }
+                return { 
+                    "result": "true" 
+                    }
 
     # If we got here, then there was no match
     raise HTTPException(status_code=401, detail="Bad userid or password")
