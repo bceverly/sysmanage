@@ -2,12 +2,13 @@
 This module contains the API implementation for the user object in the system.
 """
 from datetime import datetime, timezone
-from fastapi import HTTPException, APIRouter
+from fastapi import HTTPException, APIRouter, Depends, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import sessionmaker
 
 from pyargon2 import hash as argon2_hash
 
+from backend.auth.auth_bearer import JWTBearer
 from backend.persistence import db, models
 from backend.config import config
 
@@ -21,7 +22,7 @@ class User(BaseModel):
     userid: EmailStr
     password: str
 
-@router.delete("/user/{id}")
+@router.delete("/user/{id}", dependencies=[Depends(JWTBearer())])
 async def delete_user(id: int):
     """
     This function deletes a single user given a userid
@@ -46,8 +47,8 @@ async def delete_user(id: int):
         "result": True
         }
 
-@router.get("/user/{id}")
-async def get_user(id: int):
+@router.get("/user/{id}", dependencies=[Depends(JWTBearer())])
+async def get_user(id: int, request: Request):
     """
     This function retrieves a single user by its id
     """
@@ -71,7 +72,7 @@ async def get_user(id: int):
             "data": ret_user
             }
 
-@router.get("/user/by_userid/{userid}")
+@router.get("/user/by_userid/{userid}", dependencies=[Depends(JWTBearer())])
 async def get_user_by_userid(userid: str):
     """
     This function retrieves a single user by userid
@@ -96,7 +97,7 @@ async def get_user_by_userid(userid: str):
             "data": ret_user
             }
 
-@router.get("/users")
+@router.get("/users", dependencies=[Depends(JWTBearer())])
 async def get_all_users():
     """
     This function retrieves all users in the system
@@ -120,7 +121,7 @@ async def get_all_users():
             "data": ret_users
             }
 
-@router.post("/user")
+@router.post("/user", dependencies=[Depends(JWTBearer())])
 async def add_user(new_user: User):
     """
     This function adds a new user to the system.
@@ -149,7 +150,7 @@ async def add_user(new_user: User):
             "data": ret_user 
             }
 
-@router.put("/user/{id}")
+@router.put("/user/{id}", dependencies=[Depends(JWTBearer())])
 async def update_user(id: int, user_data: User):
     """
     This function updates an existing user by id
