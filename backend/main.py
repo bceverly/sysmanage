@@ -10,7 +10,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api import login, user
-from backend.auth.auth_handler import sign_jwt, decode_jwt
+from backend.auth.auth_handler import sign_jwt, reauth_decode_jwt
 from backend.config import config
 
 # Parse the /etc/sysmanage.yaml file
@@ -47,7 +47,7 @@ async def add_token_header(request: Request, call_next):
         old_string = the_headers["Authorization"]
         the_elements = old_string.split()
         if len(the_elements) == 2:
-            old_dict = decode_jwt(the_elements[1])
+            old_dict = reauth_decode_jwt(the_elements[1])
             if old_dict:
                 if "user_id" in old_dict:
                     user_id = old_dict["user_id"]

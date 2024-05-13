@@ -3,7 +3,7 @@ This module holds the various models that are persistence backed by the
 PostgreSQL database.
 """
 
-from sqlalchemy import Column, BigInteger, Integer, String, DateTime, Boolean
+from sqlalchemy import Column, BigInteger, String, DateTime, Boolean
 from backend.persistence.db import Base
 
 class User(Base):

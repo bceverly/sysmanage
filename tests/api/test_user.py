@@ -4,8 +4,10 @@ backend API for SysManage.  The main entry point is a function called
 test_user_all() which in turn runs all of the individual unit tests in this
 file.
 """
+from random import randint
 
 from fastapi.testclient import TestClient
+
 from backend.main import app
 from backend.config import config
 
@@ -32,11 +34,12 @@ def test_user():
     token = response.json()["access_token"]
 
     # Add a user
+    random_email = f"test{randint(100000,999999)}@example.com"
     response = client.post("/user", headers={
         "Authorization": f"Bearer {token}"
     }, json={
         "active": True,
-        "userid": "test123456@example.com",
+        "userid": random_email,
         "password": "password"
     })
     assert response.status_code == 200
@@ -51,18 +54,18 @@ def test_user():
     assert response.status_code == 200
     assert response.json() == {"id": the_id,
                                "active": True,
-                               "userid": "test123456@example.com"}
+                               "userid": random_email}
 
     token = response.headers["reauthorization"]
 
     # Get the user by userid
-    response = client.get("/user/by_userid/test123456@example.com", headers={
+    response = client.get(f"/user/by_userid/{random_email}", headers={
         "Authorization": f"Bearer {token}"
     })
     assert response.status_code == 200
     assert response.json() == {"id": the_id,
                                "active": True,
-                               "userid": "test123456@example.com"}
+                               "userid": random_email}
 
     token = response.headers["reauthorization"]
 
@@ -71,26 +74,3 @@ def test_user():
         "Authorization": f"Bearer {token}"
     })
     assert response.status_code == 200
-
-def test_user_get_by_id():
-    """
-    This test validates that a user can be succesfully found by
-    its primary key.  It is non-destructive other than advancing
-    the numberic key on the database table.
-    """
-    assert True
-
-def test_user_get_by_userid():
-    """
-    This test validates that a user can be successfully found by
-    its userid.  It is non-destructive other than advancing the
-    numeric key on the database table.
-    """
-    assert True
-
-def test_user_get_all():
-    """
-    This test validates that multiple users can be successfully
-    retrieved 
-    """
-    assert True
