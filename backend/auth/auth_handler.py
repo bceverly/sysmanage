@@ -23,7 +23,7 @@ def token_response(token: str):
     This is a helper function to create a JSON payload from a jwt token
     """
     return {
-        "access_token": token
+        "X_Reauthorization": token
     }
 
 def sign_jwt(user_id: str) -> Dict[str, str]:
