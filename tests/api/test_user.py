@@ -31,7 +31,7 @@ def test_user():
     assert response.status_code == 200
 
     # Get the bearer token
-    token = response.json()["access_token"]
+    token = response.json()["X_Reauthorization"]
 
     # Add a user
     random_email = f"test{randint(100000,999999)}@example.com"
@@ -44,7 +44,7 @@ def test_user():
     })
     assert response.status_code == 200
 
-    token = response.headers["reauthorization"]
+    token = response.headers["X_Reauthorization"]
     the_id = response.json()["id"]
 
     # Get the user by id
@@ -56,7 +56,7 @@ def test_user():
                                "active": True,
                                "userid": random_email}
 
-    token = response.headers["reauthorization"]
+    token = response.headers["X_Reauthorization"]
 
     # Get the user by userid
     response = client.get(f"/user/by_userid/{random_email}", headers={
@@ -67,7 +67,7 @@ def test_user():
                                "active": True,
                                "userid": random_email}
 
-    token = response.headers["reauthorization"]
+    token = response.headers["X_Reauthorization"]
 
     # Cleanup
     response = client.delete(f"/user/{the_id}", headers={
