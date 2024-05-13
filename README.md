@@ -11,6 +11,8 @@ has lost connectivity (i.e. the remote machine might be "down")
 - Keep track of any updates that might be available for the remote server
 - Install updates on the remote server
 
+Please see LICENSE for licensing of this service.
+
 # Building
 To build this project, you need to be running python 3.12 or higher in a 
 virtual environment with the following items installed:
@@ -43,5 +45,3 @@ or
 The following command shows the history of migrations:
 
 (.venv) $ alembic history
-
-Please see LICENSE for licensing of this service.
