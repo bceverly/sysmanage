@@ -75,9 +75,9 @@ code of 403 (Forbidden).
 To access the OpenAPI swagger documentation for SysManage, run the service
 as follows:
 
-(.venv) % uvicorn backend/main:app
+(.venv) % uvicorn backend.main:app --reload
 
 You can then point your browser at the URL/API port specified in the file at
 /etc/sysmanage.yaml, followed by the docs path.  For example:
 
-http://localhost:8000/docs
+http://127.0.0.1:8000/docs
