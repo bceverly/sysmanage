@@ -7,7 +7,6 @@ from typing import Dict
 
 import jwt
 import jwt.exceptions
-from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import sessionmaker
 
 from backend.config import config

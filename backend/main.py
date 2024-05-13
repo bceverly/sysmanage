@@ -46,7 +46,7 @@ async def add_token_header(request: Request, call_next):
     # Error: Forbidden state
     if response.status_code == 403:
         return response
-    
+
     # get the Bearer token from the request
     the_headers = request.headers
     if "Authorization" in the_headers:
