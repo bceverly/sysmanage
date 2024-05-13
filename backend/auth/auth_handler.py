@@ -1,12 +1,13 @@
 """
 This module manages the JWT aut mechanism used by the backend.
 """
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import time
 from typing import Dict
 
 import jwt
 import jwt.exceptions
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import sessionmaker
 
 from backend.config import config
@@ -75,6 +76,13 @@ def decode_jwt(token: str) -> dict:
             # Time value is not past expiration; however, need to check to
             # see if the token has already been used
             session_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
+
+            # Delete any old tokens to keep the query fast
+            with session_local() as session:
+                stmt = session.query(models.BearerToken).filter(models.BearerToken.created_datetime < datetime.now(timezone.utc) - 
+                                                                timedelta(seconds=int(the_config["security"]["jwt_timeout"])))
+                stmt.delete()
+                session.commit()
 
             # Check to see if the token is in the database, if not, then it has never
             # been used and is currently valid.
