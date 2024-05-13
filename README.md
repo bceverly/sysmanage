@@ -25,4 +25,23 @@ directory
 - Run the backend API with "uvicorn backend.main:app"
 - Run the unit tests with "pytest"
 
+# Database Migration
+Edit the persistence/models.py file to define new database tables or
+columns.  Afterwards, execute:
+
+(.venv) $ alembic revision --autogenerate -m "describe the changes"
+(.venv) $ alembic upgrade head
+
+If you need to roll back a migration, you can run:
+
+(.venv) $ alembic downgrade <revision>
+
+or
+
+(.venv) $ alembic downgrade -1
+
+The following command shows the history of migrations:
+
+(.venv) $ alembic history
+
 Please see LICENSE for licensing of this service.
