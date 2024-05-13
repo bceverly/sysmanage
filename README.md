@@ -71,3 +71,13 @@ A token can only be used one time and even if it is unexpired, it will be
 deny-listed on the server and prevent a subsequent successful re-use of the
 same token.  Any bad or attempted re-use of tokens will result in a response
 code of 403 (Forbidden).
+
+To access the OpenAPI swagger documentation for SysManage, run the service
+as follows:
+
+(.venv) % uvicorn backend/main:app
+
+You can then point your browser at the URL/API port specified in the file at
+/etc/sysmanage.yaml, followed by the docs path.  For example:
+
+http://localhost:8000/docs
