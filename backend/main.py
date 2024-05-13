@@ -42,6 +42,11 @@ async def add_token_header(request: Request, call_next):
     """
     response = await call_next(request)
 
+    # Check that this is a content-type = application/json
+    content_type = response.headers.get('Content-Type')
+    if content_type != "application/json":
+        return response
+
     # Do not "leak" a valid reauthorization token if we are in an
     # Error: Forbidden state
     if response.status_code == 403:
