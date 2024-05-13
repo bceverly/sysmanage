@@ -40,8 +40,14 @@ async def add_token_header(request: Request, call_next):
     This function retrieves/decodes the user_id from the request JWT token
     and adds an HTTP repsonse header that contains a refreshed token
     """
-    # get the Bearer token from the request
     response = await call_next(request)
+
+    # Do not "leak" a valid reauthorization token if we are in an
+    # Error: Forbidden state
+    if response.status_code == 403:
+        return response
+    
+    # get the Bearer token from the request
     the_headers = request.headers
     if "Authorization" in the_headers:
         old_string = the_headers["Authorization"]
@@ -52,7 +58,7 @@ async def add_token_header(request: Request, call_next):
                 if "user_id" in old_dict:
                     user_id = old_dict["user_id"]
                     new_token = sign_jwt(user_id)
-                    response.headers["reauthorization"] = new_token["access_token"]
+                    response.headers["X_Reauthorization"] = new_token["access_token"]
 
     return response
 

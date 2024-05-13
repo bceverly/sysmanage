@@ -20,7 +20,7 @@ DB_NAME = the_config["database"]["name"]
 SQLALCHEMY_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # create the database connection
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={})
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={}, echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Get the base model class - we can use this to extend any models
