@@ -82,3 +82,10 @@ You can then point your browser at the URL/API port specified in the file at
 /etc/sysmanage.yaml, followed by the docs path.  For example:
 
 http://127.0.0.1:8000/docs
+
+# Front-end
+
+The front-end is written in React.JS and can be executve in a local
+environment by navigating to the "website" directory and running:
+
+$ npm start
