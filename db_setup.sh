@@ -10,8 +10,6 @@ echo ""
 echo "The complete list of environment variables you need to set in order"
 echo "to successfully run this script is:"
 echo ""
-echo "SYSMANAGE_WEBHOST"
-echo "SYSMANAGE_WEBPORT"
 echo "SYSMANAGE_APIHOST"
 echo "SYSMANAGE_APIPORT"
 echo "SYSMANAGE_API_TLS_CERT_FILE"
@@ -25,6 +23,11 @@ echo "SYSMANAGE_DATABASE"
 echo "SYSMANAGE_ADMINUSER"
 echo "SYSMANAGE_ADMINPASSWORD"
 echo "SYSMANAGE_JWT_TIMEOUT"
+echo "SYSMANAGE_WEBHOST"
+echo "SYSMANAGE_WEBPORT"
+echo "SYSMANAGE_WEB_TLS_CERT_FILE"
+echo "SYSMANAGE_WEB_TLS_KEY_FILE"
+echo "SYSMANAGE_WEB_TLS_CHAIN_FILE"
 echo ""
 
 if [[ -z "${SYSMANAGE_WEBHOST}" ]]; then
@@ -40,6 +43,30 @@ if [[ -z "${SYSMANAGE_WEBPORT}" ]]; then
     echo "network port:"
     echo ""
     echo "$ export SYSMANAGE_WEBPORT='webport'"
+    exit 1
+fi
+
+if [[ -z "${SYSMANAGE_WEB_TLS_CERT_FILE}" ]]; then
+    echo "You must set SYSMANAGE_WEB_TLS_CERT_FILE to the name of your webui"
+    echo "HTTPS certificate file:"
+    echo ""
+    echo "$ export SYSMANAGE_WEB_TLS_CERT_FILE='/path/to/file'"
+    exit 1
+fi
+
+if [[ -z "${SYSMANAGE_WEB_TLS_CHAIN_FILE}" ]]; then
+    echo "You must set SYSMANAGE_WEB_TLS_CHAIN_FILE to the name of your webui"
+    echo "HTTPS full chain file:"
+    echo ""
+    echo "$ export SYSMANAGE_WEB_TLS_CHAIN_FILE='/path/to/file'"
+    exit 1
+fi
+
+if [[ -z "${SYSMANAGE_WEB_TLS_KEY_FILE}" ]]; then
+    echo "You must set SYSMANAGE_WEB_TLS_KEY_FILE to the name of your web"
+    echo "HTTPS certificate chain file:"
+    echo ""
+    echo "$ export SYSMANAGE_WEB_TLS_KEY_FILE='/path/to/file'"
     exit 1
 fi
 
@@ -175,14 +202,12 @@ echo "${PSQLCMD} -d postgres -c \"grant connect on database ${SYSMANAGE_DATABASE
 echo "${PSQLCMD} -d postgres -c \"grant all privileges on database ${SYSMANAGE_DATABASE} to ${SYSMANAGE_DBUSER};\"" >> createdb.sh
 echo "${PSQLCMD} -d ${SYSMANAGE_DATABASE} -c \"grant all on schema public to ${SYSMANAGE_DBUSER};\"" >> createdb.sh
 
-echo "network:" > sysmanage.yaml
-echo "  webHost: \"${SYSMANAGE_WEBHOST}\"" >> sysmanage.yaml
-echo "  webPort: ${SYSMANAGE_WEBPORT}" >> sysmanage.yaml
-echo "  apiHost: \"${SYSMANAGE_APIHOST}\"" >> sysmanage.yaml
-echo "  apiPort: ${SYSMANAGE_APIPORT}" >> sysmanage.yaml
-echo "  apiCertFile: \"${SYSMANAGE_API_TLS_CERT_FILE}\"" >> sysmanage.yaml
-echo "  apiChainFile: \"${SYSMANAGE_API_TLS_CHAIN_FILE}\"" >> sysmanage.yaml
-echo "  apiKeyFile: \"${SYSMANAGE_API_TLS_KEY_FILE}\"" >> sysmanage.yaml
+echo "api:" > sysmanage.yaml
+echo "  host: \"${SYSMANAGE_APIHOST}\"" >> sysmanage.yaml
+echo "  port: ${SYSMANAGE_APIPORT}" >> sysmanage.yaml
+echo "  certFile: \"${SYSMANAGE_API_TLS_CERT_FILE}\"" >> sysmanage.yaml
+echo "  chainFile: \"${SYSMANAGE_API_TLS_CHAIN_FILE}\"" >> sysmanage.yaml
+echo "  keyFile: \"${SYSMANAGE_API_TLS_KEY_FILE}\"" >> sysmanage.yaml
 echo "" >> sysmanage.yaml
 echo "database:" >> sysmanage.yaml
 echo "  user: \"${SYSMANAGE_DBUSER}\"" >> sysmanage.yaml
@@ -200,3 +225,11 @@ JWTSECRET=`openssl rand -base64 32`
 echo "  jwt_secret: \"${JWTSECRET}\"" >> sysmanage.yaml
 echo "  jwt_algorithm: \"HS256\"" >> sysmanage.yaml
 echo "  jwt_timeout: ${SYSMANAGE_JWT_TIMEOUT}" >> sysmanage.yaml
+echo "" >> sysmanage.yaml
+echo "webui:" >> sysmanage.yaml
+echo "  host: \"${SYSMANAGE_WEBHOST}\"" >> sysmanage.yaml
+echo "  port: ${SYSMANAGE_WEBPORT}" >> sysmanage.yaml
+echo "  certFile: \"${SYSMANAGE_WEB_TLS_CERT_FILE}\"" >> sysmanage.yaml
+echo "  chainFile: \"${SYSMANAGE_WEB_TLS_CHAIN_FILE}\"" >> sysmanage.yaml
+echo "  keyFile: \"${SYSMANAGE_WEB_TLS_KEY_FILE}\"" >> sysmanage.yaml
+echo "" >> sysmanage.yaml

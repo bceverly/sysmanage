@@ -6,11 +6,12 @@
 # It allows the user to specify key configuration items for the sysmanage
 # service such as:
 #
-# network:
-#   hostName: "FQDN"
-#   webPort: 80
-#   tlsCertFile: "TLS_Certificate_File"
-#   apiPort: 8000
+# api:
+#   host: "FQDN"
+#   port: 443
+#   certFile: "/path_to_file"
+#   chainFile: "/path_to_file"
+#   keyFile: "/path_to_file"
 #
 # database:
 #   user: "db_user"
@@ -26,3 +27,11 @@
 #   jwt_secret: "secret_for_jwt_tokens"
 #   jwt_algorithm: "HS256"
 #   jwt_timeout: 600
+#
+# webui:
+#   host: "FQDN"
+#   port: 443
+#   certFile: "/path_to_file"
+#   chainFile: "/path_to_file"
+#   keyFile: "/path_to_file"
+#
