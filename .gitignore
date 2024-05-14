@@ -161,3 +161,6 @@ cython_debug/
 
 sysmanage.yaml
 createdb.sh
+cert.pem
+fullchain.pem
+privkey.pem

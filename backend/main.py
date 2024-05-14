@@ -4,6 +4,7 @@ process.  It reads and processes the sysmanage.yaml configuration file, sets
 up the CORS configuration in the middleware, includes all of the various
 routers for the system and then launches the application.
 """
+import ssl
 import uvicorn
 
 from fastapi import FastAPI, Request
@@ -21,9 +22,8 @@ app = FastAPI()
 
 # Set up the CORS configuration
 origins = [
-    "http://"+app_config['network']['hostName'],
-    "http://"+app_config['network']['hostName']+":"+str(app_config['network']['webPort']),
-    "http://"+app_config['network']['hostName']+":"+str(app_config['network']['apiPort']),
+    "https://"+app_config['network']['webHost']+":"+str(app_config['network']['webPort']),
+    "https://"+app_config['network']['apiHost']+":"+str(app_config['network']['apiPort']),
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -80,4 +80,8 @@ async def root():
     return {"message": "Hello World"}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host=app_config['network']['hostName'], port=app_config['network']['apiPort'])
+    uvicorn.run(app, host=app_config['network']['apiHost'],
+                port=app_config['network']['apiPort'],
+                ssl_keyfile=app_config['network']['tlsKeyFile'],
+                ssl_certfile=app_config['network']['tlsCertFile'],
+                ssl_ca_certs=app_config['network']['tlsChainFile'])
