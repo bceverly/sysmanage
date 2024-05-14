@@ -11,6 +11,9 @@
             "module": "uvicorn",
             "args": [
                 "backend.main:app",
+                "--ssl-keyfile=privkey.pem",
+                "--ssl-certfile=cert.pem",
+                "--ssl-ca-certs=fullchain.pem",
                 "--reload"
             ],
             "jinja": true
