@@ -17,7 +17,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "HOST=sysmanage.org PORT=8080 HTTPS=true SSL_CRT_FILE=~/dev/certs/sysmanage.org/cert.pem SSL_KEY_FILE=~/dev/certs/sysmanage.org/privkey.pem react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
