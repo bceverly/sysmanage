@@ -4,13 +4,12 @@ process.  It reads and processes the sysmanage.yaml configuration file, sets
 up the CORS configuration in the middleware, includes all of the various
 routers for the system and then launches the application.
 """
-import ssl
 import uvicorn
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api import login, user
+from backend.api import login, host, user
 from backend.auth.auth_handler import sign_jwt, reauth_decode_jwt
 from backend.config import config
 
@@ -68,6 +67,7 @@ async def add_token_header(request: Request, call_next):
     return response
 
 # Import the dependencies
+app.include_router(host.router)
 app.include_router(login.router)
 app.include_router(user.router)
 

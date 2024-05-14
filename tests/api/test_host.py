@@ -1,7 +1,7 @@
 """
-This module contains all of the unit tests for the /user routes in the 
+This module contains all of the unit tests for the /host routes in the 
 backend API for SysManage.  The main entry point is a function called
-test_user() which in turn runs all of the individual unit tests in this
+test_host() which in turn runs all of the individual unit tests in this
 file.
 """
 from random import randint
@@ -17,7 +17,7 @@ client = TestClient(app)
 # Get the /etc/sysmanage.yaml configuration
 the_config = config.get_config()
 
-def test_user():
+def test_host():
     """
     This test validates that a user can be successfully added to
     the system.  It is non-destructive other than advancing the
@@ -33,44 +33,51 @@ def test_user():
     # Get the bearer token
     token = response.json()["X_Reauthorization"]
 
-    # Add a user
-    random_email = f"test{randint(100000,999999)}@example.com"
-    response = client.post("/user", headers={
+    # Add a host
+    random_host = f"host{randint(100000,999999)}.example.com"
+    random_ipv4 = f"{randint(1,255)}.{randint(1,255)}.{randint(1,255)}.{randint(1,255)}"
+    random_ipv6 = f"{randint(1,65535):x}.{randint(1,65535):x}.{randint(1,65535):x}.{randint(1,65535):x}.{randint(1,65535):x}.{randint(1,65535):x}.{randint(1,65535):x}.{randint(1,65535):x}"
+    response = client.post("/host", headers={
         "Authorization": f"Bearer {token}"
     }, json={
         "active": True,
-        "userid": random_email,
-        "password": "password"
+        "fqdn": random_host,
+        "ipv4": random_ipv4,
+        "ipv6": random_ipv6
     })
     assert response.status_code == 200
 
     token = response.headers["X_Reauthorization"]
     the_id = response.json()["id"]
 
-    # Get the user by id
-    response = client.get(f"/user/{the_id}", headers={
+    # Get the host by id
+    response = client.get(f"/host/{the_id}", headers={
         "Authorization": f"Bearer {token}"
     })
     assert response.status_code == 200
     assert response.json() == {"id": the_id,
                                "active": True,
-                               "userid": random_email}
+                               "fqdn": random_host,
+                               "ipv4": random_ipv4,
+                               "ipv6": random_ipv6}
 
     token = response.headers["X_Reauthorization"]
 
-    # Get the user by userid
-    response = client.get(f"/user/by_userid/{random_email}", headers={
+    # Get the host by fqdn
+    response = client.get(f"/host/by_fqdn/{random_host}", headers={
         "Authorization": f"Bearer {token}"
     })
     assert response.status_code == 200
     assert response.json() == {"id": the_id,
                                "active": True,
-                               "userid": random_email}
+                               "fqdn": random_host,
+                               "ipv4": random_ipv4,
+                               "ipv6": random_ipv6}
 
     token = response.headers["X_Reauthorization"]
 
     # Cleanup
-    response = client.delete(f"/user/{the_id}", headers={
+    response = client.delete(f"/host/{the_id}", headers={
         "Authorization": f"Bearer {token}"
     })
     assert response.status_code == 200
