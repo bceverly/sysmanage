@@ -15,32 +15,32 @@ const Navbar = () => {
         <>
            <Nav>
             <NavLogo to="/">
-                Logo
+                SysManage
             </NavLogo>
             <Bars />
 
             <NavMenu>
                 <NavLink 
                   to="/"
-                  activeStyle={{ color:'black' }}
+                  activestyle={{ color:'black' }}
                 >
                     Home
                 </NavLink>
                 <NavLink 
                   to="/about"
-                  activeStyle={{ color: 'black' }}
+                  activestyle={{ color: 'black' }}
                 >
                     About
                 </NavLink>
                 <NavLink 
                   to="/contact" 
-                  activeStyle={{ color: 'black' }}
+                  activestyle={{ color: 'black' }}
                 >
                     Contact
                 </NavLink>
                 <NavLink
                   to="/signin"
-                  activeStyle={{ color: 'black' }}
+                  activestyle={{ color: 'black' }}
                 >
                     Sign In
                 </NavLink>
