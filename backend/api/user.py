@@ -16,7 +16,7 @@ router = APIRouter()
 
 class User(BaseModel):
     """
-    This class represents the JSON payload to the /user POST request.
+    This class represents the JSON payload to the /user POST/PUT requests.
     """
     active: bool
     userid: EmailStr
@@ -25,7 +25,7 @@ class User(BaseModel):
 @router.delete("/user/{id}", dependencies=[Depends(JWTBearer())])
 async def delete_user(id: int):
     """
-    This function deletes a single user given a userid
+    This function deletes a single user given an id
     """
 
     # Get the SQLAlchemy session
