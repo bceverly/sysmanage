@@ -22,8 +22,8 @@ app = FastAPI()
 
 # Set up the CORS configuration
 origins = [
-    "https://"+app_config['network']['webHost']+":"+str(app_config['network']['webPort']),
-    "https://"+app_config['network']['apiHost']+":"+str(app_config['network']['apiPort']),
+    "https://"+app_config['webui']['host']+":"+str(app_config['webui']['port']),
+    "https://"+app_config['api']['host']+":"+str(app_config['api']['port']),
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -80,8 +80,8 @@ async def root():
     return {"message": "Hello World"}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host=app_config['network']['apiHost'],
-                port=app_config['network']['apiPort'],
-                ssl_keyfile=app_config['network']['tlsKeyFile'],
-                ssl_certfile=app_config['network']['tlsCertFile'],
-                ssl_ca_certs=app_config['network']['tlsChainFile'])
+    uvicorn.run(app, host=app_config['api']['host'],
+                port=app_config['api']['port'],
+                ssl_keyfile=app_config['api']['keyFile'],
+                ssl_certfile=app_config['api']['certFile'],
+                ssl_ca_certs=app_config['api']['chainFile'])
