@@ -12,7 +12,11 @@ echo "to successfully run this script is:"
 echo ""
 echo "SYSMANAGE_WEBHOST"
 echo "SYSMANAGE_WEBPORT"
+echo "SYSMANAGE_APIHOST"
 echo "SYSMANAGE_APIPORT"
+echo "SYSMANAGE_API_TLS_CERT_FILE"
+echo "SYSMANAGE_API_TLS_KEY_FILE"
+echo "SYSMANAGE_API_TLS_CHAIN_FILE"
 echo "SYSMANAGE_DBHOST"
 echo "SYSMANAGE_DBPORT"
 echo "SYSMANAGE_DBUSER"
@@ -39,11 +43,43 @@ if [[ -z "${SYSMANAGE_WEBPORT}" ]]; then
     exit 1
 fi
 
+if [[ -z "${SYSMANAGE_APIHOST}" ]]; then
+    echo "You must set SYSMANAGE_APIHOST to the name of your api server"
+    echo "hostname or IP:"
+    echo ""
+    echo "$ export SYSMANAGE_APIHOST='apihostname'"
+    exit 1
+fi
+
 if [[ -z "${SYSMANAGE_APIPORT}" ]]; then
     echo "You must set SYSMANAGE_APIPORT to the name of your api server"
     echo "network port:"
     echo ""
     echo "$ export SYSMANAGE_APIPORT='apiport'"
+    exit 1
+fi
+
+if [[ -z "${SYSMANAGE_API_TLS_CERT_FILE}" ]]; then
+    echo "You must set SYSMANAGE_API_TLS_CERT_FILE to the name of your api"
+    echo "HTTPS certificate file:"
+    echo ""
+    echo "$ export SYSMANAGE_API_TLS_CERT_FILE='/path/to/file'"
+    exit 1
+fi
+
+if [[ -z "${SYSMANAGE_API_TLS_CHAIN_FILE}" ]]; then
+    echo "You must set SYSMANAGE_API_TLS_CHAIN_FILE to the name of your api"
+    echo "HTTPS full chain file:"
+    echo ""
+    echo "$ export SYSMANAGE_API_TLS_CHAIN_FILE='/path/to/file'"
+    exit 1
+fi
+
+if [[ -z "${SYSMANAGE_API_TLS_KEY_FILE}" ]]; then
+    echo "You must set SYSMANAGE_API_TLS_KEY_FILE to the name of your api"
+    echo "HTTPS certificate chain file:"
+    echo ""
+    echo "$ export SYSMANAGE_API_TLS_KEY_FILE='/path/to/file'"
     exit 1
 fi
 
@@ -140,10 +176,13 @@ echo "${PSQLCMD} -d postgres -c \"grant all privileges on database ${SYSMANAGE_D
 echo "${PSQLCMD} -d ${SYSMANAGE_DATABASE} -c \"grant all on schema public to ${SYSMANAGE_DBUSER};\"" >> createdb.sh
 
 echo "network:" > sysmanage.yaml
-echo "  hostName: \"${SYSMANAGE_WEBHOST}\"" >> sysmanage.yaml
+echo "  webHost: \"${SYSMANAGE_WEBHOST}\"" >> sysmanage.yaml
 echo "  webPort: ${SYSMANAGE_WEBPORT}" >> sysmanage.yaml
-echo "  tlsCertFile: \"TLS_Certificate_File\"" >> sysmanage.yaml
+echo "  apiHost: \"${SYSMANAGE_APIHOST}\"" >> sysmanage.yaml
 echo "  apiPort: ${SYSMANAGE_APIPORT}" >> sysmanage.yaml
+echo "  apiCertFile: \"${SYSMANAGE_API_TLS_CERT_FILE}\"" >> sysmanage.yaml
+echo "  apiChainFile: \"${SYSMANAGE_API_TLS_CHAIN_FILE}\"" >> sysmanage.yaml
+echo "  apiKeyFile: \"${SYSMANAGE_API_TLS_KEY_FILE}\"" >> sysmanage.yaml
 echo "" >> sysmanage.yaml
 echo "database:" >> sysmanage.yaml
 echo "  user: \"${SYSMANAGE_DBUSER}\"" >> sysmanage.yaml
