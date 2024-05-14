@@ -32,6 +32,7 @@ Edit the persistence/models.py file to define new database tables or
 columns.  Afterwards, execute:
 
 (.venv) $ alembic revision --autogenerate -m "describe the changes"
+
 (.venv) $ alembic upgrade head
 
 If you need to roll back a migration, you can run:
