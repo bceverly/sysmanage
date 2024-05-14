@@ -22,6 +22,7 @@ app = FastAPI()
 # Set up the CORS configuration
 origins = [
     "https://"+app_config['webui']['host']+":"+str(app_config['webui']['port']),
+    "http://localhost:3000",
     "https://"+app_config['api']['host']+":"+str(app_config['api']['port']),
 ]
 app.add_middleware(
