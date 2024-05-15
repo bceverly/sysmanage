@@ -1,3 +1,4 @@
+import styles from './styles/login.css'
 
 const SignIn = () => {
   const handleSubmit = (event) => {
@@ -27,17 +28,17 @@ const SignIn = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="email">Email</label>
-        <input id="email" type="text" />
-      </div>
-      <div>
-        <label htmlFor="password">Password</label>
-        <input id="password" type="password" />
-      </div>
-      <button type="submit">Submit</button>
-    </form>
+    <div className={styles["form-container"]}>
+      <form id='login-form' className={styles["form"]} onSubmit={handleSubmit}>
+        <div>
+          <input id="email" type="text" placeholder="Email" />
+        </div>
+        <div>
+          <input id="password" type="password" placeholder="Password" />
+        </div>
+        <button type="submit">Login</button>
+      </form>
+    </div>
   );
 };
   export default SignIn;
