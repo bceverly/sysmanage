@@ -20,6 +20,7 @@
   input[type="text"],
   input[type="password"],
   button {
+    width: 90%;
     margin-bottom: 15px;
     padding: 10px;
     border: 1px solid #ccc;
@@ -28,14 +29,15 @@
   }
   
   button {
-    background-color: #4CAF50;
+    width: 95%;
+    background-color: cornflowerblue;
     color: white;
     border: none;
     cursor: pointer;
   }
   
   button:hover {
-    background-color: #45a049;
+    background-color: cornflowerblue;
   }
   
   @media screen and (max-width: 600px) {
