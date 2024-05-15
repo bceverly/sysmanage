@@ -1,3 +1,4 @@
+import Axios from "axios";
 import styles from './styles/login.css'
 
 const SignIn = () => {
@@ -6,35 +7,28 @@ const SignIn = () => {
 
     const email = event.target.elements.email.value;
     const password = event.target.elements.password.value;
-    
-    fetch('https://api.sysmanage.org:8443/login', {
-      method: 'POST',
-      body: JSON.stringify({
+
+    Axios.post('https://api.sysmanage.org:8443/login', {
         "userid": email,
         "password": password
-      }),
-      headers: {
-        'Content-type': 'application/json; charset=UTF-8',
-      },
     })
-       .then((response) => response.json())
-       .then((data) => {
-          console.log(data);
-          // Handle data
-       })
-       .catch((err) => {
-          console.log(err.message);
-       });
+    .then((response) => {
+      console.log(response.data);
+    })
+    .catch((error) => {
+      console.log(error);
+    })
   };
 
   return (
-    <div className={styles["form-container"]}>
-      <form id='login-form' className={styles["form"]} onSubmit={handleSubmit}>
+    <div className="form-container">
+      <form id='login-form' className="form" onSubmit={handleSubmit}>
+        <h2>Login</h2>
         <div>
-          <input id="email" type="text" placeholder="Email" />
+          <input required id="email" type="text" placeholder="Email" />
         </div>
         <div>
-          <input id="password" type="password" placeholder="Password" />
+          <input required id="password" type="password" placeholder="Password" />
         </div>
         <button type="submit">Login</button>
       </form>
