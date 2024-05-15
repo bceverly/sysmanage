@@ -24,19 +24,19 @@ const Navbar = () => {
                   to="/"
                   activestyle={{ color:'black' }}
                 >
-                    Home
+                    Dashboard
                 </NavLink>
                 <NavLink 
-                  to="/about"
+                  to="/hosts"
                   activestyle={{ color: 'black' }}
                 >
-                    About
+                    Hosts
                 </NavLink>
                 <NavLink 
-                  to="/contact" 
+                  to="/users" 
                   activestyle={{ color: 'black' }}
                 >
-                    Contact
+                    Users
                 </NavLink>
                 <NavLink
                   to="/login"
@@ -44,9 +44,6 @@ const Navbar = () => {
                 >
                     Log In
                 </NavLink>
-                <NavBtn>
-                    <NavBtnLink to="/sign-up">Sign Up</NavBtnLink>
-                </NavBtn>
             </NavMenu>
            </Nav> 
         </>
