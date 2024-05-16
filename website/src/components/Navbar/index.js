@@ -44,6 +44,9 @@ const Navbar = () => {
                 >
                     Log In
                 </NavLink>
+                <NavBtn>
+                    <NavBtnLink to="/logout">Log Out</NavBtnLink>
+                </NavBtn>
             </NavMenu>
            </Nav> 
         </>
