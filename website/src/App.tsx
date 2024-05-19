@@ -4,14 +4,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './App.css';
 
 //import AuthProvider from './hooks/AuthProvider';
-import PrivateRoute from "./router/route"
+import PrivateRoute from "./router/route.tsx"
 
-import Navbar from "./components/Navbar";
-import Dashboard from './pages';
-import Hosts from './pages/hosts';
-import Users from './pages/users';
-import LogIn from './pages/login';
-import LogOut from './pages/logout';
+import Navbar from "./components/Navbar/index.tsx";
+import Dashboard from './pages/index.tsx';
+import Hosts from './pages/hosts.tsx';
+import Users from './pages/users.tsx';
+import LogIn from './pages/login.tsx';
+import LogOut from './pages/logout.tsx';
 
 function App() {
   return (

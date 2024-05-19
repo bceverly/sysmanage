@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthProvider from "../classes/AuthProvider";
+import AuthProvider from "../classes/AuthProvider.tsx";
 
 import styles from './styles/login.css'
 
