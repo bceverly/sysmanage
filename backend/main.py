@@ -9,7 +9,7 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api import login, host, user
+from backend.api import auth, host, user
 from backend.auth.auth_handler import sign_jwt, reauth_decode_jwt
 from backend.config import config
 
@@ -68,7 +68,7 @@ async def add_token_header(request: Request, call_next):
 
 # Import the dependencies
 app.include_router(host.router)
-app.include_router(login.router)
+app.include_router(auth.router)
 app.include_router(user.router)
 
 @app.get("/")

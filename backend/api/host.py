@@ -8,7 +8,6 @@ from sqlalchemy.orm import sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer
 from backend.persistence import db, models
-from backend.config import config
 
 router = APIRouter()
 
@@ -147,9 +146,6 @@ async def update_host(id: int, host_data: Host):
     """
     This function updates an existing host by id
     """
-
-    # Get the /etc/sysmanage.yaml configuration
-    the_config = config.get_config()
 
     # Get the SQLAlchemy session
     session_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
