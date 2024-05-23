@@ -1,13 +1,19 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
-import AuthProvider from "../classes/AuthProvider.tsx";
+
+import { useAuth } from "../components/AuthContext";
 
 const LogOut = () => {
+    const { doLogout } = useAuth();
+    
     const navigate = useNavigate();
 
     useEffect(() => {
-        AuthProvider.doLogout();
-        navigate("/login");
+        doLogout()
+        .then (() => {
+            console.log("Navigating to /login...")
+            navigate("/login");
+        });
     }, []);
 
     return (

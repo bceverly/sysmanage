@@ -23,7 +23,7 @@ def token_response(token: str):
     This is a helper function to create a JSON payload from a jwt token
     """
     return {
-        "X_Reauthorization": token
+        "Reauthorization": token
     }
 
 def sign_jwt(user_id: str) -> Dict[str, str]:
@@ -68,6 +68,7 @@ def decode_jwt(token: str) -> dict:
     This function decodes a JWT token
     """
     try:
+        print(f"decode_jwt(token) = {token}")
         decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
 
         # Test to see if the token has expired
