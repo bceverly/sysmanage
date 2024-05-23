@@ -27,8 +27,7 @@ const doLogin = (requestData: DoLoginRequest) => {
     }
   })
   .then((response) => {
-  // No error - process response
-    console.log('Reauthorization = ' + response.data.Reauthorization);
+    // No error - process response
     localStorage.setItem("userid", requestData.userid);
     localStorage.setItem("bearer_token", response.data.Reauthorization);
   })
@@ -51,10 +50,8 @@ const doLogin = (requestData: DoLoginRequest) => {
 };
 
 const doLogout = () => {
-  console.log('Removing local storage...');
   localStorage.removeItem("userid");
   localStorage.removeItem("bearer_token");
-  console.log("local storage removed");
 };
 
 const checkValid = () => {
@@ -69,7 +66,6 @@ const checkValid = () => {
   .then ((res) => {
     // No error - process response
     localStorage.setItem("bearer_token", res.headers["reauthorization"]);
-    console.log('checkValid() token = ' + res.headers["reauthorization"]);
   })
   .catch ((err) => {
     // Error situation - clear out storage
