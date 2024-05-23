@@ -30,6 +30,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Reauthorization"],
 )
 
 # Add middleware to refresh the JWT token in the response headers
@@ -62,7 +63,7 @@ async def add_token_header(request: Request, call_next):
                 if "user_id" in old_dict:
                     user_id = old_dict["user_id"]
                     new_token = sign_jwt(user_id)
-                    response.headers["X_Reauthorization"] = new_token["X_Reauthorization"]
+                    response.headers["Reauthorization"] = new_token["Reauthorization"]
 
     return response
 
