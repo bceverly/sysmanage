@@ -8,7 +8,7 @@ const Users = () => {
         if (!localStorage.getItem('bearer_token')) {
             navigate("/login");
         }
-    }, []);
+    });
     return <div>Users</div>;
 }
  

@@ -8,7 +8,7 @@ const Dashboard = () => {
         if (!localStorage.getItem('bearer_token')) {
             navigate("/login");
         }
-    }, []);
+    });
     return <div>Dashboard</div>;
 }
  
