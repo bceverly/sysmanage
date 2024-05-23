@@ -23,7 +23,6 @@ const Login = () => {
         })
         .then((response) => {
         // No error - process response
-          console.log('Reauthorization = ' + response.data.Reauthorization);
           localStorage.setItem("userid", input.userid);
           localStorage.setItem("bearer_token", response.data.Reauthorization);
           navigate("/");
