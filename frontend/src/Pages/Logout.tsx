@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
-import { doLogout } from "../Services/AuthHelper";
 
 const Logout = () => {
-//    const { doLogout } = useAuth();
     
     const navigate = useNavigate();
 
@@ -15,7 +13,7 @@ const Logout = () => {
         navigate("/login");
         window.location.reload();
 
-    }, []);
+    });
 
     return (
         <div>Logout</div>
