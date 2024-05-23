@@ -18,11 +18,9 @@ const Navbar = () => {
 
   const checkIfLoggedIn = () => {
     if (localStorage.getItem('bearer_token')) {
-      console.log('Menu is visible');
       return "visible";
     }
 
-    console.log('Menu is hidden');
     return "hidden";
   };
 
