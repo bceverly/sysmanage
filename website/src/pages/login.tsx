@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthProvider from "../classes/AuthProvider.tsx";
 
-import styles from './styles/login.css'
+import { useAuth } from "../components/AuthContext";
+import './styles/login.css'
 
 const Login = () => {
+    const { doLogin } = useAuth();
+    
     const [input, setInput] = useState({
       userid: "",
       password: "",
@@ -13,14 +15,20 @@ const Login = () => {
     const handleSubmitEvent = (e) => {
       e.preventDefault();
       if (input.userid !== "" && input.password !== "") {
-        console.log(input);
-        AuthProvider.doLogin(input);
-        if (localStorage.getItem("bearer_token")) {
-          navigate("/");
-        }
-        return;
+        doLogin(input)
+        .then (() => {
+          if (localStorage.getItem("bearer_token")) {
+            console.log('navigating to /hosts');
+            navigate("/hosts");
+          } else {
+            alert("Please provide a valid userid/password combination.");
+          }
+          return;
+        })
+        .catch ((err) => {
+          alert("Error calling login API.  Are you connected to the Internet?");
+        });
       }
-      alert("please provide a valid input");
     };
 
     const handleInput = (e) => {

@@ -8,9 +8,22 @@ import {
     NavMenu,
     NavBtn,
     NavBtnLink,
-} from "./NavbarElements.tsx";
+} from "./NavbarElements";
 
 const Navbar = () => {
+    if (!localStorage.getItem('bearer_token')) {
+        console.log("not logged in");
+        return (
+            <>
+            <Nav>
+                <NavLogo to="/">
+                    SysManage
+                </NavLogo>
+            </Nav>
+            </>
+        );
+    }
+    console.log("logged in");
     return (
         <>
            <Nav>
@@ -37,12 +50,6 @@ const Navbar = () => {
                   activestyle={{ color: 'black' }}
                 >
                     Users
-                </NavLink>
-                <NavLink
-                  to="/login"
-                  activestyle={{ color: 'black' }}
-                >
-                    Log In
                 </NavLink>
                 <NavBtn>
                     <NavBtnLink to="/logout">Log Out</NavBtnLink>

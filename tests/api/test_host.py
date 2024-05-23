@@ -31,7 +31,7 @@ def test_host():
     assert response.status_code == 200
 
     # Get the bearer token
-    token = response.json()["X_Reauthorization"]
+    token = response.json()["Reauthorization"]
 
     # Add a host
     random_host = f"host{randint(100000,999999)}.example.com"
@@ -47,7 +47,7 @@ def test_host():
     })
     assert response.status_code == 200
 
-    token = response.headers["X_Reauthorization"]
+    token = response.headers["Reauthorization"]
     the_id = response.json()["id"]
 
     # Get the host by id
@@ -61,7 +61,7 @@ def test_host():
                                "ipv4": random_ipv4,
                                "ipv6": random_ipv6}
 
-    token = response.headers["X_Reauthorization"]
+    token = response.headers["Reauthorization"]
 
     # Get the host by fqdn
     response = client.get(f"/host/by_fqdn/{random_host}", headers={
@@ -74,7 +74,7 @@ def test_host():
                                "ipv4": random_ipv4,
                                "ipv6": random_ipv6}
 
-    token = response.headers["X_Reauthorization"]
+    token = response.headers["Reauthorization"]
 
     # Cleanup
     response = client.delete(f"/host/{the_id}", headers={
