@@ -25,6 +25,7 @@ const Login = () => {
         // No error - process response
           localStorage.setItem("userid", input.userid);
           localStorage.setItem("bearer_token", response.data.Reauthorization);
+          console.log("Login returned tokeN:" + localStorage.getItem('bearer_token'));
           navigate("/");
           window.location.reload();
         })
