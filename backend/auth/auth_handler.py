@@ -22,6 +22,7 @@ def token_response(token: str):
     """
     This is a helper function to create a JSON payload from a jwt token
     """
+    print(f'Returning token {token}')
     return {
         "Reauthorization": token
     }
