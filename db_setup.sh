@@ -191,7 +191,7 @@ fi
 if [[ `uname` == 'Linux' ]]; then
     echo "This script will be using sudo so please type your password if"
     echo "prompted..."
-    PSQLCMD="sudo -u postgres psql -h ${SYSMANAGE_DBHOST} -p ${SYSMANAGE_DBPORRT}"
+    PSQLCMD="sudo -u postgres psql -h ${SYSMANAGE_DBHOST} -p ${SYSMANAGE_DBPORT}"
 fi
 
 # Create the database and user creation script
