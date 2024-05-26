@@ -2,13 +2,14 @@
 This module contains the API implementation for the user object in the system.
 """
 from datetime import datetime, timezone
-from fastapi import HTTPException, APIRouter, Depends
+from fastapi import HTTPException, APIRouter, Depends, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import sessionmaker
 
 from pyargon2 import hash as argon2_hash
 
 from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_handler import reauth_decode_jwt
 from backend.persistence import db, models
 from backend.config import config
 
@@ -46,6 +47,47 @@ async def delete_user(id: int):
     return {
         "result": True
         }
+
+@router.get("/user/me", dependencies=[Depends(JWTBearer())])
+async def get_logged_in_user(request: Request):
+    """
+    This function retrieves the user record for the currently logged in
+    user.
+    """
+    # Get the current userid
+    userid = ''
+    if "Authorization" in request.headers:
+        token = request.headers.get('Authorization')
+        the_elements = token.split()
+        if len(the_elements) == 2:
+            old_dict = reauth_decode_jwt(the_elements[1])
+            if old_dict:
+                if "user_id" in old_dict:
+                    userid = old_dict["user_id"]
+
+    # Check for special case admin user
+    the_config = config.get_config()
+    if userid == the_config["security"]["admin_userid"]:
+        ret_user = models.User(id=0,
+                               active=True,
+                               userid=userid)
+        return ret_user
+
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
+
+    with session_local() as session:
+        users = session.query(models.User).filter(models.User.userid == userid).all()
+
+        # Check for failure
+        if len(users) != 1:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        ret_user = models.User(id=users[0].id,
+                               active=users[0].active,
+                               userid=users[0].userid)
+
+        return ret_user
 
 @router.get("/user/{id}", dependencies=[Depends(JWTBearer())])
 async def get_user(id: int):
@@ -90,7 +132,7 @@ async def get_user_by_userid(userid: str):
                                userid=users[0].userid)
 
         return ret_user
-
+    
 @router.get("/users", dependencies=[Depends(JWTBearer())])
 async def get_all_users():
     """

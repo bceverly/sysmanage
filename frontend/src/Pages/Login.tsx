@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import axios from "axios";
+import api from "../Services/api"
 import './css/Login.css'
 
 const Login = () => {
@@ -13,37 +13,25 @@ const Login = () => {
     const handleSubmitEvent = (e: { preventDefault: () => void; }) => {
       e.preventDefault();
       if (input.userid !== "" && input.password !== "") {
-        axios.post("https://api.sysmanage.org:8443/login", {
-          'userid': input.userid,
-          'password': input.password
-        }, {
-          headers: {
-            'Content-Type': "application/json"
-          }
+        api.post("/login", {
+          userid: input.userid,
+          password: input.password
         })
-        .then((response) => {
-        // No error - process response
-          localStorage.setItem("userid", input.userid);
-          localStorage.setItem("bearer_token", response.data.Reauthorization);
-          console.log("Login returned tokeN:" + localStorage.getItem('bearer_token'));
+        .then((response: { data: { Reauthorization: any; }; }) => {
+          if (response.data.Reauthorization) {
+            localStorage.setItem("userid", input.userid);
+            localStorage.setItem("bearer_token", response.data.Reauthorization);
+          }
+
           navigate("/");
           window.location.reload();
+          return response.data;
         })
         .catch((error) => {
           // Error situation - clear out storage
           localStorage.removeItem("userid");
           localStorage.removeItem("bearer_token");
-      
-          if (error.response) {
-            // Error response returned by server
-            console.log('Error returned by server: ' + error);
-          } else if (error.request) {
-            // Error was in the request, no response sent by server
-            console.log('Error - no response from server: ' + error);
-          } else {
-            // Some other error
-            console.log('Unknown error: ' + error);
-          }
+          alert('Invalid userid/password combination.');
         });
       }
     };
