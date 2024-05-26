@@ -22,7 +22,11 @@ virtual environment with the following items installed:
 - Run db_setup.sh to generate the createdb.sh script and the
 sysmanage.yaml file (copy it to /etc)
 - Migrate to the latest database schema with "alembic upgrade head"
-- Run the web UI via "python3 -m http.server" from the ./website
+- Make sure your /etc/hosts file has entries in it for the URLs you are
+using for the website and the API
+- Run 'npm install' to install the dependencies the project needs in the
+./frontend directory
+- Run the web UI via "npm start" from the ./frontend
 directory
 - Run the backend API with "uvicorn backend.main:app"
 - Run the unit tests with "pytest"

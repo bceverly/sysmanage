@@ -12,7 +12,7 @@
             "args": [
                 "backend.main:app",
                 "--host=api.sysmanage.org",
-                "--port=8443",
+                "--port=6443",
                 "--ssl-keyfile=../certs/api.sysmanage.org/privkey.pem",
                 "--ssl-certfile=../certs/api.sysmanage.org/cert.pem",
                 "--ssl-ca-certs=../certs/api.sysmanage.org/fullchain.pem",
