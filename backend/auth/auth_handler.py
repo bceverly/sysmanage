@@ -1,16 +1,13 @@
 """
 This module manages the JWT aut mechanism used by the backend.
 """
-from datetime import datetime, timezone, timedelta
 import time
 from typing import Dict
 
 import jwt
 import jwt.exceptions
-from sqlalchemy.orm import sessionmaker
 
 from backend.config import config
-from backend.persistence import db, models
 
 # Read the YAML file
 the_config = config.get_config()
@@ -74,33 +71,6 @@ def decode_jwt(token: str) -> dict:
 
         # Test to see if the token has expired
         if decoded_token["expires"] >= time.time():
-            # Time value is not past expiration; however, need to check to
-            # see if the token has already been used
-            session_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
-
-            # Delete any old tokens to keep the query fast
-            with session_local() as session:
-                stmt = session.query(models.BearerToken).filter(models.BearerToken.created_datetime < datetime.now(timezone.utc) - 
-                                                                timedelta(seconds=int(the_config["security"]["jwt_timeout"])))
-                stmt.delete()
-                session.commit()
-
-            # Check to see if the token is in the database, if not, then it has never
-            # been used and is currently valid.
-            with session_local() as session:
-                tokens = session.query(models.BearerToken).filter(models.BearerToken.token == token).all()
-                if len(tokens) > 0:
-                    # We got a hit on the database, this is a replay attack
-                    return None
-
-            # Insert the token into the database, indicating that the token
-            # is no longer valid (i.e. it has been used)
-            bearer_token = models.BearerToken(token=token,
-                                              created_datetime=datetime.now(timezone.utc))
-            with session_local() as session:
-                session.add(bearer_token)
-                session.commit()
-
             return decoded_token
 
         # Token has expired
