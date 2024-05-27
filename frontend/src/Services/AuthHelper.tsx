@@ -9,7 +9,7 @@ type DoLoginRequest = {
 }
 
 type DoLoginResponse = {
-  "Reauthorization": string;
+  "Authorization": string;
 }
 
 type CheckValidResponse = {
@@ -29,7 +29,7 @@ const doLogin = (requestData: DoLoginRequest) => {
   .then((response) => {
     // No error - process response
     localStorage.setItem("userid", requestData.userid);
-    localStorage.setItem("bearer_token", response.data.Reauthorization);
+    localStorage.setItem("bearer_token", response.data.Authorization);
   })
   .catch((error) => {
     // Error situation - clear out storage
@@ -65,7 +65,7 @@ const checkValid = () => {
   })
   .then ((res) => {
     // No error - process response
-    localStorage.setItem("bearer_token", res.headers["reauthorization"]);
+    localStorage.setItem("bearer_token", res.headers["authorization"]);
   })
   .catch ((err) => {
     // Error situation - clear out storage
