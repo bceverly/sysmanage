@@ -10,7 +10,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api import auth, host, user
-from backend.auth.auth_handler import sign_jwt, reauth_decode_jwt
+from backend.auth.auth_handler import sign_jwt
 from backend.config import config
 
 # Parse the /etc/sysmanage.yaml file
@@ -30,42 +30,8 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["Reauthorization"],
+    expose_headers=["Authorization"],
 )
-
-# Add middleware to refresh the JWT token in the response headers
-@app.middleware("http")
-async def add_token_header(request: Request, call_next):
-    """
-    This function retrieves/decodes the user_id from the request JWT token
-    and adds an HTTP repsonse header that contains a refreshed token
-    """
-    response = await call_next(request)
-
-    # Check that this is a content-type = application/json
-    content_type = response.headers.get('Content-Type')
-    if content_type != "application/json":
-        return response
-
-    # Do not "leak" a valid reauthorization token if we are in an
-    # Error: Forbidden state
-    if response.status_code == 403:
-        return response
-
-    # get the Bearer token from the request
-    the_headers = request.headers
-    if "Authorization" in the_headers:
-        old_string = the_headers["Authorization"]
-        the_elements = old_string.split()
-        if len(the_elements) == 2:
-            old_dict = reauth_decode_jwt(the_elements[1])
-            if old_dict:
-                if "user_id" in old_dict:
-                    user_id = old_dict["user_id"]
-                    new_token = sign_jwt(user_id)
-                    response.headers["Reauthorization"] = new_token["Reauthorization"]
-
-    return response
 
 # Import the dependencies
 app.include_router(host.router)
