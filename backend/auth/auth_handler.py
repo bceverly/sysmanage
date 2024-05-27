@@ -21,7 +21,7 @@ def token_response(token: str):
     """
     print(f'Returning token {token}')
     return {
-        "Reauthorization": token
+        "Authorization": token
     }
 
 def sign_jwt(user_id: str) -> Dict[str, str]:
@@ -39,27 +39,6 @@ def sign_jwt(user_id: str) -> Dict[str, str]:
 
     # Return the encoded token
     return token_response(the_token)
-
-def reauth_decode_jwt(token: str) -> dict:
-    """
-    This function is ONLY used to decode a token for the purpose of generating
-    a reauthorization token.  It does not check to see if a token has been
-    used already and thus would be subject to a replay attack within the
-    expiration timeframe.  It is to only be used after a token has already
-    been validated as not previously used so that the userid can be extracted
-    for use in creating the reauthorization token.
-    """
-    try:
-        decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-
-        # Test to see if the token has expired
-        if decoded_token["expires"] >= time.time():
-            return decoded_token
-
-        # Token has expired
-        return None
-    except (jwt.exceptions.InvalidTokenError, jwt.exceptions.DecodeError):
-        return {}
 
 def decode_jwt(token: str) -> dict:
     """

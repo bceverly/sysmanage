@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from pyargon2 import hash as argon2_hash
 
 from backend.auth.auth_bearer import JWTBearer
-from backend.auth.auth_handler import reauth_decode_jwt
+from backend.auth.auth_handler import decode_jwt
 from backend.persistence import db, models
 from backend.config import config
 
@@ -60,7 +60,7 @@ async def get_logged_in_user(request: Request):
         token = request.headers.get('Authorization')
         the_elements = token.split()
         if len(the_elements) == 2:
-            old_dict = reauth_decode_jwt(the_elements[1])
+            old_dict = decode_jwt(the_elements[1])
             if old_dict:
                 if "user_id" in old_dict:
                     userid = old_dict["user_id"]

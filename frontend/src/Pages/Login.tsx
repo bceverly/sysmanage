@@ -17,10 +17,10 @@ const Login = () => {
           userid: input.userid,
           password: input.password
         })
-        .then((response: { data: { Reauthorization: any; }; }) => {
-          if (response.data.Reauthorization) {
+        .then((response: { data: { Authorization: any; }; }) => {
+          if (response.data.Authorization) {
             localStorage.setItem("userid", input.userid);
-            localStorage.setItem("bearer_token", response.data.Reauthorization);
+            localStorage.setItem("bearer_token", response.data.Authorization);
           }
 
           navigate("/");
