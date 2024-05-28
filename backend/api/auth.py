@@ -3,10 +3,11 @@ This module provides the necessary function to support login to the SysManage
 server.
 """
 from datetime import datetime, timezone
-from fastapi import HTTPException, APIRouter, Depends
+from fastapi import HTTPException, APIRouter, Depends, Request
 from pydantic import BaseModel, EmailStr
 from pyargon2 import hash as argon2_hash
 from sqlalchemy.orm import sessionmaker
+from fastapi.responses import JSONResponse
 
 from backend.auth.auth_handler import sign_jwt
 from backend.auth.auth_bearer import JWTBearer
@@ -53,14 +54,23 @@ async def login(login_data: UserLogin):
                 session.query(models.User).filter(models.User.id == record.id).update({models.User.last_access: datetime.now(timezone.utc)})
                 session.commit()
 
+                # Add the refresh token to an http-only cookie
+                response = JSONResponse(
+                    content = sign_jwt(login_data.userid)
+                )
+                response.set_cookie('key=refresh_token',
+                                    value='123456',
+                                    expires=600000,
+                                    httponly=True)
+
                 # Return success
-                return sign_jwt(login_data.userid)
+                return response
 
     # If we got here, then there was no match
     raise HTTPException(status_code=401, detail="Bad userid or password")
 
 @router.post("/validate", dependencies=[Depends(JWTBearer())])
-async def validate():
+async def validate(request: Request):
     """
     This function provides login ability to the SysManage server.  Since it
     is set up as depending on JWTBearer(), it will automatically do what we
@@ -68,6 +78,7 @@ async def validate():
     error if the token is invalid for some reason) and then will add the
     response header with a refreshed token.
     """
+    print(f'Num cookies: {len(request.cookies)}')
     return {
         "result": True
         }
