@@ -45,6 +45,7 @@ class JWTBearer(HTTPBearer):
         is_token_valid: bool = False
 
         try:
+            print(f"Calling decode_jwt with token {jwtoken}")
             payload = decode_jwt(jwtoken)
         except:
             payload = None

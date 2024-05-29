@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import React, { useEffect } from 'react';
-//import axios from "axios";
+import api from "../Services/api"
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -9,7 +9,7 @@ const Dashboard = () => {
         if (!localStorage.getItem('bearer_token')) {
             navigate("/login");
         }
-    });
+      });
     return <div>Dashboard</div>;
 }
  

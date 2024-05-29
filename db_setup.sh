@@ -22,7 +22,8 @@ echo "SYSMANAGE_DBPASSWORD"
 echo "SYSMANAGE_DATABASE"
 echo "SYSMANAGE_ADMINUSER"
 echo "SYSMANAGE_ADMINPASSWORD"
-echo "SYSMANAGE_JWT_TIMEOUT"
+echo "SYSMANAGE_JWT_AUTH_TIMEOUT"
+echo "SYSMANAGE_JWT_REFRESH_TIMEOUT"
 echo "SYSMANAGE_WEBHOST"
 echo "SYSMANAGE_WEBPORT"
 echo "SYSMANAGE_WEB_TLS_CERT_FILE"
@@ -166,11 +167,19 @@ if [[ -z "${SYSMANAGE_ADMINPASSWORD}" ]]; then
     exit 1
 fi
 
-if [[ -z "${SYSMANAGE_JWT_TIMEOUT}" ]]; then
-    echo "You must set SYSMANAGE_JWT_TIMEOUT to the name of your SysManage"
-    echo "JWT timeout value in tenths of a second:"
+if [[ -z "${SYSMANAGE_JWT_AUTH_TIMEOUT}" ]]; then
+    echo "You must set SYSMANAGE_JWT_AUTH_TIMEOUT to the name of your SysManage"
+    echo "JWT auth token timeout value in tenths of a second:"
     echo ""
-    echo "$ export SYSMANAGE_JWT_TIMEOUT='600'"
+    echo "$ export SYSMANAGE_JWT_AUTH_TIMEOUT='600'"
+    exit 1
+fi
+
+if [[ -z "${SYSMANAGE_JWT_REFRESH_TIMEOUT}" ]]; then
+    echo "You must set SYSMANAGE_JWT_REFRESH_TIMEOUT to the name of your SysManage"
+    echo "JWT refresh token timeout value in tenths of a second:"
+    echo ""
+    echo "$ export SYSMANAGE_JWT_REFRESH_TIMEOUT='60000'"
     exit 1
 fi
 
@@ -224,7 +233,8 @@ echo "  admin_password: \"${SYSMANAGE_ADMINPASSWORD}\"" >> sysmanage.yaml
 JWTSECRET=`openssl rand -base64 32`
 echo "  jwt_secret: \"${JWTSECRET}\"" >> sysmanage.yaml
 echo "  jwt_algorithm: \"HS256\"" >> sysmanage.yaml
-echo "  jwt_timeout: ${SYSMANAGE_JWT_TIMEOUT}" >> sysmanage.yaml
+echo "  jwt_auth_timeout: ${SYSMANAGE_JWT_AUTH_TIMEOUT}" >> sysmanage.yaml
+echo "  jwt_refresh_timeout: ${SYSMANAGE_JWT_REFRESH_TIMEOUT}" >> sysmanage.yaml
 echo "" >> sysmanage.yaml
 echo "webui:" >> sysmanage.yaml
 echo "  host: \"${SYSMANAGE_WEBHOST}\"" >> sysmanage.yaml
