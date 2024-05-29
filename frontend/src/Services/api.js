@@ -1,10 +1,12 @@
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const axiosInstance = axios.create({
   baseURL: "https://api.sysmanage.org:6443",
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true
 });
 
 axiosInstance.interceptors.request.use(
@@ -33,12 +35,22 @@ axiosInstance.interceptors.response.use(
         originalConfig._retry = true;
 
         try {
-/*          const rs = await axiosInstance.post("/auth/refreshtoken", {
-            refreshToken: TokenService.getLocalRefreshToken(),
-          });*/
+          axiosInstance.post("/refresh", {
+          })
+          .then((response) => {
+            localStorage.setItem("bearer_token", response.data.Authorization);
+            return response.data;
+          })
+          .catch((error) => {
+            // Error situation - clear out storage
+            console.log(error);
+            localStorage.removeItem("userid");
+            localStorage.removeItem("bearer_token");
 
-/*          const { accessToken } = rs.data;
-          TokenService.updateLocalAccessToken(accessToken);*/
+            const navigate = useNavigate();
+
+            navigate("/login")
+          });
 
           return axiosInstance(originalConfig);
         } catch (_error) {

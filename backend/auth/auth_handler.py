@@ -24,21 +24,22 @@ def token_response(token: str):
         "Authorization": token
     }
 
-def sign_jwt(user_id: str) -> Dict[str, str]:
+def sign_jwt(user_id: str):
     """
     This function signs/encodes a JWT token
     """
     # Create the payload
     payload = {
         "user_id": user_id,
-        "expires": time.time() + int(the_config["security"]["jwt_timeout"])
+        "expires": time.time() + int(the_config["security"]["jwt_auth_timeout"])
     }
 
     # Encode the token
     the_token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
     # Return the encoded token
-    return token_response(the_token)
+#    return token_response(the_token)
+    return the_token
 
 def decode_jwt(token: str) -> dict:
     """
@@ -47,12 +48,20 @@ def decode_jwt(token: str) -> dict:
     try:
         print(f"decode_jwt(token) = {token}")
         decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        print(f"decoded_token {decoded_token}")
+        print(f"decoded_token.user_id = {decoded_token["user_id"]}")
+        print(f"decoded_token.expires = {decoded_token["expires"]}")
+        print(f"time.time() = {time.time()}")
 
         # Test to see if the token has expired
         if decoded_token["expires"] >= time.time():
+            print("Token is NOT expired")
             return decoded_token
 
         # Token has expired
         return None
     except (jwt.exceptions.InvalidTokenError, jwt.exceptions.DecodeError):
+        print("Exception")
         return {}
+    except Exception as e:
+        print(f"Uncaught exception: {e}")
