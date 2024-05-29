@@ -2,14 +2,13 @@
 This module provides the necessary function to support login to the SysManage
 server.
 """
-from datetime import datetime, timezone
-from fastapi import HTTPException, APIRouter, Depends, Request
+from datetime import datetime, timezone, timedelta
+from fastapi import HTTPException, APIRouter, Depends, Request, Response
 from pydantic import BaseModel, EmailStr
 from pyargon2 import hash as argon2_hash
 from sqlalchemy.orm import sessionmaker
-from fastapi.responses import JSONResponse
 
-from backend.auth.auth_handler import sign_jwt
+from backend.auth.auth_handler import sign_jwt, decode_jwt
 from backend.auth.auth_bearer import JWTBearer
 from backend.persistence import db, models
 from backend.config import config
@@ -24,7 +23,7 @@ class UserLogin(BaseModel):
     password: str
 
 @router.post("/login")
-async def login(login_data: UserLogin):
+async def login(login_data: UserLogin, response: Response):
     """
     This function provides login ability to the SysManage server.
     """
@@ -34,9 +33,20 @@ async def login(login_data: UserLogin):
     db.get_db()
     if login_data.userid == the_config["security"]["admin_userid"]:
         if login_data.password == the_config["security"]["admin_password"]:
-            return sign_jwt(login_data.userid)
-        
+            response.set_cookie(key='refresh_token',
+                                value=sign_jwt(login_data.userid),
+                                expires=datetime.now().replace(tzinfo=timezone.utc) + timedelta(seconds=the_config["security"]["jwt_refresh_timeout"]),
+                                path='/',
+                                domain='sysmanage.org',
+                                secure=True,
+                                httponly=True,
+                                samesite='none')
+            return {
+                "Authorization": sign_jwt(login_data.userid)
+            }
+
         raise HTTPException(status_code=401, detail="Bad userid or password")
+
 
     # Get the SQLAlchemy session
     session_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
@@ -55,13 +65,17 @@ async def login(login_data: UserLogin):
                 session.commit()
 
                 # Add the refresh token to an http-only cookie
-                response = JSONResponse(
-                    content = sign_jwt(login_data.userid)
-                )
-                response.set_cookie('key=refresh_token',
-                                    value='123456',
-                                    expires=600000,
-                                    httponly=True)
+                response.body = {
+                    "Authorization": sign_jwt(login_data.userid)
+                }
+                response.set_cookie(key='refresh_token',
+                                    value=sign_jwt(login_data.userid),
+                                    expires=datetime.now().replace(tzinfo=timezone.utc) + timedelta(seconds=the_config["security"]["jwt_refresh_timeout"]),
+                                    path='/',
+                                    domain='sysmanage.org',
+                                    secure=True,
+                                    httponly=True,
+                                    samesite='none')
 
                 # Return success
                 return response
@@ -69,16 +83,24 @@ async def login(login_data: UserLogin):
     # If we got here, then there was no match
     raise HTTPException(status_code=401, detail="Bad userid or password")
 
-@router.post("/validate", dependencies=[Depends(JWTBearer())])
-async def validate(request: Request):
+@router.post("/refresh", dependencies=[Depends(JWTBearer())])
+async def refresh(request: Request):
     """
-    This function provides login ability to the SysManage server.  Since it
-    is set up as depending on JWTBearer(), it will automatically do what we
-    want it to - validate the token passed in (JWTBearer() will return an
-    error if the token is invalid for some reason) and then will add the
-    response header with a refreshed token.
+    This API call looks for refresh token passed in the cookies of the
+    request as an http_only cookie (inaccessible to the client).  If present,
+    a new JWT Authentication token will be generated and returned.  If not,
+    then a 403 - Forbidden error will be returned, forcing the client to
+    re-authenticate via a user-managed login.
     """
     print(f'Num cookies: {len(request.cookies)}')
-    return {
-        "result": True
-        }
+    if len(request.cookies) > 0:
+        if 'refresh_token' in request.cookies:
+            refresh_token = request.cookies['refresh_token']
+            token_dict = decode_jwt(refresh_token)
+            the_userid = token_dict['user_id']
+            new_token = sign_jwt(the_userid)
+            return {
+                "Authorization": new_token
+            }
+
+    raise HTTPException(status_code=403, detail="Invalid or missing refresh token")

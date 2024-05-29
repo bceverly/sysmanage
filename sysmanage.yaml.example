@@ -26,7 +26,8 @@
 #   admin_password: "password_for_above"
 #   jwt_secret: "secret_for_jwt_tokens"
 #   jwt_algorithm: "HS256"
-#   jwt_timeout: 600
+#   jwt_auth_timeout: 600
+#   jwt_refresh_timeout: 60000
 #
 # webui:
 #   host: "FQDN"
