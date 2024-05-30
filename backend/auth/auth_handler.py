@@ -41,6 +41,23 @@ def sign_jwt(user_id: str):
 #    return token_response(the_token)
     return the_token
 
+def sign_refresh_token(user_id: str):
+    """
+    This function signs/encodes a JWT refresh token
+    """
+    # Create the payload
+    payload = {
+        "user_id": user_id,
+        "expires": time.time() + int(the_config["security"]["jwt_refresh_timeout"])
+    }
+
+    # Encode the token
+    the_token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+    # Return the encoded token
+#    return token_response(the_token)
+    return the_token
+
 def decode_jwt(token: str) -> dict:
     """
     This function decodes a JWT token
@@ -50,7 +67,6 @@ def decode_jwt(token: str) -> dict:
 
         # Test to see if the token has expired
         if decoded_token["expires"] >= time.time():
-            print("Token is NOT expired")
             return decoded_token
 
         # Token has expired

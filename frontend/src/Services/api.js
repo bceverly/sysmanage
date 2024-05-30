@@ -31,15 +31,20 @@ axiosInstance.interceptors.response.use(
 
     if (originalConfig.url !== "/login" && err.response) {
       // Access Token was expired
+      console.log('Token expired? err.response = ' + err.response);
+      console.log('retry = ' + originalConfig._retry);
       if (err.response.status === 401 && !originalConfig._retry) {
         originalConfig._retry = true;
 
         try {
-          axiosInstance.post("/refresh", {
+          console.log("Calling /refresh to get a new auth token...");
+          await axiosInstance.post("/refresh", {
           })
           .then((response) => {
+            console.log('Received response: ' + response);
             localStorage.setItem("bearer_token", response.data.Authorization);
-            return response.data;
+            return axiosInstance(originalConfig);
+//            return Promise.resolve(response.data);
           })
           .catch((error) => {
             // Error situation - clear out storage
@@ -50,6 +55,7 @@ axiosInstance.interceptors.response.use(
             const navigate = useNavigate();
 
             navigate("/login")
+            return Promise.reject(error);
           });
 
           return axiosInstance(originalConfig);
