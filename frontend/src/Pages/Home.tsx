@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import React, { useEffect } from 'react';
-import api from "../Services/api"
 
 const Dashboard = () => {
     const navigate = useNavigate();
