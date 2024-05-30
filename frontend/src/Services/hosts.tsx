@@ -30,6 +30,8 @@ function processError(error: AxiosError) {
 }
 
 const doAddHost = async (active: boolean, fqdn: string, ipv4: string, ipv6: string) => {
+    let result = {} as SysManageHost;
+
     await api.post("/host", {
         'active': active,
         'fqdn': fqdn,
@@ -38,45 +40,50 @@ const doAddHost = async (active: boolean, fqdn: string, ipv4: string, ipv6: stri
       })
     .then((response) => {
         // No error - process response
-        console.log('Updated host: ' + response);
-        return response;
+        result = response.data;
+        return Promise.resolve(response);
     })
     .catch((error) => {
         processError(error);
         return Promise.reject(error);
     });
+    return result;
 };
 
 const doDeleteHost = async (id: BigInteger) => {
+    let successResponse = {} as SuccessResponse;
+
     await api.delete<SuccessResponse>("/host/" + id)
     .then((response) => {
         // No error - process response
-        const successResponse: SuccessResponse = response.data;
-        console.log('Host ' + id + ' deleted: ' + successResponse);
-        return successResponse;
+        successResponse = response.data;
+        return Promise.resolve(successResponse);
     })
     .catch((error) => {
         processError(error);
         return Promise.reject(error);
     });
+    return successResponse;
 };
 
 const doGetHostByID = async (id: BigInteger) => {
+    let result = {} as SysManageHost;
+
     await api.get<SysManageHost>("/host/" + id)
     .then((response) => {
         // No error - process response
-        const host: SysManageHost = response.data;
-        console.log('Host ' + id + ' found: ' + host);
-        return host;
+        result = response.data;
+        return result;
     })
     .catch((error) => {
         processError(error);
         return Promise.reject(error);
     });
+    return result;
 };
 
 const doGetHosts = async (): Promise<SysManageHost[]> => {
-    let results: SysManageHost[] = [];
+    let results = [] as SysManageHost[];
 
     await api.get<SysManageHost[]>("/hosts")
     .then((response) => {
@@ -92,20 +99,23 @@ const doGetHosts = async (): Promise<SysManageHost[]> => {
 };
 
 const doGetHostByFQDN = async (fqdn: string) => {
+    let result = {} as SysManageHost;
+
     await api.get<SysManageHost>("/host/by_fqdn/" + fqdn)
     .then((response) => {
         // No error - process response
-        const host: SysManageHost = response.data;
-        console.log('Host ' + fqdn + ' found: ' + response);
-        return host;
+        result = response.data;
+        return Promise.resolve(result);
     })
     .catch((error) => {
         processError(error);
         return Promise.reject(error);
     });
+    return result;
 };
 
 const doUpdateHost = async (id: BigInteger, active: boolean, fqdn: string, ipv4: string, ipv6: string) => {
+    let successResponse = {} as SuccessResponse;
     await api.put<SuccessResponse>("/host/" + id, {
         'active': active,
         'fqdn': fqdn,
@@ -114,14 +124,14 @@ const doUpdateHost = async (id: BigInteger, active: boolean, fqdn: string, ipv4:
       })
     .then((response) => {
         // No error - process response
-        const successResponse: SuccessResponse = response.data;
-        console.log('Updated host: ' + successResponse);
-        return successResponse;
+        successResponse = response.data;
+        return Promise.resolve(successResponse);
     })
     .catch((error) => {
         processError(error);
         return Promise.reject(error);
     });
+    return successResponse;
 };
 
 export type { SuccessResponse, SysManageHost };
