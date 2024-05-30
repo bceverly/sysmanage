@@ -26,7 +26,7 @@ const Users = () => {
             }
             return Promise.resolve(response);
         });
-    }, []);
+    }, [navigate]);
     return (
         <div  style={{ height: 400, width: '100%' }}>
             <DataGrid

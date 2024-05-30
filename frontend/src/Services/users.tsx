@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { AxiosError } from 'axios'
 
 import api from './api'
