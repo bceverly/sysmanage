@@ -22,14 +22,14 @@ const Dashboard = () => {
     }, [navigate]);
     return (
         <Box
-            height={225}
-            width={225}
+            height={250}
+            width={250}
             sx={{ 
                 border: '1px solid white',
                 borderRadius: 3
              }}
         >
-            <Typography align="center">
+            <Typography align="center" variant="h5">
                 Active Hosts
             </Typography>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 1, md: 3 }}>
