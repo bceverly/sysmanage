@@ -46,12 +46,7 @@ def decode_jwt(token: str) -> dict:
     This function decodes a JWT token
     """
     try:
-        print(f"decode_jwt(token) = {token}")
         decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        print(f"decoded_token {decoded_token}")
-        print(f"decoded_token.user_id = {decoded_token["user_id"]}")
-        print(f"decoded_token.expires = {decoded_token["expires"]}")
-        print(f"time.time() = {time.time()}")
 
         # Test to see if the token has expired
         if decoded_token["expires"] >= time.time():
@@ -61,7 +56,7 @@ def decode_jwt(token: str) -> dict:
         # Token has expired
         return None
     except (jwt.exceptions.InvalidTokenError, jwt.exceptions.DecodeError):
-        print("Exception")
+        print("JWT exception")
         return {}
     except Exception as e:
-        print(f"Uncaught exception: {e}")
+        print(f"Uncaught exception in decode_jwt: {e}")
