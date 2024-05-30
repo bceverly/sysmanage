@@ -37,7 +37,8 @@ async def login(login_data: UserLogin, response: Response):
             jwt_refresh_timout = int(the_config["security"]["jwt_refresh_timeout"])
             response.set_cookie(key='refresh_token',
                                 value=refresh_token,
-                                expires=datetime.now().replace(tzinfo=timezone.utc) + timedelta(seconds=jwt_refresh_timout),
+                                expires=datetime.now().replace(tzinfo=timezone.utc) +
+                                    timedelta(seconds=jwt_refresh_timout),
                                 path='/',
                                 domain='sysmanage.org',
                                 secure=True,
