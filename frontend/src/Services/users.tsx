@@ -29,6 +29,8 @@ function processError(error: AxiosError) {
 }
 
 const doAddUser = async (active: boolean, userid: string, password: string) => {
+    let result = {} as SysManageUser;
+
     await api.post("/user", {
         'active': active,
         'userid': userid,
@@ -36,36 +38,39 @@ const doAddUser = async (active: boolean, userid: string, password: string) => {
       })
     .then((response) => {
         // No error - process response
-        console.log('Updated user: ' + response);
-        return response;
+        result = response.data;
+        return Promise.resolve(result);
     })
     .catch((error) => {
         processError(error);
         return Promise.reject(error);
     });
+    return result;
 };
 
 const doDeleteUser = async (id: BigInteger) => {
+    let successResponse = {} as SuccessResponse;
+
     await api.delete<SuccessResponse>("/user/" + id)
     .then((response) => {
         // No error - process response
-        const successResponse: SuccessResponse = response.data;
-        console.log('User ' + id + ' deleted: ' + successResponse);
-        return successResponse;
+        successResponse = response.data;
+        return Promise.resolve(successResponse);
     })
     .catch((error) => {
         processError(error);
         return Promise.reject(error);
     });
+    return successResponse;
 };
 
 const doGetMe = async () => {
+    let result = {} as SysManageUser;
     await api.get<SysManageUser>("/user/me")
     .then((response) => {
         // No error - process response
-        const user: SysManageUser = response.data;
-        console.log('User ' + user.id + ' found: ' + user);
-        return user;
+        result = response.data;
+        return Promise.resolve(result);
     })
     .catch((error) => {
         processError(error);
@@ -74,17 +79,19 @@ const doGetMe = async () => {
 };
 
 const doGetUserByID = async (id: BigInteger) => {
+    let result = {} as SysManageUser;
+
     await api.get<SysManageUser>("/user/" + id)
     .then((response) => {
         // No error - process response
-        const user: SysManageUser = response.data;
-        console.log('User ' + id + ' found: ' + user);
-        return user;
+        result = response.data;
+        return Promise.resolve(result);
     })
     .catch((error) => {
         processError(error);
         return Promise.reject(error);
     });
+    return result;
 };
 
 const doGetUsers = async (): Promise<SysManageUser[]> => {
@@ -104,20 +111,24 @@ const doGetUsers = async (): Promise<SysManageUser[]> => {
 };
 
 const doGetUserByUserid = async (userid: string) => {
+    let result = {} as SysManageUser;
+
     await api.get<SysManageUser>("/host/by_userid/" + userid)
     .then((response) => {
         // No error - process response
-        const host: SysManageUser = response.data;
-        console.log('User ' + userid + ' found: ' + response);
-        return host;
+        result = response.data;
+        return Promise.resolve(result);
     })
     .catch((error) => {
         processError(error);
         return Promise.reject(error);
     });
+    return result;
 };
 
 const doUpdateUser = async (id: BigInteger, active: boolean, userid: string, password: string) => {
+    let successResponse = {} as SuccessResponse;
+
     await api.put<SuccessResponse>("/user/" + id, {
         'active': active,
         'userid': userid,
@@ -125,14 +136,14 @@ const doUpdateUser = async (id: BigInteger, active: boolean, userid: string, pas
       })
     .then((response) => {
         // No error - process response
-        const successResponse: SuccessResponse = response.data;
-        console.log('Updated host: ' + successResponse);
-        return successResponse;
+        successResponse = response.data;
+        return Promise.resolve(successResponse);
     })
     .catch((error) => {
         processError(error);
         return Promise.reject(error);
     });
+    return successResponse;
 };
 
 export type { SuccessResponse, SysManageUser };
