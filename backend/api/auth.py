@@ -8,7 +8,7 @@ from pydantic import BaseModel, EmailStr
 from pyargon2 import hash as argon2_hash
 from sqlalchemy.orm import sessionmaker
 
-from backend.auth.auth_handler import sign_jwt, decode_jwt
+from backend.auth.auth_handler import sign_jwt, decode_jwt, sign_refresh_token
 from backend.auth.auth_bearer import JWTBearer
 from backend.persistence import db, models
 from backend.config import config
@@ -33,9 +33,11 @@ async def login(login_data: UserLogin, response: Response):
     db.get_db()
     if login_data.userid == the_config["security"]["admin_userid"]:
         if login_data.password == the_config["security"]["admin_password"]:
+            refresh_token = sign_refresh_token(login_data.userid)
+            jwt_refresh_timout = int(the_config["security"]["jwt_refresh_timeout"])
             response.set_cookie(key='refresh_token',
-                                value=sign_jwt(login_data.userid),
-                                expires=datetime.now().replace(tzinfo=timezone.utc) + timedelta(seconds=the_config["security"]["jwt_refresh_timeout"]),
+                                value=refresh_token,
+                                expires=datetime.now().replace(tzinfo=timezone.utc) + timedelta(seconds=jwt_refresh_timout),
                                 path='/',
                                 domain='sysmanage.org',
                                 secure=True,
@@ -68,9 +70,11 @@ async def login(login_data: UserLogin, response: Response):
                 response.body = {
                     "Authorization": sign_jwt(login_data.userid)
                 }
+                refresh_token = sign_refresh_token(login_data.userid)
+                jwt_refresh_timout = int(the_config["security"]["jwt_refresh_timeout"])
                 response.set_cookie(key='refresh_token',
-                                    value=sign_jwt(login_data.userid),
-                                    expires=datetime.now().replace(tzinfo=timezone.utc) + timedelta(seconds=the_config["security"]["jwt_refresh_timeout"]),
+                                    value=refresh_token,
+                                    expires=datetime.now().replace(tzinfo=timezone.utc) + timedelta(seconds=jwt_refresh_timout),
                                     path='/',
                                     domain='sysmanage.org',
                                     secure=True,
@@ -83,7 +87,7 @@ async def login(login_data: UserLogin, response: Response):
     # If we got here, then there was no match
     raise HTTPException(status_code=401, detail="Bad userid or password")
 
-@router.post("/refresh", dependencies=[Depends(JWTBearer())])
+@router.post("/refresh")
 async def refresh(request: Request):
     """
     This API call looks for refresh token passed in the cookies of the
@@ -92,7 +96,6 @@ async def refresh(request: Request):
     then a 403 - Forbidden error will be returned, forcing the client to
     re-authenticate via a user-managed login.
     """
-    print(f'Num cookies: {len(request.cookies)}')
     if len(request.cookies) > 0:
         if 'refresh_token' in request.cookies:
             refresh_token = request.cookies['refresh_token']
