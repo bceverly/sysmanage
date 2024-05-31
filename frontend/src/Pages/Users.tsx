@@ -27,6 +27,8 @@ const Users = () => {
     const [tableData, setTableData] = useState<SysManageUser[]>([]);
     const [selection, setSelection] = useState<GridRowSelectionModel>([]);
     const [addDialogOpen, setAddDialogOpen] = useState(false);
+    const [dupeError, setDupeError] = useState<boolean>(false);
+
     const navigate = useNavigate();
 
     const handleDelete = () => {
@@ -57,6 +59,7 @@ const Users = () => {
     };
     
       const handleClose = () => {
+        setDupeError(false);
         setAddDialogOpen(false);
     };
 
@@ -66,11 +69,6 @@ const Users = () => {
         }
         doGetUsers().then((response: SysManageUser[]) => {
             setTableData(response);
-            console.log('Num users returned: ' + response.length);
-            console.log("typeof(response): " + typeof response);
-            for (let i=0 ; i<response.length ; i++) {
-                console.log(response[i]);
-            }
             return Promise.resolve(response);
         });
     }, [navigate]);
@@ -125,11 +123,7 @@ const Users = () => {
                         event.preventDefault();
                         const formData = new FormData(event.currentTarget);
                         const formJson = Object.fromEntries((formData as any).entries());
-                        const email = formJson.email;
-                        const password = formJson.password;
-                        console.log(email);
-                        console.log(password);
-                        doAddUser(true, email, password)
+                        doAddUser(true, formJson.email, formJson.password)
                         .then((result) => {
                             let newData: SysManageUser[] = [];
                             for (let i=0 ; i<tableData.length ; i++) {
@@ -142,10 +136,16 @@ const Users = () => {
                                 password: result.password,
                             };
                             newData.push(newRow);
-                            console.log('newRow.id = ' + newRow.id);
                             setTableData(newData);
+                            setDupeError(false);
+                            handleClose();
+                        })
+                        .catch((error) => {
+                            console.log('TheError: ' + error);
+                            if (error == 'AxiosError: Request failed with status code 409') {
+                                setDupeError(true);
+                            }
                         });
-                        handleClose();
                     },
                 }}
             >
@@ -165,6 +165,8 @@ const Users = () => {
                         label="Email Address"
                         type="email"
                         variant="standard"
+                        error={dupeError}
+                        helperText={dupeError ? "Email address must be unique" : ""}
                         InputProps={{
                             startAdornment: (
                               <InputAdornment position="start">
