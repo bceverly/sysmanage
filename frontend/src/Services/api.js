@@ -44,7 +44,6 @@ axiosInstance.interceptors.response.use(
             console.log('Received response: ' + response);
             localStorage.setItem("bearer_token", response.data.Authorization);
             return axiosInstance(originalConfig);
-//            return Promise.resolve(response.data);
           })
           .catch((error) => {
             // Error situation - clear out storage
