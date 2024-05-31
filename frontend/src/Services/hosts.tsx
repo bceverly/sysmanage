@@ -7,7 +7,7 @@ type SuccessResponse = {
 }
 
 type SysManageHost = {
-    id: BigInteger;
+    id: BigInt;
     active: boolean;
     fqdn: string;
     ipv4: string;
@@ -49,7 +49,7 @@ const doAddHost = async (active: boolean, fqdn: string, ipv4: string, ipv6: stri
     return result;
 };
 
-const doDeleteHost = async (id: BigInteger) => {
+const doDeleteHost = async (id: BigInt) => {
     let successResponse = {} as SuccessResponse;
 
     await api.delete<SuccessResponse>("/host/" + id)
@@ -65,7 +65,7 @@ const doDeleteHost = async (id: BigInteger) => {
     return successResponse;
 };
 
-const doGetHostByID = async (id: BigInteger) => {
+const doGetHostByID = async (id: BigInt) => {
     let result = {} as SysManageHost;
 
     await api.get<SysManageHost>("/host/" + id)
@@ -113,7 +113,7 @@ const doGetHostByFQDN = async (fqdn: string) => {
     return result;
 };
 
-const doUpdateHost = async (id: BigInteger, active: boolean, fqdn: string, ipv4: string, ipv6: string) => {
+const doUpdateHost = async (id: BigInt, active: boolean, fqdn: string, ipv4: string, ipv6: string) => {
     let successResponse = {} as SuccessResponse;
     await api.put<SuccessResponse>("/host/" + id, {
         'active': active,

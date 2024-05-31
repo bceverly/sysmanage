@@ -7,7 +7,7 @@ type SuccessResponse = {
 }
 
 type SysManageUser = {
-    id: BigInteger;
+    id: BigInt;
     active: boolean;
     userid: string;
     password: string;
@@ -47,7 +47,7 @@ const doAddUser = async (active: boolean, userid: string, password: string) => {
     return result;
 };
 
-const doDeleteUser = async (id: BigInteger) => {
+const doDeleteUser = async (id: BigInt) => {
     let successResponse = {} as SuccessResponse;
 
     await api.delete<SuccessResponse>("/user/" + id)
@@ -77,7 +77,7 @@ const doGetMe = async () => {
     });
 };
 
-const doGetUserByID = async (id: BigInteger) => {
+const doGetUserByID = async (id: BigInt) => {
     let result = {} as SysManageUser;
 
     await api.get<SysManageUser>("/user/" + id)
@@ -125,7 +125,7 @@ const doGetUserByUserid = async (userid: string) => {
     return result;
 };
 
-const doUpdateUser = async (id: BigInteger, active: boolean, userid: string, password: string) => {
+const doUpdateUser = async (id: BigInt, active: boolean, userid: string, password: string) => {
     let successResponse = {} as SuccessResponse;
 
     await api.put<SuccessResponse>("/user/" + id, {
