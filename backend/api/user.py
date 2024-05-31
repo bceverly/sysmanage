@@ -167,6 +167,12 @@ async def add_user(new_user: User):
 
     # Add the data to the database
     with session_local() as session:
+        # See if the caller is trying to add a user that already exists
+        checkDuplicate = session.query(models.User).filter(models.User.userid == new_user.userid).all()
+        if len(checkDuplicate) > 0:
+            raise HTTPException(status_code=409, detail="User already exists")
+
+        # This is a unique user.  Proceed...
         hashed_value = argon2_hash(new_user.password, the_config["security"]["password_salt"])
         user = models.User(userid=new_user.userid,
                            active=new_user.active,

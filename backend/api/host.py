@@ -126,6 +126,12 @@ async def add_host(new_host: Host):
 
     # Add the data to the database
     with session_local() as session:
+        # See if we are trying to add a duplicate host
+        checkDuplicate = session.query(models.Host).filter(models.Host.fqdn == new_host.fqdn).all()
+        if len(checkDuplicate) > 0:
+            raise HTTPException(status_code=409, detail="Host already exists")
+
+        # Host doesn't exist so proceed with adding it
         host = models.Host(fqdn=new_host.fqdn,
                            active=new_host.active,
                            ipv4=new_host.ipv4,
