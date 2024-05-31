@@ -1,6 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from 'react';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 import { SysManageUser, doGetUsers } from '../Services/users'
 
@@ -11,6 +17,7 @@ const columns: GridColDef[] = [
 
 const Users = () => {
     const [tableData, setTableData] = useState<SysManageUser[]>([]);
+    const [selection, setSelection] = useState<GridRowSelectionModel>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -28,18 +35,33 @@ const Users = () => {
         });
     }, [navigate]);
     return (
-        <div  style={{ height: 400, width: '100%' }}>
-            <DataGrid
-                rows={tableData}
-                columns={columns}
-                initialState={{
-                    pagination: {
-                      paginationModel: { page: 0, pageSize: 5 },
-                    },
-                  }}
-                  pageSizeOptions={[5, 10]}
-                  checkboxSelection
-            />
+        <div>
+            <div  style={{ height: 400, width: '99%' }}>
+                <DataGrid
+                    rows={tableData}
+                    columns={columns}
+                    initialState={{
+                        pagination: {
+                        paginationModel: { page: 0, pageSize: 5 },
+                        },
+                    }}
+                    pageSizeOptions={[5, 10]}
+                    checkboxSelection
+                    onRowSelectionModelChange={setSelection}
+                />
+            </div>
+            <Box component="section">&nbsp;</Box>
+            <Stack direction="row" spacing={2}>
+                <Button variant="outlined" startIcon={<AddIcon />} disabled={selection.length > 0}>
+                    Add
+                </Button>
+                <Button variant="outlined" startIcon={<EditIcon />} disabled={selection.length === 0}>
+                    Edit
+                </Button>
+                <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0}>
+                    Delete Selected
+                </Button>
+            </Stack>
         </div>
     );
 }

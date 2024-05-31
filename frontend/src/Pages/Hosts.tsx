@@ -1,6 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from 'react';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 import { SysManageHost, doGetHosts } from '../Services/hosts'
 
@@ -13,6 +17,7 @@ const columns: GridColDef[] = [
 
 const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
+    const [selection, setSelection] = useState<GridRowSelectionModel>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -30,18 +35,27 @@ const Hosts = () => {
         });
     }, [navigate]);
     return (
-        <div  style={{ height: 400, width: '100%' }}>
-            <DataGrid
-                rows={tableData}
-                columns={columns}
-                initialState={{
-                    pagination: {
-                      paginationModel: { page: 0, pageSize: 5 },
-                    },
-                  }}
-                  pageSizeOptions={[5, 10]}
-                  checkboxSelection
-            />
+        <div>
+            <div  style={{ height: 400, width: '99%' }}>
+                <DataGrid
+                    rows={tableData}
+                    columns={columns}
+                    initialState={{
+                        pagination: {
+                        paginationModel: { page: 0, pageSize: 5 },
+                        },
+                    }}
+                    pageSizeOptions={[5, 10]}
+                    checkboxSelection
+                    onRowSelectionModelChange={setSelection}
+                />
+            </div>
+            <Box component="section">&nbsp;</Box>
+            <Stack direction="row" spacing={2}>
+                <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0}>
+                    Delete Selected
+                </Button>
+            </Stack>
         </div>
     );
 }
