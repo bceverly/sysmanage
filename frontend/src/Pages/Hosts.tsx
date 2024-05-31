@@ -6,7 +6,7 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-import { SysManageHost, doGetHosts } from '../Services/hosts'
+import { SysManageHost, doDeleteHost, doGetHosts } from '../Services/hosts'
 
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
@@ -19,6 +19,29 @@ const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
     const [selection, setSelection] = useState<GridRowSelectionModel>([]);
     const navigate = useNavigate();
+
+    const handleDelete = () => {
+        // Call the API to remove the selected rows
+        for (let i=0 ; i<selection.length ; i++) {
+            let theID =  BigInt(selection[i].toString());
+            doDeleteHost(theID);
+        }
+
+        // Remove the selected rows from the tableData
+        let newArray: SysManageHost[] = [];
+        for (let i=0 ; i<tableData.length ; i++) {
+            let found = false;
+            for (let j=0 ; j<selection.length ; j++) {
+                if (tableData[i].id == BigInt(selection[j])) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                newArray.push(tableData[i]);
+            }
+        }
+        setTableData(newArray);
+    }
 
     useEffect(() => {
         if (!localStorage.getItem('bearer_token')) {
@@ -44,6 +67,14 @@ const Hosts = () => {
                         pagination: {
                         paginationModel: { page: 0, pageSize: 5 },
                         },
+                        sorting: {
+                            sortModel: [{ field: 'fqdn', sort: 'asc'}],
+                        },
+                        columns: {
+                            columnVisibilityModel: {
+                                id: false,
+                            },
+                        },
                     }}
                     pageSizeOptions={[5, 10]}
                     checkboxSelection
@@ -52,7 +83,7 @@ const Hosts = () => {
             </div>
             <Box component="section">&nbsp;</Box>
             <Stack direction="row" spacing={2}>
-                <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0}>
+                <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
                     Delete Selected
                 </Button>
             </Stack>
