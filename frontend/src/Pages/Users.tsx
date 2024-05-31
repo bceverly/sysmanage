@@ -170,7 +170,6 @@ const Users = () => {
                     />
                     <Box component="section">&nbsp;</Box>
                     <TextField
-                        autoFocus
                         required
                         fullWidth
                         margin="normal"
