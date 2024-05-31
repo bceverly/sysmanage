@@ -20,7 +20,7 @@ import { SysManageUser, doAddUser, doDeleteUser, doGetUsers } from '../Services/
 
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'userid', headerName: 'Email Address', width: 200 }
+    { field: 'userid', headerName: 'Email Address', width: 400 }
 ]
 
 const Users = () => {
@@ -93,6 +93,11 @@ const Users = () => {
                                 id: false,
                             },
                         },
+                    }}
+                    autosizeOptions = {{
+                        columns: ['userid'],
+                        includeOutliers: true,
+                        includeHeaders: true,
                     }}
                     pageSizeOptions={[5, 10]}
                     checkboxSelection
