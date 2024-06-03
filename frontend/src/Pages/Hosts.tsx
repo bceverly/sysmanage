@@ -32,7 +32,7 @@ const Hosts = () => {
         for (let i=0 ; i<tableData.length ; i++) {
             let found = false;
             for (let j=0 ; j<selection.length ; j++) {
-                if (tableData[i].id == BigInt(selection[j])) {
+                if (tableData[i].id === BigInt(selection[j])) {
                     found = true;
                 }
             }

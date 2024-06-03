@@ -43,7 +43,7 @@ const Users = () => {
         for (let i=0 ; i<tableData.length ; i++) {
             let found = false;
             for (let j=0 ; j<selection.length ; j++) {
-                if (tableData[i].id == BigInt(selection[j])) {
+                if (tableData[i].id === BigInt(selection[j])) {
                     found = true;
                 }
             }
@@ -142,7 +142,7 @@ const Users = () => {
                         })
                         .catch((error) => {
                             console.log('TheError: ' + error);
-                            if (error == 'AxiosError: Request failed with status code 409') {
+                            if (error === 'AxiosError: Request failed with status code 409') {
                                 setDupeError(true);
                             }
                         });
