@@ -6,10 +6,10 @@ routers for the system and then launches the application.
 """
 import uvicorn
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api import auth, host, user
+from backend.api import agent, auth, host, user
 from backend.auth.auth_handler import sign_jwt
 from backend.config import config
 
@@ -34,6 +34,7 @@ app.add_middleware(
 )
 
 # Import the dependencies
+app.include_router(agent.router)
 app.include_router(host.router)
 app.include_router(auth.router)
 app.include_router(user.router)
