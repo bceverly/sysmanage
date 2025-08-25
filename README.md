@@ -1,4 +1,11 @@
-# SysManage
+# SysManage Server
+
+[![CI/CD Pipeline](https://github.com/bceverly/sysmanage/actions/workflows/ci.yml/badge.svg)](https://github.com/bceverly/sysmanage/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/bceverly/sysmanage/branch/main/graph/badge.svg)](https://codecov.io/gh/bceverly/sysmanage)
+[![Python Version](https://img.shields.io/badge/python-3.12-blue.svg)](https://python.org)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 Cross platform system monitoring and management service
 
 SysManage is a python application that allows you to have remote servers
