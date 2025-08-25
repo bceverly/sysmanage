@@ -33,8 +33,9 @@
   "scripts": {
     "start": "HOST=sysmanage.org PORT=7443 HTTPS=true SSL_CRT_FILE=~/dev/certs/sysmanage.org/cert.pem SSL_KEY_FILE=~/dev/certs/sysmanage.org/privkey.pem react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "test": "react-scripts test --passWithNoTests",
+    "eject": "react-scripts eject",
+    "lint": "eslint src --ext .ts,.tsx,.js,.jsx --max-warnings 0"
   },
   "eslintConfig": {
     "extends": [
@@ -54,7 +55,16 @@
       "last 1 safari version"
     ]
   },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!(axios|@mui|d3-|uuid)/)"
+    ],
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+    }
+  },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "identity-obj-proxy": "^3.0.0"
   }
 }
