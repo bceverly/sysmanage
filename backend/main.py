@@ -24,7 +24,7 @@ origins = [
     "https://" + app_config["api"]["host"] + ":" + str(app_config["api"]["port"]),
     # Add localhost origins for development
     "http://localhost:3000",
-    "https://localhost:3000", 
+    "https://localhost:3000",
     "http://localhost:7443",
     "https://localhost:7443",
     "https://sysmanage.org:7443",
