@@ -5,13 +5,6 @@ type DoLoginRequest = {
   'password': string;
 }
 
-type DoLoginResponse = {
-  "Authorization": string;
-}
-
-type CheckValidResponse = {
-  'result': string;
-}
 
 const doLogin = async (requestData: DoLoginRequest) => {
   await api.post("https://api.sysmanage.org:8443/login", {

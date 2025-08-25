@@ -2,8 +2,9 @@
 This module manages the "db" object which is the gateway into the SQLAlchemy
 ORM used by SysManage.
 """
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 from backend.config import config
 
@@ -17,7 +18,9 @@ DB_PORT = the_config["database"]["port"]
 DB_NAME = the_config["database"]["name"]
 
 # Build the connection string
-SQLALCHEMY_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+SQLALCHEMY_DATABASE_URL = (
+    f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
 
 # create the database connection
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={}, echo=False)
@@ -26,11 +29,13 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Get the base model class - we can use this to extend any models
 Base = declarative_base()
 
+
 def get_engine():
     """
     Provide a mechanism to retrieve the engine from within the rest of the application
     """
     return engine
+
 
 def get_db():
     """
