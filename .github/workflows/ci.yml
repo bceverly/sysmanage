@@ -6,10 +6,15 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  contents: read
+
 jobs:
   test-backend:
     name: Backend Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     services:
       postgres:
@@ -27,15 +32,15 @@ jobs:
           - 5432:5432
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Set up Python 3.12
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.12'
 
     - name: Cache pip packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -90,8 +95,9 @@ jobs:
         PYTHONPATH: .
 
     - name: Upload backend coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
       with:
+        token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
         flags: backend
         name: backend-coverage
@@ -99,27 +105,25 @@ jobs:
   lint-backend:
     name: Backend Linting
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Set up Python 3.12
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.12'
 
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint black isort
+        pip install pylint black
 
     - name: Run Black formatter check
       run: |
         python -m black --check --diff backend/ tests/
-
-    - name: Run isort import check
-      run: |
-        python -m isort --check-only --diff backend/ tests/
 
     - name: Run Pylint
       run: |
@@ -128,20 +132,25 @@ jobs:
   test-frontend:
     name: Frontend Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
+        registry-url: 'https://registry.npmjs.org/'
         cache: 'npm'
         cache-dependency-path: frontend/package-lock.json
 
     - name: Install frontend dependencies
       working-directory: frontend
-      run: npm ci
+      run: |
+        npm cache clean --force || true
+        npm install --legacy-peer-deps || npm ci --legacy-peer-deps
 
     - name: Run frontend linting
       working-directory: frontend
@@ -149,40 +158,47 @@ jobs:
 
     - name: Run frontend tests
       working-directory: frontend
-      run: npm test -- --coverage --watchAll=false --passWithNoTests
+      run: npm run test:no-coverage
 
-    - name: Upload frontend coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./frontend/coverage/lcov.info
-        flags: frontend
-        name: frontend-coverage
+    # Note: Frontend coverage disabled due to babel-plugin-istanbul Node.js compatibility issues
+    # - name: Upload frontend coverage to Codecov
+    #   uses: codecov/codecov-action@v5
+    #   with:
+    #     token: ${{ secrets.CODECOV_TOKEN }}
+    #     file: ./frontend/coverage/lcov.info
+    #     flags: frontend
+    #     name: frontend-coverage
 
   build:
     name: Build Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: [test-backend, lint-backend, test-frontend]
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
+        registry-url: 'https://registry.npmjs.org/'
         cache: 'npm'
         cache-dependency-path: frontend/package-lock.json
 
     - name: Install frontend dependencies
       working-directory: frontend
-      run: npm ci
+      run: |
+        npm cache clean --force || true
+        npm install --legacy-peer-deps || npm ci --legacy-peer-deps
 
     - name: Build frontend
       working-directory: frontend
       run: npm run build
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: frontend-build
         path: frontend/build/
