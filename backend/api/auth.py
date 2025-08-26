@@ -39,6 +39,13 @@ async def login(login_data: UserLogin, response: Response):
         if login_data.password == the_config["security"]["admin_password"]:
             refresh_token = sign_refresh_token(login_data.userid)
             jwt_refresh_timout = int(the_config["security"]["jwt_refresh_timeout"])
+            
+            # Determine if we should use secure cookies based on config
+            is_secure = (
+                the_config.get("api", {}).get("certFile") is not None
+                and len(the_config.get("api", {}).get("certFile", "")) > 0
+            )
+            
             response.set_cookie(
                 key="refresh_token",
                 value=refresh_token,
@@ -46,9 +53,9 @@ async def login(login_data: UserLogin, response: Response):
                 + timedelta(seconds=jwt_refresh_timout),
                 path="/",
                 domain="sysmanage.org",
-                secure=True,
+                secure=is_secure,
                 httponly=True,
-                samesite="none",
+                samesite="strict" if is_secure else "lax",
             )
             return {"Authorization": sign_jwt(login_data.userid)}
 
@@ -83,6 +90,13 @@ async def login(login_data: UserLogin, response: Response):
                 response.body = {"Authorization": sign_jwt(login_data.userid)}
                 refresh_token = sign_refresh_token(login_data.userid)
                 jwt_refresh_timout = int(the_config["security"]["jwt_refresh_timeout"])
+                
+                # Determine if we should use secure cookies based on config
+                is_secure = (
+                    the_config.get("api", {}).get("certFile") is not None
+                    and len(the_config.get("api", {}).get("certFile", "")) > 0
+                )
+                
                 response.set_cookie(
                     key="refresh_token",
                     value=refresh_token,
@@ -90,9 +104,9 @@ async def login(login_data: UserLogin, response: Response):
                     + timedelta(seconds=jwt_refresh_timout),
                     path="/",
                     domain="sysmanage.org",
-                    secure=True,
+                    secure=is_secure,
                     httponly=True,
-                    samesite="none",
+                    samesite="strict" if is_secure else "lax",
                 )
 
                 # Return success
