@@ -9,7 +9,7 @@ cryptography>=45.0.0
 dill==0.3.8
 dnspython==2.6.1
 email_validator==2.1.1
-fastapi==0.110.2
+fastapi>=0.115.6
 gevent==24.2.1
 greenlet==3.0.3
 h11>=0.16.0
