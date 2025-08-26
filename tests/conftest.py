@@ -11,10 +11,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from backend.auth.auth_bearer import JWTBearer
 from backend.main import app
 from backend.persistence.db import Base, get_db
 from backend.websocket.connection_manager import ConnectionManager
-from backend.auth.auth_bearer import JWTBearer
 
 # Test database URL - using SQLite in memory for tests
 TEST_DATABASE_URL = "sqlite:///:memory:"
