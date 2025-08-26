@@ -12,11 +12,7 @@ from sqlalchemy.orm import Session
 from backend.persistence.db import get_db
 from backend.persistence.models import Host
 from backend.websocket.connection_manager import connection_manager
-from backend.websocket.messages import (
-    ErrorMessage,
-    MessageType,
-    create_message,
-)
+from backend.websocket.messages import ErrorMessage, MessageType, create_message
 
 router = APIRouter()
 
