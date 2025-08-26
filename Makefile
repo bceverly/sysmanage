@@ -58,8 +58,7 @@ lint-python: $(VENV)/bin/activate clean-whitespace
 # TypeScript/React linting
 lint-typescript:
 	@echo "=== TypeScript/React Linting ==="
-	@cd frontend && npm run lint 2>/dev/null || echo "⚠️  ESLint not configured in package.json, using direct eslint"
-	@cd frontend && npx eslint src --ext .ts,.tsx,.js,.jsx --max-warnings 0 || true
+	@cd frontend && npm run lint
 	@echo "✅ TypeScript linting completed"
 
 # Combined linting
@@ -80,7 +79,7 @@ test-python: $(VENV)/bin/activate clean-whitespace
 # TypeScript/React tests
 test-typescript:
 	@echo "=== Running TypeScript/React Tests ==="
-	@cd frontend && npm test -- --coverage --verbose --watchAll=false
+	@cd frontend && npm test
 	@echo "✅ TypeScript tests completed"
 
 # Combined testing
