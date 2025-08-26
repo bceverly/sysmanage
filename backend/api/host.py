@@ -232,27 +232,27 @@ async def register_host(registration_data: HostRegistration):
             )
 
             return ret_host
-        else:
-            # Create new host
-            host = models.Host(
-                fqdn=registration_data.fqdn,
-                active=registration_data.active,
-                ipv4=registration_data.ipv4,
-                ipv6=registration_data.ipv6,
-                last_access=datetime.now(timezone.utc),
-            )
-            session.add(host)
-            session.commit()
 
-            ret_host = models.Host(
-                id=host.id,
-                active=host.active,
-                fqdn=host.fqdn,
-                ipv4=host.ipv4,
-                ipv6=host.ipv6,
-            )
+        # Create new host
+        host = models.Host(
+            fqdn=registration_data.fqdn,
+            active=registration_data.active,
+            ipv4=registration_data.ipv4,
+            ipv6=registration_data.ipv6,
+            last_access=datetime.now(timezone.utc),
+        )
+        session.add(host)
+        session.commit()
 
-            return ret_host
+        ret_host = models.Host(
+            id=host.id,
+            active=host.active,
+            fqdn=host.fqdn,
+            ipv4=host.ipv4,
+            ipv6=host.ipv6,
+        )
+
+        return ret_host
 
 
 @router.put("/host/{host_id}", dependencies=[Depends(JWTBearer())])
