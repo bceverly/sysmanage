@@ -15,17 +15,17 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.97",
-    "@types/react": "^18.3.2",
-    "@types/react-dom": "^18.3.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
     "axios": "^1.8.0",
     "localStorage": "^1.0.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-icons": "^5.2.1",
+    "react-icons": "^5.3.0",
     "react-responsive": "^10.0.0",
     "react-router": "^6.23.1",
     "react-router-dom": "^6.23.1",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "styled-components": "^6.1.11",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
@@ -33,9 +33,10 @@
   "scripts": {
     "start": "HOST=sysmanage.org PORT=7443 HTTPS=true SSL_CRT_FILE=~/dev/certs/sysmanage.org/cert.pem SSL_KEY_FILE=~/dev/certs/sysmanage.org/privkey.pem react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --passWithNoTests",
+    "test": "react-scripts test --passWithNoTests --verbose --watchAll=false",
+    "test:coverage": "CI=true react-scripts test --passWithNoTests --coverage --verbose --watchAll=false",
     "eject": "react-scripts eject",
-    "lint": "eslint src --ext .ts,.tsx,.js,.jsx --max-warnings 0"
+    "lint": "eslint src --ext .ts,.tsx,.js,.jsx --max-warnings 0 && stylelint 'src/**/*.css'"
   },
   "eslintConfig": {
     "extends": [
@@ -65,6 +66,21 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "identity-obj-proxy": "^3.0.0"
+    "identity-obj-proxy": "^3.0.0",
+    "eslint-plugin-css-modules": "^2.12.0",
+    "stylelint": "^16.10.0",
+    "stylelint-config-standard": "^36.0.1"
+  },
+  "overrides": {
+    "nth-check": "^2.1.1",
+    "postcss": "^8.4.47",
+    "webpack-dev-server": "^5.2.1",
+    "svgo": "^3.3.2",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
+    "@types/react": "$@types/react",
+    "glob": "^10.4.5",
+    "rimraf": "^5.0.10",
+    "babel-plugin-istanbul": "^6.1.1",
+    "test-exclude": "^6.0.0"
   }
 }
