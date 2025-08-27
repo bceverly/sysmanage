@@ -2,101 +2,289 @@
 
 [![CI/CD Pipeline](https://github.com/bceverly/sysmanage/actions/workflows/ci.yml/badge.svg)](https://github.com/bceverly/sysmanage/actions/workflows/ci.yml)
 [![Python Version](https://img.shields.io/badge/python-3.12-blue.svg)](https://python.org)
+[![Node.js Version](https://img.shields.io/badge/node.js-20.x-green.svg)](https://nodejs.org)
 [![License](https://img.shields.io/badge/license-BSD%202--Clause-green.svg)](LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Linting](https://img.shields.io/badge/linting-pylint-blue.svg)](https://github.com/PyCQA/pylint)
 
-Cross platform system monitoring and management service
+A modern, cross-platform system monitoring and management platform with real-time WebSocket communication, built with FastAPI and React.
 
-SysManage is a python application that allows you to have remote servers
-in a variety of supported operating systems (Linux, Windows, MacOS, FreeBSD and
-OpenBSD) that have an agent installedon them (SysManage Agent) that will
-connect with this service and provide the following functions:
+## Overview
 
-- Periodically check in and allow the server to identify that a remote agent
-has lost connectivity (i.e. the remote machine might be "down")
-- Keep track of any updates that might be available for the remote server
-- Install updates on the remote server
+SysManage is a comprehensive system management solution that allows you to monitor and manage remote servers across multiple operating systems (Linux, Windows, macOS, FreeBSD, and OpenBSD). The system consists of:
 
-Please see LICENSE for licensing of this service.
+- **Backend API**: FastAPI-based REST API with WebSocket support
+- **Frontend Web UI**: Modern React application built with Vite
+- **Database**: PostgreSQL with Alembic migrations
+- **Real-time Communication**: WebSocket-based agent communication
 
-# Building
-To build this project, you need to be running python 3.12 or higher in a 
-virtual environment with the following items installed:
+### Key Features
 
-- python3 -m pip install -r requirements.txt
-- Install PostgreSQL version 14 or higher
-- Run db_setup.sh to generate the createdb.sh script and the
-sysmanage.yaml file (copy it to /etc)
-- Migrate to the latest database schema with "alembic upgrade head"
-- Make sure your /etc/hosts file has entries in it for the URLs you are
-using for the website and the API
-- Run 'npm install' to install the dependencies the project needs in the
-./frontend directory
-- Run the web UI via "npm start" from the ./frontend
-directory
-- Run the backend API with "uvicorn backend.main:app"
-- Run the unit tests with "pytest"
+- 🔄 Real-time agent status monitoring via WebSockets
+- 📊 System metrics and health monitoring
+- 🔐 JWT-based authentication with token rotation
+- 👥 Multi-user management system
+- 🏢 Fleet-based host organization
+- 🖥️ Cross-platform agent support
+- 📱 Responsive web interface
+- 🧪 Comprehensive test coverage (61 tests)
 
-# Database Migration
-Edit the persistence/models.py file to define new database tables or
-columns.  Afterwards, execute:
+## Prerequisites
 
-(.venv) $ alembic revision --autogenerate -m "describe the changes"
+### System Requirements
+- **Python**: 3.12 or higher
+- **Node.js**: 20.x or higher
+- **PostgreSQL**: 14 or higher
+- **OS**: Linux, macOS, Windows, FreeBSD, or OpenBSD
 
-(.venv) $ alembic upgrade head
+### Required Tools
+```bash
+# Python tools (automatically installed)
+pip install -r requirements.txt
 
-If you need to roll back a migration, you can run:
+# Node.js tools (automatically installed)
+npm install
+```
 
-(.venv) $ alembic downgrade <revision>
+## Quick Start
 
-or
+### 1. Clone and Setup
+```bash
+git clone https://github.com/bceverly/sysmanage.git
+cd sysmanage
 
-(.venv) $ alembic downgrade -1
+# Create Python virtual environment
+python3.12 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
 
-The following command shows the history of migrations:
+### 2. Install Backend Dependencies
+```bash
+pip install -r requirements.txt
+```
 
-(.venv) $ alembic history
+### 3. Database Setup
+```bash
+# Install PostgreSQL 14+
+# Create database and user
+createdb sysmanage
+createuser sysmanage_user
 
-# API Call Flow
+# Run database migrations
+alembic upgrade head
+```
 
-To use the API, first call the /login method.  A response body will be
-returned containing a JSON value called X_Reauthorization.  This is the
-"bearer token" that will be used to validate privileged API calls from that
-point forward.
+### 4. Install Frontend Dependencies
+```bash
+cd frontend
+npm install
+```
 
-On the next API call to a privileged API, set a header called
-Authorization with a value of the word "Bearer" followed by the token
-you received from the response body to /login.  For example, if you
-were using curl:
+### 5. Configuration
 
-curl -X 'GET' 'https://localhost:8000/users' \
-  -H 'accept: application/json' \
-  -H 'Authorization: Bearer xxxxxxxxxxx'
+#### SSL Certificates (Development)
+For HTTPS development, place your SSL certificates in:
+```
+~/dev/certs/sysmanage.org/
+├── cert.pem
+└── privkey.pem
+```
 
-where the x's in the "Authorization" header are the value of the token
-you received from the call to /login.  If successful, this call will return
-an HTTP response header called "X_Reauthorization" which contains the token
-you will use on your next call and so on.
+If certificates are not found, the system will automatically fall back to HTTP on localhost.
 
-A token can only be used one time and even if it is unexpired, it will be
-deny-listed on the server and prevent a subsequent successful re-use of the
-same token.  Any bad or attempted re-use of tokens will result in a response
-code of 403 (Forbidden).
+#### Environment Configuration
+Create `/etc/sysmanage.yaml` or set environment variables:
+```yaml
+database_url: "postgresql://sysmanage_user:password@localhost/sysmanage"
+secret_key: "your-secret-key-here"
+api_host: "localhost"
+api_port: 6443
+frontend_host: "localhost"
+frontend_port: 7443
+```
 
-To access the OpenAPI swagger documentation for SysManage, run the service
-as follows:
+## Development Workflow
 
-(.venv) % uvicorn backend.main:app --reload
+### Running the Application
 
-You can then point your browser at the URL/API port specified in the file at
-/etc/sysmanage.yaml, followed by the docs path.  For example:
+#### Backend API Server
+```bash
+# Development mode with auto-reload
+uvicorn backend.main:app --reload --host 0.0.0.0 --port 6443
 
-http://127.0.0.1:8000/docs
+# Production mode
+uvicorn backend.main:app --host 0.0.0.0 --port 6443
+```
 
-# Front-end
+#### Frontend Development Server
+```bash
+cd frontend
+npm run dev
+```
+The frontend will be available at:
+- HTTPS: https://sysmanage.org:7443 (if SSL certs exist)
+- HTTP: http://localhost:3000 (fallback)
 
-The front-end is written in React.JS and can be executve in a local
-environment by navigating to the "website" directory and running:
+### Testing
 
-$ npm start
+#### Run All Tests
+```bash
+make test
+```
+
+#### Individual Test Suites
+```bash
+# Backend tests (Python)
+python -m pytest tests/ -v
+
+# Frontend tests (TypeScript/React)
+cd frontend && npm test
+
+# Test with coverage
+python -m pytest tests/ --cov=backend --cov-report=html
+```
+
+#### Linting
+```bash
+# Python linting
+python -m pylint backend/
+
+# TypeScript/React linting
+cd frontend && npm run lint
+```
+
+### Database Management
+
+#### Creating Migrations
+```bash
+# Auto-generate migration from model changes
+alembic revision --autogenerate -m "Description of changes"
+
+# Apply migrations
+alembic upgrade head
+```
+
+#### Migration Commands
+```bash
+# Show migration history
+alembic history
+
+# Rollback one migration
+alembic downgrade -1
+
+# Rollback to specific revision
+alembic downgrade <revision_id>
+```
+
+## Project Structure
+
+```
+sysmanage/
+├── backend/                 # FastAPI backend
+│   ├── api/                # REST API endpoints
+│   ├── auth/               # JWT authentication
+│   ├── config/             # Configuration management
+│   ├── persistence/        # Database models and ORM
+│   ├── websocket/          # WebSocket communication
+│   └── main.py             # FastAPI application entry point
+├── frontend/               # React frontend (Vite-based)
+│   ├── src/
+│   │   ├── Components/     # React components
+│   │   ├── Pages/          # Page components
+│   │   ├── Services/       # API client services
+│   │   └── __tests__/      # Frontend tests
+│   ├── vite.config.ts      # Vite configuration
+│   └── package.json        # Node.js dependencies
+├── tests/                  # Backend Python tests
+├── alembic/                # Database migrations
+├── requirements.txt        # Python dependencies
+└── Makefile               # Build automation
+```
+
+## API Documentation
+
+### Authentication Flow
+
+1. **Login**: `POST /login` - Returns JWT token
+2. **Authenticated Requests**: Include `Authorization: Bearer <token>` header
+3. **Token Rotation**: Each successful request returns a new token in `X_Reauthorization` header
+4. **Security**: Tokens are single-use and automatically deny-listed after use
+
+### API Endpoints
+
+- **Authentication**: `/login`, `/logout`
+- **Users**: `/users`, `/users/{id}`
+- **Hosts**: `/hosts`, `/hosts/{id}`, `/host/by_fqdn/{fqdn}`
+- **Fleet Management**: `/fleet`, `/fleet/{id}`
+- **WebSocket**: `/ws/{agent_id}` - Real-time agent communication
+
+### Swagger Documentation
+When running the backend, visit: http://localhost:6443/docs
+
+## WebSocket Architecture
+
+The system uses WebSocket connections for real-time communication between agents and the server:
+
+- **Connection Management**: Automatic agent registration and heartbeat monitoring
+- **Message Types**: System info, commands, heartbeats, errors
+- **Broadcasting**: Send commands to all agents, specific platforms, or individual hosts
+- **Fault Tolerance**: Automatic cleanup of failed connections
+
+## Deployment
+
+### Production Build
+
+#### Backend
+```bash
+# Install production dependencies
+pip install -r requirements.txt
+
+# Run with production settings
+uvicorn backend.main:app --host 0.0.0.0 --port 6443 --workers 4
+```
+
+#### Frontend
+```bash
+cd frontend
+npm run build
+# Serve the built files from frontend/build/
+```
+
+### Docker Support
+```bash
+# Build and run with Docker Compose
+docker-compose up -d
+```
+
+## Development Guidelines
+
+- **Code Style**: Black formatting, pylint for Python; ESLint + Prettier for TypeScript
+- **Testing**: Maintain >90% test coverage for critical paths
+- **Commits**: Use conventional commit format with Claude Code co-author attribution
+- **Security**: No hardcoded secrets, secure JWT implementation, input validation
+
+## Troubleshooting
+
+### Common Issues
+
+1. **SSL Certificate Errors**: Ensure certificates exist in correct path or disable HTTPS
+2. **Database Connection**: Verify PostgreSQL is running and credentials are correct
+3. **Port Conflicts**: Check that ports 6443 (API) and 7443 (frontend) are available
+4. **Node.js Version**: Ensure Node.js 20.x is installed
+
+### Logs
+- Backend logs: Console output from uvicorn
+- Frontend logs: Browser developer console
+- Database logs: PostgreSQL logs
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make changes with tests
+4. Ensure all tests pass and linting is clean
+5. Submit a pull request
+
+## License
+
+This project is licensed under the BSD 2-Clause License. See [LICENSE](LICENSE) for details.
