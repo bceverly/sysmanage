@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "dashboard": "대시보드",
+    "hosts": "호스트",
+    "users": "사용자",
+    "logout": "로그아웃"
+  },
+  "login": {
+    "title": "SysManage 로그인",
+    "username": "이메일 주소",
+    "password": "비밀번호",
+    "submit": "로그인",
+    "error": "잘못된 사용자 이름 또는 비밀번호",
+    "remember": "로그인 상태 유지",
+    "forgotPassword": "비밀번호를 잊으셨나요?",
+    "signUp": "계정이 없으신가요? 가입하기"
+  },
+  "dashboard": {
+    "title": "대시보드",
+    "welcome": "SysManage에 오신 것을 환영합니다",
+    "activeHosts": "활성 호스트",
+    "totalUsers": "전체 사용자",
+    "systemHealth": "시스템 상태"
+  },
+  "hosts": {
+    "title": "호스트 관리",
+    "fqdn": "FQDN",
+    "ipv4": "IPv4 주소",
+    "ipv6": "IPv6 주소",
+    "status": "상태",
+    "active": "활성",
+    "inactive": "비활성",
+    "actions": "작업",
+    "edit": "편집",
+    "delete": "삭제",
+    "addHost": "호스트 추가"
+  },
+  "users": {
+    "title": "사용자 관리",
+    "username": "사용자 이름",
+    "email": "이메일",
+    "role": "역할",
+    "status": "상태",
+    "actions": "작업",
+    "addUser": "사용자 추가",
+    "enterInfo": "아래에 새 사용자의 정보를 입력하세요.",
+    "emailUnique": "이메일 주소는 고유해야 합니다"
+  },
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "add": "추가",
+    "selected": "선택됨",
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "success": "작업이 성공적으로 완료되었습니다"
+  }
+}

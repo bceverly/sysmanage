@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "dashboard": "Tablero",
+    "hosts": "Hosts",
+    "users": "Usuarios",
+    "logout": "Cerrar Sesión"
+  },
+  "login": {
+    "title": "Iniciar Sesión en SysManage",
+    "username": "Dirección de Email",
+    "password": "Contraseña",
+    "submit": "Iniciar Sesión",
+    "error": "Nombre de usuario o contraseña inválidos",
+    "remember": "Recordarme",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "signUp": "¿No tienes una cuenta? Regístrate"
+  },
+  "dashboard": {
+    "title": "Tablero",
+    "welcome": "Bienvenido a SysManage",
+    "activeHosts": "Hosts Activos",
+    "totalUsers": "Total de Usuarios",
+    "systemHealth": "Salud del Sistema"
+  },
+  "hosts": {
+    "title": "Gestión de Hosts",
+    "fqdn": "FQDN",
+    "ipv4": "Dirección IPv4",
+    "ipv6": "Dirección IPv6",
+    "status": "Estado",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "actions": "Acciones",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "addHost": "Agregar Host"
+  },
+  "users": {
+    "title": "Gestión de Usuarios",
+    "username": "Nombre de Usuario",
+    "email": "Email",
+    "role": "Rol",
+    "status": "Estado",
+    "actions": "Acciones",
+    "addUser": "Agregar Usuario",
+    "enterInfo": "Ingresa la información del nuevo usuario a continuación.",
+    "emailUnique": "La dirección de email debe ser única"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "add": "Agregar",
+    "selected": "Seleccionado",
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "success": "Operación completada exitosamente"
+  }
+}

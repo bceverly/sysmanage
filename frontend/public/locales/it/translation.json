@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "hosts": "Host",
+    "users": "Utenti",
+    "logout": "Esci"
+  },
+  "login": {
+    "title": "Accedi a SysManage",
+    "username": "Indirizzo Email",
+    "password": "Password",
+    "submit": "Accedi",
+    "error": "Nome utente o password non validi",
+    "remember": "Ricordami",
+    "forgotPassword": "Password dimenticata?",
+    "signUp": "Non hai un account? Registrati"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Benvenuto in SysManage",
+    "activeHosts": "Host Attivi",
+    "totalUsers": "Utenti Totali",
+    "systemHealth": "Salute del Sistema"
+  },
+  "hosts": {
+    "title": "Gestione Host",
+    "fqdn": "FQDN",
+    "ipv4": "Indirizzo IPv4",
+    "ipv6": "Indirizzo IPv6",
+    "status": "Stato",
+    "active": "Attivo",
+    "inactive": "Inattivo",
+    "actions": "Azioni",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "addHost": "Aggiungi Host"
+  },
+  "users": {
+    "title": "Gestione Utenti",
+    "username": "Nome Utente",
+    "email": "Email",
+    "role": "Ruolo",
+    "status": "Stato",
+    "actions": "Azioni",
+    "addUser": "Aggiungi Utente",
+    "enterInfo": "Inserisci le informazioni del nuovo utente qui sotto.",
+    "emailUnique": "L'indirizzo email deve essere unico"
+  },
+  "common": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "add": "Aggiungi",
+    "selected": "Selezionato",
+    "loading": "Caricamento...",
+    "error": "Si è verificato un errore",
+    "success": "Operazione completata con successo"
+  }
+}
