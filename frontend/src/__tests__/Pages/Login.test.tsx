@@ -1,22 +1,28 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { vi } from 'vitest';
 import Login from '../../Pages/Login';
 
 // Mock the API service
-jest.mock('../../Services/api.js', () => ({
-  login: jest.fn(),
+vi.mock('../../Services/api.js', () => ({
+  default: {
+    post: vi.fn()
+  }
 }));
 
 const LoginWithRouter = () => (
-  <BrowserRouter>
+  <BrowserRouter future={{
+    v7_startTransition: true,
+    v7_relativeSplatPath: true
+  }}>
     <Login />
   </BrowserRouter>
 );
 
 describe('Login Page', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders login form', () => {

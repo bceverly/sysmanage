@@ -34,7 +34,7 @@ const Dashboard = () => {
             </Typography>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 1, md: 3 }}>
                 <Gauge width={200} height={200} value={numHosts} valueMin={0} valueMax={numHosts} 
-                sx={(theme) => ({
+                sx={(_theme) => ({
                     [`& .${gaugeClasses.valueText}`] : {
                         fontSize: 40,
                     },

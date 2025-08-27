@@ -158,7 +158,7 @@ jobs:
 
     - name: Run frontend tests
       working-directory: frontend
-      run: npm run test:no-coverage
+      run: npm test
 
     # Note: Frontend coverage disabled due to babel-plugin-istanbul Node.js compatibility issues
     # - name: Upload frontend coverage to Codecov

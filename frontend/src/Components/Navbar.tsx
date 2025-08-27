@@ -69,13 +69,13 @@ const Navbar = () => {
             </li>
           </ul>
           <div className="nav__close" id="nav-close" onClick={toggleMenu}>
-            {/* @ts-ignore */}
+            {/* @ts-expect-error - IoClose component type issues */}
             <IoClose />
           </div>
         </div>
 
         <div className="nav__toggle" id="nav-toggle" onClick={toggleMenu}>
-          {/* @ts-ignore */}
+          {/* @ts-expect-error - IoMenu component type issues */}
           <IoMenu />
         </div>
       </nav>

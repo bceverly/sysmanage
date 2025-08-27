@@ -4,7 +4,10 @@ import { BrowserRouter } from 'react-router-dom';
 import Navbar from '../../Components/Navbar';
 
 const NavbarWithRouter = () => (
-  <BrowserRouter>
+  <BrowserRouter future={{
+    v7_startTransition: true,
+    v7_relativeSplatPath: true
+  }}>
     <Navbar />
   </BrowserRouter>
 );
