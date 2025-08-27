@@ -1,0 +1,78 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ru\n"
+
+# Authentication messages
+msgid "Invalid username or password"
+msgstr "Неверное имя пользователя или пароль"
+
+msgid "Authentication required"
+msgstr "Требуется аутентификация"
+
+msgid "Token expired"
+msgstr "Токен истёк"
+
+msgid "Access denied"
+msgstr "Доступ запрещён"
+
+# Host management
+msgid "Host not found"
+msgstr "Хост не найден"
+
+msgid "Host created successfully"
+msgstr "Хост успешно создан"
+
+msgid "Host updated successfully"
+msgstr "Хост успешно обновлён"
+
+msgid "Host deleted successfully"
+msgstr "Хост успешно удалён"
+
+msgid "Invalid FQDN format"
+msgstr "Неверный формат FQDN"
+
+# User management
+msgid "User not found"
+msgstr "Пользователь не найден"
+
+msgid "User created successfully"
+msgstr "Пользователь успешно создан"
+
+msgid "User updated successfully"
+msgstr "Пользователь успешно обновлён"
+
+msgid "User deleted successfully"
+msgstr "Пользователь успешно удалён"
+
+msgid "Username already exists"
+msgstr "Имя пользователя уже существует"
+
+msgid "Email already exists"
+msgstr "Email уже существует"
+
+# Agent communication
+msgid "Agent not connected"
+msgstr "Агент не подключён"
+
+msgid "Agent registered successfully"
+msgstr "Агент успешно зарегистрирован"
+
+msgid "Command sent successfully"
+msgstr "Команда успешно отправлена"
+
+msgid "Agent disconnected"
+msgstr "Агент отключён"
+
+# General errors
+msgid "Internal server error"
+msgstr "Внутренняя ошибка сервера"
+
+msgid "Invalid request data"
+msgstr "Неверные данные запроса"
+
+msgid "Operation completed successfully"
+msgstr "Операция успешно завершена"
+
+msgid "Database error"
+msgstr "Ошибка базы данных"

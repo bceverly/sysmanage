@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "hosts": "Hosts",
+    "users": "Gebruikers",
+    "logout": "Uitloggen"
+  },
+  "login": {
+    "title": "Inloggen bij SysManage",
+    "username": "E-mailadres",
+    "password": "Wachtwoord",
+    "submit": "Inloggen",
+    "error": "Ongeldige gebruikersnaam of wachtwoord",
+    "remember": "Onthoud mij",
+    "forgotPassword": "Wachtwoord vergeten?",
+    "signUp": "Geen account? Registreren"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welkom bij SysManage",
+    "activeHosts": "Actieve Hosts",
+    "totalUsers": "Totaal Gebruikers",
+    "systemHealth": "Systeemgezondheid"
+  },
+  "hosts": {
+    "title": "Host Beheer",
+    "fqdn": "FQDN",
+    "ipv4": "IPv4 Adres",
+    "ipv6": "IPv6 Adres",
+    "status": "Status",
+    "active": "Actief",
+    "inactive": "Inactief",
+    "actions": "Acties",
+    "edit": "Bewerken",
+    "delete": "Verwijderen",
+    "addHost": "Host Toevoegen"
+  },
+  "users": {
+    "title": "Gebruikersbeheer",
+    "username": "Gebruikersnaam",
+    "email": "E-mail",
+    "role": "Rol",
+    "status": "Status",
+    "actions": "Acties",
+    "addUser": "Gebruiker Toevoegen",
+    "enterInfo": "Voer hieronder de informatie van de nieuwe gebruiker in.",
+    "emailUnique": "E-mailadres moet uniek zijn"
+  },
+  "common": {
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "add": "Toevoegen",
+    "selected": "Geselecteerd",
+    "loading": "Laden...",
+    "error": "Er is een fout opgetreden",
+    "success": "Operatie succesvol voltooid"
+  }
+}

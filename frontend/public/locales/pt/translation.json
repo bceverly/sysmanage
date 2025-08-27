@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "dashboard": "Painel",
+    "hosts": "Hosts",
+    "users": "Usuários",
+    "logout": "Sair"
+  },
+  "login": {
+    "title": "Entrar no SysManage",
+    "username": "Endereço de Email",
+    "password": "Senha",
+    "submit": "Entrar",
+    "error": "Nome de usuário ou senha inválidos",
+    "remember": "Lembrar-me",
+    "forgotPassword": "Esqueceu a senha?",
+    "signUp": "Não tem uma conta? Cadastre-se"
+  },
+  "dashboard": {
+    "title": "Painel",
+    "welcome": "Bem-vindo ao SysManage",
+    "activeHosts": "Hosts Ativos",
+    "totalUsers": "Total de Usuários",
+    "systemHealth": "Saúde do Sistema"
+  },
+  "hosts": {
+    "title": "Gerenciamento de Hosts",
+    "fqdn": "FQDN",
+    "ipv4": "Endereço IPv4",
+    "ipv6": "Endereço IPv6",
+    "status": "Status",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "actions": "Ações",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "addHost": "Adicionar Host"
+  },
+  "users": {
+    "title": "Gerenciamento de Usuários",
+    "username": "Nome de Usuário",
+    "email": "Email",
+    "role": "Função",
+    "status": "Status",
+    "actions": "Ações",
+    "addUser": "Adicionar Usuário",
+    "enterInfo": "Digite as informações do novo usuário abaixo.",
+    "emailUnique": "O endereço de email deve ser único"
+  },
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "add": "Adicionar",
+    "selected": "Selecionado",
+    "loading": "Carregando...",
+    "error": "Ocorreu um erro",
+    "success": "Operação concluída com sucesso"
+  }
+}

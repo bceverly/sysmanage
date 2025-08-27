@@ -1,0 +1,78 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: nl\n"
+
+# Authentication messages
+msgid "Invalid username or password"
+msgstr "Ongeldige gebruikersnaam of wachtwoord"
+
+msgid "Authentication required"
+msgstr "Authenticatie vereist"
+
+msgid "Token expired"
+msgstr "Token verlopen"
+
+msgid "Access denied"
+msgstr "Toegang geweigerd"
+
+# Host management
+msgid "Host not found"
+msgstr "Host niet gevonden"
+
+msgid "Host created successfully"
+msgstr "Host succesvol aangemaakt"
+
+msgid "Host updated successfully"
+msgstr "Host succesvol bijgewerkt"
+
+msgid "Host deleted successfully"
+msgstr "Host succesvol verwijderd"
+
+msgid "Invalid FQDN format"
+msgstr "Ongeldig FQDN-formaat"
+
+# User management
+msgid "User not found"
+msgstr "Gebruiker niet gevonden"
+
+msgid "User created successfully"
+msgstr "Gebruiker succesvol aangemaakt"
+
+msgid "User updated successfully"
+msgstr "Gebruiker succesvol bijgewerkt"
+
+msgid "User deleted successfully"
+msgstr "Gebruiker succesvol verwijderd"
+
+msgid "Username already exists"
+msgstr "Gebruikersnaam bestaat al"
+
+msgid "Email already exists"
+msgstr "E-mail bestaat al"
+
+# Agent communication
+msgid "Agent not connected"
+msgstr "Agent niet verbonden"
+
+msgid "Agent registered successfully"
+msgstr "Agent succesvol geregistreerd"
+
+msgid "Command sent successfully"
+msgstr "Commando succesvol verzonden"
+
+msgid "Agent disconnected"
+msgstr "Agent losgekoppeld"
+
+# General errors
+msgid "Internal server error"
+msgstr "Interne serverfout"
+
+msgid "Invalid request data"
+msgstr "Ongeldige aanvraaggegevens"
+
+msgid "Operation completed successfully"
+msgstr "Operatie succesvol voltooid"
+
+msgid "Database error"
+msgstr "Databasefout"

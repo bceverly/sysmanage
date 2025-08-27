@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "dashboard": "仪表板",
+    "hosts": "主机",
+    "users": "用户",
+    "logout": "退出登录"
+  },
+  "login": {
+    "title": "登录 SysManage",
+    "username": "邮箱地址",
+    "password": "密码",
+    "submit": "登录",
+    "error": "用户名或密码无效",
+    "remember": "记住我",
+    "forgotPassword": "忘记密码？",
+    "signUp": "没有账户？注册"
+  },
+  "dashboard": {
+    "title": "仪表板",
+    "welcome": "欢迎使用 SysManage",
+    "activeHosts": "活跃主机",
+    "totalUsers": "用户总数",
+    "systemHealth": "系统健康状态"
+  },
+  "hosts": {
+    "title": "主机管理",
+    "fqdn": "FQDN",
+    "ipv4": "IPv4 地址",
+    "ipv6": "IPv6 地址",
+    "status": "状态",
+    "active": "活跃",
+    "inactive": "非活跃",
+    "actions": "操作",
+    "edit": "编辑",
+    "delete": "删除",
+    "addHost": "添加主机"
+  },
+  "users": {
+    "title": "用户管理",
+    "username": "用户名",
+    "email": "邮箱",
+    "role": "角色",
+    "status": "状态",
+    "actions": "操作",
+    "addUser": "添加用户",
+    "enterInfo": "请在下面输入新用户的信息。",
+    "emailUnique": "邮箱地址必须唯一"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "add": "添加",
+    "selected": "已选择",
+    "loading": "加载中...",
+    "error": "发生错误",
+    "success": "操作成功完成"
+  }
+}

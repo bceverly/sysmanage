@@ -31,7 +31,28 @@ SysManage is a comprehensive system management solution that allows you to monit
 - 🏢 Fleet-based host organization
 - 🖥️ Cross-platform agent support
 - 📱 Responsive web interface
+- 🌍 Multi-language support (11 languages)
 - 🧪 Comprehensive test coverage (61 tests)
+
+### Internationalization
+
+SysManage supports multiple languages with full localization of the user interface and system messages. The following languages are natively supported:
+
+| Language | Code | Status |
+|----------|------|--------|
+| English | `en` | ✅ Complete |
+| Spanish | `es` | ✅ Complete |
+| French | `fr` | ✅ Complete |
+| German | `de` | ✅ Complete |
+| Italian | `it` | ✅ Complete |
+| Portuguese | `pt` | ✅ Complete |
+| Dutch | `nl` | ✅ Complete |
+| Japanese | `ja` | ✅ Complete |
+| Simplified Chinese | `zh_CN` | ✅ Complete |
+| Korean | `ko` | ✅ Complete |
+| Russian | `ru` | ✅ Complete |
+
+The system automatically detects the browser's preferred language and falls back to English if the preferred language is not supported. Users can manually change the language using the language selector in the navigation bar.
 
 ## Prerequisites
 

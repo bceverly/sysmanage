@@ -1,0 +1,78 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: it\n"
+
+# Authentication messages
+msgid "Invalid username or password"
+msgstr "Nome utente o password non validi"
+
+msgid "Authentication required"
+msgstr "Autenticazione richiesta"
+
+msgid "Token expired"
+msgstr "Token scaduto"
+
+msgid "Access denied"
+msgstr "Accesso negato"
+
+# Host management
+msgid "Host not found"
+msgstr "Host non trovato"
+
+msgid "Host created successfully"
+msgstr "Host creato con successo"
+
+msgid "Host updated successfully"
+msgstr "Host aggiornato con successo"
+
+msgid "Host deleted successfully"
+msgstr "Host eliminato con successo"
+
+msgid "Invalid FQDN format"
+msgstr "Formato FQDN non valido"
+
+# User management
+msgid "User not found"
+msgstr "Utente non trovato"
+
+msgid "User created successfully"
+msgstr "Utente creato con successo"
+
+msgid "User updated successfully"
+msgstr "Utente aggiornato con successo"
+
+msgid "User deleted successfully"
+msgstr "Utente eliminato con successo"
+
+msgid "Username already exists"
+msgstr "Nome utente già esistente"
+
+msgid "Email already exists"
+msgstr "Email già esistente"
+
+# Agent communication
+msgid "Agent not connected"
+msgstr "Agente non connesso"
+
+msgid "Agent registered successfully"
+msgstr "Agente registrato con successo"
+
+msgid "Command sent successfully"
+msgstr "Comando inviato con successo"
+
+msgid "Agent disconnected"
+msgstr "Agente disconnesso"
+
+# General errors
+msgid "Internal server error"
+msgstr "Errore interno del server"
+
+msgid "Invalid request data"
+msgstr "Dati di richiesta non validi"
+
+msgid "Operation completed successfully"
+msgstr "Operazione completata con successo"
+
+msgid "Database error"
+msgstr "Errore del database"
