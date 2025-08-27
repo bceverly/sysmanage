@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { vi } from 'vitest';
 import App from '../App';
 
@@ -29,18 +29,24 @@ vi.mock('../Pages/Hosts', () => ({
 }));
 
 describe('App Component', () => {
-  test('renders without crashing', () => {
-    render(<App />);
+  test('renders without crashing', async () => {
+    await act(async () => {
+      render(<App />);
+    });
     expect(screen.getByTestId('navbar')).toBeInTheDocument();
   });
 
-  test('contains navbar component', () => {
-    render(<App />);
+  test('contains navbar component', async () => {
+    await act(async () => {
+      render(<App />);
+    });
     expect(screen.getByTestId('navbar')).toBeInTheDocument();
   });
 
-  test('has proper document structure', () => {
-    render(<App />);
+  test('has proper document structure', async () => {
+    await act(async () => {
+      render(<App />);
+    });
     expect(screen.getByTestId('navbar')).toBeInTheDocument();
   });
 });

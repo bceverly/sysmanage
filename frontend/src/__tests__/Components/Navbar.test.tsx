@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import Navbar from '../../Components/Navbar';
 
@@ -13,8 +13,10 @@ const NavbarWithRouter = () => (
 );
 
 describe('Navbar Component', () => {
-  test('renders navigation links', () => {
-    render(<NavbarWithRouter />);
+  test('renders navigation links', async () => {
+    await act(async () => {
+      render(<NavbarWithRouter />);
+    });
     
     expect(screen.getByText('SysManage')).toBeInTheDocument();
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
@@ -23,16 +25,20 @@ describe('Navbar Component', () => {
     expect(screen.getByText('Logout')).toBeInTheDocument();
   });
 
-  test('has proper navigation structure', () => {
-    render(<NavbarWithRouter />);
+  test('has proper navigation structure', async () => {
+    await act(async () => {
+      render(<NavbarWithRouter />);
+    });
     
     const nav = screen.getByRole('banner');
     expect(nav).toBeInTheDocument();
     expect(nav.tagName).toBe('HEADER');
   });
 
-  test('contains navigation menu', () => {
-    render(<NavbarWithRouter />);
+  test('contains navigation menu', async () => {
+    await act(async () => {
+      render(<NavbarWithRouter />);
+    });
     
     // Check that navigation links are present in the DOM
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
@@ -41,15 +47,19 @@ describe('Navbar Component', () => {
     expect(screen.getByText('Logout')).toBeInTheDocument();
   });
 
-  test('menu toggle functionality', () => {
-    render(<NavbarWithRouter />);
+  test('menu toggle functionality', async () => {
+    await act(async () => {
+      render(<NavbarWithRouter />);
+    });
     
     // Check if menu toggle elements exist (mobile menu)
     expect(screen.getByText('SysManage')).toBeInTheDocument();
   });
 
-  test('navigation links are clickable', () => {
-    render(<NavbarWithRouter />);
+  test('navigation links are clickable', async () => {
+    await act(async () => {
+      render(<NavbarWithRouter />);
+    });
     
     // Navigation links exist in DOM but are hidden by CSS visibility
     // Use getAllByRole to get all links including hidden ones
