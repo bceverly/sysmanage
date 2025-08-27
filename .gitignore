@@ -168,3 +168,6 @@ createdb.sh
 cert.pem
 fullchain.pem
 privkey.pem
+
+# Git commit fix script
+fix-commits.sh
