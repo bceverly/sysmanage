@@ -8,7 +8,14 @@ interface AllTheProvidersProps {
 }
 
 const AllTheProviders: React.FC<AllTheProvidersProps> = ({ children }) => {
-  return <BrowserRouter>{children}</BrowserRouter>;
+  return (
+    <BrowserRouter future={{
+      v7_startTransition: true,
+      v7_relativeSplatPath: true
+    }}>
+      {children}
+    </BrowserRouter>
+  );
 };
 
 const customRender = (

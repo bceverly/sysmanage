@@ -4,7 +4,10 @@ import { BrowserRouter } from 'react-router-dom';
 import Home from '../../Pages/Home';
 
 const HomeWithRouter = () => (
-  <BrowserRouter>
+  <BrowserRouter future={{
+    v7_startTransition: true,
+    v7_relativeSplatPath: true
+  }}>
     <Home />
   </BrowserRouter>
 );

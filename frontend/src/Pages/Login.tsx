@@ -28,7 +28,7 @@ const Login = () => {
           userid: input.userid,
           password: input.password
         })
-        .then((response: { data: { Authorization: any; }; }) => {
+        .then((response: { data: { Authorization: string; }; }) => {
           if (response.data.Authorization) {
             localStorage.setItem("userid", input.userid);
             localStorage.setItem("bearer_token", response.data.Authorization);
@@ -38,7 +38,7 @@ const Login = () => {
           window.location.reload();
           return response.data;
         })
-        .catch((error) => {
+        .catch((_error) => {
           // Error situation - clear out storage
           localStorage.removeItem("userid");
           localStorage.removeItem("bearer_token");
@@ -47,7 +47,7 @@ const Login = () => {
       }
     };
 
-    const handleInput = (e: { target: { name: any; value: any; }; }) => {
+    const handleInput = (e: { target: { name: string; value: string; }; }) => {
       const { name, value } = e.target;
       setInput((prev) => ({
         ...prev,

@@ -34,7 +34,10 @@ function App() {
     <div className="App">
       <ThemeProvider theme={darkTheme}>
         <CssBaseline enableColorScheme/>
-        <Router>
+        <Router future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}>
           <Navbar />
             <main className="main-content">
               <Routes>

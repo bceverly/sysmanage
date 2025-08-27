@@ -126,3 +126,5 @@ like to add:
 27. User Management - Ability to manage
     add/edit/delete users of SysManage
     with email integration.
+
+28. Get a proper logo

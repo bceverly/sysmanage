@@ -122,7 +122,7 @@ const Users = () => {
                     onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
                         event.preventDefault();
                         const formData = new FormData(event.currentTarget);
-                        const formJson = Object.fromEntries((formData as any).entries());
+                        const formJson = Object.fromEntries(formData.entries());
                         doAddUser(true, formJson.email, formJson.password)
                         .then((result) => {
                             let newData: SysManageUser[] = [];

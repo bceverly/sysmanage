@@ -1,43 +1,32 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 import App from '../App';
 
 // Mock the components to avoid routing complexity in unit tests
-jest.mock('../Components/Navbar', () => {
-  return function MockNavbar() {
-    return <div data-testid="navbar">Mock Navbar</div>;
-  };
-});
+vi.mock('../Components/Navbar', () => ({
+  default: () => <div data-testid="navbar">Mock Navbar</div>
+}));
 
-jest.mock('../Pages/Home', () => {
-  return function MockHome() {
-    return <div data-testid="home">Mock Home</div>;
-  };
-});
+vi.mock('../Pages/Home', () => ({
+  default: () => <div data-testid="home">Mock Home</div>
+}));
 
-jest.mock('../Pages/Login', () => {
-  return function MockLogin() {
-    return <div data-testid="login">Mock Login</div>;
-  };
-});
+vi.mock('../Pages/Login', () => ({
+  default: () => <div data-testid="login">Mock Login</div>
+}));
 
-jest.mock('../Pages/Logout', () => {
-  return function MockLogout() {
-    return <div data-testid="logout">Mock Logout</div>;
-  };
-});
+vi.mock('../Pages/Logout', () => ({
+  default: () => <div data-testid="logout">Mock Logout</div>
+}));
 
-jest.mock('../Pages/Users', () => {
-  return function MockUsers() {
-    return <div data-testid="users">Mock Users</div>;
-  };
-});
+vi.mock('../Pages/Users', () => ({
+  default: () => <div data-testid="users">Mock Users</div>
+}));
 
-jest.mock('../Pages/Hosts', () => {
-  return function MockHosts() {
-    return <div data-testid="hosts">Mock Hosts</div>;
-  };
-});
+vi.mock('../Pages/Hosts', () => ({
+  default: () => <div data-testid="hosts">Mock Hosts</div>
+}));
 
 describe('App Component', () => {
   test('renders without crashing', () => {
