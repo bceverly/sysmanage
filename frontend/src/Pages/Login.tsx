@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -21,6 +22,7 @@ const Login = () => {
       password: "",
     });
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const handleSubmitEvent = (e: { preventDefault: () => void; }) => {
       e.preventDefault();
       if (input.userid !== "" && input.password !== "") {
@@ -42,7 +44,7 @@ const Login = () => {
           // Error situation - clear out storage
           localStorage.removeItem("userid");
           localStorage.removeItem("bearer_token");
-          alert('Invalid userid/password combination.');
+          alert(t('login.error'));
         });
       }
     };
@@ -70,7 +72,7 @@ const Login = () => {
         }}
       >
         <Typography component="h1" variant="h5">
-          Log in
+          {t('login.title')}
         </Typography>
         <Box component="form" onSubmit={handleSubmitEvent} noValidate sx={{ mt: 1 }}>
           <TextField
@@ -78,7 +80,7 @@ const Login = () => {
             required
             fullWidth
             id="userid"
-            label="Email Address"
+            label={t('login.username')}
             name="userid"
             autoComplete="email"
             autoFocus
@@ -96,7 +98,7 @@ const Login = () => {
             required
             fullWidth
             name="password"
-            label="Password"
+            label={t('login.password')}
             type="password"
             id="password"
             autoComplete="current-password"
@@ -104,7 +106,7 @@ const Login = () => {
           />
           <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
+            label={t('login.remember', { defaultValue: 'Remember me' })}
           />
           <Button
             type="submit"
@@ -112,17 +114,17 @@ const Login = () => {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Log In
+            {t('login.submit')}
           </Button>
           <Grid container>
             <Grid item xs>
               <Link href="#" variant="body2">
-                Forgot password?
+                {t('login.forgotPassword', { defaultValue: 'Forgot password?' })}
               </Link>
             </Grid>
             <Grid item>
               <Link href="#" variant="body2">
-                {"Don't have an account? Sign Up"}
+                {t('login.signUp', { defaultValue: "Don't have an account? Sign Up" })}
               </Link>
             </Grid>
           </Grid>

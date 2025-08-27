@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "hosts": "Hôtes",
+    "users": "Utilisateurs",
+    "logout": "Déconnexion"
+  },
+  "login": {
+    "title": "Connexion à SysManage",
+    "username": "Adresse email",
+    "password": "Mot de passe",
+    "submit": "Connexion",
+    "error": "Nom d'utilisateur ou mot de passe invalide",
+    "remember": "Se souvenir de moi",
+    "forgotPassword": "Mot de passe oublié ?",
+    "signUp": "Vous n'avez pas de compte ? S'inscrire"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcome": "Bienvenue dans SysManage",
+    "activeHosts": "Hôtes actifs",
+    "totalUsers": "Utilisateurs totaux",
+    "systemHealth": "Santé du système"
+  },
+  "hosts": {
+    "title": "Gestion des hôtes",
+    "fqdn": "FQDN",
+    "ipv4": "Adresse IPv4",
+    "ipv6": "Adresse IPv6",
+    "status": "Statut",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "actions": "Actions",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "addHost": "Ajouter un hôte"
+  },
+  "users": {
+    "title": "Gestion des utilisateurs",
+    "username": "Nom d'utilisateur",
+    "email": "Email",
+    "role": "Rôle",
+    "status": "Statut",
+    "actions": "Actions",
+    "addUser": "Ajouter un utilisateur",
+    "enterInfo": "Entrez les informations du nouvel utilisateur ci-dessous.",
+    "emailUnique": "L'adresse email doit être unique"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "selected": "Sélectionné",
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "success": "Opération terminée avec succès"
+  }
+}

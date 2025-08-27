@@ -281,6 +281,63 @@ docker-compose up -d
 - Frontend logs: Browser developer console
 - Database logs: PostgreSQL logs
 
+## Internationalization (i18n)
+
+SysManage supports multiple languages through comprehensive internationalization:
+
+### Supported Languages
+- **English** (en) - Default
+- **French** (fr) - Français  
+- **Japanese** (ja) - 日本語
+
+### Translation Files Location
+
+**Frontend (React/TypeScript):**
+```
+frontend/public/locales/
+├── en/translation.json
+├── fr/translation.json
+└── ja/translation.json
+```
+
+**Backend (Python):**
+```
+backend/i18n/locales/
+├── en/LC_MESSAGES/messages.po
+├── fr/LC_MESSAGES/messages.po
+└── ja/LC_MESSAGES/messages.po
+```
+
+### Adding New Languages
+
+1. **Frontend**: Create new JSON files in `frontend/public/locales/{language}/translation.json`
+2. **Backend**: Create new `.po` files in `backend/i18n/locales/{language}/LC_MESSAGES/messages.po`
+3. **Compile translations**: Run `msgfmt messages.po -o messages.mo` in the LC_MESSAGES directory
+4. **Update language selector**: Add language to `frontend/src/Components/LanguageSelector.tsx`
+
+### Using Translations
+
+**Frontend (React):**
+```typescript
+import { useTranslation } from 'react-i18next';
+
+const MyComponent = () => {
+  const { t } = useTranslation();
+  return <div>{t('nav.dashboard')}</div>;
+};
+```
+
+**Backend (Python):**
+```python
+from backend.i18n import _
+
+raise HTTPException(status_code=401, detail=_("Invalid username or password"))
+```
+
+### Language Detection
+- **Frontend**: Automatically detects browser language, falls back to stored preference
+- **Backend**: Language can be set programmatically via `set_language()` function
+
 ## Contributing
 
 1. Fork the repository

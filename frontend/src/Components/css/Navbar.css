@@ -35,6 +35,11 @@
   .nav__logo-img:hover {
     opacity: 0.8;
   }
+
+  .nav__language {
+    margin-top: 1rem;
+    padding: 0 1rem;
+  }
   
   .nav__toggle,
   .nav__close {

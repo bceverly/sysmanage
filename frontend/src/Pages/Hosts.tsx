@@ -5,20 +5,22 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useTranslation } from 'react-i18next';
 
 import { SysManageHost, doDeleteHost, doGetHosts } from '../Services/hosts'
-
-const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'fqdn', headerName: 'Name', width: 200 },
-    { field: 'ipv4', headerName: 'IP', width: 150 },
-    { field: 'ipv6', headerName: 'IPv6', width: 200 }
-]
 
 const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
     const [selection, setSelection] = useState<GridRowSelectionModel>([]);
     const navigate = useNavigate();
+    const { t } = useTranslation();
+
+    const columns: GridColDef[] = [
+        { field: 'id', headerName: 'ID', width: 70 },
+        { field: 'fqdn', headerName: t('hosts.fqdn'), width: 200 },
+        { field: 'ipv4', headerName: t('hosts.ipv4'), width: 150 },
+        { field: 'ipv6', headerName: t('hosts.ipv6'), width: 200 }
+    ]
 
     const handleDelete = () => {
         // Call the API to remove the selected rows
@@ -84,7 +86,7 @@ const Hosts = () => {
             <Box component="section">&nbsp;</Box>
             <Stack direction="row" spacing={2}>
                 <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
-                    Delete Selected
+                    {t('common.delete')} {t('common.selected', { defaultValue: 'Selected' })}
                 </Button>
             </Stack>
         </div>

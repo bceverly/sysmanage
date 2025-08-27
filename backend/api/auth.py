@@ -13,6 +13,7 @@ from sqlalchemy.orm import sessionmaker
 from backend.auth.auth_handler import decode_jwt, sign_jwt, sign_refresh_token
 from backend.config import config
 from backend.persistence import db, models
+from backend.i18n import _
 
 router = APIRouter()
 
@@ -59,7 +60,7 @@ async def login(login_data: UserLogin, response: Response):
             )
             return {"Authorization": sign_jwt(login_data.userid)}
 
-        raise HTTPException(status_code=401, detail="Bad userid or password")
+        raise HTTPException(status_code=401, detail=_("Invalid username or password"))
 
     # Get the SQLAlchemy session
     session_local = sessionmaker(
@@ -113,7 +114,7 @@ async def login(login_data: UserLogin, response: Response):
                 return response
 
     # If we got here, then there was no match
-    raise HTTPException(status_code=401, detail="Bad userid or password")
+    raise HTTPException(status_code=401, detail=_("Invalid username or password"))
 
 
 @router.post("/refresh")

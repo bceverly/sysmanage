@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Stack from '@mui/material/Stack';
 import { Gauge, gaugeClasses } from '@mui/x-charts/Gauge';
 import Box from '@mui/material/Box';
+import { useTranslation } from 'react-i18next';
 
 import { SysManageHost, doGetHosts } from '../Services/hosts'
 import { Typography } from "@mui/material";
@@ -10,6 +11,7 @@ import { Typography } from "@mui/material";
 const Dashboard = () => {
     const [numHosts, setNumHosts] = useState<number>();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (!localStorage.getItem('bearer_token')) {
@@ -30,7 +32,7 @@ const Dashboard = () => {
              }}
         >
             <Typography align="center" variant="h5">
-                Active Hosts
+                {t('dashboard.activeHosts')}
             </Typography>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 1, md: 3 }}>
                 <Gauge width={200} height={200} value={numHosts} valueMin={0} valueMax={numHosts} 

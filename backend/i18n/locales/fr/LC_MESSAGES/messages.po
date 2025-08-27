@@ -1,0 +1,78 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: fr\n"
+
+# Authentication messages
+msgid "Invalid username or password"
+msgstr "Nom d'utilisateur ou mot de passe invalide"
+
+msgid "Authentication required"
+msgstr "Authentification requise"
+
+msgid "Token expired"
+msgstr "Jeton expiré"
+
+msgid "Access denied"
+msgstr "Accès refusé"
+
+# Host management
+msgid "Host not found"
+msgstr "Hôte non trouvé"
+
+msgid "Host created successfully"
+msgstr "Hôte créé avec succès"
+
+msgid "Host updated successfully"
+msgstr "Hôte mis à jour avec succès"
+
+msgid "Host deleted successfully"
+msgstr "Hôte supprimé avec succès"
+
+msgid "Invalid FQDN format"
+msgstr "Format FQDN invalide"
+
+# User management
+msgid "User not found"
+msgstr "Utilisateur non trouvé"
+
+msgid "User created successfully"
+msgstr "Utilisateur créé avec succès"
+
+msgid "User updated successfully"
+msgstr "Utilisateur mis à jour avec succès"
+
+msgid "User deleted successfully"
+msgstr "Utilisateur supprimé avec succès"
+
+msgid "Username already exists"
+msgstr "Le nom d'utilisateur existe déjà"
+
+msgid "Email already exists"
+msgstr "L'email existe déjà"
+
+# Agent communication
+msgid "Agent not connected"
+msgstr "Agent non connecté"
+
+msgid "Agent registered successfully"
+msgstr "Agent enregistré avec succès"
+
+msgid "Command sent successfully"
+msgstr "Commande envoyée avec succès"
+
+msgid "Agent disconnected"
+msgstr "Agent déconnecté"
+
+# General errors
+msgid "Internal server error"
+msgstr "Erreur interne du serveur"
+
+msgid "Invalid request data"
+msgstr "Données de requête invalides"
+
+msgid "Operation completed successfully"
+msgstr "Opération terminée avec succès"
+
+msgid "Database error"
+msgstr "Erreur de base de données"

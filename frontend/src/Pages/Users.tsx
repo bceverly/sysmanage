@@ -16,12 +16,8 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 
+import { useTranslation } from 'react-i18next';
 import { SysManageUser, doAddUser, doDeleteUser, doGetUsers } from '../Services/users'
-
-const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'userid', headerName: 'Email Address', width: 400 }
-]
 
 const Users = () => {
     const [tableData, setTableData] = useState<SysManageUser[]>([]);
@@ -30,6 +26,12 @@ const Users = () => {
     const [dupeError, setDupeError] = useState<boolean>(false);
 
     const navigate = useNavigate();
+    const { t } = useTranslation();
+
+    const columns: GridColDef[] = [
+        { field: 'id', headerName: 'ID', width: 70 },
+        { field: 'userid', headerName: t('users.email'), width: 400 }
+    ]
 
     const handleDelete = () => {
         // Call the API to remove the selected rows
@@ -105,13 +107,13 @@ const Users = () => {
             <Box component="section">&nbsp;</Box>
             <Stack direction="row" spacing={2}>
                 <Button variant="outlined" startIcon={<AddIcon />} disabled={selection.length > 0} onClick={handleClickOpen}>
-                    Add
+                    {t('common.add')}
                 </Button>
                 <Button variant="outlined" startIcon={<EditIcon />} disabled={selection.length === 0}>
-                    Edit
+                    {t('common.edit')}
                 </Button>
                 <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
-                    Delete Selected
+                    {t('common.delete')} {t('common.selected')}
                 </Button>
             </Stack>
             <Dialog
@@ -149,10 +151,10 @@ const Users = () => {
                     },
                 }}
             >
-                <DialogTitle align="center">Add User</DialogTitle>
+                <DialogTitle align="center">{t('users.addUser')}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Enter the new user's information below.
+                        {t('users.enterInfo', { defaultValue: 'Enter the new user\'s information below.' })}
                     </DialogContentText>
                     <Box component="section">&nbsp;</Box>
                     <TextField
@@ -162,11 +164,11 @@ const Users = () => {
                         margin="normal"
                         id="email"
                         name="email"
-                        label="Email Address"
+                        label={t('users.email')}
                         type="email"
                         variant="standard"
                         error={dupeError}
-                        helperText={dupeError ? "Email address must be unique" : ""}
+                        helperText={dupeError ? t('users.emailUnique', { defaultValue: 'Email address must be unique' }) : ""}
                         InputProps={{
                             startAdornment: (
                               <InputAdornment position="start">
@@ -182,14 +184,14 @@ const Users = () => {
                         margin="normal"
                         id="password"
                         name="password"
-                        label="Password"
+                        label={t('login.password')}
                         type="password"
                         variant="standard"
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
-                    <Button type="submit">Save</Button>
+                    <Button onClick={handleClose}>{t('common.cancel')}</Button>
+                    <Button type="submit">{t('common.save')}</Button>
                 </DialogActions>
             </Dialog>
         </div>

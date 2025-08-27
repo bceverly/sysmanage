@@ -1,0 +1,78 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ja\n"
+
+# Authentication messages
+msgid "Invalid username or password"
+msgstr "ユーザー名またはパスワードが無効です"
+
+msgid "Authentication required"
+msgstr "認証が必要です"
+
+msgid "Token expired"
+msgstr "トークンが期限切れです"
+
+msgid "Access denied"
+msgstr "アクセスが拒否されました"
+
+# Host management
+msgid "Host not found"
+msgstr "ホストが見つかりません"
+
+msgid "Host created successfully"
+msgstr "ホストが正常に作成されました"
+
+msgid "Host updated successfully"
+msgstr "ホストが正常に更新されました"
+
+msgid "Host deleted successfully"
+msgstr "ホストが正常に削除されました"
+
+msgid "Invalid FQDN format"
+msgstr "無効なFQDN形式"
+
+# User management
+msgid "User not found"
+msgstr "ユーザーが見つかりません"
+
+msgid "User created successfully"
+msgstr "ユーザーが正常に作成されました"
+
+msgid "User updated successfully"
+msgstr "ユーザーが正常に更新されました"
+
+msgid "User deleted successfully"
+msgstr "ユーザーが正常に削除されました"
+
+msgid "Username already exists"
+msgstr "ユーザー名は既に存在します"
+
+msgid "Email already exists"
+msgstr "メールは既に存在します"
+
+# Agent communication
+msgid "Agent not connected"
+msgstr "エージェントが接続されていません"
+
+msgid "Agent registered successfully"
+msgstr "エージェントが正常に登録されました"
+
+msgid "Command sent successfully"
+msgstr "コマンドが正常に送信されました"
+
+msgid "Agent disconnected"
+msgstr "エージェントが切断されました"
+
+# General errors
+msgid "Internal server error"
+msgstr "内部サーバーエラー"
+
+msgid "Invalid request data"
+msgstr "無効なリクエストデータ"
+
+msgid "Operation completed successfully"
+msgstr "操作が正常に完了しました"
+
+msgid "Database error"
+msgstr "データベースエラー"
