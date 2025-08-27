@@ -25,6 +25,16 @@
 
 /*    font-family: var(--second-font); */
   }
+
+  .nav__logo-img {
+    height: 67px;
+    width: auto;
+    transition: opacity 0.4s;
+  }
+
+  .nav__logo-img:hover {
+    opacity: 0.8;
+  }
   
   .nav__toggle,
   .nav__close {

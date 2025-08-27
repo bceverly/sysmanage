@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { IoClose, IoMenu } from "react-icons/io5";
 import "./css/Navbar.css";
+import SysManageLogo from "../assets/sysmanage-logo.svg";
 
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
@@ -30,7 +31,7 @@ const Navbar = () => {
     <header className="header">
       <nav className="nav container">
         <NavLink to="/" className="nav__logo">
-          SysManage
+          <img src={SysManageLogo} alt="SysManage" className="nav__logo-img" />
         </NavLink>
 
         <div

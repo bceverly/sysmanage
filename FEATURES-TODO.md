@@ -127,6 +127,6 @@ like to add:
     add/edit/delete users of SysManage
     with email integration.
 
-28. Get a proper logo
+28. ~~Get a proper logo~~
 
 29. Update the UI

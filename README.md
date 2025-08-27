@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="sysmanage-logo.svg" alt="SysManage" width="300"/>
+</div>
+
 # SysManage Server
 
 [![CI/CD Pipeline](https://github.com/bceverly/sysmanage/actions/workflows/ci.yml/badge.svg)](https://github.com/bceverly/sysmanage/actions/workflows/ci.yml)
