@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "hosts": "ホスト",
+    "users": "ユーザー",
+    "logout": "ログアウト"
+  },
+  "login": {
+    "title": "SysManageにログイン",
+    "username": "メールアドレス",
+    "password": "パスワード",
+    "submit": "ログイン",
+    "error": "ユーザー名またはパスワードが無効です",
+    "remember": "ログイン情報を記憶する",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "signUp": "アカウントをお持ちでない方はサインアップ"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "welcome": "SysManageへようこそ",
+    "activeHosts": "アクティブなホスト",
+    "totalUsers": "総ユーザー数",
+    "systemHealth": "システムの健全性"
+  },
+  "hosts": {
+    "title": "ホスト管理",
+    "fqdn": "FQDN",
+    "ipv4": "IPv4アドレス",
+    "ipv6": "IPv6アドレス",
+    "status": "ステータス",
+    "active": "アクティブ",
+    "inactive": "非アクティブ",
+    "actions": "アクション",
+    "edit": "編集",
+    "delete": "削除",
+    "addHost": "ホストを追加"
+  },
+  "users": {
+    "title": "ユーザー管理",
+    "username": "ユーザー名",
+    "email": "メール",
+    "role": "役割",
+    "status": "ステータス",
+    "actions": "アクション",
+    "addUser": "ユーザーを追加",
+    "enterInfo": "新しいユーザーの情報を以下に入力してください。",
+    "emailUnique": "メールアドレスは一意である必要があります"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "add": "追加",
+    "selected": "選択済み",
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "success": "操作が正常に完了しました"
+  }
+}

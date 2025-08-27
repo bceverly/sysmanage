@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { IoClose, IoMenu } from "react-icons/io5";
+import { useTranslation } from 'react-i18next';
 import "./css/Navbar.css";
 import SysManageLogo from "../assets/sysmanage-logo.svg";
+import LanguageSelector from "./LanguageSelector";
 
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
+  const { t } = useTranslation();
 
   const toggleMenu = () => {
     setShowMenu(!showMenu);
@@ -42,7 +45,7 @@ const Navbar = () => {
           <ul className="nav__list">
             <li className="nav__item">
               <NavLink to="/" className="nav__link" onClick={closeMenuOnMobile}>
-                Dashboard
+                {t('nav.dashboard')}
               </NavLink>
             </li>
             <li className="nav__item">
@@ -51,7 +54,7 @@ const Navbar = () => {
                 className="nav__link"
                 onClick={closeMenuOnMobile}
               >
-                Hosts
+                {t('nav.hosts')}
               </NavLink>
             </li>
             <li className="nav__item">
@@ -60,15 +63,18 @@ const Navbar = () => {
                 className="nav__link"
                 onClick={closeMenuOnMobile}
               >
-                Users
+                {t('nav.users')}
               </NavLink>
             </li>
             <li className="nav__item">
               <NavLink to="/logout" className="nav__link nav__cta">
-                Logout
+                {t('nav.logout')}
               </NavLink>
             </li>
           </ul>
+          <div className="nav__language">
+            <LanguageSelector />
+          </div>
           <div className="nav__close" id="nav-close" onClick={toggleMenu}>
             {/* @ts-expect-error - IoClose component type issues */}
             <IoClose />

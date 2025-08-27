@@ -18,7 +18,7 @@ describe('Navbar Component', () => {
       render(<NavbarWithRouter />);
     });
     
-    expect(screen.getByText('SysManage')).toBeInTheDocument();
+    expect(screen.getByAltText('SysManage')).toBeInTheDocument();
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Users')).toBeInTheDocument();
     expect(screen.getByText('Hosts')).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe('Navbar Component', () => {
     });
     
     // Check if menu toggle elements exist (mobile menu)
-    expect(screen.getByText('SysManage')).toBeInTheDocument();
+    expect(screen.getByAltText('SysManage')).toBeInTheDocument();
   });
 
   test('navigation links are clickable', async () => {

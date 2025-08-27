@@ -1,11 +1,11 @@
 Here are the features (in no particular order) that I would
 like to add:
 
-1.  Internationalization - externalize all user visible
-    strings for translation
+1.  ~~Internationalization - externalize all user visible
+    strings for translation~~
 
-2.  Localization - Add a language switcher to the UI
-    and translate all externalized strings
+2.  ~~Localization - Add a language switcher to the UI
+    and translate all externalized strings~~
 
 3.  Validate security of login process
 
@@ -130,3 +130,25 @@ like to add:
 28. ~~Get a proper logo~~
 
 29. Update the UI
+
+30. Default the language based on browser
+    setting detection.
+
+31. Add a standard list of locales that we
+    support and translate to:  English, 
+    Spanish, French, German, Italian, 
+    Portuguese, Dutch, Japanese, Simplified
+    Chinese, Korean and Russian.
+
+32. Move the language dropdown to be on the
+    same level as the rest of the toolbar
+    buttons but to the left of them.
+
+33. Change Logout button to be the user's
+    first initial with a circle around it
+    that drops down a menu with the users
+    name at the top, a profile link that
+    takes them to a profile editor and
+    a logout link with a separator bar
+    between the logout link and the profile
+    button.

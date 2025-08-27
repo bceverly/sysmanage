@@ -30,10 +30,10 @@ describe('Login Page', () => {
       render(<LoginWithRouter />);
     });
     
-    expect(screen.getByText('Log in')).toBeInTheDocument();
+    expect(screen.getByText('Login to SysManage')).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i) || screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i) || screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
   });
 
   test('has proper form structure', async () => {
@@ -42,7 +42,7 @@ describe('Login Page', () => {
     });
     
     // Look for form elements or login text
-    expect(screen.getByText('Log in')).toBeInTheDocument();
+    expect(screen.getByText('Login to SysManage')).toBeInTheDocument();
   });
 
   test('contains email and password inputs', async () => {
@@ -64,7 +64,7 @@ describe('Login Page', () => {
       render(<LoginWithRouter />);
     });
     
-    const submitButton = screen.getByRole('button', { name: /log in/i });
+    const submitButton = screen.getByRole('button', { name: /login/i });
     
     await act(async () => {
       fireEvent.click(submitButton);
@@ -80,6 +80,6 @@ describe('Login Page', () => {
     await act(async () => {
       render(<LoginWithRouter />);
     });
-    expect(screen.getByText('Log in')).toBeInTheDocument();
+    expect(screen.getByText('Login to SysManage')).toBeInTheDocument();
   });
 });
