@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import Login from '../../Pages/Login';
@@ -25,8 +25,10 @@ describe('Login Page', () => {
     vi.clearAllMocks();
   });
 
-  test('renders login form', () => {
-    render(<LoginWithRouter />);
+  test('renders login form', async () => {
+    await act(async () => {
+      render(<LoginWithRouter />);
+    });
     
     expect(screen.getByText('Log in')).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i) || screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
@@ -34,15 +36,19 @@ describe('Login Page', () => {
     expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();
   });
 
-  test('has proper form structure', () => {
-    render(<LoginWithRouter />);
+  test('has proper form structure', async () => {
+    await act(async () => {
+      render(<LoginWithRouter />);
+    });
     
     // Look for form elements or login text
     expect(screen.getByText('Log in')).toBeInTheDocument();
   });
 
-  test('contains email and password inputs', () => {
-    render(<LoginWithRouter />);
+  test('contains email and password inputs', async () => {
+    await act(async () => {
+      render(<LoginWithRouter />);
+    });
     
     const emailInput = screen.getByLabelText(/email/i) || 
                       screen.getByPlaceholderText(/email/i) ||
@@ -54,11 +60,15 @@ describe('Login Page', () => {
   });
 
   test('form submission', async () => {
-    render(<LoginWithRouter />);
+    await act(async () => {
+      render(<LoginWithRouter />);
+    });
     
     const submitButton = screen.getByRole('button', { name: /log in/i });
     
-    fireEvent.click(submitButton);
+    await act(async () => {
+      fireEvent.click(submitButton);
+    });
     
     // Test that the component handles form submission without crashing
     await waitFor(() => {
@@ -66,8 +76,10 @@ describe('Login Page', () => {
     });
   });
 
-  test('renders without errors', () => {
-    render(<LoginWithRouter />);
+  test('renders without errors', async () => {
+    await act(async () => {
+      render(<LoginWithRouter />);
+    });
     expect(screen.getByText('Log in')).toBeInTheDocument();
   });
 });
