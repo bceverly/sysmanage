@@ -128,3 +128,5 @@ like to add:
     with email integration.
 
 28. Get a proper logo
+
+29. Update the UI
