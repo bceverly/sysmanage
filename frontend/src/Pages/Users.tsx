@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from 'react';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
+import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -15,8 +16,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-
-import { useTranslation } from 'react-i18next';
 import { SysManageUser, doAddUser, doDeleteUser, doGetUsers } from '../Services/users'
 
 const Users = () => {
@@ -24,9 +23,9 @@ const Users = () => {
     const [selection, setSelection] = useState<GridRowSelectionModel>([]);
     const [addDialogOpen, setAddDialogOpen] = useState(false);
     const [dupeError, setDupeError] = useState<boolean>(false);
+    const { t } = useTranslation();
 
     const navigate = useNavigate();
-    const { t } = useTranslation();
 
     const columns: GridColDef[] = [
         { field: 'id', headerName: 'ID', width: 70 },
@@ -102,6 +101,13 @@ const Users = () => {
                     pageSizeOptions={[5, 10]}
                     checkboxSelection
                     onRowSelectionModelChange={setSelection}
+                    localeText={{
+                        MuiTablePagination: {
+                            labelRowsPerPage: t('common.rowsPerPage'),
+                            labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) =>
+                                `${from}–${to} ${t('common.of')} ${count !== -1 ? count : `${t('common.of')} ${to}`}`,
+                        },
+                    }}
                 />
             </div>
             <Box component="section">&nbsp;</Box>

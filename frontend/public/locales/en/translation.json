@@ -55,6 +55,14 @@
     "selected": "Selected",
     "loading": "Loading...",
     "error": "An error occurred",
-    "success": "Operation completed successfully"
+    "success": "Operation completed successfully",
+    "rowsPerPage": "Rows per page",
+    "of": "of",
+    "page": "Page",
+    "goToPage": "Go to page",
+    "firstPage": "First page",
+    "lastPage": "Last page",
+    "nextPage": "Next page",
+    "previousPage": "Previous page"
   }
 }

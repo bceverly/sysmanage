@@ -131,18 +131,18 @@ like to add:
 
 29. Update the UI
 
-30. Default the language based on browser
-    setting detection.
+30. ~~Default the language based on browser
+    setting detection.~~
 
-31. Add a standard list of locales that we
+31. ~~Add a standard list of locales that we
     support and translate to:  English, 
     Spanish, French, German, Italian, 
     Portuguese, Dutch, Japanese, Simplified
-    Chinese, Korean and Russian.
+    Chinese, Korean and Russian.~~
 
-32. Move the language dropdown to be on the
+32. ~~Move the language dropdown to be on the
     same level as the rest of the toolbar
-    buttons but to the left of them.
+    buttons but to the left of them.~~
 
 33. Change Logout button to be the user's
     first initial with a circle around it

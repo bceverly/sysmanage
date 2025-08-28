@@ -55,6 +55,14 @@
     "selected": "Geselecteerd",
     "loading": "Laden...",
     "error": "Er is een fout opgetreden",
-    "success": "Operatie succesvol voltooid"
+    "success": "Operatie succesvol voltooid",
+    "rowsPerPage": "Rijen per pagina",
+    "of": "van",
+    "page": "Pagina",
+    "goToPage": "Ga naar pagina",
+    "firstPage": "Eerste pagina",
+    "lastPage": "Laatste pagina",
+    "nextPage": "Volgende pagina",
+    "previousPage": "Vorige pagina"
   }
 }

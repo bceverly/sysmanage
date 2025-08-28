@@ -37,6 +37,11 @@ const Navbar = () => {
           <img src={SysManageLogo} alt="SysManage" className="nav__logo-img" />
         </NavLink>
 
+        {/* Language selector at toolbar level */}
+        <div className="nav__language-toolbar" style={{visibility: menuVisible}}>
+          <LanguageSelector />
+        </div>
+
         <div
           className={`nav__menu ${showMenu ? "show-menu" : ""}`}
           id="nav-menu"
@@ -72,9 +77,6 @@ const Navbar = () => {
               </NavLink>
             </li>
           </ul>
-          <div className="nav__language">
-            <LanguageSelector />
-          </div>
           <div className="nav__close" id="nav-close" onClick={toggleMenu}>
             {/* @ts-expect-error - IoClose component type issues */}
             <IoClose />

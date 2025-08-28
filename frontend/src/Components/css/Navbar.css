@@ -40,6 +40,13 @@
     margin-top: 1rem;
     padding: 0 1rem;
   }
+
+  .nav__language-toolbar {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 1rem;
+  }
   
   .nav__toggle,
   .nav__close {
