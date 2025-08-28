@@ -178,7 +178,11 @@ class TestSendCommand:
         data = response.json()
         assert data["status"] == "sent"
         assert "command_id" in data
-        assert "sent to test.example.com" in data["message"]
+        # Use exact matching for security - check specific message format
+        assert (
+            data["message"]
+            == "Command CommandType.GET_SYSTEM_INFO sent to test.example.com"
+        )
 
     @patch("backend.api.fleet.connection_manager")
     def test_send_command_agent_not_connected(
@@ -298,7 +302,8 @@ class TestShellCommand:
         data = response.json()
         assert data["status"] == "sent"
         assert data["command"] == "ls -la"
-        assert "sent to test.example.com" in data["message"]
+        # Use exact matching for security - check specific message format
+        assert data["message"] == "Shell command sent to test.example.com"
 
     @patch("backend.api.fleet.connection_manager")
     def test_send_shell_command_agent_not_found(
@@ -361,7 +366,10 @@ class TestPackageManagement:
         data = response.json()
         assert data["status"] == "sent"
         assert data["package"] == "nginx"
-        assert "sent to test.example.com" in data["message"]
+        # Use exact matching for security - check specific message format
+        assert (
+            data["message"] == "Package installation command sent to test.example.com"
+        )
 
     def test_install_package_missing_name(self, client, auth_headers):
         """Test installing package without package name."""
@@ -397,7 +405,8 @@ class TestServiceManagement:
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "sent"
-        assert "sent to test.example.com" in data["message"]
+        # Use exact matching for security - check specific message format
+        assert data["message"] == "Service restart command sent to test.example.com"
 
     def test_restart_service_missing_name(self, client, auth_headers):
         """Test restarting service without service name."""
@@ -429,7 +438,8 @@ class TestSystemCommands:
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "sent"
-        assert "sent to test.example.com" in data["message"]
+        # Use exact matching for security - check specific message format
+        assert data["message"] == "System update command sent to test.example.com"
 
     @patch("backend.api.fleet.connection_manager")
     def test_reboot_system_success(self, mock_connection_manager, client, auth_headers):
@@ -446,7 +456,8 @@ class TestSystemCommands:
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "sent"
-        assert "sent to test.example.com" in data["message"]
+        # Use exact matching for security - check specific message format
+        assert data["message"] == "Reboot command sent to test.example.com"
 
 
 class TestBroadcastCommand:

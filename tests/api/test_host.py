@@ -131,11 +131,11 @@ class TestHostsList:
         assert isinstance(data, list)
         assert len(data) == 3
 
-        # Verify host data
+        # Verify host data - use exact matching for security
         fqdns = [host["fqdn"] for host in data]
-        assert "host1.example.com" in fqdns
-        assert "host2.example.com" in fqdns
-        assert "host3.example.com" in fqdns
+        expected_fqdns = {"host1.example.com", "host2.example.com", "host3.example.com"}
+        actual_fqdns = set(fqdns)
+        assert expected_fqdns.issubset(actual_fqdns)
 
     def test_get_hosts_empty(self, client, auth_headers):
         """Test getting empty hosts list."""
