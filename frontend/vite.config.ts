@@ -3,9 +3,10 @@ import react from '@vitejs/plugin-react'
 import fs from 'fs'
 import path from 'path'
 
-// Check if SSL certificates exist (for development)
+// Force HTTP for development (set FORCE_HTTP=true)
+const forceHTTP = process.env.FORCE_HTTP === 'true';
 const certPath = path.resolve(process.env.HOME || '', 'dev/certs/sysmanage.org');
-const hasSSLCerts = fs.existsSync(path.join(certPath, 'privkey.pem')) && 
+const hasSSLCerts = !forceHTTP && fs.existsSync(path.join(certPath, 'privkey.pem')) && 
                    fs.existsSync(path.join(certPath, 'cert.pem'));
 
 // https://vite.dev/config/

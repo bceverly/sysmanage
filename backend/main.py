@@ -50,10 +50,11 @@ app = FastAPI(lifespan=lifespan)
 
 # Set up the CORS configuration
 origins = [
-    "https://" + app_config["webui"]["host"] + ":" + str(app_config["webui"]["port"]),
-    "https://" + app_config["api"]["host"] + ":" + str(app_config["api"]["port"]),
+    "http://" + app_config["webui"]["host"] + ":" + str(app_config["webui"]["port"]),
+    "http://" + app_config["api"]["host"] + ":" + str(app_config["api"]["port"]),
     # Add localhost origins for development
     "http://localhost:3000",
+    "http://localhost:8080",
     "https://localhost:3000",
     "http://localhost:7443",
     "https://localhost:7443",
@@ -87,11 +88,19 @@ async def root():
 
 
 if __name__ == "__main__":
+    # Check if SSL certificates are configured
+    ssl_config = {}
+    if app_config["api"].get("keyFile") and app_config["api"].get("certFile"):
+        ssl_config = {
+            "ssl_keyfile": app_config["api"]["keyFile"],
+            "ssl_certfile": app_config["api"]["certFile"],
+        }
+        if app_config["api"].get("chainFile"):
+            ssl_config["ssl_ca_certs"] = app_config["api"]["chainFile"]
+
     uvicorn.run(
         app,
         host=app_config["api"]["host"],
         port=app_config["api"]["port"],
-        ssl_keyfile=app_config["api"]["keyFile"],
-        ssl_certfile=app_config["api"]["certFile"],
-        ssl_ca_certs=app_config["api"]["chainFile"],
+        **ssl_config
     )
