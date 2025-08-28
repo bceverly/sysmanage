@@ -43,8 +43,14 @@
     "status": "ステータス",
     "actions": "アクション",
     "addUser": "ユーザーを追加",
+    "editUser": "ユーザー編集",
     "enterInfo": "新しいユーザーの情報を以下に入力してください。",
-    "emailUnique": "メールアドレスは一意である必要があります"
+    "editInfo": "以下でユーザー情報を編集してください。",
+    "emailUnique": "メールアドレスは一意である必要があります",
+    "newPassword": "新しいパスワードを入力",
+    "locked": "ロック済み",
+    "unlocked": "ロック解除済み",
+    "unlock": "ロック解除"
   },
   "common": {
     "save": "保存",

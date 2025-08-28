@@ -16,6 +16,13 @@ msgstr "令牌已过期"
 msgid "Access denied"
 msgstr "访问被拒绝"
 
+# Account locking messages
+msgid "Account is locked due to too many failed login attempts"
+msgstr "由于登录失败次数过多，账户已被锁定"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "由于登录失败次数过多，账户已被锁定"
+
 # Host management
 msgid "Host not found"
 msgstr "主机未找到"

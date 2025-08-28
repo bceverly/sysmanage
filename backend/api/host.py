@@ -94,6 +94,8 @@ async def get_host(host_id: int):
             fqdn=hosts[0].fqdn,
             ipv4=hosts[0].ipv4,
             ipv6=hosts[0].ipv6,
+            status=hosts[0].status,
+            last_access=hosts[0].last_access,
         )
 
         return ret_host
@@ -123,6 +125,8 @@ async def get_host_by_fqdn(fqdn: str):
             fqdn=hosts[0].fqdn,
             ipv4=hosts[0].ipv4,
             ipv6=hosts[0].ipv6,
+            status=hosts[0].status,
+            last_access=hosts[0].last_access,
         )
 
         return ret_host
@@ -150,6 +154,8 @@ async def get_all_hosts():
                 fqdn=host.fqdn,
                 ipv4=host.ipv4,
                 ipv6=host.ipv6,
+                status=host.status,
+                last_access=host.last_access,
             )
             ret_hosts.append(the_host)
 
@@ -191,6 +197,8 @@ async def add_host(new_host: Host):
             fqdn=host.fqdn,
             ipv4=host.ipv4,
             ipv6=host.ipv6,
+            status=host.status,
+            last_access=host.last_access,
         )
 
         return ret_host
@@ -229,6 +237,8 @@ async def register_host(registration_data: HostRegistration):
                 fqdn=existing_host.fqdn,
                 ipv4=existing_host.ipv4,
                 ipv6=existing_host.ipv6,
+                status=existing_host.status,
+                last_access=existing_host.last_access,
             )
 
             return ret_host
@@ -250,6 +260,8 @@ async def register_host(registration_data: HostRegistration):
             fqdn=host.fqdn,
             ipv4=host.ipv4,
             ipv6=host.ipv6,
+            status=host.status,
+            last_access=host.last_access,
         )
 
         return ret_host
@@ -287,12 +299,18 @@ async def update_host(host_id: int, host_data: Host):
         )
         session.commit()
 
+        # Get updated host data after commit
+        updated_host = (
+            session.query(models.Host).filter(models.Host.id == host_id).first()
+        )
         ret_host = models.Host(
-            id=id,
-            active=host_data.active,
-            fqdn=host_data.fqdn,
-            ipv4=host_data.ipv4,
-            ipv6=host_data.ipv6,
+            id=updated_host.id,
+            active=updated_host.active,
+            fqdn=updated_host.fqdn,
+            ipv4=updated_host.ipv4,
+            ipv6=updated_host.ipv6,
+            status=updated_host.status,
+            last_access=updated_host.last_access,
         )
 
     return ret_host

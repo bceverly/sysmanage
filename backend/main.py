@@ -5,18 +5,48 @@ up the CORS configuration in the middleware, includes all of the various
 routers for the system and then launches the application.
 """
 
+import asyncio
+from contextlib import asynccontextmanager
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api import agent, auth, fleet, host, user
+from backend.api import agent, auth, fleet, host, user, config_management
 from backend.config import config
+from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
+from backend.discovery.discovery_service import discovery_beacon
 
 # Parse the /etc/sysmanage.yaml file
 app_config = config.get_config()
 
+
+@asynccontextmanager
+async def lifespan(fastapi_app: FastAPI):
+    """
+    Application lifespan manager to handle startup and shutdown events.
+    """
+    # Startup: Start the heartbeat monitor service
+    heartbeat_task = asyncio.create_task(heartbeat_monitor_service())
+
+    # Startup: Start the discovery beacon service
+    await discovery_beacon.start_beacon_service()
+
+    yield
+
+    # Shutdown: Stop the discovery beacon service
+    await discovery_beacon.stop_beacon_service()
+
+    # Shutdown: Cancel the heartbeat monitor service
+    heartbeat_task.cancel()
+    try:
+        await heartbeat_task
+    except asyncio.CancelledError:
+        pass
+
+
 # Start the application
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 # Set up the CORS configuration
 origins = [
@@ -44,6 +74,7 @@ app.include_router(host.router)
 app.include_router(auth.router)
 app.include_router(user.router)
 app.include_router(fleet.router)
+app.include_router(config_management.router)
 
 
 @app.get("/")

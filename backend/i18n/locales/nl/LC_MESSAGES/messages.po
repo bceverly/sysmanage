@@ -16,6 +16,13 @@ msgstr "Token verlopen"
 msgid "Access denied"
 msgstr "Toegang geweigerd"
 
+# Account locking messages
+msgid "Account is locked due to too many failed login attempts"
+msgstr "Account vergrendeld vanwege te veel mislukte inlogpogingen"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "Account vergrendeld vanwege te veel mislukte inlogpogingen"
+
 # Host management
 msgid "Host not found"
 msgstr "Host niet gevonden"

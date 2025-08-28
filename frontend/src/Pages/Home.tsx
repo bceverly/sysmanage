@@ -10,6 +10,7 @@ import { Typography } from "@mui/material";
 
 const Dashboard = () => {
     const [numHosts, setNumHosts] = useState<number>();
+    const [hostStatusColor, setHostStatusColor] = useState<string>('#52b202'); // Default green
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -19,6 +20,15 @@ const Dashboard = () => {
         }
         doGetHosts().then((response: SysManageHost[]) => {
             setNumHosts(response.length);
+            
+            // Determine color based on host status
+            const anyHostDown = response.some(host => host.status === 'down');
+            if (anyHostDown) {
+                setHostStatusColor('#ff1744'); // Red
+            } else {
+                setHostStatusColor('#52b202'); // Green
+            }
+            
             return Promise.resolve(response);
         });
     }, [navigate]);
@@ -32,7 +42,7 @@ const Dashboard = () => {
              }}
         >
             <Typography align="center" variant="h5">
-                {t('dashboard.activeHosts')}
+                {t('dashboard.hosts')}
             </Typography>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 1, md: 3 }}>
                 <Gauge width={200} height={200} value={numHosts} valueMin={0} valueMax={numHosts} 
@@ -41,7 +51,7 @@ const Dashboard = () => {
                         fontSize: 40,
                     },
                     [`& .${gaugeClasses.valueArc}`]: {
-                        fill: '#52b202',
+                        fill: hostStatusColor,
                     },
                 })}
                 />

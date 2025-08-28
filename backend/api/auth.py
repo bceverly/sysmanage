@@ -14,6 +14,7 @@ from backend.auth.auth_handler import decode_jwt, sign_jwt, sign_refresh_token
 from backend.config import config
 from backend.persistence import db, models
 from backend.i18n import _
+from backend.security.login_security import login_security
 
 router = APIRouter()
 
@@ -28,16 +29,38 @@ class UserLogin(BaseModel):
 
 
 @router.post("/login")
-async def login(login_data: UserLogin, response: Response):
+async def login(login_data: UserLogin, request: Request, response: Response):
     """
-    This function provides login ability to the SysManage server.
+    This function provides login ability to the SysManage server with enhanced security.
     """
+    # Get client information for security logging
+    client_ip = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+
+    # Validate login attempt against security policies
+    is_allowed, reason = login_security.validate_login_attempt(
+        str(login_data.userid), client_ip
+    )
+    if not is_allowed:
+        login_security.record_failed_login(
+            str(login_data.userid), client_ip, user_agent
+        )
+        raise HTTPException(status_code=429, detail=_(reason))
     # Get the /etc/sysmanage.yaml configuration
     the_config = config.get_config()
 
     db.get_db()
+    success = False
+
     if login_data.userid == the_config["security"]["admin_userid"]:
         if login_data.password == the_config["security"]["admin_password"]:
+            success = True
+
+            # Record successful login
+            login_security.record_successful_login(
+                str(login_data.userid), client_ip, user_agent
+            )
+
             refresh_token = sign_refresh_token(login_data.userid)
             jwt_refresh_timout = int(the_config["security"]["jwt_refresh_timeout"])
 
@@ -60,7 +83,11 @@ async def login(login_data: UserLogin, response: Response):
             )
             return {"Authorization": sign_jwt(login_data.userid)}
 
-        raise HTTPException(status_code=401, detail=_("Invalid username or password"))
+        # Record failed admin login attempt
+        if not success:
+            login_security.record_failed_login(
+                str(login_data.userid), client_ip, user_agent
+            )
 
     # Get the SQLAlchemy session
     session_local = sessionmaker(
@@ -74,17 +101,36 @@ async def login(login_data: UserLogin, response: Response):
             login_data.password, the_config["security"]["password_salt"]
         )
 
-        # Query the database
-        records = session.query(models.User).all()
-        for record in records:
-            if (
-                record.userid == login_data.userid
-                and record.hashed_password == hashed_value
-            ):
-                # Update the last access datetime
-                session.query(models.User).filter(models.User.id == record.id).update(
-                    {models.User.last_access: datetime.now(timezone.utc)}
+        # Query for the specific user
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == login_data.userid)
+            .first()
+        )
+
+        if user:
+            # Check if user account is locked
+            if login_security.is_user_account_locked(user):
+                login_security.record_failed_login(
+                    str(login_data.userid), client_ip, user_agent
                 )
+                raise HTTPException(
+                    status_code=423,
+                    detail=_("Account is locked due to too many failed login attempts"),
+                )
+
+            # Verify password
+            if user.hashed_password == hashed_value:
+                success = True
+
+                # Record successful login and reset failed attempts
+                login_security.record_successful_login(
+                    str(login_data.userid), client_ip, user_agent
+                )
+                login_security.reset_failed_login_attempts(user, session)
+
+                # Update the last access datetime
+                user.last_access = datetime.now(timezone.utc)
                 session.commit()
 
                 # Add the refresh token to an http-only cookie
@@ -112,6 +158,22 @@ async def login(login_data: UserLogin, response: Response):
 
                 # Return success
                 return response
+            # Wrong password - record failed attempt and potentially lock account
+            login_security.record_failed_login(
+                str(login_data.userid), client_ip, user_agent
+            )
+            account_locked = login_security.record_failed_login_for_user(user, session)
+
+            if account_locked:
+                raise HTTPException(
+                    status_code=423,
+                    detail=_("Account locked due to too many failed login attempts"),
+                )
+        else:
+            # User not found - still record failed attempt for security
+            login_security.record_failed_login(
+                str(login_data.userid), client_ip, user_agent
+            )
 
     # If we got here, then there was no match
     raise HTTPException(status_code=401, detail=_("Invalid username or password"))

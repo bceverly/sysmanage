@@ -12,6 +12,8 @@ type SysManageHost = {
     fqdn: string;
     ipv4: string;
     ipv6: string;
+    status: string;
+    last_access: string;
 }
 
 function processError(error: AxiosError) {

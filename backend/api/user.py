@@ -13,6 +13,7 @@ from backend.auth.auth_bearer import JWTBearer
 from backend.auth.auth_handler import decode_jwt
 from backend.config import config
 from backend.persistence import db, models
+from backend.security.login_security import login_security
 
 router = APIRouter()
 
@@ -73,7 +74,14 @@ async def get_logged_in_user(request: Request):
     # Check for special case admin user
     the_config = config.get_config()
     if userid == the_config["security"]["admin_userid"]:
-        ret_user = models.User(id=0, active=True, userid=userid)
+        ret_user = models.User(
+            id=0,
+            active=True,
+            userid=userid,
+            is_locked=False,
+            failed_login_attempts=0,
+            locked_at=None,
+        )
         return ret_user
 
     # Get the SQLAlchemy session
@@ -89,7 +97,12 @@ async def get_logged_in_user(request: Request):
             raise HTTPException(status_code=404, detail="User not found")
 
         ret_user = models.User(
-            id=users[0].id, active=users[0].active, userid=users[0].userid
+            id=users[0].id,
+            active=users[0].active,
+            userid=users[0].userid,
+            is_locked=users[0].is_locked,
+            failed_login_attempts=users[0].failed_login_attempts,
+            locked_at=users[0].locked_at,
         )
 
         return ret_user
@@ -114,7 +127,12 @@ async def get_user(user_id: int):
             raise HTTPException(status_code=404, detail="User not found")
 
         ret_user = models.User(
-            id=users[0].id, active=users[0].active, userid=users[0].userid
+            id=users[0].id,
+            active=users[0].active,
+            userid=users[0].userid,
+            is_locked=users[0].is_locked,
+            failed_login_attempts=users[0].failed_login_attempts,
+            locked_at=users[0].locked_at,
         )
 
         return ret_user
@@ -139,7 +157,12 @@ async def get_user_by_userid(userid: str):
             raise HTTPException(status_code=404, detail="User not found")
 
         ret_user = models.User(
-            id=users[0].id, active=users[0].active, userid=users[0].userid
+            id=users[0].id,
+            active=users[0].active,
+            userid=users[0].userid,
+            is_locked=users[0].is_locked,
+            failed_login_attempts=users[0].failed_login_attempts,
+            locked_at=users[0].locked_at,
         )
 
         return ret_user
@@ -161,7 +184,14 @@ async def get_all_users():
 
         ret_users = []
         for user in result:
-            the_user = models.User(id=user.id, active=user.active, userid=user.userid)
+            the_user = models.User(
+                id=user.id,
+                active=user.active,
+                userid=user.userid,
+                is_locked=user.is_locked,
+                failed_login_attempts=user.failed_login_attempts,
+                locked_at=user.locked_at,
+            )
             ret_users.append(the_user)
 
         return ret_users
@@ -203,7 +233,14 @@ async def add_user(new_user: User):
         )
         session.add(user)
         session.commit()
-        ret_user = models.User(id=user.id, active=user.active, userid=user.userid)
+        ret_user = models.User(
+            id=user.id,
+            active=user.active,
+            userid=user.userid,
+            is_locked=user.is_locked,
+            failed_login_attempts=user.failed_login_attempts,
+            locked_at=user.locked_at,
+        )
 
         return ret_user
 
@@ -245,8 +282,50 @@ async def update_user(user_id: int, user_data: User):
         )
         session.commit()
 
+        # Get updated user data to return current lock status
+        updated_user = (
+            session.query(models.User).filter(models.User.id == user_id).first()
+        )
         ret_user = models.User(
-            id=user_id, active=user_data.active, userid=user_data.userid
+            id=user_id,
+            active=user_data.active,
+            userid=user_data.userid,
+            is_locked=updated_user.is_locked,
+            failed_login_attempts=updated_user.failed_login_attempts,
+            locked_at=updated_user.locked_at,
+        )
+
+    return ret_user
+
+
+@router.post("/user/{user_id}/unlock", dependencies=[Depends(JWTBearer())])
+async def unlock_user(user_id: int):
+    """
+    This function unlocks a user account manually
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # See if we were passed a valid id
+        user = session.query(models.User).filter(models.User.id == user_id).first()
+
+        # Check for failure
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        # Unlock the account
+        login_security.unlock_user_account(user, session)
+
+        ret_user = models.User(
+            id=user.id,
+            active=user.active,
+            userid=user.userid,
+            is_locked=user.is_locked,
+            failed_login_attempts=user.failed_login_attempts,
+            locked_at=user.locked_at,
         )
 
     return ret_user

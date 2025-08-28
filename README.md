@@ -26,12 +26,15 @@ SysManage is a comprehensive system management solution that allows you to monit
 
 - 🔄 Real-time agent status monitoring via WebSockets
 - 📊 System metrics and health monitoring
-- 🔐 JWT-based authentication with token rotation
-- 👥 Multi-user management system
+- 🔐 JWT-based authentication with token rotation and login security
+- 👥 Multi-user management system with account locking
 - 🏢 Fleet-based host organization
-- 🖥️ Cross-platform agent support
+- 🖥️ Cross-platform agent support with auto-discovery
 - 📱 Responsive web interface
 - 🌍 Multi-language support (11 languages)
+- 🛡️ Comprehensive security with encrypted communication
+- ⚙️ Agent configuration management from server
+- 🔍 Automatic server discovery for new agents
 - 🧪 Comprehensive test coverage (61 tests)
 
 ### Internationalization
@@ -241,19 +244,72 @@ sysmanage/
 - **Users**: `/users`, `/users/{id}`
 - **Hosts**: `/hosts`, `/hosts/{id}`, `/host/by_fqdn/{fqdn}`
 - **Fleet Management**: `/fleet`, `/fleet/{id}`
-- **WebSocket**: `/ws/{agent_id}` - Real-time agent communication
+- **WebSocket**: `/api/agent/connect` - Secure agent communication with authentication
+- **Configuration Management**: `/api/config/push` - Push configuration updates to agents
+
+### Agent Auto-Discovery
+
+SysManage includes an automatic discovery system that allows agents to find and configure themselves with available servers on the network:
+
+#### How Auto-Discovery Works
+
+1. **Server Beacon Service**: The SysManage server runs a UDP beacon service on port 31337 that responds to discovery requests from agents
+2. **Agent Discovery Process**: When an agent starts without a configuration file, it:
+   - Sends UDP broadcast discovery requests on port 31337 to common network broadcast addresses
+   - Listens for server announcement broadcasts on port 31338
+   - Evaluates discovered servers using a scoring system (SSL preference, local network preference)
+   - Automatically configures itself with the best available server
+3. **Configuration Distribution**: The server provides default configuration parameters to new agents during discovery
+4. **Fallback Support**: If discovery fails, agents can still be manually configured using traditional configuration files
+
+#### Discovery Message Flow
+
+```
+Agent Discovery Process:
+1. Agent broadcasts: "Looking for SysManage server" → Port 31337
+2. Server responds: "SysManage server available" + config → Agent
+3. Agent selects best server and writes configuration file
+4. Agent connects via WebSocket using discovered configuration
+
+Server Announcement Process:
+1. Server periodically broadcasts: "SysManage server available" → Port 31338
+2. Agents listen and collect server information
+3. Agents update their server lists and select best options
+```
+
+### Required Network Ports
+
+For full SysManage functionality, ensure the following ports are open in your firewall:
+
+#### Server Ports (Inbound)
+- **TCP 6443** (or configured port) - HTTPS API server
+- **TCP 7443** (or configured port) - HTTPS Web UI
+- **UDP 31337** - Discovery beacon service (responds to agent discovery requests)
+
+#### Agent Ports (Outbound)  
+- **TCP 6443** (or server port) - HTTPS connections to server API and WebSocket
+- **UDP 31337** - Discovery requests to servers
+- **UDP 31338** - Listen for server announcements
+
+#### Optional Ports
+- **TCP 5432** - PostgreSQL database (if running on separate server)
+- **TCP 6443** - HTTP API server (fallback if no SSL certificates)
+- **TCP 3000** - HTTP Web UI (development/fallback mode)
 
 ### Swagger Documentation
 When running the backend, visit: http://localhost:6443/docs
 
 ## WebSocket Architecture
 
-The system uses WebSocket connections for real-time communication between agents and the server:
+The system uses secure WebSocket connections for real-time communication between agents and the server:
 
-- **Connection Management**: Automatic agent registration and heartbeat monitoring
-- **Message Types**: System info, commands, heartbeats, errors
+- **Secure Authentication**: Agents must obtain connection tokens before establishing WebSocket connections
+- **Connection Management**: Automatic agent registration and heartbeat monitoring with connection timeouts
+- **Message Types**: System info, commands, heartbeats, configuration updates, errors
+- **Message Security**: HMAC validation ensures message integrity and prevents tampering
 - **Broadcasting**: Send commands to all agents, specific platforms, or individual hosts
-- **Fault Tolerance**: Automatic cleanup of failed connections
+- **Configuration Push**: Server can push configuration updates to agents in real-time
+- **Fault Tolerance**: Automatic cleanup of failed connections and rate limiting protection
 
 ## Deployment
 

@@ -43,8 +43,14 @@
     "status": "상태",
     "actions": "작업",
     "addUser": "사용자 추가",
+    "editUser": "사용자 편집",
     "enterInfo": "아래에 새 사용자의 정보를 입력하세요.",
-    "emailUnique": "이메일 주소는 고유해야 합니다"
+    "editInfo": "아래에서 사용자 정보를 편집하세요.",
+    "emailUnique": "이메일 주소는 고유해야 합니다",
+    "newPassword": "새 비밀번호 입력",
+    "locked": "잠김",
+    "unlocked": "잠금 해제됨",
+    "unlock": "잠금 해제"
   },
   "common": {
     "save": "저장",

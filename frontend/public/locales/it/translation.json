@@ -43,8 +43,14 @@
     "status": "Stato",
     "actions": "Azioni",
     "addUser": "Aggiungi Utente",
+    "editUser": "Modifica Utente",
     "enterInfo": "Inserisci le informazioni del nuovo utente qui sotto.",
-    "emailUnique": "L'indirizzo email deve essere unico"
+    "editInfo": "Modifica le informazioni utente qui sotto.",
+    "emailUnique": "L'indirizzo email deve essere unico",
+    "newPassword": "Inserisci nuova password",
+    "locked": "Bloccato",
+    "unlocked": "Sbloccato",
+    "unlock": "Sbloccare"
   },
   "common": {
     "save": "Salva",

@@ -16,6 +16,13 @@ msgstr "Token expired"
 msgid "Access denied"
 msgstr "Access denied"
 
+# Account locking messages
+msgid "Account is locked due to too many failed login attempts"
+msgstr "Account is locked due to too many failed login attempts"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "Account locked due to too many failed login attempts"
+
 # Host management
 msgid "Host not found"
 msgstr "Host not found"

@@ -18,7 +18,7 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Willkommen bei SysManage",
-    "activeHosts": "Aktive Hosts",
+    "hosts": "Hosts",
     "totalUsers": "Gesamtzahl Benutzer",
     "systemHealth": "Systemgesundheit"
   },
@@ -30,6 +30,9 @@
     "status": "Status",
     "active": "Aktiv",
     "inactive": "Inaktiv",
+    "up": "Online",
+    "down": "Offline",
+    "lastCheckin": "Letzte Meldung",
     "actions": "Aktionen",
     "edit": "Bearbeiten",
     "delete": "Löschen",
@@ -43,8 +46,14 @@
     "status": "Status",
     "actions": "Aktionen",
     "addUser": "Benutzer hinzufügen",
+    "editUser": "Benutzer Bearbeiten",
     "enterInfo": "Geben Sie die Informationen des neuen Benutzers unten ein.",
-    "emailUnique": "E-Mail-Adresse muss eindeutig sein"
+    "editInfo": "Bearbeiten Sie die Benutzerinformationen unten.",
+    "emailUnique": "E-Mail-Adresse muss eindeutig sein",
+    "newPassword": "Neues Passwort eingeben",
+    "locked": "Gesperrt",
+    "unlocked": "Entsperrt",
+    "unlock": "Entsperren"
   },
   "common": {
     "save": "Speichern",

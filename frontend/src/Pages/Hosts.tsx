@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { Chip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 import { SysManageHost, doDeleteHost, doGetHosts } from '../Services/hosts'
@@ -19,7 +20,28 @@ const Hosts = () => {
         { field: 'id', headerName: 'ID', width: 70 },
         { field: 'fqdn', headerName: t('hosts.fqdn'), width: 200 },
         { field: 'ipv4', headerName: t('hosts.ipv4'), width: 150 },
-        { field: 'ipv6', headerName: t('hosts.ipv6'), width: 200 }
+        { field: 'ipv6', headerName: t('hosts.ipv6'), width: 200 },
+        { 
+            field: 'status', 
+            headerName: t('hosts.status'), 
+            width: 100,
+            renderCell: (params) => (
+                <Chip 
+                    label={params.value === 'up' ? t('hosts.up') : t('hosts.down')}
+                    color={params.value === 'up' ? 'success' : 'error'}
+                    size="small"
+                />
+            )
+        },
+        { 
+            field: 'last_access', 
+            headerName: t('hosts.lastCheckin'), 
+            width: 180,
+            renderCell: (params) => {
+                const date = new Date(params.value);
+                return date.toLocaleString();
+            }
+        }
     ]
 
     const handleDelete = () => {

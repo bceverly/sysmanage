@@ -16,6 +16,13 @@ msgstr "トークンが期限切れです"
 msgid "Access denied"
 msgstr "アクセスが拒否されました"
 
+# Account locking messages
+msgid "Account is locked due to too many failed login attempts"
+msgstr "ログイン試行の失敗回数が多すぎるため、アカウントがロックされています"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "ログイン試行の失敗回数が多すぎるため、アカウントがロックされています"
+
 # Host management
 msgid "Host not found"
 msgstr "ホストが見つかりません"
