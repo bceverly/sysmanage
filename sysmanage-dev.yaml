@@ -1,0 +1,25 @@
+api:
+  host: "localhost"
+  port: 8080
+  # Development - no SSL certificates for HTTP
+
+database:
+  user: "sysmanage"
+  password: "abc123"
+  host: "localhost"
+  port: 5432
+  name: "sysmanage"
+
+security:
+  password_salt: "6/InQvDb8f3cM6sao8kWzIiYVHKGH9sqkEJ3uZhIo9Q="
+  admin_userid: "admin@sysmanage.org"
+  admin_password: "pa$$word"
+  jwt_secret: "I+Z74n/CFHser01E47pyrL91OuonEX9hNSvVFr/KLi4="
+  jwt_algorithm: "HS256"
+  jwt_auth_timeout: 6000
+  jwt_refresh_timeout: 60000
+
+webui:
+  host: "localhost"
+  port: 3000
+  # Development - no SSL certificates for HTTP

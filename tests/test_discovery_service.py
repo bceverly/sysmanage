@@ -25,7 +25,7 @@ class TestDiscoveryBeaconService:
                 "api": {"host": "localhost", "port": 8000, "certFile": "/path/to/cert"},
                 "webui": {"port": 8080},
             }
-            self.service = DiscoveryBeaconService(discovery_port=31337)
+            self.service = DiscoveryBeaconService(discovery_port_param=31337)
 
     @pytest.mark.asyncio
     async def test_start_beacon_service(self):

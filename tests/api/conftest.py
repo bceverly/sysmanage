@@ -90,8 +90,21 @@ def test_db():
 @pytest.fixture
 def client(test_db):
     """Create a FastAPI test client."""
-    with TestClient(app) as test_client:
-        yield test_client
+    import asyncio
+    from unittest.mock import patch, AsyncMock
+
+    # Mock services that might bind to ports
+    with patch("backend.monitoring.heartbeat_monitor.heartbeat_monitor_service"):
+        with patch(
+            "backend.discovery.discovery_service.discovery_beacon.start_beacon_service",
+            new_callable=AsyncMock,
+        ):
+            with patch(
+                "backend.discovery.discovery_service.discovery_beacon.stop_beacon_service",
+                new_callable=AsyncMock,
+            ):
+                with TestClient(app) as test_client:
+                    yield test_client
 
 
 @pytest.fixture

@@ -60,13 +60,13 @@ if [ -f "backend/main.py" ]; then
         source venv/bin/activate
     fi
     
-    # Start uvicorn server in background
-    nohup uvicorn backend.main:app --host 0.0.0.0 --port 6443 --ssl-keyfile ~/dev/certs/sysmanage.org/privkey.pem --ssl-certfile ~/dev/certs/sysmanage.org/cert.pem > logs/backend.log 2>&1 &
+    # Start the backend using the main.py configuration
+    nohup python -m backend.main > logs/backend.log 2>&1 &
     BACKEND_PID=$!
     echo $BACKEND_PID > logs/backend.pid
     
-    # Wait for backend to be ready
-    if ! wait_for_service 6443 "Backend API"; then
+    # Wait for backend to be ready (using the configured port 8080)
+    if ! wait_for_service 8080 "Backend API"; then
         echo "ERROR: Backend API failed to start"
         exit 1
     fi
@@ -86,15 +86,15 @@ if [ -d "frontend" ] && [ -f "frontend/package.json" ]; then
         npm install
     fi
     
-    # Start the React development server in background
-    nohup npm start > ../logs/frontend.log 2>&1 &
+    # Start the React development server in background with HTTP forced
+    nohup env FORCE_HTTP=true npm start > ../logs/frontend.log 2>&1 &
     FRONTEND_PID=$!
     echo $FRONTEND_PID > ../logs/frontend.pid
     
     cd ..
     
     # Wait for frontend to be ready
-    if ! wait_for_service 7443 "Frontend Web UI"; then
+    if ! wait_for_service 3000 "Frontend Web UI"; then
         echo "WARNING: Frontend Web UI may not have started properly"
     fi
 else
@@ -112,9 +112,9 @@ echo ""
 echo "✅ SysManage Server is successfully running!"
 echo ""
 echo "Services:"
-echo "  🔧 Backend API:    https://localhost:6443 (WebSocket agent endpoint: wss://localhost:6443/agent/connect)"
-echo "  🌐 Frontend UI:    https://localhost:7443"
-echo "  📋 API Docs:      https://localhost:6443/docs"
+echo "  🔧 Backend API:    http://localhost:8080 (WebSocket agent endpoint: ws://localhost:8080/agent/connect)"
+echo "  🌐 Frontend UI:    http://localhost:3000"
+echo "  📋 API Docs:      http://localhost:8080/docs"
 echo ""
 echo "Logs:"
 echo "  📄 Backend:       tail -f logs/backend.log"

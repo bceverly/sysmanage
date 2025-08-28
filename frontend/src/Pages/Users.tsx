@@ -58,27 +58,25 @@ const Users = () => {
         }
     ]
 
-    const handleDelete = () => {
-        // Call the API to remove the selected rows
-        for (let i=0 ; i<selection.length ; i++) {
-            let theID =  BigInt(selection[i].toString());
-            doDeleteUser(theID);
+    const handleDelete = async () => {
+        try {
+            // Call the API to remove the selected rows
+            const deletePromises = selection.map(id => {
+                const theID = BigInt(id.toString());
+                return doDeleteUser(theID);
+            });
+            
+            await Promise.all(deletePromises);
+            
+            // Refresh the data from the server
+            const updatedUsers = await doGetUsers();
+            setTableData(updatedUsers);
+            
+            // Clear selection
+            setSelection([]);
+        } catch (error) {
+            console.error('Error deleting users:', error);
         }
-
-        // Remove the selected rows from the tableData
-        let newArray: SysManageUser[] = [];
-        for (let i=0 ; i<tableData.length ; i++) {
-            let found = false;
-            for (let j=0 ; j<selection.length ; j++) {
-                if (tableData[i].id === BigInt(selection[j])) {
-                    found = true;
-                }
-            }
-            if (!found) {
-                newArray.push(tableData[i]);
-            }
-        }
-        setTableData(newArray);
     }
 
     const handleUnlock = () => {

@@ -4,13 +4,20 @@ This module encapsulates the reading and processing of the config file
 various properties specified therein.
 """
 
+import os
 import sys
 
 import yaml
 
 # Read/validate the configuration file
+# Check for development config first, then fall back to system config
+CONFIG_PATH = "/etc/sysmanage.yaml"
+if os.path.exists("sysmanage-dev.yaml"):
+    CONFIG_PATH = "sysmanage-dev.yaml"
+    print(f"Using development config: {CONFIG_PATH}")
+
 try:
-    with open("/etc/sysmanage.yaml", "r", encoding="utf-8") as file:
+    with open(CONFIG_PATH, "r", encoding="utf-8") as file:
         config = yaml.safe_load(file)
         if not "host" in config["api"].keys():
             config["api"]["host"] = "localhost"

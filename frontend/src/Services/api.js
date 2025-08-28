@@ -2,7 +2,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const axiosInstance = axios.create({
-  baseURL: "https://localhost:6443",
+  baseURL: "http://localhost:8080",
   headers: {
     "Content-Type": "application/json",
   },
