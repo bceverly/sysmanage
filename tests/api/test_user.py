@@ -186,11 +186,15 @@ class TestUsersList:
         assert isinstance(data, list)
         assert len(data) == 3
 
-        # Verify user data
+        # Verify user data - use exact matching for security
         userids = [user["userid"] for user in data]
-        assert "user1@example.com" in userids
-        assert "user2@example.com" in userids
-        assert "user3@example.com" in userids
+        expected_userids = {
+            "user1@example.com",
+            "user2@example.com",
+            "user3@example.com",
+        }
+        actual_userids = set(userids)
+        assert expected_userids.issubset(actual_userids)
 
         # Verify passwords are not included
         for user in data:

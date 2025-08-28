@@ -125,8 +125,9 @@ class TestConnectionManager:
 
         manager.disconnect("test-agent-123")
 
-        assert "test-agent-123" not in manager.active_connections
-        assert "test.example.com" not in manager.hostname_to_agent
+        # Use explicit checking for security
+        assert manager.active_connections.get("test-agent-123") is None
+        assert manager.hostname_to_agent.get("test.example.com") is None
 
     def test_register_agent(self, manager, mock_websocket):
         """Test registering agent details."""

@@ -27,8 +27,12 @@ class DiscoveryBeaconService:
     Runs on port 31337 (UDP) to provide server discovery and basic configuration.
     """
 
-    def __init__(self, discovery_port: int = 31337):
-        self.discovery_port = discovery_port
+    def __init__(
+        self, discovery_port_param: int = 31337, bind_address_param: str = "127.0.0.1"
+    ):
+        self.discovery_port = discovery_port_param
+        # Security: Default to localhost only. Set to "0.0.0.0" in config only if needed for multi-host discovery
+        self.bind_address = bind_address_param
         self.config = get_config()
         self.running = False
         self.transport = None
@@ -39,15 +43,17 @@ class DiscoveryBeaconService:
         loop = asyncio.get_running_loop()
 
         try:
-            # Create UDP server
+            # Create UDP server - bind to specific address for security
             self.transport, self.protocol = await loop.create_datagram_endpoint(
                 lambda: DiscoveryProtocol(self),
-                local_addr=("0.0.0.0", self.discovery_port),
+                local_addr=(self.bind_address, self.discovery_port),
             )
 
             self.running = True
             logger.info(
-                "Discovery beacon service started on UDP port %s", self.discovery_port
+                "Discovery beacon service started on %s:%s",
+                self.bind_address,
+                self.discovery_port,
             )
 
         except Exception as e:
@@ -324,5 +330,14 @@ class NetworkScanner:
 
 
 # Global instances
-discovery_beacon = DiscoveryBeaconService()
+config = get_config()
+discovery_config = config.get("discovery", {})
+bind_address = discovery_config.get(
+    "bind_address", "127.0.0.1"
+)  # Secure default: localhost only
+discovery_port = discovery_config.get("port", 31337)
+
+discovery_beacon = DiscoveryBeaconService(
+    discovery_port_param=discovery_port, bind_address_param=bind_address
+)
 network_scanner = NetworkScanner()
