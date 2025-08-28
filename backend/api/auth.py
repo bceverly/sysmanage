@@ -134,7 +134,7 @@ async def login(login_data: UserLogin, request: Request, response: Response):
                 session.commit()
 
                 # Add the refresh token to an http-only cookie
-                response.body = {"Authorization": sign_jwt(login_data.userid)}
+                auth_token = sign_jwt(login_data.userid)
                 refresh_token = sign_refresh_token(login_data.userid)
                 jwt_refresh_timout = int(the_config["security"]["jwt_refresh_timeout"])
 
@@ -157,7 +157,7 @@ async def login(login_data: UserLogin, request: Request, response: Response):
                 )
 
                 # Return success
-                return response
+                return {"Authorization": auth_token}
             # Wrong password - record failed attempt and potentially lock account
             login_security.record_failed_login(
                 str(login_data.userid), client_ip, user_agent
@@ -192,8 +192,9 @@ async def refresh(request: Request):
         if "refresh_token" in request.cookies:
             refresh_token = request.cookies["refresh_token"]
             token_dict = decode_jwt(refresh_token)
-            the_userid = token_dict["user_id"]
-            new_token = sign_jwt(the_userid)
-            return {"Authorization": new_token}
+            if token_dict:
+                the_userid = token_dict["user_id"]
+                new_token = sign_jwt(the_userid)
+                return {"Authorization": new_token}
 
     raise HTTPException(status_code=403, detail="Invalid or missing refresh token")

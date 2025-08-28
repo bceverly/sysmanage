@@ -21,7 +21,7 @@ class BearerToken(Base):
 
 class Host(Base):
     """
-    This class holds the object mapping for the user table in the PostgreSQL
+    This class holds the object mapping for the host table in the PostgreSQL
     database.
     """
 
