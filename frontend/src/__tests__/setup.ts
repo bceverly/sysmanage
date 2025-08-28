@@ -40,7 +40,15 @@ i18n
           },
           common: {
             delete: 'Delete',
-            selected: 'Selected'
+            selected: 'Selected',
+            rowsPerPage: 'Rows per page',
+            of: 'of',
+            page: 'Page',
+            goToPage: 'Go to page',
+            firstPage: 'First page',
+            lastPage: 'Last page',
+            nextPage: 'Next page',
+            previousPage: 'Previous page'
           },
           app: {
             title: 'SysManage'

@@ -55,6 +55,14 @@
     "selected": "已选择",
     "loading": "加载中...",
     "error": "发生错误",
-    "success": "操作成功完成"
+    "success": "操作成功完成",
+    "rowsPerPage": "每页行数",
+    "of": "共",
+    "page": "页",
+    "goToPage": "转到页",
+    "firstPage": "首页",
+    "lastPage": "末页",
+    "nextPage": "下一页",
+    "previousPage": "上一页"
   }
 }

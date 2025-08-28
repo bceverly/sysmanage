@@ -81,6 +81,13 @@ const Hosts = () => {
                     pageSizeOptions={[5, 10]}
                     checkboxSelection
                     onRowSelectionModelChange={setSelection}
+                    localeText={{
+                        MuiTablePagination: {
+                            labelRowsPerPage: t('common.rowsPerPage'),
+                            labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) =>
+                                `${from}–${to} ${t('common.of')} ${count !== -1 ? count : `${t('common.of')} ${to}`}`,
+                        },
+                    }}
                 />
             </div>
             <Box component="section">&nbsp;</Box>

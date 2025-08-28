@@ -55,6 +55,14 @@
     "selected": "Ausgewählt",
     "loading": "Laden...",
     "error": "Ein Fehler ist aufgetreten",
-    "success": "Operation erfolgreich abgeschlossen"
+    "success": "Operation erfolgreich abgeschlossen",
+    "rowsPerPage": "Zeilen pro Seite",
+    "of": "von",
+    "page": "Seite",
+    "goToPage": "Gehe zu Seite",
+    "firstPage": "Erste Seite",
+    "lastPage": "Letzte Seite",
+    "nextPage": "Nächste Seite",
+    "previousPage": "Vorherige Seite"
   }
 }

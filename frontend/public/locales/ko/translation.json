@@ -55,6 +55,14 @@
     "selected": "선택됨",
     "loading": "로딩 중...",
     "error": "오류가 발생했습니다",
-    "success": "작업이 성공적으로 완료되었습니다"
+    "success": "작업이 성공적으로 완료되었습니다",
+    "rowsPerPage": "페이지당 행 수",
+    "of": "/",
+    "page": "페이지",
+    "goToPage": "페이지로 이동",
+    "firstPage": "첫 페이지",
+    "lastPage": "마지막 페이지",
+    "nextPage": "다음 페이지",
+    "previousPage": "이전 페이지"
   }
 }
