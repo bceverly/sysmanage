@@ -16,6 +16,13 @@ msgstr "Jeton expiré"
 msgid "Access denied"
 msgstr "Accès refusé"
 
+# Account locking messages
+msgid "Account is locked due to too many failed login attempts"
+msgstr "Le compte est verrouillé en raison de trop nombreuses tentatives de connexion échouées"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "Compte verrouillé en raison de trop nombreuses tentatives de connexion échouées"
+
 # Host management
 msgid "Host not found"
 msgstr "Hôte non trouvé"

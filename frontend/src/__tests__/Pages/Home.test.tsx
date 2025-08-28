@@ -45,7 +45,7 @@ describe('Home Page', () => {
       render(<HomeWithRouter />);
     });
     // Check for actual content from the Home page
-    expect(screen.getByText('Active Hosts')).toBeInTheDocument();
+    expect(screen.getByText('Hosts')).toBeInTheDocument();
   });
 
   test('displays home page content', async () => {

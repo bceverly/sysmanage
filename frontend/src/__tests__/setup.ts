@@ -28,7 +28,11 @@ i18n
             error: 'Invalid username or password'
           },
           dashboard: {
-            activeHosts: 'Active Hosts'
+            title: 'Dashboard',
+            welcome: 'Welcome to SysManage',
+            hosts: 'Hosts',
+            totalUsers: 'Total Users',
+            systemHealth: 'System Health'
           },
           hosts: {
             fqdn: 'FQDN',

@@ -11,6 +11,9 @@ type SysManageUser = {
     active: boolean;
     userid: string;
     password: string;
+    is_locked: boolean;
+    failed_login_attempts: number;
+    locked_at: string | null;
 }
 
 function processError(error: AxiosError) {
@@ -145,5 +148,21 @@ const doUpdateUser = async (id: BigInt, active: boolean, userid: string, passwor
     return successResponse;
 };
 
+const doUnlockUser = async (id: BigInt) => {
+    let result = {} as SysManageUser;
+
+    await api.post<SysManageUser>("/user/" + id + "/unlock")
+    .then((response) => {
+        // No error - process response
+        result = response.data;
+        return Promise.resolve(result);
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
 export type { SuccessResponse, SysManageUser };
-export { doAddUser, doDeleteUser, doGetMe, doGetUserByID, doGetUserByUserid, doGetUsers, doUpdateUser };
+export { doAddUser, doDeleteUser, doGetMe, doGetUserByID, doGetUserByUserid, doGetUsers, doUpdateUser, doUnlockUser };

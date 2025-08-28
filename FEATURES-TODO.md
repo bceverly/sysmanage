@@ -7,22 +7,22 @@ like to add:
 2.  ~~Localization - Add a language switcher to the UI
     and translate all externalized strings~~
 
-3.  Validate security of login process
+3.  ~~Validate security of login process~~
 
-4.  Validate security of communication between agent
-    and server
+4.  ~~Validate security of communication between agent
+    and server~~
 
-5.  Heartbeat - Add a configurable heartbeat from
+5.  ~~Heartbeat - Add a configurable heartbeat from
     the clients to the server to know when a client
-    goes offline
+    goes offline~~
 
-6.  Agent config push - Allow the server to push
-    configuration files to the agent
+6.  ~~Agent config push - Allow the server to push
+    configuration files to the agent~~
 
-7.  Auto-discovery - If an agent is unconfigured
+7.  ~~Auto-discovery - If an agent is unconfigured
     as to where its server is, have it try to
     do a network discovery and get a default
-    config pushed to it by the server
+    config pushed to it by the server~~
 
 8.  Hardware inventory - Server can request on
     demand that an agent do a hardware inveentory
@@ -38,7 +38,10 @@ like to add:
 
 10. Installer for agent - There should be a text-
     based command-line installer for the agent that
-    work on MacOS, Windows, Linux and BSD.
+    work on MacOS, Windows, Linux and BSD.  The
+    installer should be able to configure the
+    local system to run the agent at startup and
+    shut it down cleanly at shutdown.
 
 11. UI Fallback - When the server goes down, the
     current code just displays a cryptic error 
@@ -152,3 +155,30 @@ like to add:
     a logout link with a separator bar
     between the logout link and the profile
     button.
+
+34. Queue on both server and agent that any
+    messages to be sent are written to
+    first.  Then, when the message is
+    successfully sent, the message is
+    removed from the queue.  This queue
+    needs to be persistent across any
+    possibility of reboot or process kill
+    and restart and needs to preserve the
+    order in which things are added to it
+    with a timestamp in UTC date time
+    locale.  This way, if the communication
+    is broken between the client and the
+    server, messages will be replayed in
+    the order they were meant to be sent
+    when the communication is restored.
+    Use the postgreSQL database (with
+    Alembic migrations) for the server's
+    queue and just persist the agent's
+    queue to the local filesystem.
+
+35. Create a standalone python script on
+    both the agent and the server to
+    gather diagnostic information that
+    can be analyzed to troubleshoot
+    configuration or communication
+    problems.

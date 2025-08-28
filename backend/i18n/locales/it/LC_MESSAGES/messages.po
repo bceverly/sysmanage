@@ -16,6 +16,13 @@ msgstr "Token scaduto"
 msgid "Access denied"
 msgstr "Accesso negato"
 
+# Account locking messages
+msgid "Account is locked due to too many failed login attempts"
+msgstr "Account bloccato a causa di troppi tentativi di accesso falliti"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "Account bloccato a causa di troppi tentativi di accesso falliti"
+
 # Host management
 msgid "Host not found"
 msgstr "Host non trovato"

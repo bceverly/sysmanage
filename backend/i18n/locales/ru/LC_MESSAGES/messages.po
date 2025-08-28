@@ -16,6 +16,13 @@ msgstr "Токен истёк"
 msgid "Access denied"
 msgstr "Доступ запрещён"
 
+# Account locking messages
+msgid "Account is locked due to too many failed login attempts"
+msgstr "Аккаунт заблокирован из-за слишком большого количества неудачных попыток входа"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "Аккаунт заблокирован из-за слишком большого количества неудачных попыток входа"
+
 # Host management
 msgid "Host not found"
 msgstr "Хост не найден"

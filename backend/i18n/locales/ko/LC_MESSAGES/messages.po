@@ -16,6 +16,13 @@ msgstr "토큰이 만료되었습니다"
 msgid "Access denied"
 msgstr "액세스가 거부되었습니다"
 
+# Account locking messages
+msgid "Account is locked due to too many failed login attempts"
+msgstr "로그인 실패 횟수가 너무 많아 계정이 잠겼습니다"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "로그인 실패 횟수가 너무 많아 계정이 잠겼습니다"
+
 # Host management
 msgid "Host not found"
 msgstr "호스트를 찾을 수 없습니다"

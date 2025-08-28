@@ -16,6 +16,13 @@ msgstr "Token abgelaufen"
 msgid "Access denied"
 msgstr "Zugriff verweigert"
 
+# Account locking messages
+msgid "Account is locked due to too many failed login attempts"
+msgstr "Konto ist gesperrt aufgrund zu vieler fehlgeschlagener Anmeldeversuche"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "Konto gesperrt aufgrund zu vieler fehlgeschlagener Anmeldeversuche"
+
 # Host management
 msgid "Host not found"
 msgstr "Host nicht gefunden"

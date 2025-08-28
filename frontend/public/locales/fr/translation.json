@@ -18,7 +18,7 @@
   "dashboard": {
     "title": "Tableau de bord",
     "welcome": "Bienvenue dans SysManage",
-    "activeHosts": "Hôtes actifs",
+    "hosts": "Hôtes",
     "totalUsers": "Utilisateurs totaux",
     "systemHealth": "Santé du système"
   },
@@ -30,6 +30,9 @@
     "status": "Statut",
     "active": "Actif",
     "inactive": "Inactif",
+    "up": "En ligne",
+    "down": "Hors ligne",
+    "lastCheckin": "Dernière vérification",
     "actions": "Actions",
     "edit": "Modifier",
     "delete": "Supprimer",
@@ -43,8 +46,14 @@
     "status": "Statut",
     "actions": "Actions",
     "addUser": "Ajouter un utilisateur",
+    "editUser": "Modifier Utilisateur",
     "enterInfo": "Entrez les informations du nouvel utilisateur ci-dessous.",
-    "emailUnique": "L'adresse email doit être unique"
+    "editInfo": "Modifiez les informations de l'utilisateur ci-dessous.",
+    "emailUnique": "L'adresse email doit être unique",
+    "newPassword": "Entrez un nouveau mot de passe",
+    "locked": "Verrouillé",
+    "unlocked": "Déverrouillé",
+    "unlock": "Déverrouiller"
   },
   "common": {
     "save": "Enregistrer",

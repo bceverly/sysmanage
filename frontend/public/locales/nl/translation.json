@@ -43,8 +43,14 @@
     "status": "Status",
     "actions": "Acties",
     "addUser": "Gebruiker Toevoegen",
+    "editUser": "Gebruiker Bewerken",
     "enterInfo": "Voer hieronder de informatie van de nieuwe gebruiker in.",
-    "emailUnique": "E-mailadres moet uniek zijn"
+    "editInfo": "Bewerk de gebruikersinformatie hieronder.",
+    "emailUnique": "E-mailadres moet uniek zijn",
+    "newPassword": "Voer nieuw wachtwoord in",
+    "locked": "Vergrendeld",
+    "unlocked": "Ontgrendeld",
+    "unlock": "Ontgrendelen"
   },
   "common": {
     "save": "Opslaan",
