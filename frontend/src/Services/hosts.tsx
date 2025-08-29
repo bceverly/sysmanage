@@ -13,6 +13,7 @@ type SysManageHost = {
     ipv4: string;
     ipv6: string;
     status: string;
+    approval_status: string;
     last_access: string;
 }
 
@@ -135,5 +136,37 @@ const doUpdateHost = async (id: BigInt, active: boolean, fqdn: string, ipv4: str
     return successResponse;
 };
 
+const doApproveHost = async (id: BigInt) => {
+    let result = {} as SysManageHost;
+
+    await api.put<SysManageHost>("/host/" + id + "/approve")
+    .then((response) => {
+        // No error - process response
+        result = response.data;
+        return Promise.resolve(response);
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doRejectHost = async (id: BigInt) => {
+    let result = {} as SysManageHost;
+
+    await api.put<SysManageHost>("/host/" + id + "/reject")
+    .then((response) => {
+        // No error - process response
+        result = response.data;
+        return Promise.resolve(response);
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
 export type { SuccessResponse, SysManageHost };
-export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost };
+export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost };

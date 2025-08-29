@@ -5,7 +5,7 @@ Periodically checks for hosts that haven't sent heartbeats and marks them as dow
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from backend.persistence.db import get_db
 from backend.persistence.models import Host
@@ -22,7 +22,9 @@ async def check_host_heartbeats():
     db = next(get_db())
     try:
         timeout_minutes = get_heartbeat_timeout_minutes()
-        timeout_threshold = datetime.utcnow() - timedelta(minutes=timeout_minutes)
+        timeout_threshold = datetime.now(timezone.utc) - timedelta(
+            minutes=timeout_minutes
+        )
 
         # Find hosts that haven't been seen within the timeout period
         stale_hosts = (

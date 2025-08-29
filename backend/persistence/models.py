@@ -31,8 +31,9 @@ class Host(Base):
     fqdn = Column(String, index=True)
     ipv4 = Column(String)
     ipv6 = Column(String)
-    last_access = Column(DateTime)
+    last_access = Column(DateTime(timezone=True))
     status = Column(String(20), nullable=False, server_default="up")
+    approval_status = Column(String(20), nullable=False, server_default="pending")
 
 
 class User(Base):
@@ -46,7 +47,7 @@ class User(Base):
     active = Column(Boolean, unique=False, index=False)
     userid = Column(String)
     hashed_password = Column(String, unique=False, index=False)
-    last_access = Column(DateTime)
+    last_access = Column(DateTime(timezone=True))
     # Account locking fields
     is_locked = Column(Boolean, default=False, nullable=False)
     failed_login_attempts = Column(Integer, default=0, nullable=False)

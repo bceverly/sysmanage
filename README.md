@@ -204,6 +204,32 @@ alembic downgrade -1
 alembic downgrade <revision_id>
 ```
 
+### Agent Approval System
+
+SysManage implements a manual approval system for agent registration to ensure only authorized hosts can connect to your server:
+
+#### How it Works
+
+1. **Agent Registration**: When a new agent attempts to connect, it registers with the server but is initially set to "pending" status
+2. **Manual Approval Required**: Agents with "pending" or "rejected" status cannot establish WebSocket connections
+3. **Administrative Approval**: Administrators must manually approve new agents through the web interface
+4. **Connection Authorization**: Only "approved" agents can connect and send heartbeat/monitoring data
+
+#### Approval Workflow
+
+1. **Initial Connection**: New agents register via `/host/register` endpoint
+2. **Pending Status**: Host is created with `approval_status="pending"`  
+3. **Admin Review**: Navigate to Hosts page in the web UI to see pending registrations
+4. **Approve/Reject**: Use the approve (✓) or reject (✗) buttons for each pending host
+5. **Agent Access**: Approved agents can establish WebSocket connections and begin monitoring
+
+#### Important Notes
+
+- **Existing approved agents** continue to work normally when server is updated
+- **Deleted hosts** that reconnect are automatically set back to "pending" status requiring re-approval  
+- **Rejected agents** cannot connect until their status is changed to "approved"
+- **Database persistence** ensures approval status survives server restarts
+
 ## Project Structure
 
 ```
@@ -304,7 +330,7 @@ When running the backend, visit: http://localhost:6443/docs
 The system uses secure WebSocket connections for real-time communication between agents and the server:
 
 - **Secure Authentication**: Agents must obtain connection tokens before establishing WebSocket connections
-- **Connection Management**: Automatic agent registration and heartbeat monitoring with connection timeouts
+- **Connection Management**: Agent registration with manual approval system - new agents require administrator approval before establishing connections. Includes heartbeat monitoring with connection timeouts
 - **Message Types**: System info, commands, heartbeats, configuration updates, errors
 - **Message Security**: HMAC validation ensures message integrity and prevents tampering
 - **Broadcasting**: Send commands to all agents, specific platforms, or individual hosts

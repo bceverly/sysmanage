@@ -31,8 +31,8 @@ class AgentConnection:
         try:
             await self.websocket.send_text(json.dumps(message))
             return True
-        except Exception as exc:
-            print(f"Failed to send message to agent {self.agent_id}: {exc}")
+        except Exception:
+            # Failed to send message to agent
             return False
 
     def update_info(
@@ -71,7 +71,7 @@ class ConnectionManager:
         await websocket.accept()
         connection = AgentConnection(websocket, agent_id)
         self.active_connections[connection.agent_id] = connection
-        print(f"Agent {connection.agent_id} connected")
+        # Agent connected
         return connection
 
     def disconnect(self, agent_id: str):
@@ -81,7 +81,7 @@ class ConnectionManager:
             if connection.hostname and connection.hostname in self.hostname_to_agent:
                 del self.hostname_to_agent[connection.hostname]
             del self.active_connections[agent_id]
-            print(f"Agent {agent_id} disconnected")
+            # Agent disconnected
 
     def register_agent(
         self,

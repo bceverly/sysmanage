@@ -36,7 +36,23 @@
     "actions": "Actions",
     "edit": "Edit",
     "delete": "Delete",
-    "addHost": "Add Host"
+    "addHost": "Add Host",
+    "approvalNeeded": "Approval Needed",
+    "refreshing": "Refreshing...",
+    "refreshNow": "Refresh Now",
+    "approveSelected": "Approve Selected",
+    "never": "never",
+    "justNow": "just now",
+    "secondsAgo": "{{seconds}}s ago",
+    "minutesAgo": "{{minutes}}m ago",
+    "hoursAgo": "{{hours}}h ago",
+    "daysAgo": "{{days}}d ago",
+    "updated": "Updated",
+    "autoRefresh": "Auto-refresh",
+    "lastSeen": "Last seen {{minutes}} minutes ago",
+    "noRows": "No rows",
+    "noResults": "No results found",
+    "invalidDate": "Invalid date"
   },
   "users": {
     "title": "User Management",
@@ -72,6 +88,8 @@
     "firstPage": "First page",
     "lastPage": "Last page",
     "nextPage": "Next page",
-    "previousPage": "Previous page"
+    "previousPage": "Previous page",
+    "rowSelected": "row selected",
+    "rowsSelected": "rows selected"
   }
 }

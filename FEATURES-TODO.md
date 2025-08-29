@@ -47,7 +47,13 @@ like to add:
     current code just displays a cryptic error 
     message.  There should be some sort of fallback
     message that is displayed saying the server is
-    down.
+    down.  Perhaps a popup that says the connection
+    to the server has been interrupted, retrying in
+    x seconds/minutes that has an exponential back-
+    off in terms of the time between retries and
+    a maximum number of retries with a final failure
+    saying that the server is down and you need to
+    contact support.
 
 12. Recreate DB - Make sure that all activities
     resulting in data being stored in the server
@@ -182,3 +188,10 @@ like to add:
     can be analyzed to troubleshoot
     configuration or communication
     problems.
+
+36. We need some sort of visual indicator
+    of what screen is currently being
+    displayed by highlighting the button
+    on the main toolbar that was clicked
+    by the user to get to the current
+    screen.

@@ -22,6 +22,7 @@ class TestHostDelete:
             ipv6="2001:db8::1",
             active=True,
         )
+        host.approval_status = "approved"
         session.add(host)
         session.commit()
         host_id = host.id
@@ -65,6 +66,7 @@ class TestHostGet:
             ipv6="2001:db8::2",
             active=True,
         )
+        host.approval_status = "approved"
         session.add(host)
         session.commit()
 
@@ -120,6 +122,11 @@ class TestHostsList:
                 active=True,
             ),
         ]
+        # Set approval status after creation
+        hosts[0].approval_status = "approved"
+        hosts[1].approval_status = "approved"
+        hosts[2].approval_status = "pending"
+
         for host in hosts:
             session.add(host)
         session.commit()
@@ -194,6 +201,7 @@ class TestHostCreate:
             ipv6="2001:db8::100",
             active=True,
         )
+        existing_host.approval_status = "approved"
         session.add(existing_host)
         session.commit()
 
@@ -254,6 +262,7 @@ class TestHostUpdate:
             ipv6="2001:db8::100",
             active=False,
         )
+        host.approval_status = "approved"
         session.add(host)
         session.commit()
         host_id = host.id
@@ -308,6 +317,7 @@ class TestHostUpdate:
             ipv6="2001:db8::1",
             active=True,
         )
+        host1.approval_status = "approved"
         host2 = models.Host(
             id=2,
             fqdn="host2.example.com",
@@ -315,6 +325,7 @@ class TestHostUpdate:
             ipv6="2001:db8::2",
             active=True,
         )
+        host2.approval_status = "approved"
         session.add_all([host1, host2])
         session.commit()
 
@@ -394,6 +405,7 @@ class TestHostRegister:
             ipv6="2001:db8::100",
             active=True,
         )
+        existing_host.approval_status = "approved"
         session.add(existing_host)
         session.commit()
 
