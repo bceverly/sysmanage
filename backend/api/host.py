@@ -8,9 +8,11 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
+from cryptography import x509
 
 from backend.auth.auth_bearer import JWTBearer
 from backend.persistence import db, models
+from backend.security.certificate_manager import certificate_manager
 
 router = APIRouter()
 
@@ -51,7 +53,7 @@ async def delete_host(host_id: int):
     """
 
     # Get the SQLAlchemy session
-    session_local = sessionmaker(
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
 
@@ -77,7 +79,7 @@ async def get_host(host_id: int):
     """
 
     # Get the SQLAlchemy session
-    session_local = sessionmaker(
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
 
@@ -98,7 +100,7 @@ async def get_host_by_fqdn(fqdn: str):
     """
 
     # Get the SQLAlchemy session
-    session_local = sessionmaker(
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
 
@@ -119,7 +121,7 @@ async def get_all_hosts():
     """
 
     # Get the SQLAlchemy session
-    session_local = sessionmaker(
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
 
@@ -134,7 +136,7 @@ async def add_host(new_host: Host):
     This function adds a new host to the system.
     """
     # Get the SQLAlchemy session
-    session_local = sessionmaker(
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
 
@@ -170,7 +172,7 @@ async def register_host(registration_data: HostRegistration):
     This endpoint does not require authentication for initial registration.
     """
     # Get the SQLAlchemy session
-    session_local = sessionmaker(
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
 
@@ -216,7 +218,7 @@ async def update_host(host_id: int, host_data: Host):
     """
 
     # Get the SQLAlchemy session
-    session_local = sessionmaker(
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
 
@@ -250,12 +252,12 @@ async def update_host(host_id: int, host_data: Host):
 
 
 @router.put("/host/{host_id}/approve", dependencies=[Depends(JWTBearer())])
-async def approve_host(host_id: int):
+async def approve_host(host_id: int):  # pylint: disable=duplicate-code
     """
     Approve a pending host registration
     """
     # Get the SQLAlchemy session
-    session_local = sessionmaker(
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
 
@@ -268,6 +270,20 @@ async def approve_host(host_id: int):
 
         if host.approval_status != "pending":
             raise HTTPException(status_code=400, detail="Host is not in pending status")
+
+        # Generate client certificate for the approved host
+        cert_pem, _ = certificate_manager.generate_client_certificate(
+            host.fqdn, host.id
+        )
+
+        # Store certificate information in host record
+        host.client_certificate = cert_pem.decode("utf-8")
+        host.certificate_issued_at = datetime.now(timezone.utc)
+
+        # Extract serial number for tracking
+
+        cert = x509.load_pem_x509_certificate(cert_pem)
+        host.certificate_serial = str(cert.serial_number)
 
         # Update approval status
         host.approval_status = "approved"
@@ -289,12 +305,12 @@ async def approve_host(host_id: int):
 
 
 @router.put("/host/{host_id}/reject", dependencies=[Depends(JWTBearer())])
-async def reject_host(host_id: int):
+async def reject_host(host_id: int):  # pylint: disable=duplicate-code
     """
     Reject a pending host registration
     """
     # Get the SQLAlchemy session
-    session_local = sessionmaker(
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
 

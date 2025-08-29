@@ -3,7 +3,7 @@ This module holds the various models that are persistence backed by the
 PostgreSQL database.
 """
 
-from sqlalchemy import BigInteger, Boolean, Column, DateTime, Integer, String
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, Integer, String, Text
 
 from backend.persistence.db import Base
 
@@ -34,6 +34,9 @@ class Host(Base):
     last_access = Column(DateTime(timezone=True))
     status = Column(String(20), nullable=False, server_default="up")
     approval_status = Column(String(20), nullable=False, server_default="pending")
+    client_certificate = Column(Text, nullable=True)
+    certificate_serial = Column(String(64), nullable=True)
+    certificate_issued_at = Column(DateTime(timezone=True), nullable=True)
 
 
 class User(Base):

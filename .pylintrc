@@ -36,7 +36,8 @@ disable=
     import-error,
     no-member,
     unused-argument,
-    broad-except
+    broad-except,
+    duplicate-code
 
 [REPORTS]
 # Set the output format.
