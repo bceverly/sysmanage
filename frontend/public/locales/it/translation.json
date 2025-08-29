@@ -134,10 +134,33 @@
     "failedAttempts": "Tentativi di login falliti",
     "lockedAt": "Bloccato il"
   },
-  "nav": {
-    "logoAlt": "SysManage"
-  },
   "logout": {
     "loading": "Disconnessione in corso..."
+  },
+  "serverDown": {
+    "title": "Connessione Interrotta",
+    "titleFailed": "Server Non Disponibile",
+    "message": "La connessione al server è stata interrotta. Tentativo di riconnessione automatica.",
+    "messageFailed": "Impossibile connettersi al server dopo più tentativi. Contattare il supporto o riprovare più tardi.",
+    "details": "Dettagli Connessione:",
+    "attempts": "Tentativi: {{count}}",
+    "lastConnected": "Ultima connessione: {{time}}",
+    "nextRetry": "Prossimo tentativo tra:",
+    "retrying": "Nuovo tentativo...",
+    "retryNow": "Riprova Ora",
+    "resetRetries": "Reimposta Tentativi",
+    "secondsRemaining": "{{seconds}}s",
+    "timeRemaining": "{{minutes}}m {{seconds}}s",
+    "error": "Errore"
+  },
+  "connectionStatus": {
+    "connected": "Connesso",
+    "retrying": "Nuovo tentativo",
+    "offline": "Offline",
+    "disconnected": "Disconnesso",
+    "connectedTooltip": "Connesso al server",
+    "retryingTooltip": "Tentativo di riconnessione al server",
+    "offlineTooltip": "Impossibile connettersi al server",
+    "disconnectedTooltip": "Connessione persa, nuovo tentativo..."
   }
 }

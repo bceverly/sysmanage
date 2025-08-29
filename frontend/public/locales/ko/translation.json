@@ -137,5 +137,31 @@
     "yes": "예",
     "no": "아니오",
     "id": "ID"
+  },
+  "serverDown": {
+    "title": "연결이 중단됨",
+    "titleFailed": "서버를 사용할 수 없음",
+    "message": "서버와의 연결이 중단되었습니다. 자동으로 재연결을 시도하고 있습니다.",
+    "messageFailed": "여러 번 시도 후에도 서버에 연결할 수 없습니다. 지원팀에 문의하거나 나중에 다시 시도해주세요.",
+    "details": "연결 세부정보:",
+    "attempts": "시도 횟수: {{count}}",
+    "lastConnected": "마지막 연결: {{time}}",
+    "nextRetry": "다음 재시도:",
+    "retrying": "재시도 중...",
+    "retryNow": "지금 재시도",
+    "resetRetries": "재시도 재설정",
+    "secondsRemaining": "{{seconds}}초",
+    "timeRemaining": "{{minutes}}분 {{seconds}}초",
+    "error": "오류"
+  },
+  "connectionStatus": {
+    "connected": "연결됨",
+    "retrying": "재시도 중",
+    "offline": "오프라인",
+    "disconnected": "연결 끊김",
+    "connectedTooltip": "서버에 연결됨",
+    "retryingTooltip": "서버에 재연결 시도 중",
+    "offlineTooltip": "서버에 연결할 수 없음",
+    "disconnectedTooltip": "연결이 끊김, 재시도 중..."
   }
 }

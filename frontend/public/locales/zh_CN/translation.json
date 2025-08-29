@@ -138,5 +138,31 @@
     "yes": "是",
     "no": "否",
     "id": "ID"
+  },
+  "serverDown": {
+    "title": "连接中断",
+    "titleFailed": "服务器不可用",
+    "message": "与服务器的连接已中断。正在尝试自动重新连接。",
+    "messageFailed": "经过多次尝试后仍无法连接到服务器。请联系技术支持或稍后再试。",
+    "details": "连接详情：",
+    "attempts": "尝试次数：{{count}}",
+    "lastConnected": "上次连接：{{time}}",
+    "nextRetry": "下次重试时间：",
+    "retrying": "重试中...",
+    "retryNow": "立即重试",
+    "resetRetries": "重置重试",
+    "secondsRemaining": "{{seconds}}秒",
+    "timeRemaining": "{{minutes}}分 {{seconds}}秒",
+    "error": "错误"
+  },
+  "connectionStatus": {
+    "connected": "已连接",
+    "retrying": "重试中",
+    "offline": "离线",
+    "disconnected": "已断开",
+    "connectedTooltip": "已连接到服务器",
+    "retryingTooltip": "正在尝试重新连接到服务器",
+    "offlineTooltip": "无法连接到服务器",
+    "disconnectedTooltip": "连接丢失，重试中..."
   }
 }

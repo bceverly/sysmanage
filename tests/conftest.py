@@ -22,8 +22,9 @@ import tempfile
 import os
 import time
 
-# Use timestamp to ensure unique database for each test run
-_test_db_file = tempfile.mktemp(suffix=f"_{int(time.time())}.db")
+# Use secure temporary file for test database
+_test_db_fd, _test_db_file = tempfile.mkstemp(suffix=f"_{int(time.time())}.db")
+os.close(_test_db_fd)  # Close the file descriptor, we only need the path
 TEST_DATABASE_URL = f"sqlite:///{_test_db_file}"
 
 # Test configuration with different ports to avoid conflicts with dev server
@@ -57,7 +58,8 @@ def engine():
     # Create a unique database file for each test
     import uuid
 
-    test_db_file = tempfile.mktemp(suffix=f"_{uuid.uuid4().hex}.db")
+    test_db_fd, test_db_file = tempfile.mkstemp(suffix=f"_{uuid.uuid4().hex}.db")
+    os.close(test_db_fd)  # Close the file descriptor, we only need the path
     test_db_url = f"sqlite:///{test_db_file}"
 
     test_engine = create_engine(test_db_url, connect_args={"check_same_thread": False})

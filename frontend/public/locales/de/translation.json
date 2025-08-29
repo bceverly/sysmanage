@@ -3,7 +3,8 @@
     "dashboard": "Dashboard",
     "hosts": "Hosts",
     "users": "Benutzer",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "logoAlt": "SysManage"
   },
   "login": {
     "title": "Bei SysManage anmelden",
@@ -134,10 +135,33 @@
     "failedAttempts": "Fehlgeschlagene Anmeldeversuche",
     "lockedAt": "Gesperrt am"
   },
-  "nav": {
-    "logoAlt": "SysManage"
-  },
   "logout": {
     "loading": "Abmeldung läuft..."
+  },
+  "serverDown": {
+    "title": "Verbindung Unterbrochen",
+    "titleFailed": "Server Nicht Verfügbar",
+    "message": "Die Verbindung zum Server wurde unterbrochen. Versuche automatisch zu verbinden.",
+    "messageFailed": "Kann nach mehreren Versuchen keine Verbindung zum Server herstellen. Bitte kontaktieren Sie den Support oder versuchen Sie es später erneut.",
+    "details": "Verbindungsdetails:",
+    "attempts": "Versuche: {{count}}",
+    "lastConnected": "Zuletzt verbunden: {{time}}",
+    "nextRetry": "Nächster Versuch in:",
+    "retrying": "Erneuter Versuch...",
+    "retryNow": "Jetzt Wiederholen",
+    "resetRetries": "Versuche Zurücksetzen",
+    "secondsRemaining": "{{seconds}}s",
+    "timeRemaining": "{{minutes}}m {{seconds}}s",
+    "error": "Fehler"
+  },
+  "connectionStatus": {
+    "connected": "Verbunden",
+    "retrying": "Wiederhole",
+    "offline": "Offline",
+    "disconnected": "Getrennt",
+    "connectedTooltip": "Mit Server verbunden",
+    "retryingTooltip": "Versuche Serververbindung",
+    "offlineTooltip": "Kann nicht mit Server verbinden",
+    "disconnectedTooltip": "Verbindung verloren, versuche erneut..."
   }
 }

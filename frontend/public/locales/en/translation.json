@@ -132,5 +132,34 @@
     "securityInfo": "Security Information",
     "failedAttempts": "Failed Login Attempts",
     "lockedAt": "Locked At"
+  },
+  "logout": {
+    "loading": "Logging out..."
+  },
+  "serverDown": {
+    "title": "Connection Interrupted",
+    "titleFailed": "Server Unavailable", 
+    "message": "The connection to the server has been interrupted. Attempting to reconnect automatically.",
+    "messageFailed": "Unable to connect to the server after multiple attempts. Please contact support or try again later.",
+    "details": "Connection Details:",
+    "attempts": "Attempts: {{count}}",
+    "lastConnected": "Last connected: {{time}}",
+    "nextRetry": "Next retry in:",
+    "retrying": "Retrying...",
+    "retryNow": "Retry Now",
+    "resetRetries": "Reset Retries",
+    "secondsRemaining": "{{seconds}}s",
+    "timeRemaining": "{{minutes}}m {{seconds}}s",
+    "error": "Error"
+  },
+  "connectionStatus": {
+    "connected": "Connected",
+    "retrying": "Retrying",
+    "offline": "Offline",
+    "disconnected": "Disconnected",
+    "connectedTooltip": "Connected to server",
+    "retryingTooltip": "Attempting to reconnect to server",
+    "offlineTooltip": "Unable to connect to server",
+    "disconnectedTooltip": "Connection lost, retrying..."
   }
 }
