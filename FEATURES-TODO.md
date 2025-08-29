@@ -28,7 +28,12 @@ like to add:
     demand that an agent do a hardware inveentory
     and send that information to the server.  This
     should be done the first time an agent registers
-    with the server.
+    with the server.  It should include the CPU
+    information (vendor, model, speed, cores, etc.),
+    the amount of RAM, the number of hard drives,
+    their capacity, type and any hardware info that
+    can be obtained (vendor, etc.), the network
+    hardware as well.
 
 9.  ~~OS Version Capture - Server can request on
     demand that an agent determine the version of

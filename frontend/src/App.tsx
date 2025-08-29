@@ -13,7 +13,9 @@ import Navbar from "./Components/Navbar"
 import Login from './Pages/Login';
 import Home from './Pages/Home';
 import Hosts from './Pages/Hosts';
+import HostDetail from './Pages/HostDetail';
 import Users from './Pages/Users';
+import UserDetail from './Pages/UserDetail';
 import Logout from './Pages/Logout';
 
 function App() {
@@ -44,7 +46,9 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/" element={<Home />} />
                 <Route path="/hosts" element={<Hosts />} />
+                <Route path="/hosts/:hostId" element={<HostDetail />} />
                 <Route path="/users" element={<Users />} />
+                <Route path="/users/:userId" element={<UserDetail />} />
                 <Route path="/logout" element={<Logout />} />
               </Routes>
             </main>

@@ -34,7 +34,7 @@ const Navbar = () => {
     <header className="header">
       <nav className="nav container">
         <NavLink to="/" className="nav__logo">
-          <img src={SysManageLogo} alt="SysManage" className="nav__logo-img" />
+          <img src={SysManageLogo} alt={t('nav.logoAlt', 'SysManage')} className="nav__logo-img" />
         </NavLink>
 
         {/* Language selector at toolbar level */}
@@ -49,7 +49,12 @@ const Navbar = () => {
         >
           <ul className="nav__list">
             <li className="nav__item">
-              <NavLink to="/" className="nav__link" onClick={closeMenuOnMobile}>
+              <NavLink 
+                to="/" 
+                className="nav__link" 
+                onClick={closeMenuOnMobile}
+                end
+              >
                 {t('nav.dashboard')}
               </NavLink>
             </li>

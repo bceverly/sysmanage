@@ -2,12 +2,14 @@ import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from 'react';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
+import { useTablePageSize } from '../hooks/useTablePageSize';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -15,6 +17,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import { SysManageUser, doAddUser, doDeleteUser, doGetUsers, doUnlockUser, doUpdateUser } from '../Services/users'
 import LockIcon from '@mui/icons-material/Lock';
@@ -30,11 +33,18 @@ const Users = () => {
     const [editEmail, setEditEmail] = useState<string>('');
     const [editPassword, setEditPassword] = useState<string>('');
     const { t } = useTranslation();
+    
+    // Dynamic table page sizing based on window height
+    const { pageSize, pageSizeOptions } = useTablePageSize({
+        reservedHeight: 350, // Account for navbar, title, buttons, margins, and action buttons below table
+        minRows: 5,
+        maxRows: 50,
+    });
 
     const navigate = useNavigate();
 
     const columns: GridColDef[] = [
-        { field: 'id', headerName: 'ID', width: 70 },
+        { field: 'id', headerName: t('common.id', 'ID'), width: 70 },
         { field: 'userid', headerName: t('users.email'), width: 400 },
         { 
             field: 'is_locked', 
@@ -54,6 +64,23 @@ const Users = () => {
                         </>
                     )}
                 </Box>
+            )
+        },
+        {
+            field: 'actions',
+            headerName: t('common.actions'),
+            width: 100,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) => (
+                <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={() => navigate(`/users/${params.row.id}`)}
+                    title={t('common.view')}
+                >
+                    <VisibilityIcon />
+                </IconButton>
             )
         }
     ]
@@ -146,13 +173,13 @@ const Users = () => {
 
     return (
         <div>
-            <div  style={{ height: 400, width: '99%' }}>
+            <div  style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px`, width: '99%' }}>
                 <DataGrid
                     rows={tableData}
                     columns={columns}
                     initialState={{
                         pagination: {
-                        paginationModel: { page: 0, pageSize: 5 },
+                            paginationModel: { page: 0, pageSize: pageSize },
                         },
                         sorting: {
                             sortModel: [{ field: 'userid', sort: 'asc'}],
@@ -168,7 +195,7 @@ const Users = () => {
                         includeOutliers: true,
                         includeHeaders: true,
                     }}
-                    pageSizeOptions={[5, 10]}
+                    pageSizeOptions={pageSizeOptions}
                     checkboxSelection
                     onRowSelectionModelChange={setSelection}
                     localeText={{

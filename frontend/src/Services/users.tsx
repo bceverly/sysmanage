@@ -11,6 +11,7 @@ type SysManageUser = {
     active: boolean;
     userid: string;
     password: string;
+    last_access?: string;
     is_locked: boolean;
     failed_login_attempts: number;
     locked_at: string | null;

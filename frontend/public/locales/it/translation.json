@@ -40,6 +40,7 @@
     "approvalNeeded": "Approvazione Richiesta",
     "refreshing": "Aggiornamento...",
     "refreshNow": "Aggiorna Ora",
+    "refreshHosts": "Aggiorna Host",
     "approveSelected": "Approva Selezionati",
     "never": "mai",
     "justNow": "ora",
@@ -51,7 +52,8 @@
     "autoRefresh": "Auto-aggiornamento",
     "lastSeen": "Visto {{minutes}} minuti fa",
     "noRows": "Nessuna riga",
-    "noResults": "Nessun risultato trovato"
+    "noResults": "Nessun risultato trovato",
+    "invalidDate": "Data non valida"
   },
   "users": {
     "title": "Gestione Utenti",
@@ -87,6 +89,55 @@
     "firstPage": "Prima pagina",
     "lastPage": "Ultima pagina",
     "nextPage": "Pagina successiva",
-    "previousPage": "Pagina precedente"
+    "previousPage": "Pagina precedente",
+    "rowSelected": "riga selezionata",
+    "rowsSelected": "righe selezionate",
+    "actions": "Azioni",
+    "view": "Visualizza",
+    "back": "Indietro",
+    "notAvailable": "N/D",
+    "invalidDate": "Data non valida",
+    "yes": "Sì",
+    "no": "No",
+    "id": "ID"
+  },
+  "hostDetail": {
+    "invalidId": "ID host non valido",
+    "loadError": "Errore nel caricamento dei dettagli host",
+    "notFound": "Host non trovato",
+    "basicInfo": "Informazioni di base",
+    "hostId": "ID Host",
+    "approvalStatus": "Stato di approvazione",
+    "active": "Attivo",
+    "osInfo": "Sistema operativo",
+    "platform": "Piattaforma",
+    "platformRelease": "Versione piattaforma",
+    "platformVersion": "Versione piattaforma",
+    "architecture": "Architettura",
+    "processor": "Processore",
+    "osVersionUpdated": "Info OS aggiornate",
+    "osDetails": "Dettagli OS aggiuntivi",
+    "certificateInfo": "Informazioni certificato",
+    "certificateSerial": "Numero seriale certificato",
+    "certificateIssued": "Certificato emesso",
+    "hasCertificate": "Ha certificato client"
+  },
+  "userDetail": {
+    "invalidId": "ID utente non valido",
+    "loadError": "Errore nel caricamento dettagli utente",
+    "notFound": "Utente non trovato",
+    "basicInfo": "Informazioni di base",
+    "userId": "ID Utente",
+    "active": "Attivo",
+    "lastAccess": "Ultimo accesso",
+    "securityInfo": "Informazioni di sicurezza",
+    "failedAttempts": "Tentativi di login falliti",
+    "lockedAt": "Bloccato il"
+  },
+  "nav": {
+    "logoAlt": "SysManage"
+  },
+  "logout": {
+    "loading": "Disconnessione in corso..."
   }
 }

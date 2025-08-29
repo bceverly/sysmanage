@@ -40,6 +40,7 @@
     "approvalNeeded": "Genehmigung Erforderlich",
     "refreshing": "Aktualisierung...",
     "refreshNow": "Jetzt Aktualisieren",
+    "refreshHosts": "Hosts Aktualisieren",
     "approveSelected": "Auswahl Genehmigen",
     "never": "niemals",
     "justNow": "gerade eben",
@@ -51,7 +52,8 @@
     "autoRefresh": "Auto-Aktualisierung",
     "lastSeen": "Vor {{minutes}} Minuten gesehen",
     "noRows": "Keine Zeilen",
-    "noResults": "Keine Ergebnisse gefunden"
+    "noResults": "Keine Ergebnisse gefunden",
+    "invalidDate": "Ungültiges Datum"
   },
   "users": {
     "title": "Benutzerverwaltung",
@@ -87,6 +89,55 @@
     "firstPage": "Erste Seite",
     "lastPage": "Letzte Seite",
     "nextPage": "Nächste Seite",
-    "previousPage": "Vorherige Seite"
+    "previousPage": "Vorherige Seite",
+    "rowSelected": "Zeile ausgewählt",
+    "rowsSelected": "Zeilen ausgewählt",
+    "actions": "Aktionen",
+    "view": "Anzeigen",
+    "back": "Zurück",
+    "notAvailable": "N/V",
+    "invalidDate": "Ungültiges Datum",
+    "yes": "Ja",
+    "no": "Nein",
+    "id": "ID"
+  },
+  "hostDetail": {
+    "invalidId": "Ungültige Host-ID",
+    "loadError": "Fehler beim Laden der Host-Details",
+    "notFound": "Host nicht gefunden",
+    "basicInfo": "Grundinformationen",
+    "hostId": "Host-ID",
+    "approvalStatus": "Genehmigungsstatus",
+    "active": "Aktiv",
+    "osInfo": "Betriebssystem",
+    "platform": "Plattform",
+    "platformRelease": "Plattform-Version",
+    "platformVersion": "Plattform-Version",
+    "architecture": "Architektur",
+    "processor": "Prozessor",
+    "osVersionUpdated": "OS-Info aktualisiert",
+    "osDetails": "Zusätzliche OS-Details",
+    "certificateInfo": "Zertifikatsinformationen",
+    "certificateSerial": "Zertifikatsnummer",
+    "certificateIssued": "Zertifikat ausgestellt",
+    "hasCertificate": "Hat Client-Zertifikat"
+  },
+  "userDetail": {
+    "invalidId": "Ungültige Benutzer-ID",
+    "loadError": "Fehler beim Laden der Benutzerdetails",
+    "notFound": "Benutzer nicht gefunden",
+    "basicInfo": "Grundinformationen",
+    "userId": "Benutzer-ID",
+    "active": "Aktiv",
+    "lastAccess": "Letzter Zugriff",
+    "securityInfo": "Sicherheitsinformationen",
+    "failedAttempts": "Fehlgeschlagene Anmeldeversuche",
+    "lockedAt": "Gesperrt am"
+  },
+  "nav": {
+    "logoAlt": "SysManage"
+  },
+  "logout": {
+    "loading": "Abmeldung läuft..."
   }
 }

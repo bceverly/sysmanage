@@ -5,23 +5,31 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckIcon from '@mui/icons-material/Check';
-import { Chip, Typography, CircularProgress } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import SyncIcon from '@mui/icons-material/Sync';
+import { Chip, Typography, IconButton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost } from '../Services/hosts'
+import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshHostData } from '../Services/hosts'
+import { useTablePageSize } from '../hooks/useTablePageSize';
 
 const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
     const [selection, setSelection] = useState<GridRowSelectionModel>([]);
     const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
-    const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const navigate = useNavigate();
     const { t } = useTranslation();
+    
+    // Dynamic table page sizing based on window height
+    const { pageSize, pageSizeOptions } = useTablePageSize({
+        reservedHeight: 350, // Account for navbar, title, buttons, margins, and action buttons below table
+        minRows: 5,
+        maxRows: 50,
+    });
 
     const columns: GridColDef[] = [
-        { field: 'id', headerName: 'ID', width: 70 },
+        { field: 'id', headerName: t('common.id', 'ID'), width: 70 },
         { field: 'fqdn', headerName: t('hosts.fqdn'), width: 200 },
         { field: 'ipv4', headerName: t('hosts.ipv4'), width: 150 },
         { field: 'ipv6', headerName: t('hosts.ipv6'), width: 200 },
@@ -123,6 +131,23 @@ const Hosts = () => {
                     </div>
                 );
             }
+        },
+        {
+            field: 'actions',
+            headerName: t('common.actions'),
+            width: 100,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) => (
+                <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={() => navigate(`/hosts/${params.row.id}`)}
+                    title={t('common.view')}
+                >
+                    <VisibilityIcon />
+                </IconButton>
+            )
         }
     ]
 
@@ -172,21 +197,34 @@ const Hosts = () => {
         }
     }
 
-    const refreshHosts = async (showLoading: boolean = false) => {
+    const handleRefreshData = async () => {
         try {
-            if (showLoading) {
-                setIsRefreshing(true);
-            }
+            // Request OS data refresh for selected hosts
+            const refreshPromises = selection.map(id => {
+                const theID = BigInt(id.toString());
+                return doRefreshHostData(theID);
+            });
+            
+            await Promise.all(refreshPromises);
+            
+            // Clear selection after successful requests
+            setSelection([]);
+            
+            // Optional: Show success message or refresh data after a delay
+            console.log(`Refresh data requested for ${selection.length} hosts`);
+        } catch (error) {
+            console.error('Error requesting data refresh:', error);
+        }
+    }
+
+    const refreshHosts = async () => {
+        try {
             const response = await doGetHosts();
             setTableData(response);
             setLastRefresh(new Date());
             console.log('Hosts refreshed:', response.length, 'hosts at', new Date().toISOString());
         } catch (error) {
             console.error('Error refreshing hosts:', error);
-        } finally {
-            if (showLoading) {
-                setIsRefreshing(false);
-            }
         }
     };
 
@@ -195,11 +233,11 @@ const Hosts = () => {
             navigate("/login");
         }
         
-        // Initial load with loading indicator
-        refreshHosts(true);
+        // Initial load
+        refreshHosts();
         
-        // Set up periodic refresh every 30 seconds (background refresh)
-        const intervalId = window.setInterval(() => refreshHosts(false), 30000);
+        // Set up periodic refresh every 30 seconds
+        const intervalId = window.setInterval(() => refreshHosts(), 30000);
         
         // Cleanup interval on unmount
         return () => window.clearInterval(intervalId);
@@ -225,24 +263,20 @@ const Hosts = () => {
             {/* Subtle Refresh Status */}
             <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Typography variant="caption" color="textSecondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                    {isRefreshing ? (
-                        <><CircularProgress size={12} sx={{ mr: 1 }} /> {t('hosts.refreshing', 'Refreshing...')}</>
-                    ) : (
-                        <>{t('hosts.updated', 'Updated')} {formatLastRefresh()} <span style={{ marginLeft: '4px', color: '#4caf50', fontSize: '8px' }}>●</span></>
-                    )}
+                    {t('hosts.updated', 'Updated')} {formatLastRefresh()} <span style={{ marginLeft: '4px', color: '#4caf50', fontSize: '8px' }}>●</span>
                 </Typography>
                 <Typography variant="caption" color="textSecondary">
                     {t('hosts.autoRefresh', 'Auto-refresh')}: 30s
                 </Typography>
             </Box>
             
-            <div  style={{ height: 400, width: '99%' }}>
+            <div  style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px`, width: '99%' }}>
                 <DataGrid
                     rows={tableData}
                     columns={columns}
                     initialState={{
                         pagination: {
-                        paginationModel: { page: 0, pageSize: 5 },
+                            paginationModel: { page: 0, pageSize: pageSize },
                         },
                         sorting: {
                             sortModel: [{ field: 'fqdn', sort: 'asc'}],
@@ -253,7 +287,7 @@ const Hosts = () => {
                             },
                         },
                     }}
-                    pageSizeOptions={[5, 10]}
+                    pageSizeOptions={pageSizeOptions}
                     checkboxSelection
                     rowSelectionModel={selection}
                     onRowSelectionModelChange={setSelection}
@@ -277,20 +311,21 @@ const Hosts = () => {
             <Stack direction="row" spacing={2}>
                 <Button 
                     variant="outlined" 
-                    startIcon={<RefreshIcon />} 
-                    onClick={() => refreshHosts(true)}
-                    disabled={isRefreshing}
-                >
-                    {isRefreshing ? t('hosts.refreshing', { defaultValue: 'Refreshing...' }) : t('hosts.refreshNow', { defaultValue: 'Refresh Now' })}
-                </Button>
-                <Button 
-                    variant="outlined" 
                     startIcon={<CheckIcon />} 
                     disabled={!hasPendingSelection}
                     onClick={handleApprove}
                     color="success"
                 >
                     {t('hosts.approveSelected', { defaultValue: 'Approve Selected' })}
+                </Button>
+                <Button 
+                    variant="outlined" 
+                    startIcon={<SyncIcon />} 
+                    disabled={selection.length === 0}
+                    onClick={handleRefreshData}
+                    color="info"
+                >
+                    {t('hosts.refreshHosts', 'Refresh Hosts')}
                 </Button>
                 <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
                     {t('common.delete')} {t('common.selected', { defaultValue: 'Selected' })}

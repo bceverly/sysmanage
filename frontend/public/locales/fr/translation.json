@@ -40,6 +40,7 @@
     "approvalNeeded": "Approbation Requise",
     "refreshing": "Actualisation...",
     "refreshNow": "Actualiser Maintenant",
+    "refreshHosts": "Actualiser les Hôtes",
     "approveSelected": "Approuver la Sélection",
     "never": "jamais",
     "justNow": "à l'instant",
@@ -51,7 +52,8 @@
     "autoRefresh": "Auto-actualisation",
     "lastSeen": "Vu il y a {{minutes}} minutes",
     "noRows": "Aucune ligne",
-    "noResults": "Aucun résultat trouvé"
+    "noResults": "Aucun résultat trouvé",
+    "invalidDate": "Date invalide"
   },
   "users": {
     "title": "Gestion des utilisateurs",
@@ -87,6 +89,55 @@
     "firstPage": "Première page",
     "lastPage": "Dernière page",
     "nextPage": "Page suivante",
-    "previousPage": "Page précédente"
+    "previousPage": "Page précédente",
+    "rowSelected": "ligne sélectionnée",
+    "rowsSelected": "lignes sélectionnées",
+    "actions": "Actions",
+    "view": "Voir",
+    "back": "Retour",
+    "notAvailable": "N/D",
+    "invalidDate": "Date invalide",
+    "yes": "Oui",
+    "no": "Non",
+    "id": "ID"
+  },
+  "hostDetail": {
+    "invalidId": "ID d'hôte invalide",
+    "loadError": "Échec du chargement des détails de l'hôte",
+    "notFound": "Hôte non trouvé",
+    "basicInfo": "Informations de base",
+    "hostId": "ID de l'hôte",
+    "approvalStatus": "Statut d'approbation",
+    "active": "Actif",
+    "osInfo": "Système d'exploitation",
+    "platform": "Plateforme",
+    "platformRelease": "Version de la plateforme",
+    "platformVersion": "Version de la plateforme",
+    "architecture": "Architecture",
+    "processor": "Processeur",
+    "osVersionUpdated": "Info OS mise à jour",
+    "osDetails": "Détails supplémentaires de l'OS",
+    "certificateInfo": "Informations du certificat",
+    "certificateSerial": "Numéro de série du certificat",
+    "certificateIssued": "Certificat émis",
+    "hasCertificate": "A un certificat client"
+  },
+  "userDetail": {
+    "invalidId": "ID utilisateur invalide",
+    "loadError": "Échec du chargement des détails utilisateur",
+    "notFound": "Utilisateur non trouvé",
+    "basicInfo": "Informations de base",
+    "userId": "ID utilisateur",
+    "active": "Actif",
+    "lastAccess": "Dernier accès",
+    "securityInfo": "Informations de sécurité",
+    "failedAttempts": "Tentatives de connexion échouées",
+    "lockedAt": "Verrouillé le"
+  },
+  "nav": {
+    "logoAlt": "SysManage"
+  },
+  "logout": {
+    "loading": "Déconnexion en cours..."
   }
 }
