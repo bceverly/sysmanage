@@ -13,8 +13,11 @@ import os
 from backend.persistence.db import Base
 
 # Try to import the database URL, but provide fallback for CI environments
+SQLALCHEMY_DATABASE_URL = None
+
 try:
-    from backend.persistence.db import SQLALCHEMY_DATABASE_URL
+    from backend.persistence.db import SQLALCHEMY_DATABASE_URL as imported_url
+    SQLALCHEMY_DATABASE_URL = imported_url
 except Exception as e:
     print(f"Warning: Could not import SQLALCHEMY_DATABASE_URL: {e}")
     # Fallback for CI/testing environments
@@ -22,6 +25,13 @@ except Exception as e:
         'DATABASE_URL',
         'postgresql://sysmanage:abc123@localhost:5432/sysmanage'
     )
+    print(f"Using fallback DATABASE_URL from environment")
+
+# Validate URL format
+if not SQLALCHEMY_DATABASE_URL or not SQLALCHEMY_DATABASE_URL.startswith(('postgresql://', 'sqlite:///')):
+    print(f"Error: Invalid database URL format, using CI default")
+    # Force a known good URL for CI
+    SQLALCHEMY_DATABASE_URL = 'postgresql://sysmanage:abc123@localhost:5432/sysmanage'
 
 from backend.persistence.models import User
 
@@ -31,8 +41,11 @@ config = context.config
 
 # Only set the production database URL if no URL is already configured
 # This allows tests to override with their own database URL
-if not config.get_main_option("sqlalchemy.url"):
+existing_url = config.get_main_option("sqlalchemy.url")
+
+if not existing_url:
     config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
+    print(f"Using dynamic database URL for alembic")
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
