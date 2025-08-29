@@ -15,6 +15,18 @@ type SysManageHost = {
     status: string;
     approval_status: string;
     last_access: string;
+    // OS Version fields
+    platform?: string;
+    platform_release?: string;
+    platform_version?: string;
+    machine_architecture?: string;
+    processor?: string;
+    os_details?: string;
+    os_version_updated_at?: string;
+    // Certificate fields
+    client_certificate?: string;
+    certificate_serial?: string;
+    certificate_issued_at?: string;
 }
 
 function processError(error: AxiosError) {
@@ -168,5 +180,21 @@ const doRejectHost = async (id: BigInt) => {
     return result;
 };
 
+const doRefreshHostData = async (id: BigInt) => {
+    let result = {} as SuccessResponse;
+
+    await api.post<SuccessResponse>("/host/" + id + "/request-os-update")
+    .then((response) => {
+        // No error - process response
+        result = response.data;
+        return Promise.resolve(response);
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
 export type { SuccessResponse, SysManageHost };
-export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost };
+export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData };

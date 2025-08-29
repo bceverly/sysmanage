@@ -40,6 +40,7 @@
     "approvalNeeded": "Aprovação Necessária",
     "refreshing": "Atualizando...",
     "refreshNow": "Atualizar Agora",
+    "refreshHosts": "Atualizar Hosts",
     "approveSelected": "Aprovar Selecionados",
     "never": "nunca",
     "justNow": "agora mesmo",
@@ -51,7 +52,8 @@
     "autoRefresh": "Auto-atualização",
     "lastSeen": "Visto há {{minutes}} minutos",
     "noRows": "Sem linhas",
-    "noResults": "Nenhum resultado encontrado"
+    "noResults": "Nenhum resultado encontrado",
+    "invalidDate": "Data inválida"
   },
   "users": {
     "title": "Gerenciamento de Usuários",
@@ -87,6 +89,55 @@
     "firstPage": "Primeira página",
     "lastPage": "Última página",
     "nextPage": "Próxima página",
-    "previousPage": "Página anterior"
+    "previousPage": "Página anterior",
+    "rowSelected": "linha selecionada",
+    "rowsSelected": "linhas selecionadas",
+    "actions": "Ações",
+    "view": "Visualizar",
+    "back": "Voltar",
+    "notAvailable": "N/D",
+    "invalidDate": "Data inválida",
+    "yes": "Sim",
+    "no": "Não",
+    "id": "ID"
+  },
+  "hostDetail": {
+    "invalidId": "ID do host inválido",
+    "loadError": "Falha ao carregar detalhes do host",
+    "notFound": "Host não encontrado",
+    "basicInfo": "Informações básicas",
+    "hostId": "ID do Host",
+    "approvalStatus": "Status de aprovação",
+    "active": "Ativo",
+    "osInfo": "Sistema operacional",
+    "platform": "Plataforma",
+    "platformRelease": "Versão da plataforma",
+    "platformVersion": "Versão da plataforma",
+    "architecture": "Arquitetura",
+    "processor": "Processador",
+    "osVersionUpdated": "Info do SO atualizada",
+    "osDetails": "Detalhes adicionais do SO",
+    "certificateInfo": "Informações do certificado",
+    "certificateSerial": "Número de série do certificado",
+    "certificateIssued": "Certificado emitido",
+    "hasCertificate": "Tem certificado cliente"
+  },
+  "userDetail": {
+    "invalidId": "ID de usuário inválido",
+    "loadError": "Falha ao carregar detalhes do usuário",
+    "notFound": "Usuário não encontrado",
+    "basicInfo": "Informações básicas",
+    "userId": "ID do Usuário",
+    "active": "Ativo",
+    "lastAccess": "Último acesso",
+    "securityInfo": "Informações de segurança",
+    "failedAttempts": "Tentativas de login falharam",
+    "lockedAt": "Bloqueado em"
+  },
+  "nav": {
+    "logoAlt": "SysManage"
+  },
+  "logout": {
+    "loading": "Fazendo logout..."
   }
 }

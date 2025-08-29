@@ -3,7 +3,8 @@
     "dashboard": "Панель управления",
     "hosts": "Хосты",
     "users": "Пользователи",
-    "logout": "Выйти"
+    "logout": "Выйти",
+    "logoAlt": "SysManage"
   },
   "login": {
     "title": "Войти в SysManage",
@@ -40,7 +41,20 @@
     "approvalNeeded": "Требуется одобрение",
     "refreshing": "Обновление...",
     "refreshNow": "Обновить сейчас",
-    "approveSelected": "Одобрить выбранные"
+    "refreshHosts": "Обновить Хосты",
+    "approveSelected": "Одобрить выбранные",
+    "never": "никогда",
+    "justNow": "только что",
+    "secondsAgo": "{{seconds}}с назад",
+    "minutesAgo": "{{minutes}}м назад",
+    "hoursAgo": "{{hours}}ч назад",
+    "daysAgo": "{{days}}д назад",
+    "updated": "Обновлено",
+    "autoRefresh": "Автообновление",
+    "lastSeen": "Последний раз виден {{minutes}} минут назад",
+    "noRows": "Нет строк",
+    "noResults": "Результаты не найдены",
+    "invalidDate": "Неверная дата"
   },
   "users": {
     "title": "Управление пользователями",
@@ -59,6 +73,42 @@
     "unlocked": "Разблокирован",
     "unlock": "Разблокировать"
   },
+  "hostDetail": {
+    "invalidId": "Неверный ID хоста",
+    "loadError": "Ошибка загрузки данных хоста",
+    "notFound": "Хост не найден",
+    "basicInfo": "Основная информация",
+    "hostId": "ID хоста",
+    "approvalStatus": "Статус одобрения",
+    "active": "Активный",
+    "osInfo": "Операционная система",
+    "platform": "Платформа",
+    "platformRelease": "Релиз платформы",
+    "platformVersion": "Версия платформы",
+    "architecture": "Архитектура",
+    "processor": "Процессор",
+    "osVersionUpdated": "Информация об ОС обновлена",
+    "osDetails": "Дополнительные данные об ОС",
+    "certificateInfo": "Информация о сертификате",
+    "certificateSerial": "Серийный номер сертификата",
+    "certificateIssued": "Сертификат выдан",
+    "hasCertificate": "Имеет клиентский сертификат"
+  },
+  "userDetail": {
+    "invalidId": "Неверный ID пользователя",
+    "loadError": "Ошибка загрузки данных пользователя",
+    "notFound": "Пользователь не найден",
+    "basicInfo": "Основная информация",
+    "userId": "ID пользователя",
+    "active": "Активный",
+    "lastAccess": "Последний вход",
+    "securityInfo": "Информация о безопасности",
+    "failedAttempts": "Неудачные попытки входа",
+    "lockedAt": "Заблокировано"
+  },
+  "logout": {
+    "loading": "Выход..."
+  },
   "common": {
     "save": "Сохранить",
     "cancel": "Отменить",
@@ -76,6 +126,16 @@
     "firstPage": "Первая страница",
     "lastPage": "Последняя страница",
     "nextPage": "Следующая страница",
-    "previousPage": "Предыдущая страница"
+    "previousPage": "Предыдущая страница",
+    "rowSelected": "строка выбрана",
+    "rowsSelected": "строк выбрано",
+    "actions": "Действия",
+    "view": "Просмотр",
+    "back": "Назад",
+    "notAvailable": "Не доступно",
+    "invalidDate": "Неверная дата",
+    "yes": "Да",
+    "no": "Нет",
+    "id": "ID"
   }
 }

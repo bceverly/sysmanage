@@ -3,7 +3,8 @@
     "dashboard": "Dashboard",
     "hosts": "Hosts",
     "users": "Gebruikers",
-    "logout": "Uitloggen"
+    "logout": "Uitloggen",
+    "logoAlt": "SysManage"
   },
   "login": {
     "title": "Inloggen bij SysManage",
@@ -40,6 +41,7 @@
     "approvalNeeded": "Goedkeuring Vereist",
     "refreshing": "Vernieuwen...",
     "refreshNow": "Nu Vernieuwen",
+    "refreshHosts": "Hosts Vernieuwen",
     "approveSelected": "Geselecteerde Goedkeuren",
     "never": "nooit",
     "justNow": "nu net",
@@ -51,7 +53,8 @@
     "autoRefresh": "Auto-vernieuwen",
     "lastSeen": "{{minutes}} minuten geleden gezien",
     "noRows": "Geen rijen",
-    "noResults": "Geen resultaten gevonden"
+    "noResults": "Geen resultaten gevonden",
+    "invalidDate": "Ongeldige datum"
   },
   "users": {
     "title": "Gebruikersbeheer",
@@ -70,6 +73,42 @@
     "unlocked": "Ontgrendeld",
     "unlock": "Ontgrendelen"
   },
+  "hostDetail": {
+    "invalidId": "Ongeldig host-ID",
+    "loadError": "Laden van hostdetails mislukt",
+    "notFound": "Host niet gevonden",
+    "basicInfo": "Basisinformatie",
+    "hostId": "Host-ID",
+    "approvalStatus": "Goedkeuringsstatus",
+    "active": "Actief",
+    "osInfo": "Besturingssysteem",
+    "platform": "Platform",
+    "platformRelease": "Platformversie",
+    "platformVersion": "Platformversienummer",
+    "architecture": "Architectuur",
+    "processor": "Processor",
+    "osVersionUpdated": "OS-info bijgewerkt",
+    "osDetails": "Aanvullende OS-details",
+    "certificateInfo": "Certificaatinformatie",
+    "certificateSerial": "Certificaatserieel",
+    "certificateIssued": "Certificaat uitgegeven",
+    "hasCertificate": "Heeft clientcertificaat"
+  },
+  "userDetail": {
+    "invalidId": "Ongeldig gebruiker-ID",
+    "loadError": "Laden van gebruikersdetails mislukt",
+    "notFound": "Gebruiker niet gevonden",
+    "basicInfo": "Basisinformatie",
+    "userId": "Gebruiker-ID",
+    "active": "Actief",
+    "lastAccess": "Laatste toegang",
+    "securityInfo": "Beveiligingsinformatie",
+    "failedAttempts": "Mislukte inlogpogingen",
+    "lockedAt": "Vergrendeld op"
+  },
+  "logout": {
+    "loading": "Uitloggen..."
+  },
   "common": {
     "save": "Opslaan",
     "cancel": "Annuleren",
@@ -87,6 +126,16 @@
     "firstPage": "Eerste pagina",
     "lastPage": "Laatste pagina",
     "nextPage": "Volgende pagina",
-    "previousPage": "Vorige pagina"
+    "previousPage": "Vorige pagina",
+    "rowSelected": "rij geselecteerd",
+    "rowsSelected": "rijen geselecteerd",
+    "actions": "Acties",
+    "view": "Bekijken",
+    "back": "Terug",
+    "notAvailable": "N.v.t.",
+    "invalidDate": "Ongeldige datum",
+    "yes": "Ja",
+    "no": "Nee",
+    "id": "ID"
   }
 }

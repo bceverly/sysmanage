@@ -32,13 +32,24 @@ const Dashboard = () => {
             return Promise.resolve(response);
         });
     }, [navigate]);
+    const handleHostsClick = () => {
+        navigate('/hosts');
+    };
+
     return (
         <Box
             height={250}
             width={250}
+            onClick={handleHostsClick}
             sx={{ 
                 border: '1px solid white',
-                borderRadius: 3
+                borderRadius: 3,
+                cursor: 'pointer',
+                '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    borderColor: '#90caf9',
+                },
+                transition: 'background-color 0.2s, border-color 0.2s'
              }}
         >
             <Typography align="center" variant="h5">

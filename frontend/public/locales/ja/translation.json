@@ -3,7 +3,8 @@
     "dashboard": "ダッシュボード",
     "hosts": "ホスト",
     "users": "ユーザー",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "logoAlt": "SysManage"
   },
   "login": {
     "title": "SysManageにログイン",
@@ -40,6 +41,7 @@
     "approvalNeeded": "承認が必要",
     "refreshing": "更新中...",
     "refreshNow": "今すぐ更新",
+    "refreshHosts": "ホストを更新",
     "approveSelected": "選択したものを承認",
     "never": "未確認",
     "justNow": "たった今",
@@ -71,6 +73,42 @@
     "unlocked": "ロック解除済み",
     "unlock": "ロック解除"
   },
+  "hostDetail": {
+    "invalidId": "無効なホストID",
+    "loadError": "ホスト詳細の読み込みに失敗しました",
+    "notFound": "ホストが見つかりません",
+    "basicInfo": "基本情報",
+    "hostId": "ホストID",
+    "approvalStatus": "承認ステータス",
+    "active": "アクティブ",
+    "osInfo": "オペレーティングシステム",
+    "platform": "プラットフォーム",
+    "platformRelease": "プラットフォームリリース",
+    "platformVersion": "プラットフォームバージョン",
+    "architecture": "アーキテクチャ",
+    "processor": "プロセッサ",
+    "osVersionUpdated": "OS情報が更新されました",
+    "osDetails": "追加のOS詳細",
+    "certificateInfo": "証明書情報",
+    "certificateSerial": "証明書シリアル番号",
+    "certificateIssued": "証明書発行日",
+    "hasCertificate": "クライアント証明書あり"
+  },
+  "userDetail": {
+    "invalidId": "無効なユーザーID",
+    "loadError": "ユーザー詳細の読み込みに失敗しました",
+    "notFound": "ユーザーが見つかりません",
+    "basicInfo": "基本情報",
+    "userId": "ユーザーID",
+    "active": "アクティブ",
+    "lastAccess": "最終アクセス",
+    "securityInfo": "セキュリティ情報",
+    "failedAttempts": "ログイン失敗回数",
+    "lockedAt": "ロック日時"
+  },
+  "logout": {
+    "loading": "ログアウト中..."
+  },
   "common": {
     "save": "保存",
     "cancel": "キャンセル",
@@ -90,6 +128,14 @@
     "nextPage": "次のページ",
     "previousPage": "前のページ",
     "rowsSelected": "行が選択されています",
-    "rowSelected": "行が選択されています"
+    "rowSelected": "行が選択されています",
+    "actions": "アクション",
+    "view": "表示",
+    "back": "戻る",
+    "notAvailable": "N/A",
+    "invalidDate": "無効な日付",
+    "yes": "はい",
+    "no": "いいえ",
+    "id": "ID"
   }
 }

@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 
 const Logout = () => {
     
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     useEffect(() => {
         localStorage.removeItem("userid");
@@ -13,7 +15,7 @@ const Logout = () => {
     });
 
     return (
-        <div>Logout</div>
+        <div>{t('logout.loading', 'Logging out...')}</div>
     );
 };
 

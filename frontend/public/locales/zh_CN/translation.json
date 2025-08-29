@@ -3,7 +3,8 @@
     "dashboard": "仪表板",
     "hosts": "主机",
     "users": "用户",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "logoAlt": "SysManage"
   },
   "login": {
     "title": "登录 SysManage",
@@ -18,6 +19,7 @@
   "dashboard": {
     "title": "仪表板",
     "welcome": "欢迎使用 SysManage",
+    "hosts": "主机",
     "activeHosts": "活跃主机",
     "totalUsers": "用户总数",
     "systemHealth": "系统健康状态"
@@ -40,6 +42,7 @@
     "approvalNeeded": "需要批准",
     "refreshing": "刷新中...",
     "refreshNow": "立即刷新",
+    "refreshHosts": "刷新主机",
     "approveSelected": "批准所选",
     "never": "从未",
     "justNow": "刚刚",
@@ -51,7 +54,8 @@
     "autoRefresh": "自动刷新",
     "lastSeen": "{{minutes}}分钟前看到",
     "noRows": "无数据",
-    "noResults": "未找到结果"
+    "noResults": "未找到结果",
+    "invalidDate": "无效日期"
   },
   "users": {
     "title": "用户管理",
@@ -70,6 +74,42 @@
     "unlocked": "已解锁",
     "unlock": "解锁"
   },
+  "hostDetail": {
+    "invalidId": "无效的主机ID",
+    "loadError": "加载主机详细信息失败",
+    "notFound": "未找到主机",
+    "basicInfo": "基本信息",
+    "hostId": "主机ID",
+    "approvalStatus": "批准状态",
+    "active": "活跃",
+    "osInfo": "操作系统",
+    "platform": "平台",
+    "platformRelease": "平台版本",
+    "platformVersion": "平台版本号",
+    "architecture": "架构",
+    "processor": "处理器",
+    "osVersionUpdated": "操作系统信息已更新",
+    "osDetails": "其他操作系统详细信息",
+    "certificateInfo": "证书信息",
+    "certificateSerial": "证书序列号",
+    "certificateIssued": "证书签发时间",
+    "hasCertificate": "拥有客户端证书"
+  },
+  "userDetail": {
+    "invalidId": "无效的用户ID",
+    "loadError": "加载用户详细信息失败",
+    "notFound": "未找到用户",
+    "basicInfo": "基本信息",
+    "userId": "用户ID",
+    "active": "活跃",
+    "lastAccess": "最后访问",
+    "securityInfo": "安全信息",
+    "failedAttempts": "登录失败次数",
+    "lockedAt": "锁定时间"
+  },
+  "logout": {
+    "loading": "退出中..."
+  },
   "common": {
     "save": "保存",
     "cancel": "取消",
@@ -87,6 +127,16 @@
     "firstPage": "首页",
     "lastPage": "末页",
     "nextPage": "下一页",
-    "previousPage": "上一页"
+    "previousPage": "上一页",
+    "rowSelected": "行已选择",
+    "rowsSelected": "行已选择",
+    "actions": "操作",
+    "view": "查看",
+    "back": "返回",
+    "notAvailable": "不可用",
+    "invalidDate": "无效日期",
+    "yes": "是",
+    "no": "否",
+    "id": "ID"
   }
 }

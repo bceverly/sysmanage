@@ -40,6 +40,7 @@
     "approvalNeeded": "Aprobación Requerida",
     "refreshing": "Actualizando...",
     "refreshNow": "Actualizar Ahora",
+    "refreshHosts": "Actualizar Hosts",
     "approveSelected": "Aprobar Seleccionados",
     "never": "nunca",
     "justNow": "ahora mismo",
@@ -51,7 +52,8 @@
     "autoRefresh": "Auto-actualizar",
     "lastSeen": "Visto por última vez hace {{minutes}} minutos",
     "noRows": "Sin filas",
-    "noResults": "No se encontraron resultados"
+    "noResults": "No se encontraron resultados",
+    "invalidDate": "Fecha inválida"
   },
   "users": {
     "title": "Gestión de Usuarios",
@@ -87,6 +89,55 @@
     "firstPage": "Primera página",
     "lastPage": "Última página",
     "nextPage": "Página siguiente",
-    "previousPage": "Página anterior"
+    "previousPage": "Página anterior",
+    "rowSelected": "fila seleccionada",
+    "rowsSelected": "filas seleccionadas",
+    "actions": "Acciones",
+    "view": "Ver",
+    "back": "Atrás",
+    "notAvailable": "N/D",
+    "invalidDate": "Fecha inválida",
+    "yes": "Sí",
+    "no": "No",
+    "id": "ID"
+  },
+  "hostDetail": {
+    "invalidId": "ID de host inválido",
+    "loadError": "Error al cargar detalles del host",
+    "notFound": "Host no encontrado",
+    "basicInfo": "Información Básica",
+    "hostId": "ID del Host",
+    "approvalStatus": "Estado de Aprobación",
+    "active": "Activo",
+    "osInfo": "Sistema Operativo",
+    "platform": "Plataforma",
+    "platformRelease": "Versión de Plataforma",
+    "platformVersion": "Versión de Plataforma",
+    "architecture": "Arquitectura",
+    "processor": "Procesador",
+    "osVersionUpdated": "Info del SO Actualizada",
+    "osDetails": "Detalles Adicionales del SO",
+    "certificateInfo": "Información del Certificado",
+    "certificateSerial": "Serial del Certificado",
+    "certificateIssued": "Certificado Emitido",
+    "hasCertificate": "Tiene Certificado de Cliente"
+  },
+  "userDetail": {
+    "invalidId": "ID de usuario inválido",
+    "loadError": "Error al cargar detalles del usuario",
+    "notFound": "Usuario no encontrado",
+    "basicInfo": "Información Básica",
+    "userId": "ID del Usuario",
+    "active": "Activo",
+    "lastAccess": "Último Acceso",
+    "securityInfo": "Información de Seguridad",
+    "failedAttempts": "Intentos de Inicio Fallidos",
+    "lockedAt": "Bloqueado el"
+  },
+  "nav": {
+    "logoAlt": "SysManage"
+  },
+  "logout": {
+    "loading": "Cerrando sesión..."
   }
 }

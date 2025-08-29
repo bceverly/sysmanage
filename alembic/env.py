@@ -9,8 +9,19 @@ from sqlalchemy import pool
 
 from alembic import context
 
+import os
 from backend.persistence.db import Base
-from backend.persistence.db import SQLALCHEMY_DATABASE_URL
+
+# Try to import the database URL, but provide fallback for CI environments
+try:
+    from backend.persistence.db import SQLALCHEMY_DATABASE_URL
+except Exception as e:
+    print(f"Warning: Could not import SQLALCHEMY_DATABASE_URL: {e}")
+    # Fallback for CI/testing environments
+    SQLALCHEMY_DATABASE_URL = os.getenv(
+        'DATABASE_URL',
+        'postgresql://sysmanage:abc123@localhost:5432/sysmanage'
+    )
 
 from backend.persistence.models import User
 

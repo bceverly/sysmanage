@@ -87,12 +87,14 @@ jobs:
         python -m alembic upgrade head
       env:
         PYTHONPATH: .
+        DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
 
     - name: Run backend tests
       run: |
         python -m pytest tests/ -v --cov=backend --cov-report=xml --cov-report=term-missing
       env:
         PYTHONPATH: .
+        DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
 
     - name: Upload backend coverage to Codecov
       uses: codecov/codecov-action@v5
