@@ -9,7 +9,7 @@ from unittest.mock import Mock, patch, AsyncMock
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer
@@ -17,8 +17,14 @@ from backend.main import app
 from backend.persistence.db import Base, get_db
 from backend.websocket.connection_manager import ConnectionManager
 
-# Test database URL - using SQLite in memory for tests
-TEST_DATABASE_URL = "sqlite:///:memory:"
+# Test database URL - using temporary SQLite file for tests
+import tempfile
+import os
+import time
+
+# Use timestamp to ensure unique database for each test run
+_test_db_file = tempfile.mktemp(suffix=f"_{int(time.time())}.db")
+TEST_DATABASE_URL = f"sqlite:///{_test_db_file}"
 
 # Test configuration with different ports to avoid conflicts with dev server
 TEST_CONFIG = {
@@ -45,24 +51,32 @@ TEST_CONFIG = {
 }
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def engine():
-    """Create test database engine and run Alembic migrations."""
-    from alembic.config import Config
-    from alembic import command
+    """Create test database engine with fresh schema for each test."""
+    # Create a unique database file for each test
+    import uuid
 
-    test_engine = create_engine(
-        TEST_DATABASE_URL, connect_args={"check_same_thread": False}
-    )
+    test_db_file = tempfile.mktemp(suffix=f"_{uuid.uuid4().hex}.db")
+    test_db_url = f"sqlite:///{test_db_file}"
 
-    # Configure Alembic to use the test database
-    alembic_cfg = Config("alembic.ini")
-    alembic_cfg.set_main_option("sqlalchemy.url", TEST_DATABASE_URL)
+    test_engine = create_engine(test_db_url, connect_args={"check_same_thread": False})
 
-    # Run all migrations to head
-    command.upgrade(alembic_cfg, "head")
+    # Clear any cached metadata and recreate tables
+    Base.metadata.clear()
+    # Import models again to ensure fresh metadata
+    from backend.persistence import models  # noqa: F401
 
-    return test_engine
+    Base.metadata.create_all(bind=test_engine)
+
+    yield test_engine
+
+    # Clean up the temporary database file after test
+    try:
+        if os.path.exists(test_db_file):
+            os.unlink(test_db_file)
+    except OSError:
+        pass
 
 
 @pytest.fixture(scope="function")

@@ -370,11 +370,6 @@ class TestHostRegister:
             "hostname": "agent",
             "ipv4": "192.168.1.150",
             "ipv6": "2001:db8::150",
-            "platform": "Linux",
-            "platform_release": "5.4.0-42",
-            "platform_version": "#46-Ubuntu SMP Fri Jul 10 00:24:02 UTC 2020",
-            "architecture": "x86_64",
-            "processor": "Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz",
         }
 
         response = client.post("/host/register", json=registration_data)
@@ -416,9 +411,6 @@ class TestHostRegister:
             "hostname": "existing",
             "ipv4": "192.168.1.101",  # Updated IP
             "ipv6": "2001:db8::101",  # Updated IP
-            "platform": "Linux",
-            "platform_release": "5.8.0",  # Updated release
-            "architecture": "x86_64",
         }
 
         response = client.post("/host/register", json=registration_data)

@@ -17,6 +17,7 @@ class MessageType(str, Enum):
     HEARTBEAT = "heartbeat"
     COMMAND_RESULT = "command_result"
     ERROR = "error"
+    OS_VERSION_UPDATE = "os_version_update"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -164,6 +165,35 @@ class ErrorMessage(Message):
         super().__init__(MessageType.ERROR, data)
 
 
+class OSVersionUpdateMessage(Message):
+    """Message containing OS version information from agent."""
+
+    def __init__(
+        self,
+        platform: str = None,
+        platform_release: str = None,
+        platform_version: str = None,
+        architecture: str = None,
+        processor: str = None,
+        machine_architecture: str = None,
+        python_version: str = None,
+        os_info: Dict[str, Any] = None,
+        **kwargs
+    ):
+        data = {
+            "platform": platform,
+            "platform_release": platform_release,
+            "platform_version": platform_version,
+            "architecture": architecture,
+            "processor": processor,
+            "machine_architecture": machine_architecture,
+            "python_version": python_version,
+            "os_info": os_info or {},
+            **kwargs,
+        }
+        super().__init__(MessageType.OS_VERSION_UPDATE, data)
+
+
 # Message factory for creating messages from raw data
 def create_message(raw_data: Dict[str, Any]) -> Message:
     """Create appropriate message object from raw dictionary data."""
@@ -214,5 +244,40 @@ def create_message(raw_data: Dict[str, Any]) -> Message:
             error_message=data.get("error_message", ""),
             details=data.get("details"),
         )
+    if message_type == MessageType.OS_VERSION_UPDATE:
+        data = raw_data.get("data", {})
+        return OSVersionUpdateMessage(
+            platform=data.get("platform"),
+            platform_release=data.get("platform_release"),
+            platform_version=data.get("platform_version"),
+            architecture=data.get("architecture"),
+            processor=data.get("processor"),
+            machine_architecture=data.get("machine_architecture"),
+            python_version=data.get("python_version"),
+            os_info=data.get("os_info"),
+            **{
+                k: v
+                for k, v in data.items()
+                if k
+                not in [
+                    "platform",
+                    "platform_release",
+                    "platform_version",
+                    "architecture",
+                    "processor",
+                    "machine_architecture",
+                    "python_version",
+                    "os_info",
+                ]
+            }
+        )
     # Default fallback
     return Message.from_dict(raw_data)
+
+
+def create_command_message(
+    command_type: str, parameters: Dict[str, Any] = None
+) -> Dict[str, Any]:
+    """Create a command message dictionary for sending to agents."""
+    message = CommandMessage(command_type=command_type, parameters=parameters or {})
+    return message.to_dict()

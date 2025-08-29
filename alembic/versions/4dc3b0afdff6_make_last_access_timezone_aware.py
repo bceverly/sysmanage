@@ -20,11 +20,25 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # Convert last_access columns to timezone-aware for both host and user tables
-    op.alter_column('host', 'last_access', type_=sa.DateTime(timezone=True))
-    op.alter_column('user', 'last_access', type_=sa.DateTime(timezone=True))
+    bind = op.get_bind()
+    if bind.dialect.name == 'sqlite':
+        # SQLite doesn't distinguish between timezone-aware and naive DateTime
+        # Skip this migration for SQLite
+        pass
+    else:
+        # PostgreSQL and other databases
+        op.alter_column('host', 'last_access', type_=sa.DateTime(timezone=True))
+        op.alter_column('user', 'last_access', type_=sa.DateTime(timezone=True))
 
 
 def downgrade() -> None:
     # Revert last_access columns to timezone-naive
-    op.alter_column('host', 'last_access', type_=sa.DateTime())
-    op.alter_column('user', 'last_access', type_=sa.DateTime())
+    bind = op.get_bind()
+    if bind.dialect.name == 'sqlite':
+        # SQLite doesn't distinguish between timezone-aware and naive DateTime
+        # Skip this migration for SQLite
+        pass
+    else:
+        # PostgreSQL and other databases
+        op.alter_column('host', 'last_access', type_=sa.DateTime())
+        op.alter_column('user', 'last_access', type_=sa.DateTime())

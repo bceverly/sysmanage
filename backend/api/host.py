@@ -3,7 +3,7 @@ This module houses the API routes for the host object in SysManage.
 """
 
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -13,14 +13,32 @@ from cryptography import x509
 from backend.auth.auth_bearer import JWTBearer
 from backend.persistence import db, models
 from backend.security.certificate_manager import certificate_manager
+from backend.websocket.connection_manager import connection_manager
+from backend.websocket.messages import create_command_message
 
 router = APIRouter()
 
 
 class HostRegistration(BaseModel):
     """
-    This class represents the JSON payload for agent registration.
-    Extends Host with optional fields for agent registration.
+    This class represents the minimal JSON payload for agent registration.
+    Only contains essential connection information.
+    """
+
+    class Config:
+        extra = "forbid"  # Forbid extra fields to enforce data separation
+
+    active: bool
+    fqdn: str
+    hostname: str
+    ipv4: Optional[str] = None
+    ipv6: Optional[str] = None
+
+
+class HostRegistrationLegacy(BaseModel):
+    """
+    Legacy registration model for backward compatibility.
+    Contains all fields for comprehensive registration.
     """
 
     active: bool
@@ -33,6 +51,9 @@ class HostRegistration(BaseModel):
     platform_version: Optional[str] = None
     architecture: Optional[str] = None
     processor: Optional[str] = None
+    machine_architecture: Optional[str] = None
+    python_version: Optional[str] = None
+    os_info: Optional[Dict[str, Any]] = None
 
 
 class Host(BaseModel):
@@ -171,6 +192,14 @@ async def register_host(registration_data: HostRegistration):
     Register a new host (agent) with the system.
     This endpoint does not require authentication for initial registration.
     """
+    print("=== Minimal Host Registration Data Received ===")
+    print(f"FQDN: {registration_data.fqdn}")
+    print(f"Hostname: {registration_data.hostname}")
+    print(f"Active: {registration_data.active}")
+    print(f"IPv4: {registration_data.ipv4}")
+    print(f"IPv6: {registration_data.ipv6}")
+    print("=== End Minimal Registration Data ===")
+
     # Get the SQLAlchemy session
     session_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -185,17 +214,29 @@ async def register_host(registration_data: HostRegistration):
         )
 
         if existing_host:
-            # Update existing host with new information
-            existing_host.active = registration_data.active
-            existing_host.ipv4 = registration_data.ipv4
-            existing_host.ipv6 = registration_data.ipv6
-            existing_host.last_access = datetime.now(timezone.utc)
-            session.commit()
-            session.refresh(existing_host)
+            # Update existing host with minimal registration information
+            print("Updating existing host with minimal registration data...")
+            try:
+                existing_host.active = registration_data.active
+                existing_host.ipv4 = registration_data.ipv4
+                existing_host.ipv6 = registration_data.ipv6
+                existing_host.last_access = datetime.now(timezone.utc)
 
-            return existing_host
+                print(
+                    f"Before commit - FQDN: {existing_host.fqdn}, Active: {existing_host.active}"
+                )
+                session.commit()
+                print("Database commit successful")
+                session.refresh(existing_host)
+                print("After refresh - Host updated with minimal data")
 
-        # Create new host with pending approval status
+                return existing_host
+            except Exception as e:
+                print(f"Error updating existing host: {e}")
+                session.rollback()
+                raise
+
+        # Create new host with pending approval status and minimal data
         host = models.Host(
             fqdn=registration_data.fqdn,
             active=registration_data.active,
@@ -341,3 +382,38 @@ async def reject_host(host_id: int):  # pylint: disable=duplicate-code
         )
 
         return ret_host
+
+
+@router.post("/host/{host_id}/request-os-update", dependencies=[Depends(JWTBearer())])
+async def request_os_version_update(host_id: int):
+    """
+    Request an agent to update its OS version information.
+    This sends a message via WebSocket to the agent requesting fresh OS data.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the host
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+
+        if not host:
+            raise HTTPException(status_code=404, detail="Host not found")
+
+        if host.approval_status != "approved":
+            raise HTTPException(status_code=400, detail="Host is not approved")
+
+        # Create command message for OS version update request
+        command_message = create_command_message(
+            command_type="update_os_version", parameters={}
+        )
+
+        # Send command to agent via WebSocket
+        success = await connection_manager.send_to_host(host_id, command_message)
+
+        if not success:
+            raise HTTPException(status_code=503, detail="Agent is not connected")
+
+        return {"result": True, "message": "OS version update requested"}

@@ -35,7 +35,18 @@ class CertificateManager:
             cert_path = tempfile.mkdtemp(prefix="sysmanage_test_certs_")
 
         self.cert_dir = Path(cert_path)
-        self.cert_dir.mkdir(parents=True, exist_ok=True)
+
+        # Try to create the system directory, fall back to local directory if permission denied
+        try:
+            self.cert_dir.mkdir(parents=True, exist_ok=True)
+        except PermissionError:
+            # Fall back to local directory in the project
+            project_dir = Path(__file__).parent.parent.parent  # Go up to sysmanage root
+            fallback_dir = project_dir / ".sysmanage-certs"
+
+            print(f"⚠️  Cannot access {cert_path}, falling back to {fallback_dir}")
+            self.cert_dir = fallback_dir
+            self.cert_dir.mkdir(parents=True, exist_ok=True)
 
         # Certificate paths
         self.server_cert_path = self.cert_dir / "server.crt"
