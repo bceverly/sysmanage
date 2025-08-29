@@ -12,10 +12,11 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api import agent, auth, fleet, host, user, config_management
+from backend.api import agent, auth, certificates, fleet, host, user, config_management
 from backend.config import config
 from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
 from backend.discovery.discovery_service import discovery_beacon
+from backend.security.certificate_manager import certificate_manager
 
 # Parse the /etc/sysmanage.yaml file
 app_config = config.get_config()
@@ -26,6 +27,9 @@ async def lifespan(fastapi_app: FastAPI):
     """
     Application lifespan manager to handle startup and shutdown events.
     """
+    # Startup: Ensure server certificates are generated
+    certificate_manager.ensure_server_certificate()
+
     # Startup: Start the heartbeat monitor service
     heartbeat_task = asyncio.create_task(heartbeat_monitor_service())
 
@@ -71,6 +75,7 @@ app.add_middleware(
 
 # Import the dependencies
 app.include_router(agent.router)
+app.include_router(certificates.router)
 app.include_router(host.router)
 app.include_router(auth.router)
 app.include_router(user.router)

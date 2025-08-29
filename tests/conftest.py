@@ -47,11 +47,21 @@ TEST_CONFIG = {
 
 @pytest.fixture(scope="session")
 def engine():
-    """Create test database engine."""
+    """Create test database engine and run Alembic migrations."""
+    from alembic.config import Config
+    from alembic import command
+
     test_engine = create_engine(
         TEST_DATABASE_URL, connect_args={"check_same_thread": False}
     )
-    Base.metadata.create_all(bind=test_engine)
+
+    # Configure Alembic to use the test database
+    alembic_cfg = Config("alembic.ini")
+    alembic_cfg.set_main_option("sqlalchemy.url", TEST_DATABASE_URL)
+
+    # Run all migrations to head
+    command.upgrade(alembic_cfg, "head")
+
     return test_engine
 
 

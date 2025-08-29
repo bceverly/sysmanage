@@ -45,6 +45,14 @@ def test_db():
         ipv6 = Column(String)
         last_access = Column(DateTime)
         status = Column(String(20), nullable=False, server_default="up")
+        approval_status = Column(String(20), nullable=False, server_default="pending")
+        client_certificate = Column(
+            String, nullable=True
+        )  # Using String instead of Text for SQLite
+        certificate_serial = Column(String(64), nullable=True)
+        certificate_issued_at = Column(
+            DateTime, nullable=True
+        )  # Timezone not supported in SQLite
 
     # Create test version of User model with Integer ID for SQLite compatibility
     class User(TestBase):
