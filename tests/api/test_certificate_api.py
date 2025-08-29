@@ -65,16 +65,18 @@ class TestCertificateEndpoints:
 
     def test_get_client_certificate_success(self, client, session, auth_headers):
         """Test successful client certificate retrieval."""
-        # Create a test host in the database
-        host = Host(
-            id=101,
-            fqdn="success-test.example.com",
-            active=True,
-            ipv4="192.168.1.100",
-            approval_status="approved",
-            last_access=datetime.now(timezone.utc),
+        # Create a test host in the database using raw SQL to avoid model field issues
+        from sqlalchemy import text
+
+        session.execute(
+            text(
+                """
+            INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access)
+            VALUES (101, 'success-test.example.com', 1, '192.168.1.100', 'approved', :timestamp)
+        """
+            ),
+            {"timestamp": datetime.now(timezone.utc)},
         )
-        session.add(host)
         session.commit()
 
         with patch("backend.api.certificates.certificate_manager") as mock_cert_manager:
@@ -122,15 +124,18 @@ class TestCertificateEndpoints:
         self, client, session, auth_headers
     ):
         """Test client certificate retrieval when host not approved."""
-        host = Host(
-            id=102,
-            fqdn="pending-test.example.com",
-            active=True,
-            ipv4="192.168.1.100",
-            approval_status="pending",
-            last_access=datetime.now(timezone.utc),
+        # Create a test host with pending approval using raw SQL
+        from sqlalchemy import text
+
+        session.execute(
+            text(
+                """
+            INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access)
+            VALUES (102, 'pending-test.example.com', 1, '192.168.1.100', 'pending', :timestamp)
+        """
+            ),
+            {"timestamp": datetime.now(timezone.utc)},
         )
-        session.add(host)
         session.commit()
 
         response = client.get("/certificates/client/102", headers=auth_headers)
@@ -146,18 +151,19 @@ class TestCertificateEndpoints:
 
     def test_revoke_client_certificate_success(self, client, session, auth_headers):
         """Test successful client certificate revocation."""
-        host = Host(
-            id=103,
-            fqdn="revoke-test.example.com",
-            active=True,
-            ipv4="192.168.1.100",
-            approval_status="approved",
-            client_certificate="existing cert",
-            certificate_serial="12345",
-            certificate_issued_at=datetime.now(timezone.utc),
-            last_access=datetime.now(timezone.utc),
+        # Create a test host with existing certificate using raw SQL
+        from sqlalchemy import text
+
+        timestamp = datetime.now(timezone.utc)
+        session.execute(
+            text(
+                """
+            INSERT INTO host (id, fqdn, active, ipv4, approval_status, client_certificate, certificate_serial, certificate_issued_at, last_access)
+            VALUES (103, 'revoke-test.example.com', 1, '192.168.1.100', 'approved', 'existing cert', '12345', :timestamp, :timestamp)
+        """
+            ),
+            {"timestamp": timestamp},
         )
-        session.add(host)
         session.commit()
 
         response = client.post("/certificates/revoke/103", headers=auth_headers)
@@ -165,8 +171,11 @@ class TestCertificateEndpoints:
         assert response.status_code == 200
         assert "Certificate revoked successfully" in response.json()["result"]
 
-        # Refresh the host to verify changes
-        session.refresh(host)
+        # Query the host to verify changes
+        from backend.persistence.models import Host
+
+        host = session.query(Host).filter(Host.id == 103).first()
+        assert host is not None
         assert host.client_certificate is None
         assert host.certificate_serial is None
         assert host.certificate_issued_at is None
@@ -191,15 +200,18 @@ class TestCertificateEndpointsIntegration:
 
     def test_certificate_workflow_integration(self, client, session, auth_headers):
         """Test complete certificate workflow integration."""
-        host = Host(
-            id=104,
-            fqdn="integration-test.example.com",
-            active=True,
-            ipv4="192.168.1.100",
-            approval_status="approved",
-            last_access=datetime.now(timezone.utc),
+        # Create a test host using raw SQL to avoid model field issues
+        from sqlalchemy import text
+
+        session.execute(
+            text(
+                """
+            INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access)
+            VALUES (104, 'integration-test.example.com', 1, '192.168.1.100', 'approved', :timestamp)
+        """
+            ),
+            {"timestamp": datetime.now(timezone.utc)},
         )
-        session.add(host)
         session.commit()
 
         with patch("backend.api.certificates.certificate_manager") as mock_cert_manager:

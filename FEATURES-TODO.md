@@ -30,11 +30,11 @@ like to add:
     should be done the first time an agent registers
     with the server.
 
-9.  OS Version Capture - Server can request on
+9.  ~~OS Version Capture - Server can request on
     demand that an agent determine the version of
     its operating system and transmit it to the
     server for storage.  This should be done the
-    first time an agent registers with the server.
+    first time an agent registers with the server.~~
 
 10. Installer for agent - There should be a text-
     based command-line installer for the agent that
@@ -195,3 +195,20 @@ like to add:
     on the main toolbar that was clicked
     by the user to get to the current
     screen.
+
+37. ~~We need to divide up the types of data
+    that we store on the server side
+    (hardware info, operating system,
+    users, etc.) and have separate messages
+    that push that info to the server from
+    the agent.  That way we aren't over-
+    loading any one single communication.
+    For example, registering the server
+    should just pass the bare minimum of
+    information (hostname, IPv4 IPv6) and
+    not pass OS name, version, etc.  That
+    should come later in separate messages
+    after it has successfully registered.
+    The server also needs to have the
+    ability to ask the agent to push that
+    info back if it isn't offering it up.~~

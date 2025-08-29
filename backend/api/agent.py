@@ -203,6 +203,67 @@ async def handle_config_acknowledgment(connection, message_data: dict):
     await connection.send_message(response)
 
 
+async def handle_os_version_update(db: Session, connection, message_data: dict):
+    """Handle OS version update message from agent."""
+    hostname = connection.hostname
+    if not hostname:
+        return
+
+    print("=== OS Version Update Data Received ===")
+    print(f"FQDN: {hostname}")
+    print(f"Platform: {message_data.get('platform')}")
+    print(f"Platform Release: {message_data.get('platform_release')}")
+    print(f"Machine Architecture: {message_data.get('machine_architecture')}")
+    print(f"Processor: {message_data.get('processor')}")
+    print(f"OS Info: {message_data.get('os_info')}")
+    print("=== End OS Version Data ===")
+
+    # Update host with new OS version information
+    host = db.query(Host).filter(Host.fqdn == hostname).first()
+
+    if host:
+        print("Updating existing host with OS version data...")
+        try:
+            # Update OS version fields
+            host.platform = message_data.get("platform")
+            host.platform_release = message_data.get("platform_release")
+            host.platform_version = message_data.get("platform_version")
+            host.machine_architecture = message_data.get("machine_architecture")
+            host.processor = message_data.get("processor")
+
+            # Store additional OS info as JSON
+            os_info = message_data.get("os_info", {})
+            if os_info:
+                print(f"Setting os_details to: {json.dumps(os_info)}")
+                host.os_details = json.dumps(os_info)
+
+            host.os_version_updated_at = datetime.now(timezone.utc)
+            host.last_access = datetime.now(timezone.utc)
+
+            print(
+                f"Before commit - Platform: {host.platform}, Machine Arch: {host.machine_architecture}"
+            )
+            db.commit()
+            print("Database commit successful")
+            db.refresh(host)
+            print(
+                f"After refresh - Platform: {host.platform}, Machine Arch: {host.machine_architecture}"
+            )
+
+        except Exception as e:
+            print(f"Error updating host with OS version data: {e}")
+            db.rollback()
+            raise
+
+    # Send acknowledgment
+    response = {
+        "message_type": "ack",
+        "message_id": message_data.get("message_id"),
+        "data": {"status": "os_version_updated"},
+    }
+    await connection.send_message(response)
+
+
 @router.websocket("/agent/connect")
 async def agent_connect(websocket: WebSocket):
     """
@@ -272,6 +333,10 @@ async def agent_connect(websocket: WebSocket):
                 elif message.message_type == "config_ack":
                     # Handle configuration acknowledgment
                     await handle_config_acknowledgment(connection, message.data)
+
+                elif message.message_type == MessageType.OS_VERSION_UPDATE:
+                    # Handle OS version update from agent
+                    await handle_os_version_update(db, connection, message.data)
 
                 else:
                     # Unknown message type - send error

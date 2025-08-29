@@ -37,6 +37,14 @@ class Host(Base):
     client_certificate = Column(Text, nullable=True)
     certificate_serial = Column(String(64), nullable=True)
     certificate_issued_at = Column(DateTime(timezone=True), nullable=True)
+    # OS Version fields
+    platform = Column(String(50), nullable=True)
+    platform_release = Column(String(100), nullable=True)
+    platform_version = Column(Text, nullable=True)
+    machine_architecture = Column(String(50), nullable=True)  # x86_64, arm64, etc.
+    processor = Column(String(100), nullable=True)
+    os_details = Column(Text, nullable=True)  # JSON field for additional OS info
+    os_version_updated_at = Column(DateTime(timezone=True), nullable=True)
 
 
 class User(Base):

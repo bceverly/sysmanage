@@ -37,7 +37,9 @@ disable=
     no-member,
     unused-argument,
     broad-except,
-    duplicate-code
+    duplicate-code,
+    import-outside-toplevel,
+    too-many-return-statements
 
 [REPORTS]
 # Set the output format.

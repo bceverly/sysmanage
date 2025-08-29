@@ -114,6 +114,23 @@ class ConnectionManager:
             return await self.send_to_agent(agent_id, message)
         return False
 
+    async def send_to_host(self, host_id: int, message: dict) -> bool:
+        """Send a message to an agent by database host ID."""
+        # Import here to avoid circular imports
+        from backend.persistence.db import get_engine
+        from backend.persistence.models import Host
+        from sqlalchemy.orm import sessionmaker
+
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=get_engine()
+        )
+
+        with session_local() as session:
+            host = session.query(Host).filter(Host.id == host_id).first()
+            if host and host.fqdn:
+                return await self.send_to_hostname(host.fqdn, message)
+        return False
+
     async def broadcast_to_all(self, message: dict) -> int:
         """Broadcast a message to all connected agents."""
         successful_sends = 0
