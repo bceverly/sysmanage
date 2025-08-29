@@ -5,7 +5,7 @@ Enhanced with security validation and secure communication protocols.
 """
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Request
 from sqlalchemy.orm import Session
@@ -61,18 +61,20 @@ async def update_or_create_host(
         # Update existing host
         host.ipv4 = ipv4
         host.ipv6 = ipv6
-        host.last_access = datetime.utcnow()
+        host.last_access = datetime.now(timezone.utc)
         host.active = True
         host.status = "up"
+        # Don't modify approval_status for existing hosts - preserve the current status
     else:
-        # Create new host
+        # Create new host with pending approval status
         host = Host(
             fqdn=hostname,
             ipv4=ipv4,
             ipv6=ipv6,
-            last_access=datetime.utcnow(),
+            last_access=datetime.now(timezone.utc),
             active=True,
             status="up",
+            approval_status="pending",  # New hosts need approval
         )
         db.add(host)
 
@@ -88,9 +90,22 @@ async def handle_system_info(db: Session, connection, message_data: dict):
     ipv6 = message_data.get("ipv6")
     platform = message_data.get("platform")
 
+    # System info received from agent
+
     if hostname:
         # Update database
         host = await update_or_create_host(db, hostname, ipv4, ipv6)
+
+        # Check approval status
+        if host.approval_status != "approved":
+            error_msg = ErrorMessage(
+                "host_not_approved",
+                f"Host {hostname} is not approved for connection. Current status: {host.approval_status}",
+            )
+            await connection.send_message(error_msg.to_dict())
+            # Close the WebSocket connection for unapproved hosts
+            await connection.websocket.close(code=4003, reason="Host not approved")
+            return
 
         # Register agent in connection manager
         connection_manager.register_agent(
@@ -118,16 +133,31 @@ async def handle_system_info(db: Session, connection, message_data: dict):
 async def handle_heartbeat(db: Session, connection, message_data: dict):
     """Handle heartbeat message from agent."""
     # Update last seen time in connection manager
-    connection.last_seen = datetime.utcnow()
+    connection.last_seen = datetime.now(timezone.utc)
+
+    # Get hostname from message data (new) or connection (fallback)
+    hostname = message_data.get("hostname") or connection.hostname
+    ipv4 = message_data.get("ipv4") or connection.ipv4
+    ipv6 = message_data.get("ipv6") or connection.ipv6
 
     # Update host status in database if hostname is known
-    if connection.hostname:
-        host = db.query(Host).filter(Host.fqdn == connection.hostname).first()
-        if host:
-            host.last_access = datetime.utcnow()
-            host.status = "up"
-            host.active = True
-            db.commit()
+    if hostname:
+        # Updating/creating host record
+        # Update connection info if provided in heartbeat
+        if not connection.hostname and hostname:
+            connection.hostname = hostname
+            connection.ipv4 = ipv4
+            connection.ipv6 = ipv6
+            # Register in connection manager
+            connection_manager.register_agent(
+                connection.agent_id, hostname, ipv4, ipv6, connection.platform
+            )
+
+        # Use the same logic as system_info to ensure consistency
+        await update_or_create_host(db, hostname, ipv4, ipv6)
+    else:
+        # No hostname available for agent
+        pass
 
     # Send heartbeat acknowledgment
     response = {
@@ -140,15 +170,8 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
 
 async def handle_command_result(connection, message_data: dict):
     """Handle command result message from agent."""
-    command_id = message_data.get("command_id")
-    success = message_data.get("success")
-    result = message_data.get("result")
-    error = message_data.get("error")
-
-    print(
-        f"Command {command_id} result from {connection.hostname}: "
-        f"success={success}, result={result}, error={error}"
-    )
+    # Command result received from agent
+    # Variables available: command_id, success, result, error from message_data
 
     # Send acknowledgment
     response = {
@@ -213,7 +236,7 @@ async def agent_connect(websocket: WebSocket):
         while True:
             # Receive message from agent
             data = await websocket.receive_text()
-            print(f"Message received from agent {connection.agent_id}: {data}")
+            # Message received from agent
 
             try:
                 raw_message = json.loads(data)
@@ -230,6 +253,7 @@ async def agent_connect(websocket: WebSocket):
                     continue
 
                 message = create_message(raw_message)
+                # Processing message from agent
 
                 # Handle different message types
                 if message.message_type == MessageType.SYSTEM_INFO:
@@ -242,7 +266,8 @@ async def agent_connect(websocket: WebSocket):
                     await handle_command_result(connection, message.data)
 
                 elif message.message_type == MessageType.ERROR:
-                    print(f"Agent {connection.agent_id} reported error: {message.data}")
+                    # Agent reported error
+                    pass
 
                 elif message.message_type == "config_ack":
                     # Handle configuration acknowledgment
@@ -262,15 +287,19 @@ async def agent_connect(websocket: WebSocket):
                 await connection.send_message(error_msg.to_dict())
 
             except Exception as exc:
-                # Unexpected error
-                print(
-                    f"Error processing message from agent {connection.agent_id}: {exc}"
-                )
+                # Error processing message from agent
                 error_msg = ErrorMessage("processing_error", str(exc))
                 await connection.send_message(error_msg.to_dict())
 
     except WebSocketDisconnect:
-        print(f"Agent {connection.agent_id} disconnected")
+        # Agent disconnected
+        pass
+    except RuntimeError as e:
+        if "WebSocket is not connected" in str(e):
+            # WebSocket was closed (e.g., due to unapproved host)
+            pass
+        else:
+            raise
     finally:
         # Clean up
         connection_manager.disconnect(connection.agent_id)

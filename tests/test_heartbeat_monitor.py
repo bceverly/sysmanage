@@ -236,15 +236,20 @@ class TestHeartbeatHandling:
         """Test heartbeat handling when host is not found in database."""
         from backend.api.agent import handle_heartbeat
 
-        # Setup
+        # Setup - need to mock connection properties for host creation
+        mock_connection.ipv4 = "192.168.1.100"
+        mock_connection.ipv6 = "2001:db8::1"
         mock_db_session.query.return_value.filter.return_value.first.return_value = None
+        mock_db_session.add = Mock()
+        mock_db_session.refresh = Mock()
         message_data = {"message_id": "test-123"}
 
         # Execute
         await handle_heartbeat(mock_db_session, mock_connection, message_data)
 
-        # Verify no database updates
-        mock_db_session.commit.assert_not_called()
+        # Verify host was created and committed
+        mock_db_session.add.assert_called_once()
+        mock_db_session.commit.assert_called_once()
 
         # Verify acknowledgment was still sent
         mock_connection.send_message.assert_called_once()

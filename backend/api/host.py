@@ -88,17 +88,7 @@ async def get_host(host_id: int):
         if len(hosts) != 1:
             raise HTTPException(status_code=404, detail="Host not found")
 
-        ret_host = models.Host(
-            id=hosts[0].id,
-            active=hosts[0].active,
-            fqdn=hosts[0].fqdn,
-            ipv4=hosts[0].ipv4,
-            ipv6=hosts[0].ipv6,
-            status=hosts[0].status,
-            last_access=hosts[0].last_access,
-        )
-
-        return ret_host
+        return hosts[0]
 
 
 @router.get("/host/by_fqdn/{fqdn}", dependencies=[Depends(JWTBearer())])
@@ -119,17 +109,7 @@ async def get_host_by_fqdn(fqdn: str):
         if len(hosts) != 1:
             raise HTTPException(status_code=404, detail="Host not found")
 
-        ret_host = models.Host(
-            id=hosts[0].id,
-            active=hosts[0].active,
-            fqdn=hosts[0].fqdn,
-            ipv4=hosts[0].ipv4,
-            ipv6=hosts[0].ipv6,
-            status=hosts[0].status,
-            last_access=hosts[0].last_access,
-        )
-
-        return ret_host
+        return hosts[0]
 
 
 @router.get("/hosts", dependencies=[Depends(JWTBearer())])
@@ -145,21 +125,7 @@ async def get_all_hosts():
 
     with session_local() as session:
         result = session.query(models.Host).all()
-
-        ret_hosts = []
-        for host in result:
-            the_host = models.Host(
-                id=host.id,
-                active=host.active,
-                fqdn=host.fqdn,
-                ipv4=host.ipv4,
-                ipv6=host.ipv6,
-                status=host.status,
-                last_access=host.last_access,
-            )
-            ret_hosts.append(the_host)
-
-        return ret_hosts
+        return result
 
 
 @router.post("/host", dependencies=[Depends(JWTBearer())])
@@ -189,19 +155,12 @@ async def add_host(new_host: Host):
             ipv6=new_host.ipv6,
             last_access=datetime.now(timezone.utc),
         )
+        host.approval_status = "approved"  # Manually created hosts are pre-approved
         session.add(host)
         session.commit()
-        ret_host = models.Host(
-            id=host.id,
-            active=host.active,
-            fqdn=host.fqdn,
-            ipv4=host.ipv4,
-            ipv6=host.ipv6,
-            status=host.status,
-            last_access=host.last_access,
-        )
+        session.refresh(host)
 
-        return ret_host
+        return host
 
 
 @router.post("/host/register")
@@ -230,20 +189,11 @@ async def register_host(registration_data: HostRegistration):
             existing_host.ipv6 = registration_data.ipv6
             existing_host.last_access = datetime.now(timezone.utc)
             session.commit()
+            session.refresh(existing_host)
 
-            ret_host = models.Host(
-                id=existing_host.id,
-                active=existing_host.active,
-                fqdn=existing_host.fqdn,
-                ipv4=existing_host.ipv4,
-                ipv6=existing_host.ipv6,
-                status=existing_host.status,
-                last_access=existing_host.last_access,
-            )
+            return existing_host
 
-            return ret_host
-
-        # Create new host
+        # Create new host with pending approval status
         host = models.Host(
             fqdn=registration_data.fqdn,
             active=registration_data.active,
@@ -251,20 +201,12 @@ async def register_host(registration_data: HostRegistration):
             ipv6=registration_data.ipv6,
             last_access=datetime.now(timezone.utc),
         )
+        host.approval_status = "pending"
         session.add(host)
         session.commit()
+        session.refresh(host)
 
-        ret_host = models.Host(
-            id=host.id,
-            active=host.active,
-            fqdn=host.fqdn,
-            ipv4=host.ipv4,
-            ipv6=host.ipv6,
-            status=host.status,
-            last_access=host.last_access,
-        )
-
-        return ret_host
+        return host
 
 
 @router.put("/host/{host_id}", dependencies=[Depends(JWTBearer())])
@@ -303,14 +245,83 @@ async def update_host(host_id: int, host_data: Host):
         updated_host = (
             session.query(models.Host).filter(models.Host.id == host_id).first()
         )
+
+    return updated_host
+
+
+@router.put("/host/{host_id}/approve", dependencies=[Depends(JWTBearer())])
+async def approve_host(host_id: int):
+    """
+    Approve a pending host registration
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the host
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+
+        if not host:
+            raise HTTPException(status_code=404, detail="Host not found")
+
+        if host.approval_status != "pending":
+            raise HTTPException(status_code=400, detail="Host is not in pending status")
+
+        # Update approval status
+        host.approval_status = "approved"
+        host.last_access = datetime.now(timezone.utc)
+        session.commit()
+
         ret_host = models.Host(
-            id=updated_host.id,
-            active=updated_host.active,
-            fqdn=updated_host.fqdn,
-            ipv4=updated_host.ipv4,
-            ipv6=updated_host.ipv6,
-            status=updated_host.status,
-            last_access=updated_host.last_access,
+            id=host.id,
+            active=host.active,
+            fqdn=host.fqdn,
+            ipv4=host.ipv4,
+            ipv6=host.ipv6,
+            status=host.status,
+            approval_status=host.approval_status,
+            last_access=host.last_access,
         )
 
-    return ret_host
+        return ret_host
+
+
+@router.put("/host/{host_id}/reject", dependencies=[Depends(JWTBearer())])
+async def reject_host(host_id: int):
+    """
+    Reject a pending host registration
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the host
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+
+        if not host:
+            raise HTTPException(status_code=404, detail="Host not found")
+
+        if host.approval_status != "pending":
+            raise HTTPException(status_code=400, detail="Host is not in pending status")
+
+        # Update approval status
+        host.approval_status = "rejected"
+        host.last_access = datetime.now(timezone.utc)
+        session.commit()
+
+        ret_host = models.Host(
+            id=host.id,
+            active=host.active,
+            fqdn=host.fqdn,
+            ipv4=host.ipv4,
+            ipv6=host.ipv6,
+            status=host.status,
+            approval_status=host.approval_status,
+            last_access=host.last_access,
+        )
+
+        return ret_host

@@ -14,7 +14,7 @@ import yaml
 CONFIG_PATH = "/etc/sysmanage.yaml"
 if os.path.exists("sysmanage-dev.yaml"):
     CONFIG_PATH = "sysmanage-dev.yaml"
-    print(f"Using development config: {CONFIG_PATH}")
+    # Using development configuration
 
 try:
     with open(CONFIG_PATH, "r", encoding="utf-8") as file:
@@ -39,9 +39,9 @@ try:
 except yaml.YAMLError as exc:
     if hasattr(exc, "problem_mark"):
         mark = exc.problem_mark
-        print(
-            f"Error reading sysmanage.yaml on line {mark.line+1} in column {mark.column+1}"
-        )
+        # Error reading configuration file
+        sys.exit(1)
+    else:
         sys.exit(1)
 
 

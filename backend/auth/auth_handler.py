@@ -21,7 +21,7 @@ def token_response(token: str):
     """
     This is a helper function to create a JSON payload from a jwt token
     """
-    print(f"Returning token {token}")
+    # Returning authentication token
     return {"Authorization": token}
 
 
@@ -75,8 +75,8 @@ def decode_jwt(token: str) -> Optional[dict]:
         # Token has expired
         return None
     except (jwt.exceptions.InvalidTokenError, jwt.exceptions.DecodeError):
-        print("JWT exception")
+        # JWT decoding exception
         return {}
-    except Exception as exc:
-        print(f"Uncaught exception in decode_jwt: {exc}")
+    except Exception:
+        # Uncaught exception in JWT decoding
         return None

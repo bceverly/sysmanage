@@ -52,10 +52,7 @@ class TestConfigPush:
 
         response = client.post("/config/push", json=config_data, headers=auth_headers)
 
-        # Debug output
-        if response.status_code != 200:
-            print(f"Status: {response.status_code}")
-            print(f"Response: {response.text}")
+        # Check response status
 
         assert response.status_code == 200
         data = response.json()
@@ -133,10 +130,7 @@ class TestConfigPush:
 
         response = client.post("/config/push", json=config_data, headers=auth_headers)
 
-        # Debug output
-        if response.status_code not in [400, 422, 500]:
-            print(f"Invalid request test - Status: {response.status_code}")
-            print(f"Response: {response.text}")
+        # Check response status - should be error code
 
         assert response.status_code == 500  # API wraps validation errors in 500s
         data = response.json()

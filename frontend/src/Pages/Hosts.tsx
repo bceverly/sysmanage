@@ -6,10 +6,11 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import CheckIcon from '@mui/icons-material/Check';
 import { Chip, Typography, CircularProgress } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { SysManageHost, doDeleteHost, doGetHosts } from '../Services/hosts'
+import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost } from '../Services/hosts'
 
 const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
@@ -27,12 +28,15 @@ const Hosts = () => {
         { 
             field: 'status', 
             headerName: t('hosts.status'), 
-            width: 120,
+            width: 200,  // Increased width for dual status chips
             renderCell: (params) => {
                 const row = params.row;
-                // Server returns UTC timestamps without 'Z', so we need to add it
+                // Server returns timezone-aware timestamps  
                 const rawLastAccess = row.last_access;
-                const utcLastAccess = typeof rawLastAccess === 'string' && !rawLastAccess.endsWith('Z')
+                const utcLastAccess = typeof rawLastAccess === 'string' && 
+                    !rawLastAccess.endsWith('Z') && 
+                    !rawLastAccess.includes('+') && 
+                    !rawLastAccess.includes('-')
                     ? rawLastAccess + 'Z'
                     : rawLastAccess;
                 
@@ -44,13 +48,27 @@ const Hosts = () => {
                 const isRecentlyActive = diffMinutes <= 5;
                 const displayStatus = isRecentlyActive ? 'up' : 'down';
                 
+                // Check if approval is needed
+                const needsApproval = row.approval_status === 'pending';
+                
                 return (
-                    <Chip 
-                        label={displayStatus === 'up' ? t('hosts.up') : t('hosts.down')}
-                        color={displayStatus === 'up' ? 'success' : 'error'}
-                        size="small"
-                        title={`Last seen ${diffMinutes} minutes ago`}
-                    />
+                    <Box>
+                        <Chip 
+                            label={displayStatus === 'up' ? t('hosts.up') : t('hosts.down')}
+                            color={displayStatus === 'up' ? 'success' : 'error'}
+                            size="small"
+                            title={t('hosts.lastSeen', 'Last seen {{minutes}} minutes ago', { minutes: diffMinutes })}
+                        />
+                        {needsApproval && (
+                            <Chip 
+                                label={t('hosts.approvalNeeded')}
+                                color="warning"
+                                size="small"
+                                variant="outlined"
+                                sx={{ ml: 0.5 }}
+                            />
+                        )}
+                    </Box>
                 );
             }
         },
@@ -59,11 +77,14 @@ const Hosts = () => {
             headerName: t('hosts.lastCheckin'), 
             width: 200,
             renderCell: (params) => {
-                // Server returns UTC timestamps without 'Z', so we need to add it
-                // This forces JavaScript to parse as UTC instead of local time
+                // Server returns timezone-aware timestamps
                 const rawValue = params.value;
-                const utcTimestamp = typeof rawValue === 'string' && !rawValue.endsWith('Z')
-                    ? rawValue + 'Z'  // Add UTC marker if missing
+                // Don't modify if it already has timezone info (+ or - offset) or Z
+                const utcTimestamp = typeof rawValue === 'string' && 
+                    !rawValue.endsWith('Z') && 
+                    !rawValue.includes('+') && 
+                    !rawValue.includes('-')
+                    ? rawValue + 'Z'  // Add UTC marker only if no timezone info
                     : rawValue;
                 
                 const date = new Date(utcTimestamp);
@@ -72,7 +93,7 @@ const Hosts = () => {
                 
                 // Check if date is valid
                 if (isNaN(date.getTime())) {
-                    return <span style={{ color: '#f44336' }}>Invalid date</span>;
+                    return <span style={{ color: '#f44336' }}>{t('hosts.invalidDate', 'Invalid date')}</span>;
                 }
                 
                 const diffSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
@@ -82,13 +103,13 @@ const Hosts = () => {
                 let timeText = '';
                 
                 if (absDiff < 60) {
-                    timeText = diffSeconds < 0 ? 'Just now' : `${absDiff}s ago`;
+                    timeText = diffSeconds < 0 ? t('hosts.justNow', 'Just now') : t('hosts.secondsAgo', '{{seconds}}s ago', { seconds: absDiff });
                 } else if (absDiff < 3600) {
-                    timeText = `${Math.floor(absDiff / 60)}m ago`;
+                    timeText = t('hosts.minutesAgo', '{{minutes}}m ago', { minutes: Math.floor(absDiff / 60) });
                 } else if (absDiff < 86400) {
-                    timeText = `${Math.floor(absDiff / 3600)}h ago`;
+                    timeText = t('hosts.hoursAgo', '{{hours}}h ago', { hours: Math.floor(absDiff / 3600) });
                 } else {
-                    timeText = `${Math.floor(absDiff / 86400)}d ago`;
+                    timeText = t('hosts.daysAgo', '{{days}}d ago', { days: Math.floor(absDiff / 86400) });
                 }
                 
                 return (
@@ -104,6 +125,31 @@ const Hosts = () => {
             }
         }
     ]
+
+    const handleApprove = async () => {
+        try {
+            // Get selected hosts that need approval
+            const selectedHosts = tableData.filter(host => 
+                selection.includes(host.id) && host.approval_status === 'pending'
+            );
+            
+            // Approve each selected pending host
+            const approvePromises = selectedHosts.map(host => 
+                doApproveHost(BigInt(host.id.toString()))
+            );
+            
+            await Promise.all(approvePromises);
+            
+            // Refresh the data from the server
+            const updatedHosts = await doGetHosts();
+            setTableData(updatedHosts);
+            
+            // Clear selection
+            setSelection([]);
+        } catch (error) {
+            console.error('Error approving hosts:', error);
+        }
+    };
 
     const handleDelete = async () => {
         try {
@@ -159,15 +205,20 @@ const Hosts = () => {
         return () => window.clearInterval(intervalId);
     }, [navigate]);
     const formatLastRefresh = () => {
-        if (!lastRefresh) return 'never';
+        if (!lastRefresh) return t('hosts.never', 'never');
         const now = new Date();
         const diffSeconds = Math.floor((now.getTime() - lastRefresh.getTime()) / 1000);
         
-        if (diffSeconds < 10) return 'just now';
-        if (diffSeconds < 60) return `${diffSeconds}s ago`;
-        if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
+        if (diffSeconds < 10) return t('hosts.justNow', 'just now');
+        if (diffSeconds < 60) return t('hosts.secondsAgo', '{{seconds}}s ago', { seconds: diffSeconds });
+        if (diffSeconds < 3600) return t('hosts.minutesAgo', '{{minutes}}m ago', { minutes: Math.floor(diffSeconds / 60) });
         return lastRefresh.toLocaleTimeString();
     };
+
+    // Check if any selected hosts need approval
+    const hasPendingSelection = tableData.some(host => 
+        selection.includes(host.id) && host.approval_status === 'pending'
+    );
 
     return (
         <div>
@@ -175,13 +226,13 @@ const Hosts = () => {
             <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Typography variant="caption" color="textSecondary" sx={{ display: 'flex', alignItems: 'center' }}>
                     {isRefreshing ? (
-                        <><CircularProgress size={12} sx={{ mr: 1 }} /> Refreshing...</>
+                        <><CircularProgress size={12} sx={{ mr: 1 }} /> {t('hosts.refreshing', 'Refreshing...')}</>
                     ) : (
-                        <>Updated {formatLastRefresh()} <span style={{ marginLeft: '4px', color: '#4caf50', fontSize: '8px' }}>●</span></>
+                        <>{t('hosts.updated', 'Updated')} {formatLastRefresh()} <span style={{ marginLeft: '4px', color: '#4caf50', fontSize: '8px' }}>●</span></>
                     )}
                 </Typography>
                 <Typography variant="caption" color="textSecondary">
-                    Auto-refresh: 30s
+                    {t('hosts.autoRefresh', 'Auto-refresh')}: 30s
                 </Typography>
             </Box>
             
@@ -204,6 +255,7 @@ const Hosts = () => {
                     }}
                     pageSizeOptions={[5, 10]}
                     checkboxSelection
+                    rowSelectionModel={selection}
                     onRowSelectionModelChange={setSelection}
                     localeText={{
                         MuiTablePagination: {
@@ -211,6 +263,13 @@ const Hosts = () => {
                             labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) =>
                                 `${from}–${to} ${t('common.of')} ${count !== -1 ? count : `${t('common.of')} ${to}`}`,
                         },
+                        noRowsLabel: t('hosts.noRows'),
+                        noResultsOverlayLabel: t('hosts.noResults'),
+                        // Additional DataGrid locale text
+                        footerRowSelected: (count: number) => 
+                            count !== 1 
+                                ? `${count.toLocaleString()} ${t('common.rowsSelected')}`
+                                : `${count.toLocaleString()} ${t('common.rowSelected')}`,
                     }}
                 />
             </div>
@@ -222,7 +281,16 @@ const Hosts = () => {
                     onClick={() => refreshHosts(true)}
                     disabled={isRefreshing}
                 >
-                    {isRefreshing ? 'Refreshing...' : 'Refresh Now'}
+                    {isRefreshing ? t('hosts.refreshing', { defaultValue: 'Refreshing...' }) : t('hosts.refreshNow', { defaultValue: 'Refresh Now' })}
+                </Button>
+                <Button 
+                    variant="outlined" 
+                    startIcon={<CheckIcon />} 
+                    disabled={!hasPendingSelection}
+                    onClick={handleApprove}
+                    color="success"
+                >
+                    {t('hosts.approveSelected', { defaultValue: 'Approve Selected' })}
                 </Button>
                 <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
                     {t('common.delete')} {t('common.selected', { defaultValue: 'Selected' })}

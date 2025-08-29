@@ -33,7 +33,14 @@
     "actions": "작업",
     "edit": "편집",
     "delete": "삭제",
-    "addHost": "호스트 추가"
+    "addHost": "호스트 추가",
+    "up": "온라인",
+    "down": "오프라인",
+    "lastCheckin": "마지막 체크인",
+    "approvalNeeded": "승인 필요",
+    "refreshing": "새로고침 중...",
+    "refreshNow": "지금 새로고침",
+    "approveSelected": "선택된 항목 승인"
   },
   "users": {
     "title": "사용자 관리",

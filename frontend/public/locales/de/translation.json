@@ -36,7 +36,22 @@
     "actions": "Aktionen",
     "edit": "Bearbeiten",
     "delete": "Löschen",
-    "addHost": "Host hinzufügen"
+    "addHost": "Host hinzufügen",
+    "approvalNeeded": "Genehmigung Erforderlich",
+    "refreshing": "Aktualisierung...",
+    "refreshNow": "Jetzt Aktualisieren",
+    "approveSelected": "Auswahl Genehmigen",
+    "never": "niemals",
+    "justNow": "gerade eben",
+    "secondsAgo": "vor {{seconds}}s",
+    "minutesAgo": "vor {{minutes}}m",
+    "hoursAgo": "vor {{hours}}h",
+    "daysAgo": "vor {{days}}d",
+    "updated": "Aktualisiert",
+    "autoRefresh": "Auto-Aktualisierung",
+    "lastSeen": "Vor {{minutes}} Minuten gesehen",
+    "noRows": "Keine Zeilen",
+    "noResults": "Keine Ergebnisse gefunden"
   },
   "users": {
     "title": "Benutzerverwaltung",

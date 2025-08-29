@@ -36,7 +36,22 @@
     "actions": "Acciones",
     "edit": "Editar",
     "delete": "Eliminar",
-    "addHost": "Agregar Host"
+    "addHost": "Agregar Host",
+    "approvalNeeded": "Aprobación Requerida",
+    "refreshing": "Actualizando...",
+    "refreshNow": "Actualizar Ahora",
+    "approveSelected": "Aprobar Seleccionados",
+    "never": "nunca",
+    "justNow": "ahora mismo",
+    "secondsAgo": "hace {{seconds}}s",
+    "minutesAgo": "hace {{minutes}}m",
+    "hoursAgo": "hace {{hours}}h",
+    "daysAgo": "hace {{days}}d",
+    "updated": "Actualizado",
+    "autoRefresh": "Auto-actualizar",
+    "lastSeen": "Visto por última vez hace {{minutes}} minutos",
+    "noRows": "Sin filas",
+    "noResults": "No se encontraron resultados"
   },
   "users": {
     "title": "Gestión de Usuarios",
