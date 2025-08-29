@@ -137,5 +137,31 @@
   },
   "logout": {
     "loading": "正在登出..."
+  },
+  "serverDown": {
+    "title": "連線中斷",
+    "titleFailed": "伺服器無法使用",
+    "message": "與伺服器的連線已中斷。正在嘗試自動重新連線。",
+    "messageFailed": "經多次嘗試後無法連線至伺服器。請聯絡技術支援或稍後再試。",
+    "details": "連線詳情：",
+    "attempts": "嘗試次數：{{count}}",
+    "lastConnected": "最後連線時間：{{time}}",
+    "nextRetry": "下次重試時間：",
+    "retrying": "重試中...",
+    "retryNow": "立即重試",
+    "resetRetries": "重設重試",
+    "secondsRemaining": "{{seconds}}秒",
+    "timeRemaining": "{{minutes}}分 {{seconds}}秒",
+    "error": "錯誤"
+  },
+  "connectionStatus": {
+    "connected": "已連線",
+    "retrying": "重試中",
+    "offline": "離線",
+    "disconnected": "已中斷連線",
+    "connectedTooltip": "已連線至伺服器",
+    "retryingTooltip": "正在嘗試重新連線至伺服器",
+    "offlineTooltip": "無法連線至伺服器",
+    "disconnectedTooltip": "連線中斷，正在重試..."
   }
 }

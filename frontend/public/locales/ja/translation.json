@@ -137,5 +137,31 @@
     "yes": "はい",
     "no": "いいえ",
     "id": "ID"
+  },
+  "serverDown": {
+    "title": "接続が中断されました",
+    "titleFailed": "サーバーが利用できません",
+    "message": "サーバーとの接続が中断されました。自動的に再接続を試みています。",
+    "messageFailed": "複数回の試行後もサーバーに接続できませんでした。サポートに連絡するか、後でもう一度お試しください。",
+    "details": "接続の詳細：",
+    "attempts": "試行回数：{{count}}",
+    "lastConnected": "最後の接続：{{time}}",
+    "nextRetry": "次回の再試行：",
+    "retrying": "再試行中...",
+    "retryNow": "今すぐ再試行",
+    "resetRetries": "再試行をリセット",
+    "secondsRemaining": "{{seconds}}秒",
+    "timeRemaining": "{{minutes}}分 {{seconds}}秒",
+    "error": "エラー"
+  },
+  "connectionStatus": {
+    "connected": "接続済み",
+    "retrying": "再試行中",
+    "offline": "オフライン",
+    "disconnected": "切断",
+    "connectedTooltip": "サーバーに接続中",
+    "retryingTooltip": "サーバーへの再接続を試行中",
+    "offlineTooltip": "サーバーに接続できません",
+    "disconnectedTooltip": "接続が失われました。再試行中..."
   }
 }

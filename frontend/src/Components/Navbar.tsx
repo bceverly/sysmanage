@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import "./css/Navbar.css";
 import SysManageLogo from "../assets/sysmanage-logo.svg";
 import LanguageSelector from "./LanguageSelector";
+import ConnectionStatusIndicator from "./ConnectionStatusIndicator";
 
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
@@ -37,8 +38,9 @@ const Navbar = () => {
           <img src={SysManageLogo} alt={t('nav.logoAlt', 'SysManage')} className="nav__logo-img" />
         </NavLink>
 
-        {/* Language selector at toolbar level */}
+        {/* Language selector and connection status at toolbar level */}
         <div className="nav__language-toolbar" style={{visibility: menuVisible}}>
+          <ConnectionStatusIndicator />
           <LanguageSelector />
         </div>
 

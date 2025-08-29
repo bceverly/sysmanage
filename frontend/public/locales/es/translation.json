@@ -3,7 +3,8 @@
     "dashboard": "Tablero",
     "hosts": "Hosts",
     "users": "Usuarios",
-    "logout": "Cerrar Sesión"
+    "logout": "Cerrar Sesión",
+    "logoAlt": "SysManage"
   },
   "login": {
     "title": "Iniciar Sesión en SysManage",
@@ -134,10 +135,33 @@
     "failedAttempts": "Intentos de Inicio Fallidos",
     "lockedAt": "Bloqueado el"
   },
-  "nav": {
-    "logoAlt": "SysManage"
-  },
   "logout": {
     "loading": "Cerrando sesión..."
+  },
+  "serverDown": {
+    "title": "Conexión Interrumpida",
+    "titleFailed": "Servidor No Disponible",
+    "message": "La conexión al servidor se ha interrumpido. Intentando reconectar automáticamente.",
+    "messageFailed": "No se puede conectar al servidor después de múltiples intentos. Contacte al soporte o intente más tarde.",
+    "details": "Detalles de Conexión:",
+    "attempts": "Intentos: {{count}}",
+    "lastConnected": "Última conexión: {{time}}",
+    "nextRetry": "Siguiente intento en:",
+    "retrying": "Reintentando...",
+    "retryNow": "Reintentar Ahora",
+    "resetRetries": "Reiniciar Intentos",
+    "secondsRemaining": "{{seconds}}s",
+    "timeRemaining": "{{minutes}}m {{seconds}}s",
+    "error": "Error"
+  },
+  "connectionStatus": {
+    "connected": "Conectado",
+    "retrying": "Reintentando",
+    "offline": "Sin Conexión",
+    "disconnected": "Desconectado",
+    "connectedTooltip": "Conectado al servidor",
+    "retryingTooltip": "Intentando reconectar al servidor",
+    "offlineTooltip": "No se puede conectar al servidor",
+    "disconnectedTooltip": "Conexión perdida, reintentando..."
   }
 }

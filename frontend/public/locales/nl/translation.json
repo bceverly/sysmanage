@@ -137,5 +137,31 @@
     "yes": "Ja",
     "no": "Nee",
     "id": "ID"
+  },
+  "serverDown": {
+    "title": "Verbinding Onderbroken",
+    "titleFailed": "Server Niet Beschikbaar",
+    "message": "De verbinding met de server is onderbroken. Er wordt automatisch geprobeerd opnieuw verbinding te maken.",
+    "messageFailed": "Kan geen verbinding maken met de server na meerdere pogingen. Neem contact op met ondersteuning of probeer het later opnieuw.",
+    "details": "Verbindingsdetails:",
+    "attempts": "Pogingen: {{count}}",
+    "lastConnected": "Laatst verbonden: {{time}}",
+    "nextRetry": "Volgende poging over:",
+    "retrying": "Opnieuw proberen...",
+    "retryNow": "Nu Opnieuw Proberen",
+    "resetRetries": "Pogingen Resetten",
+    "secondsRemaining": "{{seconds}}s",
+    "timeRemaining": "{{minutes}}m {{seconds}}s",
+    "error": "Fout"
+  },
+  "connectionStatus": {
+    "connected": "Verbonden",
+    "retrying": "Opnieuw Proberen",
+    "offline": "Offline",
+    "disconnected": "Niet Verbonden",
+    "connectedTooltip": "Verbonden met server",
+    "retryingTooltip": "Proberen opnieuw verbinding te maken met server",
+    "offlineTooltip": "Kan geen verbinding maken met server",
+    "disconnectedTooltip": "Verbinding verloren, opnieuw proberen..."
   }
 }

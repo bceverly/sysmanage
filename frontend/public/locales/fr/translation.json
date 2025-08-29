@@ -3,7 +3,8 @@
     "dashboard": "Tableau de bord",
     "hosts": "Hôtes",
     "users": "Utilisateurs",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "logoAlt": "SysManage"
   },
   "login": {
     "title": "Connexion à SysManage",
@@ -134,10 +135,33 @@
     "failedAttempts": "Tentatives de connexion échouées",
     "lockedAt": "Verrouillé le"
   },
-  "nav": {
-    "logoAlt": "SysManage"
-  },
   "logout": {
     "loading": "Déconnexion en cours..."
+  },
+  "serverDown": {
+    "title": "Connexion Interrompue",
+    "titleFailed": "Serveur Indisponible",
+    "message": "La connexion au serveur a été interrompue. Tentative de reconnexion automatique.",
+    "messageFailed": "Impossible de se connecter au serveur après plusieurs tentatives. Veuillez contacter le support ou réessayer plus tard.",
+    "details": "Détails de Connexion :",
+    "attempts": "Tentatives : {{count}}",
+    "lastConnected": "Dernière connexion : {{time}}",
+    "nextRetry": "Prochaine tentative dans :",
+    "retrying": "Nouvelle tentative...",
+    "retryNow": "Réessayer Maintenant",
+    "resetRetries": "Réinitialiser les Tentatives",
+    "secondsRemaining": "{{seconds}}s",
+    "timeRemaining": "{{minutes}}m {{seconds}}s",
+    "error": "Erreur"
+  },
+  "connectionStatus": {
+    "connected": "Connecté",
+    "retrying": "Nouvelle tentative",
+    "offline": "Hors ligne",
+    "disconnected": "Déconnecté",
+    "connectedTooltip": "Connecté au serveur",
+    "retryingTooltip": "Tentative de reconnexion au serveur",
+    "offlineTooltip": "Impossible de se connecter au serveur",
+    "disconnectedTooltip": "Connexion perdue, nouvelle tentative..."
   }
 }
