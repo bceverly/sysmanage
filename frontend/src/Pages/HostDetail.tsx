@@ -15,6 +15,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ComputerIcon from '@mui/icons-material/Computer';
 import SecurityIcon from '@mui/icons-material/Security';
 import InfoIcon from '@mui/icons-material/Info';
+import MemoryIcon from '@mui/icons-material/Memory';
+import StorageIcon from '@mui/icons-material/Storage';
 import { useTranslation } from 'react-i18next';
 
 import { SysManageHost, doGetHostByID } from '../Services/hosts';
@@ -78,6 +80,22 @@ const HostDetail = () => {
             case 'revoked': return 'error';
             default: return 'default';
         }
+    };
+
+    const formatMemorySize = (mb: number | undefined) => {
+        if (!mb) return t('common.notAvailable');
+        if (mb >= 1024) {
+            return `${(mb / 1024).toFixed(1)} GB`;
+        }
+        return `${mb} MB`;
+    };
+
+    const formatCpuFrequency = (mhz: number | undefined) => {
+        if (!mhz) return t('common.notAvailable');
+        if (mhz >= 1000) {
+            return `${(mhz / 1000).toFixed(1)} GHz`;
+        }
+        return `${mhz} MHz`;
     };
 
     if (loading) {
@@ -252,6 +270,124 @@ const HostDetail = () => {
                                         <Box sx={{ mt: 1, p: 1, backgroundColor: 'grey.900', borderRadius: 1, overflow: 'auto' }}>
                                             <Typography variant="body2" component="pre" sx={{ fontSize: '0.75rem', whiteSpace: 'pre-wrap' }}>
                                                 {host.os_details}
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+                                )}
+                            </Grid>
+                        </CardContent>
+                    </Card>
+                </Grid>
+
+                {/* Hardware Information */}
+                <Grid item xs={12}>
+                    <Card>
+                        <CardContent>
+                            <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+                                <MemoryIcon sx={{ mr: 1 }} />
+                                {t('hostDetail.hardwareInfo', 'Hardware Information')}
+                            </Typography>
+                            <Grid container spacing={3}>
+                                {/* CPU Information */}
+                                <Grid item xs={12} md={6}>
+                                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                                        {t('hostDetail.cpuInfo', 'CPU')}
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('hostDetail.cpuVendor', 'CPU Vendor')}
+                                            </Typography>
+                                            <Typography variant="body1">{host.cpu_vendor || t('common.notAvailable')}</Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('hostDetail.cpuModel', 'CPU Model')}
+                                            </Typography>
+                                            <Typography variant="body1">{host.cpu_model || t('common.notAvailable')}</Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('hostDetail.cpuCores', 'Cores')}
+                                            </Typography>
+                                            <Typography variant="body1">{host.cpu_cores || t('common.notAvailable')}</Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('hostDetail.cpuThreads', 'Threads')}
+                                            </Typography>
+                                            <Typography variant="body1">{host.cpu_threads || t('common.notAvailable')}</Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('hostDetail.cpuFrequency', 'Frequency')}
+                                            </Typography>
+                                            <Typography variant="body1">{formatCpuFrequency(host.cpu_frequency_mhz)}</Typography>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+
+                                {/* Memory Information */}
+                                <Grid item xs={12} md={6}>
+                                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                                        {t('hostDetail.memoryInfo', 'Memory')}
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('hostDetail.totalMemory', 'Total Memory')}
+                                            </Typography>
+                                            <Typography variant="body1">{formatMemorySize(host.memory_total_mb)}</Typography>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+
+                                {/* Hardware Update Timestamp */}
+                                <Grid item xs={12}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('hostDetail.hardwareUpdated', 'Hardware Info Updated')}
+                                    </Typography>
+                                    <Typography variant="body1">{formatDate(host.hardware_updated_at)}</Typography>
+                                </Grid>
+
+                                {/* Storage Details */}
+                                {host.storage_details && (
+                                    <Grid item xs={12}>
+                                        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                                            <StorageIcon sx={{ mr: 1 }} />
+                                            {t('hostDetail.storageDetails', 'Storage Details')}
+                                        </Typography>
+                                        <Box sx={{ mt: 1, p: 1, backgroundColor: 'grey.900', borderRadius: 1, overflow: 'auto' }}>
+                                            <Typography variant="body2" component="pre" sx={{ fontSize: '0.75rem', whiteSpace: 'pre-wrap' }}>
+                                                {host.storage_details}
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+                                )}
+
+                                {/* Network Details */}
+                                {host.network_details && (
+                                    <Grid item xs={12}>
+                                        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                                            {t('hostDetail.networkDetails', 'Network Interfaces')}
+                                        </Typography>
+                                        <Box sx={{ mt: 1, p: 1, backgroundColor: 'grey.900', borderRadius: 1, overflow: 'auto' }}>
+                                            <Typography variant="body2" component="pre" sx={{ fontSize: '0.75rem', whiteSpace: 'pre-wrap' }}>
+                                                {host.network_details}
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+                                )}
+
+                                {/* Additional Hardware Details */}
+                                {host.hardware_details && (
+                                    <Grid item xs={12}>
+                                        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                                            {t('hostDetail.additionalHardware', 'Additional Hardware Details')}
+                                        </Typography>
+                                        <Box sx={{ mt: 1, p: 1, backgroundColor: 'grey.900', borderRadius: 1, overflow: 'auto' }}>
+                                            <Typography variant="body2" component="pre" sx={{ fontSize: '0.75rem', whiteSpace: 'pre-wrap' }}>
+                                                {host.hardware_details}
                                             </Typography>
                                         </Box>
                                     </Grid>
