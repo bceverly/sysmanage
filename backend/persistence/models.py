@@ -45,6 +45,19 @@ class Host(Base):
     processor = Column(String(100), nullable=True)
     os_details = Column(Text, nullable=True)  # JSON field for additional OS info
     os_version_updated_at = Column(DateTime(timezone=True), nullable=True)
+    # Hardware inventory fields
+    cpu_vendor = Column(String(100), nullable=True)
+    cpu_model = Column(String(200), nullable=True)
+    cpu_cores = Column(Integer, nullable=True)
+    cpu_threads = Column(Integer, nullable=True)
+    cpu_frequency_mhz = Column(Integer, nullable=True)
+    memory_total_mb = Column(BigInteger, nullable=True)
+    storage_details = Column(Text, nullable=True)  # JSON field for storage devices
+    network_details = Column(Text, nullable=True)  # JSON field for network interfaces
+    hardware_details = Column(
+        Text, nullable=True
+    )  # JSON field for additional hardware info
+    hardware_updated_at = Column(DateTime(timezone=True), nullable=True)
 
 
 class User(Base):

@@ -27,6 +27,17 @@ type SysManageHost = {
     client_certificate?: string;
     certificate_serial?: string;
     certificate_issued_at?: string;
+    // Hardware inventory fields
+    cpu_vendor?: string;
+    cpu_model?: string;
+    cpu_cores?: number;
+    cpu_threads?: number;
+    cpu_frequency_mhz?: number;
+    memory_total_mb?: number;
+    storage_details?: string;
+    network_details?: string;
+    hardware_details?: string;
+    hardware_updated_at?: string;
 }
 
 function processError(error: AxiosError) {
@@ -196,5 +207,32 @@ const doRefreshHostData = async (id: BigInt) => {
     return result;
 };
 
+const doRefreshHardwareData = async (id: BigInt) => {
+    let result = {} as SuccessResponse;
+
+    await api.post<SuccessResponse>("/host/" + id + "/request-hardware-update")
+    .then((response) => {
+        // No error - process response
+        result = response.data;
+        return Promise.resolve(response);
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doRefreshAllHostData = async (id: BigInt) => {
+    // Request both OS and hardware updates
+    const promises = [
+        doRefreshHostData(id),
+        doRefreshHardwareData(id)
+    ];
+    
+    await Promise.all(promises);
+    return { result: true } as SuccessResponse;
+};
+
 export type { SuccessResponse, SysManageHost };
-export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData };
+export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshAllHostData };

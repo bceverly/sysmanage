@@ -18,6 +18,7 @@ class MessageType(str, Enum):
     COMMAND_RESULT = "command_result"
     ERROR = "error"
     OS_VERSION_UPDATE = "os_version_update"
+    HARDWARE_UPDATE = "hardware_update"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -194,6 +195,37 @@ class OSVersionUpdateMessage(Message):
         super().__init__(MessageType.OS_VERSION_UPDATE, data)
 
 
+class HardwareUpdateMessage(Message):
+    """Message containing hardware information from agent."""
+
+    def __init__(
+        self,
+        cpu_vendor: str = None,
+        cpu_model: str = None,
+        cpu_cores: int = None,
+        cpu_threads: int = None,
+        cpu_frequency_mhz: int = None,
+        memory_total_mb: int = None,
+        storage_details: str = None,
+        network_details: str = None,
+        hardware_details: str = None,
+        **kwargs
+    ):
+        data = {
+            "cpu_vendor": cpu_vendor,
+            "cpu_model": cpu_model,
+            "cpu_cores": cpu_cores,
+            "cpu_threads": cpu_threads,
+            "cpu_frequency_mhz": cpu_frequency_mhz,
+            "memory_total_mb": memory_total_mb,
+            "storage_details": storage_details,
+            "network_details": network_details,
+            "hardware_details": hardware_details,
+            **kwargs,
+        }
+        super().__init__(MessageType.HARDWARE_UPDATE, data)
+
+
 # Message factory for creating messages from raw data
 def create_message(raw_data: Dict[str, Any]) -> Message:
     """Create appropriate message object from raw dictionary data."""
@@ -268,6 +300,35 @@ def create_message(raw_data: Dict[str, Any]) -> Message:
                     "machine_architecture",
                     "python_version",
                     "os_info",
+                ]
+            }
+        )
+    if message_type == MessageType.HARDWARE_UPDATE:
+        data = raw_data.get("data", {})
+        return HardwareUpdateMessage(
+            cpu_vendor=data.get("cpu_vendor"),
+            cpu_model=data.get("cpu_model"),
+            cpu_cores=data.get("cpu_cores"),
+            cpu_threads=data.get("cpu_threads"),
+            cpu_frequency_mhz=data.get("cpu_frequency_mhz"),
+            memory_total_mb=data.get("memory_total_mb"),
+            storage_details=data.get("storage_details"),
+            network_details=data.get("network_details"),
+            hardware_details=data.get("hardware_details"),
+            **{
+                k: v
+                for k, v in data.items()
+                if k
+                not in [
+                    "cpu_vendor",
+                    "cpu_model",
+                    "cpu_cores",
+                    "cpu_threads",
+                    "cpu_frequency_mhz",
+                    "memory_total_mb",
+                    "storage_details",
+                    "network_details",
+                    "hardware_details",
                 ]
             }
         )

@@ -11,7 +11,7 @@ import SyncIcon from '@mui/icons-material/Sync';
 import { Chip, Typography, IconButton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshHostData } from '../Services/hosts'
+import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData } from '../Services/hosts'
 import { useTablePageSize } from '../hooks/useTablePageSize';
 
 const Hosts = () => {
@@ -199,10 +199,10 @@ const Hosts = () => {
 
     const handleRefreshData = async () => {
         try {
-            // Request OS data refresh for selected hosts
+            // Request comprehensive data refresh (OS + hardware) for selected hosts
             const refreshPromises = selection.map(id => {
                 const theID = BigInt(id.toString());
-                return doRefreshHostData(theID);
+                return doRefreshAllHostData(theID);
             });
             
             await Promise.all(refreshPromises);
@@ -211,9 +211,9 @@ const Hosts = () => {
             setSelection([]);
             
             // Optional: Show success message or refresh data after a delay
-            console.log(`Refresh data requested for ${selection.length} hosts`);
+            console.log(`Comprehensive data refresh requested for ${selection.length} hosts`);
         } catch (error) {
-            console.error('Error requesting data refresh:', error);
+            console.error('Error requesting comprehensive data refresh:', error);
         }
     }
 
@@ -325,7 +325,7 @@ const Hosts = () => {
                     onClick={handleRefreshData}
                     color="info"
                 >
-                    {t('hosts.refreshHosts', 'Refresh Hosts')}
+                    {t('hosts.refreshAllData', 'Refresh All Data')}
                 </Button>
                 <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
                     {t('common.delete')} {t('common.selected', { defaultValue: 'Selected' })}

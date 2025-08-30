@@ -417,3 +417,149 @@ async def request_os_version_update(host_id: int):
             raise HTTPException(status_code=503, detail="Agent is not connected")
 
         return {"result": True, "message": "OS version update requested"}
+
+
+@router.post("/host/{host_id}/update-hardware", dependencies=[Depends(JWTBearer())])
+async def update_host_hardware(host_id: int, hardware_data: dict):
+    """
+    Update hardware information for a specific host.
+    This endpoint receives hardware data from the agent and stores it in the database.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the host
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+
+        if not host:
+            raise HTTPException(status_code=404, detail="Host not found")
+
+        # Update hardware fields
+        if "cpu_vendor" in hardware_data:
+            host.cpu_vendor = hardware_data["cpu_vendor"]
+        if "cpu_model" in hardware_data:
+            host.cpu_model = hardware_data["cpu_model"]
+        if "cpu_cores" in hardware_data:
+            host.cpu_cores = hardware_data["cpu_cores"]
+        if "cpu_threads" in hardware_data:
+            host.cpu_threads = hardware_data["cpu_threads"]
+        if "cpu_frequency_mhz" in hardware_data:
+            host.cpu_frequency_mhz = hardware_data["cpu_frequency_mhz"]
+        if "memory_total_mb" in hardware_data:
+            host.memory_total_mb = hardware_data["memory_total_mb"]
+        if "storage_details" in hardware_data:
+            host.storage_details = hardware_data["storage_details"]
+        if "network_details" in hardware_data:
+            host.network_details = hardware_data["network_details"]
+        if "hardware_details" in hardware_data:
+            host.hardware_details = hardware_data["hardware_details"]
+
+        host.hardware_updated_at = datetime.now(timezone.utc)
+        host.last_access = datetime.now(timezone.utc)
+
+        session.commit()
+        session.refresh(host)
+
+        return {"result": True, "message": "Hardware information updated successfully"}
+
+
+@router.post(
+    "/host/{host_id}/request-hardware-update", dependencies=[Depends(JWTBearer())]
+)
+async def request_hardware_update(host_id: int):
+    """
+    Request an agent to update its hardware information.
+    This sends a message via WebSocket to the agent requesting fresh hardware data.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the host
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+
+        if not host:
+            raise HTTPException(status_code=404, detail="Host not found")
+
+        if host.approval_status != "approved":
+            raise HTTPException(status_code=400, detail="Host is not approved")
+
+        # Create command message for hardware update request
+        command_message = create_command_message(
+            command_type="update_hardware", parameters={}
+        )
+
+        # Send command to agent via WebSocket
+        success = await connection_manager.send_to_host(host_id, command_message)
+
+        if not success:
+            raise HTTPException(status_code=503, detail="Agent is not connected")
+
+        return {"result": True, "message": "Hardware update requested"}
+
+
+@router.post("/hosts/request-hardware-update", dependencies=[Depends(JWTBearer())])
+async def request_hardware_update_bulk(host_ids: list[int]):
+    """
+    Request multiple agents to update their hardware information.
+    This sends messages via WebSocket to the selected agents requesting fresh hardware data.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    results = []
+
+    with session_local() as session:
+        for host_id in host_ids:
+            # Find the host
+            host = session.query(models.Host).filter(models.Host.id == host_id).first()
+
+            if not host:
+                results.append(
+                    {"host_id": host_id, "success": False, "error": "Host not found"}
+                )
+                continue
+
+            if host.approval_status != "approved":
+                results.append(
+                    {
+                        "host_id": host_id,
+                        "success": False,
+                        "error": "Host is not approved",
+                    }
+                )
+                continue
+
+            # Create command message for hardware update request
+            command_message = create_command_message(
+                command_type="update_hardware", parameters={}
+            )
+
+            # Send command to agent via WebSocket
+            success = await connection_manager.send_to_host(host_id, command_message)
+
+            if success:
+                results.append(
+                    {
+                        "host_id": host_id,
+                        "success": True,
+                        "message": "Hardware update requested",
+                    }
+                )
+            else:
+                results.append(
+                    {
+                        "host_id": host_id,
+                        "success": False,
+                        "error": "Agent is not connected",
+                    }
+                )
+
+    return {"results": results}

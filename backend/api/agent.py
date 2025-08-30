@@ -264,6 +264,65 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
     await connection.send_message(response)
 
 
+async def handle_hardware_update(db: Session, connection, message_data: dict):
+    """Handle hardware update message from agent."""
+    hostname = connection.hostname
+    if not hostname:
+        return
+
+    print("=== Hardware Update Data Received ===")
+    print(f"FQDN: {hostname}")
+    print(f"CPU Vendor: {message_data.get('cpu_vendor')}")
+    print(f"CPU Model: {message_data.get('cpu_model')}")
+    print(f"CPU Cores: {message_data.get('cpu_cores')}")
+    print(f"CPU Threads: {message_data.get('cpu_threads')}")
+    print(f"Memory Total MB: {message_data.get('memory_total_mb')}")
+    print("=== End Hardware Data ===")
+
+    # Update host with new hardware information
+    host = db.query(Host).filter(Host.fqdn == hostname).first()
+
+    if host:
+        print("Updating existing host with hardware data...")
+        try:
+            # Update hardware fields
+            host.cpu_vendor = message_data.get("cpu_vendor")
+            host.cpu_model = message_data.get("cpu_model")
+            host.cpu_cores = message_data.get("cpu_cores")
+            host.cpu_threads = message_data.get("cpu_threads")
+            host.cpu_frequency_mhz = message_data.get("cpu_frequency_mhz")
+            host.memory_total_mb = message_data.get("memory_total_mb")
+            host.storage_details = message_data.get("storage_details")
+            host.network_details = message_data.get("network_details")
+            host.hardware_details = message_data.get("hardware_details")
+
+            host.hardware_updated_at = datetime.now(timezone.utc)
+            host.last_access = datetime.now(timezone.utc)
+
+            print(
+                f"Before commit - CPU Vendor: {host.cpu_vendor}, CPU Model: {host.cpu_model}"
+            )
+            db.commit()
+            print("Database commit successful")
+            db.refresh(host)
+            print(
+                f"After refresh - CPU Vendor: {host.cpu_vendor}, Memory: {host.memory_total_mb} MB"
+            )
+
+        except Exception as e:
+            print(f"Error updating host with hardware data: {e}")
+            db.rollback()
+            raise
+
+    # Send acknowledgment
+    response = {
+        "message_type": "ack",
+        "message_id": message_data.get("message_id"),
+        "data": {"status": "hardware_updated"},
+    }
+    await connection.send_message(response)
+
+
 @router.websocket("/agent/connect")
 async def agent_connect(websocket: WebSocket):
     """
@@ -337,6 +396,10 @@ async def agent_connect(websocket: WebSocket):
                 elif message.message_type == MessageType.OS_VERSION_UPDATE:
                     # Handle OS version update from agent
                     await handle_os_version_update(db, connection, message.data)
+
+                elif message.message_type == MessageType.HARDWARE_UPDATE:
+                    # Handle hardware update from agent
+                    await handle_hardware_update(db, connection, message.data)
 
                 else:
                     # Unknown message type - send error
