@@ -325,7 +325,7 @@ const HostDetail = () => {
             <Grid container spacing={3}>
                 {/* Basic Information */}
                 <Grid item xs={12} md={6}>
-                    <Card>
+                    <Card sx={{ height: '100%' }}>
                         <CardContent>
                             <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
                                 <InfoIcon sx={{ mr: 1 }} />
@@ -393,7 +393,7 @@ const HostDetail = () => {
 
                 {/* Operating System Information */}
                 <Grid item xs={12} md={6}>
-                    <Card>
+                    <Card sx={{ height: '100%' }}>
                         <CardContent>
                             <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
                                 <ComputerIcon sx={{ mr: 1 }} />
