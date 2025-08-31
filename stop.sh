@@ -9,6 +9,31 @@ echo "Stopping SysManage Server..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Function to get configuration value
+get_config_value() {
+    local key=$1
+    local config_file="sysmanage.yaml"
+    
+    if [ -f "$config_file" ]; then
+        python3 -c "
+import yaml
+import sys
+try:
+    with open('$config_file', 'r') as f:
+        config = yaml.safe_load(f)
+    keys = '$key'.split('.')
+    value = config
+    for k in keys:
+        value = value[k]
+    print(value)
+except:
+    sys.exit(1)
+" 2>/dev/null
+    else
+        return 1
+    fi
+}
+
 # Function to kill process by PID file
 kill_by_pidfile() {
     local pidfile=$1
@@ -37,13 +62,21 @@ kill_by_pattern() {
     
     local pids=$(pgrep -f "$pattern" 2>/dev/null)
     if [ -n "$pids" ]; then
-        echo "Stopping $service_name processes..."
+        local pid_count=$(echo "$pids" | wc -l)
+        echo "Found $pid_count $service_name process(es), stopping them..."
+        echo "$pids" | while read pid; do
+            if [ -n "$pid" ]; then
+                local cmd=$(ps -p "$pid" -o command= 2>/dev/null | head -c 60)
+                echo "  Stopping PID $pid: $cmd"
+            fi
+        done
         echo "$pids" | xargs kill 2>/dev/null
         sleep 2
         # Force kill if still running
         local remaining_pids=$(pgrep -f "$pattern" 2>/dev/null)
         if [ -n "$remaining_pids" ]; then
-            echo "Force stopping $service_name processes..."
+            local remaining_count=$(echo "$remaining_pids" | wc -l)
+            echo "⚠️  $remaining_count $service_name process(es) still running, force stopping..."
             echo "$remaining_pids" | xargs kill -9 2>/dev/null
         fi
     fi
@@ -63,17 +96,25 @@ kill_by_pattern "node.*react-scripts.*start" "Frontend Web UI (Node)"
 # Kill any processes on the specific ports
 echo "Checking for processes on SysManage ports..."
 
-# Backend port (6443)
-backend_pid=$(lsof -ti:6443 2>/dev/null)
+# Get configured ports
+BACKEND_PORT=$(get_config_value "webui.port")
+if [ $? -ne 0 ] || [ -z "$BACKEND_PORT" ]; then
+    BACKEND_PORT=8080  # Default fallback
+fi
+
+FRONTEND_PORT=3000  # React dev server default
+
+# Backend port
+backend_pid=$(lsof -ti:$BACKEND_PORT 2>/dev/null)
 if [ -n "$backend_pid" ]; then
-    echo "Killing process on port 6443 (PID: $backend_pid)..."
+    echo "Killing process on port $BACKEND_PORT (PID: $backend_pid)..."
     kill -9 $backend_pid 2>/dev/null
 fi
 
-# Frontend port (7443)
-frontend_pid=$(lsof -ti:7443 2>/dev/null)
+# Frontend port
+frontend_pid=$(lsof -ti:$FRONTEND_PORT 2>/dev/null)
 if [ -n "$frontend_pid" ]; then
-    echo "Killing process on port 7443 (PID: $frontend_pid)..."
+    echo "Killing process on port $FRONTEND_PORT (PID: $frontend_pid)..."
     kill -9 $frontend_pid 2>/dev/null
 fi
 
@@ -86,8 +127,8 @@ fi
 
 # Verify everything is stopped
 sleep 1
-backend_check=$(lsof -ti:6443 2>/dev/null)
-frontend_check=$(lsof -ti:7443 2>/dev/null)
+backend_check=$(lsof -ti:$BACKEND_PORT 2>/dev/null)
+frontend_check=$(lsof -ti:$FRONTEND_PORT 2>/dev/null)
 
 if [ -z "$backend_check" ] && [ -z "$frontend_check" ]; then
     echo ""
@@ -96,10 +137,10 @@ else
     echo ""
     echo "⚠️  Warning: Some processes may still be running"
     if [ -n "$backend_check" ]; then
-        echo "   Backend still running on port 6443"
+        echo "   Backend still running on port $BACKEND_PORT"
     fi
     if [ -n "$frontend_check" ]; then
-        echo "   Frontend still running on port 7443"
+        echo "   Frontend still running on port $FRONTEND_PORT"
     fi
     echo "   You may need to manually kill these processes"
 fi

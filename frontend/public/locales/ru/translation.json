@@ -103,7 +103,18 @@
     "storageDetails": "Детали Хранения",
     "networkDetails": "Сетевые Интерфейсы",
     "additionalHardware": "Дополнительные Детали Железа",
-    "certificateInfo": "Информация о сертификате",
+    "mountPoint": "Точка монтирования",
+    "capacity": "Ёмкость",
+    "filesystem": "Файловая система",
+    "deviceType": "Тип устройства",
+    "interfaceType": "Тип интерфейса",
+    "ipv4Address": "IPv4 адрес",
+    "ipv6Address": "IPv6 адрес",
+    "macAddress": "MAC адрес",
+    "speed": "Скорость",
+    "storageDeviceDetails": "Детали устройства хранения",
+    "networkInterfaceDetails": "Детали сетевого интерфейса",
+    "additionalOSDetails": "Дополнительные детали ОС",    "certificateInfo": "Информация о сертификате",
     "certificateSerial": "Серийный номер сертификата",
     "certificateIssued": "Сертификат выдан",
     "hasCertificate": "Имеет клиентский сертификат"
@@ -150,6 +161,7 @@
     "invalidDate": "Неверная дата",
     "yes": "Да",
     "no": "Нет",
+    "unassigned": "Не назначено",
     "id": "ID"
   },
   "serverDown": {

@@ -450,6 +450,58 @@ async def update_host_hardware(host_id: int, hardware_data: dict):
             host.cpu_frequency_mhz = hardware_data["cpu_frequency_mhz"]
         if "memory_total_mb" in hardware_data:
             host.memory_total_mb = hardware_data["memory_total_mb"]
+        # Handle normalized storage devices
+        if "storage_devices" in hardware_data:
+            # Delete existing storage devices for this host
+            session.query(models.StorageDevice).filter(
+                models.StorageDevice.host_id == host_id
+            ).delete()
+
+            # Add new storage devices
+            for device_data in hardware_data["storage_devices"]:
+                if not device_data.get("error"):  # Skip error entries
+                    storage_device = models.StorageDevice(
+                        host_id=host_id,
+                        name=device_data.get("name"),
+                        device_path=device_data.get("device_path"),
+                        mount_point=device_data.get("mount_point"),
+                        file_system=device_data.get("file_system"),
+                        device_type=device_data.get("device_type"),
+                        capacity_bytes=device_data.get("capacity_bytes"),
+                        used_bytes=device_data.get("used_bytes"),
+                        available_bytes=device_data.get("available_bytes"),
+                        created_at=datetime.now(timezone.utc),
+                        updated_at=datetime.now(timezone.utc),
+                    )
+                    session.add(storage_device)
+
+        # Handle normalized network interfaces
+        if "network_interfaces" in hardware_data:
+            # Delete existing network interfaces for this host
+            session.query(models.NetworkInterface).filter(
+                models.NetworkInterface.host_id == host_id
+            ).delete()
+
+            # Add new network interfaces
+            for interface_data in hardware_data["network_interfaces"]:
+                if not interface_data.get("error"):  # Skip error entries
+                    network_interface = models.NetworkInterface(
+                        host_id=host_id,
+                        name=interface_data.get("name"),
+                        interface_type=interface_data.get("interface_type"),
+                        hardware_type=interface_data.get("hardware_type"),
+                        mac_address=interface_data.get("mac_address"),
+                        ipv4_address=interface_data.get("ipv4_address"),
+                        ipv6_address=interface_data.get("ipv6_address"),
+                        subnet_mask=interface_data.get("subnet_mask"),
+                        is_active=interface_data.get("is_active", False),
+                        speed_mbps=interface_data.get("speed_mbps"),
+                        created_at=datetime.now(timezone.utc),
+                        updated_at=datetime.now(timezone.utc),
+                    )
+                    session.add(network_interface)
+
+        # Keep backward compatibility for JSON fields (for migration period)
         if "storage_details" in hardware_data:
             host.storage_details = hardware_data["storage_details"]
         if "network_details" in hardware_data:
@@ -464,6 +516,110 @@ async def update_host_hardware(host_id: int, hardware_data: dict):
         session.refresh(host)
 
         return {"result": True, "message": "Hardware information updated successfully"}
+
+
+@router.get("/host/{host_id}/storage", dependencies=[Depends(JWTBearer())])
+async def get_host_storage(host_id: int):
+    """
+    Get storage devices for a specific host from the normalized storage_devices table.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the host first to ensure it exists
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+        if not host:
+            raise HTTPException(status_code=404, detail="Host not found")
+
+        # Get storage devices
+        storage_devices = (
+            session.query(models.StorageDevice)
+            .filter(models.StorageDevice.host_id == host_id)
+            .all()
+        )
+
+        # Convert to dict format
+        devices = []
+        for device in storage_devices:
+            devices.append(
+                {
+                    "id": device.id,
+                    "name": device.name,
+                    "device_path": device.device_path,
+                    "mount_point": device.mount_point,
+                    "file_system": device.file_system,
+                    "device_type": device.device_type,
+                    "capacity_bytes": device.capacity_bytes,
+                    "used_bytes": device.used_bytes,
+                    "available_bytes": device.available_bytes,
+                    "is_physical": device.is_physical,
+                    "created_at": (
+                        device.created_at.isoformat() if device.created_at else None
+                    ),
+                    "updated_at": (
+                        device.updated_at.isoformat() if device.updated_at else None
+                    ),
+                }
+            )
+
+        return devices
+
+
+@router.get("/host/{host_id}/network", dependencies=[Depends(JWTBearer())])
+async def get_host_network(host_id: int):
+    """
+    Get network interfaces for a specific host from the normalized network_interfaces table.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the host first to ensure it exists
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+        if not host:
+            raise HTTPException(status_code=404, detail="Host not found")
+
+        # Get network interfaces
+        network_interfaces = (
+            session.query(models.NetworkInterface)
+            .filter(models.NetworkInterface.host_id == host_id)
+            .all()
+        )
+
+        # Convert to dict format
+        interfaces = []
+        for interface in network_interfaces:
+            interfaces.append(
+                {
+                    "id": interface.id,
+                    "name": interface.name,
+                    "interface_type": interface.interface_type,
+                    "hardware_type": interface.hardware_type,
+                    "mac_address": interface.mac_address,
+                    "ipv4_address": interface.ipv4_address,
+                    "ipv6_address": interface.ipv6_address,
+                    "subnet_mask": interface.subnet_mask,
+                    "is_active": interface.is_active,
+                    "speed_mbps": interface.speed_mbps,
+                    "created_at": (
+                        interface.created_at.isoformat()
+                        if interface.created_at
+                        else None
+                    ),
+                    "updated_at": (
+                        interface.updated_at.isoformat()
+                        if interface.updated_at
+                        else None
+                    ),
+                }
+            )
+
+        return interfaces
 
 
 @router.post(

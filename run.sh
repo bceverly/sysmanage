@@ -12,6 +12,31 @@ cd "$SCRIPT_DIR"
 # Create logs directory if it doesn't exist
 mkdir -p logs
 
+# Function to get configuration value
+get_config_value() {
+    local key=$1
+    local config_file="sysmanage.yaml"
+    
+    if [ -f "$config_file" ]; then
+        python3 -c "
+import yaml
+import sys
+try:
+    with open('$config_file', 'r') as f:
+        config = yaml.safe_load(f)
+    keys = '$key'.split('.')
+    value = config
+    for k in keys:
+        value = value[k]
+    print(value)
+except:
+    sys.exit(1)
+" 2>/dev/null
+    else
+        return 1
+    fi
+}
+
 # Function to check if a port is in use
 check_port() {
     local port=$1
@@ -44,9 +69,76 @@ wait_for_service() {
     return 1
 }
 
+# Function to check for running server processes
+check_existing_processes() {
+    local found_processes=false
+    
+    # Check for backend processes
+    local backend_pids=$(pgrep -f "backend.main" 2>/dev/null)
+    if [ -n "$backend_pids" ]; then
+        echo "⚠️  Found existing backend processes:"
+        echo "$backend_pids" | while read pid; do
+            if [ -n "$pid" ]; then
+                local cmd=$(ps -p "$pid" -o command= 2>/dev/null | head -c 80)
+                echo "   PID $pid: $cmd"
+            fi
+        done
+        found_processes=true
+    fi
+    
+    # Check for frontend processes
+    local frontend_pids=$(pgrep -f "react-scripts start" 2>/dev/null)
+    if [ -n "$frontend_pids" ]; then
+        echo "⚠️  Found existing frontend processes:"
+        echo "$frontend_pids" | while read pid; do
+            if [ -n "$pid" ]; then
+                local cmd=$(ps -p "$pid" -o command= 2>/dev/null | head -c 80)
+                echo "   PID $pid: $cmd"
+            fi
+        done
+        found_processes=true
+    fi
+    
+    # Check configured ports
+    BACKEND_PORT=$(get_config_value "webui.port")
+    if [ $? -ne 0 ] || [ -z "$BACKEND_PORT" ]; then
+        BACKEND_PORT=8080
+    fi
+    
+    local backend_port_pid=$(lsof -ti:$BACKEND_PORT 2>/dev/null)
+    if [ -n "$backend_port_pid" ]; then
+        echo "⚠️  Found process using backend port $BACKEND_PORT (PID: $backend_port_pid)"
+        found_processes=true
+    fi
+    
+    local frontend_port_pid=$(lsof -ti:3000 2>/dev/null)
+    if [ -n "$frontend_port_pid" ]; then
+        echo "⚠️  Found process using frontend port 3000 (PID: $frontend_port_pid)"
+        found_processes=true
+    fi
+    
+    if [ "$found_processes" = true ]; then
+        echo "Attempting to stop existing processes..."
+        return 0  # Found processes
+    else
+        echo "No existing SysManage processes found"
+        return 1  # No processes found
+    fi
+}
+
 # Stop any existing processes
-echo "Stopping any existing SysManage processes..."
-./stop.sh >/dev/null 2>&1
+if check_existing_processes; then
+    ./stop.sh
+    sleep 2
+    
+    # Verify they were stopped
+    if check_existing_processes >/dev/null 2>&1; then
+        echo "❌ ERROR: Failed to stop existing processes. Please manually stop them before continuing."
+        exit 1
+    else
+        echo "✅ Successfully stopped existing processes"
+    fi
+fi
 
 # Start the backend API server
 echo "Starting backend API server..."
@@ -60,13 +152,20 @@ if [ -f "backend/main.py" ]; then
         source venv/bin/activate
     fi
     
+    # Get backend port from configuration
+    BACKEND_PORT=$(get_config_value "webui.port")
+    if [ $? -ne 0 ] || [ -z "$BACKEND_PORT" ]; then
+        echo "WARNING: Could not read webui.port from sysmanage.yaml, using default 8080"
+        BACKEND_PORT=8080
+    fi
+    
     # Start the backend using the main.py configuration
     nohup python -m backend.main > logs/backend.log 2>&1 &
     BACKEND_PID=$!
     echo $BACKEND_PID > logs/backend.pid
     
-    # Wait for backend to be ready (using the configured port 8080)
-    if ! wait_for_service 8080 "Backend API"; then
+    # Wait for backend to be ready (using the configured port)
+    if ! wait_for_service $BACKEND_PORT "Backend API"; then
         echo "ERROR: Backend API failed to start"
         exit 1
     fi
@@ -93,8 +192,11 @@ if [ -d "frontend" ] && [ -f "frontend/package.json" ]; then
     
     cd ..
     
+    # Get frontend port (React dev server typically uses 3000)
+    FRONTEND_PORT=3000
+    
     # Wait for frontend to be ready
-    if ! wait_for_service 3000 "Frontend Web UI"; then
+    if ! wait_for_service $FRONTEND_PORT "Frontend Web UI"; then
         echo "WARNING: Frontend Web UI may not have started properly"
     fi
 else
@@ -112,9 +214,9 @@ echo ""
 echo "✅ SysManage Server is successfully running!"
 echo ""
 echo "Services:"
-echo "  🔧 Backend API:    http://localhost:8080 (WebSocket agent endpoint: ws://localhost:8080/agent/connect)"
-echo "  🌐 Frontend UI:    http://localhost:3000"
-echo "  📋 API Docs:      http://localhost:8080/docs"
+echo "  🔧 Backend API:    http://localhost:$BACKEND_PORT (WebSocket agent endpoint: ws://localhost:$BACKEND_PORT/agent/connect)"
+echo "  🌐 Frontend UI:    http://localhost:$FRONTEND_PORT"
+echo "  📋 API Docs:      http://localhost:$BACKEND_PORT/docs"
 echo ""
 echo "Logs:"
 echo "  📄 Backend:       tail -f logs/backend.log"

@@ -100,6 +100,7 @@
     "invalidDate": "Data non valida",
     "yes": "Sì",
     "no": "No",
+    "unassigned": "Non assegnato",
     "id": "ID"
   },
   "hostDetail": {
@@ -131,7 +132,18 @@
     "storageDetails": "Dettagli Archiviazione",
     "networkDetails": "Interfacce di Rete",
     "additionalHardware": "Dettagli Hardware Aggiuntivi",
-    "certificateInfo": "Informazioni certificato",
+    "mountPoint": "Punto di montaggio",
+    "capacity": "Capacità",
+    "filesystem": "File system",
+    "deviceType": "Tipo di dispositivo",
+    "interfaceType": "Tipo di interfaccia",
+    "ipv4Address": "Indirizzo IPv4",
+    "ipv6Address": "Indirizzo IPv6",
+    "macAddress": "Indirizzo MAC",
+    "speed": "Velocità",
+    "storageDeviceDetails": "Dettagli dispositivo di archiviazione",
+    "networkInterfaceDetails": "Dettagli interfaccia di rete",
+    "additionalOSDetails": "Dettagli OS aggiuntivi",    "certificateInfo": "Informazioni certificato",
     "certificateSerial": "Numero seriale certificato",
     "certificateIssued": "Certificato emesso",
     "hasCertificate": "Ha certificato client"

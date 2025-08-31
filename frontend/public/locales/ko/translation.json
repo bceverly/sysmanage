@@ -103,7 +103,18 @@
     "storageDetails": "저장소 세부사항",
     "networkDetails": "네트워크 인터페이스",
     "additionalHardware": "추가 하드웨어 세부사항",
-    "certificateInfo": "인증서 정보",
+    "mountPoint": "마운트 포인트",
+    "capacity": "용량",
+    "filesystem": "파일 시스템",
+    "deviceType": "장치 유형",
+    "interfaceType": "인터페이스 유형",
+    "ipv4Address": "IPv4 주소",
+    "ipv6Address": "IPv6 주소",
+    "macAddress": "MAC 주소",
+    "speed": "속도",
+    "storageDeviceDetails": "스토리지 장치 세부 정보",
+    "networkInterfaceDetails": "네트워크 인터페이스 세부 정보",
+    "additionalOSDetails": "추가 OS 세부 정보",    "certificateInfo": "인증서 정보",
     "certificateSerial": "인증서 시리얼 번호",
     "certificateIssued": "인증서 발급일",
     "hasCertificate": "클라이언트 인증서 보유"
@@ -150,6 +161,7 @@
     "invalidDate": "잘못된 날짜",
     "yes": "예",
     "no": "아니오",
+    "unassigned": "할당되지 않음",
     "id": "ID"
   },
   "serverDown": {

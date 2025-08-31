@@ -101,6 +101,7 @@
     "invalidDate": "無效日期",
     "yes": "是",
     "no": "否",
+    "unassigned": "未分配",
     "id": "ID"
   },
   "hostDetail": {
@@ -132,7 +133,18 @@
     "storageDetails": "儲存詳情",
     "networkDetails": "網路介面",
     "additionalHardware": "其他硬體詳情",
-    "certificateInfo": "憑證資訊",
+    "mountPoint": "掛載點",
+    "capacity": "容量",
+    "filesystem": "檔案系統",
+    "deviceType": "設備類型",
+    "interfaceType": "介面類型",
+    "ipv4Address": "IPv4位址",
+    "ipv6Address": "IPv6位址",
+    "macAddress": "MAC位址",
+    "speed": "速度",
+    "storageDeviceDetails": "儲存設備詳情",
+    "networkInterfaceDetails": "網路介面詳情",
+    "additionalOSDetails": "額外作業系統詳情",    "certificateInfo": "憑證資訊",
     "certificateSerial": "憑證序號",
     "certificateIssued": "憑證已簽發",
     "hasCertificate": "擁有用戶端憑證"

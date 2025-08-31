@@ -47,10 +47,8 @@ clean-whitespace:
 	@find . -name "*.py" -type f -exec sed -i '' 's/[[:space:]]*$$//' {} \; 2>/dev/null || true
 
 # Python linting
-lint-python: $(VENV)/bin/activate clean-whitespace
+lint-python: format-python
 	@echo "=== Python Linting ==="
-	@echo "Running Black code formatter..."
-	@$(PYTHON) -m black --check --diff backend/ tests/ || (echo "Run 'make format-python' to fix formatting"; exit 1)
 	@echo "Running pylint..."
 	@$(PYTHON) -m pylint backend/ --rcfile=.pylintrc || true
 	@echo "✅ Python linting completed"

@@ -104,7 +104,18 @@
     "storageDetails": "存储详情",
     "networkDetails": "网络接口",
     "additionalHardware": "其他硬件详情",
-    "certificateInfo": "证书信息",
+    "mountPoint": "挂载点",
+    "capacity": "容量",
+    "filesystem": "文件系统",
+    "deviceType": "设备类型",
+    "interfaceType": "接口类型",
+    "ipv4Address": "IPv4地址",
+    "ipv6Address": "IPv6地址",
+    "macAddress": "MAC地址",
+    "speed": "速度",
+    "storageDeviceDetails": "存储设备详情",
+    "networkInterfaceDetails": "网络接口详情",
+    "additionalOSDetails": "额外操作系统详情",    "certificateInfo": "证书信息",
     "certificateSerial": "证书序列号",
     "certificateIssued": "证书签发时间",
     "hasCertificate": "拥有客户端证书"
@@ -151,6 +162,7 @@
     "invalidDate": "无效日期",
     "yes": "是",
     "no": "否",
+    "unassigned": "未分配",
     "id": "ID"
   },
   "serverDown": {

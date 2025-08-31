@@ -103,7 +103,18 @@
     "storageDetails": "Opslagdetails",
     "networkDetails": "Netwerkinterfaces",
     "additionalHardware": "Aanvullende Hardware-details",
-    "certificateInfo": "Certificaatinformatie",
+    "mountPoint": "Koppelpunt",
+    "capacity": "Capaciteit",
+    "filesystem": "Bestandssysteem",
+    "deviceType": "Apparaattype",
+    "interfaceType": "Interface type",
+    "ipv4Address": "IPv4-adres",
+    "ipv6Address": "IPv6-adres",
+    "macAddress": "MAC-adres",
+    "speed": "Snelheid",
+    "storageDeviceDetails": "Opslagapparaat details",
+    "networkInterfaceDetails": "Netwerkinterface details",
+    "additionalOSDetails": "Aanvullende OS-details",    "certificateInfo": "Certificaatinformatie",
     "certificateSerial": "Certificaatserieel",
     "certificateIssued": "Certificaat uitgegeven",
     "hasCertificate": "Heeft clientcertificaat"
@@ -150,6 +161,7 @@
     "invalidDate": "Ongeldige datum",
     "yes": "Ja",
     "no": "Nee",
+    "unassigned": "Niet toegewezen",
     "id": "ID"
   },
   "serverDown": {

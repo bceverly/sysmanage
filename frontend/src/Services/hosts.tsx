@@ -40,6 +40,36 @@ type SysManageHost = {
     hardware_updated_at?: string;
 }
 
+type StorageDevice = {
+    id: number;
+    name?: string;
+    device_path?: string;
+    mount_point?: string;
+    file_system?: string;
+    device_type?: string;
+    capacity_bytes?: number;
+    used_bytes?: number;
+    available_bytes?: number;
+    is_physical?: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
+
+type NetworkInterface = {
+    id: number;
+    name?: string;
+    interface_type?: string;
+    hardware_type?: string;
+    mac_address?: string;
+    ipv4_address?: string;
+    ipv6_address?: string;
+    subnet_mask?: string;
+    is_active: boolean;
+    speed_mbps?: number;
+    created_at?: string;
+    updated_at?: string;
+}
+
 function processError(error: AxiosError) {
     // Error situation
     if (error.response) {
@@ -234,5 +264,37 @@ const doRefreshAllHostData = async (id: BigInt) => {
     return { result: true } as SuccessResponse;
 };
 
-export type { SuccessResponse, SysManageHost };
-export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshAllHostData };
+const doGetHostStorage = async (id: BigInt): Promise<StorageDevice[]> => {
+    let result: StorageDevice[] = [];
+
+    await api.get<StorageDevice[]>("/host/" + id + "/storage")
+    .then((response) => {
+        // No error - process response
+        result = response.data;
+        return Promise.resolve(response);
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doGetHostNetwork = async (id: BigInt): Promise<NetworkInterface[]> => {
+    let result: NetworkInterface[] = [];
+
+    await api.get<NetworkInterface[]>("/host/" + id + "/network")
+    .then((response) => {
+        // No error - process response
+        result = response.data;
+        return Promise.resolve(response);
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface };
+export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork };

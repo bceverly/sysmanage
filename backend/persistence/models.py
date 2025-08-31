@@ -3,7 +3,17 @@ This module holds the various models that are persistence backed by the
 PostgreSQL database.
 """
 
-from sqlalchemy import BigInteger, Boolean, Column, DateTime, Integer, String, Text
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Column,
+    DateTime,
+    Integer,
+    String,
+    Text,
+    ForeignKey,
+)
+from sqlalchemy.orm import relationship
 
 from backend.persistence.db import Base
 
@@ -59,6 +69,14 @@ class Host(Base):
     )  # JSON field for additional hardware info
     hardware_updated_at = Column(DateTime(timezone=True), nullable=True)
 
+    # Relationships to normalized hardware tables
+    storage_devices = relationship(
+        "StorageDevice", back_populates="host", cascade="all, delete-orphan"
+    )
+    network_interfaces = relationship(
+        "NetworkInterface", back_populates="host", cascade="all, delete-orphan"
+    )
+
 
 class User(Base):
     """
@@ -76,3 +94,53 @@ class User(Base):
     is_locked = Column(Boolean, default=False, nullable=False)
     failed_login_attempts = Column(Integer, default=0, nullable=False)
     locked_at = Column(DateTime, nullable=True)
+
+
+class StorageDevice(Base):
+    """
+    This class holds the object mapping for the storage_devices table in the
+    PostgreSQL database.
+    """
+
+    __tablename__ = "storage_devices"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    host_id = Column(Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String(255), nullable=True)
+    device_path = Column(String(255), nullable=True)
+    mount_point = Column(String(255), nullable=True)
+    file_system = Column(String(100), nullable=True)
+    device_type = Column(String(100), nullable=True)
+    capacity_bytes = Column(BigInteger, nullable=True)
+    used_bytes = Column(BigInteger, nullable=True)
+    available_bytes = Column(BigInteger, nullable=True)
+    is_physical = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Relationship back to Host
+    host = relationship("Host", back_populates="storage_devices")
+
+
+class NetworkInterface(Base):
+    """
+    This class holds the object mapping for the network_interfaces table in the
+    PostgreSQL database.
+    """
+
+    __tablename__ = "network_interfaces"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    host_id = Column(Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String(255), nullable=True)
+    interface_type = Column(String(100), nullable=True)
+    hardware_type = Column(String(100), nullable=True)
+    mac_address = Column(String(17), nullable=True)
+    ipv4_address = Column(String(15), nullable=True)
+    ipv6_address = Column(String(39), nullable=True)
+    subnet_mask = Column(String(15), nullable=True)
+    is_active = Column(Boolean, default=False, nullable=False)
+    speed_mbps = Column(Integer, nullable=True)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Relationship back to Host
+    host = relationship("Host", back_populates="network_interfaces")
