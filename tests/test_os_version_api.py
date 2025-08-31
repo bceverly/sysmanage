@@ -202,21 +202,70 @@ class TestOSVersionAPI:
         assert ack_message["data"]["status"] == "os_version_updated"
 
     @pytest.mark.asyncio
-    async def test_handle_os_version_update_no_hostname(self, mock_db):
-        """Test handling OS version update when connection has no hostname."""
+    async def test_handle_os_version_update_no_hostname_no_ip(self, mock_db):
+        """Test handling OS version update when connection has no hostname and no IP lookup possible."""
         mock_db_func, mock_session = mock_db
 
-        # Mock connection without hostname
+        # Mock connection without hostname and without websocket.client (no IP available)
         mock_connection = Mock()
         mock_connection.hostname = None
+        mock_connection.ipv4 = None
+        mock_connection.websocket = Mock()
+        mock_connection.websocket.client = None
         mock_connection.send_message = AsyncMock()
 
         message_data = {"platform": "Linux"}
 
         from backend.api.agent import handle_os_version_update
 
-        # Should return early without error
+        # Should return early without error when no hostname and no IP available
         await handle_os_version_update(mock_session, mock_connection, message_data)
 
-        # Should not send acknowledgment
+        # Should not send acknowledgment when no hostname can be determined
         mock_connection.send_message.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_handle_os_version_update_ip_lookup_success(self, mock_db, mock_host):
+        """Test handling OS version update using IP lookup when no hostname in connection."""
+        mock_db_func, mock_session = mock_db
+
+        # Mock connection without hostname but with websocket client IP
+        mock_connection = Mock()
+        mock_connection.hostname = None
+        mock_connection.ipv4 = None
+        mock_connection.websocket = Mock()
+        mock_connection.websocket.client = Mock()
+        mock_connection.websocket.client.host = (
+            "192.168.1.100"  # IP that matches mock_host
+        )
+        mock_connection.send_message = AsyncMock()
+
+        # Mock the query to return our test host
+        mock_session.query.return_value.filter.return_value.first.return_value = (
+            mock_host
+        )
+
+        message_data = {
+            "message_id": "msg-456",
+            "platform": "Linux",
+            "platform_release": "6.2.0-35-generic",
+            "machine_architecture": "x86_64",
+            "processor": "AMD Ryzen 7",
+            "os_info": {"distribution": "Ubuntu", "distribution_version": "23.04"},
+        }
+
+        from backend.api.agent import handle_os_version_update
+
+        await handle_os_version_update(mock_session, mock_connection, message_data)
+
+        # Verify host was updated
+        assert mock_host.platform == "Linux"
+        assert mock_host.platform_release == "6.2.0-35-generic"
+        assert mock_host.machine_architecture == "x86_64"
+        assert mock_host.processor == "AMD Ryzen 7"
+
+        # Verify acknowledgment was sent
+        mock_connection.send_message.assert_called_once()
+        ack_message = mock_connection.send_message.call_args[0][0]
+        assert ack_message["message_type"] == "ack"
+        assert ack_message["data"]["status"] == "os_version_updated"

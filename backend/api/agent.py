@@ -222,9 +222,50 @@ async def handle_config_acknowledgment(connection, message_data: dict):
 
 async def handle_os_version_update(db: Session, connection, message_data: dict):
     """Handle OS version update message from agent."""
-    hostname = connection.hostname
+    debug_logger.info(
+        "handle_os_version_update called with connection.hostname: %s",
+        getattr(connection, "hostname", "NO HOSTNAME ATTR"),
+    )
+    debug_logger.info("Message data keys: %s", list(message_data.keys()))
+    debug_logger.info("Connection ipv4: %s", getattr(connection, "ipv4", "NO IPV4"))
+    debug_logger.info(
+        "Connection websocket client: %s",
+        getattr(connection.websocket, "client", "NO WEBSOCKET CLIENT"),
+    )
+
+    # Try to get hostname from connection first, then from message data
+    hostname = connection.hostname or message_data.get("hostname")
+
+    # If no hostname, try to find the host by IP address
     if not hostname:
+        client_ip = getattr(connection, "ipv4", None)
+        if (
+            not client_ip
+            and hasattr(connection.websocket, "client")
+            and connection.websocket.client
+        ):
+            # Try to get IP from websocket client
+            client_ip = connection.websocket.client.host
+            debug_logger.info("Got IP from websocket.client.host: %s", client_ip)
+
+        if client_ip:
+            debug_logger.info("No hostname, looking up host by IP: %s", client_ip)
+            try:
+                host = db.query(Host).filter(Host.ipv4 == client_ip).first()
+                if host:
+                    hostname = host.fqdn
+                    debug_logger.info("Found host by IP lookup: %s", hostname)
+            except Exception as e:
+                debug_logger.error("Error looking up host by IP: %s", e)
+
+    if not hostname:
+        debug_logger.info("No hostname found via any method, returning early")
         return
+
+    # Debug: Log the complete raw message data
+    debug_logger.info("=== RAW OS VERSION MESSAGE DATA ===")
+    debug_logger.info("Full message_data: %s", json.dumps(message_data, indent=2))
+    debug_logger.info("=== END RAW DATA ===")
 
     debug_logger.info("=== OS Version Update Data Received ===")
     debug_logger.info("FQDN: %s", hostname)
