@@ -10,11 +10,11 @@ import sys
 import yaml
 
 # Read/validate the configuration file
-# Check for development config first, then fall back to system config
+# Check for system config first (security), then fall back to development config
 CONFIG_PATH = "/etc/sysmanage.yaml"
-if os.path.exists("sysmanage-dev.yaml"):
+if not os.path.exists("/etc/sysmanage.yaml") and os.path.exists("sysmanage-dev.yaml"):
     CONFIG_PATH = "sysmanage-dev.yaml"
-    # Using development configuration
+    # Using development configuration as fallback
 
 try:
     with open(CONFIG_PATH, "r", encoding="utf-8") as file:
