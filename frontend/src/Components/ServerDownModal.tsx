@@ -155,7 +155,7 @@ const ServerDownModal: React.FC<ServerDownModalProps> = ({ open }) => {
               <Chip
                 size="small"
                 label={t('serverDown.lastConnected', 
-                  `Last connected: ${status.lastConnected.toLocaleTimeString()}`)}
+                  { time: status.lastConnected.toLocaleTimeString() })}
                 color="default"
               />
             )}
