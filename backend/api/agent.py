@@ -5,17 +5,32 @@ Enhanced with security validation and secure communication protocols.
 """
 
 import json
+import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Request
 from sqlalchemy.orm import Session
 
 from backend.persistence.db import get_db
-from backend.persistence.models import Host
+from backend.persistence.models import Host, StorageDevice, NetworkInterface
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import ErrorMessage, MessageType, create_message
 from backend.security.communication_security import websocket_security
 from backend.config.config_push import config_push_manager
+
+# Set up debug logger
+debug_logger = logging.getLogger("websocket_debug")
+debug_logger.setLevel(logging.INFO)
+
+# Ensure we have a console handler for debug output
+if not debug_logger.handlers:
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    formatter = logging.Formatter("[WEBSOCKET] %(message)s")
+    console_handler.setFormatter(formatter)
+    debug_logger.addHandler(console_handler)
+
+debug_logger.info("agent.py module loaded with WebSocket debug logging")
 
 router = APIRouter()
 
@@ -97,7 +112,9 @@ async def handle_system_info(db: Session, connection, message_data: dict):
         host = await update_or_create_host(db, hostname, ipv4, ipv6)
 
         # Check approval status
+        debug_logger.info("Host %s approval status: %s", hostname, host.approval_status)
         if host.approval_status != "approved":
+            debug_logger.info("Rejecting connection - host not approved")
             error_msg = ErrorMessage(
                 "host_not_approved",
                 f"Host {hostname} is not approved for connection. Current status: {host.approval_status}",
@@ -106,6 +123,8 @@ async def handle_system_info(db: Session, connection, message_data: dict):
             # Close the WebSocket connection for unapproved hosts
             await connection.websocket.close(code=4003, reason="Host not approved")
             return
+
+        debug_logger.info("Host %s approved, allowing connection", hostname)
 
         # Register agent in connection manager
         connection_manager.register_agent(
@@ -155,9 +174,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
 
         # Use the same logic as system_info to ensure consistency
         await update_or_create_host(db, hostname, ipv4, ipv6)
-    else:
-        # No hostname available for agent
-        pass
+    # Note: No hostname available for agent - no database update needed
 
     # Send heartbeat acknowledgment
     response = {
@@ -209,20 +226,22 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
     if not hostname:
         return
 
-    print("=== OS Version Update Data Received ===")
-    print(f"FQDN: {hostname}")
-    print(f"Platform: {message_data.get('platform')}")
-    print(f"Platform Release: {message_data.get('platform_release')}")
-    print(f"Machine Architecture: {message_data.get('machine_architecture')}")
-    print(f"Processor: {message_data.get('processor')}")
-    print(f"OS Info: {message_data.get('os_info')}")
-    print("=== End OS Version Data ===")
+    debug_logger.info("=== OS Version Update Data Received ===")
+    debug_logger.info("FQDN: %s", hostname)
+    debug_logger.info("Platform: %s", message_data.get("platform"))
+    debug_logger.info("Platform Release: %s", message_data.get("platform_release"))
+    debug_logger.info(
+        "Machine Architecture: %s", message_data.get("machine_architecture")
+    )
+    debug_logger.info("Processor: %s", message_data.get("processor"))
+    debug_logger.info("OS Info: %s", message_data.get("os_info"))
+    debug_logger.info("=== End OS Version Data ===")
 
     # Update host with new OS version information
     host = db.query(Host).filter(Host.fqdn == hostname).first()
 
     if host:
-        print("Updating existing host with OS version data...")
+        debug_logger.info("Updating existing host with OS version data...")
         try:
             # Update OS version fields
             host.platform = message_data.get("platform")
@@ -234,24 +253,28 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
             # Store additional OS info as JSON
             os_info = message_data.get("os_info", {})
             if os_info:
-                print(f"Setting os_details to: {json.dumps(os_info)}")
+                debug_logger.info("Setting os_details to: %s", json.dumps(os_info))
                 host.os_details = json.dumps(os_info)
 
             host.os_version_updated_at = datetime.now(timezone.utc)
             host.last_access = datetime.now(timezone.utc)
 
-            print(
-                f"Before commit - Platform: {host.platform}, Machine Arch: {host.machine_architecture}"
+            debug_logger.info(
+                "Before commit - Platform: %s, Machine Arch: %s",
+                host.platform,
+                host.machine_architecture,
             )
             db.commit()
-            print("Database commit successful")
+            debug_logger.info("Database commit successful")
             db.refresh(host)
-            print(
-                f"After refresh - Platform: {host.platform}, Machine Arch: {host.machine_architecture}"
+            debug_logger.info(
+                "After refresh - Platform: %s, Machine Arch: %s",
+                host.platform,
+                host.machine_architecture,
             )
 
         except Exception as e:
-            print(f"Error updating host with OS version data: {e}")
+            debug_logger.error("Error updating host with OS version data: %s", e)
             db.rollback()
             raise
 
@@ -266,24 +289,32 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
 
 async def handle_hardware_update(db: Session, connection, message_data: dict):
     """Handle hardware update message from agent."""
-    hostname = connection.hostname
+    # Try to get hostname from connection first, then from message data
+    hostname = connection.hostname or message_data.get("hostname")
     if not hostname:
+        debug_logger.info(
+            "Hardware update received but no hostname available - skipping"
+        )
         return
-
-    print("=== Hardware Update Data Received ===")
-    print(f"FQDN: {hostname}")
-    print(f"CPU Vendor: {message_data.get('cpu_vendor')}")
-    print(f"CPU Model: {message_data.get('cpu_model')}")
-    print(f"CPU Cores: {message_data.get('cpu_cores')}")
-    print(f"CPU Threads: {message_data.get('cpu_threads')}")
-    print(f"Memory Total MB: {message_data.get('memory_total_mb')}")
-    print("=== End Hardware Data ===")
+    debug_logger.info("=== Hardware Update Data Received ===")
+    debug_logger.info("FQDN: %s", hostname)
+    debug_logger.info(
+        "CPU: %s %s", message_data.get("cpu_vendor"), message_data.get("cpu_model")
+    )
+    debug_logger.info("Memory: %s MB", message_data.get("memory_total_mb"))
+    if "storage_devices" in message_data:
+        debug_logger.info("Storage devices: %s", len(message_data["storage_devices"]))
+    if "network_interfaces" in message_data:
+        debug_logger.info(
+            "Network interfaces: %s", len(message_data["network_interfaces"])
+        )
+    debug_logger.info("=== End Hardware Data ===")
 
     # Update host with new hardware information
     host = db.query(Host).filter(Host.fqdn == hostname).first()
 
     if host:
-        print("Updating existing host with hardware data...")
+        debug_logger.info("Updating existing host with hardware data...")
         try:
             # Update hardware fields
             host.cpu_vendor = message_data.get("cpu_vendor")
@@ -296,21 +327,79 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
             host.network_details = message_data.get("network_details")
             host.hardware_details = message_data.get("hardware_details")
 
+            # Handle normalized storage devices
+            if "storage_devices" in message_data:
+                debug_logger.info(
+                    "Processing %s storage devices...",
+                    len(message_data["storage_devices"]),
+                )
+                # Delete existing storage devices for this host
+                db.query(StorageDevice).filter(
+                    StorageDevice.host_id == host.id
+                ).delete()
+
+                # Add new storage devices
+                for device_data in message_data["storage_devices"]:
+                    if not device_data.get("error"):  # Skip error entries
+                        storage_device = StorageDevice(
+                            host_id=host.id,
+                            name=device_data.get("name"),
+                            device_path=device_data.get("device_path"),
+                            mount_point=device_data.get("mount_point"),
+                            file_system=device_data.get("file_system"),
+                            device_type=device_data.get("device_type"),
+                            capacity_bytes=device_data.get("capacity_bytes"),
+                            used_bytes=device_data.get("used_bytes"),
+                            available_bytes=device_data.get("available_bytes"),
+                            is_physical=device_data.get(
+                                "is_physical", True
+                            ),  # Default to True for backward compatibility
+                            created_at=datetime.now(timezone.utc),
+                            updated_at=datetime.now(timezone.utc),
+                        )
+                        db.add(storage_device)
+                debug_logger.info("Storage devices processing complete")
+
+            # Handle normalized network interfaces
+            if "network_interfaces" in message_data:
+                debug_logger.info(
+                    "Processing %s network interfaces...",
+                    len(message_data["network_interfaces"]),
+                )
+                # Delete existing network interfaces for this host
+                db.query(NetworkInterface).filter(
+                    NetworkInterface.host_id == host.id
+                ).delete()
+
+                # Add new network interfaces
+                for interface_data in message_data["network_interfaces"]:
+                    if not interface_data.get("error"):  # Skip error entries
+                        network_interface = NetworkInterface(
+                            host_id=host.id,
+                            name=interface_data.get("name"),
+                            interface_type=interface_data.get("interface_type"),
+                            hardware_type=interface_data.get("hardware_type"),
+                            mac_address=interface_data.get("mac_address"),
+                            ipv4_address=interface_data.get("ipv4_address"),
+                            ipv6_address=interface_data.get("ipv6_address"),
+                            subnet_mask=interface_data.get("subnet_mask"),
+                            is_active=interface_data.get("is_active", False),
+                            speed_mbps=interface_data.get("speed_mbps"),
+                            created_at=datetime.now(timezone.utc),
+                            updated_at=datetime.now(timezone.utc),
+                        )
+                        db.add(network_interface)
+                debug_logger.info("Network interfaces processing complete")
+
             host.hardware_updated_at = datetime.now(timezone.utc)
             host.last_access = datetime.now(timezone.utc)
 
-            print(
-                f"Before commit - CPU Vendor: {host.cpu_vendor}, CPU Model: {host.cpu_model}"
-            )
             db.commit()
-            print("Database commit successful")
+            debug_logger.info("Hardware data committed to database")
             db.refresh(host)
-            print(
-                f"After refresh - CPU Vendor: {host.cpu_vendor}, Memory: {host.memory_total_mb} MB"
-            )
 
         except Exception as e:
-            print(f"Error updating host with hardware data: {e}")
+            debug_logger.error("Error updating host with hardware data: %s", e)
             db.rollback()
             raise
 
@@ -329,33 +418,48 @@ async def agent_connect(websocket: WebSocket):
     Handle secure WebSocket connections from agents with full bidirectional communication.
     Enhanced with authentication and message validation.
     """
+    debug_logger.info("WebSocket connection attempt started")
     client_host = websocket.client.host if websocket.client else "unknown"
+    debug_logger.info("Client host: %s", client_host)
 
     # Check for authentication token in query parameters
     auth_token = websocket.query_params.get("token")
+    debug_logger.info("Auth token present: %s", bool(auth_token))
     connection_id = None
 
     if auth_token:
+        debug_logger.info("Validating auth token...")
         is_valid, connection_id, error_msg = (
             websocket_security.validate_connection_token(auth_token, client_host)
         )
+        debug_logger.info(
+            "Token validation result - Valid: %s, Error: %s", is_valid, error_msg
+        )
         if not is_valid:
+            debug_logger.info("Closing connection due to auth failure")
             await websocket.close(
                 code=4001, reason=f"Authentication failed: {error_msg}"
             )
             return
     else:
+        debug_logger.info("No auth token provided, closing connection")
         await websocket.close(code=4000, reason="Authentication token required")
         return
 
     # Accept connection and register with connection manager
+    debug_logger.info("About to accept WebSocket connection...")
     connection = await connection_manager.connect(websocket)
+    debug_logger.info(
+        "WebSocket connection established, connection ID: %s", connection.agent_id
+    )
+    debug_logger.info("Connection object created, waiting for messages...")
     db = next(get_db())
 
     try:
         while True:
             # Receive message from agent
             data = await websocket.receive_text()
+            debug_logger.info("Received WebSocket message: %s...", data[:100])
             # Message received from agent
 
             try:
@@ -373,33 +477,54 @@ async def agent_connect(websocket: WebSocket):
                     continue
 
                 message = create_message(raw_message)
+                debug_logger.info("Received message type: %s", message.message_type)
                 # Processing message from agent
 
                 # Handle different message types
                 if message.message_type == MessageType.SYSTEM_INFO:
+                    debug_logger.info("Calling handle_system_info")
                     await handle_system_info(db, connection, message.data)
 
                 elif message.message_type == MessageType.HEARTBEAT:
+                    debug_logger.info("Calling handle_heartbeat")
                     await handle_heartbeat(db, connection, message.data)
 
                 elif message.message_type == MessageType.COMMAND_RESULT:
+                    debug_logger.info("Calling handle_command_result")
                     await handle_command_result(connection, message.data)
 
                 elif message.message_type == MessageType.ERROR:
-                    # Agent reported error
-                    pass
+                    debug_logger.info("Processing ERROR message type")
+                    # Agent reported error - no action needed
 
                 elif message.message_type == "config_ack":
+                    debug_logger.info("Calling handle_config_acknowledgment")
                     # Handle configuration acknowledgment
                     await handle_config_acknowledgment(connection, message.data)
 
                 elif message.message_type == MessageType.OS_VERSION_UPDATE:
-                    # Handle OS version update from agent
-                    await handle_os_version_update(db, connection, message.data)
+                    debug_logger.info("Calling handle_os_version_update")
+                    try:
+                        # Handle OS version update from agent
+                        await handle_os_version_update(db, connection, message.data)
+                        debug_logger.info(
+                            "handle_os_version_update completed successfully"
+                        )
+                    except Exception as e:
+                        debug_logger.error("Error in handle_os_version_update: %s", e)
+                        raise
 
                 elif message.message_type == MessageType.HARDWARE_UPDATE:
-                    # Handle hardware update from agent
-                    await handle_hardware_update(db, connection, message.data)
+                    debug_logger.info("Calling handle_hardware_update")
+                    try:
+                        # Handle hardware update from agent
+                        await handle_hardware_update(db, connection, message.data)
+                        debug_logger.info(
+                            "handle_hardware_update completed successfully"
+                        )
+                    except Exception as e:
+                        debug_logger.error("Error in handle_hardware_update: %s", e)
+                        raise
 
                 else:
                     # Unknown message type - send error
@@ -420,12 +545,12 @@ async def agent_connect(websocket: WebSocket):
                 await connection.send_message(error_msg.to_dict())
 
     except WebSocketDisconnect:
-        # Agent disconnected
-        pass
+        # Agent disconnected - normal cleanup handled in finally
+        debug_logger.info("Agent disconnected")
     except RuntimeError as e:
         if "WebSocket is not connected" in str(e):
-            # WebSocket was closed (e.g., due to unapproved host)
-            pass
+            # WebSocket was closed (e.g., due to unapproved host) - normal cleanup handled in finally
+            debug_logger.info("WebSocket connection closed")
         else:
             raise
     finally:

@@ -173,6 +173,8 @@ const Hosts = () => {
             setSelection([]);
         } catch (error) {
             console.error('Error approving hosts:', error);
+            // Still clear selection even if there was an error
+            setSelection([]);
         }
     };
 
@@ -194,6 +196,8 @@ const Hosts = () => {
             setSelection([]);
         } catch (error) {
             console.error('Error deleting hosts:', error);
+            // Still clear selection even if there was an error
+            setSelection([]);
         }
     }
 
@@ -214,6 +218,8 @@ const Hosts = () => {
             console.log(`Comprehensive data refresh requested for ${selection.length} hosts`);
         } catch (error) {
             console.error('Error requesting comprehensive data refresh:', error);
+            // Still clear selection even if there was an error
+            setSelection([]);
         }
     }
 

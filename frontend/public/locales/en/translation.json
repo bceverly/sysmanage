@@ -99,7 +99,8 @@
     "notAvailable": "N/A",
     "invalidDate": "Invalid date",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "unassigned": "Unassigned"
   },
   "hostDetail": {
     "invalidId": "Invalid host ID",
@@ -130,6 +131,18 @@
     "storageDetails": "Storage Details",
     "networkDetails": "Network Interfaces",
     "additionalHardware": "Additional Hardware Details",
+    "mountPoint": "Mount Point",
+    "capacity": "Capacity",
+    "filesystem": "Filesystem",
+    "deviceType": "Device Type",
+    "interfaceType": "Interface Type",
+    "ipv4Address": "IPv4 Address",
+    "ipv6Address": "IPv6 Address",
+    "macAddress": "MAC Address",
+    "speed": "Speed",
+    "storageDeviceDetails": "Storage Device Details",
+    "networkInterfaceDetails": "Network Interface Details",
+    "additionalOSDetails": "Additional OS Details",
     "certificateInfo": "Certificate Information",
     "certificateSerial": "Certificate Serial",
     "certificateIssued": "Certificate Issued",

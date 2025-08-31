@@ -24,7 +24,7 @@ like to add:
     do a network discovery and get a default
     config pushed to it by the server~~
 
-8.  Hardware inventory - Server can request on
+8.  ~~Hardware inventory - Server can request on
     demand that an agent do a hardware inveentory
     and send that information to the server.  This
     should be done the first time an agent registers
@@ -33,7 +33,7 @@ like to add:
     the amount of RAM, the number of hard drives,
     their capacity, type and any hardware info that
     can be obtained (vendor, etc.), the network
-    hardware as well.
+    hardware as well.~~
 
 9.  ~~OS Version Capture - Server can request on
     demand that an agent determine the version of
@@ -48,7 +48,7 @@ like to add:
     local system to run the agent at startup and
     shut it down cleanly at shutdown.
 
-11. UI Fallback - When the server goes down, the
+11. ~~UI Fallback - When the server goes down, the
     current code just displays a cryptic error 
     message.  There should be some sort of fallback
     message that is displayed saying the server is
@@ -58,15 +58,15 @@ like to add:
     off in terms of the time between retries and
     a maximum number of retries with a final failure
     saying that the server is down and you need to
-    contact support.
+    contact support.~~
 
-12. Recreate DB - Make sure that all activities
+12. ~~Recreate DB - Make sure that all activities
     resulting in data being stored in the server
     db can be asked for by either the server or
     pushed proactively to the server by the client
     so that even if the server's database is
     cleared out it can recreate it point in time
-    by making a series of requests to all clients.
+    by making a series of requests to all clients.~~
 
 13. Scripts - Add the ability to run scripts as
     a specified user.  Scripts can either be
@@ -81,11 +81,25 @@ like to add:
 
 15. Updates - Query the list of available updates
     on the agent and provide it as a list to the
-    server for storage in the database.
+    server for storage in the database.  The server
+    UI needs to alert the user when there are
+    updates that need to be applied (perhaps like
+    a messages list with an unread count thing
+    driven by a bell icon in the toolbar?) and
+    then the UI needs to allow the user to tell
+    the server to instruct the agent to apply
+    those updates.  Then the agent needs to 
+    actually kick off the update process and
+    communicate back the results of it.
 
 16. Software Inventory - Query the list of
     installed software and supply it to the
-    server for storage in the database.
+    server for storage in the database.  This
+    needs to show up in the UI for the hosts
+    and perhaps a global "Software Inventory"
+    that shows aggregated packages installed
+    across the enterprise with version
+    differences called out.
 
 17. Broadcast - Allow the server to send a
     broadcast request out to all agents to
@@ -217,3 +231,60 @@ like to add:
     The server also needs to have the
     ability to ask the agent to push that
     info back if it isn't offering it up.~~
+
+38. Create a github pages hosted static
+    website for sysmanage.org domain that
+    documents the project, its location,
+    and has a "Docs" subsection that
+    stores a lot of the stuff we have
+    cluttering up the README.md files
+    currently.  slim the readme down to
+    the basics and direct the reader to
+    the url.
+
+39. Groups list - just like the users
+    that the agent captures from the
+    local system, we need a way to get
+    groups and store / display them on
+    the server.
+
+40. We need a reporting infrastructure
+    in the server UI that allows us to
+    run reports and then turn them into
+    PDF files.
+
+41. We need a password reset capability
+    that uses email.  We should confirm
+    the user's initial email via an
+    email mechanism that won't allow them
+    to do anything until they have 
+    clicked a link in an email we have
+    sent them.  This should also be
+    used any time they update the
+    email address we have on file.
+
+42. We need a MFA mechanism using an
+    authenticator app on someone's
+    mobile device as well as the ability
+    to send a code via email to their
+    registered email address.
+
+43. User image / icon - we need a way
+    to allow a user to uplaod an image
+    file that will be displayed for
+    them in the UI.
+
+44. The agent should be able to run as
+    a "regular" user account but have
+    limitations imposed on it (can't
+    run scripts as root, etc.) and it
+    should also be able to run as root
+    but that should require "extra"
+    configuration effort on the part
+    of the person deploying it.
+
+45. For the server and the agent, add
+    a debug log verbosity level feature
+    to the config file (low / medium /
+    high) that controls the amount of
+    information logged.
