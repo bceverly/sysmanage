@@ -2,3 +2,18 @@
   padding-top: 7rem;
   padding-left: 1rem;
 }
+
+/* RTL support for Arabic */
+[dir="rtl"] .main-content {
+  padding-left: 0;
+  padding-right: 1rem;
+}
+
+/* Ensure proper text alignment for RTL languages */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="ltr"] {
+  text-align: left;
+}
