@@ -187,6 +187,7 @@
     "yes": "Да",
     "no": "Нет",
     "unassigned": "Не назначено",
+    "less": "меньше",
     "id": "ID"
   },
   "serverDown": {

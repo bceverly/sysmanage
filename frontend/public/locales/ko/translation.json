@@ -187,6 +187,7 @@
     "yes": "예",
     "no": "아니오",
     "unassigned": "할당되지 않음",
+    "less": "적게",
     "id": "ID"
   },
   "serverDown": {

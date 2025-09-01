@@ -77,12 +77,20 @@ def _process_user_group_memberships(
     db: Session, host_id: int, users_data: list, user_id_map: dict, group_id_map: dict
 ):
     """Process user-group memberships for a host."""
+    debug_logger.info("Processing memberships for %d users", len(users_data))
+    debug_logger.info(
+        "Available users: %d, Available groups: %d", len(user_id_map), len(group_id_map)
+    )
+
+    membership_count = 0
     for user_data in users_data:
         if not user_data.get("error") and "groups" in user_data:
             username = user_data.get("username")
+            groups_list = user_data.get("groups", [])
+
             if username in user_id_map:
                 user_account_id = user_id_map[username]
-                for group_name in user_data.get("groups", []):
+                for group_name in groups_list:
                     if group_name in group_id_map:
                         group_id = group_id_map[group_name]
                         membership = UserGroupMembership(
@@ -93,6 +101,26 @@ def _process_user_group_memberships(
                             updated_at=datetime.now(timezone.utc),
                         )
                         db.add(membership)
+                        membership_count += 1
+                    else:
+                        debug_logger.debug(
+                            "Group '%s' not found in group_id_map for user %s",
+                            group_name,
+                            username,
+                        )
+            else:
+                debug_logger.debug("User '%s' not found in user_id_map", username)
+        else:
+            if user_data.get("error"):
+                debug_logger.debug(
+                    "Skipping user with error: %s", user_data.get("username", "unknown")
+                )
+            elif "groups" not in user_data:
+                debug_logger.debug(
+                    "User %s has no groups field", user_data.get("username", "unknown")
+                )
+
+    debug_logger.info("Added %d memberships to database", membership_count)
 
 
 router = APIRouter()
@@ -571,6 +599,9 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
                 # Add new user groups
                 _process_user_groups(db, host.id, message_data["groups"])
                 debug_logger.info("User groups processing complete")
+
+            # CRITICAL FIX: Commit the session so the new users and groups are available for ID mapping
+            db.commit()
 
             # Handle user-group memberships
             debug_logger.info("Processing user-group memberships...")
