@@ -43,7 +43,13 @@ const LanguageSelector: React.FC = () => {
       'ko': 'ko',
       'ko-KR': 'ko',
       'ru': 'ru',
-      'ru-RU': 'ru'
+      'ru-RU': 'ru',
+      'ar': 'ar',
+      'ar-SA': 'ar',
+      'ar-AE': 'ar',
+      'ar-EG': 'ar',
+      'hi': 'hi',
+      'hi-IN': 'hi'
     };
     
     return langMap[browserLang] || 'en';
@@ -67,7 +73,7 @@ const LanguageSelector: React.FC = () => {
       }
       
       // Ensure the detected language is supported
-      const supportedLangs = ['en', 'es', 'fr', 'de', 'it', 'pt', 'nl', 'ja', 'zh_CN', 'zh_TW', 'ko', 'ru'];
+      const supportedLangs = ['en', 'es', 'fr', 'de', 'it', 'pt', 'nl', 'ja', 'zh_CN', 'zh_TW', 'ko', 'ru', 'ar', 'hi'];
       const finalLang = supportedLangs.includes(detectedLang) ? detectedLang : 'en';
       
       setCurrentLanguage(finalLang);
@@ -109,7 +115,9 @@ const LanguageSelector: React.FC = () => {
     { code: 'zh_CN', name: '简体中文' },
     { code: 'zh_TW', name: '繁體中文' },
     { code: 'ko', name: '한국어' },
-    { code: 'ru', name: 'Русский' }
+    { code: 'ru', name: 'Русский' },
+    { code: 'ar', name: 'العربية' },
+    { code: 'hi', name: 'हिन्दी' }
   ];
 
   return (

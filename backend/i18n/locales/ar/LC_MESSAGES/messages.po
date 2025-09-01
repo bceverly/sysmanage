@@ -1,0 +1,62 @@
+# Backend messages for SysManage - ar
+# Copyright (C) 2024 SysManage
+# This file is distributed under the same license as the SysManage package.
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ar\n"
+
+msgid "OS version update requested"
+msgstr "تم طلب تحديث إصدار نظام التشغيل"
+
+msgid "Hardware information updated successfully"
+msgstr "تم تحديث معلومات الأجهزة بنجاح"
+
+msgid "Hardware update requested"
+msgstr "تم طلب تحديث الأجهزة"
+
+msgid "User access update requested"
+msgstr "تم طلب تحديث وصول المستخدم"
+
+msgid "Host {hostname} registered successfully"
+msgstr "تم تسجيل المضيف {hostname} بنجاح"
+
+msgid "Command {command_type} sent to {hostname}"
+msgstr "تم إرسال الأمر {command_type} إلى {hostname}"
+
+msgid "Shell command sent to {hostname}"
+msgstr "تم إرسال أمر الصدفة إلى {hostname}"
+
+msgid "Package installation command sent to {hostname}"
+msgstr "تم إرسال أمر تثبيت الحزمة إلى {hostname}"
+
+msgid "Service restart command sent to {hostname}"
+msgstr "تم إرسال أمر إعادة تشغيل الخدمة إلى {hostname}"
+
+msgid "System update command sent to {hostname}"
+msgstr "تم إرسال أمر تحديث النظام إلى {hostname}"
+
+msgid "Reboot command sent to {hostname}"
+msgstr "تم إرسال أمر إعادة التشغيل إلى {hostname}"
+
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "تم بث الأمر {command_type} إلى {sent_count} وكيل"
+
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "تم بث أمر الصدفة إلى {sent_count} وكيل"
+
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "تم إرسال الأمر {command_type} إلى {sent_count} وكيل {platform}"
+
+msgid "Configuration pushed to all agents"
+msgstr "تم دفع التكوين إلى جميع الوكلاء"
+
+msgid "Configuration pushed successfully"
+msgstr "تم دفع التكوين بنجاح"
+
+msgid "Configuration pushed to platform agents"
+msgstr "تم دفع التكوين إلى وكلاء المنصة"
+
+msgid "Configuration acknowledgment processed"
+msgstr "تمت معالجة إقرار التكوين"

@@ -1,0 +1,62 @@
+# Backend messages for SysManage - hi
+# Copyright (C) 2024 SysManage
+# This file is distributed under the same license as the SysManage package.
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: hi\n"
+
+msgid "OS version update requested"
+msgstr "ओएस संस्करण अपडेट का अनुरोध किया गया"
+
+msgid "Hardware information updated successfully"
+msgstr "हार्डवेयर जानकारी सफलतापूर्वक अपडेट की गई"
+
+msgid "Hardware update requested"
+msgstr "हार्डवेयर अपडेट का अनुरोध किया गया"
+
+msgid "User access update requested"
+msgstr "उपयोगकर्ता एक्सेस अपडेट का अनुरोध किया गया"
+
+msgid "Host {hostname} registered successfully"
+msgstr "होस्ट {hostname} सफलतापूर्वक पंजीकृत हुआ"
+
+msgid "Command {command_type} sent to {hostname}"
+msgstr "कमांड {command_type} को {hostname} भेजा गया"
+
+msgid "Shell command sent to {hostname}"
+msgstr "शेल कमांड {hostname} को भेजा गया"
+
+msgid "Package installation command sent to {hostname}"
+msgstr "पैकेज इंस्टॉलेशन कमांड {hostname} को भेजा गया"
+
+msgid "Service restart command sent to {hostname}"
+msgstr "सेवा पुनः आरंभ कमांड {hostname} को भेजा गया"
+
+msgid "System update command sent to {hostname}"
+msgstr "सिस्टम अपडेट कमांड {hostname} को भेजा गया"
+
+msgid "Reboot command sent to {hostname}"
+msgstr "रीबूट कमांड {hostname} को भेजा गया"
+
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "कमांड {command_type} को {sent_count} एजेंटों में प्रसारित किया गया"
+
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "शेल कमांड को {sent_count} एजेंटों में प्रसारित किया गया"
+
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "कमांड {command_type} को {sent_count} {platform} एजेंटों को भेजा गया"
+
+msgid "Configuration pushed to all agents"
+msgstr "कॉन्फ़िगरेशन सभी एजेंटों को पुश की गई"
+
+msgid "Configuration pushed successfully"
+msgstr "कॉन्फ़िगरेशन सफलतापूर्वक पुश की गई"
+
+msgid "Configuration pushed to platform agents"
+msgstr "कॉन्फ़िगरेशन प्लेटफॉर्म एजेंटों को पुश की गई"
+
+msgid "Configuration acknowledgment processed"
+msgstr "कॉन्फ़िगरेशन स्वीकृति प्रसंस्कृत की गई"

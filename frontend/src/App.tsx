@@ -1,7 +1,13 @@
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { prefixer } from 'stylis';
+import rtlPlugin from 'stylis-plugin-rtl';
+import { CacheProvider } from '@emotion/react';
+import createCache from '@emotion/cache';
 import darkScrollbar from '@mui/material/darkScrollbar';
 import CssBaseline from '@mui/material/CssBaseline';
 import '@fontsource/roboto/300.css';
@@ -20,7 +26,39 @@ import UserDetail from './Pages/UserDetail';
 import Logout from './Pages/Logout';
 
 function App() {
+  const { i18n } = useTranslation();
+  const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
+
+  // Create emotion cache for RTL support
+  const cacheRtl = createCache({
+    key: 'muirtl',
+    stylisPlugins: [prefixer, rtlPlugin],
+  });
+
+  const cacheLtr = createCache({
+    key: 'muiltr',
+    stylisPlugins: [prefixer],
+  });
+
+  // Update direction when language changes
+  useEffect(() => {
+    const updateDirection = () => {
+      const isRtl = i18n.language === 'ar';
+      const newDirection = isRtl ? 'rtl' : 'ltr';
+      setDirection(newDirection);
+      document.dir = newDirection;
+    };
+
+    updateDirection();
+    i18n.on('languageChanged', updateDirection);
+
+    return () => {
+      i18n.off('languageChanged', updateDirection);
+    };
+  }, [i18n]);
+
   const darkTheme = createTheme({
+    direction,
     palette: {
       mode: 'dark',
     },
@@ -35,28 +73,30 @@ function App() {
 
   return (
     <div className="App">
-      <ThemeProvider theme={darkTheme}>
-        <CssBaseline enableColorScheme/>
-        <ConnectionProvider>
-          <Router future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true
-          }}>
-            <Navbar />
-              <main className="main-content">
-                <Routes>
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/" element={<Home />} />
-                  <Route path="/hosts" element={<Hosts />} />
-                  <Route path="/hosts/:hostId" element={<HostDetail />} />
-                  <Route path="/users" element={<Users />} />
-                  <Route path="/users/:userId" element={<UserDetail />} />
-                  <Route path="/logout" element={<Logout />} />
-                </Routes>
-              </main>
-          </Router>
-        </ConnectionProvider>
-      </ThemeProvider>
+      <CacheProvider value={direction === 'rtl' ? cacheRtl : cacheLtr}>
+        <ThemeProvider theme={darkTheme}>
+          <CssBaseline enableColorScheme/>
+          <ConnectionProvider>
+            <Router future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true
+            }}>
+              <Navbar />
+                <main className="main-content">
+                  <Routes>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/" element={<Home />} />
+                    <Route path="/hosts" element={<Hosts />} />
+                    <Route path="/hosts/:hostId" element={<HostDetail />} />
+                    <Route path="/users" element={<Users />} />
+                    <Route path="/users/:userId" element={<UserDetail />} />
+                    <Route path="/logout" element={<Logout />} />
+                  </Routes>
+                </main>
+            </Router>
+          </ConnectionProvider>
+        </ThemeProvider>
+      </CacheProvider>
     </div>
   );
 }

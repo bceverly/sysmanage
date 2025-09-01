@@ -31,7 +31,7 @@ SysManage is a comprehensive system management solution that allows you to monit
 - 🏢 Fleet-based host organization
 - 🖥️ Cross-platform agent support with auto-discovery
 - 📱 Responsive web interface
-- 🌍 Multi-language support (12 languages)
+- 🌍 Multi-language support (14 languages including RTL support)
 - 🛡️ Comprehensive security with encrypted communication
 - ⚙️ Agent configuration management from server
 - 🔍 Automatic server discovery for new agents
@@ -55,8 +55,12 @@ SysManage supports multiple languages with full localization of the user interfa
 | Traditional Chinese | `zh_TW` | ✅ Complete |
 | Korean | `ko` | ✅ Complete |
 | Russian | `ru` | ✅ Complete |
+| Arabic | `ar` | ✅ Complete (RTL) |
+| Hindi | `hi` | ✅ Complete |
 
 The system automatically detects the browser's preferred language and falls back to English if the preferred language is not supported. Users can manually change the language using the language selector in the navigation bar.
+
+**RTL Support**: Arabic language includes full right-to-left (RTL) text support with automatic theme switching and proper text direction handling.
 
 ## Prerequisites
 
@@ -493,8 +497,19 @@ SysManage supports multiple languages through comprehensive internationalization
 
 ### Supported Languages
 - **English** (en) - Default
-- **French** (fr) - Français  
+- **Spanish** (es) - Español
+- **French** (fr) - Français
+- **German** (de) - Deutsch
+- **Italian** (it) - Italiano
+- **Portuguese** (pt) - Português
+- **Dutch** (nl) - Nederlands
 - **Japanese** (ja) - 日本語
+- **Simplified Chinese** (zh_CN) - 简体中文
+- **Traditional Chinese** (zh_TW) - 繁體中文
+- **Korean** (ko) - 한국어
+- **Russian** (ru) - Русский
+- **Arabic** (ar) - العربية (RTL)
+- **Hindi** (hi) - हिन्दी
 
 ### Translation Files Location
 
@@ -502,16 +517,38 @@ SysManage supports multiple languages through comprehensive internationalization
 ```
 frontend/public/locales/
 ├── en/translation.json
+├── es/translation.json
 ├── fr/translation.json
-└── ja/translation.json
+├── de/translation.json
+├── it/translation.json
+├── pt/translation.json
+├── nl/translation.json
+├── ja/translation.json
+├── zh_CN/translation.json
+├── zh_TW/translation.json
+├── ko/translation.json
+├── ru/translation.json
+├── ar/translation.json
+└── hi/translation.json
 ```
 
 **Backend (Python):**
 ```
 backend/i18n/locales/
 ├── en/LC_MESSAGES/messages.po
+├── es/LC_MESSAGES/messages.po
 ├── fr/LC_MESSAGES/messages.po
-└── ja/LC_MESSAGES/messages.po
+├── de/LC_MESSAGES/messages.po
+├── it/LC_MESSAGES/messages.po
+├── pt/LC_MESSAGES/messages.po
+├── nl/LC_MESSAGES/messages.po
+├── ja/LC_MESSAGES/messages.po
+├── zh_CN/LC_MESSAGES/messages.po
+├── zh_TW/LC_MESSAGES/messages.po
+├── ko/LC_MESSAGES/messages.po
+├── ru/LC_MESSAGES/messages.po
+├── ar/LC_MESSAGES/messages.po
+└── hi/LC_MESSAGES/messages.po
 ```
 
 ### Adding New Languages
