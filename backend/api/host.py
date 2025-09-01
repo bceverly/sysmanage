@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from cryptography import x509
 
 from backend.auth.auth_bearer import JWTBearer
+from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.certificate_manager import certificate_manager
 from backend.websocket.connection_manager import connection_manager
@@ -416,7 +417,7 @@ async def request_os_version_update(host_id: int):
         if not success:
             raise HTTPException(status_code=503, detail="Agent is not connected")
 
-        return {"result": True, "message": "OS version update requested"}
+        return {"result": True, "message": _("OS version update requested")}
 
 
 @router.post("/host/{host_id}/update-hardware", dependencies=[Depends(JWTBearer())])
@@ -515,7 +516,10 @@ async def update_host_hardware(host_id: int, hardware_data: dict):
         session.commit()
         session.refresh(host)
 
-        return {"result": True, "message": "Hardware information updated successfully"}
+        return {
+            "result": True,
+            "message": _("Hardware information updated successfully"),
+        }
 
 
 @router.get("/host/{host_id}/storage", dependencies=[Depends(JWTBearer())])
@@ -656,7 +660,7 @@ async def request_hardware_update(host_id: int):
         if not success:
             raise HTTPException(status_code=503, detail="Agent is not connected")
 
-        return {"result": True, "message": "Hardware update requested"}
+        return {"result": True, "message": _("Hardware update requested")}
 
 
 @router.post("/hosts/request-hardware-update", dependencies=[Depends(JWTBearer())])
@@ -719,3 +723,157 @@ async def request_hardware_update_bulk(host_ids: list[int]):
                 )
 
     return {"results": results}
+
+
+@router.get("/host/{host_id}/users", dependencies=[Depends(JWTBearer())])
+async def get_host_users(host_id: int):
+    """
+    Get user accounts for a specific host from the normalized user_accounts table.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Verify host exists
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+        if not host:
+            raise HTTPException(status_code=404, detail="Host not found")
+
+        # Get user accounts
+        user_accounts = (
+            session.query(models.UserAccount)
+            .filter(models.UserAccount.host_id == host_id)
+            .all()
+        )
+
+        # Convert to JSON-compatible format
+        users = []
+        for user in user_accounts:
+            # Get group memberships for this user
+            group_memberships = (
+                session.query(models.UserGroupMembership, models.UserGroup)
+                .join(
+                    models.UserGroup,
+                    models.UserGroupMembership.user_group_id == models.UserGroup.id,
+                )
+                .filter(models.UserGroupMembership.user_account_id == user.id)
+                .all()
+            )
+
+            group_names = [group.group_name for _, group in group_memberships]
+
+            users.append(
+                {
+                    "id": user.id,
+                    "username": user.username,
+                    "uid": user.uid,
+                    "home_directory": user.home_directory,
+                    "shell": user.shell,
+                    "is_system_user": user.is_system_user,
+                    "groups": group_names,
+                    "created_at": (
+                        user.created_at.isoformat() if user.created_at else None
+                    ),
+                    "updated_at": (
+                        user.updated_at.isoformat() if user.updated_at else None
+                    ),
+                }
+            )
+
+        return users
+
+
+@router.get("/host/{host_id}/groups", dependencies=[Depends(JWTBearer())])
+async def get_host_groups(host_id: int):
+    """
+    Get user groups for a specific host from the normalized user_groups table.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Verify host exists
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+        if not host:
+            raise HTTPException(status_code=404, detail="Host not found")
+
+        # Get user groups
+        user_groups = (
+            session.query(models.UserGroup)
+            .filter(models.UserGroup.host_id == host_id)
+            .all()
+        )
+
+        # Convert to JSON-compatible format
+        groups = []
+        for group in user_groups:
+            # Get user memberships for this group
+            user_memberships = (
+                session.query(models.UserGroupMembership, models.UserAccount)
+                .join(
+                    models.UserAccount,
+                    models.UserGroupMembership.user_account_id == models.UserAccount.id,
+                )
+                .filter(models.UserGroupMembership.user_group_id == group.id)
+                .all()
+            )
+
+            user_names = [user.username for _, user in user_memberships]
+            groups.append(
+                {
+                    "id": group.id,
+                    "group_name": group.group_name,
+                    "gid": group.gid,
+                    "is_system_group": group.is_system_group,
+                    "users": user_names,
+                    "created_at": (
+                        group.created_at.isoformat() if group.created_at else None
+                    ),
+                    "updated_at": (
+                        group.updated_at.isoformat() if group.updated_at else None
+                    ),
+                }
+            )
+
+        return groups
+
+
+@router.post(
+    "/host/{host_id}/request-user-access-update", dependencies=[Depends(JWTBearer())]
+)
+async def request_user_access_update(host_id: int):
+    """
+    Request an agent to update its user access information.
+    This sends a message via WebSocket to the agent requesting fresh user and group data.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the host
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+
+        if not host:
+            raise HTTPException(status_code=404, detail="Host not found")
+
+        if host.approval_status != "approved":
+            raise HTTPException(status_code=400, detail="Host is not approved")
+
+        # Create command message for user access update request
+        command_message = create_command_message(
+            command_type="update_user_access", parameters={}
+        )
+
+        # Send command to agent via WebSocket
+        success = await connection_manager.send_to_host(host_id, command_message)
+
+        if not success:
+            raise HTTPException(status_code=503, detail="Agent is not connected")
+
+        return {"result": True, "message": _("User access update requested")}

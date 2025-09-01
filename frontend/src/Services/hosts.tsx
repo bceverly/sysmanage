@@ -70,6 +70,28 @@ type NetworkInterface = {
     updated_at?: string;
 }
 
+type UserAccount = {
+    id: number;
+    username: string;
+    uid?: number;
+    home_directory?: string;
+    shell?: string;
+    is_system_user: boolean;
+    groups: string[];
+    created_at?: string;
+    updated_at?: string;
+}
+
+type UserGroup = {
+    id: number;
+    group_name: string;
+    gid?: number;
+    is_system_group: boolean;
+    users: string[];
+    created_at?: string;
+    updated_at?: string;
+}
+
 function processError(error: AxiosError) {
     // Error situation
     if (error.response) {
@@ -296,5 +318,53 @@ const doGetHostNetwork = async (id: BigInt): Promise<NetworkInterface[]> => {
     return result;
 };
 
-export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface };
-export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork };
+const doGetHostUsers = async (id: BigInt): Promise<UserAccount[]> => {
+    let result: UserAccount[] = [];
+
+    await api.get<UserAccount[]>("/host/" + id + "/users")
+    .then((response) => {
+        // No error - process response
+        result = response.data;
+        return Promise.resolve(response);
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doGetHostGroups = async (id: BigInt): Promise<UserGroup[]> => {
+    let result: UserGroup[] = [];
+
+    await api.get<UserGroup[]>("/host/" + id + "/groups")
+    .then((response) => {
+        // No error - process response
+        result = response.data;
+        return Promise.resolve(response);
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doRefreshUserAccessData = async (id: BigInt) => {
+    let result = {} as SuccessResponse;
+
+    await api.post<SuccessResponse>("/host/" + id + "/request-user-access-update")
+    .then((response) => {
+        // No error - process response
+        result = response.data;
+        return Promise.resolve(response);
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup };
+export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData };

@@ -1,85 +1,63 @@
+# Backend messages for SysManage - nl
+# Copyright (C) 2024 SysManage
+# This file is distributed under the same license as the SysManage package.
+#
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language: nl\n"
 
-# Authentication messages
-msgid "Invalid username or password"
-msgstr "Ongeldige gebruikersnaam of wachtwoord"
+msgid "OS version update requested"
+msgstr "OS versie-update aangevraagd"
 
-msgid "Authentication required"
-msgstr "Authenticatie vereist"
+msgid "Hardware information updated successfully"
+msgstr "Hardware informatie succesvol bijgewerkt"
 
-msgid "Token expired"
-msgstr "Token verlopen"
+msgid "Hardware update requested"
+msgstr "Hardware update aangevraagd"
 
-msgid "Access denied"
-msgstr "Toegang geweigerd"
+msgid "User access update requested"
+msgstr "Gebruikerstoegang update aangevraagd"
 
-# Account locking messages
-msgid "Account is locked due to too many failed login attempts"
-msgstr "Account vergrendeld vanwege te veel mislukte inlogpogingen"
+msgid "Host {hostname} registered successfully"
+msgstr "Host {hostname} succesvol geregistreerd"
 
-msgid "Account locked due to too many failed login attempts"
-msgstr "Account vergrendeld vanwege te veel mislukte inlogpogingen"
+msgid "Command {command_type} sent to {hostname}"
+msgstr "Commando {command_type} verzonden naar {hostname}"
 
-# Host management
-msgid "Host not found"
-msgstr "Host niet gevonden"
+msgid "Shell command sent to {hostname}"
+msgstr "Shell commando verzonden naar {hostname}"
 
-msgid "Host created successfully"
-msgstr "Host succesvol aangemaakt"
+msgid "Package installation command sent to {hostname}"
+msgstr "Pakketinstallatie commando verzonden naar {hostname}"
 
-msgid "Host updated successfully"
-msgstr "Host succesvol bijgewerkt"
+msgid "Service restart command sent to {hostname}"
+msgstr "Service herstart commando verzonden naar {hostname}"
 
-msgid "Host deleted successfully"
-msgstr "Host succesvol verwijderd"
+msgid "System update command sent to {hostname}"
+msgstr "Systeem update commando verzonden naar {hostname}"
 
-msgid "Invalid FQDN format"
-msgstr "Ongeldig FQDN-formaat"
+msgid "Reboot command sent to {hostname}"
+msgstr "Herstart commando verzonden naar {hostname}"
 
-# User management
-msgid "User not found"
-msgstr "Gebruiker niet gevonden"
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "Commando {command_type} uitgezonden naar {sent_count} agents"
 
-msgid "User created successfully"
-msgstr "Gebruiker succesvol aangemaakt"
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "Shell commando uitgezonden naar {sent_count} agents"
 
-msgid "User updated successfully"
-msgstr "Gebruiker succesvol bijgewerkt"
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "Commando {command_type} verzonden naar {sent_count} {platform} agents"
 
-msgid "User deleted successfully"
-msgstr "Gebruiker succesvol verwijderd"
+msgid "Configuration pushed to all agents"
+msgstr "Configuratie naar alle agents gepusht"
 
-msgid "Username already exists"
-msgstr "Gebruikersnaam bestaat al"
+msgid "Configuration pushed successfully"
+msgstr "Configuratie succesvol gepusht"
 
-msgid "Email already exists"
-msgstr "E-mail bestaat al"
+msgid "Configuration pushed to platform agents"
+msgstr "Configuratie naar platform agents gepusht"
 
-# Agent communication
-msgid "Agent not connected"
-msgstr "Agent niet verbonden"
+msgid "Configuration acknowledgment processed"
+msgstr "Configuratie bevestiging verwerkt"
 
-msgid "Agent registered successfully"
-msgstr "Agent succesvol geregistreerd"
-
-msgid "Command sent successfully"
-msgstr "Commando succesvol verzonden"
-
-msgid "Agent disconnected"
-msgstr "Agent losgekoppeld"
-
-# General errors
-msgid "Internal server error"
-msgstr "Interne serverfout"
-
-msgid "Invalid request data"
-msgstr "Ongeldige aanvraaggegevens"
-
-msgid "Operation completed successfully"
-msgstr "Operatie succesvol voltooid"
-
-msgid "Database error"
-msgstr "Databasefout"

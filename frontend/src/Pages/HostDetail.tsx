@@ -10,7 +10,9 @@ import {
     Button,
     CircularProgress,
     Paper,
-    LinearProgress
+    LinearProgress,
+    Tabs,
+    Tab
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ComputerIcon from '@mui/icons-material/Computer';
@@ -18,12 +20,15 @@ import InfoIcon from '@mui/icons-material/Info';
 import MemoryIcon from '@mui/icons-material/Memory';
 import StorageIcon from '@mui/icons-material/Storage';
 import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
+import GroupIcon from '@mui/icons-material/Group';
+import PersonIcon from '@mui/icons-material/Person';
+import SecurityIcon from '@mui/icons-material/Security';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import CloseIcon from '@mui/icons-material/Close';
 import { Dialog, DialogTitle, DialogContent, IconButton, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, doGetHostByID, doGetHostStorage, doGetHostNetwork } from '../Services/hosts';
+import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups } from '../Services/hosts';
 
 // Use the service types directly - no need for local interfaces anymore
 
@@ -32,9 +37,14 @@ const HostDetail = () => {
     const [host, setHost] = useState<SysManageHost | null>(null);
     const [storageDevices, setStorageDevices] = useState<StorageDeviceType[]>([]);
     const [networkInterfaces, setNetworkInterfaces] = useState<NetworkInterfaceType[]>([]);
+    const [userAccounts, setUserAccounts] = useState<UserAccount[]>([]);
+    const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [currentTab, setCurrentTab] = useState<number>(0);
     const [storageFilter, setStorageFilter] = useState<'all' | 'physical' | 'logical'>('physical');
+    const [userFilter, setUserFilter] = useState<'all' | 'system' | 'regular'>('regular');
+    const [groupFilter, setGroupFilter] = useState<'all' | 'system' | 'regular'>('regular');
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [dialogContent, setDialogContent] = useState<string>('');
     const [dialogTitle, setDialogTitle] = useState<string>('');
@@ -59,11 +69,13 @@ const HostDetail = () => {
                 const hostData = await doGetHostByID(BigInt(hostId));
                 setHost(hostData);
                 
-                // Fetch normalized storage and network data
+                // Fetch normalized storage, network, and user access data
                 try {
-                    const [storageData, networkData] = await Promise.all([
+                    const [storageData, networkData, usersData, groupsData] = await Promise.all([
                         doGetHostStorage(BigInt(hostId)),
-                        doGetHostNetwork(BigInt(hostId))
+                        doGetHostNetwork(BigInt(hostId)),
+                        doGetHostUsers(BigInt(hostId)),
+                        doGetHostGroups(BigInt(hostId))
                     ]);
                     
                     // If normalized data is empty, try to parse JSON fallback data
@@ -88,6 +100,10 @@ const HostDetail = () => {
                     } else {
                         setNetworkInterfaces(networkData);
                     }
+                    
+                    // Set user access data
+                    setUserAccounts(usersData);
+                    setUserGroups(groupsData);
                 } catch (hardwareErr) {
                     // Log but don't fail the whole request - hardware data is optional
                     console.warn('Failed to fetch hardware data:', hardwareErr);
@@ -280,6 +296,40 @@ const HostDetail = () => {
         }
     };
 
+    // Filter user accounts based on system/regular selection
+    const getFilteredUsers = (users: UserAccount[]): UserAccount[] => {
+        switch (userFilter) {
+            case 'system':
+                return users.filter(user => user.is_system_user === true);
+            case 'regular':
+                return users.filter(user => user.is_system_user === false);
+            case 'all':
+            default:
+                // Sort regular users first, then system
+                return users.sort((a, b) => {
+                    if (a.is_system_user === b.is_system_user) return 0;
+                    return a.is_system_user ? 1 : -1;
+                });
+        }
+    };
+
+    // Filter user groups based on system/regular selection
+    const getFilteredGroups = (groups: UserGroup[]): UserGroup[] => {
+        switch (groupFilter) {
+            case 'system':
+                return groups.filter(group => group.is_system_group === true);
+            case 'regular':
+                return groups.filter(group => group.is_system_group === false);
+            case 'all':
+            default:
+                // Sort regular groups first, then system
+                return groups.sort((a, b) => {
+                    if (a.is_system_group === b.is_system_group) return 0;
+                    return a.is_system_group ? 1 : -1;
+                });
+        }
+    };
+
     if (loading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -307,6 +357,10 @@ const HostDetail = () => {
         );
     }
 
+    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+        setCurrentTab(newValue);
+    };
+
     return (
         <Box>
             <Button 
@@ -322,7 +376,33 @@ const HostDetail = () => {
                 {host.fqdn}
             </Typography>
 
-            <Grid container spacing={3}>
+            {/* Tabs */}
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+                <Tabs value={currentTab} onChange={handleTabChange} aria-label="host detail tabs">
+                    <Tab 
+                        icon={<InfoIcon />} 
+                        label={t('hostDetail.infoTab', 'Info')} 
+                        iconPosition="start"
+                        sx={{ textTransform: 'none' }}
+                    />
+                    <Tab 
+                        icon={<MemoryIcon />} 
+                        label={t('hostDetail.hardwareTab', 'Hardware')} 
+                        iconPosition="start"
+                        sx={{ textTransform: 'none' }}
+                    />
+                    <Tab 
+                        icon={<SecurityIcon />} 
+                        label={t('hostDetail.accessTab', 'Access')} 
+                        iconPosition="start"
+                        sx={{ textTransform: 'none' }}
+                    />
+                </Tabs>
+            </Box>
+
+            {/* Tab Content */}
+            {currentTab === 0 && (
+                <Grid container spacing={3}>
                 {/* Basic Information */}
                 <Grid item xs={12} md={6}>
                     <Card sx={{ height: '100%' }}>
@@ -456,7 +536,12 @@ const HostDetail = () => {
                         </CardContent>
                     </Card>
                 </Grid>
+                </Grid>
+            )}
 
+            {/* Hardware Tab */}
+            {currentTab === 1 && (
+                <Grid container spacing={3}>
                 {/* Hardware Information */}
                 <Grid item xs={12}>
                     <Card>
@@ -756,7 +841,223 @@ const HostDetail = () => {
                     </Card>
                 </Grid>
 
-            </Grid>
+                </Grid>
+            )}
+
+            {/* Access Tab */}
+            {currentTab === 2 && (
+                <Grid container spacing={3}>
+                    {/* User Accounts */}
+                    <Grid item xs={12}>
+                        <Card>
+                            <CardContent>
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <PersonIcon sx={{ mr: 1 }} />
+                                        {t('hostDetail.userAccounts', 'User Accounts')} ({getFilteredUsers(userAccounts).length})
+                                    </Typography>
+                                    <ToggleButtonGroup
+                                        value={userFilter}
+                                        exclusive
+                                        onChange={(_, newFilter) => {
+                                            if (newFilter !== null) {
+                                                setUserFilter(newFilter);
+                                            }
+                                        }}
+                                        size="small"
+                                        sx={{ ml: 2 }}
+                                    >
+                                        <ToggleButton value="regular" aria-label="regular users">
+                                            {t('hostDetail.regularUsers', 'Regular')}
+                                        </ToggleButton>
+                                        <ToggleButton value="system" aria-label="system users">
+                                            {t('hostDetail.systemUsers', 'System')}
+                                        </ToggleButton>
+                                        <ToggleButton value="all" aria-label="all users">
+                                            {t('hostDetail.allUsers', 'All')}
+                                        </ToggleButton>
+                                    </ToggleButtonGroup>
+                                </Box>
+                                {getFilteredUsers(userAccounts).length === 0 ? (
+                                    <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 2 }}>
+                                        {t('hostDetail.noUsersFound', 'No user accounts found')}
+                                    </Typography>
+                                ) : (
+                                    <Grid container spacing={2}>
+                                        {getFilteredUsers(userAccounts).map((user: UserAccount, index: number) => (
+                                            <Grid item xs={12} sm={6} md={4} key={user.id || index}>
+                                                <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
+                                                    <CardContent sx={{ p: 2 }}>
+                                                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                                            {user.username}
+                                                        </Typography>
+                                                        <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
+                                                            UID: {user.uid !== undefined ? user.uid : t('common.notAvailable')}
+                                                        </Typography>
+                                                        {user.home_directory && (
+                                                            <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5, wordBreak: 'break-all' }}>
+                                                                {t('hostDetail.homeDir', 'Home')}: {user.home_directory}
+                                                            </Typography>
+                                                        )}
+                                                        {user.shell && (
+                                                            <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
+                                                                {t('hostDetail.shell', 'Shell')}: {user.shell}
+                                                            </Typography>
+                                                        )}
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, mb: 1 }}>
+                                                            <Chip 
+                                                                label={user.is_system_user ? t('hostDetail.systemUser', 'System') : t('hostDetail.regularUser', 'Regular')}
+                                                                color={user.is_system_user ? 'default' : 'primary'}
+                                                                size="small"
+                                                            />
+                                                        </Box>
+                                                        {user.groups && user.groups.length > 0 && (
+                                                            <Box sx={{ mt: 1 }}>
+                                                                <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5, fontSize: '0.75rem' }}>
+                                                                    {t('hostDetail.memberOfGroups', 'Groups')}:
+                                                                </Typography>
+                                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxHeight: '60px', overflow: 'auto' }}>
+                                                                    {user.groups.slice(0, 6).map((groupName: string, groupIndex: number) => (
+                                                                        <Chip 
+                                                                            key={groupIndex}
+                                                                            label={groupName}
+                                                                            size="small"
+                                                                            variant="outlined"
+                                                                            color="secondary"
+                                                                            sx={{ 
+                                                                                fontSize: '0.7rem', 
+                                                                                height: '20px',
+                                                                                '& .MuiChip-label': { px: 1 }
+                                                                            }}
+                                                                        />
+                                                                    ))}
+                                                                    {user.groups.length > 6 && (
+                                                                        <Chip 
+                                                                            label={`+${user.groups.length - 6}`}
+                                                                            size="small"
+                                                                            variant="outlined"
+                                                                            color="info"
+                                                                            sx={{ 
+                                                                                fontSize: '0.7rem', 
+                                                                                height: '20px',
+                                                                                '& .MuiChip-label': { px: 1 }
+                                                                            }}
+                                                                        />
+                                                                    )}
+                                                                </Box>
+                                                            </Box>
+                                                        )}
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        ))}
+                                    </Grid>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </Grid>
+
+                    {/* User Groups */}
+                    <Grid item xs={12}>
+                        <Card>
+                            <CardContent>
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <GroupIcon sx={{ mr: 1 }} />
+                                        {t('hostDetail.userGroups', 'User Groups')} ({getFilteredGroups(userGroups).length})
+                                    </Typography>
+                                    <ToggleButtonGroup
+                                        value={groupFilter}
+                                        exclusive
+                                        onChange={(_, newFilter) => {
+                                            if (newFilter !== null) {
+                                                setGroupFilter(newFilter);
+                                            }
+                                        }}
+                                        size="small"
+                                        sx={{ ml: 2 }}
+                                    >
+                                        <ToggleButton value="regular" aria-label="regular groups">
+                                            {t('hostDetail.regularGroups', 'Regular')}
+                                        </ToggleButton>
+                                        <ToggleButton value="system" aria-label="system groups">
+                                            {t('hostDetail.systemGroups', 'System')}
+                                        </ToggleButton>
+                                        <ToggleButton value="all" aria-label="all groups">
+                                            {t('hostDetail.allGroups', 'All')}
+                                        </ToggleButton>
+                                    </ToggleButtonGroup>
+                                </Box>
+                                {getFilteredGroups(userGroups).length === 0 ? (
+                                    <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 2 }}>
+                                        {t('hostDetail.noGroupsFound', 'No user groups found')}
+                                    </Typography>
+                                ) : (
+                                    <Grid container spacing={2}>
+                                        {getFilteredGroups(userGroups).map((group: UserGroup, index: number) => (
+                                            <Grid item xs={12} sm={6} md={4} key={group.id || index}>
+                                                <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
+                                                    <CardContent sx={{ p: 2 }}>
+                                                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                                            {group.group_name}
+                                                        </Typography>
+                                                        <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
+                                                            GID: {group.gid !== undefined ? group.gid : t('common.notAvailable')}
+                                                        </Typography>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, mb: 1 }}>
+                                                            <Chip 
+                                                                label={group.is_system_group ? t('hostDetail.systemGroup', 'System') : t('hostDetail.regularGroup', 'Regular')}
+                                                                color={group.is_system_group ? 'default' : 'primary'}
+                                                                size="small"
+                                                            />
+                                                        </Box>
+                                                        {group.users && group.users.length > 0 && (
+                                                            <Box sx={{ mt: 1 }}>
+                                                                <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5, fontSize: '0.75rem' }}>
+                                                                    {t('hostDetail.groupMembers', 'Members')}:
+                                                                </Typography>
+                                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxHeight: '60px', overflow: 'auto' }}>
+                                                                    {group.users.slice(0, 6).map((userName: string, userIndex: number) => (
+                                                                        <Chip 
+                                                                            key={userIndex}
+                                                                            label={userName}
+                                                                            size="small"
+                                                                            variant="outlined"
+                                                                            color="secondary"
+                                                                            sx={{ 
+                                                                                fontSize: '0.7rem', 
+                                                                                height: '20px',
+                                                                                '& .MuiChip-label': { px: 1 }
+                                                                            }}
+                                                                        />
+                                                                    ))}
+                                                                    {group.users.length > 6 && (
+                                                                        <Chip 
+                                                                            label={`+${group.users.length - 6}`}
+                                                                            size="small"
+                                                                            variant="outlined"
+                                                                            color="info"
+                                                                            sx={{ 
+                                                                                fontSize: '0.7rem', 
+                                                                                height: '20px',
+                                                                                '& .MuiChip-label': { px: 1 }
+                                                                            }}
+                                                                        />
+                                                                    )}
+                                                                </Box>
+                                                            </Box>
+                                                        )}
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        ))}
+                                    </Grid>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                </Grid>
+            )}
 
             {/* Dialog for Additional Details */}
             <Dialog
