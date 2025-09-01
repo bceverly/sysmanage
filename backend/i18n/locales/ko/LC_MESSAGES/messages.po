@@ -61,3 +61,12 @@ msgstr "플랫폼 에이전트에 구성을 푸시했습니다"
 msgid "Configuration acknowledgment processed"
 msgstr "구성 확인 응답을 처리했습니다"
 
+msgid "Host not found"
+msgstr "호스트를 찾을 수 없습니다"
+
+msgid "Agent is not connected"
+msgstr "에이전트가 연결되지 않았습니다"
+
+msgid "Software inventory update requested"
+msgstr "소프트웨어 인벤토리 업데이트가 요청되었습니다"
+

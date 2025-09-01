@@ -92,14 +92,14 @@ like to add:
     actually kick off the update process and
     communicate back the results of it.
 
-16. Software Inventory - Query the list of
+16. ~~Software Inventory - Query the list of
     installed software and supply it to the
     server for storage in the database.  This
     needs to show up in the UI for the hosts
     and perhaps a global "Software Inventory"
     that shows aggregated packages installed
     across the enterprise with version
-    differences called out.
+    differences called out.~~
 
 17. Broadcast - Allow the server to send a
     broadcast request out to all agents to
@@ -288,3 +288,16 @@ like to add:
     to the config file (low / medium /
     high) that controls the amount of
     information logged.
+
+46. Have the agent and the server log
+    their messages to the operating
+    system appropriate location but
+    fall back to the local logs dir-
+    ectory if they don't have access
+    to that OS location or if the
+    OS directory (in the case of Linux
+    macOS or BSD) doesn't exist.  The
+    OS location on those platforms
+    needs to have a sysmanage or
+    sysmanage-agent subdirectory in
+    which the logs should be placed.

@@ -38,6 +38,8 @@ type SysManageHost = {
     network_details?: string;
     hardware_details?: string;
     hardware_updated_at?: string;
+    // Software inventory fields
+    software_updated_at?: string;
 }
 
 type StorageDevice = {
@@ -90,6 +92,29 @@ type UserGroup = {
     users: string[];
     created_at?: string;
     updated_at?: string;
+}
+
+type SoftwarePackage = {
+    id: number;
+    package_name: string;
+    version?: string;
+    description?: string;
+    package_manager: string;
+    source?: string;
+    architecture?: string;
+    size_bytes?: number;
+    install_date?: string;
+    vendor?: string;
+    category?: string;
+    license_type?: string;
+    bundle_id?: string;
+    app_store_id?: string;
+    installation_path?: string;
+    is_system_package: boolean;
+    is_user_installed: boolean;
+    created_at?: string;
+    updated_at?: string;
+    software_updated_at?: string;
 }
 
 function processError(error: AxiosError) {
@@ -366,5 +391,33 @@ const doRefreshUserAccessData = async (id: BigInt) => {
     return result;
 };
 
-export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup };
-export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData };
+const doGetHostSoftware = async (id: BigInt) => {
+    let result = [] as SoftwarePackage[];
+    
+    await api.get("/host/" + id + "/software")
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doRefreshSoftwareData = async (id: BigInt) => {
+    let result = {} as SuccessResponse;
+
+    await api.post("/host/refresh/software/" + id)
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage };
+export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doGetHostSoftware, doRefreshSoftwareData };

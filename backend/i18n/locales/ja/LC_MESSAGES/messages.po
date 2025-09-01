@@ -61,3 +61,12 @@ msgstr "設定をプラットフォームエージェントにプッシュしま
 msgid "Configuration acknowledgment processed"
 msgstr "設定の確認応答を処理しました"
 
+msgid "Host not found"
+msgstr "ホストが見つかりません"
+
+msgid "Agent is not connected"
+msgstr "エージェントが接続されていません"
+
+msgid "Software inventory update requested"
+msgstr "ソフトウェアインベントリの更新が要求されました"
+

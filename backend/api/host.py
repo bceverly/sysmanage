@@ -877,3 +877,100 @@ async def request_user_access_update(host_id: int):
             raise HTTPException(status_code=503, detail="Agent is not connected")
 
         return {"result": True, "message": _("User access update requested")}
+
+
+@router.get("/host/{host_id}/software", dependencies=[Depends(JWTBearer())])
+async def get_host_software(host_id: int):
+    """
+    Get software packages for a specific host from the software_packages table.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the host first to ensure it exists
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+        if not host:
+            raise HTTPException(status_code=404, detail=_("Host not found"))
+
+        # Get software packages
+        software_packages = (
+            session.query(models.SoftwarePackage)
+            .filter(models.SoftwarePackage.host_id == host_id)
+            .order_by(models.SoftwarePackage.package_name)
+            .all()
+        )
+
+        # Convert to dict format
+        packages = []
+        for package in software_packages:
+            packages.append(
+                {
+                    "id": package.id,
+                    "package_name": package.package_name,
+                    "version": package.version,
+                    "description": package.description,
+                    "package_manager": package.package_manager,
+                    "source": package.source,
+                    "architecture": package.architecture,
+                    "size_bytes": package.size_bytes,
+                    "install_date": (
+                        package.install_date.isoformat()
+                        if package.install_date
+                        else None
+                    ),
+                    "vendor": package.vendor,
+                    "category": package.category,
+                    "license_type": package.license_type,
+                    "bundle_id": package.bundle_id,
+                    "app_store_id": package.app_store_id,
+                    "installation_path": package.installation_path,
+                    "is_system_package": package.is_system_package,
+                    "is_user_installed": package.is_user_installed,
+                    "created_at": (
+                        package.created_at.isoformat() if package.created_at else None
+                    ),
+                    "updated_at": (
+                        package.updated_at.isoformat() if package.updated_at else None
+                    ),
+                    "software_updated_at": (
+                        package.software_updated_at.isoformat()
+                        if package.software_updated_at
+                        else None
+                    ),
+                }
+            )
+
+        return packages
+
+
+@router.post("/host/refresh/software/{host_id}", dependencies=[Depends(JWTBearer())])
+async def refresh_host_software(host_id: int):
+    """
+    Request software inventory refresh for a specific host.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the host first to ensure it exists
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+        if not host:
+            raise HTTPException(status_code=404, detail=_("Host not found"))
+
+        # Create command message for software inventory update
+        command_message = create_command_message(
+            command_type="update_software_inventory", parameters={}
+        )
+
+        # Send command to agent via WebSocket
+        success = await connection_manager.send_to_host(host_id, command_message)
+
+        if not success:
+            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+
+        return {"result": True, "message": _("Software inventory update requested")}

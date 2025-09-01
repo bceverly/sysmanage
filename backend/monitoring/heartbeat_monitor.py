@@ -19,7 +19,12 @@ async def check_host_heartbeats():
     Check for hosts that haven't sent heartbeats within the timeout period
     and mark them as down.
     """
-    db = next(get_db())
+    try:
+        db = next(get_db())
+    except Exception as e:
+        logger.error("Failed to get database connection: %s", e)
+        return
+
     try:
         timeout_minutes = get_heartbeat_timeout_minutes()
         timeout_threshold = datetime.now(timezone.utc) - timedelta(

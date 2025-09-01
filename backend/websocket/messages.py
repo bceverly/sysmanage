@@ -20,6 +20,7 @@ class MessageType(str, Enum):
     OS_VERSION_UPDATE = "os_version_update"
     HARDWARE_UPDATE = "hardware_update"
     USER_ACCESS_UPDATE = "user_access_update"
+    SOFTWARE_INVENTORY_UPDATE = "software_inventory_update"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -258,6 +259,27 @@ class UserAccessUpdateMessage(Message):
         super().__init__(MessageType.USER_ACCESS_UPDATE, data)
 
 
+class SoftwareInventoryUpdateMessage(Message):
+    """Message containing software inventory information from agent."""
+
+    def __init__(
+        self,
+        software_packages: list = None,
+        platform: str = None,
+        total_packages: int = None,
+        collection_timestamp: str = None,
+        **kwargs
+    ):
+        data = {
+            "software_packages": software_packages or [],
+            "platform": platform,
+            "total_packages": total_packages,
+            "collection_timestamp": collection_timestamp,
+            **kwargs,
+        }
+        super().__init__(MessageType.SOFTWARE_INVENTORY_UPDATE, data)
+
+
 # Message factory for creating messages from raw data
 def create_message(raw_data: Dict[str, Any]) -> Message:
     """Create appropriate message object from raw dictionary data."""
@@ -390,6 +412,25 @@ def create_message(raw_data: Dict[str, Any]) -> Message:
                     "regular_users",
                     "system_groups",
                     "regular_groups",
+                ]
+            }
+        )
+    if message_type == MessageType.SOFTWARE_INVENTORY_UPDATE:
+        data = raw_data.get("data", {})
+        return SoftwareInventoryUpdateMessage(
+            software_packages=data.get("software_packages"),
+            platform=data.get("platform"),
+            total_packages=data.get("total_packages"),
+            collection_timestamp=data.get("collection_timestamp"),
+            **{
+                k: v
+                for k, v in data.items()
+                if k
+                not in [
+                    "software_packages",
+                    "platform",
+                    "total_packages",
+                    "collection_timestamp",
                 ]
             }
         )

@@ -61,3 +61,12 @@ msgstr "Konfiguration an Plattform-Agents übertragen"
 msgid "Configuration acknowledgment processed"
 msgstr "Konfigurations-Bestätigung verarbeitet"
 
+msgid "Host not found"
+msgstr "Host nicht gefunden"
+
+msgid "Agent is not connected"
+msgstr "Agent ist nicht verbunden"
+
+msgid "Software inventory update requested"
+msgstr "Software-Inventar-Aktualisierung angefordert"
+

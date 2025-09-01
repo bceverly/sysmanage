@@ -110,20 +110,27 @@ def client(db_session, mock_config):
         finally:
             pass
 
-    # Mock services that might bind to ports
-    with patch("backend.monitoring.heartbeat_monitor.heartbeat_monitor_service"):
-        with patch(
-            "backend.discovery.discovery_service.discovery_beacon.start_beacon_service",
-            new_callable=AsyncMock,
-        ):
-            with patch(
-                "backend.discovery.discovery_service.discovery_beacon.stop_beacon_service",
-                new_callable=AsyncMock,
-            ):
-                app.dependency_overrides[get_db] = override_get_db
-                with TestClient(app) as test_client:
-                    yield test_client
-                app.dependency_overrides.clear()
+    # Mock the FastAPI app lifespan to prevent service startup during tests
+    from contextlib import asynccontextmanager
+
+    @asynccontextmanager
+    async def mock_lifespan(app):
+        # Mock startup - do nothing
+        yield
+        # Mock shutdown - do nothing
+
+    # Replace the lifespan manager
+    original_lifespan = app.router.lifespan_context
+    app.router.lifespan_context = mock_lifespan
+
+    try:
+        app.dependency_overrides[get_db] = override_get_db
+        with TestClient(app) as test_client:
+            yield test_client
+        app.dependency_overrides.clear()
+    finally:
+        # Restore original lifespan
+        app.router.lifespan_context = original_lifespan
 
 
 @pytest.fixture(scope="function")
@@ -141,26 +148,32 @@ def authenticated_client(db_session, mock_config):
         """Mock JWT bearer call that always returns authenticated user."""
         return "mocked_user_id"
 
-    # Override database dependency
-    app.dependency_overrides[get_db] = override_get_db
+    # Mock the FastAPI app lifespan to prevent service startup during tests
+    from contextlib import asynccontextmanager
 
-    # Mock services that might bind to ports and patch JWT auth
-    with patch("backend.monitoring.heartbeat_monitor.heartbeat_monitor_service"):
-        with patch(
-            "backend.discovery.discovery_service.discovery_beacon.start_beacon_service",
-            new_callable=AsyncMock,
-        ):
-            with patch(
-                "backend.discovery.discovery_service.discovery_beacon.stop_beacon_service",
-                new_callable=AsyncMock,
-            ):
-                with patch(
-                    "backend.auth.auth_bearer.JWTBearer.__call__", mock_jwt_call
-                ):
-                    with TestClient(app) as test_client:
-                        yield test_client
+    @asynccontextmanager
+    async def mock_lifespan(app):
+        # Mock startup - do nothing
+        yield
+        # Mock shutdown - do nothing
 
-    app.dependency_overrides.clear()
+    # Replace the lifespan manager
+    original_lifespan = app.router.lifespan_context
+    app.router.lifespan_context = mock_lifespan
+
+    try:
+        # Override database dependency
+        app.dependency_overrides[get_db] = override_get_db
+
+        # Mock JWT auth
+        with patch("backend.auth.auth_bearer.JWTBearer.__call__", mock_jwt_call):
+            with TestClient(app) as test_client:
+                yield test_client
+
+        app.dependency_overrides.clear()
+    finally:
+        # Restore original lifespan
+        app.router.lifespan_context = original_lifespan
 
 
 @pytest.fixture
@@ -191,12 +204,10 @@ def mock_login_security():
 @pytest.fixture
 def mock_websocket():
     """Create a mock WebSocket for testing."""
-    mock_ws = Mock()
-    mock_ws.accept = Mock(return_value=asyncio.coroutine(lambda: None)())
-    mock_ws.send_text = Mock(return_value=asyncio.coroutine(lambda x: None)())
-    mock_ws.receive_text = Mock(
-        return_value=asyncio.coroutine(lambda: '{"test": "data"}')()
-    )
+    mock_ws = AsyncMock()
+    mock_ws.accept = AsyncMock()
+    mock_ws.send_text = AsyncMock()
+    mock_ws.receive_text = AsyncMock(return_value='{"test": "data"}')
     return mock_ws
 
 

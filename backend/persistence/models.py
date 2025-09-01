@@ -68,6 +68,8 @@ class Host(Base):
         Text, nullable=True
     )  # JSON field for additional hardware info
     hardware_updated_at = Column(DateTime(timezone=True), nullable=True)
+    # Software inventory fields
+    software_updated_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships to normalized hardware tables
     storage_devices = relationship(
@@ -86,6 +88,11 @@ class Host(Base):
     )
     user_group_memberships = relationship(
         "UserGroupMembership", back_populates="host", cascade="all, delete-orphan"
+    )
+
+    # Relationship to software inventory table
+    software_packages = relationship(
+        "SoftwarePackage", back_populates="host", cascade="all, delete-orphan"
     )
 
 
@@ -220,3 +227,52 @@ class UserGroupMembership(Base):
     host = relationship("Host", back_populates="user_group_memberships")
     user_account = relationship("UserAccount")
     user_group = relationship("UserGroup")
+
+
+class SoftwarePackage(Base):
+    """
+    This class holds the object mapping for the software_packages table in the
+    PostgreSQL database. Stores comprehensive software inventory across all platforms.
+    """
+
+    __tablename__ = "software_packages"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    host_id = Column(Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+
+    # Core package information
+    package_name = Column(String(255), nullable=False, index=True)
+    version = Column(String(100), nullable=True)
+    description = Column(Text, nullable=True)
+
+    # Package manager and source information
+    package_manager = Column(
+        String(50), nullable=False, index=True
+    )  # apt, snap, homebrew, etc.
+    source = Column(String(100), nullable=True)  # repository, store, local install
+
+    # Technical details
+    architecture = Column(String(50), nullable=True)  # x86_64, arm64, universal, etc.
+    size_bytes = Column(BigInteger, nullable=True)
+    install_date = Column(DateTime(timezone=True), nullable=True)
+
+    # Metadata
+    vendor = Column(String(255), nullable=True)  # Publisher/developer
+    category = Column(String(100), nullable=True)  # Application category
+    license_type = Column(String(100), nullable=True)  # GPL, MIT, Commercial, etc.
+
+    # Platform-specific fields
+    bundle_id = Column(String(255), nullable=True)  # macOS bundle identifier
+    app_store_id = Column(String(50), nullable=True)  # Store-specific ID
+    installation_path = Column(String(500), nullable=True)  # Installation directory
+
+    # System classification
+    is_system_package = Column(Boolean, nullable=False, default=False)
+    is_user_installed = Column(Boolean, nullable=False, default=True)
+
+    # Audit fields
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+    software_updated_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Relationship back to Host
+    host = relationship("Host", back_populates="software_packages")

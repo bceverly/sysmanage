@@ -61,3 +61,12 @@ msgstr "Configuração enviada para agentes de plataforma"
 msgid "Configuration acknowledgment processed"
 msgstr "Confirmação de configuração processada"
 
+msgid "Host not found"
+msgstr "Host não encontrado"
+
+msgid "Agent is not connected"
+msgstr "Agente não está conectado"
+
+msgid "Software inventory update requested"
+msgstr "Atualização de inventário de software solicitada"
+

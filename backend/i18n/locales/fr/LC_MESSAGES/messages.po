@@ -61,3 +61,12 @@ msgstr "Configuration poussée vers les agents de plateforme"
 msgid "Configuration acknowledgment processed"
 msgstr "Accusé de réception de configuration traité"
 
+msgid "Host not found"
+msgstr "Hôte introuvable"
+
+msgid "Agent is not connected"
+msgstr "L'agent n'est pas connecté"
+
+msgid "Software inventory update requested"
+msgstr "Mise à jour de l'inventaire logiciel demandée"
+

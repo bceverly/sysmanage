@@ -61,3 +61,12 @@ msgstr "Конфигурация отправлена агентам платф�
 msgid "Configuration acknowledgment processed"
 msgstr "Подтверждение конфигурации обработано"
 
+msgid "Host not found"
+msgstr "Хост не найден"
+
+msgid "Agent is not connected"
+msgstr "Агент не подключен"
+
+msgid "Software inventory update requested"
+msgstr "Запрошено обновление инвентаря программного обеспечения"
+

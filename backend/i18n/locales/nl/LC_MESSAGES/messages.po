@@ -61,3 +61,12 @@ msgstr "Configuratie naar platform agents gepusht"
 msgid "Configuration acknowledgment processed"
 msgstr "Configuratie bevestiging verwerkt"
 
+msgid "Host not found"
+msgstr "Host niet gevonden"
+
+msgid "Agent is not connected"
+msgstr "Agent is niet verbonden"
+
+msgid "Software inventory update requested"
+msgstr "Software-inventaris update aangevraagd"
+
