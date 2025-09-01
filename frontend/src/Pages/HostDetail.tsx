@@ -48,6 +48,8 @@ const HostDetail = () => {
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [dialogContent, setDialogContent] = useState<string>('');
     const [dialogTitle, setDialogTitle] = useState<string>('');
+    const [expandedUserGroups, setExpandedUserGroups] = useState<Set<number>>(new Set());
+    const [expandedGroupUsers, setExpandedGroupUsers] = useState<Set<number>>(new Set());
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -916,8 +918,8 @@ const HostDetail = () => {
                                                                 <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5, fontSize: '0.75rem' }}>
                                                                     {t('hostDetail.memberOfGroups', 'Groups')}:
                                                                 </Typography>
-                                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxHeight: '60px', overflow: 'auto' }}>
-                                                                    {user.groups.slice(0, 6).map((groupName: string, groupIndex: number) => (
+                                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxHeight: expandedUserGroups.has(user.id) ? 'none' : '60px', overflow: 'auto' }}>
+                                                                    {(expandedUserGroups.has(user.id) ? user.groups : user.groups.slice(0, 6)).map((groupName: string, groupIndex: number) => (
                                                                         <Chip 
                                                                             key={groupIndex}
                                                                             label={groupName}
@@ -931,7 +933,7 @@ const HostDetail = () => {
                                                                             }}
                                                                         />
                                                                     ))}
-                                                                    {user.groups.length > 6 && (
+                                                                    {user.groups.length > 6 && !expandedUserGroups.has(user.id) && (
                                                                         <Chip 
                                                                             label={`+${user.groups.length - 6}`}
                                                                             size="small"
@@ -940,7 +942,32 @@ const HostDetail = () => {
                                                                             sx={{ 
                                                                                 fontSize: '0.7rem', 
                                                                                 height: '20px',
-                                                                                '& .MuiChip-label': { px: 1 }
+                                                                                '& .MuiChip-label': { px: 1 },
+                                                                                cursor: 'pointer'
+                                                                            }}
+                                                                            onClick={() => {
+                                                                                setExpandedUserGroups(prev => new Set([...prev, user.id]));
+                                                                            }}
+                                                                        />
+                                                                    )}
+                                                                    {expandedUserGroups.has(user.id) && (
+                                                                        <Chip 
+                                                                            label={t('common.less', 'less')}
+                                                                            size="small"
+                                                                            variant="outlined"
+                                                                            color="default"
+                                                                            sx={{ 
+                                                                                fontSize: '0.7rem', 
+                                                                                height: '20px',
+                                                                                '& .MuiChip-label': { px: 1 },
+                                                                                cursor: 'pointer'
+                                                                            }}
+                                                                            onClick={() => {
+                                                                                setExpandedUserGroups(prev => {
+                                                                                    const newSet = new Set(prev);
+                                                                                    newSet.delete(user.id);
+                                                                                    return newSet;
+                                                                                });
                                                                             }}
                                                                         />
                                                                     )}
@@ -1016,8 +1043,8 @@ const HostDetail = () => {
                                                                 <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5, fontSize: '0.75rem' }}>
                                                                     {t('hostDetail.groupMembers', 'Members')}:
                                                                 </Typography>
-                                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxHeight: '60px', overflow: 'auto' }}>
-                                                                    {group.users.slice(0, 6).map((userName: string, userIndex: number) => (
+                                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxHeight: expandedGroupUsers.has(group.id) ? 'none' : '60px', overflow: 'auto' }}>
+                                                                    {(expandedGroupUsers.has(group.id) ? group.users : group.users.slice(0, 6)).map((userName: string, userIndex: number) => (
                                                                         <Chip 
                                                                             key={userIndex}
                                                                             label={userName}
@@ -1031,7 +1058,7 @@ const HostDetail = () => {
                                                                             }}
                                                                         />
                                                                     ))}
-                                                                    {group.users.length > 6 && (
+                                                                    {group.users.length > 6 && !expandedGroupUsers.has(group.id) && (
                                                                         <Chip 
                                                                             label={`+${group.users.length - 6}`}
                                                                             size="small"
@@ -1040,7 +1067,32 @@ const HostDetail = () => {
                                                                             sx={{ 
                                                                                 fontSize: '0.7rem', 
                                                                                 height: '20px',
-                                                                                '& .MuiChip-label': { px: 1 }
+                                                                                '& .MuiChip-label': { px: 1 },
+                                                                                cursor: 'pointer'
+                                                                            }}
+                                                                            onClick={() => {
+                                                                                setExpandedGroupUsers(prev => new Set([...prev, group.id]));
+                                                                            }}
+                                                                        />
+                                                                    )}
+                                                                    {expandedGroupUsers.has(group.id) && (
+                                                                        <Chip 
+                                                                            label={t('common.less', 'less')}
+                                                                            size="small"
+                                                                            variant="outlined"
+                                                                            color="default"
+                                                                            sx={{ 
+                                                                                fontSize: '0.7rem', 
+                                                                                height: '20px',
+                                                                                '& .MuiChip-label': { px: 1 },
+                                                                                cursor: 'pointer'
+                                                                            }}
+                                                                            onClick={() => {
+                                                                                setExpandedGroupUsers(prev => {
+                                                                                    const newSet = new Set(prev);
+                                                                                    newSet.delete(group.id);
+                                                                                    return newSet;
+                                                                                });
                                                                             }}
                                                                         />
                                                                     )}

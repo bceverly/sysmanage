@@ -100,7 +100,8 @@
     "invalidDate": "Invalid date",
     "yes": "Yes",
     "no": "No",
-    "unassigned": "Unassigned"
+    "unassigned": "Unassigned",
+    "less": "less"
   },
   "hostDetail": {
     "invalidId": "Invalid host ID",

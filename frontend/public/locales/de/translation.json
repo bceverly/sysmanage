@@ -102,6 +102,7 @@
     "yes": "Ja",
     "no": "Nein",
     "unassigned": "Nicht zugewiesen",
+    "less": "weniger",
     "id": "ID"
   },
   "hostDetail": {
