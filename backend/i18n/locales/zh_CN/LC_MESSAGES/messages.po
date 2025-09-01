@@ -1,85 +1,63 @@
+# Backend messages for SysManage - zh_CN
+# Copyright (C) 2024 SysManage
+# This file is distributed under the same license as the SysManage package.
+#
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language: zh_CN\n"
 
-# Authentication messages
-msgid "Invalid username or password"
-msgstr "用户名或密码无效"
+msgid "OS version update requested"
+msgstr "已请求操作系统版本更新"
 
-msgid "Authentication required"
-msgstr "需要身份验证"
+msgid "Hardware information updated successfully"
+msgstr "硬件信息更新成功"
 
-msgid "Token expired"
-msgstr "令牌已过期"
+msgid "Hardware update requested"
+msgstr "已请求硬件更新"
 
-msgid "Access denied"
-msgstr "访问被拒绝"
+msgid "User access update requested"
+msgstr "已请求用户访问更新"
 
-# Account locking messages
-msgid "Account is locked due to too many failed login attempts"
-msgstr "由于登录失败次数过多，账户已被锁定"
+msgid "Host {hostname} registered successfully"
+msgstr "主机 {hostname} 注册成功"
 
-msgid "Account locked due to too many failed login attempts"
-msgstr "由于登录失败次数过多，账户已被锁定"
+msgid "Command {command_type} sent to {hostname}"
+msgstr "命令 {command_type} 已发送到 {hostname}"
 
-# Host management
-msgid "Host not found"
-msgstr "主机未找到"
+msgid "Shell command sent to {hostname}"
+msgstr "Shell 命令已发送到 {hostname}"
 
-msgid "Host created successfully"
-msgstr "主机创建成功"
+msgid "Package installation command sent to {hostname}"
+msgstr "软件包安装命令已发送到 {hostname}"
 
-msgid "Host updated successfully"
-msgstr "主机更新成功"
+msgid "Service restart command sent to {hostname}"
+msgstr "服务重启命令已发送到 {hostname}"
 
-msgid "Host deleted successfully"
-msgstr "主机删除成功"
+msgid "System update command sent to {hostname}"
+msgstr "系统更新命令已发送到 {hostname}"
 
-msgid "Invalid FQDN format"
-msgstr "无效的FQDN格式"
+msgid "Reboot command sent to {hostname}"
+msgstr "重启命令已发送到 {hostname}"
 
-# User management
-msgid "User not found"
-msgstr "用户未找到"
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "命令 {command_type} 已广播到 {sent_count} 个代理"
 
-msgid "User created successfully"
-msgstr "用户创建成功"
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "Shell 命令已广播到 {sent_count} 个代理"
 
-msgid "User updated successfully"
-msgstr "用户更新成功"
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "命令 {command_type} 已发送到 {sent_count} 个 {platform} 代理"
 
-msgid "User deleted successfully"
-msgstr "用户删除成功"
+msgid "Configuration pushed to all agents"
+msgstr "配置已推送到所有代理"
 
-msgid "Username already exists"
-msgstr "用户名已存在"
+msgid "Configuration pushed successfully"
+msgstr "配置推送成功"
 
-msgid "Email already exists"
-msgstr "邮箱已存在"
+msgid "Configuration pushed to platform agents"
+msgstr "配置已推送到平台代理"
 
-# Agent communication
-msgid "Agent not connected"
-msgstr "代理未连接"
+msgid "Configuration acknowledgment processed"
+msgstr "配置确认已处理"
 
-msgid "Agent registered successfully"
-msgstr "代理注册成功"
-
-msgid "Command sent successfully"
-msgstr "命令发送成功"
-
-msgid "Agent disconnected"
-msgstr "代理已断开连接"
-
-# General errors
-msgid "Internal server error"
-msgstr "服务器内部错误"
-
-msgid "Invalid request data"
-msgstr "无效的请求数据"
-
-msgid "Operation completed successfully"
-msgstr "操作成功完成"
-
-msgid "Database error"
-msgstr "数据库错误"

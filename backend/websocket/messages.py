@@ -19,6 +19,7 @@ class MessageType(str, Enum):
     ERROR = "error"
     OS_VERSION_UPDATE = "os_version_update"
     HARDWARE_UPDATE = "hardware_update"
+    USER_ACCESS_UPDATE = "user_access_update"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -226,6 +227,37 @@ class HardwareUpdateMessage(Message):
         super().__init__(MessageType.HARDWARE_UPDATE, data)
 
 
+class UserAccessUpdateMessage(Message):
+    """Message containing user access information from agent."""
+
+    def __init__(
+        self,
+        users: list = None,
+        groups: list = None,
+        platform: str = None,
+        total_users: int = None,
+        total_groups: int = None,
+        system_users: int = None,
+        regular_users: int = None,
+        system_groups: int = None,
+        regular_groups: int = None,
+        **kwargs
+    ):
+        data = {
+            "users": users or [],
+            "groups": groups or [],
+            "platform": platform,
+            "total_users": total_users,
+            "total_groups": total_groups,
+            "system_users": system_users,
+            "regular_users": regular_users,
+            "system_groups": system_groups,
+            "regular_groups": regular_groups,
+            **kwargs,
+        }
+        super().__init__(MessageType.USER_ACCESS_UPDATE, data)
+
+
 # Message factory for creating messages from raw data
 def create_message(raw_data: Dict[str, Any]) -> Message:
     """Create appropriate message object from raw dictionary data."""
@@ -329,6 +361,35 @@ def create_message(raw_data: Dict[str, Any]) -> Message:
                     "storage_details",
                     "network_details",
                     "hardware_details",
+                ]
+            }
+        )
+    if message_type == MessageType.USER_ACCESS_UPDATE:
+        data = raw_data.get("data", {})
+        return UserAccessUpdateMessage(
+            users=data.get("users"),
+            groups=data.get("groups"),
+            platform=data.get("platform"),
+            total_users=data.get("total_users"),
+            total_groups=data.get("total_groups"),
+            system_users=data.get("system_users"),
+            regular_users=data.get("regular_users"),
+            system_groups=data.get("system_groups"),
+            regular_groups=data.get("regular_groups"),
+            **{
+                k: v
+                for k, v in data.items()
+                if k
+                not in [
+                    "users",
+                    "groups",
+                    "platform",
+                    "total_users",
+                    "total_groups",
+                    "system_users",
+                    "regular_users",
+                    "system_groups",
+                    "regular_groups",
                 ]
             }
         )

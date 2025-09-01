@@ -75,9 +75,9 @@ like to add:
     feature that has to be turned on for each
     client and defaults to "off" if not specified.
 
-14. User List - Query the list of users on the
+14. ~~User List - Query the list of users on the
     agent system and provide it to the server
-    for storage in the database.
+    for storage in the database.~~
 
 15. Updates - Query the list of available updates
     on the agent and provide it as a list to the
@@ -242,11 +242,11 @@ like to add:
     the basics and direct the reader to
     the url.
 
-39. Groups list - just like the users
+39. ~~Groups list - just like the users
     that the agent captures from the
     local system, we need a way to get
     groups and store / display them on
-    the server.
+    the server.~~
 
 40. We need a reporting infrastructure
     in the server UI that allows us to

@@ -1,85 +1,63 @@
+# Backend messages for SysManage - ja
+# Copyright (C) 2024 SysManage
+# This file is distributed under the same license as the SysManage package.
+#
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language: ja\n"
 
-# Authentication messages
-msgid "Invalid username or password"
-msgstr "ユーザー名またはパスワードが無効です"
+msgid "OS version update requested"
+msgstr "OSバージョン更新が要求されました"
 
-msgid "Authentication required"
-msgstr "認証が必要です"
+msgid "Hardware information updated successfully"
+msgstr "ハードウェア情報が正常に更新されました"
 
-msgid "Token expired"
-msgstr "トークンが期限切れです"
+msgid "Hardware update requested"
+msgstr "ハードウェア更新が要求されました"
 
-msgid "Access denied"
-msgstr "アクセスが拒否されました"
+msgid "User access update requested"
+msgstr "ユーザーアクセス更新が要求されました"
 
-# Account locking messages
-msgid "Account is locked due to too many failed login attempts"
-msgstr "ログイン試行の失敗回数が多すぎるため、アカウントがロックされています"
+msgid "Host {hostname} registered successfully"
+msgstr "ホスト {hostname} が正常に登録されました"
 
-msgid "Account locked due to too many failed login attempts"
-msgstr "ログイン試行の失敗回数が多すぎるため、アカウントがロックされています"
+msgid "Command {command_type} sent to {hostname}"
+msgstr "コマンド {command_type} を {hostname} に送信しました"
 
-# Host management
-msgid "Host not found"
-msgstr "ホストが見つかりません"
+msgid "Shell command sent to {hostname}"
+msgstr "シェルコマンドを {hostname} に送信しました"
 
-msgid "Host created successfully"
-msgstr "ホストが正常に作成されました"
+msgid "Package installation command sent to {hostname}"
+msgstr "パッケージインストールコマンドを {hostname} に送信しました"
 
-msgid "Host updated successfully"
-msgstr "ホストが正常に更新されました"
+msgid "Service restart command sent to {hostname}"
+msgstr "サービス再起動コマンドを {hostname} に送信しました"
 
-msgid "Host deleted successfully"
-msgstr "ホストが正常に削除されました"
+msgid "System update command sent to {hostname}"
+msgstr "システム更新コマンドを {hostname} に送信しました"
 
-msgid "Invalid FQDN format"
-msgstr "無効なFQDN形式"
+msgid "Reboot command sent to {hostname}"
+msgstr "再起動コマンドを {hostname} に送信しました"
 
-# User management
-msgid "User not found"
-msgstr "ユーザーが見つかりません"
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "コマンド {command_type} を {sent_count} エージェントにブロードキャストしました"
 
-msgid "User created successfully"
-msgstr "ユーザーが正常に作成されました"
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "シェルコマンドを {sent_count} エージェントにブロードキャストしました"
 
-msgid "User updated successfully"
-msgstr "ユーザーが正常に更新されました"
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "コマンド {command_type} を {sent_count} {platform} エージェントに送信しました"
 
-msgid "User deleted successfully"
-msgstr "ユーザーが正常に削除されました"
+msgid "Configuration pushed to all agents"
+msgstr "設定をすべてのエージェントにプッシュしました"
 
-msgid "Username already exists"
-msgstr "ユーザー名は既に存在します"
+msgid "Configuration pushed successfully"
+msgstr "設定が正常にプッシュされました"
 
-msgid "Email already exists"
-msgstr "メールは既に存在します"
+msgid "Configuration pushed to platform agents"
+msgstr "設定をプラットフォームエージェントにプッシュしました"
 
-# Agent communication
-msgid "Agent not connected"
-msgstr "エージェントが接続されていません"
+msgid "Configuration acknowledgment processed"
+msgstr "設定の確認応答を処理しました"
 
-msgid "Agent registered successfully"
-msgstr "エージェントが正常に登録されました"
-
-msgid "Command sent successfully"
-msgstr "コマンドが正常に送信されました"
-
-msgid "Agent disconnected"
-msgstr "エージェントが切断されました"
-
-# General errors
-msgid "Internal server error"
-msgstr "内部サーバーエラー"
-
-msgid "Invalid request data"
-msgstr "無効なリクエストデータ"
-
-msgid "Operation completed successfully"
-msgstr "操作が正常に完了しました"
-
-msgid "Database error"
-msgstr "データベースエラー"

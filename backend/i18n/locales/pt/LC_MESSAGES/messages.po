@@ -1,85 +1,63 @@
+# Backend messages for SysManage - pt
+# Copyright (C) 2024 SysManage
+# This file is distributed under the same license as the SysManage package.
+#
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language: pt\n"
 
-# Authentication messages
-msgid "Invalid username or password"
-msgstr "Nome de usuário ou senha inválidos"
+msgid "OS version update requested"
+msgstr "Atualização de versão do SO solicitada"
 
-msgid "Authentication required"
-msgstr "Autenticação necessária"
+msgid "Hardware information updated successfully"
+msgstr "Informações de hardware atualizadas com sucesso"
 
-msgid "Token expired"
-msgstr "Token expirado"
+msgid "Hardware update requested"
+msgstr "Atualização de hardware solicitada"
 
-msgid "Access denied"
-msgstr "Acesso negado"
+msgid "User access update requested"
+msgstr "Atualização de acesso de usuários solicitada"
 
-# Account locking messages
-msgid "Account is locked due to too many failed login attempts"
-msgstr "Conta bloqueada devido a muitas tentativas de login falharam"
+msgid "Host {hostname} registered successfully"
+msgstr "Host {hostname} registrado com sucesso"
 
-msgid "Account locked due to too many failed login attempts"
-msgstr "Conta bloqueada devido a muitas tentativas de login falharam"
+msgid "Command {command_type} sent to {hostname}"
+msgstr "Comando {command_type} enviado para {hostname}"
 
-# Host management
-msgid "Host not found"
-msgstr "Host não encontrado"
+msgid "Shell command sent to {hostname}"
+msgstr "Comando shell enviado para {hostname}"
 
-msgid "Host created successfully"
-msgstr "Host criado com sucesso"
+msgid "Package installation command sent to {hostname}"
+msgstr "Comando de instalação de pacote enviado para {hostname}"
 
-msgid "Host updated successfully"
-msgstr "Host atualizado com sucesso"
+msgid "Service restart command sent to {hostname}"
+msgstr "Comando de reinicialização de serviço enviado para {hostname}"
 
-msgid "Host deleted successfully"
-msgstr "Host excluído com sucesso"
+msgid "System update command sent to {hostname}"
+msgstr "Comando de atualização do sistema enviado para {hostname}"
 
-msgid "Invalid FQDN format"
-msgstr "Formato FQDN inválido"
+msgid "Reboot command sent to {hostname}"
+msgstr "Comando de reinicialização enviado para {hostname}"
 
-# User management
-msgid "User not found"
-msgstr "Usuário não encontrado"
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "Comando {command_type} transmitido para {sent_count} agentes"
 
-msgid "User created successfully"
-msgstr "Usuário criado com sucesso"
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "Comando shell transmitido para {sent_count} agentes"
 
-msgid "User updated successfully"
-msgstr "Usuário atualizado com sucesso"
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "Comando {command_type} enviado para {sent_count} agentes {platform}"
 
-msgid "User deleted successfully"
-msgstr "Usuário excluído com sucesso"
+msgid "Configuration pushed to all agents"
+msgstr "Configuração enviada para todos os agentes"
 
-msgid "Username already exists"
-msgstr "Nome de usuário já existe"
+msgid "Configuration pushed successfully"
+msgstr "Configuração enviada com sucesso"
 
-msgid "Email already exists"
-msgstr "E-mail já existe"
+msgid "Configuration pushed to platform agents"
+msgstr "Configuração enviada para agentes de plataforma"
 
-# Agent communication
-msgid "Agent not connected"
-msgstr "Agente não conectado"
+msgid "Configuration acknowledgment processed"
+msgstr "Confirmação de configuração processada"
 
-msgid "Agent registered successfully"
-msgstr "Agente registrado com sucesso"
-
-msgid "Command sent successfully"
-msgstr "Comando enviado com sucesso"
-
-msgid "Agent disconnected"
-msgstr "Agente desconectado"
-
-# General errors
-msgid "Internal server error"
-msgstr "Erro interno do servidor"
-
-msgid "Invalid request data"
-msgstr "Dados de solicitação inválidos"
-
-msgid "Operation completed successfully"
-msgstr "Operação concluída com sucesso"
-
-msgid "Database error"
-msgstr "Erro do banco de dados"

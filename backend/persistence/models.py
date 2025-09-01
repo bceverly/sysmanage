@@ -77,6 +77,17 @@ class Host(Base):
         "NetworkInterface", back_populates="host", cascade="all, delete-orphan"
     )
 
+    # Relationships to user access tables
+    user_accounts = relationship(
+        "UserAccount", back_populates="host", cascade="all, delete-orphan"
+    )
+    user_groups = relationship(
+        "UserGroup", back_populates="host", cascade="all, delete-orphan"
+    )
+    user_group_memberships = relationship(
+        "UserGroupMembership", back_populates="host", cascade="all, delete-orphan"
+    )
+
 
 class User(Base):
     """
@@ -144,3 +155,68 @@ class NetworkInterface(Base):
 
     # Relationship back to Host
     host = relationship("Host", back_populates="network_interfaces")
+
+
+class UserAccount(Base):
+    """
+    This class holds the object mapping for the user_accounts table in the
+    PostgreSQL database.
+    """
+
+    __tablename__ = "user_accounts"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    host_id = Column(Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    username = Column(String(255), nullable=False)
+    uid = Column(Integer, nullable=True)  # Linux/macOS user ID
+    home_directory = Column(String(500), nullable=True)
+    shell = Column(String(255), nullable=True)
+    is_system_user = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Relationship back to Host
+    host = relationship("Host", back_populates="user_accounts")
+
+
+class UserGroup(Base):
+    """
+    This class holds the object mapping for the user_groups table in the
+    PostgreSQL database.
+    """
+
+    __tablename__ = "user_groups"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    host_id = Column(Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    group_name = Column(String(255), nullable=False)
+    gid = Column(Integer, nullable=True)  # Linux/macOS group ID
+    is_system_group = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Relationship back to Host
+    host = relationship("Host", back_populates="user_groups")
+
+
+class UserGroupMembership(Base):
+    """
+    This class holds the object mapping for the user_group_memberships table in the
+    PostgreSQL database. This table stores many-to-many relationships between
+    users and groups.
+    """
+
+    __tablename__ = "user_group_memberships"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    host_id = Column(Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    user_account_id = Column(
+        Integer, ForeignKey("user_accounts.id", ondelete="CASCADE"), nullable=False
+    )
+    user_group_id = Column(
+        Integer, ForeignKey("user_groups.id", ondelete="CASCADE"), nullable=False
+    )
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Relationships
+    host = relationship("Host", back_populates="user_group_memberships")
+    user_account = relationship("UserAccount")
+    user_group = relationship("UserGroup")

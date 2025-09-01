@@ -1,85 +1,63 @@
+# Backend messages for SysManage - en
+# Copyright (C) 2024 SysManage
+# This file is distributed under the same license as the SysManage package.
+#
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language: en\n"
 
-# Authentication messages
-msgid "Invalid username or password"
-msgstr "Invalid username or password"
+msgid "OS version update requested"
+msgstr "OS version update requested"
 
-msgid "Authentication required"
-msgstr "Authentication required"
+msgid "Hardware information updated successfully"
+msgstr "Hardware information updated successfully"
 
-msgid "Token expired"
-msgstr "Token expired"
+msgid "Hardware update requested"
+msgstr "Hardware update requested"
 
-msgid "Access denied"
-msgstr "Access denied"
+msgid "User access update requested"
+msgstr "User access update requested"
 
-# Account locking messages
-msgid "Account is locked due to too many failed login attempts"
-msgstr "Account is locked due to too many failed login attempts"
+msgid "Host {hostname} registered successfully"
+msgstr "Host {hostname} registered successfully"
 
-msgid "Account locked due to too many failed login attempts"
-msgstr "Account locked due to too many failed login attempts"
+msgid "Command {command_type} sent to {hostname}"
+msgstr "Command {command_type} sent to {hostname}"
 
-# Host management
-msgid "Host not found"
-msgstr "Host not found"
+msgid "Shell command sent to {hostname}"
+msgstr "Shell command sent to {hostname}"
 
-msgid "Host created successfully"
-msgstr "Host created successfully"
+msgid "Package installation command sent to {hostname}"
+msgstr "Package installation command sent to {hostname}"
 
-msgid "Host updated successfully"
-msgstr "Host updated successfully"
+msgid "Service restart command sent to {hostname}"
+msgstr "Service restart command sent to {hostname}"
 
-msgid "Host deleted successfully"
-msgstr "Host deleted successfully"
+msgid "System update command sent to {hostname}"
+msgstr "System update command sent to {hostname}"
 
-msgid "Invalid FQDN format"
-msgstr "Invalid FQDN format"
+msgid "Reboot command sent to {hostname}"
+msgstr "Reboot command sent to {hostname}"
 
-# User management
-msgid "User not found"
-msgstr "User not found"
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "Command {command_type} broadcast to {sent_count} agents"
 
-msgid "User created successfully"
-msgstr "User created successfully"
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "Shell command broadcast to {sent_count} agents"
 
-msgid "User updated successfully"
-msgstr "User updated successfully"
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "Command {command_type} sent to {sent_count} {platform} agents"
 
-msgid "User deleted successfully"
-msgstr "User deleted successfully"
+msgid "Configuration pushed to all agents"
+msgstr "Configuration pushed to all agents"
 
-msgid "Username already exists"
-msgstr "Username already exists"
+msgid "Configuration pushed successfully"
+msgstr "Configuration pushed successfully"
 
-msgid "Email already exists"
-msgstr "Email already exists"
+msgid "Configuration pushed to platform agents"
+msgstr "Configuration pushed to platform agents"
 
-# Agent communication
-msgid "Agent not connected"
-msgstr "Agent not connected"
+msgid "Configuration acknowledgment processed"
+msgstr "Configuration acknowledgment processed"
 
-msgid "Agent registered successfully"
-msgstr "Agent registered successfully"
-
-msgid "Command sent successfully"
-msgstr "Command sent successfully"
-
-msgid "Agent disconnected"
-msgstr "Agent disconnected"
-
-# General errors
-msgid "Internal server error"
-msgstr "Internal server error"
-
-msgid "Invalid request data"
-msgstr "Invalid request data"
-
-msgid "Operation completed successfully"
-msgstr "Operation completed successfully"
-
-msgid "Database error"
-msgstr "Database error"

@@ -11,8 +11,16 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Request
 from sqlalchemy.orm import Session
 
+from backend.i18n import _
 from backend.persistence.db import get_db
-from backend.persistence.models import Host, StorageDevice, NetworkInterface
+from backend.persistence.models import (
+    Host,
+    StorageDevice,
+    NetworkInterface,
+    UserAccount,
+    UserGroup,
+    UserGroupMembership,
+)
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import ErrorMessage, MessageType, create_message
 from backend.security.communication_security import websocket_security
@@ -31,6 +39,61 @@ if not debug_logger.handlers:
     debug_logger.addHandler(console_handler)
 
 debug_logger.info("agent.py module loaded with WebSocket debug logging")
+
+
+def _process_user_accounts(db: Session, host_id: int, users_data: list):
+    """Process user accounts data for a host."""
+    for user_data in users_data:
+        if not user_data.get("error"):  # Skip error entries
+            user_account = UserAccount(
+                host_id=host_id,
+                username=user_data.get("username"),
+                uid=user_data.get("uid"),
+                home_directory=user_data.get("home_directory"),
+                shell=user_data.get("shell"),
+                is_system_user=user_data.get("is_system_user", False),
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc),
+            )
+            db.add(user_account)
+
+
+def _process_user_groups(db: Session, host_id: int, groups_data: list):
+    """Process user groups data for a host."""
+    for group_data in groups_data:
+        if not group_data.get("error"):  # Skip error entries
+            user_group = UserGroup(
+                host_id=host_id,
+                group_name=group_data.get("group_name"),
+                gid=group_data.get("gid"),
+                is_system_group=group_data.get("is_system_group", False),
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc),
+            )
+            db.add(user_group)
+
+
+def _process_user_group_memberships(
+    db: Session, host_id: int, users_data: list, user_id_map: dict, group_id_map: dict
+):
+    """Process user-group memberships for a host."""
+    for user_data in users_data:
+        if not user_data.get("error") and "groups" in user_data:
+            username = user_data.get("username")
+            if username in user_id_map:
+                user_account_id = user_id_map[username]
+                for group_name in user_data.get("groups", []):
+                    if group_name in group_id_map:
+                        group_id = group_id_map[group_name]
+                        membership = UserGroupMembership(
+                            host_id=host_id,
+                            user_account_id=user_account_id,
+                            user_group_id=group_id,
+                            created_at=datetime.now(timezone.utc),
+                            updated_at=datetime.now(timezone.utc),
+                        )
+                        db.add(membership)
+
 
 router = APIRouter()
 
@@ -137,7 +200,9 @@ async def handle_system_info(db: Session, connection, message_data: dict):
             "message_id": message_data.get("message_id"),
             "data": {
                 "status": "success",
-                "message": f"Host {hostname} registered successfully",
+                "message": _("Host {hostname} registered successfully").format(
+                    hostname=hostname
+                ),
                 "host_id": host.id,
             },
         }
@@ -453,6 +518,110 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
     await connection.send_message(response)
 
 
+async def handle_user_access_update(db: Session, connection, message_data: dict):
+    """Handle user access update message from agent."""
+    # Try to get hostname from connection first, then from message data
+    hostname = connection.hostname or message_data.get("hostname")
+    if not hostname:
+        debug_logger.info(
+            "User access update received but no hostname available - skipping"
+        )
+        return
+    debug_logger.info("=== User Access Update Data Received ===")
+    debug_logger.info("FQDN: %s", hostname)
+    debug_logger.info("Platform: %s", message_data.get("platform"))
+    debug_logger.info("Total users: %s", message_data.get("total_users", 0))
+    debug_logger.info("Total groups: %s", message_data.get("total_groups", 0))
+    debug_logger.info("System users: %s", message_data.get("system_users", 0))
+    debug_logger.info("Regular users: %s", message_data.get("regular_users", 0))
+    if "users" in message_data:
+        debug_logger.info("Users data: %s", len(message_data["users"]))
+    if "groups" in message_data:
+        debug_logger.info("Groups data: %s", len(message_data["groups"]))
+    debug_logger.info("=== End User Access Data ===")
+
+    # Update host with new user access information
+    host = db.query(Host).filter(Host.fqdn == hostname).first()
+
+    if host:
+        debug_logger.info("Updating existing host with user access data...")
+        try:
+            # Handle normalized user accounts
+            if "users" in message_data:
+                debug_logger.info(
+                    "Processing %s user accounts...",
+                    len(message_data["users"]),
+                )
+                # Delete existing user accounts for this host
+                db.query(UserAccount).filter(UserAccount.host_id == host.id).delete()
+
+                # Add new user accounts
+                _process_user_accounts(db, host.id, message_data["users"])
+                debug_logger.info("User accounts processing complete")
+
+            # Handle normalized user groups
+            if "groups" in message_data:
+                debug_logger.info(
+                    "Processing %s user groups...",
+                    len(message_data["groups"]),
+                )
+                # Delete existing user groups for this host
+                db.query(UserGroup).filter(UserGroup.host_id == host.id).delete()
+
+                # Add new user groups
+                _process_user_groups(db, host.id, message_data["groups"])
+                debug_logger.info("User groups processing complete")
+
+            # Handle user-group memberships
+            debug_logger.info("Processing user-group memberships...")
+
+            # Delete existing memberships for this host
+            db.query(UserGroupMembership).filter(
+                UserGroupMembership.host_id == host.id
+            ).delete()
+
+            # Build mapping of usernames to user_account IDs and group names to user_group IDs
+            user_id_map = {}
+            group_id_map = {}
+
+            for user_account in (
+                db.query(UserAccount).filter(UserAccount.host_id == host.id).all()
+            ):
+                user_id_map[user_account.username] = user_account.id
+
+            for user_group in (
+                db.query(UserGroup).filter(UserGroup.host_id == host.id).all()
+            ):
+                group_id_map[user_group.group_name] = user_group.id
+
+            # Process group memberships from user data
+            if "users" in message_data:
+                _process_user_group_memberships(
+                    db, host.id, message_data["users"], user_id_map, group_id_map
+                )
+
+            debug_logger.info("User-group memberships processing complete")
+
+            host.last_access = datetime.now(timezone.utc)
+
+            db.commit()
+            debug_logger.info("User access data committed to database")
+            db.refresh(host)
+
+        except Exception as e:
+            debug_logger.error("Error updating host with user access data: %s", e)
+            db.rollback()
+            raise
+
+    # Send acknowledgment
+    response = {
+        "message_type": "ack",
+        "message_id": message_data.get("message_id"),
+        "data": {"status": "user_access_updated"},
+    }
+    await connection.send_message(response)
+
+
 @router.websocket("/agent/connect")
 async def agent_connect(websocket: WebSocket):
     """
@@ -565,6 +734,18 @@ async def agent_connect(websocket: WebSocket):
                         )
                     except Exception as e:
                         debug_logger.error("Error in handle_hardware_update: %s", e)
+                        raise
+
+                elif message.message_type == MessageType.USER_ACCESS_UPDATE:
+                    debug_logger.info("Calling handle_user_access_update")
+                    try:
+                        # Handle user access update from agent
+                        await handle_user_access_update(db, connection, message.data)
+                        debug_logger.info(
+                            "handle_user_access_update completed successfully"
+                        )
+                    except Exception as e:
+                        debug_logger.error("Error in handle_user_access_update: %s", e)
                         raise
 
                 else:

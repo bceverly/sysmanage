@@ -1,85 +1,63 @@
+# Backend messages for SysManage - de
+# Copyright (C) 2024 SysManage
+# This file is distributed under the same license as the SysManage package.
+#
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language: de\n"
 
-# Authentication messages
-msgid "Invalid username or password"
-msgstr "Ungültiger Benutzername oder Passwort"
+msgid "OS version update requested"
+msgstr "Betriebssystem-Versions-Update angefordert"
 
-msgid "Authentication required"
-msgstr "Authentifizierung erforderlich"
+msgid "Hardware information updated successfully"
+msgstr "Hardware-Informationen erfolgreich aktualisiert"
 
-msgid "Token expired"
-msgstr "Token abgelaufen"
+msgid "Hardware update requested"
+msgstr "Hardware-Update angefordert"
 
-msgid "Access denied"
-msgstr "Zugriff verweigert"
+msgid "User access update requested"
+msgstr "Benutzerzugriff-Update angefordert"
 
-# Account locking messages
-msgid "Account is locked due to too many failed login attempts"
-msgstr "Konto ist gesperrt aufgrund zu vieler fehlgeschlagener Anmeldeversuche"
+msgid "Host {hostname} registered successfully"
+msgstr "Host {hostname} erfolgreich registriert"
 
-msgid "Account locked due to too many failed login attempts"
-msgstr "Konto gesperrt aufgrund zu vieler fehlgeschlagener Anmeldeversuche"
+msgid "Command {command_type} sent to {hostname}"
+msgstr "Befehl {command_type} an {hostname} gesendet"
 
-# Host management
-msgid "Host not found"
-msgstr "Host nicht gefunden"
+msgid "Shell command sent to {hostname}"
+msgstr "Shell-Befehl an {hostname} gesendet"
 
-msgid "Host created successfully"
-msgstr "Host erfolgreich erstellt"
+msgid "Package installation command sent to {hostname}"
+msgstr "Paketinstallations-Befehl an {hostname} gesendet"
 
-msgid "Host updated successfully"
-msgstr "Host erfolgreich aktualisiert"
+msgid "Service restart command sent to {hostname}"
+msgstr "Dienst-Neustart-Befehl an {hostname} gesendet"
 
-msgid "Host deleted successfully"
-msgstr "Host erfolgreich gelöscht"
+msgid "System update command sent to {hostname}"
+msgstr "System-Update-Befehl an {hostname} gesendet"
 
-msgid "Invalid FQDN format"
-msgstr "Ungültiges FQDN-Format"
+msgid "Reboot command sent to {hostname}"
+msgstr "Neustart-Befehl an {hostname} gesendet"
 
-# User management
-msgid "User not found"
-msgstr "Benutzer nicht gefunden"
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "Befehl {command_type} an {sent_count} Agents gesendet"
 
-msgid "User created successfully"
-msgstr "Benutzer erfolgreich erstellt"
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "Shell-Befehl an {sent_count} Agents gesendet"
 
-msgid "User updated successfully"
-msgstr "Benutzer erfolgreich aktualisiert"
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "Befehl {command_type} an {sent_count} {platform} Agents gesendet"
 
-msgid "User deleted successfully"
-msgstr "Benutzer erfolgreich gelöscht"
+msgid "Configuration pushed to all agents"
+msgstr "Konfiguration an alle Agents übertragen"
 
-msgid "Username already exists"
-msgstr "Benutzername bereits vorhanden"
+msgid "Configuration pushed successfully"
+msgstr "Konfiguration erfolgreich übertragen"
 
-msgid "Email already exists"
-msgstr "E-Mail bereits vorhanden"
+msgid "Configuration pushed to platform agents"
+msgstr "Konfiguration an Plattform-Agents übertragen"
 
-# Agent communication
-msgid "Agent not connected"
-msgstr "Agent nicht verbunden"
+msgid "Configuration acknowledgment processed"
+msgstr "Konfigurations-Bestätigung verarbeitet"
 
-msgid "Agent registered successfully"
-msgstr "Agent erfolgreich registriert"
-
-msgid "Command sent successfully"
-msgstr "Befehl erfolgreich gesendet"
-
-msgid "Agent disconnected"
-msgstr "Agent getrennt"
-
-# General errors
-msgid "Internal server error"
-msgstr "Interner Serverfehler"
-
-msgid "Invalid request data"
-msgstr "Ungültige Anfragedaten"
-
-msgid "Operation completed successfully"
-msgstr "Operation erfolgreich abgeschlossen"
-
-msgid "Database error"
-msgstr "Datenbankfehler"

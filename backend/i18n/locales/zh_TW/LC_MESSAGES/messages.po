@@ -1,63 +1,63 @@
-# Backend messages for SysManage - it
+# Backend messages for SysManage - zh_TW
 # Copyright (C) 2024 SysManage
 # This file is distributed under the same license as the SysManage package.
 #
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
-"Language: it\n"
+"Language: zh_TW\n"
 
 msgid "OS version update requested"
-msgstr "Aggiornamento versione OS richiesto"
+msgstr "已請求作業系統版本更新"
 
 msgid "Hardware information updated successfully"
-msgstr "Informazioni hardware aggiornate con successo"
+msgstr "硬體資訊更新成功"
 
 msgid "Hardware update requested"
-msgstr "Aggiornamento hardware richiesto"
+msgstr "已請求硬體更新"
 
 msgid "User access update requested"
-msgstr "Aggiornamento accesso utenti richiesto"
+msgstr "已請求使用者存取更新"
 
 msgid "Host {hostname} registered successfully"
-msgstr "Host {hostname} registrato con successo"
+msgstr "主機 {hostname} 註冊成功"
 
 msgid "Command {command_type} sent to {hostname}"
-msgstr "Comando {command_type} inviato a {hostname}"
+msgstr "命令 {command_type} 已發送到 {hostname}"
 
 msgid "Shell command sent to {hostname}"
-msgstr "Comando shell inviato a {hostname}"
+msgstr "Shell 命令已發送到 {hostname}"
 
 msgid "Package installation command sent to {hostname}"
-msgstr "Comando di installazione pacchetto inviato a {hostname}"
+msgstr "套件安裝命令已發送到 {hostname}"
 
 msgid "Service restart command sent to {hostname}"
-msgstr "Comando di riavvio servizio inviato a {hostname}"
+msgstr "服務重啟命令已發送到 {hostname}"
 
 msgid "System update command sent to {hostname}"
-msgstr "Comando di aggiornamento sistema inviato a {hostname}"
+msgstr "系統更新命令已發送到 {hostname}"
 
 msgid "Reboot command sent to {hostname}"
-msgstr "Comando di riavvio inviato a {hostname}"
+msgstr "重啟命令已發送到 {hostname}"
 
 msgid "Command {command_type} broadcast to {sent_count} agents"
-msgstr "Comando {command_type} trasmesso a {sent_count} agent"
+msgstr "命令 {command_type} 已廣播到 {sent_count} 個代理"
 
 msgid "Shell command broadcast to {sent_count} agents"
-msgstr "Comando shell trasmesso a {sent_count} agent"
+msgstr "Shell 命令已廣播到 {sent_count} 個代理"
 
 msgid "Command {command_type} sent to {sent_count} {platform} agents"
-msgstr "Comando {command_type} inviato a {sent_count} agent {platform}"
+msgstr "命令 {command_type} 已發送到 {sent_count} 個 {platform} 代理"
 
 msgid "Configuration pushed to all agents"
-msgstr "Configurazione inviata a tutti gli agent"
+msgstr "設定已推送到所有代理"
 
 msgid "Configuration pushed successfully"
-msgstr "Configurazione inviata con successo"
+msgstr "設定推送成功"
 
 msgid "Configuration pushed to platform agents"
-msgstr "Configurazione inviata agli agent di piattaforma"
+msgstr "設定已推送到平台代理"
 
 msgid "Configuration acknowledgment processed"
-msgstr "Conferma configurazione elaborata"
+msgstr "設定確認已處理"
 

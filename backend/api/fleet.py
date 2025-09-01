@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from backend.auth.auth_bearer import JWTBearer
+from backend.i18n import _
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import CommandMessage, CommandType, MessageType
 
@@ -99,7 +100,9 @@ async def send_command_to_agent(
     return {
         "status": "sent",
         "command_id": cmd_message.message_id,
-        "message": f"Command {command.command_type} sent to {hostname}",
+        "message": _("Command {command_type} sent to {hostname}").format(
+            command_type=command.command_type, hostname=hostname
+        ),
     }
 
 
@@ -132,7 +135,7 @@ async def execute_shell_command(
         "status": "sent",
         "command_id": cmd_message.message_id,
         "command": shell_request.command,
-        "message": f"Shell command sent to {hostname}",
+        "message": _("Shell command sent to {hostname}").format(hostname=hostname),
     }
 
 
@@ -165,7 +168,9 @@ async def install_package(
         "status": "sent",
         "command_id": cmd_message.message_id,
         "package": package_request.package_name,
-        "message": f"Package installation command sent to {hostname}",
+        "message": _("Package installation command sent to {hostname}").format(
+            hostname=hostname
+        ),
     }
 
 
@@ -195,7 +200,9 @@ async def restart_service(
         "status": "sent",
         "command_id": cmd_message.message_id,
         "service": service_request.service_name,
-        "message": f"Service restart command sent to {hostname}",
+        "message": _("Service restart command sent to {hostname}").format(
+            hostname=hostname
+        ),
     }
 
 
@@ -220,7 +227,9 @@ async def update_system(hostname: str, dependencies=Depends(JWTBearer())):
     return {
         "status": "sent",
         "command_id": cmd_message.message_id,
-        "message": f"System update command sent to {hostname}",
+        "message": _("System update command sent to {hostname}").format(
+            hostname=hostname
+        ),
     }
 
 
@@ -245,7 +254,7 @@ async def reboot_system(hostname: str, dependencies=Depends(JWTBearer())):
     return {
         "status": "sent",
         "command_id": cmd_message.message_id,
-        "message": f"Reboot command sent to {hostname}",
+        "message": _("Reboot command sent to {hostname}").format(hostname=hostname),
     }
 
 
@@ -264,7 +273,9 @@ async def broadcast_command(command: CommandRequest, dependencies=Depends(JWTBea
         "status": "broadcast",
         "command_id": cmd_message.message_id,
         "sent_to": sent_count,
-        "message": f"Command {command.command_type} broadcast to {sent_count} agents",
+        "message": _("Command {command_type} broadcast to {sent_count} agents").format(
+            command_type=command.command_type, sent_count=sent_count
+        ),
     }
 
 
@@ -288,7 +299,9 @@ async def broadcast_shell_command(
         "command_id": cmd_message.message_id,
         "command": shell_request.command,
         "sent_to": sent_count,
-        "message": f"Shell command broadcast to {sent_count} agents",
+        "message": _("Shell command broadcast to {sent_count} agents").format(
+            sent_count=sent_count
+        ),
     }
 
 
@@ -314,5 +327,9 @@ async def send_command_to_platform(
         "command_id": cmd_message.message_id,
         "platform": platform,
         "sent_to": sent_count,
-        "message": f"Command {command.command_type} sent to {sent_count} {platform} agents",
+        "message": _(
+            "Command {command_type} sent to {sent_count} {platform} agents"
+        ).format(
+            command_type=command.command_type, sent_count=sent_count, platform=platform
+        ),
     }

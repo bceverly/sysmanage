@@ -1,85 +1,63 @@
+# Backend messages for SysManage - ru
+# Copyright (C) 2024 SysManage
+# This file is distributed under the same license as the SysManage package.
+#
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language: ru\n"
 
-# Authentication messages
-msgid "Invalid username or password"
-msgstr "Неверное имя пользователя или пароль"
+msgid "OS version update requested"
+msgstr "Запрошено обновление версии ОС"
 
-msgid "Authentication required"
-msgstr "Требуется аутентификация"
+msgid "Hardware information updated successfully"
+msgstr "Информация об аппаратном обеспечении успешно обновлена"
 
-msgid "Token expired"
-msgstr "Токен истёк"
+msgid "Hardware update requested"
+msgstr "Запрошено обновление аппаратного обеспечения"
 
-msgid "Access denied"
-msgstr "Доступ запрещён"
+msgid "User access update requested"
+msgstr "Запрошено обновление доступа пользователей"
 
-# Account locking messages
-msgid "Account is locked due to too many failed login attempts"
-msgstr "Аккаунт заблокирован из-за слишком большого количества неудачных попыток входа"
+msgid "Host {hostname} registered successfully"
+msgstr "Хост {hostname} успешно зарегистрирован"
 
-msgid "Account locked due to too many failed login attempts"
-msgstr "Аккаунт заблокирован из-за слишком большого количества неудачных попыток входа"
+msgid "Command {command_type} sent to {hostname}"
+msgstr "Команда {command_type} отправлена на {hostname}"
 
-# Host management
-msgid "Host not found"
-msgstr "Хост не найден"
+msgid "Shell command sent to {hostname}"
+msgstr "Команда оболочки отправлена на {hostname}"
 
-msgid "Host created successfully"
-msgstr "Хост успешно создан"
+msgid "Package installation command sent to {hostname}"
+msgstr "Команда установки пакета отправлена на {hostname}"
 
-msgid "Host updated successfully"
-msgstr "Хост успешно обновлён"
+msgid "Service restart command sent to {hostname}"
+msgstr "Команда перезапуска службы отправлена на {hostname}"
 
-msgid "Host deleted successfully"
-msgstr "Хост успешно удалён"
+msgid "System update command sent to {hostname}"
+msgstr "Команда обновления системы отправлена на {hostname}"
 
-msgid "Invalid FQDN format"
-msgstr "Неверный формат FQDN"
+msgid "Reboot command sent to {hostname}"
+msgstr "Команда перезагрузки отправлена на {hostname}"
 
-# User management
-msgid "User not found"
-msgstr "Пользователь не найден"
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "Команда {command_type} передана {sent_count} агентам"
 
-msgid "User created successfully"
-msgstr "Пользователь успешно создан"
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "Команда оболочки передана {sent_count} агентам"
 
-msgid "User updated successfully"
-msgstr "Пользователь успешно обновлён"
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "Команда {command_type} отправлена {sent_count} агентам {platform}"
 
-msgid "User deleted successfully"
-msgstr "Пользователь успешно удалён"
+msgid "Configuration pushed to all agents"
+msgstr "Конфигурация отправлена всем агентам"
 
-msgid "Username already exists"
-msgstr "Имя пользователя уже существует"
+msgid "Configuration pushed successfully"
+msgstr "Конфигурация успешно отправлена"
 
-msgid "Email already exists"
-msgstr "Email уже существует"
+msgid "Configuration pushed to platform agents"
+msgstr "Конфигурация отправлена агентам платформы"
 
-# Agent communication
-msgid "Agent not connected"
-msgstr "Агент не подключён"
+msgid "Configuration acknowledgment processed"
+msgstr "Подтверждение конфигурации обработано"
 
-msgid "Agent registered successfully"
-msgstr "Агент успешно зарегистрирован"
-
-msgid "Command sent successfully"
-msgstr "Команда успешно отправлена"
-
-msgid "Agent disconnected"
-msgstr "Агент отключён"
-
-# General errors
-msgid "Internal server error"
-msgstr "Внутренняя ошибка сервера"
-
-msgid "Invalid request data"
-msgstr "Неверные данные запроса"
-
-msgid "Operation completed successfully"
-msgstr "Операция успешно завершена"
-
-msgid "Database error"
-msgstr "Ошибка базы данных"
