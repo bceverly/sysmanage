@@ -60,3 +60,12 @@ msgstr "تم دفع التكوين إلى وكلاء المنصة"
 
 msgid "Configuration acknowledgment processed"
 msgstr "تمت معالجة إقرار التكوين"
+
+msgid "Host not found"
+msgstr "لم يتم العثور على المضيف"
+
+msgid "Agent is not connected"
+msgstr "الوكيل غير متصل"
+
+msgid "Software inventory update requested"
+msgstr "تم طلب تحديث مخزون البرمجيات"

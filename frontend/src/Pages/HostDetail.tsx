@@ -25,10 +25,11 @@ import PersonIcon from '@mui/icons-material/Person';
 import SecurityIcon from '@mui/icons-material/Security';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import CloseIcon from '@mui/icons-material/Close';
+import AppsIcon from '@mui/icons-material/Apps';
 import { Dialog, DialogTitle, DialogContent, IconButton, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups } from '../Services/hosts';
+import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware } from '../Services/hosts';
 
 // Use the service types directly - no need for local interfaces anymore
 
@@ -39,12 +40,14 @@ const HostDetail = () => {
     const [networkInterfaces, setNetworkInterfaces] = useState<NetworkInterfaceType[]>([]);
     const [userAccounts, setUserAccounts] = useState<UserAccount[]>([]);
     const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
+    const [softwarePackages, setSoftwarePackages] = useState<SoftwarePackage[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [currentTab, setCurrentTab] = useState<number>(0);
     const [storageFilter, setStorageFilter] = useState<'all' | 'physical' | 'logical'>('physical');
     const [userFilter, setUserFilter] = useState<'all' | 'system' | 'regular'>('regular');
     const [groupFilter, setGroupFilter] = useState<'all' | 'system' | 'regular'>('regular');
+    const [packageManagerFilter, setPackageManagerFilter] = useState<string>('all');
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [dialogContent, setDialogContent] = useState<string>('');
     const [dialogTitle, setDialogTitle] = useState<string>('');
@@ -71,13 +74,14 @@ const HostDetail = () => {
                 const hostData = await doGetHostByID(BigInt(hostId));
                 setHost(hostData);
                 
-                // Fetch normalized storage, network, and user access data
+                // Fetch normalized storage, network, user access, and software data
                 try {
-                    const [storageData, networkData, usersData, groupsData] = await Promise.all([
+                    const [storageData, networkData, usersData, groupsData, softwareData] = await Promise.all([
                         doGetHostStorage(BigInt(hostId)),
                         doGetHostNetwork(BigInt(hostId)),
                         doGetHostUsers(BigInt(hostId)),
-                        doGetHostGroups(BigInt(hostId))
+                        doGetHostGroups(BigInt(hostId)),
+                        doGetHostSoftware(BigInt(hostId))
                     ]);
                     
                     // If normalized data is empty, try to parse JSON fallback data
@@ -106,9 +110,12 @@ const HostDetail = () => {
                     // Set user access data
                     setUserAccounts(usersData);
                     setUserGroups(groupsData);
+                    
+                    // Set software data
+                    setSoftwarePackages(softwareData);
                 } catch (hardwareErr) {
-                    // Log but don't fail the whole request - hardware data is optional
-                    console.warn('Failed to fetch hardware data:', hardwareErr);
+                    // Log but don't fail the whole request - hardware/software data is optional
+                    console.warn('Failed to fetch hardware/software data:', hardwareErr);
                 }
                 
                 setError(null);
@@ -135,6 +142,17 @@ const HostDetail = () => {
 
     const getStatusColor = (status: string) => {
         return status === 'up' ? 'success' : 'error';
+    };
+
+    const getDisplayStatus = (host: SysManageHost) => {
+        if (!host.last_access) return 'down';
+        
+        // Same logic as host list: consider host "up" if last access was within 5 minutes
+        const lastAccess = new Date(host.last_access);
+        const now = new Date();
+        const diffMinutes = Math.floor((now.getTime() - lastAccess.getTime()) / 60000);
+        
+        return diffMinutes <= 5 ? 'up' : 'down';
     };
 
     const getApprovalStatusColor = (status: string) => {
@@ -332,6 +350,27 @@ const HostDetail = () => {
         }
     };
 
+    // Get unique package managers from software packages
+    const getPackageManagers = (packages: SoftwarePackage[]): string[] => {
+        const managers = new Set<string>();
+        packages.forEach(pkg => {
+            if (pkg.package_manager) {
+                managers.add(pkg.package_manager);
+            }
+        });
+        return Array.from(managers).sort();
+    };
+
+    // Filter software packages based on package manager selection
+    const getFilteredSoftwarePackages = (packages: SoftwarePackage[]): SoftwarePackage[] => {
+        if (packageManagerFilter === 'all') {
+            return packages.sort((a, b) => (a.package_name || '').localeCompare(b.package_name || ''));
+        }
+        return packages
+            .filter(pkg => pkg.package_manager === packageManagerFilter)
+            .sort((a, b) => (a.package_name || '').localeCompare(b.package_name || ''));
+    };
+
     if (loading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -394,6 +433,12 @@ const HostDetail = () => {
                         sx={{ textTransform: 'none' }}
                     />
                     <Tab 
+                        icon={<AppsIcon />} 
+                        label={t('hostDetail.softwareTab', 'Software')} 
+                        iconPosition="start"
+                        sx={{ textTransform: 'none' }}
+                    />
+                    <Tab 
                         icon={<SecurityIcon />} 
                         label={t('hostDetail.accessTab', 'Access')} 
                         iconPosition="start"
@@ -437,8 +482,8 @@ const HostDetail = () => {
                                         {t('hosts.status', 'Status')}
                                     </Typography>
                                     <Chip 
-                                        label={host.status === 'up' ? t('hosts.up') : t('hosts.down')}
-                                        color={getStatusColor(host.status)}
+                                        label={getDisplayStatus(host) === 'up' ? t('hosts.up') : t('hosts.down')}
+                                        color={getStatusColor(getDisplayStatus(host))}
                                         size="small"
                                     />
                                 </Grid>
@@ -846,8 +891,110 @@ const HostDetail = () => {
                 </Grid>
             )}
 
-            {/* Access Tab */}
+            {/* Software Tab */}
             {currentTab === 2 && (
+                <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                        <Card>
+                            <CardContent>
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <AppsIcon sx={{ mr: 1 }} />
+                                        {t('hostDetail.softwarePackages', 'Software Packages')} ({getFilteredSoftwarePackages(softwarePackages).length})
+                                    </Typography>
+                                    <ToggleButtonGroup
+                                        value={packageManagerFilter}
+                                        exclusive
+                                        onChange={(_, newFilter) => {
+                                            if (newFilter !== null) {
+                                                setPackageManagerFilter(newFilter);
+                                            }
+                                        }}
+                                        size="small"
+                                        sx={{ ml: 2 }}
+                                    >
+                                        <ToggleButton value="all" aria-label="all packages">
+                                            {t('common.all', 'All')}
+                                        </ToggleButton>
+                                        {getPackageManagers(softwarePackages).map((manager) => (
+                                            <ToggleButton key={manager} value={manager} aria-label={`${manager} packages`}>
+                                                {manager}
+                                            </ToggleButton>
+                                        ))}
+                                    </ToggleButtonGroup>
+                                </Box>
+                                {getFilteredSoftwarePackages(softwarePackages).length === 0 ? (
+                                    <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 2 }}>
+                                        {t('hostDetail.noSoftwareFound', 'No software packages found')}
+                                    </Typography>
+                                ) : (
+                                    <Grid container spacing={2}>
+                                        {getFilteredSoftwarePackages(softwarePackages).map((pkg: SoftwarePackage, index: number) => (
+                                            <Grid item xs={12} sm={6} md={4} key={pkg.id || index}>
+                                                <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
+                                                    <CardContent sx={{ p: 2 }}>
+                                                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1, wordBreak: 'break-word' }}>
+                                                            {pkg.package_name || t('common.unknown', 'Unknown')}
+                                                        </Typography>
+                                                        {pkg.version && (
+                                                            <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
+                                                                {t('hostDetail.version', 'Version')}: {pkg.version}
+                                                            </Typography>
+                                                        )}
+                                                        {pkg.package_manager && (
+                                                            <Chip 
+                                                                label={pkg.package_manager}
+                                                                color="primary"
+                                                                size="small"
+                                                                sx={{ mb: 1 }}
+                                                            />
+                                                        )}
+                                                        {pkg.description && (
+                                                            <Typography variant="body2" color="textSecondary" sx={{ 
+                                                                fontSize: '0.75rem', 
+                                                                mt: 1,
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                display: '-webkit-box',
+                                                                WebkitLineClamp: 3,
+                                                                WebkitBoxOrient: 'vertical'
+                                                            }}>
+                                                                {pkg.description}
+                                                            </Typography>
+                                                        )}
+                                                        {(pkg.size_bytes || pkg.install_date || pkg.vendor) && (
+                                                            <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid', borderColor: 'grey.700' }}>
+                                                                {pkg.size_bytes && (
+                                                                    <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
+                                                                        {t('hostDetail.size', 'Size')}: {formatBytesWithCommas(pkg.size_bytes)}
+                                                                    </Typography>
+                                                                )}
+                                                                {pkg.install_date && (
+                                                                    <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
+                                                                        {t('hostDetail.installed', 'Installed')}: {formatDate(pkg.install_date)}
+                                                                    </Typography>
+                                                                )}
+                                                                {pkg.vendor && (
+                                                                    <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
+                                                                        {t('hostDetail.vendor', 'Vendor')}: {pkg.vendor}
+                                                                    </Typography>
+                                                                )}
+                                                            </Box>
+                                                        )}
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        ))}
+                                    </Grid>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                </Grid>
+            )}
+
+            {/* Access Tab */}
+            {currentTab === 3 && (
                 <Grid container spacing={3}>
                     {/* User Accounts */}
                     <Grid item xs={12}>

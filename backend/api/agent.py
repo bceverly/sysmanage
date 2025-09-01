@@ -20,6 +20,7 @@ from backend.persistence.models import (
     UserAccount,
     UserGroup,
     UserGroupMembership,
+    SoftwarePackage,
 )
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import ErrorMessage, MessageType, create_message
@@ -121,6 +122,44 @@ def _process_user_group_memberships(
                 )
 
     debug_logger.info("Added %d memberships to database", membership_count)
+
+
+def _process_software_packages(db: Session, host_id: int, packages_data: list):
+    """Process software packages data for a host."""
+    package_count = 0
+    for package_data in packages_data:
+        if not package_data.get("error"):  # Skip error entries
+            software_package = SoftwarePackage(
+                host_id=host_id,
+                package_name=package_data.get("package_name"),
+                version=package_data.get("version"),
+                description=package_data.get("description"),
+                package_manager=package_data.get("package_manager"),
+                source=package_data.get("source"),
+                architecture=package_data.get("architecture"),
+                size_bytes=package_data.get("size_bytes"),
+                install_date=package_data.get("install_date"),
+                vendor=package_data.get("vendor"),
+                category=package_data.get("category"),
+                license_type=package_data.get("license_type"),
+                bundle_id=package_data.get("bundle_id"),
+                app_store_id=package_data.get("app_store_id"),
+                installation_path=package_data.get("installation_path"),
+                is_system_package=package_data.get("is_system_package", False),
+                is_user_installed=package_data.get("is_user_installed", True),
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc),
+                software_updated_at=datetime.now(timezone.utc),
+            )
+            db.add(software_package)
+            package_count += 1
+        else:
+            debug_logger.debug(
+                "Skipping package with error: %s",
+                package_data.get("package_name", "unknown"),
+            )
+
+    debug_logger.info("Added %d software packages to database", package_count)
 
 
 router = APIRouter()
@@ -653,6 +692,76 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
     await connection.send_message(response)
 
 
+async def handle_software_update(db: Session, connection, message_data: dict):
+    """Handle software inventory update message from agent."""
+    # Try to get hostname from connection first, then from message data
+    hostname = connection.hostname or message_data.get("hostname")
+    if not hostname:
+        debug_logger.info(
+            "Software inventory update received but no hostname available - skipping"
+        )
+        return
+    debug_logger.info("=== Software Inventory Update Data Received ===")
+    debug_logger.info("FQDN: %s", hostname)
+    debug_logger.info("Platform: %s", message_data.get("platform"))
+    debug_logger.info("Total packages: %s", message_data.get("total_packages", 0))
+    debug_logger.info(
+        "Collection timestamp: %s", message_data.get("collection_timestamp")
+    )
+    if "software_packages" in message_data:
+        debug_logger.info(
+            "Software packages data: %s", len(message_data["software_packages"])
+        )
+    debug_logger.info("=== End Software Inventory Data ===")
+
+    # Update host with new software inventory information
+    host = db.query(Host).filter(Host.fqdn == hostname).first()
+
+    if host:
+        debug_logger.info("Updating existing host with software inventory data...")
+        try:
+            # Handle software packages
+            if "software_packages" in message_data:
+                debug_logger.info(
+                    "Processing %s software packages...",
+                    len(message_data["software_packages"]),
+                )
+                # Delete existing software packages for this host
+                db.query(SoftwarePackage).filter(
+                    SoftwarePackage.host_id == host.id
+                ).delete()
+
+                # Add new software packages
+                _process_software_packages(
+                    db, host.id, message_data["software_packages"]
+                )
+                debug_logger.info("Software packages processing complete")
+
+            # Update host software inventory timestamp
+            host.software_updated_at = datetime.now(timezone.utc)
+
+            # Commit all changes
+            db.commit()
+            debug_logger.info(
+                "Host software inventory data updated successfully in database"
+            )
+
+        except Exception as e:
+            debug_logger.error(
+                "Error updating host with software inventory data: %s", e
+            )
+            db.rollback()
+            raise
+
+    # Send acknowledgment
+    response = {
+        "message_type": "ack",
+        "message_id": message_data.get("message_id"),
+        "data": {"status": "software_inventory_updated"},
+    }
+    await connection.send_message(response)
+
+
 @router.websocket("/agent/connect")
 async def agent_connect(websocket: WebSocket):
     """
@@ -777,6 +886,18 @@ async def agent_connect(websocket: WebSocket):
                         )
                     except Exception as e:
                         debug_logger.error("Error in handle_user_access_update: %s", e)
+                        raise
+
+                elif message.message_type == MessageType.SOFTWARE_INVENTORY_UPDATE:
+                    debug_logger.info("Calling handle_software_update")
+                    try:
+                        # Handle software inventory update from agent
+                        await handle_software_update(db, connection, message.data)
+                        debug_logger.info(
+                            "handle_software_update completed successfully"
+                        )
+                    except Exception as e:
+                        debug_logger.error("Error in handle_software_update: %s", e)
                         raise
 
                 else:

@@ -61,3 +61,12 @@ msgstr "設定已推送到平台代理"
 msgid "Configuration acknowledgment processed"
 msgstr "設定確認已處理"
 
+msgid "Host not found"
+msgstr "未找到主機"
+
+msgid "Agent is not connected"
+msgstr "代理未連接"
+
+msgid "Software inventory update requested"
+msgstr "已請求軟體清單更新"
+
