@@ -175,22 +175,22 @@ sudo pkg install gcc cmake make
 #### OpenBSD
 ```bash
 # Update package manager
-sudo pkg_add -u
+doas pkg_add -u
 
 # Install Python 3.12+
-sudo pkg_add python-3.12 py3-pip
+doas pkg_add python-3.12 py3-pip
 
 # Install Node.js 20.x
-sudo pkg_add node
+doas pkg_add node
 
 # Install PostgreSQL 14+
-sudo pkg_add postgresql-server postgresql-client
-sudo rcctl enable postgresql
-sudo su - _postgresql -c "initdb -D /var/postgresql/data"
-sudo rcctl start postgresql
+doas pkg_add postgresql-server postgresql-client
+doas rcctl enable postgresql
+doas su - _postgresql -c "initdb -D /var/postgresql/data"
+doas rcctl start postgresql
 
 # Install build tools (required for cryptography packages)
-sudo pkg_add rust gcc cmake gmake
+doas pkg_add rust gcc cmake gmake pkgconf
 ```
 
 ### Required Tools
