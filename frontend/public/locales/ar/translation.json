@@ -60,6 +60,8 @@
     "title": "إدارة المستخدمين",
     "username": "اسم المستخدم",
     "email": "البريد الإلكتروني",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
     "role": "الدور",
     "status": "الحالة",
     "actions": "الإجراءات",
@@ -179,6 +181,8 @@
     "notFound": "لم يتم العثور على المستخدم",
     "basicInfo": "المعلومات الأساسية",
     "userId": "معرف المستخدم",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
     "active": "نشط",
     "lastAccess": "آخر وصول",
     "securityInfo": "معلومات الأمان",
@@ -239,5 +243,24 @@
     "filterBy": "تصفية حسب",
     "showSystemPackages": "عرض حزم النظام",
     "showUserPackages": "عرض حزم المستخدم"
+  },
+  "userProfile": {
+    "userMenu": "قائمة المستخدم",
+    "profile": "الملف الشخصي",
+    "unknownUser": "مستخدم غير معروف",
+    "accountInfo": "معلومات الحساب",
+    "email": "البريد الإلكتروني",
+    "profilePlaceholder": "محرر الملف الشخصي قادم قريباً...",
+    "personalInfo": "المعلومات الشخصية",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "firstNamePlaceholder": "أدخل اسمك الأول",
+    "lastNamePlaceholder": "أدخل اسم عائلتك",
+    "save": "حفظ التغييرات",
+    "saving": "جارٍ الحفظ...",
+    "cancel": "إلغاء",
+    "loadError": "فشل في تحميل بيانات الملف الشخصي",
+    "saveError": "فشل في حفظ تغييرات الملف الشخصي",
+    "saveSuccess": "تم تحديث الملف الشخصي بنجاح"
   }
 }

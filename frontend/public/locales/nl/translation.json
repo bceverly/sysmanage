@@ -61,6 +61,8 @@
     "title": "Gebruikersbeheer",
     "username": "Gebruikersnaam",
     "email": "E-mail",
+    "firstName": "Voornaam",
+    "lastName": "Achternaam",
     "role": "Rol",
     "status": "Status",
     "actions": "Acties",
@@ -150,6 +152,8 @@
     "notFound": "Gebruiker niet gevonden",
     "basicInfo": "Basisinformatie",
     "userId": "Gebruiker-ID",
+    "firstName": "Voornaam",
+    "lastName": "Achternaam",
     "active": "Actief",
     "lastAccess": "Laatste toegang",
     "securityInfo": "Beveiligingsinformatie",
@@ -241,5 +245,24 @@
     "filterBy": "Filteren op",
     "showSystemPackages": "Systeempakketten Tonen",
     "showUserPackages": "Gebruikerspakketten Tonen"
+  },
+  "userProfile": {
+    "userMenu": "Gebruikersmenu",
+    "profile": "Profiel",
+    "unknownUser": "Onbekende Gebruiker",
+    "accountInfo": "Accountinformatie",
+    "email": "E-mail",
+    "profilePlaceholder": "Profiel editor binnenkort beschikbaar...",
+    "personalInfo": "Persoonlijke Informatie",
+    "firstName": "Voornaam",
+    "lastName": "Achternaam",
+    "firstNamePlaceholder": "Voer uw voornaam in",
+    "lastNamePlaceholder": "Voer uw achternaam in",
+    "save": "Wijzigingen Opslaan",
+    "saving": "Opslaan...",
+    "cancel": "Annuleren",
+    "loadError": "Fout bij het laden van profielgegevens",
+    "saveError": "Fout bij het opslaan van profielwijzigingen",
+    "saveSuccess": "Profiel succesvol bijgewerkt"
   }
 }

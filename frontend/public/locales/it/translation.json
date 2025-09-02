@@ -60,6 +60,8 @@
     "title": "Gestione Utenti",
     "username": "Nome Utente",
     "email": "Email",
+    "firstName": "Nome",
+    "lastName": "Cognome",
     "role": "Ruolo",
     "status": "Stato",
     "actions": "Azioni",
@@ -180,6 +182,8 @@
     "notFound": "Utente non trovato",
     "basicInfo": "Informazioni di base",
     "userId": "ID Utente",
+    "firstName": "Nome",
+    "lastName": "Cognome",
     "active": "Attivo",
     "lastAccess": "Ultimo accesso",
     "securityInfo": "Informazioni di sicurezza",
@@ -240,5 +244,24 @@
     "filterBy": "Filtra per",
     "showSystemPackages": "Mostra Pacchetti Sistema",
     "showUserPackages": "Mostra Pacchetti Utente"
+  },
+  "userProfile": {
+    "userMenu": "Menu utente",
+    "profile": "Profilo",
+    "unknownUser": "Utente Sconosciuto",
+    "accountInfo": "Informazioni Account",
+    "email": "Email",
+    "profilePlaceholder": "Editor del profilo in arrivo...",
+    "personalInfo": "Informazioni Personali",
+    "firstName": "Nome",
+    "lastName": "Cognome",
+    "firstNamePlaceholder": "Inserisci il tuo nome",
+    "lastNamePlaceholder": "Inserisci il tuo cognome",
+    "save": "Salva Modifiche",
+    "saving": "Salvataggio in corso...",
+    "cancel": "Annulla",
+    "loadError": "Errore nel caricamento dei dati del profilo",
+    "saveError": "Errore nel salvataggio delle modifiche del profilo",
+    "saveSuccess": "Profilo aggiornato con successo"
   }
 }

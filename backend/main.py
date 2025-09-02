@@ -12,7 +12,16 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api import agent, auth, certificates, fleet, host, user, config_management
+from backend.api import (
+    agent,
+    auth,
+    certificates,
+    fleet,
+    host,
+    user,
+    config_management,
+    profile,
+)
 from backend.config import config
 from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
 from backend.discovery.discovery_service import discovery_beacon
@@ -81,6 +90,7 @@ app.include_router(auth.router)
 app.include_router(user.router)
 app.include_router(fleet.router)
 app.include_router(config_management.router)
+app.include_router(profile.router)
 
 
 @app.get("/")

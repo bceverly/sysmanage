@@ -60,6 +60,8 @@
     "title": "Gerenciamento de Usuários",
     "username": "Nome de Usuário",
     "email": "Email",
+    "firstName": "Nome",
+    "lastName": "Sobrenome",
     "role": "Função",
     "status": "Status",
     "actions": "Ações",
@@ -180,6 +182,8 @@
     "notFound": "Usuário não encontrado",
     "basicInfo": "Informações básicas",
     "userId": "ID do Usuário",
+    "firstName": "Nome",
+    "lastName": "Sobrenome",
     "active": "Ativo",
     "lastAccess": "Último acesso",
     "securityInfo": "Informações de segurança",
@@ -240,5 +244,24 @@
     "filterBy": "Filtrar por",
     "showSystemPackages": "Mostrar Pacotes do Sistema",
     "showUserPackages": "Mostrar Pacotes do Usuário"
+  },
+  "userProfile": {
+    "userMenu": "Menu do usuário",
+    "profile": "Perfil",
+    "unknownUser": "Usuário Desconhecido",
+    "accountInfo": "Informações da Conta",
+    "email": "Email",
+    "profilePlaceholder": "Editor de perfil em breve...",
+    "personalInfo": "Informações Pessoais",
+    "firstName": "Nome",
+    "lastName": "Sobrenome",
+    "firstNamePlaceholder": "Digite seu nome",
+    "lastNamePlaceholder": "Digite seu sobrenome",
+    "save": "Salvar Alterações",
+    "saving": "Salvando...",
+    "cancel": "Cancelar",
+    "loadError": "Falha ao carregar dados do perfil",
+    "saveError": "Falha ao salvar alterações do perfil",
+    "saveSuccess": "Perfil atualizado com sucesso"
   }
 }

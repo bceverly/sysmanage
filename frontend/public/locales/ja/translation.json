@@ -61,6 +61,8 @@
     "title": "ユーザー管理",
     "username": "ユーザー名",
     "email": "メール",
+    "firstName": "名前",
+    "lastName": "姓",
     "role": "役割",
     "status": "ステータス",
     "actions": "アクション",
@@ -150,6 +152,8 @@
     "notFound": "ユーザーが見つかりません",
     "basicInfo": "基本情報",
     "userId": "ユーザーID",
+    "firstName": "名前",
+    "lastName": "姓",
     "active": "アクティブ",
     "lastAccess": "最終アクセス",
     "securityInfo": "セキュリティ情報",
@@ -241,5 +245,24 @@
     "filterBy": "フィルター",
     "showSystemPackages": "システムパッケージを表示",
     "showUserPackages": "ユーザーパッケージを表示"
+  },
+  "userProfile": {
+    "userMenu": "ユーザーメニュー",
+    "profile": "プロフィール",
+    "unknownUser": "不明なユーザー",
+    "accountInfo": "アカウント情報",
+    "email": "メール",
+    "profilePlaceholder": "プロファイルエディターは近日公開...",
+    "personalInfo": "個人情報",
+    "firstName": "名前",
+    "lastName": "姓",
+    "firstNamePlaceholder": "お名前を入力してください",
+    "lastNamePlaceholder": "姓を入力してください",
+    "save": "変更を保存",
+    "saving": "保存中...",
+    "cancel": "キャンセル",
+    "loadError": "プロフィールデータの読み込みに失敗しました",
+    "saveError": "プロフィール変更の保存に失敗しました",
+    "saveSuccess": "プロフィールが正常に更新されました"
   }
 }

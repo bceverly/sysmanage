@@ -61,6 +61,8 @@
     "title": "사용자 관리",
     "username": "사용자 이름",
     "email": "이메일",
+    "firstName": "이름",
+    "lastName": "성",
     "role": "역할",
     "status": "상태",
     "actions": "작업",
@@ -150,6 +152,8 @@
     "notFound": "사용자를 찾을 수 없음",
     "basicInfo": "기본 정보",
     "userId": "사용자 ID",
+    "firstName": "이름",
+    "lastName": "성",
     "active": "활성",
     "lastAccess": "마지막 접속",
     "securityInfo": "보안 정보",
@@ -241,5 +245,24 @@
     "filterBy": "필터링",
     "showSystemPackages": "시스템 패키지 표시",
     "showUserPackages": "사용자 패키지 표시"
+  },
+  "userProfile": {
+    "userMenu": "사용자 메뉴",
+    "profile": "프로필",
+    "unknownUser": "알 수 없는 사용자",
+    "accountInfo": "계정 정보",
+    "email": "이메일",
+    "profilePlaceholder": "프로필 편집기 출시 예정...",
+    "personalInfo": "개인 정보",
+    "firstName": "이름",
+    "lastName": "성",
+    "firstNamePlaceholder": "이름을 입력하세요",
+    "lastNamePlaceholder": "성을 입력하세요",
+    "save": "변경 사항 저장",
+    "saving": "저장 중...",
+    "cancel": "취소",
+    "loadError": "프로필 데이터 로드 실패",
+    "saveError": "프로필 변경 사항 저장 실패",
+    "saveSuccess": "프로필이 성공적으로 업데이트되었습니다"
   }
 }

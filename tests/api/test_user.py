@@ -21,6 +21,8 @@ class TestUserDelete:
             userid="delete_me@example.com",
             hashed_password="hashed_password",
             active=True,
+            first_name="Delete",
+            last_name="Me",
         )
         session.add(user)
         session.commit()
@@ -63,6 +65,8 @@ class TestUserMe:
             userid="admin@sysmanage.org",  # Use admin user like in other tests
             hashed_password="hashed_password",
             active=True,
+            first_name="Admin",
+            last_name="User",
         )
         session.add(user)
         session.commit()
@@ -92,6 +96,8 @@ class TestUserGet:
             userid="getme@example.com",
             hashed_password="hashed_password",
             active=True,
+            first_name="Get",
+            last_name="Me",
         )
         session.add(user)
         session.commit()
@@ -129,6 +135,8 @@ class TestUserGetByUserid:
             userid="findme@example.com",
             hashed_password="hashed_password",
             active=True,
+            first_name="Find",
+            last_name="Me",
         )
         session.add(user)
         session.commit()
@@ -224,6 +232,8 @@ class TestUserCreate:
             "userid": "newuser@example.com",
             "password": "NewPassword123!",
             "active": True,
+            "first_name": "New",
+            "last_name": "User",
         }
 
         response = client.post("/user", json=user_data, headers=auth_headers)
@@ -254,6 +264,8 @@ class TestUserCreate:
             userid="duplicate@example.com",
             hashed_password="existing_password",
             active=True,
+            first_name="Duplicate",
+            last_name="User",
         )
         session.add(existing_user)
         session.commit()
@@ -263,6 +275,8 @@ class TestUserCreate:
             "userid": "duplicate@example.com",
             "password": "NewPassword123!",
             "active": True,
+            "first_name": "Duplicate",
+            "last_name": "User",
         }
 
         response = client.post("/user", json=user_data, headers=auth_headers)
@@ -277,6 +291,8 @@ class TestUserCreate:
             "userid": "invalid-email",
             "password": "Password123!",
             "active": True,
+            "first_name": "Invalid",
+            "last_name": "Email",
         }
 
         response = client.post("/user", json=user_data, headers=auth_headers)
@@ -306,6 +322,8 @@ class TestUserCreate:
             "userid": "test@example.com",
             "password": "Password123!",
             "active": True,
+            "first_name": "Test",
+            "last_name": "User",
         }
         response = client.post("/user", json=user_data)
         assert response.status_code == 403
@@ -322,6 +340,8 @@ class TestUserUpdate:
             userid="update@example.com",
             hashed_password="old_password",
             active=False,
+            first_name="Update",
+            last_name="Me",
         )
         session.add(user)
         session.commit()
@@ -332,6 +352,8 @@ class TestUserUpdate:
             "userid": "updated@example.com",
             "password": "NewPassword123!",
             "active": True,
+            "first_name": "Updated",
+            "last_name": "User",
         }
 
         response = client.put(
@@ -355,6 +377,8 @@ class TestUserUpdate:
             "userid": "test@example.com",
             "password": "Password123!",
             "active": True,
+            "first_name": "Test",
+            "last_name": "User",
         }
 
         response = client.put("/user/999", json=update_data, headers=auth_headers)
@@ -367,10 +391,20 @@ class TestUserUpdate:
         """Test updating user with duplicate userid."""
         # Create two users
         user1 = models.User(
-            id=1, userid="user1@example.com", hashed_password="pass1", active=True
+            id=1,
+            userid="user1@example.com",
+            hashed_password="pass1",
+            active=True,
+            first_name="User",
+            last_name="One",
         )
         user2 = models.User(
-            id=2, userid="user2@example.com", hashed_password="pass2", active=True
+            id=2,
+            userid="user2@example.com",
+            hashed_password="pass2",
+            active=True,
+            first_name="User",
+            last_name="Two",
         )
         session.add_all([user1, user2])
         session.commit()
@@ -380,6 +414,8 @@ class TestUserUpdate:
             "userid": "user1@example.com",
             "password": "NewPassword123!",
             "active": True,
+            "first_name": "User",
+            "last_name": "One",
         }
 
         response = client.put(
@@ -397,6 +433,8 @@ class TestUserUpdate:
             "userid": "test@example.com",
             "password": "Password123!",
             "active": True,
+            "first_name": "Test",
+            "last_name": "User",
         }
         response = client.put("/user/1", json=update_data)
         assert response.status_code == 403
@@ -416,6 +454,8 @@ class TestUserUnlock:
             hashed_password="password",
             active=True,
             is_locked=True,
+            first_name="Locked",
+            last_name="User",
         )
         session.add(user)
         session.commit()

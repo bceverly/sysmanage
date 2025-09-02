@@ -62,6 +62,8 @@ def test_db():
         )  # Changed from BigInteger
         active = Column(Boolean, unique=False, index=False)
         userid = Column(String, index=True)
+        first_name = Column(String(100), nullable=True)
+        last_name = Column(String(100), nullable=True)
         hashed_password = Column(String)
         last_access = Column(DateTime)
         is_locked = Column(Boolean, default=False, nullable=False)

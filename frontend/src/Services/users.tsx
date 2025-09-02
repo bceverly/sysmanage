@@ -11,6 +11,8 @@ type SysManageUser = {
     active: boolean;
     userid: string;
     password: string;
+    first_name?: string;
+    last_name?: string;
     last_access?: string;
     is_locked: boolean;
     failed_login_attempts: number;
@@ -31,13 +33,15 @@ function processError(error: AxiosError) {
     }
 }
 
-const doAddUser = async (active: boolean, userid: string, password: string) => {
+const doAddUser = async (active: boolean, userid: string, password: string, firstName?: string, lastName?: string) => {
     let result = {} as SysManageUser;
 
     await api.post("/user", {
         'active': active,
         'userid': userid,
         'password': password,
+        'first_name': firstName || null,
+        'last_name': lastName || null,
       })
     .then((response) => {
         // No error - process response
@@ -129,13 +133,15 @@ const doGetUserByUserid = async (userid: string) => {
     return result;
 };
 
-const doUpdateUser = async (id: BigInt, active: boolean, userid: string, password: string) => {
+const doUpdateUser = async (id: BigInt, active: boolean, userid: string, password: string, firstName?: string, lastName?: string) => {
     let successResponse = {} as SuccessResponse;
 
     await api.put<SuccessResponse>("/user/" + id, {
         'active': active,
         'userid': userid,
         'password': password,
+        'first_name': firstName || null,
+        'last_name': lastName || null,
       })
     .then((response) => {
         // No error - process response

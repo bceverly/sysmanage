@@ -61,6 +61,8 @@
     "title": "用戶管理",
     "username": "用戶名",
     "email": "電子郵件",
+    "firstName": "名字",
+    "lastName": "姓氏",
     "role": "角色",
     "status": "狀態",
     "actions": "操作",
@@ -181,6 +183,8 @@
     "notFound": "找不到用戶",
     "basicInfo": "基本資訊",
     "userId": "用戶 ID",
+    "firstName": "名字",
+    "lastName": "姓氏",
     "active": "活躍",
     "lastAccess": "最後存取",
     "securityInfo": "安全資訊",
@@ -241,5 +245,24 @@
     "filterBy": "篩選條件",
     "showSystemPackages": "顯示系統套件",
     "showUserPackages": "顯示使用者套件"
+  },
+  "userProfile": {
+    "userMenu": "使用者選單",
+    "profile": "個人檔案",
+    "unknownUser": "未知使用者",
+    "accountInfo": "帳戶資訊",
+    "email": "電子郵件",
+    "profilePlaceholder": "個人檔案編輯器即將推出...",
+    "personalInfo": "個人資訊",
+    "firstName": "名字",
+    "lastName": "姓氏",
+    "firstNamePlaceholder": "請輸入您的名字",
+    "lastNamePlaceholder": "請輸入您的姓氏",
+    "save": "儲存變更",
+    "saving": "儲存中...",
+    "cancel": "取消",
+    "loadError": "載入個人檔案數據失敗",
+    "saveError": "儲存個人檔案變更失敗",
+    "saveSuccess": "個人檔案更新成功"
   }
 }

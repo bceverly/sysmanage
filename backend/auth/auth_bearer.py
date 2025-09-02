@@ -2,7 +2,7 @@
 This module ise used to verify the JWT token we use for authentication
 """
 
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from backend.auth.auth_handler import decode_jwt
@@ -52,3 +52,17 @@ class JWTBearer(HTTPBearer):
             is_token_valid = True
 
         return is_token_valid
+
+
+async def get_current_user(token: str = Depends(JWTBearer())) -> str:
+    """
+    Extract the current user's userid from the JWT token.
+    """
+    try:
+        payload = decode_jwt(token)
+        if payload and "user_id" in payload:
+            return payload["user_id"]
+    except Exception:
+        pass
+
+    raise HTTPException(status_code=401, detail="Could not validate credentials")

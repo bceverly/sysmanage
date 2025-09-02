@@ -241,5 +241,24 @@
     "filterBy": "Фильтр по",
     "showSystemPackages": "Показать системные пакеты",
     "showUserPackages": "Показать пользовательские пакеты"
+  },
+  "userProfile": {
+    "userMenu": "Меню пользователя",
+    "profile": "Профиль",
+    "unknownUser": "Неизвестный пользователь",
+    "accountInfo": "Информация об аккаунте",
+    "email": "Электронная почта",
+    "profilePlaceholder": "Редактор профиля скоро будет доступен...",
+    "personalInfo": "Личная информация",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "firstNamePlaceholder": "Введите ваше имя",
+    "lastNamePlaceholder": "Введите вашу фамилию",
+    "save": "Сохранить изменения",
+    "saving": "Сохранение...",
+    "cancel": "Отменить",
+    "loadError": "Ошибка загрузки данных профиля",
+    "saveError": "Ошибка сохранения изменений профиля",
+    "saveSuccess": "Профиль успешно обновлён"
   }
 }

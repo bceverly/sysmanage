@@ -60,6 +60,8 @@
     "title": "उपयोगकर्ता प्रबंधन",
     "username": "उपयोगकर्ता नाम",
     "email": "ईमेल",
+    "firstName": "पहला नाम",
+    "lastName": "अंतिम नाम",
     "role": "भूमिका",
     "status": "स्थिति",
     "actions": "क्रियाएं",
@@ -179,6 +181,8 @@
     "notFound": "उपयोगकर्ता नहीं मिला",
     "basicInfo": "बुनियादी जानकारी",
     "userId": "उपयोगकर्ता आईडी",
+    "firstName": "पहला नाम",
+    "lastName": "अंतिम नाम",
     "active": "सक्रिय",
     "lastAccess": "अंतिम एक्सेस",
     "securityInfo": "सुरक्षा जानकारी",
@@ -239,5 +243,24 @@
     "filterBy": "फिल्टर करें",
     "showSystemPackages": "सिस्टम पैकेज दिखाएं",
     "showUserPackages": "उपयोगकर्ता पैकेज दिखाएं"
+  },
+  "userProfile": {
+    "userMenu": "उपयोगकर्ता मेनू",
+    "profile": "प्रोफ़ाइल",
+    "unknownUser": "अज्ञात उपयोगकर्ता",
+    "accountInfo": "खाता जानकारी",
+    "email": "ईमेल",
+    "profilePlaceholder": "प्रोफ़ाइल संपादक जल्द आ रहा है...",
+    "personalInfo": "व्यक्तिगत जानकारी",
+    "firstName": "पहला नाम",
+    "lastName": "अंतिम नाम",
+    "firstNamePlaceholder": "अपना पहला नाम दर्ज करें",
+    "lastNamePlaceholder": "अपना अंतिम नाम दर्ज करें",
+    "save": "परिवर्तन सहेजें",
+    "saving": "सहेजा जा रहा है...",
+    "cancel": "रद्द करें",
+    "loadError": "प्रोफ़ाइल डेटा लोड करने में विफल",
+    "saveError": "प्रोफ़ाइल परिवर्तन सहेजने में विफल",
+    "saveSuccess": "प्रोफ़ाइल सफलतापूर्वक अपडेट हुई"
   }
 }

@@ -26,6 +26,8 @@ class User(BaseModel):
     active: bool
     userid: EmailStr
     password: str
+    first_name: str = None
+    last_name: str = None
 
 
 @router.delete("/user/{user_id}", dependencies=[Depends(JWTBearer())])
@@ -100,6 +102,8 @@ async def get_logged_in_user(request: Request):
             id=users[0].id,
             active=users[0].active,
             userid=users[0].userid,
+            first_name=users[0].first_name,
+            last_name=users[0].last_name,
             is_locked=users[0].is_locked,
             failed_login_attempts=users[0].failed_login_attempts,
             locked_at=users[0].locked_at,
@@ -130,6 +134,8 @@ async def get_user(user_id: int):
             id=users[0].id,
             active=users[0].active,
             userid=users[0].userid,
+            first_name=users[0].first_name,
+            last_name=users[0].last_name,
             is_locked=users[0].is_locked,
             failed_login_attempts=users[0].failed_login_attempts,
             locked_at=users[0].locked_at,
@@ -160,6 +166,8 @@ async def get_user_by_userid(userid: str):
             id=users[0].id,
             active=users[0].active,
             userid=users[0].userid,
+            first_name=users[0].first_name,
+            last_name=users[0].last_name,
             is_locked=users[0].is_locked,
             failed_login_attempts=users[0].failed_login_attempts,
             locked_at=users[0].locked_at,
@@ -188,6 +196,8 @@ async def get_all_users():
                 id=user.id,
                 active=user.active,
                 userid=user.userid,
+                first_name=user.first_name,
+                last_name=user.last_name,
                 is_locked=user.is_locked,
                 failed_login_attempts=user.failed_login_attempts,
                 locked_at=user.locked_at,
@@ -228,6 +238,8 @@ async def add_user(new_user: User):
         user = models.User(
             userid=new_user.userid,
             active=new_user.active,
+            first_name=new_user.first_name,
+            last_name=new_user.last_name,
             hashed_password=hashed_value,
             last_access=datetime.now(timezone.utc),
         )
@@ -276,6 +288,8 @@ async def update_user(user_id: int, user_data: User):
             {
                 models.User.active: user_data.active,
                 models.User.userid: user_data.userid,
+                models.User.first_name: user_data.first_name,
+                models.User.last_name: user_data.last_name,
                 models.User.hashed_password: hashed_value,
                 models.User.last_access: datetime.now(timezone.utc),
             }

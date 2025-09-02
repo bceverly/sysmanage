@@ -6,6 +6,7 @@ import "./css/Navbar.css";
 import SysManageLogo from "../assets/sysmanage-logo.svg";
 import LanguageSelector from "./LanguageSelector";
 import ConnectionStatusIndicator from "./ConnectionStatusIndicator";
+import UserProfileDropdown from "./UserProfileDropdown";
 
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
@@ -37,12 +38,6 @@ const Navbar = () => {
         <NavLink to="/" className="nav__logo">
           <img src={SysManageLogo} alt={t('nav.logoAlt', 'SysManage')} className="nav__logo-img" />
         </NavLink>
-
-        {/* Language selector and connection status at toolbar level */}
-        <div className="nav__language-toolbar" style={{visibility: menuVisible}}>
-          <ConnectionStatusIndicator />
-          <LanguageSelector />
-        </div>
 
         <div
           className={`nav__menu ${showMenu ? "show-menu" : ""}`}
@@ -78,16 +73,22 @@ const Navbar = () => {
                 {t('nav.users')}
               </NavLink>
             </li>
-            <li className="nav__item">
-              <NavLink to="/logout" className="nav__link nav__cta">
-                {t('nav.logout')}
-              </NavLink>
-            </li>
           </ul>
           <div className="nav__close" id="nav-close" onClick={toggleMenu}>
             {/* @ts-expect-error - IoClose component type issues */}
             <IoClose />
           </div>
+        </div>
+
+        {/* Language selector, connection status at toolbar level */}
+        <div className="nav__language-toolbar" style={{visibility: menuVisible}}>
+          <ConnectionStatusIndicator />
+          <LanguageSelector />
+        </div>
+
+        {/* User profile dropdown positioned on the far right (LTR) or far left (RTL) */}
+        <div className="nav__user-profile" style={{visibility: menuVisible}}>
+          <UserProfileDropdown />
         </div>
 
         <div className="nav__toggle" id="nav-toggle" onClick={toggleMenu}>
