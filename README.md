@@ -138,6 +138,7 @@ cd sysmanage
 # Create Python virtual environment
 python3.12 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+                           # On OpenBSD: . .venv/bin/activate
 ```
 
 ### 2. Install Backend Dependencies
