@@ -70,6 +70,129 @@ The system automatically detects the browser's preferred language and falls back
 - **PostgreSQL**: 14 or higher
 - **OS**: Linux, macOS, Windows, FreeBSD, or OpenBSD
 
+### Platform-Specific Installation Instructions
+
+#### Linux (Ubuntu/Debian)
+```bash
+# Update package manager
+sudo apt update
+
+# Install Python 3.12+
+sudo apt install python3.12 python3.12-venv python3.12-dev python3-pip
+
+# Install Node.js 20.x
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Install PostgreSQL 14+
+sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+
+# Install build tools for Python packages
+sudo apt install build-essential libffi-dev libssl-dev
+```
+
+#### Linux (CentOS/RHEL/Fedora)
+```bash
+# Install Python 3.12+
+sudo dnf install python3.12 python3.12-devel python3-pip
+
+# Install Node.js 20.x
+curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
+sudo dnf install -y nodejs
+
+# Install PostgreSQL 14+
+sudo dnf install postgresql postgresql-server postgresql-contrib
+sudo postgresql-setup --initdb
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+
+# Install build tools
+sudo dnf groupinstall "Development Tools"
+sudo dnf install libffi-devel openssl-devel
+```
+
+#### macOS
+```bash
+# Install Homebrew (if not already installed)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install Python 3.12+
+brew install python@3.12
+
+# Install Node.js 20.x
+brew install node@20
+brew link node@20
+
+# Install PostgreSQL 14+
+brew install postgresql@14
+brew services start postgresql@14
+
+# Build tools are included with Xcode Command Line Tools
+xcode-select --install
+```
+
+#### Windows
+```powershell
+# Install Python 3.12+ from https://python.org/downloads/
+# Make sure to check "Add Python to PATH" during installation
+
+# Install Node.js 20.x from https://nodejs.org/
+# Download and run the Windows installer
+
+# Install PostgreSQL 14+ from https://postgresql.org/download/windows/
+# Download and run the Windows installer
+
+# Install Git for Windows (includes build tools)
+# Download from https://git-scm.com/download/win
+
+# Optional: Install Windows Build Tools for native packages
+npm install --global windows-build-tools
+```
+
+#### FreeBSD
+```bash
+# Update package manager
+sudo pkg update
+
+# Install Python 3.12+
+sudo pkg install python312 py312-pip py312-sqlite3
+
+# Install Node.js 20.x
+sudo pkg install node20 npm
+
+# Install PostgreSQL 14+
+sudo pkg install postgresql14-server postgresql14-client
+sudo service postgresql enable
+sudo service postgresql initdb
+sudo service postgresql start
+
+# Install build tools
+sudo pkg install gcc cmake make
+```
+
+#### OpenBSD
+```bash
+# Update package manager
+sudo pkg_add -u
+
+# Install Python 3.12+
+sudo pkg_add python-3.12 py3-pip
+
+# Install Node.js 20.x
+sudo pkg_add node
+
+# Install PostgreSQL 14+
+sudo pkg_add postgresql-server postgresql-client
+sudo rcctl enable postgresql
+sudo su - _postgresql -c "initdb -D /var/postgresql/data"
+sudo rcctl start postgresql
+
+# Install build tools (required for cryptography packages)
+sudo pkg_add rust gcc cmake gmake
+```
+
 ### Required Tools
 ```bash
 # Python tools (automatically installed)
