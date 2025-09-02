@@ -61,6 +61,8 @@
     "title": "Benutzerverwaltung",
     "username": "Benutzername",
     "email": "E-Mail",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
     "role": "Rolle",
     "status": "Status",
     "actions": "Aktionen",
@@ -181,6 +183,8 @@
     "notFound": "Benutzer nicht gefunden",
     "basicInfo": "Grundinformationen",
     "userId": "Benutzer-ID",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
     "active": "Aktiv",
     "lastAccess": "Letzter Zugriff",
     "securityInfo": "Sicherheitsinformationen",
@@ -241,5 +245,24 @@
     "filterBy": "Filtern nach",
     "showSystemPackages": "Systempakete Anzeigen",
     "showUserPackages": "Benutzerpakete Anzeigen"
+  },
+  "userProfile": {
+    "userMenu": "Benutzermenü",
+    "profile": "Profil",
+    "unknownUser": "Unbekannter Benutzer",
+    "accountInfo": "Kontoinformationen",
+    "email": "E-Mail",
+    "profilePlaceholder": "Profil-Editor demnächst verfügbar...",
+    "personalInfo": "Persönliche Informationen",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "firstNamePlaceholder": "Geben Sie Ihren Vornamen ein",
+    "lastNamePlaceholder": "Geben Sie Ihren Nachnamen ein",
+    "save": "Änderungen Speichern",
+    "saving": "Speichern...",
+    "cancel": "Abbrechen",
+    "loadError": "Fehler beim Laden der Profildaten",
+    "saveError": "Fehler beim Speichern der Profil-Änderungen",
+    "saveSuccess": "Profil erfolgreich aktualisiert"
   }
 }

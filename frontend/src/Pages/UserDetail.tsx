@@ -140,6 +140,18 @@ const UserDetail = () => {
                                 </Grid>
                                 <Grid item xs={12}>
                                     <Typography variant="body2" color="textSecondary">
+                                        {t('userDetail.firstName', 'First Name')}
+                                    </Typography>
+                                    <Typography variant="body1">{user.first_name || t('common.notAvailable', 'N/A')}</Typography>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('userDetail.lastName', 'Last Name')}
+                                    </Typography>
+                                    <Typography variant="body1">{user.last_name || t('common.notAvailable', 'N/A')}</Typography>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Typography variant="body2" color="textSecondary">
                                         {t('userDetail.active', 'Active')}
                                     </Typography>
                                     <Chip 

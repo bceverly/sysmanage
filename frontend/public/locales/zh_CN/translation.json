@@ -62,6 +62,8 @@
     "title": "用户管理",
     "username": "用户名",
     "email": "邮箱",
+    "firstName": "名字",
+    "lastName": "姓氏",
     "role": "角色",
     "status": "状态",
     "actions": "操作",
@@ -151,6 +153,8 @@
     "notFound": "未找到用户",
     "basicInfo": "基本信息",
     "userId": "用户ID",
+    "firstName": "名字",
+    "lastName": "姓氏",
     "active": "活跃",
     "lastAccess": "最后访问",
     "securityInfo": "安全信息",
@@ -242,5 +246,24 @@
     "filterBy": "筛选条件",
     "showSystemPackages": "显示系统包",
     "showUserPackages": "显示用户包"
+  },
+  "userProfile": {
+    "userMenu": "用户菜单",
+    "profile": "个人资料",
+    "unknownUser": "未知用户",
+    "accountInfo": "账户信息",
+    "email": "电子邮件",
+    "profilePlaceholder": "个人资料编辑器即将推出...",
+    "personalInfo": "个人信息",
+    "firstName": "名字",
+    "lastName": "姓氏",
+    "firstNamePlaceholder": "请输入您的名字",
+    "lastNamePlaceholder": "请输入您的姓氏",
+    "save": "保存更改",
+    "saving": "保存中...",
+    "cancel": "取消",
+    "loadError": "加载个人资料数据失败",
+    "saveError": "保存个人资料更改失败",
+    "saveSuccess": "个人资料更新成功"
   }
 }

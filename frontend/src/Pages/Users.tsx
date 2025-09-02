@@ -32,6 +32,8 @@ const Users = () => {
     const [editUser, setEditUser] = useState<SysManageUser | null>(null);
     const [editEmail, setEditEmail] = useState<string>('');
     const [editPassword, setEditPassword] = useState<string>('');
+    const [editFirstName, setEditFirstName] = useState<string>('');
+    const [editLastName, setEditLastName] = useState<string>('');
     const { t } = useTranslation();
     
     // Dynamic table page sizing based on window height
@@ -143,6 +145,8 @@ const Users = () => {
                 setEditUser(selectedUser);
                 setEditEmail(selectedUser.userid);
                 setEditPassword('');
+                setEditFirstName(selectedUser.first_name || '');
+                setEditLastName(selectedUser.last_name || '');
                 setEditDialogOpen(true);
             }
         }
@@ -159,6 +163,8 @@ const Users = () => {
         setEditUser(null);
         setEditEmail('');
         setEditPassword('');
+        setEditFirstName('');
+        setEditLastName('');
     };
 
     useEffect(() => {
@@ -236,7 +242,7 @@ const Users = () => {
                         event.preventDefault();
                         const formData = new FormData(event.currentTarget);
                         const formJson = Object.fromEntries(formData.entries());
-                        doAddUser(true, formJson.email, formJson.password)
+                        doAddUser(true, formJson.email, formJson.password, formJson.firstName, formJson.lastName)
                         .then((result) => {
                             let newData: SysManageUser[] = [];
                             for (let i=0 ; i<tableData.length ; i++) {
@@ -291,6 +297,24 @@ const Users = () => {
                             ),
                           }}
                     />
+                    <TextField
+                        fullWidth
+                        margin="normal"
+                        id="firstName"
+                        name="firstName"
+                        label={t('users.firstName', 'First Name')}
+                        type="text"
+                        variant="standard"
+                    />
+                    <TextField
+                        fullWidth
+                        margin="normal"
+                        id="lastName"
+                        name="lastName"
+                        label={t('users.lastName', 'Last Name')}
+                        type="text"
+                        variant="standard"
+                    />
                     <Box component="section">&nbsp;</Box>
                     <TextField
                         required
@@ -320,7 +344,7 @@ const Users = () => {
                         event.preventDefault();
                         if (!editUser) return;
                         
-                        doUpdateUser(editUser.id, true, editEmail, editPassword)
+                        doUpdateUser(editUser.id, true, editEmail, editPassword, editFirstName, editLastName)
                         .then(() => {
                             // Update the tableData with the edited user
                             setTableData(prevData => 
@@ -373,6 +397,28 @@ const Users = () => {
                             ),
                           }}
                     />
+                    <TextField
+                        fullWidth
+                        margin="normal"
+                        id="editFirstName"
+                        name="editFirstName"
+                        label={t('users.firstName', 'First Name')}
+                        type="text"
+                        variant="standard"
+                        value={editFirstName}
+                        onChange={(e) => setEditFirstName(e.target.value)}
+                    />
+                    <TextField
+                        fullWidth
+                        margin="normal"
+                        id="editLastName"
+                        name="editLastName"
+                        label={t('users.lastName', 'Last Name')}
+                        type="text"
+                        variant="standard"
+                        value={editLastName}
+                        onChange={(e) => setEditLastName(e.target.value)}
+                    />
                     <Box component="section">&nbsp;</Box>
                     <TextField
                         required
@@ -380,7 +426,7 @@ const Users = () => {
                         margin="normal"
                         id="password"
                         name="password"
-                        label={t('login.password')}
+                        label={t('users.newPassword', 'Enter new password')}
                         type="password"
                         variant="standard"
                         value={editPassword}

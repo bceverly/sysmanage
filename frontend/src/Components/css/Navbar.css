@@ -16,6 +16,7 @@
     position: relative;
     height: var(--header-height);
     margin: 1rem;
+    gap: 1rem;
   }
   
   .nav__logo {
@@ -47,7 +48,29 @@
     display: flex;
     align-items: center;
     margin-left: auto;
-    margin-right: 1rem;
+  }
+
+  /* RTL support */
+  [dir="rtl"] .nav__language-toolbar {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  .nav__user-profile {
+    display: flex;
+    align-items: center;
+  }
+
+  /* RTL support - position user profile on the left for Arabic */
+  [dir="rtl"] .nav__user-profile {
+    margin-left: 0;
+    margin-right: auto;
+    order: -1; /* Move to beginning in RTL */
+  }
+  
+  /* RTL - adjust logo position */
+  [dir="rtl"] .nav__logo {
+    order: 1; /* Move logo after user profile in RTL */
   }
   
   .nav__toggle,

@@ -60,6 +60,8 @@
     "title": "User Management",
     "username": "Username",
     "email": "Email",
+    "firstName": "First Name",
+    "lastName": "Last Name",
     "role": "Role",
     "status": "Status",
     "actions": "Actions",
@@ -179,6 +181,8 @@
     "notFound": "User not found",
     "basicInfo": "Basic Information",
     "userId": "User ID",
+    "firstName": "First Name",
+    "lastName": "Last Name",
     "active": "Active",
     "lastAccess": "Last Access",
     "securityInfo": "Security Information",
@@ -239,5 +243,24 @@
     "filterBy": "Filter by",
     "showSystemPackages": "Show System Packages",
     "showUserPackages": "Show User Packages"
+  },
+  "userProfile": {
+    "userMenu": "User menu",
+    "profile": "Profile",
+    "unknownUser": "Unknown User",
+    "accountInfo": "Account Information",
+    "email": "Email",
+    "profilePlaceholder": "Profile editor coming soon...",
+    "personalInfo": "Personal Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "firstNamePlaceholder": "Enter your first name",
+    "lastNamePlaceholder": "Enter your last name",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "loadError": "Failed to load profile data",
+    "saveError": "Failed to save profile changes",
+    "saveSuccess": "Profile updated successfully"
   }
 }

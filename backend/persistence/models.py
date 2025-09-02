@@ -106,6 +106,8 @@ class User(Base):
     id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
     active = Column(Boolean, unique=False, index=False)
     userid = Column(String)
+    first_name = Column(String(100), nullable=True)
+    last_name = Column(String(100), nullable=True)
     hashed_password = Column(String, unique=False, index=False)
     last_access = Column(DateTime(timezone=True))
     # Account locking fields

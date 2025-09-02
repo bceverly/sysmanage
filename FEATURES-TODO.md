@@ -172,14 +172,14 @@ like to add:
     same level as the rest of the toolbar
     buttons but to the left of them.~~
 
-33. Change Logout button to be the user's
+33. ~~Change Logout button to be the user's
     first initial with a circle around it
     that drops down a menu with the users
     name at the top, a profile link that
     takes them to a profile editor and
     a logout link with a separator bar
     between the logout link and the profile
-    button.
+    button.~~
 
 34. Queue on both server and agent that any
     messages to be sent are written to
@@ -208,12 +208,12 @@ like to add:
     configuration or communication
     problems.
 
-36. We need some sort of visual indicator
+36. ~~We need some sort of visual indicator
     of what screen is currently being
     displayed by highlighting the button
     on the main toolbar that was clicked
     by the user to get to the current
-    screen.
+    screen.~~
 
 37. ~~We need to divide up the types of data
     that we store on the server side

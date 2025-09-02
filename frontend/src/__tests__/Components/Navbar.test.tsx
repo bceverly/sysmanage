@@ -22,7 +22,8 @@ describe('Navbar Component', () => {
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Users')).toBeInTheDocument();
     expect(screen.getByText('Hosts')).toBeInTheDocument();
-    expect(screen.getByText('Logout')).toBeInTheDocument();
+    // User profile dropdown should be present instead of direct logout link
+    expect(screen.getByLabelText('User menu')).toBeInTheDocument();
   });
 
   test('has proper navigation structure', async () => {
@@ -44,7 +45,8 @@ describe('Navbar Component', () => {
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Users')).toBeInTheDocument();
     expect(screen.getByText('Hosts')).toBeInTheDocument();
-    expect(screen.getByText('Logout')).toBeInTheDocument();
+    // User profile dropdown replaces direct logout link
+    expect(screen.getByLabelText('User menu')).toBeInTheDocument();
   });
 
   test('menu toggle functionality', async () => {
@@ -65,18 +67,16 @@ describe('Navbar Component', () => {
     // Use getAllByRole to get all links including hidden ones
     const allLinks = screen.getAllByRole('link', { hidden: true });
     
-    // Verify we have the expected links
-    expect(allLinks).toHaveLength(5); // SysManage logo + 4 nav links
+    // Verify we have the expected links (no more logout link in main nav)
+    expect(allLinks).toHaveLength(4); // SysManage logo + 3 nav links (Dashboard, Users, Hosts)
     
     // Find links by their href attributes since they don't have accessible names when hidden
     const dashboardLink = allLinks.find(link => link.getAttribute('href') === '/');
     const usersLink = allLinks.find(link => link.getAttribute('href') === '/users');
     const hostsLink = allLinks.find(link => link.getAttribute('href') === '/hosts');
-    const logoutLink = allLinks.find(link => link.getAttribute('href') === '/logout');
     
     expect(dashboardLink).toHaveAttribute('href', '/');
     expect(usersLink).toHaveAttribute('href', '/users');
     expect(hostsLink).toHaveAttribute('href', '/hosts');
-    expect(logoutLink).toHaveAttribute('href', '/logout');
   });
 });

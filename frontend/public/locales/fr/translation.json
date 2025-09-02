@@ -61,6 +61,8 @@
     "title": "Gestion des utilisateurs",
     "username": "Nom d'utilisateur",
     "email": "Email",
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
     "role": "Rôle",
     "status": "Statut",
     "actions": "Actions",
@@ -181,6 +183,8 @@
     "notFound": "Utilisateur non trouvé",
     "basicInfo": "Informations de base",
     "userId": "ID utilisateur",
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
     "active": "Actif",
     "lastAccess": "Dernier accès",
     "securityInfo": "Informations de sécurité",
@@ -241,5 +245,24 @@
     "filterBy": "Filtrer par",
     "showSystemPackages": "Afficher les Paquets Système",
     "showUserPackages": "Afficher les Paquets Utilisateur"
+  },
+  "userProfile": {
+    "userMenu": "Menu utilisateur",
+    "profile": "Profil",
+    "unknownUser": "Utilisateur Inconnu",
+    "accountInfo": "Informations du Compte",
+    "email": "Email",
+    "profilePlaceholder": "Éditeur de profil à venir...",
+    "personalInfo": "Informations Personnelles",
+    "firstName": "Prénom",
+    "lastName": "Nom de Famille",
+    "firstNamePlaceholder": "Entrez votre prénom",
+    "lastNamePlaceholder": "Entrez votre nom de famille",
+    "save": "Enregistrer les Modifications",
+    "saving": "Enregistrement en cours...",
+    "cancel": "Annuler",
+    "loadError": "Échec du chargement des données du profil",
+    "saveError": "Échec de l'enregistrement des modifications du profil",
+    "saveSuccess": "Profil mis à jour avec succès"
   }
 }
