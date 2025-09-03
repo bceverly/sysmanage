@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from cryptography import x509
 
 from backend.auth.auth_bearer import JWTBearer
+from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.certificate_manager import certificate_manager
 
@@ -28,7 +29,7 @@ async def get_server_fingerprint():
         return {"fingerprint": fingerprint}
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to get server fingerprint: {str(e)}"
+            status_code=500, detail=_("Failed to get server fingerprint: %s") % str(e)
         ) from e
 
 
@@ -47,7 +48,7 @@ async def get_ca_certificate():
         )
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to get CA certificate: {str(e)}"
+            status_code=500, detail=_("Failed to get CA certificate: %s") % str(e)
         ) from e
 
 
@@ -68,10 +69,10 @@ async def get_client_certificate(host_id: int):  # pylint: disable=duplicate-cod
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail="Host not found")
+            raise HTTPException(status_code=404, detail=_("Host not found"))
 
         if host.approval_status != "approved":
-            raise HTTPException(status_code=403, detail="Host is not approved")
+            raise HTTPException(status_code=403, detail=_("Host is not approved"))
 
         # Generate new private key (certificates are regenerated for security)
         cert_pem, key_pem = certificate_manager.generate_client_certificate(
@@ -111,7 +112,7 @@ async def revoke_client_certificate(host_id: int):  # pylint: disable=duplicate-
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail="Host not found")
+            raise HTTPException(status_code=404, detail=_("Host not found"))
 
         # Clear certificate data
         host.client_certificate = None

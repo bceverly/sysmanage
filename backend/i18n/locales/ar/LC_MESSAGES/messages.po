@@ -4,11 +4,149 @@
 #
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-03 14:35-0400\n"
 "Language: ar\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Invalid token signature"
+msgstr "توقيع الرمز المميز غير صحيح"
+
+msgid "Token expired"
+msgstr "انتهت صلاحية الرمز المميز"
+
+msgid "Malformed token"
+msgstr "الرمز المميز مُشوَّه"
+
+msgid "Encrypted data expired"
+msgstr "انتهت صلاحية البيانات المشفرة"
+
+msgid "Invalid signature"
+msgstr "توقيع غير صحيح"
+
+#, python-format
+msgid "Decryption failed: %s"
+msgstr "فشل في فك التشفير: %s"
+
+msgid "Invalid authentication scheme."
+msgstr "مخطط مصادقة غير صحيح."
+
+msgid "Expired token."
+msgstr "الرمز المميز منتهي الصلاحية."
+
+msgid "Invalid authorization code."
+msgstr "رمز الترخيص غير صحيح."
+
+msgid "Could not validate credentials"
+msgstr "لا يمكن التحقق من بيانات الاعتماد"
+
+msgid "Host not found"
+msgstr "لم يتم العثور على المضيف"
+
+msgid "Host is not approved"
+msgstr "المضيف غير معتمد"
+
+msgid "Account is locked due to too many failed login attempts"
+msgstr "الحساب مقفل بسبب محاولات تسجيل دخول فاشلة كثيرة"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "الحساب مقفل بسبب محاولات تسجيل دخول فاشلة كثيرة"
+
+msgid "Invalid username or password"
+msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
+
+msgid "User not found"
+msgstr "لم يتم العثور على المستخدم"
+
+msgid "User already exists"
+msgstr "المستخدم موجود بالفعل"
+
+#, python-format
+msgid "Agent with hostname %s not found"
+msgstr "لم يتم العثور على الوكيل بعنوان المضيف %s"
+
+#, python-format
+msgid "Agent %s is not connected"
+msgstr "الوكيل %s غير متصل"
+
+#, python-format
+msgid "Failed to send command to %s"
+msgstr "فشل في إرسال الأمر إلى %s"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {hostname}"
+msgstr "تم إرسال الأمر {command_type} إلى {hostname}"
+
+#, python-format
+msgid "Failed to send shell command to %s"
+msgstr "فشل في إرسال أمر الصدفة إلى %s"
+
+#, python-brace-format
+msgid "Shell command sent to {hostname}"
+msgstr "تم إرسال أمر الصدفة إلى {hostname}"
+
+#, python-format
+msgid "Failed to send install command to %s"
+msgstr "فشل في إرسال أمر التثبيت إلى %s"
+
+#, python-brace-format
+msgid "Package installation command sent to {hostname}"
+msgstr "تم إرسال أمر تثبيت الحزمة إلى {hostname}"
+
+#, python-format
+msgid "Failed to send restart command to %s"
+msgstr "فشل في إرسال أمر إعادة التشغيل إلى %s"
+
+#, python-brace-format
+msgid "Service restart command sent to {hostname}"
+msgstr "تم إرسال أمر إعادة تشغيل الخدمة إلى {hostname}"
+
+#, python-format
+msgid "Failed to send update command to %s"
+msgstr "فشل في إرسال أمر التحديث إلى %s"
+
+#, python-brace-format
+msgid "System update command sent to {hostname}"
+msgstr "تم إرسال أمر تحديث النظام إلى {hostname}"
+
+#, python-format
+msgid "Failed to send reboot command to %s"
+msgstr "فشل في إرسال أمر إعادة التشغيل إلى %s"
+
+#, python-brace-format
+msgid "Reboot command sent to {hostname}"
+msgstr "تم إرسال أمر إعادة التشغيل إلى {hostname}"
+
+#, python-brace-format
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "تم بث الأمر {command_type} إلى {sent_count} وكيل"
+
+#, python-brace-format
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "تم بث أمر الصدفة إلى {sent_count} وكيل"
+
+#, python-format
+msgid "No agents found for platform %s"
+msgstr "لم يتم العثور على وكلاء لمنصة %s"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "تم إرسال الأمر {command_type} إلى {sent_count} وكيل {platform}"
+
+msgid "Host already exists"
+msgstr "المضيف موجود بالفعل"
+
+msgid "Host is not in pending status"
+msgstr "المضيف ليس في حالة انتظار"
+
+msgid "Agent is not connected"
+msgstr "الوكيل غير متصل"
 
 msgid "OS version update requested"
 msgstr "تم طلب تحديث إصدار نظام التشغيل"
+
+msgid "Updates check requested"
+msgstr "تم طلب فحص التحديثات"
 
 msgid "Hardware information updated successfully"
 msgstr "تم تحديث معلومات الأجهزة بنجاح"
@@ -19,35 +157,8 @@ msgstr "تم طلب تحديث الأجهزة"
 msgid "User access update requested"
 msgstr "تم طلب تحديث وصول المستخدم"
 
-msgid "Host {hostname} registered successfully"
-msgstr "تم تسجيل المضيف {hostname} بنجاح"
-
-msgid "Command {command_type} sent to {hostname}"
-msgstr "تم إرسال الأمر {command_type} إلى {hostname}"
-
-msgid "Shell command sent to {hostname}"
-msgstr "تم إرسال أمر الصدفة إلى {hostname}"
-
-msgid "Package installation command sent to {hostname}"
-msgstr "تم إرسال أمر تثبيت الحزمة إلى {hostname}"
-
-msgid "Service restart command sent to {hostname}"
-msgstr "تم إرسال أمر إعادة تشغيل الخدمة إلى {hostname}"
-
-msgid "System update command sent to {hostname}"
-msgstr "تم إرسال أمر تحديث النظام إلى {hostname}"
-
-msgid "Reboot command sent to {hostname}"
-msgstr "تم إرسال أمر إعادة التشغيل إلى {hostname}"
-
-msgid "Command {command_type} broadcast to {sent_count} agents"
-msgstr "تم بث الأمر {command_type} إلى {sent_count} وكيل"
-
-msgid "Shell command broadcast to {sent_count} agents"
-msgstr "تم بث أمر الصدفة إلى {sent_count} وكيل"
-
-msgid "Command {command_type} sent to {sent_count} {platform} agents"
-msgstr "تم إرسال الأمر {command_type} إلى {sent_count} وكيل {platform}"
+msgid "Software inventory update requested"
+msgstr "تم طلب تحديث مخزون البرمجيات"
 
 msgid "Configuration pushed to all agents"
 msgstr "تم دفع التكوين إلى جميع الوكلاء"
@@ -55,17 +166,101 @@ msgstr "تم دفع التكوين إلى جميع الوكلاء"
 msgid "Configuration pushed successfully"
 msgstr "تم دفع التكوين بنجاح"
 
+msgid "Agent not found or unreachable"
+msgstr "الوكيل غير موجود أو غير قابل للوصول"
+
 msgid "Configuration pushed to platform agents"
 msgstr "تم دفع التكوين إلى وكلاء المنصة"
+
+msgid "Must specify target_hostname, target_platform, or push_to_all"
+msgstr "يجب تحديد target_hostname أو target_platform أو push_to_all"
 
 msgid "Configuration acknowledgment processed"
 msgstr "تمت معالجة إقرار التكوين"
 
-msgid "Host not found"
-msgstr "لم يتم العثور على المضيف"
+#, python-format
+msgid "Failed to store updates: %s"
+msgstr "فشل في حفظ التحديثات: %s"
 
-msgid "Agent is not connected"
-msgstr "الوكيل غير متصل"
+#, python-format
+msgid "Failed to get update summary: %s"
+msgstr "فشل في الحصول على ملخص التحديث: %s"
 
-msgid "Software inventory update requested"
-msgstr "تم طلب تحديث مخزون البرمجيات"
+#, python-format
+msgid "Failed to get host updates: %s"
+msgstr "فشل في الحصول على تحديثات المضيف: %s"
+
+#, python-format
+msgid "Failed to get updates: %s"
+msgstr "فشل في الحصول على التحديثات: %s"
+
+msgid "Host not found or inactive"
+msgstr "لم يتم العثور على المضيف أو أنه غير نشط"
+
+msgid "No matching updates found for specified packages"
+msgstr "لم يتم العثور على تحديثات مطابقة للحزم المحددة"
+
+msgid "Update execution started"
+msgstr "بدأ تنفيذ التحديث"
+
+#, python-format
+msgid "Failed to send command: %s"
+msgstr "فشل في إرسال الأمر: %s"
+
+#, python-format
+msgid "Failed to send update command: %s"
+msgstr "فشل في إرسال أمر التحديث: %s"
+
+#, python-format
+msgid "Failed to execute updates: %s"
+msgstr "فشل في تنفيذ التحديثات: %s"
+
+#, python-format
+msgid "Failed to get execution log: %s"
+msgstr "فشل في الحصول على سجل التنفيذ: %s"
+
+#, python-format
+msgid "Failed to get server fingerprint: %s"
+msgstr "فشل في الحصول على بصمة الخادم: %s"
+
+#, python-format
+msgid "Failed to get CA certificate: %s"
+msgstr "فشل في الحصول على شهادة المرجع المعتمد: %s"
+
+msgid "Rate limit exceeded"
+msgstr "تم تجاوز حد المعدل"
+
+msgid "Host not approved"
+msgstr "المضيف غير معتمد"
+
+#, python-brace-format
+msgid "Host {hostname} registered successfully"
+msgstr "تم تسجيل المضيف {hostname} بنجاح"
+
+msgid "Hostname is required for registration"
+msgstr "اسم المضيف مطلوب للتسجيل"
+
+msgid "os_version_updated"
+msgstr "تم تحديث إصدار نظام التشغيل"
+
+msgid "hardware_updated"
+msgstr "تم تحديث الأجهزة"
+
+msgid "user_access_updated"
+msgstr "تم تحديث وصول المستخدم"
+
+msgid "software_inventory_updated"
+msgstr "تم تحديث مخزون البرمجيات"
+
+#, python-format
+msgid "Authentication failed: %s"
+msgstr "فشل في المصادقة: %s"
+
+msgid "Authentication token required"
+msgstr "مطلوب رمز المصادقة"
+
+msgid "Message failed security validation"
+msgstr "فشلت الرسالة في التحقق الأمني"
+
+msgid "Message must be valid JSON"
+msgstr "يجب أن تكون الرسالة بتنسيق JSON صحيح"

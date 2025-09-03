@@ -95,7 +95,7 @@ async def delete_host(host_id: int):
 
         # Check for failure
         if len(hosts) != 1:
-            raise HTTPException(status_code=404, detail="Host not found")
+            raise HTTPException(status_code=404, detail=_("Host not found"))
 
         # Delete the record
         session.query(models.Host).filter(models.Host.id == host_id).delete()
@@ -153,7 +153,7 @@ async def add_host(new_host: Host):
             session.query(models.Host).filter(models.Host.fqdn == new_host.fqdn).all()
         )
         if len(check_duplicate) > 0:
-            raise HTTPException(status_code=409, detail="Host already exists")
+            raise HTTPException(status_code=409, detail=_("Host already exists"))
 
         # Host doesn't exist so proceed with adding it
         host = models.Host(
@@ -255,7 +255,7 @@ async def update_host(host_id: int, host_data: Host):
 
         # Check for failure
         if len(hosts) != 1:
-            raise HTTPException(status_code=404, detail="Host not found")
+            raise HTTPException(status_code=404, detail=_("Host not found"))
 
         # Update the values
         session.query(models.Host).filter(models.Host.id == host_id).update(
@@ -292,13 +292,15 @@ async def approve_host(host_id: int):  # pylint: disable=duplicate-code
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail="Host not found")
+            raise HTTPException(status_code=404, detail=_("Host not found"))
 
         if host.approval_status != "pending":
-            raise HTTPException(status_code=400, detail="Host is not in pending status")
+            raise HTTPException(
+                status_code=400, detail=_("Host is not in pending status")
+            )
 
         # Generate client certificate for the approved host
-        cert_pem, _ = certificate_manager.generate_client_certificate(
+        cert_pem, _unused = certificate_manager.generate_client_certificate(
             host.fqdn, host.id
         )
 
@@ -345,10 +347,12 @@ async def reject_host(host_id: int):  # pylint: disable=duplicate-code
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail="Host not found")
+            raise HTTPException(status_code=404, detail=_("Host not found"))
 
         if host.approval_status != "pending":
-            raise HTTPException(status_code=400, detail="Host is not in pending status")
+            raise HTTPException(
+                status_code=400, detail=_("Host is not in pending status")
+            )
 
         # Update approval status
         host.approval_status = "rejected"
@@ -385,7 +389,7 @@ async def request_os_version_update(host_id: int):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail="Host not found")
+            raise HTTPException(status_code=404, detail=_("Host not found"))
 
         validate_host_approval_status(host)
 
@@ -398,7 +402,7 @@ async def request_os_version_update(host_id: int):
         success = await connection_manager.send_to_host(host_id, command_message)
 
         if not success:
-            raise HTTPException(status_code=503, detail="Agent is not connected")
+            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
 
         return {"result": True, "message": _("OS version update requested")}
 
@@ -421,7 +425,7 @@ async def request_updates_check(host_id: int):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail="Host not found")
+            raise HTTPException(status_code=404, detail=_("Host not found"))
 
         validate_host_approval_status(host)
 
@@ -434,7 +438,7 @@ async def request_updates_check(host_id: int):
         success = await connection_manager.send_to_host(host_id, command_message)
 
         if not success:
-            raise HTTPException(status_code=503, detail="Agent is not connected")
+            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
 
         return {"result": True, "message": _("Updates check requested")}
 
@@ -455,7 +459,7 @@ async def update_host_hardware(host_id: int, hardware_data: dict):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail="Host not found")
+            raise HTTPException(status_code=404, detail=_("Host not found"))
 
         # Update hardware fields
         if "cpu_vendor" in hardware_data:
@@ -575,7 +579,7 @@ async def request_hardware_update(host_id: int):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail="Host not found")
+            raise HTTPException(status_code=404, detail=_("Host not found"))
 
         validate_host_approval_status(host)
 
@@ -588,7 +592,7 @@ async def request_hardware_update(host_id: int):
         success = await connection_manager.send_to_host(host_id, command_message)
 
         if not success:
-            raise HTTPException(status_code=503, detail="Agent is not connected")
+            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
 
         return {"result": True, "message": _("Hardware update requested")}
 
@@ -689,7 +693,7 @@ async def request_user_access_update(host_id: int):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail="Host not found")
+            raise HTTPException(status_code=404, detail=_("Host not found"))
 
         validate_host_approval_status(host)
 
@@ -702,7 +706,7 @@ async def request_user_access_update(host_id: int):
         success = await connection_manager.send_to_host(host_id, command_message)
 
         if not success:
-            raise HTTPException(status_code=503, detail="Agent is not connected")
+            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
 
         return {"result": True, "message": _("User access update requested")}
 

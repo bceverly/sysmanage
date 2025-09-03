@@ -62,7 +62,7 @@ async def authenticate_agent(request: Request):
 
     # Check rate limiting
     if websocket_security.is_connection_rate_limited(client_host):
-        return {"error": "Rate limit exceeded", "retry_after": 900}
+        return {"error": _("Rate limit exceeded"), "retry_after": 900}
 
     # Record connection attempt
     websocket_security.record_connection_attempt(client_host)
@@ -138,7 +138,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):
             )
             await connection.send_message(error_msg.to_dict())
             # Close the WebSocket connection for unapproved hosts
-            await connection.websocket.close(code=4003, reason="Host not approved")
+            await connection.websocket.close(code=4003, reason=_("Host not approved"))
             return
 
         debug_logger.info("Host %s approved, allowing connection", hostname)
@@ -163,7 +163,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):
         await connection.send_message(response)
     else:
         error_msg = ErrorMessage(
-            "missing_hostname", "Hostname is required for registration"
+            "missing_hostname", _("Hostname is required for registration")
         )
         await connection.send_message(error_msg.to_dict())
 
@@ -342,7 +342,7 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
     response = {
         "message_type": "ack",
         "message_id": message_data.get("message_id"),
-        "data": {"status": "os_version_updated"},
+        "data": {"status": _("os_version_updated")},
     }
     await connection.send_message(response)
 
@@ -467,7 +467,7 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
     response = {
         "message_type": "ack",
         "message_id": message_data.get("message_id"),
-        "data": {"status": "hardware_updated"},
+        "data": {"status": _("hardware_updated")},
     }
     await connection.send_message(response)
 
@@ -574,7 +574,7 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
     response = {
         "message_type": "ack",
         "message_id": message_data.get("message_id"),
-        "data": {"status": "user_access_updated"},
+        "data": {"status": _("user_access_updated")},
     }
     await connection.send_message(response)
 
@@ -644,7 +644,7 @@ async def handle_software_update(db: Session, connection, message_data: dict):
     response = {
         "message_type": "ack",
         "message_id": message_data.get("message_id"),
-        "data": {"status": "software_inventory_updated"},
+        "data": {"status": _("software_inventory_updated")},
     }
     await connection.send_message(response)
 
@@ -755,12 +755,12 @@ async def agent_connect(websocket: WebSocket):
         if not is_valid:
             debug_logger.info("Closing connection due to auth failure")
             await websocket.close(
-                code=4001, reason=f"Authentication failed: {error_msg}"
+                code=4001, reason=_("Authentication failed: %s") % error_msg
             )
             return
     else:
         debug_logger.info("No auth token provided, closing connection")
-        await websocket.close(code=4000, reason="Authentication token required")
+        await websocket.close(code=4000, reason=_("Authentication token required"))
         return
 
     # Accept connection and register with connection manager
@@ -788,7 +788,7 @@ async def agent_connect(websocket: WebSocket):
                 ):
                     error_msg = ErrorMessage(
                         "message_validation_failed",
-                        "Message failed security validation",
+                        _("Message failed security validation"),
                     )
                     await connection.send_message(error_msg.to_dict())
                     continue
@@ -892,7 +892,9 @@ async def agent_connect(websocket: WebSocket):
 
             except json.JSONDecodeError:
                 # Invalid JSON - send error
-                error_msg = ErrorMessage("invalid_json", "Message must be valid JSON")
+                error_msg = ErrorMessage(
+                    "invalid_json", _("Message must be valid JSON")
+                )
                 await connection.send_message(error_msg.to_dict())
 
             except Exception as exc:

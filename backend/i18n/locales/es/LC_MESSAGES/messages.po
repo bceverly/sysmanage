@@ -4,11 +4,151 @@
 #
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-03 14:35-0400\n"
 "Language: es\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Invalid token signature"
+msgstr "Firma de token no válida"
+
+msgid "Token expired"
+msgstr "Token expirado"
+
+msgid "Malformed token"
+msgstr "Token malformado"
+
+msgid "Encrypted data expired"
+msgstr "Datos cifrados expirados"
+
+msgid "Invalid signature"
+msgstr "Firma no válida"
+
+#, python-format
+msgid "Decryption failed: %s"
+msgstr "Error de descifrado: %s"
+
+msgid "Invalid authentication scheme."
+msgstr "Esquema de autenticación no válido."
+
+msgid "Expired token."
+msgstr "Token expirado."
+
+msgid "Invalid authorization code."
+msgstr "Código de autorización no válido."
+
+msgid "Could not validate credentials"
+msgstr "No se pudieron validar las credenciales"
+
+msgid "Host not found"
+msgstr "Host no encontrado"
+
+msgid "Host is not approved"
+msgstr "El host no está aprobado"
+
+msgid "Account is locked due to too many failed login attempts"
+msgstr ""
+"La cuenta está bloqueada debido a demasiados intentos de inicio de sesión "
+"fallidos"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "Cuenta bloqueada por demasiados intentos de inicio de sesión fallidos"
+
+msgid "Invalid username or password"
+msgstr "Nombre de usuario o contraseña no válidos"
+
+msgid "User not found"
+msgstr "Usuario no encontrado"
+
+msgid "User already exists"
+msgstr "El usuario ya existe"
+
+#, python-format
+msgid "Agent with hostname %s not found"
+msgstr "Agente con nombre de host %s no encontrado"
+
+#, python-format
+msgid "Agent %s is not connected"
+msgstr "El agente %s no está conectado"
+
+#, python-format
+msgid "Failed to send command to %s"
+msgstr "Error al enviar comando a %s"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {hostname}"
+msgstr "Comando {command_type} enviado a {hostname}"
+
+#, python-format
+msgid "Failed to send shell command to %s"
+msgstr "Error al enviar comando shell a %s"
+
+#, python-brace-format
+msgid "Shell command sent to {hostname}"
+msgstr "Comando de shell enviado a {hostname}"
+
+#, python-format
+msgid "Failed to send install command to %s"
+msgstr "Error al enviar comando de instalación a %s"
+
+#, python-brace-format
+msgid "Package installation command sent to {hostname}"
+msgstr "Comando de instalación de paquete enviado a {hostname}"
+
+#, python-format
+msgid "Failed to send restart command to %s"
+msgstr "Error al enviar comando de reinicio a %s"
+
+#, python-brace-format
+msgid "Service restart command sent to {hostname}"
+msgstr "Comando de reinicio de servicio enviado a {hostname}"
+
+#, python-format
+msgid "Failed to send update command to %s"
+msgstr "Error al enviar comando de actualización a %s"
+
+#, python-brace-format
+msgid "System update command sent to {hostname}"
+msgstr "Comando de actualización del sistema enviado a {hostname}"
+
+#, python-format
+msgid "Failed to send reboot command to %s"
+msgstr "Error al enviar comando de reinicio a %s"
+
+#, python-brace-format
+msgid "Reboot command sent to {hostname}"
+msgstr "Comando de reinicio enviado a {hostname}"
+
+#, python-brace-format
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "Comando {command_type} enviado a {sent_count} agentes"
+
+#, python-brace-format
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "Comando de shell enviado a {sent_count} agentes"
+
+#, python-format
+msgid "No agents found for platform %s"
+msgstr "No se encontraron agentes para la plataforma %s"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "Comando {command_type} enviado a {sent_count} agentes {platform}"
+
+msgid "Host already exists"
+msgstr "El host ya existe"
+
+msgid "Host is not in pending status"
+msgstr "El host no está en estado pendiente"
+
+msgid "Agent is not connected"
+msgstr "El agente no está conectado"
 
 msgid "OS version update requested"
 msgstr "Actualización de versión del SO solicitada"
+
+msgid "Updates check requested"
+msgstr "Verificación de actualizaciones solicitada"
 
 msgid "Hardware information updated successfully"
 msgstr "Información de hardware actualizada correctamente"
@@ -19,35 +159,8 @@ msgstr "Actualización de hardware solicitada"
 msgid "User access update requested"
 msgstr "Actualización de acceso de usuarios solicitada"
 
-msgid "Host {hostname} registered successfully"
-msgstr "Host {hostname} registrado correctamente"
-
-msgid "Command {command_type} sent to {hostname}"
-msgstr "Comando {command_type} enviado a {hostname}"
-
-msgid "Shell command sent to {hostname}"
-msgstr "Comando de shell enviado a {hostname}"
-
-msgid "Package installation command sent to {hostname}"
-msgstr "Comando de instalación de paquete enviado a {hostname}"
-
-msgid "Service restart command sent to {hostname}"
-msgstr "Comando de reinicio de servicio enviado a {hostname}"
-
-msgid "System update command sent to {hostname}"
-msgstr "Comando de actualización del sistema enviado a {hostname}"
-
-msgid "Reboot command sent to {hostname}"
-msgstr "Comando de reinicio enviado a {hostname}"
-
-msgid "Command {command_type} broadcast to {sent_count} agents"
-msgstr "Comando {command_type} enviado a {sent_count} agentes"
-
-msgid "Shell command broadcast to {sent_count} agents"
-msgstr "Comando de shell enviado a {sent_count} agentes"
-
-msgid "Command {command_type} sent to {sent_count} {platform} agents"
-msgstr "Comando {command_type} enviado a {sent_count} agentes {platform}"
+msgid "Software inventory update requested"
+msgstr "Actualización de inventario de software solicitada"
 
 msgid "Configuration pushed to all agents"
 msgstr "Configuración enviada a todos los agentes"
@@ -55,18 +168,103 @@ msgstr "Configuración enviada a todos los agentes"
 msgid "Configuration pushed successfully"
 msgstr "Configuración enviada correctamente"
 
+msgid "Agent not found or unreachable"
+msgstr "Agente no encontrado o no accesible"
+
 msgid "Configuration pushed to platform agents"
 msgstr "Configuración enviada a agentes de plataforma"
+
+msgid "Must specify target_hostname, target_platform, or push_to_all"
+msgstr "Debe especificar target_hostname, target_platform, o push_to_all"
 
 msgid "Configuration acknowledgment processed"
 msgstr "Confirmación de configuración procesada"
 
-msgid "Host not found"
-msgstr "Host no encontrado"
+#, python-format
+msgid "Failed to store updates: %s"
+msgstr "Error al almacenar actualizaciones: %s"
 
-msgid "Agent is not connected"
-msgstr "El agente no está conectado"
+#, python-format
+msgid "Failed to get update summary: %s"
+msgstr "Error al obtener el resumen de actualización: %s"
 
-msgid "Software inventory update requested"
-msgstr "Actualización de inventario de software solicitada"
+#, python-format
+msgid "Failed to get host updates: %s"
+msgstr "Error al obtener actualizaciones del host: %s"
 
+#, python-format
+msgid "Failed to get updates: %s"
+msgstr "Error al obtener actualizaciones: %s"
+
+msgid "Host not found or inactive"
+msgstr "Host no encontrado o inactivo"
+
+msgid "No matching updates found for specified packages"
+msgstr ""
+"No se encontraron actualizaciones coincidentes para los paquetes "
+"especificados"
+
+msgid "Update execution started"
+msgstr "Ejecución de actualización iniciada"
+
+#, python-format
+msgid "Failed to send command: %s"
+msgstr "Error al enviar comando: %s"
+
+#, python-format
+msgid "Failed to send update command: %s"
+msgstr "Error al enviar comando de actualización: %s"
+
+#, python-format
+msgid "Failed to execute updates: %s"
+msgstr "Error al ejecutar actualizaciones: %s"
+
+#, python-format
+msgid "Failed to get execution log: %s"
+msgstr "Error al obtener el registro de ejecución: %s"
+
+#, python-format
+msgid "Failed to get server fingerprint: %s"
+msgstr "Error al obtener la huella del servidor: %s"
+
+#, python-format
+msgid "Failed to get CA certificate: %s"
+msgstr "Error al obtener el certificado CA: %s"
+
+msgid "Rate limit exceeded"
+msgstr "Límite de velocidad excedido"
+
+msgid "Host not approved"
+msgstr "Host no aprobado"
+
+#, python-brace-format
+msgid "Host {hostname} registered successfully"
+msgstr "Host {hostname} registrado correctamente"
+
+msgid "Hostname is required for registration"
+msgstr "Se requiere nombre de host para el registro"
+
+msgid "os_version_updated"
+msgstr "Versión del SO actualizada"
+
+msgid "hardware_updated"
+msgstr "Hardware actualizado"
+
+msgid "user_access_updated"
+msgstr "Acceso de usuario actualizado"
+
+msgid "software_inventory_updated"
+msgstr "Inventario de software actualizado"
+
+#, python-format
+msgid "Authentication failed: %s"
+msgstr "Fallo de autenticación: %s"
+
+msgid "Authentication token required"
+msgstr "Se requiere token de autenticación"
+
+msgid "Message failed security validation"
+msgstr "El mensaje falló la validación de seguridad"
+
+msgid "Message must be valid JSON"
+msgstr "El mensaje debe ser JSON válido"

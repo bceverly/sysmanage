@@ -4,11 +4,149 @@
 #
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-03 14:35-0400\n"
 "Language: de\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Invalid token signature"
+msgstr "Ungültige Token-Signatur"
+
+msgid "Token expired"
+msgstr "Token abgelaufen"
+
+msgid "Malformed token"
+msgstr "Fehlerhafter Token"
+
+msgid "Encrypted data expired"
+msgstr "Verschlüsselte Daten abgelaufen"
+
+msgid "Invalid signature"
+msgstr "Ungültige Signatur"
+
+#, python-format
+msgid "Decryption failed: %s"
+msgstr "Entschlüsselung fehlgeschlagen: %s"
+
+msgid "Invalid authentication scheme."
+msgstr "Ungültiges Authentifizierungsschema."
+
+msgid "Expired token."
+msgstr "Abgelaufener Token."
+
+msgid "Invalid authorization code."
+msgstr "Ungültiger Autorisierungscode."
+
+msgid "Could not validate credentials"
+msgstr "Anmeldedaten konnten nicht validiert werden"
+
+msgid "Host not found"
+msgstr "Host nicht gefunden"
+
+msgid "Host is not approved"
+msgstr "Host ist nicht genehmigt"
+
+msgid "Account is locked due to too many failed login attempts"
+msgstr "Konto ist wegen zu vieler fehlgeschlagener Anmeldeversuche gesperrt"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "Konto wegen zu vieler fehlgeschlagener Anmeldeversuche gesperrt"
+
+msgid "Invalid username or password"
+msgstr "Ungültiger Benutzername oder Passwort"
+
+msgid "User not found"
+msgstr "Benutzer nicht gefunden"
+
+msgid "User already exists"
+msgstr "Benutzer existiert bereits"
+
+#, python-format
+msgid "Agent with hostname %s not found"
+msgstr "Agent mit Hostname %s nicht gefunden"
+
+#, python-format
+msgid "Agent %s is not connected"
+msgstr "Agent %s ist nicht verbunden"
+
+#, python-format
+msgid "Failed to send command to %s"
+msgstr "Fehler beim Senden des Befehls an %s"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {hostname}"
+msgstr "Befehl {command_type} an {hostname} gesendet"
+
+#, python-format
+msgid "Failed to send shell command to %s"
+msgstr "Fehler beim Senden des Shell-Befehls an %s"
+
+#, python-brace-format
+msgid "Shell command sent to {hostname}"
+msgstr "Shell-Befehl an {hostname} gesendet"
+
+#, python-format
+msgid "Failed to send install command to %s"
+msgstr "Fehler beim Senden des Installationsbefehls an %s"
+
+#, python-brace-format
+msgid "Package installation command sent to {hostname}"
+msgstr "Paketinstallations-Befehl an {hostname} gesendet"
+
+#, python-format
+msgid "Failed to send restart command to %s"
+msgstr "Fehler beim Senden des Neustart-Befehls an %s"
+
+#, python-brace-format
+msgid "Service restart command sent to {hostname}"
+msgstr "Dienst-Neustart-Befehl an {hostname} gesendet"
+
+#, python-format
+msgid "Failed to send update command to %s"
+msgstr "Fehler beim Senden des Update-Befehls an %s"
+
+#, python-brace-format
+msgid "System update command sent to {hostname}"
+msgstr "System-Update-Befehl an {hostname} gesendet"
+
+#, python-format
+msgid "Failed to send reboot command to %s"
+msgstr "Fehler beim Senden des Neustart-Befehls an %s"
+
+#, python-brace-format
+msgid "Reboot command sent to {hostname}"
+msgstr "Neustart-Befehl an {hostname} gesendet"
+
+#, python-brace-format
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "Befehl {command_type} an {sent_count} Agents gesendet"
+
+#, python-brace-format
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "Shell-Befehl an {sent_count} Agents gesendet"
+
+#, python-format
+msgid "No agents found for platform %s"
+msgstr "Keine Agents für Plattform %s gefunden"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "Befehl {command_type} an {sent_count} {platform} Agents gesendet"
+
+msgid "Host already exists"
+msgstr "Host existiert bereits"
+
+msgid "Host is not in pending status"
+msgstr "Host befindet sich nicht im ausstehenden Status"
+
+msgid "Agent is not connected"
+msgstr "Agent ist nicht verbunden"
 
 msgid "OS version update requested"
 msgstr "Betriebssystem-Versions-Update angefordert"
+
+msgid "Updates check requested"
+msgstr "Update-Prüfung angefordert"
 
 msgid "Hardware information updated successfully"
 msgstr "Hardware-Informationen erfolgreich aktualisiert"
@@ -19,35 +157,8 @@ msgstr "Hardware-Update angefordert"
 msgid "User access update requested"
 msgstr "Benutzerzugriff-Update angefordert"
 
-msgid "Host {hostname} registered successfully"
-msgstr "Host {hostname} erfolgreich registriert"
-
-msgid "Command {command_type} sent to {hostname}"
-msgstr "Befehl {command_type} an {hostname} gesendet"
-
-msgid "Shell command sent to {hostname}"
-msgstr "Shell-Befehl an {hostname} gesendet"
-
-msgid "Package installation command sent to {hostname}"
-msgstr "Paketinstallations-Befehl an {hostname} gesendet"
-
-msgid "Service restart command sent to {hostname}"
-msgstr "Dienst-Neustart-Befehl an {hostname} gesendet"
-
-msgid "System update command sent to {hostname}"
-msgstr "System-Update-Befehl an {hostname} gesendet"
-
-msgid "Reboot command sent to {hostname}"
-msgstr "Neustart-Befehl an {hostname} gesendet"
-
-msgid "Command {command_type} broadcast to {sent_count} agents"
-msgstr "Befehl {command_type} an {sent_count} Agents gesendet"
-
-msgid "Shell command broadcast to {sent_count} agents"
-msgstr "Shell-Befehl an {sent_count} Agents gesendet"
-
-msgid "Command {command_type} sent to {sent_count} {platform} agents"
-msgstr "Befehl {command_type} an {sent_count} {platform} Agents gesendet"
+msgid "Software inventory update requested"
+msgstr "Software-Inventar-Aktualisierung angefordert"
 
 msgid "Configuration pushed to all agents"
 msgstr "Konfiguration an alle Agents übertragen"
@@ -55,18 +166,102 @@ msgstr "Konfiguration an alle Agents übertragen"
 msgid "Configuration pushed successfully"
 msgstr "Konfiguration erfolgreich übertragen"
 
+msgid "Agent not found or unreachable"
+msgstr "Agent nicht gefunden oder nicht erreichbar"
+
 msgid "Configuration pushed to platform agents"
 msgstr "Konfiguration an Plattform-Agents übertragen"
+
+msgid "Must specify target_hostname, target_platform, or push_to_all"
+msgstr ""
+"Es muss target_hostname, target_platform oder push_to_all angegeben werden"
 
 msgid "Configuration acknowledgment processed"
 msgstr "Konfigurations-Bestätigung verarbeitet"
 
-msgid "Host not found"
-msgstr "Host nicht gefunden"
+#, python-format
+msgid "Failed to store updates: %s"
+msgstr "Fehler beim Speichern der Updates: %s"
 
-msgid "Agent is not connected"
-msgstr "Agent ist nicht verbunden"
+#, python-format
+msgid "Failed to get update summary: %s"
+msgstr "Fehler beim Abrufen der Update-Zusammenfassung: %s"
 
-msgid "Software inventory update requested"
-msgstr "Software-Inventar-Aktualisierung angefordert"
+#, python-format
+msgid "Failed to get host updates: %s"
+msgstr "Fehler beim Abrufen der Host-Updates: %s"
 
+#, python-format
+msgid "Failed to get updates: %s"
+msgstr "Fehler beim Abrufen der Updates: %s"
+
+msgid "Host not found or inactive"
+msgstr "Host nicht gefunden oder inaktiv"
+
+msgid "No matching updates found for specified packages"
+msgstr "Keine passenden Updates für die angegebenen Pakete gefunden"
+
+msgid "Update execution started"
+msgstr "Update-Ausführung gestartet"
+
+#, python-format
+msgid "Failed to send command: %s"
+msgstr "Fehler beim Senden des Befehls: %s"
+
+#, python-format
+msgid "Failed to send update command: %s"
+msgstr "Fehler beim Senden des Update-Befehls: %s"
+
+#, python-format
+msgid "Failed to execute updates: %s"
+msgstr "Fehler beim Ausführen der Updates: %s"
+
+#, python-format
+msgid "Failed to get execution log: %s"
+msgstr "Fehler beim Abrufen des Ausführungsprotokoll: %s"
+
+#, python-format
+msgid "Failed to get server fingerprint: %s"
+msgstr "Fehler beim Abrufen des Server-Fingerabdrucks: %s"
+
+#, python-format
+msgid "Failed to get CA certificate: %s"
+msgstr "Fehler beim Abrufen des CA-Zertifikats: %s"
+
+msgid "Rate limit exceeded"
+msgstr "Ratenbegrenzung überschritten"
+
+msgid "Host not approved"
+msgstr "Host ist nicht genehmigt"
+
+#, python-brace-format
+msgid "Host {hostname} registered successfully"
+msgstr "Host {hostname} erfolgreich registriert"
+
+msgid "Hostname is required for registration"
+msgstr "Hostname ist für die Registrierung erforderlich"
+
+msgid "os_version_updated"
+msgstr "Betriebssystem-Version aktualisiert"
+
+msgid "hardware_updated"
+msgstr "Hardware aktualisiert"
+
+msgid "user_access_updated"
+msgstr "Benutzerzugriff aktualisiert"
+
+msgid "software_inventory_updated"
+msgstr "Software-Inventar aktualisiert"
+
+#, python-format
+msgid "Authentication failed: %s"
+msgstr "Authentifizierung fehlgeschlagen: %s"
+
+msgid "Authentication token required"
+msgstr "Authentifizierungs-Token erforderlich"
+
+msgid "Message failed security validation"
+msgstr "Nachricht hat Sicherheitsvalidierung nicht bestanden"
+
+msgid "Message must be valid JSON"
+msgstr "Nachricht muss gültiges JSON sein"

@@ -4,11 +4,153 @@
 #
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-03 14:35-0400\n"
 "Language: zh_TW\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Invalid token signature"
+msgstr "無效的權杖簽名"
+
+msgid "Token expired"
+msgstr "權杖過期"
+
+#, fuzzy
+msgid "Malformed token"
+msgstr "過期的權杖。"
+
+msgid "Encrypted data expired"
+msgstr "加密資料過期"
+
+msgid "Invalid signature"
+msgstr "無效簽名"
+
+#, python-format
+msgid "Decryption failed: %s"
+msgstr "解密失敗：%s"
+
+msgid "Invalid authentication scheme."
+msgstr "無效的身份驗證方案。"
+
+msgid "Expired token."
+msgstr "過期的權杖。"
+
+msgid "Invalid authorization code."
+msgstr "無效的授權碼。"
+
+msgid "Could not validate credentials"
+msgstr "無法驗證憑證"
+
+msgid "Host not found"
+msgstr "未找到主機"
+
+#, fuzzy
+msgid "Host is not approved"
+msgstr "主機未核准"
+
+msgid "Account is locked due to too many failed login attempts"
+msgstr "由於登入嘗試失敗次數過多，帳戶已被鎖定"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "由於登入嘗試失敗次數過多，帳戶被鎖定"
+
+msgid "Invalid username or password"
+msgstr "無效的使用者名稱或密碼"
+
+#, fuzzy
+msgid "User not found"
+msgstr "找不到使用者"
+
+msgid "User already exists"
+msgstr "使用者已存在"
+
+#, python-format
+msgid "Agent with hostname %s not found"
+msgstr "找不到主機名稱為 %s 的代理程式"
+
+#, python-format
+msgid "Agent %s is not connected"
+msgstr "代理程式 %s 未連線"
+
+#, python-format
+msgid "Failed to send command to %s"
+msgstr "向 %s 傳送指令失敗"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {hostname}"
+msgstr "命令 {command_type} 已發送到 {hostname}"
+
+#, python-format
+msgid "Failed to send shell command to %s"
+msgstr "向 %s 傳送 shell 指令失敗"
+
+#, python-brace-format
+msgid "Shell command sent to {hostname}"
+msgstr "Shell 命令已發送到 {hostname}"
+
+#, python-format
+msgid "Failed to send install command to %s"
+msgstr "向 %s 傳送安裝指令失敗"
+
+#, python-brace-format
+msgid "Package installation command sent to {hostname}"
+msgstr "套件安裝命令已發送到 {hostname}"
+
+#, python-format
+msgid "Failed to send restart command to %s"
+msgstr "向 %s 傳送重新啟動指令失敗"
+
+#, python-brace-format
+msgid "Service restart command sent to {hostname}"
+msgstr "服務重啟命令已發送到 {hostname}"
+
+#, python-format
+msgid "Failed to send update command to %s"
+msgstr "向 %s 傳送更新指令失敗"
+
+#, python-brace-format
+msgid "System update command sent to {hostname}"
+msgstr "系統更新命令已發送到 {hostname}"
+
+#, python-format
+msgid "Failed to send reboot command to %s"
+msgstr "向 %s 傳送重新啟動指令失敗"
+
+#, python-brace-format
+msgid "Reboot command sent to {hostname}"
+msgstr "重啟命令已發送到 {hostname}"
+
+#, python-brace-format
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "命令 {command_type} 已廣播到 {sent_count} 個代理"
+
+#, python-brace-format
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "Shell 命令已廣播到 {sent_count} 個代理"
+
+#, python-format
+msgid "No agents found for platform %s"
+msgstr "找不到平台 %s 的代理程式"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "命令 {command_type} 已發送到 {sent_count} 個 {platform} 代理"
+
+msgid "Host already exists"
+msgstr "主機已存在"
+
+msgid "Host is not in pending status"
+msgstr "主機不處於待定狀態"
+
+msgid "Agent is not connected"
+msgstr "代理未連接"
 
 msgid "OS version update requested"
 msgstr "已請求作業系統版本更新"
+
+#, fuzzy
+msgid "Updates check requested"
+msgstr "已要求更新檢查"
 
 msgid "Hardware information updated successfully"
 msgstr "硬體資訊更新成功"
@@ -19,35 +161,8 @@ msgstr "已請求硬體更新"
 msgid "User access update requested"
 msgstr "已請求使用者存取更新"
 
-msgid "Host {hostname} registered successfully"
-msgstr "主機 {hostname} 註冊成功"
-
-msgid "Command {command_type} sent to {hostname}"
-msgstr "命令 {command_type} 已發送到 {hostname}"
-
-msgid "Shell command sent to {hostname}"
-msgstr "Shell 命令已發送到 {hostname}"
-
-msgid "Package installation command sent to {hostname}"
-msgstr "套件安裝命令已發送到 {hostname}"
-
-msgid "Service restart command sent to {hostname}"
-msgstr "服務重啟命令已發送到 {hostname}"
-
-msgid "System update command sent to {hostname}"
-msgstr "系統更新命令已發送到 {hostname}"
-
-msgid "Reboot command sent to {hostname}"
-msgstr "重啟命令已發送到 {hostname}"
-
-msgid "Command {command_type} broadcast to {sent_count} agents"
-msgstr "命令 {command_type} 已廣播到 {sent_count} 個代理"
-
-msgid "Shell command broadcast to {sent_count} agents"
-msgstr "Shell 命令已廣播到 {sent_count} 個代理"
-
-msgid "Command {command_type} sent to {sent_count} {platform} agents"
-msgstr "命令 {command_type} 已發送到 {sent_count} 個 {platform} 代理"
+msgid "Software inventory update requested"
+msgstr "已請求軟體清單更新"
 
 msgid "Configuration pushed to all agents"
 msgstr "設定已推送到所有代理"
@@ -55,18 +170,104 @@ msgstr "設定已推送到所有代理"
 msgid "Configuration pushed successfully"
 msgstr "設定推送成功"
 
+#, fuzzy
+msgid "Agent not found or unreachable"
+msgstr "找不到代理程式或無法存取"
+
 msgid "Configuration pushed to platform agents"
 msgstr "設定已推送到平台代理"
+
+msgid "Must specify target_hostname, target_platform, or push_to_all"
+msgstr "必須指定 target_hostname、target_platform 或 push_to_all"
 
 msgid "Configuration acknowledgment processed"
 msgstr "設定確認已處理"
 
-msgid "Host not found"
-msgstr "未找到主機"
+#, python-format
+msgid "Failed to store updates: %s"
+msgstr "儲存更新失敗：%s"
 
-msgid "Agent is not connected"
-msgstr "代理未連接"
+#, python-format
+msgid "Failed to get update summary: %s"
+msgstr "取得更新摘要失敗：%s"
 
-msgid "Software inventory update requested"
-msgstr "已請求軟體清單更新"
+#, python-format
+msgid "Failed to get host updates: %s"
+msgstr "取得主機更新失敗：%s"
 
+#, python-format
+msgid "Failed to get updates: %s"
+msgstr "取得更新失敗：%s"
+
+#, fuzzy
+msgid "Host not found or inactive"
+msgstr "找不到主機或主機處於非作用中狀態"
+
+msgid "No matching updates found for specified packages"
+msgstr "找不到指定套件的相符更新"
+
+msgid "Update execution started"
+msgstr "更新執行已開始"
+
+#, python-format
+msgid "Failed to send command: %s"
+msgstr "傳送指令失敗：%s"
+
+#, python-format
+msgid "Failed to send update command: %s"
+msgstr "傳送更新指令失敗：%s"
+
+#, python-format
+msgid "Failed to execute updates: %s"
+msgstr "執行更新失敗：%s"
+
+#, python-format
+msgid "Failed to get execution log: %s"
+msgstr "取得執行記錄失敗：%s"
+
+#, python-format
+msgid "Failed to get server fingerprint: %s"
+msgstr "取得伺服器指紋失敗：%s"
+
+#, python-format
+msgid "Failed to get CA certificate: %s"
+msgstr "取得 CA 憑證失敗：%s"
+
+msgid "Rate limit exceeded"
+msgstr "超出速率限制"
+
+#, fuzzy
+msgid "Host not approved"
+msgstr "主機未核准"
+
+#, python-brace-format
+msgid "Host {hostname} registered successfully"
+msgstr "主機 {hostname} 註冊成功"
+
+msgid "Hostname is required for registration"
+msgstr "註冊需要主機名稱"
+
+msgid "os_version_updated"
+msgstr "作業系統版本已更新"
+
+msgid "hardware_updated"
+msgstr "硬體已更新"
+
+msgid "user_access_updated"
+msgstr "使用者存取已更新"
+
+msgid "software_inventory_updated"
+msgstr "軟體清單已更新"
+
+#, python-format
+msgid "Authentication failed: %s"
+msgstr "認證失敗：%s"
+
+msgid "Authentication token required"
+msgstr "需要認證權杖"
+
+msgid "Message failed security validation"
+msgstr "訊息安全驗證失敗"
+
+msgid "Message must be valid JSON"
+msgstr "訊息必須是有效的JSON"
