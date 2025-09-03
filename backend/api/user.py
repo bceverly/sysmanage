@@ -12,6 +12,7 @@ from sqlalchemy.orm import sessionmaker
 from backend.auth.auth_bearer import JWTBearer
 from backend.auth.auth_handler import decode_jwt
 from backend.config import config
+from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.login_security import login_security
 
@@ -47,7 +48,7 @@ async def delete_user(user_id: int):
 
         # Check for failure
         if len(users) != 1:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail=_("User not found"))
 
         # Delete the record
         session.query(models.User).filter(models.User.id == user_id).delete()
@@ -96,7 +97,7 @@ async def get_logged_in_user(request: Request):
 
         # Check for failure
         if len(users) != 1:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail=_("User not found"))
 
         ret_user = models.User(
             id=users[0].id,
@@ -128,7 +129,7 @@ async def get_user(user_id: int):
 
         # Check for failure
         if len(users) != 1:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail=_("User not found"))
 
         ret_user = models.User(
             id=users[0].id,
@@ -160,7 +161,7 @@ async def get_user_by_userid(userid: str):
 
         # Check for failure
         if len(users) != 1:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail=_("User not found"))
 
         ret_user = models.User(
             id=users[0].id,
@@ -229,7 +230,7 @@ async def add_user(new_user: User):
             .all()
         )
         if len(check_duplicate) > 0:
-            raise HTTPException(status_code=409, detail="User already exists")
+            raise HTTPException(status_code=409, detail=_("User already exists"))
 
         # This is a unique user.  Proceed...
         hashed_value = argon2_hash(
@@ -278,7 +279,7 @@ async def update_user(user_id: int, user_data: User):
 
         # Check for failure
         if len(users) != 1:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail=_("User not found"))
 
         # Update the values
         hashed_value = argon2_hash(
@@ -328,7 +329,7 @@ async def unlock_user(user_id: int):
 
         # Check for failure
         if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail=_("User not found"))
 
         # Unlock the account
         login_security.unlock_user_account(user, session)

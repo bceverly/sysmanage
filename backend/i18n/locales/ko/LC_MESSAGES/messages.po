@@ -4,11 +4,154 @@
 #
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-03 14:35-0400\n"
 "Language: ko\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Invalid token signature"
+msgstr "잘못된 토큰 서명"
+
+msgid "Token expired"
+msgstr "토큰 만료"
+
+#, fuzzy
+msgid "Malformed token"
+msgstr "만료된 토큰입니다."
+
+msgid "Encrypted data expired"
+msgstr "암호화된 데이터 만료"
+
+msgid "Invalid signature"
+msgstr "잘못된 서명"
+
+#, python-format
+msgid "Decryption failed: %s"
+msgstr "복호화 실패: %s"
+
+msgid "Invalid authentication scheme."
+msgstr "잘못된 인증 방식입니다."
+
+msgid "Expired token."
+msgstr "만료된 토큰입니다."
+
+msgid "Invalid authorization code."
+msgstr "잘못된 권한 부여 코드입니다."
+
+msgid "Could not validate credentials"
+msgstr "자격 증명을 검증할 수 없습니다"
+
+msgid "Host not found"
+msgstr "호스트를 찾을 수 없습니다"
+
+#, fuzzy
+msgid "Host is not approved"
+msgstr "호스트가 승인되지 않았습니다"
+
+msgid "Account is locked due to too many failed login attempts"
+msgstr "로그인 시도 실패가 너무 많아 계정이 잠겼습니다"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "로그인 시도 실패가 너무 많아 계정이 잠김"
+
+msgid "Invalid username or password"
+msgstr "잘못된 사용자명 또는 비밀번호"
+
+#, fuzzy
+msgid "User not found"
+msgstr "사용자를 찾을 수 없습니다"
+
+msgid "User already exists"
+msgstr "사용자가 이미 존재합니다"
+
+#, python-format
+msgid "Agent with hostname %s not found"
+msgstr "호스트명 %s의 에이전트를 찾을 수 없습니다"
+
+#, python-format
+msgid "Agent %s is not connected"
+msgstr "에이전트 %s가 연결되지 않음"
+
+#, python-format
+msgid "Failed to send command to %s"
+msgstr "%s로 명령 전송 실패"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {hostname}"
+msgstr "명령 {command_type}을 {hostname}에 전송했습니다"
+
+#, python-format
+msgid "Failed to send shell command to %s"
+msgstr "%s로 셸 명령 전송 실패"
+
+#, python-brace-format
+msgid "Shell command sent to {hostname}"
+msgstr "셸 명령을 {hostname}에 전송했습니다"
+
+#, python-format
+msgid "Failed to send install command to %s"
+msgstr "%s로 설치 명령 전송 실패"
+
+#, python-brace-format
+msgid "Package installation command sent to {hostname}"
+msgstr "패키지 설치 명령을 {hostname}에 전송했습니다"
+
+#, python-format
+msgid "Failed to send restart command to %s"
+msgstr "%s로 재시작 명령 전송 실패"
+
+#, python-brace-format
+msgid "Service restart command sent to {hostname}"
+msgstr "서비스 재시작 명령을 {hostname}에 전송했습니다"
+
+#, python-format
+msgid "Failed to send update command to %s"
+msgstr "%s로 업데이트 명령 전송 실패"
+
+#, python-brace-format
+msgid "System update command sent to {hostname}"
+msgstr "시스템 업데이트 명령을 {hostname}에 전송했습니다"
+
+#, python-format
+msgid "Failed to send reboot command to %s"
+msgstr "%s로 재부팅 명령 전송 실패"
+
+#, python-brace-format
+msgid "Reboot command sent to {hostname}"
+msgstr "재부팅 명령을 {hostname}에 전송했습니다"
+
+#, python-brace-format
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "명령 {command_type}을 {sent_count}개 에이전트에 브로드캐스트했습니다"
+
+#, python-brace-format
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "셸 명령을 {sent_count}개 에이전트에 브로드캐스트했습니다"
+
+#, python-format
+msgid "No agents found for platform %s"
+msgstr "플랫폼 %s에 대한 에이전트를 찾을 수 없습니다"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr ""
+"명령 {command_type}을 {sent_count}개 {platform} 에이전트에 전송했습니다"
+
+msgid "Host already exists"
+msgstr "호스트가 이미 존재합니다"
+
+msgid "Host is not in pending status"
+msgstr "호스트가 대기 상태가 아닙니다"
+
+msgid "Agent is not connected"
+msgstr "에이전트가 연결되지 않았습니다"
 
 msgid "OS version update requested"
 msgstr "OS 버전 업데이트가 요청되었습니다"
+
+#, fuzzy
+msgid "Updates check requested"
+msgstr "업데이트 확인이 요청되었습니다"
 
 msgid "Hardware information updated successfully"
 msgstr "하드웨어 정보가 성공적으로 업데이트되었습니다"
@@ -19,35 +162,8 @@ msgstr "하드웨어 업데이트가 요청되었습니다"
 msgid "User access update requested"
 msgstr "사용자 액세스 업데이트가 요청되었습니다"
 
-msgid "Host {hostname} registered successfully"
-msgstr "호스트 {hostname}가 성공적으로 등록되었습니다"
-
-msgid "Command {command_type} sent to {hostname}"
-msgstr "명령 {command_type}을 {hostname}에 전송했습니다"
-
-msgid "Shell command sent to {hostname}"
-msgstr "셸 명령을 {hostname}에 전송했습니다"
-
-msgid "Package installation command sent to {hostname}"
-msgstr "패키지 설치 명령을 {hostname}에 전송했습니다"
-
-msgid "Service restart command sent to {hostname}"
-msgstr "서비스 재시작 명령을 {hostname}에 전송했습니다"
-
-msgid "System update command sent to {hostname}"
-msgstr "시스템 업데이트 명령을 {hostname}에 전송했습니다"
-
-msgid "Reboot command sent to {hostname}"
-msgstr "재부팅 명령을 {hostname}에 전송했습니다"
-
-msgid "Command {command_type} broadcast to {sent_count} agents"
-msgstr "명령 {command_type}을 {sent_count}개 에이전트에 브로드캐스트했습니다"
-
-msgid "Shell command broadcast to {sent_count} agents"
-msgstr "셸 명령을 {sent_count}개 에이전트에 브로드캐스트했습니다"
-
-msgid "Command {command_type} sent to {sent_count} {platform} agents"
-msgstr "명령 {command_type}을 {sent_count}개 {platform} 에이전트에 전송했습니다"
+msgid "Software inventory update requested"
+msgstr "소프트웨어 인벤토리 업데이트가 요청되었습니다"
 
 msgid "Configuration pushed to all agents"
 msgstr "모든 에이전트에 구성을 푸시했습니다"
@@ -55,18 +171,104 @@ msgstr "모든 에이전트에 구성을 푸시했습니다"
 msgid "Configuration pushed successfully"
 msgstr "구성이 성공적으로 푸시되었습니다"
 
+#, fuzzy
+msgid "Agent not found or unreachable"
+msgstr "에이전트를 찾을 수 없거나 접근할 수 없습니다"
+
 msgid "Configuration pushed to platform agents"
 msgstr "플랫폼 에이전트에 구성을 푸시했습니다"
+
+msgid "Must specify target_hostname, target_platform, or push_to_all"
+msgstr "target_hostname, target_platform, 또는 push_to_all을 지정해야 합니다"
 
 msgid "Configuration acknowledgment processed"
 msgstr "구성 확인 응답을 처리했습니다"
 
-msgid "Host not found"
-msgstr "호스트를 찾을 수 없습니다"
+#, python-format
+msgid "Failed to store updates: %s"
+msgstr "업데이트 저장 실패: %s"
 
-msgid "Agent is not connected"
-msgstr "에이전트가 연결되지 않았습니다"
+#, python-format
+msgid "Failed to get update summary: %s"
+msgstr "업데이트 요약 가져오기 실패: %s"
 
-msgid "Software inventory update requested"
-msgstr "소프트웨어 인벤토리 업데이트가 요청되었습니다"
+#, python-format
+msgid "Failed to get host updates: %s"
+msgstr "호스트 업데이트 가져오기 실패: %s"
 
+#, python-format
+msgid "Failed to get updates: %s"
+msgstr "업데이트 가져오기 실패: %s"
+
+#, fuzzy
+msgid "Host not found or inactive"
+msgstr "호스트를 찾을 수 없거나 비활성 상태입니다"
+
+msgid "No matching updates found for specified packages"
+msgstr "지정된 패키지에 대한 일치하는 업데이트를 찾을 수 없습니다"
+
+msgid "Update execution started"
+msgstr "업데이트 실행이 시작되었습니다"
+
+#, python-format
+msgid "Failed to send command: %s"
+msgstr "명령 전송 실패: %s"
+
+#, python-format
+msgid "Failed to send update command: %s"
+msgstr "업데이트 명령 전송 실패: %s"
+
+#, python-format
+msgid "Failed to execute updates: %s"
+msgstr "업데이트 실행 실패: %s"
+
+#, python-format
+msgid "Failed to get execution log: %s"
+msgstr "실행 로그 가져오기 실패: %s"
+
+#, python-format
+msgid "Failed to get server fingerprint: %s"
+msgstr "서버 지문 가져오기 실패: %s"
+
+#, python-format
+msgid "Failed to get CA certificate: %s"
+msgstr "CA 인증서 가져오기 실패: %s"
+
+msgid "Rate limit exceeded"
+msgstr "속도 제한 초과"
+
+#, fuzzy
+msgid "Host not approved"
+msgstr "호스트가 승인되지 않았습니다"
+
+#, python-brace-format
+msgid "Host {hostname} registered successfully"
+msgstr "호스트 {hostname}가 성공적으로 등록되었습니다"
+
+msgid "Hostname is required for registration"
+msgstr "등록에 호스트명이 필요합니다"
+
+msgid "os_version_updated"
+msgstr "OS 버전이 업데이트되었습니다"
+
+msgid "hardware_updated"
+msgstr "하드웨어가 업데이트되었습니다"
+
+msgid "user_access_updated"
+msgstr "사용자 액세스가 업데이트되었습니다"
+
+msgid "software_inventory_updated"
+msgstr "소프트웨어 인벤토리가 업데이트되었습니다"
+
+#, python-format
+msgid "Authentication failed: %s"
+msgstr "인증 실패: %s"
+
+msgid "Authentication token required"
+msgstr "인증 토큰이 필요합니다"
+
+msgid "Message failed security validation"
+msgstr "메시지 보안 검증 실패"
+
+msgid "Message must be valid JSON"
+msgstr "메시지는 유효한 JSON이어야 합니다"

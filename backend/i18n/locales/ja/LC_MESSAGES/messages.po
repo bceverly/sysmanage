@@ -4,11 +4,156 @@
 #
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-03 14:35-0400\n"
 "Language: ja\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Invalid token signature"
+msgstr "無効なトークン署名"
+
+msgid "Token expired"
+msgstr "トークンの有効期限切れ"
+
+#, fuzzy
+msgid "Malformed token"
+msgstr "期限切れのトークンです。"
+
+msgid "Encrypted data expired"
+msgstr "暗号化データの有効期限切れ"
+
+msgid "Invalid signature"
+msgstr "無効な署名"
+
+#, python-format
+msgid "Decryption failed: %s"
+msgstr "復号化に失敗しました: %s"
+
+msgid "Invalid authentication scheme."
+msgstr "無効な認証スキームです。"
+
+msgid "Expired token."
+msgstr "期限切れのトークンです。"
+
+msgid "Invalid authorization code."
+msgstr "無効な認証コードです。"
+
+msgid "Could not validate credentials"
+msgstr "認証情報を検証できませんでした"
+
+msgid "Host not found"
+msgstr "ホストが見つかりません"
+
+#, fuzzy
+msgid "Host is not approved"
+msgstr "ホストは承認されていません"
+
+msgid "Account is locked due to too many failed login attempts"
+msgstr "ログイン試行の失敗が多すぎるためアカウントがロックされています"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "ログイン試行の失敗が多すぎるためアカウントがロックされました"
+
+msgid "Invalid username or password"
+msgstr "無効なユーザー名またはパスワード"
+
+#, fuzzy
+msgid "User not found"
+msgstr "ユーザーが見つかりません"
+
+msgid "User already exists"
+msgstr "ユーザーは既に存在しています"
+
+#, python-format
+msgid "Agent with hostname %s not found"
+msgstr "ホスト名 %s のエージェントが見つかりません"
+
+#, python-format
+msgid "Agent %s is not connected"
+msgstr "エージェント %s は接続されていません"
+
+#, python-format
+msgid "Failed to send command to %s"
+msgstr "%s へのコマンド送信に失敗しました"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {hostname}"
+msgstr "コマンド {command_type} を {hostname} に送信しました"
+
+#, python-format
+msgid "Failed to send shell command to %s"
+msgstr "%s へのシェルコマンド送信に失敗しました"
+
+#, python-brace-format
+msgid "Shell command sent to {hostname}"
+msgstr "シェルコマンドを {hostname} に送信しました"
+
+#, python-format
+msgid "Failed to send install command to %s"
+msgstr "%s へのインストールコマンド送信に失敗しました"
+
+#, python-brace-format
+msgid "Package installation command sent to {hostname}"
+msgstr "パッケージインストールコマンドを {hostname} に送信しました"
+
+#, python-format
+msgid "Failed to send restart command to %s"
+msgstr "%s への再起動コマンド送信に失敗しました"
+
+#, python-brace-format
+msgid "Service restart command sent to {hostname}"
+msgstr "サービス再起動コマンドを {hostname} に送信しました"
+
+#, python-format
+msgid "Failed to send update command to %s"
+msgstr "%s への更新コマンド送信に失敗しました"
+
+#, python-brace-format
+msgid "System update command sent to {hostname}"
+msgstr "システム更新コマンドを {hostname} に送信しました"
+
+#, python-format
+msgid "Failed to send reboot command to %s"
+msgstr "%s への再起動コマンド送信に失敗しました"
+
+#, python-brace-format
+msgid "Reboot command sent to {hostname}"
+msgstr "再起動コマンドを {hostname} に送信しました"
+
+#, python-brace-format
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr ""
+"コマンド {command_type} を {sent_count} エージェントにブロードキャストしまし"
+"た"
+
+#, python-brace-format
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "シェルコマンドを {sent_count} エージェントにブロードキャストしました"
+
+#, python-format
+msgid "No agents found for platform %s"
+msgstr "プラットフォーム %s のエージェントが見つかりません"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr ""
+"コマンド {command_type} を {sent_count} {platform} エージェントに送信しました"
+
+msgid "Host already exists"
+msgstr "ホストは既に存在しています"
+
+msgid "Host is not in pending status"
+msgstr "ホストは保留状態ではありません"
+
+msgid "Agent is not connected"
+msgstr "エージェントが接続されていません"
 
 msgid "OS version update requested"
 msgstr "OSバージョン更新が要求されました"
+
+#, fuzzy
+msgid "Updates check requested"
+msgstr "更新チェックが要求されました"
 
 msgid "Hardware information updated successfully"
 msgstr "ハードウェア情報が正常に更新されました"
@@ -19,35 +164,8 @@ msgstr "ハードウェア更新が要求されました"
 msgid "User access update requested"
 msgstr "ユーザーアクセス更新が要求されました"
 
-msgid "Host {hostname} registered successfully"
-msgstr "ホスト {hostname} が正常に登録されました"
-
-msgid "Command {command_type} sent to {hostname}"
-msgstr "コマンド {command_type} を {hostname} に送信しました"
-
-msgid "Shell command sent to {hostname}"
-msgstr "シェルコマンドを {hostname} に送信しました"
-
-msgid "Package installation command sent to {hostname}"
-msgstr "パッケージインストールコマンドを {hostname} に送信しました"
-
-msgid "Service restart command sent to {hostname}"
-msgstr "サービス再起動コマンドを {hostname} に送信しました"
-
-msgid "System update command sent to {hostname}"
-msgstr "システム更新コマンドを {hostname} に送信しました"
-
-msgid "Reboot command sent to {hostname}"
-msgstr "再起動コマンドを {hostname} に送信しました"
-
-msgid "Command {command_type} broadcast to {sent_count} agents"
-msgstr "コマンド {command_type} を {sent_count} エージェントにブロードキャストしました"
-
-msgid "Shell command broadcast to {sent_count} agents"
-msgstr "シェルコマンドを {sent_count} エージェントにブロードキャストしました"
-
-msgid "Command {command_type} sent to {sent_count} {platform} agents"
-msgstr "コマンド {command_type} を {sent_count} {platform} エージェントに送信しました"
+msgid "Software inventory update requested"
+msgstr "ソフトウェアインベントリの更新が要求されました"
 
 msgid "Configuration pushed to all agents"
 msgstr "設定をすべてのエージェントにプッシュしました"
@@ -55,18 +173,105 @@ msgstr "設定をすべてのエージェントにプッシュしました"
 msgid "Configuration pushed successfully"
 msgstr "設定が正常にプッシュされました"
 
+#, fuzzy
+msgid "Agent not found or unreachable"
+msgstr "エージェントが見つからないか到達不能です"
+
 msgid "Configuration pushed to platform agents"
 msgstr "設定をプラットフォームエージェントにプッシュしました"
+
+msgid "Must specify target_hostname, target_platform, or push_to_all"
+msgstr ""
+"target_hostname、target_platform、またはpush_to_allを指定する必要があります"
 
 msgid "Configuration acknowledgment processed"
 msgstr "設定の確認応答を処理しました"
 
-msgid "Host not found"
-msgstr "ホストが見つかりません"
+#, python-format
+msgid "Failed to store updates: %s"
+msgstr "更新の保存に失敗しました: %s"
 
-msgid "Agent is not connected"
-msgstr "エージェントが接続されていません"
+#, python-format
+msgid "Failed to get update summary: %s"
+msgstr "更新サマリーの取得に失敗しました: %s"
 
-msgid "Software inventory update requested"
-msgstr "ソフトウェアインベントリの更新が要求されました"
+#, python-format
+msgid "Failed to get host updates: %s"
+msgstr "ホスト更新の取得に失敗しました: %s"
 
+#, python-format
+msgid "Failed to get updates: %s"
+msgstr "更新の取得に失敗しました: %s"
+
+#, fuzzy
+msgid "Host not found or inactive"
+msgstr "ホストが見つからないか非アクティブです"
+
+msgid "No matching updates found for specified packages"
+msgstr "指定されたパッケージに一致する更新が見つかりません"
+
+msgid "Update execution started"
+msgstr "更新の実行が開始されました"
+
+#, python-format
+msgid "Failed to send command: %s"
+msgstr "コマンドの送信に失敗しました: %s"
+
+#, python-format
+msgid "Failed to send update command: %s"
+msgstr "更新コマンドの送信に失敗しました: %s"
+
+#, python-format
+msgid "Failed to execute updates: %s"
+msgstr "更新の実行に失敗しました: %s"
+
+#, python-format
+msgid "Failed to get execution log: %s"
+msgstr "実行ログの取得に失敗しました: %s"
+
+#, python-format
+msgid "Failed to get server fingerprint: %s"
+msgstr "サーバーフィンガープリントの取得に失敗しました: %s"
+
+#, python-format
+msgid "Failed to get CA certificate: %s"
+msgstr "CA証明書の取得に失敗しました: %s"
+
+msgid "Rate limit exceeded"
+msgstr "レート制限を超過しました"
+
+#, fuzzy
+msgid "Host not approved"
+msgstr "ホストは承認されていません"
+
+#, python-brace-format
+msgid "Host {hostname} registered successfully"
+msgstr "ホスト {hostname} が正常に登録されました"
+
+msgid "Hostname is required for registration"
+msgstr "登録にはホスト名が必要です"
+
+msgid "os_version_updated"
+msgstr "OSバージョンが更新されました"
+
+msgid "hardware_updated"
+msgstr "ハードウェアが更新されました"
+
+msgid "user_access_updated"
+msgstr "ユーザーアクセスが更新されました"
+
+msgid "software_inventory_updated"
+msgstr "ソフトウェアインベントリが更新されました"
+
+#, python-format
+msgid "Authentication failed: %s"
+msgstr "認証に失敗しました: %s"
+
+msgid "Authentication token required"
+msgstr "認証トークンが必要です"
+
+msgid "Message failed security validation"
+msgstr "メッセージのセキュリティ検証に失敗しました"
+
+msgid "Message must be valid JSON"
+msgstr "メッセージは有効なJSONである必要があります"

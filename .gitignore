@@ -54,6 +54,7 @@ cover/
 # Translations
 *.mo
 *.pot
+*.po~
 
 # Django stuff:
 *.log
@@ -171,3 +172,6 @@ privkey.pem
 
 # Git commit fix script
 fix-commits.sh
+
+# Claude
+CLAUDE.md

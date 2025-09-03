@@ -118,7 +118,7 @@ async def report_updates(
 
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to store updates: {str(e)}"
+            status_code=500, detail=_("Failed to store updates: %s") % str(e)
         ) from e
 
 
@@ -178,7 +178,7 @@ async def get_update_summary(dependencies=Depends(JWTBearer())):
 
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to get update summary: {str(e)}"
+            status_code=500, detail=_("Failed to get update summary: %s") % str(e)
         ) from e
 
 
@@ -258,7 +258,7 @@ async def get_host_updates(
 
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to get host updates: {str(e)}"
+            status_code=500, detail=_("Failed to get host updates: %s") % str(e)
         ) from e
 
 
@@ -338,7 +338,7 @@ async def get_all_updates(
 
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to get updates: {str(e)}"
+            status_code=500, detail=_("Failed to get updates: %s") % str(e)
         ) from e
 
 
@@ -455,7 +455,7 @@ async def execute_updates(
                         update.status = "available"
                     for log in execution_logs:
                         log.status = "failed"
-                        log.error_message = f"Failed to send command: {str(e)}"
+                        log.error_message = _("Failed to send command: %s") % str(e)
                     session.commit()
 
                     results.append(
@@ -463,7 +463,7 @@ async def execute_updates(
                             "host_id": host_id,
                             "hostname": host.fqdn,
                             "success": False,
-                            "error": f"Failed to send update command: {str(e)}",
+                            "error": _("Failed to send update command: %s") % str(e),
                         }
                     )
 
@@ -471,7 +471,7 @@ async def execute_updates(
 
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to execute updates: {str(e)}"
+            status_code=500, detail=_("Failed to execute updates: %s") % str(e)
         ) from e
 
 
@@ -526,5 +526,5 @@ async def get_execution_log(
 
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to get execution log: {str(e)}"
+            status_code=500, detail=_("Failed to get execution log: %s") % str(e)
         ) from e

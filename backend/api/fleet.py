@@ -77,7 +77,7 @@ async def get_agent(hostname: str, _dependencies=Depends(JWTBearer())):
     agent = connection_manager.get_agent_by_hostname(hostname)
     if not agent:
         raise HTTPException(
-            status_code=404, detail=f"Agent with hostname {hostname} not found"
+            status_code=404, detail=_("Agent with hostname %s not found") % hostname
         )
     return agent
 
@@ -93,7 +93,7 @@ async def send_command_to_agent(
     # Check if agent is connected
     if not connection_manager.get_agent_by_hostname(hostname):
         raise HTTPException(
-            status_code=404, detail=f"Agent {hostname} is not connected"
+            status_code=404, detail=_("Agent %s is not connected") % hostname
         )
 
     # Create and send command
@@ -104,7 +104,7 @@ async def send_command_to_agent(
 
     if not success:
         raise HTTPException(
-            status_code=500, detail=f"Failed to send command to {hostname}"
+            status_code=500, detail=_("Failed to send command to %s") % hostname
         )
 
     return {
@@ -123,7 +123,7 @@ async def execute_shell_command(
     """Execute a shell command on a specific agent."""
     if not connection_manager.get_agent_by_hostname(hostname):
         raise HTTPException(
-            status_code=404, detail=f"Agent {hostname} is not connected"
+            status_code=404, detail=_("Agent %s is not connected") % hostname
         )
 
     parameters = {
@@ -138,7 +138,7 @@ async def execute_shell_command(
 
     if not success:
         raise HTTPException(
-            status_code=500, detail=f"Failed to send shell command to {hostname}"
+            status_code=500, detail=_("Failed to send shell command to %s") % hostname
         )
 
     return {
@@ -156,7 +156,7 @@ async def install_package(
     """Install a package on a specific agent."""
     if not connection_manager.get_agent_by_hostname(hostname):
         raise HTTPException(
-            status_code=404, detail=f"Agent {hostname} is not connected"
+            status_code=404, detail=_("Agent %s is not connected") % hostname
         )
 
     parameters = {
@@ -171,7 +171,7 @@ async def install_package(
 
     if not success:
         raise HTTPException(
-            status_code=500, detail=f"Failed to send install command to {hostname}"
+            status_code=500, detail=_("Failed to send install command to %s") % hostname
         )
 
     return {
@@ -191,7 +191,7 @@ async def restart_service(
     """Restart a service on a specific agent."""
     if not connection_manager.get_agent_by_hostname(hostname):
         raise HTTPException(
-            status_code=404, detail=f"Agent {hostname} is not connected"
+            status_code=404, detail=_("Agent %s is not connected") % hostname
         )
 
     parameters = {"service_name": service_request.service_name}
@@ -203,7 +203,7 @@ async def restart_service(
 
     if not success:
         raise HTTPException(
-            status_code=500, detail=f"Failed to send restart command to {hostname}"
+            status_code=500, detail=_("Failed to send restart command to %s") % hostname
         )
 
     return {
@@ -221,7 +221,7 @@ async def update_system(hostname: str, dependencies=Depends(JWTBearer())):
     """Trigger system updates on a specific agent."""
     if not connection_manager.get_agent_by_hostname(hostname):
         raise HTTPException(
-            status_code=404, detail=f"Agent {hostname} is not connected"
+            status_code=404, detail=_("Agent %s is not connected") % hostname
         )
 
     cmd_message = CommandMessage(
@@ -231,7 +231,7 @@ async def update_system(hostname: str, dependencies=Depends(JWTBearer())):
 
     if not success:
         raise HTTPException(
-            status_code=500, detail=f"Failed to send update command to {hostname}"
+            status_code=500, detail=_("Failed to send update command to %s") % hostname
         )
 
     return {
@@ -248,7 +248,7 @@ async def reboot_system(hostname: str, dependencies=Depends(JWTBearer())):
     """Reboot a specific agent system."""
     if not connection_manager.get_agent_by_hostname(hostname):
         raise HTTPException(
-            status_code=404, detail=f"Agent {hostname} is not connected"
+            status_code=404, detail=_("Agent %s is not connected") % hostname
         )
 
     cmd_message = CommandMessage(
@@ -258,7 +258,7 @@ async def reboot_system(hostname: str, dependencies=Depends(JWTBearer())):
 
     if not success:
         raise HTTPException(
-            status_code=500, detail=f"Failed to send reboot command to {hostname}"
+            status_code=500, detail=_("Failed to send reboot command to %s") % hostname
         )
 
     return {
@@ -329,7 +329,7 @@ async def send_command_to_platform(
 
     if sent_count == 0:
         raise HTTPException(
-            status_code=404, detail=f"No agents found for platform {platform}"
+            status_code=404, detail=_("No agents found for platform %s") % platform
         )
 
     return {

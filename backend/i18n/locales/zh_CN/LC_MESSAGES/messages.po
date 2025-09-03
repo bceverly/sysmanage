@@ -4,11 +4,153 @@
 #
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-03 14:35-0400\n"
 "Language: zh_CN\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Invalid token signature"
+msgstr "无效的令牌签名"
+
+msgid "Token expired"
+msgstr "令牌过期"
+
+#, fuzzy
+msgid "Malformed token"
+msgstr "过期的令牌。"
+
+msgid "Encrypted data expired"
+msgstr "加密数据过期"
+
+msgid "Invalid signature"
+msgstr "无效签名"
+
+#, python-format
+msgid "Decryption failed: %s"
+msgstr "解密失败：%s"
+
+msgid "Invalid authentication scheme."
+msgstr "无效的身份验证方案。"
+
+msgid "Expired token."
+msgstr "过期的令牌。"
+
+msgid "Invalid authorization code."
+msgstr "无效的授权码。"
+
+msgid "Could not validate credentials"
+msgstr "无法验证凭据"
+
+msgid "Host not found"
+msgstr "未找到主机"
+
+#, fuzzy
+msgid "Host is not approved"
+msgstr "主机未批准"
+
+msgid "Account is locked due to too many failed login attempts"
+msgstr "由于登录尝试失败次数过多，账户已被锁定"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "由于登录尝试失败次数过多，账户被锁定"
+
+msgid "Invalid username or password"
+msgstr "无效的用户名或密码"
+
+#, fuzzy
+msgid "User not found"
+msgstr "未找到用户"
+
+msgid "User already exists"
+msgstr "用户已存在"
+
+#, python-format
+msgid "Agent with hostname %s not found"
+msgstr "未找到主机名为 %s 的代理"
+
+#, python-format
+msgid "Agent %s is not connected"
+msgstr "代理 %s 未连接"
+
+#, python-format
+msgid "Failed to send command to %s"
+msgstr "向 %s 发送命令失败"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {hostname}"
+msgstr "命令 {command_type} 已发送到 {hostname}"
+
+#, python-format
+msgid "Failed to send shell command to %s"
+msgstr "向 %s 发送 shell 命令失败"
+
+#, python-brace-format
+msgid "Shell command sent to {hostname}"
+msgstr "Shell 命令已发送到 {hostname}"
+
+#, python-format
+msgid "Failed to send install command to %s"
+msgstr "向 %s 发送安装命令失败"
+
+#, python-brace-format
+msgid "Package installation command sent to {hostname}"
+msgstr "软件包安装命令已发送到 {hostname}"
+
+#, python-format
+msgid "Failed to send restart command to %s"
+msgstr "向 %s 发送重启命令失败"
+
+#, python-brace-format
+msgid "Service restart command sent to {hostname}"
+msgstr "服务重启命令已发送到 {hostname}"
+
+#, python-format
+msgid "Failed to send update command to %s"
+msgstr "向 %s 发送更新命令失败"
+
+#, python-brace-format
+msgid "System update command sent to {hostname}"
+msgstr "系统更新命令已发送到 {hostname}"
+
+#, python-format
+msgid "Failed to send reboot command to %s"
+msgstr "向 %s 发送重启命令失败"
+
+#, python-brace-format
+msgid "Reboot command sent to {hostname}"
+msgstr "重启命令已发送到 {hostname}"
+
+#, python-brace-format
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "命令 {command_type} 已广播到 {sent_count} 个代理"
+
+#, python-brace-format
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "Shell 命令已广播到 {sent_count} 个代理"
+
+#, python-format
+msgid "No agents found for platform %s"
+msgstr "未找到平台 %s 的代理"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "命令 {command_type} 已发送到 {sent_count} 个 {platform} 代理"
+
+msgid "Host already exists"
+msgstr "主机已存在"
+
+msgid "Host is not in pending status"
+msgstr "主机不处于待定状态"
+
+msgid "Agent is not connected"
+msgstr "代理未连接"
 
 msgid "OS version update requested"
 msgstr "已请求操作系统版本更新"
+
+#, fuzzy
+msgid "Updates check requested"
+msgstr "已请求更新检查"
 
 msgid "Hardware information updated successfully"
 msgstr "硬件信息更新成功"
@@ -19,35 +161,8 @@ msgstr "已请求硬件更新"
 msgid "User access update requested"
 msgstr "已请求用户访问更新"
 
-msgid "Host {hostname} registered successfully"
-msgstr "主机 {hostname} 注册成功"
-
-msgid "Command {command_type} sent to {hostname}"
-msgstr "命令 {command_type} 已发送到 {hostname}"
-
-msgid "Shell command sent to {hostname}"
-msgstr "Shell 命令已发送到 {hostname}"
-
-msgid "Package installation command sent to {hostname}"
-msgstr "软件包安装命令已发送到 {hostname}"
-
-msgid "Service restart command sent to {hostname}"
-msgstr "服务重启命令已发送到 {hostname}"
-
-msgid "System update command sent to {hostname}"
-msgstr "系统更新命令已发送到 {hostname}"
-
-msgid "Reboot command sent to {hostname}"
-msgstr "重启命令已发送到 {hostname}"
-
-msgid "Command {command_type} broadcast to {sent_count} agents"
-msgstr "命令 {command_type} 已广播到 {sent_count} 个代理"
-
-msgid "Shell command broadcast to {sent_count} agents"
-msgstr "Shell 命令已广播到 {sent_count} 个代理"
-
-msgid "Command {command_type} sent to {sent_count} {platform} agents"
-msgstr "命令 {command_type} 已发送到 {sent_count} 个 {platform} 代理"
+msgid "Software inventory update requested"
+msgstr "已请求软件清单更新"
 
 msgid "Configuration pushed to all agents"
 msgstr "配置已推送到所有代理"
@@ -55,18 +170,104 @@ msgstr "配置已推送到所有代理"
 msgid "Configuration pushed successfully"
 msgstr "配置推送成功"
 
+#, fuzzy
+msgid "Agent not found or unreachable"
+msgstr "未找到代理或无法访问"
+
 msgid "Configuration pushed to platform agents"
 msgstr "配置已推送到平台代理"
+
+msgid "Must specify target_hostname, target_platform, or push_to_all"
+msgstr "必须指定 target_hostname、target_platform 或 push_to_all"
 
 msgid "Configuration acknowledgment processed"
 msgstr "配置确认已处理"
 
-msgid "Host not found"
-msgstr "未找到主机"
+#, python-format
+msgid "Failed to store updates: %s"
+msgstr "存储更新失败：%s"
 
-msgid "Agent is not connected"
-msgstr "代理未连接"
+#, python-format
+msgid "Failed to get update summary: %s"
+msgstr "获取更新摘要失败：%s"
 
-msgid "Software inventory update requested"
-msgstr "已请求软件清单更新"
+#, python-format
+msgid "Failed to get host updates: %s"
+msgstr "获取主机更新失败：%s"
 
+#, python-format
+msgid "Failed to get updates: %s"
+msgstr "获取更新失败：%s"
+
+#, fuzzy
+msgid "Host not found or inactive"
+msgstr "未找到主机或主机处于非活动状态"
+
+msgid "No matching updates found for specified packages"
+msgstr "未找到指定软件包的匹配更新"
+
+msgid "Update execution started"
+msgstr "更新执行已开始"
+
+#, python-format
+msgid "Failed to send command: %s"
+msgstr "发送命令失败：%s"
+
+#, python-format
+msgid "Failed to send update command: %s"
+msgstr "发送更新命令失败：%s"
+
+#, python-format
+msgid "Failed to execute updates: %s"
+msgstr "执行更新失败：%s"
+
+#, python-format
+msgid "Failed to get execution log: %s"
+msgstr "获取执行日志失败：%s"
+
+#, python-format
+msgid "Failed to get server fingerprint: %s"
+msgstr "获取服务器指纹失败：%s"
+
+#, python-format
+msgid "Failed to get CA certificate: %s"
+msgstr "获取 CA 证书失败：%s"
+
+msgid "Rate limit exceeded"
+msgstr "超出速率限制"
+
+#, fuzzy
+msgid "Host not approved"
+msgstr "主机未批准"
+
+#, python-brace-format
+msgid "Host {hostname} registered successfully"
+msgstr "主机 {hostname} 注册成功"
+
+msgid "Hostname is required for registration"
+msgstr "注册需要主机名"
+
+msgid "os_version_updated"
+msgstr "操作系统版本已更新"
+
+msgid "hardware_updated"
+msgstr "硬件已更新"
+
+msgid "user_access_updated"
+msgstr "用户访问已更新"
+
+msgid "software_inventory_updated"
+msgstr "软件清单已更新"
+
+#, python-format
+msgid "Authentication failed: %s"
+msgstr "认证失败：%s"
+
+msgid "Authentication token required"
+msgstr "需要认证令牌"
+
+msgid "Message failed security validation"
+msgstr "消息安全验证失败"
+
+msgid "Message must be valid JSON"
+msgstr "消息必须是有效的JSON"

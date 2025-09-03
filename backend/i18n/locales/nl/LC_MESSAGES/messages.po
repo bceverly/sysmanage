@@ -4,11 +4,153 @@
 #
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-03 14:35-0400\n"
 "Language: nl\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Invalid token signature"
+msgstr "Ongeldige token-handtekening"
+
+msgid "Token expired"
+msgstr "Token verlopen"
+
+#, fuzzy
+msgid "Malformed token"
+msgstr "Verlopen token."
+
+msgid "Encrypted data expired"
+msgstr "Versleutelde gegevens verlopen"
+
+msgid "Invalid signature"
+msgstr "Ongeldige handtekening"
+
+#, python-format
+msgid "Decryption failed: %s"
+msgstr "Ontsleuteling mislukt: %s"
+
+msgid "Invalid authentication scheme."
+msgstr "Ongeldig authenticatieschema."
+
+msgid "Expired token."
+msgstr "Verlopen token."
+
+msgid "Invalid authorization code."
+msgstr "Ongeldige autorisatiecode."
+
+msgid "Could not validate credentials"
+msgstr "Kon inloggegevens niet valideren"
+
+msgid "Host not found"
+msgstr "Host niet gevonden"
+
+#, fuzzy
+msgid "Host is not approved"
+msgstr "Host is niet goedgekeurd"
+
+msgid "Account is locked due to too many failed login attempts"
+msgstr "Account is vergrendeld vanwege te veel mislukte inlogpogingen"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "Account vergrendeld wegens te veel mislukte inlogpogingen"
+
+msgid "Invalid username or password"
+msgstr "Ongeldige gebruikersnaam of wachtwoord"
+
+#, fuzzy
+msgid "User not found"
+msgstr "Gebruiker niet gevonden"
+
+msgid "User already exists"
+msgstr "Gebruiker bestaat al"
+
+#, python-format
+msgid "Agent with hostname %s not found"
+msgstr "Agent met hostnaam %s niet gevonden"
+
+#, python-format
+msgid "Agent %s is not connected"
+msgstr "Agent %s is niet verbonden"
+
+#, python-format
+msgid "Failed to send command to %s"
+msgstr "Verzenden van commando naar %s mislukt"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {hostname}"
+msgstr "Commando {command_type} verzonden naar {hostname}"
+
+#, python-format
+msgid "Failed to send shell command to %s"
+msgstr "Verzenden van shell-commando naar %s mislukt"
+
+#, python-brace-format
+msgid "Shell command sent to {hostname}"
+msgstr "Shell commando verzonden naar {hostname}"
+
+#, python-format
+msgid "Failed to send install command to %s"
+msgstr "Verzenden van installatie-commando naar %s mislukt"
+
+#, python-brace-format
+msgid "Package installation command sent to {hostname}"
+msgstr "Pakketinstallatie commando verzonden naar {hostname}"
+
+#, python-format
+msgid "Failed to send restart command to %s"
+msgstr "Verzenden van herstart-commando naar %s mislukt"
+
+#, python-brace-format
+msgid "Service restart command sent to {hostname}"
+msgstr "Service herstart commando verzonden naar {hostname}"
+
+#, python-format
+msgid "Failed to send update command to %s"
+msgstr "Verzenden van update-commando naar %s mislukt"
+
+#, python-brace-format
+msgid "System update command sent to {hostname}"
+msgstr "Systeem update commando verzonden naar {hostname}"
+
+#, python-format
+msgid "Failed to send reboot command to %s"
+msgstr "Verzenden van herstart-commando naar %s mislukt"
+
+#, python-brace-format
+msgid "Reboot command sent to {hostname}"
+msgstr "Herstart commando verzonden naar {hostname}"
+
+#, python-brace-format
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "Commando {command_type} uitgezonden naar {sent_count} agents"
+
+#, python-brace-format
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "Shell commando uitgezonden naar {sent_count} agents"
+
+#, python-format
+msgid "No agents found for platform %s"
+msgstr "Geen agents gevonden voor platform %s"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "Commando {command_type} verzonden naar {sent_count} {platform} agents"
+
+msgid "Host already exists"
+msgstr "Host bestaat al"
+
+msgid "Host is not in pending status"
+msgstr "Host heeft geen wachtende status"
+
+msgid "Agent is not connected"
+msgstr "Agent is niet verbonden"
 
 msgid "OS version update requested"
 msgstr "OS versie-update aangevraagd"
+
+#, fuzzy
+msgid "Updates check requested"
+msgstr "Update-controle aangevraagd"
 
 msgid "Hardware information updated successfully"
 msgstr "Hardware informatie succesvol bijgewerkt"
@@ -19,35 +161,8 @@ msgstr "Hardware update aangevraagd"
 msgid "User access update requested"
 msgstr "Gebruikerstoegang update aangevraagd"
 
-msgid "Host {hostname} registered successfully"
-msgstr "Host {hostname} succesvol geregistreerd"
-
-msgid "Command {command_type} sent to {hostname}"
-msgstr "Commando {command_type} verzonden naar {hostname}"
-
-msgid "Shell command sent to {hostname}"
-msgstr "Shell commando verzonden naar {hostname}"
-
-msgid "Package installation command sent to {hostname}"
-msgstr "Pakketinstallatie commando verzonden naar {hostname}"
-
-msgid "Service restart command sent to {hostname}"
-msgstr "Service herstart commando verzonden naar {hostname}"
-
-msgid "System update command sent to {hostname}"
-msgstr "Systeem update commando verzonden naar {hostname}"
-
-msgid "Reboot command sent to {hostname}"
-msgstr "Herstart commando verzonden naar {hostname}"
-
-msgid "Command {command_type} broadcast to {sent_count} agents"
-msgstr "Commando {command_type} uitgezonden naar {sent_count} agents"
-
-msgid "Shell command broadcast to {sent_count} agents"
-msgstr "Shell commando uitgezonden naar {sent_count} agents"
-
-msgid "Command {command_type} sent to {sent_count} {platform} agents"
-msgstr "Commando {command_type} verzonden naar {sent_count} {platform} agents"
+msgid "Software inventory update requested"
+msgstr "Software-inventaris update aangevraagd"
 
 msgid "Configuration pushed to all agents"
 msgstr "Configuratie naar alle agents gepusht"
@@ -55,18 +170,104 @@ msgstr "Configuratie naar alle agents gepusht"
 msgid "Configuration pushed successfully"
 msgstr "Configuratie succesvol gepusht"
 
+#, fuzzy
+msgid "Agent not found or unreachable"
+msgstr "Agent niet gevonden of onbereikbaar"
+
 msgid "Configuration pushed to platform agents"
 msgstr "Configuratie naar platform agents gepusht"
+
+msgid "Must specify target_hostname, target_platform, or push_to_all"
+msgstr "Moet target_hostname, target_platform, of push_to_all specificeren"
 
 msgid "Configuration acknowledgment processed"
 msgstr "Configuratie bevestiging verwerkt"
 
-msgid "Host not found"
-msgstr "Host niet gevonden"
+#, python-format
+msgid "Failed to store updates: %s"
+msgstr "Opslaan van updates mislukt: %s"
 
-msgid "Agent is not connected"
-msgstr "Agent is niet verbonden"
+#, python-format
+msgid "Failed to get update summary: %s"
+msgstr "Ophalen van update-samenvatting mislukt: %s"
 
-msgid "Software inventory update requested"
-msgstr "Software-inventaris update aangevraagd"
+#, python-format
+msgid "Failed to get host updates: %s"
+msgstr "Ophalen van host-updates mislukt: %s"
 
+#, python-format
+msgid "Failed to get updates: %s"
+msgstr "Ophalen van updates mislukt: %s"
+
+#, fuzzy
+msgid "Host not found or inactive"
+msgstr "Host niet gevonden of inactief"
+
+msgid "No matching updates found for specified packages"
+msgstr "Geen overeenkomende updates gevonden voor gespecificeerde pakketten"
+
+msgid "Update execution started"
+msgstr "Update-uitvoering gestart"
+
+#, python-format
+msgid "Failed to send command: %s"
+msgstr "Verzenden van commando mislukt: %s"
+
+#, python-format
+msgid "Failed to send update command: %s"
+msgstr "Verzenden van update-commando mislukt: %s"
+
+#, python-format
+msgid "Failed to execute updates: %s"
+msgstr "Uitvoeren van updates mislukt: %s"
+
+#, python-format
+msgid "Failed to get execution log: %s"
+msgstr "Ophalen van uitvoeringslog mislukt: %s"
+
+#, python-format
+msgid "Failed to get server fingerprint: %s"
+msgstr "Ophalen van server-vingerafdruk mislukt: %s"
+
+#, python-format
+msgid "Failed to get CA certificate: %s"
+msgstr "Ophalen van CA-certificaat mislukt: %s"
+
+msgid "Rate limit exceeded"
+msgstr "Snelheidslimiet overschreden"
+
+#, fuzzy
+msgid "Host not approved"
+msgstr "Host is niet goedgekeurd"
+
+#, python-brace-format
+msgid "Host {hostname} registered successfully"
+msgstr "Host {hostname} succesvol geregistreerd"
+
+msgid "Hostname is required for registration"
+msgstr "Hostnaam is vereist voor registratie"
+
+msgid "os_version_updated"
+msgstr "OS versie bijgewerkt"
+
+msgid "hardware_updated"
+msgstr "Hardware bijgewerkt"
+
+msgid "user_access_updated"
+msgstr "Gebruikerstoegang bijgewerkt"
+
+msgid "software_inventory_updated"
+msgstr "Software-inventaris bijgewerkt"
+
+#, python-format
+msgid "Authentication failed: %s"
+msgstr "Authenticatie mislukt: %s"
+
+msgid "Authentication token required"
+msgstr "Authenticatie token vereist"
+
+msgid "Message failed security validation"
+msgstr "Bericht heeft beveiligingsvalidatie gefaald"
+
+msgid "Message must be valid JSON"
+msgstr "Bericht moet geldige JSON zijn"

@@ -4,11 +4,153 @@
 #
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-03 14:35-0400\n"
 "Language: hi\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Invalid token signature"
+msgstr "अवैध टोकन हस्ताक्षर"
+
+msgid "Token expired"
+msgstr "टोकन का समय समाप्त"
+
+#, fuzzy
+msgid "Malformed token"
+msgstr "समाप्त हो चुका टोकन।"
+
+msgid "Encrypted data expired"
+msgstr "एन्क्रिप्टेड डेटा का समय समाप्त"
+
+msgid "Invalid signature"
+msgstr "अवैध हस्ताक्षर"
+
+#, python-format
+msgid "Decryption failed: %s"
+msgstr "डिक्रिप्शन असफल: %s"
+
+msgid "Invalid authentication scheme."
+msgstr "अवैध प्रमाणीकरण योजना।"
+
+msgid "Expired token."
+msgstr "समाप्त हो चुका टोकन।"
+
+msgid "Invalid authorization code."
+msgstr "अवैध प्राधिकरण कोड।"
+
+msgid "Could not validate credentials"
+msgstr "प्रमाणीकरण की पुष्टि नहीं हो सकी"
+
+msgid "Host not found"
+msgstr "होस्ट नहीं मिला"
+
+#, fuzzy
+msgid "Host is not approved"
+msgstr "होस्ट अनुमोदित नहीं है"
+
+msgid "Account is locked due to too many failed login attempts"
+msgstr "बहुत सारे असफल लॉगिन प्रयासों के कारण खाता लॉक हो गया है"
+
+msgid "Account locked due to too many failed login attempts"
+msgstr "बहुत सारे असफल लॉगिन प्रयासों के कारण खाता लॉक"
+
+msgid "Invalid username or password"
+msgstr "अवैध उपयोगकर्ता नाम या पासवर्ड"
+
+#, fuzzy
+msgid "User not found"
+msgstr "उपयोगकर्ता नहीं मिला"
+
+msgid "User already exists"
+msgstr "उपयोगकर्ता पहले से मौजूद है"
+
+#, python-format
+msgid "Agent with hostname %s not found"
+msgstr "होस्टनाम %s वाला एजेंट नहीं मिला"
+
+#, python-format
+msgid "Agent %s is not connected"
+msgstr "एजेंट %s कनेक्ट नहीं है"
+
+#, python-format
+msgid "Failed to send command to %s"
+msgstr "%s को कमांड भेजने में असफल"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {hostname}"
+msgstr "कमांड {command_type} को {hostname} भेजा गया"
+
+#, python-format
+msgid "Failed to send shell command to %s"
+msgstr "%s को शेल कमांड भेजने में असफल"
+
+#, python-brace-format
+msgid "Shell command sent to {hostname}"
+msgstr "शेल कमांड {hostname} को भेजा गया"
+
+#, python-format
+msgid "Failed to send install command to %s"
+msgstr "%s को इंस्टॉल कमांड भेजने में असफल"
+
+#, python-brace-format
+msgid "Package installation command sent to {hostname}"
+msgstr "पैकेज इंस्टॉलेशन कमांड {hostname} को भेजा गया"
+
+#, python-format
+msgid "Failed to send restart command to %s"
+msgstr "%s को पुनः आरंभ कमांड भेजने में असफल"
+
+#, python-brace-format
+msgid "Service restart command sent to {hostname}"
+msgstr "सेवा पुनः आरंभ कमांड {hostname} को भेजा गया"
+
+#, python-format
+msgid "Failed to send update command to %s"
+msgstr "%s को अपडेट कमांड भेजने में असफल"
+
+#, python-brace-format
+msgid "System update command sent to {hostname}"
+msgstr "सिस्टम अपडेट कमांड {hostname} को भेजा गया"
+
+#, python-format
+msgid "Failed to send reboot command to %s"
+msgstr "%s को रीबूट कमांड भेजने में असफल"
+
+#, python-brace-format
+msgid "Reboot command sent to {hostname}"
+msgstr "रीबूट कमांड {hostname} को भेजा गया"
+
+#, python-brace-format
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr "कमांड {command_type} को {sent_count} एजेंटों में प्रसारित किया गया"
+
+#, python-brace-format
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr "शेल कमांड को {sent_count} एजेंटों में प्रसारित किया गया"
+
+#, python-format
+msgid "No agents found for platform %s"
+msgstr "प्लेटफॉर्म %s के लिए कोई एजेंट नहीं मिला"
+
+#, python-brace-format
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr "कमांड {command_type} को {sent_count} {platform} एजेंटों को भेजा गया"
+
+msgid "Host already exists"
+msgstr "होस्ट पहले से मौजूद है"
+
+msgid "Host is not in pending status"
+msgstr "होस्ट लंबित स्थिति में नहीं है"
+
+msgid "Agent is not connected"
+msgstr "एजेंट कनेक्ट नहीं है"
 
 msgid "OS version update requested"
 msgstr "ओएस संस्करण अपडेट का अनुरोध किया गया"
+
+#, fuzzy
+msgid "Updates check requested"
+msgstr "अपडेट जांच का अनुरोध"
 
 msgid "Hardware information updated successfully"
 msgstr "हार्डवेयर जानकारी सफलतापूर्वक अपडेट की गई"
@@ -19,35 +161,8 @@ msgstr "हार्डवेयर अपडेट का अनुरोध �
 msgid "User access update requested"
 msgstr "उपयोगकर्ता एक्सेस अपडेट का अनुरोध किया गया"
 
-msgid "Host {hostname} registered successfully"
-msgstr "होस्ट {hostname} सफलतापूर्वक पंजीकृत हुआ"
-
-msgid "Command {command_type} sent to {hostname}"
-msgstr "कमांड {command_type} को {hostname} भेजा गया"
-
-msgid "Shell command sent to {hostname}"
-msgstr "शेल कमांड {hostname} को भेजा गया"
-
-msgid "Package installation command sent to {hostname}"
-msgstr "पैकेज इंस्टॉलेशन कमांड {hostname} को भेजा गया"
-
-msgid "Service restart command sent to {hostname}"
-msgstr "सेवा पुनः आरंभ कमांड {hostname} को भेजा गया"
-
-msgid "System update command sent to {hostname}"
-msgstr "सिस्टम अपडेट कमांड {hostname} को भेजा गया"
-
-msgid "Reboot command sent to {hostname}"
-msgstr "रीबूट कमांड {hostname} को भेजा गया"
-
-msgid "Command {command_type} broadcast to {sent_count} agents"
-msgstr "कमांड {command_type} को {sent_count} एजेंटों में प्रसारित किया गया"
-
-msgid "Shell command broadcast to {sent_count} agents"
-msgstr "शेल कमांड को {sent_count} एजेंटों में प्रसारित किया गया"
-
-msgid "Command {command_type} sent to {sent_count} {platform} agents"
-msgstr "कमांड {command_type} को {sent_count} {platform} एजेंटों को भेजा गया"
+msgid "Software inventory update requested"
+msgstr "सॉफ़्टवेयर इन्वेंटरी अपडेट का अनुरोध किया गया"
 
 msgid "Configuration pushed to all agents"
 msgstr "कॉन्फ़िगरेशन सभी एजेंटों को पुश की गई"
@@ -55,17 +170,104 @@ msgstr "कॉन्फ़िगरेशन सभी एजेंटों क
 msgid "Configuration pushed successfully"
 msgstr "कॉन्फ़िगरेशन सफलतापूर्वक पुश की गई"
 
+#, fuzzy
+msgid "Agent not found or unreachable"
+msgstr "एजेंट नहीं मिला या पहुंच योग्य नहीं है"
+
 msgid "Configuration pushed to platform agents"
 msgstr "कॉन्फ़िगरेशन प्लेटफॉर्म एजेंटों को पुश की गई"
+
+msgid "Must specify target_hostname, target_platform, or push_to_all"
+msgstr "target_hostname, target_platform, या push_to_all निर्दिष्ट करना होगा"
 
 msgid "Configuration acknowledgment processed"
 msgstr "कॉन्फ़िगरेशन स्वीकृति प्रसंस्कृत की गई"
 
-msgid "Host not found"
-msgstr "होस्ट नहीं मिला"
+#, python-format
+msgid "Failed to store updates: %s"
+msgstr "अपडेट संग्रहीत करने में असफल: %s"
 
-msgid "Agent is not connected"
-msgstr "एजेंट कनेक्ट नहीं है"
+#, python-format
+msgid "Failed to get update summary: %s"
+msgstr "अपडेट सारांश प्राप्त करने में असफल: %s"
 
-msgid "Software inventory update requested"
-msgstr "सॉफ़्टवेयर इन्वेंटरी अपडेट का अनुरोध किया गया"
+#, python-format
+msgid "Failed to get host updates: %s"
+msgstr "होस्ट अपडेट प्राप्त करने में असफल: %s"
+
+#, python-format
+msgid "Failed to get updates: %s"
+msgstr "अपडेट प्राप्त करने में असफल: %s"
+
+#, fuzzy
+msgid "Host not found or inactive"
+msgstr "होस्ट नहीं मिला या निष्क्रिय"
+
+msgid "No matching updates found for specified packages"
+msgstr "निर्दिष्ट पैकेज के लिए कोई मिलान अपडेट नहीं मिला"
+
+msgid "Update execution started"
+msgstr "अपडेट निष्पादन शुरू"
+
+#, python-format
+msgid "Failed to send command: %s"
+msgstr "कमांड भेजने में असफल: %s"
+
+#, python-format
+msgid "Failed to send update command: %s"
+msgstr "अपडेट कमांड भेजने में असफल: %s"
+
+#, python-format
+msgid "Failed to execute updates: %s"
+msgstr "अपडेट निष्पादित करने में असफल: %s"
+
+#, python-format
+msgid "Failed to get execution log: %s"
+msgstr "निष्पादन लॉग प्राप्त करने में असफल: %s"
+
+#, python-format
+msgid "Failed to get server fingerprint: %s"
+msgstr "सर्वर फिंगरप्रिंट प्राप्त करने में असफल: %s"
+
+#, python-format
+msgid "Failed to get CA certificate: %s"
+msgstr "CA प्रमाणपत्र प्राप्त करने में असफल: %s"
+
+msgid "Rate limit exceeded"
+msgstr "दर सीमा पार"
+
+#, fuzzy
+msgid "Host not approved"
+msgstr "होस्ट अनुमोदित नहीं है"
+
+#, python-brace-format
+msgid "Host {hostname} registered successfully"
+msgstr "होस्ट {hostname} सफलतापूर्वक पंजीकृत हुआ"
+
+msgid "Hostname is required for registration"
+msgstr "पंजीकरण के लिए होस्टनाम आवश्यक"
+
+msgid "os_version_updated"
+msgstr "ओएस संस्करण अपडेट किया गया"
+
+msgid "hardware_updated"
+msgstr "हार्डवेयर अपडेट किया गया"
+
+msgid "user_access_updated"
+msgstr "उपयोगकर्ता एक्सेस अपडेट किया गया"
+
+msgid "software_inventory_updated"
+msgstr "सॉफ़्टवेयर इन्वेंटरी अपडेट किया गया"
+
+#, python-format
+msgid "Authentication failed: %s"
+msgstr "प्रमाणीकरण असफल: %s"
+
+msgid "Authentication token required"
+msgstr "प्रमाणीकरण टोकन आवश्यक"
+
+msgid "Message failed security validation"
+msgstr "संदेश सुरक्षा सत्यापन में असफल"
+
+msgid "Message must be valid JSON"
+msgstr "संदेश वैध JSON होना चाहिए"

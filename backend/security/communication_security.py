@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from typing import Dict, Optional, Tuple, Any
 
 from backend.config.config import get_config
+from backend.i18n import _
 
 logger = logging.getLogger(__name__)
 
@@ -108,13 +109,13 @@ class WebSocketSecurityManager:
 
             if not hmac.compare_digest(signature, expected_signature):
                 logger.warning("Invalid token signature from IP: %s", client_ip)
-                return False, None, "Invalid token signature"
+                return False, None, _("Invalid token signature")
 
             # Check expiration
             current_time = int(time.time())
             if current_time > payload.get("expires", 0):
                 logger.info("Expired token from IP: %s", client_ip)
-                return False, None, "Token expired"
+                return False, None, _("Token expired")
 
             # Check IP consistency (allow some flexibility for NAT/proxy scenarios)
             token_ip = payload.get("client_ip", "")
@@ -133,7 +134,7 @@ class WebSocketSecurityManager:
 
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             logger.warning("Malformed token from IP %s: %s", client_ip, e)
-            return False, None, "Malformed token"
+            return False, None, _("Malformed token")
 
     def validate_message_integrity(
         self, message: Dict[str, Any], connection_id: str
@@ -324,7 +325,7 @@ class MessageEncryption:
             # Check age (max 1 hour)
             current_time = int(time.time())
             if current_time - timestamp > 3600:
-                return False, None, "Encrypted data expired"
+                return False, None, _("Encrypted data expired")
 
             # Verify signature
             secret_key = self.config.get("security", {}).get(
@@ -335,14 +336,14 @@ class MessageEncryption:
             ).hexdigest()
 
             if not hmac.compare_digest(signature, expected_signature):
-                return False, None, "Invalid signature"
+                return False, None, _("Invalid signature")
 
             # Parse decrypted data
             data = json.loads(data_json)
             return True, data, "Decryption successful"
 
         except (json.JSONDecodeError, KeyError, ValueError) as e:
-            return False, None, f"Decryption failed: {str(e)}"
+            return False, None, _("Decryption failed: %s") % str(e)
 
 
 # Global instances
