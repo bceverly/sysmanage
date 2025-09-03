@@ -199,7 +199,17 @@ like to add:
     Use the postgreSQL database (with
     Alembic migrations) for the server's
     queue and just persist the agent's
-    queue to the local filesystem.
+    queue to the local filesystem.  There
+    should actually be two such queues
+    given the bidirectional nature of
+    the communication between the agent
+    and the server (i.e. the agent can
+    asynchronously contact the server
+    and the server can likewise asynch-
+    rounously contact the agent).  One
+    queue should be for messages that
+    are received and one should be for
+    messages that need to be sent.
 
 35. Create a standalone python script on
     both the agent and the server to
@@ -310,3 +320,12 @@ like to add:
     color coded so that 0 means green
     and >0 means red.  Same with
     system updates needed.
+
+48. Tagging - We need a way to have
+    a host be a part of zero or more
+    groups (or tags).  For example,
+    you might have a host that is
+    part of a "Linux Servers" group
+    and if it is running apache
+    would also be part of a "Web
+    Servers" group.
