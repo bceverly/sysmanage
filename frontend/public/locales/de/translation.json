@@ -4,7 +4,8 @@
     "hosts": "Hosts",
     "users": "Benutzer",
     "logout": "Abmelden",
-    "logoAlt": "SysManage"
+    "logoAlt": "SysManage",
+    "updates": "Updates"
   },
   "login": {
     "title": "Bei SysManage anmelden",
@@ -264,5 +265,52 @@
     "loadError": "Fehler beim Laden der Profildaten",
     "saveError": "Fehler beim Speichern der Profil-Änderungen",
     "saveSuccess": "Profil erfolgreich aktualisiert"
+  },
+  "updates": {
+    "title": "Paket-Updates",
+    "refresh": "Aktualisieren",
+    "loading": "Updates werden geladen...",
+    "noUpdates": "Alle Systeme sind auf dem neuesten Stand",
+    "noMatchingUpdates": "Keine Updates entsprechen den aktuellen Filtern",
+    "executeSuccess": "Update-Ausführung für ausgewählte Pakete gestartet",
+    "executeError": "Fehler beim Ausführen von Updates",
+    "requiresReboot": "Neustart erforderlich",
+    "unknown": "Unbekannt",
+    "previous": "Vorherige",
+    "next": "Nächste",
+    "pageInfo": "Seite {{current}} von {{total}}",
+    "selectAll": "Alle auswählen",
+    "executeSelected": "Ausgewählte Updates Ausführen",
+    "stats": {
+      "total": "Gesamt Updates",
+      "security": "Sicherheits-Updates",
+      "system": "System-Updates",
+      "hosts": "Betroffene Hosts"
+    },
+    "filters": {
+      "securityOnly": "Nur Sicherheits-Updates",
+      "systemOnly": "Nur System-Updates",
+      "allManagers": "Alle Paket-Manager"
+    },
+    "types": {
+      "security": "Sicherheit",
+      "system": "System",
+      "application": "Anwendung"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "tooltip": "Verfügbare Updates anzeigen"
+    },
+    "title": "Verfügbare Updates",
+    "loading": "Updates werden geladen...",
+    "totalUpdates": "Gesamt Updates",
+    "securityUpdates": "Sicherheits-Updates",
+    "systemUpdates": "System-Updates",
+    "applicationUpdates": "Anwendungs-Updates",
+    "hostsAffected": "{{count}} von {{total}} Hosts haben Updates",
+    "noUpdates": "Alle Systeme sind auf dem neuesten Stand",
+    "viewSecurity": "Sicherheits-Updates Anzeigen",
+    "viewAll": "Alle Updates Anzeigen"
   }
 }

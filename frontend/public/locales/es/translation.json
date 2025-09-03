@@ -3,6 +3,7 @@
     "dashboard": "Tablero",
     "hosts": "Hosts",
     "users": "Usuarios",
+    "updates": "Actualizaciones",
     "logout": "Cerrar Sesión",
     "logoAlt": "SysManage"
   },
@@ -264,5 +265,52 @@
     "loadError": "Error al cargar datos del perfil",
     "saveError": "Error al guardar cambios del perfil",
     "saveSuccess": "Perfil actualizado exitosamente"
+  },
+  "updates": {
+    "title": "Actualizaciones de Paquetes",
+    "refresh": "Actualizar",
+    "loading": "Cargando actualizaciones...",
+    "noUpdates": "Todos los sistemas están actualizados",
+    "noMatchingUpdates": "No hay actualizaciones que coincidan con los filtros actuales",
+    "executeSuccess": "Ejecución de actualización iniciada para paquetes seleccionados",
+    "executeError": "Error al ejecutar actualizaciones",
+    "requiresReboot": "Requiere reinicio",
+    "unknown": "Desconocido",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pageInfo": "Página {{current}} de {{total}}",
+    "selectAll": "Seleccionar Todo",
+    "executeSelected": "Ejecutar Actualizaciones Seleccionadas",
+    "stats": {
+      "total": "Total de Actualizaciones",
+      "security": "Actualizaciones de Seguridad", 
+      "system": "Actualizaciones del Sistema",
+      "hosts": "Hosts Afectados"
+    },
+    "filters": {
+      "securityOnly": "Solo Actualizaciones de Seguridad",
+      "systemOnly": "Solo Actualizaciones del Sistema",
+      "allManagers": "Todos los Gestores de Paquetes"
+    },
+    "types": {
+      "security": "Seguridad",
+      "system": "Sistema",
+      "application": "Aplicación"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "tooltip": "Ver actualizaciones disponibles"
+    },
+    "title": "Actualizaciones Disponibles",
+    "loading": "Cargando actualizaciones...",
+    "totalUpdates": "Total de Actualizaciones",
+    "securityUpdates": "Actualizaciones de Seguridad",
+    "systemUpdates": "Actualizaciones del Sistema",
+    "applicationUpdates": "Actualizaciones de Aplicaciones",
+    "hostsAffected": "{{count}} de {{total}} hosts tienen actualizaciones",
+    "noUpdates": "Todos los sistemas están actualizados",
+    "viewSecurity": "Ver Actualizaciones de Seguridad",
+    "viewAll": "Ver Todas las Actualizaciones"
   }
 }

@@ -21,6 +21,7 @@ from backend.api import (
     user,
     config_management,
     profile,
+    updates,
 )
 from backend.config import config
 from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
@@ -32,7 +33,7 @@ app_config = config.get_config()
 
 
 @asynccontextmanager
-async def lifespan(fastapi_app: FastAPI):
+async def lifespan(_fastapi_app: FastAPI):
     """
     Application lifespan manager to handle startup and shutdown events.
     """
@@ -91,6 +92,7 @@ app.include_router(user.router)
 app.include_router(fleet.router)
 app.include_router(config_management.router)
 app.include_router(profile.router)
+app.include_router(updates.router, prefix="/api/updates", tags=["updates"])
 
 
 @app.get("/")

@@ -7,6 +7,7 @@ import SysManageLogo from "../assets/sysmanage-logo.svg";
 import LanguageSelector from "./LanguageSelector";
 import ConnectionStatusIndicator from "./ConnectionStatusIndicator";
 import UserProfileDropdown from "./UserProfileDropdown";
+import NotificationBell from "./NotificationBell";
 
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
@@ -73,6 +74,15 @@ const Navbar = () => {
                 {t('nav.users')}
               </NavLink>
             </li>
+            <li className="nav__item">
+              <NavLink
+                to="/updates"
+                className="nav__link"
+                onClick={closeMenuOnMobile}
+              >
+                {t('nav.updates')}
+              </NavLink>
+            </li>
           </ul>
           <div className="nav__close" id="nav-close" onClick={toggleMenu}>
             {/* @ts-expect-error - IoClose component type issues */}
@@ -80,9 +90,10 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Language selector, connection status at toolbar level */}
+        {/* Language selector, connection status, and notifications at toolbar level */}
         <div className="nav__language-toolbar" style={{visibility: menuVisible}}>
           <ConnectionStatusIndicator />
+          <NotificationBell />
           <LanguageSelector />
         </div>
 

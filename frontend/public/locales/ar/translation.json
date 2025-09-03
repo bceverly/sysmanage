@@ -3,7 +3,8 @@
     "dashboard": "لوحة التحكم",
     "hosts": "المضيفات",
     "users": "المستخدمون",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "updates": "التحديثات"
   },
   "login": {
     "title": "تسجيل الدخول إلى سيس مانج",
@@ -262,5 +263,52 @@
     "loadError": "فشل في تحميل بيانات الملف الشخصي",
     "saveError": "فشل في حفظ تغييرات الملف الشخصي",
     "saveSuccess": "تم تحديث الملف الشخصي بنجاح"
+  },
+  "updates": {
+    "title": "تحديثات الحزم",
+    "refresh": "تحديث",
+    "loading": "جاري تحميل التحديثات...",
+    "noUpdates": "جميع الأنظمة محدثة",
+    "noMatchingUpdates": "لا توجد تحديثات تطابق المرشحات الحالية",
+    "executeSuccess": "تم بدء تنفيذ التحديث للحزم المحددة",
+    "executeError": "فشل في تنفيذ التحديثات",
+    "requiresReboot": "يتطلب إعادة التشغيل",
+    "unknown": "غير معروف",
+    "previous": "السابق",
+    "next": "التالي",
+    "pageInfo": "صفحة {{current}} من {{total}}",
+    "selectAll": "تحديد الكل",
+    "executeSelected": "تنفيذ التحديثات المحددة",
+    "stats": {
+      "total": "إجمالي التحديثات",
+      "security": "تحديثات الأمان",
+      "system": "تحديثات النظام",
+      "hosts": "المضيفات المتأثرة"
+    },
+    "filters": {
+      "securityOnly": "تحديثات الأمان فقط",
+      "systemOnly": "تحديثات النظام فقط",
+      "allManagers": "جميع مديري الحزم"
+    },
+    "types": {
+      "security": "أمان",
+      "system": "نظام",
+      "application": "تطبيق"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "tooltip": "عرض التحديثات المتاحة"
+    },
+    "title": "التحديثات المتاحة",
+    "loading": "جاري تحميل التحديثات...",
+    "totalUpdates": "إجمالي التحديثات",
+    "securityUpdates": "تحديثات الأمان",
+    "systemUpdates": "تحديثات النظام",
+    "applicationUpdates": "تحديثات التطبيقات",
+    "hostsAffected": "{{count}} من {{total}} مضيف لديه تحديثات",
+    "noUpdates": "جميع الأنظمة محدثة",
+    "viewSecurity": "عرض تحديثات الأمان",
+    "viewAll": "عرض جميع التحديثات"
   }
 }

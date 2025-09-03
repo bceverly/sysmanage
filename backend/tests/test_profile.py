@@ -66,14 +66,14 @@ def client():
     from backend.auth.auth_bearer import JWTBearer, get_current_user
 
     # Mock authentication dependencies that return the expected values
-    def mock_jwt_bearer():
+    async def mock_jwt_bearer():
         return "mock_token"
 
-    def mock_get_current_user():
+    async def mock_get_current_user():
         return "test@example.com"
 
     # Override the dependencies for testing using the actual functions
-    app.dependency_overrides[JWTBearer] = mock_jwt_bearer
+    app.dependency_overrides[JWTBearer()] = mock_jwt_bearer
     app.dependency_overrides[get_current_user] = mock_get_current_user
 
     test_client = TestClient(app)
@@ -90,14 +90,14 @@ def client_nonexistent_user():
     from backend.auth.auth_bearer import JWTBearer, get_current_user
 
     # Mock authentication dependencies
-    def mock_jwt_bearer():
+    async def mock_jwt_bearer():
         return "mock_token"
 
-    def mock_get_current_user():
+    async def mock_get_current_user():
         return "nonexistent@example.com"
 
     # Override the dependencies for testing
-    app.dependency_overrides[JWTBearer] = mock_jwt_bearer
+    app.dependency_overrides[JWTBearer()] = mock_jwt_bearer
     app.dependency_overrides[get_current_user] = mock_get_current_user
 
     test_client = TestClient(app)

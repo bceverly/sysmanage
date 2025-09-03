@@ -3,7 +3,8 @@
     "dashboard": "डैशबोर्ड",
     "hosts": "होस्ट्स",
     "users": "उपयोगकर्ता",
-    "logout": "लॉगआउट"
+    "logout": "लॉगआउट",
+    "updates": "अपडेट"
   },
   "login": {
     "title": "सिसमैनेज में लॉगिन करें",
@@ -262,5 +263,52 @@
     "loadError": "प्रोफ़ाइल डेटा लोड करने में विफल",
     "saveError": "प्रोफ़ाइल परिवर्तन सहेजने में विफल",
     "saveSuccess": "प्रोफ़ाइल सफलतापूर्वक अपडेट हुई"
+  },
+  "updates": {
+    "title": "पैकेज अपडेट",
+    "refresh": "रिफ्रेश",
+    "loading": "अपडेट लोड हो रहे हैं...",
+    "noUpdates": "सभी सिस्टम अप टू डेट हैं",
+    "noMatchingUpdates": "वर्तमान फिल्टर से कोई अपडेट मेल नहीं खाते",
+    "executeSuccess": "चयनित पैकेजों के लिए अपडेट निष्पादन शुरू किया गया",
+    "executeError": "अपडेट निष्पादित करने में विफल",
+    "requiresReboot": "रीबूट की आवश्यकता है",
+    "unknown": "अज्ञात",
+    "previous": "पिछला",
+    "next": "अगला",
+    "pageInfo": "पेज {{current}} का {{total}}",
+    "selectAll": "सभी चुनें",
+    "executeSelected": "चयनित अपडेट निष्पादित करें",
+    "stats": {
+      "total": "कुल अपडेट",
+      "security": "सुरक्षा अपडेट",
+      "system": "सिस्टम अपडेट",
+      "hosts": "प्रभावित होस्ट"
+    },
+    "filters": {
+      "securityOnly": "केवल सुरक्षा अपडेट",
+      "systemOnly": "केवल सिस्टम अपडेट",
+      "allManagers": "सभी पैकेज प्रबंधक"
+    },
+    "types": {
+      "security": "सुरक्षा",
+      "system": "सिस्टम",
+      "application": "एप्लिकेशन"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "tooltip": "उपलब्ध अपडेट देखें"
+    },
+    "title": "उपलब्ध अपडेट",
+    "loading": "अपडेट लोड हो रहे हैं...",
+    "totalUpdates": "कुल अपडेट",
+    "securityUpdates": "सुरक्षा अपडेट",
+    "systemUpdates": "सिस्टम अपडेट",
+    "applicationUpdates": "एप्लिकेशन अपडेट",
+    "hostsAffected": "{{total}} में से {{count}} होस्ट में अपडेट हैं",
+    "noUpdates": "सभी सिस्टम अप टू डेट हैं",
+    "viewSecurity": "सुरक्षा अपडेट देखें",
+    "viewAll": "सभी अपडेट देखें"
   }
 }

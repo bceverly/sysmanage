@@ -99,7 +99,7 @@ class ConfigPushManager:
 
             return success
 
-        except Exception as e:
+        except (ValueError, KeyError, OSError) as e:
             logger.error("Error pushing config to agent %s: %s", hostname, e)
             return False
 

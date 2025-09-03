@@ -4,7 +4,8 @@
     "hosts": "主机",
     "users": "用户",
     "logout": "退出登录",
-    "logoAlt": "SysManage"
+    "logoAlt": "SysManage",
+    "updates": "更新"
   },
   "login": {
     "title": "登录 SysManage",
@@ -265,5 +266,52 @@
     "loadError": "加载个人资料数据失败",
     "saveError": "保存个人资料更改失败",
     "saveSuccess": "个人资料更新成功"
+  },
+  "updates": {
+    "title": "软件包更新",
+    "refresh": "刷新",
+    "loading": "正在加载更新...",
+    "noUpdates": "所有系统都是最新的",
+    "noMatchingUpdates": "没有更新匹配当前筛选器",
+    "executeSuccess": "已开始为所选软件包执行更新",
+    "executeError": "执行更新失败",
+    "requiresReboot": "需要重启",
+    "unknown": "未知",
+    "previous": "上一页",
+    "next": "下一页",
+    "pageInfo": "第 {{current}} 页，共 {{total}} 页",
+    "selectAll": "全选",
+    "executeSelected": "执行所选更新",
+    "stats": {
+      "total": "更新总数",
+      "security": "安全更新",
+      "system": "系统更新",
+      "hosts": "受影响的主机"
+    },
+    "filters": {
+      "securityOnly": "仅安全更新",
+      "systemOnly": "仅系统更新",
+      "allManagers": "所有包管理器"
+    },
+    "types": {
+      "security": "安全",
+      "system": "系统",
+      "application": "应用程序"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "tooltip": "查看可用更新"
+    },
+    "title": "可用更新",
+    "loading": "正在加载更新...",
+    "totalUpdates": "更新总数",
+    "securityUpdates": "安全更新",
+    "systemUpdates": "系统更新",
+    "applicationUpdates": "应用程序更新",
+    "hostsAffected": "{{total}} 个主机中有 {{count}} 个有更新",
+    "noUpdates": "所有系统都是最新的",
+    "viewSecurity": "查看安全更新",
+    "viewAll": "查看所有更新"
   }
 }

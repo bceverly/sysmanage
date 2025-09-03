@@ -4,7 +4,8 @@
     "hosts": "호스트",
     "users": "사용자",
     "logout": "로그아웃",
-    "logoAlt": "SysManage"
+    "logoAlt": "SysManage",
+    "updates": "업데이트"
   },
   "login": {
     "title": "SysManage 로그인",
@@ -264,5 +265,52 @@
     "loadError": "프로필 데이터 로드 실패",
     "saveError": "프로필 변경 사항 저장 실패",
     "saveSuccess": "프로필이 성공적으로 업데이트되었습니다"
+  },
+  "updates": {
+    "title": "패키지 업데이트",
+    "refresh": "새로 고침",
+    "loading": "업데이트를 불러오는 중...",
+    "noUpdates": "모든 시스템이 최신 상태입니다",
+    "noMatchingUpdates": "현재 필터와 일치하는 업데이트가 없습니다",
+    "executeSuccess": "선택한 패키지에 대한 업데이트 실행이 시작되었습니다",
+    "executeError": "업데이트 실행 실패",
+    "requiresReboot": "재부팅 필요",
+    "unknown": "알 수 없음",
+    "previous": "이전",
+    "next": "다음",
+    "pageInfo": "{{total}}페이지 중 {{current}}페이지",
+    "selectAll": "모두 선택",
+    "executeSelected": "선택한 업데이트 실행",
+    "stats": {
+      "total": "총 업데이트",
+      "security": "보안 업데이트",
+      "system": "시스템 업데이트",
+      "hosts": "영향받는 호스트"
+    },
+    "filters": {
+      "securityOnly": "보안 업데이트만",
+      "systemOnly": "시스템 업데이트만",
+      "allManagers": "모든 패키지 관리자"
+    },
+    "types": {
+      "security": "보안",
+      "system": "시스템",
+      "application": "애플리케이션"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "tooltip": "사용 가능한 업데이트 보기"
+    },
+    "title": "사용 가능한 업데이트",
+    "loading": "업데이트를 불러오는 중...",
+    "totalUpdates": "총 업데이트",
+    "securityUpdates": "보안 업데이트",
+    "systemUpdates": "시스템 업데이트",
+    "applicationUpdates": "애플리케이션 업데이트",
+    "hostsAffected": "{{total}}개 호스트 중 {{count}}개에 업데이트가 있습니다",
+    "noUpdates": "모든 시스템이 최신 상태입니다",
+    "viewSecurity": "보안 업데이트 보기",
+    "viewAll": "모든 업데이트 보기"
   }
 }

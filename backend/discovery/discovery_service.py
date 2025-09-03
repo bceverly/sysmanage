@@ -31,7 +31,8 @@ class DiscoveryBeaconService:
         self, discovery_port_param: int = 31337, bind_address_param: str = "127.0.0.1"
     ):
         self.discovery_port = discovery_port_param
-        # Security: Default to localhost only. Set to "0.0.0.0" in config only if needed for multi-host discovery
+        # Security: Default to localhost only. Set to "0.0.0.0" in config only if needed
+        # for multi-host discovery
         self.bind_address = bind_address_param
         self.config = get_config()
         self.running = False

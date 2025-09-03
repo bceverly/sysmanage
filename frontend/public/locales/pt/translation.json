@@ -3,7 +3,8 @@
     "dashboard": "Painel",
     "hosts": "Hosts",
     "users": "Usuários",
-    "logout": "Sair"
+    "logout": "Sair",
+    "updates": "Atualizações"
   },
   "login": {
     "title": "Entrar no SysManage",
@@ -263,5 +264,52 @@
     "loadError": "Falha ao carregar dados do perfil",
     "saveError": "Falha ao salvar alterações do perfil",
     "saveSuccess": "Perfil atualizado com sucesso"
+  },
+  "updates": {
+    "title": "Atualizações de Pacotes",
+    "refresh": "Atualizar",
+    "loading": "Carregando atualizações...",
+    "noUpdates": "Todos os sistemas estão atualizados",
+    "noMatchingUpdates": "Nenhuma atualização corresponde aos filtros atuais",
+    "executeSuccess": "Execução de atualização iniciada para pacotes selecionados",
+    "executeError": "Falha ao executar atualizações",
+    "requiresReboot": "Requer reinicialização",
+    "unknown": "Desconhecido",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "pageInfo": "Página {{current}} de {{total}}",
+    "selectAll": "Selecionar Tudo",
+    "executeSelected": "Executar Atualizações Selecionadas",
+    "stats": {
+      "total": "Total de Atualizações",
+      "security": "Atualizações de Segurança",
+      "system": "Atualizações do Sistema",
+      "hosts": "Hosts Afetados"
+    },
+    "filters": {
+      "securityOnly": "Apenas Atualizações de Segurança",
+      "systemOnly": "Apenas Atualizações do Sistema",
+      "allManagers": "Todos os Gerenciadores de Pacotes"
+    },
+    "types": {
+      "security": "Segurança",
+      "system": "Sistema",
+      "application": "Aplicação"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "tooltip": "Ver atualizações disponíveis"
+    },
+    "title": "Atualizações Disponíveis",
+    "loading": "Carregando atualizações...",
+    "totalUpdates": "Total de Atualizações",
+    "securityUpdates": "Atualizações de Segurança",
+    "systemUpdates": "Atualizações do Sistema",
+    "applicationUpdates": "Atualizações de Aplicações",
+    "hostsAffected": "{{count}} de {{total}} hosts têm atualizações",
+    "noUpdates": "Todos os sistemas estão atualizados",
+    "viewSecurity": "Ver Atualizações de Segurança",
+    "viewAll": "Ver Todas as Atualizações"
   }
 }
