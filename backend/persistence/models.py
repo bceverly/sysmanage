@@ -95,6 +95,11 @@ class Host(Base):
         "SoftwarePackage", back_populates="host", cascade="all, delete-orphan"
     )
 
+    # Relationships to update management tables
+    package_updates = relationship(
+        "PackageUpdate", back_populates="host", cascade="all, delete-orphan"
+    )
+
 
 class User(Base):
     """
@@ -278,3 +283,89 @@ class SoftwarePackage(Base):
 
     # Relationship back to Host
     host = relationship("Host", back_populates="software_packages")
+
+
+class PackageUpdate(Base):
+    """
+    This class holds the object mapping for the package_updates table in the
+    PostgreSQL database. Stores available package updates detected by agents.
+    """
+
+    __tablename__ = "package_updates"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    host_id = Column(Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+
+    # Package identification
+    package_name = Column(String(255), nullable=False, index=True)
+    current_version = Column(String(100), nullable=True)
+    available_version = Column(String(100), nullable=False)
+
+    # Package manager information
+    package_manager = Column(
+        String(50), nullable=False, index=True
+    )  # apt, snap, homebrew, etc.
+    source = Column(String(100), nullable=True)  # repository, store source
+
+    # Update classification
+    is_security_update = Column(Boolean, nullable=False, default=False, index=True)
+    is_system_update = Column(Boolean, nullable=False, default=False, index=True)
+    requires_reboot = Column(Boolean, nullable=False, default=False)
+
+    # Update metadata
+    update_size_bytes = Column(BigInteger, nullable=True)
+    bundle_id = Column(String(255), nullable=True)  # Platform-specific ID
+    repository = Column(String(100), nullable=True)  # Source repository
+    channel = Column(String(50), nullable=True)  # Snap channels, etc.
+
+    # Status tracking
+    status = Column(
+        String(20), nullable=False, default="available", index=True
+    )  # available, updating, completed, failed
+
+    # Timestamps
+    detected_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+    last_checked_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Relationship back to Host
+    host = relationship("Host", back_populates="package_updates")
+
+
+class UpdateExecutionLog(Base):
+    """
+    This class holds the object mapping for the update_execution_log table in the
+    PostgreSQL database. Tracks execution of package updates.
+    """
+
+    __tablename__ = "update_execution_log"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    host_id = Column(Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    package_update_id = Column(
+        Integer, ForeignKey("package_updates.id", ondelete="CASCADE"), nullable=True
+    )
+
+    # Execution details
+    package_name = Column(String(255), nullable=False)
+    package_manager = Column(String(50), nullable=False)
+    from_version = Column(String(100), nullable=True)
+    to_version = Column(String(100), nullable=False)
+
+    # Execution status
+    status = Column(
+        String(20), nullable=False, index=True
+    )  # pending, running, completed, failed
+    started_at = Column(DateTime(timezone=True), nullable=True)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Result information
+    success = Column(Boolean, nullable=True)
+    error_message = Column(Text, nullable=True)
+    execution_log = Column(Text, nullable=True)  # Command output/logs
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Relationships
+    host = relationship("Host")
+    package_update = relationship("PackageUpdate")

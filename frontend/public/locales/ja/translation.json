@@ -4,7 +4,8 @@
     "hosts": "ホスト",
     "users": "ユーザー",
     "logout": "ログアウト",
-    "logoAlt": "SysManage"
+    "logoAlt": "SysManage",
+    "updates": "アップデート"
   },
   "login": {
     "title": "SysManageにログイン",
@@ -264,5 +265,52 @@
     "loadError": "プロフィールデータの読み込みに失敗しました",
     "saveError": "プロフィール変更の保存に失敗しました",
     "saveSuccess": "プロフィールが正常に更新されました"
+  },
+  "updates": {
+    "title": "パッケージアップデート",
+    "refresh": "更新",
+    "loading": "アップデートを読み込み中...",
+    "noUpdates": "すべてのシステムが最新です",
+    "noMatchingUpdates": "現在のフィルターに一致するアップデートはありません",
+    "executeSuccess": "選択されたパッケージのアップデート実行を開始しました",
+    "executeError": "アップデートの実行に失敗しました",
+    "requiresReboot": "再起動が必要",
+    "unknown": "不明",
+    "previous": "前へ",
+    "next": "次へ",
+    "pageInfo": "ページ {{current}} / {{total}}",
+    "selectAll": "すべて選択",
+    "executeSelected": "選択したアップデートを実行",
+    "stats": {
+      "total": "総アップデート数",
+      "security": "セキュリティアップデート",
+      "system": "システムアップデート",
+      "hosts": "影響を受けるホスト"
+    },
+    "filters": {
+      "securityOnly": "セキュリティアップデートのみ",
+      "systemOnly": "システムアップデートのみ",
+      "allManagers": "すべてのパッケージマネージャー"
+    },
+    "types": {
+      "security": "セキュリティ",
+      "system": "システム",
+      "application": "アプリケーション"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "tooltip": "利用可能なアップデートを表示"
+    },
+    "title": "利用可能なアップデート",
+    "loading": "アップデートを読み込み中...",
+    "totalUpdates": "総アップデート数",
+    "securityUpdates": "セキュリティアップデート",
+    "systemUpdates": "システムアップデート",
+    "applicationUpdates": "アプリケーションアップデート",
+    "hostsAffected": "{{total}} ホスト中 {{count}} ホストにアップデートがあります",
+    "noUpdates": "すべてのシステムが最新です",
+    "viewSecurity": "セキュリティアップデートを表示",
+    "viewAll": "すべてのアップデートを表示"
   }
 }

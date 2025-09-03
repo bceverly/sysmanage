@@ -3,6 +3,7 @@
     "dashboard": "Dashboard",
     "hosts": "Hosts",
     "users": "Users",
+    "updates": "Updates",
     "logout": "Logout"
   },
   "login": {
@@ -262,5 +263,52 @@
     "loadError": "Failed to load profile data",
     "saveError": "Failed to save profile changes",
     "saveSuccess": "Profile updated successfully"
+  },
+  "updates": {
+    "title": "Package Updates",
+    "refresh": "Refresh",
+    "loading": "Loading updates...",
+    "noUpdates": "All systems are up to date",
+    "noMatchingUpdates": "No updates match the current filters",
+    "executeSuccess": "Update execution started for selected packages",
+    "executeError": "Failed to execute updates",
+    "requiresReboot": "Requires reboot",
+    "unknown": "Unknown",
+    "previous": "Previous",
+    "next": "Next",
+    "pageInfo": "Page {{current}} of {{total}}",
+    "selectAll": "Select All",
+    "executeSelected": "Execute Selected Updates",
+    "stats": {
+      "total": "Total Updates",
+      "security": "Security Updates", 
+      "system": "System Updates",
+      "hosts": "Affected Hosts"
+    },
+    "filters": {
+      "securityOnly": "Security Updates Only",
+      "systemOnly": "System Updates Only",
+      "allManagers": "All Package Managers"
+    },
+    "types": {
+      "security": "Security",
+      "system": "System",
+      "application": "Application"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "tooltip": "View available updates"
+    },
+    "title": "Available Updates",
+    "loading": "Loading updates...",
+    "totalUpdates": "Total Updates",
+    "securityUpdates": "Security Updates",
+    "systemUpdates": "System Updates",
+    "applicationUpdates": "Application Updates",
+    "hostsAffected": "{{count}} of {{total}} hosts have updates",
+    "noUpdates": "All systems are up to date",
+    "viewSecurity": "View Security Updates",
+    "viewAll": "View All Updates"
   }
 }

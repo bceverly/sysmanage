@@ -46,7 +46,7 @@ class JWTBearer(HTTPBearer):
 
         try:
             payload = decode_jwt(jwtoken)
-        except Exception:
+        except (ValueError, TypeError, KeyError):
             payload = None
         if payload:
             is_token_valid = True
@@ -62,7 +62,7 @@ async def get_current_user(token: str = Depends(JWTBearer())) -> str:
         payload = decode_jwt(token)
         if payload and "user_id" in payload:
             return payload["user_id"]
-    except Exception:
+    except (ValueError, TypeError, KeyError):
         pass
 
     raise HTTPException(status_code=401, detail="Could not validate credentials")

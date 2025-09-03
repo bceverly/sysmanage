@@ -300,11 +300,28 @@ const doRefreshHardwareData = async (id: BigInt) => {
     return result;
 };
 
+const doRefreshUpdatesCheck = async (id: BigInt) => {
+    let result = {} as SuccessResponse;
+
+    await api.post<SuccessResponse>("/host/" + id + "/request-updates-check")
+    .then((response) => {
+        // No error - process response
+        result = response.data;
+        return Promise.resolve(response);
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
 const doRefreshAllHostData = async (id: BigInt) => {
-    // Request both OS and hardware updates
+    // Request OS, hardware updates, and updates check
     const promises = [
         doRefreshHostData(id),
-        doRefreshHardwareData(id)
+        doRefreshHardwareData(id),
+        doRefreshUpdatesCheck(id)
     ];
     
     await Promise.all(promises);
@@ -420,4 +437,4 @@ const doRefreshSoftwareData = async (id: BigInt) => {
 };
 
 export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage };
-export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doGetHostSoftware, doRefreshSoftwareData };
+export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doGetHostSoftware, doRefreshSoftwareData };

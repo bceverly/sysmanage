@@ -32,7 +32,8 @@ class AgentConnection:
             await self.websocket.send_text(json.dumps(message))
             return True
         except Exception:
-            # Failed to send message to agent
+            # Failed to send message to agent - catch all exceptions
+            # to handle various WebSocket error conditions
             return False
 
     def update_info(

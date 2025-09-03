@@ -4,7 +4,8 @@
     "hosts": "Hosts",
     "users": "Gebruikers",
     "logout": "Uitloggen",
-    "logoAlt": "SysManage"
+    "logoAlt": "SysManage",
+    "updates": "Updates"
   },
   "login": {
     "title": "Inloggen bij SysManage",
@@ -264,5 +265,52 @@
     "loadError": "Fout bij het laden van profielgegevens",
     "saveError": "Fout bij het opslaan van profielwijzigingen",
     "saveSuccess": "Profiel succesvol bijgewerkt"
+  },
+  "updates": {
+    "title": "Pakket Updates",
+    "refresh": "Vernieuwen",
+    "loading": "Updates laden...",
+    "noUpdates": "Alle systemen zijn bijgewerkt",
+    "noMatchingUpdates": "Geen updates komen overeen met de huidige filters",
+    "executeSuccess": "Update-uitvoering gestart voor geselecteerde pakketten",
+    "executeError": "Fout bij uitvoeren van updates",
+    "requiresReboot": "Herstart vereist",
+    "unknown": "Onbekend",
+    "previous": "Vorige",
+    "next": "Volgende",
+    "pageInfo": "Pagina {{current}} van {{total}}",
+    "selectAll": "Alles Selecteren",
+    "executeSelected": "Geselecteerde Updates Uitvoeren",
+    "stats": {
+      "total": "Totale Updates",
+      "security": "Beveiligingsupdates",
+      "system": "Systeemupdates",
+      "hosts": "Betrokken Hosts"
+    },
+    "filters": {
+      "securityOnly": "Alleen Beveiligingsupdates",
+      "systemOnly": "Alleen Systeemupdates",
+      "allManagers": "Alle Pakketbeheerders"
+    },
+    "types": {
+      "security": "Beveiliging",
+      "system": "Systeem",
+      "application": "Applicatie"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "tooltip": "Beschikbare updates bekijken"
+    },
+    "title": "Beschikbare Updates",
+    "loading": "Updates laden...",
+    "totalUpdates": "Totale Updates",
+    "securityUpdates": "Beveiligingsupdates",
+    "systemUpdates": "Systeemupdates",
+    "applicationUpdates": "Applicatie Updates",
+    "hostsAffected": "{{count}} van {{total}} hosts hebben updates",
+    "noUpdates": "Alle systemen zijn bijgewerkt",
+    "viewSecurity": "Beveiligingsupdates Bekijken",
+    "viewAll": "Alle Updates Bekijken"
   }
 }

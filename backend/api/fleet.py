@@ -18,29 +18,39 @@ router = APIRouter()
 
 # Pydantic models for API requests
 class CommandRequest(BaseModel):
+    """Request model for fleet commands."""
+
     command_type: CommandType
     parameters: dict = {}
     timeout: int = 300
 
 
 class ShellCommandRequest(BaseModel):
+    """Request model for shell commands."""
+
     command: str
     timeout: int = 300
     working_directory: Optional[str] = None
 
 
 class PackageRequest(BaseModel):
+    """Request model for package operations."""
+
     package_name: str
     version: Optional[str] = None
     timeout: int = 300
 
 
 class ServiceRequest(BaseModel):
+    """Request model for service operations."""
+
     service_name: str
     timeout: int = 300
 
 
 class BroadcastRequest(BaseModel):
+    """Request model for broadcast messages."""
+
     message: str
     message_type: MessageType = MessageType.COMMAND
 
@@ -49,20 +59,20 @@ class BroadcastRequest(BaseModel):
 
 
 @router.get("/fleet/status")
-async def get_fleet_status(dependencies=Depends(JWTBearer())):
+async def get_fleet_status(_dependencies=Depends(JWTBearer())):
     """Get status of all connected agents."""
     agents = connection_manager.get_active_agents()
     return {"total_agents": len(agents), "agents": agents}
 
 
 @router.get("/fleet/agents")
-async def list_agents(dependencies=Depends(JWTBearer())):
+async def list_agents(_dependencies=Depends(JWTBearer())):
     """List all connected agents with their details."""
     return connection_manager.get_active_agents()
 
 
 @router.get("/fleet/agent/{hostname}")
-async def get_agent(hostname: str, dependencies=Depends(JWTBearer())):
+async def get_agent(hostname: str, _dependencies=Depends(JWTBearer())):
     """Get details of a specific agent by hostname."""
     agent = connection_manager.get_agent_by_hostname(hostname)
     if not agent:
@@ -77,7 +87,7 @@ async def get_agent(hostname: str, dependencies=Depends(JWTBearer())):
 
 @router.post("/fleet/agent/{hostname}/command")
 async def send_command_to_agent(
-    hostname: str, command: CommandRequest, dependencies=Depends(JWTBearer())
+    hostname: str, command: CommandRequest, _dependencies=Depends(JWTBearer())
 ):
     """Send a command to a specific agent by hostname."""
     # Check if agent is connected

@@ -21,6 +21,7 @@ class MessageType(str, Enum):
     HARDWARE_UPDATE = "hardware_update"
     USER_ACCESS_UPDATE = "user_access_update"
     SOFTWARE_INVENTORY_UPDATE = "software_inventory_update"
+    PACKAGE_UPDATES_UPDATE = "package_updates_update"
 
     # Server -> Agent messages
     COMMAND = "command"

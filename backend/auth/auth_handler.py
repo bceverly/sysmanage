@@ -77,6 +77,6 @@ def decode_jwt(token: str) -> Optional[dict]:
     except (jwt.exceptions.InvalidTokenError, jwt.exceptions.DecodeError):
         # JWT decoding exception
         return {}
-    except Exception:
+    except (ValueError, TypeError, KeyError):
         # Uncaught exception in JWT decoding
         return None

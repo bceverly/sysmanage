@@ -16,6 +16,16 @@ from backend.persistence import db, models
 from backend.security.certificate_manager import certificate_manager
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
+from backend.api.host_utils import (
+    get_host_by_id,
+    get_host_by_fqdn,
+    validate_host_approval_status,
+    get_host_storage_devices,
+    get_host_network_interfaces,
+    get_host_users_with_groups,
+    get_host_user_groups,
+    get_host_software_packages,
+)
 
 router = APIRouter()
 
@@ -99,41 +109,15 @@ async def get_host(host_id: int):
     """
     This function retrieves a single host by its id
     """
-
-    # Get the SQLAlchemy session
-    session_local = sessionmaker(  # pylint: disable=duplicate-code
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
-
-    with session_local() as session:
-        hosts = session.query(models.Host).filter(models.Host.id == host_id).all()
-
-        # Check for failure
-        if len(hosts) != 1:
-            raise HTTPException(status_code=404, detail="Host not found")
-
-        return hosts[0]
+    return get_host_by_id(host_id)
 
 
 @router.get("/host/by_fqdn/{fqdn}", dependencies=[Depends(JWTBearer())])
-async def get_host_by_fqdn(fqdn: str):
+async def get_host_by_fqdn_endpoint(fqdn: str):
     """
     This function retrieves a single host by fully qualified domain name
     """
-
-    # Get the SQLAlchemy session
-    session_local = sessionmaker(  # pylint: disable=duplicate-code
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
-
-    with session_local() as session:
-        hosts = session.query(models.Host).filter(models.Host.fqdn == fqdn).all()
-
-        # Check for failure
-        if len(hosts) != 1:
-            raise HTTPException(status_code=404, detail="Host not found")
-
-        return hosts[0]
+    return get_host_by_fqdn(fqdn)
 
 
 @router.get("/hosts", dependencies=[Depends(JWTBearer())])
@@ -403,8 +387,7 @@ async def request_os_version_update(host_id: int):
         if not host:
             raise HTTPException(status_code=404, detail="Host not found")
 
-        if host.approval_status != "approved":
-            raise HTTPException(status_code=400, detail="Host is not approved")
+        validate_host_approval_status(host)
 
         # Create command message for OS version update request
         command_message = create_command_message(
@@ -418,6 +401,42 @@ async def request_os_version_update(host_id: int):
             raise HTTPException(status_code=503, detail="Agent is not connected")
 
         return {"result": True, "message": _("OS version update requested")}
+
+
+@router.post(
+    "/host/{host_id}/request-updates-check", dependencies=[Depends(JWTBearer())]
+)
+async def request_updates_check(host_id: int):
+    """
+    Request an agent to check for available updates.
+    This sends a message via WebSocket to the agent requesting an update check.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the host
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+
+        if not host:
+            raise HTTPException(status_code=404, detail="Host not found")
+
+        validate_host_approval_status(host)
+
+        # Create command message for updates check request
+        command_message = create_command_message(
+            command_type="check_updates", parameters={}
+        )
+
+        # Send command to agent via WebSocket
+        success = await connection_manager.send_to_host(host_id, command_message)
+
+        if not success:
+            raise HTTPException(status_code=503, detail="Agent is not connected")
+
+        return {"result": True, "message": _("Updates check requested")}
 
 
 @router.post("/host/{host_id}/update-hardware", dependencies=[Depends(JWTBearer())])
@@ -527,49 +546,7 @@ async def get_host_storage(host_id: int):
     """
     Get storage devices for a specific host from the normalized storage_devices table.
     """
-    # Get the SQLAlchemy session
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
-
-    with session_local() as session:
-        # Find the host first to ensure it exists
-        host = session.query(models.Host).filter(models.Host.id == host_id).first()
-        if not host:
-            raise HTTPException(status_code=404, detail="Host not found")
-
-        # Get storage devices
-        storage_devices = (
-            session.query(models.StorageDevice)
-            .filter(models.StorageDevice.host_id == host_id)
-            .all()
-        )
-
-        # Convert to dict format
-        devices = []
-        for device in storage_devices:
-            devices.append(
-                {
-                    "id": device.id,
-                    "name": device.name,
-                    "device_path": device.device_path,
-                    "mount_point": device.mount_point,
-                    "file_system": device.file_system,
-                    "device_type": device.device_type,
-                    "capacity_bytes": device.capacity_bytes,
-                    "used_bytes": device.used_bytes,
-                    "available_bytes": device.available_bytes,
-                    "is_physical": device.is_physical,
-                    "created_at": (
-                        device.created_at.isoformat() if device.created_at else None
-                    ),
-                    "updated_at": (
-                        device.updated_at.isoformat() if device.updated_at else None
-                    ),
-                }
-            )
-
-        return devices
+    return get_host_storage_devices(host_id)
 
 
 @router.get("/host/{host_id}/network", dependencies=[Depends(JWTBearer())])
@@ -577,53 +554,7 @@ async def get_host_network(host_id: int):
     """
     Get network interfaces for a specific host from the normalized network_interfaces table.
     """
-    # Get the SQLAlchemy session
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
-
-    with session_local() as session:
-        # Find the host first to ensure it exists
-        host = session.query(models.Host).filter(models.Host.id == host_id).first()
-        if not host:
-            raise HTTPException(status_code=404, detail="Host not found")
-
-        # Get network interfaces
-        network_interfaces = (
-            session.query(models.NetworkInterface)
-            .filter(models.NetworkInterface.host_id == host_id)
-            .all()
-        )
-
-        # Convert to dict format
-        interfaces = []
-        for interface in network_interfaces:
-            interfaces.append(
-                {
-                    "id": interface.id,
-                    "name": interface.name,
-                    "interface_type": interface.interface_type,
-                    "hardware_type": interface.hardware_type,
-                    "mac_address": interface.mac_address,
-                    "ipv4_address": interface.ipv4_address,
-                    "ipv6_address": interface.ipv6_address,
-                    "subnet_mask": interface.subnet_mask,
-                    "is_active": interface.is_active,
-                    "speed_mbps": interface.speed_mbps,
-                    "created_at": (
-                        interface.created_at.isoformat()
-                        if interface.created_at
-                        else None
-                    ),
-                    "updated_at": (
-                        interface.updated_at.isoformat()
-                        if interface.updated_at
-                        else None
-                    ),
-                }
-            )
-
-        return interfaces
+    return get_host_network_interfaces(host_id)
 
 
 @router.post(
@@ -646,8 +577,7 @@ async def request_hardware_update(host_id: int):
         if not host:
             raise HTTPException(status_code=404, detail="Host not found")
 
-        if host.approval_status != "approved":
-            raise HTTPException(status_code=400, detail="Host is not approved")
+        validate_host_approval_status(host)
 
         # Create command message for hardware update request
         command_message = create_command_message(
@@ -730,59 +660,7 @@ async def get_host_users(host_id: int):
     """
     Get user accounts for a specific host from the normalized user_accounts table.
     """
-    # Get the SQLAlchemy session
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
-
-    with session_local() as session:
-        # Verify host exists
-        host = session.query(models.Host).filter(models.Host.id == host_id).first()
-        if not host:
-            raise HTTPException(status_code=404, detail="Host not found")
-
-        # Get user accounts
-        user_accounts = (
-            session.query(models.UserAccount)
-            .filter(models.UserAccount.host_id == host_id)
-            .all()
-        )
-
-        # Convert to JSON-compatible format
-        users = []
-        for user in user_accounts:
-            # Get group memberships for this user
-            group_memberships = (
-                session.query(models.UserGroupMembership, models.UserGroup)
-                .join(
-                    models.UserGroup,
-                    models.UserGroupMembership.user_group_id == models.UserGroup.id,
-                )
-                .filter(models.UserGroupMembership.user_account_id == user.id)
-                .all()
-            )
-
-            group_names = [group.group_name for _, group in group_memberships]
-
-            users.append(
-                {
-                    "id": user.id,
-                    "username": user.username,
-                    "uid": user.uid,
-                    "home_directory": user.home_directory,
-                    "shell": user.shell,
-                    "is_system_user": user.is_system_user,
-                    "groups": group_names,
-                    "created_at": (
-                        user.created_at.isoformat() if user.created_at else None
-                    ),
-                    "updated_at": (
-                        user.updated_at.isoformat() if user.updated_at else None
-                    ),
-                }
-            )
-
-        return users
+    return get_host_users_with_groups(host_id)
 
 
 @router.get("/host/{host_id}/groups", dependencies=[Depends(JWTBearer())])
@@ -790,56 +668,7 @@ async def get_host_groups(host_id: int):
     """
     Get user groups for a specific host from the normalized user_groups table.
     """
-    # Get the SQLAlchemy session
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
-
-    with session_local() as session:
-        # Verify host exists
-        host = session.query(models.Host).filter(models.Host.id == host_id).first()
-        if not host:
-            raise HTTPException(status_code=404, detail="Host not found")
-
-        # Get user groups
-        user_groups = (
-            session.query(models.UserGroup)
-            .filter(models.UserGroup.host_id == host_id)
-            .all()
-        )
-
-        # Convert to JSON-compatible format
-        groups = []
-        for group in user_groups:
-            # Get user memberships for this group
-            user_memberships = (
-                session.query(models.UserGroupMembership, models.UserAccount)
-                .join(
-                    models.UserAccount,
-                    models.UserGroupMembership.user_account_id == models.UserAccount.id,
-                )
-                .filter(models.UserGroupMembership.user_group_id == group.id)
-                .all()
-            )
-
-            user_names = [user.username for _, user in user_memberships]
-            groups.append(
-                {
-                    "id": group.id,
-                    "group_name": group.group_name,
-                    "gid": group.gid,
-                    "is_system_group": group.is_system_group,
-                    "users": user_names,
-                    "created_at": (
-                        group.created_at.isoformat() if group.created_at else None
-                    ),
-                    "updated_at": (
-                        group.updated_at.isoformat() if group.updated_at else None
-                    ),
-                }
-            )
-
-        return groups
+    return get_host_user_groups(host_id)
 
 
 @router.post(
@@ -862,8 +691,7 @@ async def request_user_access_update(host_id: int):
         if not host:
             raise HTTPException(status_code=404, detail="Host not found")
 
-        if host.approval_status != "approved":
-            raise HTTPException(status_code=400, detail="Host is not approved")
+        validate_host_approval_status(host)
 
         # Create command message for user access update request
         command_message = create_command_message(
@@ -884,66 +712,7 @@ async def get_host_software(host_id: int):
     """
     Get software packages for a specific host from the software_packages table.
     """
-    # Get the SQLAlchemy session
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
-
-    with session_local() as session:
-        # Find the host first to ensure it exists
-        host = session.query(models.Host).filter(models.Host.id == host_id).first()
-        if not host:
-            raise HTTPException(status_code=404, detail=_("Host not found"))
-
-        # Get software packages
-        software_packages = (
-            session.query(models.SoftwarePackage)
-            .filter(models.SoftwarePackage.host_id == host_id)
-            .order_by(models.SoftwarePackage.package_name)
-            .all()
-        )
-
-        # Convert to dict format
-        packages = []
-        for package in software_packages:
-            packages.append(
-                {
-                    "id": package.id,
-                    "package_name": package.package_name,
-                    "version": package.version,
-                    "description": package.description,
-                    "package_manager": package.package_manager,
-                    "source": package.source,
-                    "architecture": package.architecture,
-                    "size_bytes": package.size_bytes,
-                    "install_date": (
-                        package.install_date.isoformat()
-                        if package.install_date
-                        else None
-                    ),
-                    "vendor": package.vendor,
-                    "category": package.category,
-                    "license_type": package.license_type,
-                    "bundle_id": package.bundle_id,
-                    "app_store_id": package.app_store_id,
-                    "installation_path": package.installation_path,
-                    "is_system_package": package.is_system_package,
-                    "is_user_installed": package.is_user_installed,
-                    "created_at": (
-                        package.created_at.isoformat() if package.created_at else None
-                    ),
-                    "updated_at": (
-                        package.updated_at.isoformat() if package.updated_at else None
-                    ),
-                    "software_updated_at": (
-                        package.software_updated_at.isoformat()
-                        if package.software_updated_at
-                        else None
-                    ),
-                }
-            )
-
-        return packages
+    return get_host_software_packages(host_id)
 
 
 @router.post("/host/refresh/software/{host_id}", dependencies=[Depends(JWTBearer())])

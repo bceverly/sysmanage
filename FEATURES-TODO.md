@@ -301,3 +301,12 @@ like to add:
     needs to have a sysmanage or
     sysmanage-agent subdirectory in
     which the logs should be placed.
+
+47. Add new things to the dashboard
+    screen.  Specifically a card
+    like the one for hosts that shows
+    the total number of security
+    updates needed across all hosts
+    color coded so that 0 means green
+    and >0 means red.  Same with
+    system updates needed.

@@ -4,7 +4,8 @@
     "hosts": "Hôtes",
     "users": "Utilisateurs",
     "logout": "Déconnexion",
-    "logoAlt": "SysManage"
+    "logoAlt": "SysManage",
+    "updates": "Mises à jour"
   },
   "login": {
     "title": "Connexion à SysManage",
@@ -264,5 +265,52 @@
     "loadError": "Échec du chargement des données du profil",
     "saveError": "Échec de l'enregistrement des modifications du profil",
     "saveSuccess": "Profil mis à jour avec succès"
+  },
+  "updates": {
+    "title": "Mises à jour des Paquets",
+    "refresh": "Actualiser",
+    "loading": "Chargement des mises à jour...",
+    "noUpdates": "Tous les systèmes sont à jour",
+    "noMatchingUpdates": "Aucune mise à jour ne correspond aux filtres actuels",
+    "executeSuccess": "Exécution de mise à jour démarrée pour les paquets sélectionnés",
+    "executeError": "Échec de l'exécution des mises à jour",
+    "requiresReboot": "Nécessite un redémarrage",
+    "unknown": "Inconnu",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "pageInfo": "Page {{current}} sur {{total}}",
+    "selectAll": "Tout sélectionner",
+    "executeSelected": "Exécuter les Mises à jour Sélectionnées",
+    "stats": {
+      "total": "Total des Mises à jour",
+      "security": "Mises à jour de Sécurité",
+      "system": "Mises à jour du Système",
+      "hosts": "Hôtes Affectés"
+    },
+    "filters": {
+      "securityOnly": "Mises à jour de Sécurité Seulement",
+      "systemOnly": "Mises à jour du Système Seulement",
+      "allManagers": "Tous les Gestionnaires de Paquets"
+    },
+    "types": {
+      "security": "Sécurité",
+      "system": "Système",
+      "application": "Application"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "tooltip": "Voir les mises à jour disponibles"
+    },
+    "title": "Mises à jour Disponibles",
+    "loading": "Chargement des mises à jour...",
+    "totalUpdates": "Total des Mises à jour",
+    "securityUpdates": "Mises à jour de Sécurité",
+    "systemUpdates": "Mises à jour du Système",
+    "applicationUpdates": "Mises à jour d'Applications",
+    "hostsAffected": "{{count}} sur {{total}} hôtes ont des mises à jour",
+    "noUpdates": "Tous les systèmes sont à jour",
+    "viewSecurity": "Voir les Mises à jour de Sécurité",
+    "viewAll": "Voir Toutes les Mises à jour"
   }
 }

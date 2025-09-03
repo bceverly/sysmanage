@@ -4,7 +4,8 @@
     "hosts": "主機",
     "users": "用戶",
     "logout": "登出",
-    "logoAlt": "SysManage"
+    "logoAlt": "SysManage",
+    "updates": "更新"
   },
   "login": {
     "title": "登入 SysManage",
@@ -264,5 +265,52 @@
     "loadError": "載入個人檔案數據失敗",
     "saveError": "儲存個人檔案變更失敗",
     "saveSuccess": "個人檔案更新成功"
+  },
+  "updates": {
+    "title": "軟體包更新",
+    "refresh": "重新整理",
+    "loading": "正在載入更新...",
+    "noUpdates": "所有系統都是最新的",
+    "noMatchingUpdates": "沒有更新符合當前篩選條件",
+    "executeSuccess": "已開始為所選軟體包執行更新",
+    "executeError": "執行更新失敗",
+    "requiresReboot": "需要重新啟動",
+    "unknown": "未知",
+    "previous": "上一頁",
+    "next": "下一頁",
+    "pageInfo": "第 {{current}} 頁，共 {{total}} 頁",
+    "selectAll": "全選",
+    "executeSelected": "執行所選更新",
+    "stats": {
+      "total": "更新總數",
+      "security": "安全性更新",
+      "system": "系統更新",
+      "hosts": "受影響的主機"
+    },
+    "filters": {
+      "securityOnly": "僅安全性更新",
+      "systemOnly": "僅系統更新",
+      "allManagers": "所有套件管理器"
+    },
+    "types": {
+      "security": "安全性",
+      "system": "系統",
+      "application": "應用程式"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "tooltip": "檢視可用更新"
+    },
+    "title": "可用更新",
+    "loading": "正在載入更新...",
+    "totalUpdates": "更新總數",
+    "securityUpdates": "安全性更新",
+    "systemUpdates": "系統更新",
+    "applicationUpdates": "應用程式更新",
+    "hostsAffected": "{{total}} 個主機中有 {{count}} 個有更新",
+    "noUpdates": "所有系統都是最新的",
+    "viewSecurity": "檢視安全性更新",
+    "viewAll": "檢視所有更新"
   }
 }
