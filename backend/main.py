@@ -62,18 +62,52 @@ async def lifespan(_fastapi_app: FastAPI):
 # Start the application
 app = FastAPI(lifespan=lifespan)
 
-# Set up the CORS configuration
-origins = [
-    "http://" + app_config["webui"]["host"] + ":" + str(app_config["webui"]["port"]),
-    "http://" + app_config["api"]["host"] + ":" + str(app_config["api"]["port"]),
-    # Add localhost origins for development
-    "http://localhost:3000",
-    "http://localhost:8080",
-    "https://localhost:3000",
-    "http://localhost:7443",
-    "https://localhost:7443",
-    "https://sysmanage.org:7443",
-]
+# Set up the CORS configuration - purely config-driven
+origins = []
+
+# Add primary origins from config
+webui_host = app_config["webui"]["host"]
+webui_port = app_config["webui"]["port"]
+api_host = app_config["api"]["host"]
+api_port = app_config["api"]["port"]
+
+# Add HTTP origins - but skip 0.0.0.0 as it's not a valid browser origin
+if webui_host != "0.0.0.0":
+    origins.append(f"http://{webui_host}:{webui_port}")
+if api_host != "0.0.0.0":
+    origins.append(f"http://{api_host}:{api_port}")
+
+# Add HTTPS origins if certificates are configured - but skip 0.0.0.0
+if app_config["api"].get("certFile") and app_config["api"].get("keyFile"):
+    if webui_host != "0.0.0.0":
+        origins.append(f"https://{webui_host}:{webui_port}")
+    if api_host != "0.0.0.0":
+        origins.append(f"https://{api_host}:{api_port}")
+
+# Add localhost alternatives if host is 0.0.0.0 (listening on all interfaces)
+if webui_host == "0.0.0.0":
+    origins.extend([f"http://localhost:{webui_port}", f"http://127.0.0.1:{webui_port}"])
+    if app_config["api"].get("certFile"):
+        origins.extend(
+            [f"https://localhost:{webui_port}", f"https://127.0.0.1:{webui_port}"]
+        )
+
+if api_host == "0.0.0.0":
+    origins.extend([f"http://localhost:{api_port}", f"http://127.0.0.1:{api_port}"])
+    if app_config["api"].get("certFile"):
+        origins.extend(
+            [f"https://localhost:{api_port}", f"https://127.0.0.1:{api_port}"]
+        )
+
+# Add any additional origins specified in config
+if "cors" in app_config and "additional_origins" in app_config["cors"]:
+    origins.extend(app_config["cors"]["additional_origins"])
+
+# Debug logging
+print(f"CORS Debug - WebUI: {webui_host}:{webui_port}")
+print(f"CORS Debug - API: {api_host}:{api_port}")
+print(f"CORS Debug - Generated origins: {origins}")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -119,5 +153,5 @@ if __name__ == "__main__":
         app,
         host=app_config["api"]["host"],
         port=app_config["api"]["port"],
-        **ssl_config
+        **ssl_config,
     )

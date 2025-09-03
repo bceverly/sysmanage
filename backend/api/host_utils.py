@@ -71,10 +71,24 @@ def get_host_storage_devices(host_id: int) -> List[Dict[str, Any]]:
                 "device_path": device.device_path,
                 "mount_point": device.mount_point,
                 "file_system": device.file_system,
-                "size_gb": device.size_gb,
-                "used_gb": device.used_gb,
-                "available_gb": device.available_gb,
-                "usage_percent": device.usage_percent,
+                "size_gb": (
+                    round(device.capacity_bytes / (1024**3), 2)
+                    if device.capacity_bytes
+                    else 0
+                ),
+                "used_gb": (
+                    round(device.used_bytes / (1024**3), 2) if device.used_bytes else 0
+                ),
+                "available_gb": (
+                    round(device.available_bytes / (1024**3), 2)
+                    if device.available_bytes
+                    else 0
+                ),
+                "usage_percent": (
+                    round((device.used_bytes / device.capacity_bytes) * 100, 1)
+                    if device.capacity_bytes and device.used_bytes
+                    else 0
+                ),
                 "device_type": device.device_type,
             }
             for device in storage_devices
