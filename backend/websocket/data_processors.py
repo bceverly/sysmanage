@@ -68,10 +68,13 @@ def process_user_group_memberships(
                 for group_name in groups_list:
                     if group_name in group_id_map:
                         group_id = group_id_map[group_name]
+                        current_time = datetime.now(timezone.utc)
                         membership = UserGroupMembership(
                             host_id=host_id,
                             user_account_id=user_account_id,
                             user_group_id=group_id,
+                            created_at=current_time,
+                            updated_at=current_time,
                         )
                         db.merge(membership)
                         membership_count += 1
