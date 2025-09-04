@@ -349,3 +349,37 @@ def update_host_timestamp(host_id: int, field_name: str) -> None:
         if host:
             setattr(host, field_name, datetime.now(timezone.utc))
             session.commit()
+
+
+async def update_or_create_host(
+    db_session, hostname: str, ipv4: str = None, ipv6: str = None
+):
+    """
+    Update existing host record or create a new one.
+    """
+    host = db_session.query(models.Host).filter(models.Host.fqdn == hostname).first()
+
+    if host:
+        # Update existing host
+        host.ipv4 = ipv4
+        host.ipv6 = ipv6
+        host.last_access = datetime.now(timezone.utc)
+        host.active = True
+        host.status = "up"
+        # Don't modify approval_status for existing hosts - preserve the current status
+    else:
+        # Create new host with pending approval status
+        host = models.Host(
+            fqdn=hostname,
+            ipv4=ipv4,
+            ipv6=ipv6,
+            last_access=datetime.now(timezone.utc),
+            active=True,
+            status="up",
+            approval_status="pending",  # New hosts need approval
+        )
+        db_session.add(host)
+
+    db_session.commit()
+    db_session.refresh(host)
+    return host

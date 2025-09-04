@@ -296,8 +296,13 @@
     },
     "types": {
       "security": "Security",
-      "system": "System",
+      "system": "System", 
       "application": "Application"
+    },
+    "status": {
+      "pending": "Update Requested",
+      "success": "Successfully Updated",
+      "failed": "Update Failed"
     }
   },
   "notifications": {

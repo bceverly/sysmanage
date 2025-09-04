@@ -5,269 +5,362 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-03 14:35-0400\n"
+"POT-Creation-Date: 2025-09-04 11:51-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
+#: backend/security/communication_security.py:112
 msgid "Invalid token signature"
 msgstr "अवैध टोकन हस्ताक्षर"
 
+#: backend/security/communication_security.py:118
 msgid "Token expired"
 msgstr "टोकन का समय समाप्त"
 
+#: backend/security/communication_security.py:137
 #, fuzzy
 msgid "Malformed token"
 msgstr "समाप्त हो चुका टोकन।"
 
+#: backend/security/communication_security.py:328
 msgid "Encrypted data expired"
 msgstr "एन्क्रिप्टेड डेटा का समय समाप्त"
 
+#: backend/security/communication_security.py:339
 msgid "Invalid signature"
 msgstr "अवैध हस्ताक्षर"
 
+#: backend/security/communication_security.py:346
 #, python-format
 msgid "Decryption failed: %s"
 msgstr "डिक्रिप्शन असफल: %s"
 
+#: backend/auth/auth_bearer.py:33
 msgid "Invalid authentication scheme."
 msgstr "अवैध प्रमाणीकरण योजना।"
 
+#: backend/auth/auth_bearer.py:36
 msgid "Expired token."
 msgstr "समाप्त हो चुका टोकन।"
 
+#: backend/auth/auth_bearer.py:40
 msgid "Invalid authorization code."
 msgstr "अवैध प्राधिकरण कोड।"
 
+#: backend/auth/auth_bearer.py:69
 msgid "Could not validate credentials"
 msgstr "प्रमाणीकरण की पुष्टि नहीं हो सकी"
 
+#: backend/api/host_utils.py:25 backend/api/host_utils.py:38
+#: backend/api/host_utils.py:58 backend/api/host_utils.py:108
+#: backend/api/host_utils.py:150 backend/api/host_utils.py:186
+#: backend/api/host_utils.py:242 backend/api/host_utils.py:294
+#: backend/api/host.py:98 backend/api/host.py:258 backend/api/host.py:295
+#: backend/api/host.py:350 backend/api/host.py:392 backend/api/host.py:428
+#: backend/api/host.py:462 backend/api/host.py:582 backend/api/host.py:696
+#: backend/api/host.py:736 backend/api/updates.py:103
+#: backend/api/updates.py:235 backend/api/updates.py:552
+#: backend/api/certificates.py:72 backend/api/certificates.py:115
 msgid "Host not found"
 msgstr "होस्ट नहीं मिला"
 
+#: backend/api/host_utils.py:45 backend/api/certificates.py:75
 #, fuzzy
 msgid "Host is not approved"
 msgstr "होस्ट अनुमोदित नहीं है"
 
+#: backend/api/auth.py:119
 msgid "Account is locked due to too many failed login attempts"
 msgstr "बहुत सारे असफल लॉगिन प्रयासों के कारण खाता लॉक हो गया है"
 
+#: backend/api/auth.py:170
 msgid "Account locked due to too many failed login attempts"
 msgstr "बहुत सारे असफल लॉगिन प्रयासों के कारण खाता लॉक"
 
+#: backend/api/auth.py:179
 msgid "Invalid username or password"
 msgstr "अवैध उपयोगकर्ता नाम या पासवर्ड"
 
+#: backend/api/user.py:51 backend/api/user.py:100 backend/api/user.py:132
+#: backend/api/user.py:164 backend/api/user.py:282 backend/api/user.py:332
+#: backend/api/profile.py:58 backend/api/profile.py:89
 #, fuzzy
 msgid "User not found"
 msgstr "उपयोगकर्ता नहीं मिला"
 
+#: backend/api/user.py:233
 msgid "User already exists"
 msgstr "उपयोगकर्ता पहले से मौजूद है"
 
+#: backend/api/fleet.py:80
 #, python-format
 msgid "Agent with hostname %s not found"
 msgstr "होस्टनाम %s वाला एजेंट नहीं मिला"
 
+#: backend/api/fleet.py:96 backend/api/fleet.py:126 backend/api/fleet.py:159
+#: backend/api/fleet.py:194 backend/api/fleet.py:224 backend/api/fleet.py:251
 #, python-format
 msgid "Agent %s is not connected"
 msgstr "एजेंट %s कनेक्ट नहीं है"
 
+#: backend/api/fleet.py:107
 #, python-format
 msgid "Failed to send command to %s"
 msgstr "%s को कमांड भेजने में असफल"
 
+#: backend/api/fleet.py:113
 #, python-brace-format
 msgid "Command {command_type} sent to {hostname}"
 msgstr "कमांड {command_type} को {hostname} भेजा गया"
 
+#: backend/api/fleet.py:141
 #, python-format
 msgid "Failed to send shell command to %s"
 msgstr "%s को शेल कमांड भेजने में असफल"
 
+#: backend/api/fleet.py:148
 #, python-brace-format
 msgid "Shell command sent to {hostname}"
 msgstr "शेल कमांड {hostname} को भेजा गया"
 
+#: backend/api/fleet.py:174
 #, python-format
 msgid "Failed to send install command to %s"
 msgstr "%s को इंस्टॉल कमांड भेजने में असफल"
 
+#: backend/api/fleet.py:181
 #, python-brace-format
 msgid "Package installation command sent to {hostname}"
 msgstr "पैकेज इंस्टॉलेशन कमांड {hostname} को भेजा गया"
 
+#: backend/api/fleet.py:206
 #, python-format
 msgid "Failed to send restart command to %s"
 msgstr "%s को पुनः आरंभ कमांड भेजने में असफल"
 
+#: backend/api/fleet.py:213
 #, python-brace-format
 msgid "Service restart command sent to {hostname}"
 msgstr "सेवा पुनः आरंभ कमांड {hostname} को भेजा गया"
 
+#: backend/api/fleet.py:234
 #, python-format
 msgid "Failed to send update command to %s"
 msgstr "%s को अपडेट कमांड भेजने में असफल"
 
+#: backend/api/fleet.py:240
 #, python-brace-format
 msgid "System update command sent to {hostname}"
 msgstr "सिस्टम अपडेट कमांड {hostname} को भेजा गया"
 
+#: backend/api/fleet.py:261
 #, python-format
 msgid "Failed to send reboot command to %s"
 msgstr "%s को रीबूट कमांड भेजने में असफल"
 
+#: backend/api/fleet.py:267
 #, python-brace-format
 msgid "Reboot command sent to {hostname}"
 msgstr "रीबूट कमांड {hostname} को भेजा गया"
 
+#: backend/api/fleet.py:286
 #, python-brace-format
 msgid "Command {command_type} broadcast to {sent_count} agents"
 msgstr "कमांड {command_type} को {sent_count} एजेंटों में प्रसारित किया गया"
 
+#: backend/api/fleet.py:312
 #, python-brace-format
 msgid "Shell command broadcast to {sent_count} agents"
 msgstr "शेल कमांड को {sent_count} एजेंटों में प्रसारित किया गया"
 
+#: backend/api/fleet.py:332
 #, python-format
 msgid "No agents found for platform %s"
 msgstr "प्लेटफॉर्म %s के लिए कोई एजेंट नहीं मिला"
 
+#: backend/api/fleet.py:341
 #, python-brace-format
 msgid "Command {command_type} sent to {sent_count} {platform} agents"
 msgstr "कमांड {command_type} को {sent_count} {platform} एजेंटों को भेजा गया"
 
+#: backend/api/host.py:156
 msgid "Host already exists"
 msgstr "होस्ट पहले से मौजूद है"
 
+#: backend/api/host.py:299 backend/api/host.py:354
 msgid "Host is not in pending status"
 msgstr "होस्ट लंबित स्थिति में नहीं है"
 
+#: backend/api/host.py:405 backend/api/host.py:441 backend/api/host.py:595
+#: backend/api/host.py:709 backend/api/host.py:747
 msgid "Agent is not connected"
 msgstr "एजेंट कनेक्ट नहीं है"
 
+#: backend/api/host.py:407
 msgid "OS version update requested"
 msgstr "ओएस संस्करण अपडेट का अनुरोध किया गया"
 
+#: backend/api/host.py:443
 #, fuzzy
 msgid "Updates check requested"
 msgstr "अपडेट जांच का अनुरोध"
 
+#: backend/api/host.py:544
 msgid "Hardware information updated successfully"
 msgstr "हार्डवेयर जानकारी सफलतापूर्वक अपडेट की गई"
 
+#: backend/api/host.py:597
 msgid "Hardware update requested"
 msgstr "हार्डवेयर अपडेट का अनुरोध किया गया"
 
+#: backend/api/host.py:711
 msgid "User access update requested"
 msgstr "उपयोगकर्ता एक्सेस अपडेट का अनुरोध किया गया"
 
+#: backend/api/host.py:749
 msgid "Software inventory update requested"
 msgstr "सॉफ़्टवेयर इन्वेंटरी अपडेट का अनुरोध किया गया"
 
+#: backend/api/config_management.py:77
 msgid "Configuration pushed to all agents"
 msgstr "कॉन्फ़िगरेशन सभी एजेंटों को पुश की गई"
 
+#: backend/api/config_management.py:89
 msgid "Configuration pushed successfully"
 msgstr "कॉन्फ़िगरेशन सफलतापूर्वक पुश की गई"
 
+#: backend/api/config_management.py:93
 #, fuzzy
 msgid "Agent not found or unreachable"
 msgstr "एजेंट नहीं मिला या पहुंच योग्य नहीं है"
 
+#: backend/api/config_management.py:101
 msgid "Configuration pushed to platform agents"
 msgstr "कॉन्फ़िगरेशन प्लेटफॉर्म एजेंटों को पुश की गई"
 
+#: backend/api/config_management.py:108
 msgid "Must specify target_hostname, target_platform, or push_to_all"
 msgstr "target_hostname, target_platform, या push_to_all निर्दिष्ट करना होगा"
 
+#: backend/api/config_management.py:193
 msgid "Configuration acknowledgment processed"
 msgstr "कॉन्फ़िगरेशन स्वीकृति प्रसंस्कृत की गई"
 
+#: backend/api/updates.py:143
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "अपडेट संग्रहीत करने में असफल: %s"
 
+#: backend/api/updates.py:216
 #, python-format
 msgid "Failed to get update summary: %s"
 msgstr "अपडेट सारांश प्राप्त करने में असफल: %s"
 
+#: backend/api/updates.py:298
 #, python-format
 msgid "Failed to get host updates: %s"
 msgstr "होस्ट अपडेट प्राप्त करने में असफल: %s"
 
+#: backend/api/updates.py:378
 #, python-format
 msgid "Failed to get updates: %s"
 msgstr "अपडेट प्राप्त करने में असफल: %s"
 
+#: backend/api/updates.py:425
 #, fuzzy
 msgid "Host not found or inactive"
 msgstr "होस्ट नहीं मिला या निष्क्रिय"
 
+#: backend/api/updates.py:455
 msgid "No matching updates found for specified packages"
 msgstr "निर्दिष्ट पैकेज के लिए कोई मिलान अपडेट नहीं मिला"
 
+#: backend/api/updates.py:502
 msgid "Update execution started"
 msgstr "अपडेट निष्पादन शुरू"
 
+#: backend/api/updates.py:513
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "कमांड भेजने में असफल: %s"
 
+#: backend/api/updates.py:521
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "अपडेट कमांड भेजने में असफल: %s"
 
+#: backend/api/updates.py:534
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "अपडेट निष्पादित करने में असफल: %s"
 
+#: backend/api/updates.py:589
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "निष्पादन लॉग प्राप्त करने में असफल: %s"
 
+#: backend/api/updates.py:609
+#, fuzzy, python-format
+msgid "Failed to get update results: %s"
+msgstr "अपडेट प्राप्त करने में असफल: %s"
+
+#: backend/api/certificates.py:32
 #, python-format
 msgid "Failed to get server fingerprint: %s"
 msgstr "सर्वर फिंगरप्रिंट प्राप्त करने में असफल: %s"
 
+#: backend/api/certificates.py:51
 #, python-format
 msgid "Failed to get CA certificate: %s"
 msgstr "CA प्रमाणपत्र प्राप्त करने में असफल: %s"
 
+#: backend/api/agent.py:65
 msgid "Rate limit exceeded"
 msgstr "दर सीमा पार"
 
+#: backend/api/agent.py:141
 #, fuzzy
 msgid "Host not approved"
 msgstr "होस्ट अनुमोदित नहीं है"
 
+#: backend/api/agent.py:157
 #, python-brace-format
 msgid "Host {hostname} registered successfully"
 msgstr "होस्ट {hostname} सफलतापूर्वक पंजीकृत हुआ"
 
+#: backend/api/agent.py:166
 msgid "Hostname is required for registration"
 msgstr "पंजीकरण के लिए होस्टनाम आवश्यक"
 
+#: backend/api/agent.py:345
 msgid "os_version_updated"
 msgstr "ओएस संस्करण अपडेट किया गया"
 
+#: backend/api/agent.py:470
 msgid "hardware_updated"
 msgstr "हार्डवेयर अपडेट किया गया"
 
+#: backend/api/agent.py:577
 msgid "user_access_updated"
 msgstr "उपयोगकर्ता एक्सेस अपडेट किया गया"
 
+#: backend/api/agent.py:647
 msgid "software_inventory_updated"
 msgstr "सॉफ़्टवेयर इन्वेंटरी अपडेट किया गया"
 
+#: backend/api/agent.py:855
 #, python-format
 msgid "Authentication failed: %s"
 msgstr "प्रमाणीकरण असफल: %s"
 
+#: backend/api/agent.py:860
 msgid "Authentication token required"
 msgstr "प्रमाणीकरण टोकन आवश्यक"
 
+#: backend/api/agent.py:888
 msgid "Message failed security validation"
 msgstr "संदेश सुरक्षा सत्यापन में असफल"
 
+#: backend/api/agent.py:1004
 msgid "Message must be valid JSON"
 msgstr "संदेश वैध JSON होना चाहिए"

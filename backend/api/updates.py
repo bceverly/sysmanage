@@ -2,11 +2,12 @@
 This module houses the API routes for package update management in SysManage.
 """
 
+import logging
 from datetime import datetime, timezone
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy import and_, desc
 from sqlalchemy.orm import sessionmaker
 
@@ -15,6 +16,8 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -54,6 +57,25 @@ class UpdateExecutionRequest(BaseModel):
     host_ids: List[int]
     package_names: List[str]
     package_managers: Optional[List[str]] = None
+
+    @validator("host_ids")
+    def validate_host_ids(cls, values):  # pylint: disable=no-self-argument
+        if not values:
+            raise ValueError("host_ids cannot be empty")
+        return values
+
+    @validator("package_names")
+    def validate_package_names(cls, values):  # pylint: disable=no-self-argument
+        if not values:
+            raise ValueError("package_names cannot be empty")
+        return values
+
+    @validator("package_managers", pre=True)
+    def validate_package_managers(cls, values):  # pylint: disable=no-self-argument
+        # Convert empty array to None
+        if values == []:
+            return None
+        return values
 
 
 class UpdateStatsSummary(BaseModel):
@@ -122,9 +144,9 @@ async def report_updates(
         ) from e
 
 
-@router.get("/summary", response_model=UpdateStatsSummary)
+@router.get("/summary")
 async def get_update_summary(dependencies=Depends(JWTBearer())):
-    """Get summary statistics for package updates across all hosts."""
+    """Get summary statistics for package updates across all hosts, including update results."""
     try:
         session_factory = sessionmaker(bind=db.engine)
         with session_factory() as session:
@@ -167,14 +189,27 @@ async def get_update_summary(dependencies=Depends(JWTBearer())):
                 .count()
             )
 
-            return UpdateStatsSummary(
-                total_hosts=total_hosts,
-                hosts_with_updates=hosts_with_updates,
-                total_updates=total_updates,
-                security_updates=security_updates,
-                system_updates=system_updates,
-                application_updates=application_updates,
-            )
+            # Try to get update results from the agent module's cache
+            update_results = {}
+            try:
+                import backend.api.agent as agent_module
+
+                if hasattr(agent_module, "handle_update_apply_result"):
+                    handler = getattr(agent_module, "handle_update_apply_result")
+                    if hasattr(handler, "update_results_cache"):
+                        update_results = handler.update_results_cache.copy()
+            except Exception:
+                pass  # If we can't get the cache, just return empty results
+
+            return {
+                "total_hosts": total_hosts,
+                "hosts_with_updates": hosts_with_updates,
+                "total_updates": total_updates,
+                "security_updates": security_updates,
+                "system_updates": system_updates,
+                "application_updates": application_updates,
+                "results": update_results,
+            }
 
     except Exception as e:
         raise HTTPException(
@@ -222,6 +257,8 @@ async def get_host_updates(
             for update in updates:
                 update_dict = {
                     "id": update.id,
+                    "host_id": host_id,  # Add missing host_id
+                    "hostname": host.fqdn,  # Add missing hostname
                     "package_name": update.package_name,
                     "current_version": update.current_version,
                     "available_version": update.available_version,
@@ -342,12 +379,30 @@ async def get_all_updates(
         ) from e
 
 
+@router.post("/execute-debug")
+async def debug_execute_updates(
+    raw_body: dict = Body(...), dependencies=Depends(JWTBearer())
+):
+    """Debug endpoint to see what data we're receiving."""
+    print(f"DEBUG RAW BODY: {raw_body}")
+    try:
+        request = UpdateExecutionRequest(**raw_body)
+        print(f"DEBUG VALIDATION SUCCESS: {request}")
+        return {"success": True, "message": "Validation passed", "data": request.dict()}
+    except Exception as e:
+        print(f"DEBUG VALIDATION ERROR: {e}")
+        return {"success": False, "error": str(e)}
+
+
 @router.post("/execute")
 async def execute_updates(
     request: UpdateExecutionRequest, dependencies=Depends(JWTBearer())
 ):
     """Execute package updates on specified hosts."""
     try:
+        print(
+            f"DEBUG: Received update execution request: host_ids={request.host_ids}, package_names={request.package_names}, package_managers={request.package_managers}"
+        )
         session_factory = sessionmaker(bind=db.engine)
         with session_factory() as session:
             results = []
@@ -437,7 +492,7 @@ async def execute_updates(
                         },
                     )
 
-                    await connection_manager.send_to_host(host.fqdn, command_message)
+                    await connection_manager.send_to_host(host.id, command_message)
 
                     results.append(
                         {
@@ -470,6 +525,11 @@ async def execute_updates(
             return {"results": results}
 
     except Exception as e:
+        import traceback
+
+        error_details = traceback.format_exc()
+        print(f"ERROR: Update execution failed: {str(e)}")
+        print(f"ERROR: Full traceback:\n{error_details}")
         raise HTTPException(
             status_code=500, detail=_("Failed to execute updates: %s") % str(e)
         ) from e
@@ -528,3 +588,42 @@ async def get_execution_log(
         raise HTTPException(
             status_code=500, detail=_("Failed to get execution log: %s") % str(e)
         ) from e
+
+
+@router.get("/results", response_model=UpdateStatsSummary)
+async def get_update_results(dependencies=Depends(JWTBearer())):
+    """Get recent update application results from agents."""
+    try:
+        logger.info("SUCCESS: get_update_results called successfully")
+        return UpdateStatsSummary(
+            total_hosts=0,
+            hosts_with_updates=0,
+            total_updates=0,
+            security_updates=0,
+            system_updates=0,
+            application_updates=0,
+        )
+    except Exception as e:
+        logger.error("Error in get_update_results: %s", e)
+        raise HTTPException(
+            status_code=500, detail=_("Failed to get update results: %s") % str(e)
+        ) from e
+
+
+@router.get("/update-status")
+async def get_update_status(dependencies=Depends(JWTBearer())):
+    """Get recent update application results from agents."""
+    try:
+        # Try to get the update results cache from the global scope
+        import backend.api.agent as agent_module
+
+        if hasattr(agent_module, "handle_update_apply_result"):
+            handler = getattr(agent_module, "handle_update_apply_result")
+            if hasattr(handler, "update_results_cache"):
+                results = handler.update_results_cache.copy()
+                return {"results": results}
+
+        return {"results": {}}
+    except Exception as e:
+        logger.error("Error fetching update status: %s", e)
+        return {"results": {}, "error": str(e)}

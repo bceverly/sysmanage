@@ -44,6 +44,16 @@ export interface HostUpdatesResponse {
   application_updates: number;
 }
 
+export interface UpdateResultsResponse {
+  total_hosts: number;
+  hosts_with_updates: number;
+  total_updates: number;
+  security_updates: number;
+  system_updates: number;
+  application_updates: number;
+  results: Record<string, unknown>;
+}
+
 class UpdatesService {
   private baseURL: string;
 
@@ -121,13 +131,15 @@ class UpdatesService {
 
   async executeUpdates(hostIds: number[], packageNames: string[], packageManagers?: string[]): Promise<unknown> {
     try {
+      const requestData = {
+        host_ids: hostIds,
+        package_names: packageNames,
+        package_managers: packageManagers,
+      };
+      
       const response = await axios.post(
         `${this.baseURL}/api/updates/execute`,
-        {
-          host_ids: hostIds,
-          package_names: packageNames,
-          package_managers: packageManagers,
-        },
+        requestData,
         {
           headers: this.getAuthHeaders(),
         }
@@ -151,6 +163,19 @@ class UpdatesService {
       return response.data;
     } catch (error) {
       console.error('Failed to fetch execution log:', error);
+      throw error;
+    }
+  }
+
+  async getUpdateResults(): Promise<UpdateResultsResponse> {
+    try {
+      const response = await axios.get(`${this.baseURL}/api/updates/summary`, {
+        headers: this.getAuthHeaders(),
+      });
+      // Return the actual response data which includes update results
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch update results:', error);
       throw error;
     }
   }

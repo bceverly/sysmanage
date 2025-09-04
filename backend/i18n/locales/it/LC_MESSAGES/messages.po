@@ -5,270 +5,363 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-03 14:35-0400\n"
+"POT-Creation-Date: 2025-09-04 11:51-0400\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
+#: backend/security/communication_security.py:112
 msgid "Invalid token signature"
 msgstr "Firma del token non valida"
 
+#: backend/security/communication_security.py:118
 msgid "Token expired"
 msgstr "Token scaduto"
 
+#: backend/security/communication_security.py:137
 #, fuzzy
 msgid "Malformed token"
 msgstr "Token scaduto."
 
+#: backend/security/communication_security.py:328
 msgid "Encrypted data expired"
 msgstr "Dati crittografati scaduti"
 
+#: backend/security/communication_security.py:339
 msgid "Invalid signature"
 msgstr "Firma non valida"
 
+#: backend/security/communication_security.py:346
 #, python-format
 msgid "Decryption failed: %s"
 msgstr "Decrittografia fallita: %s"
 
+#: backend/auth/auth_bearer.py:33
 msgid "Invalid authentication scheme."
 msgstr "Schema di autenticazione non valido."
 
+#: backend/auth/auth_bearer.py:36
 msgid "Expired token."
 msgstr "Token scaduto."
 
+#: backend/auth/auth_bearer.py:40
 msgid "Invalid authorization code."
 msgstr "Codice di autorizzazione non valido."
 
+#: backend/auth/auth_bearer.py:69
 msgid "Could not validate credentials"
 msgstr "Impossibile validare le credenziali"
 
+#: backend/api/host_utils.py:25 backend/api/host_utils.py:38
+#: backend/api/host_utils.py:58 backend/api/host_utils.py:108
+#: backend/api/host_utils.py:150 backend/api/host_utils.py:186
+#: backend/api/host_utils.py:242 backend/api/host_utils.py:294
+#: backend/api/host.py:98 backend/api/host.py:258 backend/api/host.py:295
+#: backend/api/host.py:350 backend/api/host.py:392 backend/api/host.py:428
+#: backend/api/host.py:462 backend/api/host.py:582 backend/api/host.py:696
+#: backend/api/host.py:736 backend/api/updates.py:103
+#: backend/api/updates.py:235 backend/api/updates.py:552
+#: backend/api/certificates.py:72 backend/api/certificates.py:115
 msgid "Host not found"
 msgstr "Host non trovato"
 
+#: backend/api/host_utils.py:45 backend/api/certificates.py:75
 #, fuzzy
 msgid "Host is not approved"
 msgstr "L'host non è approvato"
 
+#: backend/api/auth.py:119
 msgid "Account is locked due to too many failed login attempts"
 msgstr "L'account è bloccato a causa di troppi tentativi di accesso falliti"
 
+#: backend/api/auth.py:170
 msgid "Account locked due to too many failed login attempts"
 msgstr "Account bloccato per troppi tentativi di accesso falliti"
 
+#: backend/api/auth.py:179
 msgid "Invalid username or password"
 msgstr "Nome utente o password non validi"
 
+#: backend/api/user.py:51 backend/api/user.py:100 backend/api/user.py:132
+#: backend/api/user.py:164 backend/api/user.py:282 backend/api/user.py:332
+#: backend/api/profile.py:58 backend/api/profile.py:89
 #, fuzzy
 msgid "User not found"
 msgstr "Utente non trovato"
 
+#: backend/api/user.py:233
 msgid "User already exists"
 msgstr "L'utente esiste già"
 
+#: backend/api/fleet.py:80
 #, python-format
 msgid "Agent with hostname %s not found"
 msgstr "Agente con hostname %s non trovato"
 
+#: backend/api/fleet.py:96 backend/api/fleet.py:126 backend/api/fleet.py:159
+#: backend/api/fleet.py:194 backend/api/fleet.py:224 backend/api/fleet.py:251
 #, python-format
 msgid "Agent %s is not connected"
 msgstr "L'agente %s non è connesso"
 
+#: backend/api/fleet.py:107
 #, python-format
 msgid "Failed to send command to %s"
 msgstr "Fallimento nell'invio comando a %s"
 
+#: backend/api/fleet.py:113
 #, python-brace-format
 msgid "Command {command_type} sent to {hostname}"
 msgstr "Comando {command_type} inviato a {hostname}"
 
+#: backend/api/fleet.py:141
 #, python-format
 msgid "Failed to send shell command to %s"
 msgstr "Fallimento nell'invio comando shell a %s"
 
+#: backend/api/fleet.py:148
 #, python-brace-format
 msgid "Shell command sent to {hostname}"
 msgstr "Comando shell inviato a {hostname}"
 
+#: backend/api/fleet.py:174
 #, python-format
 msgid "Failed to send install command to %s"
 msgstr "Fallimento nell'invio comando di installazione a %s"
 
+#: backend/api/fleet.py:181
 #, python-brace-format
 msgid "Package installation command sent to {hostname}"
 msgstr "Comando di installazione pacchetto inviato a {hostname}"
 
+#: backend/api/fleet.py:206
 #, python-format
 msgid "Failed to send restart command to %s"
 msgstr "Fallimento nell'invio comando di riavvio a %s"
 
+#: backend/api/fleet.py:213
 #, python-brace-format
 msgid "Service restart command sent to {hostname}"
 msgstr "Comando di riavvio servizio inviato a {hostname}"
 
+#: backend/api/fleet.py:234
 #, python-format
 msgid "Failed to send update command to %s"
 msgstr "Fallimento nell'invio comando di aggiornamento a %s"
 
+#: backend/api/fleet.py:240
 #, python-brace-format
 msgid "System update command sent to {hostname}"
 msgstr "Comando di aggiornamento sistema inviato a {hostname}"
 
+#: backend/api/fleet.py:261
 #, python-format
 msgid "Failed to send reboot command to %s"
 msgstr "Fallimento nell'invio comando di riavvio a %s"
 
+#: backend/api/fleet.py:267
 #, python-brace-format
 msgid "Reboot command sent to {hostname}"
 msgstr "Comando di riavvio inviato a {hostname}"
 
+#: backend/api/fleet.py:286
 #, python-brace-format
 msgid "Command {command_type} broadcast to {sent_count} agents"
 msgstr "Comando {command_type} trasmesso a {sent_count} agent"
 
+#: backend/api/fleet.py:312
 #, python-brace-format
 msgid "Shell command broadcast to {sent_count} agents"
 msgstr "Comando shell trasmesso a {sent_count} agent"
 
+#: backend/api/fleet.py:332
 #, python-format
 msgid "No agents found for platform %s"
 msgstr "Nessun agente trovato per la piattaforma %s"
 
+#: backend/api/fleet.py:341
 #, python-brace-format
 msgid "Command {command_type} sent to {sent_count} {platform} agents"
 msgstr "Comando {command_type} inviato a {sent_count} agent {platform}"
 
+#: backend/api/host.py:156
 msgid "Host already exists"
 msgstr "L'host esiste già"
 
+#: backend/api/host.py:299 backend/api/host.py:354
 msgid "Host is not in pending status"
 msgstr "L'host non è in stato di attesa"
 
+#: backend/api/host.py:405 backend/api/host.py:441 backend/api/host.py:595
+#: backend/api/host.py:709 backend/api/host.py:747
 msgid "Agent is not connected"
 msgstr "L'agent non è connesso"
 
+#: backend/api/host.py:407
 msgid "OS version update requested"
 msgstr "Aggiornamento versione OS richiesto"
 
+#: backend/api/host.py:443
 #, fuzzy
 msgid "Updates check requested"
 msgstr "Controllo aggiornamenti richiesto"
 
+#: backend/api/host.py:544
 msgid "Hardware information updated successfully"
 msgstr "Informazioni hardware aggiornate con successo"
 
+#: backend/api/host.py:597
 msgid "Hardware update requested"
 msgstr "Aggiornamento hardware richiesto"
 
+#: backend/api/host.py:711
 msgid "User access update requested"
 msgstr "Aggiornamento accesso utenti richiesto"
 
+#: backend/api/host.py:749
 msgid "Software inventory update requested"
 msgstr "Aggiornamento inventario software richiesto"
 
+#: backend/api/config_management.py:77
 msgid "Configuration pushed to all agents"
 msgstr "Configurazione inviata a tutti gli agent"
 
+#: backend/api/config_management.py:89
 msgid "Configuration pushed successfully"
 msgstr "Configurazione inviata con successo"
 
+#: backend/api/config_management.py:93
 #, fuzzy
 msgid "Agent not found or unreachable"
 msgstr "Agente non trovato o non raggiungibile"
 
+#: backend/api/config_management.py:101
 msgid "Configuration pushed to platform agents"
 msgstr "Configurazione inviata agli agent di piattaforma"
 
+#: backend/api/config_management.py:108
 msgid "Must specify target_hostname, target_platform, or push_to_all"
 msgstr "Deve specificare target_hostname, target_platform, o push_to_all"
 
+#: backend/api/config_management.py:193
 msgid "Configuration acknowledgment processed"
 msgstr "Conferma configurazione elaborata"
 
+#: backend/api/updates.py:143
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "Fallimento nel salvare gli aggiornamenti: %s"
 
+#: backend/api/updates.py:216
 #, python-format
 msgid "Failed to get update summary: %s"
 msgstr "Fallimento nell'ottenere il riassunto aggiornamento: %s"
 
+#: backend/api/updates.py:298
 #, python-format
 msgid "Failed to get host updates: %s"
 msgstr "Fallimento nell'ottenere gli aggiornamenti host: %s"
 
+#: backend/api/updates.py:378
 #, python-format
 msgid "Failed to get updates: %s"
 msgstr "Fallimento nell'ottenere gli aggiornamenti: %s"
 
+#: backend/api/updates.py:425
 #, fuzzy
 msgid "Host not found or inactive"
 msgstr "Host non trovato o inattivo"
 
+#: backend/api/updates.py:455
 msgid "No matching updates found for specified packages"
 msgstr ""
 "Nessun aggiornamento corrispondente trovato per i pacchetti specificati"
 
+#: backend/api/updates.py:502
 msgid "Update execution started"
 msgstr "Esecuzione aggiornamento avviata"
 
+#: backend/api/updates.py:513
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "Fallimento nell'invio comando: %s"
 
+#: backend/api/updates.py:521
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "Fallimento nell'invio comando di aggiornamento: %s"
 
+#: backend/api/updates.py:534
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "Fallimento nell'esecuzione degli aggiornamenti: %s"
 
+#: backend/api/updates.py:589
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "Fallimento nell'ottenere il log di esecuzione: %s"
 
+#: backend/api/updates.py:609
+#, fuzzy, python-format
+msgid "Failed to get update results: %s"
+msgstr "Fallimento nell'ottenere gli aggiornamenti: %s"
+
+#: backend/api/certificates.py:32
 #, python-format
 msgid "Failed to get server fingerprint: %s"
 msgstr "Fallimento nell'ottenere l'impronta del server: %s"
 
+#: backend/api/certificates.py:51
 #, python-format
 msgid "Failed to get CA certificate: %s"
 msgstr "Fallimento nell'ottenere il certificato CA: %s"
 
+#: backend/api/agent.py:65
 msgid "Rate limit exceeded"
 msgstr "Limite di velocità superato"
 
+#: backend/api/agent.py:141
 #, fuzzy
 msgid "Host not approved"
 msgstr "L'host non è approvato"
 
+#: backend/api/agent.py:157
 #, python-brace-format
 msgid "Host {hostname} registered successfully"
 msgstr "Host {hostname} registrato con successo"
 
+#: backend/api/agent.py:166
 msgid "Hostname is required for registration"
 msgstr "L'hostname è richiesto per la registrazione"
 
+#: backend/api/agent.py:345
 msgid "os_version_updated"
 msgstr "Versione OS aggiornata"
 
+#: backend/api/agent.py:470
 msgid "hardware_updated"
 msgstr "Hardware aggiornato"
 
+#: backend/api/agent.py:577
 msgid "user_access_updated"
 msgstr "Accesso utenti aggiornato"
 
+#: backend/api/agent.py:647
 msgid "software_inventory_updated"
 msgstr "Inventario software aggiornato"
 
+#: backend/api/agent.py:855
 #, python-format
 msgid "Authentication failed: %s"
 msgstr "Autenticazione fallita: %s"
 
+#: backend/api/agent.py:860
 msgid "Authentication token required"
 msgstr "Token di autenticazione richiesto"
 
+#: backend/api/agent.py:888
 msgid "Message failed security validation"
 msgstr "Il messaggio ha fallito la validazione di sicurezza"
 
+#: backend/api/agent.py:1004
 msgid "Message must be valid JSON"
 msgstr "Il messaggio deve essere un JSON valido"

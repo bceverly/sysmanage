@@ -5,269 +5,362 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-03 14:35-0400\n"
+"POT-Creation-Date: 2025-09-04 11:51-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
+#: backend/security/communication_security.py:112
 msgid "Invalid token signature"
 msgstr "无效的令牌签名"
 
+#: backend/security/communication_security.py:118
 msgid "Token expired"
 msgstr "令牌过期"
 
+#: backend/security/communication_security.py:137
 #, fuzzy
 msgid "Malformed token"
 msgstr "过期的令牌。"
 
+#: backend/security/communication_security.py:328
 msgid "Encrypted data expired"
 msgstr "加密数据过期"
 
+#: backend/security/communication_security.py:339
 msgid "Invalid signature"
 msgstr "无效签名"
 
+#: backend/security/communication_security.py:346
 #, python-format
 msgid "Decryption failed: %s"
 msgstr "解密失败：%s"
 
+#: backend/auth/auth_bearer.py:33
 msgid "Invalid authentication scheme."
 msgstr "无效的身份验证方案。"
 
+#: backend/auth/auth_bearer.py:36
 msgid "Expired token."
 msgstr "过期的令牌。"
 
+#: backend/auth/auth_bearer.py:40
 msgid "Invalid authorization code."
 msgstr "无效的授权码。"
 
+#: backend/auth/auth_bearer.py:69
 msgid "Could not validate credentials"
 msgstr "无法验证凭据"
 
+#: backend/api/host_utils.py:25 backend/api/host_utils.py:38
+#: backend/api/host_utils.py:58 backend/api/host_utils.py:108
+#: backend/api/host_utils.py:150 backend/api/host_utils.py:186
+#: backend/api/host_utils.py:242 backend/api/host_utils.py:294
+#: backend/api/host.py:98 backend/api/host.py:258 backend/api/host.py:295
+#: backend/api/host.py:350 backend/api/host.py:392 backend/api/host.py:428
+#: backend/api/host.py:462 backend/api/host.py:582 backend/api/host.py:696
+#: backend/api/host.py:736 backend/api/updates.py:103
+#: backend/api/updates.py:235 backend/api/updates.py:552
+#: backend/api/certificates.py:72 backend/api/certificates.py:115
 msgid "Host not found"
 msgstr "未找到主机"
 
+#: backend/api/host_utils.py:45 backend/api/certificates.py:75
 #, fuzzy
 msgid "Host is not approved"
 msgstr "主机未批准"
 
+#: backend/api/auth.py:119
 msgid "Account is locked due to too many failed login attempts"
 msgstr "由于登录尝试失败次数过多，账户已被锁定"
 
+#: backend/api/auth.py:170
 msgid "Account locked due to too many failed login attempts"
 msgstr "由于登录尝试失败次数过多，账户被锁定"
 
+#: backend/api/auth.py:179
 msgid "Invalid username or password"
 msgstr "无效的用户名或密码"
 
+#: backend/api/user.py:51 backend/api/user.py:100 backend/api/user.py:132
+#: backend/api/user.py:164 backend/api/user.py:282 backend/api/user.py:332
+#: backend/api/profile.py:58 backend/api/profile.py:89
 #, fuzzy
 msgid "User not found"
 msgstr "未找到用户"
 
+#: backend/api/user.py:233
 msgid "User already exists"
 msgstr "用户已存在"
 
+#: backend/api/fleet.py:80
 #, python-format
 msgid "Agent with hostname %s not found"
 msgstr "未找到主机名为 %s 的代理"
 
+#: backend/api/fleet.py:96 backend/api/fleet.py:126 backend/api/fleet.py:159
+#: backend/api/fleet.py:194 backend/api/fleet.py:224 backend/api/fleet.py:251
 #, python-format
 msgid "Agent %s is not connected"
 msgstr "代理 %s 未连接"
 
+#: backend/api/fleet.py:107
 #, python-format
 msgid "Failed to send command to %s"
 msgstr "向 %s 发送命令失败"
 
+#: backend/api/fleet.py:113
 #, python-brace-format
 msgid "Command {command_type} sent to {hostname}"
 msgstr "命令 {command_type} 已发送到 {hostname}"
 
+#: backend/api/fleet.py:141
 #, python-format
 msgid "Failed to send shell command to %s"
 msgstr "向 %s 发送 shell 命令失败"
 
+#: backend/api/fleet.py:148
 #, python-brace-format
 msgid "Shell command sent to {hostname}"
 msgstr "Shell 命令已发送到 {hostname}"
 
+#: backend/api/fleet.py:174
 #, python-format
 msgid "Failed to send install command to %s"
 msgstr "向 %s 发送安装命令失败"
 
+#: backend/api/fleet.py:181
 #, python-brace-format
 msgid "Package installation command sent to {hostname}"
 msgstr "软件包安装命令已发送到 {hostname}"
 
+#: backend/api/fleet.py:206
 #, python-format
 msgid "Failed to send restart command to %s"
 msgstr "向 %s 发送重启命令失败"
 
+#: backend/api/fleet.py:213
 #, python-brace-format
 msgid "Service restart command sent to {hostname}"
 msgstr "服务重启命令已发送到 {hostname}"
 
+#: backend/api/fleet.py:234
 #, python-format
 msgid "Failed to send update command to %s"
 msgstr "向 %s 发送更新命令失败"
 
+#: backend/api/fleet.py:240
 #, python-brace-format
 msgid "System update command sent to {hostname}"
 msgstr "系统更新命令已发送到 {hostname}"
 
+#: backend/api/fleet.py:261
 #, python-format
 msgid "Failed to send reboot command to %s"
 msgstr "向 %s 发送重启命令失败"
 
+#: backend/api/fleet.py:267
 #, python-brace-format
 msgid "Reboot command sent to {hostname}"
 msgstr "重启命令已发送到 {hostname}"
 
+#: backend/api/fleet.py:286
 #, python-brace-format
 msgid "Command {command_type} broadcast to {sent_count} agents"
 msgstr "命令 {command_type} 已广播到 {sent_count} 个代理"
 
+#: backend/api/fleet.py:312
 #, python-brace-format
 msgid "Shell command broadcast to {sent_count} agents"
 msgstr "Shell 命令已广播到 {sent_count} 个代理"
 
+#: backend/api/fleet.py:332
 #, python-format
 msgid "No agents found for platform %s"
 msgstr "未找到平台 %s 的代理"
 
+#: backend/api/fleet.py:341
 #, python-brace-format
 msgid "Command {command_type} sent to {sent_count} {platform} agents"
 msgstr "命令 {command_type} 已发送到 {sent_count} 个 {platform} 代理"
 
+#: backend/api/host.py:156
 msgid "Host already exists"
 msgstr "主机已存在"
 
+#: backend/api/host.py:299 backend/api/host.py:354
 msgid "Host is not in pending status"
 msgstr "主机不处于待定状态"
 
+#: backend/api/host.py:405 backend/api/host.py:441 backend/api/host.py:595
+#: backend/api/host.py:709 backend/api/host.py:747
 msgid "Agent is not connected"
 msgstr "代理未连接"
 
+#: backend/api/host.py:407
 msgid "OS version update requested"
 msgstr "已请求操作系统版本更新"
 
+#: backend/api/host.py:443
 #, fuzzy
 msgid "Updates check requested"
 msgstr "已请求更新检查"
 
+#: backend/api/host.py:544
 msgid "Hardware information updated successfully"
 msgstr "硬件信息更新成功"
 
+#: backend/api/host.py:597
 msgid "Hardware update requested"
 msgstr "已请求硬件更新"
 
+#: backend/api/host.py:711
 msgid "User access update requested"
 msgstr "已请求用户访问更新"
 
+#: backend/api/host.py:749
 msgid "Software inventory update requested"
 msgstr "已请求软件清单更新"
 
+#: backend/api/config_management.py:77
 msgid "Configuration pushed to all agents"
 msgstr "配置已推送到所有代理"
 
+#: backend/api/config_management.py:89
 msgid "Configuration pushed successfully"
 msgstr "配置推送成功"
 
+#: backend/api/config_management.py:93
 #, fuzzy
 msgid "Agent not found or unreachable"
 msgstr "未找到代理或无法访问"
 
+#: backend/api/config_management.py:101
 msgid "Configuration pushed to platform agents"
 msgstr "配置已推送到平台代理"
 
+#: backend/api/config_management.py:108
 msgid "Must specify target_hostname, target_platform, or push_to_all"
 msgstr "必须指定 target_hostname、target_platform 或 push_to_all"
 
+#: backend/api/config_management.py:193
 msgid "Configuration acknowledgment processed"
 msgstr "配置确认已处理"
 
+#: backend/api/updates.py:143
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "存储更新失败：%s"
 
+#: backend/api/updates.py:216
 #, python-format
 msgid "Failed to get update summary: %s"
 msgstr "获取更新摘要失败：%s"
 
+#: backend/api/updates.py:298
 #, python-format
 msgid "Failed to get host updates: %s"
 msgstr "获取主机更新失败：%s"
 
+#: backend/api/updates.py:378
 #, python-format
 msgid "Failed to get updates: %s"
 msgstr "获取更新失败：%s"
 
+#: backend/api/updates.py:425
 #, fuzzy
 msgid "Host not found or inactive"
 msgstr "未找到主机或主机处于非活动状态"
 
+#: backend/api/updates.py:455
 msgid "No matching updates found for specified packages"
 msgstr "未找到指定软件包的匹配更新"
 
+#: backend/api/updates.py:502
 msgid "Update execution started"
 msgstr "更新执行已开始"
 
+#: backend/api/updates.py:513
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "发送命令失败：%s"
 
+#: backend/api/updates.py:521
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "发送更新命令失败：%s"
 
+#: backend/api/updates.py:534
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "执行更新失败：%s"
 
+#: backend/api/updates.py:589
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "获取执行日志失败：%s"
 
+#: backend/api/updates.py:609
+#, fuzzy, python-format
+msgid "Failed to get update results: %s"
+msgstr "获取更新失败：%s"
+
+#: backend/api/certificates.py:32
 #, python-format
 msgid "Failed to get server fingerprint: %s"
 msgstr "获取服务器指纹失败：%s"
 
+#: backend/api/certificates.py:51
 #, python-format
 msgid "Failed to get CA certificate: %s"
 msgstr "获取 CA 证书失败：%s"
 
+#: backend/api/agent.py:65
 msgid "Rate limit exceeded"
 msgstr "超出速率限制"
 
+#: backend/api/agent.py:141
 #, fuzzy
 msgid "Host not approved"
 msgstr "主机未批准"
 
+#: backend/api/agent.py:157
 #, python-brace-format
 msgid "Host {hostname} registered successfully"
 msgstr "主机 {hostname} 注册成功"
 
+#: backend/api/agent.py:166
 msgid "Hostname is required for registration"
 msgstr "注册需要主机名"
 
+#: backend/api/agent.py:345
 msgid "os_version_updated"
 msgstr "操作系统版本已更新"
 
+#: backend/api/agent.py:470
 msgid "hardware_updated"
 msgstr "硬件已更新"
 
+#: backend/api/agent.py:577
 msgid "user_access_updated"
 msgstr "用户访问已更新"
 
+#: backend/api/agent.py:647
 msgid "software_inventory_updated"
 msgstr "软件清单已更新"
 
+#: backend/api/agent.py:855
 #, python-format
 msgid "Authentication failed: %s"
 msgstr "认证失败：%s"
 
+#: backend/api/agent.py:860
 msgid "Authentication token required"
 msgstr "需要认证令牌"
 
+#: backend/api/agent.py:888
 msgid "Message failed security validation"
 msgstr "消息安全验证失败"
 
+#: backend/api/agent.py:1004
 msgid "Message must be valid JSON"
 msgstr "消息必须是有效的JSON"

@@ -79,7 +79,7 @@ like to add:
     agent system and provide it to the server
     for storage in the database.~~
 
-15. Updates - Query the list of available updates
+15. ~~Updates - Query the list of available updates
     on the agent and provide it as a list to the
     server for storage in the database.  The server
     UI needs to alert the user when there are
@@ -90,7 +90,7 @@ like to add:
     the server to instruct the agent to apply
     those updates.  Then the agent needs to 
     actually kick off the update process and
-    communicate back the results of it.
+    communicate back the results of it.~~
 
 16. ~~Software Inventory - Query the list of
     installed software and supply it to the
@@ -209,7 +209,15 @@ like to add:
     rounously contact the agent).  One
     queue should be for messages that
     are received and one should be for
-    messages that need to be sent.
+    messages that need to be sent. Both
+    the server and the agent should
+    process messages in the queue and 
+    mark the one that is being processed
+    currently in a way that prevents
+    movement to the next message until
+    the currently processing message is
+    finished processing and then is
+    removed from the queue.
 
 35. Create a standalone python script on
     both the agent and the server to
