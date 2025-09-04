@@ -7,7 +7,7 @@
 [![CI/CD Pipeline](https://github.com/bceverly/sysmanage/actions/workflows/ci.yml/badge.svg)](https://github.com/bceverly/sysmanage/actions/workflows/ci.yml)
 [![Python Version](https://img.shields.io/badge/python-3.12-blue.svg)](https://python.org)
 [![Node.js Version](https://img.shields.io/badge/node.js-20.x-green.svg)](https://nodejs.org)
-[![License](https://img.shields.io/badge/license-BSD%202--Clause-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-AGPLv3-blue.svg)](LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Linting](https://img.shields.io/badge/linting-pylint-blue.svg)](https://github.com/PyCQA/pylint)
 
