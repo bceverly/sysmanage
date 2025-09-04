@@ -20,7 +20,9 @@
   "dashboard": {
     "title": "ダッシュボード",
     "welcome": "SysManageへようこそ",
-    "activeHosts": "アクティブなホスト",
+    "hosts": "ホスト",
+    "updates": "アップデート",
+    "security": "セキュリティ",
     "totalUsers": "総ユーザー数",
     "systemHealth": "システムの健全性"
   },
@@ -290,7 +292,9 @@
     "filters": {
       "securityOnly": "セキュリティアップデートのみ",
       "systemOnly": "システムアップデートのみ",
-      "allManagers": "すべてのパッケージマネージャー"
+      "allManagers": "すべてのパッケージマネージャー",
+      "allHosts": "影響を受けるすべてのホスト",
+      "updates": "アップデート"
     },
     "types": {
       "security": "セキュリティ",

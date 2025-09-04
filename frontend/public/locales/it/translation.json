@@ -19,7 +19,9 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Benvenuto in SysManage",
-    "activeHosts": "Host Attivi",
+    "hosts": "Host",
+    "updates": "Aggiornamenti",
+    "security": "Sicurezza",
     "totalUsers": "Utenti Totali",
     "systemHealth": "Salute del Sistema"
   },
@@ -289,7 +291,9 @@
     "filters": {
       "securityOnly": "Solo Aggiornamenti di Sicurezza",
       "systemOnly": "Solo Aggiornamenti di Sistema",
-      "allManagers": "Tutti i Gestori Pacchetti"
+      "allManagers": "Tutti i Gestori Pacchetti",
+      "allHosts": "Tutti gli host interessati",
+      "updates": "aggiornamenti"
     },
     "types": {
       "security": "Sicurezza",

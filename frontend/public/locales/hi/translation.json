@@ -20,6 +20,8 @@
     "title": "डैशबोर्ड",
     "welcome": "सिसमैनेज में आपका स्वागत है",
     "hosts": "होस्ट्स",
+    "updates": "अपडेट",
+    "security": "सुरक्षा",
     "totalUsers": "कुल उपयोगकर्ता",
     "systemHealth": "सिस्टम हेल्थ"
   },
@@ -288,7 +290,9 @@
     "filters": {
       "securityOnly": "केवल सुरक्षा अपडेट",
       "systemOnly": "केवल सिस्टम अपडेट",
-      "allManagers": "सभी पैकेज प्रबंधक"
+      "allManagers": "सभी पैकेज प्रबंधक",
+      "allHosts": "सभी प्रभावित होस्ट",
+      "updates": "अपडेट"
     },
     "types": {
       "security": "सुरक्षा",

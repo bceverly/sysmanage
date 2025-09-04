@@ -21,6 +21,8 @@
     "title": "Tableau de bord",
     "welcome": "Bienvenue dans SysManage",
     "hosts": "Hôtes",
+    "updates": "Mises à jour",
+    "security": "Sécurité",
     "totalUsers": "Utilisateurs totaux",
     "systemHealth": "Santé du système"
   },
@@ -290,7 +292,9 @@
     "filters": {
       "securityOnly": "Mises à jour de Sécurité Seulement",
       "systemOnly": "Mises à jour du Système Seulement",
-      "allManagers": "Tous les Gestionnaires de Paquets"
+      "allManagers": "Tous les Gestionnaires de Paquets",
+      "allHosts": "Tous les hôtes affectés",
+      "updates": "mises à jour"
     },
     "types": {
       "security": "Sécurité",

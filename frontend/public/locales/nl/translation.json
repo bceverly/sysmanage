@@ -20,7 +20,9 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welkom bij SysManage",
-    "activeHosts": "Actieve Hosts",
+    "hosts": "Hosts",
+    "updates": "Updates",
+    "security": "Beveiliging",
     "totalUsers": "Totaal Gebruikers",
     "systemHealth": "Systeemgezondheid"
   },
@@ -290,7 +292,9 @@
     "filters": {
       "securityOnly": "Alleen Beveiligingsupdates",
       "systemOnly": "Alleen Systeemupdates",
-      "allManagers": "Alle Pakketbeheerders"
+      "allManagers": "Alle Pakketbeheerders",
+      "allHosts": "Alle getroffen hosts",
+      "updates": "updates"
     },
     "types": {
       "security": "Beveiliging",

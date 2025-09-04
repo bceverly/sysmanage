@@ -20,7 +20,9 @@
   "dashboard": {
     "title": "대시보드",
     "welcome": "SysManage에 오신 것을 환영합니다",
-    "activeHosts": "활성 호스트",
+    "hosts": "호스트",
+    "updates": "업데이트",
+    "security": "보안",
     "totalUsers": "전체 사용자",
     "systemHealth": "시스템 상태"
   },
@@ -290,7 +292,9 @@
     "filters": {
       "securityOnly": "보안 업데이트만",
       "systemOnly": "시스템 업데이트만",
-      "allManagers": "모든 패키지 관리자"
+      "allManagers": "모든 패키지 관리자",
+      "allHosts": "영향을 받는 모든 호스트",
+      "updates": "업데이트"
     },
     "types": {
       "security": "보안",

@@ -20,6 +20,8 @@
     "title": "Dashboard",
     "welcome": "Welcome to SysManage",
     "hosts": "Hosts",
+    "updates": "Updates",
+    "security": "Security",
     "totalUsers": "Total Users",
     "systemHealth": "System Health"
   },
@@ -288,7 +290,9 @@
     "filters": {
       "securityOnly": "Security Updates Only",
       "systemOnly": "System Updates Only",
-      "allManagers": "All Package Managers"
+      "allManagers": "All Package Managers",
+      "allHosts": "All Affected Hosts",
+      "updates": "updates"
     },
     "types": {
       "security": "Security",
