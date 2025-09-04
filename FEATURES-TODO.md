@@ -199,7 +199,7 @@ like to add:
     Use the postgreSQL database (with
     Alembic migrations) for the server's
     queue and just persist the agent's
-    queue to the local filesystem.  There
+    queue to sqlite3 w/Alembic.  There
     should actually be two such queues
     given the bidirectional nature of
     the communication between the agent
