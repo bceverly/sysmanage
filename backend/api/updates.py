@@ -391,7 +391,7 @@ async def debug_execute_updates(
         return {"success": True, "message": "Validation passed", "data": request.dict()}
     except Exception as e:
         print(f"DEBUG VALIDATION ERROR: {e}")
-        return {"success": False, "error": str(e)}
+        return {"success": False, "error": "Validation failed"}
 
 
 @router.post("/execute")
@@ -626,4 +626,4 @@ async def get_update_status(dependencies=Depends(JWTBearer())):
         return {"results": {}}
     except Exception as e:
         logger.error("Error fetching update status: %s", e)
-        return {"results": {}, "error": str(e)}
+        return {"results": {}, "error": "Failed to fetch update status"}
