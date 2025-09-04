@@ -4,6 +4,7 @@ Handles various message types received from agents.
 """
 
 import logging
+import os
 from datetime import datetime, timezone
 
 from sqlalchemy import text, update
@@ -15,11 +16,24 @@ from backend.i18n import _
 # Logger for debugging
 debug_logger = logging.getLogger("debug_logger")
 debug_logger.setLevel(logging.DEBUG)
-file_handler = logging.FileHandler("logs/backend.log")
-file_handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-file_handler.setFormatter(formatter)
-debug_logger.addHandler(file_handler)
+
+# Only add file handler if logs directory exists or can be created
+log_file = "logs/backend.log"
+try:
+    # Create logs directory if it doesn't exist
+    os.makedirs(os.path.dirname(log_file), exist_ok=True)
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    file_handler.setFormatter(formatter)
+    debug_logger.addHandler(file_handler)
+except (OSError, PermissionError):
+    # If we can't create the log file, just use console logging
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    console_handler.setFormatter(formatter)
+    debug_logger.addHandler(console_handler)
 
 
 async def handle_system_info(db: Session, connection, message_data: dict):
