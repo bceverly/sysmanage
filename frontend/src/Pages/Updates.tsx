@@ -16,7 +16,8 @@ import {
   updatesService, 
   UpdateStatsSummary, 
   PackageUpdate, 
-  UpdatesResponse 
+  UpdatesResponse,
+  HostUpdatesResponse 
 } from '../Services/updates';
 import './css/Updates.css';
 
@@ -24,6 +25,12 @@ interface SelectedUpdate {
   hostId: number;
   packageName: string;
   packageManager: string;
+}
+
+interface HostWithUpdates {
+  hostId: number;
+  hostname: string;
+  updateCount: number;
 }
 
 const Updates: React.FC = () => {
@@ -37,10 +44,13 @@ const Updates: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
+  const [hostsWithUpdates, setHostsWithUpdates] = useState<HostWithUpdates[]>([]);
+  const [hostSpecificStats, setHostSpecificStats] = useState<HostUpdatesResponse | null>(null);
   const [filters, setFilters] = useState({
-    security_only: searchParams.get('filter') === 'security',
+    security_only: searchParams.get('securityOnly') === 'true',
     system_only: false,
-    package_manager: ''
+    package_manager: '',
+    host_id: ''
   });
 
   const ITEMS_PER_PAGE = 50;
@@ -55,23 +65,83 @@ const Updates: React.FC = () => {
     }
   };
 
+  const fetchHostsWithUpdates = useCallback(async () => {
+    try {
+      // Get all updates to extract unique hosts
+      const response = await updatesService.getAllUpdates(
+        undefined,
+        undefined,
+        undefined,
+        1000,
+        0
+      );
+      
+      // Extract unique hosts from updates
+      const hostMap = new Map<number, { hostname: string; count: number }>();
+      response.updates.forEach(update => {
+        const existing = hostMap.get(update.host_id);
+        if (existing) {
+          existing.count++;
+        } else {
+          hostMap.set(update.host_id, {
+            hostname: update.hostname,
+            count: 1
+          });
+        }
+      });
+
+      // Convert to array and sort by hostname
+      const hosts = Array.from(hostMap.entries()).map(([hostId, data]) => ({
+        hostId,
+        hostname: data.hostname,
+        updateCount: data.count
+      })).sort((a, b) => a.hostname.localeCompare(b.hostname));
+
+      setHostsWithUpdates(hosts);
+    } catch (error) {
+      console.error('Failed to fetch hosts with updates:', error);
+      setHostsWithUpdates([]);
+    }
+  }, []);
+
   const fetchUpdates = useCallback(async (page = 0) => {
     try {
       setIsLoading(true);
-      const response: UpdatesResponse = await updatesService.getAllUpdates(
-        filters.security_only || undefined,
-        filters.system_only || undefined,
-        filters.package_manager || undefined,
-        ITEMS_PER_PAGE,
-        page * ITEMS_PER_PAGE
-      );
-      setUpdates(response.updates);
-      setTotalCount(response.total_count);
-      setCurrentPage(page);
+      
+      if (filters.host_id) {
+        // Fetch host-specific updates
+        const hostId = parseInt(filters.host_id);
+        const response: HostUpdatesResponse = await updatesService.getHostUpdates(
+          hostId,
+          filters.package_manager || undefined,
+          filters.security_only || undefined,
+          filters.system_only || undefined
+        );
+        
+        setUpdates(response.updates);
+        setTotalCount(response.total_updates);
+        setHostSpecificStats(response);
+        setCurrentPage(0);
+      } else {
+        // Fetch all updates
+        const response: UpdatesResponse = await updatesService.getAllUpdates(
+          filters.security_only || undefined,
+          filters.system_only || undefined,
+          filters.package_manager || undefined,
+          ITEMS_PER_PAGE,
+          page * ITEMS_PER_PAGE
+        );
+        
+        setUpdates(response.updates);
+        setTotalCount(response.total_count);
+        setHostSpecificStats(null);
+        setCurrentPage(page);
+      }
     } catch (error) {
       console.error('Failed to fetch updates:', error);
       setUpdates([]);
       setTotalCount(0);
+      setHostSpecificStats(null);
     } finally {
       setIsLoading(false);
     }
@@ -81,6 +151,7 @@ const Updates: React.FC = () => {
     setIsRefreshing(true);
     await Promise.all([
       fetchUpdatesSummary(),
+      fetchHostsWithUpdates(),
       fetchUpdates(0)
     ]);
     setIsRefreshing(false);
@@ -90,9 +161,10 @@ const Updates: React.FC = () => {
   useEffect(() => {
     Promise.all([
       fetchUpdatesSummary(),
+      fetchHostsWithUpdates(),
       fetchUpdates(0)
     ]);
-  }, [filters, fetchUpdates]);
+  }, [filters, fetchUpdates, fetchHostsWithUpdates]);
 
   const handleFilterChange = (key: string, value: boolean | string) => {
     setFilters(prev => ({
@@ -184,7 +256,16 @@ const Updates: React.FC = () => {
     }
   };
 
-  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+  // Use host-specific stats if available, otherwise use global stats
+  const displayStats = hostSpecificStats ? {
+    total_updates: hostSpecificStats.total_updates,
+    security_updates: hostSpecificStats.security_updates,
+    system_updates: hostSpecificStats.system_updates,
+    application_updates: hostSpecificStats.application_updates,
+    hosts_with_updates: 1 // Single host when filtered
+  } : updateStats;
+
+  const totalPages = filters.host_id ? 1 : Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   return (
     <div className="updates">
@@ -201,14 +282,14 @@ const Updates: React.FC = () => {
       </div>
 
       {/* Statistics Cards */}
-      {updateStats && (
+      {displayStats && (
         <div className="updates__stats">
           <div className="updates__stat-card">
             <div className="updates__stat-icon">
               <IoApps />
             </div>
             <div className="updates__stat-content">
-              <div className="updates__stat-number">{updateStats.total_updates}</div>
+              <div className="updates__stat-number">{displayStats.total_updates}</div>
               <div className="updates__stat-label">{t('updates.stats.total', 'Total Updates')}</div>
             </div>
           </div>
@@ -218,7 +299,7 @@ const Updates: React.FC = () => {
               <IoShieldCheckmark />
             </div>
             <div className="updates__stat-content">
-              <div className="updates__stat-number">{updateStats.security_updates}</div>
+              <div className="updates__stat-number">{displayStats.security_updates}</div>
               <div className="updates__stat-label">{t('updates.stats.security', 'Security Updates')}</div>
             </div>
           </div>
@@ -228,7 +309,7 @@ const Updates: React.FC = () => {
               <IoHardwareChip />
             </div>
             <div className="updates__stat-content">
-              <div className="updates__stat-number">{updateStats.system_updates}</div>
+              <div className="updates__stat-number">{displayStats.system_updates}</div>
               <div className="updates__stat-label">{t('updates.stats.system', 'System Updates')}</div>
             </div>
           </div>
@@ -238,7 +319,7 @@ const Updates: React.FC = () => {
               <IoWarning />
             </div>
             <div className="updates__stat-content">
-              <div className="updates__stat-number">{updateStats.hosts_with_updates}</div>
+              <div className="updates__stat-number">{displayStats.hosts_with_updates}</div>
               <div className="updates__stat-label">{t('updates.stats.hosts', 'Affected Hosts')}</div>
             </div>
           </div>
@@ -285,6 +366,20 @@ const Updates: React.FC = () => {
             <option value="pkg">PKG</option>
           </select>
         </div>
+
+        <div className="updates__filter">
+          <select
+            value={filters.host_id}
+            onChange={(e) => handleFilterChange('host_id', e.target.value)}
+          >
+            <option value="">{t('updates.filters.allHosts', 'All Affected Hosts')}</option>
+            {hostsWithUpdates.map(host => (
+              <option key={host.hostId} value={host.hostId.toString()}>
+                {host.hostname} ({host.updateCount} {t('updates.filters.updates', 'updates')})
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Action Bar */}
@@ -321,7 +416,7 @@ const Updates: React.FC = () => {
           </div>
         ) : updates.length === 0 ? (
           <div className="updates__empty">
-            {filters.security_only || filters.system_only || filters.package_manager ? 
+            {filters.security_only || filters.system_only || filters.package_manager || filters.host_id ? 
               t('updates.noMatchingUpdates', 'No updates match the current filters') :
               t('updates.noUpdates', 'All systems are up to date')
             }
@@ -356,7 +451,9 @@ const Updates: React.FC = () => {
                     </div>
                     
                     <div className="updates__item-details">
-                      <span className="updates__item-host">{update.hostname}</span>
+                      {!filters.host_id && (
+                        <span className="updates__item-host">{update.hostname}</span>
+                      )}
                       <span className="updates__item-manager">{update.package_manager}</span>
                       <span className="updates__item-version">
                         {update.current_version || t('updates.unknown', 'Unknown')} → {update.available_version}

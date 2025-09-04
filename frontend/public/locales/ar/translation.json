@@ -20,6 +20,8 @@
     "title": "لوحة التحكم",
     "welcome": "مرحباً بك في سيس مانج",
     "hosts": "المضيفات",
+    "updates": "التحديثات",
+    "security": "الأمان",
     "totalUsers": "إجمالي المستخدمين",
     "systemHealth": "صحة النظام"
   },
@@ -288,7 +290,9 @@
     "filters": {
       "securityOnly": "تحديثات الأمان فقط",
       "systemOnly": "تحديثات النظام فقط",
-      "allManagers": "جميع مديري الحزم"
+      "allManagers": "جميع مديري الحزم",
+      "allHosts": "جميع الأجهزة المتأثرة",
+      "updates": "تحديثات"
     },
     "types": {
       "security": "أمان",

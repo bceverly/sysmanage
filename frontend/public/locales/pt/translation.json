@@ -19,7 +19,9 @@
   "dashboard": {
     "title": "Painel",
     "welcome": "Bem-vindo ao SysManage",
-    "activeHosts": "Hosts Ativos",
+    "hosts": "Hosts",
+    "updates": "Atualizações",
+    "security": "Segurança",
     "totalUsers": "Total de Usuários",
     "systemHealth": "Saúde do Sistema"
   },
@@ -289,7 +291,9 @@
     "filters": {
       "securityOnly": "Apenas Atualizações de Segurança",
       "systemOnly": "Apenas Atualizações do Sistema",
-      "allManagers": "Todos os Gerenciadores de Pacotes"
+      "allManagers": "Todos os Gerenciadores de Pacotes",
+      "allHosts": "Todos os hosts afetados",
+      "updates": "atualizações"
     },
     "types": {
       "security": "Segurança",

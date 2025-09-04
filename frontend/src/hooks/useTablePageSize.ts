@@ -90,6 +90,13 @@ export const useTablePageSize = (options: UseTablePageSizeOptions = {}) => {
           options.push(5);
         }
         
+        // Add common page size options if not included
+        [10, 25, 50].forEach(size => {
+          if (!options.includes(size) && size <= maxRows) {
+            options.push(size);
+          }
+        });
+        
         // Sort and remove duplicates
         return [...new Set(options)].sort((a, b) => a - b);
       };

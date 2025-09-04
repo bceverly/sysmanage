@@ -21,6 +21,8 @@
     "title": "Tablero",
     "welcome": "Bienvenido a SysManage",
     "hosts": "Hosts",
+    "updates": "Actualizaciones",
+    "security": "Seguridad",
     "totalUsers": "Total de Usuarios",
     "systemHealth": "Salud del Sistema"
   },
@@ -290,7 +292,9 @@
     "filters": {
       "securityOnly": "Solo Actualizaciones de Seguridad",
       "systemOnly": "Solo Actualizaciones del Sistema",
-      "allManagers": "Todos los Gestores de Paquetes"
+      "allManagers": "Todos los Gestores de Paquetes",
+      "allHosts": "Todos los hosts afectados",
+      "updates": "actualizaciones"
     },
     "types": {
       "security": "Seguridad",

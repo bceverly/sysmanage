@@ -21,6 +21,8 @@
     "title": "儀表板",
     "welcome": "歡迎使用 SysManage",
     "hosts": "主機",
+    "updates": "更新",
+    "security": "安全性",
     "totalUsers": "用戶總數",
     "systemHealth": "系統健康狀況"
   },
@@ -290,7 +292,9 @@
     "filters": {
       "securityOnly": "僅安全性更新",
       "systemOnly": "僅系統更新",
-      "allManagers": "所有套件管理器"
+      "allManagers": "所有套件管理器",
+      "allHosts": "所有受影響的主機",
+      "updates": "個更新"
     },
     "types": {
       "security": "安全性",
