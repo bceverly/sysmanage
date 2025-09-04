@@ -8,6 +8,7 @@ from unittest.mock import Mock, patch
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.pool import StaticPool
 
 from backend.main import app
 from backend.persistence import db, models
@@ -15,8 +16,13 @@ from backend.persistence import db, models
 
 @pytest.fixture
 def test_engine():
-    """Create an in-memory SQLite database for testing"""
-    engine = create_engine("sqlite:///:memory:")
+    """Create a shared in-memory SQLite database for testing"""
+    # Use shared cache and check_same_thread=False to allow sharing between sessions
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
     models.Base.metadata.create_all(bind=engine)
     return engine
 
@@ -117,10 +123,12 @@ def mock_jwt_token():
 class TestProfileAPI:
     """Test cases for profile API endpoints"""
 
+    @patch("backend.auth.auth_bearer.decode_jwt")
     @patch("backend.persistence.db.get_engine")
     def test_get_profile_success(
         self,
         mock_get_engine,
+        mock_decode_jwt,
         client,
         test_engine,
         test_session,
@@ -128,6 +136,14 @@ class TestProfileAPI:
         mock_jwt_token,
     ):
         """Test successful profile retrieval"""
+        # Mock JWT decoding to return valid user
+        import time
+
+        mock_decode_jwt.return_value = {
+            "user_id": test_user.userid,
+            "expires": time.time() + 3600,  # Valid for 1 hour
+        }
+
         # Mock database engine
         mock_get_engine.return_value = test_engine
 
@@ -141,11 +157,25 @@ class TestProfileAPI:
         assert data["last_name"] == test_user.last_name
         assert data["active"] == test_user.active
 
+    @patch("backend.auth.auth_bearer.decode_jwt")
     @patch("backend.persistence.db.get_engine")
     def test_get_profile_user_not_found(
-        self, mock_get_engine, client_nonexistent_user, test_engine, mock_jwt_token
+        self,
+        mock_get_engine,
+        mock_decode_jwt,
+        client_nonexistent_user,
+        test_engine,
+        mock_jwt_token,
     ):
         """Test profile retrieval when user doesn't exist"""
+        # Mock JWT decoding to return non-existent user
+        import time
+
+        mock_decode_jwt.return_value = {
+            "user_id": "nonexistent@example.com",
+            "expires": time.time() + 3600,  # Valid for 1 hour
+        }
+
         # Mock database engine
         mock_get_engine.return_value = test_engine
 
@@ -171,14 +201,12 @@ class TestProfileAPI:
 
         assert response.status_code == 401
 
+    @patch("backend.auth.auth_bearer.decode_jwt")
     @patch("backend.persistence.db.get_engine")
-    @patch("backend.auth.auth_bearer.get_current_user")
-    @patch("backend.auth.auth_bearer.JWTBearer.__call__")
     def test_update_profile_success(
         self,
-        mock_jwt_bearer,
-        mock_get_current_user,
         mock_get_engine,
+        mock_decode_jwt,
         client,
         test_engine,
         test_session,
@@ -186,11 +214,13 @@ class TestProfileAPI:
         mock_jwt_token,
     ):
         """Test successful profile update"""
-        # Mock JWT Bearer to pass authentication
-        mock_jwt_bearer.return_value = True
+        # Mock JWT decoding to return valid user
+        import time
 
-        # Mock get_current_user to return test user ID
-        mock_get_current_user.return_value = test_user.userid
+        mock_decode_jwt.return_value = {
+            "user_id": test_user.userid,
+            "expires": time.time() + 3600,  # Valid for 1 hour
+        }
 
         # Mock database engine
         mock_get_engine.return_value = test_engine
@@ -207,14 +237,12 @@ class TestProfileAPI:
         assert data["last_name"] == "Smith"
         assert data["active"] == test_user.active
 
+    @patch("backend.auth.auth_bearer.decode_jwt")
     @patch("backend.persistence.db.get_engine")
-    @patch("backend.auth.auth_bearer.get_current_user")
-    @patch("backend.auth.auth_bearer.JWTBearer.__call__")
     def test_update_profile_partial(
         self,
-        mock_jwt_bearer,
-        mock_get_current_user,
         mock_get_engine,
+        mock_decode_jwt,
         client,
         test_engine,
         test_session,
@@ -222,11 +250,13 @@ class TestProfileAPI:
         mock_jwt_token,
     ):
         """Test partial profile update (only first name)"""
-        # Mock JWT Bearer to pass authentication
-        mock_jwt_bearer.return_value = True
+        # Mock JWT decoding to return valid user
+        import time
 
-        # Mock get_current_user to return test user ID
-        mock_get_current_user.return_value = test_user.userid
+        mock_decode_jwt.return_value = {
+            "user_id": test_user.userid,
+            "expires": time.time() + 3600,  # Valid for 1 hour
+        }
 
         # Mock database engine
         mock_get_engine.return_value = test_engine
@@ -243,14 +273,12 @@ class TestProfileAPI:
         assert data["last_name"] == test_user.last_name  # Should remain unchanged
         assert data["active"] == test_user.active
 
+    @patch("backend.auth.auth_bearer.decode_jwt")
     @patch("backend.persistence.db.get_engine")
-    @patch("backend.auth.auth_bearer.get_current_user")
-    @patch("backend.auth.auth_bearer.JWTBearer.__call__")
     def test_update_profile_empty_data(
         self,
-        mock_jwt_bearer,
-        mock_get_current_user,
         mock_get_engine,
+        mock_decode_jwt,
         client,
         test_engine,
         test_session,
@@ -258,11 +286,13 @@ class TestProfileAPI:
         mock_jwt_token,
     ):
         """Test profile update with empty data"""
-        # Mock JWT Bearer to pass authentication
-        mock_jwt_bearer.return_value = True
+        # Mock JWT decoding to return valid user
+        import time
 
-        # Mock get_current_user to return test user ID
-        mock_get_current_user.return_value = test_user.userid
+        mock_decode_jwt.return_value = {
+            "user_id": test_user.userid,
+            "expires": time.time() + 3600,  # Valid for 1 hour
+        }
 
         # Mock database engine
         mock_get_engine.return_value = test_engine
@@ -279,14 +309,12 @@ class TestProfileAPI:
         assert data["last_name"] == test_user.last_name  # Should remain unchanged
         assert data["active"] == test_user.active
 
+    @patch("backend.auth.auth_bearer.decode_jwt")
     @patch("backend.persistence.db.get_engine")
-    @patch("backend.auth.auth_bearer.get_current_user")
-    @patch("backend.auth.auth_bearer.JWTBearer.__call__")
     def test_update_profile_null_values(
         self,
-        mock_jwt_bearer,
-        mock_get_current_user,
         mock_get_engine,
+        mock_decode_jwt,
         client,
         test_engine,
         test_session,
@@ -294,11 +322,13 @@ class TestProfileAPI:
         mock_jwt_token,
     ):
         """Test profile update with null values"""
-        # Mock JWT Bearer to pass authentication
-        mock_jwt_bearer.return_value = True
+        # Mock JWT decoding to return valid user
+        import time
 
-        # Mock get_current_user to return test user ID
-        mock_get_current_user.return_value = test_user.userid
+        mock_decode_jwt.return_value = {
+            "user_id": test_user.userid,
+            "expires": time.time() + 3600,  # Valid for 1 hour
+        }
 
         # Mock database engine
         mock_get_engine.return_value = test_engine
@@ -315,24 +345,24 @@ class TestProfileAPI:
         assert data["last_name"] is None
         assert data["active"] == test_user.active
 
+    @patch("backend.auth.auth_bearer.decode_jwt")
     @patch("backend.persistence.db.get_engine")
-    @patch("backend.auth.auth_bearer.get_current_user")
-    @patch("backend.auth.auth_bearer.JWTBearer.__call__")
     def test_update_profile_user_not_found(
         self,
-        mock_jwt_bearer,
-        mock_get_current_user,
         mock_get_engine,
+        mock_decode_jwt,
         client,
         test_engine,
         mock_jwt_token,
     ):
         """Test profile update when user doesn't exist"""
-        # Mock JWT Bearer to pass authentication
-        mock_jwt_bearer.return_value = True
+        # Mock JWT decoding to return non-existent user
+        import time
 
-        # Mock get_current_user to return non-existent user ID
-        mock_get_current_user.return_value = "nonexistent@example.com"
+        mock_decode_jwt.return_value = {
+            "user_id": "nonexistent@example.com",
+            "expires": time.time() + 3600,  # Valid for 1 hour
+        }
 
         # Mock database engine
         mock_get_engine.return_value = test_engine
@@ -365,14 +395,12 @@ class TestProfileAPI:
 
         assert response.status_code == 401
 
+    @patch("backend.auth.auth_bearer.decode_jwt")
     @patch("backend.persistence.db.get_engine")
-    @patch("backend.auth.auth_bearer.get_current_user")
-    @patch("backend.auth.auth_bearer.JWTBearer.__call__")
     def test_update_profile_updates_last_access(
         self,
-        mock_jwt_bearer,
-        mock_get_current_user,
         mock_get_engine,
+        mock_decode_jwt,
         client,
         test_engine,
         test_session,
@@ -380,11 +408,13 @@ class TestProfileAPI:
         mock_jwt_token,
     ):
         """Test that profile update updates the last_access timestamp"""
-        # Mock JWT Bearer to pass authentication
-        mock_jwt_bearer.return_value = True
+        # Mock JWT decoding to return valid user
+        import time
 
-        # Mock get_current_user to return test user ID
-        mock_get_current_user.return_value = test_user.userid
+        mock_decode_jwt.return_value = {
+            "user_id": test_user.userid,
+            "expires": time.time() + 3600,  # Valid for 1 hour
+        }
 
         # Mock database engine
         mock_get_engine.return_value = test_engine

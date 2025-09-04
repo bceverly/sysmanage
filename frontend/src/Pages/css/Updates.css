@@ -276,6 +276,18 @@
   color: var(--first-color);
 }
 
+.update-icon.pending {
+  color: #f39c12; /* Orange/yellow for pending */
+}
+
+.update-icon.success {
+  color: #27ae60; /* Green for success */
+}
+
+.update-icon.failed {
+  color: #e74c3c; /* Red for failed */
+}
+
 .updates__item-content {
   flex: 1;
   min-width: 0;
@@ -307,6 +319,29 @@
 
 .updates__item.security .updates__item-type {
   background: #e74c3c;
+}
+
+.updates__status-pill {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.updates__status-pill.pending {
+  background: #f39c12;
+  color: white;
+}
+
+.updates__status-pill.success {
+  background: #27ae60;
+  color: white;
+}
+
+.updates__status-pill.failed {
+  background: #e74c3c;
+  color: white;
 }
 
 .updates__item-details {

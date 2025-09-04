@@ -10,7 +10,10 @@ import {
   IoHardwareChip,
   IoApps,
   IoFilter,
-  IoPlay
+  IoPlay,
+  IoTime,
+  IoCheckmarkCircle,
+  IoCloseCircle
 } from 'react-icons/io5';
 import { 
   updatesService, 
@@ -33,6 +36,24 @@ interface HostWithUpdates {
   updateCount: number;
 }
 
+interface UpdateStatus {
+  status: 'pending' | 'success' | 'failed';
+  newVersion?: string;
+  timestamp: number;
+}
+
+interface UpdatePackage {
+  package_name: string;
+  package_manager: string;
+  new_version?: string;
+  error?: string;
+}
+
+interface HostResult {
+  updated_packages?: UpdatePackage[];
+  failed_packages?: UpdatePackage[];
+}
+
 const Updates: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
@@ -40,6 +61,7 @@ const Updates: React.FC = () => {
   const [updateStats, setUpdateStats] = useState<UpdateStatsSummary | null>(null);
   const [updates, setUpdates] = useState<PackageUpdate[]>([]);
   const [selectedUpdates, setSelectedUpdates] = useState<Set<string>>(new Set());
+  const [updateStatuses, setUpdateStatuses] = useState<Map<string, UpdateStatus>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
@@ -118,6 +140,7 @@ const Updates: React.FC = () => {
           filters.system_only || undefined
         );
         
+        
         setUpdates(response.updates);
         setTotalCount(response.total_updates);
         setHostSpecificStats(response);
@@ -166,6 +189,77 @@ const Updates: React.FC = () => {
     ]);
   }, [filters, fetchUpdates, fetchHostsWithUpdates]);
 
+  // Poll for update results when there are pending updates
+  useEffect(() => {
+    const pollForResults = async () => {
+      if (updateStatuses.size === 0) return;
+      
+      try {
+        const response = await updatesService.getUpdateResults();
+        const results = response.results || {};
+        
+        // Process results and update status for matching packages
+        const newStatuses = new Map(updateStatuses);
+        let hasUpdates = false;
+        
+        Object.entries(results).forEach(([hostId, hostResult]: [string, HostResult]) => {
+          // Handle successful updates
+          hostResult.updated_packages?.forEach((pkg: UpdatePackage) => {
+            const key = `${hostId}-${pkg.package_name}-${pkg.package_manager}`;
+            if (newStatuses.has(key)) {
+              newStatuses.set(key, {
+                status: 'success',
+                newVersion: pkg.new_version,
+                timestamp: Date.now()
+              });
+              hasUpdates = true;
+            }
+          });
+          
+          // Handle failed updates
+          hostResult.failed_packages?.forEach((pkg: UpdatePackage) => {
+            const key = `${hostId}-${pkg.package_name}-${pkg.package_manager}`;
+            if (newStatuses.has(key)) {
+              newStatuses.set(key, {
+                status: 'failed',
+                timestamp: Date.now()
+              });
+              hasUpdates = true;
+            }
+          });
+        });
+        
+        if (hasUpdates) {
+          setUpdateStatuses(newStatuses);
+          
+          // Clear selections for completed updates after a delay
+          setTimeout(() => {
+            const completedKeys = new Set<string>();
+            newStatuses.forEach((status, key) => {
+              if (status.status === 'success' || status.status === 'failed') {
+                completedKeys.add(key);
+              }
+            });
+            
+            if (completedKeys.size > 0) {
+              setSelectedUpdates(prev => {
+                const newSelected = new Set(prev);
+                completedKeys.forEach(key => newSelected.delete(key));
+                return newSelected;
+              });
+            }
+          }, 3000); // Clear selections after 3 seconds
+        }
+      } catch (error) {
+        console.error('Failed to poll for update results:', error);
+      }
+    };
+
+    // Start polling for update results every 2 seconds
+    const interval = window.setInterval(pollForResults, 2000); // Poll every 2 seconds
+    return () => window.clearInterval(interval);
+  }, [updateStatuses]);
+
   const handleFilterChange = (key: string, value: boolean | string) => {
     setFilters(prev => ({
       ...prev,
@@ -208,6 +302,11 @@ const Updates: React.FC = () => {
       const key = `${update.host_id}-${update.package_name}-${update.package_manager}`;
       if (selectedUpdates.has(key)) {
         const hostId = update.host_id;
+        if (hostId === null || hostId === undefined) {
+          console.error('ERROR: Found null/undefined host_id in update:', update);
+          return; // Skip this update
+        }
+        
         if (!updatesByHost.has(hostId)) {
           updatesByHost.set(hostId, []);
         }
@@ -219,6 +318,16 @@ const Updates: React.FC = () => {
       }
     });
 
+    // Set pending status for all selected updates
+    const newStatuses = new Map(updateStatuses);
+    selectedUpdates.forEach(key => {
+      newStatuses.set(key, {
+        status: 'pending',
+        timestamp: Date.now()
+      });
+    });
+    setUpdateStatuses(newStatuses);
+
     try {
       for (const [hostId, hostUpdates] of updatesByHost) {
         const packageNames = hostUpdates.map(u => u.packageName);
@@ -227,16 +336,42 @@ const Updates: React.FC = () => {
         await updatesService.executeUpdates([hostId], packageNames, packageManagers);
       }
       
-      alert(t('updates.executeSuccess', 'Update execution started for selected packages'));
-      setSelectedUpdates(new Set());
-      await refreshAll();
+      // Don't clear selections - they'll be cleared when we receive status updates
+      // setSelectedUpdates(new Set());
+      // Don't refresh automatically - status will be updated via WebSocket
+      // await refreshAll();
     } catch (error) {
       console.error('Failed to execute updates:', error);
-      alert(t('updates.executeError', 'Failed to execute updates'));
+      
+      // Set failed status for updates that failed to submit
+      const failedStatuses = new Map(newStatuses);
+      selectedUpdates.forEach(key => {
+        failedStatuses.set(key, {
+          status: 'failed',
+          timestamp: Date.now()
+        });
+      });
+      setUpdateStatuses(failedStatuses);
     }
   };
 
   const getUpdateIcon = (update: PackageUpdate) => {
+    const key = `${update.host_id}-${update.package_name}-${update.package_manager}`;
+    const status = updateStatuses.get(key);
+    
+    // If there's a status update, show status-specific icon
+    if (status) {
+      switch (status.status) {
+        case 'pending':
+          return <IoTime className="update-icon pending" />;
+        case 'success':
+          return <IoCheckmarkCircle className="update-icon success" />;
+        case 'failed':
+          return <IoCloseCircle className="update-icon failed" />;
+      }
+    }
+    
+    // Default icons based on update type
     if (update.is_security_update) {
       return <IoShieldCheckmark className="update-icon security" />;
     } else if (update.is_system_update) {
@@ -254,6 +389,24 @@ const Updates: React.FC = () => {
     } else {
       return t('updates.types.application', 'Application');
     }
+  };
+
+  const getStatusPill = (update: PackageUpdate) => {
+    const key = `${update.host_id}-${update.package_name}-${update.package_manager}`;
+    const status = updateStatuses.get(key);
+    
+    if (status) {
+      switch (status.status) {
+        case 'pending':
+          return <span className="updates__status-pill pending">{t('updates.status.pending', 'Update Requested')}</span>;
+        case 'success':
+          return <span className="updates__status-pill success">{t('updates.status.success', 'Successfully Updated')}</span>;
+        case 'failed':
+          return <span className="updates__status-pill failed">{t('updates.status.failed', 'Update Failed')}</span>;
+      }
+    }
+    
+    return null;
   };
 
   // Use host-specific stats if available, otherwise use global stats
@@ -448,6 +601,7 @@ const Updates: React.FC = () => {
                     <div className="updates__item-header">
                       <span className="updates__item-package">{update.package_name}</span>
                       <span className="updates__item-type">{getUpdateTypeText(update)}</span>
+                      {getStatusPill(update)}
                     </div>
                     
                     <div className="updates__item-details">

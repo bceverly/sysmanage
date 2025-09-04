@@ -5,262 +5,355 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-03 14:35-0400\n"
+"POT-Creation-Date: 2025-09-04 11:51-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
+#: backend/security/communication_security.py:112
 msgid "Invalid token signature"
 msgstr "توقيع الرمز المميز غير صحيح"
 
+#: backend/security/communication_security.py:118
 msgid "Token expired"
 msgstr "انتهت صلاحية الرمز المميز"
 
+#: backend/security/communication_security.py:137
 msgid "Malformed token"
 msgstr "الرمز المميز مُشوَّه"
 
+#: backend/security/communication_security.py:328
 msgid "Encrypted data expired"
 msgstr "انتهت صلاحية البيانات المشفرة"
 
+#: backend/security/communication_security.py:339
 msgid "Invalid signature"
 msgstr "توقيع غير صحيح"
 
+#: backend/security/communication_security.py:346
 #, python-format
 msgid "Decryption failed: %s"
 msgstr "فشل في فك التشفير: %s"
 
+#: backend/auth/auth_bearer.py:33
 msgid "Invalid authentication scheme."
 msgstr "مخطط مصادقة غير صحيح."
 
+#: backend/auth/auth_bearer.py:36
 msgid "Expired token."
 msgstr "الرمز المميز منتهي الصلاحية."
 
+#: backend/auth/auth_bearer.py:40
 msgid "Invalid authorization code."
 msgstr "رمز الترخيص غير صحيح."
 
+#: backend/auth/auth_bearer.py:69
 msgid "Could not validate credentials"
 msgstr "لا يمكن التحقق من بيانات الاعتماد"
 
+#: backend/api/host_utils.py:25 backend/api/host_utils.py:38
+#: backend/api/host_utils.py:58 backend/api/host_utils.py:108
+#: backend/api/host_utils.py:150 backend/api/host_utils.py:186
+#: backend/api/host_utils.py:242 backend/api/host_utils.py:294
+#: backend/api/host.py:98 backend/api/host.py:258 backend/api/host.py:295
+#: backend/api/host.py:350 backend/api/host.py:392 backend/api/host.py:428
+#: backend/api/host.py:462 backend/api/host.py:582 backend/api/host.py:696
+#: backend/api/host.py:736 backend/api/updates.py:103
+#: backend/api/updates.py:235 backend/api/updates.py:552
+#: backend/api/certificates.py:72 backend/api/certificates.py:115
 msgid "Host not found"
 msgstr "لم يتم العثور على المضيف"
 
+#: backend/api/host_utils.py:45 backend/api/certificates.py:75
 msgid "Host is not approved"
 msgstr "المضيف غير معتمد"
 
+#: backend/api/auth.py:119
 msgid "Account is locked due to too many failed login attempts"
 msgstr "الحساب مقفل بسبب محاولات تسجيل دخول فاشلة كثيرة"
 
+#: backend/api/auth.py:170
 msgid "Account locked due to too many failed login attempts"
 msgstr "الحساب مقفل بسبب محاولات تسجيل دخول فاشلة كثيرة"
 
+#: backend/api/auth.py:179
 msgid "Invalid username or password"
 msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
 
+#: backend/api/user.py:51 backend/api/user.py:100 backend/api/user.py:132
+#: backend/api/user.py:164 backend/api/user.py:282 backend/api/user.py:332
+#: backend/api/profile.py:58 backend/api/profile.py:89
 msgid "User not found"
 msgstr "لم يتم العثور على المستخدم"
 
+#: backend/api/user.py:233
 msgid "User already exists"
 msgstr "المستخدم موجود بالفعل"
 
+#: backend/api/fleet.py:80
 #, python-format
 msgid "Agent with hostname %s not found"
 msgstr "لم يتم العثور على الوكيل بعنوان المضيف %s"
 
+#: backend/api/fleet.py:96 backend/api/fleet.py:126 backend/api/fleet.py:159
+#: backend/api/fleet.py:194 backend/api/fleet.py:224 backend/api/fleet.py:251
 #, python-format
 msgid "Agent %s is not connected"
 msgstr "الوكيل %s غير متصل"
 
+#: backend/api/fleet.py:107
 #, python-format
 msgid "Failed to send command to %s"
 msgstr "فشل في إرسال الأمر إلى %s"
 
+#: backend/api/fleet.py:113
 #, python-brace-format
 msgid "Command {command_type} sent to {hostname}"
 msgstr "تم إرسال الأمر {command_type} إلى {hostname}"
 
+#: backend/api/fleet.py:141
 #, python-format
 msgid "Failed to send shell command to %s"
 msgstr "فشل في إرسال أمر الصدفة إلى %s"
 
+#: backend/api/fleet.py:148
 #, python-brace-format
 msgid "Shell command sent to {hostname}"
 msgstr "تم إرسال أمر الصدفة إلى {hostname}"
 
+#: backend/api/fleet.py:174
 #, python-format
 msgid "Failed to send install command to %s"
 msgstr "فشل في إرسال أمر التثبيت إلى %s"
 
+#: backend/api/fleet.py:181
 #, python-brace-format
 msgid "Package installation command sent to {hostname}"
 msgstr "تم إرسال أمر تثبيت الحزمة إلى {hostname}"
 
+#: backend/api/fleet.py:206
 #, python-format
 msgid "Failed to send restart command to %s"
 msgstr "فشل في إرسال أمر إعادة التشغيل إلى %s"
 
+#: backend/api/fleet.py:213
 #, python-brace-format
 msgid "Service restart command sent to {hostname}"
 msgstr "تم إرسال أمر إعادة تشغيل الخدمة إلى {hostname}"
 
+#: backend/api/fleet.py:234
 #, python-format
 msgid "Failed to send update command to %s"
 msgstr "فشل في إرسال أمر التحديث إلى %s"
 
+#: backend/api/fleet.py:240
 #, python-brace-format
 msgid "System update command sent to {hostname}"
 msgstr "تم إرسال أمر تحديث النظام إلى {hostname}"
 
+#: backend/api/fleet.py:261
 #, python-format
 msgid "Failed to send reboot command to %s"
 msgstr "فشل في إرسال أمر إعادة التشغيل إلى %s"
 
+#: backend/api/fleet.py:267
 #, python-brace-format
 msgid "Reboot command sent to {hostname}"
 msgstr "تم إرسال أمر إعادة التشغيل إلى {hostname}"
 
+#: backend/api/fleet.py:286
 #, python-brace-format
 msgid "Command {command_type} broadcast to {sent_count} agents"
 msgstr "تم بث الأمر {command_type} إلى {sent_count} وكيل"
 
+#: backend/api/fleet.py:312
 #, python-brace-format
 msgid "Shell command broadcast to {sent_count} agents"
 msgstr "تم بث أمر الصدفة إلى {sent_count} وكيل"
 
+#: backend/api/fleet.py:332
 #, python-format
 msgid "No agents found for platform %s"
 msgstr "لم يتم العثور على وكلاء لمنصة %s"
 
+#: backend/api/fleet.py:341
 #, python-brace-format
 msgid "Command {command_type} sent to {sent_count} {platform} agents"
 msgstr "تم إرسال الأمر {command_type} إلى {sent_count} وكيل {platform}"
 
+#: backend/api/host.py:156
 msgid "Host already exists"
 msgstr "المضيف موجود بالفعل"
 
+#: backend/api/host.py:299 backend/api/host.py:354
 msgid "Host is not in pending status"
 msgstr "المضيف ليس في حالة انتظار"
 
+#: backend/api/host.py:405 backend/api/host.py:441 backend/api/host.py:595
+#: backend/api/host.py:709 backend/api/host.py:747
 msgid "Agent is not connected"
 msgstr "الوكيل غير متصل"
 
+#: backend/api/host.py:407
 msgid "OS version update requested"
 msgstr "تم طلب تحديث إصدار نظام التشغيل"
 
+#: backend/api/host.py:443
 msgid "Updates check requested"
 msgstr "تم طلب فحص التحديثات"
 
+#: backend/api/host.py:544
 msgid "Hardware information updated successfully"
 msgstr "تم تحديث معلومات الأجهزة بنجاح"
 
+#: backend/api/host.py:597
 msgid "Hardware update requested"
 msgstr "تم طلب تحديث الأجهزة"
 
+#: backend/api/host.py:711
 msgid "User access update requested"
 msgstr "تم طلب تحديث وصول المستخدم"
 
+#: backend/api/host.py:749
 msgid "Software inventory update requested"
 msgstr "تم طلب تحديث مخزون البرمجيات"
 
+#: backend/api/config_management.py:77
 msgid "Configuration pushed to all agents"
 msgstr "تم دفع التكوين إلى جميع الوكلاء"
 
+#: backend/api/config_management.py:89
 msgid "Configuration pushed successfully"
 msgstr "تم دفع التكوين بنجاح"
 
+#: backend/api/config_management.py:93
 msgid "Agent not found or unreachable"
 msgstr "الوكيل غير موجود أو غير قابل للوصول"
 
+#: backend/api/config_management.py:101
 msgid "Configuration pushed to platform agents"
 msgstr "تم دفع التكوين إلى وكلاء المنصة"
 
+#: backend/api/config_management.py:108
 msgid "Must specify target_hostname, target_platform, or push_to_all"
 msgstr "يجب تحديد target_hostname أو target_platform أو push_to_all"
 
+#: backend/api/config_management.py:193
 msgid "Configuration acknowledgment processed"
 msgstr "تمت معالجة إقرار التكوين"
 
+#: backend/api/updates.py:143
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "فشل في حفظ التحديثات: %s"
 
+#: backend/api/updates.py:216
 #, python-format
 msgid "Failed to get update summary: %s"
 msgstr "فشل في الحصول على ملخص التحديث: %s"
 
+#: backend/api/updates.py:298
 #, python-format
 msgid "Failed to get host updates: %s"
 msgstr "فشل في الحصول على تحديثات المضيف: %s"
 
+#: backend/api/updates.py:378
 #, python-format
 msgid "Failed to get updates: %s"
 msgstr "فشل في الحصول على التحديثات: %s"
 
+#: backend/api/updates.py:425
 msgid "Host not found or inactive"
 msgstr "لم يتم العثور على المضيف أو أنه غير نشط"
 
+#: backend/api/updates.py:455
 msgid "No matching updates found for specified packages"
 msgstr "لم يتم العثور على تحديثات مطابقة للحزم المحددة"
 
+#: backend/api/updates.py:502
 msgid "Update execution started"
 msgstr "بدأ تنفيذ التحديث"
 
+#: backend/api/updates.py:513
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "فشل في إرسال الأمر: %s"
 
+#: backend/api/updates.py:521
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "فشل في إرسال أمر التحديث: %s"
 
+#: backend/api/updates.py:534
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "فشل في تنفيذ التحديثات: %s"
 
+#: backend/api/updates.py:589
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "فشل في الحصول على سجل التنفيذ: %s"
 
+#: backend/api/updates.py:609
+#, fuzzy, python-format
+msgid "Failed to get update results: %s"
+msgstr "فشل في الحصول على التحديثات: %s"
+
+#: backend/api/certificates.py:32
 #, python-format
 msgid "Failed to get server fingerprint: %s"
 msgstr "فشل في الحصول على بصمة الخادم: %s"
 
+#: backend/api/certificates.py:51
 #, python-format
 msgid "Failed to get CA certificate: %s"
 msgstr "فشل في الحصول على شهادة المرجع المعتمد: %s"
 
+#: backend/api/agent.py:65
 msgid "Rate limit exceeded"
 msgstr "تم تجاوز حد المعدل"
 
+#: backend/api/agent.py:141
 msgid "Host not approved"
 msgstr "المضيف غير معتمد"
 
+#: backend/api/agent.py:157
 #, python-brace-format
 msgid "Host {hostname} registered successfully"
 msgstr "تم تسجيل المضيف {hostname} بنجاح"
 
+#: backend/api/agent.py:166
 msgid "Hostname is required for registration"
 msgstr "اسم المضيف مطلوب للتسجيل"
 
+#: backend/api/agent.py:345
 msgid "os_version_updated"
 msgstr "تم تحديث إصدار نظام التشغيل"
 
+#: backend/api/agent.py:470
 msgid "hardware_updated"
 msgstr "تم تحديث الأجهزة"
 
+#: backend/api/agent.py:577
 msgid "user_access_updated"
 msgstr "تم تحديث وصول المستخدم"
 
+#: backend/api/agent.py:647
 msgid "software_inventory_updated"
 msgstr "تم تحديث مخزون البرمجيات"
 
+#: backend/api/agent.py:855
 #, python-format
 msgid "Authentication failed: %s"
 msgstr "فشل في المصادقة: %s"
 
+#: backend/api/agent.py:860
 msgid "Authentication token required"
 msgstr "مطلوب رمز المصادقة"
 
+#: backend/api/agent.py:888
 msgid "Message failed security validation"
 msgstr "فشلت الرسالة في التحقق الأمني"
 
+#: backend/api/agent.py:1004
 msgid "Message must be valid JSON"
 msgstr "يجب أن تكون الرسالة بتنسيق JSON صحيح"

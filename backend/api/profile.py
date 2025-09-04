@@ -88,10 +88,12 @@ async def update_profile(
         if not user:
             raise HTTPException(status_code=404, detail=_("User not found"))
 
-        # Update the fields if provided
-        if profile_data.first_name is not None:
+        # Update the fields if explicitly provided (including None values)
+        # Using model_dump to check which fields were actually provided in the request
+        update_dict = profile_data.model_dump(exclude_unset=True)
+        if "first_name" in update_dict:
             user.first_name = profile_data.first_name
-        if profile_data.last_name is not None:
+        if "last_name" in update_dict:
             user.last_name = profile_data.last_name
 
         # Update last access
