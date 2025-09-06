@@ -12,6 +12,7 @@ from sqlalchemy import (
     String,
     Text,
     ForeignKey,
+    Index,
 )
 from sqlalchemy.orm import relationship
 
@@ -369,3 +370,133 @@ class UpdateExecutionLog(Base):
     # Relationships
     host = relationship("Host")
     package_update = relationship("PackageUpdate")
+
+
+class MessageQueue(Base):
+    """
+    Message queue table for persistent message storage between server and agents.
+
+    This table stores both inbound (from agents) and outbound (to agents) messages
+    with their processing status, priority, and timestamps for reliable delivery.
+    """
+
+    __tablename__ = "message_queue"
+
+    # Primary key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Host association (nullable for broadcast messages)
+    host_id = Column(
+        Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+
+    # Message identification
+    message_id = Column(String(36), unique=True, nullable=False, index=True)  # UUID
+    direction = Column(String(10), nullable=False, index=True)  # inbound/outbound
+
+    # Message content
+    message_type = Column(String(50), nullable=False, index=True)
+    message_data = Column(Text, nullable=False)  # JSON serialized message
+
+    # Queue management
+    status = Column(String(15), nullable=False, default="pending", index=True)
+    priority = Column(String(10), nullable=False, default="normal", index=True)
+    retry_count = Column(Integer, nullable=False, default=0)
+    max_retries = Column(Integer, nullable=False, default=3)
+
+    # Timestamps (PostgreSQL handles timezone automatically)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    scheduled_at = Column(
+        DateTime(timezone=True), nullable=True
+    )  # When to process (for delays)
+    started_at = Column(
+        DateTime(timezone=True), nullable=True
+    )  # When processing started
+    completed_at = Column(
+        DateTime(timezone=True), nullable=True
+    )  # When processing finished
+
+    # Error handling
+    error_message = Column(Text, nullable=True)
+    last_error_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Metadata
+    correlation_id = Column(
+        String(36), nullable=True, index=True
+    )  # For message correlation
+    reply_to = Column(String(36), nullable=True, index=True)  # For message replies
+
+    # Create composite indexes for common queries
+    __table_args__ = (
+        Index(
+            "idx_queue_processing", "direction", "status", "priority", "scheduled_at"
+        ),
+        Index("idx_queue_cleanup", "status", "completed_at"),
+        Index("idx_queue_retry", "status", "retry_count", "max_retries"),
+        Index("idx_queue_host_direction", "host_id", "direction", "status"),
+    )
+
+    # Relationship back to Host
+    host = relationship("Host")
+
+    def __repr__(self):
+        return (
+            f"<MessageQueue(id={self.id}, message_id='{self.message_id}', "
+            f"type='{self.message_type}', direction='{self.direction}', "
+            f"status='{self.status}', host_id={self.host_id})>"
+        )
+
+
+class QueueMetrics(Base):
+    """
+    Table for storing queue performance metrics and statistics.
+    Tracks message processing performance and error rates.
+    """
+
+    __tablename__ = "queue_metrics"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Metric identification
+    metric_name = Column(String(50), nullable=False, index=True)
+    direction = Column(String(10), nullable=False, index=True)  # inbound/outbound
+    host_id = Column(
+        Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+
+    # Metric values
+    count = Column(Integer, nullable=False, default=0)
+    total_time_ms = Column(Integer, nullable=False, default=0)
+    avg_time_ms = Column(Integer, nullable=False, default=0)
+    min_time_ms = Column(Integer, nullable=True)
+    max_time_ms = Column(Integer, nullable=True)
+
+    # Error tracking
+    error_count = Column(Integer, nullable=False, default=0)
+
+    # Timestamps
+    period_start = Column(DateTime(timezone=True), nullable=False)
+    period_end = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Indexes for efficient querying
+    __table_args__ = (
+        Index(
+            "idx_metrics_period",
+            "metric_name",
+            "direction",
+            "period_start",
+            "period_end",
+        ),
+        Index("idx_metrics_latest", "metric_name", "direction", "updated_at"),
+        Index("idx_metrics_host", "host_id", "metric_name", "direction"),
+    )
+
+    # Relationship back to Host
+    host = relationship("Host")
+
+    def __repr__(self):
+        return (
+            f"<QueueMetrics(id={self.id}, metric='{self.metric_name}', "
+            f"direction='{self.direction}', count={self.count}, host_id={self.host_id})>"
+        )

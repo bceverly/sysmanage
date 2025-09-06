@@ -715,4 +715,4 @@ raise HTTPException(status_code=401, detail=_("Invalid username or password"))
 
 ## License
 
-This project is licensed under the BSD 2-Clause License. See [LICENSE](LICENSE) for details.
+This project is licensed under the GNU Affero General Public License v3.0. See [LICENSE](LICENSE) for details.

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { 
@@ -75,9 +75,15 @@ const Updates: React.FC = () => {
     host_id: ''
   });
 
-  const ITEMS_PER_PAGE = 50;
+  // Auto-refresh state
+  const [refreshCountdown, setRefreshCountdown] = useState(30);
+  const refreshTimerRef = useRef<number | null>(null);
+  const countdownTimerRef = useRef<number | null>(null);
 
-  const fetchUpdatesSummary = async () => {
+  const ITEMS_PER_PAGE = 50;
+  const AUTO_REFRESH_INTERVAL = 30000; // 30 seconds
+
+  const fetchUpdatesSummary = useCallback(async () => {
     try {
       const stats = await updatesService.getUpdatesSummary();
       setUpdateStats(stats);
@@ -85,7 +91,7 @@ const Updates: React.FC = () => {
       console.error('Failed to fetch update statistics:', error);
       setUpdateStats(null);
     }
-  };
+  }, []);
 
   const fetchHostsWithUpdates = useCallback(async () => {
     try {
@@ -170,7 +176,7 @@ const Updates: React.FC = () => {
     }
   }, [filters]);
 
-  const refreshAll = async () => {
+  const refreshAll = useCallback(async () => {
     setIsRefreshing(true);
     await Promise.all([
       fetchUpdatesSummary(),
@@ -179,7 +185,47 @@ const Updates: React.FC = () => {
     ]);
     setIsRefreshing(false);
     setSelectedUpdates(new Set());
+  }, [fetchUpdatesSummary, fetchHostsWithUpdates, fetchUpdates]);
+
+  const handleManualRefresh = async () => {
+    await refreshAll();
+    resetAutoRefreshTimer(); // Reset timer after manual refresh
   };
+
+  // Auto-refresh timer management
+  const resetAutoRefreshTimer = useCallback(() => {
+    // Clear existing timers
+    if (refreshTimerRef.current) {
+      window.clearTimeout(refreshTimerRef.current);
+    }
+    if (countdownTimerRef.current) {
+      window.clearInterval(countdownTimerRef.current);
+    }
+
+    // Reset countdown to 30 seconds
+    setRefreshCountdown(30);
+
+    // Start countdown timer (updates every second)
+    countdownTimerRef.current = window.setInterval(() => {
+      setRefreshCountdown((prev) => {
+        if (prev <= 1) {
+          // Countdown reached 0, trigger refresh
+          refreshAll();
+          return 30; // Reset to 30 after refresh
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    // Set main refresh timer
+    refreshTimerRef.current = window.setTimeout(() => {
+      refreshAll();
+    }, AUTO_REFRESH_INTERVAL);
+  }, [refreshAll, AUTO_REFRESH_INTERVAL]);
+
+  const handleUserInteraction = useCallback(() => {
+    resetAutoRefreshTimer();
+  }, [resetAutoRefreshTimer]);
 
   useEffect(() => {
     Promise.all([
@@ -187,7 +233,37 @@ const Updates: React.FC = () => {
       fetchHostsWithUpdates(),
       fetchUpdates(0)
     ]);
-  }, [filters, fetchUpdates, fetchHostsWithUpdates]);
+  }, [filters, fetchUpdates, fetchHostsWithUpdates, fetchUpdatesSummary]);
+
+  // Initialize auto-refresh timer
+  useEffect(() => {
+    resetAutoRefreshTimer();
+    
+    // Cleanup timers on component unmount
+    return () => {
+      if (refreshTimerRef.current) {
+        window.clearTimeout(refreshTimerRef.current);
+      }
+      if (countdownTimerRef.current) {
+        window.clearInterval(countdownTimerRef.current);
+      }
+    };
+  }, [resetAutoRefreshTimer]);
+
+  // Add event listeners for user interactions
+  useEffect(() => {
+    const events = ['click', 'scroll', 'keydown', 'mousemove'];
+    
+    events.forEach(event => {
+      document.addEventListener(event, handleUserInteraction, { passive: true });
+    });
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, handleUserInteraction);
+      });
+    };
+  }, [handleUserInteraction]);
 
   // Poll for update results when there are pending updates
   useEffect(() => {
@@ -328,6 +404,9 @@ const Updates: React.FC = () => {
     });
     setUpdateStatuses(newStatuses);
 
+    // Clear checkboxes immediately after setting pending status
+    setSelectedUpdates(new Set());
+
     try {
       for (const [hostId, hostUpdates] of updatesByHost) {
         const packageNames = hostUpdates.map(u => u.packageName);
@@ -336,20 +415,20 @@ const Updates: React.FC = () => {
         await updatesService.executeUpdates([hostId], packageNames, packageManagers);
       }
       
-      // Don't clear selections - they'll be cleared when we receive status updates
-      // setSelectedUpdates(new Set());
-      // Don't refresh automatically - status will be updated via WebSocket
-      // await refreshAll();
+      // Checkboxes are already cleared above
     } catch (error) {
       console.error('Failed to execute updates:', error);
       
       // Set failed status for updates that failed to submit
       const failedStatuses = new Map(newStatuses);
-      selectedUpdates.forEach(key => {
-        failedStatuses.set(key, {
-          status: 'failed',
-          timestamp: Date.now()
-        });
+      // Note: selectedUpdates is already cleared, so we need to iterate over the keys that had pending status
+      newStatuses.forEach((status, key) => {
+        if (status.status === 'pending') {
+          failedStatuses.set(key, {
+            status: 'failed',
+            timestamp: Date.now()
+          });
+        }
       });
       setUpdateStatuses(failedStatuses);
     }
@@ -357,16 +436,30 @@ const Updates: React.FC = () => {
 
   const getUpdateIcon = (update: PackageUpdate) => {
     const key = `${update.host_id}-${update.package_name}-${update.package_manager}`;
-    const status = updateStatuses.get(key);
+    const localStatus = updateStatuses.get(key);
     
-    // If there's a status update, show status-specific icon
-    if (status) {
-      switch (status.status) {
+    // First check local state (for immediate feedback after clicking execute)
+    if (localStatus) {
+      switch (localStatus.status) {
         case 'pending':
           return <IoTime className="update-icon pending" />;
         case 'success':
           return <IoCheckmarkCircle className="update-icon success" />;
         case 'failed':
+          return <IoCloseCircle className="update-icon failed" />;
+      }
+    }
+    
+    // Then check backend status from the update object itself
+    if (update.status) {
+      switch (update.status) {
+        case 'updating':
+          return <IoTime className="update-icon pending" />;
+        case 'completed':
+        case 'success':
+          return <IoCheckmarkCircle className="update-icon success" />;
+        case 'failed':
+        case 'error':
           return <IoCloseCircle className="update-icon failed" />;
       }
     }
@@ -393,15 +486,30 @@ const Updates: React.FC = () => {
 
   const getStatusPill = (update: PackageUpdate) => {
     const key = `${update.host_id}-${update.package_name}-${update.package_manager}`;
-    const status = updateStatuses.get(key);
+    const localStatus = updateStatuses.get(key);
     
-    if (status) {
-      switch (status.status) {
+    // First check local state (for immediate feedback after clicking execute)
+    if (localStatus) {
+      switch (localStatus.status) {
         case 'pending':
           return <span className="updates__status-pill pending">{t('updates.status.pending', 'Update Requested')}</span>;
         case 'success':
           return <span className="updates__status-pill success">{t('updates.status.success', 'Successfully Updated')}</span>;
         case 'failed':
+          return <span className="updates__status-pill failed">{t('updates.status.failed', 'Update Failed')}</span>;
+      }
+    }
+    
+    // Then check backend status from the update object itself
+    if (update.status) {
+      switch (update.status) {
+        case 'updating':
+          return <span className="updates__status-pill pending">{t('updates.status.pending', 'Update Requested')}</span>;
+        case 'completed':
+        case 'success':
+          return <span className="updates__status-pill success">{t('updates.status.success', 'Successfully Updated')}</span>;
+        case 'failed':
+        case 'error':
           return <span className="updates__status-pill failed">{t('updates.status.failed', 'Update Failed')}</span>;
       }
     }
@@ -424,14 +532,19 @@ const Updates: React.FC = () => {
     <div className="updates">
       <div className="updates__header">
         <h1 className="updates__title">{t('updates.title', 'Package Updates')}</h1>
-        <button 
-          className={`updates__refresh ${isRefreshing ? 'refreshing' : ''}`}
-          onClick={refreshAll}
-          disabled={isRefreshing}
-        >
-          <IoRefresh />
-          {t('updates.refresh', 'Refresh')}
-        </button>
+        <div className="updates__refresh-section">
+          <div className="updates__auto-refresh-info">
+            {t('updates.autoRefreshIn', 'Auto-refresh in')} {refreshCountdown}s
+          </div>
+          <button 
+            className={`updates__refresh ${isRefreshing ? 'refreshing' : ''}`}
+            onClick={handleManualRefresh}
+            disabled={isRefreshing}
+          >
+            <IoRefresh />
+            {t('updates.refresh', 'Refresh')}
+          </button>
+        </div>
       </div>
 
       {/* Statistics Cards */}

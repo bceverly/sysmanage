@@ -176,7 +176,10 @@
     "groupMembers": "الأعضاء",
     "physicalVolumes": "فيزيائي",
     "logicalVolumes": "منطقي",
-    "allVolumes": "الجميع"
+    "allVolumes": "الجميع",
+    "activeInterfaces": "نشطة",
+    "inactiveInterfaces": "غير نشطة",
+    "allInterfaces": "الجميع"
   },
   "userDetail": {
     "invalidId": "معرف مستخدم غير صالح",
@@ -269,6 +272,7 @@
   "updates": {
     "title": "تحديثات الحزم",
     "refresh": "تحديث",
+    "autoRefreshIn": "إعادة تحديث تلقائي في",
     "loading": "جاري تحميل التحديثات...",
     "noUpdates": "جميع الأنظمة محدثة",
     "noMatchingUpdates": "لا توجد تحديثات تطابق المرشحات الحالية",
@@ -298,6 +302,11 @@
       "security": "أمان",
       "system": "نظام",
       "application": "تطبيق"
+    },
+    "status": {
+      "pending": "تم طلب التحديث",
+      "success": "تم التحديث بنجاح",
+      "failed": "فشل في التحديث"
     }
   },
   "notifications": {

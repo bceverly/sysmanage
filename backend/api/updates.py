@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import List, Optional
 from pydantic import BaseModel, validator
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Body
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_, desc
 from sqlalchemy.orm import sessionmaker
 
@@ -59,23 +59,25 @@ class UpdateExecutionRequest(BaseModel):
     package_managers: Optional[List[str]] = None
 
     @validator("host_ids")
-    def validate_host_ids(cls, values):  # pylint: disable=no-self-argument
-        if not values:
+    def validate_host_ids(cls, host_ids):  # pylint: disable=no-self-argument
+        if not host_ids:
             raise ValueError("host_ids cannot be empty")
-        return values
+        return host_ids
 
     @validator("package_names")
-    def validate_package_names(cls, values):  # pylint: disable=no-self-argument
-        if not values:
+    def validate_package_names(cls, package_names):  # pylint: disable=no-self-argument
+        if not package_names:
             raise ValueError("package_names cannot be empty")
-        return values
+        return package_names
 
     @validator("package_managers", pre=True)
-    def validate_package_managers(cls, values):  # pylint: disable=no-self-argument
+    def validate_package_managers(
+        cls, package_managers
+    ):  # pylint: disable=no-self-argument
         # Convert empty array to None
-        if values == []:
+        if package_managers == []:
             return None
-        return values
+        return package_managers
 
 
 class UpdateStatsSummary(BaseModel):
@@ -189,13 +191,15 @@ async def get_update_summary(dependencies=Depends(JWTBearer())):
                 .count()
             )
 
-            # Try to get update results from the agent module's cache
+            # Try to get update results from the update handlers module's cache
             update_results = {}
             try:
-                import backend.api.agent as agent_module
+                import backend.api.update_handlers as update_handlers_module
 
-                if hasattr(agent_module, "handle_update_apply_result"):
-                    handler = getattr(agent_module, "handle_update_apply_result")
+                if hasattr(update_handlers_module, "handle_update_apply_result"):
+                    handler = getattr(
+                        update_handlers_module, "handle_update_apply_result"
+                    )
                     if hasattr(handler, "update_results_cache"):
                         update_results = handler.update_results_cache.copy()
             except Exception:
@@ -379,29 +383,17 @@ async def get_all_updates(
         ) from e
 
 
-@router.post("/execute-debug")
-async def debug_execute_updates(
-    raw_body: dict = Body(...), dependencies=Depends(JWTBearer())
-):
-    """Debug endpoint to see what data we're receiving."""
-    print(f"DEBUG RAW BODY: {raw_body}")
-    try:
-        request = UpdateExecutionRequest(**raw_body)
-        print(f"DEBUG VALIDATION SUCCESS: {request}")
-        return {"success": True, "message": "Validation passed", "data": request.dict()}
-    except Exception as e:
-        print(f"DEBUG VALIDATION ERROR: {e}")
-        return {"success": False, "error": "Validation failed"}
-
-
 @router.post("/execute")
 async def execute_updates(
     request: UpdateExecutionRequest, dependencies=Depends(JWTBearer())
 ):
     """Execute package updates on specified hosts."""
     try:
-        print(
-            f"DEBUG: Received update execution request: host_ids={request.host_ids}, package_names={request.package_names}, package_managers={request.package_managers}"
+        logger.info(
+            "Received update execution request: host_ids=%s, package_names=%s, package_managers=%s",
+            request.host_ids,
+            request.package_names,
+            request.package_managers,
         )
         session_factory = sessionmaker(bind=db.engine)
         with session_factory() as session:
@@ -528,8 +520,8 @@ async def execute_updates(
         import traceback
 
         error_details = traceback.format_exc()
-        print(f"ERROR: Update execution failed: {str(e)}")
-        print(f"ERROR: Full traceback:\n{error_details}")
+        logger.error("Update execution failed: %s", str(e))
+        logger.error("Full traceback:\n%s", error_details)
         raise HTTPException(
             status_code=500, detail=_("Failed to execute updates: %s") % str(e)
         ) from e

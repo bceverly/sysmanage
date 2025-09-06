@@ -146,6 +146,9 @@
     "physicalVolumes": "物理",
     "logicalVolumes": "論理",
     "allVolumes": "すべて",
+    "activeInterfaces": "アクティブ",
+    "inactiveInterfaces": "非アクティブ",
+    "allInterfaces": "すべて",
     "memberOfGroups": "グループ",
     "groupMembers": "メンバー"
   },
@@ -271,6 +274,7 @@
   "updates": {
     "title": "パッケージアップデート",
     "refresh": "更新",
+    "autoRefreshIn": "自動更新まで",
     "loading": "アップデートを読み込み中...",
     "noUpdates": "すべてのシステムが最新です",
     "noMatchingUpdates": "現在のフィルターに一致するアップデートはありません",

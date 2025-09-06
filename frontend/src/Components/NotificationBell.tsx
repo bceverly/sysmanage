@@ -3,6 +3,7 @@ import { IoNotifications, IoNotificationsOutline } from 'react-icons/io5';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { updatesService, UpdateStatsSummary } from '../Services/updates';
+import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
 import './css/NotificationBell.css';
 
 const NotificationBell: React.FC = () => {
@@ -12,6 +13,7 @@ const NotificationBell: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const isMountedRef = useRef(true);
+  const { registerRefresh, unregisterRefresh } = useNotificationRefresh();
 
   const fetchUpdateStats = useCallback(async () => {
     if (!isMountedRef.current) return;
@@ -40,14 +42,27 @@ const NotificationBell: React.FC = () => {
     isMountedRef.current = true;
     fetchUpdateStats();
     
-    // Poll for updates every 5 minutes
-    const interval = window.setInterval(fetchUpdateStats, 5 * 60 * 1000);
+    // Register the refresh function for external triggers
+    registerRefresh(fetchUpdateStats);
+    
+    // Start with frequent polling (every 10 seconds) for the first 2 minutes to catch initial data
+    let interval = window.setInterval(fetchUpdateStats, 10 * 1000);
+    
+    // After 2 minutes, switch to less frequent polling (every 30 seconds)
+    const slowDownTimeout = window.setTimeout(() => {
+      if (isMountedRef.current) {
+        window.clearInterval(interval);
+        interval = window.setInterval(fetchUpdateStats, 30 * 1000);
+      }
+    }, 2 * 60 * 1000);
     
     return () => {
       isMountedRef.current = false;
+      unregisterRefresh();
       window.clearInterval(interval);
+      window.clearTimeout(slowDownTimeout);
     };
-  }, [fetchUpdateStats]);
+  }, [fetchUpdateStats, registerRefresh, unregisterRefresh]);
 
   const handleBellClick = () => {
     setShowDropdown(!showDropdown);

@@ -29,6 +29,7 @@ class MessageType(str, Enum):
     UPDATE_REQUEST = "update_request"
     PING = "ping"
     SHUTDOWN = "shutdown"
+    HOST_APPROVED = "host_approved"
 
 
 class CommandType(str, Enum):
@@ -282,6 +283,25 @@ class SoftwareInventoryUpdateMessage(Message):
         super().__init__(MessageType.SOFTWARE_INVENTORY_UPDATE, data)
 
 
+class HostApprovedMessage(Message):
+    """Message sent from server to agent when host is approved."""
+
+    def __init__(
+        self,
+        host_id: int,
+        approval_status: str = "approved",
+        certificate: str = None,
+        **kwargs
+    ):
+        data = {
+            "host_id": host_id,
+            "approval_status": approval_status,
+            "certificate": certificate,
+            **kwargs,
+        }
+        super().__init__(MessageType.HOST_APPROVED, data)
+
+
 # Message factory for creating messages from raw data
 def create_message(raw_data: Dict[str, Any]) -> Message:
     """Create appropriate message object from raw dictionary data."""
@@ -436,6 +456,18 @@ def create_message(raw_data: Dict[str, Any]) -> Message:
                 ]
             }
         )
+    if message_type == MessageType.HOST_APPROVED:
+        data = raw_data.get("data", {})
+        return HostApprovedMessage(
+            host_id=data.get("host_id"),
+            approval_status=data.get("approval_status", "approved"),
+            certificate=data.get("certificate"),
+            **{
+                k: v
+                for k, v in data.items()
+                if k not in ["host_id", "approval_status", "certificate"]
+            }
+        )
     # Default fallback
     return Message.from_dict(raw_data)
 
@@ -445,4 +477,14 @@ def create_command_message(
 ) -> Dict[str, Any]:
     """Create a command message dictionary for sending to agents."""
     message = CommandMessage(command_type=command_type, parameters=parameters or {})
+    return message.to_dict()
+
+
+def create_host_approved_message(
+    host_id: int, approval_status: str = "approved", certificate: str = None
+) -> Dict[str, Any]:
+    """Create a host approved message dictionary for sending to agents."""
+    message = HostApprovedMessage(
+        host_id=host_id, approval_status=approval_status, certificate=certificate
+    )
     return message.to_dict()

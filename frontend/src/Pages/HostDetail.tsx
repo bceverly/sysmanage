@@ -45,6 +45,7 @@ const HostDetail = () => {
     const [error, setError] = useState<string | null>(null);
     const [currentTab, setCurrentTab] = useState<number>(0);
     const [storageFilter, setStorageFilter] = useState<'all' | 'physical' | 'logical'>('physical');
+    const [networkFilter, setNetworkFilter] = useState<'all' | 'active' | 'inactive'>('active');
     const [userFilter, setUserFilter] = useState<'all' | 'system' | 'regular'>('regular');
     const [groupFilter, setGroupFilter] = useState<'all' | 'system' | 'regular'>('regular');
     const [packageManagerFilter, setPackageManagerFilter] = useState<string>('all');
@@ -346,6 +347,25 @@ const HostDetail = () => {
                 return groups.sort((a, b) => {
                     if (a.is_system_group === b.is_system_group) return 0;
                     return a.is_system_group ? 1 : -1;
+                });
+        }
+    };
+
+    // Filter network interfaces based on active/inactive selection
+    const getFilteredNetworkInterfaces = (interfaces: NetworkInterfaceType[]): NetworkInterfaceType[] => {
+        switch (networkFilter) {
+            case 'active':
+                return interfaces.filter(iface => !!(iface.ipv4_address || iface.ipv6_address));
+            case 'inactive':
+                return interfaces.filter(iface => !(iface.ipv4_address || iface.ipv6_address));
+            case 'all':
+            default:
+                // Sort active interfaces first, then inactive
+                return interfaces.sort((a, b) => {
+                    const aHasIP = !!(a.ipv4_address || a.ipv6_address);
+                    const bHasIP = !!(b.ipv4_address || b.ipv6_address);
+                    if (aHasIP === bHasIP) return 0;
+                    return aHasIP ? -1 : 1;
                 });
         }
     };
@@ -776,19 +796,34 @@ const HostDetail = () => {
                                 {/* Network Details */}
                                 {networkInterfaces.length > 0 && (
                                     <Grid item xs={12}>
-                                        <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-                                            <NetworkCheckIcon sx={{ mr: 1 }} />
-                                            {t('hostDetail.networkDetails', 'Network Interfaces')}
-                                        </Typography>
-                                        {networkInterfaces
-                                            .sort((a, b) => {
-                                                // Sort by IP address presence: those with IPs come first
-                                                const aHasIP = !!(a.ipv4_address || a.ipv6_address);
-                                                const bHasIP = !!(b.ipv4_address || b.ipv6_address);
-                                                if (aHasIP === bHasIP) return 0;
-                                                return aHasIP ? -1 : 1;
-                                            })
-                                            .map((iface: NetworkInterfaceType, index: number) => (
+                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                                                <NetworkCheckIcon sx={{ mr: 1 }} />
+                                                {t('hostDetail.networkDetails', 'Network Interfaces')}
+                                            </Typography>
+                                            <ToggleButtonGroup
+                                                value={networkFilter}
+                                                exclusive
+                                                onChange={(_, newFilter) => {
+                                                    if (newFilter !== null) {
+                                                        setNetworkFilter(newFilter);
+                                                    }
+                                                }}
+                                                size="small"
+                                                sx={{ ml: 2 }}
+                                            >
+                                                <ToggleButton value="active" aria-label="active interfaces">
+                                                    {t('hostDetail.activeInterfaces', 'Active')}
+                                                </ToggleButton>
+                                                <ToggleButton value="inactive" aria-label="inactive interfaces">
+                                                    {t('hostDetail.inactiveInterfaces', 'Inactive')}
+                                                </ToggleButton>
+                                                <ToggleButton value="all" aria-label="all interfaces">
+                                                    {t('hostDetail.allInterfaces', 'All')}
+                                                </ToggleButton>
+                                            </ToggleButtonGroup>
+                                        </Box>
+                                        {getFilteredNetworkInterfaces(networkInterfaces).map((iface: NetworkInterfaceType, index: number) => (
                                             <Box key={iface.id || index} sx={{ mb: 3, p: 2, pb: 3, backgroundColor: 'grey.900', borderRadius: 1, minHeight: '140px', display: 'flex', flexDirection: 'column' }}>
                                                 <Grid container spacing={2} alignItems="flex-start">
                                                     <Grid item xs={12} md={3}>

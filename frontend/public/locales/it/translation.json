@@ -176,6 +176,9 @@
     "physicalVolumes": "Fisici",
     "logicalVolumes": "Logici",
     "allVolumes": "Tutti",
+    "activeInterfaces": "Attivi",
+    "inactiveInterfaces": "Inattivi",
+    "allInterfaces": "Tutti",
     "memberOfGroups": "Gruppi",
     "groupMembers": "Membri"
   },
@@ -270,6 +273,7 @@
   "updates": {
     "title": "Aggiornamenti Pacchetti",
     "refresh": "Aggiorna",
+    "autoRefreshIn": "Aggiornamento automatico tra",
     "loading": "Caricamento aggiornamenti...",
     "noUpdates": "Tutti i sistemi sono aggiornati",
     "noMatchingUpdates": "Nessun aggiornamento corrisponde ai filtri attuali",

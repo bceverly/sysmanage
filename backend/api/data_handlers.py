@@ -48,11 +48,20 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
 
     # For test compatibility - check for hostname instead of host_id if needed
     if not hasattr(connection, "host_id") or not connection.host_id:
-        # Try to find host by hostname for tests
+        # Try to find host by hostname first
         if has_hostname:
             host = db.query(Host).filter(Host.fqdn == connection.hostname).first()
             if host:
                 connection.host_id = host.id
+            else:
+                return {"message_type": "error", "error": _("Host not registered")}
+        # If no hostname, try IP lookup via websocket client
+        elif has_websocket_client:
+            client_ip = connection.websocket.client.host
+            host = db.query(Host).filter(Host.ipv4 == client_ip).first()
+            if host:
+                connection.host_id = host.id
+                connection.hostname = host.fqdn
             else:
                 return {"message_type": "error", "error": _("Host not registered")}
         else:
@@ -133,24 +142,78 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
         return {"message_type": "error", "error": _("Host not registered")}
 
     try:
-        # Update basic host hardware info
-        hardware_info = {
-            "cpu_info": message_data.get("cpu_info"),
-            "memory_total": message_data.get("memory_total"),
-            "memory_available": message_data.get("memory_available"),
-            "disk_usage": message_data.get("disk_usage"),
-        }
+        # Map hardware data from agent message to database fields
+        hardware_updates = {}
 
-        # Remove None values
-        hardware_info = {k: v for k, v in hardware_info.items() if v is not None}
+        # Map CPU information
+        cpu_vendor = message_data.get("cpu_vendor")
+        if cpu_vendor is not None:
+            hardware_updates["cpu_vendor"] = cpu_vendor
 
-        if hardware_info:
+        cpu_model = message_data.get("cpu_model")
+        if cpu_model is not None:
+            hardware_updates["cpu_model"] = cpu_model
+
+        cpu_cores = message_data.get("cpu_cores")
+        if cpu_cores is not None:
+            hardware_updates["cpu_cores"] = cpu_cores
+
+        cpu_threads = message_data.get("cpu_threads")
+        if cpu_threads is not None:
+            hardware_updates["cpu_threads"] = cpu_threads
+
+        cpu_frequency_mhz = message_data.get("cpu_frequency_mhz")
+        if cpu_frequency_mhz is not None:
+            hardware_updates["cpu_frequency_mhz"] = cpu_frequency_mhz
+
+        # Map memory information
+        memory_total_mb = message_data.get("memory_total_mb")
+        if memory_total_mb is not None:
+            hardware_updates["memory_total_mb"] = memory_total_mb
+
+        # Map JSON detail fields
+        hardware_details = message_data.get("hardware_details")
+        if hardware_details is not None:
+            hardware_updates["hardware_details"] = (
+                json.dumps(hardware_details)
+                if isinstance(hardware_details, dict)
+                else hardware_details
+            )
+
+        storage_details = message_data.get("storage_details")
+        if storage_details is not None:
+            hardware_updates["storage_details"] = (
+                json.dumps(storage_details)
+                if isinstance(storage_details, dict)
+                else storage_details
+            )
+
+        network_details = message_data.get("network_details")
+        if network_details is not None:
+            hardware_updates["network_details"] = (
+                json.dumps(network_details)
+                if isinstance(network_details, dict)
+                else network_details
+            )
+
+        # Update hardware information if we have any data
+        if hardware_updates:
+            from datetime import datetime, timezone
+
+            hardware_updates["hardware_updated_at"] = datetime.now(timezone.utc)
+
             stmt = (
                 update(Host)
                 .where(Host.id == connection.host_id)
-                .values(**hardware_info)
+                .values(**hardware_updates)
             )
             db.execute(stmt)
+
+            debug_logger.info(
+                "Hardware fields updated for host %s: %s",
+                connection.host_id,
+                list(hardware_updates.keys()),
+            )
 
         # Handle network interfaces
         network_interfaces = message_data.get("network_interfaces", [])
@@ -163,14 +226,24 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
             )
 
             # Add new interfaces
+            from datetime import datetime, timezone
+
             for interface in network_interfaces:
+                now = datetime.now(timezone.utc)
                 network_interface = NetworkInterface(
                     host_id=connection.host_id,
                     name=interface.get("name"),
                     ipv4_address=interface.get("ipv4_address"),
                     ipv6_address=interface.get("ipv6_address"),
                     mac_address=interface.get("mac_address"),
-                    status=interface.get("status", "unknown"),
+                    # Note: 'status' field doesn't exist in NetworkInterface model - removed
+                    is_active=(
+                        interface.get("status") == "active"
+                        if interface.get("status")
+                        else False
+                    ),
+                    created_at=now,
+                    updated_at=now,
                 )
                 db.add(network_interface)
 
@@ -184,14 +257,36 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
 
             # Add new storage devices
             for device in storage_devices:
+                now = datetime.now(timezone.utc)
+
+                # Determine if device is physical based on device type
+                device_type = device.get("device_type", "unknown")
+
+                # Logic to determine physical vs logical storage
+                # Per requirements: disk image = logical, everything else = physical
+                is_physical = True
+                if device_type and device_type.lower() == "disk image":
+                    is_physical = False
+
                 storage_device = StorageDevice(
                     host_id=connection.host_id,
-                    device_name=device.get("device_name"),
-                    device_type=device.get("device_type", "unknown"),
-                    total_size=device.get("total_size"),
-                    used_size=device.get("used_size"),
-                    filesystem=device.get("filesystem"),
+                    name=device.get("name"),  # Use correct field name
+                    device_path=device.get("device_path"),  # Add device_path
+                    device_type=device_type,
+                    capacity_bytes=device.get(
+                        "total_size"
+                    ),  # Map total_size to capacity_bytes
+                    used_bytes=device.get("used_size"),
+                    available_bytes=device.get(
+                        "available_size"
+                    ),  # Map available_size to available_bytes
+                    file_system=device.get(
+                        "filesystem"
+                    ),  # Map filesystem to file_system
                     mount_point=device.get("mount_point"),
+                    is_physical=is_physical,  # Set based on device analysis
+                    created_at=now,
+                    updated_at=now,
                 )
                 db.add(storage_device)
 
@@ -219,8 +314,18 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
         return {"message_type": "error", "error": _("Host not registered")}
 
     try:
-        # Handle user accounts
+        # Debug: log what keys we're receiving
+        debug_logger.info("User access message keys: %s", list(message_data.keys()))
+
+        # Handle user accounts - try both possible field names
         user_accounts = message_data.get("user_accounts", [])
+        if not user_accounts:
+            # Try alternate field name the agent might be using
+            user_accounts = message_data.get("users", [])
+            if user_accounts:
+                debug_logger.info(
+                    "Found %d users under 'users' key", len(user_accounts)
+                )
         if user_accounts:
             # Delete existing user accounts for this host
             db.execute(
@@ -229,30 +334,141 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
 
             # Add new user accounts
             for account in user_accounts:
+                from datetime import datetime, timezone
+
+                now = datetime.now(timezone.utc)
+
+                # Determine if this is a system user based on UID and username
+                uid = account.get("uid", 0)
+                username = account.get("username", "")
+
+                # System user detection logic
+                is_system_user = False
+                if uid is not None:
+                    # macOS: UIDs < 500 are typically system users
+                    # Linux: UIDs < 1000 are typically system users
+                    if uid < 500:
+                        is_system_user = True
+
+                # Also check for common system usernames
+                system_usernames = {
+                    "root",
+                    "daemon",
+                    "bin",
+                    "sys",
+                    "sync",
+                    "games",
+                    "man",
+                    "lp",
+                    "mail",
+                    "news",
+                    "uucp",
+                    "proxy",
+                    "www-data",
+                    "backup",
+                    "list",
+                    "irc",
+                    "gnats",
+                    "nobody",
+                    "systemd-network",
+                    "systemd-resolve",
+                    "syslog",
+                    "messagebus",
+                    "uuidd",
+                    "dnsmasq",
+                    "landscape",
+                    "pollinate",
+                    "sshd",
+                    "chrony",
+                    "_www",
+                    "_taskgated",
+                    "_networkd",
+                    "_installassistant",
+                    "_lp",
+                    "_postfix",
+                    "_scsd",
+                    "_ces",
+                    "_mcxalr",
+                    "_appleevents",
+                    "_geod",
+                    "_devdocs",
+                    "_sandbox",
+                    "_mdnsresponder",
+                    "_ard",
+                    "_eppc",
+                    "_cvs",
+                    "_svn",
+                    "_mysql",
+                    "_pgsql",
+                    "_krb_krbtgt",
+                    "_krb_kadmin",
+                    "_krb_changepw",
+                    "_devicemgr",
+                    "_spotlight",
+                    "_windowserver",
+                    "_securityagent",
+                    "_calendar",
+                    "_teamsserver",
+                    "_update_sharing",
+                    "_appstore",
+                    "_lpd",
+                    "_postdrop",
+                    "_qtss",
+                    "_coreaudiod",
+                    "_screensaver",
+                    "_locationd",
+                    "_trustevaluationagent",
+                    "_timezone",
+                    "_cvmsroot",
+                    "_usbmuxd",
+                    "_dovecot",
+                    "_dpaudio",
+                    "_postgres",
+                    "_krbtgt",
+                    "_kadmin_admin",
+                    "_kadmin_changepw",
+                }
+
+                if username in system_usernames or username.startswith("_"):
+                    is_system_user = True
+
                 user_account = UserAccount(
                     host_id=connection.host_id,
-                    username=account.get("username"),
-                    uid=account.get("uid"),
-                    gid=account.get("gid"),
+                    username=username,
+                    uid=uid,
                     home_directory=account.get("home_directory"),
                     shell=account.get("shell"),
-                    full_name=account.get("full_name", ""),
+                    is_system_user=is_system_user,  # Set proper classification
+                    created_at=now,
+                    updated_at=now,
                 )
                 db.add(user_account)
 
-        # Handle user groups
+        # Handle user groups - try both possible field names
         user_groups = message_data.get("user_groups", [])
+        if not user_groups:
+            # Try alternate field name the agent might be using
+            user_groups = message_data.get("groups", [])
+            if user_groups:
+                debug_logger.info(
+                    "Found %d groups under 'groups' key", len(user_groups)
+                )
         if user_groups:
             # Delete existing user groups for this host
             db.execute(delete(UserGroup).where(UserGroup.host_id == connection.host_id))
 
             # Add new user groups
             for group in user_groups:
+                now = datetime.now(timezone.utc)
                 user_group = UserGroup(
                     host_id=connection.host_id,
                     group_name=group.get("group_name"),
                     gid=group.get("gid"),
-                    members=json.dumps(group.get("members", [])),
+                    is_system_group=group.get("is_system_group", False),
+                    # Note: members field doesn't exist in UserGroup model - removed
+                    # (use UserGroupMembership table for members relationships)
+                    created_at=now,
+                    updated_at=now,
                 )
                 db.add(user_group)
 
@@ -291,7 +507,10 @@ async def handle_software_update(db: Session, connection, message_data: dict):
             )
 
             # Add new software packages
+            from datetime import datetime, timezone
+
             for package in software_packages:
+                now = datetime.now(timezone.utc)
                 software_package = SoftwarePackage(
                     host_id=connection.host_id,
                     package_name=package.get("package_name"),
@@ -299,6 +518,8 @@ async def handle_software_update(db: Session, connection, message_data: dict):
                     package_manager=package.get("package_manager", "unknown"),
                     bundle_id=package.get("bundle_id"),
                     installation_path=package.get("installation_path"),
+                    created_at=now,
+                    updated_at=now,
                 )
                 db.add(software_package)
 
@@ -345,26 +566,63 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
             connection.host_id,
         )
 
+        # Debug: log first package update structure to understand data format
+        if available_updates:
+            debug_logger.info(
+                "Sample package update structure: %s", available_updates[0]
+            )
+
+        from datetime import datetime, timezone
+
         for package_update in available_updates:
+            now = datetime.now(timezone.utc)
+            # Debug: log all keys in this package update
+            debug_logger.info(
+                "Package update keys for %s: %s",
+                package_update.get("package_name", "unknown"),
+                list(package_update.keys()),
+            )
+
+            # Handle case where new_version is None - skip if no version available
+            new_version = package_update.get("new_version") or package_update.get(
+                "available_version"
+            )
+            debug_logger.info(
+                "Package %s: new_version=%s, available_version=%s, resolved=%s",
+                package_update.get("package_name", "unknown"),
+                package_update.get("new_version"),
+                package_update.get("available_version"),
+                new_version,
+            )
+
+            if not new_version:
+                debug_logger.warning(
+                    "Skipping package update %s - no new version available",
+                    package_update.get("package_name", "unknown"),
+                )
+                continue
+
             package_update_record = PackageUpdate(
                 host_id=connection.host_id,
                 package_name=package_update.get("package_name"),
                 current_version=package_update.get("current_version"),
-                new_version=package_update.get("new_version"),
-                update_type=package_update.get("update_type", "application"),
+                available_version=new_version,  # Use validated version
                 package_manager=package_update.get("package_manager", "unknown"),
                 is_security_update=package_update.get("is_security_update", False),
-                description=package_update.get("description"),
                 status="available",
+                # Required timestamp fields
+                detected_at=now,
+                updated_at=now,
+                last_checked_at=now,
             )
             db.add(package_update_record)
-            db.add(package_update)
+            # Note: Removed duplicate 'db.add(package_update)' line
 
-        # Update host's last update check timestamp
+        # Update host's last access timestamp
         stmt = (
             update(Host)
             .where(Host.id == connection.host_id)
-            .values(last_update_check=text("NOW()"))
+            .values(last_access=text("NOW()"))
         )
         db.execute(stmt)
 

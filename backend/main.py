@@ -6,11 +6,14 @@ routers for the system and then launches the application.
 """
 
 import asyncio
+import logging
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.api import (
     agent,
@@ -27,6 +30,7 @@ from backend.config import config
 from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
 from backend.discovery.discovery_service import discovery_beacon
 from backend.security.certificate_manager import certificate_manager
+from backend.websocket.message_processor import message_processor
 
 # Parse the /etc/sysmanage.yaml file
 app_config = config.get_config()
@@ -37,19 +41,94 @@ async def lifespan(_fastapi_app: FastAPI):
     """
     Application lifespan manager to handle startup and shutdown events.
     """
-    # Startup: Ensure server certificates are generated
-    certificate_manager.ensure_server_certificate()
+    print("DEBUG: lifespan function called", flush=True)
+    print("DEBUG: About to call logging.info", flush=True)
+    logging.info("DEBUG: lifespan function called")
+    print("DEBUG: logging.info called successfully", flush=True)
+    try:
+        # Startup: Ensure server certificates are generated
+        print(
+            "DEBUG: About to call certificate_manager.ensure_server_certificate()",
+            flush=True,
+        )
+        logging.info(
+            "DEBUG: About to call certificate_manager.ensure_server_certificate()"
+        )
+        certificate_manager.ensure_server_certificate()
+        print("DEBUG: certificate_manager completed", flush=True)
+        logging.info("DEBUG: certificate_manager.ensure_server_certificate() completed")
 
-    # Startup: Start the heartbeat monitor service
-    heartbeat_task = asyncio.create_task(heartbeat_monitor_service())
+        # Startup: Start the heartbeat monitor service
+        print("DEBUG: About to start heartbeat monitor service", flush=True)
+        heartbeat_task = asyncio.create_task(heartbeat_monitor_service())
+        print("DEBUG: heartbeat monitor service started", flush=True)
 
-    # Startup: Start the discovery beacon service
-    await discovery_beacon.start_beacon_service()
+        # Startup: Start the message processor service
+        print("DEBUG: About to start message processor", flush=True)
+        logging.info("DEBUG: About to start message processor")
 
-    yield
+        # Get current event loop and schedule the message processor to start
+        loop = asyncio.get_event_loop()
+        print("DEBUG: Got event loop", flush=True)
+
+        # Create the task and schedule it with the event loop
+        message_processor_task = loop.create_task(message_processor.start())
+        print("DEBUG: Created message processor task with loop.create_task", flush=True)
+        logging.info(
+            "DEBUG: Message processor task created: %s", message_processor_task
+        )
+
+        # Allow the event loop to process the task creation
+        print("DEBUG: Yielding control to event loop", flush=True)
+        await asyncio.sleep(0.1)  # Short yield to let task start
+
+        # Force the event loop to process any pending tasks
+        await asyncio.sleep(0.5)  # Give it time to actually start
+        print("DEBUG: Finished yielding to event loop", flush=True)
+
+        # Check task status
+        if message_processor_task.done():
+            print(
+                "DEBUG: WARNING - Message processor task completed during startup",
+                flush=True,
+            )
+            logging.warning("DEBUG: Message processor task completed during startup")
+            try:
+                result = await message_processor_task
+                print(f"DEBUG: Task result: {result}", flush=True)
+            except Exception as task_e:
+                logging.error(
+                    "DEBUG: Message processor startup failed: %s", task_e, exc_info=True
+                )
+                print(f"DEBUG: Task exception: {task_e}", flush=True)
+                raise
+        else:
+            print("DEBUG: Message processor task scheduled and running", flush=True)
+            logging.info("DEBUG: Message processor task scheduled and running")
+
+        # Startup: Start the discovery beacon service
+        print("DEBUG: About to start discovery beacon service", flush=True)
+        await discovery_beacon.start_beacon_service()
+        print("DEBUG: discovery beacon service started", flush=True)
+
+        logging.info("DEBUG: All startup tasks completed successfully")
+        print("DEBUG: All startup tasks completed successfully", flush=True)
+
+        yield
+    except Exception as e:
+        logging.error("DEBUG: Exception in lifespan startup: %s", e, exc_info=True)
+        raise
 
     # Shutdown: Stop the discovery beacon service
     await discovery_beacon.stop_beacon_service()
+
+    # Shutdown: Stop the message processor service
+    message_processor.stop()
+    message_processor_task.cancel()
+    try:
+        await message_processor_task
+    except asyncio.CancelledError:
+        pass
 
     # Shutdown: Cancel the heartbeat monitor service
     heartbeat_task.cancel()
@@ -84,20 +163,26 @@ if app_config["api"].get("certFile") and app_config["api"].get("keyFile"):
     if api_host != "0.0.0.0":
         origins.append(f"https://{api_host}:{api_port}")
 
-# Add localhost alternatives if host is 0.0.0.0 (listening on all interfaces)
-if webui_host == "0.0.0.0":
-    origins.extend([f"http://localhost:{webui_port}", f"http://127.0.0.1:{webui_port}"])
-    if app_config["api"].get("certFile"):
-        origins.extend(
-            [f"https://localhost:{webui_port}", f"https://127.0.0.1:{webui_port}"]
-        )
+# Always add localhost origins for development (regardless of host config)
+origins.extend(
+    [
+        f"http://localhost:{webui_port}",
+        f"http://localhost:{api_port}",
+        f"http://127.0.0.1:{webui_port}",
+        f"http://127.0.0.1:{api_port}",
+    ]
+)
 
-if api_host == "0.0.0.0":
-    origins.extend([f"http://localhost:{api_port}", f"http://127.0.0.1:{api_port}"])
-    if app_config["api"].get("certFile"):
-        origins.extend(
-            [f"https://localhost:{api_port}", f"https://127.0.0.1:{api_port}"]
-        )
+# Add HTTPS localhost origins if certificates are configured
+if app_config["api"].get("certFile") and app_config["api"].get("keyFile"):
+    origins.extend(
+        [
+            f"https://localhost:{webui_port}",
+            f"https://localhost:{api_port}",
+            f"https://127.0.0.1:{webui_port}",
+            f"https://127.0.0.1:{api_port}",
+        ]
+    )
 
 # Add any additional origins specified in config
 if "cors" in app_config and "additional_origins" in app_config["cors"]:
@@ -116,6 +201,40 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["Authorization"],
 )
+
+
+# Add exception handlers to ensure CORS headers are always present
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handle HTTP exceptions and ensure CORS headers are included."""
+    response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+    # Add CORS headers manually for error responses
+    origin = request.headers.get("origin")
+    if origin and origin in origins:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Expose-Headers"] = "Authorization"
+
+    return response
+
+
+@app.exception_handler(500)
+async def internal_server_error_handler(request: Request, exc: Exception):
+    """Handle internal server errors and ensure CORS headers are included."""
+    response = JSONResponse(
+        status_code=500, content={"detail": "Internal server error"}
+    )
+
+    # Add CORS headers manually for error responses
+    origin = request.headers.get("origin")
+    if origin and origin in origins:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Expose-Headers"] = "Authorization"
+
+    return response
+
 
 # Import the dependencies
 app.include_router(agent.router)

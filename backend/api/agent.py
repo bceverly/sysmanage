@@ -13,24 +13,22 @@ from backend.i18n import _
 from backend.persistence.db import get_db
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import ErrorMessage, MessageType, create_message
+from backend.websocket.queue_manager import server_queue_manager, QueueDirection
 from backend.api.message_handlers import (
     handle_system_info,
     handle_command_result,
     handle_config_acknowledgment,
+    handle_heartbeat,
 )
 from backend.api.update_handlers import handle_update_apply_result
+
+# pylint: disable=unused-import
+from backend.api.data_handlers import (
+    handle_os_version_update,
+)
 from backend.security.communication_security import websocket_security
 from backend.config.config_push import config_push_manager
 
-# Import handlers for backward compatibility with tests
-from backend.api.data_handlers import (
-    handle_os_version_update,
-    handle_hardware_update,
-    handle_user_access_update,
-    handle_software_update,
-    handle_package_updates_update,
-)
-from backend.api.message_handlers import handle_heartbeat
 
 # Set up debug logger
 debug_logger = logging.getLogger("websocket_debug")
@@ -147,13 +145,17 @@ async def agent_connect(websocket: WebSocket):
                     continue
 
                 message = create_message(raw_message)
-                debug_logger.info("Received message type: %s", message.message_type)
+                message_size = len(data)
+                debug_logger.info(
+                    "Received message type: %s (size: %d bytes)",
+                    message.message_type,
+                    message_size,
+                )
                 # Processing message from agent
 
                 # Handle different message types
                 if message.message_type == MessageType.SYSTEM_INFO:
-                    debug_logger.info("Calling handle_system_info")
-                    await handle_system_info(db, connection, message.data)
+                    await _handle_system_info_message(message, connection, db)
 
                 elif message.message_type == MessageType.HEARTBEAT:
                     debug_logger.info("Calling handle_heartbeat")
@@ -172,79 +174,20 @@ async def agent_connect(websocket: WebSocket):
                     # Handle configuration acknowledgment
                     await handle_config_acknowledgment(connection, message.data)
 
-                elif message.message_type == MessageType.OS_VERSION_UPDATE:
-                    debug_logger.info("Calling handle_os_version_update")
-                    try:
-                        # Handle OS version update from agent
-                        await handle_os_version_update(db, connection, message.data)
-                        debug_logger.info(
-                            "handle_os_version_update completed successfully"
-                        )
-                    except Exception as e:
-                        debug_logger.error("Error in handle_os_version_update: %s", e)
-                        raise
-
-                elif message.message_type == MessageType.HARDWARE_UPDATE:
-                    debug_logger.info("Calling handle_hardware_update")
-                    try:
-                        # Handle hardware update from agent
-                        await handle_hardware_update(db, connection, message.data)
-                        debug_logger.info(
-                            "handle_hardware_update completed successfully"
-                        )
-                    except Exception as e:
-                        debug_logger.error("Error in handle_hardware_update: %s", e)
-                        raise
-
-                elif message.message_type == MessageType.USER_ACCESS_UPDATE:
-                    debug_logger.info("Calling handle_user_access_update")
-                    try:
-                        # Handle user access update from agent
-                        await handle_user_access_update(db, connection, message.data)
-                        debug_logger.info(
-                            "handle_user_access_update completed successfully"
-                        )
-                    except Exception as e:
-                        debug_logger.error("Error in handle_user_access_update: %s", e)
-                        raise
-
-                elif message.message_type == MessageType.SOFTWARE_INVENTORY_UPDATE:
-                    debug_logger.info("Calling handle_software_update")
-                    try:
-                        # Handle software inventory update from agent
-                        await handle_software_update(db, connection, message.data)
-                        debug_logger.info(
-                            "handle_software_update completed successfully"
-                        )
-                    except Exception as e:
-                        debug_logger.error("Error in handle_software_update: %s", e)
-                        raise
-                elif message.message_type == MessageType.PACKAGE_UPDATES_UPDATE:
-                    debug_logger.info("Calling handle_package_updates_update")
-                    try:
-                        # Handle package updates update from agent
-                        await handle_package_updates_update(
-                            db, connection, message.data
-                        )
-                        debug_logger.info(
-                            "handle_package_updates_update completed successfully"
-                        )
-                    except Exception as e:
-                        debug_logger.error(
-                            "Error in handle_package_updates_update: %s", e
-                        )
-                        raise
+                elif message.message_type in [
+                    MessageType.OS_VERSION_UPDATE,
+                    MessageType.HARDWARE_UPDATE,
+                    MessageType.USER_ACCESS_UPDATE,
+                    MessageType.SOFTWARE_INVENTORY_UPDATE,
+                    MessageType.PACKAGE_UPDATES_UPDATE,
+                ]:
+                    # Process inventory message using helper function to reduce nesting
+                    debug_logger.info(
+                        "Received inventory message type: %s", message.message_type
+                    )
+                    await _process_inventory_message(message, connection, db)
                 elif message.message_type == MessageType.UPDATE_APPLY_RESULT:
-                    debug_logger.info("Received update apply result from agent")
-                    try:
-                        # Handle update application results from agent
-                        await handle_update_apply_result(db, connection, message.data)
-                        debug_logger.info("Update apply result processed successfully")
-                    except Exception as e:
-                        debug_logger.error(
-                            "Error processing update apply result: %s", e
-                        )
-                        raise
+                    await _handle_update_result_message(message, connection, db)
 
                 else:
                     # Unknown message type - send error
@@ -263,19 +206,241 @@ async def agent_connect(websocket: WebSocket):
 
             except Exception as exc:
                 # Error processing message from agent
+                debug_logger.error("Error processing message: %s", exc, exc_info=True)
                 error_msg = ErrorMessage("processing_error", str(exc))
-                await connection.send_message(error_msg.to_dict())
+                try:
+                    await connection.send_message(error_msg.to_dict())
+                except Exception as send_exc:
+                    debug_logger.error("Failed to send error message: %s", send_exc)
 
-    except WebSocketDisconnect:
+    except WebSocketDisconnect as e:
         # Agent disconnected - normal cleanup handled in finally
-        debug_logger.info("Agent disconnected")
+        debug_logger.info("Agent disconnected - WebSocketDisconnect: %s", e)
     except RuntimeError as e:
         if "WebSocket is not connected" in str(e):
             # WebSocket was closed (e.g., due to unapproved host) - normal cleanup handled in finally
-            debug_logger.info("WebSocket connection closed")
+            debug_logger.info("WebSocket connection closed - RuntimeError: %s", e)
         else:
+            debug_logger.error(
+                "Unexpected RuntimeError in WebSocket handler: %s", e, exc_info=True
+            )
             raise
+    except Exception as e:
+        debug_logger.error(
+            "Unexpected exception in WebSocket handler: %s", e, exc_info=True
+        )
+        raise
     finally:
         # Clean up
         connection_manager.disconnect(connection.agent_id)
         db.close()
+
+
+async def _validate_and_get_host(message_data, connection, db):
+    """
+    Validate host registration and approval status for inventory messages.
+
+    Returns:
+        tuple: (host_object, error_message) - host_object is None if validation fails
+    """
+    hostname = message_data.get("hostname")
+    host_id = message_data.get("host_id")
+
+    if not hostname:
+        debug_logger.error("Message missing hostname - cannot validate host")
+        error_msg = ErrorMessage(
+            "missing_hostname",
+            _("Message must include hostname for host validation"),
+        )
+        return None, error_msg
+
+    # Look up host in database
+    from backend.persistence.models import Host
+
+    # Refresh the database session to ensure we see the latest data
+    db.expunge_all()
+    db.commit()
+
+    # If host_id is provided, validate it first
+    if host_id is not None:
+        debug_logger.info("Validating message with host_id: %s", host_id)
+        host = db.query(Host).filter(Host.id == host_id).first()
+
+        if not host:
+            debug_logger.warning(
+                "Host ID %s not found - sending stale host_id error", host_id
+            )
+            error_msg = ErrorMessage(
+                "host_not_registered",
+                _("Host ID no longer valid - please re-register"),
+            )
+            return None, error_msg
+
+        # Verify that the host_id matches the hostname
+        if host.fqdn != hostname:
+            debug_logger.warning(
+                "Host ID %s hostname mismatch (expected: %s, got: %s) - sending error",
+                host_id,
+                host.fqdn,
+                hostname,
+            )
+            error_msg = ErrorMessage(
+                "host_not_registered",
+                _("Host ID and hostname mismatch - please re-register"),
+            )
+            return None, error_msg
+
+        debug_logger.info(
+            "Host ID validation successful for host %s (ID: %s)", hostname, host_id
+        )
+    else:
+        # No host_id provided, fall back to hostname lookup
+        debug_logger.info("No host_id provided, validating by hostname: %s", hostname)
+        host = db.query(Host).filter(Host.fqdn == hostname).first()
+
+    if not host:
+        debug_logger.warning(
+            "Host %s not registered - sending registration required error", hostname
+        )
+        error_msg = ErrorMessage(
+            "host_not_registered",
+            _("Host must register before sending inventory data"),
+        )
+        return None, error_msg
+
+    if host.approval_status != "approved":
+        debug_logger.warning(
+            "Host %s not approved (status: %s) - sending approval required error",
+            hostname,
+            host.approval_status,
+        )
+        error_msg = ErrorMessage(
+            "host_not_approved", _("Host registration pending approval")
+        )
+        return None, error_msg
+
+    return host, None
+
+
+async def _handle_system_info_message(message, connection, db):
+    """Handle system info message with error handling."""
+    debug_logger.info("Calling handle_system_info")
+    try:
+        response = await handle_system_info(db, connection, message.data)
+        if response:
+            await connection.send_message(response)
+            debug_logger.info(
+                "handle_system_info response sent: %s",
+                response.get("message_type"),
+            )
+        debug_logger.info("handle_system_info completed successfully")
+    except Exception as e:
+        debug_logger.error("Error in handle_system_info: %s", e, exc_info=True)
+        raise
+
+
+async def _handle_update_result_message(message, connection, db):
+    """Handle update apply result message with error handling."""
+    debug_logger.info("Received update apply result from agent")
+    try:
+        # Handle update application results from agent directly (time-sensitive)
+        await handle_update_apply_result(db, connection, message.data)
+        debug_logger.info("Update apply result processed successfully")
+    except Exception as e:
+        debug_logger.error("Error processing update apply result: %s", e)
+        raise
+
+
+async def _process_inventory_message(message, connection, db):
+    """Process inventory message after host validation."""
+    # Validate host first
+    host, error_msg = await _validate_and_get_host(message.data, connection, db)
+    if error_msg:
+        await connection.send_message(error_msg.to_dict())
+        return
+
+    hostname = host.fqdn
+    debug_logger.info("Host %s registered and approved - enqueueing message", hostname)
+    debug_logger.info(
+        "DEBUG: About to enqueue with host.id=%s, host object type=%s",
+        host.id,
+        type(host),
+    )
+
+    # Log detailed message information
+    data_keys = list(message.data.keys()) if message.data else []
+    data_size = len(str(message.data)) if message.data else 0
+    debug_logger.info(
+        "SERVER_DEBUG: Enqueueing message type=%s, data_keys=%s, data_size=%d bytes, host_id=%s",
+        message.message_type,
+        data_keys,
+        data_size,
+        host.id,
+    )
+
+    # Log specific data for different message types
+    if message.message_type == "hardware_update":
+        cpu_vendor = message.data.get("cpu_vendor", "N/A")
+        cpu_model = message.data.get("cpu_model", "N/A")
+        memory_mb = message.data.get("memory_total_mb", "N/A")
+        storage_count = len(message.data.get("storage_devices", []))
+        debug_logger.info(
+            "SERVER_DEBUG: Hardware data - CPU: %s %s, Memory: %s MB, Storage devices: %d",
+            cpu_vendor,
+            cpu_model,
+            memory_mb,
+            storage_count,
+        )
+    elif message.message_type == "software_inventory_update":
+        total_packages = message.data.get("total_packages", 0)
+        software_packages = message.data.get("software_packages", [])
+        debug_logger.info(
+            "SERVER_DEBUG: Software data - Total packages: %d, First package: %s",
+            total_packages,
+            software_packages[0] if software_packages else "None",
+        )
+    elif message.message_type == "user_access_update":
+        total_users = message.data.get("total_users", 0)
+        total_groups = message.data.get("total_groups", 0)
+        debug_logger.info(
+            "SERVER_DEBUG: User access data - Users: %d, Groups: %d",
+            total_users,
+            total_groups,
+        )
+
+    try:
+        message_id = server_queue_manager.enqueue_message(
+            message_type=message.message_type,
+            message_data=message.data,
+            direction=QueueDirection.INBOUND,
+            host_id=host.id,
+            db=db,
+        )
+        debug_logger.info(
+            "SERVER_DEBUG: Message enqueued successfully with queue_id=%s for host %s (message_type=%s)",
+            message_id,
+            hostname,
+            message.message_type,
+        )
+
+        # Commit the database session to persist the enqueued message
+        db.commit()
+        debug_logger.info("SERVER_DEBUG: Database committed for message %s", message_id)
+
+        # Send success acknowledgment to agent
+        ack_message = {
+            "message_type": "ack",
+            "message_id": message.data.get("message_id", "unknown"),
+            "queue_id": message_id,
+            "status": "queued",
+        }
+        await connection.send_message(ack_message)
+        debug_logger.info(
+            "SERVER_DEBUG: Successfully processed and acknowledged message %s",
+            message.message_type,
+        )
+
+    except Exception as e:
+        debug_logger.error("Error enqueueing message %s: %s", message.message_type, e)
+        error_msg = ErrorMessage("queue_error", f"Failed to queue message: {str(e)}")
+        await connection.send_message(error_msg.to_dict())

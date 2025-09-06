@@ -146,6 +146,9 @@
     "physicalVolumes": "Fysiek",
     "logicalVolumes": "Logisch",
     "allVolumes": "Alle",
+    "activeInterfaces": "Actief",
+    "inactiveInterfaces": "Inactief",
+    "allInterfaces": "Alle",
     "memberOfGroups": "Groepen",
     "groupMembers": "Leden"
   },
@@ -271,6 +274,7 @@
   "updates": {
     "title": "Pakket Updates",
     "refresh": "Vernieuwen",
+    "autoRefreshIn": "Auto-ververzing over",
     "loading": "Updates laden...",
     "noUpdates": "Alle systemen zijn bijgewerkt",
     "noMatchingUpdates": "Geen updates komen overeen met de huidige filters",

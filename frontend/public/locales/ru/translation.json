@@ -144,6 +144,9 @@
     "physicalVolumes": "Физические",
     "logicalVolumes": "Логические",
     "allVolumes": "Все",
+    "activeInterfaces": "Активные",
+    "inactiveInterfaces": "Неактивные",
+    "allInterfaces": "Все",
     "memberOfGroups": "Группы",
     "groupMembers": "Участники"
   },
@@ -267,6 +270,7 @@
   "updates": {
     "title": "Обновления Пакетов",
     "refresh": "Обновить",
+    "autoRefreshIn": "Авто-обновление через",
     "loading": "Загрузка обновлений...",
     "noUpdates": "Все системы обновлены",
     "noMatchingUpdates": "Нет обновлений, соответствующих текущим фильтрам",
