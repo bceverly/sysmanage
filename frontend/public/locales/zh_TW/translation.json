@@ -177,6 +177,9 @@
     "physicalVolumes": "實體",
     "logicalVolumes": "邏輯",
     "allVolumes": "全部",
+    "activeInterfaces": "活動",
+    "inactiveInterfaces": "非活動",
+    "allInterfaces": "全部",
     "memberOfGroups": "群組",
     "groupMembers": "成員"
   },

@@ -17,9 +17,23 @@ Object.defineProperty(window, 'localStorage', {
 // Mock the hosts service
 vi.mock('../../Services/hosts', () => ({
   doGetHosts: vi.fn(() => Promise.resolve([
-    { id: 1n, active: true, fqdn: 'test1.example.com', ipv4: '192.168.1.1', ipv6: '::1' },
-    { id: 2n, active: true, fqdn: 'test2.example.com', ipv4: '192.168.1.2', ipv6: '::2' }
+    { id: 1n, active: true, status: 'up', fqdn: 'test1.example.com', ipv4: '192.168.1.1', ipv6: '::1' },
+    { id: 2n, active: true, status: 'up', fqdn: 'test2.example.com', ipv4: '192.168.1.2', ipv6: '::2' }
   ]))
+}));
+
+// Mock the updates service
+vi.mock('../../Services/updates', () => ({
+  updatesService: {
+    getUpdatesSummary: vi.fn(() => Promise.resolve({
+      total_hosts: 2,
+      hosts_with_updates: 1,
+      total_updates: 5,
+      security_updates: 2,
+      system_updates: 2,
+      application_updates: 1
+    }))
+  }
 }));
 
 const HomeWithRouter = () => (

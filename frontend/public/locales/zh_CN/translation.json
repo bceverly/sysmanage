@@ -146,6 +146,9 @@
     "physicalVolumes": "物理",
     "logicalVolumes": "逻辑",
     "allVolumes": "全部",
+    "activeInterfaces": "活动",
+    "inactiveInterfaces": "非活动",
+    "allInterfaces": "全部",
     "memberOfGroups": "组",
     "groupMembers": "成员"
   },
@@ -271,6 +274,7 @@
   "updates": {
     "title": "软件包更新",
     "refresh": "刷新",
+    "autoRefreshIn": "自动刷新于",
     "loading": "正在加载更新...",
     "noUpdates": "所有系统都是最新的",
     "noMatchingUpdates": "没有更新匹配当前筛选器",

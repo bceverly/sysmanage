@@ -10,7 +10,6 @@ import { SysManageHost, doGetHosts } from '../Services/hosts'
 import { updatesService, UpdateStatsSummary } from '../Services/updates';
 
 const Dashboard = () => {
-    const [hostsUp, setHostsUp] = useState<number>(0);
     const [hostsTotal, setHostsTotal] = useState<number>(0);
     const [hostStatusColor, setHostStatusColor] = useState<string>('#52b202'); // Default green
     const [hostsWithUpdates, setHostsWithUpdates] = useState<number>(0);
@@ -30,16 +29,19 @@ const Dashboard = () => {
         doGetHosts().then((response: SysManageHost[]) => {
             setHostsTotal(response.length);
             
-            // Count hosts that are up
-            const upHosts = response.filter(host => host.status === 'up').length;
-            setHostsUp(upHosts);
+            // Determine color based on host status - only consider approved hosts
+            const approvedHosts = response.filter(host => host.approval_status === 'approved');
+            const approvedHostsUp = approvedHosts.filter(host => host.status === 'up').length;
+            const approvedHostsDown = approvedHosts.filter(host => host.status === 'down').length;
             
-            // Determine color based on host status
-            const anyHostDown = response.some(host => host.status === 'down');
-            if (anyHostDown) {
-                setHostStatusColor('#ff1744'); // Red
+            if (approvedHosts.length === 0) {
+                setHostStatusColor('#52b202'); // Green if no approved hosts
+            } else if (approvedHostsDown === approvedHosts.length) {
+                setHostStatusColor('#ff1744'); // Red - all approved hosts are down
+            } else if (approvedHostsUp > 0 && approvedHostsDown > 0) {
+                setHostStatusColor('#ff9800'); // Yellow - mixed up/down
             } else {
-                setHostStatusColor('#52b202'); // Green
+                setHostStatusColor('#52b202'); // Green - all approved hosts are up
             }
             
             return Promise.resolve(response);
@@ -127,7 +129,7 @@ const Dashboard = () => {
             <Grid item>
                 <DashboardCard
                     title={t('dashboard.hosts')}
-                    value={hostsUp}
+                    value={hostsTotal}
                     maxValue={hostsTotal || 1} // Prevent division by zero
                     color={hostStatusColor}
                     onClick={handleHostsClick}

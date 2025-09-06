@@ -15,7 +15,10 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.certificate_manager import certificate_manager
 from backend.websocket.connection_manager import connection_manager
-from backend.websocket.messages import create_command_message
+from backend.websocket.messages import (
+    create_command_message,
+    create_host_approved_message,
+)
 from backend.api.host_utils import (
     get_host_by_id,
     get_host_by_fqdn,
@@ -317,6 +320,33 @@ async def approve_host(host_id: int):  # pylint: disable=duplicate-code
         host.approval_status = "approved"
         host.last_access = datetime.now(timezone.utc)
         session.commit()
+
+        # Send host approval notification to the agent via WebSocket
+        try:
+            approval_message = create_host_approved_message(
+                host_id=host.id,
+                approval_status="approved",
+                certificate=host.client_certificate,
+            )
+
+            # Try to send the message to the agent if it's connected
+            success = await connection_manager.send_to_host(host.id, approval_message)
+            if success:
+                print(
+                    f"DEBUG: Successfully sent host approval notification to host {host.id} ({host.fqdn})",
+                    flush=True,
+                )
+            else:
+                print(
+                    f"DEBUG: Host {host.id} ({host.fqdn}) not currently connected, approval message not sent",
+                    flush=True,
+                )
+        except Exception as e:
+            # Don't fail the approval process if we can't send the notification
+            print(
+                f"DEBUG: Error sending host approval notification to {host.id} ({host.fqdn}): {e}",
+                flush=True,
+            )
 
         ret_host = models.Host(
             id=host.id,

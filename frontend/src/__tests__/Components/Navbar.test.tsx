@@ -1,7 +1,22 @@
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { vi } from 'vitest';
 import Navbar from '../../Components/Navbar';
+
+// Mock the updates service for NotificationBell component
+vi.mock('../../Services/updates', () => ({
+  updatesService: {
+    getUpdatesSummary: vi.fn(() => Promise.resolve({
+      total_hosts: 2,
+      hosts_with_updates: 1,
+      total_updates: 5,
+      security_updates: 2,
+      system_updates: 2,
+      application_updates: 1
+    }))
+  }
+}));
 
 const NavbarWithRouter = () => (
   <BrowserRouter future={{

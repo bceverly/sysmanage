@@ -71,6 +71,18 @@ def get_host_storage_devices(host_id: int) -> List[Dict[str, Any]]:
                 "device_path": device.device_path,
                 "mount_point": device.mount_point,
                 "file_system": device.file_system,
+                "device_type": device.device_type,
+                "capacity_bytes": device.capacity_bytes,
+                "used_bytes": device.used_bytes,
+                "available_bytes": device.available_bytes,
+                "is_physical": device.is_physical,
+                "created_at": (
+                    device.created_at.isoformat() if device.created_at else None
+                ),
+                "updated_at": (
+                    device.updated_at.isoformat() if device.updated_at else None
+                ),
+                # Legacy fields for backward compatibility
                 "size_gb": (
                     round(device.capacity_bytes / (1024**3), 2)
                     if device.capacity_bytes
@@ -89,7 +101,6 @@ def get_host_storage_devices(host_id: int) -> List[Dict[str, Any]]:
                     if device.capacity_bytes and device.used_bytes
                     else 0
                 ),
-                "device_type": device.device_type,
             }
             for device in storage_devices
         ]

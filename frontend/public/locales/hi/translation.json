@@ -176,7 +176,10 @@
     "groupMembers": "सदस्य",
     "physicalVolumes": "भौतिक",
     "logicalVolumes": "तार्किक",
-    "allVolumes": "सभी"
+    "allVolumes": "सभी",
+    "activeInterfaces": "सक्रिय",
+    "inactiveInterfaces": "निष्क्रिय",
+    "allInterfaces": "सभी"
   },
   "userDetail": {
     "invalidId": "अमान्य उपयोगकर्ता आईडी",

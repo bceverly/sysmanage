@@ -155,6 +155,7 @@
     "hasCertificate": "Has Client Certificate",
     "infoTab": "Info",
     "hardwareTab": "Hardware",
+    "softwareTab": "Software",
     "accessTab": "Access",
     "userAccounts": "User Accounts",
     "userGroups": "User Groups",
@@ -176,7 +177,10 @@
     "groupMembers": "Members",
     "physicalVolumes": "Physical",
     "logicalVolumes": "Logical",
-    "allVolumes": "All"
+    "allVolumes": "All",
+    "activeInterfaces": "Active",
+    "inactiveInterfaces": "Inactive",
+    "allInterfaces": "All"
   },
   "userDetail": {
     "invalidId": "Invalid user ID",
@@ -269,6 +273,7 @@
   "updates": {
     "title": "Package Updates",
     "refresh": "Refresh",
+    "autoRefreshIn": "Auto-refresh in",
     "loading": "Loading updates...",
     "noUpdates": "All systems are up to date",
     "noMatchingUpdates": "No updates match the current filters",

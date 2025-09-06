@@ -18,11 +18,11 @@ debug_logger = logging.getLogger("debug_logger")
 debug_logger.setLevel(logging.DEBUG)
 
 # Only add file handler if logs directory exists or can be created
-log_file = "logs/backend.log"
+LOG_FILE = "logs/backend.log"
 try:
     # Create logs directory if it doesn't exist
-    os.makedirs(os.path.dirname(log_file), exist_ok=True)
-    file_handler = logging.FileHandler(log_file)
+    os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+    file_handler = logging.FileHandler(LOG_FILE)
     file_handler.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     file_handler.setFormatter(formatter)
@@ -59,12 +59,19 @@ async def handle_system_info(db: Session, connection, message_data: dict):
             connection.host_id = host.id
             connection.hostname = hostname
 
+            # Update connection manager mapping for sending messages to this host
+            from backend.websocket.connection_manager import connection_manager
+
+            connection_manager.register_agent(
+                connection.agent_id, hostname, ipv4, ipv6, platform
+            )
+
             # Update host online status
             stmt = (
                 update(Host)
                 .where(Host.id == host.id)
                 .values(
-                    last_seen=text("NOW()"),
+                    last_access=text("NOW()"),
                     status="up",
                     platform=platform,
                 )
@@ -121,34 +128,45 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                 db.commit()
                 result_rowcount = 1
             else:
-                # Host not found - create new host for tests compatibility
-                if (
-                    hasattr(connection, "hostname")
-                    or hasattr(connection, "ipv4")
-                    or hasattr(connection, "ipv6")
-                ):
-                    new_host = Host(
-                        fqdn=getattr(
-                            connection, "hostname", f"host-{connection.host_id}"
-                        ),
-                        ipv4=getattr(connection, "ipv4", None),
-                        ipv6=getattr(connection, "ipv6", None),
-                        status="up",
+                # Host not found - create a new host entry if we have the connection info
+                has_hostname = hasattr(connection, "hostname") and connection.hostname
+                has_ipv4 = hasattr(connection, "ipv4") and connection.ipv4
+                has_ipv6 = hasattr(connection, "ipv6") and connection.ipv6
+
+                if has_hostname and has_ipv4 and has_ipv6:
+                    # Create new host
+                    host = Host(
+                        fqdn=connection.hostname,
+                        ipv4=connection.ipv4,
+                        ipv6=connection.ipv6,
                         active=True,
-                        last_access=datetime.now(timezone.utc),
+                        status="up",
                         approval_status="pending",
+                        last_access=datetime.now(timezone.utc),
                     )
-                    db.add(new_host)
+                    db.add(host)
                     db.commit()
-                    db.refresh(new_host)
+                    db.refresh(host)
+                    connection.host_id = host.id
                     result_rowcount = 1
+                    debug_logger.info(
+                        "Created new host %s (ID: %s) from heartbeat",
+                        connection.hostname,
+                        host.id,
+                    )
                 else:
+                    # Host not found and no connection info - clear the connection state
+                    debug_logger.warning(
+                        "Host ID %s not found in database, clearing connection state",
+                        connection.host_id,
+                    )
+                    connection.host_id = None
+                    connection.hostname = None
                     result_rowcount = 0
 
             if result_rowcount == 0:
                 debug_logger.warning(
-                    "No host found with ID %s for heartbeat and insufficient data to create",
-                    connection.host_id,
+                    "No host found for heartbeat - connection state cleared, agent should re-register"
                 )
 
             # Send acknowledgment to agent

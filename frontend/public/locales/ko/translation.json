@@ -146,6 +146,9 @@
     "physicalVolumes": "물리적",
     "logicalVolumes": "논리적",
     "allVolumes": "모두",
+    "activeInterfaces": "활성",
+    "inactiveInterfaces": "비활성",
+    "allInterfaces": "모두",
     "memberOfGroups": "그룹",
     "groupMembers": "멤버"
   },

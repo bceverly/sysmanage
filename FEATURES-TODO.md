@@ -181,7 +181,7 @@ like to add:
     between the logout link and the profile
     button.~~
 
-34. Queue on both server and agent that any
+34. ~~Queue on both server and agent that any
     messages to be sent are written to
     first.  Then, when the message is
     successfully sent, the message is
@@ -217,7 +217,7 @@ like to add:
     movement to the next message until
     the currently processing message is
     finished processing and then is
-    removed from the queue.
+    removed from the queue.~~
 
 35. Create a standalone python script on
     both the agent and the server to

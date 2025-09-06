@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 
 import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData } from '../Services/hosts'
 import { useTablePageSize } from '../hooks/useTablePageSize';
+import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
 
 const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
@@ -20,6 +21,7 @@ const Hosts = () => {
     const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const { triggerRefresh } = useNotificationRefresh();
     
     // Dynamic table page sizing based on window height
     const { pageSize, pageSizeOptions } = useTablePageSize({
@@ -169,6 +171,9 @@ const Hosts = () => {
             const updatedHosts = await doGetHosts();
             setTableData(updatedHosts);
             
+            // Trigger notification bell refresh
+            await triggerRefresh();
+            
             // Clear selection
             setSelection([]);
         } catch (error) {
@@ -191,6 +196,9 @@ const Hosts = () => {
             // Refresh the data from the server
             const updatedHosts = await doGetHosts();
             setTableData(updatedHosts);
+            
+            // Trigger notification bell refresh
+            await triggerRefresh();
             
             // Clear selection
             setSelection([]);

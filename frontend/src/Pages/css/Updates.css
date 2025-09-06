@@ -50,6 +50,23 @@
   animation: spin 1s linear infinite;
 }
 
+.updates__refresh-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.updates__auto-refresh-info {
+  font-size: 0.875rem;
+  color: var(--text-color-light);
+  padding: 0.5rem 1rem;
+  background: var(--body-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

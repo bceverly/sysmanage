@@ -160,7 +160,7 @@ class WebSocketSecurityManager:
                 )
                 return False
 
-        # Validate timestamp (should be within last 5 minutes)
+        # Validate timestamp (should be within last 30 minutes to handle post-approval scenarios)
         try:
             msg_timestamp = datetime.fromisoformat(
                 message["timestamp"].replace("Z", "+00:00")
@@ -168,7 +168,9 @@ class WebSocketSecurityManager:
             current_time = datetime.now(timezone.utc)
             time_diff = abs((current_time - msg_timestamp).total_seconds())
 
-            if time_diff > 300:  # 5 minutes
+            if (
+                time_diff > 1800
+            ):  # 30 minutes (increased tolerance for inventory messages after host approval)
                 logger.warning(
                     "Message timestamp too old: %ss from connection %s",
                     time_diff,
