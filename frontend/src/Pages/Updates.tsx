@@ -69,7 +69,7 @@ const Updates: React.FC = () => {
   const [hostsWithUpdates, setHostsWithUpdates] = useState<HostWithUpdates[]>([]);
   const [hostSpecificStats, setHostSpecificStats] = useState<HostUpdatesResponse | null>(null);
   const [filters, setFilters] = useState({
-    security_only: searchParams.get('securityOnly') === 'true',
+    security_only: searchParams.get('securityOnly') === 'true' || searchParams.get('filter') === 'security',
     system_only: false,
     package_manager: '',
     host_id: ''
@@ -234,6 +234,16 @@ const Updates: React.FC = () => {
       fetchUpdates(0)
     ]);
   }, [filters, fetchUpdates, fetchHostsWithUpdates, fetchUpdatesSummary]);
+
+  // Watch for changes in search parameters and update filters accordingly
+  useEffect(() => {
+    const securityFilter = searchParams.get('securityOnly') === 'true' || searchParams.get('filter') === 'security';
+    
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      security_only: securityFilter
+    }));
+  }, [searchParams]);
 
   // Initialize auto-refresh timer
   useEffect(() => {
