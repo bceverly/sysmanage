@@ -24,6 +24,7 @@
     "hosts": "호스트",
     "updates": "업데이트",
     "security": "보안",
+    "rebootRequired": "재부팅 필요",
     "totalUsers": "전체 사용자",
     "systemHealth": "시스템 상태"
   },
@@ -43,6 +44,7 @@
     "down": "오프라인",
     "lastCheckin": "마지막 체크인",
     "approvalNeeded": "승인 필요",
+    "rebootRequired": "재부팅 필요",
     "refreshing": "새로고침 중...",
     "refreshNow": "지금 새로고침",
     "refreshHosts": "호스트 새로고침",

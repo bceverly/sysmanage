@@ -23,6 +23,7 @@
     "hosts": "Hosts",
     "updates": "Updates",
     "security": "Security",
+    "rebootRequired": "Reboots Required",
     "totalUsers": "Total Users",
     "systemHealth": "System Health"
   },
@@ -42,6 +43,7 @@
     "delete": "Delete",
     "addHost": "Add Host",
     "approvalNeeded": "Approval Needed",
+    "rebootRequired": "Reboot Required",
     "refreshing": "Refreshing...",
     "refreshNow": "Refresh Now",
     "refreshHosts": "Refresh Hosts",

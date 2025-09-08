@@ -40,6 +40,9 @@ type SysManageHost = {
     hardware_updated_at?: string;
     // Software inventory fields
     software_updated_at?: string;
+    // Update management fields
+    reboot_required?: boolean;
+    reboot_required_updated_at?: string;
 }
 
 type StorageDevice = {

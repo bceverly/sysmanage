@@ -17,6 +17,8 @@ const Dashboard = () => {
     const [updatesColor, setUpdatesColor] = useState<string>('#52b202'); // Default green
     const [securityUpdates, setSecurityUpdates] = useState<number>(0);
     const [securityColor, setSecurityColor] = useState<string>('#52b202'); // Default green
+    const [rebootRequired, setRebootRequired] = useState<number>(0);
+    const [rebootColor, setRebootColor] = useState<string>('#52b202'); // Default green
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -43,6 +45,13 @@ const Dashboard = () => {
             } else {
                 setHostStatusColor('#52b202'); // Green - all approved hosts are up
             }
+            
+            // Calculate reboot required statistics
+            const hostsRequiringReboot = response.filter(host => 
+                host.approval_status === 'approved' && host.reboot_required
+            ).length;
+            setRebootRequired(hostsRequiringReboot);
+            setRebootColor(hostsRequiringReboot > 0 ? '#ff1744' : '#52b202'); // Red if any, green if none
             
             return Promise.resolve(response);
         });
@@ -76,6 +85,11 @@ const Dashboard = () => {
     const handleSecurityClick = () => {
         // Navigate to updates page with security filter pre-selected
         navigate('/updates?securityOnly=true');
+    };
+
+    const handleRebootClick = () => {
+        // Navigate to hosts page to show hosts requiring reboot
+        navigate('/hosts');
     };
 
     const DashboardCard = ({ title, value, maxValue, color, onClick }: {
@@ -151,6 +165,15 @@ const Dashboard = () => {
                     maxValue={updatesTotal || 1}
                     color={securityColor}
                     onClick={handleSecurityClick}
+                />
+            </Grid>
+            <Grid item>
+                <DashboardCard
+                    title={t('dashboard.rebootRequired')}
+                    value={rebootRequired}
+                    maxValue={hostsTotal || 1}
+                    color={rebootColor}
+                    onClick={handleRebootClick}
                 />
             </Grid>
         </Grid>

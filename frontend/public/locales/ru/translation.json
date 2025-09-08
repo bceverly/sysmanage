@@ -24,6 +24,7 @@
     "hosts": "Хосты",
     "updates": "Обновления",
     "security": "Безопасность",
+    "rebootRequired": "Требуется перезагрузка",
     "totalUsers": "Всего пользователей",
     "systemHealth": "Состояние системы"
   },
@@ -43,6 +44,7 @@
     "down": "Не в сети",
     "lastCheckin": "Последняя проверка",
     "approvalNeeded": "Требуется одобрение",
+    "rebootRequired": "Требуется перезагрузка",
     "refreshing": "Обновление...",
     "refreshNow": "Обновить сейчас",
     "refreshHosts": "Обновить Хосты",

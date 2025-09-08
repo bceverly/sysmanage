@@ -23,6 +23,7 @@
     "hosts": "المضيفات",
     "updates": "التحديثات",
     "security": "الأمان",
+    "rebootRequired": "إعادة التشغيل مطلوبة",
     "totalUsers": "إجمالي المستخدمين",
     "systemHealth": "صحة النظام"
   },
@@ -42,6 +43,7 @@
     "delete": "حذف",
     "addHost": "إضافة مضيف",
     "approvalNeeded": "يتطلب موافقة",
+    "rebootRequired": "إعادة التشغيل مطلوبة",
     "refreshing": "جاري التحديث...",
     "refreshNow": "تحديث الآن",
     "refreshHosts": "تحديث المضيفات",
