@@ -264,6 +264,14 @@ const Scripts: React.FC = () => {
   };
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    // Clear execution state when leaving the Execute Script tab (index 1)
+    if (tabValue === 1 && newValue !== 1) {
+      setSelectedHost('');
+      setSavedScriptId('');
+      setExecutionResult(null);
+      setCurrentExecutionId(null);
+      setIsExecuting(false);
+    }
     setTabValue(newValue);
   };
 
