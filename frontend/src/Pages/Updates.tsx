@@ -22,6 +22,7 @@ import {
   UpdatesResponse,
   HostUpdatesResponse 
 } from '../Services/updates';
+import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
 import './css/Updates.css';
 
 interface SelectedUpdate {
@@ -57,6 +58,7 @@ interface HostResult {
 const Updates: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
+  const { triggerRefresh } = useNotificationRefresh();
   
   const [updateStats, setUpdateStats] = useState<UpdateStatsSummary | null>(null);
   const [updates, setUpdates] = useState<PackageUpdate[]>([]);
@@ -77,11 +79,13 @@ const Updates: React.FC = () => {
 
   // Auto-refresh state
   const [refreshCountdown, setRefreshCountdown] = useState(30);
+  const [hasActiveUpdates, setHasActiveUpdates] = useState(false);
   const refreshTimerRef = useRef<number | null>(null);
   const countdownTimerRef = useRef<number | null>(null);
 
   const ITEMS_PER_PAGE = 50;
-  const AUTO_REFRESH_INTERVAL = 30000; // 30 seconds
+  const STANDARD_REFRESH_INTERVAL = 30000; // 30 seconds 
+  const ACTIVE_UPDATES_REFRESH_INTERVAL = 15000; // 15 seconds when updates are running
 
   const fetchUpdatesSummary = useCallback(async () => {
     try {
@@ -185,15 +189,20 @@ const Updates: React.FC = () => {
     ]);
     setIsRefreshing(false);
     setSelectedUpdates(new Set());
-  }, [fetchUpdatesSummary, fetchHostsWithUpdates, fetchUpdates]);
+    
+    // Trigger notification bell refresh after data refresh
+    triggerRefresh();
+  }, [fetchUpdatesSummary, fetchHostsWithUpdates, fetchUpdates, triggerRefresh]);
 
   const handleManualRefresh = async () => {
     await refreshAll();
     resetAutoRefreshTimer(); // Reset timer after manual refresh
   };
 
-  // Auto-refresh timer management
-  const resetAutoRefreshTimer = useCallback(() => {
+  // Store timer function in ref to avoid useCallback dependencies
+  const resetAutoRefreshTimerRef = useRef<() => void>();
+  
+  resetAutoRefreshTimerRef.current = () => {
     // Clear existing timers
     if (refreshTimerRef.current) {
       window.clearTimeout(refreshTimerRef.current);
@@ -202,16 +211,17 @@ const Updates: React.FC = () => {
       window.clearInterval(countdownTimerRef.current);
     }
 
-    // Reset countdown to 30 seconds
-    setRefreshCountdown(30);
+    // Choose interval based on whether updates are active
+    const interval = hasActiveUpdates ? ACTIVE_UPDATES_REFRESH_INTERVAL : STANDARD_REFRESH_INTERVAL;
+    const countdownSeconds = Math.floor(interval / 1000);
+    
+    setRefreshCountdown(countdownSeconds);
 
     // Start countdown timer (updates every second)
     countdownTimerRef.current = window.setInterval(() => {
       setRefreshCountdown((prev) => {
         if (prev <= 1) {
-          // Countdown reached 0, trigger refresh
-          refreshAll();
-          return 30; // Reset to 30 after refresh
+          return countdownSeconds; // Reset countdown
         }
         return prev - 1;
       });
@@ -220,12 +230,19 @@ const Updates: React.FC = () => {
     // Set main refresh timer
     refreshTimerRef.current = window.setTimeout(() => {
       refreshAll();
-    }, AUTO_REFRESH_INTERVAL);
-  }, [refreshAll, AUTO_REFRESH_INTERVAL]);
+      if (resetAutoRefreshTimerRef.current) {
+        resetAutoRefreshTimerRef.current(); // Schedule next refresh
+      }
+    }, interval);
+  };
 
-  const handleUserInteraction = useCallback(() => {
-    resetAutoRefreshTimer();
-  }, [resetAutoRefreshTimer]);
+  const resetAutoRefreshTimer = useCallback(() => {
+    if (resetAutoRefreshTimerRef.current) {
+      resetAutoRefreshTimerRef.current();
+    }
+  }, []);
+
+  // Remove user interaction timer resets to prevent excessive refreshing
 
   useEffect(() => {
     Promise.all([
@@ -234,6 +251,17 @@ const Updates: React.FC = () => {
       fetchUpdates(0)
     ]);
   }, [filters, fetchUpdates, fetchHostsWithUpdates, fetchUpdatesSummary]);
+
+  // Check for active updates on component mount and when updateStatuses changes
+  useEffect(() => {
+    let hasPending = false;
+    updateStatuses.forEach((status) => {
+      if (status.status === 'pending') {
+        hasPending = true;
+      }
+    });
+    setHasActiveUpdates(hasPending);
+  }, [updateStatuses]);
 
   // Watch for changes in search parameters and update filters accordingly
   useEffect(() => {
@@ -247,7 +275,9 @@ const Updates: React.FC = () => {
 
   // Initialize auto-refresh timer
   useEffect(() => {
-    resetAutoRefreshTimer();
+    if (resetAutoRefreshTimerRef.current) {
+      resetAutoRefreshTimerRef.current();
+    }
     
     // Cleanup timers on component unmount
     return () => {
@@ -258,22 +288,16 @@ const Updates: React.FC = () => {
         window.clearInterval(countdownTimerRef.current);
       }
     };
-  }, [resetAutoRefreshTimer]);
+  }, []); // Only run on mount
 
-  // Add event listeners for user interactions
+  // Only reset timer when active updates state changes (not on every resetAutoRefreshTimer change)
   useEffect(() => {
-    const events = ['click', 'scroll', 'keydown', 'mousemove'];
-    
-    events.forEach(event => {
-      document.addEventListener(event, handleUserInteraction, { passive: true });
-    });
+    if (resetAutoRefreshTimerRef.current) {
+      resetAutoRefreshTimerRef.current();
+    }
+  }, [hasActiveUpdates]); // Using ref directly to avoid dependency issues
 
-    return () => {
-      events.forEach(event => {
-        document.removeEventListener(event, handleUserInteraction);
-      });
-    };
-  }, [handleUserInteraction]);
+  // Removed excessive user interaction listeners that were causing timer resets
 
   // Poll for update results when there are pending updates
   useEffect(() => {
@@ -288,9 +312,10 @@ const Updates: React.FC = () => {
         const newStatuses = new Map(updateStatuses);
         let hasUpdates = false;
         
-        Object.entries(results).forEach(([hostId, hostResult]: [string, HostResult]) => {
+        Object.entries(results).forEach(([hostId, hostResult]: [string, unknown]) => {
+          const result = hostResult as HostResult;
           // Handle successful updates
-          hostResult.updated_packages?.forEach((pkg: UpdatePackage) => {
+          result.updated_packages?.forEach((pkg: UpdatePackage) => {
             const key = `${hostId}-${pkg.package_name}-${pkg.package_manager}`;
             if (newStatuses.has(key)) {
               newStatuses.set(key, {
@@ -303,7 +328,7 @@ const Updates: React.FC = () => {
           });
           
           // Handle failed updates
-          hostResult.failed_packages?.forEach((pkg: UpdatePackage) => {
+          result.failed_packages?.forEach((pkg: UpdatePackage) => {
             const key = `${hostId}-${pkg.package_name}-${pkg.package_manager}`;
             if (newStatuses.has(key)) {
               newStatuses.set(key, {
@@ -317,6 +342,22 @@ const Updates: React.FC = () => {
         
         if (hasUpdates) {
           setUpdateStatuses(newStatuses);
+          
+          // Trigger notification bell refresh when packages are updated
+          triggerRefresh();
+          
+          // Check if all updates are complete (no pending updates remaining)
+          let hasPendingUpdates = false;
+          newStatuses.forEach((status) => {
+            if (status.status === 'pending') {
+              hasPendingUpdates = true;
+            }
+          });
+          
+          // Disable fast polling if no pending updates remain
+          if (!hasPendingUpdates) {
+            setHasActiveUpdates(false);
+          }
           
           // Clear selections for completed updates after a delay
           setTimeout(() => {
@@ -341,10 +382,12 @@ const Updates: React.FC = () => {
       }
     };
 
-    // Start polling for update results every 2 seconds
-    const interval = window.setInterval(pollForResults, 2000); // Poll every 2 seconds
+    // Only poll if there are pending updates, and use a reasonable interval
+    if (updateStatuses.size === 0) return;
+    
+    const interval = window.setInterval(pollForResults, 10000); // Poll every 10 seconds only when needed
     return () => window.clearInterval(interval);
-  }, [updateStatuses]);
+  }, [updateStatuses, triggerRefresh]);
 
   const handleFilterChange = (key: string, value: boolean | string) => {
     setFilters(prev => ({
@@ -413,14 +456,16 @@ const Updates: React.FC = () => {
       });
     });
     setUpdateStatuses(newStatuses);
+    setHasActiveUpdates(true); // Enable fast polling
 
     // Clear checkboxes immediately after setting pending status
     setSelectedUpdates(new Set());
 
     try {
-      for (const [hostId, hostUpdates] of updatesByHost) {
-        const packageNames = hostUpdates.map(u => u.packageName);
-        const packageManagers = [...new Set(hostUpdates.map(u => u.packageManager))];
+      const hosts = Array.from(updatesByHost.entries());
+      for (const [hostId, hostUpdates] of hosts) {
+        const packageNames = hostUpdates.map((u: SelectedUpdate) => u.packageName);
+        const packageManagers = Array.from(new Set<string>(hostUpdates.map((u: SelectedUpdate) => u.packageManager)));
         
         await updatesService.executeUpdates([hostId], packageNames, packageManagers);
       }
@@ -686,11 +731,7 @@ const Updates: React.FC = () => {
 
       {/* Updates List */}
       <div className="updates__content">
-        {isLoading ? (
-          <div className="updates__loading">
-            {t('updates.loading', 'Loading updates...')}
-          </div>
-        ) : updates.length === 0 ? (
+        {updates.length === 0 && !isLoading ? (
           <div className="updates__empty">
             {filters.security_only || filters.system_only || filters.package_manager || filters.host_id ? 
               t('updates.noMatchingUpdates', 'No updates match the current filters') :

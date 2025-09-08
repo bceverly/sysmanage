@@ -83,10 +83,18 @@ const Navbar = () => {
                 {t('nav.updates')}
               </NavLink>
             </li>
+            <li className="nav__item">
+              <NavLink
+                to="/scripts"
+                className="nav__link"
+                onClick={closeMenuOnMobile}
+              >
+                {t('nav.scripts')}
+              </NavLink>
+            </li>
           </ul>
           <div className="nav__close" id="nav-close" onClick={toggleMenu}>
-            {/* @ts-expect-error - IoClose component type issues */}
-            <IoClose />
+              <IoClose />
           </div>
         </div>
 
@@ -103,7 +111,6 @@ const Navbar = () => {
         </div>
 
         <div className="nav__toggle" id="nav-toggle" onClick={toggleMenu}>
-          {/* @ts-expect-error - IoMenu component type issues */}
           <IoMenu />
         </div>
       </nav>

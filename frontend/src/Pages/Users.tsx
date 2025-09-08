@@ -242,7 +242,13 @@ const Users = () => {
                         event.preventDefault();
                         const formData = new FormData(event.currentTarget);
                         const formJson = Object.fromEntries(formData.entries());
-                        doAddUser(true, formJson.email, formJson.password, formJson.firstName, formJson.lastName)
+                        doAddUser(
+                            true, 
+                            formJson.email as string, 
+                            formJson.password as string, 
+                            formJson.firstName as string, 
+                            formJson.lastName as string
+                        )
                         .then((result) => {
                             let newData: SysManageUser[] = [];
                             for (let i=0 ; i<tableData.length ; i++) {

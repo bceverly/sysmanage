@@ -68,12 +68,21 @@ like to add:
     cleared out it can recreate it point in time
     by making a series of requests to all clients.~~
 
-13. Scripts - Add the ability to run scripts as
-    a specified user.  Scripts can either be
-    entered ad-hoc, or be ran from a saved list
-    that is stored on the server.  Make this a
-    feature that has to be turned on for each
-    client and defaults to "off" if not specified.
+13. ~~Scripts - Add the ability to have the remote
+    agent run a script in the shell specified.  If
+    the agent is running as root, then allow the
+    UI to specify the user.  Scripts can either be
+    entered ad-hoc (with a nice open-source syntax
+    highlighting editor that supports the primary
+    shells for all of the platforms (Windows [Power
+    Shell, BAT and CMD), Mac [zsh and whatever common
+    shells mac uses], Linux [all the common shells
+    but default to bash], BSD [default to ksh on
+    OpenBSD[), or be ran from a saved list that is
+    stored on the server.  Make this a feature that
+    has to be turned on for each client in the YAML
+    configuration on the agent and defaults to "off"
+    if not explicitly turned on.~~
 
 14. ~~User List - Query the list of users on the
     agent system and provide it to the server

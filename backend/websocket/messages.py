@@ -23,6 +23,7 @@ class MessageType(str, Enum):
     SOFTWARE_INVENTORY_UPDATE = "software_inventory_update"
     PACKAGE_UPDATES_UPDATE = "package_updates_update"
     UPDATE_APPLY_RESULT = "update_apply_result"
+    SCRIPT_EXECUTION_RESULT = "script_execution_result"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -43,6 +44,7 @@ class CommandType(str, Enum):
     GET_INSTALLED_PACKAGES = "get_installed_packages"
     GET_AVAILABLE_UPDATES = "get_available_updates"
     REBOOT_SYSTEM = "reboot_system"
+    EXECUTE_SCRIPT = "execute_script"
 
 
 class Message:
@@ -302,6 +304,41 @@ class HostApprovedMessage(Message):
         super().__init__(MessageType.HOST_APPROVED, data)
 
 
+class ScriptExecutionResultMessage(Message):
+    """Message sent from agent to server with script execution results."""
+
+    def __init__(
+        self,
+        script_id: int = None,
+        execution_id: str = None,
+        success: bool = True,
+        exit_code: int = None,
+        stdout: str = None,
+        stderr: str = None,
+        execution_time: float = None,
+        shell_used: str = None,
+        error: str = None,
+        timeout: bool = False,
+        hostname: str = None,
+        **kwargs
+    ):
+        data = {
+            "script_id": script_id,
+            "execution_id": execution_id,
+            "success": success,
+            "exit_code": exit_code,
+            "stdout": stdout,
+            "stderr": stderr,
+            "execution_time": execution_time,
+            "shell_used": shell_used,
+            "error": error,
+            "timeout": timeout,
+            "hostname": hostname,
+            **kwargs,
+        }
+        super().__init__(MessageType.SCRIPT_EXECUTION_RESULT, data)
+
+
 # Message factory for creating messages from raw data
 def create_message(raw_data: Dict[str, Any]) -> Message:
     """Create appropriate message object from raw dictionary data."""
@@ -466,6 +503,45 @@ def create_message(raw_data: Dict[str, Any]) -> Message:
                 k: v
                 for k, v in data.items()
                 if k not in ["host_id", "approval_status", "certificate"]
+            }
+        )
+    if message_type == MessageType.SCRIPT_EXECUTION_RESULT:
+        # Script execution results come with data at the top level, not under a 'data' field
+        # Extract all fields except message_type, message_id, and timestamp
+        script_data = {
+            k: v
+            for k, v in raw_data.items()
+            if k not in ["message_type", "message_id", "timestamp"]
+        }
+        return ScriptExecutionResultMessage(
+            script_id=script_data.get("script_id"),
+            execution_id=script_data.get("execution_id"),
+            success=script_data.get("success", True),
+            exit_code=script_data.get("exit_code"),
+            stdout=script_data.get("stdout"),
+            stderr=script_data.get("stderr"),
+            execution_time=script_data.get("execution_time"),
+            shell_used=script_data.get("shell_used"),
+            error=script_data.get("error"),
+            timeout=script_data.get("timeout", False),
+            hostname=script_data.get("hostname"),
+            **{
+                k: v
+                for k, v in script_data.items()
+                if k
+                not in [
+                    "script_id",
+                    "execution_id",
+                    "success",
+                    "exit_code",
+                    "stdout",
+                    "stderr",
+                    "execution_time",
+                    "shell_used",
+                    "error",
+                    "timeout",
+                    "hostname",
+                ]
             }
         )
     # Default fallback

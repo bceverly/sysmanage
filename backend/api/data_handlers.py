@@ -646,3 +646,115 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
             "message_type": "error",
             "error": _("Failed to store updates: %s") % str(e),
         }
+
+
+async def handle_script_execution_result(db: Session, connection, message_data: dict):
+    """Handle script execution result from agent."""
+    debug_logger.info(
+        "Processing script execution result from %s", message_data.get("hostname")
+    )
+
+    try:
+        hostname = message_data.get("hostname")
+        execution_id = message_data.get("execution_id")
+
+        if not hostname:
+            debug_logger.error("No hostname provided in script execution result")
+            return {"message_type": "error", "error": _("Hostname is required")}
+
+        if not execution_id:
+            debug_logger.error("No execution_id provided in script execution result")
+            return {"message_type": "error", "error": _("Execution ID is required")}
+
+        # Find the host (case-insensitive)
+        host = db.query(Host).filter(Host.fqdn.ilike(hostname)).first()
+        if not host:
+            debug_logger.error("Host not found: %s", hostname)
+            return {
+                "message_type": "error",
+                "error": _("Host not found: %s") % hostname,
+            }
+
+        # Find existing script execution log entry by execution_id
+        from backend.persistence.models import ScriptExecutionLog
+        from datetime import datetime, timezone
+
+        execution_log = (
+            db.query(ScriptExecutionLog)
+            .filter(ScriptExecutionLog.execution_id == execution_id)
+            .first()
+        )
+
+        if execution_log:
+            # Update existing entry
+            debug_logger.info(
+                "Updating existing script execution log for execution_id: %s",
+                execution_id,
+            )
+            execution_log.status = (
+                "completed" if message_data.get("success", False) else "failed"
+            )
+            execution_log.exit_code = message_data.get("exit_code")
+            execution_log.stdout_output = message_data.get("stdout", "")
+            execution_log.stderr_output = message_data.get("stderr", "")
+            execution_log.execution_time = message_data.get("execution_time")
+            execution_log.shell_used = message_data.get("shell_used")
+            execution_log.error_message = message_data.get("error")
+            execution_log.timed_out = message_data.get("timeout", False)
+            execution_log.completed_at = datetime.now(timezone.utc)
+            execution_log.updated_at = datetime.now(timezone.utc)
+
+            # Set started_at if not already set
+            if not execution_log.started_at:
+                execution_log.started_at = execution_log.completed_at
+
+        else:
+            # Create new entry (fallback for cases where execution wasn't properly logged)
+            debug_logger.warning(
+                "No existing execution log found for execution_id: %s, creating new entry",
+                execution_id,
+            )
+            execution_log = ScriptExecutionLog(
+                host_id=host.id,
+                saved_script_id=message_data.get(
+                    "script_id"
+                ),  # May be None for ad-hoc scripts
+                script_name=message_data.get("script_name", "Unknown"),
+                script_content="",  # Not available in result message
+                shell_type=message_data.get("shell_used", "bash"),
+                run_as_user=None,  # Not available in result message
+                requested_by="system",  # Fallback value
+                execution_id=execution_id,
+                status="completed" if message_data.get("success", False) else "failed",
+                started_at=datetime.now(timezone.utc),
+                completed_at=datetime.now(timezone.utc),
+                exit_code=message_data.get("exit_code"),
+                stdout_output=message_data.get("stdout", ""),
+                stderr_output=message_data.get("stderr", ""),
+                error_message=message_data.get("error"),
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc),
+            )
+            db.add(execution_log)
+
+        db.commit()
+
+        debug_logger.info(
+            "Successfully stored script execution result for host %s (execution_id: %s)",
+            hostname,
+            execution_id,
+        )
+
+        return {
+            "message_type": "script_execution_result_stored",
+            "execution_log_id": execution_log.id,
+            "host_id": host.id,
+        }
+
+    except Exception as e:
+        debug_logger.error("Error storing script execution result: %s", e)
+        db.rollback()
+        return {
+            "message_type": "error",
+            "error": _("Failed to store script execution result: %s") % str(e),
+        }

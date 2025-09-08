@@ -44,7 +44,10 @@ class ConnectionMonitor {
 
   constructor(options?: Partial<ConnectionMonitorOptions>) {
     this.options = { ...this.options, ...options };
-    this.startHealthCheck();
+    // Only start health checks if user is authenticated
+    if (localStorage.getItem('bearer_token')) {
+      this.startHealthCheck();
+    }
   }
 
   /**
@@ -145,6 +148,13 @@ class ConnectionMonitor {
   }
 
   private async performHealthCheck(): Promise<void> {
+    // Don't perform health checks if user is not authenticated
+    if (!localStorage.getItem('bearer_token')) {
+      // Schedule next check but don't actually perform it
+      this.startHealthCheck();
+      return;
+    }
+    
     try {
       // Simple health check - try to fetch from the API
       const controller = new AbortController();
@@ -214,6 +224,12 @@ class ConnectionMonitor {
 
   private async performRetry(): Promise<void> {
     if (this.isRetrying) return;
+    
+    // Don't retry if user is not authenticated
+    if (!localStorage.getItem('bearer_token')) {
+      this.stopRetryProcess();
+      return;
+    }
     
     this.isRetrying = true;
     this.status.retryCount++;

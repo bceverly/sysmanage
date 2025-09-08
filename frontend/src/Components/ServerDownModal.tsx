@@ -51,13 +51,12 @@ const ServerDownModal: React.FC<ServerDownModalProps> = ({ open }) => {
     if (seconds <= 0) return t('serverDown.retrying', 'Retrying...');
     
     if (seconds < 60) {
-      return t('serverDown.secondsRemaining', { seconds }, `${seconds}s`);
+      return t('serverDown.secondsRemaining', `${seconds}s`, { seconds });
     }
     
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return t('serverDown.timeRemaining', { minutes, seconds: remainingSeconds }, 
-      `${minutes}m ${remainingSeconds}s`);
+    return t('serverDown.timeRemaining', `${minutes}m ${remainingSeconds}s`, { minutes, seconds: remainingSeconds });
   };
 
   const getProgressValue = (): number => {
@@ -147,8 +146,7 @@ const ServerDownModal: React.FC<ServerDownModalProps> = ({ open }) => {
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
             <Chip
               size="small"
-              label={t('serverDown.attempts', { count: status.retryCount }, 
-                `Attempts: ${status.retryCount}`)}
+              label={t('serverDown.attempts', `Attempts: ${status.retryCount}`, { count: status.retryCount })}
               color={status.retryCount >= 10 ? 'error' : 'default'}
             />
             {status.lastConnected && (

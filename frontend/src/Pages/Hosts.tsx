@@ -157,7 +157,7 @@ const Hosts = () => {
         try {
             // Get selected hosts that need approval
             const selectedHosts = tableData.filter(host => 
-                selection.includes(host.id) && host.approval_status === 'pending'
+                selection.includes(Number(host.id)) && host.approval_status === 'pending'
             );
             
             // Approve each selected pending host
@@ -269,7 +269,7 @@ const Hosts = () => {
 
     // Check if any selected hosts need approval
     const hasPendingSelection = tableData.some(host => 
-        selection.includes(host.id) && host.approval_status === 'pending'
+        selection.includes(Number(host.id)) && host.approval_status === 'pending'
     );
 
     return (

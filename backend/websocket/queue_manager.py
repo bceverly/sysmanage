@@ -223,13 +223,11 @@ class ServerMessageQueueManager:
                     raise
 
             logger.debug(
-                _(
-                    "Enqueued message: id={message_id}, type={message_type}, direction={direction}, host_id={host_id}"
-                ),
-                message_id=message_id,
-                message_type=message_type,
-                direction=direction,
-                host_id=host_id,
+                _("Enqueued message: id=%s, type=%s, direction=%s, host_id=%s"),
+                message_id,
+                message_type,
+                direction,
+                host_id,
             )
 
         except Exception:
@@ -389,18 +387,16 @@ class ServerMessageQueueManager:
             if not session_provided:
                 db.commit()
 
-            logger.debug(
-                _("Marked message as processing: {message_id}"), message_id=message_id
-            )
+            logger.debug(_("Marked message as processing: %s"), message_id)
             return True
 
         except Exception as e:
             if not session_provided:
                 db.rollback()
             logger.error(
-                _("Failed to mark message {message_id} as processing: {error}"),
-                message_id=message_id,
-                error=str(e),
+                _("Failed to mark message %s as processing: %s"),
+                message_id,
+                str(e),
             )
             return False
         finally:
@@ -434,18 +430,16 @@ class ServerMessageQueueManager:
             if not session_provided:
                 db.commit()
 
-            logger.debug(
-                _("Marked message as completed: {message_id}"), message_id=message_id
-            )
+            logger.debug(_("Marked message as completed: %s"), message_id)
             return True
 
         except Exception as e:
             if not session_provided:
                 db.rollback()
             logger.error(
-                _("Failed to mark message {message_id} as completed: {error}"),
-                message_id=message_id,
-                error=str(e),
+                _("Failed to mark message %s as completed: %s"),
+                message_id,
+                str(e),
             )
             return False
         finally:
@@ -501,12 +495,12 @@ class ServerMessageQueueManager:
 
                 logger.info(
                     _(
-                        "Message {message_id} failed (attempt {retry_count}/{max_retries}), scheduled for retry in {backoff_seconds} seconds"
+                        "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
                     ),
-                    message_id=message_id,
-                    retry_count=message.retry_count,
-                    max_retries=message.max_retries,
-                    backoff_seconds=backoff_seconds,
+                    message_id,
+                    message.retry_count,
+                    message.max_retries,
+                    backoff_seconds,
                 )
             else:
                 # Max retries reached or retry disabled
@@ -514,12 +508,10 @@ class ServerMessageQueueManager:
                 message.completed_at = datetime.now(timezone.utc)
 
                 logger.warning(
-                    _(
-                        "Message {message_id} permanently failed after {retry_count} attempts: {error_message}"
-                    ),
-                    message_id=message_id,
-                    retry_count=message.retry_count,
-                    error_message=error_message,
+                    _("Message %s permanently failed after %d attempts: %s"),
+                    message_id,
+                    message.retry_count,
+                    error_message,
                 )
 
             if not session_provided:
@@ -531,9 +523,9 @@ class ServerMessageQueueManager:
             if not session_provided:
                 db.rollback()
             logger.error(
-                _("Failed to mark message {message_id} as failed: {error}"),
-                message_id=message_id,
-                error=str(e),
+                _("Failed to mark message %s as failed: %s"),
+                message_id,
+                str(e),
             )
             return False
         finally:
@@ -653,15 +645,15 @@ class ServerMessageQueueManager:
                 db.commit()
 
             logger.info(
-                _("Cleaned up {deleted_count} old messages"),
-                deleted_count=deleted_count,
+                _("Cleaned up %d old messages"),
+                deleted_count,
             )
             return deleted_count
 
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(_("Failed to cleanup old messages: {error}"), error=str(e))
+            logger.error(_("Failed to cleanup old messages: %s"), str(e))
             return 0
         finally:
             if not session_provided:
@@ -722,9 +714,9 @@ class ServerMessageQueueManager:
             return json.loads(message.message_data)
         except (json.JSONDecodeError, TypeError) as e:
             logger.error(
-                _("Failed to deserialize message {message_id}: {error}"),
-                message_id=message.message_id,
-                error=str(e),
+                _("Failed to deserialize message %s: %s"),
+                message.message_id,
+                str(e),
             )
             return {}
 

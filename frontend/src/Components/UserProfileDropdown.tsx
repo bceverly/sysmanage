@@ -76,7 +76,8 @@ const UserProfileDropdown: React.FC = () => {
                 tabIndex={0}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
-                        handleClick(e as React.KeyboardEvent<HTMLElement> & { currentTarget: HTMLElement });
+                        e.preventDefault();
+                        setAnchorEl(e.currentTarget);
                     }
                 }}
             >

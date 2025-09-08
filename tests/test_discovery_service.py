@@ -286,46 +286,29 @@ class TestNetworkScanner:
         # Should not raise exception, but should still try to close socket
         await self.scanner.broadcast_server_announcement("192.168.1.255", 31338)
 
-    @patch("builtins.__import__")
-    def test_get_local_subnets_with_netifaces(self, mock_import):
+    @patch("backend.discovery.discovery_service.netifaces")
+    @patch("backend.discovery.discovery_service.ipaddress")
+    def test_get_local_subnets_with_netifaces(self, mock_ipaddress, mock_netifaces):
         """Test getting local subnets with netifaces available."""
-        # Mock netifaces and ipaddress modules
-        mock_netifaces = Mock()
+        # Mock netifaces module
         mock_netifaces.interfaces.return_value = ["eth0"]
         mock_netifaces.ifaddresses.return_value = {
             2: [{"addr": "192.168.1.10", "netmask": "255.255.255.0"}]  # AF_INET = 2
         }
         mock_netifaces.AF_INET = 2
 
-        mock_ipaddress = Mock()
+        # Mock ipaddress module
         mock_network = Mock()
         mock_network.broadcast_address = "192.168.1.255"
         mock_ipaddress.IPv4Network.return_value = mock_network
-
-        def import_side_effect(name, *args, **kwargs):
-            if name == "netifaces":
-                return mock_netifaces
-            elif name == "ipaddress":
-                return mock_ipaddress
-            return __import__(name, *args, **kwargs)
-
-        mock_import.side_effect = import_side_effect
 
         addresses = self.scanner.get_local_subnets()
 
         assert "192.168.1.255" in addresses
 
-    @patch("builtins.__import__")
-    def test_get_local_subnets_without_netifaces(self, mock_import):
+    @patch("backend.discovery.discovery_service.netifaces", None)
+    def test_get_local_subnets_without_netifaces(self):
         """Test getting local subnets when netifaces is not available."""
-
-        def import_side_effect(name, *args, **kwargs):
-            if name == "netifaces":
-                raise ImportError("No module named 'netifaces'")
-            return __import__(name, *args, **kwargs)
-
-        mock_import.side_effect = import_side_effect
-
         addresses = self.scanner.get_local_subnets()
 
         # Should return default addresses
@@ -338,18 +321,10 @@ class TestNetworkScanner:
         for addr in expected_defaults:
             assert addr in addresses
 
-    @patch("builtins.__import__")
-    def test_get_local_subnets_with_exception(self, mock_import):
+    @patch("backend.discovery.discovery_service.netifaces")
+    def test_get_local_subnets_with_exception(self, mock_netifaces):
         """Test subnet detection with exception handling."""
-        mock_netifaces = Mock()
         mock_netifaces.interfaces.side_effect = Exception("Network error")
-
-        def import_side_effect(name, *args, **kwargs):
-            if name == "netifaces":
-                return mock_netifaces
-            return __import__(name, *args, **kwargs)
-
-        mock_import.side_effect = import_side_effect
 
         addresses = self.scanner.get_local_subnets()
 
