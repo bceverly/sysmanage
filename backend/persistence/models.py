@@ -500,3 +500,82 @@ class QueueMetrics(Base):
             f"<QueueMetrics(id={self.id}, metric='{self.metric_name}', "
             f"direction='{self.direction}', count={self.count}, host_id={self.host_id})>"
         )
+
+
+class SavedScript(Base):
+    """
+    This class holds the object mapping for the saved_scripts table in the
+    PostgreSQL database. Stores user-created scripts for later execution.
+    """
+
+    __tablename__ = "saved_scripts"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255), nullable=False, index=True)
+    description = Column(Text, nullable=True)
+    content = Column(Text, nullable=False)
+    shell_type = Column(String(50), nullable=False)  # bash, zsh, powershell, cmd, etc.
+    platform = Column(
+        String(50), nullable=True, index=True
+    )  # linux, windows, darwin, openbsd, etc.
+    run_as_user = Column(
+        String(100), nullable=True
+    )  # User to run script as (if agent runs as root)
+    is_active = Column(Boolean, nullable=False, server_default="true", index=True)
+    created_by = Column(String(100), nullable=False)  # User who created the script
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    def __repr__(self):
+        return (
+            f"<SavedScript(id={self.id}, name='{self.name}', "
+            f"shell_type='{self.shell_type}', platform='{self.platform}')>"
+        )
+
+
+class ScriptExecutionLog(Base):
+    """
+    This class holds the object mapping for the script_execution_log table in the
+    PostgreSQL database. Tracks execution of scripts on remote hosts.
+    """
+
+    __tablename__ = "script_execution_log"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    host_id = Column(
+        Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    saved_script_id = Column(
+        Integer, ForeignKey("saved_scripts.id", ondelete="SET NULL"), nullable=True
+    )
+    script_name = Column(String(255), nullable=True)  # Name for ad-hoc scripts
+    script_content = Column(
+        Text, nullable=False
+    )  # Actual script content that was executed
+    shell_type = Column(String(50), nullable=False)
+    run_as_user = Column(String(100), nullable=True)
+    requested_by = Column(String(100), nullable=False)  # User who requested execution
+    execution_id = Column(
+        String(36), nullable=False, unique=True, index=True
+    )  # UUID for tracking
+    status = Column(
+        String(20), nullable=False, server_default="pending", index=True
+    )  # pending, running, completed, failed, cancelled
+    started_at = Column(DateTime(timezone=True), nullable=True)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+    exit_code = Column(Integer, nullable=True)
+    stdout_output = Column(Text, nullable=True)
+    stderr_output = Column(Text, nullable=True)
+    error_message = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), nullable=False, index=True)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Relationships
+    host = relationship("Host")
+    saved_script = relationship("SavedScript")
+
+    def __repr__(self):
+        return (
+            f"<ScriptExecutionLog(id={self.id}, execution_id='{self.execution_id}', "
+            f"status='{self.status}', host_id={self.host_id})>"
+        )

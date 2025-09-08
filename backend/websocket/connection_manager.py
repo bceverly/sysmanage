@@ -5,11 +5,15 @@ with SysManage agents across the fleet.
 
 import asyncio
 import json
+import logging
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
 from fastapi import WebSocket
+from websockets.exceptions import ConnectionClosed
+
+logger = logging.getLogger(__name__)
 
 
 class AgentConnection:
@@ -31,10 +35,53 @@ class AgentConnection:
         try:
             await self.websocket.send_text(json.dumps(message))
             return True
-        except Exception:
-            # Failed to send message to agent - catch all exceptions
-            # to handle various WebSocket error conditions
+        except ConnectionClosed as e:
+            # WebSocket connection closed - this is a communication error that warrants disconnection
+            logger.error(
+                "WEBSOCKET_COMMUNICATION_ERROR: Connection closed during send to agent %s: %s",
+                getattr(self, "hostname", "unknown"),
+                e,
+            )
             return False
+        except (OSError, RuntimeError) as e:
+            # Network/system level communication errors - warrants disconnection
+            logger.error(
+                "WEBSOCKET_COMMUNICATION_ERROR: Network/system error sending to agent %s: %s",
+                getattr(self, "hostname", "unknown"),
+                e,
+            )
+            return False
+        except (TypeError, ValueError) as e:
+            # Protocol/data errors - message format issues, don't disconnect
+            logger.warning(
+                "WEBSOCKET_PROTOCOL_ERROR: Invalid message format to agent %s (connection stays active): %s",
+                getattr(self, "hostname", "unknown"),
+                e,
+            )
+            return True  # Return True to avoid triggering disconnection
+        except Exception as e:
+            # Generic connection errors should trigger disconnection
+            error_msg = str(e)
+            if (
+                "connection" in error_msg.lower()
+                or "network" in error_msg.lower()
+                or "timeout" in error_msg.lower()
+            ):
+                # Network/connection related errors - warrants disconnection
+                logger.error(
+                    "WEBSOCKET_COMMUNICATION_ERROR: Connection error sending to agent %s: %s",
+                    getattr(self, "hostname", "unknown"),
+                    e,
+                )
+                return False
+
+            # Other unknown errors - log as protocol error and don't disconnect to be safe
+            logger.warning(
+                "WEBSOCKET_PROTOCOL_ERROR: Unknown error sending to agent %s (connection stays active): %s",
+                getattr(self, "hostname", "unknown"),
+                e,
+            )
+            return True  # Return True to avoid triggering disconnection
 
     def update_info(
         self,
@@ -109,10 +156,31 @@ class ConnectionManager:
         return False
 
     async def send_to_hostname(self, hostname: str, message: dict) -> bool:
-        """Send a message to an agent by hostname."""
+        """Send a message to an agent by hostname (case-insensitive)."""
+        logger.info("send_to_hostname called for hostname: %s", hostname)
+        logger.info("Available hostnames: %s", list(self.hostname_to_agent.keys()))
+
+        # Try exact match first
         if hostname in self.hostname_to_agent:
             agent_id = self.hostname_to_agent[hostname]
+            logger.info(
+                "Found agent_id %s for hostname %s (exact match)", agent_id, hostname
+            )
             return await self.send_to_agent(agent_id, message)
+
+        # Try case-insensitive match
+        hostname_lower = hostname.lower()
+        for registered_hostname, agent_id in self.hostname_to_agent.items():
+            if registered_hostname.lower() == hostname_lower:
+                logger.info(
+                    "Found agent_id %s for hostname %s (case-insensitive match with %s)",
+                    agent_id,
+                    hostname,
+                    registered_hostname,
+                )
+                return await self.send_to_agent(agent_id, message)
+
+        logger.warning("Hostname %s not found in hostname_to_agent mapping", hostname)
         return False
 
     async def send_to_host(self, host_id: int, message: dict) -> bool:

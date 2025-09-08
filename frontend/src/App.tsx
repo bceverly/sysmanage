@@ -24,6 +24,7 @@ import HostDetail from './Pages/HostDetail';
 import Users from './Pages/Users';
 import UserDetail from './Pages/UserDetail';
 import Updates from './Pages/Updates';
+import Scripts from './Pages/Scripts';
 import Profile from './Pages/Profile';
 import Logout from './Pages/Logout';
 
@@ -93,6 +94,7 @@ function App() {
                     <Route path="/users" element={<Users />} />
                     <Route path="/users/:userId" element={<UserDetail />} />
                     <Route path="/updates" element={<Updates />} />
+                    <Route path="/scripts" element={<Scripts />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/logout" element={<Logout />} />
                   </Routes>

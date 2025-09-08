@@ -64,7 +64,7 @@ export const useTablePageSize = (options: UseTablePageSizeOptions = {}) => {
       
       // Create page size options as multiples of the optimal size
       const generateMultipleOptions = (baseSize: number): number[] => {
-        const options = [];
+        const options: number[] = [];
         
         // Always include the base calculated size
         options.push(baseSize);
@@ -91,14 +91,14 @@ export const useTablePageSize = (options: UseTablePageSizeOptions = {}) => {
         }
         
         // Add common page size options if not included
-        [10, 25, 50].forEach(size => {
+        [10, 25, 50].forEach((size: number) => {
           if (!options.includes(size) && size <= maxRows) {
             options.push(size);
           }
         });
         
         // Sort and remove duplicates
-        return [...new Set(options)].sort((a, b) => a - b);
+        return Array.from(new Set<number>(options)).sort((a: number, b: number) => a - b);
       };
       
       const filteredOptions = generateMultipleOptions(optimalRows);

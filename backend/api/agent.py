@@ -104,13 +104,19 @@ async def agent_connect(websocket: WebSocket):
             "Token validation result - Valid: %s, Error: %s", is_valid, error_msg
         )
         if not is_valid:
-            debug_logger.info("Closing connection due to auth failure")
+            debug_logger.warning(
+                "WEBSOCKET_PROTOCOL_ERROR: Authentication failed from %s: %s",
+                client_host,
+                error_msg,
+            )
             await websocket.close(
                 code=4001, reason=_("Authentication failed: %s") % error_msg
             )
             return
     else:
-        debug_logger.info("No auth token provided, closing connection")
+        debug_logger.warning(
+            "WEBSOCKET_PROTOCOL_ERROR: No auth token provided from %s", client_host
+        )
         await websocket.close(code=4000, reason=_("Authentication token required"))
         return
 
@@ -189,6 +195,79 @@ async def agent_connect(websocket: WebSocket):
                 elif message.message_type == MessageType.UPDATE_APPLY_RESULT:
                     await _handle_update_result_message(message, connection, db)
 
+                elif message.message_type == MessageType.SCRIPT_EXECUTION_RESULT:
+                    debug_logger.info(
+                        "CRAZY_LOG: SCRIPT_EXECUTION_RESULT message received"
+                    )
+                    debug_logger.info(
+                        "CRAZY_LOG: SCRIPT_EXECUTION_RESULT message data keys: %s",
+                        list(message.data.keys()) if message.data else [],
+                    )
+                    debug_logger.info(
+                        "CRAZY_LOG: SCRIPT_EXECUTION_RESULT message data: %s",
+                        message.data,
+                    )
+
+                    # Queue script execution results for reliable processing
+                    debug_logger.info(
+                        "CRAZY_LOG: About to validate host for script execution result"
+                    )
+                    host, error_msg = await _validate_and_get_host(
+                        message.data, connection, db
+                    )
+                    debug_logger.info(
+                        "CRAZY_LOG: Host validation result - host: %s, error_msg: %s",
+                        host,
+                        error_msg,
+                    )
+
+                    if error_msg:
+                        debug_logger.info(
+                            "CRAZY_LOG: Host validation failed - sending error message"
+                        )
+                        await connection.send_message(error_msg.to_dict())
+                        return
+
+                    hostname = host.fqdn
+                    debug_logger.info(
+                        "CRAZY_LOG: Host %s - enqueueing script execution result",
+                        hostname,
+                    )
+
+                    # Enqueue the message for processing by message processor
+                    from backend.websocket.queue_manager import Priority
+
+                    try:
+                        queue_message_id = server_queue_manager.enqueue_message(
+                            message_type=message.message_type,
+                            message_data=message.data,
+                            direction=QueueDirection.INBOUND,
+                            host_id=host.id,
+                            priority=Priority.HIGH,
+                            db=db,
+                        )
+                        debug_logger.info(
+                            "Enqueued script execution result from host %s (message_id: %s)",
+                            hostname,
+                            queue_message_id,
+                        )
+
+                        # Send acknowledgment back to agent
+                        ack_msg = {
+                            "message_type": "script_execution_result_queued",
+                            "message_id": queue_message_id,
+                        }
+                        await connection.send_message(ack_msg)
+
+                    except Exception as e:
+                        debug_logger.error(
+                            "Error enqueueing script execution result: %s", e
+                        )
+                        error_msg = ErrorMessage(
+                            "queue_error", f"Failed to queue script result: {str(e)}"
+                        )
+                        await connection.send_message(error_msg.to_dict())
+
                 else:
                     # Unknown message type - send error
                     error_msg = ErrorMessage(
@@ -215,19 +294,29 @@ async def agent_connect(websocket: WebSocket):
 
     except WebSocketDisconnect as e:
         # Agent disconnected - normal cleanup handled in finally
-        debug_logger.info("Agent disconnected - WebSocketDisconnect: %s", e)
+        debug_logger.info(
+            "WEBSOCKET_COMMUNICATION_ERROR: Agent disconnected normally - WebSocketDisconnect: %s",
+            e,
+        )
     except RuntimeError as e:
         if "WebSocket is not connected" in str(e):
             # WebSocket was closed (e.g., due to unapproved host) - normal cleanup handled in finally
-            debug_logger.info("WebSocket connection closed - RuntimeError: %s", e)
+            debug_logger.info(
+                "WEBSOCKET_COMMUNICATION_ERROR: WebSocket connection closed - RuntimeError: %s",
+                e,
+            )
         else:
             debug_logger.error(
-                "Unexpected RuntimeError in WebSocket handler: %s", e, exc_info=True
+                "WEBSOCKET_UNKNOWN_ERROR: Unexpected RuntimeError in WebSocket handler: %s",
+                e,
+                exc_info=True,
             )
             raise
     except Exception as e:
         debug_logger.error(
-            "Unexpected exception in WebSocket handler: %s", e, exc_info=True
+            "WEBSOCKET_UNKNOWN_ERROR: Unexpected exception in WebSocket handler: %s",
+            e,
+            exc_info=True,
         )
         raise
     finally:
@@ -243,11 +332,20 @@ async def _validate_and_get_host(message_data, connection, db):
     Returns:
         tuple: (host_object, error_message) - host_object is None if validation fails
     """
+    debug_logger.info(
+        "CRAZY_LOG: _validate_and_get_host called with message_data keys: %s",
+        list(message_data.keys()) if message_data else [],
+    )
     hostname = message_data.get("hostname")
     host_id = message_data.get("host_id")
+    debug_logger.info(
+        "CRAZY_LOG: _validate_and_get_host extracted hostname=%s, host_id=%s",
+        hostname,
+        host_id,
+    )
 
     if not hostname:
-        debug_logger.error("Message missing hostname - cannot validate host")
+        debug_logger.error("CRAZY_LOG: Message missing hostname - cannot validate host")
         error_msg = ErrorMessage(
             "missing_hostname",
             _("Message must include hostname for host validation"),
@@ -258,13 +356,15 @@ async def _validate_and_get_host(message_data, connection, db):
     from backend.persistence.models import Host
 
     # Refresh the database session to ensure we see the latest data
+    debug_logger.info("CRAZY_LOG: Refreshing database session")
     db.expunge_all()
     db.commit()
 
     # If host_id is provided, validate it first
     if host_id is not None:
-        debug_logger.info("Validating message with host_id: %s", host_id)
+        debug_logger.info("CRAZY_LOG: Validating message with host_id: %s", host_id)
         host = db.query(Host).filter(Host.id == host_id).first()
+        debug_logger.info("CRAZY_LOG: Host lookup by host_id result: %s", host)
 
         if not host:
             debug_logger.warning(
@@ -276,8 +376,8 @@ async def _validate_and_get_host(message_data, connection, db):
             )
             return None, error_msg
 
-        # Verify that the host_id matches the hostname
-        if host.fqdn != hostname:
+        # Verify that the host_id matches the hostname (case-insensitive)
+        if host.fqdn.lower() != hostname.lower():
             debug_logger.warning(
                 "Host ID %s hostname mismatch (expected: %s, got: %s) - sending error",
                 host_id,
@@ -294,9 +394,11 @@ async def _validate_and_get_host(message_data, connection, db):
             "Host ID validation successful for host %s (ID: %s)", hostname, host_id
         )
     else:
-        # No host_id provided, fall back to hostname lookup
+        # No host_id provided, fall back to hostname lookup (case-insensitive)
         debug_logger.info("No host_id provided, validating by hostname: %s", hostname)
-        host = db.query(Host).filter(Host.fqdn == hostname).first()
+        from sqlalchemy import func
+
+        host = db.query(Host).filter(func.lower(Host.fqdn) == hostname.lower()).first()
 
     if not host:
         debug_logger.warning(

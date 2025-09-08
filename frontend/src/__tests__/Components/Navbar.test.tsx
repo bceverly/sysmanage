@@ -85,17 +85,19 @@ describe('Navbar Component', () => {
     const allLinks = screen.getAllByRole('link', { hidden: true });
     
     // Verify we have the expected links (no more logout link in main nav)
-    expect(allLinks).toHaveLength(5); // SysManage logo + 4 nav links (Dashboard, Users, Hosts, Updates)
+    expect(allLinks).toHaveLength(6); // SysManage logo + 5 nav links (Dashboard, Users, Hosts, Updates, Scripts)
     
     // Find links by their href attributes since they don't have accessible names when hidden
     const dashboardLink = allLinks.find(link => link.getAttribute('href') === '/');
     const usersLink = allLinks.find(link => link.getAttribute('href') === '/users');
     const hostsLink = allLinks.find(link => link.getAttribute('href') === '/hosts');
     const updatesLink = allLinks.find(link => link.getAttribute('href') === '/updates');
+    const scriptsLink = allLinks.find(link => link.getAttribute('href') === '/scripts');
     
     expect(dashboardLink).toHaveAttribute('href', '/');
     expect(usersLink).toHaveAttribute('href', '/users');
     expect(hostsLink).toHaveAttribute('href', '/hosts');
     expect(updatesLink).toHaveAttribute('href', '/updates');
+    expect(scriptsLink).toHaveAttribute('href', '/scripts');
   });
 });

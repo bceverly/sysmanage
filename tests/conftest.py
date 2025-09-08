@@ -64,9 +64,7 @@ def engine():
 
     test_engine = create_engine(test_db_url, connect_args={"check_same_thread": False})
 
-    # Clear any cached metadata and recreate tables
-    Base.metadata.clear()
-    # Import models again to ensure fresh metadata
+    # Import models to ensure metadata registration
     from backend.persistence import models  # noqa: F401
 
     Base.metadata.create_all(bind=test_engine)

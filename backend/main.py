@@ -25,15 +25,31 @@ from backend.api import (
     config_management,
     profile,
     updates,
+    scripts,
 )
 from backend.config import config
 from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
 from backend.discovery.discovery_service import discovery_beacon
 from backend.security.certificate_manager import certificate_manager
 from backend.websocket.message_processor import message_processor
+from backend.utils.logging_formatter import UTCTimestampFormatter
 
 # Parse the /etc/sysmanage.yaml file
 app_config = config.get_config()
+
+# Configure logging with UTC timestamp formatter
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("logs/backend.log", mode="a"),
+    ],
+)
+
+# Apply UTC timestamp formatter to all handlers
+utc_formatter = UTCTimestampFormatter("%(levelname)s: %(name)s: %(message)s")
+for handler in logging.root.handlers:
+    handler.setFormatter(utc_formatter)
 
 
 @asynccontextmanager
@@ -246,6 +262,7 @@ app.include_router(fleet.router)
 app.include_router(config_management.router)
 app.include_router(profile.router)
 app.include_router(updates.router, prefix="/api/updates", tags=["updates"])
+app.include_router(scripts.router, prefix="/api/scripts", tags=["scripts"])
 
 
 @app.get("/")
@@ -272,5 +289,7 @@ if __name__ == "__main__":
         app,
         host=app_config["api"]["host"],
         port=app_config["api"]["port"],
+        ws_ping_interval=60.0,  # Increased from default 20s to match agent config
+        ws_ping_timeout=60.0,  # Increased to handle large message transmissions
         **ssl_config,
     )

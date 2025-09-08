@@ -149,8 +149,15 @@ class WebSocketSecurityManager:
         Returns:
             True if message is valid
         """
-        # Check required fields
-        required_fields = ["message_type", "message_id", "timestamp"]
+        # Check required fields - script_execution_result messages have different format
+        message_type = message.get("message_type", "")
+        if message_type == "script_execution_result":
+            # Script execution results only require message_type and execution_id
+            required_fields = ["message_type", "execution_id"]
+        else:
+            # Standard messages require message_type, message_id, and timestamp
+            required_fields = ["message_type", "message_id", "timestamp"]
+
         for field in required_fields:
             if field not in message:
                 logger.warning(
@@ -161,35 +168,40 @@ class WebSocketSecurityManager:
                 return False
 
         # Validate timestamp (should be within last 30 minutes to handle post-approval scenarios)
-        try:
-            msg_timestamp = datetime.fromisoformat(
-                message["timestamp"].replace("Z", "+00:00")
-            )
-            current_time = datetime.now(timezone.utc)
-            time_diff = abs((current_time - msg_timestamp).total_seconds())
+        # Skip timestamp validation for script execution results
+        if message_type != "script_execution_result":
+            try:
+                msg_timestamp = datetime.fromisoformat(
+                    message["timestamp"].replace("Z", "+00:00")
+                )
+                current_time = datetime.now(timezone.utc)
+                time_diff = abs((current_time - msg_timestamp).total_seconds())
 
-            if (
-                time_diff > 1800
-            ):  # 30 minutes (increased tolerance for inventory messages after host approval)
+                if (
+                    time_diff > 1800
+                ):  # 30 minutes (increased tolerance for inventory messages after host approval)
+                    logger.warning(
+                        "Message timestamp too old: %ss from connection %s",
+                        time_diff,
+                        connection_id,
+                    )
+                    return False
+            except (ValueError, AttributeError):
                 logger.warning(
-                    "Message timestamp too old: %ss from connection %s",
-                    time_diff,
+                    "Invalid timestamp format in message from connection %s",
                     connection_id,
                 )
                 return False
-        except (ValueError, AttributeError):
-            logger.warning(
-                "Invalid timestamp format in message from connection %s", connection_id
-            )
-            return False
 
         # Validate message ID format (should be UUID-like)
-        message_id = message.get("message_id", "")
-        if len(message_id) < 20 or not message_id.replace("-", "").isalnum():
-            logger.warning(
-                "Invalid message ID format from connection %s", connection_id
-            )
-            return False
+        # Script execution results use execution_id instead of message_id
+        if message_type != "script_execution_result":
+            message_id = message.get("message_id", "")
+            if len(message_id) < 20 or not message_id.replace("-", "").isalnum():
+                logger.warning(
+                    "Invalid message ID format from connection %s", connection_id
+                )
+                return False
 
         # Update connection activity
         if connection_id in self.active_connections:

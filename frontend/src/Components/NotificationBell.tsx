@@ -18,6 +18,15 @@ const NotificationBell: React.FC = () => {
   const fetchUpdateStats = useCallback(async () => {
     if (!isMountedRef.current) return;
     
+    // Don't fetch updates if user is not authenticated
+    if (!localStorage.getItem('bearer_token')) {
+      if (isMountedRef.current) {
+        setUpdateStats(null);
+        setIsLoading(false);
+      }
+      return;
+    }
+    
     try {
       if (isMountedRef.current) {
         setIsLoading(true);
@@ -40,6 +49,14 @@ const NotificationBell: React.FC = () => {
 
   useEffect(() => {
     isMountedRef.current = true;
+    
+    // Don't set up polling if user is not authenticated
+    if (!localStorage.getItem('bearer_token')) {
+      return () => {
+        isMountedRef.current = false;
+      };
+    }
+    
     fetchUpdateStats();
     
     // Register the refresh function for external triggers
@@ -80,6 +97,11 @@ const NotificationBell: React.FC = () => {
 
   const hasUpdates = updateStats && updateStats.total_updates > 0;
   const hasSecurityUpdates = updateStats && updateStats.security_updates > 0;
+
+  // Don't render anything if user is not authenticated
+  if (!localStorage.getItem('bearer_token')) {
+    return null;
+  }
 
   return (
     <div className="notification-bell">

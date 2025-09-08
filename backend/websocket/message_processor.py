@@ -23,6 +23,7 @@ from backend.api.data_handlers import (
     handle_user_access_update,
     handle_software_update,
     handle_package_updates_update,
+    handle_script_execution_result,
 )
 from backend.i18n import _
 
@@ -316,6 +317,9 @@ class MessageProcessor:
                         message.message_id, f"Processing error: {str(e)}", db=db
                     )
 
+            # Third, process outbound messages (from server to agents)
+            await self._process_outbound_messages(db)
+
         finally:
             db.close()
 
@@ -341,6 +345,14 @@ class MessageProcessor:
                 message.message_type,
             )
 
+            # Debug: Show message type comparison
+            logger.info(
+                "MSGPROC_DEBUG: message_type='%s', SCRIPT_EXECUTION_RESULT='%s', equal=%s",
+                message.message_type,
+                MessageType.SCRIPT_EXECUTION_RESULT,
+                message.message_type == MessageType.SCRIPT_EXECUTION_RESULT,
+            )
+
             # Route to appropriate handler based on message type
             success = False
 
@@ -364,9 +376,16 @@ class MessageProcessor:
                 await handle_package_updates_update(db, mock_connection, message_data)
                 success = True
 
+            elif message.message_type == MessageType.SCRIPT_EXECUTION_RESULT:
+                logger.info("MSGPROC_DEBUG: Processing SCRIPT_EXECUTION_RESULT")
+                await handle_script_execution_result(db, mock_connection, message_data)
+                success = True
+
             else:
                 logger.warning(
-                    _("Unknown message type in queue: %s"), message.message_type
+                    _("Unknown message type in queue: %s (expected: %s)"),
+                    message.message_type,
+                    MessageType.SCRIPT_EXECUTION_RESULT,
                 )
                 success = False
 
@@ -583,6 +602,18 @@ class MessageProcessor:
                     "MSGPROC_DEBUG: Successfully processed package updates", flush=True
                 )
 
+            elif message.message_type == MessageType.SCRIPT_EXECUTION_RESULT:
+                print(
+                    "MSGPROC_DEBUG: About to call handle_script_execution_result",
+                    flush=True,
+                )
+                await handle_script_execution_result(db, mock_connection, message_data)
+                success = True
+                print(
+                    "MSGPROC_DEBUG: Successfully processed script execution result",
+                    flush=True,
+                )
+
             else:
                 print(
                     f"MSGPROC_DEBUG: Unknown message type: {message.message_type}",
@@ -634,6 +665,152 @@ class MessageProcessor:
             server_queue_manager.mark_failed(
                 message.message_id, error_message=str(e), db=db
             )
+
+    async def _process_outbound_messages(self, db: Session):
+        """Process outbound messages from the server to agents."""
+        logger.info("DEBUG: MSGPROC Processing outbound messages")
+
+        from backend.persistence.models import MessageQueue, Host
+
+        # Get outbound messages for all hosts
+        outbound_messages = (
+            db.query(MessageQueue)
+            .filter(
+                MessageQueue.direction == QueueDirection.OUTBOUND,
+                MessageQueue.status == QueueStatus.PENDING,
+                MessageQueue.host_id.is_not(None),
+            )
+            .order_by(MessageQueue.priority.desc(), MessageQueue.created_at.asc())
+            .limit(20)
+            .all()
+        )
+
+        # Group messages by host for efficient processing
+        messages_by_host = {}
+        for message in outbound_messages:
+            if message.host_id:
+                if message.host_id not in messages_by_host:
+                    messages_by_host[message.host_id] = []
+                messages_by_host[message.host_id].append(message)
+
+        # Process messages for each host
+        for host_id, host_messages in messages_by_host.items():
+            # Check if host exists and is approved
+            host = db.query(Host).filter(Host.id == host_id).first()
+            if not host:
+                logger.warning(
+                    "Host %d not found, marking outbound messages as failed", host_id
+                )
+                for message in host_messages:
+                    server_queue_manager.mark_failed(
+                        message.message_id, "Host not found", db=db
+                    )
+                continue
+
+            if host.approval_status != "approved":
+                logger.warning(
+                    "Host %d not approved, marking outbound messages as failed", host_id
+                )
+                for message in host_messages:
+                    server_queue_manager.mark_failed(
+                        message.message_id,
+                        f"Host not approved (status: {host.approval_status})",
+                        db=db,
+                    )
+                continue
+
+            # Process each message for this host
+            for message in host_messages:
+                await self._process_outbound_message(message, host, db)
+
+    async def _process_outbound_message(self, message, host, db: Session):
+        """Process a single outbound message."""
+        try:
+            # Mark message as processing
+            if not server_queue_manager.mark_processing(message.message_id, db=db):
+                logger.warning(
+                    "Could not mark outbound message %s as processing",
+                    message.message_id,
+                )
+                return
+
+            # Deserialize message data
+            message_data = server_queue_manager.deserialize_message_data(message)
+
+            logger.info(
+                "Processing outbound message: %s (type: %s) for host %s",
+                message.message_id,
+                message.message_type,
+                host.fqdn,
+            )
+
+            # Handle different types of outbound messages
+            success = False
+            if message.message_type == "command":
+                success = await self._send_command_to_agent(
+                    message_data, host, message.message_id
+                )
+            else:
+                logger.warning(
+                    "Unknown outbound message type: %s", message.message_type
+                )
+
+            if success:
+                server_queue_manager.mark_completed(message.message_id, db=db)
+                logger.info(
+                    "Successfully sent outbound message: %s to host %s",
+                    message.message_id,
+                    host.fqdn,
+                )
+            else:
+                server_queue_manager.mark_failed(
+                    message.message_id, "Failed to send message to agent", db=db
+                )
+
+        except Exception as e:
+            logger.error(
+                "Error processing outbound message %s: %s", message.message_id, str(e)
+            )
+            server_queue_manager.mark_failed(
+                message.message_id, f"Processing error: {str(e)}", db=db
+            )
+
+    async def _send_command_to_agent(
+        self, command_data: dict, host, message_id: str
+    ) -> bool:
+        """Send a command message to an agent."""
+        from backend.websocket.messages import create_command_message
+        from backend.websocket.connection_manager import connection_manager
+
+        try:
+            # Create the command message
+            # Check if this is a script execution command
+            if "execution_id" in command_data:
+                message = create_command_message("execute_script", command_data)
+            else:
+                # Other types of commands
+                message = create_command_message("generic_command", command_data)
+
+            # Send via connection manager
+            logger.info(
+                "Sending command message %s to host %s (%s)",
+                message_id,
+                host.id,
+                host.fqdn,
+            )
+            success = await connection_manager.send_to_host(host.id, message)
+
+            if not success:
+                logger.warning(
+                    "Failed to send command to host %s - agent may not be connected",
+                    host.fqdn,
+                )
+
+            return success
+
+        except Exception as e:
+            logger.error("Error sending command to agent: %s", str(e))
+            return False
 
 
 class MockConnection:

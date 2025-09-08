@@ -262,10 +262,11 @@ const HostDetail = () => {
         
         // Group devices by name
         devices.forEach(device => {
-            if (!devicesByName.has(device.name)) {
-                devicesByName.set(device.name, []);
+            const deviceName = device.name || 'Unknown Device';
+            if (!devicesByName.has(deviceName)) {
+                devicesByName.set(deviceName, []);
             }
-            devicesByName.get(device.name)!.push(device);
+            devicesByName.get(deviceName)!.push(device);
         });
         
         // For each name, select the best representative device
@@ -278,8 +279,8 @@ const HostDetail = () => {
                 // Multiple devices with same name, prioritize by mount point
                 // Priority: root (/), then system volumes, then others
                 const prioritized = deviceGroup.sort((a, b) => {
-                    const aMountPriority = getMountPointPriority(a.mount_point);
-                    const bMountPriority = getMountPointPriority(b.mount_point);
+                    const aMountPriority = getMountPointPriority(a.mount_point || '');
+                    const bMountPriority = getMountPointPriority(b.mount_point || '');
                     return aMountPriority - bMountPriority;
                 });
                 
@@ -591,7 +592,7 @@ const HostDetail = () => {
                                             {t('hostDetail.osDetails', 'Additional Details')}
                                             <IconButton 
                                                 size="small" 
-                                                onClick={() => handleShowDialog(t('hostDetail.additionalOSDetails', 'Additional OS Details'), host.os_details)}
+                                                onClick={() => handleShowDialog(t('hostDetail.additionalOSDetails', 'Additional OS Details'), host.os_details || '')}
                                                 sx={{ color: 'textSecondary' }}
                                             >
                                                 <HelpOutlineIcon fontSize="small" />
@@ -910,7 +911,7 @@ const HostDetail = () => {
                                             {t('hostDetail.additionalHardware', 'Additional Hardware Details')}
                                             <IconButton 
                                                 size="small" 
-                                                onClick={() => handleShowDialog('Additional Hardware Details', host.hardware_details)}
+                                                onClick={() => handleShowDialog('Additional Hardware Details', host.hardware_details || '')}
                                                 sx={{ color: 'textSecondary' }}
                                             >
                                                 <HelpOutlineIcon fontSize="small" />
@@ -1128,7 +1129,7 @@ const HostDetail = () => {
                                                                                 cursor: 'pointer'
                                                                             }}
                                                                             onClick={() => {
-                                                                                setExpandedUserGroups(prev => new Set([...prev, user.id]));
+                                                                                setExpandedUserGroups(prev => new Set(Array.from(prev).concat([user.id || 0])));
                                                                             }}
                                                                         />
                                                                     )}
@@ -1253,7 +1254,7 @@ const HostDetail = () => {
                                                                                 cursor: 'pointer'
                                                                             }}
                                                                             onClick={() => {
-                                                                                setExpandedGroupUsers(prev => new Set([...prev, group.id]));
+                                                                                setExpandedGroupUsers(prev => new Set(Array.from(prev).concat([group.id || 0])));
                                                                             }}
                                                                         />
                                                                     )}
