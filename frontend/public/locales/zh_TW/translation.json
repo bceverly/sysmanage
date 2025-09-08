@@ -24,6 +24,7 @@
     "hosts": "主機",
     "updates": "更新",
     "security": "安全性",
+    "rebootRequired": "需要重新啟動",
     "totalUsers": "用戶總數",
     "systemHealth": "系統健康狀況"
   },
@@ -43,6 +44,7 @@
     "delete": "刪除",
     "addHost": "新增主機",
     "approvalNeeded": "需要批准",
+    "rebootRequired": "需要重新啟動",
     "refreshing": "正在刷新...",
     "refreshNow": "立即刷新",
     "refreshHosts": "刷新主機",

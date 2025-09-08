@@ -23,6 +23,7 @@
     "hosts": "होस्ट्स",
     "updates": "अपडेट",
     "security": "सुरक्षा",
+    "rebootRequired": "रीबूट आवश्यक",
     "totalUsers": "कुल उपयोगकर्ता",
     "systemHealth": "सिस्टम हेल्थ"
   },
@@ -42,6 +43,7 @@
     "delete": "हटाएं",
     "addHost": "होस्ट जोड़ें",
     "approvalNeeded": "अनुमोदन आवश्यक",
+    "rebootRequired": "रीबूट आवश्यक",
     "refreshing": "रिफ्रेश हो रहा है...",
     "refreshNow": "अभी रिफ्रेश करें",
     "refreshHosts": "होस्ट्स रिफ्रेश करें",

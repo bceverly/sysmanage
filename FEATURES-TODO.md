@@ -129,13 +129,13 @@ like to add:
     piece of software or particular version
     locally.
 
-21. Dashboard - Make the dashboard actually
+21. ~~Dashboard - Make the dashboard actually
     work showing (among other things) the
     status of all connected agent machines
     (flagging yellow those machines that
     need some action taken).  Show the
     overall security health of the total
-    enterprise.
+    enterprise.~~
 
 22. Reboot Check - If a machine needs a
     reboot to allow updates to be installed

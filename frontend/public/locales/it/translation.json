@@ -23,6 +23,7 @@
     "hosts": "Host",
     "updates": "Aggiornamenti",
     "security": "Sicurezza",
+    "rebootRequired": "Riavvii Richiesti",
     "totalUsers": "Utenti Totali",
     "systemHealth": "Salute del Sistema"
   },
@@ -42,6 +43,7 @@
     "down": "Offline",
     "lastCheckin": "Ultimo Check-in",
     "approvalNeeded": "Approvazione Richiesta",
+    "rebootRequired": "Riavvio Richiesto",
     "refreshing": "Aggiornamento...",
     "refreshNow": "Aggiorna Ora",
     "refreshHosts": "Aggiorna Host",

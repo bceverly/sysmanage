@@ -24,6 +24,7 @@
     "hosts": "Hosts",
     "updates": "Updates",
     "security": "Beveiliging",
+    "rebootRequired": "Herstarts Vereist",
     "totalUsers": "Totaal Gebruikers",
     "systemHealth": "Systeemgezondheid"
   },
@@ -43,6 +44,7 @@
     "down": "Offline",
     "lastCheckin": "Laatste Check-in",
     "approvalNeeded": "Goedkeuring Vereist",
+    "rebootRequired": "Herstart Vereist",
     "refreshing": "Vernieuwen...",
     "refreshNow": "Nu Vernieuwen",
     "refreshHosts": "Hosts Vernieuwen",

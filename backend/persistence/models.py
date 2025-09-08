@@ -72,6 +72,10 @@ class Host(Base):
     # Software inventory fields
     software_updated_at = Column(DateTime(timezone=True), nullable=True)
 
+    # Update management fields
+    reboot_required = Column(Boolean, nullable=False, default=False, index=True)
+    reboot_required_updated_at = Column(DateTime(timezone=True), nullable=True)
+
     # Relationships to normalized hardware tables
     storage_devices = relationship(
         "StorageDevice", back_populates="host", cascade="all, delete-orphan"

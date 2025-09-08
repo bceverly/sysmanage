@@ -24,6 +24,7 @@ class MessageType(str, Enum):
     PACKAGE_UPDATES_UPDATE = "package_updates_update"
     UPDATE_APPLY_RESULT = "update_apply_result"
     SCRIPT_EXECUTION_RESULT = "script_execution_result"
+    REBOOT_STATUS_UPDATE = "reboot_status_update"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -39,12 +40,14 @@ class CommandType(str, Enum):
     EXECUTE_SHELL = "execute_shell"
     INSTALL_PACKAGE = "install_package"
     UPDATE_SYSTEM = "update_system"
+    APPLY_UPDATES = "apply_updates"
     RESTART_SERVICE = "restart_service"
     GET_SYSTEM_INFO = "get_system_info"
     GET_INSTALLED_PACKAGES = "get_installed_packages"
     GET_AVAILABLE_UPDATES = "get_available_updates"
     REBOOT_SYSTEM = "reboot_system"
     EXECUTE_SCRIPT = "execute_script"
+    CHECK_REBOOT_STATUS = "check_reboot_status"
 
 
 class Message:

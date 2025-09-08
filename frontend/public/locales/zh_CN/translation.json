@@ -24,6 +24,7 @@
     "hosts": "主机",
     "updates": "更新",
     "security": "安全",
+    "rebootRequired": "需要重启",
     "totalUsers": "用户总数",
     "systemHealth": "系统健康状态"
   },
@@ -43,6 +44,7 @@
     "down": "离线",
     "lastCheckin": "最后检查",
     "approvalNeeded": "需要批准",
+    "rebootRequired": "需要重启",
     "refreshing": "刷新中...",
     "refreshNow": "立即刷新",
     "refreshHosts": "刷新主机",

@@ -758,3 +758,55 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
             "message_type": "error",
             "error": _("Failed to store script execution result: %s") % str(e),
         }
+
+
+async def handle_reboot_status_update(db: Session, connection, message_data: dict):
+    """Handle reboot status update from an agent."""
+    from datetime import datetime, timezone
+
+    try:
+        hostname = message_data.get("hostname")
+        reboot_required = message_data.get("reboot_required", False)
+
+        if not hostname:
+            return {
+                "message_type": "error",
+                "error": _("Hostname is required for reboot status update"),
+            }
+
+        debug_logger.info("Processing reboot status update from %s", hostname)
+
+        # Find the host
+        host = db.query(Host).filter(Host.fqdn == hostname).first()
+        if not host:
+            debug_logger.error("Host not found: %s", hostname)
+            return {
+                "message_type": "error",
+                "error": _("Host not found: %s") % hostname,
+            }
+
+        # Update the reboot status
+        host.reboot_required = reboot_required
+        host.reboot_required_updated_at = datetime.now(timezone.utc)
+
+        db.commit()
+
+        debug_logger.info(
+            "Successfully updated reboot status for host %s: reboot_required=%s",
+            hostname,
+            reboot_required,
+        )
+
+        return {
+            "message_type": "reboot_status_updated",
+            "host_id": host.id,
+            "reboot_required": reboot_required,
+        }
+
+    except Exception as e:
+        debug_logger.error("Error updating reboot status: %s", e)
+        db.rollback()
+        return {
+            "message_type": "error",
+            "error": _("Failed to update reboot status: %s") % str(e),
+        }

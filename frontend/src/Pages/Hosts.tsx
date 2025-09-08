@@ -78,6 +78,15 @@ const Hosts = () => {
                                 sx={{ ml: 0.5 }}
                             />
                         )}
+                        {row.reboot_required && (
+                            <Chip 
+                                label={t('hosts.rebootRequired')}
+                                color="error"
+                                size="small"
+                                variant="outlined"
+                                sx={{ ml: 0.5 }}
+                            />
+                        )}
                     </Box>
                 );
             }

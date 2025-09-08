@@ -24,6 +24,7 @@
     "hosts": "ホスト",
     "updates": "アップデート",
     "security": "セキュリティ",
+    "rebootRequired": "再起動が必要",
     "totalUsers": "総ユーザー数",
     "systemHealth": "システムの健全性"
   },
@@ -43,6 +44,7 @@
     "down": "オフライン",
     "lastCheckin": "最終チェックイン",
     "approvalNeeded": "承認が必要",
+    "rebootRequired": "再起動が必要",
     "refreshing": "更新中...",
     "refreshNow": "今すぐ更新",
     "refreshHosts": "ホストを更新",

@@ -24,6 +24,7 @@ from backend.api.data_handlers import (
     handle_software_update,
     handle_package_updates_update,
     handle_script_execution_result,
+    handle_reboot_status_update,
 )
 from backend.i18n import _
 
@@ -381,6 +382,11 @@ class MessageProcessor:
                 await handle_script_execution_result(db, mock_connection, message_data)
                 success = True
 
+            elif message.message_type == MessageType.REBOOT_STATUS_UPDATE:
+                logger.info("MSGPROC_DEBUG: Processing REBOOT_STATUS_UPDATE")
+                await handle_reboot_status_update(db, mock_connection, message_data)
+                success = True
+
             else:
                 logger.warning(
                     _("Unknown message type in queue: %s (expected: %s)"),
@@ -611,6 +617,18 @@ class MessageProcessor:
                 success = True
                 print(
                     "MSGPROC_DEBUG: Successfully processed script execution result",
+                    flush=True,
+                )
+
+            elif message.message_type == MessageType.REBOOT_STATUS_UPDATE:
+                print(
+                    "MSGPROC_DEBUG: About to call handle_reboot_status_update",
+                    flush=True,
+                )
+                await handle_reboot_status_update(db, mock_connection, message_data)
+                success = True
+                print(
+                    "MSGPROC_DEBUG: Successfully processed reboot status update",
                     flush=True,
                 )
 
