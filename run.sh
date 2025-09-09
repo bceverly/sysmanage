@@ -42,6 +42,45 @@ except:
 " 2>/dev/null
 }
 
+# Function to generate user-friendly URLs
+generate_urls() {
+    local service_type=$1
+    local port=$2
+    
+    # Get host from config
+    local config_host=""
+    if [ "$service_type" = "api" ]; then
+        config_host=$(get_config_value "api.host")
+    else
+        config_host=$(get_config_value "webui.host")
+    fi
+    
+    if [ $? -ne 0 ] || [ -z "$config_host" ]; then
+        config_host="localhost"
+    fi
+    
+    # Generate URLs based on config host
+    if [ "$config_host" = "0.0.0.0" ]; then
+        # When bound to 0.0.0.0, prefer FQDN, fallback to hostname, then localhost
+        local fqdn=$(hostname -f 2>/dev/null)
+        local shortname=$(hostname 2>/dev/null)
+        
+        if [ -n "$fqdn" ] && [ "$fqdn" != "localhost" ] && [ "$fqdn" != "$shortname" ]; then
+            # Use FQDN if available and different from short hostname
+            echo "http://$fqdn:$port"
+        elif [ -n "$shortname" ] && [ "$shortname" != "localhost" ]; then
+            # Use short hostname if FQDN not available
+            echo "http://$shortname:$port"
+        else
+            # Fall back to localhost
+            echo "http://localhost:$port"
+        fi
+    else
+        # Use the configured host directly
+        echo "http://$config_host:$port"
+    fi
+}
+
 # Function to check if a port is in use
 check_port() {
     local port=$1
@@ -195,8 +234,19 @@ if [ -d "frontend" ] && [ -f "frontend/package.json" ]; then
         npm install
     fi
     
-    # Start the React development server in background with HTTP forced
-    nohup env FORCE_HTTP=true npm start > ../logs/frontend.log 2>&1 &
+    # Get webui host and port from configuration  
+    WEBUI_HOST=$(get_config_value "webui.host")
+    if [ $? -ne 0 ] || [ -z "$WEBUI_HOST" ]; then
+        WEBUI_HOST="localhost"
+    fi
+    
+    WEBUI_PORT=$(get_config_value "webui.port")
+    if [ $? -ne 0 ] || [ -z "$WEBUI_PORT" ]; then
+        WEBUI_PORT="3000"
+    fi
+    
+    # Start the React development server in background with config-driven host/port
+    nohup env FORCE_HTTP=true VITE_HOST="$WEBUI_HOST" VITE_PORT="$WEBUI_PORT" npm start > ../logs/frontend.log 2>&1 &
     FRONTEND_PID=$!
     echo $FRONTEND_PID > ../logs/frontend.pid
     
@@ -228,9 +278,23 @@ echo ""
 echo "✅ SysManage Server is successfully running!"
 echo ""
 echo "Services:"
-echo "  🔧 Backend API:    http://localhost:$BACKEND_PORT (WebSocket agent endpoint: ws://localhost:$BACKEND_PORT/agent/connect)"
-echo "  🌐 Frontend UI:    http://localhost:$FRONTEND_PORT"
-echo "  📋 API Docs:      http://localhost:$BACKEND_PORT/docs"
+
+# Backend API URL
+backend_url=$(generate_urls "api" "$BACKEND_PORT")
+ws_url=$(echo "$backend_url" | sed 's|http://|ws://|')/agent/connect
+echo "  🔧 Backend API:      $backend_url"
+echo "  📡 Agent WebSocket:  $ws_url"
+
+# Frontend UI URL
+if [ -n "$FRONTEND_PID" ]; then
+    frontend_url=$(generate_urls "webui" "$FRONTEND_PORT")
+    echo "  🌐 Frontend UI:      $frontend_url"
+fi
+
+# API Documentation URL
+api_docs_url="$backend_url/docs"
+echo "  📋 API Docs:        $api_docs_url"
+
 echo ""
 echo "Logs:"
 echo "  📄 Backend:       tail -f logs/backend.log"
