@@ -77,8 +77,11 @@ The system automatically detects the browser's preferred language and falls back
 # Update package manager
 sudo apt update
 
-# Install Python 3.12+
-sudo apt install python3.12 python3.12-venv python3.12-dev python3-pip
+# Install Python 3.12+ (use available version)
+sudo apt install python3 python3-venv python3-dev python3-pip
+
+# If python3.12 is available in your distribution, you can also try:
+# sudo apt install python3.12 python3.12-venv python3.12-dev python3-pip
 
 # Install Node.js 20.x
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
@@ -95,8 +98,11 @@ sudo apt install build-essential libffi-dev libssl-dev
 
 #### Linux (CentOS/RHEL/Fedora)
 ```bash
-# Install Python 3.12+
-sudo dnf install python3.12 python3.12-devel python3-pip
+# Install Python 3.12+ (use available version)
+sudo dnf install python3 python3-devel python3-pip
+
+# If python3.12 is available in your distribution, you can also try:
+# sudo dnf install python3.12 python3.12-devel python3-pip
 
 # Install Node.js 20.x
 curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
@@ -259,7 +265,7 @@ git clone https://github.com/bceverly/sysmanage.git
 cd sysmanage
 
 # Create Python virtual environment
-python3.12 -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
                            # On OpenBSD: . .venv/bin/activate
 ```
