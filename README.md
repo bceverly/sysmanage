@@ -78,10 +78,10 @@ The system automatically detects the browser's preferred language and falls back
 sudo apt update
 
 # Install Python (3.11 or 3.12 ONLY - not 3.13)
-# For Ubuntu 22.04 and newer:
+# For Ubuntu 22.04 through 24.10:
 sudo apt install python3.11 python3.11-venv python3.11-dev python3-pip
 
-# For Ubuntu with Python 3.12:
+# For Ubuntu with Python 3.12 (if available):
 # sudo add-apt-repository ppa:deadsnakes/ppa
 # sudo apt update
 # sudo apt install python3.12 python3.12-venv python3.12-dev python3-pip
@@ -100,6 +100,52 @@ sudo apt install build-essential libffi-dev libssl-dev libpq-dev
 
 # Additional packages needed for Python 3.13+ compatibility
 sudo apt install libuv1-dev python3-setuptools
+```
+
+#### Linux (Ubuntu 25.04 or newer) - Building Python 3.12 from Source
+
+Ubuntu 25.04+ only ships with Python 3.13, which is not yet compatible with many packages. You must build Python 3.12 from source:
+
+```bash
+# Install build dependencies
+sudo apt install build-essential libssl-dev zlib1g-dev libbz2-dev \
+    libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
+    libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev \
+    python3-openssl git libpq-dev libuv1-dev
+
+# Download and build Python 3.12
+cd /tmp
+wget https://www.python.org/ftp/python/3.12.7/Python-3.12.7.tgz
+tar -xf Python-3.12.7.tgz
+cd Python-3.12.7
+
+# Configure and build (this may take 10-15 minutes)
+./configure --enable-optimizations --with-ensurepip=install
+make -j$(nproc)
+sudo make altinstall
+
+# Verify installation
+python3.12 --version
+
+# Return to your project directory
+cd ~/dev/sysmanage
+
+# Create virtual environment with Python 3.12
+python3.12 -m venv .venv
+source .venv/bin/activate
+
+# Upgrade pip to latest version
+pip install --upgrade pip
+
+# Install remaining Ubuntu packages
+# Install Node.js 20.x
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Install PostgreSQL 14+
+sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
 ```
 
 #### Linux (CentOS/RHEL/Fedora)
@@ -277,6 +323,9 @@ cd sysmanage
 python3.11 -m venv .venv  # Or python3.12 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
                            # On OpenBSD: . .venv/bin/activate
+
+# Upgrade pip to latest version
+pip install --upgrade pip
 ```
 
 ### 2. Install Backend Dependencies
