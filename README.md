@@ -92,8 +92,11 @@ sudo apt install postgresql postgresql-contrib
 sudo systemctl start postgresql
 sudo systemctl enable postgresql
 
-# Install build tools for Python packages
-sudo apt install build-essential libffi-dev libssl-dev
+# Install build tools and development libraries for Python packages
+sudo apt install build-essential libffi-dev libssl-dev libpq-dev
+
+# Additional packages needed for Python 3.13+ compatibility
+sudo apt install libuv1-dev python3-setuptools
 ```
 
 #### Linux (CentOS/RHEL/Fedora)
@@ -114,9 +117,12 @@ sudo postgresql-setup --initdb
 sudo systemctl start postgresql
 sudo systemctl enable postgresql
 
-# Install build tools
+# Install build tools and development libraries
 sudo dnf groupinstall "Development Tools"
-sudo dnf install libffi-devel openssl-devel
+sudo dnf install libffi-devel openssl-devel postgresql-devel
+
+# Additional packages needed for Python 3.13+ compatibility
+sudo dnf install libuv-devel python3-setuptools
 ```
 
 #### macOS
@@ -276,13 +282,45 @@ pip install -r requirements.txt
 ```
 
 ### 3. Database Setup
-```bash
-# Install PostgreSQL 14+
-# Create database and user
-createdb sysmanage
-createuser sysmanage_user
 
-# Run database migrations
+#### PostgreSQL Installation and Configuration
+
+After installing PostgreSQL (see platform-specific instructions above), set up the database and user:
+
+```bash
+# Switch to the postgres user
+sudo -u postgres psql
+
+# In the PostgreSQL prompt, create the database and user
+# IMPORTANT: Replace 'changeme123' with a strong password for production!
+CREATE USER sysmanage WITH PASSWORD 'changeme123';
+CREATE DATABASE sysmanage OWNER sysmanage;
+GRANT ALL PRIVILEGES ON DATABASE sysmanage TO sysmanage;
+
+# Grant schema permissions (required for Alembic migrations)
+\c sysmanage
+GRANT ALL ON SCHEMA public TO sysmanage;
+
+# Exit PostgreSQL
+\q
+```
+
+**Security Notes:**
+- ⚠️ The default development configuration uses password `abc123` - **NEVER use this in production**
+- 🔐 Generate a strong password for production environments
+- 🛡️ Consider using PostgreSQL's peer authentication for local connections
+- 🔒 Restrict database access to localhost only in `postgresql.conf`
+
+#### Test Database Connection
+```bash
+# Test the connection with your new credentials
+PGPASSWORD=changeme123 psql -U sysmanage -d sysmanage -h localhost -c "SELECT version();"
+```
+
+#### Run Database Migrations
+```bash
+# After configuring sysmanage.yaml with your database credentials
+# Run Alembic migrations to create the schema
 alembic upgrade head
 ```
 
@@ -305,15 +343,38 @@ For HTTPS development, place your SSL certificates in:
 If certificates are not found, the system will automatically fall back to HTTP on localhost.
 
 #### Environment Configuration
-Create `/etc/sysmanage.yaml` or set environment variables:
+Create `/etc/sysmanage.yaml` (or `sysmanage-dev.yaml` for development):
 ```yaml
-database_url: "postgresql://sysmanage_user:password@localhost/sysmanage"
-secret_key: "your-secret-key-here"
-api_host: "localhost"
-api_port: 6443
-frontend_host: "localhost"
-frontend_port: 7443
+api:
+  host: "localhost"
+  port: 8080
+
+database:
+  user: "sysmanage"
+  password: "changeme123"  # CHANGE THIS! Use the password you set during PostgreSQL setup
+  host: "localhost"
+  port: 5432
+  name: "sysmanage"
+
+security:
+  password_salt: "GENERATE_A_NEW_BASE64_STRING"  # Generate with: openssl rand -base64 32
+  admin_userid: "admin@yourdomain.com"  # Change to your admin email
+  admin_password: "CHANGE_THIS_PASSWORD"  # Set a strong admin password
+  jwt_secret: "GENERATE_A_NEW_JWT_SECRET"  # Generate with: openssl rand -base64 32
+  jwt_algorithm: "HS256"
+  jwt_auth_timeout: 6000
+  jwt_refresh_timeout: 60000
+
+webui:
+  host: "localhost"
+  port: 3000
 ```
+
+**Important Security Steps:**
+1. 🔑 Generate new secrets: `openssl rand -base64 32`
+2. 🔐 Use strong passwords (minimum 12 characters, mixed case, numbers, symbols)
+3. 📝 Store production configuration in `/etc/sysmanage.yaml` with restricted permissions: `chmod 600 /etc/sysmanage.yaml`
+4. 🚫 Never commit configuration files with real passwords to version control
 
 ## Development Workflow
 
@@ -615,6 +676,21 @@ docker-compose up -d
 2. **Database Connection**: Verify PostgreSQL is running and credentials are correct
 3. **Port Conflicts**: Check that ports 6443 (API) and 7443 (frontend) are available
 4. **Node.js Version**: Ensure Node.js 20.x is installed
+5. **Python Package Build Errors**: If you encounter build errors when installing Python packages:
+   - **Missing libpq-fe.h**: Install `libpq-dev` (Ubuntu/Debian) or `postgresql-devel` (RHEL/Fedora)
+   - **httptools/uvloop build errors**: Install `libuv1-dev` (Ubuntu/Debian) or `libuv-devel` (RHEL/Fedora)
+   - **Python 3.13+ compatibility**: Some packages may not yet support Python 3.13. Consider using Python 3.11 or 3.12:
+     ```bash
+     # Ubuntu/Debian
+     sudo apt install python3.11 python3.11-venv python3.11-dev
+     python3.11 -m venv .venv
+     
+     # Or use deadsnakes PPA for newer Python versions
+     sudo add-apt-repository ppa:deadsnakes/ppa
+     sudo apt update
+     sudo apt install python3.12 python3.12-venv python3.12-dev
+     python3.12 -m venv .venv
+     ```
 
 ### Logs
 - Backend logs: Console output from uvicorn
