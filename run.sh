@@ -105,7 +105,7 @@ check_existing_processes() {
     fi
     
     # Check configured ports
-    BACKEND_PORT=$(get_config_value "webui.port")
+    BACKEND_PORT=$(get_config_value "api.port")
     if [ $? -ne 0 ] || [ -z "$BACKEND_PORT" ]; then
         BACKEND_PORT=8080
     fi
@@ -116,9 +116,14 @@ check_existing_processes() {
         found_processes=true
     fi
     
-    local frontend_port_pid=$(lsof -ti:3000 2>/dev/null)
+    FRONTEND_PORT=$(get_config_value "webui.port")
+    if [ $? -ne 0 ] || [ -z "$FRONTEND_PORT" ]; then
+        FRONTEND_PORT=3000
+    fi
+    
+    local frontend_port_pid=$(lsof -ti:$FRONTEND_PORT 2>/dev/null)
     if [ -n "$frontend_port_pid" ]; then
-        echo "⚠️  Found process using frontend port 3000 (PID: $frontend_port_pid)"
+        echo "⚠️  Found process using frontend port $FRONTEND_PORT (PID: $frontend_port_pid)"
         found_processes=true
     fi
     
@@ -158,9 +163,9 @@ if [ -f "backend/main.py" ]; then
     fi
     
     # Get backend port from configuration
-    BACKEND_PORT=$(get_config_value "webui.port")
+    BACKEND_PORT=$(get_config_value "api.port")
     if [ $? -ne 0 ] || [ -z "$BACKEND_PORT" ]; then
-        echo "WARNING: Could not read webui.port from /etc/sysmanage.yaml or sysmanage-dev.yaml, using default 8080"
+        echo "WARNING: Could not read api.port from /etc/sysmanage.yaml or sysmanage-dev.yaml, using default 8080"
         BACKEND_PORT=8080
     fi
     
@@ -197,8 +202,12 @@ if [ -d "frontend" ] && [ -f "frontend/package.json" ]; then
     
     cd ..
     
-    # Get frontend port (React dev server typically uses 3000)
-    FRONTEND_PORT=3000
+    # Get frontend port from configuration
+    FRONTEND_PORT=$(get_config_value "webui.port")
+    if [ $? -ne 0 ] || [ -z "$FRONTEND_PORT" ]; then
+        echo "WARNING: Could not read webui.port from /etc/sysmanage.yaml or sysmanage-dev.yaml, using default 3000"
+        FRONTEND_PORT=3000
+    fi
     
     # Wait for frontend to be ready
     if ! wait_for_service $FRONTEND_PORT "Frontend Web UI"; then
