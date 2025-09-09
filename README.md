@@ -361,6 +361,37 @@ GRANT ALL ON SCHEMA public TO sysmanage;
 ```
 
 **For OpenBSD (using doas instead of sudo):**
+
+First, configure doas properly for PostgreSQL access. As root, create or edit `/etc/doas.conf`:
+
+```bash
+# Edit /etc/doas.conf as root
+echo "# Allow wheel group members to run commands as any user" >> /etc/doas.conf
+echo "permit :wheel" >> /etc/doas.conf
+echo "" >> /etc/doas.conf
+echo "# Allow wheel group to run commands as _postgresql user (for database setup)" >> /etc/doas.conf
+echo "permit :wheel as _postgresql" >> /etc/doas.conf
+```
+
+Or manually add these lines to `/etc/doas.conf`:
+```
+# Allow wheel group members to run commands as any user
+permit :wheel
+
+# Allow wheel group to run commands as _postgresql user (for database setup)
+permit :wheel as _postgresql
+```
+
+Then ensure your user is in the wheel group:
+```bash
+# Check if you're in the wheel group:
+groups
+
+# If not in wheel group, add yourself (as root):
+# usermod -G wheel yourusername
+```
+
+Now you can set up the database:
 ```bash
 # Switch to the _postgresql user
 doas -u _postgresql psql
@@ -377,6 +408,16 @@ GRANT ALL ON SCHEMA public TO sysmanage;
 
 # Exit PostgreSQL
 \q
+```
+
+**Alternative method if doas configuration is not desired:**
+```bash
+# Become root first
+su -
+# Then switch to _postgresql user
+su - _postgresql
+psql
+# (then run the same SQL commands above)
 ```
 
 **Security Notes:**
