@@ -344,8 +344,8 @@ After installing PostgreSQL (see platform-specific instructions above), set up t
 sudo -u postgres psql
 
 # In the PostgreSQL prompt, create the database and user
-# IMPORTANT: Replace 'changeme123' with a strong password for production!
-CREATE USER sysmanage WITH PASSWORD 'changeme123';
+# NOTE: Using credentials from sysmanage-dev.yaml - CHANGE FOR PRODUCTION!
+CREATE USER sysmanage WITH PASSWORD 'abc123';
 CREATE DATABASE sysmanage OWNER sysmanage;
 GRANT ALL PRIVILEGES ON DATABASE sysmanage TO sysmanage;
 
@@ -358,15 +358,15 @@ GRANT ALL ON SCHEMA public TO sysmanage;
 ```
 
 **Security Notes:**
-- ⚠️ The default development configuration uses password `abc123` - **NEVER use this in production**
-- 🔐 Generate a strong password for production environments
+- ⚠️ The default development configuration uses password `abc123` (from `sysmanage-dev.yaml`) - **NEVER use this in production**
+- 🔐 For production: Change the password in both PostgreSQL AND your `sysmanage.yaml` configuration file
 - 🛡️ Consider using PostgreSQL's peer authentication for local connections
 - 🔒 Restrict database access to localhost only in `postgresql.conf`
 
 #### Test Database Connection
 ```bash
-# Test the connection with your new credentials
-PGPASSWORD=changeme123 psql -U sysmanage -d sysmanage -h localhost -c "SELECT version();"
+# Test the connection with the development credentials (matches sysmanage-dev.yaml)
+PGPASSWORD=abc123 psql -U sysmanage -d sysmanage -h localhost -c "SELECT version();"
 ```
 
 #### Run Database Migrations
@@ -403,7 +403,7 @@ api:
 
 database:
   user: "sysmanage"
-  password: "changeme123"  # CHANGE THIS! Use the password you set during PostgreSQL setup
+  password: "abc123"  # MATCHES development database setup above - CHANGE FOR PRODUCTION!
   host: "localhost"
   port: 5432
   name: "sysmanage"
