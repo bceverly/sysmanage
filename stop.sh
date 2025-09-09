@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # SysManage Server Stop Script
 # Stops both the backend API server and frontend web UI
@@ -6,7 +6,7 @@
 echo "Stopping SysManage Server..."
 
 # Get the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # Function to get configuration value

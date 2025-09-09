@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # SysManage Server Startup Script
 # Starts both the backend API server and frontend web UI
@@ -91,10 +91,14 @@ generate_urls() {
 # Function to check if a port is in use
 check_port() {
     local port=$1
-    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
-        return 0  # Port is in use
+    # Try multiple approaches for different systems
+    if command -v lsof >/dev/null 2>&1; then
+        lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1
     else
-        return 1  # Port is free
+        # OpenBSD/BSD netstat format: try multiple patterns
+        netstat -an | grep -E "(\.${port}[[:space:]].*LISTEN|:${port}[[:space:]].*LISTEN|\*\.${port}[[:space:]].*LISTEN|\*:${port}[[:space:]].*LISTEN)" >/dev/null 2>&1 || \
+        netstat -an | grep "LISTEN" | grep ":${port}" >/dev/null 2>&1 || \
+        netstat -an | grep "LISTEN" | grep "\.${port}" >/dev/null 2>&1
     fi
 }
 
@@ -107,16 +111,39 @@ wait_for_service() {
     
     echo "Waiting for $service_name to start on port $port..."
     while [ $attempt -lt $max_attempts ]; do
+        # Try to check port
         if check_port $port; then
-            echo "$service_name is ready!"
+            echo
+            echo "✅ $service_name is ready on port $port!"
             return 0
         fi
+        
+        # Also try a simple HTTP test for web services
+        if command -v curl >/dev/null 2>&1; then
+            if curl -s --connect-timeout 1 "http://localhost:$port" >/dev/null 2>&1; then
+                echo
+                echo "✅ $service_name is ready on port $port! (detected via HTTP)"
+                return 0
+            fi
+        fi
+        
         sleep 1
         attempt=$((attempt + 1))
         echo -n "."
+        
+        # Show debug info every 10 attempts
+        if [ $((attempt % 10)) -eq 0 ]; then
+            echo
+            echo "⚠️  Still waiting... (attempt $attempt/$max_attempts)"
+            if command -v netstat >/dev/null 2>&1; then
+                echo "Current LISTEN ports:"
+                netstat -an | grep LISTEN | head -5
+            fi
+        fi
     done
     echo
-    echo "ERROR: $service_name failed to start within 30 seconds"
+    echo "⚠️  WARNING: $service_name may not have started within 30 seconds"
+    echo "   But it might actually be running. Check logs: tail -f logs/backend.log"
     return 1
 }
 
@@ -125,12 +152,17 @@ check_existing_processes() {
     local found_processes=false
     
     # Check for backend processes
-    local backend_pids=$(pgrep -f "backend.main" 2>/dev/null)
+    local backend_pids
+    if command -v pgrep >/dev/null 2>&1; then
+        backend_pids=$(pgrep -f "backend.main" 2>/dev/null)
+    else
+        backend_pids=$(ps -ax | grep "backend.main" | grep -v grep | awk '{print $1}')
+    fi
     if [ -n "$backend_pids" ]; then
         echo "⚠️  Found existing backend processes:"
         echo "$backend_pids" | while read pid; do
             if [ -n "$pid" ]; then
-                local cmd=$(ps -p "$pid" -o command= 2>/dev/null | head -c 80)
+                local cmd=$(ps -p "$pid" -o command= 2>/dev/null | cut -c 1-80)
                 echo "   PID $pid: $cmd"
             fi
         done
@@ -138,12 +170,17 @@ check_existing_processes() {
     fi
     
     # Check for frontend processes
-    local frontend_pids=$(pgrep -f "react-scripts start" 2>/dev/null)
+    local frontend_pids
+    if command -v pgrep >/dev/null 2>&1; then
+        frontend_pids=$(pgrep -f "react-scripts start" 2>/dev/null)
+    else
+        frontend_pids=$(ps -ax | grep "react-scripts start" | grep -v grep | awk '{print $1}')
+    fi
     if [ -n "$frontend_pids" ]; then
         echo "⚠️  Found existing frontend processes:"
         echo "$frontend_pids" | while read pid; do
             if [ -n "$pid" ]; then
-                local cmd=$(ps -p "$pid" -o command= 2>/dev/null | head -c 80)
+                local cmd=$(ps -p "$pid" -o command= 2>/dev/null | cut -c 1-80)
                 echo "   PID $pid: $cmd"
             fi
         done
@@ -156,7 +193,12 @@ check_existing_processes() {
         BACKEND_PORT=8080
     fi
     
-    local backend_port_pid=$(lsof -ti:$BACKEND_PORT 2>/dev/null)
+    local backend_port_pid
+    if command -v lsof >/dev/null 2>&1; then
+        backend_port_pid=$(lsof -ti:$BACKEND_PORT 2>/dev/null)
+    else
+        backend_port_pid=$(fstat | awk "\$9 ~ /:$BACKEND_PORT\$/ {print \$3}" | head -1 2>/dev/null)
+    fi
     if [ -n "$backend_port_pid" ]; then
         echo "⚠️  Found process using backend port $BACKEND_PORT (PID: $backend_port_pid)"
         found_processes=true
@@ -167,7 +209,12 @@ check_existing_processes() {
         FRONTEND_PORT=3000
     fi
     
-    local frontend_port_pid=$(lsof -ti:$FRONTEND_PORT 2>/dev/null)
+    local frontend_port_pid
+    if command -v lsof >/dev/null 2>&1; then
+        frontend_port_pid=$(lsof -ti:$FRONTEND_PORT 2>/dev/null)
+    else
+        frontend_port_pid=$(fstat | awk "\$9 ~ /:$FRONTEND_PORT\$/ {print \$3}" | head -1 2>/dev/null)
+    fi
     if [ -n "$frontend_port_pid" ]; then
         echo "⚠️  Found process using frontend port $FRONTEND_PORT (PID: $frontend_port_pid)"
         found_processes=true
@@ -202,10 +249,10 @@ if [ -f "backend/main.py" ]; then
     # Check if virtual environment exists and activate it
     if [ -d ".venv" ]; then
         echo "Activating virtual environment..."
-        source .venv/bin/activate
+        . .venv/bin/activate
     elif [ -d "venv" ]; then
         echo "Activating virtual environment..."
-        source venv/bin/activate
+        . venv/bin/activate
     fi
     
     # Get backend port from configuration
@@ -222,8 +269,9 @@ if [ -f "backend/main.py" ]; then
     
     # Wait for backend to be ready (using the configured port)
     if ! wait_for_service $BACKEND_PORT "Backend API"; then
-        echo "ERROR: Backend API failed to start"
-        exit 1
+        echo "⚠️  WARNING: Backend API detection failed, but continuing..."
+        echo "   The backend may actually be running. Check logs: tail -f logs/backend.log"
+        echo "   Continuing with frontend startup..."
     fi
 else
     echo "ERROR: backend/main.py not found"
