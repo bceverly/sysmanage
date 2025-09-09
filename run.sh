@@ -15,10 +15,18 @@ mkdir -p logs
 # Function to get configuration value
 get_config_value() {
     local key=$1
-    local config_file="sysmanage.yaml"
+    local config_file=""
     
-    if [ -f "$config_file" ]; then
-        python3 -c "
+    # Use same priority as backend config loader: /etc/sysmanage.yaml first, then sysmanage-dev.yaml
+    if [ -f "/etc/sysmanage.yaml" ]; then
+        config_file="/etc/sysmanage.yaml"
+    elif [ -f "sysmanage-dev.yaml" ]; then
+        config_file="sysmanage-dev.yaml"
+    else
+        return 1
+    fi
+    
+    python3 -c "
 import yaml
 import sys
 try:
@@ -32,9 +40,6 @@ try:
 except:
     sys.exit(1)
 " 2>/dev/null
-    else
-        return 1
-    fi
 }
 
 # Function to check if a port is in use
@@ -155,7 +160,7 @@ if [ -f "backend/main.py" ]; then
     # Get backend port from configuration
     BACKEND_PORT=$(get_config_value "webui.port")
     if [ $? -ne 0 ] || [ -z "$BACKEND_PORT" ]; then
-        echo "WARNING: Could not read webui.port from sysmanage.yaml, using default 8080"
+        echo "WARNING: Could not read webui.port from /etc/sysmanage.yaml or sysmanage-dev.yaml, using default 8080"
         BACKEND_PORT=8080
     fi
     
