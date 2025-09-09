@@ -7,6 +7,7 @@ routers for the system and then launches the application.
 
 import asyncio
 import logging
+import socket
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -26,6 +27,7 @@ from backend.api import (
     profile,
     updates,
     scripts,
+    security,
 )
 from backend.config import config
 from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
@@ -33,6 +35,78 @@ from backend.discovery.discovery_service import discovery_beacon
 from backend.security.certificate_manager import certificate_manager
 from backend.websocket.message_processor import message_processor
 from backend.utils.logging_formatter import UTCTimestampFormatter
+
+
+# Function to get dynamic hostnames and IPs for CORS
+def get_cors_origins(web_ui_port, backend_api_port):
+    """Generate CORS origins including dynamic hostname discovery."""
+    cors_origins = []
+
+    # Always add localhost for development
+    cors_origins.extend(
+        [
+            f"http://localhost:{web_ui_port}",
+            f"http://localhost:{backend_api_port}",
+            f"http://127.0.0.1:{web_ui_port}",
+            f"http://127.0.0.1:{backend_api_port}",
+        ]
+    )
+
+    # Get system hostname and add variations
+    try:
+        hostname = socket.gethostname()
+        if hostname and hostname != "localhost":
+            cors_origins.extend(
+                [
+                    f"http://{hostname}:{web_ui_port}",
+                    f"http://{hostname}:{backend_api_port}",
+                ]
+            )
+
+        # Add FQDN if different from hostname
+        try:
+            fqdn = socket.getfqdn()
+            if fqdn and fqdn != hostname and fqdn != "localhost":
+                cors_origins.extend(
+                    [
+                        f"http://{fqdn}:{web_ui_port}",
+                        f"http://{fqdn}:{backend_api_port}",
+                    ]
+                )
+        except Exception:
+            pass
+
+        # Add common domain variations
+        hostname_variations = [
+            f"{hostname}.local",
+            f"{hostname}.lan",
+            f"{hostname}.theeverlys.lan",
+            f"{hostname}.theeverlys.com",
+        ]
+
+        for variation in hostname_variations:
+            origins.extend(
+                [f"http://{variation}:{webui_port}", f"http://{variation}:{api_port}"]
+            )
+    except Exception:
+        pass
+
+    # Get network interface IPs
+    try:
+        hostname_for_ip = socket.gethostname()
+        host_ip = socket.gethostbyname(hostname_for_ip)
+        if host_ip and host_ip != "127.0.0.1":
+            cors_origins.extend(
+                [
+                    f"http://{host_ip}:{web_ui_port}",
+                    f"http://{host_ip}:{backend_api_port}",
+                ]
+            )
+    except Exception:
+        pass
+
+    return list(set(cors_origins))  # Remove duplicates
+
 
 # Parse the /etc/sysmanage.yaml file
 app_config = config.get_config()
@@ -157,57 +231,31 @@ async def lifespan(_fastapi_app: FastAPI):
 # Start the application
 app = FastAPI(lifespan=lifespan)
 
-# Set up the CORS configuration - purely config-driven
-origins = []
-
-# Add primary origins from config
-webui_host = app_config["webui"]["host"]
+# Set up the CORS configuration - dynamically discover hostnames
 webui_port = app_config["webui"]["port"]
-api_host = app_config["api"]["host"]
 api_port = app_config["api"]["port"]
 
-# Add HTTP origins - but skip 0.0.0.0 as it's not a valid browser origin
-if webui_host != "0.0.0.0":
-    origins.append(f"http://{webui_host}:{webui_port}")
-if api_host != "0.0.0.0":
-    origins.append(f"http://{api_host}:{api_port}")
-
-# Add HTTPS origins if certificates are configured - but skip 0.0.0.0
-if app_config["api"].get("certFile") and app_config["api"].get("keyFile"):
-    if webui_host != "0.0.0.0":
-        origins.append(f"https://{webui_host}:{webui_port}")
-    if api_host != "0.0.0.0":
-        origins.append(f"https://{api_host}:{api_port}")
-
-# Always add localhost origins for development (regardless of host config)
-origins.extend(
-    [
-        f"http://localhost:{webui_port}",
-        f"http://localhost:{api_port}",
-        f"http://127.0.0.1:{webui_port}",
-        f"http://127.0.0.1:{api_port}",
-    ]
-)
-
-# Add HTTPS localhost origins if certificates are configured
-if app_config["api"].get("certFile") and app_config["api"].get("keyFile"):
-    origins.extend(
-        [
-            f"https://localhost:{webui_port}",
-            f"https://localhost:{api_port}",
-            f"https://127.0.0.1:{webui_port}",
-            f"https://127.0.0.1:{api_port}",
-        ]
-    )
+# Get dynamic origins including hostname discovery
+origins = get_cors_origins(webui_port, api_port)
 
 # Add any additional origins specified in config
 if "cors" in app_config and "additional_origins" in app_config["cors"]:
     origins.extend(app_config["cors"]["additional_origins"])
 
+# Add HTTPS origins if certificates are configured
+if app_config["api"].get("certFile") and app_config["api"].get("keyFile"):
+    https_origins = []
+    for origin in origins:
+        https_origins.append(origin.replace("http://", "https://"))
+    origins.extend(https_origins)
+
 # Debug logging
-print(f"CORS Debug - WebUI: {webui_host}:{webui_port}")
-print(f"CORS Debug - API: {api_host}:{api_port}")
-print(f"CORS Debug - Generated origins: {origins}")
+print(f"CORS Debug - WebUI Port: {webui_port}")
+print(f"CORS Debug - API Port: {api_port}")
+print(
+    f"CORS Debug - Generated origins: {origins[:10]}..."
+)  # Show first 10 to avoid log spam
+print(f"CORS Debug - Total origins count: {len(origins)}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -226,9 +274,9 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
     # Add CORS headers manually for error responses
-    origin = request.headers.get("origin")
-    if origin and origin in origins:
-        response.headers["Access-Control-Allow-Origin"] = origin
+    request_origin = request.headers.get("origin")
+    if request_origin and request_origin in origins:
+        response.headers["Access-Control-Allow-Origin"] = request_origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
         response.headers["Access-Control-Expose-Headers"] = "Authorization"
 
@@ -243,9 +291,9 @@ async def internal_server_error_handler(request: Request, exc: Exception):
     )
 
     # Add CORS headers manually for error responses
-    origin = request.headers.get("origin")
-    if origin and origin in origins:
-        response.headers["Access-Control-Allow-Origin"] = origin
+    request_origin = request.headers.get("origin")
+    if request_origin and request_origin in origins:
+        response.headers["Access-Control-Allow-Origin"] = request_origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
         response.headers["Access-Control-Expose-Headers"] = "Authorization"
 
@@ -263,6 +311,7 @@ app.include_router(config_management.router)
 app.include_router(profile.router)
 app.include_router(updates.router, prefix="/api/updates", tags=["updates"])
 app.include_router(scripts.router, prefix="/api/scripts", tags=["scripts"])
+app.include_router(security.router)
 
 
 @app.get("/")

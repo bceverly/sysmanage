@@ -65,11 +65,18 @@ generate_urls() {
         local fqdn=$(hostname -f 2>/dev/null)
         local shortname=$(hostname 2>/dev/null)
         
-        if [ -n "$fqdn" ] && [ "$fqdn" != "localhost" ] && [ "$fqdn" != "$shortname" ]; then
-            # Use FQDN if available and different from short hostname
+        # Check which one looks like a real FQDN (contains dots)
+        if [ -n "$fqdn" ] && echo "$fqdn" | grep -q '\.' && [ "$fqdn" != "localhost" ]; then
+            # Use FQDN if available and contains domain suffix
+            echo "http://$fqdn:$port"
+        elif [ -n "$shortname" ] && echo "$shortname" | grep -q '\.' && [ "$shortname" != "localhost" ]; then
+            # Use shortname if it's actually an FQDN
+            echo "http://$shortname:$port"
+        elif [ -n "$fqdn" ] && [ "$fqdn" != "localhost" ]; then
+            # Fall back to whatever hostname -f returned
             echo "http://$fqdn:$port"
         elif [ -n "$shortname" ] && [ "$shortname" != "localhost" ]; then
-            # Use short hostname if FQDN not available
+            # Fall back to what hostname returned
             echo "http://$shortname:$port"
         else
             # Fall back to localhost

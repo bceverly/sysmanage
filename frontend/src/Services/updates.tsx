@@ -59,7 +59,10 @@ class UpdatesService {
 
   constructor() {
     const config = JSON.parse(localStorage.getItem('sysmanage_config') || '{}');
-    this.baseURL = config.apiUrl || 'http://localhost:8080';
+    // Dynamically determine the backend URL based on current host
+    const currentHost = window.location.hostname;
+    const backendPort = 8080; // This should match your config file
+    this.baseURL = config.apiUrl || `http://${currentHost}:${backendPort}`;
   }
 
   private getAuthHeaders() {

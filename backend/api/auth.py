@@ -52,8 +52,12 @@ async def login(login_data: UserLogin, request: Request, response: Response):
     db.get_db()
     success = False
 
-    if login_data.userid == the_config["security"]["admin_userid"]:
-        if login_data.password == the_config["security"]["admin_password"]:
+    # Check YAML admin credentials only if they are configured
+    admin_userid = the_config.get("security", {}).get("admin_userid")
+    admin_password = the_config.get("security", {}).get("admin_password")
+
+    if admin_userid and admin_password and login_data.userid == admin_userid:
+        if login_data.password == admin_password:
             success = True
 
             # Record successful login

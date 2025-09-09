@@ -199,6 +199,7 @@ async def get_all_users():
                 userid=user.userid,
                 first_name=user.first_name,
                 last_name=user.last_name,
+                last_access=user.last_access,
                 is_locked=user.is_locked,
                 failed_login_attempts=user.failed_login_attempts,
                 locked_at=user.locked_at,

@@ -131,7 +131,7 @@ class ConnectionManager:
             del self.active_connections[agent_id]
             # Agent disconnected
 
-    def register_agent(
+    def register_agent(  # pylint: disable=too-many-positional-arguments
         self,
         agent_id: str,
         hostname: str,

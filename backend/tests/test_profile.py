@@ -456,18 +456,28 @@ class TestProfileAPI:
         from backend.api.profile import ProfileResponse
 
         profile_response = ProfileResponse(
-            userid="test@example.com", first_name="John", last_name="Doe", active=True
+            userid="test@example.com",
+            first_name="John",
+            last_name="Doe",
+            active=True,
+            password_requirements="Test requirements",
         )
 
         assert profile_response.userid == "test@example.com"
         assert profile_response.first_name == "John"
         assert profile_response.last_name == "Doe"
         assert profile_response.active is True
+        assert profile_response.password_requirements == "Test requirements"
 
         # Test with null names
-        profile_response = ProfileResponse(userid="test@example.com", active=True)
+        profile_response = ProfileResponse(
+            userid="test@example.com",
+            active=True,
+            password_requirements="Test requirements",
+        )
 
         assert profile_response.userid == "test@example.com"
         assert profile_response.first_name is None
         assert profile_response.last_name is None
         assert profile_response.active is True
+        assert profile_response.password_requirements == "Test requirements"

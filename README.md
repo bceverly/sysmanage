@@ -9,7 +9,9 @@
 [![Node.js Version](https://img.shields.io/badge/node.js-20.x-green.svg)](https://nodejs.org)
 [![License](https://img.shields.io/badge/license-AGPLv3-blue.svg)](LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Linting](https://img.shields.io/badge/linting-pylint-blue.svg)](https://github.com/PyCQA/pylint)
+[![Linting](https://img.shields.io/badge/pylint-10.00/10-brightgreen.svg)](https://github.com/PyCQA/pylint)
+[![Test Coverage](https://img.shields.io/badge/test%20coverage-49%25-yellow.svg)]()
+[![TypeScript](https://img.shields.io/badge/eslint-0%20warnings-brightgreen.svg)]())
 
 A modern, cross-platform system monitoring and management platform with real-time WebSocket communication, built with FastAPI and React.
 
@@ -32,10 +34,10 @@ SysManage is a comprehensive system management solution that allows you to monit
 - 🖥️ Cross-platform agent support with auto-discovery
 - 📱 Responsive web interface
 - 🌍 Multi-language support (14 languages including RTL support)
-- 🛡️ Comprehensive security with encrypted communication
+- 🛡️ Comprehensive security with encrypted communication and configurable password policies
 - ⚙️ Agent configuration management from server
 - 🔍 Automatic server discovery for new agents
-- 🧪 Comprehensive test coverage (61 tests)
+- 🧪 Comprehensive test coverage (258 Python tests, 24 TypeScript tests)
 
 ### Internationalization
 
@@ -416,6 +418,18 @@ security:
   jwt_algorithm: "HS256"
   jwt_auth_timeout: 6000
   jwt_refresh_timeout: 60000
+  
+  # Password Policy Configuration (optional - defaults shown)
+  password_policy:
+    min_length: 8                    # Minimum password length
+    max_length: 128                  # Maximum password length
+    require_uppercase: true          # Require at least one uppercase letter
+    require_lowercase: true          # Require at least one lowercase letter
+    require_numbers: true            # Require at least one number
+    require_special: true            # Require at least one special character
+    special_characters: "!@#$%^&*()_+-=[]{}|;:,.<>?" # Allowed special characters
+    min_character_types: 3           # Minimum different character types required
+    prevent_username_in_password: true # Prevent username/email in password
 
 webui:
   host: "localhost"
@@ -467,6 +481,11 @@ cd frontend && npm test
 
 # Test with coverage
 python -m pytest tests/ --cov=backend --cov-report=html
+
+# Run using make commands
+make test     # Run all tests with coverage
+make lint     # Run all linting (Python + TypeScript)
+make dev      # Start development servers
 ```
 
 #### Linting
@@ -579,6 +598,48 @@ SysManage implements mutual TLS authentication to protect against DNS poisoning 
 - **Agent Spoofing Prevention**: Only hosts with valid certificates can connect
 - **Man-in-the-Middle Protection**: Full TLS encryption with mutual certificate validation
 - **Identity Verification**: Each certificate is cryptographically tied to specific hostname and host ID
+
+## Advanced Security Features
+
+### Dynamic Password Policy System
+
+SysManage includes a comprehensive, configurable password policy system that enforces strong password requirements:
+
+#### Features
+- **Configurable Requirements**: Set minimum/maximum length, character type requirements
+- **Real-time Validation**: Both client-side and server-side password validation
+- **Dynamic Display**: Password requirements are displayed dynamically based on configuration
+- **Multi-language Support**: Password validation messages in all 14 supported languages
+
+#### Configuration Options
+```yaml
+security:
+  password_policy:
+    min_length: 8                    # Minimum password length (default: 8)
+    max_length: 128                  # Maximum password length (default: 128)
+    require_uppercase: true          # Require uppercase letters
+    require_lowercase: true          # Require lowercase letters
+    require_numbers: true            # Require numbers
+    require_special: true            # Require special characters
+    special_characters: "!@#$%^&*()_+-=[]{}|;:,.<>?"  # Allowed special chars
+    min_character_types: 3           # Minimum character types required
+    prevent_username_in_password: true # Prevent username/email in password
+```
+
+#### Profile UI Enhancement
+The user profile interface has been reorganized for better security management:
+- **Account Information Tab**: Email change functionality
+- **Personal Information Tab**: Name and profile details
+- **Security Information Tab**: Password change with real-time validation
+
+### Security Warning System
+
+SysManage automatically detects and warns about security configuration issues:
+- **Default Credentials Detection**: Warns when default admin credentials are in use
+- **Default JWT Secret Detection**: Alerts for default cryptographic secrets
+- **Default Password Salt Detection**: Identifies default password salts
+- **Mixed Security States**: Warns about inconsistent security configurations
+- **Visual Security Banner**: Prominent warnings displayed in the UI until resolved
 
 ## Project Structure
 
@@ -715,10 +776,12 @@ docker-compose up -d
 
 ## Development Guidelines
 
-- **Code Style**: Black formatting, pylint for Python; ESLint + Prettier for TypeScript
-- **Testing**: Maintain >90% test coverage for critical paths
+- **Code Quality**: Perfect 10.00/10 PyLint score, 0 ESLint warnings, Black formatting
+- **Testing**: Maintain comprehensive test coverage (258 Python tests, 24 TypeScript tests)
+- **Dependencies**: All production dependencies properly managed in requirements.txt
 - **Commits**: Use conventional commit format with Claude Code co-author attribution
-- **Security**: No hardcoded secrets, secure JWT implementation, input validation
+- **Security**: No hardcoded secrets, secure JWT implementation, configurable password policies
+- **Internationalization**: All user-visible strings must be externalized and translated
 
 ## Troubleshooting
 

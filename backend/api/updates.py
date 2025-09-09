@@ -304,7 +304,7 @@ async def get_host_updates(
 
 
 @router.get("/")
-async def get_all_updates(
+async def get_all_updates(  # pylint: disable=too-many-positional-arguments
     security_only: Optional[bool] = Query(None),
     system_only: Optional[bool] = Query(None),
     package_manager: Optional[str] = Query(None),

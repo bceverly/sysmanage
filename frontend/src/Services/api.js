@@ -1,8 +1,15 @@
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+// Dynamically determine the backend URL based on current host
+const getBackendBaseURL = () => {
+  const currentHost = window.location.hostname;
+  const backendPort = 8080; // This should match your config file
+  return `http://${currentHost}:${backendPort}`;
+};
+
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: getBackendBaseURL(),
   headers: {
     "Content-Type": "application/json",
   },

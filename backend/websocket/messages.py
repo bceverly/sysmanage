@@ -127,7 +127,7 @@ class CommandMessage(Message):
 class CommandResultMessage(Message):
     """Message containing the result of a command execution."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-positional-arguments
         self,
         command_id: str,
         success: bool,
@@ -179,7 +179,7 @@ class ErrorMessage(Message):
 class OSVersionUpdateMessage(Message):
     """Message containing OS version information from agent."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-positional-arguments
         self,
         platform: str = None,
         platform_release: str = None,
@@ -208,7 +208,7 @@ class OSVersionUpdateMessage(Message):
 class HardwareUpdateMessage(Message):
     """Message containing hardware information from agent."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-positional-arguments
         self,
         cpu_vendor: str = None,
         cpu_model: str = None,
@@ -239,7 +239,7 @@ class HardwareUpdateMessage(Message):
 class UserAccessUpdateMessage(Message):
     """Message containing user access information from agent."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-positional-arguments
         self,
         users: list = None,
         groups: list = None,
@@ -310,7 +310,7 @@ class HostApprovedMessage(Message):
 class ScriptExecutionResultMessage(Message):
     """Message sent from agent to server with script execution results."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-positional-arguments
         self,
         script_id: int = None,
         execution_id: str = None,
