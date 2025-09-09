@@ -6,6 +6,43 @@ type SuccessResponse = {
     result: boolean;
 }
 
+type DiagnosticReport = {
+    id: number;
+    collection_id: string;
+    status: string;
+    requested_by: string;
+    requested_at: string;
+    started_at: string | null;
+    completed_at: string | null;
+    collection_size_bytes: number | null;
+    files_collected: number | null;
+    error_message: string | null;
+}
+
+type DiagnosticDetailResponse = {
+    id: number;
+    host_id: number;
+    collection_id: string;
+    status: string;
+    requested_by: string;
+    requested_at: string;
+    started_at: string | null;
+    completed_at: string | null;
+    collection_size_bytes: number | null;
+    files_collected: number | null;
+    error_message: string | null;
+    diagnostic_data: {
+        system_logs: unknown;
+        configuration_files: unknown;
+        network_info: unknown;
+        process_info: unknown;
+        disk_usage: unknown;
+        environment_variables: unknown;
+        agent_logs: unknown;
+        error_logs: unknown;
+    };
+}
+
 type SysManageHost = {
     id: BigInt;
     active: boolean;
@@ -40,9 +77,14 @@ type SysManageHost = {
     hardware_updated_at?: string;
     // Software inventory fields
     software_updated_at?: string;
+    // User access data timestamp
+    user_access_updated_at?: string;
     // Update management fields
     reboot_required?: boolean;
     reboot_required_updated_at?: string;
+    // Diagnostics request tracking fields
+    diagnostics_requested_at?: string;
+    diagnostics_request_status?: string;
 }
 
 type StorageDevice = {
@@ -439,5 +481,63 @@ const doRefreshSoftwareData = async (id: BigInt) => {
     return result;
 };
 
-export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage };
-export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doGetHostSoftware, doRefreshSoftwareData };
+const doGetHostDiagnostics = async (id: BigInt) => {
+    let result = [] as DiagnosticReport[];
+    
+    await api.get("/host/" + id + "/diagnostics")
+    .then((response) => {
+        // The API returns {host_id: number, diagnostics: array}
+        // Extract the diagnostics array from the response
+        result = response.data.diagnostics || [];
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doRequestHostDiagnostics = async (id: BigInt) => {
+    let result = {} as SuccessResponse;
+    
+    await api.post("/host/" + id + "/collect-diagnostics")
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doGetDiagnosticDetail = async (diagnosticId: number) => {
+    let result = {} as DiagnosticDetailResponse;
+    
+    await api.get("/diagnostic/" + diagnosticId)
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doDeleteDiagnostic = async (diagnosticId: number) => {
+    let result = {} as SuccessResponse;
+    
+    await api.delete("/diagnostic/" + diagnosticId)
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse };
+export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic };

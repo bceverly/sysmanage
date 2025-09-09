@@ -20,6 +20,7 @@ from backend.api import (
     agent,
     auth,
     certificates,
+    diagnostics,
     fleet,
     host,
     user,
@@ -311,6 +312,7 @@ app.include_router(config_management.router)
 app.include_router(profile.router)
 app.include_router(updates.router, prefix="/api/updates", tags=["updates"])
 app.include_router(scripts.router, prefix="/api/scripts", tags=["scripts"])
+app.include_router(diagnostics.router, tags=["diagnostics"])
 app.include_router(security.router)
 
 

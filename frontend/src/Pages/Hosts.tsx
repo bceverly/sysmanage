@@ -8,6 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SyncIcon from '@mui/icons-material/Sync';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import { Chip, Typography, IconButton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
@@ -240,6 +241,26 @@ const Hosts = () => {
         }
     }
 
+    const handleGetDiagnostics = async () => {
+        try {
+            // For now, we'll just collect diagnostics for the first selected host
+            // TODO: Add modal dialog for progress tracking and results display
+            if (selection.length === 0) return;
+            
+            const hostId = Number(selection[0]);
+            console.log(`Requesting diagnostics for host ${hostId}`);
+            
+            // TODO: Implement diagnostics API call and modal display
+            alert('Diagnostics collection will be implemented. This is a placeholder.');
+            
+            // Clear selection
+            setSelection([]);
+        } catch (error) {
+            console.error('Error requesting diagnostics:', error);
+            setSelection([]);
+        }
+    }
+
     const refreshHosts = async () => {
         try {
             const response = await doGetHosts();
@@ -349,6 +370,15 @@ const Hosts = () => {
                     color="info"
                 >
                     {t('hosts.refreshAllData', 'Refresh All Data')}
+                </Button>
+                <Button 
+                    variant="outlined" 
+                    startIcon={<MedicalServicesIcon />} 
+                    disabled={selection.length !== 1}
+                    onClick={handleGetDiagnostics}
+                    color="secondary"
+                >
+                    {t('hosts.getDiagnostics', 'Get Diagnostics')}
                 </Button>
                 <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
                     {t('common.delete')} {t('common.selected', { defaultValue: 'Selected' })}

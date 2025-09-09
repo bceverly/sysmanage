@@ -5,6 +5,7 @@ Handles OS version, hardware, user access, and software update messages.
 
 import json
 import logging
+from datetime import datetime, timezone
 
 from sqlalchemy import text, update, delete
 from sqlalchemy.orm import Session
@@ -97,8 +98,6 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
                     host.os_details = os_info["os_details"]
 
                 # Set timestamp
-                from datetime import datetime, timezone
-
                 host.os_version_updated_at = datetime.now(timezone.utc)
 
                 # Commit changes
@@ -198,8 +197,6 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
 
         # Update hardware information if we have any data
         if hardware_updates:
-            from datetime import datetime, timezone
-
             hardware_updates["hardware_updated_at"] = datetime.now(timezone.utc)
 
             stmt = (
@@ -226,8 +223,6 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
             )
 
             # Add new interfaces
-            from datetime import datetime, timezone
-
             for interface in network_interfaces:
                 now = datetime.now(timezone.utc)
                 network_interface = NetworkInterface(
@@ -334,8 +329,6 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
 
             # Add new user accounts
             for account in user_accounts:
-                from datetime import datetime, timezone
-
                 now = datetime.now(timezone.utc)
 
                 # Determine if this is a system user based on UID and username
@@ -472,6 +465,14 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
                 )
                 db.add(user_group)
 
+        # Update the user access timestamp on the host
+        stmt = (
+            update(Host)
+            .where(Host.id == connection.host_id)
+            .values(user_access_updated_at=datetime.now(timezone.utc))
+        )
+        db.execute(stmt)
+
         db.commit()
 
         debug_logger.info("User access updated for host %s", connection.host_id)
@@ -507,8 +508,6 @@ async def handle_software_update(db: Session, connection, message_data: dict):
             )
 
             # Add new software packages
-            from datetime import datetime, timezone
-
             for package in software_packages:
                 now = datetime.now(timezone.utc)
                 software_package = SoftwarePackage(
@@ -522,6 +521,14 @@ async def handle_software_update(db: Session, connection, message_data: dict):
                     updated_at=now,
                 )
                 db.add(software_package)
+
+        # Update the software updated timestamp on the host
+        stmt = (
+            update(Host)
+            .where(Host.id == connection.host_id)
+            .values(software_updated_at=datetime.now(timezone.utc))
+        )
+        db.execute(stmt)
 
         db.commit()
 
@@ -571,8 +578,6 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
             debug_logger.info(
                 "Sample package update structure: %s", available_updates[0]
             )
-
-        from datetime import datetime, timezone
 
         for package_update in available_updates:
             now = datetime.now(timezone.utc)
@@ -677,7 +682,6 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
 
         # Find existing script execution log entry by execution_id
         from backend.persistence.models import ScriptExecutionLog
-        from datetime import datetime, timezone
 
         execution_log = (
             db.query(ScriptExecutionLog)
@@ -762,8 +766,6 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
 
 async def handle_reboot_status_update(db: Session, connection, message_data: dict):
     """Handle reboot status update from an agent."""
-    from datetime import datetime, timezone
-
     try:
         hostname = message_data.get("hostname")
         reboot_required = message_data.get("reboot_required", False)

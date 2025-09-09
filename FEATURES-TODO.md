@@ -137,10 +137,10 @@ like to add:
     overall security health of the total
     enterprise.~~
 
-22. Reboot Check - If a machine needs a
+22. ~~Reboot Check - If a machine needs a
     reboot to allow updates to be installed
     detect this and communicate it back to
-    the server where it can be stored.
+    the server where it can be stored.~~
 
 23. Special Updates - Allow an agent to 
     manage Ubuntu Pro as well as any other
@@ -166,7 +166,7 @@ like to add:
 
 28. ~~Get a proper logo~~
 
-29. Update the UI
+29. ~~Update the UI~~
 
 30. ~~Default the language based on browser
     setting detection.~~
@@ -228,12 +228,12 @@ like to add:
     finished processing and then is
     removed from the queue.~~
 
-35. Create a standalone python script on
+35. ~~Create a standalone python script on
     both the agent and the server to
     gather diagnostic information that
     can be analyzed to troubleshoot
     configuration or communication
-    problems.
+    problems.~~
 
 36. ~~We need some sort of visual indicator
     of what screen is currently being
@@ -299,7 +299,16 @@ like to add:
 43. User image / icon - we need a way
     to allow a user to uplaod an image
     file that will be displayed for
-    them in the UI.
+    them in the UI. Store the image as
+    a blob in the database, change the
+    initial in a circle to a small 
+    circular cropped image (if the image
+    is present in the db, use the letter
+    if it is not) for the user profile
+    dropdown in the upper right corner
+    of the UI.  Take images as PNG,
+    JPG, GIF and other easily managed
+    common graphics format.
 
 44. The agent should be able to run as
     a "regular" user account but have
@@ -329,14 +338,14 @@ like to add:
     sysmanage-agent subdirectory in
     which the logs should be placed.
 
-47. Add new things to the dashboard
+47. ~~Add new things to the dashboard
     screen.  Specifically a card
     like the one for hosts that shows
     the total number of security
     updates needed across all hosts
     color coded so that 0 means green
     and >0 means red.  Same with
-    system updates needed.
+    system updates needed.~~
 
 48. Tagging - We need a way to have
     a host be a part of zero or more
@@ -345,4 +354,7 @@ like to add:
     part of a "Linux Servers" group
     and if it is running apache
     would also be part of a "Web
-    Servers" group.
+    Servers" group.  Add the ability
+    to filter by tags to the hosts
+    screen with a dropdown of all
+    the tags.

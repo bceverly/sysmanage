@@ -221,3 +221,63 @@ async def handle_config_acknowledgment(connection, message_data: dict):
         "message_type": "config_ack_received",
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
+
+
+async def handle_diagnostic_result(db: Session, connection, message_data: dict):
+    """Handle diagnostic collection result from agent."""
+    from backend.api.diagnostics import process_diagnostic_result
+
+    debug_logger.info(
+        "Diagnostic collection result from %s: %s",
+        getattr(connection, "hostname", "unknown"),
+        {
+            k: v for k, v in message_data.items() if k != "data"
+        },  # Log metadata without full data
+    )
+
+    try:
+        # Process the diagnostic result
+        await process_diagnostic_result(message_data)
+
+        # Update host diagnostics request status to completed if we have a host_id
+        if hasattr(connection, "host_id") and connection.host_id:
+            stmt = (
+                update(Host)
+                .where(Host.id == connection.host_id)
+                .values(diagnostics_request_status="completed")
+            )
+            db.execute(stmt)
+            db.commit()
+
+        return {
+            "message_type": "diagnostic_result_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "status": "processed",
+        }
+    except Exception as e:
+        debug_logger.error(
+            "Error processing diagnostic result from %s: %s",
+            getattr(connection, "hostname", "unknown"),
+            e,
+        )
+
+        # Mark diagnostics request as failed if we have a host_id
+        if hasattr(connection, "host_id") and connection.host_id:
+            try:
+                stmt = (
+                    update(Host)
+                    .where(Host.id == connection.host_id)
+                    .values(diagnostics_request_status="failed")
+                )
+                db.execute(stmt)
+                db.commit()
+            except Exception as db_error:
+                debug_logger.error(
+                    "Failed to update diagnostics request status to failed: %s",
+                    db_error,
+                )
+
+        return {
+            "message_type": "error",
+            "error": f"Failed to process diagnostic result: {str(e)}",
+        }
