@@ -393,8 +393,8 @@ groups
 
 Now you can set up the database:
 ```bash
-# Switch to the _postgresql user
-doas -u _postgresql psql
+# Switch to the _postgresql user and connect to the default postgres database
+doas -u _postgresql psql postgres
 
 # In the PostgreSQL prompt, create the database and user
 # NOTE: Using credentials from sysmanage-dev.yaml - CHANGE FOR PRODUCTION!
@@ -414,9 +414,9 @@ GRANT ALL ON SCHEMA public TO sysmanage;
 ```bash
 # Become root first
 su -
-# Then switch to _postgresql user
+# Then switch to _postgresql user and connect to postgres database
 su - _postgresql
-psql
+psql postgres
 # (then run the same SQL commands above)
 ```
 
