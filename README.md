@@ -65,7 +65,7 @@ The system automatically detects the browser's preferred language and falls back
 ## Prerequisites
 
 ### System Requirements
-- **Python**: 3.12 or higher
+- **Python**: 3.11 or 3.12 (Note: Python 3.13 is NOT yet supported due to package compatibility)
 - **Node.js**: 20.x or higher
 - **PostgreSQL**: 14 or higher
 - **OS**: Linux, macOS, Windows, FreeBSD, or OpenBSD
@@ -77,10 +77,13 @@ The system automatically detects the browser's preferred language and falls back
 # Update package manager
 sudo apt update
 
-# Install Python 3.12+ (use available version)
-sudo apt install python3 python3-venv python3-dev python3-pip
+# Install Python (3.11 or 3.12 ONLY - not 3.13)
+# For Ubuntu 22.04 and newer:
+sudo apt install python3.11 python3.11-venv python3.11-dev python3-pip
 
-# If python3.12 is available in your distribution, you can also try:
+# For Ubuntu with Python 3.12:
+# sudo add-apt-repository ppa:deadsnakes/ppa
+# sudo apt update
 # sudo apt install python3.12 python3.12-venv python3.12-dev python3-pip
 
 # Install Node.js 20.x
@@ -270,8 +273,8 @@ sudo useradd -r -s /bin/false -d /opt/sysmanage -c "SysManage Server" sysmanage
 git clone https://github.com/bceverly/sysmanage.git
 cd sysmanage
 
-# Create Python virtual environment
-python3 -m venv .venv
+# Create Python virtual environment (use specific version)
+python3.11 -m venv .venv  # Or python3.12 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
                            # On OpenBSD: . .venv/bin/activate
 ```
