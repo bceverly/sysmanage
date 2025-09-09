@@ -17,6 +17,7 @@ import '@fontsource/roboto/700.css';
 
 import Navbar from "./Components/Navbar"
 import ConnectionProvider from './Components/ConnectionProvider';
+import SecurityWarningBanner from './Components/SecurityWarningBanner';
 import Login from './Pages/Login';
 import Home from './Pages/Home';
 import Hosts from './Pages/Hosts';
@@ -85,6 +86,7 @@ function App() {
               v7_relativeSplatPath: true
             }}>
               <Navbar />
+              <SecurityWarningBanner />
                 <main className="main-content">
                   <Routes>
                     <Route path="/login" element={<Login />} />

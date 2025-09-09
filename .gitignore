@@ -175,3 +175,5 @@ fix-commits.sh
 
 # Claude
 CLAUDE.md
+
+*.backup

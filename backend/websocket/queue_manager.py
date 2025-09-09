@@ -56,7 +56,7 @@ class ServerMessageQueueManager:
         """Initialize the server queue manager."""
         logger.info(_("Server message queue manager initialized"))
 
-    def enqueue_message(
+    def enqueue_message(  # pylint: disable=too-many-positional-arguments
         self,
         message_type: str,
         message_data: Dict[str, Any],
@@ -240,7 +240,7 @@ class ServerMessageQueueManager:
 
         return message_id
 
-    def dequeue_messages_for_host(
+    def dequeue_messages_for_host(  # pylint: disable=too-many-positional-arguments
         self,
         host_id: int,
         direction: Union[str, QueueDirection] = QueueDirection.OUTBOUND,

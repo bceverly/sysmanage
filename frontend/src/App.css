@@ -1,6 +1,7 @@
 .main-content {
-  padding-top: 7rem;
+  padding-top: calc(7rem + var(--security-banner-height, 0px));
   padding-left: 1rem;
+  transition: padding-top 0.3s ease;
 }
 
 /* RTL support for Arabic */

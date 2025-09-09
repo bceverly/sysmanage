@@ -18,6 +18,36 @@ security:
   jwt_algorithm: "HS256"
   jwt_auth_timeout: 6000
   jwt_refresh_timeout: 60000
+  password_policy:
+    # Minimum password length (default: 8)
+    min_length: 8
+    
+    # Maximum password length (default: 128)
+    max_length: 128
+    
+    # Require at least one uppercase letter (A-Z)
+    require_uppercase: true
+    
+    # Require at least one lowercase letter (a-z)
+    require_lowercase: true
+    
+    # Require at least one number (0-9)
+    require_numbers: true
+    
+    # Require at least one special character
+    require_special_chars: true
+    
+    # Define which special characters are allowed
+    special_chars: "!@#$%^&*()_+-=[]{}|;':\",./<>?"
+    
+    # Prevent users from including their username/email in password
+    allow_username_in_password: false
+    
+    # Remember last N passwords to prevent reuse (0 = disabled)
+    password_history_count: 3
+    
+    # Minimum number of different character types required (1-4)
+    min_character_types: 3
 
 webui:
   host: "localhost"

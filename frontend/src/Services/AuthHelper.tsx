@@ -7,7 +7,7 @@ type DoLoginRequest = {
 
 
 const doLogin = async (requestData: DoLoginRequest) => {
-  await api.post("https://api.sysmanage.org:8443/login", {
+  await api.post("/login", {
     'userid': requestData.userid,
     'password': requestData.password
   })
