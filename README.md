@@ -341,9 +341,29 @@ pip install -r requirements.txt
 
 After installing PostgreSQL (see platform-specific instructions above), set up the database and user:
 
+**For most platforms (Linux, macOS, FreeBSD):**
 ```bash
 # Switch to the postgres user
 sudo -u postgres psql
+
+# In the PostgreSQL prompt, create the database and user
+# NOTE: Using credentials from sysmanage-dev.yaml - CHANGE FOR PRODUCTION!
+CREATE USER sysmanage WITH PASSWORD 'abc123';
+CREATE DATABASE sysmanage OWNER sysmanage;
+GRANT ALL PRIVILEGES ON DATABASE sysmanage TO sysmanage;
+
+# Grant schema permissions (required for Alembic migrations)
+\c sysmanage
+GRANT ALL ON SCHEMA public TO sysmanage;
+
+# Exit PostgreSQL
+\q
+```
+
+**For OpenBSD (using doas instead of sudo):**
+```bash
+# Switch to the _postgresql user
+doas -u _postgresql psql
 
 # In the PostgreSQL prompt, create the database and user
 # NOTE: Using credentials from sysmanage-dev.yaml - CHANGE FOR PRODUCTION!
