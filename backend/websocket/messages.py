@@ -25,6 +25,7 @@ class MessageType(str, Enum):
     UPDATE_APPLY_RESULT = "update_apply_result"
     SCRIPT_EXECUTION_RESULT = "script_execution_result"
     REBOOT_STATUS_UPDATE = "reboot_status_update"
+    DIAGNOSTIC_COLLECTION_RESULT = "diagnostic_collection_result"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -48,6 +49,7 @@ class CommandType(str, Enum):
     REBOOT_SYSTEM = "reboot_system"
     EXECUTE_SCRIPT = "execute_script"
     CHECK_REBOOT_STATUS = "check_reboot_status"
+    COLLECT_DIAGNOSTICS = "collect_diagnostics"
 
 
 class Message:
@@ -342,6 +344,49 @@ class ScriptExecutionResultMessage(Message):
         super().__init__(MessageType.SCRIPT_EXECUTION_RESULT, data)
 
 
+class DiagnosticCollectionResultMessage(Message):
+    """Message sent from agent to server with diagnostic collection results."""
+
+    def __init__(  # pylint: disable=too-many-positional-arguments
+        self,
+        collection_id: str = None,
+        success: bool = True,
+        system_logs: dict = None,
+        configuration_files: dict = None,
+        network_info: dict = None,
+        process_info: dict = None,
+        disk_usage: dict = None,
+        environment_variables: dict = None,
+        agent_logs: dict = None,
+        error_logs: dict = None,
+        collection_size_bytes: int = None,
+        files_collected: int = None,
+        error: str = None,
+        collection_time: float = None,
+        hostname: str = None,
+        **kwargs
+    ):
+        data = {
+            "collection_id": collection_id,
+            "success": success,
+            "system_logs": system_logs,
+            "configuration_files": configuration_files,
+            "network_info": network_info,
+            "process_info": process_info,
+            "disk_usage": disk_usage,
+            "environment_variables": environment_variables,
+            "agent_logs": agent_logs,
+            "error_logs": error_logs,
+            "collection_size_bytes": collection_size_bytes,
+            "files_collected": files_collected,
+            "error": error,
+            "collection_time": collection_time,
+            "hostname": hostname,
+            **kwargs,
+        }
+        super().__init__(MessageType.DIAGNOSTIC_COLLECTION_RESULT, data)
+
+
 # Message factory for creating messages from raw data
 def create_message(raw_data: Dict[str, Any]) -> Message:
     """Create appropriate message object from raw dictionary data."""
@@ -543,6 +588,47 @@ def create_message(raw_data: Dict[str, Any]) -> Message:
                     "shell_used",
                     "error",
                     "timeout",
+                    "hostname",
+                ]
+            }
+        )
+    if message_type == MessageType.DIAGNOSTIC_COLLECTION_RESULT:
+        data = raw_data.get("data", {})
+        return DiagnosticCollectionResultMessage(
+            collection_id=data.get("collection_id"),
+            success=data.get("success", True),
+            system_logs=data.get("system_logs"),
+            configuration_files=data.get("configuration_files"),
+            network_info=data.get("network_info"),
+            process_info=data.get("process_info"),
+            disk_usage=data.get("disk_usage"),
+            environment_variables=data.get("environment_variables"),
+            agent_logs=data.get("agent_logs"),
+            error_logs=data.get("error_logs"),
+            collection_size_bytes=data.get("collection_size_bytes"),
+            files_collected=data.get("files_collected"),
+            error=data.get("error"),
+            collection_time=data.get("collection_time"),
+            hostname=data.get("hostname"),
+            **{
+                k: v
+                for k, v in data.items()
+                if k
+                not in [
+                    "collection_id",
+                    "success",
+                    "system_logs",
+                    "configuration_files",
+                    "network_info",
+                    "process_info",
+                    "disk_usage",
+                    "environment_variables",
+                    "agent_logs",
+                    "error_logs",
+                    "collection_size_bytes",
+                    "files_collected",
+                    "error",
+                    "collection_time",
                     "hostname",
                 ]
             }

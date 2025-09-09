@@ -72,6 +72,15 @@ class Host(Base):
     # Software inventory fields
     software_updated_at = Column(DateTime(timezone=True), nullable=True)
 
+    # User access data timestamp
+    user_access_updated_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Diagnostics request tracking
+    diagnostics_requested_at = Column(DateTime(timezone=True), nullable=True)
+    diagnostics_request_status = Column(
+        String(50), nullable=True
+    )  # 'pending', 'completed', 'failed'
+
     # Update management fields
     reboot_required = Column(Boolean, nullable=False, default=False, index=True)
     reboot_required_updated_at = Column(DateTime(timezone=True), nullable=True)
@@ -581,5 +590,61 @@ class ScriptExecutionLog(Base):
     def __repr__(self):
         return (
             f"<ScriptExecutionLog(id={self.id}, execution_id='{self.execution_id}', "
+            f"status='{self.status}', host_id={self.host_id})>"
+        )
+
+
+class DiagnosticReport(Base):
+    """
+    This class holds the object mapping for the diagnostic_reports table in the
+    PostgreSQL database. Stores diagnostic information collected from agents.
+    """
+
+    __tablename__ = "diagnostic_reports"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    host_id = Column(
+        Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+
+    # Collection metadata
+    collection_id = Column(
+        String(36), nullable=False, unique=True, index=True
+    )  # UUID for tracking
+    requested_by = Column(String(100), nullable=False)  # User who requested diagnostics
+    status = Column(
+        String(20), nullable=False, server_default="pending", index=True
+    )  # pending, collecting, completed, failed
+
+    # Timestamps
+    requested_at = Column(DateTime(timezone=True), nullable=False, index=True)
+    started_at = Column(DateTime(timezone=True), nullable=True)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Diagnostic data (JSON stored as text)
+    system_logs = Column(Text, nullable=True)  # JSON with log files and contents
+    configuration_files = Column(Text, nullable=True)  # JSON with config files
+    network_info = Column(Text, nullable=True)  # JSON with network diagnostics
+    process_info = Column(Text, nullable=True)  # JSON with running processes
+    disk_usage = Column(Text, nullable=True)  # JSON with disk usage info
+    environment_variables = Column(Text, nullable=True)  # JSON with env vars
+    agent_logs = Column(Text, nullable=True)  # JSON with agent-specific logs
+    error_logs = Column(Text, nullable=True)  # JSON with system error logs
+
+    # Collection results
+    collection_size_bytes = Column(BigInteger, nullable=True)
+    files_collected = Column(Integer, nullable=True)
+    error_message = Column(Text, nullable=True)
+
+    # Metadata
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Relationships
+    host = relationship("Host")
+
+    def __repr__(self):
+        return (
+            f"<DiagnosticReport(id={self.id}, collection_id='{self.collection_id}', "
             f"status='{self.status}', host_id={self.host_id})>"
         )

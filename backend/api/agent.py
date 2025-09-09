@@ -19,6 +19,7 @@ from backend.api.message_handlers import (
     handle_command_result,
     handle_config_acknowledgment,
     handle_heartbeat,
+    handle_diagnostic_result,
 )
 from backend.api.update_handlers import handle_update_apply_result
 
@@ -134,163 +135,7 @@ async def agent_connect(websocket: WebSocket):
             # Receive message from agent
             data = await websocket.receive_text()
             debug_logger.info("Received WebSocket message: %s...", data[:100])
-            # Message received from agent
-
-            try:
-                raw_message = json.loads(data)
-
-                # Validate message integrity and structure
-                if not websocket_security.validate_message_integrity(
-                    raw_message, connection_id or connection.agent_id
-                ):
-                    error_msg = ErrorMessage(
-                        "message_validation_failed",
-                        _("Message failed security validation"),
-                    )
-                    await connection.send_message(error_msg.to_dict())
-                    continue
-
-                message = create_message(raw_message)
-                message_size = len(data)
-                debug_logger.info(
-                    "Received message type: %s (size: %d bytes)",
-                    message.message_type,
-                    message_size,
-                )
-                # Processing message from agent
-
-                # Handle different message types
-                if message.message_type == MessageType.SYSTEM_INFO:
-                    await _handle_system_info_message(message, connection, db)
-
-                elif message.message_type == MessageType.HEARTBEAT:
-                    debug_logger.info("Calling handle_heartbeat")
-                    await handle_heartbeat(db, connection, message.data)
-
-                elif message.message_type == MessageType.COMMAND_RESULT:
-                    debug_logger.info("Calling handle_command_result")
-                    await handle_command_result(connection, message.data)
-
-                elif message.message_type == MessageType.ERROR:
-                    debug_logger.info("Processing ERROR message type")
-                    # Agent reported error - no action needed
-
-                elif message.message_type == "config_ack":
-                    debug_logger.info("Calling handle_config_acknowledgment")
-                    # Handle configuration acknowledgment
-                    await handle_config_acknowledgment(connection, message.data)
-
-                elif message.message_type in [
-                    MessageType.OS_VERSION_UPDATE,
-                    MessageType.HARDWARE_UPDATE,
-                    MessageType.USER_ACCESS_UPDATE,
-                    MessageType.SOFTWARE_INVENTORY_UPDATE,
-                    MessageType.PACKAGE_UPDATES_UPDATE,
-                ]:
-                    # Process inventory message using helper function to reduce nesting
-                    debug_logger.info(
-                        "Received inventory message type: %s", message.message_type
-                    )
-                    await _process_inventory_message(message, connection, db)
-                elif message.message_type == MessageType.UPDATE_APPLY_RESULT:
-                    await _handle_update_result_message(message, connection, db)
-
-                elif message.message_type == MessageType.SCRIPT_EXECUTION_RESULT:
-                    debug_logger.info(
-                        "CRAZY_LOG: SCRIPT_EXECUTION_RESULT message received"
-                    )
-                    debug_logger.info(
-                        "CRAZY_LOG: SCRIPT_EXECUTION_RESULT message data keys: %s",
-                        list(message.data.keys()) if message.data else [],
-                    )
-                    debug_logger.info(
-                        "CRAZY_LOG: SCRIPT_EXECUTION_RESULT message data: %s",
-                        message.data,
-                    )
-
-                    # Queue script execution results for reliable processing
-                    debug_logger.info(
-                        "CRAZY_LOG: About to validate host for script execution result"
-                    )
-                    host, error_msg = await _validate_and_get_host(
-                        message.data, connection, db
-                    )
-                    debug_logger.info(
-                        "CRAZY_LOG: Host validation result - host: %s, error_msg: %s",
-                        host,
-                        error_msg,
-                    )
-
-                    if error_msg:
-                        debug_logger.info(
-                            "CRAZY_LOG: Host validation failed - sending error message"
-                        )
-                        await connection.send_message(error_msg.to_dict())
-                        return
-
-                    hostname = host.fqdn
-                    debug_logger.info(
-                        "CRAZY_LOG: Host %s - enqueueing script execution result",
-                        hostname,
-                    )
-
-                    # Enqueue the message for processing by message processor
-                    from backend.websocket.queue_manager import Priority
-
-                    try:
-                        queue_message_id = server_queue_manager.enqueue_message(
-                            message_type=message.message_type,
-                            message_data=message.data,
-                            direction=QueueDirection.INBOUND,
-                            host_id=host.id,
-                            priority=Priority.HIGH,
-                            db=db,
-                        )
-                        debug_logger.info(
-                            "Enqueued script execution result from host %s (message_id: %s)",
-                            hostname,
-                            queue_message_id,
-                        )
-
-                        # Send acknowledgment back to agent
-                        ack_msg = {
-                            "message_type": "script_execution_result_queued",
-                            "message_id": queue_message_id,
-                        }
-                        await connection.send_message(ack_msg)
-
-                    except Exception as e:
-                        debug_logger.error(
-                            "Error enqueueing script execution result: %s", e
-                        )
-                        error_msg = ErrorMessage(
-                            "queue_error", f"Failed to queue script result: {str(e)}"
-                        )
-                        await connection.send_message(error_msg.to_dict())
-
-                else:
-                    # Unknown message type - send error
-                    error_msg = ErrorMessage(
-                        "unknown_message_type",
-                        f"Unknown message type: {message.message_type}",
-                    )
-                    await connection.send_message(error_msg.to_dict())
-
-            except json.JSONDecodeError:
-                # Invalid JSON - send error
-                error_msg = ErrorMessage(
-                    "invalid_json", _("Message must be valid JSON")
-                )
-                await connection.send_message(error_msg.to_dict())
-
-            except Exception as exc:
-                # Error processing message from agent
-                debug_logger.error("Error processing message: %s", exc, exc_info=True)
-                error_msg = ErrorMessage("processing_error", str(exc))
-                try:
-                    await connection.send_message(error_msg.to_dict())
-                except Exception as send_exc:
-                    debug_logger.error("Failed to send error message: %s", send_exc)
+            await _process_websocket_message(data, connection, db, connection_id)
 
     except WebSocketDisconnect as e:
         # Agent disconnected - normal cleanup handled in finally
@@ -323,6 +168,175 @@ async def agent_connect(websocket: WebSocket):
         # Clean up
         connection_manager.disconnect(connection.agent_id)
         db.close()
+
+
+async def _process_websocket_message(data, connection, db, connection_id):
+    """Process a single WebSocket message from the agent."""
+    try:
+        raw_message = json.loads(data)
+
+        # Validate message integrity and structure
+        if not websocket_security.validate_message_integrity(
+            raw_message, connection_id or connection.agent_id
+        ):
+            error_msg = ErrorMessage(
+                "message_validation_failed",
+                _("Message failed security validation"),
+            )
+            await connection.send_message(error_msg.to_dict())
+            return
+
+        message = create_message(raw_message)
+        message_size = len(data)
+        debug_logger.info(
+            "Received message type: %s (size: %d bytes)",
+            message.message_type,
+            message_size,
+        )
+
+        await _handle_message_by_type(message, connection, db)
+
+    except json.JSONDecodeError:
+        # Invalid JSON - send error
+        error_msg = ErrorMessage("invalid_json", _("Message must be valid JSON"))
+        await connection.send_message(error_msg.to_dict())
+
+    except Exception as exc:
+        # Error processing message from agent
+        debug_logger.error("Error processing message: %s", exc, exc_info=True)
+        error_msg = ErrorMessage("processing_error", str(exc))
+        try:
+            await connection.send_message(error_msg.to_dict())
+        except Exception as send_exc:
+            debug_logger.error("Failed to send error message: %s", send_exc)
+
+
+async def _handle_message_by_type(message, connection, db):
+    """Handle message routing by message type."""
+    if message.message_type == MessageType.SYSTEM_INFO:
+        await _handle_system_info_message(message, connection, db)
+
+    elif message.message_type == MessageType.HEARTBEAT:
+        debug_logger.info("Calling handle_heartbeat")
+        await handle_heartbeat(db, connection, message.data)
+
+    elif message.message_type == MessageType.COMMAND_RESULT:
+        debug_logger.info("Calling handle_command_result")
+        await handle_command_result(connection, message.data)
+
+    elif message.message_type == MessageType.ERROR:
+        debug_logger.info("Processing ERROR message type")
+        # Agent reported error - no action needed
+
+    elif message.message_type == "config_ack":
+        debug_logger.info("Calling handle_config_acknowledgment")
+        # Handle configuration acknowledgment
+        await handle_config_acknowledgment(connection, message.data)
+
+    elif message.message_type in [
+        MessageType.OS_VERSION_UPDATE,
+        MessageType.HARDWARE_UPDATE,
+        MessageType.USER_ACCESS_UPDATE,
+        MessageType.SOFTWARE_INVENTORY_UPDATE,
+        MessageType.PACKAGE_UPDATES_UPDATE,
+    ]:
+        # Process inventory message using helper function
+        debug_logger.info("Received inventory message type: %s", message.message_type)
+        await _process_inventory_message(message, connection, db)
+
+    elif message.message_type == MessageType.UPDATE_APPLY_RESULT:
+        await _handle_update_result_message(message, connection, db)
+
+    elif message.message_type == MessageType.SCRIPT_EXECUTION_RESULT:
+        await _handle_script_execution_result(message, connection, db)
+
+    elif message.message_type == MessageType.DIAGNOSTIC_COLLECTION_RESULT:
+        await _handle_diagnostic_result_msg(message, connection, db)
+
+    else:
+        # Unknown message type - send error
+        error_msg = ErrorMessage(
+            "unknown_message_type",
+            f"Unknown message type: {message.message_type}",
+        )
+        await connection.send_message(error_msg.to_dict())
+
+
+async def _handle_script_execution_result(message, connection, db):
+    """Handle script execution result message."""
+    debug_logger.info("CRAZY_LOG: SCRIPT_EXECUTION_RESULT message received")
+    debug_logger.info(
+        "CRAZY_LOG: SCRIPT_EXECUTION_RESULT message data keys: %s",
+        list(message.data.keys()) if message.data else [],
+    )
+
+    # Queue script execution results for reliable processing
+    host, error_msg = await _validate_and_get_host(message.data, connection, db)
+    if error_msg:
+        debug_logger.info("CRAZY_LOG: Host validation failed - sending error message")
+        await connection.send_message(error_msg.to_dict())
+        return
+
+    hostname = host.fqdn
+    debug_logger.info(
+        "CRAZY_LOG: Host %s - enqueueing script execution result", hostname
+    )
+
+    # Enqueue the message for processing by message processor
+    from backend.websocket.queue_manager import Priority
+
+    try:
+        queue_message_id = server_queue_manager.enqueue_message(
+            message_type=message.message_type,
+            message_data=message.data,
+            direction=QueueDirection.INBOUND,
+            host_id=host.id,
+            priority=Priority.HIGH,
+            db=db,
+        )
+        debug_logger.info(
+            "Enqueued script execution result from host %s (message_id: %s)",
+            hostname,
+            queue_message_id,
+        )
+
+        # Send acknowledgment back to agent
+        ack_msg = {
+            "message_type": "script_execution_result_queued",
+            "message_id": queue_message_id,
+        }
+        await connection.send_message(ack_msg)
+
+    except Exception as e:
+        debug_logger.error("Error enqueueing script execution result: %s", e)
+        error_msg = ErrorMessage(
+            "queue_error", f"Failed to queue script result: {str(e)}"
+        )
+        await connection.send_message(error_msg.to_dict())
+
+
+async def _handle_diagnostic_result_msg(message, connection, db):
+    """Handle diagnostic collection result message."""
+    debug_logger.info("Diagnostic collection result received")
+    debug_logger.info(
+        "Diagnostic result data keys: %s",
+        list(message.data.keys()) if message.data else [],
+    )
+
+    # Handle diagnostic collection result directly (no queuing needed)
+    try:
+        response = await handle_diagnostic_result(db, connection, message.data)
+        debug_logger.info("Diagnostic collection result processed successfully")
+        # Send acknowledgment back to agent
+        if response:
+            await connection.send_message(response)
+    except Exception as e:
+        debug_logger.error("Error processing diagnostic collection result: %s", e)
+        error_msg = ErrorMessage(
+            "diagnostic_error",
+            f"Failed to process diagnostic result: {str(e)}",
+        )
+        await connection.send_message(error_msg.to_dict())
 
 
 async def _validate_and_get_host(message_data, connection, db):

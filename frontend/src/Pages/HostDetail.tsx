@@ -26,10 +26,13 @@ import SecurityIcon from '@mui/icons-material/Security';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import CloseIcon from '@mui/icons-material/Close';
 import AppsIcon from '@mui/icons-material/Apps';
-import { Dialog, DialogTitle, DialogContent, IconButton, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Alert, Snackbar } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware } from '../Services/hosts';
+import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic } from '../Services/hosts';
 
 // Use the service types directly - no need for local interfaces anymore
 
@@ -41,9 +44,11 @@ const HostDetail = () => {
     const [userAccounts, setUserAccounts] = useState<UserAccount[]>([]);
     const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
     const [softwarePackages, setSoftwarePackages] = useState<SoftwarePackage[]>([]);
+    const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticReport[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [currentTab, setCurrentTab] = useState<number>(0);
+    const [diagnosticsLoading, setDiagnosticsLoading] = useState<boolean>(false);
     const [storageFilter, setStorageFilter] = useState<'all' | 'physical' | 'logical'>('physical');
     const [networkFilter, setNetworkFilter] = useState<'all' | 'active' | 'inactive'>('active');
     const [userFilter, setUserFilter] = useState<'all' | 'system' | 'regular'>('regular');
@@ -54,6 +59,14 @@ const HostDetail = () => {
     const [dialogTitle, setDialogTitle] = useState<string>('');
     const [expandedUserGroups, setExpandedUserGroups] = useState<Set<number>>(new Set());
     const [expandedGroupUsers, setExpandedGroupUsers] = useState<Set<number>>(new Set());
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false);
+    const [diagnosticToDelete, setDiagnosticToDelete] = useState<number | null>(null);
+    const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
+    const [snackbarMessage, setSnackbarMessage] = useState<string>('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+    const [diagnosticDetailOpen, setDiagnosticDetailOpen] = useState<boolean>(false);
+    const [selectedDiagnostic, setSelectedDiagnostic] = useState<DiagnosticDetailResponse | null>(null);
+    const [diagnosticDetailLoading, setDiagnosticDetailLoading] = useState<boolean>(false);
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -75,14 +88,15 @@ const HostDetail = () => {
                 const hostData = await doGetHostByID(BigInt(hostId));
                 setHost(hostData);
                 
-                // Fetch normalized storage, network, user access, and software data
+                // Fetch normalized storage, network, user access, software, and diagnostics data
                 try {
-                    const [storageData, networkData, usersData, groupsData, softwareData] = await Promise.all([
+                    const [storageData, networkData, usersData, groupsData, softwareData, diagnosticsData] = await Promise.all([
                         doGetHostStorage(BigInt(hostId)),
                         doGetHostNetwork(BigInt(hostId)),
                         doGetHostUsers(BigInt(hostId)),
                         doGetHostGroups(BigInt(hostId)),
-                        doGetHostSoftware(BigInt(hostId))
+                        doGetHostSoftware(BigInt(hostId)),
+                        doGetHostDiagnostics(BigInt(hostId))
                     ]);
                     
                     // If normalized data is empty, try to parse JSON fallback data
@@ -114,9 +128,12 @@ const HostDetail = () => {
                     
                     // Set software data
                     setSoftwarePackages(softwareData);
+                    
+                    // Set diagnostics data
+                    setDiagnosticsData(diagnosticsData);
                 } catch (hardwareErr) {
-                    // Log but don't fail the whole request - hardware/software data is optional
-                    console.warn('Failed to fetch hardware/software data:', hardwareErr);
+                    // Log but don't fail the whole request - hardware/software/diagnostics data is optional
+                    console.warn('Failed to fetch hardware/software/diagnostics data:', hardwareErr);
                 }
                 
                 setError(null);
@@ -139,6 +156,19 @@ const HostDetail = () => {
         } catch {
             return t('common.invalidDate', 'Invalid date');
         }
+    };
+
+    const formatTimestamp = (timestamp: string | null | undefined) => {
+        if (!timestamp) return t('hosts.never', 'never');
+        const date = new Date(timestamp);
+        if (isNaN(date.getTime())) return t('hosts.invalidDate', 'invalid');
+        
+        const now = new Date();
+        const diffMinutes = Math.floor((now.getTime() - date.getTime()) / 60000);
+        if (diffMinutes < 2) return t('hosts.justNow', 'just now');
+        if (diffMinutes < 60) return t('hosts.minutesAgo', '{{minutes}}m ago', { minutes: diffMinutes });
+        if (diffMinutes < 1440) return t('hosts.hoursAgo', '{{hours}}h ago', { hours: Math.floor(diffMinutes / 60) });
+        return t('hosts.daysAgo', '{{days}}d ago', { days: Math.floor(diffMinutes / 1440) });
     };
 
     const getStatusColor = (status: string) => {
@@ -392,6 +422,119 @@ const HostDetail = () => {
             .sort((a, b) => (a.package_name || '').localeCompare(b.package_name || ''));
     };
 
+    // Check if diagnostics are currently being processed based on persistent state
+    const isDiagnosticsProcessing = host?.diagnostics_request_status === 'pending';
+
+    const handleRequestDiagnostics = async () => {
+        if (!hostId) return;
+        
+        try {
+            setDiagnosticsLoading(true);
+            await doRequestHostDiagnostics(BigInt(hostId));
+            
+            // Show success message
+            console.log('Diagnostics collection requested successfully');
+            
+            // Refresh host data to get updated diagnostics request status
+            const updatedHost = await doGetHostByID(BigInt(hostId));
+            setHost(updatedHost);
+            
+            // Start polling for completion if request is pending
+            if (updatedHost?.diagnostics_request_status === 'pending') {
+                const pollForCompletion = async (attempts = 0, maxAttempts = 20) => {
+                    if (attempts >= maxAttempts) {
+                        console.log('Diagnostics polling completed after max attempts');
+                        return;
+                    }
+                    
+                    setTimeout(async () => {
+                        try {
+                            const currentHost = await doGetHostByID(BigInt(hostId));
+                            setHost(currentHost);
+                            
+                            // If status changed from pending, also refresh diagnostics data
+                            if (currentHost?.diagnostics_request_status !== 'pending') {
+                                const updatedDiagnostics = await doGetHostDiagnostics(BigInt(hostId));
+                                setDiagnosticsData(updatedDiagnostics);
+                                console.log('Diagnostics request completed');
+                            } else {
+                                // Continue polling
+                                pollForCompletion(attempts + 1, maxAttempts);
+                            }
+                        } catch (err) {
+                            console.warn('Failed to refresh host data:', err);
+                            pollForCompletion(attempts + 1, maxAttempts);
+                        }
+                    }, 3000); // Poll every 3 seconds
+                };
+                
+                pollForCompletion();
+            }
+        } catch (error) {
+            console.error('Error requesting diagnostics:', error);
+        } finally {
+            setDiagnosticsLoading(false);
+        }
+    };
+
+    const handleDeleteDiagnostic = (diagnosticId: number) => {
+        setDiagnosticToDelete(diagnosticId);
+        setDeleteConfirmOpen(true);
+    };
+
+    const handleViewDiagnosticDetail = async (diagnosticId: number) => {
+        try {
+            setDiagnosticDetailLoading(true);
+            setDiagnosticDetailOpen(true);
+            const diagnosticDetail = await doGetDiagnosticDetail(diagnosticId);
+            setSelectedDiagnostic(diagnosticDetail);
+        } catch (error) {
+            console.error('Error fetching diagnostic detail:', error);
+            setSnackbarMessage(t('hostDetail.diagnosticLoadFailed', 'Failed to load diagnostic details'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+            setDiagnosticDetailOpen(false);
+        } finally {
+            setDiagnosticDetailLoading(false);
+        }
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!diagnosticToDelete) return;
+        
+        try {
+            await doDeleteDiagnostic(diagnosticToDelete);
+            
+            // Refresh diagnostics data after deletion
+            if (hostId) {
+                const updatedDiagnostics = await doGetHostDiagnostics(BigInt(hostId));
+                setDiagnosticsData(updatedDiagnostics);
+            }
+            
+            setSnackbarMessage(t('hostDetail.diagnosticDeleted', 'Diagnostic report deleted successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            
+        } catch (error) {
+            console.error('Error deleting diagnostic:', error);
+            setSnackbarMessage(t('hostDetail.diagnosticDeleteFailed', 'Failed to delete diagnostic report'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setDeleteConfirmOpen(false);
+            setDiagnosticToDelete(null);
+        }
+    };
+
+    const handleCancelDelete = () => {
+        setDeleteConfirmOpen(false);
+        setDiagnosticToDelete(null);
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbarOpen(false);
+    };
+
     if (loading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -411,7 +554,7 @@ const HostDetail = () => {
                     {t('common.back')}
                 </Button>
                 <Paper sx={{ p: 3, textAlign: 'center' }}>
-                    <Typography variant="h6" color="error">
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1.25rem' }} color="error">
                         {error || t('hostDetail.notFound', 'Host not found')}
                     </Typography>
                 </Paper>
@@ -465,6 +608,12 @@ const HostDetail = () => {
                         iconPosition="start"
                         sx={{ textTransform: 'none' }}
                     />
+                    <Tab 
+                        icon={<MedicalServicesIcon />} 
+                        label={t('hostDetail.diagnosticsTab', 'Diagnostics')} 
+                        iconPosition="start"
+                        sx={{ textTransform: 'none' }}
+                    />
                 </Tabs>
             </Box>
 
@@ -475,7 +624,7 @@ const HostDetail = () => {
                 <Grid item xs={12} md={6}>
                     <Card sx={{ height: '100%' }}>
                         <CardContent>
-                            <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="subtitle1" sx={{ mb: 2, display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
                                 <InfoIcon sx={{ mr: 1 }} />
                                 {t('hostDetail.basicInfo', 'Basic Information')}
                             </Typography>
@@ -543,9 +692,12 @@ const HostDetail = () => {
                 <Grid item xs={12} md={6}>
                     <Card sx={{ height: '100%' }}>
                         <CardContent>
-                            <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="subtitle1" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2, fontWeight: 'bold', fontSize: '1.1rem' }}>
                                 <ComputerIcon sx={{ mr: 1 }} />
                                 {t('hostDetail.osInfo', 'Operating System')}
+                                <Typography variant="caption" color="textSecondary">
+                                    {t('hosts.updated', 'Updated')}: {formatTimestamp(host.os_version_updated_at)}
+                                </Typography>
                             </Typography>
                             <Grid container spacing={2}>
                                 <Grid item xs={12}>
@@ -580,12 +732,6 @@ const HostDetail = () => {
                                     </Typography>
                                     <Typography variant="body1">{host.processor || t('common.notAvailable')}</Typography>
                                 </Grid>
-                                <Grid item xs={12}>
-                                    <Typography variant="body2" color="textSecondary">
-                                        {t('hostDetail.osVersionUpdated', 'OS Info Updated')}
-                                    </Typography>
-                                    <Typography variant="body1">{formatDate(host.os_version_updated_at)}</Typography>
-                                </Grid>
                                 {host.os_details && (
                                     <Grid item xs={12}>
                                         <Typography variant="body2" color="textSecondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -614,9 +760,12 @@ const HostDetail = () => {
                 <Grid item xs={12}>
                     <Card>
                         <CardContent>
-                            <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="subtitle1" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2, fontWeight: 'bold', fontSize: '1.1rem' }}>
                                 <MemoryIcon sx={{ mr: 1 }} />
                                 {t('hostDetail.hardwareInfo', 'Hardware Information')}
+                                <Typography variant="caption" color="textSecondary">
+                                    {t('hosts.updated', 'Updated')}: {formatTimestamp(host.hardware_updated_at)}
+                                </Typography>
                             </Typography>
                             <Grid container spacing={3}>
                                 {/* CPU Information */}
@@ -673,13 +822,6 @@ const HostDetail = () => {
                                     </Grid>
                                 </Grid>
 
-                                {/* Hardware Update Timestamp */}
-                                <Grid item xs={12}>
-                                    <Typography variant="body2" color="textSecondary">
-                                        {t('hostDetail.hardwareUpdated', 'Hardware Info Updated')}
-                                    </Typography>
-                                    <Typography variant="body1">{formatDate(host.hardware_updated_at)}</Typography>
-                                </Grid>
 
                                 {/* Storage Details */}
                                 {storageDevices.length > 0 && (
@@ -934,10 +1076,15 @@ const HostDetail = () => {
                         <Card>
                             <CardContent>
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <AppsIcon sx={{ mr: 1 }} />
-                                        {t('hostDetail.softwarePackages', 'Software Packages')} ({getFilteredSoftwarePackages(softwarePackages).length})
-                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                            <AppsIcon sx={{ mr: 1 }} />
+                                            {t('hostDetail.softwarePackages', 'Software Packages')} ({getFilteredSoftwarePackages(softwarePackages).length})
+                                        </Typography>
+                                        <Typography variant="caption" color="textSecondary">
+                                            {t('hosts.updated', 'Updated')}: {formatTimestamp(host.software_updated_at)}
+                                        </Typography>
+                                    </Box>
                                     <ToggleButtonGroup
                                         value={packageManagerFilter}
                                         exclusive
@@ -1037,10 +1184,15 @@ const HostDetail = () => {
                         <Card>
                             <CardContent>
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <PersonIcon sx={{ mr: 1 }} />
-                                        {t('hostDetail.userAccounts', 'User Accounts')} ({getFilteredUsers(userAccounts).length})
-                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                            <PersonIcon sx={{ mr: 1 }} />
+                                            {t('hostDetail.userAccounts', 'User Accounts')} ({getFilteredUsers(userAccounts).length})
+                                        </Typography>
+                                        <Typography variant="caption" color="textSecondary">
+                                            {t('hosts.updated', 'Updated')}: {formatTimestamp(host.user_access_updated_at)}
+                                        </Typography>
+                                    </Box>
                                     <ToggleButtonGroup
                                         value={userFilter}
                                         exclusive
@@ -1172,10 +1324,15 @@ const HostDetail = () => {
                         <Card>
                             <CardContent>
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <GroupIcon sx={{ mr: 1 }} />
-                                        {t('hostDetail.userGroups', 'User Groups')} ({getFilteredGroups(userGroups).length})
-                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                            <GroupIcon sx={{ mr: 1 }} />
+                                            {t('hostDetail.userGroups', 'User Groups')} ({getFilteredGroups(userGroups).length})
+                                        </Typography>
+                                        <Typography variant="caption" color="textSecondary">
+                                            {t('hosts.updated', 'Updated')}: {formatTimestamp(host.user_access_updated_at)}
+                                        </Typography>
+                                    </Box>
                                     <ToggleButtonGroup
                                         value={groupFilter}
                                         exclusive
@@ -1294,6 +1451,188 @@ const HostDetail = () => {
                 </Grid>
             )}
 
+            {/* Diagnostics Tab */}
+            {currentTab === 4 && (
+                <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                        <Card>
+                            <CardContent>
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                            <MedicalServicesIcon sx={{ mr: 1 }} />
+                                            {t('hostDetail.diagnosticsData', 'Diagnostics Data')}
+                                        </Typography>
+                                        {diagnosticsData.length > 0 && !isDiagnosticsProcessing && (
+                                            <Typography variant="caption" color="textSecondary">
+                                                {t('hosts.updated', 'Updated')}: {formatTimestamp(diagnosticsData[0]?.completed_at)}
+                                            </Typography>
+                                        )}
+                                        {isDiagnosticsProcessing && (
+                                            <Chip 
+                                                label={t('hostDetail.processingDiagnostics', 'Processing...')}
+                                                color="warning"
+                                                size="small"
+                                                sx={{ 
+                                                    animation: 'pulse 1.5s ease-in-out infinite',
+                                                    '@keyframes pulse': {
+                                                        '0%': { opacity: 1 },
+                                                        '50%': { opacity: 0.5 },
+                                                        '100%': { opacity: 1 }
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                        {host?.diagnostics_requested_at && host?.diagnostics_request_status !== 'pending' && (
+                                            <Typography variant="caption" color="textSecondary" sx={{ ml: 1 }}>
+                                                {t('hostDetail.lastRequested', 'Last requested')}: {formatTimestamp(host.diagnostics_requested_at)}
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                    <Button
+                                        variant="contained"
+                                        startIcon={<RefreshIcon />}
+                                        onClick={handleRequestDiagnostics}
+                                        disabled={diagnosticsLoading}
+                                        color="primary"
+                                    >
+                                        {diagnosticsLoading 
+                                            ? t('hostDetail.requestingDiagnostics', 'Requesting...') 
+                                            : t('hostDetail.requestHostData', 'Request Host Data')
+                                        }
+                                    </Button>
+                                </Box>
+                                
+                                {diagnosticsData.length === 0 ? (
+                                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                                        <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
+                                            {t('hostDetail.noDiagnosticsData', 'No diagnostics data available for this host.')}
+                                        </Typography>
+                                        <Typography variant="body2" color="textSecondary">
+                                            {t('hostDetail.clickRequestData', 'Click "Request Host Data" to collect diagnostic information from the agent.')}
+                                        </Typography>
+                                    </Box>
+                                ) : (
+                                    <Grid container spacing={2}>
+                                        {diagnosticsData.map((diagnostic: DiagnosticReport, index: number) => (
+                                            <Grid item xs={12} key={diagnostic.id || index}>
+                                                <Card 
+                                                    sx={{ 
+                                                        backgroundColor: 'grey.900',
+                                                        cursor: 'pointer',
+                                                        '&:hover': {
+                                                            backgroundColor: 'grey.800'
+                                                        }
+                                                    }}
+                                                    onClick={() => handleViewDiagnosticDetail(diagnostic.id)}
+                                                >
+                                                    <CardContent sx={{ p: 2 }}>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                                                            <Box>
+                                                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                                    {t('hostDetail.diagnosticReport', 'Diagnostic Report')} #{diagnostic.id}
+                                                                </Typography>
+                                                                <Typography variant="body2" color="textSecondary">
+                                                                    {t('hostDetail.collectedAt', 'Collected')}: {formatDate(diagnostic.completed_at)}
+                                                                </Typography>
+                                                            </Box>
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleDeleteDiagnostic(diagnostic.id);
+                                                                }}
+                                                                sx={{ 
+                                                                    ml: 2,
+                                                                    color: 'white',
+                                                                    '&:hover': {
+                                                                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        </Box>
+                                                        
+                                                        {/* System Logs Section */}
+                                                        {diagnostic.system_logs && (
+                                                            <Box sx={{ mb: 2 }}>
+                                                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                                                    {t('hostDetail.systemLogs', 'System Logs')}
+                                                                </Typography>
+                                                                <Paper sx={{ p: 2, backgroundColor: 'grey.800', maxHeight: 200, overflow: 'auto' }}>
+                                                                    <Typography variant="body2" sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
+                                                                        {typeof diagnostic.system_logs === 'string' 
+                                                                            ? diagnostic.system_logs 
+                                                                            : JSON.stringify(diagnostic.system_logs, null, 2)
+                                                                        }
+                                                                    </Typography>
+                                                                </Paper>
+                                                            </Box>
+                                                        )}
+                                                        
+                                                        {/* Configuration Files Section */}
+                                                        {diagnostic.configuration_files && (
+                                                            <Box sx={{ mb: 2 }}>
+                                                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                                                    {t('hostDetail.configurationFiles', 'Configuration Files')}
+                                                                </Typography>
+                                                                <Paper sx={{ p: 2, backgroundColor: 'grey.800', maxHeight: 200, overflow: 'auto' }}>
+                                                                    <Typography variant="body2" sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
+                                                                        {typeof diagnostic.configuration_files === 'string' 
+                                                                            ? diagnostic.configuration_files 
+                                                                            : JSON.stringify(diagnostic.configuration_files, null, 2)
+                                                                        }
+                                                                    </Typography>
+                                                                </Paper>
+                                                            </Box>
+                                                        )}
+                                                        
+                                                        {/* Process List Section */}
+                                                        {diagnostic.process_list && (
+                                                            <Box sx={{ mb: 2 }}>
+                                                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                                                    {t('hostDetail.processList', 'Process List')}
+                                                                </Typography>
+                                                                <Paper sx={{ p: 2, backgroundColor: 'grey.800', maxHeight: 200, overflow: 'auto' }}>
+                                                                    <Typography variant="body2" sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
+                                                                        {typeof diagnostic.process_list === 'string' 
+                                                                            ? diagnostic.process_list 
+                                                                            : JSON.stringify(diagnostic.process_list, null, 2)
+                                                                        }
+                                                                    </Typography>
+                                                                </Paper>
+                                                            </Box>
+                                                        )}
+                                                        
+                                                        {/* System Information Section */}
+                                                        {diagnostic.system_information && (
+                                                            <Box>
+                                                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                                                    {t('hostDetail.systemInformation', 'System Information')}
+                                                                </Typography>
+                                                                <Paper sx={{ p: 2, backgroundColor: 'grey.800', maxHeight: 200, overflow: 'auto' }}>
+                                                                    <Typography variant="body2" sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
+                                                                        {typeof diagnostic.system_information === 'string' 
+                                                                            ? diagnostic.system_information 
+                                                                            : JSON.stringify(diagnostic.system_information, null, 2)
+                                                                        }
+                                                                    </Typography>
+                                                                </Paper>
+                                                            </Box>
+                                                        )}
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        ))}
+                                    </Grid>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                </Grid>
+            )}
+
             {/* Dialog for Additional Details */}
             <Dialog
                 open={dialogOpen}
@@ -1305,7 +1644,7 @@ const HostDetail = () => {
                 }}
             >
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="h6">{dialogTitle}</Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>{dialogTitle}</Typography>
                     <IconButton onClick={handleCloseDialog} size="small">
                         <CloseIcon />
                     </IconButton>
@@ -1324,6 +1663,160 @@ const HostDetail = () => {
                     </Typography>
                 </DialogContent>
             </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog
+                open={deleteConfirmOpen}
+                onClose={handleCancelDelete}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{
+                    sx: { backgroundColor: 'grey.900' }
+                }}
+            >
+                <DialogTitle>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
+                        {t('hostDetail.deleteDiagnosticConfirm', 'Delete Diagnostic Report')}
+                    </Typography>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        {t('hostDetail.deleteDiagnosticMessage', 'Are you sure you want to delete this diagnostic report? This action cannot be undone.')}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCancelDelete}>
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button onClick={handleConfirmDelete} color="error" variant="contained">
+                        {t('hosts.delete', 'Delete')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Diagnostic Detail Modal */}
+            <Dialog
+                open={diagnosticDetailOpen}
+                onClose={() => setDiagnosticDetailOpen(false)}
+                maxWidth="lg"
+                fullWidth
+                scroll="paper"
+            >
+                <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
+                        {t('hostDetail.diagnosticDetailTitle', 'Diagnostic Report Details')}
+                        {selectedDiagnostic && ` #${selectedDiagnostic.id}`}
+                    </Typography>
+                    <IconButton onClick={() => setDiagnosticDetailOpen(false)} size="small">
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent sx={{ p: 3 }}>
+                    {diagnosticDetailLoading ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                            <CircularProgress />
+                        </Box>
+                    ) : selectedDiagnostic ? (
+                        <Box>
+                            {/* Diagnostic Report Metadata */}
+                            <Card sx={{ mb: 3, backgroundColor: 'grey.800' }}>
+                                <CardContent>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12} sm={6}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('hostDetail.collectionId', 'Collection ID')}
+                                            </Typography>
+                                            <Typography variant="body1" sx={{ fontFamily: 'monospace' }}>
+                                                {selectedDiagnostic.collection_id}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('hostDetail.collectionStatus', 'Status')}
+                                            </Typography>
+                                            <Chip 
+                                                label={selectedDiagnostic.status} 
+                                                color={selectedDiagnostic.status === 'completed' ? 'success' : 'warning'} 
+                                                size="small" 
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('hostDetail.requestedAt', 'Requested At')}
+                                            </Typography>
+                                            <Typography variant="body1">
+                                                {formatDate(selectedDiagnostic.requested_at)}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('hostDetail.completedAt', 'Completed At')}
+                                            </Typography>
+                                            <Typography variant="body1">
+                                                {formatDate(selectedDiagnostic.completed_at)}
+                                            </Typography>
+                                        </Grid>
+                                    </Grid>
+                                </CardContent>
+                            </Card>
+
+                            {/* Diagnostic Data Sections */}
+                            {selectedDiagnostic.diagnostic_data && (
+                                <Box>
+                                    {Object.entries(selectedDiagnostic.diagnostic_data).map(([key, value]) => {
+                                        if (!value || (typeof value === 'object' && Object.keys(value).length === 0)) return null;
+                                        
+                                        const sectionTitle = t(`hostDetail.${key}`, key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+                                        
+                                        return (
+                                            <Card key={key} sx={{ mb: 2, backgroundColor: 'grey.700' }}>
+                                                <CardContent>
+                                                    <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                                        {sectionTitle}
+                                                    </Typography>
+                                                    <Paper sx={{ p: 2, backgroundColor: 'grey.900', color: 'white', maxHeight: 300, overflow: 'auto' }}>
+                                                        <Typography variant="body2" sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
+                                                            {typeof value === 'string' 
+                                                                ? value 
+                                                                : JSON.stringify(value, null, 2)
+                                                            }
+                                                        </Typography>
+                                                    </Paper>
+                                                </CardContent>
+                                            </Card>
+                                        );
+                                    })}
+                                </Box>
+                            )}
+
+                            {(!selectedDiagnostic.diagnostic_data || Object.keys(selectedDiagnostic.diagnostic_data).length === 0) && (
+                                <Box sx={{ textAlign: 'center', py: 4 }}>
+                                    <Typography variant="body1" color="textSecondary">
+                                        {t('hostDetail.noDataAvailable', 'No data available')}
+                                    </Typography>
+                                </Box>
+                            )}
+                        </Box>
+                    ) : null}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDiagnosticDetailOpen(false)}>
+                        {t('common.close', 'Close')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Success/Error Snackbar */}
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={4000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };
