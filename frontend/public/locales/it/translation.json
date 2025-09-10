@@ -355,7 +355,9 @@
     "passwordNeedsNumber": "La password deve contenere almeno un numero",
     "passwordNeedsSpecial": "La password deve contenere almeno un carattere speciale",
     "passwordNeedsCharTypes": "La password deve contenere almeno 3 tipi di caratteri diversi",
-    "passwordContainsUsername": "La password non può contenere il tuo nome utente o email"
+    "passwordContainsUsername": "La password non può contenere il tuo nome utente o email",
+    "uploadImage": "Carica immagine",
+    "deleteImage": "Elimina"
   },
   "updates": {
     "title": "Aggiornamenti Pacchetti",

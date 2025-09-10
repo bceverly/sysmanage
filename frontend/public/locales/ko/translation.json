@@ -356,7 +356,9 @@
     "passwordNeedsNumber": "비밀번호에는 숫자가 최소 1개 포함되어야 합니다",
     "passwordNeedsSpecial": "비밀번호에는 특수문자가 최소 1개 포함되어야 합니다",
     "passwordNeedsCharTypes": "비밀번호에는 최소 3가지 다른 문자 유형이 포함되어야 합니다",
-    "passwordContainsUsername": "비밀번호에는 사용자명이나 이메일이 포함될 수 없습니다"
+    "passwordContainsUsername": "비밀번호에는 사용자명이나 이메일이 포함될 수 없습니다",
+    "uploadImage": "이미지 업로드",
+    "deleteImage": "삭제"
   },
   "updates": {
     "title": "패키지 업데이트",

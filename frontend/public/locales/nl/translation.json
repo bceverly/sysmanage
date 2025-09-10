@@ -356,7 +356,9 @@
     "passwordNeedsNumber": "Het wachtwoord moet minimaal één cijfer bevatten",
     "passwordNeedsSpecial": "Het wachtwoord moet minimaal één speciaal teken bevatten",
     "passwordNeedsCharTypes": "Het wachtwoord moet minimaal 3 verschillende tekentypen bevatten",
-    "passwordContainsUsername": "Het wachtwoord mag uw gebruikersnaam of e-mail niet bevatten"
+    "passwordContainsUsername": "Het wachtwoord mag uw gebruikersnaam of e-mail niet bevatten",
+    "uploadImage": "Afbeelding uploaden",
+    "deleteImage": "Verwijderen"
   },
   "updates": {
     "title": "Pakket Updates",

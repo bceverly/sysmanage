@@ -356,7 +356,9 @@
     "passwordNeedsNumber": "Das Passwort muss mindestens eine Zahl enthalten",
     "passwordNeedsSpecial": "Das Passwort muss mindestens ein Sonderzeichen enthalten",
     "passwordNeedsCharTypes": "Das Passwort muss mindestens 3 verschiedene Zeichentypen enthalten",
-    "passwordContainsUsername": "Das Passwort darf nicht Ihren Benutzernamen oder Ihre E-Mail enthalten"
+    "passwordContainsUsername": "Das Passwort darf nicht Ihren Benutzernamen oder Ihre E-Mail enthalten",
+    "uploadImage": "Bild hochladen",
+    "deleteImage": "Löschen"
   },
   "updates": {
     "title": "Paket-Updates",

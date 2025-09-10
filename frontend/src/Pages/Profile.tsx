@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,7 +14,6 @@ import {
     Tabs,
     Tab,
     Avatar,
-    IconButton,
     Input
 } from '@mui/material';
 import {
@@ -22,6 +21,7 @@ import {
     Delete as DeleteIcon
 } from '@mui/icons-material';
 import { getProfile, updateProfile, changePassword, ProfileData, ProfileUpdateData, PasswordChangeData } from '../Services/profile';
+import axiosInstance from '../Services/api';
 
 const Profile: React.FC = () => {
     const { t } = useTranslation();
@@ -168,6 +168,26 @@ const Profile: React.FC = () => {
         }
         return {isValid: true, message: ''};
     };
+
+    // Profile image functions - defined before useEffect to avoid hoisting issues
+    const fetchProfileImage = useCallback(async () => {
+        if (imageLoading) return;
+        
+        setImageLoading(true);
+        try {
+            const response = await axiosInstance.get('/profile/image', {
+                responseType: 'blob'
+            });
+
+            const imageBlob = response.data;
+            const imageUrl = window.URL.createObjectURL(imageBlob);
+            setProfileImageUrl(imageUrl);
+        } catch {
+            console.debug('No profile image available or error fetching image');
+        } finally {
+            setImageLoading(false);
+        }
+    }, [imageLoading]);
     
     useEffect(() => {
         const loadProfile = async () => {
@@ -195,10 +215,10 @@ const Profile: React.FC = () => {
         // Cleanup: revoke object URLs when component unmounts
         return () => {
             if (profileImageUrl) {
-                URL.revokeObjectURL(profileImageUrl);
+                window.URL.revokeObjectURL(profileImageUrl);
             }
         };
-    }, [t]);
+    }, [t, navigate, fetchProfileImage, profileImageUrl]);
 
     const handleSave = async () => {
         try {
@@ -314,33 +334,6 @@ const Profile: React.FC = () => {
         }
     };
 
-    // Profile image functions
-    const fetchProfileImage = async () => {
-        if (imageLoading) return;
-        
-        setImageLoading(true);
-        try {
-            const token = localStorage.getItem('access_token');
-            if (!token) return;
-
-            const response = await fetch('/profile/image', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                const imageBlob = await response.blob();
-                const imageUrl = URL.createObjectURL(imageBlob);
-                setProfileImageUrl(imageUrl);
-            }
-        } catch (error) {
-            console.debug('No profile image available or error fetching image');
-        } finally {
-            setImageLoading(false);
-        }
-    };
-
     const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
@@ -363,34 +356,23 @@ const Profile: React.FC = () => {
             setImageError(null);
             setImageSuccess(null);
 
-            const token = localStorage.getItem('access_token');
-            if (!token) {
-                throw new Error('No authentication token');
-            }
-
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await fetch('/profile/image', {
-                method: 'POST',
+            await axiosInstance.post('/profile/image', formData, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
+                    'Content-Type': 'multipart/form-data'
+                }
             });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'Upload failed');
-            }
 
             setImageSuccess(t('userProfile.imageUploadSuccess', 'Profile image uploaded successfully'));
             
             // Refresh the profile image
             await fetchProfileImage();
             
-        } catch (error: any) {
-            setImageError(error.message || t('userProfile.imageUploadError', 'Failed to upload image. Please try again.'));
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            setImageError(errorMessage || t('userProfile.imageUploadError', 'Failed to upload image. Please try again.'));
         } finally {
             setImageUploading(false);
             // Reset file input
@@ -404,33 +386,19 @@ const Profile: React.FC = () => {
             setImageError(null);
             setImageSuccess(null);
 
-            const token = localStorage.getItem('access_token');
-            if (!token) {
-                throw new Error('No authentication token');
-            }
-
-            const response = await fetch('/profile/image', {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'Delete failed');
-            }
+            await axiosInstance.delete('/profile/image');
 
             // Clear the current image
             if (profileImageUrl) {
-                URL.revokeObjectURL(profileImageUrl);
+                window.URL.revokeObjectURL(profileImageUrl);
             }
             setProfileImageUrl(null);
             
             setImageSuccess(t('userProfile.imageDeleteSuccess', 'Profile image deleted successfully'));
             
-        } catch (error: any) {
-            setImageError(error.message || t('userProfile.imageDeleteError', 'Failed to delete image. Please try again.'));
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            setImageError(errorMessage || t('userProfile.imageDeleteError', 'Failed to delete image. Please try again.'));
         } finally {
             setImageDeleting(false);
         }

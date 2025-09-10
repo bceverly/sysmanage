@@ -356,7 +356,9 @@
     "passwordNeedsNumber": "密码必须包含至少一个数字",
     "passwordNeedsSpecial": "密码必须包含至少一个特殊字符",
     "passwordNeedsCharTypes": "密码必须包含至少3种不同类型的字符",
-    "passwordContainsUsername": "密码不能包含您的用户名或电子邮件"
+    "passwordContainsUsername": "密码不能包含您的用户名或电子邮件",
+    "uploadImage": "上传图片",
+    "deleteImage": "删除"
   },
   "updates": {
     "title": "软件包更新",

@@ -356,7 +356,9 @@
     "passwordNeedsNumber": "パスワードには数字を1つ以上含める必要があります",
     "passwordNeedsSpecial": "パスワードには特殊文字を1つ以上含める必要があります",
     "passwordNeedsCharTypes": "パスワードには3つ以上の異なる文字種を含める必要があります",
-    "passwordContainsUsername": "パスワードにはユーザー名やメールアドレスを含めることはできません"
+    "passwordContainsUsername": "パスワードにはユーザー名やメールアドレスを含めることはできません",
+    "uploadImage": "画像をアップロード",
+    "deleteImage": "削除"
   },
   "updates": {
     "title": "パッケージアップデート",

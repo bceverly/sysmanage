@@ -171,5 +171,44 @@ const doUnlockUser = async (id: BigInt) => {
     return result;
 };
 
+const doUploadUserImage = async (userId: BigInt, file: globalThis.File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const response = await api.post(`/user/${userId}/image`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        processError(error);
+        return Promise.reject(error);
+    }
+};
+
+const doGetUserImage = async (userId: BigInt): Promise<globalThis.Blob> => {
+    try {
+        const response = await api.get(`/user/${userId}/image`, {
+            responseType: 'blob'
+        });
+        return response.data;
+    } catch (error) {
+        processError(error);
+        return Promise.reject(error);
+    }
+};
+
+const doDeleteUserImage = async (userId: BigInt) => {
+    try {
+        const response = await api.delete(`/user/${userId}/image`);
+        return response.data;
+    } catch (error) {
+        processError(error);
+        return Promise.reject(error);
+    }
+};
+
 export type { SuccessResponse, SysManageUser };
-export { doAddUser, doDeleteUser, doGetMe, doGetUserByID, doGetUserByUserid, doGetUsers, doUpdateUser, doUnlockUser };
+export { doAddUser, doDeleteUser, doGetMe, doGetUserByID, doGetUserByUserid, doGetUsers, doUpdateUser, doUnlockUser, doUploadUserImage, doGetUserImage, doDeleteUserImage };

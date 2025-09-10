@@ -7,7 +7,6 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import Dialog from '@mui/material/Dialog';
@@ -19,9 +18,12 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import { SysManageUser, doAddUser, doDeleteUser, doGetUsers, doUnlockUser, doUpdateUser } from '../Services/users'
+import { SysManageUser, doAddUser, doDeleteUser, doGetUsers, doUnlockUser, doUpdateUser, doUploadUserImage, doGetUserImage, doDeleteUserImage } from '../Services/users'
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Avatar from '@mui/material/Avatar';
 
 const Users = () => {
     const [tableData, setTableData] = useState<SysManageUser[]>([]);
@@ -34,6 +36,8 @@ const Users = () => {
     const [editPassword, setEditPassword] = useState<string>('');
     const [editFirstName, setEditFirstName] = useState<string>('');
     const [editLastName, setEditLastName] = useState<string>('');
+    const [editUserImageUrl, setEditUserImageUrl] = useState<string | null>(null);
+    const [editImageLoading, setEditImageLoading] = useState<boolean>(false);
     const { t } = useTranslation();
     
     // Dynamic table page sizing based on window height
@@ -138,6 +142,22 @@ const Users = () => {
         setAddDialogOpen(true);
     };
 
+    const fetchEditUserImage = async (userId: BigInt) => {
+        if (editImageLoading) return;
+        
+        setEditImageLoading(true);
+        try {
+            const imageBlob = await doGetUserImage(userId);
+            const imageUrl = window.URL.createObjectURL(imageBlob);
+            setEditUserImageUrl(imageUrl);
+        } catch {
+            console.debug('No profile image available for user or error fetching image');
+            setEditUserImageUrl(null);
+        } finally {
+            setEditImageLoading(false);
+        }
+    };
+
     const handleEditClickOpen = () => {
         if (selection.length === 1) {
             const selectedUser = tableData.find(user => Number(user.id) === Number(selection[0]));
@@ -147,7 +167,10 @@ const Users = () => {
                 setEditPassword('');
                 setEditFirstName(selectedUser.first_name || '');
                 setEditLastName(selectedUser.last_name || '');
+                setEditUserImageUrl(null);
                 setEditDialogOpen(true);
+                // Fetch the user's profile image
+                fetchEditUserImage(selectedUser.id);
             }
         }
     };
@@ -165,6 +188,46 @@ const Users = () => {
         setEditPassword('');
         setEditFirstName('');
         setEditLastName('');
+        // Clean up image URL
+        if (editUserImageUrl) {
+            window.URL.revokeObjectURL(editUserImageUrl);
+        }
+        setEditUserImageUrl(null);
+        setEditImageLoading(false);
+    };
+
+    const handleEditImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file || !editUser) return;
+
+        try {
+            await doUploadUserImage(editUser.id, file);
+            // Refresh the image
+            await fetchEditUserImage(editUser.id);
+        } catch (error) {
+            console.error('Error uploading profile image:', error);
+        }
+    };
+
+    const handleEditImageDelete = async () => {
+        if (!editUser) return;
+
+        try {
+            await doDeleteUserImage(editUser.id);
+            // Clear the current image
+            if (editUserImageUrl) {
+                window.URL.revokeObjectURL(editUserImageUrl);
+            }
+            setEditUserImageUrl(null);
+        } catch (error) {
+            console.error('Error deleting profile image:', error);
+        }
+    };
+
+    const getFirstInitial = (email: string): string => {
+        if (!email) return '?';
+        const beforeAt = email.split('@')[0];
+        return beforeAt.charAt(0).toUpperCase();
     };
 
     useEffect(() => {
@@ -380,6 +443,52 @@ const Users = () => {
                     <DialogContentText>
                         {t('users.editInfo', { defaultValue: 'Edit the user\'s information below.' })}
                     </DialogContentText>
+                    
+                    {/* Profile Image Section */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 3 }}>
+                        <Avatar
+                            src={editUserImageUrl || undefined}
+                            sx={{
+                                width: 120,
+                                height: 120,
+                                mb: 2,
+                                bgcolor: editUserImageUrl ? 'transparent' : 'primary.main',
+                                fontSize: '2rem',
+                                fontWeight: 'bold',
+                            }}
+                        >
+                            {!editUserImageUrl && getFirstInitial(editEmail)}
+                        </Avatar>
+                        
+                        <Stack direction="row" spacing={2}>
+                            <Button
+                                variant="outlined"
+                                component="label"
+                                startIcon={<PhotoCameraIcon />}
+                                size="small"
+                            >
+                                {t('profile.uploadImage', 'Upload Image')}
+                                <input
+                                    type="file"
+                                    hidden
+                                    accept="image/*"
+                                    onChange={handleEditImageUpload}
+                                />
+                            </Button>
+                            {editUserImageUrl && (
+                                <Button
+                                    variant="outlined"
+                                    color="error"
+                                    startIcon={<DeleteIcon />}
+                                    size="small"
+                                    onClick={handleEditImageDelete}
+                                >
+                                    {t('profile.deleteImage', 'Delete')}
+                                </Button>
+                            )}
+                        </Stack>
+                    </Box>
+                    
                     <Box component="section">&nbsp;</Box>
                     <TextField
                         autoFocus

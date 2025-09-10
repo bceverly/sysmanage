@@ -4,7 +4,8 @@ This module contains the API implementation for the user object in the system.
 
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
+from fastapi.responses import Response
 from pyargon2 import hash as argon2_hash
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import sessionmaker
@@ -15,6 +16,7 @@ from backend.config import config
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.login_security import login_security
+from backend.api.profile import validate_and_process_image
 
 router = APIRouter()
 
@@ -345,3 +347,128 @@ async def unlock_user(user_id: int):
         )
 
     return ret_user
+
+
+@router.post("/user/{user_id}/image", dependencies=[Depends(JWTBearer())])
+async def upload_user_profile_image(user_id: int, file: UploadFile = File(...)):
+    """
+    Upload a profile image for a specific user (admin function).
+
+    Security features:
+    - File size limit (5MB) to prevent DoS attacks
+    - Image format validation
+    - Automatic resizing to prevent excessive storage usage
+    - Image processing to ensure valid image data
+    """
+    # Validate file is provided
+    if not file:
+        raise HTTPException(status_code=400, detail=_("No file provided"))
+
+    # Read file content
+    try:
+        file_content = await file.read()
+    except Exception as exc:
+        raise HTTPException(
+            status_code=400, detail=_("Error reading uploaded file")
+        ) from exc
+
+    # Validate and process the image using the same function as profile.py
+    processed_image_bytes, image_format = validate_and_process_image(
+        file_content, file.filename or "image"
+    )
+
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the user by id
+        user = session.query(models.User).filter(models.User.id == user_id).first()
+
+        if not user:
+            raise HTTPException(status_code=404, detail=_("User not found"))
+
+        # Update user's profile image
+        user.profile_image = processed_image_bytes
+        user.profile_image_type = image_format
+        user.profile_image_uploaded_at = datetime.now(timezone.utc)
+
+        session.commit()
+
+        return {
+            "message": _("Profile image uploaded successfully"),
+            "image_format": image_format,
+            "uploaded_at": user.profile_image_uploaded_at,
+        }
+
+
+@router.get("/user/{user_id}/image", dependencies=[Depends(JWTBearer())])
+async def get_user_profile_image(user_id: int):
+    """
+    Get a specific user's profile image (admin function).
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the user by id
+        user = session.query(models.User).filter(models.User.id == user_id).first()
+
+        if not user:
+            raise HTTPException(status_code=404, detail=_("User not found"))
+
+        if not user.profile_image:
+            raise HTTPException(status_code=404, detail=_("No profile image found"))
+
+        # Determine content type based on stored format
+        content_type = f"image/{user.profile_image_type}"
+        if user.profile_image_type == "jpg":
+            content_type = "image/jpeg"
+
+        return Response(
+            content=user.profile_image,
+            media_type=content_type,
+            headers={
+                "Cache-Control": "public, max-age=3600",  # Cache for 1 hour
+                "Last-Modified": (
+                    user.profile_image_uploaded_at.strftime("%a, %d %b %Y %H:%M:%S GMT")
+                    if user.profile_image_uploaded_at
+                    else datetime.now(timezone.utc).strftime(
+                        "%a, %d %b %Y %H:%M:%S GMT"
+                    )
+                ),
+            },
+        )
+
+
+@router.delete("/user/{user_id}/image", dependencies=[Depends(JWTBearer())])
+async def delete_user_profile_image(user_id: int):
+    """
+    Delete a specific user's profile image (admin function).
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the user by id
+        user = session.query(models.User).filter(models.User.id == user_id).first()
+
+        if not user:
+            raise HTTPException(status_code=404, detail=_("User not found"))
+
+        if not user.profile_image:
+            raise HTTPException(status_code=404, detail=_("No profile image to delete"))
+
+        # Clear the profile image data
+        user.profile_image = None
+        user.profile_image_type = None
+        user.profile_image_uploaded_at = None
+
+        session.commit()
+
+        return {"message": _("Profile image deleted successfully")}

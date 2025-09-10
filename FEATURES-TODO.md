@@ -358,3 +358,16 @@ like to add:
     to filter by tags to the hosts
     screen with a dropdown of all
     the tags.
+
+49. The agent should pass along to the
+    server whether it is running in
+    privilege elevated mode and that
+    info should be stored in the 
+    database at each heartbeat checkin.
+    This will allow the server's UI
+    to do things like include which
+    user to run scripts as if the
+    agent in question is running
+    with elevated privileges and
+    can change user context for
+    the script execution.

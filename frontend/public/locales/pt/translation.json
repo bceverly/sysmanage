@@ -355,7 +355,9 @@
     "passwordNeedsNumber": "A senha deve conter pelo menos um número",
     "passwordNeedsSpecial": "A senha deve conter pelo menos um caractere especial",
     "passwordNeedsCharTypes": "A senha deve conter pelo menos 3 tipos de caracteres diferentes",
-    "passwordContainsUsername": "A senha não pode conter seu nome de usuário ou email"
+    "passwordContainsUsername": "A senha não pode conter seu nome de usuário ou email",
+    "uploadImage": "Enviar imagem",
+    "deleteImage": "Excluir"
   },
   "updates": {
     "title": "Atualizações de Pacotes",

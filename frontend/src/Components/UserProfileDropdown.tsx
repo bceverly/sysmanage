@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import axiosInstance from '../Services/api';
 import {
     Avatar,
     Menu,
@@ -41,31 +42,24 @@ const UserProfileDropdown: React.FC = () => {
     };
 
     // Fetch profile image
-    const fetchProfileImage = async () => {
+    const fetchProfileImage = useCallback(async () => {
         if (!userid || imageLoading) return;
         
         setImageLoading(true);
         try {
-            const token = localStorage.getItem('access_token');
-            if (!token) return;
-
-            const response = await fetch('/profile/image', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+            const response = await axiosInstance.get('/profile/image', {
+                responseType: 'blob'
             });
 
-            if (response.ok) {
-                const imageBlob = await response.blob();
-                const imageUrl = URL.createObjectURL(imageBlob);
-                setProfileImageUrl(imageUrl);
-            }
-        } catch (error) {
+            const imageBlob = response.data;
+            const imageUrl = window.URL.createObjectURL(imageBlob);
+            setProfileImageUrl(imageUrl);
+        } catch {
             console.debug('No profile image available or error fetching image');
         } finally {
             setImageLoading(false);
         }
-    };
+    }, [userid, imageLoading]);
 
     // Load profile image on component mount
     useEffect(() => {
@@ -74,16 +68,16 @@ const UserProfileDropdown: React.FC = () => {
         // Cleanup: revoke object URL when component unmounts or image changes
         return () => {
             if (profileImageUrl) {
-                URL.revokeObjectURL(profileImageUrl);
+                window.URL.revokeObjectURL(profileImageUrl);
             }
         };
-    }, [userid]);
+    }, [userid, fetchProfileImage, profileImageUrl]);
 
     // Cleanup old URL when new one is set
     useEffect(() => {
         return () => {
             if (profileImageUrl) {
-                URL.revokeObjectURL(profileImageUrl);
+                window.URL.revokeObjectURL(profileImageUrl);
             }
         };
     }, [profileImageUrl]);

@@ -356,7 +356,9 @@
     "passwordNeedsNumber": "密碼必須包含至少一個數字",
     "passwordNeedsSpecial": "密碼必須包含至少一個特殊字元",
     "passwordNeedsCharTypes": "密碼必須包含至少3種不同類型的字元",
-    "passwordContainsUsername": "密碼不能包含您的使用者名或電子郵件"
+    "passwordContainsUsername": "密碼不能包含您的使用者名或電子郵件",
+    "uploadImage": "上傳圖片",
+    "deleteImage": "刪除"
   },
   "updates": {
     "title": "軟體包更新",

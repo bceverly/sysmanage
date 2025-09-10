@@ -354,7 +354,9 @@
     "passwordNeedsNumber": "पासवर्ड में कम से कम एक संख्या होनी चाहिए",
     "passwordNeedsSpecial": "पासवर्ड में कम से कम एक विशेष अक्षर होना चाहिए",
     "passwordNeedsCharTypes": "पासवर्ड में कम से कम 3 अलग-अलग प्रकार के अक्षर होने चाहिए",
-    "passwordContainsUsername": "पासवर्ड में आपका उपयोगकर्ता नाम या ईमेल नहीं हो सकता"
+    "passwordContainsUsername": "पासवर्ड में आपका उपयोगकर्ता नाम या ईमेल नहीं हो सकता",
+    "uploadImage": "छवि अपलोड करें",
+    "deleteImage": "हटाएं"
   },
   "updates": {
     "title": "पैकेज अपडेट",

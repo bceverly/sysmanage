@@ -363,7 +363,9 @@
     "passwordNeedsNumber": "Password must contain at least one number",
     "passwordNeedsSpecial": "Password must contain at least one special character",
     "passwordNeedsCharTypes": "Password must contain at least 3 different character types",
-    "passwordContainsUsername": "Password cannot contain your username or email"
+    "passwordContainsUsername": "Password cannot contain your username or email",
+    "uploadImage": "Upload Image",
+    "deleteImage": "Delete"
   },
   "updates": {
     "title": "Package Updates",
