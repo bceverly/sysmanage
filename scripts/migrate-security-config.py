@@ -312,8 +312,26 @@ def migrate_user_passwords(old_salt, new_salt, dry_run=False):
             print(f"\n✅ Updated {len(migrations)} users with temporary passwords")
             print("\n🔑 TEMPORARY PASSWORDS (save these securely!):")
             print("=" * 60)
-            for migration in migrations:
-                print(f"User: {migration['userid']:<25} Password: {migration['temp_password']}")
+            # Write passwords to a secure temporary file instead of logging them
+            temp_file = f"temp_passwords_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+            try:
+                with open(temp_file, 'w') as f:
+                    f.write("SysManage Temporary Passwords\n")
+                    f.write("Generated: {}\n".format(datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')))
+                    f.write("=" * 40 + "\n")
+                    for migration in migrations:
+                        f.write(f"User: {migration['userid']:<25} Password: {migration['temp_password']}\n")
+                    f.write("=" * 40 + "\n")
+                    f.write("Users MUST change these passwords immediately after logging in!\n")
+                print(f"📄 Temporary passwords saved to: {temp_file}")
+                print("   Please share these credentials securely with users")
+                print("   Delete this file after users have updated their passwords")
+            except Exception as e:
+                print(f"❌ Error writing temporary passwords file: {e}")
+                print("   Passwords will be shown on screen instead:")
+                for migration in migrations:
+                    print(f"User: {migration['userid']:<25} Password: ********")
+                    # Still don't log the actual passwords for security
             print("=" * 60)
             print("⚠️  Users MUST change these passwords immediately after logging in!")
             
@@ -382,8 +400,8 @@ def main():
     current_salt = current_config.get('security', {}).get('password_salt', '')
     
     if debug:
-        print(f"🐛 DEBUG: Current JWT secret: '{current_jwt}'")
-        print(f"🐛 DEBUG: Current password salt: '{current_salt}'")
+        print(f"🐛 DEBUG: Current JWT secret: [REDACTED - {len(current_jwt)} chars]")
+        print(f"🐛 DEBUG: Current password salt: [REDACTED - {len(current_salt)} chars]")
     
     print(f"🔍 Current JWT secret: {'DEFAULT' if current_jwt == 'I+Z74n/CFHser01E47pyrL91OuonEX9hNSvVFr/KLi4=' else 'CUSTOM'}")
     print(f"🔍 Current password salt: {'DEFAULT' if current_salt == '6/InQvDb8f3cM6sao8kWzIiYVHKGH9sqkEJ3uZhIo9Q=' else 'CUSTOM'}")
@@ -403,17 +421,17 @@ def main():
     if update_jwt:
         new_jwt = generate_jwt_secret()
         new_config['security']['jwt_secret'] = new_jwt
-        print(f"🔑 New JWT secret generated: {new_jwt[:20]}...")
+        print(f"🔑 New JWT secret generated: [REDACTED - {len(new_jwt)} chars]")
         if debug:
-            print(f"🐛 DEBUG: Full new JWT secret: {new_jwt}")
+            print(f"🐛 DEBUG: Full new JWT secret: [REDACTED - {len(new_jwt)} chars]")
     
     # Generate new password salt and handle user migration
     if update_salt:
         new_salt = generate_password_salt()
         new_config['security']['password_salt'] = new_salt
-        print(f"🧂 New password salt generated: {new_salt[:20]}...")
+        print(f"🧂 New password salt generated: [REDACTED - {len(new_salt)} chars]")
         if debug:
-            print(f"🐛 DEBUG: Full new password salt: {new_salt}")
+            print(f"🐛 DEBUG: Full new password salt: [REDACTED - {len(new_salt)} chars]")
         
         # Check for existing users and plan migration
         migrations_needed = migrate_user_passwords(current_salt, new_salt, dry_run=True)

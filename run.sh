@@ -234,9 +234,37 @@ if check_existing_processes; then
     ./stop.sh
     sleep 2
     
-    # Verify they were stopped
-    if check_existing_processes >/dev/null 2>&1; then
+    # Verify they were stopped by checking ports directly
+    BACKEND_PORT=$(get_config_value "api.port")
+    if [ $? -ne 0 ] || [ -z "$BACKEND_PORT" ]; then
+        BACKEND_PORT=8080
+    fi
+    
+    FRONTEND_PORT=$(get_config_value "webui.port")
+    if [ $? -ne 0 ] || [ -z "$FRONTEND_PORT" ]; then
+        FRONTEND_PORT=3000
+    fi
+    
+    # Check if ports are still in use
+    backend_still_running=false
+    frontend_still_running=false
+    
+    if check_port $BACKEND_PORT; then
+        backend_still_running=true
+    fi
+    
+    if check_port $FRONTEND_PORT; then
+        frontend_still_running=true
+    fi
+    
+    if [ "$backend_still_running" = true ] || [ "$frontend_still_running" = true ]; then
         echo "❌ ERROR: Failed to stop existing processes. Please manually stop them before continuing."
+        if [ "$backend_still_running" = true ]; then
+            echo "   Backend still running on port $BACKEND_PORT"
+        fi
+        if [ "$frontend_still_running" = true ]; then
+            echo "   Frontend still running on port $FRONTEND_PORT"
+        fi
         exit 1
     else
         echo "✅ Successfully stopped existing processes"
