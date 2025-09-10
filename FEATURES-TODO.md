@@ -145,6 +145,7 @@ like to add:
 23. Special Updates - Allow an agent to 
     manage Ubuntu Pro as well as any other
     special paid updates on other platforms.
+    Include syspatch on OpenBSD.
 
 24. SSH Keys - Manage SSH keys on the agents
     so that they can be pushed out from a
@@ -359,7 +360,7 @@ like to add:
     screen with a dropdown of all
     the tags.
 
-49. The agent should pass along to the
+49. ~~The agent should pass along to the
     server whether it is running in
     privilege elevated mode and that
     info should be stored in the 
@@ -370,4 +371,14 @@ like to add:
     agent in question is running
     with elevated privileges and
     can change user context for
-    the script execution.
+    the script execution.~~
+
+50. OS version upgrades - we need a
+    feature that will let us detect
+    that there is a new operating
+    system major version out there
+    and show that fact to the user.
+    We then need to, if one is 
+    available, see if the user wants
+    to upgrade.  If so, then we need
+    to apply the upgrade.

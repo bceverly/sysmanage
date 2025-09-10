@@ -155,11 +155,15 @@ class HeartbeatMessage(Message):
         agent_status: str = "healthy",
         system_load: float = None,
         memory_usage: float = None,
+        is_privileged: bool = None,
+        **kwargs
     ):
         data = {
             "agent_status": agent_status,
             "system_load": system_load,
             "memory_usage": memory_usage,
+            "is_privileged": is_privileged,
+            **kwargs,
         }
         super().__init__(MessageType.HEARTBEAT, data)
 
@@ -429,6 +433,13 @@ def create_message(raw_data: Dict[str, Any]) -> Message:
             agent_status=data.get("agent_status", "healthy"),
             system_load=data.get("system_load"),
             memory_usage=data.get("memory_usage"),
+            is_privileged=data.get("is_privileged"),
+            **{
+                k: v
+                for k, v in data.items()
+                if k
+                not in ["agent_status", "system_load", "memory_usage", "is_privileged"]
+            }
         )
     if message_type == MessageType.ERROR:
         data = raw_data.get("data", {})

@@ -93,6 +93,26 @@ const Hosts = () => {
             }
         },
         { 
+            field: 'is_agent_privileged', 
+            headerName: t('hosts.privileged'), 
+            width: 100,
+            renderCell: (params) => {
+                const isPrivileged = params.value;
+                if (isPrivileged === undefined || isPrivileged === null) {
+                    return <span style={{ color: '#666', fontStyle: 'italic' }}>Unknown</span>;
+                }
+                return (
+                    <Chip 
+                        label={isPrivileged ? t('common.yes') : t('common.no')}
+                        color={isPrivileged ? 'success' : 'error'}
+                        size="small"
+                        variant="filled"
+                        title={isPrivileged ? t('hosts.runningPrivileged') : t('hosts.runningUnprivileged')}
+                    />
+                );
+            }
+        },
+        { 
             field: 'last_access', 
             headerName: t('hosts.lastCheckin'), 
             width: 200,

@@ -47,6 +47,16 @@ const UserProfileDropdown: React.FC = () => {
         
         setImageLoading(true);
         try {
+            // First check if user has a profile image via the profile endpoint
+            const profileResponse = await axiosInstance.get('/profile');
+            
+            if (!profileResponse.data.has_profile_image) {
+                // User doesn't have a profile image, don't try to fetch it
+                setProfileImageUrl(null);
+                return;
+            }
+
+            // User has a profile image, fetch it
             const response = await axiosInstance.get('/profile/image', {
                 responseType: 'blob'
             });
@@ -55,7 +65,8 @@ const UserProfileDropdown: React.FC = () => {
             const imageUrl = window.URL.createObjectURL(imageBlob);
             setProfileImageUrl(imageUrl);
         } catch {
-            console.debug('No profile image available or error fetching image');
+            // Silently handle the case where profile image is not available
+            setProfileImageUrl(null);
         } finally {
             setImageLoading(false);
         }

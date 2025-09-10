@@ -86,6 +86,9 @@ class Host(Base):
     reboot_required = Column(Boolean, nullable=False, default=False, index=True)
     reboot_required_updated_at = Column(DateTime(timezone=True), nullable=True)
 
+    # Agent privilege status
+    is_agent_privileged = Column(Boolean, nullable=True, default=False)
+
     # Relationships to normalized hardware tables
     storage_devices = relationship(
         "StorageDevice", back_populates="host", cascade="all, delete-orphan"

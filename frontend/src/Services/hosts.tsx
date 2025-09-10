@@ -85,6 +85,8 @@ type SysManageHost = {
     // Diagnostics request tracking fields
     diagnostics_requested_at?: string;
     diagnostics_request_status?: string;
+    // Agent privilege status
+    is_agent_privileged?: boolean;
 }
 
 type StorageDevice = {

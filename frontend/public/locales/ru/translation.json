@@ -59,6 +59,9 @@
     "updated": "Обновлено",
     "autoRefresh": "Автообновление",
     "lastSeen": "Последний раз виден {{minutes}} минут назад",
+    "privileged": "Привилегированный",
+    "runningPrivileged": "Агент работает с повышенными правами", 
+    "runningUnprivileged": "Агент работает без повышенных прав",
     "noRows": "Нет строк",
     "noResults": "Результаты не найдены",
     "invalidDate": "Неверная дата"

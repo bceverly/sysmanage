@@ -124,6 +124,11 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                 host.active = True
                 host.last_access = datetime.now(timezone.utc)
 
+                # Update privileged status if provided in heartbeat
+                is_privileged = message_data.get("is_privileged")
+                if is_privileged is not None:
+                    host.is_agent_privileged = is_privileged
+
                 # Commit changes
                 db.commit()
                 result_rowcount = 1
@@ -135,6 +140,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
 
                 if has_hostname and has_ipv4 and has_ipv6:
                     # Create new host
+                    is_privileged = message_data.get("is_privileged", False)
                     host = Host(
                         fqdn=connection.hostname,
                         ipv4=connection.ipv4,
@@ -143,6 +149,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                         status="up",
                         approval_status="pending",
                         last_access=datetime.now(timezone.utc),
+                        is_agent_privileged=is_privileged,
                     )
                     db.add(host)
                     db.commit()

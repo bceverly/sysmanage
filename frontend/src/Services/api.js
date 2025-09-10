@@ -38,8 +38,8 @@ axiosInstance.interceptors.response.use(
 
     if (originalConfig.url !== "/login" && err.response) {
       // Access Token was expired
-      console.log('Token expired? err.response = ' + err.response);
-      console.log('retry = ' + originalConfig._retry);
+      console.debug('Token expired? err.response = ' + err.response);
+      console.debug('retry = ' + originalConfig._retry);
 
       // This is an attempt to log in with an expired refresh token
       if (err.response.status === 403) {

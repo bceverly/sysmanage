@@ -58,6 +58,9 @@
     "updated": "محدث",
     "autoRefresh": "التحديث التلقائي",
     "lastSeen": "آخر ظهور منذ {{minutes}} دقيقة",
+    "privileged": "مميز",
+    "runningPrivileged": "الوكيل يعمل بامتيازات مرتفعة", 
+    "runningUnprivileged": "الوكيل يعمل بدون امتيازات مرتفعة",
     "noRows": "لا توجد صفوف",
     "noResults": "لم يتم العثور على نتائج",
     "invalidDate": "تاريخ غير صالح"

@@ -59,6 +59,9 @@
     "updated": "更新済み",
     "autoRefresh": "自動更新",
     "lastSeen": "最終確認",
+    "privileged": "特権",
+    "runningPrivileged": "エージェントは昇格された権限で実行されています", 
+    "runningUnprivileged": "エージェントは昇格された権限なしで実行されています",
     "noRows": "行がありません",
     "noResults": "結果が見つかりません",
     "invalidDate": "無効な日付"

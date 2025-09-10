@@ -59,6 +59,9 @@
     "updated": "Bijgewerkt",
     "autoRefresh": "Auto-vernieuwen",
     "lastSeen": "{{minutes}} minuten geleden gezien",
+    "privileged": "Geprivilegieerd",
+    "runningPrivileged": "Agent draait met verhoogde privileges", 
+    "runningUnprivileged": "Agent draait zonder verhoogde privileges",
     "noRows": "Geen rijen",
     "noResults": "Geen resultaten gevonden",
     "invalidDate": "Ongeldige datum"

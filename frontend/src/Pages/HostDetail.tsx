@@ -667,6 +667,24 @@ const HostDetail = () => {
                                         size="small"
                                     />
                                 </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('hosts.privileged', 'Privileged')}
+                                    </Typography>
+                                    {host.is_agent_privileged === undefined || host.is_agent_privileged === null ? (
+                                        <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                                            Unknown
+                                        </Typography>
+                                    ) : (
+                                        <Chip 
+                                            label={host.is_agent_privileged ? t('common.yes') : t('common.no')}
+                                            color={host.is_agent_privileged ? 'success' : 'error'}
+                                            size="small"
+                                            variant="filled"
+                                            title={host.is_agent_privileged ? t('hosts.runningPrivileged') : t('hosts.runningUnprivileged')}
+                                        />
+                                    )}
+                                </Grid>
                                 <Grid item xs={12}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hosts.lastCheckin', 'Last Check-in')}

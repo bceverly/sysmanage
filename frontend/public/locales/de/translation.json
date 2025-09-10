@@ -59,6 +59,9 @@
     "updated": "Aktualisiert",
     "autoRefresh": "Auto-Aktualisierung",
     "lastSeen": "Vor {{minutes}} Minuten gesehen",
+    "privileged": "Privilegiert",
+    "runningPrivileged": "Agent läuft mit erweiterten Berechtigungen", 
+    "runningUnprivileged": "Agent läuft ohne erweiterte Berechtigungen",
     "noRows": "Keine Zeilen",
     "noResults": "Keine Ergebnisse gefunden",
     "invalidDate": "Ungültiges Datum"

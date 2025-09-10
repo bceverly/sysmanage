@@ -58,6 +58,9 @@
     "updated": "Atualizado",
     "autoRefresh": "Auto-atualização",
     "lastSeen": "Visto há {{minutes}} minutos",
+    "privileged": "Privilegiado",
+    "runningPrivileged": "O agente está executando com privilégios elevados", 
+    "runningUnprivileged": "O agente está executando sem privilégios elevados",
     "noRows": "Sem linhas",
     "noResults": "Nenhum resultado encontrado",
     "invalidDate": "Data inválida"

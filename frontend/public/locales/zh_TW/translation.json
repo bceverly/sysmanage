@@ -59,6 +59,9 @@
     "updated": "已更新",
     "autoRefresh": "自動刷新",
     "lastSeen": "{{minutes}}分鐘前最後見到",
+    "privileged": "特權",
+    "runningPrivileged": "代理程式正以提升權限執行", 
+    "runningUnprivileged": "代理程式正在不帶提升權限執行",
     "noRows": "無資料列",
     "noResults": "未找到結果",
     "invalidDate": "無效日期"

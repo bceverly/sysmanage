@@ -59,6 +59,9 @@
     "updated": "업데이트됨",
     "autoRefresh": "자동 새로고침",
     "lastSeen": "{{minutes}}분 전 마지막 확인",
+    "privileged": "권한",
+    "runningPrivileged": "에이전트가 상승된 권한으로 실행 중입니다", 
+    "runningUnprivileged": "에이전트가 상승된 권한 없이 실행 중입니다",
     "noRows": "데이터 없음",
     "noResults": "검색 결과 없음",
     "invalidDate": "잘못된 날짜"
