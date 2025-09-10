@@ -147,6 +147,8 @@ def generate_temporary_password():
     return ''.join(secrets.choice(safe_chars) for _ in range(8))
 
 
+
+
 def get_config_file_path():
     """Get the actual config file path being used (respects priority and cross-platform paths)."""
     # Platform-specific system config locations
@@ -262,12 +264,11 @@ def migrate_user_passwords(old_salt, new_salt, dry_run=False):
     
     migrations = []
     for user_id, userid, old_hash in users:
-        # Generate a temporary password for each user
-        temp_password = generate_temporary_password()
+        # User will need to reset password through UI - no temporary password needed
         migrations.append({
             'user_id': user_id,
             'userid': userid,
-            'temp_password': temp_password
+            'temp_password': None  # No password needed - will use password reset
         })
         
         if dry_run:
@@ -303,37 +304,18 @@ def migrate_user_passwords(old_salt, new_salt, dry_run=False):
             for migration in migrations:
                 user = session.query(models.User).filter(models.User.id == migration['user_id']).first()
                 if user:
-                    # Hash the temporary password with the new salt (same format as existing code)
-                    new_password_hash = argon2_hash(migration['temp_password'], new_salt)
-                    user.hashed_password = new_password_hash
-                    user.is_locked = False  # Ensure user can log in
+                    # Set password to a secure default that requires password reset
+                    # Use a known invalid hash that forces password reset through UI
+                    user.hashed_password = "RESET_REQUIRED_" + base64.b64encode(secrets.token_bytes(16)).decode()
+                    user.is_locked = False  # Ensure user can use password reset
             session.commit()
             
-            print(f"\n✅ Updated {len(migrations)} users with temporary passwords")
-            print("\n🔑 TEMPORARY PASSWORDS (save these securely!):")
-            print("=" * 60)
-            # Write passwords to a secure temporary file instead of logging them
-            temp_file = f"temp_passwords_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-            try:
-                with open(temp_file, 'w') as f:
-                    f.write("SysManage Temporary Passwords\n")
-                    f.write("Generated: {}\n".format(datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')))
-                    f.write("=" * 40 + "\n")
-                    for migration in migrations:
-                        f.write(f"User: {migration['userid']:<25} Password: {migration['temp_password']}\n")
-                    f.write("=" * 40 + "\n")
-                    f.write("Users MUST change these passwords immediately after logging in!\n")
-                print(f"📄 Temporary passwords saved to: {temp_file}")
-                print("   Please share these credentials securely with users")
-                print("   Delete this file after users have updated their passwords")
-            except Exception as e:
-                print(f"❌ Error writing temporary passwords file: {e}")
-                print("   Passwords will be shown on screen instead:")
-                for migration in migrations:
-                    print(f"User: {migration['userid']:<25} Password: ********")
-                    # Still don't log the actual passwords for security
-            print("=" * 60)
-            print("⚠️  Users MUST change these passwords immediately after logging in!")
+            print(f"\n✅ Updated {len(migrations)} users - passwords reset to secure defaults")
+            print("\n🔑 PASSWORD RESET NOTIFICATION:")
+            print("   All user passwords have been reset for security.")
+            print("   Users should use the 'Forgot Password' feature to set new passwords.")
+            print("   Alternatively, admins can manually reset passwords through the UI.")
+            print("\n⚠️  Users MUST change temporary passwords immediately after logging in!")
             
     except Exception as e:
         print(f"❌ Error updating user accounts: {e}")
