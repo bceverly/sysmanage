@@ -326,11 +326,11 @@ like to add:
     configuration effort on the part
     of the person deploying it.
 
-45. For the server and the agent, add
+45. ~~For the server and the agent, add
     a debug log verbosity level feature
     to the config file (low / medium /
     high) that controls the amount of
-    information logged.
+    information logged.~~
 
 46. Have the agent and the server log
     their messages to the operating
