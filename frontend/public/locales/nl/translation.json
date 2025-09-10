@@ -554,6 +554,14 @@
       "cannotDeleteActiveScript": "Kan script met actieve uitvoeringen niet verwijderen",
       "hostNotConnected": "Host is niet verbonden - script in wachtrij voor levering",
       "scriptExecutionDisabled": "Script uitvoering is uitgeschakeld in agent configuratie"
+    },
+    "search": {
+      "search": "Zoeken",
+      "searchTerm": "Zoekterm",
+      "searchColumn": "Zoeken in",
+      "searchHosts": "Hosts zoeken",
+      "searchUsers": "Gebruikers zoeken",
+      "searchScripts": "Scripts zoeken"
     }
   }
 }

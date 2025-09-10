@@ -554,6 +554,14 @@
       "cannotDeleteActiveScript": "无法删除有活动执行的脚本",
       "hostNotConnected": "主机未连接 - 脚本已排队等待传送",
       "scriptExecutionDisabled": "代理配置中禁用了脚本执行"
+    },
+    "search": {
+      "search": "搜索",
+      "searchTerm": "搜索词",
+      "searchColumn": "搜索范围",
+      "searchHosts": "搜索主机",
+      "searchUsers": "搜索用户",
+      "searchScripts": "搜索脚本"
     }
   }
 }

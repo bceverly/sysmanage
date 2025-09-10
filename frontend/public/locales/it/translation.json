@@ -555,6 +555,14 @@
       "cannotDeleteActiveScript": "Impossibile eliminare script con esecuzioni attive",
       "hostNotConnected": "Host non connesso - script in coda per la consegna",
       "scriptExecutionDisabled": "L'esecuzione degli script è disabilitata nella configurazione dell'agent"
+    },
+    "search": {
+      "search": "Cerca",
+      "searchTerm": "Termine di ricerca",
+      "searchColumn": "Cerca in",
+      "searchHosts": "Cerca host",
+      "searchUsers": "Cerca utenti",
+      "searchScripts": "Cerca script"
     }
   }
 }

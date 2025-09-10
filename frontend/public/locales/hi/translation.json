@@ -551,6 +551,14 @@
       "cannotDeleteActiveScript": "सक्रिय एक्सीक्यूशन वाली स्क्रिप्ट को डिलीट नहीं किया जा सकता",
       "hostNotConnected": "होस्ट कनेक्ट नहीं है - स्क्रिप्ट डिलीवरी के लिए क्यू में है",
       "scriptExecutionDisabled": "एजेंट कॉन्फ़िगरेशन में स्क्रिप्ट एक्सीक्यूशन अक्षम है"
+    },
+    "search": {
+      "search": "खोजें",
+      "searchTerm": "खोज की शर्त",
+      "searchColumn": "में खोजें",
+      "searchHosts": "होस्ट्स खोजें",
+      "searchUsers": "यूजर्स खोजें",
+      "searchScripts": "स्क्रिप्ट्स खोजें"
     }
   }
 }

@@ -556,6 +556,14 @@
       "cannotDeleteActiveScript": "Skript mit aktiven Ausführungen kann nicht gelöscht werden",
       "hostNotConnected": "Host ist nicht verbunden - Skript für Zustellung in Warteschlange",
       "scriptExecutionDisabled": "Skript-Ausführung ist in der Agent-Konfiguration deaktiviert"
+    },
+    "search": {
+      "search": "Suchen",
+      "searchTerm": "Suchbegriff",
+      "searchColumn": "Suchen in",
+      "searchHosts": "Hosts suchen",
+      "searchUsers": "Benutzer suchen",
+      "searchScripts": "Skripte suchen"
     }
   }
 }

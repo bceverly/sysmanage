@@ -553,6 +553,14 @@
       "cannotDeleteActiveScript": "無法刪除有活動執行的腳本",
       "hostNotConnected": "主機未連接 - 腳本已排隊等待傳送",
       "scriptExecutionDisabled": "代理程式配置中停用了腳本執行"
+    },
+    "search": {
+      "search": "搜尋",
+      "searchTerm": "搜尋詞",
+      "searchColumn": "搜尋範圍",
+      "searchHosts": "搜尋主機",
+      "searchUsers": "搜尋使用者",
+      "searchScripts": "搜尋腳本"
     }
   }
 }

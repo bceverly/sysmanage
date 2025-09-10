@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
 import { useTablePageSize } from '../hooks/useTablePageSize';
@@ -24,9 +24,11 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Avatar from '@mui/material/Avatar';
+import SearchBox from '../Components/SearchBox';
 
 const Users = () => {
     const [tableData, setTableData] = useState<SysManageUser[]>([]);
+    const [filteredData, setFilteredData] = useState<SysManageUser[]>([]);
     const [selection, setSelection] = useState<GridRowSelectionModel>([]);
     const [addDialogOpen, setAddDialogOpen] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -38,6 +40,8 @@ const Users = () => {
     const [editLastName, setEditLastName] = useState<string>('');
     const [editUserImageUrl, setEditUserImageUrl] = useState<string | null>(null);
     const [editImageLoading, setEditImageLoading] = useState<boolean>(false);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [searchColumn, setSearchColumn] = useState<string>('userid');
     const { t } = useTranslation();
     
     // Dynamic table page sizing based on window height
@@ -89,7 +93,12 @@ const Users = () => {
                 </IconButton>
             )
         }
-    ]
+    ];
+
+    // Search columns configuration (excluding irrelevant columns)
+    const searchColumns = [
+        { field: 'userid', label: t('users.email') }
+    ];
 
     const handleDelete = async () => {
         try {
@@ -132,11 +141,38 @@ const Users = () => {
     }
 
     const getSelectedUsersLockStatus = () => {
-        const selectedUsers = tableData.filter(user => 
+        const selectedUsers = filteredData.filter(user => 
             selection.includes(Number(user.id))
         );
         return selectedUsers.some(user => user.is_locked);
-    }
+    };
+
+    // Search functionality
+    const performSearch = useCallback(() => {
+        if (!searchTerm.trim()) {
+            setFilteredData(tableData);
+            return;
+        }
+
+        const filtered = tableData.filter(user => {
+            const fieldValue = user[searchColumn as keyof SysManageUser];
+            if (fieldValue === null || fieldValue === undefined) {
+                return false;
+            }
+            return String(fieldValue).toLowerCase().includes(searchTerm.toLowerCase());
+        });
+        
+        setFilteredData(filtered);
+    }, [searchTerm, searchColumn, tableData]);
+
+    // Update filtered data when table data changes or search is cleared
+    React.useEffect(() => {
+        if (!searchTerm.trim()) {
+            setFilteredData(tableData);
+        } else {
+            performSearch();
+        }
+    }, [tableData, searchTerm, searchColumn, performSearch]);
 
     const handleClickOpen = () => {
         setAddDialogOpen(true);
@@ -160,7 +196,7 @@ const Users = () => {
 
     const handleEditClickOpen = () => {
         if (selection.length === 1) {
-            const selectedUser = tableData.find(user => Number(user.id) === Number(selection[0]));
+            const selectedUser = filteredData.find(user => Number(user.id) === Number(selection[0]));
             if (selectedUser) {
                 setEditUser(selectedUser);
                 setEditEmail(selectedUser.userid);
@@ -242,9 +278,19 @@ const Users = () => {
 
     return (
         <div>
+            {/* Search Box */}
+            <SearchBox
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                searchColumn={searchColumn}
+                setSearchColumn={setSearchColumn}
+                columns={searchColumns}
+                placeholder={t('search.searchUsers', 'Search users')}
+            />
+            
             <div  style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px`, width: '99%' }}>
                 <DataGrid
-                    rows={tableData}
+                    rows={filteredData}
                     columns={columns}
                     initialState={{
                         pagination: {

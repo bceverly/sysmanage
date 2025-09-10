@@ -44,6 +44,7 @@ import {
   ExecuteScriptRequest 
 } from '../Services/scripts';
 import { useTablePageSize } from '../hooks/useTablePageSize';
+import SearchBox from '../Components/SearchBox';
 import './css/Scripts.css';
 
 interface TabPanelProps {
@@ -74,6 +75,7 @@ const Scripts: React.FC = () => {
   const { t } = useTranslation();
   const [tabValue, setTabValue] = useState(0);
   const [scripts, setScripts] = useState<Script[]>([]);
+  const [filteredScripts, setFilteredScripts] = useState<Script[]>([]);
   const [hosts, setHosts] = useState<Host[]>([]);
   const [executions, setExecutions] = useState<ScriptExecution[]>([]);
   const [loading, setLoading] = useState(false);
@@ -99,6 +101,8 @@ const Scripts: React.FC = () => {
   const [selectedScripts, setSelectedScripts] = useState<GridRowSelectionModel>([]);
   const [viewingScript, setViewingScript] = useState<Script | null>(null);
   const [showAddScriptDialog, setShowAddScriptDialog] = useState(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchColumn, setSearchColumn] = useState<string>('name');
   
   // Execution History state
   const [selectedExecutions, setSelectedExecutions] = useState<GridRowSelectionModel>([]);
@@ -133,6 +137,14 @@ const Scripts: React.FC = () => {
     { value: 'netbsd', label: t('scripts.platforms.netbsd') }
   ];
 
+  // Search columns configuration (excluding irrelevant columns)
+  const searchColumns = [
+    { field: 'name', label: t('scripts.scriptName') },
+    { field: 'description', label: t('scripts.description') },
+    { field: 'shell_type', label: t('scripts.shellType') },
+    { field: 'platform', label: t('scripts.platform') }
+  ];
+
   // Load data
   const loadScripts = useCallback(async () => {
     try {
@@ -142,6 +154,33 @@ const Scripts: React.FC = () => {
       showNotification(t('scripts.loadError'), 'error');
     }
   }, [t]);
+
+  // Search functionality
+  const performSearch = useCallback(() => {
+    if (!searchTerm.trim()) {
+      setFilteredScripts(scripts);
+      return;
+    }
+
+    const filtered = scripts.filter(script => {
+      const fieldValue = script[searchColumn as keyof Script];
+      if (fieldValue === null || fieldValue === undefined) {
+        return false;
+      }
+      return String(fieldValue).toLowerCase().includes(searchTerm.toLowerCase());
+    });
+    
+    setFilteredScripts(filtered);
+  }, [searchTerm, searchColumn, scripts]);
+
+  // Update filtered data when scripts change or search is cleared
+  React.useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredScripts(scripts);
+    } else {
+      performSearch();
+    }
+  }, [scripts, searchTerm, searchColumn, performSearch]);
 
   const loadHosts = useCallback(async () => {
     try {
@@ -778,9 +817,19 @@ const Scripts: React.FC = () => {
           </Typography>
         </Box>
 
+        {/* Search Box */}
+        <SearchBox
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          searchColumn={searchColumn}
+          setSearchColumn={setSearchColumn}
+          columns={searchColumns}
+          placeholder={t('search.searchScripts', 'Search scripts')}
+        />
+
         <div style={{ height: 400, width: '100%' }}>
           <DataGrid
-            rows={scripts}
+            rows={filteredScripts}
             columns={columns}
             initialState={{
               pagination: {

@@ -557,6 +557,14 @@
       "cannotDeleteActiveScript": "لا يمكن حذف السكريبت الذي يحتوي على تنفيذات نشطة",
       "hostNotConnected": "المضيف غير متصل - تم وضع السكريبت في الطابور للتسليم",
       "scriptExecutionDisabled": "تنفيذ السكريبتات معطل في إعدادات الوكيل"
+    },
+    "search": {
+      "search": "بحث",
+      "searchTerm": "بحث",
+      "searchColumn": "البحث في",
+      "searchHosts": "البحث في المضيفين",
+      "searchUsers": "البحث في المستخدمين",
+      "searchScripts": "البحث في السكريبتات"
     }
   }
 }

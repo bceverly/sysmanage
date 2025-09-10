@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -17,11 +17,15 @@ import { useTranslation } from 'react-i18next';
 import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost } from '../Services/hosts'
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
+import SearchBox from '../Components/SearchBox';
 
 const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
+    const [filteredData, setFilteredData] = useState<SysManageHost[]>([]);
     const [selection, setSelection] = useState<GridRowSelectionModel>([]);
     const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [searchColumn, setSearchColumn] = useState<string>('fqdn');
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { triggerRefresh } = useNotificationRefresh();
@@ -183,12 +187,19 @@ const Hosts = () => {
                 </IconButton>
             )
         }
-    ]
+    ];
+
+    // Search columns configuration (excluding irrelevant columns)
+    const searchColumns = [
+        { field: 'fqdn', label: t('hosts.fqdn') },
+        { field: 'ipv4', label: t('hosts.ipv4') },
+        { field: 'ipv6', label: t('hosts.ipv6') }
+    ];
 
     const handleApprove = async () => {
         try {
             // Get selected hosts that need approval
-            const selectedHosts = tableData.filter(host => 
+            const selectedHosts = filteredData.filter(host => 
                 selection.includes(Number(host.id)) && host.approval_status === 'pending'
             );
             
@@ -245,7 +256,7 @@ const Hosts = () => {
         try {
             // Only reboot hosts that are active and have privileged agents
             const activePrivilegedSelections = selection.filter(id => {
-                const host = tableData.find(h => h.id.toString() === id.toString());
+                const host = filteredData.find(h => h.id.toString() === id.toString());
                 return host && host.active && host.is_agent_privileged;
             });
 
@@ -275,7 +286,7 @@ const Hosts = () => {
         try {
             // Only shutdown hosts that are active and have privileged agents
             const activePrivilegedSelections = selection.filter(id => {
-                const host = tableData.find(h => h.id.toString() === id.toString());
+                const host = filteredData.find(h => h.id.toString() === id.toString());
                 return host && host.active && host.is_agent_privileged;
             });
 
@@ -303,7 +314,7 @@ const Hosts = () => {
 
     // Helper function to check if any selected hosts can be rebooted/shutdown
     const hasActivePrivilegedSelection = selection.some(id => {
-        const host = tableData.find(h => h.id.toString() === id.toString());
+        const host = filteredData.find(h => h.id.toString() === id.toString());
         return host && host.active && host.is_agent_privileged;
     });
 
@@ -386,12 +397,49 @@ const Hosts = () => {
     };
 
     // Check if any selected hosts need approval
-    const hasPendingSelection = tableData.some(host => 
+    const hasPendingSelection = filteredData.some(host => 
         selection.includes(Number(host.id)) && host.approval_status === 'pending'
     );
 
+    // Search functionality
+    const performSearch = useCallback(() => {
+        if (!searchTerm.trim()) {
+            setFilteredData(tableData);
+            return;
+        }
+
+        const filtered = tableData.filter(host => {
+            const fieldValue = host[searchColumn as keyof SysManageHost];
+            if (fieldValue === null || fieldValue === undefined) {
+                return false;
+            }
+            return String(fieldValue).toLowerCase().includes(searchTerm.toLowerCase());
+        });
+        
+        setFilteredData(filtered);
+    }, [searchTerm, searchColumn, tableData]);
+
+    // Update filtered data when table data changes or search is cleared
+    React.useEffect(() => {
+        if (!searchTerm.trim()) {
+            setFilteredData(tableData);
+        } else {
+            performSearch();
+        }
+    }, [tableData, searchTerm, searchColumn, performSearch]);
+
     return (
         <div>
+            {/* Search Box */}
+            <SearchBox
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                searchColumn={searchColumn}
+                setSearchColumn={setSearchColumn}
+                columns={searchColumns}
+                placeholder={t('search.searchHosts', 'Search hosts')}
+            />
+            
             {/* Subtle Refresh Status */}
             <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Typography variant="caption" color="textSecondary" sx={{ display: 'flex', alignItems: 'center' }}>
@@ -404,7 +452,7 @@ const Hosts = () => {
             
             <div  style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px`, width: '99%' }}>
                 <DataGrid
-                    rows={tableData}
+                    rows={filteredData}
                     columns={columns}
                     initialState={{
                         pagination: {

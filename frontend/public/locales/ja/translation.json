@@ -556,6 +556,14 @@
       "cannotDeleteActiveScript": "アクティブな実行があるスクリプトは削除できません",
       "hostNotConnected": "ホストが接続されていません - スクリプトは配信待ちです",
       "scriptExecutionDisabled": "エージェント設定でスクリプト実行が無効になっています"
+    },
+    "search": {
+      "search": "検索",
+      "searchTerm": "検索語",
+      "searchColumn": "検索対象",
+      "searchHosts": "ホストを検索",
+      "searchUsers": "ユーザーを検索",
+      "searchScripts": "スクリプトを検索"
     }
   }
 }

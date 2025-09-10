@@ -550,6 +550,14 @@
       "cannotDeleteActiveScript": "Нельзя удалить скрипт с активными выполнениями",
       "hostNotConnected": "Хост не подключён - скрипт в очереди на доставку",
       "scriptExecutionDisabled": "Выполнение скриптов отключено в конфигурации агента"
+    },
+    "search": {
+      "search": "Поиск",
+      "searchTerm": "Поисковый термин",
+      "searchColumn": "Искать в",
+      "searchHosts": "Поиск хостов",
+      "searchUsers": "Поиск пользователей",
+      "searchScripts": "Поиск скриптов"
     }
   }
 }
