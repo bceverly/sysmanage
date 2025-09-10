@@ -2,13 +2,17 @@
 This module houses the API routes for user profile management in SysManage.
 """
 
+import base64
+import io
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from pyargon2 import hash as argon2_hash
 from sqlalchemy.orm import sessionmaker
+from PIL import Image
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.config import config
@@ -38,6 +42,8 @@ class ProfileResponse(BaseModel):
     last_name: Optional[str] = None
     active: bool
     password_requirements: str
+    has_profile_image: bool = False
+    profile_image_uploaded_at: Optional[datetime] = None
 
 
 class PasswordChange(BaseModel):
@@ -79,6 +85,8 @@ async def get_profile(current_user: str = Depends(get_current_user)):
             last_name=user.last_name,
             active=user.active,
             password_requirements=password_policy.get_requirements_text(),
+            has_profile_image=user.profile_image is not None,
+            profile_image_uploaded_at=user.profile_image_uploaded_at,
         )
 
 
@@ -125,6 +133,8 @@ async def update_profile(
             last_name=user.last_name,
             active=user.active,
             password_requirements=password_policy.get_requirements_text(),
+            has_profile_image=user.profile_image is not None,
+            profile_image_uploaded_at=user.profile_image_uploaded_at,
         )
 
 
@@ -187,3 +197,210 @@ async def change_password(
         session.commit()
 
         return {"message": _("Password changed successfully")}
+
+
+# Security configuration for image uploads
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB limit to prevent DoS attacks
+ALLOWED_FORMATS = {"PNG", "JPEG", "JPG", "GIF", "WEBP"}
+MAX_DIMENSIONS = (512, 512)  # Maximum width and height in pixels
+
+
+def validate_and_process_image(file_content: bytes, filename: str) -> tuple[bytes, str]:
+    """
+    Validate and process uploaded image with security controls.
+    
+    Args:
+        file_content: The raw file bytes
+        filename: Original filename for format detection
+        
+    Returns:
+        Tuple of (processed_image_bytes, format)
+        
+    Raises:
+        HTTPException: If validation fails
+    """
+    # Check file size to prevent DoS attacks
+    if len(file_content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail=_("File size too large. Maximum allowed size is 5MB.")
+        )
+    
+    try:
+        # Open and validate the image
+        image = Image.open(io.BytesIO(file_content))
+        
+        # Verify it's a valid image format
+        if image.format not in ALLOWED_FORMATS:
+            raise HTTPException(
+                status_code=400,
+                detail=_("Unsupported image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP")
+            )
+        
+        # Convert RGBA to RGB for JPEG compatibility
+        if image.mode in ("RGBA", "LA", "P"):
+            # Create a white background
+            background = Image.new("RGB", image.size, (255, 255, 255))
+            if image.mode == "P":
+                image = image.convert("RGBA")
+            background.paste(image, mask=image.split()[-1] if image.mode == "RGBA" else None)
+            image = background
+        
+        # Resize image if it exceeds maximum dimensions
+        if image.size[0] > MAX_DIMENSIONS[0] or image.size[1] > MAX_DIMENSIONS[1]:
+            image.thumbnail(MAX_DIMENSIONS, Image.Resampling.LANCZOS)
+        
+        # Convert to bytes with consistent format (PNG for best quality with transparency support)
+        img_bytes = io.BytesIO()
+        image.save(img_bytes, format="PNG", optimize=True)
+        img_bytes.seek(0)
+        
+        return img_bytes.getvalue(), "png"
+        
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise
+        raise HTTPException(
+            status_code=400,
+            detail=_("Invalid image file. Please upload a valid image.")
+        )
+
+
+@router.post("/profile/image", dependencies=[Depends(JWTBearer())])
+async def upload_profile_image(
+    file: UploadFile = File(...),
+    current_user: str = Depends(get_current_user)
+):
+    """
+    Upload a profile image for the current user.
+    
+    Security features:
+    - File size limit (5MB) to prevent DoS attacks
+    - Image format validation
+    - Automatic resizing to prevent excessive storage usage
+    - Image processing to ensure valid image data
+    """
+    # Validate file is provided
+    if not file:
+        raise HTTPException(
+            status_code=400, 
+            detail=_("No file provided")
+        )
+    
+    # Read file content
+    try:
+        file_content = await file.read()
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail=_("Error reading uploaded file")
+        )
+    
+    # Validate and process the image
+    processed_image_bytes, image_format = validate_and_process_image(
+        file_content, file.filename or "image"
+    )
+    
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+    
+    with session_local() as session:
+        # Find the user by userid
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        
+        if not user:
+            raise HTTPException(status_code=404, detail=_("User not found"))
+        
+        # Update user's profile image
+        user.profile_image = processed_image_bytes
+        user.profile_image_type = image_format
+        user.profile_image_uploaded_at = datetime.now(timezone.utc)
+        user.last_access = datetime.now(timezone.utc)
+        
+        session.commit()
+        
+        return {
+            "message": _("Profile image uploaded successfully"),
+            "image_format": image_format,
+            "uploaded_at": user.profile_image_uploaded_at
+        }
+
+
+@router.get("/profile/image", dependencies=[Depends(JWTBearer())])
+async def get_profile_image(current_user: str = Depends(get_current_user)):
+    """
+    Get the current user's profile image.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+    
+    with session_local() as session:
+        # Find the user by userid
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        
+        if not user:
+            raise HTTPException(status_code=404, detail=_("User not found"))
+        
+        if not user.profile_image:
+            raise HTTPException(status_code=404, detail=_("No profile image found"))
+        
+        # Determine content type based on stored format
+        content_type = f"image/{user.profile_image_type}"
+        if user.profile_image_type == "jpg":
+            content_type = "image/jpeg"
+        
+        return Response(
+            content=user.profile_image,
+            media_type=content_type,
+            headers={
+                "Cache-Control": "public, max-age=3600",  # Cache for 1 hour
+                "Last-Modified": user.profile_image_uploaded_at.strftime("%a, %d %b %Y %H:%M:%S GMT")
+            }
+        )
+
+
+@router.delete("/profile/image", dependencies=[Depends(JWTBearer())])
+async def delete_profile_image(current_user: str = Depends(get_current_user)):
+    """
+    Delete the current user's profile image.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+    
+    with session_local() as session:
+        # Find the user by userid
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        
+        if not user:
+            raise HTTPException(status_code=404, detail=_("User not found"))
+        
+        if not user.profile_image:
+            raise HTTPException(status_code=404, detail=_("No profile image to delete"))
+        
+        # Clear the profile image data
+        user.profile_image = None
+        user.profile_image_type = None
+        user.profile_image_uploaded_at = None
+        user.last_access = datetime.now(timezone.utc)
+        
+        session.commit()
+        
+        return {"message": _("Profile image deleted successfully")}

@@ -10,6 +10,8 @@ export interface ProfileData {
     last_name?: string;
     active: boolean;
     password_requirements: string;
+    has_profile_image?: boolean;
+    profile_image_uploaded_at?: string;
 }
 
 export interface ProfileUpdateData {

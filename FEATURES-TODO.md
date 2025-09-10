@@ -296,7 +296,7 @@ like to add:
     to send a code via email to their
     registered email address.
 
-43. User image / icon - we need a way
+43. ~~User image / icon - we need a way
     to allow a user to uplaod an image
     file that will be displayed for
     them in the UI. Store the image as
@@ -308,7 +308,7 @@ like to add:
     dropdown in the upper right corner
     of the UI.  Take images as PNG,
     JPG, GIF and other easily managed
-    common graphics format.
+    common graphics format.~~
 
 44. The agent should be able to run as
     a "regular" user account but have

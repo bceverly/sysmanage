@@ -9,6 +9,7 @@ from sqlalchemy import (
     Column,
     DateTime,
     Integer,
+    LargeBinary,
     String,
     Text,
     ForeignKey,
@@ -133,6 +134,10 @@ class User(Base):
     is_locked = Column(Boolean, default=False, nullable=False)
     failed_login_attempts = Column(Integer, default=0, nullable=False)
     locked_at = Column(DateTime, nullable=True)
+    # Profile image fields
+    profile_image = Column(LargeBinary, nullable=True)
+    profile_image_type = Column(String(10), nullable=True)  # png, jpg, gif
+    profile_image_uploaded_at = Column(DateTime(timezone=True), nullable=True)
 
 
 class StorageDevice(Base):

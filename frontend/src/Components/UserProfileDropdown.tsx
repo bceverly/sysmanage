@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -18,6 +18,8 @@ import {
 
 const UserProfileDropdown: React.FC = () => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+    const [imageLoading, setImageLoading] = useState<boolean>(false);
     const open = Boolean(anchorEl);
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -37,6 +39,54 @@ const UserProfileDropdown: React.FC = () => {
         if (!email) return t('userProfile.unknownUser', 'Unknown User');
         return email;
     };
+
+    // Fetch profile image
+    const fetchProfileImage = async () => {
+        if (!userid || imageLoading) return;
+        
+        setImageLoading(true);
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) return;
+
+            const response = await fetch('/profile/image', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const imageBlob = await response.blob();
+                const imageUrl = URL.createObjectURL(imageBlob);
+                setProfileImageUrl(imageUrl);
+            }
+        } catch (error) {
+            console.debug('No profile image available or error fetching image');
+        } finally {
+            setImageLoading(false);
+        }
+    };
+
+    // Load profile image on component mount
+    useEffect(() => {
+        fetchProfileImage();
+
+        // Cleanup: revoke object URL when component unmounts or image changes
+        return () => {
+            if (profileImageUrl) {
+                URL.revokeObjectURL(profileImageUrl);
+            }
+        };
+    }, [userid]);
+
+    // Cleanup old URL when new one is set
+    useEffect(() => {
+        return () => {
+            if (profileImageUrl) {
+                URL.revokeObjectURL(profileImageUrl);
+            }
+        };
+    }, [profileImageUrl]);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -60,15 +110,17 @@ const UserProfileDropdown: React.FC = () => {
         <>
             <Avatar
                 onClick={handleClick}
+                src={profileImageUrl || undefined}
                 sx={{
                     width: 40,
                     height: 40,
-                    bgcolor: 'primary.main',
+                    bgcolor: profileImageUrl ? 'transparent' : 'primary.main',
                     cursor: 'pointer',
                     fontSize: '16px',
                     fontWeight: 'bold',
                     '&:hover': {
-                        bgcolor: 'primary.dark',
+                        bgcolor: profileImageUrl ? 'transparent' : 'primary.dark',
+                        opacity: profileImageUrl ? 0.8 : 1,
                     }
                 }}
                 aria-label={t('userProfile.userMenu', 'User menu')}
@@ -81,7 +133,7 @@ const UserProfileDropdown: React.FC = () => {
                     }
                 }}
             >
-                {getFirstInitial(userid)}
+                {!profileImageUrl && getFirstInitial(userid)}
             </Avatar>
 
             <Menu

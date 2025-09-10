@@ -12,8 +12,15 @@ import {
     Divider,
     CircularProgress,
     Tabs,
-    Tab
+    Tab,
+    Avatar,
+    IconButton,
+    Input
 } from '@mui/material';
+import {
+    PhotoCamera as PhotoCameraIcon,
+    Delete as DeleteIcon
+} from '@mui/icons-material';
 import { getProfile, updateProfile, changePassword, ProfileData, ProfileUpdateData, PasswordChangeData } from '../Services/profile';
 
 const Profile: React.FC = () => {
@@ -51,6 +58,14 @@ const Profile: React.FC = () => {
     const [emailMatchValidation, setEmailMatchValidation] = useState<{isValid: boolean, message: string}>({isValid: true, message: ''});
     const [passwordValidation, setPasswordValidation] = useState<{isValid: boolean, message: string}>({isValid: true, message: ''});
     const [passwordMatchValidation, setPasswordMatchValidation] = useState<{isValid: boolean, message: string}>({isValid: true, message: ''});
+
+    // Profile image state
+    const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+    const [imageLoading, setImageLoading] = useState(false);
+    const [imageUploading, setImageUploading] = useState(false);
+    const [imageDeleting, setImageDeleting] = useState(false);
+    const [imageError, setImageError] = useState<string | null>(null);
+    const [imageSuccess, setImageSuccess] = useState<string | null>(null);
 
     // Validation functions
     const validateEmail = (email: string): {isValid: boolean, message: string} => {
@@ -163,6 +178,11 @@ const Profile: React.FC = () => {
                 setFirstName(data.first_name || '');
                 setLastName(data.last_name || '');
                 setError(null);
+                
+                // Load profile image if it exists
+                if (data.has_profile_image) {
+                    await fetchProfileImage();
+                }
             } catch {
                 setError(t('userProfile.loadError', 'Failed to load profile data'));
             } finally {
@@ -171,6 +191,13 @@ const Profile: React.FC = () => {
         };
 
         loadProfile();
+
+        // Cleanup: revoke object URLs when component unmounts
+        return () => {
+            if (profileImageUrl) {
+                URL.revokeObjectURL(profileImageUrl);
+            }
+        };
     }, [t]);
 
     const handleSave = async () => {
@@ -284,6 +311,128 @@ const Profile: React.FC = () => {
             setEmailError(t('userProfile.emailChangeError', 'Failed to change email. Please try again.'));
         } finally {
             setChangingEmail(false);
+        }
+    };
+
+    // Profile image functions
+    const fetchProfileImage = async () => {
+        if (imageLoading) return;
+        
+        setImageLoading(true);
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) return;
+
+            const response = await fetch('/profile/image', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const imageBlob = await response.blob();
+                const imageUrl = URL.createObjectURL(imageBlob);
+                setProfileImageUrl(imageUrl);
+            }
+        } catch (error) {
+            console.debug('No profile image available or error fetching image');
+        } finally {
+            setImageLoading(false);
+        }
+    };
+
+    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Validate file size (5MB limit - same as backend)
+        if (file.size > 5 * 1024 * 1024) {
+            setImageError(t('userProfile.imageTooLarge', 'Image file is too large. Maximum size is 5MB.'));
+            return;
+        }
+
+        // Validate file type
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            setImageError(t('userProfile.invalidImageType', 'Invalid image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP'));
+            return;
+        }
+
+        try {
+            setImageUploading(true);
+            setImageError(null);
+            setImageSuccess(null);
+
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                throw new Error('No authentication token');
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/profile/image', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Upload failed');
+            }
+
+            setImageSuccess(t('userProfile.imageUploadSuccess', 'Profile image uploaded successfully'));
+            
+            // Refresh the profile image
+            await fetchProfileImage();
+            
+        } catch (error: any) {
+            setImageError(error.message || t('userProfile.imageUploadError', 'Failed to upload image. Please try again.'));
+        } finally {
+            setImageUploading(false);
+            // Reset file input
+            event.target.value = '';
+        }
+    };
+
+    const handleImageDelete = async () => {
+        try {
+            setImageDeleting(true);
+            setImageError(null);
+            setImageSuccess(null);
+
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                throw new Error('No authentication token');
+            }
+
+            const response = await fetch('/profile/image', {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Delete failed');
+            }
+
+            // Clear the current image
+            if (profileImageUrl) {
+                URL.revokeObjectURL(profileImageUrl);
+            }
+            setProfileImageUrl(null);
+            
+            setImageSuccess(t('userProfile.imageDeleteSuccess', 'Profile image deleted successfully'));
+            
+        } catch (error: any) {
+            setImageError(error.message || t('userProfile.imageDeleteError', 'Failed to delete image. Please try again.'));
+        } finally {
+            setImageDeleting(false);
         }
     };
 
@@ -571,6 +720,118 @@ const Profile: React.FC = () => {
         </Box>
     );
 
+    const renderProfileImage = () => {
+        // Extract first initial from user ID (fallback for avatar display)
+        const getFirstInitial = (email: string): string => {
+            if (!email) return '?';
+            const beforeAt = email.split('@')[0];
+            return beforeAt.charAt(0).toUpperCase();
+        };
+
+        return (
+            <Box sx={{ p: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                    {t('userProfile.profileImage', 'Profile Image')}
+                </Typography>
+
+                {imageError && (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                        {imageError}
+                    </Alert>
+                )}
+
+                {imageSuccess && (
+                    <Alert severity="success" sx={{ mb: 2 }}>
+                        {imageSuccess}
+                    </Alert>
+                )}
+
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                    {/* Current profile image display */}
+                    <Box sx={{ position: 'relative' }}>
+                        <Avatar
+                            src={profileImageUrl || undefined}
+                            sx={{
+                                width: 120,
+                                height: 120,
+                                bgcolor: profileImageUrl ? 'transparent' : 'primary.main',
+                                fontSize: '48px',
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            {!profileImageUrl && getFirstInitial(profileData?.userid || '')}
+                        </Avatar>
+                        
+                        {imageLoading && (
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                    borderRadius: '50%'
+                                }}
+                            >
+                                <CircularProgress size={30} sx={{ color: 'white' }} />
+                            </Box>
+                        )}
+                    </Box>
+
+                    {/* Upload section */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                        <Input
+                            type="file"
+                            id="image-upload"
+                            accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                            onChange={handleImageUpload}
+                            sx={{ display: 'none' }}
+                        />
+                        <label htmlFor="image-upload">
+                            <Button
+                                variant="outlined"
+                                component="span"
+                                startIcon={<PhotoCameraIcon />}
+                                disabled={imageUploading}
+                                sx={{ mb: 1 }}
+                            >
+                                {imageUploading 
+                                    ? t('userProfile.uploading', 'Uploading...') 
+                                    : t('userProfile.uploadImage', 'Upload Image')
+                                }
+                            </Button>
+                        </label>
+
+                        {profileImageUrl && (
+                            <Button
+                                variant="outlined"
+                                color="error"
+                                startIcon={<DeleteIcon />}
+                                onClick={handleImageDelete}
+                                disabled={imageDeleting}
+                            >
+                                {imageDeleting 
+                                    ? t('userProfile.deleting', 'Deleting...') 
+                                    : t('userProfile.deleteImage', 'Delete Image')
+                                }
+                            </Button>
+                        )}
+                    </Box>
+
+                    {/* Help text */}
+                    <Typography variant="body2" color="text.secondary" textAlign="center">
+                        {t('userProfile.imageHelp', 
+                        'Upload a profile image (PNG, JPEG, JPG, GIF, WEBP). Maximum size: 5MB. Image will be automatically resized to 512x512 pixels.')}
+                    </Typography>
+                </Box>
+            </Box>
+        );
+    };
+
     return (
         <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
             <Typography variant="h4" component="h1" gutterBottom>
@@ -587,11 +848,13 @@ const Profile: React.FC = () => {
                     <Tab label={t('userProfile.accountInfo', 'Account Information')} />
                     <Tab label={t('userProfile.personalInfo', 'Personal Information')} />
                     <Tab label={t('userProfile.securityInfo', 'Security Information')} />
+                    <Tab label={t('userProfile.profileImage', 'Profile Image')} />
                 </Tabs>
 
                 {activeTab === 0 && renderAccountInfo()}
                 {activeTab === 1 && renderPersonalInfo()}
                 {activeTab === 2 && renderSecurityInfo()}
+                {activeTab === 3 && renderProfileImage()}
             </Card>
         </Container>
     );
