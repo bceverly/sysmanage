@@ -12,10 +12,18 @@ cd "$SCRIPT_DIR"
 # Function to get configuration value
 get_config_value() {
     local key=$1
-    local config_file="sysmanage.yaml"
+    local config_file=""
     
-    if [ -f "$config_file" ]; then
-        python3 -c "
+    # Use same priority as backend config loader: /etc/sysmanage.yaml first, then sysmanage-dev.yaml
+    if [ -f "/etc/sysmanage.yaml" ]; then
+        config_file="/etc/sysmanage.yaml"
+    elif [ -f "sysmanage-dev.yaml" ]; then
+        config_file="sysmanage-dev.yaml"
+    else
+        return 1
+    fi
+    
+    python3 -c "
 import yaml
 import sys
 try:
@@ -29,9 +37,6 @@ try:
 except:
     sys.exit(1)
 " 2>/dev/null
-    else
-        return 1
-    fi
 }
 
 # Function to kill process by PID file
@@ -97,7 +102,7 @@ kill_by_pattern "node.*react-scripts.*start" "Frontend Web UI (Node)"
 echo "Checking for processes on SysManage ports..."
 
 # Get configured ports
-BACKEND_PORT=$(get_config_value "webui.port")
+BACKEND_PORT=$(get_config_value "api.port")
 if [ $? -ne 0 ] || [ -z "$BACKEND_PORT" ]; then
     BACKEND_PORT=8080  # Default fallback
 fi
@@ -105,14 +110,24 @@ fi
 FRONTEND_PORT=3000  # React dev server default
 
 # Backend port
-backend_pid=$(lsof -ti:$BACKEND_PORT 2>/dev/null)
+if command -v lsof >/dev/null 2>&1; then
+    backend_pid=$(lsof -ti:$BACKEND_PORT 2>/dev/null)
+else
+    # OpenBSD uses fstat
+    backend_pid=$(fstat | awk "\$9 ~ /:$BACKEND_PORT\$/ {print \$3}" | head -1 2>/dev/null)
+fi
 if [ -n "$backend_pid" ]; then
     echo "Killing process on port $BACKEND_PORT (PID: $backend_pid)..."
     kill -9 $backend_pid 2>/dev/null
 fi
 
 # Frontend port
-frontend_pid=$(lsof -ti:$FRONTEND_PORT 2>/dev/null)
+if command -v lsof >/dev/null 2>&1; then
+    frontend_pid=$(lsof -ti:$FRONTEND_PORT 2>/dev/null)
+else
+    # OpenBSD uses fstat
+    frontend_pid=$(fstat | awk "\$9 ~ /:$FRONTEND_PORT\$/ {print \$3}" | head -1 2>/dev/null)
+fi
 if [ -n "$frontend_pid" ]; then
     echo "Killing process on port $FRONTEND_PORT (PID: $frontend_pid)..."
     kill -9 $frontend_pid 2>/dev/null
@@ -127,8 +142,14 @@ fi
 
 # Verify everything is stopped
 sleep 1
-backend_check=$(lsof -ti:$BACKEND_PORT 2>/dev/null)
-frontend_check=$(lsof -ti:$FRONTEND_PORT 2>/dev/null)
+if command -v lsof >/dev/null 2>&1; then
+    backend_check=$(lsof -ti:$BACKEND_PORT 2>/dev/null)
+    frontend_check=$(lsof -ti:$FRONTEND_PORT 2>/dev/null)
+else
+    # OpenBSD uses fstat
+    backend_check=$(fstat | awk "\$9 ~ /:$BACKEND_PORT\$/ {print \$3}" | head -1 2>/dev/null)
+    frontend_check=$(fstat | awk "\$9 ~ /:$FRONTEND_PORT\$/ {print \$3}" | head -1 2>/dev/null)
+fi
 
 if [ -z "$backend_check" ] && [ -z "$frontend_check" ]; then
     echo ""

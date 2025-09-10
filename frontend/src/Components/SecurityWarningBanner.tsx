@@ -46,19 +46,24 @@ const SecurityWarningBanner: React.FC = () => {
         
         // Set banner height based on security warnings
         if (status && (status.hasDefaultCredentials || status.securityWarnings.length > 0)) {
-          // Calculate height based on content
+          // Calculate height based on content - be more dynamic
           const hasCredentials = status.hasDefaultCredentials;
           const warningCount = status.securityWarnings.length;
           
-          if (hasCredentials && warningCount > 0) {
-            setBannerHeight('140px'); // Larger for combined warnings
-          } else if (hasCredentials) {
-            setBannerHeight('100px'); // Standard for credential warnings
-          } else if (warningCount > 0) {
-            setBannerHeight('120px'); // Sufficient height for JWT/salt warnings
-          } else {
-            setBannerHeight('0px');
+          // Base height for padding and icon
+          let calculatedHeight = 80;
+          
+          // Add height for credentials warning
+          if (hasCredentials) {
+            calculatedHeight += 90; // For credentials warning text with better spacing
           }
+          
+          // Add height for each security warning (JWT, salt, etc.)
+          for (let i = 0; i < warningCount; i++) {
+            calculatedHeight += 85; // Each warning with command text and styling needs more space
+          }
+          
+          setBannerHeight(`${calculatedHeight}px`);
         } else {
           setBannerHeight('0px'); // No banner when no warnings
         }
@@ -102,20 +107,21 @@ const SecurityWarningBanner: React.FC = () => {
           icon={<Warning />}
           sx={{
             borderRadius: 0,
-            minHeight: hasCredentialsWarning ? '100px' : '120px',
-            height: hasCredentialsWarning ? '100px' : '120px',
+            minHeight: 'auto',
+            height: 'auto',
             fontSize: '16px',
             fontWeight: 'bold',
             boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             paddingTop: '20px',
-            paddingBottom: '10px',
+            paddingBottom: '20px',
             '& .MuiAlert-message': {
               width: '100%',
               display: 'flex',
-              alignItems: 'center',
+              alignItems: 'flex-start',
               padding: '0 16px',
+              flexDirection: 'column',
             },
             '& .MuiAlert-icon': {
               fontSize: '28px',
@@ -142,41 +148,57 @@ const SecurityWarningBanner: React.FC = () => {
           <Box sx={{ flex: 1 }}>
             {/* Critical credentials warning */}
             {hasCredentialsWarning && isLoggedInAsDefault && (
-              <Box sx={{ mb: securityStatus.securityWarnings.length > 0 ? 2 : 0 }}>
-                <AlertTitle sx={{ mb: 1, fontWeight: 'bold' }}>
+              <Box sx={{ mb: securityStatus.securityWarnings.length > 0 ? 3 : 0 }}>
+                <AlertTitle sx={{ mb: 1.5, fontWeight: 'bold', fontSize: '18px' }}>
                   {t('security.criticalWarning', 'CRITICAL SECURITY WARNING')}
                 </AlertTitle>
-                {t('security.loggedInAsDefault', 
-                  'You are logged in as the default admin user from the YAML configuration file. This is a security risk! Please create a new admin user, log in with that account, remove the admin credentials from your YAML configuration file, and restart the server.'
-                )}
+                <Box sx={{ fontSize: '16px', lineHeight: 1.5 }}>
+                  {t('security.loggedInAsDefault', 
+                    'You are logged in as the default admin user from the YAML configuration file. This is a security risk! Please create a new admin user, log in with that account, remove the admin credentials from your YAML configuration file, and restart the server.'
+                  )}
+                </Box>
               </Box>
             )}
             {hasCredentialsWarning && !isLoggedInAsDefault && (
-              <Box sx={{ mb: securityStatus.securityWarnings.length > 0 ? 2 : 0 }}>
-                <AlertTitle sx={{ mb: 1, fontWeight: 'bold' }}>
+              <Box sx={{ mb: securityStatus.securityWarnings.length > 0 ? 3 : 0 }}>
+                <AlertTitle sx={{ mb: 1.5, fontWeight: 'bold', fontSize: '18px' }}>
                   {t('security.configWarning', 'Configuration Security Warning')}
                 </AlertTitle>
-                {t('security.defaultCredentialsExist', 
-                  'Default admin credentials are still configured in your YAML file. Please remove the admin_userid and admin_password from your configuration file and restart the server to improve security.'
-                )}
+                <Box sx={{ fontSize: '16px', lineHeight: 1.5 }}>
+                  {t('security.defaultCredentialsExist', 
+                    'Default admin credentials are configured in your YAML file'
+                  )}
+                </Box>
+                <Box sx={{ fontSize: '14px', mt: 1, opacity: 0.9 }}>
+                  Remove admin_userid and admin_password from your configuration file and restart the server
+                </Box>
               </Box>
             )}
             
             {/* Other security warnings */}
             {securityStatus.securityWarnings.map((warning, index) => (
-              <Box key={index} sx={{ mb: index < securityStatus.securityWarnings.length - 1 ? 1 : 0 }}>
+              <Box key={index} sx={{ mb: index < securityStatus.securityWarnings.length - 1 ? 2.5 : 0 }}>
                 {securityStatus.securityWarnings.length === 1 && !hasCredentialsWarning && (
-                  <AlertTitle sx={{ mb: 1, fontWeight: 'bold' }}>
+                  <AlertTitle sx={{ mb: 1.5, fontWeight: 'bold', fontSize: '18px' }}>
                     {warning.severity === 'critical' 
                       ? t('security.criticalWarning', 'CRITICAL SECURITY WARNING')
                       : t('security.securityWarning', 'Security Warning')
                     }
                   </AlertTitle>
                 )}
-                <Box sx={{ fontSize: hasCredentialsWarning ? '14px' : '16px' }}>
+                <Box sx={{ fontSize: hasCredentialsWarning ? '15px' : '16px', lineHeight: 1.5 }}>
                   {warning.message}
                   {warning.details && (
-                    <Box sx={{ mt: 0.5, fontSize: '13px', opacity: 0.9 }}>
+                    <Box sx={{ 
+                      mt: 1, 
+                      fontSize: '14px', 
+                      opacity: 0.95,
+                      fontFamily: 'monospace',
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      padding: '8px 12px',
+                      borderRadius: '4px',
+                      border: '1px solid rgba(255,255,255,0.2)'
+                    }}>
                       {warning.details}
                     </Box>
                   )}
