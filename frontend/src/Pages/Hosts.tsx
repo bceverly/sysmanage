@@ -9,10 +9,12 @@ import CheckIcon from '@mui/icons-material/Check';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SyncIcon from '@mui/icons-material/Sync';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import { Chip, Typography, IconButton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData } from '../Services/hosts'
+import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost } from '../Services/hosts'
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
 
@@ -239,6 +241,72 @@ const Hosts = () => {
         }
     }
 
+    const handleRebootSelected = async () => {
+        try {
+            // Only reboot hosts that are active and have privileged agents
+            const activePrivilegedSelections = selection.filter(id => {
+                const host = tableData.find(h => h.id.toString() === id.toString());
+                return host && host.active && host.is_agent_privileged;
+            });
+
+            if (activePrivilegedSelections.length === 0) {
+                console.log('No active hosts with privileged agents selected');
+                return;
+            }
+
+            // Call the API to reboot the selected active hosts with privileged agents
+            const rebootPromises = activePrivilegedSelections.map(id => {
+                return doRebootHost(Number(id));
+            });
+            
+            await Promise.all(rebootPromises);
+            console.log(`Reboot command sent to ${activePrivilegedSelections.length} hosts`);
+            
+            // Clear selection
+            setSelection([]);
+        } catch (error) {
+            console.error('Error rebooting hosts:', error);
+            // Still clear selection even if there was an error
+            setSelection([]);
+        }
+    }
+
+    const handleShutdownSelected = async () => {
+        try {
+            // Only shutdown hosts that are active and have privileged agents
+            const activePrivilegedSelections = selection.filter(id => {
+                const host = tableData.find(h => h.id.toString() === id.toString());
+                return host && host.active && host.is_agent_privileged;
+            });
+
+            if (activePrivilegedSelections.length === 0) {
+                console.log('No active hosts with privileged agents selected');
+                return;
+            }
+
+            // Call the API to shutdown the selected active hosts with privileged agents
+            const shutdownPromises = activePrivilegedSelections.map(id => {
+                return doShutdownHost(Number(id));
+            });
+            
+            await Promise.all(shutdownPromises);
+            console.log(`Shutdown command sent to ${activePrivilegedSelections.length} hosts`);
+            
+            // Clear selection
+            setSelection([]);
+        } catch (error) {
+            console.error('Error shutting down hosts:', error);
+            // Still clear selection even if there was an error
+            setSelection([]);
+        }
+    }
+
+    // Helper function to check if any selected hosts can be rebooted/shutdown
+    const hasActivePrivilegedSelection = selection.some(id => {
+        const host = tableData.find(h => h.id.toString() === id.toString());
+        return host && host.active && host.is_agent_privileged;
+    });
+
     const handleRefreshData = async () => {
         try {
             // Request comprehensive data refresh (OS + hardware) for selected hosts
@@ -399,6 +467,24 @@ const Hosts = () => {
                     color="secondary"
                 >
                     {t('hosts.getDiagnostics', 'Get Diagnostics')}
+                </Button>
+                <Button 
+                    variant="outlined" 
+                    startIcon={<RestartAltIcon />} 
+                    disabled={!hasActivePrivilegedSelection}
+                    onClick={handleRebootSelected}
+                    color="warning"
+                >
+                    {t('hosts.rebootSelected', 'Reboot Selected')}
+                </Button>
+                <Button 
+                    variant="outlined" 
+                    startIcon={<PowerSettingsNewIcon />} 
+                    disabled={!hasActivePrivilegedSelection}
+                    onClick={handleShutdownSelected}
+                    color="error"
+                >
+                    {t('hosts.shutdownSelected', 'Shutdown Selected')}
                 </Button>
                 <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
                     {t('common.delete')} {t('common.selected', { defaultValue: 'Selected' })}

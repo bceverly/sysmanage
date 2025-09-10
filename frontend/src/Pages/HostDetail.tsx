@@ -29,10 +29,12 @@ import AppsIcon from '@mui/icons-material/Apps';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import DeleteIcon from '@mui/icons-material/Delete';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import { Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Alert, Snackbar } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic } from '../Services/hosts';
+import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost } from '../Services/hosts';
 
 // Use the service types directly - no need for local interfaces anymore
 
@@ -63,6 +65,8 @@ const HostDetail = () => {
     const [diagnosticToDelete, setDiagnosticToDelete] = useState<number | null>(null);
     const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
     const [snackbarMessage, setSnackbarMessage] = useState<string>('');
+    const [rebootConfirmOpen, setRebootConfirmOpen] = useState<boolean>(false);
+    const [shutdownConfirmOpen, setShutdownConfirmOpen] = useState<boolean>(false);
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
     const [diagnosticDetailOpen, setDiagnosticDetailOpen] = useState<boolean>(false);
     const [selectedDiagnostic, setSelectedDiagnostic] = useState<DiagnosticDetailResponse | null>(null);
@@ -499,6 +503,44 @@ const HostDetail = () => {
         }
     };
 
+    const handleRebootClick = () => {
+        setRebootConfirmOpen(true);
+    };
+
+    const handleShutdownClick = () => {
+        setShutdownConfirmOpen(true);
+    };
+
+    const handleRebootConfirm = async () => {
+        if (!host || !host.id) return;
+        
+        try {
+            await doRebootHost(host.id);
+            setSnackbarMessage(t('hosts.rebootRequested', 'Reboot requested successfully'));
+            setSnackbarOpen(true);
+            setRebootConfirmOpen(false);
+        } catch (error) {
+            console.error('Failed to request reboot:', error);
+            setSnackbarMessage(t('hosts.rebootFailed', 'Failed to request reboot'));
+            setSnackbarOpen(true);
+        }
+    };
+
+    const handleShutdownConfirm = async () => {
+        if (!host || !host.id) return;
+        
+        try {
+            await doShutdownHost(host.id);
+            setSnackbarMessage(t('hosts.shutdownRequested', 'Shutdown requested successfully'));
+            setSnackbarOpen(true);
+            setShutdownConfirmOpen(false);
+        } catch (error) {
+            console.error('Failed to request shutdown:', error);
+            setSnackbarMessage(t('hosts.shutdownFailed', 'Failed to request shutdown'));
+            setSnackbarOpen(true);
+        }
+    };
+
     const handleConfirmDelete = async () => {
         if (!diagnosticToDelete) return;
         
@@ -576,10 +618,32 @@ const HostDetail = () => {
                 {t('common.back')}
             </Button>
 
-            <Typography variant="h4" sx={{ mb: 3, display: 'flex', alignItems: 'center' }}>
-                <ComputerIcon sx={{ mr: 2, fontSize: '2rem' }} />
-                {host.fqdn}
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center' }}>
+                    <ComputerIcon sx={{ mr: 2, fontSize: '2rem' }} />
+                    {host.fqdn}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                        variant="outlined"
+                        color="warning"
+                        startIcon={<RestartAltIcon />}
+                        onClick={handleRebootClick}
+                        disabled={!host.active || !host.is_agent_privileged}
+                    >
+                        {t('hosts.reboot', 'Reboot')}
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        color="error"
+                        startIcon={<PowerSettingsNewIcon />}
+                        onClick={handleShutdownClick}
+                        disabled={!host.active || !host.is_agent_privileged}
+                    >
+                        {t('hosts.shutdown', 'Shutdown')}
+                    </Button>
+                </Box>
+            </Box>
 
             {/* Tabs */}
             <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
@@ -1680,6 +1744,56 @@ const HostDetail = () => {
                         {dialogContent}
                     </Typography>
                 </DialogContent>
+            </Dialog>
+
+            {/* Reboot Confirmation Dialog */}
+            <Dialog
+                open={rebootConfirmOpen}
+                onClose={() => setRebootConfirmOpen(false)}
+                aria-labelledby="reboot-dialog-title"
+                aria-describedby="reboot-dialog-description"
+            >
+                <DialogTitle id="reboot-dialog-title">
+                    {t('hosts.confirmReboot', 'Confirm System Reboot')}
+                </DialogTitle>
+                <DialogContent>
+                    <Typography id="reboot-dialog-description">
+                        {t('hosts.confirmRebootMessage', 'Are you sure you want to reboot {{hostname}}? The system will be unavailable for a few minutes.', { hostname: host?.fqdn })}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setRebootConfirmOpen(false)}>
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button onClick={handleRebootConfirm} color="warning" variant="contained">
+                        {t('hosts.reboot', 'Reboot')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Shutdown Confirmation Dialog */}
+            <Dialog
+                open={shutdownConfirmOpen}
+                onClose={() => setShutdownConfirmOpen(false)}
+                aria-labelledby="shutdown-dialog-title"
+                aria-describedby="shutdown-dialog-description"
+            >
+                <DialogTitle id="shutdown-dialog-title">
+                    {t('hosts.confirmShutdown', 'Confirm System Shutdown')}
+                </DialogTitle>
+                <DialogContent>
+                    <Typography id="shutdown-dialog-description">
+                        {t('hosts.confirmShutdownMessage', 'Are you sure you want to shutdown {{hostname}}? The system will need to be manually restarted.', { hostname: host?.fqdn })}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setShutdownConfirmOpen(false)}>
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button onClick={handleShutdownConfirm} color="error" variant="contained">
+                        {t('hosts.shutdown', 'Shutdown')}
+                    </Button>
+                </DialogActions>
             </Dialog>
 
             {/* Delete Confirmation Dialog */}

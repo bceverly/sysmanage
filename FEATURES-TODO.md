@@ -117,12 +117,18 @@ like to add:
     sends linearly with the number of
     registered agents.
 
-18. Reboot - Allow the server to send a
-    request to an agent to reboot itself.
+18. ~~Reboot - Allow the server to send a
+    request to an agent to reboot itself.~~
+    ~~Enhanced: Now only allows reboot when agent
+    runs in privileged mode. Added bulk reboot
+    functionality on hosts page.~~
 
-19. Shutdown - Allow the server to send a 
+19. ~~Shutdown - Allow the server to send a 
     request to an agent to shut down the
-    local machine.
+    local machine.~~
+    ~~Enhanced: Now only allows shutdown when agent
+    runs in privileged mode. Added bulk shutdown
+    functionality on hosts page.~~
 
 20. Install Software - Allow the server to
     request that an agent install a particular
