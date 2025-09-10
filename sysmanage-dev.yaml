@@ -53,3 +53,16 @@ webui:
   host: "localhost"
   port: 3000
   # Development - no SSL certificates for HTTP
+
+logging:
+  # Log levels to include: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  # Can combine multiple levels with pipe: "INFO|WARNING|ERROR|CRITICAL"
+  # Examples: "DEBUG" (debug only), "INFO|ERROR" (info and errors only), 
+  #          "WARNING|ERROR|CRITICAL" (warnings and above)
+  level: "INFO|WARNING|ERROR|CRITICAL"
+  
+  # Log to file (default is logs/* in service directory)
+  # file: "/var/log/sysmanage.log"
+  
+  # Log format - customize the log message appearance
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

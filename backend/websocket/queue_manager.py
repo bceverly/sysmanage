@@ -4,7 +4,6 @@ Manages persistent message queues for server-to-agent communication.
 """
 
 import json
-import logging
 from datetime import datetime, timezone, timedelta
 from typing import List, Dict, Any, Union
 
@@ -14,8 +13,9 @@ from sqlalchemy import and_, or_, asc
 from backend.persistence.db import get_db
 from backend.persistence.models import MessageQueue, Host
 from backend.i18n import _
+from backend.utils.verbosity_logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 # Message queue enums - replicated from agent side for consistency
@@ -137,8 +137,8 @@ class ServerMessageQueueManager:
             db.add(queue_item)
 
             # Add debug logging before commit
-            logger.info(
-                "QUEUEMANAGER_DEBUG: About to commit message %s (type=%s) to database, session_provided=%s",
+            logger.debug(
+                "About to commit message %s (type=%s) to database, session_provided=%s",
                 message_id,
                 message_type,
                 session_provided,
@@ -147,8 +147,8 @@ class ServerMessageQueueManager:
             if not session_provided:
                 try:
                     db.commit()
-                    logger.info(
-                        "QUEUEMANAGER_DEBUG: Successfully committed message %s to database (self-managed session)",
+                    logger.debug(
+                        "Successfully committed message %s to database (self-managed session)",
                         message_id,
                     )
 
@@ -159,13 +159,13 @@ class ServerMessageQueueManager:
                         .first()
                     )
                     if verification:
-                        logger.info(
-                            "QUEUEMANAGER_DEBUG: Verified message %s exists in database after commit",
+                        logger.debug(
+                            "Verified message %s exists in database after commit",
                             message_id,
                         )
                     else:
                         logger.error(
-                            "QUEUEMANAGER_DEBUG: Message %s NOT found in database after commit!",
+                            "Message %s NOT found in database after commit!",
                             message_id,
                         )
                         raise RuntimeError(
@@ -173,14 +173,14 @@ class ServerMessageQueueManager:
                         )
                 except Exception as commit_error:
                     logger.error(
-                        "QUEUEMANAGER_DEBUG: Commit failed for message %s: %s",
+                        "Commit failed for message %s: %s",
                         message_id,
                         commit_error,
                     )
                     raise
             else:
-                logger.info(
-                    "QUEUEMANAGER_DEBUG: Using provided session for message %s, db.dirty=%s, db.new=%s",
+                logger.debug(
+                    "Using provided session for message %s, db.dirty=%s, db.new=%s",
                     message_id,
                     len(db.dirty),
                     len(db.new),
@@ -190,8 +190,8 @@ class ServerMessageQueueManager:
                 # but the commit will happen later by the caller
                 try:
                     db.flush()
-                    logger.info(
-                        "QUEUEMANAGER_DEBUG: Successfully flushed message %s to provided session",
+                    logger.debug(
+                        "Successfully flushed message %s to provided session",
                         message_id,
                     )
 
@@ -202,13 +202,13 @@ class ServerMessageQueueManager:
                         .first()
                     )
                     if verification:
-                        logger.info(
-                            "QUEUEMANAGER_DEBUG: Verified message %s exists in session after flush",
+                        logger.debug(
+                            "Verified message %s exists in session after flush",
                             message_id,
                         )
                     else:
                         logger.error(
-                            "QUEUEMANAGER_DEBUG: Message %s NOT found in session after flush!",
+                            "Message %s NOT found in session after flush!",
                             message_id,
                         )
                         raise RuntimeError(
@@ -216,7 +216,7 @@ class ServerMessageQueueManager:
                         )
                 except Exception as flush_error:
                     logger.error(
-                        "QUEUEMANAGER_DEBUG: Flush failed for message %s: %s",
+                        "Flush failed for message %s: %s",
                         message_id,
                         flush_error,
                     )
@@ -493,7 +493,7 @@ class ServerMessageQueueManager:
                 )
                 message.started_at = None  # Reset processing timestamp
 
-                logger.info(
+                logger.debug(
                     _(
                         "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
                     ),

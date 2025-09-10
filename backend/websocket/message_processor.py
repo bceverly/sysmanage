@@ -4,13 +4,13 @@ Processes queued messages from agents asynchronously.
 """
 
 import asyncio
-import logging
 from datetime import timedelta
 from typing import Dict, Any
 
 from sqlalchemy.orm import Session
 
 from backend.persistence.db import get_db
+from backend.utils.verbosity_logger import get_logger
 from backend.websocket.queue_manager import (
     server_queue_manager,
     QueueDirection,
@@ -28,7 +28,7 @@ from backend.api.data_handlers import (
 )
 from backend.i18n import _
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MessageProcessor:
@@ -68,36 +68,32 @@ class MessageProcessor:
                 cycle_count += 1
                 try:
                     print(
-                        f"DEBUG: MSGPROC Processing cycle #{cycle_count} - About to call _process_pending_messages()",
+                        f"Processing cycle #{cycle_count} - About to call _process_pending_messages()",
                         flush=True,
                     )
-                    logger.info(
-                        "DEBUG: MSGPROC Processing cycle #%s starting", cycle_count
-                    )
+                    logger.info("Processing cycle #%s starting", cycle_count)
                     await self._process_pending_messages()
                     print(
-                        f"DEBUG: MSGPROC Processing cycle #{cycle_count} - Finished calling _process_pending_messages()",
+                        f"Processing cycle #{cycle_count} - Finished calling _process_pending_messages()",
                         flush=True,
                     )
-                    logger.info(
-                        "DEBUG: MSGPROC Processing cycle #%s completed", cycle_count
-                    )
+                    logger.info("Processing cycle #%s completed", cycle_count)
                 except Exception as e:
                     logger.error(
                         _("Error in message processing loop: %s"), str(e), exc_info=True
                     )
                     print(
-                        f"DEBUG: MSGPROC Error in processing cycle #{cycle_count}: {e}",
+                        f"Error in processing cycle #{cycle_count}: {e}",
                         flush=True,
                     )
 
                 # Wait before next processing cycle
                 print(
-                    f"DEBUG: MSGPROC Cycle #{cycle_count} complete - Sleeping for {self.process_interval} seconds before next cycle",
+                    f"Cycle #{cycle_count} complete - Sleeping for {self.process_interval} seconds before next cycle",
                     flush=True,
                 )
                 logger.info(
-                    "DEBUG: MSGPROC Cycle #%s complete, sleeping %ss",
+                    "Cycle #%s complete, sleeping %ss",
                     cycle_count,
                     self.process_interval,
                 )
@@ -114,12 +110,12 @@ class MessageProcessor:
 
     async def _process_pending_messages(self):
         """Process all pending messages in the queue."""
-        print("DEBUG: MSGPROC _process_pending_messages() called", flush=True)
-        logger.info("DEBUG: MSGPROC _process_pending_messages() called")
+        print("_process_pending_messages() called", flush=True)
+        logger.info("_process_pending_messages() called")
 
         db = next(get_db())
-        print(f"DEBUG: MSGPROC Got database session: {db}", flush=True)
-        logger.info("DEBUG: MSGPROC Got database session")
+        print(f"Got database session: {db}", flush=True)
+        logger.info("Got database session")
 
         try:
             # Get all hosts with pending or stuck messages
@@ -145,18 +141,18 @@ class MessageProcessor:
 
             if stuck_messages:
                 logger.warning(
-                    "DEBUG: MSGPROC Found %s stuck IN_PROGRESS messages, resetting to PENDING",
+                    "Found %s stuck IN_PROGRESS messages, resetting to PENDING",
                     len(stuck_messages),
                 )
                 print(
-                    f"DEBUG: MSGPROC Found {len(stuck_messages)} stuck IN_PROGRESS messages, resetting to PENDING",
+                    f"Found {len(stuck_messages)} stuck IN_PROGRESS messages, resetting to PENDING",
                     flush=True,
                 )
                 for msg in stuck_messages:
                     msg.status = QueueStatus.PENDING
                     msg.started_at = None
                     print(
-                        f"DEBUG: MSGPROC Reset message {msg.message_id} from IN_PROGRESS back to PENDING",
+                        f"Reset message {msg.message_id} from IN_PROGRESS back to PENDING",
                         flush=True,
                     )
                 db.commit()
@@ -175,12 +171,10 @@ class MessageProcessor:
             )
 
             print(
-                f"DEBUG: MSGPROC Found {len(host_ids)} hosts with pending messages",
+                f"Found {len(host_ids)} hosts with pending messages",
                 flush=True,
             )
-            logger.info(
-                "DEBUG: MSGPROC Found %s hosts with pending messages", len(host_ids)
-            )
+            logger.info("Found %s hosts with pending messages", len(host_ids))
 
             for (host_id,) in host_ids:
                 # Check if host exists and is still approved before processing its messages
@@ -348,7 +342,7 @@ class MessageProcessor:
 
             # Debug: Show message type comparison
             logger.info(
-                "MSGPROC_DEBUG: message_type='%s', SCRIPT_EXECUTION_RESULT='%s', equal=%s",
+                "message_type='%s', SCRIPT_EXECUTION_RESULT='%s', equal=%s",
                 message.message_type,
                 MessageType.SCRIPT_EXECUTION_RESULT,
                 message.message_type == MessageType.SCRIPT_EXECUTION_RESULT,
@@ -378,12 +372,12 @@ class MessageProcessor:
                 success = True
 
             elif message.message_type == MessageType.SCRIPT_EXECUTION_RESULT:
-                logger.info("MSGPROC_DEBUG: Processing SCRIPT_EXECUTION_RESULT")
+                logger.info("Processing SCRIPT_EXECUTION_RESULT")
                 await handle_script_execution_result(db, mock_connection, message_data)
                 success = True
 
             elif message.message_type == MessageType.REBOOT_STATUS_UPDATE:
-                logger.info("MSGPROC_DEBUG: Processing REBOOT_STATUS_UPDATE")
+                logger.info("Processing REBOOT_STATUS_UPDATE")
                 await handle_reboot_status_update(db, mock_connection, message_data)
                 success = True
 
@@ -418,11 +412,11 @@ class MessageProcessor:
         """Process a message with pre-validated host information."""
         try:
             print(
-                f"MSGPROC_DEBUG: Starting to process message {message.message_id} of type {message.message_type}",
+                f"Starting to process message {message.message_id} of type {message.message_type}",
                 flush=True,
             )
             logger.info(
-                "MSGPROC_DEBUG: Starting to process message %s of type %s",
+                "Starting to process message %s of type %s",
                 message.message_id,
                 message.message_type,
             )
@@ -436,18 +430,18 @@ class MessageProcessor:
 
             # Deserialize message data
             print(
-                f"MSGPROC_DEBUG: About to deserialize message data for {message.message_id}",
+                f"About to deserialize message data for {message.message_id}",
                 flush=True,
             )
             message_data = server_queue_manager.deserialize_message_data(message)
             data_size = len(str(message_data)) if message_data else 0
             data_keys = list(message_data.keys()) if message_data else []
             print(
-                f"MSGPROC_DEBUG: Deserialized message data - keys: {data_keys}, size: {data_size} bytes",
+                f"Deserialized message data - keys: {data_keys}, size: {data_size} bytes",
                 flush=True,
             )
             logger.info(
-                "MSGPROC_DEBUG: Deserialized message data - keys: %s, size: %s bytes",
+                "Deserialized message data - keys: %s, size: %s bytes",
                 data_keys,
                 data_size,
             )
@@ -470,11 +464,11 @@ class MessageProcessor:
                 memory_mb = message_data.get("memory_total_mb", "N/A")
                 storage_count = len(message_data.get("storage_devices", []))
                 print(
-                    f"MSGPROC_DEBUG: Hardware data - CPU: {cpu_vendor} {cpu_model}, Memory: {memory_mb} MB, Storage: {storage_count} devices",
+                    f"Hardware data - CPU: {cpu_vendor} {cpu_model}, Memory: {memory_mb} MB, Storage: {storage_count} devices",
                     flush=True,
                 )
                 logger.info(
-                    "MSGPROC_DEBUG: Hardware data - CPU: %s %s, Memory: %s MB, Storage: %s devices",
+                    "Hardware data - CPU: %s %s, Memory: %s MB, Storage: %s devices",
                     cpu_vendor,
                     cpu_model,
                     memory_mb,
@@ -484,11 +478,11 @@ class MessageProcessor:
                 total_packages = message_data.get("total_packages", 0)
                 software_packages = message_data.get("software_packages", [])
                 print(
-                    f"MSGPROC_DEBUG: Software data - Total packages: {total_packages}, Sample: {software_packages[0] if software_packages else 'None'}",
+                    f"Software data - Total packages: {total_packages}, Sample: {software_packages[0] if software_packages else 'None'}",
                     flush=True,
                 )
                 logger.info(
-                    "MSGPROC_DEBUG: Software data - Total packages: %s, Sample: %s",
+                    "Software data - Total packages: %s, Sample: %s",
                     total_packages,
                     software_packages[0] if software_packages else "None",
                 )
@@ -496,11 +490,11 @@ class MessageProcessor:
                 total_users = message_data.get("total_users", 0)
                 total_groups = message_data.get("total_groups", 0)
                 print(
-                    f"MSGPROC_DEBUG: User access data - Users: {total_users}, Groups: {total_groups}",
+                    f"User access data - Users: {total_users}, Groups: {total_groups}",
                     flush=True,
                 )
                 logger.info(
-                    "MSGPROC_DEBUG: User access data - Users: %s, Groups: %s",
+                    "User access data - Users: %s, Groups: %s",
                     total_users,
                     total_groups,
                 )
@@ -509,44 +503,42 @@ class MessageProcessor:
             success = False
 
             if message.message_type == MessageType.OS_VERSION_UPDATE:
-                print(
-                    "MSGPROC_DEBUG: About to call handle_os_version_update", flush=True
-                )
+                print("About to call handle_os_version_update", flush=True)
                 try:
                     await handle_os_version_update(db, mock_connection, message_data)
                     success = True
                     print(
-                        "MSGPROC_DEBUG: Successfully processed OS version update",
+                        "Successfully processed OS version update",
                         flush=True,
                     )
                 except Exception as e:
                     print(
-                        f"MSGPROC_DEBUG: ERROR in handle_os_version_update: {e}",
+                        f"ERROR in handle_os_version_update: {e}",
                         flush=True,
                     )
                     logger.error(
-                        "MSGPROC_DEBUG: Error in handle_os_version_update: %s",
+                        "Error in handle_os_version_update: %s",
                         e,
                         exc_info=True,
                     )
                     success = False
 
             elif message.message_type == MessageType.HARDWARE_UPDATE:
-                print("MSGPROC_DEBUG: About to call handle_hardware_update", flush=True)
+                print("About to call handle_hardware_update", flush=True)
                 try:
                     await handle_hardware_update(db, mock_connection, message_data)
                     success = True
                     print(
-                        "MSGPROC_DEBUG: Successfully processed hardware update",
+                        "Successfully processed hardware update",
                         flush=True,
                     )
                 except Exception as e:
                     print(
-                        f"MSGPROC_DEBUG: ERROR in handle_hardware_update: {e}",
+                        f"ERROR in handle_hardware_update: {e}",
                         flush=True,
                     )
                     logger.error(
-                        "MSGPROC_DEBUG: Error in handle_hardware_update: %s",
+                        "Error in handle_hardware_update: %s",
                         e,
                         exc_info=True,
                     )
@@ -554,44 +546,44 @@ class MessageProcessor:
 
             elif message.message_type == MessageType.USER_ACCESS_UPDATE:
                 print(
-                    "MSGPROC_DEBUG: About to call handle_user_access_update",
+                    "About to call handle_user_access_update",
                     flush=True,
                 )
                 try:
                     await handle_user_access_update(db, mock_connection, message_data)
                     success = True
                     print(
-                        "MSGPROC_DEBUG: Successfully processed user access update",
+                        "Successfully processed user access update",
                         flush=True,
                     )
                 except Exception as e:
                     print(
-                        f"MSGPROC_DEBUG: ERROR in handle_user_access_update: {e}",
+                        f"ERROR in handle_user_access_update: {e}",
                         flush=True,
                     )
                     logger.error(
-                        "MSGPROC_DEBUG: Error in handle_user_access_update: %s",
+                        "Error in handle_user_access_update: %s",
                         e,
                         exc_info=True,
                     )
                     success = False
 
             elif message.message_type == MessageType.SOFTWARE_INVENTORY_UPDATE:
-                print("MSGPROC_DEBUG: About to call handle_software_update", flush=True)
+                print("About to call handle_software_update", flush=True)
                 try:
                     await handle_software_update(db, mock_connection, message_data)
                     success = True
                     print(
-                        "MSGPROC_DEBUG: Successfully processed software inventory update",
+                        "Successfully processed software inventory update",
                         flush=True,
                     )
                 except Exception as e:
                     print(
-                        f"MSGPROC_DEBUG: ERROR in handle_software_update: {e}",
+                        f"ERROR in handle_software_update: {e}",
                         flush=True,
                     )
                     logger.error(
-                        "MSGPROC_DEBUG: Error in handle_software_update: %s",
+                        "Error in handle_software_update: %s",
                         e,
                         exc_info=True,
                     )
@@ -599,42 +591,40 @@ class MessageProcessor:
 
             elif message.message_type == MessageType.PACKAGE_UPDATES_UPDATE:
                 print(
-                    "MSGPROC_DEBUG: About to call handle_package_updates_update",
+                    "About to call handle_package_updates_update",
                     flush=True,
                 )
                 await handle_package_updates_update(db, mock_connection, message_data)
                 success = True
-                print(
-                    "MSGPROC_DEBUG: Successfully processed package updates", flush=True
-                )
+                print("Successfully processed package updates", flush=True)
 
             elif message.message_type == MessageType.SCRIPT_EXECUTION_RESULT:
                 print(
-                    "MSGPROC_DEBUG: About to call handle_script_execution_result",
+                    "About to call handle_script_execution_result",
                     flush=True,
                 )
                 await handle_script_execution_result(db, mock_connection, message_data)
                 success = True
                 print(
-                    "MSGPROC_DEBUG: Successfully processed script execution result",
+                    "Successfully processed script execution result",
                     flush=True,
                 )
 
             elif message.message_type == MessageType.REBOOT_STATUS_UPDATE:
                 print(
-                    "MSGPROC_DEBUG: About to call handle_reboot_status_update",
+                    "About to call handle_reboot_status_update",
                     flush=True,
                 )
                 await handle_reboot_status_update(db, mock_connection, message_data)
                 success = True
                 print(
-                    "MSGPROC_DEBUG: Successfully processed reboot status update",
+                    "Successfully processed reboot status update",
                     flush=True,
                 )
 
             else:
                 print(
-                    f"MSGPROC_DEBUG: Unknown message type: {message.message_type}",
+                    f"Unknown message type: {message.message_type}",
                     flush=True,
                 )
                 logger.warning(
@@ -645,7 +635,7 @@ class MessageProcessor:
             if success:
                 # Mark message as completed and remove from queue
                 print(
-                    f"MSGPROC_DEBUG: Marking message {message.message_id} as completed",
+                    f"Marking message {message.message_id} as completed",
                     flush=True,
                 )
                 server_queue_manager.mark_completed(message.message_id, db=db)
@@ -655,12 +645,12 @@ class MessageProcessor:
                     host.fqdn,
                 )
                 print(
-                    f"MSGPROC_DEBUG: Message {message.message_id} marked as completed successfully",
+                    f"Message {message.message_id} marked as completed successfully",
                     flush=True,
                 )
             else:
                 print(
-                    f"MSGPROC_DEBUG: Message {message.message_id} processing failed",
+                    f"Message {message.message_id} processing failed",
                     flush=True,
                 )
                 # Mark message as failed and remove from queue
@@ -686,7 +676,7 @@ class MessageProcessor:
 
     async def _process_outbound_messages(self, db: Session):
         """Process outbound messages from the server to agents."""
-        logger.info("DEBUG: MSGPROC Processing outbound messages")
+        logger.info("Processing outbound messages")
 
         from backend.persistence.models import MessageQueue, Host
 

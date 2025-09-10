@@ -36,6 +36,15 @@ try:
             config["security"]["max_failed_logins"] = 5
         if not "account_lockout_duration" in config["security"].keys():
             config["security"]["account_lockout_duration"] = 15
+        # Logging settings
+        if not "logging" in config.keys():
+            config["logging"] = {}
+        if not "level" in config["logging"].keys():
+            config["logging"]["level"] = "INFO|WARNING|ERROR|CRITICAL"
+        if not "format" in config["logging"].keys():
+            config["logging"][
+                "format"
+            ] = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 except yaml.YAMLError as exc:
     if hasattr(exc, "problem_mark"):
         mark = exc.problem_mark
@@ -71,3 +80,24 @@ def get_account_lockout_duration():
     Get the account lockout duration in minutes.
     """
     return config["security"]["account_lockout_duration"]
+
+
+def get_log_levels():
+    """
+    Get the pipe-separated logging levels configuration.
+    """
+    return config["logging"]["level"]
+
+
+def get_log_format():
+    """
+    Get the logging format string.
+    """
+    return config["logging"]["format"]
+
+
+def get_log_file():
+    """
+    Get the log file path if specified.
+    """
+    return config["logging"].get("file")

@@ -5,11 +5,11 @@ Enhanced with security validation and secure communication protocols.
 """
 
 import json
-import logging
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Request
 
 from backend.i18n import _
+from backend.utils.verbosity_logger import get_logger
 from backend.persistence.db import get_db
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import ErrorMessage, MessageType, create_message
@@ -31,19 +31,9 @@ from backend.security.communication_security import websocket_security
 from backend.config.config_push import config_push_manager
 
 
-# Set up debug logger
-debug_logger = logging.getLogger("websocket_debug")
-debug_logger.setLevel(logging.INFO)
-
-# Ensure we have a console handler for debug output
-if not debug_logger.handlers:
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    formatter = logging.Formatter("[WEBSOCKET] %(message)s")
-    console_handler.setFormatter(formatter)
-    debug_logger.addHandler(console_handler)
-
-debug_logger.info("agent.py module loaded with WebSocket debug logging")
+# Set up logger with verbosity support
+logger = get_logger("websocket.agent")
+logger.info("Agent WebSocket module initialized")
 
 # Ensure config_push_manager is available for tests
 __all__ = ["config_push_manager"]
@@ -87,25 +77,25 @@ async def agent_connect(websocket: WebSocket):
     Handle secure WebSocket connections from agents with full bidirectional communication.
     Enhanced with authentication and message validation.
     """
-    debug_logger.info("WebSocket connection attempt started")
+    logger.info("WebSocket connection attempt started")
     client_host = websocket.client.host if websocket.client else "unknown"
-    debug_logger.info("Client host: %s", client_host)
+    logger.info("Client host: %s", client_host)
 
     # Check for authentication token in query parameters
     auth_token = websocket.query_params.get("token")
-    debug_logger.info("Auth token present: %s", bool(auth_token))
+    logger.info("Auth token present: %s", bool(auth_token))
     connection_id = None
 
     if auth_token:
-        debug_logger.info("Validating auth token...")
+        logger.info("Validating auth token...")
         is_valid, connection_id, error_msg = (
             websocket_security.validate_connection_token(auth_token, client_host)
         )
-        debug_logger.info(
+        logger.info(
             "Token validation result - Valid: %s, Error: %s", is_valid, error_msg
         )
         if not is_valid:
-            debug_logger.warning(
+            logger.warning(
                 "WEBSOCKET_PROTOCOL_ERROR: Authentication failed from %s: %s",
                 client_host,
                 error_msg,
@@ -115,50 +105,50 @@ async def agent_connect(websocket: WebSocket):
             )
             return
     else:
-        debug_logger.warning(
+        logger.warning(
             "WEBSOCKET_PROTOCOL_ERROR: No auth token provided from %s", client_host
         )
         await websocket.close(code=4000, reason=_("Authentication token required"))
         return
 
     # Accept connection and register with connection manager
-    debug_logger.info("About to accept WebSocket connection...")
+    logger.info("About to accept WebSocket connection...")
     connection = await connection_manager.connect(websocket)
-    debug_logger.info(
+    logger.info(
         "WebSocket connection established, connection ID: %s", connection.agent_id
     )
-    debug_logger.info("Connection object created, waiting for messages...")
+    logger.info("Connection object created, waiting for messages...")
     db = next(get_db())
 
     try:
         while True:
             # Receive message from agent
             data = await websocket.receive_text()
-            debug_logger.info("Received WebSocket message: %s...", data[:100])
+            logger.info("Received WebSocket message: %s...", data[:100])
             await _process_websocket_message(data, connection, db, connection_id)
 
     except WebSocketDisconnect as e:
         # Agent disconnected - normal cleanup handled in finally
-        debug_logger.info(
+        logger.info(
             "WEBSOCKET_COMMUNICATION_ERROR: Agent disconnected normally - WebSocketDisconnect: %s",
             e,
         )
     except RuntimeError as e:
         if "WebSocket is not connected" in str(e):
             # WebSocket was closed (e.g., due to unapproved host) - normal cleanup handled in finally
-            debug_logger.info(
+            logger.info(
                 "WEBSOCKET_COMMUNICATION_ERROR: WebSocket connection closed - RuntimeError: %s",
                 e,
             )
         else:
-            debug_logger.error(
+            logger.error(
                 "WEBSOCKET_UNKNOWN_ERROR: Unexpected RuntimeError in WebSocket handler: %s",
                 e,
                 exc_info=True,
             )
             raise
     except Exception as e:
-        debug_logger.error(
+        logger.error(
             "WEBSOCKET_UNKNOWN_ERROR: Unexpected exception in WebSocket handler: %s",
             e,
             exc_info=True,
@@ -188,7 +178,7 @@ async def _process_websocket_message(data, connection, db, connection_id):
 
         message = create_message(raw_message)
         message_size = len(data)
-        debug_logger.info(
+        logger.info(
             "Received message type: %s (size: %d bytes)",
             message.message_type,
             message_size,
@@ -203,12 +193,12 @@ async def _process_websocket_message(data, connection, db, connection_id):
 
     except Exception as exc:
         # Error processing message from agent
-        debug_logger.error("Error processing message: %s", exc, exc_info=True)
+        logger.error("Error processing message: %s", exc, exc_info=True)
         error_msg = ErrorMessage("processing_error", str(exc))
         try:
             await connection.send_message(error_msg.to_dict())
         except Exception as send_exc:
-            debug_logger.error("Failed to send error message: %s", send_exc)
+            logger.error("Failed to send error message: %s", send_exc)
 
 
 async def _handle_message_by_type(message, connection, db):
@@ -217,19 +207,19 @@ async def _handle_message_by_type(message, connection, db):
         await _handle_system_info_message(message, connection, db)
 
     elif message.message_type == MessageType.HEARTBEAT:
-        debug_logger.info("Calling handle_heartbeat")
+        logger.info("Calling handle_heartbeat")
         await handle_heartbeat(db, connection, message.data)
 
     elif message.message_type == MessageType.COMMAND_RESULT:
-        debug_logger.info("Calling handle_command_result")
+        logger.info("Calling handle_command_result")
         await handle_command_result(connection, message.data)
 
     elif message.message_type == MessageType.ERROR:
-        debug_logger.info("Processing ERROR message type")
+        logger.info("Processing ERROR message type")
         # Agent reported error - no action needed
 
     elif message.message_type == "config_ack":
-        debug_logger.info("Calling handle_config_acknowledgment")
+        logger.info("Calling handle_config_acknowledgment")
         # Handle configuration acknowledgment
         await handle_config_acknowledgment(connection, message.data)
 
@@ -241,7 +231,7 @@ async def _handle_message_by_type(message, connection, db):
         MessageType.PACKAGE_UPDATES_UPDATE,
     ]:
         # Process inventory message using helper function
-        debug_logger.info("Received inventory message type: %s", message.message_type)
+        logger.info("Received inventory message type: %s", message.message_type)
         await _process_inventory_message(message, connection, db)
 
     elif message.message_type == MessageType.UPDATE_APPLY_RESULT:
@@ -264,23 +254,21 @@ async def _handle_message_by_type(message, connection, db):
 
 async def _handle_script_execution_result(message, connection, db):
     """Handle script execution result message."""
-    debug_logger.info("CRAZY_LOG: SCRIPT_EXECUTION_RESULT message received")
-    debug_logger.info(
-        "CRAZY_LOG: SCRIPT_EXECUTION_RESULT message data keys: %s",
+    logger.debug("Processing script execution result message")
+    logger.debug(
+        "Script execution result data keys: %s",
         list(message.data.keys()) if message.data else [],
     )
 
     # Queue script execution results for reliable processing
     host, error_msg = await _validate_and_get_host(message.data, connection, db)
     if error_msg:
-        debug_logger.info("CRAZY_LOG: Host validation failed - sending error message")
+        logger.warning("Host validation failed for script execution result")
         await connection.send_message(error_msg.to_dict())
         return
 
     hostname = host.fqdn
-    debug_logger.info(
-        "CRAZY_LOG: Host %s - enqueueing script execution result", hostname
-    )
+    logger.info("Enqueueing script execution result for host: %s", hostname)
 
     # Enqueue the message for processing by message processor
     from backend.websocket.queue_manager import Priority
@@ -294,7 +282,7 @@ async def _handle_script_execution_result(message, connection, db):
             priority=Priority.HIGH,
             db=db,
         )
-        debug_logger.info(
+        logger.info(
             "Enqueued script execution result from host %s (message_id: %s)",
             hostname,
             queue_message_id,
@@ -308,7 +296,7 @@ async def _handle_script_execution_result(message, connection, db):
         await connection.send_message(ack_msg)
 
     except Exception as e:
-        debug_logger.error("Error enqueueing script execution result: %s", e)
+        logger.error("Error enqueueing script execution result: %s", e)
         error_msg = ErrorMessage(
             "queue_error", f"Failed to queue script result: {str(e)}"
         )
@@ -317,8 +305,8 @@ async def _handle_script_execution_result(message, connection, db):
 
 async def _handle_diagnostic_result_msg(message, connection, db):
     """Handle diagnostic collection result message."""
-    debug_logger.info("Diagnostic collection result received")
-    debug_logger.info(
+    logger.info("Diagnostic collection result received")
+    logger.info(
         "Diagnostic result data keys: %s",
         list(message.data.keys()) if message.data else [],
     )
@@ -326,12 +314,12 @@ async def _handle_diagnostic_result_msg(message, connection, db):
     # Handle diagnostic collection result directly (no queuing needed)
     try:
         response = await handle_diagnostic_result(db, connection, message.data)
-        debug_logger.info("Diagnostic collection result processed successfully")
+        logger.info("Diagnostic collection result processed successfully")
         # Send acknowledgment back to agent
         if response:
             await connection.send_message(response)
     except Exception as e:
-        debug_logger.error("Error processing diagnostic collection result: %s", e)
+        logger.error("Error processing diagnostic collection result: %s", e)
         error_msg = ErrorMessage(
             "diagnostic_error",
             f"Failed to process diagnostic result: {str(e)}",
@@ -346,20 +334,20 @@ async def _validate_and_get_host(message_data, connection, db):
     Returns:
         tuple: (host_object, error_message) - host_object is None if validation fails
     """
-    debug_logger.info(
-        "CRAZY_LOG: _validate_and_get_host called with message_data keys: %s",
+    logger.debug(
+        "Validating host with message data keys: %s",
         list(message_data.keys()) if message_data else [],
     )
     hostname = message_data.get("hostname")
     host_id = message_data.get("host_id")
-    debug_logger.info(
-        "CRAZY_LOG: _validate_and_get_host extracted hostname=%s, host_id=%s",
+    logger.debug(
+        "Extracted hostname=%s, host_id=%s for validation",
         hostname,
         host_id,
     )
 
     if not hostname:
-        debug_logger.error("CRAZY_LOG: Message missing hostname - cannot validate host")
+        logger.error("Message missing hostname - cannot validate host")
         error_msg = ErrorMessage(
             "missing_hostname",
             _("Message must include hostname for host validation"),
@@ -370,18 +358,18 @@ async def _validate_and_get_host(message_data, connection, db):
     from backend.persistence.models import Host
 
     # Refresh the database session to ensure we see the latest data
-    debug_logger.info("CRAZY_LOG: Refreshing database session")
+    logger.debug("Refreshing database session for host validation")
     db.expunge_all()
     db.commit()
 
     # If host_id is provided, validate it first
     if host_id is not None:
-        debug_logger.info("CRAZY_LOG: Validating message with host_id: %s", host_id)
+        logger.debug("Validating message with host_id: %s", host_id)
         host = db.query(Host).filter(Host.id == host_id).first()
-        debug_logger.info("CRAZY_LOG: Host lookup by host_id result: %s", host)
+        logger.debug("Host lookup result: %s", host.fqdn if host else "Not found")
 
         if not host:
-            debug_logger.warning(
+            logger.warning(
                 "Host ID %s not found - sending stale host_id error", host_id
             )
             error_msg = ErrorMessage(
@@ -392,7 +380,7 @@ async def _validate_and_get_host(message_data, connection, db):
 
         # Verify that the host_id matches the hostname (case-insensitive)
         if host.fqdn.lower() != hostname.lower():
-            debug_logger.warning(
+            logger.warning(
                 "Host ID %s hostname mismatch (expected: %s, got: %s) - sending error",
                 host_id,
                 host.fqdn,
@@ -404,18 +392,18 @@ async def _validate_and_get_host(message_data, connection, db):
             )
             return None, error_msg
 
-        debug_logger.info(
+        logger.info(
             "Host ID validation successful for host %s (ID: %s)", hostname, host_id
         )
     else:
         # No host_id provided, fall back to hostname lookup (case-insensitive)
-        debug_logger.info("No host_id provided, validating by hostname: %s", hostname)
+        logger.info("No host_id provided, validating by hostname: %s", hostname)
         from sqlalchemy import func
 
         host = db.query(Host).filter(func.lower(Host.fqdn) == hostname.lower()).first()
 
     if not host:
-        debug_logger.warning(
+        logger.warning(
             "Host %s not registered - sending registration required error", hostname
         )
         error_msg = ErrorMessage(
@@ -425,7 +413,7 @@ async def _validate_and_get_host(message_data, connection, db):
         return None, error_msg
 
     if host.approval_status != "approved":
-        debug_logger.warning(
+        logger.warning(
             "Host %s not approved (status: %s) - sending approval required error",
             hostname,
             host.approval_status,
@@ -440,30 +428,30 @@ async def _validate_and_get_host(message_data, connection, db):
 
 async def _handle_system_info_message(message, connection, db):
     """Handle system info message with error handling."""
-    debug_logger.info("Calling handle_system_info")
+    logger.info("Calling handle_system_info")
     try:
         response = await handle_system_info(db, connection, message.data)
         if response:
             await connection.send_message(response)
-            debug_logger.info(
+            logger.info(
                 "handle_system_info response sent: %s",
                 response.get("message_type"),
             )
-        debug_logger.info("handle_system_info completed successfully")
+        logger.info("handle_system_info completed successfully")
     except Exception as e:
-        debug_logger.error("Error in handle_system_info: %s", e, exc_info=True)
+        logger.error("Error in handle_system_info: %s", e, exc_info=True)
         raise
 
 
 async def _handle_update_result_message(message, connection, db):
     """Handle update apply result message with error handling."""
-    debug_logger.info("Received update apply result from agent")
+    logger.info("Received update apply result from agent")
     try:
         # Handle update application results from agent directly (time-sensitive)
         await handle_update_apply_result(db, connection, message.data)
-        debug_logger.info("Update apply result processed successfully")
+        logger.info("Update apply result processed successfully")
     except Exception as e:
-        debug_logger.error("Error processing update apply result: %s", e)
+        logger.error("Error processing update apply result: %s", e)
         raise
 
 
@@ -476,8 +464,8 @@ async def _process_inventory_message(message, connection, db):
         return
 
     hostname = host.fqdn
-    debug_logger.info("Host %s registered and approved - enqueueing message", hostname)
-    debug_logger.info(
+    logger.info("Host %s registered and approved - enqueueing message", hostname)
+    logger.info(
         "DEBUG: About to enqueue with host.id=%s, host object type=%s",
         host.id,
         type(host),
@@ -486,7 +474,7 @@ async def _process_inventory_message(message, connection, db):
     # Log detailed message information
     data_keys = list(message.data.keys()) if message.data else []
     data_size = len(str(message.data)) if message.data else 0
-    debug_logger.info(
+    logger.info(
         "SERVER_DEBUG: Enqueueing message type=%s, data_keys=%s, data_size=%d bytes, host_id=%s",
         message.message_type,
         data_keys,
@@ -500,7 +488,7 @@ async def _process_inventory_message(message, connection, db):
         cpu_model = message.data.get("cpu_model", "N/A")
         memory_mb = message.data.get("memory_total_mb", "N/A")
         storage_count = len(message.data.get("storage_devices", []))
-        debug_logger.info(
+        logger.info(
             "SERVER_DEBUG: Hardware data - CPU: %s %s, Memory: %s MB, Storage devices: %d",
             cpu_vendor,
             cpu_model,
@@ -510,7 +498,7 @@ async def _process_inventory_message(message, connection, db):
     elif message.message_type == "software_inventory_update":
         total_packages = message.data.get("total_packages", 0)
         software_packages = message.data.get("software_packages", [])
-        debug_logger.info(
+        logger.info(
             "SERVER_DEBUG: Software data - Total packages: %d, First package: %s",
             total_packages,
             software_packages[0] if software_packages else "None",
@@ -518,7 +506,7 @@ async def _process_inventory_message(message, connection, db):
     elif message.message_type == "user_access_update":
         total_users = message.data.get("total_users", 0)
         total_groups = message.data.get("total_groups", 0)
-        debug_logger.info(
+        logger.info(
             "SERVER_DEBUG: User access data - Users: %d, Groups: %d",
             total_users,
             total_groups,
@@ -532,7 +520,7 @@ async def _process_inventory_message(message, connection, db):
             host_id=host.id,
             db=db,
         )
-        debug_logger.info(
+        logger.info(
             "SERVER_DEBUG: Message enqueued successfully with queue_id=%s for host %s (message_type=%s)",
             message_id,
             hostname,
@@ -541,7 +529,7 @@ async def _process_inventory_message(message, connection, db):
 
         # Commit the database session to persist the enqueued message
         db.commit()
-        debug_logger.info("SERVER_DEBUG: Database committed for message %s", message_id)
+        logger.debug("Database committed for message %s", message_id)
 
         # Send success acknowledgment to agent
         ack_message = {
@@ -551,12 +539,12 @@ async def _process_inventory_message(message, connection, db):
             "status": "queued",
         }
         await connection.send_message(ack_message)
-        debug_logger.info(
+        logger.info(
             "SERVER_DEBUG: Successfully processed and acknowledged message %s",
             message.message_type,
         )
 
     except Exception as e:
-        debug_logger.error("Error enqueueing message %s: %s", message.message_type, e)
+        logger.error("Error enqueueing message %s: %s", message.message_type, e)
         error_msg = ErrorMessage("queue_error", f"Failed to queue message: {str(e)}")
         await connection.send_message(error_msg.to_dict())

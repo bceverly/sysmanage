@@ -36,6 +36,10 @@ from backend.discovery.discovery_service import discovery_beacon
 from backend.security.certificate_manager import certificate_manager
 from backend.websocket.message_processor import message_processor
 from backend.utils.logging_formatter import UTCTimestampFormatter
+from backend.utils.verbosity_logger import get_logger
+
+# Initialize logger for startup debugging
+startup_logger = get_logger("backend.startup")
 
 
 # Function to get dynamic hostnames and IPs for CORS
@@ -132,82 +136,78 @@ async def lifespan(_fastapi_app: FastAPI):
     """
     Application lifespan manager to handle startup and shutdown events.
     """
-    print("DEBUG: lifespan function called", flush=True)
-    print("DEBUG: About to call logging.info", flush=True)
-    logging.info("DEBUG: lifespan function called")
-    print("DEBUG: logging.info called successfully", flush=True)
+    startup_logger.debug("lifespan function called")
+    startup_logger.debug("About to call logging.info")
+    startup_logger.info("lifespan function called")
+    startup_logger.debug("logging.info called successfully")
     try:
         # Startup: Ensure server certificates are generated
         print(
-            "DEBUG: About to call certificate_manager.ensure_server_certificate()",
+            "About to call certificate_manager.ensure_server_certificate()",
             flush=True,
         )
-        logging.info(
-            "DEBUG: About to call certificate_manager.ensure_server_certificate()"
-        )
+        logging.info("About to call certificate_manager.ensure_server_certificate()")
         certificate_manager.ensure_server_certificate()
-        print("DEBUG: certificate_manager completed", flush=True)
-        logging.info("DEBUG: certificate_manager.ensure_server_certificate() completed")
+        startup_logger.debug("certificate_manager completed")
+        startup_logger.info("certificate_manager.ensure_server_certificate() completed")
 
         # Startup: Start the heartbeat monitor service
-        print("DEBUG: About to start heartbeat monitor service", flush=True)
+        startup_logger.debug("About to start heartbeat monitor service")
         heartbeat_task = asyncio.create_task(heartbeat_monitor_service())
-        print("DEBUG: heartbeat monitor service started", flush=True)
+        startup_logger.debug("heartbeat monitor service started")
 
         # Startup: Start the message processor service
-        print("DEBUG: About to start message processor", flush=True)
-        logging.info("DEBUG: About to start message processor")
+        startup_logger.debug("About to start message processor")
+        startup_logger.info("About to start message processor")
 
         # Get current event loop and schedule the message processor to start
         loop = asyncio.get_event_loop()
-        print("DEBUG: Got event loop", flush=True)
+        startup_logger.debug("Got event loop")
 
         # Create the task and schedule it with the event loop
         message_processor_task = loop.create_task(message_processor.start())
-        print("DEBUG: Created message processor task with loop.create_task", flush=True)
-        logging.info(
-            "DEBUG: Message processor task created: %s", message_processor_task
-        )
+        startup_logger.debug("Created message processor task with loop.create_task")
+        logging.info("Message processor task created: %s", message_processor_task)
 
         # Allow the event loop to process the task creation
-        print("DEBUG: Yielding control to event loop", flush=True)
+        startup_logger.debug("Yielding control to event loop")
         await asyncio.sleep(0.1)  # Short yield to let task start
 
         # Force the event loop to process any pending tasks
         await asyncio.sleep(0.5)  # Give it time to actually start
-        print("DEBUG: Finished yielding to event loop", flush=True)
+        startup_logger.debug("Finished yielding to event loop")
 
         # Check task status
         if message_processor_task.done():
             print(
-                "DEBUG: WARNING - Message processor task completed during startup",
+                "WARNING - Message processor task completed during startup",
                 flush=True,
             )
-            logging.warning("DEBUG: Message processor task completed during startup")
+            startup_logger.warning("Message processor task completed during startup")
             try:
                 result = await message_processor_task
-                print(f"DEBUG: Task result: {result}", flush=True)
+                print(f"Task result: {result}")
             except Exception as task_e:
-                logging.error(
-                    "DEBUG: Message processor startup failed: %s", task_e, exc_info=True
+                startup_logger.error(
+                    "Message processor startup failed: %s", task_e, exc_info=True
                 )
-                print(f"DEBUG: Task exception: {task_e}", flush=True)
+                print(f"Task exception: {task_e}")
                 raise
         else:
-            print("DEBUG: Message processor task scheduled and running", flush=True)
-            logging.info("DEBUG: Message processor task scheduled and running")
+            startup_logger.debug("Message processor task scheduled and running")
+            startup_logger.info("Message processor task scheduled and running")
 
         # Startup: Start the discovery beacon service
-        print("DEBUG: About to start discovery beacon service", flush=True)
+        startup_logger.debug("About to start discovery beacon service")
         await discovery_beacon.start_beacon_service()
-        print("DEBUG: discovery beacon service started", flush=True)
+        startup_logger.debug("discovery beacon service started")
 
-        logging.info("DEBUG: All startup tasks completed successfully")
-        print("DEBUG: All startup tasks completed successfully", flush=True)
+        startup_logger.info("All startup tasks completed successfully")
+        startup_logger.debug("All startup tasks completed successfully")
 
         yield
     except Exception as e:
-        logging.error("DEBUG: Exception in lifespan startup: %s", e, exc_info=True)
+        startup_logger.error("Exception in lifespan startup: %s", e, exc_info=True)
         raise
 
     # Shutdown: Stop the discovery beacon service
