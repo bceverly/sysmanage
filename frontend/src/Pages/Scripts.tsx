@@ -84,9 +84,10 @@ const Scripts: React.FC = () => {
   // Script editor state
   const [scriptName, setScriptName] = useState('');
   const [scriptDescription, setScriptDescription] = useState('');
-  const [scriptContent, setScriptContent] = useState('#!/bin/bash\n\n');
+  const [scriptContent, setScriptContent] = useState('');
   const [selectedShell, setSelectedShell] = useState('bash');
   const [selectedPlatform, setSelectedPlatform] = useState('linux');
+  const [hasUserEditedContent, setHasUserEditedContent] = useState(false);
   const [selectedHost, setSelectedHost] = useState<number | ''>('');
   const [savedScriptId, setSavedScriptId] = useState<number | ''>('');
   const [isEditMode, setIsEditMode] = useState(false);
@@ -119,14 +120,21 @@ const Scripts: React.FC = () => {
     severity: 'success' | 'error' | 'info' | 'warning';
   }>({ open: false, message: '', severity: 'info' });
 
-  const shells = [
-    { value: 'bash', label: t('scripts.shells.bash') },
-    { value: 'sh', label: t('scripts.shells.sh') },
-    { value: 'zsh', label: t('scripts.shells.zsh') },
-    { value: 'powershell', label: t('scripts.shells.powershell') },
-    { value: 'cmd', label: t('scripts.shells.cmd') },
-    { value: 'ksh', label: t('scripts.shells.ksh') }
+  const allShells = [
+    { value: 'bash', label: t('scripts.shells.bash'), platforms: ['linux', 'darwin', 'freebsd', 'openbsd', 'netbsd'] },
+    { value: 'sh', label: t('scripts.shells.sh'), platforms: ['linux', 'darwin', 'freebsd', 'openbsd', 'netbsd'] },
+    { value: 'zsh', label: t('scripts.shells.zsh'), platforms: ['linux', 'darwin', 'freebsd', 'openbsd', 'netbsd'] },
+    { value: 'ksh', label: t('scripts.shells.ksh'), platforms: ['linux', 'darwin', 'freebsd', 'openbsd', 'netbsd'] },
+    { value: 'powershell', label: t('scripts.shells.powershell'), platforms: ['windows', 'linux', 'darwin'] },
+    { value: 'cmd', label: t('scripts.shells.cmd'), platforms: ['windows'] }
   ];
+
+  // Get shells available for the selected platform
+  const getShellsForPlatform = (platform: string) => {
+    return allShells.filter(shell => shell.platforms.includes(platform));
+  };
+
+  const shells = getShellsForPlatform(selectedPlatform);
 
   const platforms = [
     { value: 'linux', label: t('scripts.platforms.linux') },
@@ -317,9 +325,10 @@ const Scripts: React.FC = () => {
   const resetScriptForm = () => {
     setScriptName('');
     setScriptDescription('');
-    setScriptContent('#!/bin/bash\n\n');
+    setScriptContent(getShellHeader('bash', 'linux'));
     setSelectedShell('bash');
     setSelectedPlatform('linux');
+    setHasUserEditedContent(false);
     setIsEditMode(false);
     setEditingScriptId(null);
   };
@@ -436,6 +445,7 @@ const Scripts: React.FC = () => {
       setScriptContent(script.content);
       setSelectedShell(script.shell_type);
       setScriptName(script.name);
+      setHasUserEditedContent(true); // Content is loaded from existing script
     }
   };
 
@@ -470,6 +480,111 @@ const Scripts: React.FC = () => {
       default:
         return 'shell';
     }
+  };
+
+  // Get the appropriate shebang/header for a shell type and platform
+  const getShellHeader = useCallback((shell: string, platform: string = selectedPlatform): string => {
+    switch (shell) {
+      case 'bash':
+        // bash locations vary by OS
+        switch (platform) {
+          case 'linux':
+          case 'darwin':
+            return '#!/bin/bash\n\n';
+          case 'freebsd':
+          case 'openbsd':
+          case 'netbsd':
+            return '#!/usr/local/bin/bash\n\n';
+          default:
+            return '#!/bin/bash\n\n';
+        }
+      case 'sh':
+        // sh is usually in /bin on all Unix-like systems
+        return '#!/bin/sh\n\n';
+      case 'zsh':
+        // zsh locations
+        switch (platform) {
+          case 'linux':
+            return '#!/bin/zsh\n\n';
+          case 'darwin':
+            return '#!/bin/zsh\n\n';
+          case 'freebsd':
+          case 'openbsd':
+          case 'netbsd':
+            return '#!/usr/local/bin/zsh\n\n';
+          default:
+            return '#!/bin/zsh\n\n';
+        }
+      case 'ksh':
+        // ksh locations
+        switch (platform) {
+          case 'linux':
+            return '#!/bin/ksh\n\n';
+          case 'darwin':
+            return '#!/bin/ksh\n\n';
+          case 'freebsd':
+          case 'netbsd':
+            return '#!/usr/local/bin/ksh\n\n';
+          case 'openbsd':
+            return '#!/bin/ksh\n\n'; // ksh is default shell on OpenBSD
+          default:
+            return '#!/bin/ksh\n\n';
+        }
+      case 'powershell':
+        return '# PowerShell Script\n\n';
+      case 'cmd':
+        return '@echo off\nREM Windows Batch Script\n\n';
+      default:
+        return '#!/bin/bash\n\n';
+    }
+  }, [selectedPlatform]);
+
+  // Initialize script content with correct shebang on component mount
+  useEffect(() => {
+    if (!scriptContent) {
+      setScriptContent(getShellHeader('bash', 'linux'));
+    }
+  }, [scriptContent, getShellHeader]);
+
+  // Handle platform change
+  const handlePlatformChange = (newPlatform: string) => {
+    setSelectedPlatform(newPlatform);
+    
+    // Check if current shell is available for the new platform
+    const availableShells = getShellsForPlatform(newPlatform);
+    const currentShellAvailable = availableShells.some(shell => shell.value === selectedShell);
+    
+    if (!currentShellAvailable && availableShells.length > 0) {
+      // Switch to the first available shell for this platform
+      const defaultShell = availableShells[0].value;
+      setSelectedShell(defaultShell);
+      
+      // Update script content if user hasn't edited it
+      if (!hasUserEditedContent) {
+        setScriptContent(getShellHeader(defaultShell, newPlatform));
+      }
+    } else {
+      // Current shell is still available, but platform changed so update shebang path
+      if (!hasUserEditedContent) {
+        setScriptContent(getShellHeader(selectedShell, newPlatform));
+      }
+    }
+  };
+
+  // Handle shell type change
+  const handleShellChange = (newShell: string) => {
+    setSelectedShell(newShell);
+    
+    // Update script content if user hasn't edited it
+    if (!hasUserEditedContent) {
+      setScriptContent(getShellHeader(newShell, selectedPlatform));
+    }
+  };
+
+  // Handle script content change
+  const handleScriptContentChange = (value: string | undefined) => {
+    setScriptContent(value || '');
+    setHasUserEditedContent(true);
   };
 
   const formatTimestamp = (timestamp: string | undefined) => {
@@ -507,7 +622,7 @@ const Scripts: React.FC = () => {
       width: 120,
       renderCell: (params) => (
         <Chip 
-          label={shells.find(s => s.value === params.value)?.label || params.value} 
+          label={allShells.find(s => s.value === params.value)?.label || params.value} 
           size="small" 
           variant="outlined"
         />
@@ -669,6 +784,7 @@ const Scripts: React.FC = () => {
     setScriptContent(script.content);
     setSelectedShell(script.shell_type);
     setSelectedPlatform(script.platform || 'linux');
+    setHasUserEditedContent(true); // Content is from existing script
     setIsEditMode(true);
     setEditingScriptId(script.id || null);
     setShowAddScriptDialog(true);
@@ -737,9 +853,10 @@ const Scripts: React.FC = () => {
     // Clear the form and open the dialog
     setScriptName('');
     setScriptDescription('');
-    setScriptContent('#!/bin/bash\n\n');
+    setScriptContent(getShellHeader('bash', 'linux'));
     setSelectedShell('bash');
     setSelectedPlatform('linux');
+    setHasUserEditedContent(false);
     setIsEditMode(false);
     setEditingScriptId(null);
     setShowAddScriptDialog(true);
@@ -963,7 +1080,7 @@ const Scripts: React.FC = () => {
                       <strong>{scriptName}</strong>
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      {t('scripts.shellType')}: {shells.find(s => s.value === selectedShell)?.label}
+                      {t('scripts.shellType')}: {allShells.find(s => s.value === selectedShell)?.label}
                     </Typography>
                   </Box>
                 )}
@@ -1190,7 +1307,7 @@ const Scripts: React.FC = () => {
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                   <Chip 
-                    label={shells.find(s => s.value === viewingScript.shell_type)?.label || viewingScript.shell_type} 
+                    label={allShells.find(s => s.value === viewingScript.shell_type)?.label || viewingScript.shell_type} 
                     size="small" 
                     variant="outlined"
                   />
@@ -1419,11 +1536,15 @@ const Scripts: React.FC = () => {
             
             <Grid container spacing={2} sx={{ mt: 1 }}>
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel>{t('scripts.shellType')}</InputLabel>
+                <FormControl fullWidth variant="outlined">
+                  <InputLabel id="shell-type-label">
+                    {t('scripts.shellType')}
+                  </InputLabel>
                   <Select
+                    labelId="shell-type-label"
                     value={selectedShell}
-                    onChange={(e) => setSelectedShell(e.target.value)}
+                    label={t('scripts.shellType')}
+                    onChange={(e) => handleShellChange(e.target.value)}
                   >
                     {shells.map((shell) => (
                       <MenuItem key={shell.value} value={shell.value}>
@@ -1434,11 +1555,15 @@ const Scripts: React.FC = () => {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel>{t('scripts.platform')}</InputLabel>
+                <FormControl fullWidth variant="outlined">
+                  <InputLabel id="platform-label">
+                    {t('scripts.platform')}
+                  </InputLabel>
                   <Select
+                    labelId="platform-label"
                     value={selectedPlatform}
-                    onChange={(e) => setSelectedPlatform(e.target.value)}
+                    label={t('scripts.platform')}
+                    onChange={(e) => handlePlatformChange(e.target.value)}
                   >
                     {platforms.map((platform) => (
                       <MenuItem key={platform.value} value={platform.value}>
@@ -1459,7 +1584,7 @@ const Scripts: React.FC = () => {
               height="400px"
               language={getLanguageForShell(selectedShell)}
               value={scriptContent}
-              onChange={(value) => setScriptContent(value || '')}
+              onChange={handleScriptContentChange}
               theme="vs-dark"
               options={{
                 minimap: { enabled: false },
