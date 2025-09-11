@@ -55,6 +55,7 @@ interface HostResult {
   failed_packages?: UpdatePackage[];
 }
 
+
 const Updates: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
