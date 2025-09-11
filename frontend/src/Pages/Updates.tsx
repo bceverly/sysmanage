@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { 
@@ -80,13 +80,13 @@ const Updates: React.FC = () => {
 
   // Auto-refresh state (disabled)
   // const [refreshCountdown, setRefreshCountdown] = useState(30);
-  const [hasActiveUpdates, setHasActiveUpdates] = useState(false);
-  const refreshTimerRef = useRef<number | null>(null);
-  const countdownTimerRef = useRef<number | null>(null);
+  // const [hasActiveUpdates, setHasActiveUpdates] = useState(false);
+  // const refreshTimerRef = useRef<number | null>(null);
+  // const countdownTimerRef = useRef<number | null>(null);
 
   const ITEMS_PER_PAGE = 50;
-  const STANDARD_REFRESH_INTERVAL = 30000; // 30 seconds 
-  const ACTIVE_UPDATES_REFRESH_INTERVAL = 15000; // 15 seconds when updates are running
+  // const STANDARD_REFRESH_INTERVAL = 30000; // 30 seconds 
+  // const ACTIVE_UPDATES_REFRESH_INTERVAL = 15000; // 15 seconds when updates are running
 
   const fetchUpdatesSummary = useCallback(async () => {
     try {
@@ -197,11 +197,11 @@ const Updates: React.FC = () => {
 
   const handleManualRefresh = async () => {
     await refreshAll();
-    resetAutoRefreshTimer(); // Reset timer after manual refresh
+    // resetAutoRefreshTimer(); // Auto-refresh disabled
   };
 
-  // Store timer function in ref to avoid useCallback dependencies
-  const resetAutoRefreshTimerRef = useRef<() => void>();
+  // Store timer function in ref to avoid useCallback dependencies (disabled)
+  // const resetAutoRefreshTimerRef = useRef<() => void>();
   
   // Auto-refresh timer function disabled
   // resetAutoRefreshTimerRef.current = () => {
@@ -238,11 +238,11 @@ const Updates: React.FC = () => {
   //   }, interval);
   // };
 
-  const resetAutoRefreshTimer = useCallback(() => {
-    if (resetAutoRefreshTimerRef.current) {
-      resetAutoRefreshTimerRef.current();
-    }
-  }, []);
+  // const resetAutoRefreshTimer = useCallback(() => {
+  //   if (resetAutoRefreshTimerRef.current) {
+  //     resetAutoRefreshTimerRef.current();
+  //   }
+  // }, []);
 
   // Remove user interaction timer resets to prevent excessive refreshing
 
@@ -254,16 +254,16 @@ const Updates: React.FC = () => {
     ]);
   }, [filters, fetchUpdates, fetchHostsWithUpdates, fetchUpdatesSummary]);
 
-  // Check for active updates on component mount and when updateStatuses changes
-  useEffect(() => {
-    let hasPending = false;
-    updateStatuses.forEach((status) => {
-      if (status.status === 'pending') {
-        hasPending = true;
-      }
-    });
-    setHasActiveUpdates(hasPending);
-  }, [updateStatuses]);
+  // Check for active updates on component mount and when updateStatuses changes (disabled)
+  // useEffect(() => {
+  //   let hasPending = false;
+  //   updateStatuses.forEach((status) => {
+  //     if (status.status === 'pending') {
+  //       hasPending = true;
+  //     }
+  //   });
+  //   // setHasActiveUpdates(hasPending);
+  // }, [updateStatuses]);
 
   // Watch for changes in search parameters and update filters accordingly
   useEffect(() => {
@@ -357,7 +357,7 @@ const Updates: React.FC = () => {
           
           // Disable fast polling if no pending updates remain
           if (!hasPendingUpdates) {
-            setHasActiveUpdates(false);
+            // setHasActiveUpdates(false);
           }
           
           // Clear selections for completed updates after a delay
@@ -457,7 +457,7 @@ const Updates: React.FC = () => {
       });
     });
     setUpdateStatuses(newStatuses);
-    setHasActiveUpdates(true); // Enable fast polling
+    // setHasActiveUpdates(true); // Enable fast polling
 
     // Clear checkboxes immediately after setting pending status
     setSelectedUpdates(new Set());
