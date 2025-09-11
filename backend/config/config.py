@@ -11,8 +11,13 @@ import yaml
 
 # Read/validate the configuration file
 # Check for system config first (security), then fall back to development config
-CONFIG_PATH = "/etc/sysmanage.yaml"
-if not os.path.exists("/etc/sysmanage.yaml") and os.path.exists("sysmanage-dev.yaml"):
+if os.name == "nt":  # Windows
+    CONFIG_PATH = r"C:\ProgramData\SysManage\sysmanage.yaml"
+else:  # Unix-like (Linux, macOS, BSD)
+    CONFIG_PATH = "/etc/sysmanage.yaml"
+
+# Fallback to development config if system config doesn't exist
+if not os.path.exists(CONFIG_PATH) and os.path.exists("sysmanage-dev.yaml"):
     CONFIG_PATH = "sysmanage-dev.yaml"
     # Using development configuration as fallback
 

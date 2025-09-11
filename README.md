@@ -270,13 +270,21 @@ npm install
 The SysManage server requires certain directories to exist with proper permissions for normal operation:
 
 #### Certificate Storage Directory
-**Default location**: `/etc/sysmanage/certs/` (configurable via `certificates.path` in configuration)
+**Default locations** (configurable via `certificates.path` in configuration):
+- **Linux/macOS/BSD**: `/etc/sysmanage/certs/`
+- **Windows**: `C:\ProgramData\SysManage\certs\`
 
 ```bash
-# Create certificate directory with proper permissions
+# Create certificate directory with proper permissions (Linux/macOS/BSD)
 sudo mkdir -p /etc/sysmanage/certs
 sudo chown sysmanage:sysmanage /etc/sysmanage/certs
 sudo chmod 0755 /etc/sysmanage/certs
+```
+
+```powershell
+# Create certificate directory (Windows)
+mkdir "C:\ProgramData\SysManage\certs"
+icacls "C:\ProgramData\SysManage\certs" /grant "sysmanage:(OI)(CI)F" /T
 ```
 
 **Required permissions**:
@@ -285,13 +293,21 @@ sudo chmod 0755 /etc/sysmanage/certs
 - **Certificates**: `0644` (owner read/write, others read-only)
 
 #### Configuration Directory
-**Default location**: `/etc/sysmanage.yaml`
+**Default locations**:
+- **Linux/macOS/BSD**: `/etc/sysmanage.yaml`
+- **Windows**: `C:\ProgramData\SysManage\sysmanage.yaml`
 
 ```bash
-# Create configuration file with proper permissions
+# Create configuration file with proper permissions (Linux/macOS/BSD)
 sudo touch /etc/sysmanage.yaml
 sudo chown sysmanage:sysmanage /etc/sysmanage.yaml  
 sudo chmod 0600 /etc/sysmanage.yaml
+```
+
+```powershell
+# Create configuration file (Windows)
+New-Item -Path "C:\ProgramData\SysManage\sysmanage.yaml" -ItemType File -Force
+icacls "C:\ProgramData\SysManage\sysmanage.yaml" /grant "sysmanage:F" /inheritance:r
 ```
 
 #### Log Directory (Optional)
@@ -458,7 +474,9 @@ For HTTPS development, place your SSL certificates in:
 If certificates are not found, the system will automatically fall back to HTTP on localhost.
 
 #### Environment Configuration
-Create `/etc/sysmanage.yaml` (or `sysmanage-dev.yaml` for development):
+Create the configuration file (or `sysmanage-dev.yaml` for development):
+- **Linux/macOS/BSD**: `/etc/sysmanage.yaml` 
+- **Windows**: `C:\ProgramData\SysManage\sysmanage.yaml`
 ```yaml
 api:
   host: "localhost"
@@ -500,7 +518,9 @@ webui:
 **Important Security Steps:**
 1. 🔑 Generate new secrets: `openssl rand -base64 32`
 2. 🔐 Use strong passwords (minimum 12 characters, mixed case, numbers, symbols)
-3. 📝 Store production configuration in `/etc/sysmanage.yaml` with restricted permissions: `chmod 600 /etc/sysmanage.yaml`
+3. 📝 Store production configuration with restricted permissions:
+   - **Linux/macOS/BSD**: `/etc/sysmanage.yaml` (`chmod 600 /etc/sysmanage.yaml`)
+   - **Windows**: `C:\ProgramData\SysManage\sysmanage.yaml` (restrict access to sysmanage service account)
 4. 🚫 Never commit configuration files with real passwords to version control
 
 ## Development Workflow
@@ -628,20 +648,42 @@ SysManage implements mutual TLS authentication to protect against DNS poisoning 
 
 #### Certificate Storage
 
-**Server-side certificates** are stored in `/etc/sysmanage/certs/` (configurable):
+**Server-side certificates** are stored with restricted permissions (configurable):
+
+**Linux/macOS/BSD**: `/etc/sysmanage/certs/`
 ```
 /etc/sysmanage/certs/
 ├── ca.crt              # Certificate Authority certificate
+├── ca.key              # CA private key (0600 permissions)
+├── server.crt          # Server certificate for HTTPS
+└── server.key          # Server private key (0600 permissions)
+```
+
+**Windows**: `C:\ProgramData\SysManage\certs\`
+```
+C:\ProgramData\SysManage\certs\
+├── ca.crt              # Certificate Authority certificate
 ├── ca.key              # CA private key (restricted permissions)
-├── server.crt          # Server certificate
+├── server.crt          # Server certificate for HTTPS
 └── server.key          # Server private key (restricted permissions)
 ```
 
-**Agent-side certificates** are stored in `/etc/sysmanage-agent/` (configurable):
+**Agent-side certificates** are stored with restricted permissions (configurable):
+
+**Linux/macOS/BSD**: `/etc/sysmanage-agent/`
 ```
 /etc/sysmanage-agent/
-├── client.crt          # Agent client certificate
+├── client.crt          # Agent client certificate  
 ├── client.key          # Agent private key (0600 permissions)
+├── ca.crt              # CA certificate for server validation
+└── server.fingerprint  # Server certificate fingerprint for pinning
+```
+
+**Windows**: `C:\ProgramData\SysManage\`
+```
+C:\ProgramData\SysManage\
+├── client.crt          # Agent client certificate  
+├── client.key          # Agent private key (restricted permissions)
 ├── ca.crt              # CA certificate for server validation
 └── server.fingerprint  # Server certificate fingerprint for pinning
 ```

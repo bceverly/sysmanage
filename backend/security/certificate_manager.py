@@ -26,9 +26,13 @@ class CertificateManager:
 
     def __init__(self):
         self.config = get_config()
-        cert_path = self.config.get("certificates", {}).get(
-            "path", "/etc/sysmanage/certs"
-        )
+        # Set platform-specific default certificate path
+        if os.name == "nt":  # Windows
+            default_cert_path = r"C:\ProgramData\SysManage\certs"
+        else:  # Unix-like (Linux, macOS, BSD)
+            default_cert_path = "/etc/sysmanage/certs"
+
+        cert_path = self.config.get("certificates", {}).get("path", default_cert_path)
 
         # Use a safe default path for testing
         if "PYTEST_CURRENT_TEST" in os.environ:
