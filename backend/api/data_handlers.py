@@ -625,7 +625,10 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
 
         # Only update host's last access timestamp if this is from a live connection
         # (not from background queue processing of old messages)
-        if not hasattr(connection, 'is_mock_connection') or not connection.is_mock_connection:
+        if (
+            not hasattr(connection, "is_mock_connection")
+            or not connection.is_mock_connection
+        ):
             stmt = (
                 update(Host)
                 .where(Host.id == connection.host_id)

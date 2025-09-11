@@ -72,14 +72,13 @@ async def handle_system_info(db: Session, connection, message_data: dict):
                 "status": "up",
                 "platform": platform,
             }
-            if not hasattr(connection, 'is_mock_connection') or not connection.is_mock_connection:
+            if (
+                not hasattr(connection, "is_mock_connection")
+                or not connection.is_mock_connection
+            ):
                 update_values["last_access"] = text("NOW()")
-            
-            stmt = (
-                update(Host)
-                .where(Host.id == host.id)
-                .values(**update_values)
-            )
+
+            stmt = update(Host).where(Host.id == host.id).values(**update_values)
             db.execute(stmt)
             db.commit()
 
@@ -127,7 +126,10 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                 host.status = "up"
                 host.active = True
                 # Only update last_access for actual heartbeat/checkin messages, not queued data
-                if not hasattr(connection, 'is_mock_connection') or not connection.is_mock_connection:
+                if (
+                    not hasattr(connection, "is_mock_connection")
+                    or not connection.is_mock_connection
+                ):
                     host.last_access = datetime.now(timezone.utc)
 
                 # Update privileged status if provided in heartbeat
@@ -149,9 +151,12 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                     is_privileged = message_data.get("is_privileged", False)
                     # Only set last_access for actual heartbeat/checkin messages, not queued data
                     last_access_value = None
-                    if not hasattr(connection, 'is_mock_connection') or not connection.is_mock_connection:
+                    if (
+                        not hasattr(connection, "is_mock_connection")
+                        or not connection.is_mock_connection
+                    ):
                         last_access_value = datetime.now(timezone.utc)
-                    
+
                     host = Host(
                         fqdn=connection.hostname,
                         ipv4=connection.ipv4,

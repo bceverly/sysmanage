@@ -607,12 +607,26 @@ const HostDetail = () => {
         if (!diagnosticToDelete) return;
         
         try {
+            console.log('Deleting diagnostic:', diagnosticToDelete);
             await doDeleteDiagnostic(diagnosticToDelete);
+            console.log('Diagnostic deleted successfully, refreshing data...');
             
             // Refresh diagnostics data after deletion
             if (hostId) {
-                const updatedDiagnostics = await doGetHostDiagnostics(BigInt(hostId));
-                setDiagnosticsData(updatedDiagnostics);
+                try {
+                    const updatedDiagnostics = await doGetHostDiagnostics(BigInt(hostId));
+                    setDiagnosticsData(updatedDiagnostics);
+                    console.log('Diagnostics data refreshed:', updatedDiagnostics.length, 'reports');
+                    
+                    // Also refresh host data to update the processing pill status
+                    // This is especially important if we just deleted the last diagnostic
+                    const updatedHost = await doGetHostByID(BigInt(hostId));
+                    setHost(updatedHost);
+                    console.log('Host data refreshed, diagnostics_request_status:', updatedHost?.diagnostics_request_status);
+                } catch (refreshError) {
+                    console.error('Error refreshing data after deletion:', refreshError);
+                    // Still show success since deletion worked
+                }
             }
             
             setSnackbarMessage(t('hostDetail.diagnosticDeleted', 'Diagnostic report deleted successfully'));
@@ -1787,7 +1801,7 @@ const HostDetail = () => {
                                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                                                             <Box>
                                                                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                                    {t('hostDetail.diagnosticReport', 'Diagnostic Report')} #{diagnostic.id}
+                                                                    {t('hostDetail.diagnosticReport', 'Diagnostic Report')} #{diagnostic.collection_id?.substring(0, 8) || 'Unknown'}
                                                                 </Typography>
                                                                 <Typography variant="body2" color="textSecondary">
                                                                     {t('hostDetail.collectedAt', 'Collected')}: {formatDate(diagnostic.completed_at)}
@@ -1981,10 +1995,8 @@ const HostDetail = () => {
                     sx: { backgroundColor: 'grey.900' }
                 }}
             >
-                <DialogTitle>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
-                        {t('hostDetail.deleteDiagnosticConfirm', 'Delete Diagnostic Report')}
-                    </Typography>
+                <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
+                    {t('hostDetail.deleteDiagnosticConfirm', 'Delete Diagnostic Report')}
                 </DialogTitle>
                 <DialogContent>
                     <Typography>
@@ -2012,7 +2024,7 @@ const HostDetail = () => {
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
                         {t('hostDetail.diagnosticDetailTitle', 'Diagnostic Report Details')}
-                        {selectedDiagnostic && ` #${selectedDiagnostic.id}`}
+                        {selectedDiagnostic && ` #${selectedDiagnostic.collection_id?.substring(0, 8) || 'Unknown'}`}
                     </Typography>
                     <IconButton onClick={() => setDiagnosticDetailOpen(false)} size="small">
                         <CloseIcon />

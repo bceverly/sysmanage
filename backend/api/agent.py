@@ -208,7 +208,10 @@ async def _handle_message_by_type(message, connection, db):
 
     elif message.message_type == MessageType.HEARTBEAT:
         logger.info("Calling handle_heartbeat")
-        await handle_heartbeat(db, connection, message.data)
+        # Add message_id to the data so the handler can access it
+        heartbeat_data = message.data.copy()
+        heartbeat_data["message_id"] = message.message_id
+        await handle_heartbeat(db, connection, heartbeat_data)
 
     elif message.message_type == MessageType.COMMAND_RESULT:
         logger.info("Calling handle_command_result")

@@ -179,6 +179,20 @@ async def get_host_diagnostics(
             .all()
         )
 
+        # If there are no diagnostics and the host status is "pending", clear it
+        if not diagnostics and host.diagnostics_request_status == "pending":
+            from sqlalchemy import update
+
+            stmt = (
+                update(models.Host)
+                .where(models.Host.id == host_id)
+                .values(diagnostics_request_status=None)
+            )
+            session.execute(stmt)
+            session.commit()
+            # Refresh the host object to reflect the change
+            session.refresh(host)
+
         return {
             "host_id": host_id,
             "diagnostics": [
@@ -327,9 +341,31 @@ async def delete_diagnostic_report(diagnostic_id: int):
                 status_code=404, detail=_("Diagnostic report not found")
             )
 
+        # Store the host_id before deleting the diagnostic
+        host_id = diagnostic.host_id
+
         # Delete the record
         session.delete(diagnostic)
         session.commit()
+
+        # Check if this was the last diagnostic report for this host
+        remaining_diagnostics_count = (
+            session.query(models.DiagnosticReport)
+            .filter(models.DiagnosticReport.host_id == host_id)
+            .count()
+        )
+
+        # If no diagnostics remain, clear the host's diagnostics request status
+        if remaining_diagnostics_count == 0:
+            from sqlalchemy import update
+
+            stmt = (
+                update(models.Host)
+                .where(models.Host.id == host_id)
+                .values(diagnostics_request_status=None)
+            )
+            session.execute(stmt)
+            session.commit()
 
         return {"result": True, "message": _("Diagnostic report deleted")}
 
