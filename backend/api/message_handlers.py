@@ -67,14 +67,18 @@ async def handle_system_info(db: Session, connection, message_data: dict):
             )
 
             # Update host online status
+            # Only update last_access for actual heartbeat/checkin messages, not queued data
+            update_values = {
+                "status": "up",
+                "platform": platform,
+            }
+            if not hasattr(connection, 'is_mock_connection') or not connection.is_mock_connection:
+                update_values["last_access"] = text("NOW()")
+            
             stmt = (
                 update(Host)
                 .where(Host.id == host.id)
-                .values(
-                    last_access=text("NOW()"),
-                    status="up",
-                    platform=platform,
-                )
+                .values(**update_values)
             )
             db.execute(stmt)
             db.commit()
@@ -122,7 +126,9 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                 # Update host object attributes for test compatibility
                 host.status = "up"
                 host.active = True
-                host.last_access = datetime.now(timezone.utc)
+                # Only update last_access for actual heartbeat/checkin messages, not queued data
+                if not hasattr(connection, 'is_mock_connection') or not connection.is_mock_connection:
+                    host.last_access = datetime.now(timezone.utc)
 
                 # Update privileged status if provided in heartbeat
                 is_privileged = message_data.get("is_privileged")
@@ -141,6 +147,11 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                 if has_hostname and has_ipv4 and has_ipv6:
                     # Create new host
                     is_privileged = message_data.get("is_privileged", False)
+                    # Only set last_access for actual heartbeat/checkin messages, not queued data
+                    last_access_value = None
+                    if not hasattr(connection, 'is_mock_connection') or not connection.is_mock_connection:
+                        last_access_value = datetime.now(timezone.utc)
+                    
                     host = Host(
                         fqdn=connection.hostname,
                         ipv4=connection.ipv4,
@@ -148,7 +159,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                         active=True,
                         status="up",
                         approval_status="pending",
-                        last_access=datetime.now(timezone.utc),
+                        last_access=last_access_value,
                         is_agent_privileged=is_privileged,
                     )
                     db.add(host)

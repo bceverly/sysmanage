@@ -827,6 +827,7 @@ class MockConnection:
     def __init__(self, host_id: int):
         self.host_id = host_id
         self.hostname = None  # Will be populated by handlers if needed
+        self.is_mock_connection = True  # Flag to prevent last_access updates
 
     async def send_message(self, message: Dict[str, Any]):
         """Mock send_message method - messages are not sent back during queue processing."""
