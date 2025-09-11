@@ -31,6 +31,7 @@
   "hosts": {
     "title": "Gerenciamento de Hosts",
     "fqdn": "FQDN",
+    "platform": "Plataforma",
     "ipv4": "Endereço IPv4",
     "ipv6": "Endereço IPv6",
     "status": "Status",

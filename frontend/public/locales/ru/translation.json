@@ -32,6 +32,7 @@
   "hosts": {
     "title": "Управление хостами",
     "fqdn": "FQDN",
+    "platform": "Платформа",
     "ipv4": "IPv4 адрес",
     "ipv6": "IPv6 адрес",
     "status": "Статус",

@@ -32,6 +32,7 @@
   "hosts": {
     "title": "ホスト管理",
     "fqdn": "FQDN",
+    "platform": "プラットフォーム",
     "ipv4": "IPv4アドレス",
     "ipv6": "IPv6アドレス",
     "status": "ステータス",

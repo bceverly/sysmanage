@@ -32,6 +32,7 @@
   "hosts": {
     "title": "Gestion des hôtes",
     "fqdn": "FQDN",
+    "platform": "Plateforme",
     "ipv4": "Adresse IPv4",
     "ipv6": "Adresse IPv6",
     "status": "Statut",
@@ -564,16 +565,16 @@
       "cannotDeleteActiveScript": "Impossible de supprimer un script avec des exécutions actives",
       "hostNotConnected": "Hôte non connecté - script mis en file d'attente pour livraison",
       "scriptExecutionDisabled": "L'exécution de scripts est désactivée dans la configuration de l'agent"
-    },
-    "search": {
-      "search": "Rechercher",
-      "searchTerm": "Terme de recherche",
-      "searchColumn": "Rechercher dans",
-      "searchHosts": "Rechercher des hôtes",
-      "searchUsers": "Rechercher des utilisateurs",
-      "searchScripts": "Rechercher des scripts",
-      "searchTags": "Rechercher des balises"
     }
+  },
+  "search": {
+    "search": "Rechercher",
+    "searchTerm": "Terme de recherche",
+    "searchColumn": "Rechercher dans",
+    "searchHosts": "Rechercher des hôtes",
+    "searchUsers": "Rechercher des utilisateurs",
+    "searchScripts": "Rechercher des scripts",
+    "searchTags": "Rechercher des balises"
   },
   "tags": {
     "title": "Balises",

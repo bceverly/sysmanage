@@ -42,6 +42,7 @@ const Hosts = () => {
     const columns: GridColDef[] = [
         { field: 'id', headerName: t('common.id', 'ID'), width: 70 },
         { field: 'fqdn', headerName: t('hosts.fqdn'), width: 200 },
+        { field: 'platform', headerName: t('hosts.platform'), width: 120 },
         { field: 'ipv4', headerName: t('hosts.ipv4'), width: 150 },
         { field: 'ipv6', headerName: t('hosts.ipv6'), width: 200 },
         { 
@@ -194,6 +195,7 @@ const Hosts = () => {
     // Search columns configuration (excluding irrelevant columns)
     const searchColumns = [
         { field: 'fqdn', label: t('hosts.fqdn') },
+        { field: 'platform', label: t('hosts.platform') },
         { field: 'ipv4', label: t('hosts.ipv4') },
         { field: 'ipv6', label: t('hosts.ipv6') }
     ];

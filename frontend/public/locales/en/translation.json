@@ -30,6 +30,7 @@
   "hosts": {
     "title": "Host Management",
     "fqdn": "FQDN",
+    "platform": "Platform",
     "ipv4": "IPv4 Address",
     "ipv6": "IPv6 Address",
     "status": "Status",

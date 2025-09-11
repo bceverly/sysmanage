@@ -32,6 +32,7 @@
   "hosts": {
     "title": "Host Beheer",
     "fqdn": "FQDN",
+    "platform": "Platform",
     "ipv4": "IPv4 Adres",
     "ipv6": "IPv6 Adres",
     "status": "Status",

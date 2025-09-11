@@ -15,6 +15,7 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 
 import api from "../Services/api"
+import LanguageSelector from "../Components/LanguageSelector"
 
 const Login = () => {
     const [input, setInput] = useState({
@@ -58,22 +59,33 @@ const Login = () => {
     };
 
   return (
-    <Container component="main" maxWidth="sm">
+    <>
       <Box
         sx={{
-          boxShadow: 3,
-          borderRadius: 2,
-          px: 4,
-          py: 6,
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          position: "fixed",
+          top: 20,
+          right: 20,
+          zIndex: 1000,
         }}
       >
-        <Typography component="h1" variant="h5">
-          {t('login.title')}
-        </Typography>
+        <LanguageSelector theme="light" />
+      </Box>
+      <Container component="main" maxWidth="sm">
+        <Box
+          sx={{
+            boxShadow: 3,
+            borderRadius: 2,
+            px: 4,
+            py: 6,
+            marginTop: 8,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography component="h1" variant="h5" sx={{ mb: 2 }}>
+            {t('login.title')}
+          </Typography>
         <Box component="form" onSubmit={handleSubmitEvent} noValidate sx={{ mt: 1 }}>
           <TextField
             margin="normal"
@@ -130,7 +142,9 @@ const Login = () => {
           </Grid>
         </Box>
       </Box>
-    </Container>  );
+    </Container>
+    </>
+  );
 };
 
 export default Login;

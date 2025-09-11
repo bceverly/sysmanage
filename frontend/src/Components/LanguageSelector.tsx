@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MenuItem, Select, FormControl, SelectChangeEvent } from '@mui/material';
 
-const LanguageSelector: React.FC = () => {
+interface LanguageSelectorProps {
+  theme?: 'dark' | 'light';
+}
+
+const LanguageSelector: React.FC<LanguageSelectorProps> = ({ theme = 'dark' }) => {
   const { i18n } = useTranslation();
   const [currentLanguage, setCurrentLanguage] = useState('');
 
@@ -120,19 +124,32 @@ const LanguageSelector: React.FC = () => {
     { code: 'hi', name: 'हिन्दी' }
   ];
 
+  const getStyles = () => {
+    if (theme === 'light') {
+      return {
+        color: 'text.primary',
+        '.MuiSelect-icon': { color: 'text.primary' },
+        '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0, 0, 0, 0.23)' },
+        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0, 0, 0, 0.87)' },
+        '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2196f3' }
+      };
+    }
+    return {
+      color: 'white',
+      '.MuiSelect-icon': { color: 'white' },
+      '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+      '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2196f3' }
+    };
+  };
+
   return (
     <FormControl size="small" sx={{ minWidth: 120 }}>
       <Select
         value={currentLanguage}
         onChange={handleLanguageChange}
         displayEmpty
-        sx={{ 
-          color: 'white',
-          '.MuiSelect-icon': { color: 'white' },
-          '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2196f3' }
-        }}
+        sx={getStyles()}
       >
         {languages.map((lang) => (
           <MenuItem key={lang.code} value={lang.code}>

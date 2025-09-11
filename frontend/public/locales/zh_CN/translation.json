@@ -32,6 +32,7 @@
   "hosts": {
     "title": "主机管理",
     "fqdn": "FQDN",
+    "platform": "平台",
     "ipv4": "IPv4 地址",
     "ipv6": "IPv6 地址",
     "status": "状态",
