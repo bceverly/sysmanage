@@ -87,6 +87,8 @@ type SysManageHost = {
     diagnostics_request_status?: string;
     // Agent privilege status
     is_agent_privileged?: boolean;
+    // Tags
+    tags?: Array<{id: number, name: string, description?: string}>;
 }
 
 type StorageDevice = {

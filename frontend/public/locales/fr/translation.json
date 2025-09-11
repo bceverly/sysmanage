@@ -6,7 +6,8 @@
     "logout": "Déconnexion",
     "logoAlt": "SysManage",
     "updates": "Mises à jour",
-    "scripts": "Scripts"
+    "scripts": "Scripts",
+    "settings": "Paramètres"
   },
   "login": {
     "title": "Connexion à SysManage",
@@ -76,7 +77,9 @@
     "shutdownRequested": "Arrêt demandé avec succès",
     "shutdownFailed": "Échec de la demande d'arrêt",
     "rebootSelected": "Redémarrer Sélectionnés",
-    "shutdownSelected": "Arrêter Sélectionnés"
+    "shutdownSelected": "Arrêter Sélectionnés",
+    "filterByTags": "Filtrer par balises",
+    "selectTags": "Sélectionner des balises"
   },
   "users": {
     "title": "Gestion des utilisateurs",
@@ -236,7 +239,14 @@
     "filesCollected": "Fichiers Collectés",
     "diagnosticLoadFailed": "Échec du chargement des détails du diagnostic",
     "processingDiagnostics": "Traitement...",
-    "lastRequested": "Dernière demande"
+    "lastRequested": "Dernière demande",
+    "tags": "Balises",
+    "noTags": "Aucune balise assignée",
+    "addTag": "Ajouter une balise",
+    "tagAdded": "Balise ajoutée avec succès",
+    "tagRemoved": "Balise supprimée avec succès",
+    "tagAddFailed": "Échec de l'ajout de la balise",
+    "tagRemoveFailed": "Échec de la suppression de la balise"
   },
   "userDetail": {
     "invalidId": "ID utilisateur invalide",
@@ -561,7 +571,20 @@
       "searchColumn": "Rechercher dans",
       "searchHosts": "Rechercher des hôtes",
       "searchUsers": "Rechercher des utilisateurs",
-      "searchScripts": "Rechercher des scripts"
+      "searchScripts": "Rechercher des scripts",
+      "searchTags": "Rechercher des balises"
     }
+  },
+  "tags": {
+    "title": "Balises",
+    "name": "Nom",
+    "description": "Description",
+    "hostCount": "Nombre d'hôtes",
+    "lastUpdated": "Dernière mise à jour",
+    "addTag": "Ajouter une balise",
+    "editTag": "Modifier une balise",
+    "viewHosts": "Voir les hôtes",
+    "hostsAssociatedWith": "Hôtes associés à",
+    "noHostsAssociated": "Aucun hôte n'est associé à cette balise."
   }
 }

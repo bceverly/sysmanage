@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { 
     Box, 
     Card, 
@@ -12,7 +12,11 @@ import {
     Paper,
     LinearProgress,
     Tabs,
-    Tab
+    Tab,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ComputerIcon from '@mui/icons-material/Computer';
@@ -28,6 +32,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import AppsIcon from '@mui/icons-material/Apps';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
@@ -70,6 +75,11 @@ const HostDetail = () => {
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
     const [diagnosticDetailOpen, setDiagnosticDetailOpen] = useState<boolean>(false);
     const [selectedDiagnostic, setSelectedDiagnostic] = useState<DiagnosticDetailResponse | null>(null);
+    
+    // Tag-related state
+    const [hostTags, setHostTags] = useState<Array<{id: number, name: string, description: string | null}>>([]);
+    const [availableTags, setAvailableTags] = useState<Array<{id: number, name: string, description: string | null}>>([]);
+    const [selectedTagToAdd, setSelectedTagToAdd] = useState<number | string>('');
     const [diagnosticDetailLoading, setDiagnosticDetailLoading] = useState<boolean>(false);
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -151,6 +161,58 @@ const HostDetail = () => {
 
         fetchHost();
     }, [hostId, navigate, t]);
+
+    // Tag-related functions
+    const loadHostTags = useCallback(async () => {
+        if (!hostId) return;
+        
+        try {
+            const response = await window.fetch(`/api/hosts/${hostId}/tags`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
+                },
+            });
+            
+            if (response.ok) {
+                const tags = await response.json();
+                setHostTags(tags);
+            }
+        } catch (error) {
+            console.error('Error loading host tags:', error);
+        }
+    }, [hostId]);
+
+    const loadAvailableTags = useCallback(async () => {
+        try {
+            const response = await window.fetch('/api/tags', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
+                },
+            });
+            
+            if (response.ok) {
+                const allTags = await response.json();
+                // Filter out tags that are already assigned to this host
+                const available = allTags.filter((tag: {id: number, name: string, description: string | null}) => 
+                    !hostTags.some(hostTag => hostTag.id === tag.id)
+                );
+                setAvailableTags(available);
+            }
+        } catch (error) {
+            console.error('Error loading available tags:', error);
+        }
+    }, [hostTags]);
+
+    // Load tags when component mounts and when hostTags change
+    useEffect(() => {
+        if (hostId) {
+            loadHostTags();
+        }
+    }, [hostId, loadHostTags]);
+
+    useEffect(() => {
+        loadAvailableTags();
+    }, [hostTags, loadAvailableTags]);
 
     const formatDate = (dateString: string | undefined) => {
         if (!dateString) return t('common.notAvailable', 'N/A');
@@ -573,6 +635,67 @@ const HostDetail = () => {
         setDiagnosticToDelete(null);
     };
 
+    const handleAddTag = async () => {
+        if (!hostId || !selectedTagToAdd) return;
+        
+        try {
+            const response = await window.fetch(`/api/hosts/${hostId}/tags/${selectedTagToAdd}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
+                },
+            });
+            
+            if (response.ok) {
+                await loadHostTags();
+                await loadAvailableTags();
+                setSelectedTagToAdd('');
+                setSnackbarMessage(t('hostDetail.tagAdded', 'Tag added successfully'));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+            } else {
+                setSnackbarMessage(t('hostDetail.tagAddFailed', 'Failed to add tag'));
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+            }
+        } catch (error) {
+            console.error('Error adding tag:', error);
+            setSnackbarMessage(t('hostDetail.tagAddFailed', 'Failed to add tag'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        }
+    };
+
+    const handleRemoveTag = async (tagId: number) => {
+        if (!hostId) return;
+        
+        try {
+            const response = await window.fetch(`/api/hosts/${hostId}/tags/${tagId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
+                },
+            });
+            
+            if (response.ok) {
+                await loadHostTags();
+                await loadAvailableTags();
+                setSnackbarMessage(t('hostDetail.tagRemoved', 'Tag removed successfully'));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+            } else {
+                setSnackbarMessage(t('hostDetail.tagRemoveFailed', 'Failed to remove tag'));
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+            }
+        } catch (error) {
+            console.error('Error removing tag:', error);
+            setSnackbarMessage(t('hostDetail.tagRemoveFailed', 'Failed to remove tag'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        }
+    };
+
     const handleCloseSnackbar = () => {
         setSnackbarOpen(false);
     };
@@ -829,6 +952,58 @@ const HostDetail = () => {
                                     </Grid>
                                 )}
                             </Grid>
+                        </CardContent>
+                    </Card>
+                </Grid>
+
+                {/* Tags */}
+                <Grid item xs={12} md={6}>
+                    <Card>
+                        <CardContent>
+                            <Typography variant="subtitle1" sx={{ mb: 2, display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                <LocalOfferIcon sx={{ mr: 1 }} />
+                                {t('hostDetail.tags', 'Tags')}
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                                {hostTags.map(tag => (
+                                    <Chip
+                                        key={tag.id}
+                                        label={tag.name}
+                                        onDelete={() => handleRemoveTag(tag.id)}
+                                        deleteIcon={<DeleteIcon />}
+                                        variant="outlined"
+                                    />
+                                ))}
+                                {hostTags.length === 0 && (
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('hostDetail.noTags', 'No tags assigned')}
+                                    </Typography>
+                                )}
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                <FormControl size="small" sx={{ minWidth: 200 }}>
+                                    <InputLabel>{t('hostDetail.addTag', 'Add Tag')}</InputLabel>
+                                    <Select
+                                        value={selectedTagToAdd}
+                                        onChange={(e) => setSelectedTagToAdd(Number(e.target.value))}
+                                        label={t('hostDetail.addTag', 'Add Tag')}
+                                    >
+                                        {availableTags.map(tag => (
+                                            <MenuItem key={tag.id} value={tag.id}>
+                                                {tag.name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <Button
+                                    variant="contained"
+                                    onClick={handleAddTag}
+                                    disabled={!selectedTagToAdd}
+                                    size="small"
+                                >
+                                    {t('common.add', 'Add')}
+                                </Button>
+                            </Box>
                         </CardContent>
                     </Card>
                 </Grid>

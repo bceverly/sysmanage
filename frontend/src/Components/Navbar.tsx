@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
-import { IoClose, IoMenu } from "react-icons/io5";
+import { NavLink, useNavigate } from "react-router-dom";
+import { IoClose, IoMenu, IoSettingsOutline } from "react-icons/io5";
 import { useTranslation } from 'react-i18next';
+import { IconButton } from '@mui/material';
 import "./css/Navbar.css";
 import SysManageLogo from "../assets/sysmanage-logo.svg";
 import LanguageSelector from "./LanguageSelector";
@@ -12,6 +13,7 @@ import NotificationBell from "./NotificationBell";
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setShowMenu(!showMenu);
@@ -32,6 +34,10 @@ const Navbar = () => {
   };
 
   const menuVisible = checkIfLoggedIn();
+
+  const handleSettingsClick = () => {
+    navigate('/settings');
+  };
 
   return (
     <header className="header">
@@ -102,12 +108,16 @@ const Navbar = () => {
         <div className="nav__language-toolbar" style={{visibility: menuVisible}}>
           <ConnectionStatusIndicator />
           <NotificationBell />
-          <LanguageSelector />
-        </div>
-
-        {/* User profile dropdown positioned on the far right (LTR) or far left (RTL) */}
-        <div className="nav__user-profile" style={{visibility: menuVisible}}>
+          <IconButton 
+            onClick={handleSettingsClick}
+            size="small"
+            title={t('nav.settings', 'Settings')}
+            sx={{ color: 'inherit', mr: 1 }}
+          >
+            <IoSettingsOutline />
+          </IconButton>
           <UserProfileDropdown />
+          <LanguageSelector />
         </div>
 
         <div className="nav__toggle" id="nav-toggle" onClick={toggleMenu}>

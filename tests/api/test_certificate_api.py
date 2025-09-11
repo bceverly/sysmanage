@@ -71,8 +71,8 @@ class TestCertificateEndpoints:
         session.execute(
             text(
                 """
-            INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access)
-            VALUES (101, 'success-test.example.com', 1, '192.168.1.100', 'approved', :timestamp)
+            INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access, reboot_required)
+            VALUES (101, 'success-test.example.com', 1, '192.168.1.100', 'approved', :timestamp, 0)
         """
             ),
             {"timestamp": datetime.now(timezone.utc)},
@@ -130,8 +130,8 @@ class TestCertificateEndpoints:
         session.execute(
             text(
                 """
-            INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access)
-            VALUES (102, 'pending-test.example.com', 1, '192.168.1.100', 'pending', :timestamp)
+            INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access, reboot_required)
+            VALUES (102, 'pending-test.example.com', 1, '192.168.1.100', 'pending', :timestamp, 0)
         """
             ),
             {"timestamp": datetime.now(timezone.utc)},
@@ -158,8 +158,8 @@ class TestCertificateEndpoints:
         session.execute(
             text(
                 """
-            INSERT INTO host (id, fqdn, active, ipv4, approval_status, client_certificate, certificate_serial, certificate_issued_at, last_access)
-            VALUES (103, 'revoke-test.example.com', 1, '192.168.1.100', 'approved', 'existing cert', '12345', :timestamp, :timestamp)
+            INSERT INTO host (id, fqdn, active, ipv4, approval_status, client_certificate, certificate_serial, certificate_issued_at, last_access, reboot_required)
+            VALUES (103, 'revoke-test.example.com', 1, '192.168.1.100', 'approved', 'existing cert', '12345', :timestamp, :timestamp, 0)
         """
             ),
             {"timestamp": timestamp},
@@ -206,8 +206,8 @@ class TestCertificateEndpointsIntegration:
         session.execute(
             text(
                 """
-            INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access)
-            VALUES (104, 'integration-test.example.com', 1, '192.168.1.100', 'approved', :timestamp)
+            INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access, reboot_required)
+            VALUES (104, 'integration-test.example.com', 1, '192.168.1.100', 'approved', :timestamp, 0)
         """
             ),
             {"timestamp": datetime.now(timezone.utc)},

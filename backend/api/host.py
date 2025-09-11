@@ -135,7 +135,46 @@ async def get_all_hosts():
     )
 
     with session_local() as session:
-        result = session.query(models.Host).all()
+        hosts = session.query(models.Host).all()
+
+        # Convert to dictionaries with tags included
+        result = []
+        for host in hosts:
+            # Get tags using the dynamic relationship (.all() method)
+            host_tags = host.tags.all()
+
+            host_dict = {
+                "id": host.id,
+                "active": host.active,
+                "fqdn": host.fqdn,
+                "ipv4": host.ipv4,
+                "ipv6": host.ipv6,
+                "last_access": (
+                    host.last_access.isoformat() if host.last_access else None
+                ),
+                "status": host.status,
+                "approval_status": host.approval_status,
+                "platform": host.platform,
+                "platform_release": host.platform_release,
+                "platform_version": host.platform_version,
+                "machine_architecture": host.machine_architecture,
+                "processor": host.processor,
+                "cpu_vendor": host.cpu_vendor,
+                "cpu_model": host.cpu_model,
+                "cpu_cores": host.cpu_cores,
+                "cpu_threads": host.cpu_threads,
+                "cpu_frequency_mhz": host.cpu_frequency_mhz,
+                "memory_total_mb": host.memory_total_mb,
+                "reboot_required": host.reboot_required,
+                "is_agent_privileged": host.is_agent_privileged,
+                # Include tags
+                "tags": [
+                    {"id": tag.id, "name": tag.name, "description": tag.description}
+                    for tag in host_tags
+                ],
+            }
+            result.append(host_dict)
+
         return result
 
 

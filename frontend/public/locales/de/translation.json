@@ -3,10 +3,11 @@
     "dashboard": "Dashboard",
     "hosts": "Hosts",
     "users": "Benutzer",
-    "logout": "Abmelden",
-    "logoAlt": "SysManage",
     "updates": "Updates",
-    "scripts": "Skripte"
+    "scripts": "Skripte",
+    "settings": "Einstellungen",
+    "logout": "Abmelden",
+    "logoAlt": "SysManage"
   },
   "login": {
     "title": "Bei SysManage anmelden",
@@ -76,7 +77,9 @@
     "shutdownRequested": "Herunterfahren erfolgreich angefordert",
     "shutdownFailed": "Fehler beim Anfordern des Herunterfahrens",
     "rebootSelected": "Ausgewählte Neustarten",
-    "shutdownSelected": "Ausgewählte Herunterfahren"
+    "shutdownSelected": "Ausgewählte Herunterfahren",
+    "filterByTags": "Nach Tags filtern",
+    "selectTags": "Tags auswählen"
   },
   "users": {
     "title": "Benutzerverwaltung",
@@ -236,7 +239,14 @@
     "filesCollected": "Gesammelte Dateien",
     "diagnosticLoadFailed": "Fehler beim Laden der Diagnosedetails",
     "processingDiagnostics": "Verarbeitung...",
-    "lastRequested": "Zuletzt angefordert"
+    "lastRequested": "Zuletzt angefordert",
+    "tags": "Tags",
+    "noTags": "Keine Tags zugewiesen",
+    "addTag": "Tag hinzufügen",
+    "tagAdded": "Tag erfolgreich hinzugefügt",
+    "tagRemoved": "Tag erfolgreich entfernt",
+    "tagAddFailed": "Fehler beim Hinzufügen des Tags",
+    "tagRemoveFailed": "Fehler beim Entfernen des Tags"
   },
   "userDetail": {
     "invalidId": "Ungültige Benutzer-ID",
@@ -563,7 +573,20 @@
       "searchColumn": "Suchen in",
       "searchHosts": "Hosts suchen",
       "searchUsers": "Benutzer suchen",
-      "searchScripts": "Skripte suchen"
+      "searchScripts": "Skripte suchen",
+      "searchTags": "Tags suchen"
+    },
+    "tags": {
+      "title": "Tags",
+      "name": "Name",
+      "description": "Beschreibung",
+      "hostCount": "Host-Anzahl",
+      "lastUpdated": "Zuletzt aktualisiert",
+      "addTag": "Tag hinzufügen",
+      "editTag": "Tag bearbeiten",
+      "viewHosts": "Hosts anzeigen",
+      "hostsAssociatedWith": "Hosts verknüpft mit",
+      "noHostsAssociated": "Keine Hosts sind mit diesem Tag verknüpft."
     }
   }
 }

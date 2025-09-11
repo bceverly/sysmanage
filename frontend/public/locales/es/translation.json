@@ -6,7 +6,8 @@
     "updates": "Actualizaciones",
     "logout": "Cerrar Sesión",
     "logoAlt": "SysManage",
-    "scripts": "Scripts"
+    "scripts": "Scripts",
+    "settings": "Configuración"
   },
   "login": {
     "title": "Iniciar Sesión en SysManage",
@@ -76,7 +77,9 @@
     "shutdownRequested": "Apagado solicitado con éxito",
     "shutdownFailed": "Error al solicitar apagado",
     "rebootSelected": "Reiniciar Seleccionados",
-    "shutdownSelected": "Apagar Seleccionados"
+    "shutdownSelected": "Apagar Seleccionados",
+    "filterByTags": "Filtrar por etiquetas",
+    "selectTags": "Seleccionar etiquetas"
   },
   "users": {
     "title": "Gestión de Usuarios",
@@ -236,7 +239,14 @@
     "filesCollected": "Archivos Recopilados",
     "diagnosticLoadFailed": "Error al cargar los detalles del diagnóstico",
     "processingDiagnostics": "Procesando...",
-    "lastRequested": "Último solicitado"
+    "lastRequested": "Último solicitado",
+    "tags": "Etiquetas",
+    "noTags": "Sin etiquetas asignadas",
+    "addTag": "Agregar etiqueta",
+    "tagAdded": "Etiqueta agregada exitosamente",
+    "tagRemoved": "Etiqueta eliminada exitosamente",
+    "tagAddFailed": "Error al agregar etiqueta",
+    "tagRemoveFailed": "Error al eliminar etiqueta"
   },
   "userDetail": {
     "invalidId": "ID de usuario inválido",
@@ -565,5 +575,26 @@
       "searchUsers": "Buscar usuarios",
       "searchScripts": "Buscar scripts"
     }
+  },
+  "search": {
+    "search": "Buscar",
+    "searchTerm": "Buscar",
+    "searchColumn": "Buscar en",
+    "searchHosts": "Buscar hosts",
+    "searchUsers": "Buscar usuarios",
+    "searchScripts": "Buscar scripts",
+    "searchTags": "Buscar etiquetas"
+  },
+  "tags": {
+    "title": "Etiquetas",
+    "name": "Nombre",
+    "description": "Descripción",
+    "hostCount": "Número de Hosts",
+    "lastUpdated": "Última actualización",
+    "addTag": "Agregar etiqueta",
+    "editTag": "Editar etiqueta",
+    "viewHosts": "Ver hosts",
+    "hostsAssociatedWith": "Hosts asociados con",
+    "noHostsAssociated": "No hay hosts asociados con esta etiqueta."
   }
 }

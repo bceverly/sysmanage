@@ -6,7 +6,8 @@
     "logout": "退出登录",
     "logoAlt": "SysManage",
     "updates": "更新",
-    "scripts": "脚本"
+    "scripts": "脚本",
+    "settings": "设置"
   },
   "login": {
     "title": "登录 SysManage",
@@ -76,7 +77,9 @@
     "shutdownRequested": "关机请求成功",
     "shutdownFailed": "关机请求失败",
     "rebootSelected": "重启所选",
-    "shutdownSelected": "关闭所选"
+    "shutdownSelected": "关闭所选",
+    "filterByTags": "按标签筛选",
+    "selectTags": "选择标签"
   },
   "users": {
     "title": "用户管理",
@@ -202,7 +205,14 @@
     "filesCollected": "已收集文件",
     "diagnosticLoadFailed": "加载诊断详情失败",
     "processingDiagnostics": "处理中...",
-    "lastRequested": "上次请求"
+    "lastRequested": "上次请求",
+    "tags": "标签",
+    "noTags": "未分配标签",
+    "addTag": "添加标签",
+    "tagAdded": "标签添加成功",
+    "tagRemoved": "标签删除成功",
+    "tagAddFailed": "添加标签失败",
+    "tagRemoveFailed": "删除标签失败"
   },
   "userDetail": {
     "invalidId": "无效的用户ID",
@@ -561,7 +571,20 @@
       "searchColumn": "搜索范围",
       "searchHosts": "搜索主机",
       "searchUsers": "搜索用户",
-      "searchScripts": "搜索脚本"
+      "searchScripts": "搜索脚本",
+      "searchTags": "搜索标签"
     }
+  },
+  "tags": {
+    "title": "标签",
+    "name": "名称",
+    "description": "描述",
+    "hostCount": "主机数量",
+    "lastUpdated": "最后更新",
+    "addTag": "添加标签",
+    "editTag": "编辑标签",
+    "viewHosts": "查看主机",
+    "hostsAssociatedWith": "关联的主机",
+    "noHostsAssociated": "没有主机与此标签关联。"
   }
 }

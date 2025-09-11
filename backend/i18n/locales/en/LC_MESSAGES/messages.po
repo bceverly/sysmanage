@@ -70,3 +70,46 @@ msgstr "Agent is not connected"
 msgid "Software inventory update requested"
 msgstr "Software inventory update requested"
 
+# Tag management messages
+msgid "Failed to fetch tags: %(error)s"
+msgstr "Failed to fetch tags: %(error)s"
+
+msgid "Tag with this name already exists"
+msgstr "Tag with this name already exists"
+
+msgid "Tag not found"
+msgstr "Tag not found"
+
+msgid "Host not found"
+msgstr "Host not found"
+
+msgid "Tag already associated with this host"
+msgstr "Tag already associated with this host"
+
+msgid "Tag added to host successfully"
+msgstr "Tag added to host successfully"
+
+msgid "Tag not associated with this host"
+msgstr "Tag not associated with this host"
+
+msgid "Failed to create tag: %(error)s"
+msgstr "Failed to create tag: %(error)s"
+
+msgid "Failed to update tag: %(error)s"
+msgstr "Failed to update tag: %(error)s"
+
+msgid "Failed to delete tag: %(error)s"
+msgstr "Failed to delete tag: %(error)s"
+
+msgid "Failed to fetch tag hosts: %(error)s"
+msgstr "Failed to fetch tag hosts: %(error)s"
+
+msgid "Failed to add tag to host: %(error)s"
+msgstr "Failed to add tag to host: %(error)s"
+
+msgid "Failed to remove tag from host: %(error)s"
+msgstr "Failed to remove tag from host: %(error)s"
+
+msgid "Failed to fetch host tags: %(error)s"
+msgstr "Failed to fetch host tags: %(error)s"
+

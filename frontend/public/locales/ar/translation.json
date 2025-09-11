@@ -3,9 +3,10 @@
     "dashboard": "لوحة التحكم",
     "hosts": "المضيفات",
     "users": "المستخدمون",
-    "logout": "تسجيل الخروج",
     "updates": "التحديثات",
-    "scripts": "السكريبتات"
+    "scripts": "السكريبتات",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج"
   },
   "login": {
     "title": "تسجيل الدخول إلى سيس مانج",
@@ -75,7 +76,9 @@
     "shutdownRequested": "تم طلب إيقاف التشغيل بنجاح",
     "shutdownFailed": "فشل طلب إيقاف التشغيل",
     "rebootSelected": "إعادة تشغيل المحدد",
-    "shutdownSelected": "إيقاف تشغيل المحدد"
+    "shutdownSelected": "إيقاف تشغيل المحدد",
+    "filterByTags": "تصفية حسب العلامات",
+    "selectTags": "اختيار العلامات"
   },
   "users": {
     "title": "إدارة المستخدمين",
@@ -234,7 +237,14 @@
     "filesCollected": "الملفات المجمعة",
     "diagnosticLoadFailed": "فشل في تحميل تفاصيل التشخيص",
     "processingDiagnostics": "جاري المعالجة...",
-    "lastRequested": "آخر طلب"
+    "lastRequested": "آخر طلب",
+    "tags": "العلامات",
+    "noTags": "لم يتم تعيين علامات",
+    "addTag": "إضافة علامة",
+    "tagAdded": "تمت إضافة العلامة بنجاح",
+    "tagRemoved": "تم إزالة العلامة بنجاح",
+    "tagAddFailed": "فشل في إضافة العلامة",
+    "tagRemoveFailed": "فشل في إزالة العلامة"
   },
   "userDetail": {
     "invalidId": "معرف مستخدم غير صالح",
@@ -564,7 +574,20 @@
       "searchColumn": "البحث في",
       "searchHosts": "البحث في المضيفين",
       "searchUsers": "البحث في المستخدمين",
-      "searchScripts": "البحث في السكريبتات"
+      "searchScripts": "البحث في السكريبتات",
+      "searchTags": "البحث في العلامات"
+    },
+    "tags": {
+      "title": "العلامات",
+      "name": "الاسم",
+      "description": "الوصف",
+      "hostCount": "عدد المضيفات",
+      "lastUpdated": "آخر تحديث",
+      "addTag": "إضافة علامة",
+      "editTag": "تحرير علامة",
+      "viewHosts": "عرض المضيفات",
+      "hostsAssociatedWith": "المضيفات المرتبطة بـ",
+      "noHostsAssociated": "لا توجد مضيفات مرتبطة بهذه العلامة."
     }
   }
 }

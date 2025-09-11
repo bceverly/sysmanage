@@ -357,3 +357,46 @@ msgstr "فشلت الرسالة في التحقق الأمني"
 #: backend/api/agent.py:1004
 msgid "Message must be valid JSON"
 msgstr "يجب أن تكون الرسالة بتنسيق JSON صحيح"
+
+# Tag management messages
+msgid "Failed to fetch tags: %(error)s"
+msgstr "فشل في جلب العلامات: %(error)s"
+
+msgid "Tag with this name already exists"
+msgstr "علامة بهذا الاسم موجودة بالفعل"
+
+msgid "Tag not found"
+msgstr "العلامة غير موجودة"
+
+msgid "Host not found"
+msgstr "المضيف غير موجود"
+
+msgid "Tag already associated with this host"
+msgstr "العلامة مرتبطة بالفعل بهذا المضيف"
+
+msgid "Tag added to host successfully"
+msgstr "تمت إضافة العلامة إلى المضيف بنجاح"
+
+msgid "Tag not associated with this host"
+msgstr "العلامة غير مرتبطة بهذا المضيف"
+
+msgid "Failed to create tag: %(error)s"
+msgstr "فشل في إنشاء العلامة: %(error)s"
+
+msgid "Failed to update tag: %(error)s"
+msgstr "فشل في تحديث العلامة: %(error)s"
+
+msgid "Failed to delete tag: %(error)s"
+msgstr "فشل في حذف العلامة: %(error)s"
+
+msgid "Failed to fetch tag hosts: %(error)s"
+msgstr "فشل في جلب مضيفات العلامة: %(error)s"
+
+msgid "Failed to add tag to host: %(error)s"
+msgstr "فشل في إضافة العلامة إلى المضيف: %(error)s"
+
+msgid "Failed to remove tag from host: %(error)s"
+msgstr "فشل في إزالة العلامة من المضيف: %(error)s"
+
+msgid "Failed to fetch host tags: %(error)s"
+msgstr "فشل في جلب علامات المضيف: %(error)s"

@@ -27,6 +27,7 @@ import UserDetail from './Pages/UserDetail';
 import Updates from './Pages/Updates';
 import Scripts from './Pages/Scripts';
 import Profile from './Pages/Profile';
+import Settings from './Pages/Settings';
 import Logout from './Pages/Logout';
 
 function App() {
@@ -98,6 +99,7 @@ function App() {
                     <Route path="/updates" element={<Updates />} />
                     <Route path="/scripts" element={<Scripts />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/settings" element={<Settings />} />
                     <Route path="/logout" element={<Logout />} />
                   </Routes>
                 </main>

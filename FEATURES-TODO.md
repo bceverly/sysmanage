@@ -354,7 +354,7 @@ like to add:
     and >0 means red.  Same with
     system updates needed.~~
 
-48. Tagging - We need a way to have
+48. ~~Tagging - We need a way to have
     a host be a part of zero or more
     groups (or tags).  For example,
     you might have a host that is
@@ -364,7 +364,7 @@ like to add:
     Servers" group.  Add the ability
     to filter by tags to the hosts
     screen with a dropdown of all
-    the tags.
+    the tags.~~
 
 49. ~~The agent should pass along to the
     server whether it is running in

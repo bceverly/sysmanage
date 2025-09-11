@@ -361,3 +361,46 @@ msgstr "El mensaje falló la validación de seguridad"
 #: backend/api/agent.py:1004
 msgid "Message must be valid JSON"
 msgstr "El mensaje debe ser JSON válido"
+
+# Tag management messages
+msgid "Failed to fetch tags: %(error)s"
+msgstr "Error al obtener etiquetas: %(error)s"
+
+msgid "Tag with this name already exists"
+msgstr "Ya existe una etiqueta con este nombre"
+
+msgid "Tag not found"
+msgstr "Etiqueta no encontrada"
+
+msgid "Host not found"
+msgstr "Host no encontrado"
+
+msgid "Tag already associated with this host"
+msgstr "La etiqueta ya está asociada con este host"
+
+msgid "Tag added to host successfully"
+msgstr "Etiqueta añadida al host exitosamente"
+
+msgid "Tag not associated with this host"
+msgstr "La etiqueta no está asociada con este host"
+
+msgid "Failed to create tag: %(error)s"
+msgstr "Error al crear etiqueta: %(error)s"
+
+msgid "Failed to update tag: %(error)s"
+msgstr "Error al actualizar etiqueta: %(error)s"
+
+msgid "Failed to delete tag: %(error)s"
+msgstr "Error al eliminar etiqueta: %(error)s"
+
+msgid "Failed to fetch tag hosts: %(error)s"
+msgstr "Error al obtener hosts de etiqueta: %(error)s"
+
+msgid "Failed to add tag to host: %(error)s"
+msgstr "Error al añadir etiqueta al host: %(error)s"
+
+msgid "Failed to remove tag from host: %(error)s"
+msgstr "Error al quitar etiqueta del host: %(error)s"
+
+msgid "Failed to fetch host tags: %(error)s"
+msgstr "Error al obtener etiquetas del host: %(error)s"

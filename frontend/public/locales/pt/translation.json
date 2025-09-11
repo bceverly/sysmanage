@@ -5,7 +5,8 @@
     "users": "Usuários",
     "logout": "Sair",
     "updates": "Atualizações",
-    "scripts": "Scripts"
+    "scripts": "Scripts",
+    "settings": "Configurações"
   },
   "login": {
     "title": "Entrar no SysManage",
@@ -75,7 +76,9 @@
     "shutdownRequested": "Desligamento solicitado com sucesso",
     "shutdownFailed": "Falha ao solicitar desligamento",
     "rebootSelected": "Reiniciar Selecionados",
-    "shutdownSelected": "Desligar Selecionados"
+    "shutdownSelected": "Desligar Selecionados",
+    "filterByTags": "Filtrar por tags",
+    "selectTags": "Selecionar tags"
   },
   "users": {
     "title": "Gerenciamento de Usuários",
@@ -235,7 +238,14 @@
     "filesCollected": "Arquivos Coletados",
     "diagnosticLoadFailed": "Falha ao carregar detalhes do diagnóstico",
     "processingDiagnostics": "Processando...",
-    "lastRequested": "Último solicitado"
+    "lastRequested": "Último solicitado",
+    "tags": "Tags",
+    "noTags": "Nenhuma tag atribuída",
+    "addTag": "Adicionar tag",
+    "tagAdded": "Tag adicionada com sucesso",
+    "tagRemoved": "Tag removida com sucesso",
+    "tagAddFailed": "Falha ao adicionar tag",
+    "tagRemoveFailed": "Falha ao remover tag"
   },
   "userDetail": {
     "invalidId": "ID de usuário inválido",
@@ -562,7 +572,20 @@
       "searchColumn": "Buscar em",
       "searchHosts": "Buscar hosts",
       "searchUsers": "Buscar usuários",
-      "searchScripts": "Buscar scripts"
+      "searchScripts": "Buscar scripts",
+      "searchTags": "Pesquisar tags"
     }
+  },
+  "tags": {
+    "title": "Tags",
+    "name": "Nome",
+    "description": "Descrição",
+    "hostCount": "Número de Hosts",
+    "lastUpdated": "Última atualização",
+    "addTag": "Adicionar tag",
+    "editTag": "Editar tag",
+    "viewHosts": "Ver hosts",
+    "hostsAssociatedWith": "Hosts associados com",
+    "noHostsAssociated": "Nenhum host está associado a esta tag."
   }
 }

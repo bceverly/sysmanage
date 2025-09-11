@@ -359,3 +359,46 @@ msgstr "Le message a échoué à la validation de sécurité"
 #: backend/api/agent.py:1004
 msgid "Message must be valid JSON"
 msgstr "Le message doit être un JSON valide"
+
+# Tag management messages
+msgid "Failed to fetch tags: %(error)s"
+msgstr "Échec de la récupération des étiquettes : %(error)s"
+
+msgid "Tag with this name already exists"
+msgstr "Une étiquette avec ce nom existe déjà"
+
+msgid "Tag not found"
+msgstr "Étiquette introuvable"
+
+msgid "Host not found"
+msgstr "Hôte introuvable"
+
+msgid "Tag already associated with this host"
+msgstr "L'étiquette est déjà associée à cet hôte"
+
+msgid "Tag added to host successfully"
+msgstr "Étiquette ajoutée à l'hôte avec succès"
+
+msgid "Tag not associated with this host"
+msgstr "L'étiquette n'est pas associée à cet hôte"
+
+msgid "Failed to create tag: %(error)s"
+msgstr "Échec de la création de l'étiquette : %(error)s"
+
+msgid "Failed to update tag: %(error)s"
+msgstr "Échec de la mise à jour de l'étiquette : %(error)s"
+
+msgid "Failed to delete tag: %(error)s"
+msgstr "Échec de la suppression de l'étiquette : %(error)s"
+
+msgid "Failed to fetch tag hosts: %(error)s"
+msgstr "Échec de la récupération des hôtes de l'étiquette : %(error)s"
+
+msgid "Failed to add tag to host: %(error)s"
+msgstr "Échec de l'ajout de l'étiquette à l'hôte : %(error)s"
+
+msgid "Failed to remove tag from host: %(error)s"
+msgstr "Échec de la suppression de l'étiquette de l'hôte : %(error)s"
+
+msgid "Failed to fetch host tags: %(error)s"
+msgstr "Échec de la récupération des étiquettes de l'hôte : %(error)s"

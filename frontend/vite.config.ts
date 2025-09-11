@@ -92,7 +92,15 @@ export default defineConfig({
       cert: fs.readFileSync(path.join(certPath, 'cert.pem'))
     } : undefined,
     // Dynamically allow connections from discovered network hosts
-    allowedHosts: getNetworkHosts()
+    allowedHosts: getNetworkHosts(),
+    // Proxy API requests to backend server
+    proxy: {
+      '/api': {
+        target: `http://${config?.api?.host || 'localhost'}:${config?.api?.port || 8080}`,
+        changeOrigin: true,
+        secure: false
+      }
+    }
   },
   build: {
     outDir: 'build'

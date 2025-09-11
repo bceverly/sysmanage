@@ -364,3 +364,46 @@ msgstr "Bericht heeft beveiligingsvalidatie gefaald"
 #: backend/api/agent.py:1004
 msgid "Message must be valid JSON"
 msgstr "Bericht moet geldige JSON zijn"
+
+# Tag management messages
+msgid "Failed to fetch tags: %(error)s"
+msgstr "Fout bij ophalen van tags: %(error)s"
+
+msgid "Tag with this name already exists"
+msgstr "Een tag met deze naam bestaat al"
+
+msgid "Tag not found"
+msgstr "Tag niet gevonden"
+
+msgid "Host not found"
+msgstr "Host niet gevonden"
+
+msgid "Tag already associated with this host"
+msgstr "Tag is al gekoppeld aan deze host"
+
+msgid "Tag added to host successfully"
+msgstr "Tag succesvol toegevoegd aan host"
+
+msgid "Tag not associated with this host"
+msgstr "Tag is niet gekoppeld aan deze host"
+
+msgid "Failed to create tag: %(error)s"
+msgstr "Fout bij maken van tag: %(error)s"
+
+msgid "Failed to update tag: %(error)s"
+msgstr "Fout bij bijwerken van tag: %(error)s"
+
+msgid "Failed to delete tag: %(error)s"
+msgstr "Fout bij verwijderen van tag: %(error)s"
+
+msgid "Failed to fetch tag hosts: %(error)s"
+msgstr "Fout bij ophalen van tag hosts: %(error)s"
+
+msgid "Failed to add tag to host: %(error)s"
+msgstr "Fout bij toevoegen van tag aan host: %(error)s"
+
+msgid "Failed to remove tag from host: %(error)s"
+msgstr "Fout bij verwijderen van tag van host: %(error)s"
+
+msgid "Failed to fetch host tags: %(error)s"
+msgstr "Fout bij ophalen van host tags: %(error)s"

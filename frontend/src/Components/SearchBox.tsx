@@ -23,6 +23,7 @@ interface SearchBoxProps {
   setSearchColumn: (column: string) => void;
   columns: SearchColumn[];
   placeholder?: string;
+  inline?: boolean;
 }
 
 const SearchBox: React.FC<SearchBoxProps> = ({
@@ -31,21 +32,13 @@ const SearchBox: React.FC<SearchBoxProps> = ({
   searchColumn,
   setSearchColumn,
   columns,
-  placeholder
+  placeholder,
+  inline = false
 }) => {
   const { t } = useTranslation();
 
-  return (
-    <Box sx={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      gap: 2, 
-      mb: 2,
-      p: 2,
-      bgcolor: 'background.paper',
-      borderRadius: 1,
-      boxShadow: 1
-    }}>
+  const content = (
+    <>
       <TextField
         size="small"
         label={placeholder || t('search.searchTerm', 'Search')}
@@ -75,6 +68,25 @@ const SearchBox: React.FC<SearchBoxProps> = ({
           ))}
         </Select>
       </FormControl>
+    </>
+  );
+
+  if (inline) {
+    return content;
+  }
+
+  return (
+    <Box sx={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: 2, 
+      mb: 2,
+      p: 2,
+      bgcolor: 'background.paper',
+      borderRadius: 1,
+      boxShadow: 1
+    }}>
+      {content}
     </Box>
   );
 };

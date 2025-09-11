@@ -28,8 +28,9 @@ def test_db():
 
     # For SQLite, we need to modify BigInteger columns to Integer for autoincrement to work
     # Create a copy of metadata with modified column types
-    from sqlalchemy import Integer, Column
+    from sqlalchemy import Integer, Column, ForeignKey
     from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import relationship
 
     TestBase = declarative_base()
 
@@ -54,6 +55,61 @@ def test_db():
             DateTime, nullable=True
         )  # Timezone not supported in SQLite
 
+        # OS Version fields
+        platform = Column(String(50), nullable=True)
+        platform_release = Column(String(100), nullable=True)
+        platform_version = Column(
+            String, nullable=True
+        )  # Using String instead of Text for SQLite
+        machine_architecture = Column(String(50), nullable=True)
+        processor = Column(String(100), nullable=True)
+        os_details = Column(
+            String, nullable=True
+        )  # Using String instead of Text for SQLite
+        os_version_updated_at = Column(DateTime, nullable=True)
+
+        # Hardware inventory fields
+        cpu_vendor = Column(String(100), nullable=True)
+        cpu_model = Column(String(200), nullable=True)
+        cpu_cores = Column(Integer, nullable=True)
+        cpu_threads = Column(Integer, nullable=True)
+        cpu_frequency_mhz = Column(Integer, nullable=True)
+        memory_total_mb = Column(
+            Integer, nullable=True
+        )  # Using Integer instead of BigInteger
+        storage_details = Column(
+            String, nullable=True
+        )  # Using String instead of Text for SQLite
+        network_details = Column(
+            String, nullable=True
+        )  # Using String instead of Text for SQLite
+        hardware_details = Column(
+            String, nullable=True
+        )  # Using String instead of Text for SQLite
+        hardware_updated_at = Column(DateTime, nullable=True)
+
+        # Software inventory fields
+        software_updated_at = Column(DateTime, nullable=True)
+
+        # User access data timestamp
+        user_access_updated_at = Column(DateTime, nullable=True)
+
+        # Diagnostics request tracking
+        diagnostics_requested_at = Column(DateTime, nullable=True)
+        diagnostics_request_status = Column(String(50), nullable=True)
+
+        # Update management fields
+        reboot_required = Column(Boolean, nullable=False, default=False)
+        reboot_required_updated_at = Column(DateTime, nullable=True)
+
+        # Agent privilege status
+        is_agent_privileged = Column(Boolean, nullable=True, default=False)
+
+        # Add relationship
+        tags = relationship(
+            "Tag", secondary="host_tags", back_populates="hosts", lazy="dynamic"
+        )
+
     # Create test version of User model with Integer ID for SQLite compatibility
     class User(TestBase):
         __tablename__ = "user"
@@ -70,26 +126,84 @@ def test_db():
         failed_login_attempts = Column(Integer, default=0, nullable=False)
         locked_at = Column(DateTime, nullable=True)
 
+    # Create test version of Tag model with Integer ID for SQLite compatibility
+    class Tag(TestBase):
+        __tablename__ = "tags"
+        id = Column(
+            Integer, primary_key=True, index=True, autoincrement=True
+        )  # Changed from BigInteger
+        name = Column(String(100), nullable=False, unique=True, index=True)
+        description = Column(String(500), nullable=True)
+        created_at = Column(DateTime, nullable=False)
+        updated_at = Column(DateTime, nullable=False)
+
+        # Add relationship
+        hosts = relationship(
+            "Host", secondary="host_tags", back_populates="tags", lazy="dynamic"
+        )
+
+    # Create test version of HostTag junction table for SQLite compatibility
+    class HostTag(TestBase):
+        __tablename__ = "host_tags"
+        host_id = Column(
+            Integer,
+            ForeignKey("host.id", ondelete="CASCADE"),
+            primary_key=True,
+            nullable=False,
+        )
+        tag_id = Column(
+            Integer,
+            ForeignKey("tags.id", ondelete="CASCADE"),
+            primary_key=True,
+            nullable=False,
+        )
+        created_at = Column(DateTime, nullable=False)
+
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)
 
     # Monkey patch models to use test models during testing
     original_host = models.Host
     original_user = models.User
+    original_tag = models.Tag
+    original_host_tag = models.HostTag
     models.Host = Host
     models.User = User
+    models.Tag = Tag
+    models.HostTag = HostTag
 
     # Override the get_engine dependency
     def override_get_engine():
         return test_engine
 
+    # Create a shared sessionmaker for consistent sessions
+    TestingSessionLocal = sessionmaker(
+        autocommit=False, autoflush=True, bind=test_engine
+    )
+
+    # Override the get_db dependency for tag tests
+    def override_get_db():
+        db = TestingSessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
     app.dependency_overrides[get_engine] = override_get_engine
+    from backend.persistence.db import get_db
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    # Store the sessionmaker for the session fixture to use
+    test_engine._testing_sessionmaker = TestingSessionLocal
 
     yield test_engine
 
     # Restore original models
     models.Host = original_host
     models.User = original_user
+    models.Tag = original_tag
+    models.HostTag = original_host_tag
 
     # Cleanup
     os.close(db_fd)
@@ -100,27 +214,36 @@ def test_db():
 @pytest.fixture
 def client(test_db):
     """Create a FastAPI test client."""
-    import asyncio
-    from unittest.mock import patch, AsyncMock
+    from contextlib import asynccontextmanager
 
-    # Mock services that might bind to ports
-    with patch("backend.monitoring.heartbeat_monitor.heartbeat_monitor_service"):
-        with patch(
-            "backend.discovery.discovery_service.discovery_beacon.start_beacon_service",
-            new_callable=AsyncMock,
-        ):
-            with patch(
-                "backend.discovery.discovery_service.discovery_beacon.stop_beacon_service",
-                new_callable=AsyncMock,
-            ):
-                with TestClient(app) as test_client:
-                    yield test_client
+    # Mock the FastAPI app lifespan to prevent service startup during tests
+    @asynccontextmanager
+    async def mock_lifespan(app):
+        # Mock startup - do nothing
+        yield
+        # Mock shutdown - do nothing
+
+    # Replace the lifespan manager
+    original_lifespan = app.router.lifespan_context
+    app.router.lifespan_context = mock_lifespan
+
+    try:
+        with TestClient(app) as test_client:
+            yield test_client
+    finally:
+        # Restore original lifespan
+        app.router.lifespan_context = original_lifespan
 
 
 @pytest.fixture
 def session(test_db):
     """Create a database session for testing."""
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_db)
+    # Use the same sessionmaker that the API uses for consistency
+    SessionLocal = getattr(test_db, "_testing_sessionmaker", None)
+    if SessionLocal is None:
+        # Fallback if attribute not set
+        SessionLocal = sessionmaker(autocommit=False, autoflush=True, bind=test_db)
+
     session = SessionLocal()
     yield session
     session.close()
@@ -154,10 +277,26 @@ def test_host_data():
 
 
 @pytest.fixture
-def admin_token():
+def admin_token(mock_config):
     """Create a valid admin JWT token for testing."""
-    # Create JWT token with admin userid string
-    return sign_jwt("admin@sysmanage.org")
+    import time
+    import jwt
+
+    # Use the mocked config to create token
+    config_data = mock_config
+    payload = {
+        "user_id": "admin@sysmanage.org",
+        "expires": time.time() + int(config_data["security"]["jwt_auth_timeout"]),
+    }
+
+    # Encode the token using mocked config
+    token = jwt.encode(
+        payload,
+        config_data["security"]["jwt_secret"],
+        algorithm=config_data["security"]["jwt_algorithm"],
+    )
+
+    return token
 
 
 @pytest.fixture
@@ -190,6 +329,13 @@ def mock_config(test_db):
 
     with patch("backend.config.config.get_config", return_value=config_data), patch(
         "backend.persistence.db.get_engine", return_value=test_db
+    ), patch(
+        "backend.auth.auth_handler.JWT_SECRET", config_data["security"]["jwt_secret"]
+    ), patch(
+        "backend.auth.auth_handler.JWT_ALGORITHM",
+        config_data["security"]["jwt_algorithm"],
+    ), patch(
+        "backend.auth.auth_handler.the_config", config_data
     ):
         yield config_data
 

@@ -364,3 +364,46 @@ msgstr "संदेश सुरक्षा सत्यापन में �
 #: backend/api/agent.py:1004
 msgid "Message must be valid JSON"
 msgstr "संदेश वैध JSON होना चाहिए"
+
+# Tag management messages
+msgid "Failed to fetch tags: %(error)s"
+msgstr "टैग प्राप्त करने में असफल: %(error)s"
+
+msgid "Tag with this name already exists"
+msgstr "इस नाम का टैग पहले से मौजूद है"
+
+msgid "Tag not found"
+msgstr "टैग नहीं मिला"
+
+msgid "Host not found"
+msgstr "होस्ट नहीं मिला"
+
+msgid "Tag already associated with this host"
+msgstr "टैग पहले से ही इस होस्ट से जुड़ा हुआ है"
+
+msgid "Tag added to host successfully"
+msgstr "टैग सफलतापूर्वक होस्ट में जोड़ा गया"
+
+msgid "Tag not associated with this host"
+msgstr "टैग इस होस्ट से जुड़ा नहीं है"
+
+msgid "Failed to create tag: %(error)s"
+msgstr "टैग बनाने में असफल: %(error)s"
+
+msgid "Failed to update tag: %(error)s"
+msgstr "टैग अपडेट करने में असफल: %(error)s"
+
+msgid "Failed to delete tag: %(error)s"
+msgstr "टैग हटाने में असफल: %(error)s"
+
+msgid "Failed to fetch tag hosts: %(error)s"
+msgstr "टैग होस्ट प्राप्त करने में असफल: %(error)s"
+
+msgid "Failed to add tag to host: %(error)s"
+msgstr "होस्ट में टैग जोड़ने में असफल: %(error)s"
+
+msgid "Failed to remove tag from host: %(error)s"
+msgstr "होस्ट से टैग हटाने में असफल: %(error)s"
+
+msgid "Failed to fetch host tags: %(error)s"
+msgstr "होस्ट टैग प्राप्त करने में असफल: %(error)s"

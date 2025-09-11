@@ -368,3 +368,46 @@ msgstr "Сообщение не прошло проверку безопасно
 #: backend/api/agent.py:1004
 msgid "Message must be valid JSON"
 msgstr "Сообщение должно быть действительным JSON"
+
+# Tag management messages
+msgid "Failed to fetch tags: %(error)s"
+msgstr "Ошибка получения тегов: %(error)s"
+
+msgid "Tag with this name already exists"
+msgstr "Тег с таким именем уже существует"
+
+msgid "Tag not found"
+msgstr "Тег не найден"
+
+msgid "Host not found"
+msgstr "Хост не найден"
+
+msgid "Tag already associated with this host"
+msgstr "Тег уже связан с этим хостом"
+
+msgid "Tag added to host successfully"
+msgstr "Тег успешно добавлен к хосту"
+
+msgid "Tag not associated with this host"
+msgstr "Тег не связан с этим хостом"
+
+msgid "Failed to create tag: %(error)s"
+msgstr "Ошибка создания тега: %(error)s"
+
+msgid "Failed to update tag: %(error)s"
+msgstr "Ошибка обновления тега: %(error)s"
+
+msgid "Failed to delete tag: %(error)s"
+msgstr "Ошибка удаления тега: %(error)s"
+
+msgid "Failed to fetch tag hosts: %(error)s"
+msgstr "Ошибка получения хостов тега: %(error)s"
+
+msgid "Failed to add tag to host: %(error)s"
+msgstr "Ошибка добавления тега к хосту: %(error)s"
+
+msgid "Failed to remove tag from host: %(error)s"
+msgstr "Ошибка удаления тега с хоста: %(error)s"
+
+msgid "Failed to fetch host tags: %(error)s"
+msgstr "Ошибка получения тегов хоста: %(error)s"

@@ -11,7 +11,7 @@ import SyncIcon from '@mui/icons-material/Sync';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import { Chip, Typography, IconButton } from '@mui/material';
+import { Chip, Typography, IconButton, Autocomplete, TextField } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost } from '../Services/hosts'
@@ -26,6 +26,8 @@ const Hosts = () => {
     const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [searchColumn, setSearchColumn] = useState<string>('fqdn');
+    const [selectedTags, setSelectedTags] = useState<number[]>([]);
+    const [allTags, setAllTags] = useState<Array<{id: number, name: string}>>([]);
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { triggerRefresh } = useNotificationRefresh();
@@ -401,44 +403,117 @@ const Hosts = () => {
         selection.includes(Number(host.id)) && host.approval_status === 'pending'
     );
 
-    // Search functionality
-    const performSearch = useCallback(() => {
-        if (!searchTerm.trim()) {
-            setFilteredData(tableData);
-            return;
-        }
 
-        const filtered = tableData.filter(host => {
-            const fieldValue = host[searchColumn as keyof SysManageHost];
-            if (fieldValue === null || fieldValue === undefined) {
-                return false;
+    // Load all tags for filtering
+    const loadAllTags = useCallback(async () => {
+        try {
+            const response = await window.fetch('/api/tags', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
+                },
+            });
+            
+            if (response.ok) {
+                const tags = await response.json();
+                setAllTags(tags);
             }
-            return String(fieldValue).toLowerCase().includes(searchTerm.toLowerCase());
-        });
-        
-        setFilteredData(filtered);
-    }, [searchTerm, searchColumn, tableData]);
-
-    // Update filtered data when table data changes or search is cleared
-    React.useEffect(() => {
-        if (!searchTerm.trim()) {
-            setFilteredData(tableData);
-        } else {
-            performSearch();
+        } catch (error) {
+            console.error('Error loading tags:', error);
         }
-    }, [tableData, searchTerm, searchColumn, performSearch]);
+    }, []);
+
+    // Enhanced search and filter functionality
+    const performSearchAndFilter = useCallback(() => {
+        let filtered = [...tableData];
+
+        // Apply search filter
+        if (searchTerm.trim()) {
+            filtered = filtered.filter(host => {
+                const fieldValue = host[searchColumn as keyof SysManageHost];
+                if (fieldValue === null || fieldValue === undefined) {
+                    return false;
+                }
+                return String(fieldValue).toLowerCase().includes(searchTerm.toLowerCase());
+            });
+        }
+
+        // Apply tag filter
+        if (selectedTags.length > 0) {
+            filtered = filtered.filter(host => {
+                // Check if host has ALL of the selected tags (AND logic)
+                if (!host.tags || !Array.isArray(host.tags)) {
+                    return false; // If host has no tags, it doesn't match
+                }
+                
+                // Check if ALL selected tags are present on this host
+                const hostTagIds = host.tags.map(tag => tag.id);
+                return selectedTags.every(selectedTagId => 
+                    hostTagIds.includes(selectedTagId)
+                );
+            });
+        }
+
+        setFilteredData(filtered);
+    }, [tableData, searchTerm, searchColumn, selectedTags]);
+
+    // Update filtered data when any filter criteria changes
+    React.useEffect(() => {
+        performSearchAndFilter();
+    }, [performSearchAndFilter]);
+
+    // Load tags on component mount
+    React.useEffect(() => {
+        loadAllTags();
+    }, [loadAllTags]);
 
     return (
         <div>
-            {/* Search Box */}
-            <SearchBox
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                searchColumn={searchColumn}
-                setSearchColumn={setSearchColumn}
-                columns={searchColumns}
-                placeholder={t('search.searchHosts', 'Search hosts')}
-            />
+            {/* Search and Filter Controls */}
+            <Box sx={{ 
+                mb: 2, 
+                p: 2, 
+                bgcolor: 'background.paper', 
+                borderRadius: 1, 
+                boxShadow: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 3,
+                flexWrap: 'wrap'
+            }}>
+                {/* Search Box inline */}
+                <SearchBox
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    searchColumn={searchColumn}
+                    setSearchColumn={setSearchColumn}
+                    columns={searchColumns}
+                    placeholder={t('search.searchHosts', 'Search hosts')}
+                    inline={true}
+                />
+                
+                {/* Spacer for significant horizontal separation */}
+                <Box sx={{ flexGrow: 1, minWidth: 50 }} />
+                
+                {/* Tag Filter */}
+                <Autocomplete
+                    multiple
+                    size="small"
+                    options={allTags}
+                    getOptionLabel={(option) => option.name}
+                    value={allTags.filter(tag => selectedTags.includes(tag.id))}
+                    onChange={(event, newValue) => {
+                        setSelectedTags(newValue.map(tag => tag.id));
+                    }}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            label={t('hosts.filterByTags', 'Filter by Tags')}
+                            placeholder={t('hosts.selectTags', 'Select tags')}
+                        />
+                    )}
+                    sx={{ minWidth: 300, flexGrow: 1 }}
+                />
+            </Box>
             
             {/* Subtle Refresh Status */}
             <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

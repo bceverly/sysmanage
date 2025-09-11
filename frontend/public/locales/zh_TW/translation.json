@@ -6,7 +6,8 @@
     "logout": "登出",
     "logoAlt": "SysManage",
     "updates": "更新",
-    "scripts": "腳本"
+    "scripts": "腳本",
+    "settings": "設定"
   },
   "login": {
     "title": "登入 SysManage",
@@ -76,7 +77,9 @@
     "shutdownRequested": "關機請求成功",
     "shutdownFailed": "關機請求失敗",
     "rebootSelected": "重新啟動所選",
-    "shutdownSelected": "關閉所選"
+    "shutdownSelected": "關閉所選",
+    "filterByTags": "按標籤篩選",
+    "selectTags": "選擇標籤"
   },
   "users": {
     "title": "用戶管理",
@@ -236,7 +239,14 @@
     "filesCollected": "已收集文件",
     "diagnosticLoadFailed": "載入診斷詳情失敗",
     "processingDiagnostics": "處理中...",
-    "lastRequested": "上次請求"
+    "lastRequested": "上次請求",
+    "tags": "標籤",
+    "noTags": "未分配標籤",
+    "addTag": "新增標籤",
+    "tagAdded": "標籤新增成功",
+    "tagRemoved": "標籤刪除成功",
+    "tagAddFailed": "新增標籤失敗",
+    "tagRemoveFailed": "刪除標籤失敗"
   },
   "userDetail": {
     "invalidId": "無效的用戶 ID",
@@ -560,7 +570,20 @@
       "searchColumn": "搜尋範圍",
       "searchHosts": "搜尋主機",
       "searchUsers": "搜尋使用者",
-      "searchScripts": "搜尋腳本"
+      "searchScripts": "搜尋腳本",
+      "searchTags": "搜尋標籤"
     }
+  },
+  "tags": {
+    "title": "標籤",
+    "name": "名稱",
+    "description": "描述",
+    "hostCount": "主機數量",
+    "lastUpdated": "最後更新",
+    "addTag": "新增標籤",
+    "editTag": "編輯標籤",
+    "viewHosts": "查看主機",
+    "hostsAssociatedWith": "關聯的主機",
+    "noHostsAssociated": "沒有主機與此標籤關聯。"
   }
 }

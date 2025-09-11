@@ -582,6 +582,19 @@
     "searchColumn": "Search in",
     "searchHosts": "Search hosts",
     "searchUsers": "Search users",
-    "searchScripts": "Search scripts"
+    "searchScripts": "Search scripts",
+    "searchTags": "Search tags"
+  },
+  "tags": {
+    "title": "Tags",
+    "name": "Name",
+    "description": "Description",
+    "hostCount": "Host Count",
+    "lastUpdated": "Last Updated",
+    "addTag": "Add Tag",
+    "editTag": "Edit Tag",
+    "viewHosts": "View Hosts",
+    "hostsAssociatedWith": "Hosts associated with",
+    "noHostsAssociated": "No hosts are associated with this tag."
   }
 }

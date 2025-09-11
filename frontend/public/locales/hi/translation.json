@@ -5,7 +5,8 @@
     "users": "उपयोगकर्ता",
     "logout": "लॉगआउट",
     "updates": "अपडेट",
-    "scripts": "स्क्रिप्ट्स"
+    "scripts": "स्क्रिप्ट्स",
+    "settings": "सेटिंग्स"
   },
   "login": {
     "title": "सिसमैनेज में लॉगिन करें",
@@ -75,7 +76,9 @@
     "shutdownRequested": "बंद करने का अनुरोध सफल",
     "shutdownFailed": "बंद करने का अनुरोध विफल",
     "rebootSelected": "चयनित को पुनः आरंभ करें",
-    "shutdownSelected": "चयनित को बंद करें"
+    "shutdownSelected": "चयनित को बंद करें",
+    "filterByTags": "टैग्स के अनुसार फिल्टर करें",
+    "selectTags": "टैग्स चुनें"
   },
   "users": {
     "title": "उपयोगकर्ता प्रबंधन",
@@ -234,7 +237,14 @@
     "filesCollected": "संग्रहित फ़ाइलें",
     "diagnosticLoadFailed": "निदान विवरण लोड करने में विफल",
     "processingDiagnostics": "प्रसंस्करण हो रहा है...",
-    "lastRequested": "अंतिम अनुरोध"
+    "lastRequested": "अंतिम अनुरोध",
+    "tags": "टैग्स",
+    "noTags": "कोई टैग नहीं लगाए गए",
+    "addTag": "टैग जोड़ें",
+    "tagAdded": "टैग सफलतापूर्वक जोड़ा गया",
+    "tagRemoved": "टैग सफलतापूर्वक हटाया गया",
+    "tagAddFailed": "टैग जोड़ने में विफल",
+    "tagRemoveFailed": "टैग हटाने में विफल"
   },
   "userDetail": {
     "invalidId": "अमान्य उपयोगकर्ता आईडी",
@@ -558,7 +568,20 @@
       "searchColumn": "में खोजें",
       "searchHosts": "होस्ट्स खोजें",
       "searchUsers": "यूजर्स खोजें",
-      "searchScripts": "स्क्रिप्ट्स खोजें"
+      "searchScripts": "स्क्रिप्ट्स खोजें",
+      "searchTags": "टैग्स खोजें"
     }
+  },
+  "tags": {
+    "title": "टैग्स",
+    "name": "नाम",
+    "description": "विवरण",
+    "hostCount": "होस्ट की संख्या",
+    "lastUpdated": "अंतिम अपडेट",
+    "addTag": "टैग जोड़ें",
+    "editTag": "टैग संपादित करें",
+    "viewHosts": "होस्ट देखें",
+    "hostsAssociatedWith": "से जुड़े होस्ट",
+    "noHostsAssociated": "इस टैग से कोई होस्ट जुड़े नहीं हैं।"
   }
 }

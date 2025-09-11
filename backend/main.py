@@ -29,6 +29,7 @@ from backend.api import (
     updates,
     scripts,
     security,
+    tag,
 )
 from backend.config import config
 from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
@@ -314,6 +315,7 @@ app.include_router(updates.router, prefix="/api/updates", tags=["updates"])
 app.include_router(scripts.router, prefix="/api/scripts", tags=["scripts"])
 app.include_router(diagnostics.router, tags=["diagnostics"])
 app.include_router(security.router)
+app.include_router(tag.router, prefix="/api", tags=["tags"])
 
 
 @app.get("/")
@@ -323,6 +325,15 @@ async def root():
     the service.
     """
     return {"message": "Hello World"}
+
+
+@app.get("/api/health")
+@app.head("/api/health")
+async def health_check():
+    """
+    Health check endpoint for connection monitoring.
+    """
+    return {"status": "healthy"}
 
 
 if __name__ == "__main__":

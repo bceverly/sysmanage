@@ -6,7 +6,8 @@
     "logout": "Uitloggen",
     "logoAlt": "SysManage",
     "updates": "Updates",
-    "scripts": "Scripts"
+    "scripts": "Scripts",
+    "settings": "Instellingen"
   },
   "login": {
     "title": "Inloggen bij SysManage",
@@ -76,7 +77,9 @@
     "shutdownRequested": "Afsluiten succesvol aangevraagd",
     "shutdownFailed": "Afsluiten aanvraag mislukt",
     "rebootSelected": "Geselecteerde Herstarten",
-    "shutdownSelected": "Geselecteerde Afsluiten"
+    "shutdownSelected": "Geselecteerde Afsluiten",
+    "filterByTags": "Filteren op tags",
+    "selectTags": "Tags selecteren"
   },
   "users": {
     "title": "Gebruikersbeheer",
@@ -202,7 +205,14 @@
     "filesCollected": "Bestanden Verzameld",
     "diagnosticLoadFailed": "Fout bij laden van diagnostische details",
     "processingDiagnostics": "Verwerken...",
-    "lastRequested": "Laatst aangevraagd"
+    "lastRequested": "Laatst aangevraagd",
+    "tags": "Tags",
+    "noTags": "Geen tags toegewezen",
+    "addTag": "Tag toevoegen",
+    "tagAdded": "Tag succesvol toegevoegd",
+    "tagRemoved": "Tag succesvol verwijderd",
+    "tagAddFailed": "Toevoegen van tag mislukt",
+    "tagRemoveFailed": "Verwijderen van tag mislukt"
   },
   "userDetail": {
     "invalidId": "Ongeldig gebruiker-ID",
@@ -561,7 +571,20 @@
       "searchColumn": "Zoeken in",
       "searchHosts": "Hosts zoeken",
       "searchUsers": "Gebruikers zoeken",
-      "searchScripts": "Scripts zoeken"
+      "searchScripts": "Scripts zoeken",
+      "searchTags": "Tags zoeken"
     }
+  },
+  "tags": {
+    "title": "Tags",
+    "name": "Naam",
+    "description": "Beschrijving",
+    "hostCount": "Aantal hosts",
+    "lastUpdated": "Laatst bijgewerkt",
+    "addTag": "Tag toevoegen",
+    "editTag": "Tag bewerken",
+    "viewHosts": "Hosts bekijken",
+    "hostsAssociatedWith": "Hosts geassocieerd met",
+    "noHostsAssociated": "Geen hosts zijn geassocieerd met deze tag."
   }
 }

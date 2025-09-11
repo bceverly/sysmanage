@@ -364,3 +364,46 @@ msgstr "消息安全验证失败"
 #: backend/api/agent.py:1004
 msgid "Message must be valid JSON"
 msgstr "消息必须是有效的JSON"
+
+# Tag management messages
+msgid "Failed to fetch tags: %(error)s"
+msgstr "获取标签失败: %(error)s"
+
+msgid "Tag with this name already exists"
+msgstr "该名称的标签已存在"
+
+msgid "Tag not found"
+msgstr "标签未找到"
+
+msgid "Host not found"
+msgstr "主机未找到"
+
+msgid "Tag already associated with this host"
+msgstr "标签已与此主机关联"
+
+msgid "Tag added to host successfully"
+msgstr "标签已成功添加到主机"
+
+msgid "Tag not associated with this host"
+msgstr "标签未与此主机关联"
+
+msgid "Failed to create tag: %(error)s"
+msgstr "创建标签失败: %(error)s"
+
+msgid "Failed to update tag: %(error)s"
+msgstr "更新标签失败: %(error)s"
+
+msgid "Failed to delete tag: %(error)s"
+msgstr "删除标签失败: %(error)s"
+
+msgid "Failed to fetch tag hosts: %(error)s"
+msgstr "获取标签主机失败: %(error)s"
+
+msgid "Failed to add tag to host: %(error)s"
+msgstr "添加标签到主机失败: %(error)s"
+
+msgid "Failed to remove tag from host: %(error)s"
+msgstr "从主机移除标签失败: %(error)s"
+
+msgid "Failed to fetch host tags: %(error)s"
+msgstr "获取主机标签失败: %(error)s"

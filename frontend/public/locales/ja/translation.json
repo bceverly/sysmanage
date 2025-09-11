@@ -6,7 +6,8 @@
     "logout": "ログアウト",
     "logoAlt": "SysManage",
     "updates": "アップデート",
-    "scripts": "スクリプト"
+    "scripts": "スクリプト",
+    "settings": "設定"
   },
   "login": {
     "title": "SysManageにログイン",
@@ -76,7 +77,9 @@
     "shutdownRequested": "シャットダウン要求が成功しました",
     "shutdownFailed": "シャットダウン要求に失敗しました",
     "rebootSelected": "選択した項目を再起動",
-    "shutdownSelected": "選択した項目をシャットダウン"
+    "shutdownSelected": "選択した項目をシャットダウン",
+    "filterByTags": "タグでフィルター",
+    "selectTags": "タグを選択"
   },
   "users": {
     "title": "ユーザー管理",
@@ -202,7 +205,14 @@
     "filesCollected": "収集されたファイル",
     "diagnosticLoadFailed": "診断詳細の読み込みに失敗しました",
     "processingDiagnostics": "処理中...",
-    "lastRequested": "最終リクエスト"
+    "lastRequested": "最終リクエスト",
+    "tags": "タグ",
+    "noTags": "タグが割り当てられていません",
+    "addTag": "タグを追加",
+    "tagAdded": "タグが正常に追加されました",
+    "tagRemoved": "タグが正常に削除されました",
+    "tagAddFailed": "タグの追加に失敗しました",
+    "tagRemoveFailed": "タグの削除に失敗しました"
   },
   "userDetail": {
     "invalidId": "無効なユーザーID",
@@ -563,7 +573,20 @@
       "searchColumn": "検索対象",
       "searchHosts": "ホストを検索",
       "searchUsers": "ユーザーを検索",
-      "searchScripts": "スクリプトを検索"
+      "searchScripts": "スクリプトを検索",
+      "searchTags": "タグを検索"
     }
+  },
+  "tags": {
+    "title": "タグ",
+    "name": "名前",
+    "description": "説明",
+    "hostCount": "ホスト数",
+    "lastUpdated": "最終更新",
+    "addTag": "タグを追加",
+    "editTag": "タグを編集",
+    "viewHosts": "ホストを表示",
+    "hostsAssociatedWith": "関連するホスト",
+    "noHostsAssociated": "このタグに関連するホストはありません。"
   }
 }

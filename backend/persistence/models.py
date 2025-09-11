@@ -97,6 +97,11 @@ class Host(Base):
         "NetworkInterface", back_populates="host", cascade="all, delete-orphan"
     )
 
+    # Relationship to tags (many-to-many)
+    tags = relationship(
+        "Tag", secondary="host_tags", back_populates="hosts", lazy="dynamic"
+    )
+
     # Relationships to user access tables
     user_accounts = relationship(
         "UserAccount", back_populates="host", cascade="all, delete-orphan"
@@ -656,3 +661,53 @@ class DiagnosticReport(Base):
             f"<DiagnosticReport(id={self.id}, collection_id='{self.collection_id}', "
             f"status='{self.status}', host_id={self.host_id})>"
         )
+
+
+class Tag(Base):
+    """
+    This class holds the object mapping for the tags table in the
+    PostgreSQL database. Tags can be associated with hosts for categorization.
+    """
+
+    __tablename__ = "tags"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False, unique=True, index=True)
+    description = Column(String(500), nullable=True)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Relationships
+    hosts = relationship(
+        "Host", secondary="host_tags", back_populates="tags", lazy="dynamic"
+    )
+
+    def __repr__(self):
+        return f"<Tag(id={self.id}, name='{self.name}')>"
+
+
+class HostTag(Base):
+    """
+    This class holds the object mapping for the host_tags junction table in the
+    PostgreSQL database. This represents the many-to-many relationship between
+    hosts and tags.
+    """
+
+    __tablename__ = "host_tags"
+
+    host_id = Column(
+        BigInteger,
+        ForeignKey("host.id", ondelete="CASCADE"),
+        primary_key=True,
+        nullable=False,
+    )
+    tag_id = Column(
+        BigInteger,
+        ForeignKey("tags.id", ondelete="CASCADE"),
+        primary_key=True,
+        nullable=False,
+    )
+    created_at = Column(DateTime(timezone=True), nullable=False)
+
+    def __repr__(self):
+        return f"<HostTag(host_id={self.host_id}, tag_id={self.tag_id})>"

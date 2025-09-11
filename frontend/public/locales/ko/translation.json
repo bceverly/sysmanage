@@ -6,7 +6,8 @@
     "logout": "로그아웃",
     "logoAlt": "SysManage",
     "updates": "업데이트",
-    "scripts": "스크립트"
+    "scripts": "스크립트",
+    "settings": "설정"
   },
   "login": {
     "title": "SysManage 로그인",
@@ -76,7 +77,9 @@
     "shutdownRequested": "종료 요청 성공",
     "shutdownFailed": "종료 요청 실패",
     "rebootSelected": "선택된 항목 재부팅",
-    "shutdownSelected": "선택된 항목 종료"
+    "shutdownSelected": "선택된 항목 종료",
+    "filterByTags": "태그별 필터",
+    "selectTags": "태그 선택"
   },
   "users": {
     "title": "사용자 관리",
@@ -202,7 +205,14 @@
     "filesCollected": "수집된 파일",
     "diagnosticLoadFailed": "진단 세부사항 로드에 실패했습니다",
     "processingDiagnostics": "처리 중...",
-    "lastRequested": "마지막 요청"
+    "lastRequested": "마지막 요청",
+    "tags": "태그",
+    "noTags": "할당된 태그 없음",
+    "addTag": "태그 추가",
+    "tagAdded": "태그가 성공적으로 추가되었습니다",
+    "tagRemoved": "태그가 성공적으로 제거되었습니다",
+    "tagAddFailed": "태그 추가에 실패했습니다",
+    "tagRemoveFailed": "태그 제거에 실패했습니다"
   },
   "userDetail": {
     "invalidId": "잘못된 사용자 ID",
@@ -560,7 +570,20 @@
       "searchColumn": "검색 대상",
       "searchHosts": "호스트 검색",
       "searchUsers": "사용자 검색",
-      "searchScripts": "스크립트 검색"
+      "searchScripts": "스크립트 검색",
+      "searchTags": "태그 검색"
     }
+  },
+  "tags": {
+    "title": "태그",
+    "name": "이름",
+    "description": "설명",
+    "hostCount": "호스트 수",
+    "lastUpdated": "마지막 업데이트",
+    "addTag": "태그 추가",
+    "editTag": "태그 편집",
+    "viewHosts": "호스트 보기",
+    "hostsAssociatedWith": "연관된 호스트",
+    "noHostsAssociated": "이 태그와 연관된 호스트가 없습니다."
   }
 }

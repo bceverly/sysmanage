@@ -365,3 +365,46 @@ msgstr "메시지 보안 검증 실패"
 #: backend/api/agent.py:1004
 msgid "Message must be valid JSON"
 msgstr "메시지는 유효한 JSON이어야 합니다"
+
+# Tag management messages
+msgid "Failed to fetch tags: %(error)s"
+msgstr "태그 가져오기 실패: %(error)s"
+
+msgid "Tag with this name already exists"
+msgstr "이 이름의 태그가 이미 존재합니다"
+
+msgid "Tag not found"
+msgstr "태그를 찾을 수 없습니다"
+
+msgid "Host not found"
+msgstr "호스트를 찾을 수 없습니다"
+
+msgid "Tag already associated with this host"
+msgstr "태그가 이미 이 호스트와 연결되어 있습니다"
+
+msgid "Tag added to host successfully"
+msgstr "태그가 호스트에 성공적으로 추가되었습니다"
+
+msgid "Tag not associated with this host"
+msgstr "태그가 이 호스트와 연결되어 있지 않습니다"
+
+msgid "Failed to create tag: %(error)s"
+msgstr "태그 생성 실패: %(error)s"
+
+msgid "Failed to update tag: %(error)s"
+msgstr "태그 업데이트 실패: %(error)s"
+
+msgid "Failed to delete tag: %(error)s"
+msgstr "태그 삭제 실패: %(error)s"
+
+msgid "Failed to fetch tag hosts: %(error)s"
+msgstr "태그 호스트 가져오기 실패: %(error)s"
+
+msgid "Failed to add tag to host: %(error)s"
+msgstr "호스트에 태그 추가 실패: %(error)s"
+
+msgid "Failed to remove tag from host: %(error)s"
+msgstr "호스트에서 태그 제거 실패: %(error)s"
+
+msgid "Failed to fetch host tags: %(error)s"
+msgstr "호스트 태그 가져오기 실패: %(error)s"

@@ -6,7 +6,8 @@
     "logout": "Выйти",
     "logoAlt": "SysManage",
     "updates": "Обновления",
-    "scripts": "Скрипты"
+    "scripts": "Скрипты",
+    "settings": "Настройки"
   },
   "login": {
     "title": "Войти в SysManage",
@@ -76,7 +77,9 @@
     "shutdownRequested": "Выключение успешно запрошено",
     "shutdownFailed": "Не удалось запросить выключение",
     "rebootSelected": "Перезагрузить Выбранные",
-    "shutdownSelected": "Выключить Выбранные"
+    "shutdownSelected": "Выключить Выбранные",
+    "filterByTags": "Фильтр по тегам",
+    "selectTags": "Выбрать теги"
   },
   "users": {
     "title": "Управление пользователями",
@@ -200,7 +203,14 @@
     "filesCollected": "Файлы Собраны",
     "diagnosticLoadFailed": "Ошибка загрузки деталей диагностики",
     "processingDiagnostics": "Обработка...",
-    "lastRequested": "Последний запрос"
+    "lastRequested": "Последний запрос",
+    "tags": "Теги",
+    "noTags": "Теги не назначены",
+    "addTag": "Добавить тег",
+    "tagAdded": "Тег успешно добавлен",
+    "tagRemoved": "Тег успешно удален",
+    "tagAddFailed": "Ошибка добавления тега",
+    "tagRemoveFailed": "Ошибка удаления тега"
   },
   "userDetail": {
     "invalidId": "Неверный ID пользователя",
@@ -557,7 +567,20 @@
       "searchColumn": "Искать в",
       "searchHosts": "Поиск хостов",
       "searchUsers": "Поиск пользователей",
-      "searchScripts": "Поиск скриптов"
+      "searchScripts": "Поиск скриптов",
+      "searchTags": "Поиск тегов"
     }
+  },
+  "tags": {
+    "title": "Теги",
+    "name": "Название",
+    "description": "Описание",
+    "hostCount": "Количество хостов",
+    "lastUpdated": "Последнее обновление",
+    "addTag": "Добавить тег",
+    "editTag": "Редактировать тег",
+    "viewHosts": "Просмотр хостов",
+    "hostsAssociatedWith": "Хосты, связанные с",
+    "noHostsAssociated": "С этим тегом не связан ни один хост."
   }
 }
