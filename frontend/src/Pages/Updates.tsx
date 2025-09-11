@@ -78,8 +78,8 @@ const Updates: React.FC = () => {
     host_id: ''
   });
 
-  // Auto-refresh state
-  const [refreshCountdown, setRefreshCountdown] = useState(30);
+  // Auto-refresh state (disabled)
+  // const [refreshCountdown, setRefreshCountdown] = useState(30);
   const [hasActiveUpdates, setHasActiveUpdates] = useState(false);
   const refreshTimerRef = useRef<number | null>(null);
   const countdownTimerRef = useRef<number | null>(null);
@@ -203,39 +203,40 @@ const Updates: React.FC = () => {
   // Store timer function in ref to avoid useCallback dependencies
   const resetAutoRefreshTimerRef = useRef<() => void>();
   
-  resetAutoRefreshTimerRef.current = () => {
-    // Clear existing timers
-    if (refreshTimerRef.current) {
-      window.clearTimeout(refreshTimerRef.current);
-    }
-    if (countdownTimerRef.current) {
-      window.clearInterval(countdownTimerRef.current);
-    }
+  // Auto-refresh timer function disabled
+  // resetAutoRefreshTimerRef.current = () => {
+  //   // Clear existing timers
+  //   if (refreshTimerRef.current) {
+  //     window.clearTimeout(refreshTimerRef.current);
+  //   }
+  //   if (countdownTimerRef.current) {
+  //     window.clearInterval(countdownTimerRef.current);
+  //   }
 
-    // Choose interval based on whether updates are active
-    const interval = hasActiveUpdates ? ACTIVE_UPDATES_REFRESH_INTERVAL : STANDARD_REFRESH_INTERVAL;
-    const countdownSeconds = Math.floor(interval / 1000);
-    
-    setRefreshCountdown(countdownSeconds);
+  //   // Choose interval based on whether updates are active
+  //   const interval = hasActiveUpdates ? ACTIVE_UPDATES_REFRESH_INTERVAL : STANDARD_REFRESH_INTERVAL;
+  //   const countdownSeconds = Math.floor(interval / 1000);
+  //   
+  //   setRefreshCountdown(countdownSeconds);
 
-    // Start countdown timer (updates every second)
-    countdownTimerRef.current = window.setInterval(() => {
-      setRefreshCountdown((prev) => {
-        if (prev <= 1) {
-          return countdownSeconds; // Reset countdown
-        }
-        return prev - 1;
-      });
-    }, 1000);
+  //   // Start countdown timer (updates every second)
+  //   countdownTimerRef.current = window.setInterval(() => {
+  //     setRefreshCountdown((prev) => {
+  //       if (prev <= 1) {
+  //         return countdownSeconds; // Reset countdown
+  //       }
+  //       return prev - 1;
+  //     });
+  //   }, 1000);
 
-    // Set main refresh timer
-    refreshTimerRef.current = window.setTimeout(() => {
-      refreshAll();
-      if (resetAutoRefreshTimerRef.current) {
-        resetAutoRefreshTimerRef.current(); // Schedule next refresh
-      }
-    }, interval);
-  };
+  //   // Set main refresh timer
+  //   refreshTimerRef.current = window.setTimeout(() => {
+  //     refreshAll();
+  //     if (resetAutoRefreshTimerRef.current) {
+  //       resetAutoRefreshTimerRef.current(); // Schedule next refresh
+  //     }
+  //   }, interval);
+  // };
 
   const resetAutoRefreshTimer = useCallback(() => {
     if (resetAutoRefreshTimerRef.current) {
