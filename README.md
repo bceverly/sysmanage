@@ -896,7 +896,7 @@ docker-compose up -d
 4. **Node.js Version**: Ensure Node.js 20.x is installed
 5. **Python Package Build Errors**: If you encounter build errors when installing Python packages:
    - **Missing libpq-fe.h**: Install `libpq-dev` (Ubuntu/Debian) or `postgresql-devel` (RHEL/Fedora)
-   - **httptools/uvloop build errors**: Install `libuv1-dev` (Ubuntu/Debian) or `libuv-devel` (RHEL/Fedora)
+   - **httptools build errors**: Install `libuv1-dev` (Ubuntu/Debian) or `libuv-devel` (RHEL/Fedora)
    - **Python 3.13+ compatibility**: Some packages may not yet support Python 3.13. Consider using Python 3.11 or 3.12:
      ```bash
      # Ubuntu/Debian
