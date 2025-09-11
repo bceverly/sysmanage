@@ -274,29 +274,28 @@ const Updates: React.FC = () => {
     }));
   }, [searchParams]);
 
-  // Initialize auto-refresh timer
-  useEffect(() => {
-    if (resetAutoRefreshTimerRef.current) {
-      resetAutoRefreshTimerRef.current();
-    }
-    
-    // Cleanup timers on component unmount
-    return () => {
-      if (refreshTimerRef.current) {
-        window.clearTimeout(refreshTimerRef.current);
-      }
-      if (countdownTimerRef.current) {
-        window.clearInterval(countdownTimerRef.current);
-      }
-    };
-  }, []); // Only run on mount
+  // Auto-refresh disabled
+  // useEffect(() => {
+  //   if (resetAutoRefreshTimerRef.current) {
+  //     resetAutoRefreshTimerRef.current();
+  //   }
+  //   
+  //   // Cleanup timers on component unmount
+  //   return () => {
+  //     if (refreshTimerRef.current) {
+  //       window.clearTimeout(refreshTimerRef.current);
+  //     }
+  //     if (countdownTimerRef.current) {
+  //       window.clearInterval(countdownTimerRef.current);
+  //     }
+  //   };
+  // }, []);
 
-  // Only reset timer when active updates state changes (not on every resetAutoRefreshTimer change)
-  useEffect(() => {
-    if (resetAutoRefreshTimerRef.current) {
-      resetAutoRefreshTimerRef.current();
-    }
-  }, [hasActiveUpdates]); // Using ref directly to avoid dependency issues
+  // useEffect(() => {
+  //   if (resetAutoRefreshTimerRef.current) {
+  //     resetAutoRefreshTimerRef.current();
+  //   }
+  // }, [hasActiveUpdates]);
 
   // Removed excessive user interaction listeners that were causing timer resets
 
@@ -589,9 +588,6 @@ const Updates: React.FC = () => {
       <div className="updates__header">
         <h1 className="updates__title">{t('updates.title', 'Package Updates')}</h1>
         <div className="updates__refresh-section">
-          <div className="updates__auto-refresh-info">
-            {t('updates.autoRefreshIn', 'Auto-refresh in')} {refreshCountdown}s
-          </div>
           <button 
             className={`updates__refresh ${isRefreshing ? 'refreshing' : ''}`}
             onClick={handleManualRefresh}
