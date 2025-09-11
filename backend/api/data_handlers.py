@@ -623,13 +623,15 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
             db.add(package_update_record)
             # Note: Removed duplicate 'db.add(package_update)' line
 
-        # Update host's last access timestamp
-        stmt = (
-            update(Host)
-            .where(Host.id == connection.host_id)
-            .values(last_access=text("NOW()"))
-        )
-        db.execute(stmt)
+        # Only update host's last access timestamp if this is from a live connection
+        # (not from background queue processing of old messages)
+        if not hasattr(connection, 'is_mock_connection') or not connection.is_mock_connection:
+            stmt = (
+                update(Host)
+                .where(Host.id == connection.host_id)
+                .values(last_access=text("NOW()"))
+            )
+            db.execute(stmt)
 
         db.commit()
 
