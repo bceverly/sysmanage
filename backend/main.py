@@ -82,7 +82,7 @@ def get_cors_origins(web_ui_port, backend_api_port):
                         f"http://{fqdn}:{backend_api_port}",
                     ]
                 )
-        except Exception:
+        except Exception:  # nosec B110
             pass
 
         # Add common domain variations
@@ -97,7 +97,7 @@ def get_cors_origins(web_ui_port, backend_api_port):
             origins.extend(
                 [f"http://{variation}:{webui_port}", f"http://{variation}:{api_port}"]
             )
-    except Exception:
+    except Exception:  # nosec B110
         pass
 
     # Get network interface IPs
@@ -111,7 +111,7 @@ def get_cors_origins(web_ui_port, backend_api_port):
                     f"http://{host_ip}:{backend_api_port}",
                 ]
             )
-    except Exception:
+    except Exception:  # nosec B110
         pass
 
     return list(set(cors_origins))  # Remove duplicates

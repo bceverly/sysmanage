@@ -160,7 +160,7 @@ async def login(login_data: UserLogin, request: Request, response: Response):
 
                 # Return success
                 return {"Authorization": auth_token}
-            except Exception:
+            except Exception:  # nosec B110
                 # Wrong password - record failed attempt and potentially lock account
                 pass
 

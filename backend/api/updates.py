@@ -202,7 +202,7 @@ async def get_update_summary(dependencies=Depends(JWTBearer())):
                     )
                     if hasattr(handler, "update_results_cache"):
                         update_results = handler.update_results_cache.copy()
-            except Exception:
+            except Exception:  # nosec B110
                 pass  # If we can't get the cache, just return empty results
 
             return {

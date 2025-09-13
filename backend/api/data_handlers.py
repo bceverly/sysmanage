@@ -425,7 +425,7 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
                     username=username,
                     uid=uid,
                     home_directory=account.get("home_directory"),
-                    shell=account.get("shell"),
+                    shell=account.get("shell"),  # nosec B604
                     is_system_user=is_system_user,  # Set proper classification
                     created_at=now,
                     updated_at=now,
