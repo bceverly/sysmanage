@@ -25,19 +25,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
     
-    - name: Run Semgrep
-      uses: semgrep/semgrep-action@v1
-      with:
-        config: >-
-          p/security-audit
-          p/javascript
-          p/typescript
-          p/react
-          p/python
-          p/django
-          p/flask
-          p/owasp-top-ten
-        generateSarif: "1"
+    - name: Run Semgrep scan
+      run: |
+        pip install semgrep
+        semgrep scan --sarif --output=semgrep.sarif --config="p/security-audit" --config="p/javascript" --config="p/typescript" --config="p/react" --config="p/python" --config="p/django" --config="p/flask" --config="p/owasp-top-ten"
         
     - name: Upload SARIF file
       uses: github/codeql-action/upload-sarif@v3
@@ -137,7 +128,7 @@ jobs:
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        args: --severity-threshold=high --file=frontend/package.json
+        args: --severity-threshold=high --file=frontend/package.json --sarif-file-output=snyk.sarif
         
     - name: Upload Snyk results to GitHub Code Scanning
       uses: github/codeql-action/upload-sarif@v3
@@ -189,6 +180,4 @@ jobs:
       uses: trufflesecurity/trufflehog@main
       with:
         path: ./
-        base: main
-        head: HEAD
         extra_args: --debug --only-verified
