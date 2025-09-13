@@ -93,7 +93,7 @@ def _check_security_configuration():
     if has_default_credentials:
         logger.warning(
             "SECURITY: Default admin credentials found in configuration file"
-        )
+        )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
         warnings.append(
             SecurityWarning(
                 type="default_credentials",
@@ -108,7 +108,9 @@ def _check_security_configuration():
     has_default_jwt = jwt_secret in DEFAULT_JWT_SECRETS
 
     if has_default_jwt:
-        logger.warning("SECURITY: Default JWT secret detected in configuration")
+        logger.warning(
+            "SECURITY: Default JWT secret detected in configuration"
+        )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
         warnings.append(
             SecurityWarning(
                 type="default_jwt_secret",
@@ -124,7 +126,9 @@ def _check_security_configuration():
     user_count = _get_database_user_count()
 
     if has_default_salt:
-        logger.warning("SECURITY: Default password salt detected in configuration")
+        logger.warning(
+            "SECURITY: Default password salt detected in configuration"
+        )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
         if user_count > 0:
             warnings.append(
                 SecurityWarning(

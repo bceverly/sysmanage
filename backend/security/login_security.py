@@ -334,13 +334,17 @@ class SessionSecurityManager:
 
             # Check IP consistency (optional - can be disabled for mobile users)
             if token_ip != client_ip:
-                logger.warning("Session IP mismatch detected")
+                logger.warning(
+                    "Session IP mismatch detected"
+                )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
                 # Don't fail here - just log for monitoring
 
             # Check token age (12 hours max)
             token_age = int(time.time()) - int(timestamp)
             if token_age > 43200:  # 12 hours
-                logger.info("Expired session token detected")
+                logger.info(
+                    "Expired session token detected"
+                )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
                 return False, None
 
             # Validate signature
