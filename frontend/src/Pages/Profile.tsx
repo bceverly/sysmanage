@@ -136,7 +136,9 @@ const Profile: React.FC = () => {
             errors.push(t('userProfile.passwordNeedsNumber', 'Password must contain at least one number'));
         }
         
-        const specialCharsRegex = new RegExp(`[${config.special_chars.replace(/[\\\]\-^]/g, '\\$&')}]`);
+        // Safely escape special characters to prevent regex injection
+        const escapedChars = (config.special_chars || '').replace(/[\\[\](){}.*+?^$|]/g, '\\$&');
+        const specialCharsRegex = new RegExp(`[${escapedChars}]`);
         if (config.require_special_chars && specialCharsRegex.test(password)) charTypes++;
         else if (config.require_special_chars && !specialCharsRegex.test(password)) {
             errors.push(t('userProfile.passwordNeedsSpecial', 'Password must contain at least one special character'));

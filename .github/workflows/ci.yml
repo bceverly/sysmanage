@@ -70,10 +70,10 @@ jobs:
           port: 5432
           name: "sysmanage"
         security:
-          password_salt: "6/InQvDb8f3cM6sao8kWzIiYVHKGH9sqkEJ3uZhIo9Q="
+          password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
           admin_userid: "admin@sysmanage.org"
-          admin_password: "pa\$\$word"
-          jwt_secret: "I+Z74n/CFHser01E47pyrL91OuonEX9hNSvVFr/KLi4="
+          admin_password: "TEST_AdminPass123!"
+          jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
           jwt_algorithm: "HS256"
           jwt_auth_timeout: 6000
           jwt_refresh_timeout: 60000
@@ -134,6 +134,14 @@ jobs:
     - name: Run Bandit security scan
       run: |
         python -m bandit -r backend/ -f screen -x backend/tests/
+        # Also generate JSON report for artifacts
+        python -m bandit -r backend/ -f json -x backend/tests/ -o bandit-report.json || true
+    
+    - name: Upload Bandit results
+      uses: actions/upload-artifact@v4
+      with:
+        name: bandit-security-report
+        path: bandit-report.json
 
   test-frontend:
     name: Frontend Tests
@@ -161,7 +169,15 @@ jobs:
     - name: Run security audit
       working-directory: frontend
       run: |
+        # Run audit and save results
+        npm audit --audit-level=high --json > npm-audit-ci.json || true
         npm audit --audit-level=high || true
+    
+    - name: Upload npm audit results
+      uses: actions/upload-artifact@v4
+      with:
+        name: npm-audit-ci-report
+        path: frontend/npm-audit-ci.json
 
     - name: Run frontend linting
       working-directory: frontend

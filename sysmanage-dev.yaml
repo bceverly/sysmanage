@@ -5,16 +5,16 @@ api:
 
 database:
   user: "sysmanage"
-  password: "abc123"
+  password: "DEV_Change_Me_ABC123!"
   host: "localhost"
   port: 5432
   name: "sysmanage"
 
 security:
-  password_salt: "6/InQvDb8f3cM6sao8kWzIiYVHKGH9sqkEJ3uZhIo9Q="
+  password_salt: "fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
   admin_userid: "admin@sysmanage.org"
-  admin_password: "pa$$word"
-  jwt_secret: "I+Z74n/CFHser01E47pyrL91OuonEX9hNSvVFr/KLi4="
+  admin_password: "DEV_AdminPass123!"
+  jwt_secret: "SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
   jwt_algorithm: "HS256"
   jwt_auth_timeout: 6000
   jwt_refresh_timeout: 60000

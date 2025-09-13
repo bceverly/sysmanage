@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test lint lint-python lint-typescript security clean setup install-dev help
+.PHONY: test lint lint-python lint-typescript security security-full security-python security-frontend security-secrets clean setup install-dev help
 
 # Default target
 help:
@@ -10,7 +10,11 @@ help:
 	@echo "  make lint          - Run all linters (Python + TypeScript)"
 	@echo "  make lint-python   - Run Python linting only"
 	@echo "  make lint-typescript - Run TypeScript linting only"
-	@echo "  make security      - Run security analysis with Bandit"
+	@echo "  make security      - Run comprehensive security analysis (all tools)"
+	@echo "  make security-full - Run comprehensive security analysis (all tools)"
+	@echo "  make security-python - Run Python security scanning (Bandit + Safety)"
+	@echo "  make security-frontend - Run frontend security scanning (ESLint)"
+	@echo "  make security-secrets - Run secrets detection"
 	@echo "  make setup         - Install development dependencies"
 	@echo "  make clean         - Clean test artifacts and cache"
 	@echo "  make install-dev   - Install all development tools"
@@ -44,7 +48,7 @@ endif
 # Install development dependencies
 install-dev: $(VENV_ACTIVATE)
 	@echo "Installing Python development dependencies..."
-	@$(PIP) install pytest pytest-cov pytest-asyncio pylint black isort bandit
+	@$(PIP) install pytest pytest-cov pytest-asyncio pylint black isort bandit safety
 	@echo "Installing TypeScript/React development dependencies..."
 	@cd frontend && npm install
 	@if ! command -v eslint >/dev/null 2>&1; then \
@@ -82,16 +86,51 @@ lint-typescript:
 lint: lint-python lint-typescript
 	@echo "[OK] All linting completed successfully!"
 
-# Security analysis
-security: $(VENV_ACTIVATE)
-	@echo "=== Security Analysis ==="
-	@echo "Running Bandit security analysis..."
+# Comprehensive security analysis (default)
+security: security-full
+
+# Comprehensive security analysis - all tools
+security-full: security-python security-frontend security-secrets
+	@echo "[OK] Comprehensive security analysis completed!"
+
+# Python security analysis (Bandit + Safety)
+security-python: $(VENV_ACTIVATE)
+	@echo "=== Python Security Analysis ==="
+	@echo "Running Bandit static security analysis..."
 ifeq ($(OS),Windows_NT)
 	-@$(PYTHON) -m bandit -r backend/ -f screen -x backend/tests/
 else
 	@$(PYTHON) -m bandit -r backend/ -f screen -x backend/tests/ || true
 endif
-	@echo "[OK] Security analysis completed"
+	@echo ""
+	@echo "Running Safety dependency vulnerability scan..."
+ifeq ($(OS),Windows_NT)
+	-@$(PIP) freeze | $(PYTHON) -c "import sys; import subprocess; subprocess.run([sys.executable, '-m', 'safety', 'scan', '--stdin'], input=sys.stdin.read(), text=True)"
+else
+	@$(PIP) freeze | $(PYTHON) -m safety scan --stdin || echo "Safety scan completed with warnings"
+endif
+	@echo "[OK] Python security analysis completed"
+
+# Frontend security analysis (ESLint security plugins)
+security-frontend:
+	@echo "=== Frontend Security Analysis ==="
+	@echo "Running ESLint security scanning..."
+	@cd frontend && npx eslint --config eslint.security.config.js src/ || echo "Frontend security scan completed with warnings"
+	@echo "[OK] Frontend security analysis completed"
+
+# Secrets detection (basic pattern matching)
+security-secrets:
+	@echo "=== Secrets Detection ==="
+	@echo "Scanning for potential secrets and credentials..."
+	@echo "Checking for common secret patterns..."
+	@grep -r -i --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=__pycache__ --exclude="*.pyc" -E "(password|secret|key|token)\s*[:=]\s*['\"][^'\"\s]{8,}" . || echo "No obvious secrets found in patterns"
+	@echo ""
+	@echo "Checking for hardcoded API keys..."
+	@grep -r -i --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=__pycache__ --exclude="*.pyc" -E "(api_?key|access_?token|auth_?token)\s*[:=]\s*['\"][A-Za-z0-9+/=]{20,}" . || echo "No obvious API keys found"
+	@echo ""
+	@echo "Checking for AWS credentials..."
+	@grep -r -i --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=__pycache__ --exclude="*.pyc" -E "(AKIA[0-9A-Z]{16}|aws_secret_access_key)" . || echo "No AWS credentials found"
+	@echo "[OK] Basic secrets detection completed"
 
 # Format Python code (helper target)
 format-python: $(VENV_ACTIVATE) clean-whitespace

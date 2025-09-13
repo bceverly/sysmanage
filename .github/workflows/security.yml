@@ -1,0 +1,194 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  semgrep:
+    name: Semgrep Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+    - uses: actions/checkout@v5
+    
+    - name: Run Semgrep
+      uses: semgrep/semgrep-action@v1
+      with:
+        config: >-
+          p/security-audit
+          p/javascript
+          p/typescript
+          p/react
+          p/python
+          p/django
+          p/flask
+          p/owasp-top-ten
+        generateSarif: "1"
+        
+    - name: Upload SARIF file
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: semgrep.sarif
+      if: always()
+
+  dependency-check:
+    name: Dependency Vulnerability Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+    - uses: actions/checkout@v5
+    
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    # Backend dependency check with Safety
+    - name: Install Safety
+      run: pip install safety
+      
+    - name: Install backend dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run Safety check (Python)
+      run: |
+        pip freeze | safety check --stdin --json --output safety-report.json || true
+        
+    - name: Upload Safety results
+      uses: actions/upload-artifact@v4
+      with:
+        name: safety-report
+        path: safety-report.json
+    
+    # Frontend dependency check with npm audit and Snyk
+    - name: Install frontend dependencies
+      working-directory: frontend
+      run: |
+        npm cache clean --force || true
+        npm install --legacy-peer-deps || npm ci --legacy-peer-deps
+    
+    - name: Enhanced npm audit
+      working-directory: frontend
+      run: |
+        # Create audit report
+        npm audit --audit-level=moderate --json > npm-audit-report.json || true
+        
+        # Show human readable output
+        npm audit --audit-level=moderate || true
+        
+    - name: Upload npm audit results
+      uses: actions/upload-artifact@v4
+      with:
+        name: npm-audit-report
+        path: frontend/npm-audit-report.json
+
+  snyk:
+    name: Snyk Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+    - uses: actions/checkout@v5
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+        
+    - name: Install frontend dependencies
+      working-directory: frontend
+      run: |
+        npm cache clean --force || true
+        npm install --legacy-peer-deps || npm ci --legacy-peer-deps
+    
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/node@master
+      continue-on-error: true
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high --file=frontend/package.json
+        
+    - name: Upload Snyk results to GitHub Code Scanning
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: snyk.sarif
+
+  frontend-security-lint:
+    name: Frontend Security Linting
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - uses: actions/checkout@v5
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install dependencies
+      working-directory: frontend
+      run: |
+        npm cache clean --force || true
+        npm install --legacy-peer-deps || npm ci --legacy-peer-deps
+    
+    - name: Run security-focused ESLint
+      working-directory: frontend
+      run: |
+        # Run security linting with our dedicated config
+        npx eslint --config eslint.security.config.js src/ || true
+
+  secrets-scan:
+    name: Secrets Detection
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+        
+    - name: TruffleHog OSS
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified

@@ -950,13 +950,83 @@ npm run build
 docker-compose up -d
 ```
 
+## Security Scanning Infrastructure
+
+SysManage implements comprehensive automated security scanning to protect against vulnerabilities and ensure code quality:
+
+### Continuous Integration Security Tools
+
+Our GitHub Actions CI/CD pipeline includes multiple security scanning tools that run automatically on every push and pull request:
+
+#### Backend Security (Python)
+- **[Bandit](https://bandit.readthedocs.io/)** - Static security analysis for Python code, detecting common vulnerabilities
+- **[Safety](https://pypi.org/project/safety/)** - Vulnerability scanning for Python dependencies
+- **[Semgrep](https://semgrep.dev/)** - Multi-language static analysis with OWASP Top 10 rule sets
+
+#### Frontend Security (JavaScript/React)
+- **[ESLint Security](https://github.com/eslint-community/eslint-plugin-security)** - Security-focused linting for JavaScript/TypeScript
+- **[eslint-plugin-no-unsanitized](https://github.com/mozilla/eslint-plugin-no-unsanitized)** - Prevents DOM XSS vulnerabilities
+- **[Snyk](https://snyk.io/)** - Vulnerability scanning for npm dependencies
+- **[npm audit](https://docs.npmjs.com/cli/v8/commands/npm-audit)** - Built-in npm security auditing
+
+#### Cross-Language Security Tools
+- **[CodeQL](https://codeql.github.com/)** - GitHub's semantic code analysis for both Python and JavaScript
+- **[TruffleHog](https://github.com/trufflesecurity/trufflehog)** - Secrets detection to prevent credential leaks
+
+### Security Workflow Files
+
+Our security infrastructure is implemented through multiple GitHub Actions workflows:
+
+- **`.github/workflows/security.yml`** - Comprehensive security scanning with Semgrep, Snyk, Safety, and secrets detection
+- **`.github/workflows/codeql.yml`** - GitHub's native CodeQL security analysis
+- **`.github/workflows/ci.yml`** - Enhanced with security artifact uploads
+
+### Local Security Testing
+
+Developers can run security scans locally before committing:
+
+```bash
+# Backend security scanning
+python -m bandit -r backend/ -f screen
+pip freeze | safety check --stdin
+
+# Frontend security scanning  
+cd frontend && npx eslint --config eslint.security.config.js src/
+
+# Local comprehensive security scanning
+make security          # Run all security tools (comprehensive)
+make security-full     # Run all security tools (same as above)
+make security-python   # Python-only security (Bandit + Safety)
+make security-frontend # Frontend-only security (ESLint)
+make security-secrets  # Basic secrets detection
+```
+
+### Security Configuration Files
+
+- **`frontend/eslint.security.config.js`** - Dedicated ESLint configuration for security-focused scanning
+- **`frontend/package.json`** - Includes security-focused ESLint plugins
+- **`.github/workflows/security.yml`** - Main security scanning workflow
+- **`.github/workflows/codeql.yml`** - CodeQL configuration for Python and JavaScript analysis
+
+### Security Reporting
+
+All security scan results are:
+- **Integrated with GitHub Security Tab** - Centralized vulnerability management
+- **Available as CI Artifacts** - Downloadable reports for each scan
+- **SARIF Compatible** - Standardized security report format
+- **Automatically Updated** - Weekly scheduled scans for dependency vulnerabilities
+
+### Free for Non-Enterprise GitHub
+
+All security scanning tools used are available at no cost for public repositories and non-enterprise GitHub accounts, providing enterprise-grade security without licensing costs.
+
 ## Development Guidelines
 
 - **Code Quality**: Perfect 10.00/10 PyLint score, 0 ESLint warnings, Black formatting
 - **Testing**: Maintain comprehensive test coverage (258 Python tests, 24 TypeScript tests)
 - **Dependencies**: All production dependencies properly managed in requirements.txt
 - **Commits**: Use conventional commit format with Claude Code co-author attribution
-- **Security**: No hardcoded secrets, secure JWT implementation, configurable password policies
+- **Security**: No hardcoded secrets, secure JWT implementation, configurable password policies, comprehensive automated security scanning
 - **Internationalization**: All user-visible strings must be externalized and translated
 
 ## Troubleshooting
