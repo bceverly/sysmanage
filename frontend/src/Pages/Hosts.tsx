@@ -18,6 +18,7 @@ import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHos
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
 import SearchBox from '../Components/SearchBox';
+import axiosInstance from '../Services/api';
 
 const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
@@ -429,16 +430,8 @@ const Hosts = () => {
     // Load all tags for filtering
     const loadAllTags = useCallback(async () => {
         try {
-            const response = await window.fetch('/api/tags', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
-                },
-            });
-            
-            if (response.ok) {
-                const tags = await response.json();
-                setAllTags(tags);
-            }
+            const response = await axiosInstance.get('/api/tags');
+            setAllTags(response.data);
         } catch (error) {
             console.error('Error loading tags:', error);
         }

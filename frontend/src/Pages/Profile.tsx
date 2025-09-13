@@ -173,8 +173,6 @@ const Profile: React.FC = () => {
 
     // Profile image functions - defined before useEffect to avoid hoisting issues
     const fetchProfileImage = useCallback(async () => {
-        if (imageLoading) return;
-        
         setImageLoading(true);
         try {
             const response = await axiosInstance.get('/api/profile/image', {
@@ -186,10 +184,11 @@ const Profile: React.FC = () => {
             setProfileImageUrl(imageUrl);
         } catch {
             console.debug('No profile image available or error fetching image');
+            setProfileImageUrl(null);
         } finally {
             setImageLoading(false);
         }
-    }, [imageLoading]);
+    }, []);
     
     useEffect(() => {
         const loadProfile = async () => {
@@ -213,14 +212,17 @@ const Profile: React.FC = () => {
         };
 
         loadProfile();
+    }, [t, fetchProfileImage]);
 
-        // Cleanup: revoke object URLs when component unmounts
+    // Separate cleanup effect for blob URLs
+    useEffect(() => {
         return () => {
             if (profileImageUrl) {
                 window.URL.revokeObjectURL(profileImageUrl);
             }
         };
-    }, [t, navigate, fetchProfileImage, profileImageUrl]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleSave = async () => {
         try {

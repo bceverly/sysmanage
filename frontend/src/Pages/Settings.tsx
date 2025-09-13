@@ -24,6 +24,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import SearchBox from '../Components/SearchBox';
+import axiosInstance from '../Services/api';
 
 interface Tag {
   id: number;
@@ -100,18 +101,8 @@ const Settings: React.FC = () => {
   const loadTags = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await window.fetch('/api/tags', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setTags(data);
-      } else {
-        console.error('Failed to fetch tags');
-      }
+      const response = await axiosInstance.get('/api/tags');
+      setTags(response.data);
     } catch (error) {
       console.error('Error fetching tags:', error);
     } finally {
@@ -155,28 +146,15 @@ const Settings: React.FC = () => {
     if (!tagName.trim()) return;
     
     try {
-      const response = await window.fetch('/api/tags', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
-        },
-        body: JSON.stringify({
-          name: tagName.trim(),
-          description: tagDescription.trim() || null
-        }),
+      await axiosInstance.post('/api/tags', {
+        name: tagName.trim(),
+        description: tagDescription.trim() || null
       });
       
-      if (response.ok) {
-        await loadTags();
-        setAddDialogOpen(false);
-        setTagName('');
-        setTagDescription('');
-      } else {
-        const error = await response.json();
-        console.error('Failed to create tag:', error.detail);
-        // TODO: Show user-friendly error message
-      }
+      await loadTags();
+      setAddDialogOpen(false);
+      setTagName('');
+      setTagDescription('');
     } catch (error) {
       console.error('Error creating tag:', error);
     }
@@ -187,29 +165,16 @@ const Settings: React.FC = () => {
     if (!editingTag || !tagName.trim()) return;
     
     try {
-      const response = await window.fetch(`/api/tags/${editingTag.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
-        },
-        body: JSON.stringify({
-          name: tagName.trim(),
-          description: tagDescription.trim() || null
-        }),
+      await axiosInstance.put(`/api/tags/${editingTag.id}`, {
+        name: tagName.trim(),
+        description: tagDescription.trim() || null
       });
       
-      if (response.ok) {
-        await loadTags();
-        setEditDialogOpen(false);
-        setEditingTag(null);
-        setTagName('');
-        setTagDescription('');
-      } else {
-        const error = await response.json();
-        console.error('Failed to update tag:', error.detail);
-        // TODO: Show user-friendly error message
-      }
+      await loadTags();
+      setEditDialogOpen(false);
+      setEditingTag(null);
+      setTagName('');
+      setTagDescription('');
     } catch (error) {
       console.error('Error updating tag:', error);
     }
@@ -221,12 +186,7 @@ const Settings: React.FC = () => {
     
     try {
       const deletePromises = selectedTags.map(id =>
-        window.fetch(`/api/tags/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
-          },
-        })
+        axiosInstance.delete(`/api/tags/${id}`)
       );
       
       await Promise.all(deletePromises);
@@ -240,19 +200,9 @@ const Settings: React.FC = () => {
   // Handle view hosts for tag
   const handleViewHosts = async (tagId: number) => {
     try {
-      const response = await window.fetch(`/api/tags/${tagId}/hosts`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setViewingTag(data);
-        setViewHostsDialogOpen(true);
-      } else {
-        console.error('Failed to fetch tag hosts');
-      }
+      const response = await axiosInstance.get(`/api/tags/${tagId}/hosts`);
+      setViewingTag(response.data);
+      setViewHostsDialogOpen(true);
     } catch (error) {
       console.error('Error fetching tag hosts:', error);
     }
@@ -279,18 +229,8 @@ const Settings: React.FC = () => {
   const loadQueueMessages = useCallback(async () => {
     setQueueLoading(true);
     try {
-      const response = await window.fetch('/api/queue/failed', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setQueueMessages(data);
-      } else {
-        console.error('Failed to fetch queue messages');
-      }
+      const response = await axiosInstance.get('/api/queue/failed');
+      setQueueMessages(response.data);
     } catch (error) {
       console.error('Error fetching queue messages:', error);
     } finally {
@@ -303,22 +243,12 @@ const Settings: React.FC = () => {
     if (selectedMessages.length === 0) return;
     
     try {
-      const response = await window.fetch('/api/queue/failed', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
-        },
-        body: JSON.stringify(selectedMessages),
+      await axiosInstance.delete('/api/queue/failed', {
+        data: selectedMessages
       });
       
-      if (response.ok) {
-        await loadQueueMessages();
-        setSelectedMessages([]);
-      } else {
-        const error = await response.json();
-        console.error('Failed to delete messages:', error.detail);
-      }
+      await loadQueueMessages();
+      setSelectedMessages([]);
     } catch (error) {
       console.error('Error deleting messages:', error);
     }
@@ -327,19 +257,9 @@ const Settings: React.FC = () => {
   // Handle view message details
   const handleViewMessage = async (messageId: string) => {
     try {
-      const response = await window.fetch(`/api/queue/failed/${messageId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setSelectedMessage(data);
-        setMessageDetailOpen(true);
-      } else {
-        console.error('Failed to fetch message details');
-      }
+      const response = await axiosInstance.get(`/api/queue/failed/${messageId}`);
+      setSelectedMessage(response.data);
+      setMessageDetailOpen(true);
     } catch (error) {
       console.error('Error fetching message details:', error);
     }

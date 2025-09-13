@@ -3,6 +3,8 @@
  * and managing fallback behavior with exponential backoff retry logic.
  */
 
+import axiosInstance from './api';
+
 interface ConnectionStatus {
   isConnected: boolean;
   lastConnected: Date | null;
@@ -157,20 +159,11 @@ class ConnectionMonitor {
     
     try {
       // Simple health check - try to fetch from the API
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
-      const response = await window.fetch('/api/health', {
-        method: 'HEAD',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('bearer_token') || ''}`,
-        },
-        signal: controller.signal,
+      const response = await axiosInstance.head('/api/health', {
+        timeout: 5000,
       });
-      
-      clearTimeout(timeoutId);
 
-      if (response.ok) {
+      if (response.status === 200) {
         this.markConnectionRestored();
       } else {
         throw new Error(`Health check failed: ${response.status}`);
@@ -237,20 +230,11 @@ class ConnectionMonitor {
 
     try {
       // Try to connect to the server
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-      
-      const response = await window.fetch('/api/health', {
-        method: 'HEAD',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('bearer_token') || ''}`,
-        },
-        signal: controller.signal,
+      const response = await axiosInstance.head('/api/health', {
+        timeout: 10000,
       });
-      
-      clearTimeout(timeoutId);
 
-      if (response.ok) {
+      if (response.status === 200) {
         this.markConnectionRestored();
       } else {
         throw new Error(`Retry failed: ${response.status}`);

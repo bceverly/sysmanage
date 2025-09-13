@@ -20,7 +20,6 @@ import {
 const UserProfileDropdown: React.FC = () => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
-    const [imageLoading, setImageLoading] = useState<boolean>(false);
     const open = Boolean(anchorEl);
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -43,9 +42,8 @@ const UserProfileDropdown: React.FC = () => {
 
     // Fetch profile image
     const fetchProfileImage = useCallback(async () => {
-        if (!userid || imageLoading) return;
+        if (!userid) return;
         
-        setImageLoading(true);
         try {
             // First check if user has a profile image via the profile endpoint
             const profileResponse = await axiosInstance.get('/api/profile');
@@ -67,31 +65,23 @@ const UserProfileDropdown: React.FC = () => {
         } catch {
             // Silently handle the case where profile image is not available
             setProfileImageUrl(null);
-        } finally {
-            setImageLoading(false);
         }
-    }, [userid, imageLoading]);
+    }, [userid]);
 
     // Load profile image on component mount
     useEffect(() => {
         fetchProfileImage();
+    }, [fetchProfileImage]);
 
-        // Cleanup: revoke object URL when component unmounts or image changes
-        return () => {
-            if (profileImageUrl) {
-                window.URL.revokeObjectURL(profileImageUrl);
-            }
-        };
-    }, [userid, fetchProfileImage, profileImageUrl]);
-
-    // Cleanup old URL when new one is set
+    // Cleanup blob URLs when component unmounts
     useEffect(() => {
         return () => {
             if (profileImageUrl) {
                 window.URL.revokeObjectURL(profileImageUrl);
             }
         };
-    }, [profileImageUrl]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
