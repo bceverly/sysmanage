@@ -30,7 +30,12 @@ from backend.websocket.messages import (
     create_host_approved_message,
 )
 
-router = APIRouter()
+# Split into separate routers for different authentication requirements
+public_router = APIRouter()  # Unauthenticated endpoints (no /api prefix)
+auth_router = APIRouter()  # Authenticated endpoints (with /api prefix)
+
+# Backward compatibility - this allows existing imports to still work
+router = public_router  # Default to public router for backward compatibility
 
 
 class HostRegistration(BaseModel):
@@ -81,7 +86,7 @@ class Host(BaseModel):
     ipv6: str
 
 
-@router.delete("/host/{host_id}", dependencies=[Depends(JWTBearer())])
+@auth_router.delete("/host/{host_id}", dependencies=[Depends(JWTBearer())])
 async def delete_host(host_id: int):
     """
     This function deletes a single host given an id
@@ -107,7 +112,7 @@ async def delete_host(host_id: int):
     return {"result": True}
 
 
-@router.get("/host/{host_id}", dependencies=[Depends(JWTBearer())])
+@auth_router.get("/host/{host_id}", dependencies=[Depends(JWTBearer())])
 async def get_host(host_id: int):
     """
     This function retrieves a single host by its id
@@ -150,7 +155,7 @@ async def get_host(host_id: int):
     }
 
 
-@router.get("/host/by_fqdn/{fqdn}", dependencies=[Depends(JWTBearer())])
+@auth_router.get("/host/by_fqdn/{fqdn}", dependencies=[Depends(JWTBearer())])
 async def get_host_by_fqdn_endpoint(fqdn: str):
     """
     This function retrieves a single host by fully qualified domain name
@@ -193,7 +198,7 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
     }
 
 
-@router.get("/hosts", dependencies=[Depends(JWTBearer())])
+@auth_router.get("/hosts", dependencies=[Depends(JWTBearer())])
 async def get_all_hosts():
     """
     This function retrieves all hosts in the system
@@ -252,7 +257,7 @@ async def get_all_hosts():
         return result
 
 
-@router.post("/host", dependencies=[Depends(JWTBearer())])
+@auth_router.post("/host", dependencies=[Depends(JWTBearer())])
 async def add_host(new_host: Host):
     """
     This function adds a new host to the system.
@@ -287,7 +292,7 @@ async def add_host(new_host: Host):
         return host
 
 
-@router.post("/host/register")
+@public_router.post("/host/register")
 async def register_host(registration_data: HostRegistration):
     """
     Register a new host (agent) with the system.
@@ -353,7 +358,7 @@ async def register_host(registration_data: HostRegistration):
         return host
 
 
-@router.put("/host/{host_id}", dependencies=[Depends(JWTBearer())])
+@auth_router.put("/host/{host_id}", dependencies=[Depends(JWTBearer())])
 async def update_host(host_id: int, host_data: Host):
     """
     This function updates an existing host by id
@@ -393,7 +398,7 @@ async def update_host(host_id: int, host_data: Host):
     return updated_host
 
 
-@router.put("/host/{host_id}/approve", dependencies=[Depends(JWTBearer())])
+@auth_router.put("/host/{host_id}/approve", dependencies=[Depends(JWTBearer())])
 async def approve_host(host_id: int):  # pylint: disable=duplicate-code
     """
     Approve a pending host registration
@@ -475,7 +480,7 @@ async def approve_host(host_id: int):  # pylint: disable=duplicate-code
         return ret_host
 
 
-@router.put("/host/{host_id}/reject", dependencies=[Depends(JWTBearer())])
+@auth_router.put("/host/{host_id}/reject", dependencies=[Depends(JWTBearer())])
 async def reject_host(host_id: int):  # pylint: disable=duplicate-code
     """
     Reject a pending host registration
@@ -516,7 +521,9 @@ async def reject_host(host_id: int):  # pylint: disable=duplicate-code
         return ret_host
 
 
-@router.post("/host/{host_id}/request-os-update", dependencies=[Depends(JWTBearer())])
+@auth_router.post(
+    "/host/{host_id}/request-os-update", dependencies=[Depends(JWTBearer())]
+)
 async def request_os_version_update(host_id: int):
     """
     Request an agent to update its OS version information.
@@ -550,7 +557,7 @@ async def request_os_version_update(host_id: int):
         return {"result": True, "message": _("OS version update requested")}
 
 
-@router.post(
+@auth_router.post(
     "/host/{host_id}/request-updates-check", dependencies=[Depends(JWTBearer())]
 )
 async def request_updates_check(host_id: int):
@@ -586,7 +593,9 @@ async def request_updates_check(host_id: int):
         return {"result": True, "message": _("Updates check requested")}
 
 
-@router.post("/host/{host_id}/update-hardware", dependencies=[Depends(JWTBearer())])
+@auth_router.post(
+    "/host/{host_id}/update-hardware", dependencies=[Depends(JWTBearer())]
+)
 async def update_host_hardware(host_id: int, hardware_data: dict):
     """
     Update hardware information for a specific host.
@@ -688,7 +697,7 @@ async def update_host_hardware(host_id: int, hardware_data: dict):
         }
 
 
-@router.get("/host/{host_id}/storage", dependencies=[Depends(JWTBearer())])
+@auth_router.get("/host/{host_id}/storage", dependencies=[Depends(JWTBearer())])
 async def get_host_storage(host_id: int):
     """
     Get storage devices for a specific host from the normalized storage_devices table.
@@ -696,7 +705,7 @@ async def get_host_storage(host_id: int):
     return get_host_storage_devices(host_id)
 
 
-@router.get("/host/{host_id}/network", dependencies=[Depends(JWTBearer())])
+@auth_router.get("/host/{host_id}/network", dependencies=[Depends(JWTBearer())])
 async def get_host_network(host_id: int):
     """
     Get network interfaces for a specific host from the normalized network_interfaces table.
@@ -704,7 +713,7 @@ async def get_host_network(host_id: int):
     return get_host_network_interfaces(host_id)
 
 
-@router.post(
+@auth_router.post(
     "/host/{host_id}/request-hardware-update", dependencies=[Depends(JWTBearer())]
 )
 async def request_hardware_update(host_id: int):
@@ -740,7 +749,7 @@ async def request_hardware_update(host_id: int):
         return {"result": True, "message": _("Hardware update requested")}
 
 
-@router.post("/hosts/request-hardware-update", dependencies=[Depends(JWTBearer())])
+@auth_router.post("/hosts/request-hardware-update", dependencies=[Depends(JWTBearer())])
 async def request_hardware_update_bulk(host_ids: list[int]):
     """
     Request multiple agents to update their hardware information.
@@ -802,7 +811,7 @@ async def request_hardware_update_bulk(host_ids: list[int]):
     return {"results": results}
 
 
-@router.get("/host/{host_id}/users", dependencies=[Depends(JWTBearer())])
+@auth_router.get("/host/{host_id}/users", dependencies=[Depends(JWTBearer())])
 async def get_host_users(host_id: int):
     """
     Get user accounts for a specific host from the normalized user_accounts table.
@@ -810,7 +819,7 @@ async def get_host_users(host_id: int):
     return get_host_users_with_groups(host_id)
 
 
-@router.get("/host/{host_id}/groups", dependencies=[Depends(JWTBearer())])
+@auth_router.get("/host/{host_id}/groups", dependencies=[Depends(JWTBearer())])
 async def get_host_groups(host_id: int):
     """
     Get user groups for a specific host from the normalized user_groups table.
@@ -818,7 +827,7 @@ async def get_host_groups(host_id: int):
     return get_host_user_groups(host_id)
 
 
-@router.post(
+@auth_router.post(
     "/host/{host_id}/request-user-access-update", dependencies=[Depends(JWTBearer())]
 )
 async def request_user_access_update(host_id: int):
@@ -854,7 +863,7 @@ async def request_user_access_update(host_id: int):
         return {"result": True, "message": _("User access update requested")}
 
 
-@router.get("/host/{host_id}/software", dependencies=[Depends(JWTBearer())])
+@auth_router.get("/host/{host_id}/software", dependencies=[Depends(JWTBearer())])
 async def get_host_software(host_id: int):
     """
     Get software packages for a specific host from the software_packages table.
@@ -862,7 +871,9 @@ async def get_host_software(host_id: int):
     return get_host_software_packages(host_id)
 
 
-@router.post("/host/refresh/software/{host_id}", dependencies=[Depends(JWTBearer())])
+@auth_router.post(
+    "/host/refresh/software/{host_id}", dependencies=[Depends(JWTBearer())]
+)
 async def refresh_host_software(host_id: int):
     """
     Request software inventory refresh for a specific host.
@@ -892,7 +903,7 @@ async def refresh_host_software(host_id: int):
         return {"result": True, "message": _("Software inventory update requested")}
 
 
-@router.post("/host/reboot/{host_id}", dependencies=[Depends(JWTBearer())])
+@auth_router.post("/host/reboot/{host_id}", dependencies=[Depends(JWTBearer())])
 async def reboot_host(host_id: int):
     """
     Request a system reboot for a specific host.
@@ -922,7 +933,7 @@ async def reboot_host(host_id: int):
         return {"result": True, "message": _("System reboot requested")}
 
 
-@router.post("/host/shutdown/{host_id}", dependencies=[Depends(JWTBearer())])
+@auth_router.post("/host/shutdown/{host_id}", dependencies=[Depends(JWTBearer())])
 async def shutdown_host(host_id: int):
     """
     Request a system shutdown for a specific host.

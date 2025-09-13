@@ -40,7 +40,7 @@ const SecurityWarningBanner: React.FC = () => {
       }
 
       try {
-        const response = await api.get('/security/default-credentials-status');
+        const response = await api.get('/api/security/default-credentials-status');
         const status = response.data;
         setSecurityStatus(status);
         

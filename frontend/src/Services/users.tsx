@@ -36,7 +36,7 @@ function processError(error: AxiosError) {
 const doAddUser = async (active: boolean, userid: string, password: string, firstName?: string, lastName?: string) => {
     let result = {} as SysManageUser;
 
-    await api.post("/user", {
+    await api.post("/api/user", {
         'active': active,
         'userid': userid,
         'password': password,
@@ -58,7 +58,7 @@ const doAddUser = async (active: boolean, userid: string, password: string, firs
 const doDeleteUser = async (id: BigInt) => {
     let successResponse = {} as SuccessResponse;
 
-    await api.delete<SuccessResponse>("/user/" + id)
+    await api.delete<SuccessResponse>("/api/user/" + id)
     .then((response) => {
         // No error - process response
         successResponse = response.data;
@@ -73,7 +73,7 @@ const doDeleteUser = async (id: BigInt) => {
 
 const doGetMe = async () => {
     let result = {} as SysManageUser;
-    await api.get<SysManageUser>("/user/me")
+    await api.get<SysManageUser>("/api/user/me")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -88,7 +88,7 @@ const doGetMe = async () => {
 const doGetUserByID = async (id: BigInt) => {
     let result = {} as SysManageUser;
 
-    await api.get<SysManageUser>("/user/" + id)
+    await api.get<SysManageUser>("/api/user/" + id)
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -104,7 +104,7 @@ const doGetUserByID = async (id: BigInt) => {
 const doGetUsers = async (): Promise<SysManageUser[]> => {
     let results: SysManageUser[] = [];
 
-    await api.get<SysManageUser[]>("/users")
+    await api.get<SysManageUser[]>("/api/users")
     .then((response) => {
         // No error - process response
         results = response.data;
@@ -120,7 +120,7 @@ const doGetUsers = async (): Promise<SysManageUser[]> => {
 const doGetUserByUserid = async (userid: string) => {
     let result = {} as SysManageUser;
 
-    await api.get<SysManageUser>("/host/by_userid/" + userid)
+    await api.get<SysManageUser>("/api/host/by_userid/" + userid)
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -136,7 +136,7 @@ const doGetUserByUserid = async (userid: string) => {
 const doUpdateUser = async (id: BigInt, active: boolean, userid: string, password: string, firstName?: string, lastName?: string) => {
     let successResponse = {} as SuccessResponse;
 
-    await api.put<SuccessResponse>("/user/" + id, {
+    await api.put<SuccessResponse>("/api/user/" + id, {
         'active': active,
         'userid': userid,
         'password': password,
@@ -158,7 +158,7 @@ const doUpdateUser = async (id: BigInt, active: boolean, userid: string, passwor
 const doUnlockUser = async (id: BigInt) => {
     let result = {} as SysManageUser;
 
-    await api.post<SysManageUser>("/user/" + id + "/unlock")
+    await api.post<SysManageUser>("/api/user/" + id + "/unlock")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -176,7 +176,7 @@ const doUploadUserImage = async (userId: BigInt, file: globalThis.File) => {
     formData.append('file', file);
 
     try {
-        const response = await api.post(`/user/${userId}/image`, formData, {
+        const response = await api.post(`/api/user/${userId}/image`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -190,7 +190,7 @@ const doUploadUserImage = async (userId: BigInt, file: globalThis.File) => {
 
 const doGetUserImage = async (userId: BigInt): Promise<globalThis.Blob> => {
     try {
-        const response = await api.get(`/user/${userId}/image`, {
+        const response = await api.get(`/api/user/${userId}/image`, {
             responseType: 'blob'
         });
         return response.data;
@@ -202,7 +202,7 @@ const doGetUserImage = async (userId: BigInt): Promise<globalThis.Blob> => {
 
 const doDeleteUserImage = async (userId: BigInt) => {
     try {
-        const response = await api.delete(`/user/${userId}/image`);
+        const response = await api.delete(`/api/user/${userId}/image`);
         return response.data;
     } catch (error) {
         processError(error);

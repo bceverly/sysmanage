@@ -50,7 +50,9 @@ class TestConfigPush:
             "push_to_all": False,
         }
 
-        response = client.post("/config/push", json=config_data, headers=auth_headers)
+        response = client.post(
+            "/api/config/push", json=config_data, headers=auth_headers
+        )
 
         # Check response status
 
@@ -83,7 +85,9 @@ class TestConfigPush:
             "push_to_all": True,
         }
 
-        response = client.post("/config/push", json=config_data, headers=auth_headers)
+        response = client.post(
+            "/api/config/push", json=config_data, headers=auth_headers
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -109,7 +113,9 @@ class TestConfigPush:
             "push_to_all": False,
         }
 
-        response = client.post("/config/push", json=config_data, headers=auth_headers)
+        response = client.post(
+            "/api/config/push", json=config_data, headers=auth_headers
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -128,7 +134,9 @@ class TestConfigPush:
         # No targets specified
         config_data = {"config_data": {"test": "value"}, "push_to_all": False}
 
-        response = client.post("/config/push", json=config_data, headers=auth_headers)
+        response = client.post(
+            "/api/config/push", json=config_data, headers=auth_headers
+        )
 
         # Check response status - should be error code
 
@@ -140,14 +148,16 @@ class TestConfigPush:
         """Test pushing config with missing config data."""
         config_data = {"target_hostname": "test.example.com", "push_to_all": False}
 
-        response = client.post("/config/push", json=config_data, headers=auth_headers)
+        response = client.post(
+            "/api/config/push", json=config_data, headers=auth_headers
+        )
         assert response.status_code == 422  # Validation error
 
     def test_push_config_unauthorized(self, client):
         """Test pushing config without authentication."""
         config_data = {"config_data": {"test": "value"}, "push_to_all": True}
 
-        response = client.post("/config/push", json=config_data)
+        response = client.post("/api/config/push", json=config_data)
         assert response.status_code == 403
 
 
@@ -174,7 +184,7 @@ class TestLoggingConfig:
         }
 
         response = client.post(
-            "/config/logging", json=logging_data, headers=auth_headers
+            "/api/config/logging", json=logging_data, headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -216,7 +226,7 @@ class TestLoggingConfig:
         }
 
         response = client.post(
-            "/config/logging", json=logging_data, headers=auth_headers
+            "/api/config/logging", json=logging_data, headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -249,7 +259,7 @@ class TestLoggingConfig:
         }
 
         response = client.post(
-            "/config/logging", json=logging_data, headers=auth_headers
+            "/api/config/logging", json=logging_data, headers=auth_headers
         )
         # API wraps validation errors in 500s
         assert response.status_code == 500
@@ -267,7 +277,7 @@ class TestLoggingConfig:
         logging_data = {"log_level": "INFO", "push_to_all": False}
 
         response = client.post(
-            "/config/logging", json=logging_data, headers=auth_headers
+            "/api/config/logging", json=logging_data, headers=auth_headers
         )
 
         assert response.status_code == 500  # API wraps validation errors in 500s
@@ -278,7 +288,7 @@ class TestLoggingConfig:
         """Test updating logging config without authentication."""
         logging_data = {"log_level": "DEBUG", "push_to_all": True}
 
-        response = client.post("/config/logging", json=logging_data)
+        response = client.post("/api/config/logging", json=logging_data)
         assert response.status_code == 403
 
 
@@ -308,7 +318,7 @@ class TestWebSocketConfig:
         }
 
         response = client.post(
-            "/config/websocket", json=ws_config_data, headers=auth_headers
+            "/api/config/websocket", json=ws_config_data, headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -352,7 +362,7 @@ class TestWebSocketConfig:
         }
 
         response = client.post(
-            "/config/websocket", json=ws_config_data, headers=auth_headers
+            "/api/config/websocket", json=ws_config_data, headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -380,7 +390,7 @@ class TestWebSocketConfig:
         }
 
         response = client.post(
-            "/config/websocket", json=ws_config_data, headers=auth_headers
+            "/api/config/websocket", json=ws_config_data, headers=auth_headers
         )
         assert response.status_code == 500  # API wraps validation errors in 500s
 
@@ -388,7 +398,7 @@ class TestWebSocketConfig:
         """Test updating WebSocket config without authentication."""
         ws_config_data = {"ping_interval": 30, "push_to_all": True}
 
-        response = client.post("/config/websocket", json=ws_config_data)
+        response = client.post("/api/config/websocket", json=ws_config_data)
         assert response.status_code == 403
 
 
@@ -419,7 +429,7 @@ class TestServerConfig:
         }
 
         response = client.post(
-            "/config/server", json=server_config_data, headers=auth_headers
+            "/api/config/server", json=server_config_data, headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -466,7 +476,7 @@ class TestServerConfig:
         }
 
         response = client.post(
-            "/config/server", json=server_config_data, headers=auth_headers
+            "/api/config/server", json=server_config_data, headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -494,7 +504,7 @@ class TestServerConfig:
         }
 
         response = client.post(
-            "/config/server", json=server_config_data, headers=auth_headers
+            "/api/config/server", json=server_config_data, headers=auth_headers
         )
         assert response.status_code == 500  # API wraps validation errors in 500s
 
@@ -505,7 +515,7 @@ class TestServerConfig:
             "push_to_all": True,
         }
 
-        response = client.post("/config/server", json=server_config_data)
+        response = client.post("/api/config/server", json=server_config_data)
         assert response.status_code == 403
 
 
@@ -534,7 +544,7 @@ class TestConfigPending:
         ]
         mock_config_manager.get_pending_configs.return_value = mock_pending
 
-        response = client.get("/config/pending", headers=auth_headers)
+        response = client.get("/api/config/pending", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -550,7 +560,7 @@ class TestConfigPending:
         """Test getting pending configs when none exist."""
         mock_config_manager.get_pending_configs.return_value = []
 
-        response = client.get("/config/pending", headers=auth_headers)
+        response = client.get("/api/config/pending", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -568,7 +578,7 @@ class TestConfigPending:
 
     def test_get_pending_configs_unauthorized(self, client):
         """Test getting pending configs without authentication."""
-        response = client.get("/config/pending")
+        response = client.get("/api/config/pending")
         assert response.status_code == 403
 
 
@@ -586,7 +596,7 @@ class TestConfigAcknowledge:
         success = True
 
         response = client.post(
-            f"/config/acknowledge?hostname={hostname}&version={version}&success={success}",
+            f"/api/config/acknowledge?hostname={hostname}&version={version}&success={success}",
             headers=auth_headers,
         )
 
@@ -615,7 +625,7 @@ class TestConfigAcknowledge:
         success = False
 
         response = client.post(
-            f"/config/acknowledge?hostname={hostname}&version={version}&success={success}",
+            f"/api/config/acknowledge?hostname={hostname}&version={version}&success={success}",
             headers=auth_headers,
         )
 
@@ -629,14 +639,14 @@ class TestConfigAcknowledge:
         """Test acknowledging config with missing required fields."""
         # Missing version parameter
         response = client.post(
-            "/config/acknowledge?hostname=agent.example.com&success=true",
+            "/api/config/acknowledge?hostname=agent.example.com&success=true",
             headers=auth_headers,
         )
         assert response.status_code == 422
 
         # Missing hostname parameter
         response = client.post(
-            "/config/acknowledge?version=1&success=true",
+            "/api/config/acknowledge?version=1&success=true",
             headers=auth_headers,
         )
         assert response.status_code == 422
@@ -644,7 +654,7 @@ class TestConfigAcknowledge:
     def test_acknowledge_config_unauthorized(self, client):
         """Test acknowledging config without authentication."""
         response = client.post(
-            "/config/acknowledge?hostname=agent.example.com&version=1&success=true"
+            "/api/config/acknowledge?hostname=agent.example.com&version=1&success=true"
         )
         assert response.status_code == 403
 
@@ -664,7 +674,7 @@ class TestConfigManagementIntegration:
         }
 
         push_response = client.post(
-            "/config/push", json=config_data, headers=auth_headers
+            "/api/config/push", json=config_data, headers=auth_headers
         )
         assert push_response.status_code == 200
 
@@ -677,7 +687,7 @@ class TestConfigManagementIntegration:
             }
         ]
 
-        pending_response = client.get("/config/pending", headers=auth_headers)
+        pending_response = client.get("/api/config/pending", headers=auth_headers)
         assert pending_response.status_code == 200
         pending_data = pending_response.json()
         assert len(pending_data["pending_configs"]) == 1
@@ -688,7 +698,7 @@ class TestConfigManagementIntegration:
         success = True
 
         ack_response = client.post(
-            f"/config/acknowledge?hostname={hostname}&version={version}&success={success}",
+            f"/api/config/acknowledge?hostname={hostname}&version={version}&success={success}",
             headers=auth_headers,
         )
         assert ack_response.status_code == 200

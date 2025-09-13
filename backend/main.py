@@ -319,20 +319,34 @@ async def internal_server_error_handler(request: Request, exc: Exception):
 
 
 # Import the dependencies
-app.include_router(agent.router)
-app.include_router(certificates.router)
-app.include_router(host.router)
-app.include_router(auth.router)
-app.include_router(user.router)
-app.include_router(fleet.router)
-app.include_router(config_management.router)
+
+# Unauthenticated routes (no /api prefix)
+app.include_router(auth.router)  # /login, /refresh
+app.include_router(agent.router)  # /agent/auth, /api/agent/connect
+app.include_router(host.public_router)  # /host/register (no auth)
+app.include_router(
+    certificates.public_router
+)  # /certificates/server-fingerprint, /certificates/ca-certificate (no auth)
+
+# Secure routes (with /api prefix and JWT authentication required)
+app.include_router(user.router, prefix="/api", tags=["users"])
+app.include_router(fleet.router, prefix="/api", tags=["fleet"])
+app.include_router(config_management.router, prefix="/api", tags=["config"])
+app.include_router(diagnostics.router, prefix="/api", tags=["diagnostics"])
 app.include_router(profile.router, prefix="/api", tags=["profile"])
 app.include_router(updates.router, prefix="/api/updates", tags=["updates"])
 app.include_router(scripts.router, prefix="/api/scripts", tags=["scripts"])
-app.include_router(diagnostics.router, tags=["diagnostics"])
-app.include_router(security.router)
 app.include_router(tag.router, prefix="/api", tags=["tags"])
 app.include_router(queue.router, prefix="/api/queue", tags=["queue"])
+app.include_router(
+    certificates.auth_router, prefix="/api", tags=["certificates"]
+)  # /api/certificates/client/* (with auth)
+app.include_router(
+    host.auth_router, prefix="/api", tags=["hosts"]
+)  # /api/host/* (with auth)
+app.include_router(
+    security.router, prefix="/api", tags=["security"]
+)  # /api/security/* (with auth)
 
 
 @app.get("/")

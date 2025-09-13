@@ -15,10 +15,15 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.certificate_manager import certificate_manager
 
-router = APIRouter()
+# Split into separate routers for different authentication requirements
+public_router = APIRouter()  # Unauthenticated endpoints (no /api prefix)
+auth_router = APIRouter()  # Authenticated endpoints (with /api prefix)
+
+# Backward compatibility - this allows existing imports to still work
+router = public_router  # Default to public router for backward compatibility
 
 
-@router.get("/certificates/server-fingerprint")
+@public_router.get("/certificates/server-fingerprint")
 async def get_server_fingerprint():
     """
     Get server certificate fingerprint for client pinning.
@@ -33,7 +38,7 @@ async def get_server_fingerprint():
         ) from e
 
 
-@router.get("/certificates/ca-certificate")
+@public_router.get("/certificates/ca-certificate")
 async def get_ca_certificate():
     """
     Get CA certificate for client validation.
@@ -52,7 +57,7 @@ async def get_ca_certificate():
         ) from e
 
 
-@router.get("/certificates/client/{host_id}", dependencies=[Depends(JWTBearer())])
+@auth_router.get("/certificates/client/{host_id}", dependencies=[Depends(JWTBearer())])
 async def get_client_certificate(host_id: int):  # pylint: disable=duplicate-code
     """
     Get client certificate and private key for an approved host.
@@ -96,7 +101,7 @@ async def get_client_certificate(host_id: int):  # pylint: disable=duplicate-cod
         }
 
 
-@router.post("/certificates/revoke/{host_id}", dependencies=[Depends(JWTBearer())])
+@auth_router.post("/certificates/revoke/{host_id}", dependencies=[Depends(JWTBearer())])
 async def revoke_client_certificate(host_id: int):  # pylint: disable=duplicate-code
     """
     Revoke client certificate for a host.

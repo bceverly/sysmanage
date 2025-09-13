@@ -149,7 +149,7 @@ class TestProfileAPI:
         mock_get_engine.return_value = test_engine
 
         headers = {"Authorization": f"Bearer {mock_jwt_token}"}
-        response = client.get("/profile", headers=headers)
+        response = client.get("/api/profile", headers=headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -181,14 +181,14 @@ class TestProfileAPI:
         mock_get_engine.return_value = test_engine
 
         headers = {"Authorization": f"Bearer {mock_jwt_token}"}
-        response = client_nonexistent_user.get("/profile", headers=headers)
+        response = client_nonexistent_user.get("/api/profile", headers=headers)
 
         assert response.status_code == 404
         assert "User not found" in response.json()["detail"]
 
     def test_get_profile_no_auth(self, client):
         """Test profile retrieval without authentication"""
-        response = client.get("/profile")
+        response = client.get("/api/profile")
 
         assert response.status_code == 403
 
@@ -198,7 +198,7 @@ class TestProfileAPI:
         mock_decode_jwt.side_effect = Exception("Invalid token")
 
         headers = {"Authorization": "Bearer invalid_token"}
-        response = client.get("/profile", headers=headers)
+        response = client.get("/api/profile", headers=headers)
 
         assert response.status_code == 401
 
@@ -229,7 +229,7 @@ class TestProfileAPI:
         update_data = {"first_name": "Jane", "last_name": "Smith"}
 
         headers = {"Authorization": f"Bearer {mock_jwt_token}"}
-        response = client.put("/profile", json=update_data, headers=headers)
+        response = client.put("/api/profile", json=update_data, headers=headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -265,7 +265,7 @@ class TestProfileAPI:
         update_data = {"first_name": "Jane"}
 
         headers = {"Authorization": f"Bearer {mock_jwt_token}"}
-        response = client.put("/profile", json=update_data, headers=headers)
+        response = client.put("/api/profile", json=update_data, headers=headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -301,7 +301,7 @@ class TestProfileAPI:
         update_data = {}
 
         headers = {"Authorization": f"Bearer {mock_jwt_token}"}
-        response = client.put("/profile", json=update_data, headers=headers)
+        response = client.put("/api/profile", json=update_data, headers=headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -337,7 +337,7 @@ class TestProfileAPI:
         update_data = {"first_name": None, "last_name": None}
 
         headers = {"Authorization": f"Bearer {mock_jwt_token}"}
-        response = client.put("/profile", json=update_data, headers=headers)
+        response = client.put("/api/profile", json=update_data, headers=headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -371,7 +371,7 @@ class TestProfileAPI:
         update_data = {"first_name": "Jane", "last_name": "Smith"}
 
         headers = {"Authorization": f"Bearer {mock_jwt_token}"}
-        response = client.put("/profile", json=update_data, headers=headers)
+        response = client.put("/api/profile", json=update_data, headers=headers)
 
         assert response.status_code == 404
         assert "User not found" in response.json()["detail"]
@@ -380,7 +380,7 @@ class TestProfileAPI:
         """Test profile update without authentication"""
         update_data = {"first_name": "Jane", "last_name": "Smith"}
 
-        response = client.put("/profile", json=update_data)
+        response = client.put("/api/profile", json=update_data)
 
         assert response.status_code == 403
 
@@ -392,7 +392,7 @@ class TestProfileAPI:
         update_data = {"first_name": "Jane", "last_name": "Smith"}
 
         headers = {"Authorization": "Bearer invalid_token"}
-        response = client.put("/profile", json=update_data, headers=headers)
+        response = client.put("/api/profile", json=update_data, headers=headers)
 
         assert response.status_code == 401
 
@@ -425,7 +425,7 @@ class TestProfileAPI:
         update_data = {"first_name": "Updated"}
 
         headers = {"Authorization": f"Bearer {mock_jwt_token}"}
-        response = client.put("/profile", json=update_data, headers=headers)
+        response = client.put("/api/profile", json=update_data, headers=headers)
 
         assert response.status_code == 200
 

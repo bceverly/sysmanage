@@ -34,7 +34,7 @@ class TestFleetStatus:
         ]
         mock_connection_manager.get_active_agents.return_value = mock_agents
 
-        response = client.get("/fleet/status", headers=auth_headers)
+        response = client.get("/api/fleet/status", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -50,7 +50,7 @@ class TestFleetStatus:
         """Test getting fleet status with no connected agents."""
         mock_connection_manager.get_active_agents.return_value = []
 
-        response = client.get("/fleet/status", headers=auth_headers)
+        response = client.get("/api/fleet/status", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -59,7 +59,7 @@ class TestFleetStatus:
 
     def test_get_fleet_status_unauthorized(self, client):
         """Test getting fleet status without authentication."""
-        response = client.get("/fleet/status")
+        response = client.get("/api/fleet/status")
         assert response.status_code == 403
 
 
@@ -79,7 +79,7 @@ class TestListAgents:
         ]
         mock_connection_manager.get_active_agents.return_value = mock_agents
 
-        response = client.get("/fleet/agents", headers=auth_headers)
+        response = client.get("/api/fleet/agents", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -91,7 +91,7 @@ class TestListAgents:
         """Test listing agents when none are connected."""
         mock_connection_manager.get_active_agents.return_value = []
 
-        response = client.get("/fleet/agents", headers=auth_headers)
+        response = client.get("/api/fleet/agents", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -99,7 +99,7 @@ class TestListAgents:
 
     def test_list_agents_unauthorized(self, client):
         """Test listing agents without authentication."""
-        response = client.get("/fleet/agents")
+        response = client.get("/api/fleet/agents")
         assert response.status_code == 403
 
 
@@ -117,7 +117,7 @@ class TestGetAgent:
         }
         mock_connection_manager.get_agent_by_hostname.return_value = mock_agent
 
-        response = client.get("/fleet/agent/test.example.com", headers=auth_headers)
+        response = client.get("/api/fleet/agent/test.example.com", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -135,7 +135,7 @@ class TestGetAgent:
         mock_connection_manager.get_agent_by_hostname.return_value = None
 
         response = client.get(
-            "/fleet/agent/nonexistent.example.com", headers=auth_headers
+            "/api/fleet/agent/nonexistent.example.com", headers=auth_headers
         )
 
         assert response.status_code == 404
@@ -144,7 +144,7 @@ class TestGetAgent:
 
     def test_get_agent_unauthorized(self, client):
         """Test getting agent without authentication."""
-        response = client.get("/fleet/agent/test.example.com")
+        response = client.get("/api/fleet/agent/test.example.com")
         assert response.status_code == 403
 
 
@@ -169,7 +169,7 @@ class TestSendCommand:
         }
 
         response = client.post(
-            "/fleet/agent/test.example.com/command",
+            "/api/fleet/agent/test.example.com/command",
             json=command_data,
             headers=auth_headers,
         )
@@ -198,7 +198,7 @@ class TestSendCommand:
         }
 
         response = client.post(
-            "/fleet/agent/offline.example.com/command",
+            "/api/fleet/agent/offline.example.com/command",
             json=command_data,
             headers=auth_headers,
         )
@@ -227,7 +227,7 @@ class TestSendCommand:
         }
 
         response = client.post(
-            "/fleet/agent/test.example.com/command",
+            "/api/fleet/agent/test.example.com/command",
             json=command_data,
             headers=auth_headers,
         )
@@ -245,7 +245,7 @@ class TestSendCommand:
         }
 
         response = client.post(
-            "/fleet/agent/test.example.com/command",
+            "/api/fleet/agent/test.example.com/command",
             json=command_data,
             headers=auth_headers,
         )
@@ -256,7 +256,7 @@ class TestSendCommand:
         """Test sending command with missing required fields."""
         # Missing command_type
         response = client.post(
-            "/fleet/agent/test.example.com/command",
+            "/api/fleet/agent/test.example.com/command",
             json={"parameters": {}},
             headers=auth_headers,
         )
@@ -271,7 +271,7 @@ class TestSendCommand:
         }
 
         response = client.post(
-            "/fleet/agent/test.example.com/command", json=command_data
+            "/api/fleet/agent/test.example.com/command", json=command_data
         )
         assert response.status_code == 403
 
@@ -293,7 +293,7 @@ class TestShellCommand:
         shell_data = {"command": "ls -la", "timeout": 60, "working_directory": "/tmp"}
 
         response = client.post(
-            "/fleet/agent/test.example.com/shell",
+            "/api/fleet/agent/test.example.com/shell",
             json=shell_data,
             headers=auth_headers,
         )
@@ -315,7 +315,7 @@ class TestShellCommand:
         shell_data = {"command": "ls -la", "timeout": 60}
 
         response = client.post(
-            "/fleet/agent/nonexistent.example.com/shell",
+            "/api/fleet/agent/nonexistent.example.com/shell",
             json=shell_data,
             headers=auth_headers,
         )
@@ -327,7 +327,7 @@ class TestShellCommand:
     def test_send_shell_command_missing_command(self, client, auth_headers):
         """Test sending shell command without command field."""
         response = client.post(
-            "/fleet/agent/test.example.com/shell",
+            "/api/fleet/agent/test.example.com/shell",
             json={"timeout": 60},
             headers=auth_headers,
         )
@@ -337,7 +337,9 @@ class TestShellCommand:
         """Test sending shell command without authentication."""
         shell_data = {"command": "ls -la", "timeout": 60}
 
-        response = client.post("/fleet/agent/test.example.com/shell", json=shell_data)
+        response = client.post(
+            "/api/fleet/agent/test.example.com/shell", json=shell_data
+        )
         assert response.status_code == 403
 
 
@@ -357,7 +359,7 @@ class TestPackageManagement:
         package_data = {"package_name": "nginx", "version": "1.18.0", "timeout": 600}
 
         response = client.post(
-            "/fleet/agent/test.example.com/install-package",
+            "/api/fleet/agent/test.example.com/install-package",
             json=package_data,
             headers=auth_headers,
         )
@@ -374,7 +376,7 @@ class TestPackageManagement:
     def test_install_package_missing_name(self, client, auth_headers):
         """Test installing package without package name."""
         response = client.post(
-            "/fleet/agent/test.example.com/install-package",
+            "/api/fleet/agent/test.example.com/install-package",
             json={"version": "1.0.0"},
             headers=auth_headers,
         )
@@ -397,7 +399,7 @@ class TestServiceManagement:
         service_data = {"service_name": "apache2", "timeout": 120}
 
         response = client.post(
-            "/fleet/agent/test.example.com/restart-service",
+            "/api/fleet/agent/test.example.com/restart-service",
             json=service_data,
             headers=auth_headers,
         )
@@ -411,7 +413,7 @@ class TestServiceManagement:
     def test_restart_service_missing_name(self, client, auth_headers):
         """Test restarting service without service name."""
         response = client.post(
-            "/fleet/agent/test.example.com/restart-service",
+            "/api/fleet/agent/test.example.com/restart-service",
             json={"timeout": 120},
             headers=auth_headers,
         )
@@ -430,7 +432,7 @@ class TestSystemCommands:
         mock_connection_manager.send_to_hostname = AsyncMock(return_value=True)
 
         response = client.post(
-            "/fleet/agent/test.example.com/update-system",
+            "/api/fleet/agent/test.example.com/update-system",
             json={},
             headers=auth_headers,
         )
@@ -450,7 +452,7 @@ class TestSystemCommands:
         mock_connection_manager.send_to_hostname = AsyncMock(return_value=True)
 
         response = client.post(
-            "/fleet/agent/test.example.com/reboot", json={}, headers=auth_headers
+            "/api/fleet/agent/test.example.com/reboot", json={}, headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -479,7 +481,7 @@ class TestBroadcastCommand:
         }
 
         response = client.post(
-            "/fleet/broadcast/command", json=broadcast_data, headers=auth_headers
+            "/api/fleet/broadcast/command", json=broadcast_data, headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -491,7 +493,7 @@ class TestBroadcastCommand:
     def test_broadcast_command_missing_message(self, client, auth_headers):
         """Test broadcasting without message."""
         response = client.post(
-            "/fleet/broadcast/command",
+            "/api/fleet/broadcast/command",
             json={"message_type": "NOTIFICATION"},
             headers=auth_headers,
         )
@@ -501,5 +503,5 @@ class TestBroadcastCommand:
         """Test broadcasting without authentication."""
         broadcast_data = {"message": "Test message", "message_type": "NOTIFICATION"}
 
-        response = client.post("/fleet/broadcast/command", json=broadcast_data)
+        response = client.post("/api/fleet/broadcast/command", json=broadcast_data)
         assert response.status_code == 403

@@ -104,7 +104,9 @@ class TestCertificateEndpoints:
                 mock_cert.serial_number = 12345
                 mock_x509.load_pem_x509_certificate.return_value = mock_cert
 
-                response = client.get("/certificates/client/101", headers=auth_headers)
+                response = client.get(
+                    "/api/certificates/client/101", headers=auth_headers
+                )
 
                 assert response.status_code == 200
                 data = response.json()
@@ -115,7 +117,7 @@ class TestCertificateEndpoints:
 
     def test_get_client_certificate_host_not_found(self, client, auth_headers):
         """Test client certificate retrieval when host not found."""
-        response = client.get("/certificates/client/999", headers=auth_headers)
+        response = client.get("/api/certificates/client/999", headers=auth_headers)
 
         assert response.status_code == 404
         assert "Host not found" in response.json()["detail"]
@@ -138,14 +140,14 @@ class TestCertificateEndpoints:
         )
         session.commit()
 
-        response = client.get("/certificates/client/102", headers=auth_headers)
+        response = client.get("/api/certificates/client/102", headers=auth_headers)
 
         assert response.status_code == 403
         assert "Host is not approved" in response.json()["detail"]
 
     def test_get_client_certificate_requires_auth(self, client):
         """Test that client certificate endpoint requires authentication."""
-        response = client.get("/certificates/client/123")
+        response = client.get("/api/certificates/client/123")
 
         assert response.status_code in [401, 403]
 
@@ -166,7 +168,7 @@ class TestCertificateEndpoints:
         )
         session.commit()
 
-        response = client.post("/certificates/revoke/103", headers=auth_headers)
+        response = client.post("/api/certificates/revoke/103", headers=auth_headers)
 
         assert response.status_code == 200
         assert "Certificate revoked successfully" in response.json()["result"]
@@ -183,14 +185,14 @@ class TestCertificateEndpoints:
 
     def test_revoke_client_certificate_host_not_found(self, client, auth_headers):
         """Test certificate revocation when host not found."""
-        response = client.post("/certificates/revoke/999", headers=auth_headers)
+        response = client.post("/api/certificates/revoke/999", headers=auth_headers)
 
         assert response.status_code == 404
         assert "Host not found" in response.json()["detail"]
 
     def test_revoke_client_certificate_requires_auth(self, client):
         """Test that certificate revocation requires authentication."""
-        response = client.post("/certificates/revoke/123")
+        response = client.post("/api/certificates/revoke/123")
 
         assert response.status_code in [401, 403]
 
@@ -241,13 +243,13 @@ class TestCertificateEndpointsIntegration:
 
                 # 3. Get client certificate (authenticated)
                 client_response = client.get(
-                    "/certificates/client/104", headers=auth_headers
+                    "/api/certificates/client/104", headers=auth_headers
                 )
                 assert client_response.status_code == 200
 
                 # 4. Revoke certificate (authenticated)
                 revoke_response = client.post(
-                    "/certificates/revoke/104", headers=auth_headers
+                    "/api/certificates/revoke/104", headers=auth_headers
                 )
                 assert revoke_response.status_code == 200
 
@@ -257,6 +259,6 @@ class TestCertificateEndpointsError:
 
     def test_invalid_host_id_format(self, client, auth_headers):
         """Test handling of invalid host ID format."""
-        response = client.get("/certificates/client/invalid", headers=auth_headers)
+        response = client.get("/api/certificates/client/invalid", headers=auth_headers)
 
         assert response.status_code == 422

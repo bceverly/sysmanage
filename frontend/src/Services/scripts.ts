@@ -125,7 +125,7 @@ export const scriptsService = {
 
   // Hosts (for host selection)
   async getActiveHosts(): Promise<Host[]> {
-    const response = await axiosInstance.get('/hosts');
+    const response = await axiosInstance.get('/api/hosts');
     // Filter for approved hosts that are either active or currently up
     return response.data.filter((host: Host) => 
       host.approval_status === 'approved' && (host.active === true || host.status === 'up')

@@ -821,6 +821,36 @@ sysmanage/
 3. **Token Rotation**: Each successful request returns a new token in `X_Reauthorization` header
 4. **Security**: Tokens are single-use and automatically deny-listed after use
 
+### API Routing Conventions
+
+SysManage follows a consistent API routing pattern:
+
+#### Unauthenticated Endpoints (no `/api` prefix)
+These endpoints do not require JWT authentication and are available for initial setup:
+- `/login` - User authentication
+- `/refresh` - Token refresh
+- `/host/register` - Agent registration
+- `/certificates/server-fingerprint` - Server certificate fingerprint for agent setup
+- `/certificates/ca-certificate` - CA certificate for agent setup
+- `/agent/auth` - Agent authentication
+
+#### Authenticated Endpoints (`/api` prefix)
+All endpoints requiring JWT authentication are prefixed with `/api`:
+- `/api/users/*` - User management
+- `/api/hosts/*` - Host management (except registration)
+- `/api/fleet/*` - Fleet management
+- `/api/certificates/client/*` - Client certificate management
+- `/api/security/*` - Security status and configuration
+- `/api/config/*` - Configuration management
+- `/api/diagnostics/*` - System diagnostics
+- `/api/profiles/*` - User profile management
+- `/api/updates/*` - System updates
+- `/api/scripts/*` - Script management
+- `/api/tags/*` - Tag management
+- `/api/queue/*` - Message queue management
+
+This convention ensures clear separation between public and secure endpoints, making it easier for frontend developers and agent implementers to understand authentication requirements.
+
 ### API Endpoints
 
 - **Authentication**: `/login`, `/logout`
