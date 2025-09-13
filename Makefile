@@ -51,10 +51,20 @@ install-dev: $(VENV_ACTIVATE)
 	@$(PIP) install pytest pytest-cov pytest-asyncio pylint black isort bandit safety
 	@echo "Installing TypeScript/React development dependencies..."
 	@cd frontend && npm install
+	@echo "Installing ESLint security plugins..."
+	@cd frontend && npm install eslint-plugin-security eslint-plugin-no-unsanitized
+ifeq ($(OS),Windows_NT)
+	@echo "Checking for grep installation on Windows..."
+	@where grep >nul 2>nul || (echo "Installing grep via chocolatey (requires admin privileges)..." && powershell -Command "Start-Process powershell -ArgumentList '-Command choco install grep -y' -Verb RunAs -Wait" || echo "Failed to install grep - you may need to run as administrator or install chocolatey first")
+endif
+ifeq ($(OS),Windows_NT)
+	@where eslint >nul 2>nul || (echo "Installing global ESLint..." && npm install -g eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin)
+else
 	@if ! command -v eslint >/dev/null 2>&1; then \
 		echo "Installing global ESLint..."; \
 		npm install -g eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin; \
 	fi
+endif
 
 # Setup target that ensures everything is ready
 setup: install-dev
@@ -105,7 +115,7 @@ endif
 	@echo ""
 	@echo "Running Safety dependency vulnerability scan..."
 ifeq ($(OS),Windows_NT)
-	-@$(PIP) freeze | $(PYTHON) -c "import sys; import subprocess; subprocess.run([sys.executable, '-m', 'safety', 'scan', '--stdin'], input=sys.stdin.read(), text=True)"
+	-@powershell -Command "$(PIP) freeze | $(PYTHON) -m safety scan --stdin" || echo "Safety scan completed with warnings"
 else
 	@$(PIP) freeze | $(PYTHON) -m safety scan --stdin || echo "Safety scan completed with warnings"
 endif
@@ -122,6 +132,16 @@ security-frontend:
 security-secrets:
 	@echo "=== Secrets Detection ==="
 	@echo "Scanning for potential secrets and credentials..."
+ifeq ($(OS),Windows_NT)
+	@echo "Checking for common secret patterns..."
+	@powershell -Command "Get-ChildItem -Recurse -File -Exclude '*.pyc' | Where-Object { $$_.DirectoryName -notmatch '(\\.git|\\.venv|\\node_modules|\\__pycache__)' } | Select-String -Pattern '(password|secret|key|token)\s*[:=]\s*[\x27\x22][^\x27\x22\s]{8,}' -AllMatches" || echo "No obvious secrets found in patterns"
+	@echo ""
+	@echo "Checking for hardcoded API keys..."
+	@powershell -Command "Get-ChildItem -Recurse -File -Exclude '*.pyc' | Where-Object { $$_.DirectoryName -notmatch '(\\.git|\\.venv|\\node_modules|\\__pycache__)' } | Select-String -Pattern '(api_?key|access_?token|auth_?token)\s*[:=]\s*[\x27\x22][A-Za-z0-9+/=]{20,}' -AllMatches" || echo "No obvious API keys found"
+	@echo ""
+	@echo "Checking for AWS credentials..."
+	@powershell -Command "Get-ChildItem -Recurse -File -Exclude '*.pyc' | Where-Object { $$_.DirectoryName -notmatch '(\\.git|\\.venv|\\node_modules|\\__pycache__)' } | Select-String -Pattern '(AKIA[0-9A-Z]{16}|aws_secret_access_key)' -AllMatches" || echo "No AWS credentials found"
+else
 	@echo "Checking for common secret patterns..."
 	@grep -r -i --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=__pycache__ --exclude="*.pyc" -E "(password|secret|key|token)\s*[:=]\s*['\"][^'\"\s]{8,}" . || echo "No obvious secrets found in patterns"
 	@echo ""
@@ -130,6 +150,7 @@ security-secrets:
 	@echo ""
 	@echo "Checking for AWS credentials..."
 	@grep -r -i --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=__pycache__ --exclude="*.pyc" -E "(AKIA[0-9A-Z]{16}|aws_secret_access_key)" . || echo "No AWS credentials found"
+endif
 	@echo "[OK] Basic secrets detection completed"
 
 # Format Python code (helper target)
