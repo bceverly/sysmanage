@@ -8,7 +8,8 @@ import {
   IoDocumentText,
   IoEye,
   IoTrash,
-  IoTime
+  IoTime,
+  IoRefresh
 } from 'react-icons/io5';
 import Editor from '@monaco-editor/react';
 import {
@@ -132,6 +133,66 @@ const Scripts: React.FC = () => {
   // Get shells available for the selected platform
   const getShellsForPlatform = (platform: string) => {
     return allShells.filter(shell => shell.platforms.includes(platform));
+  };
+
+  // Helper function to check if host is compatible with selected script
+  const isHostCompatibleWithScript = (host: Host, script: Script) => {
+    // Check if host has script execution enabled
+    if (!host.script_execution_enabled) {
+      return false;
+    }
+
+    // Check if host platform matches script platform (case-insensitive)
+    if (script.platform && host.platform) {
+      const scriptPlatform = script.platform.toLowerCase();
+      const hostPlatform = host.platform.toLowerCase();
+      
+      // Map common platform names to normalized values
+      const normalizedHostPlatform = hostPlatform.startsWith('win') ? 'windows' : 
+                                      hostPlatform === 'darwin' ? 'darwin' :
+                                      hostPlatform.includes('bsd') ? hostPlatform :
+                                      'linux'; // Default to linux for other Unix-like systems
+      
+      if (scriptPlatform !== normalizedHostPlatform) {
+        return false;
+      }
+    }
+
+    // Check if host has the required shell enabled
+    if (host.enabled_shells) {
+      try {
+        const hostShells = JSON.parse(host.enabled_shells) as string[];
+        // Also make shell comparison case-insensitive
+        return hostShells.some(shell => shell.toLowerCase() === script.shell_type.toLowerCase());
+      } catch {
+        return false;
+      }
+    }
+
+    return false;
+  };
+
+  // Get compatible hosts for the selected script
+  const getCompatibleHosts = () => {
+    if (!savedScriptId) return [];
+    
+    const selectedScript = scripts.find(s => s.id === savedScriptId);
+    if (!selectedScript) return [];
+    
+    return hosts.filter(host => isHostCompatibleWithScript(host, selectedScript));
+  };
+
+  // Reset function to clear all selections and outputs
+  const handleReset = () => {
+    setSavedScriptId('');
+    setSelectedHost('');
+    setExecutionResult(null);
+    setCurrentExecutionId(null);
+    setIsExecuting(false);
+    // Reset script content and other fields if needed
+    setScriptContent('');
+    setScriptName('');
+    setHasUserEditedContent(false);
   };
 
   const shells = getShellsForPlatform(selectedPlatform);
@@ -387,6 +448,12 @@ const Scripts: React.FC = () => {
   };
 
   const handleExecuteScript = async () => {
+    // Prevent double execution
+    if (loading || isExecuting) {
+      console.warn('Script execution already in progress, ignoring request');
+      return;
+    }
+
     if (selectedHost === '') {
       showNotification(t('scripts.hostRequired'), 'error');
       return;
@@ -1006,14 +1073,25 @@ const Scripts: React.FC = () => {
                   <Typography variant="h6" sx={{ flexGrow: 1 }}>
                     {t('scripts.executeScript')}
                   </Typography>
-                  {isExecuting && (
-                    <Chip 
-                      label={t('scripts.executing')} 
-                      color="success" 
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {isExecuting && (
+                      <Chip 
+                        label={t('scripts.executing')} 
+                        color="success" 
+                        size="small"
+                        sx={{ animation: 'pulse 1.5s ease-in-out infinite' }}
+                      />
+                    )}
+                    <IconButton
+                      onClick={handleReset}
+                      disabled={!savedScriptId && !selectedHost}
                       size="small"
-                      sx={{ animation: 'pulse 1.5s ease-in-out infinite' }}
-                    />
-                  )}
+                      color="primary"
+                      title={t('scripts.reset')}
+                    >
+                      <IoRefresh />
+                    </IconButton>
+                  </Box>
                 </Box>
                 
                 <FormControl fullWidth margin="normal">
@@ -1024,11 +1102,13 @@ const Scripts: React.FC = () => {
                     onChange={(e) => {
                       const scriptId = e.target.value as number;
                       setSavedScriptId(scriptId);
+                      // Clear host selection when script changes
+                      setSelectedHost('');
                       if (scriptId) {
                         handleSavedScriptSelect(scriptId);
                       }
                     }}
-                    disabled={isExecuting}
+                    disabled={isExecuting || (savedScriptId !== '' && selectedHost !== '')}
                   >
                     {scripts.map((script) => (
                       <MenuItem key={script.id} value={script.id}>
@@ -1044,9 +1124,9 @@ const Scripts: React.FC = () => {
                     value={selectedHost}
                     label={t('scripts.selectHost')}
                     onChange={(e) => setSelectedHost(e.target.value as number)}
-                    disabled={isExecuting}
+                    disabled={isExecuting || !savedScriptId}
                   >
-                    {hosts.map((host) => (
+                    {getCompatibleHosts().map((host) => (
                       <MenuItem key={host.id} value={host.id}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                           <Typography>{host.fqdn}</Typography>

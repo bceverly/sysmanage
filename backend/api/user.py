@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 from fastapi.responses import Response
-from pyargon2 import hash as argon2_hash
+from argon2 import PasswordHasher
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import sessionmaker
 
@@ -17,6 +17,8 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.login_security import login_security
 from backend.api.profile import validate_and_process_image
+
+argon2_hasher = PasswordHasher()
 
 router = APIRouter()
 
@@ -216,9 +218,6 @@ async def add_user(new_user: User):
     """
     This function adds a new user to the system.
     """
-    # Get the /etc/sysmanage.yaml configuration
-    the_config = config.get_config()
-
     # Get the SQLAlchemy session
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -236,9 +235,7 @@ async def add_user(new_user: User):
             raise HTTPException(status_code=409, detail=_("User already exists"))
 
         # This is a unique user.  Proceed...
-        hashed_value = argon2_hash(
-            new_user.password, the_config["security"]["password_salt"]
-        )
+        hashed_value = argon2_hasher.hash(new_user.password)
         user = models.User(
             userid=new_user.userid,
             active=new_user.active,
@@ -267,9 +264,6 @@ async def update_user(user_id: int, user_data: User):
     This function updates an existing user by id
     """
 
-    # Get the /etc/sysmanage.yaml configuration
-    the_config = config.get_config()
-
     # Get the SQLAlchemy session
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -285,9 +279,7 @@ async def update_user(user_id: int, user_data: User):
             raise HTTPException(status_code=404, detail=_("User not found"))
 
         # Update the values
-        hashed_value = argon2_hash(
-            user_data.password, the_config["security"]["password_salt"]
-        )
+        hashed_value = argon2_hasher.hash(user_data.password)
         session.query(models.User).filter(models.User.id == user_id).update(
             {
                 models.User.active: user_data.active,

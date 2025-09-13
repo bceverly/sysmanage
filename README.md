@@ -9,9 +9,10 @@
 [![Node.js Version](https://img.shields.io/badge/node.js-20.x-green.svg)](https://nodejs.org)
 [![License](https://img.shields.io/badge/license-AGPLv3-blue.svg)](LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 [![Linting](https://img.shields.io/badge/pylint-10.00/10-brightgreen.svg)](https://github.com/PyCQA/pylint)
+[![TypeScript](https://img.shields.io/badge/eslint-0%20warnings-brightgreen.svg)]()
 [![Test Coverage](https://img.shields.io/badge/test%20coverage-49%25-yellow.svg)]()
-[![TypeScript](https://img.shields.io/badge/eslint-0%20warnings-brightgreen.svg)]())
 
 A modern, cross-platform system monitoring and management platform with real-time WebSocket communication, built with FastAPI and React.
 
@@ -198,7 +199,8 @@ xcode-select --install
 
 #### Windows
 ```powershell
-# Install Python 3.12+ from https://python.org/downloads/
+# Install Python 3.12 (RECOMMENDED) from https://python.org/downloads/
+# AVOID Python 3.13 - many packages don't have Windows binaries yet
 # Make sure to check "Add Python to PATH" during installation
 
 # Install Node.js 20.x from https://nodejs.org/
@@ -210,8 +212,10 @@ xcode-select --install
 # Install Git for Windows (includes build tools)
 # Download from https://git-scm.com/download/win
 
-# Optional: Install Windows Build Tools for native packages
-npm install --global windows-build-tools
+# Install Windows Build Tools (if needed for native packages)
+# Note: windows-build-tools package is deprecated and may not work
+# Instead, install Visual Studio Build Tools from Microsoft:
+# https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022
 ```
 
 #### FreeBSD
@@ -435,6 +439,45 @@ su - _postgresql
 psql postgres
 # (then run the same SQL commands above)
 ```
+
+**For Windows:**
+
+After installing PostgreSQL from the Windows installer, you can access the database using either:
+
+1. **SQL Shell (psql) - Recommended:**
+```cmd
+# Open "SQL Shell (psql)" from Start Menu or run from PostgreSQL's bin directory
+# Default connection parameters are usually correct (localhost:5432, postgres database, postgres user)
+# Press Enter for defaults, then enter the password you set during installation
+
+# In the PostgreSQL prompt, create the database and user
+# NOTE: Using credentials from sysmanage-dev.yaml - CHANGE FOR PRODUCTION!
+CREATE USER sysmanage WITH PASSWORD 'abc123';
+CREATE DATABASE sysmanage OWNER sysmanage;
+GRANT ALL PRIVILEGES ON DATABASE sysmanage TO sysmanage;
+
+# Grant schema permissions (required for Alembic migrations)
+\c sysmanage
+GRANT ALL ON SCHEMA public TO sysmanage;
+
+# Exit PostgreSQL
+\q
+```
+
+2. **Command Prompt (if psql is in PATH):**
+```cmd
+# Connect to PostgreSQL (replace 'postgres' with your admin user if different)
+psql -U postgres -h localhost
+
+# Then run the same SQL commands as above
+```
+
+3. **pgAdmin 4 (GUI option):**
+   - Open pgAdmin 4 (installed with PostgreSQL)
+   - Connect to your local PostgreSQL server
+   - Create database "sysmanage"
+   - Create user "sysmanage" with password "abc123"
+   - Grant all privileges on database to user
 
 **Security Notes:**
 - ⚠️ The default development configuration uses password `abc123` (from `sysmanage-dev.yaml`) - **NEVER use this in production**
@@ -897,7 +940,7 @@ docker-compose up -d
 5. **Python Package Build Errors**: If you encounter build errors when installing Python packages:
    - **Missing libpq-fe.h**: Install `libpq-dev` (Ubuntu/Debian) or `postgresql-devel` (RHEL/Fedora)
    - **httptools build errors**: Install `libuv1-dev` (Ubuntu/Debian) or `libuv-devel` (RHEL/Fedora)
-   - **Python 3.13+ compatibility**: Some packages may not yet support Python 3.13. Consider using Python 3.11 or 3.12:
+   - **Python 3.13+ compatibility**: Some packages may not yet support Python 3.13, especially on Windows. Consider using Python 3.11 or 3.12:
      ```bash
      # Ubuntu/Debian
      sudo apt install python3.11 python3.11-venv python3.11-dev
@@ -909,6 +952,8 @@ docker-compose up -d
      sudo apt install python3.12 python3.12-venv python3.12-dev
      python3.12 -m venv .venv
      ```
+     
+     **For Windows**: Download Python 3.12 from https://python.org/downloads/windows/ and reinstall. Python 3.13 has limited Windows binary support for many packages.
 
 ### Logs
 - Backend logs: Console output from uvicorn

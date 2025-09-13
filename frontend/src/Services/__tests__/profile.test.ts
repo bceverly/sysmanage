@@ -39,7 +39,7 @@ describe('Profile API Service', () => {
             const result = await getProfile();
 
             expect(result).toEqual(mockProfileData);
-            expect(axiosInstance.get).toHaveBeenCalledWith('/profile');
+            expect(axiosInstance.get).toHaveBeenCalledWith('/api/profile');
         });
 
         it('should throw error when fetch fails', async () => {
@@ -74,7 +74,7 @@ describe('Profile API Service', () => {
             const result = await updateProfile(updateData);
 
             expect(result).toEqual(mockUpdatedProfile);
-            expect(axiosInstance.put).toHaveBeenCalledWith('/profile', updateData);
+            expect(axiosInstance.put).toHaveBeenCalledWith('/api/profile', updateData);
         });
 
         it('should update profile with partial data', async () => {
@@ -100,7 +100,7 @@ describe('Profile API Service', () => {
             const result = await updateProfile(updateData);
 
             expect(result).toEqual(mockUpdatedProfile);
-            expect(axiosInstance.put).toHaveBeenCalledWith('/profile', updateData);
+            expect(axiosInstance.put).toHaveBeenCalledWith('/api/profile', updateData);
         });
 
         it('should throw error when update fails', async () => {
@@ -134,7 +134,7 @@ describe('Profile API Service', () => {
             const result = await updateProfile(updateData);
 
             expect(result).toEqual(mockUpdatedProfile);
-            expect(axiosInstance.put).toHaveBeenCalledWith('/profile', updateData);
+            expect(axiosInstance.put).toHaveBeenCalledWith('/api/profile', updateData);
         });
     });
 });

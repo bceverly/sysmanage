@@ -138,6 +138,8 @@ class TestTagEndpoints:
 
         response = client.delete(f"/api/tags/{tag_id}", headers=auth_headers)
 
+        if response.status_code != 204:
+            print(f"Error response: {response.json()}")
         assert response.status_code == 204
 
         # Verify tag is deleted
@@ -183,6 +185,8 @@ class TestTagHostAssociation:
             f"/api/hosts/{host.id}/tags/{tag.id}", headers=auth_headers
         )
 
+        if response.status_code != 201:
+            print(f"Error response: {response.json()}")
         assert response.status_code == 201
 
         # Verify association exists
@@ -396,6 +400,8 @@ class TestTagHostAssociation:
 
         response = client.get(f"/api/hosts/{host.id}/tags", headers=auth_headers)
 
+        if response.status_code != 200:
+            print(f"Error response: {response.json()}")
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 2
@@ -436,6 +442,8 @@ class TestTagHostAssociation:
 
         response = client.get(f"/api/tags/{tag.id}/hosts", headers=auth_headers)
 
+        if response.status_code != 200:
+            print(f"Error response: {response.json()}")
         assert response.status_code == 200
         data = response.json()
         assert data["id"] == tag.id

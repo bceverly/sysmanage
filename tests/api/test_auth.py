@@ -5,7 +5,9 @@ Tests /login and /refresh endpoints with various scenarios.
 
 import pytest
 from unittest.mock import patch, Mock
-from pyargon2 import hash as argon2_hash
+from argon2 import PasswordHasher
+
+argon2_hasher = PasswordHasher()
 
 from backend.persistence import models
 
@@ -18,8 +20,7 @@ class TestAuthLogin:
     ):
         """Test successful login with valid credentials."""
         # Create a test user in the database
-        salt = mock_config["security"]["password_salt"]
-        hashed_password = argon2_hash(test_user_data["password"], salt)
+        hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
             id=1,
             userid=test_user_data["userid"],
@@ -54,8 +55,7 @@ class TestAuthLogin:
     ):
         """Test login with invalid password."""
         # Create a test user in the database
-        salt = mock_config["security"]["password_salt"]
-        hashed_password = argon2_hash(test_user_data["password"], salt)
+        hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
             id=1,
             userid=test_user_data["userid"],
@@ -100,8 +100,7 @@ class TestAuthLogin:
     ):
         """Test login with inactive user account."""
         # Create an inactive test user
-        salt = mock_config["security"]["password_salt"]
-        hashed_password = argon2_hash(test_user_data["password"], salt)
+        hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
             id=1,
             userid=test_user_data["userid"],
@@ -169,8 +168,7 @@ class TestAuthLogin:
     ):
         """Test login with locked user account."""
         # Create a locked test user
-        salt = mock_config["security"]["password_salt"]
-        hashed_password = argon2_hash(test_user_data["password"], salt)
+        hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
             id=1,
             userid=test_user_data["userid"],
@@ -206,8 +204,7 @@ class TestAuthRefresh:
     def test_refresh_success(self, client, session, test_user_data, mock_config):
         """Test successful token refresh with valid refresh token."""
         # Create a test user
-        salt = mock_config["security"]["password_salt"]
-        hashed_password = argon2_hash(test_user_data["password"], salt)
+        hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
             id=1,
             userid=test_user_data["userid"],
@@ -258,8 +255,7 @@ class TestAuthRefresh:
     def test_refresh_inactive_user(self, client, session, test_user_data, mock_config):
         """Test refresh when user account is inactive."""
         # Create an inactive test user
-        salt = mock_config["security"]["password_salt"]
-        hashed_password = argon2_hash(test_user_data["password"], salt)
+        hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
             id=1,
             userid=test_user_data["userid"],
@@ -289,8 +285,7 @@ class TestAuthRefresh:
     def test_refresh_locked_user(self, client, session, test_user_data, mock_config):
         """Test refresh when user account is locked."""
         # Create a locked test user
-        salt = mock_config["security"]["password_salt"]
-        hashed_password = argon2_hash(test_user_data["password"], salt)
+        hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
             id=1,
             userid=test_user_data["userid"],

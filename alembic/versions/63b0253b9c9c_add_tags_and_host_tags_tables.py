@@ -49,7 +49,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_host_tags_tag_id'), table_name='host_tags')
     op.drop_index(op.f('ix_host_tags_host_id'), table_name='host_tags')
     op.drop_table('host_tags')
-    
+
     # Drop tags table
     op.drop_index(op.f('ix_tags_name'), table_name='tags')
     op.drop_table('tags')

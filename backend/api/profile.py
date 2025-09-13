@@ -9,15 +9,16 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
-from pyargon2 import hash as argon2_hash
+from argon2 import PasswordHasher
 from sqlalchemy.orm import sessionmaker
 from PIL import Image
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
-from backend.config import config
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.utils.password_policy import password_policy
+
+argon2_hasher = PasswordHasher()
 
 router = APIRouter()
 
@@ -157,10 +158,6 @@ async def change_password(
     if not is_valid:
         raise HTTPException(status_code=400, detail="; ".join(validation_errors))
 
-    # Get the current configuration
-    the_config = config.get_config()
-    password_salt = the_config["security"]["password_salt"]
-
     # Get the SQLAlchemy session
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -177,17 +174,16 @@ async def change_password(
         if not user:
             raise HTTPException(status_code=404, detail=_("User not found"))
 
-        # Verify current password
-        current_password_hash = argon2_hash(
-            password_data.current_password, password_salt
-        )
-        if user.hashed_password != current_password_hash:
+        # Verify current password using argon2-cffi
+        try:
+            argon2_hasher.verify(user.hashed_password, password_data.current_password)
+        except Exception as exc:
             raise HTTPException(
                 status_code=400, detail=_("Current password is incorrect")
-            )
+            ) from exc
 
         # Hash new password
-        new_password_hash = argon2_hash(password_data.new_password, password_salt)
+        new_password_hash = argon2_hasher.hash(password_data.new_password)
 
         # Update password and last access time
         user.hashed_password = new_password_hash

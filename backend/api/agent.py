@@ -71,7 +71,7 @@ async def authenticate_agent(request: Request):
     }
 
 
-@router.websocket("/agent/connect")
+@router.websocket("/api/agent/connect")
 async def agent_connect(websocket: WebSocket):
     """
     Handle secure WebSocket connections from agents with full bidirectional communication.
@@ -362,8 +362,8 @@ async def _validate_and_get_host(message_data, connection, db):
 
     # Refresh the database session to ensure we see the latest data
     logger.debug("Refreshing database session for host validation")
-    db.expunge_all()
-    db.commit()
+    db.expire_all()
+    db.flush()
 
     # If host_id is provided, validate it first
     if host_id is not None:
@@ -382,11 +382,17 @@ async def _validate_and_get_host(message_data, connection, db):
             return None, error_msg
 
         # Verify that the host_id matches the hostname (case-insensitive)
-        if host.fqdn.lower() != hostname.lower():
+        # Allow both short hostname and FQDN to match
+        hostname_lower = hostname.lower()
+        fqdn_lower = host.fqdn.lower()
+        short_name = fqdn_lower.split(".")[0]  # Extract short name from FQDN
+
+        if hostname_lower not in {fqdn_lower, short_name}:
             logger.warning(
-                "Host ID %s hostname mismatch (expected: %s, got: %s) - sending error",
+                "Host ID %s hostname mismatch (expected: %s or %s, got: %s) - sending error",
                 host_id,
                 host.fqdn,
+                short_name,
                 hostname,
             )
             error_msg = ErrorMessage(
@@ -431,8 +437,13 @@ async def _validate_and_get_host(message_data, connection, db):
 
 async def _handle_system_info_message(message, connection, db):
     """Handle system info message with error handling."""
-    logger.info("Calling handle_system_info")
+    logger.info(
+        "Calling handle_system_info - IMMEDIATE PROCESSING for connection registration"
+    )
     try:
+        # Process system_info immediately for connection registration
+        # This is critical to ensure the connection manager is updated
+        # before any outbound messages are processed
         response = await handle_system_info(db, connection, message.data)
         if response:
             await connection.send_message(response)
@@ -440,6 +451,13 @@ async def _handle_system_info_message(message, connection, db):
                 "handle_system_info response sent: %s",
                 response.get("message_type"),
             )
+
+            # If this was a successful registration, log the connection manager state
+            if response.get("message_type") == "registration_success":
+                logger.info(
+                    "Agent registered successfully - connection manager now has hostnames: %s",
+                    list(connection_manager.hostname_to_agent.keys()),
+                )
         logger.info("handle_system_info completed successfully")
     except Exception as e:
         logger.error("Error in handle_system_info: %s", e, exc_info=True)

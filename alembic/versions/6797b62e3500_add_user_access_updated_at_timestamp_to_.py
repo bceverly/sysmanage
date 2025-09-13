@@ -24,5 +24,5 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    # Remove user_access_updated_at column from host table  
+    # Remove user_access_updated_at column from host table
     op.drop_column('host', 'user_access_updated_at')

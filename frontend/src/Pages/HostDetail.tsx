@@ -870,6 +870,30 @@ const HostDetail = () => {
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                     <Typography variant="body2" color="textSecondary">
+                                        {t('hosts.lastCheckin', 'Last Check-in')}
+                                    </Typography>
+                                    <Typography variant="body1">{formatDate(host.last_access)}</Typography>
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('hosts.scriptsEnabled', 'Scripts Enabled')}
+                                    </Typography>
+                                    {host.script_execution_enabled === undefined || host.script_execution_enabled === null ? (
+                                        <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                                            Unknown
+                                        </Typography>
+                                    ) : (
+                                        <Chip 
+                                            label={host.script_execution_enabled ? t('common.yes') : t('common.no')}
+                                            color={host.script_execution_enabled ? 'success' : 'error'}
+                                            size="small"
+                                            variant="filled"
+                                            title={host.script_execution_enabled ? t('hosts.scriptsEnabledTooltip') : t('hosts.scriptsDisabledTooltip')}
+                                        />
+                                    )}
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <Typography variant="body2" color="textSecondary">
                                         {t('hosts.privileged', 'Privileged')}
                                     </Typography>
                                     {host.is_agent_privileged === undefined || host.is_agent_privileged === null ? (
@@ -886,13 +910,7 @@ const HostDetail = () => {
                                         />
                                     )}
                                 </Grid>
-                                <Grid item xs={12}>
-                                    <Typography variant="body2" color="textSecondary">
-                                        {t('hosts.lastCheckin', 'Last Check-in')}
-                                    </Typography>
-                                    <Typography variant="body1">{formatDate(host.last_access)}</Typography>
-                                </Grid>
-                                <Grid item xs={12}>
+                                <Grid item xs={12} sm={6}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hostDetail.active', 'Active')}
                                     </Typography>
@@ -901,6 +919,46 @@ const HostDetail = () => {
                                         color={host.active ? 'success' : 'default'}
                                         size="small"
                                     />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('hosts.shellsAllowed', 'Shells Allowed')}
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                                        {/* Enabled Shells */}
+                                        {host.enabled_shells ? (() => {
+                                            try {
+                                                const shells = JSON.parse(host.enabled_shells);
+                                                if (shells && shells.length > 0) {
+                                                    return shells.map((shell: string) => (
+                                                        <Chip
+                                                            key={shell}
+                                                            label={shell}
+                                                            color="success"
+                                                            size="small"
+                                                            variant="filled"
+                                                        />
+                                                    ));
+                                                } else {
+                                                    return (
+                                                        <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                                                            None
+                                                        </Typography>
+                                                    );
+                                                }
+                                            } catch {
+                                                return (
+                                                    <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                                                        None
+                                                    </Typography>
+                                                );
+                                            }
+                                        })() : (
+                                            <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                                                None
+                                            </Typography>
+                                        )}
+                                    </Box>
                                 </Grid>
                             </Grid>
                         </CardContent>

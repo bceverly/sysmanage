@@ -18,11 +18,26 @@ from backend.i18n import _
 # Logger for debugging
 debug_logger = logging.getLogger("debug_logger")
 debug_logger.setLevel(logging.DEBUG)
-file_handler = logging.FileHandler("logs/backend.log")
-file_handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-file_handler.setFormatter(formatter)
-debug_logger.addHandler(file_handler)
+try:
+    import os
+
+    os.makedirs("logs", exist_ok=True)
+    file_handler = logging.FileHandler("logs/backend.log", encoding="utf-8")
+    file_handler.setLevel(logging.DEBUG)
+    from backend.utils.logging_formatter import UTCTimestampFormatter
+
+    formatter = UTCTimestampFormatter("%(levelname)s: %(name)s: %(message)s")
+    file_handler.setFormatter(formatter)
+    debug_logger.addHandler(file_handler)
+except (PermissionError, OSError) as e:
+    # Fall back to console logging if file logging fails
+    from backend.utils.logging_formatter import UTCTimestampFormatter
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG)
+    formatter = UTCTimestampFormatter("%(levelname)s: %(name)s: %(message)s")
+    console_handler.setFormatter(formatter)
+    debug_logger.addHandler(console_handler)
 
 # Cache for storing update results
 update_results_cache = {}

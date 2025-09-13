@@ -11,7 +11,9 @@ import {
   Box,
   Stack,
   IconButton,
-  Chip
+  Chip,
+  Tabs,
+  Tab
 } from '@mui/material';
 import { 
   Add as AddIcon, 
@@ -43,6 +45,17 @@ interface TagWithHosts extends Tag {
   }>;
 }
 
+interface QueueMessage {
+  id: string;
+  type: string;
+  direction: string;
+  timestamp: string;
+  created_at: string;
+  host_id: number | null;
+  priority: string;
+  data: Record<string, unknown>;
+}
+
 const Settings: React.FC = () => {
   const { t } = useTranslation();
   const [tags, setTags] = useState<Tag[]>([]);
@@ -62,6 +75,16 @@ const Settings: React.FC = () => {
   // View hosts dialog state
   const [viewHostsDialogOpen, setViewHostsDialogOpen] = useState(false);
   const [viewingTag, setViewingTag] = useState<TagWithHosts | null>(null);
+  
+  // Tab state
+  const [activeTab, setActiveTab] = useState(0);
+  
+  // Queue management state
+  const [queueMessages, setQueueMessages] = useState<QueueMessage[]>([]);
+  const [selectedMessages, setSelectedMessages] = useState<GridRowSelectionModel>([]);
+  const [queueLoading, setQueueLoading] = useState(false);
+  const [messageDetailOpen, setMessageDetailOpen] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState<QueueMessage | null>(null);
 
   const { pageSize, pageSizeOptions } = useTablePageSize({
     reservedHeight: 350,
@@ -243,6 +266,85 @@ const Settings: React.FC = () => {
     setEditDialogOpen(true);
   };
 
+  // Tab change handler
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+    // Load queue messages when switching to queue tab
+    if (newValue === 1) {
+      loadQueueMessages();
+    }
+  };
+
+  // Load queue messages from API
+  const loadQueueMessages = useCallback(async () => {
+    setQueueLoading(true);
+    try {
+      const response = await window.fetch('/api/queue/failed', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setQueueMessages(data);
+      } else {
+        console.error('Failed to fetch queue messages');
+      }
+    } catch (error) {
+      console.error('Error fetching queue messages:', error);
+    } finally {
+      setQueueLoading(false);
+    }
+  }, []);
+
+  // Handle delete selected messages
+  const handleDeleteMessages = async () => {
+    if (selectedMessages.length === 0) return;
+    
+    try {
+      const response = await window.fetch('/api/queue/failed', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
+        },
+        body: JSON.stringify(selectedMessages),
+      });
+      
+      if (response.ok) {
+        await loadQueueMessages();
+        setSelectedMessages([]);
+      } else {
+        const error = await response.json();
+        console.error('Failed to delete messages:', error.detail);
+      }
+    } catch (error) {
+      console.error('Error deleting messages:', error);
+    }
+  };
+
+  // Handle view message details
+  const handleViewMessage = async (messageId: string) => {
+    try {
+      const response = await window.fetch(`/api/queue/failed/${messageId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedMessage(data);
+        setMessageDetailOpen(true);
+      } else {
+        console.error('Failed to fetch message details');
+      }
+    } catch (error) {
+      console.error('Error fetching message details:', error);
+    }
+  };
+
   // DataGrid columns
   const columns: GridColDef[] = [
     { field: 'name', headerName: t('tags.name', 'Name'), width: 200 },
@@ -280,12 +382,44 @@ const Settings: React.FC = () => {
     },
   ];
 
-  return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
-        {t('nav.settings', 'Settings')}
-      </Typography>
+  // Queue Messages DataGrid columns
+  const queueColumns: GridColDef[] = [
+    { field: 'type', headerName: t('queues.messageType', 'Message Type'), width: 150 },
+    { field: 'direction', headerName: t('queues.direction', 'Direction'), width: 120 },
+    {
+      field: 'timestamp',
+      headerName: t('queues.expired', 'Expired At'),
+      width: 180,
+      renderCell: (params) => params.value ? new Date(params.value).toLocaleString() : '-'
+    },
+    {
+      field: 'created_at',
+      headerName: t('queues.created', 'Created At'),
+      width: 180,
+      renderCell: (params) => params.value ? new Date(params.value).toLocaleString() : '-'
+    },
+    { field: 'host_id', headerName: t('queues.hostId', 'Host ID'), width: 100 },
+    { field: 'priority', headerName: t('queues.priority', 'Priority'), width: 100 },
+    {
+      field: 'actions',
+      headerName: t('common.actions', 'Actions'),
+      width: 100,
+      sortable: false,
+      renderCell: (params) => (
+        <IconButton
+          size="small"
+          onClick={() => handleViewMessage(params.row.id)}
+          title={t('queues.viewDetails', 'View Details')}
+        >
+          <VisibilityIcon sx={{ color: 'primary.main' }} />
+        </IconButton>
+      ),
+    },
+  ];
 
+  // Render Tags tab content
+  const renderTagsTab = () => (
+    <Box>
       <Typography variant="h5" sx={{ mb: 2 }}>
         {t('tags.title', 'Tags')}
       </Typography>
@@ -336,6 +470,71 @@ const Settings: React.FC = () => {
           {t('common.delete', 'Delete')} ({selectedTags.length})
         </Button>
       </Stack>
+    </Box>
+  );
+
+  // Render Queues tab content
+  const renderQueuesTab = () => (
+    <Box>
+      <Typography variant="h5" sx={{ mb: 2 }}>
+        {t('queues.title', 'Queue Management')}
+      </Typography>
+      
+      <Typography variant="body1" sx={{ mb: 2 }}>
+        {t('queues.description', 'View and manage expired/failed messages from the message queue.')}
+      </Typography>
+
+      {/* Data Grid */}
+      <div style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px`, width: '100%' }}>
+        <DataGrid
+          rows={queueMessages}
+          columns={queueColumns}
+          loading={queueLoading}
+          checkboxSelection
+          onRowSelectionModelChange={setSelectedMessages}
+          rowSelectionModel={selectedMessages}
+          initialState={{
+            pagination: {
+              paginationModel: { page: 0, pageSize: pageSize },
+            },
+          }}
+          pageSizeOptions={pageSizeOptions}
+        />
+      </div>
+
+      {/* Action Buttons */}
+      <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+        <Button
+          variant="outlined"
+          startIcon={<DeleteIcon />}
+          onClick={handleDeleteMessages}
+          disabled={selectedMessages.length === 0}
+        >
+          {t('common.delete', 'Delete')} ({selectedMessages.length})
+        </Button>
+      </Stack>
+    </Box>
+  );
+
+  return (
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h4" sx={{ mb: 3 }}>
+        {t('nav.settings', 'Settings')}
+      </Typography>
+
+      {/* Tabs */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={activeTab} onChange={handleTabChange} aria-label="settings tabs">
+          <Tab label={t('tags.title', 'Tags')} />
+          <Tab label={t('queues.title', 'Queues')} />
+        </Tabs>
+      </Box>
+
+      {/* Tab content */}
+      <Box sx={{ mt: 3 }}>
+        {activeTab === 0 && renderTagsTab()}
+        {activeTab === 1 && renderQueuesTab()}
+      </Box>
 
       {/* Add Tag Dialog */}
       <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} maxWidth="sm" fullWidth>
@@ -423,6 +622,61 @@ const Settings: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setViewHostsDialogOpen(false)}>{t('common.close', 'Close')}</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Message Details Dialog */}
+      <Dialog open={messageDetailOpen} onClose={() => setMessageDetailOpen(false)} maxWidth="lg" fullWidth>
+        <DialogTitle>
+          {t('queues.messageDetails', 'Message Details')}
+        </DialogTitle>
+        <DialogContent>
+          {selectedMessage && (
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                <strong>{t('queues.messageId', 'Message ID')}:</strong> {selectedMessage.id}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                <strong>{t('queues.messageType', 'Type')}:</strong> {selectedMessage.type}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                <strong>{t('queues.direction', 'Direction')}:</strong> {selectedMessage.direction}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                <strong>{t('queues.priority', 'Priority')}:</strong> {selectedMessage.priority}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                <strong>{t('queues.hostId', 'Host ID')}:</strong> {selectedMessage.host_id || 'N/A'}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                <strong>{t('queues.created', 'Created At')}:</strong> {selectedMessage.created_at ? new Date(selectedMessage.created_at).toLocaleString() : 'N/A'}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                <strong>{t('queues.expired', 'Expired At')}:</strong> {selectedMessage.timestamp ? new Date(selectedMessage.timestamp).toLocaleString() : 'N/A'}
+              </Typography>
+              
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                {t('queues.messageContent', 'Message Content')}:
+              </Typography>
+              <Box 
+                component="pre" 
+                sx={{ 
+                  backgroundColor: '#2d2d2d', 
+                  color: '#ffffff',
+                  p: 2, 
+                  borderRadius: 1, 
+                  overflow: 'auto',
+                  fontSize: '0.875rem',
+                  fontFamily: 'monospace'
+                }}
+              >
+                {JSON.stringify(selectedMessage.data, null, 2)}
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setMessageDetailOpen(false)}>{t('common.close', 'Close')}</Button>
         </DialogActions>
       </Dialog>
     </Box>

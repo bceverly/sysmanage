@@ -40,6 +40,9 @@ export interface Host {
   active: boolean;
   approval_status: string;
   last_access: string;
+  platform?: string;
+  script_execution_enabled?: boolean;
+  enabled_shells?: string;
 }
 
 export interface ExecuteScriptRequest {

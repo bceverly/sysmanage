@@ -122,6 +122,26 @@ const Hosts = () => {
             }
         },
         { 
+            field: 'script_execution_enabled', 
+            headerName: t('hosts.scriptsEnabled'), 
+            width: 120,
+            renderCell: (params) => {
+                const scriptsEnabled = params.value;
+                if (scriptsEnabled === undefined || scriptsEnabled === null) {
+                    return <span style={{ color: '#666', fontStyle: 'italic' }}>Unknown</span>;
+                }
+                return (
+                    <Chip 
+                        label={scriptsEnabled ? t('common.yes') : t('common.no')}
+                        color={scriptsEnabled ? 'success' : 'error'}
+                        size="small"
+                        variant="filled"
+                        title={scriptsEnabled ? t('hosts.scriptsEnabledTooltip') : t('hosts.scriptsDisabledTooltip')}
+                    />
+                );
+            }
+        },
+        { 
             field: 'last_access', 
             headerName: t('hosts.lastCheckin'), 
             width: 200,

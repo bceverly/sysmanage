@@ -87,6 +87,10 @@ type SysManageHost = {
     diagnostics_request_status?: string;
     // Agent privilege status
     is_agent_privileged?: boolean;
+    // Script execution status
+    script_execution_enabled?: boolean;
+    // Enabled shells for script execution
+    enabled_shells?: string;
     // Tags
     tags?: Array<{id: number, name: string, description?: string}>;
 }

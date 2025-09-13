@@ -112,7 +112,42 @@ async def get_host(host_id: int):
     """
     This function retrieves a single host by its id
     """
-    return get_host_by_id(host_id)
+    host = get_host_by_id(host_id)
+
+    # Get tags using the dynamic relationship
+    host_tags = host.tags.all()
+
+    # Return as dictionary with all fields
+    return {
+        "id": host.id,
+        "active": host.active,
+        "fqdn": host.fqdn,
+        "ipv4": host.ipv4,
+        "ipv6": host.ipv6,
+        "last_access": host.last_access.isoformat() if host.last_access else None,
+        "status": host.status,
+        "approval_status": host.approval_status,
+        "platform": host.platform,
+        "platform_release": host.platform_release,
+        "platform_version": host.platform_version,
+        "machine_architecture": host.machine_architecture,
+        "processor": host.processor,
+        "cpu_vendor": host.cpu_vendor,
+        "cpu_model": host.cpu_model,
+        "cpu_cores": host.cpu_cores,
+        "cpu_threads": host.cpu_threads,
+        "cpu_frequency_mhz": host.cpu_frequency_mhz,
+        "memory_total_mb": host.memory_total_mb,
+        "reboot_required": host.reboot_required,
+        "is_agent_privileged": host.is_agent_privileged,
+        "script_execution_enabled": getattr(host, "script_execution_enabled", False),
+        "enabled_shells": getattr(host, "enabled_shells", None),
+        # Include tags
+        "tags": [
+            {"id": tag.id, "name": tag.name, "description": tag.description}
+            for tag in host_tags
+        ],
+    }
 
 
 @router.get("/host/by_fqdn/{fqdn}", dependencies=[Depends(JWTBearer())])
@@ -120,7 +155,42 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
     """
     This function retrieves a single host by fully qualified domain name
     """
-    return get_host_by_fqdn(fqdn)
+    host = get_host_by_fqdn(fqdn)
+
+    # Get tags using the dynamic relationship
+    host_tags = host.tags.all()
+
+    # Return as dictionary with all fields
+    return {
+        "id": host.id,
+        "active": host.active,
+        "fqdn": host.fqdn,
+        "ipv4": host.ipv4,
+        "ipv6": host.ipv6,
+        "last_access": host.last_access.isoformat() if host.last_access else None,
+        "status": host.status,
+        "approval_status": host.approval_status,
+        "platform": host.platform,
+        "platform_release": host.platform_release,
+        "platform_version": host.platform_version,
+        "machine_architecture": host.machine_architecture,
+        "processor": host.processor,
+        "cpu_vendor": host.cpu_vendor,
+        "cpu_model": host.cpu_model,
+        "cpu_cores": host.cpu_cores,
+        "cpu_threads": host.cpu_threads,
+        "cpu_frequency_mhz": host.cpu_frequency_mhz,
+        "memory_total_mb": host.memory_total_mb,
+        "reboot_required": host.reboot_required,
+        "is_agent_privileged": host.is_agent_privileged,
+        "script_execution_enabled": getattr(host, "script_execution_enabled", False),
+        "enabled_shells": getattr(host, "enabled_shells", None),
+        # Include tags
+        "tags": [
+            {"id": tag.id, "name": tag.name, "description": tag.description}
+            for tag in host_tags
+        ],
+    }
 
 
 @router.get("/hosts", dependencies=[Depends(JWTBearer())])
@@ -167,6 +237,10 @@ async def get_all_hosts():
                 "memory_total_mb": host.memory_total_mb,
                 "reboot_required": host.reboot_required,
                 "is_agent_privileged": host.is_agent_privileged,
+                "script_execution_enabled": getattr(
+                    host, "script_execution_enabled", False
+                ),
+                "enabled_shells": getattr(host, "enabled_shells", None),
                 # Include tags
                 "tags": [
                     {"id": tag.id, "name": tag.name, "description": tag.description}

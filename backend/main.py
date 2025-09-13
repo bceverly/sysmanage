@@ -7,7 +7,9 @@ routers for the system and then launches the application.
 
 import asyncio
 import logging
+import os
 import socket
+import sys
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -30,6 +32,7 @@ from backend.api import (
     scripts,
     security,
     tag,
+    queue,
 )
 from backend.config import config
 from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
@@ -118,12 +121,25 @@ def get_cors_origins(web_ui_port, backend_api_port):
 app_config = config.get_config()
 
 # Configure logging with UTC timestamp formatter
+# Ensure logs directory exists
+os.makedirs("logs", exist_ok=True)
+
+# Configure logging with error handling for file permissions
+handlers = [logging.StreamHandler()]
+
+try:
+    # Try to add file handler, but fallback gracefully if permission denied
+    file_handler = logging.FileHandler("logs/backend.log", mode="a", encoding="utf-8")
+    handlers.append(file_handler)
+except PermissionError:
+    print(
+        "WARNING: Cannot write to logs/backend.log due to permissions. Logging to console only.",
+        file=sys.stderr,
+    )
+
 logging.basicConfig(
     level=logging.INFO,
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler("logs/backend.log", mode="a"),
-    ],
+    handlers=handlers,
 )
 
 # Apply UTC timestamp formatter to all handlers
@@ -310,12 +326,13 @@ app.include_router(auth.router)
 app.include_router(user.router)
 app.include_router(fleet.router)
 app.include_router(config_management.router)
-app.include_router(profile.router)
+app.include_router(profile.router, prefix="/api", tags=["profile"])
 app.include_router(updates.router, prefix="/api/updates", tags=["updates"])
 app.include_router(scripts.router, prefix="/api/scripts", tags=["scripts"])
 app.include_router(diagnostics.router, tags=["diagnostics"])
 app.include_router(security.router)
 app.include_router(tag.router, prefix="/api", tags=["tags"])
+app.include_router(queue.router, prefix="/api/queue", tags=["queue"])
 
 
 @app.get("/")
@@ -347,11 +364,25 @@ if __name__ == "__main__":
         if app_config["api"].get("chainFile"):
             ssl_config["ssl_ca_certs"] = app_config["api"]["chainFile"]
 
+    # Configure uvicorn logging to match our format
+    log_config = uvicorn.config.LOGGING_CONFIG
+
+    # Update both formatters to use our custom UTC timestamp format
+    log_config["formatters"]["access"] = {
+        "()": "backend.utils.logging_formatter.UTCTimestampFormatter",
+        "fmt": "%(levelname)s: %(name)s: %(message)s",
+    }
+    log_config["formatters"]["default"] = {
+        "()": "backend.utils.logging_formatter.UTCTimestampFormatter",
+        "fmt": "%(levelname)s: %(name)s: %(message)s",
+    }
+
     uvicorn.run(
         app,
         host=app_config["api"]["host"],
         port=app_config["api"]["port"],
         ws_ping_interval=60.0,  # Increased from default 20s to match agent config
         ws_ping_timeout=60.0,  # Increased to handle large message transmissions
+        log_config=log_config,
         **ssl_config,
     )

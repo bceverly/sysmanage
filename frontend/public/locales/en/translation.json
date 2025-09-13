@@ -5,6 +5,7 @@
     "users": "Users",
     "updates": "Updates",
     "scripts": "Scripts",
+    "settings": "Settings",
     "logout": "Logout"
   },
   "login": {
@@ -63,6 +64,9 @@
     "privileged": "Privileged",
     "runningPrivileged": "Agent is running with elevated privileges",
     "runningUnprivileged": "Agent is running without elevated privileges",
+    "scriptsEnabled": "Scripts Enabled",
+    "scriptsEnabledTooltip": "Script execution is enabled on this host",
+    "scriptsDisabledTooltip": "Script execution is disabled on this host",
     "noRows": "No rows",
     "noResults": "No results found",
     "invalidDate": "Invalid date",
@@ -597,5 +601,20 @@
     "viewHosts": "View Hosts",
     "hostsAssociatedWith": "Hosts associated with",
     "noHostsAssociated": "No hosts are associated with this tag."
+  },
+  "queues": {
+    "title": "Queue Management",
+    "description": "View and manage expired/failed messages from the message queue.",
+    "messageType": "Message Type",
+    "direction": "Direction",
+    "expired": "Expired At",
+    "created": "Created At",
+    "hostId": "Host ID",
+    "priority": "Priority",
+    "viewDetails": "View Details",
+    "messageDetails": "Message Details",
+    "messageId": "Message ID",
+    "messageContent": "Message Content",
+    "placeholder": "Queue management interface will be implemented here."
   }
 }

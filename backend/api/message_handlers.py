@@ -22,16 +22,20 @@ LOG_FILE = "logs/backend.log"
 try:
     # Create logs directory if it doesn't exist
     os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
-    file_handler = logging.FileHandler(LOG_FILE)
+    file_handler = logging.FileHandler(LOG_FILE, encoding="utf-8")
     file_handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    from backend.utils.logging_formatter import UTCTimestampFormatter
+
+    formatter = UTCTimestampFormatter("%(levelname)s: %(name)s: %(message)s")
     file_handler.setFormatter(formatter)
     debug_logger.addHandler(file_handler)
 except (OSError, PermissionError):
     # If we can't create the log file, just use console logging
+    from backend.utils.logging_formatter import UTCTimestampFormatter
+
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    formatter = UTCTimestampFormatter("%(levelname)s: %(name)s: %(message)s")
     console_handler.setFormatter(formatter)
     debug_logger.addHandler(console_handler)
 
@@ -72,6 +76,25 @@ async def handle_system_info(db: Session, connection, message_data: dict):
                 "status": "up",
                 "platform": platform,
             }
+
+            # Update privileged status if provided
+            is_privileged = message_data.get("is_privileged")
+            if is_privileged is not None:
+                update_values["is_agent_privileged"] = is_privileged
+
+            # Update script execution status if provided
+            script_execution_enabled = message_data.get("script_execution_enabled")
+            if script_execution_enabled is not None:
+                update_values["script_execution_enabled"] = script_execution_enabled
+
+            # Update enabled shells if provided
+            enabled_shells = message_data.get("enabled_shells")
+            if enabled_shells is not None:
+                import json
+
+                update_values["enabled_shells"] = (
+                    json.dumps(enabled_shells) if enabled_shells else None
+                )
             if (
                 not hasattr(connection, "is_mock_connection")
                 or not connection.is_mock_connection
@@ -81,6 +104,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):
             stmt = update(Host).where(Host.id == host.id).values(**update_values)
             db.execute(stmt)
             db.commit()
+            db.flush()  # Ensure changes are visible immediately
 
             return {
                 "message_type": "registration_success",
@@ -137,6 +161,20 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                 if is_privileged is not None:
                     host.is_agent_privileged = is_privileged
 
+                # Update script execution status if provided in heartbeat
+                script_execution_enabled = message_data.get("script_execution_enabled")
+                if script_execution_enabled is not None:
+                    host.script_execution_enabled = script_execution_enabled
+
+                # Update enabled shells if provided in heartbeat
+                enabled_shells = message_data.get("enabled_shells")
+                if enabled_shells is not None:
+                    import json
+
+                    host.enabled_shells = (
+                        json.dumps(enabled_shells) if enabled_shells else None
+                    )
+
                 # Commit changes
                 db.commit()
                 result_rowcount = 1
@@ -149,6 +187,15 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                 if has_hostname and has_ipv4 and has_ipv6:
                     # Create new host
                     is_privileged = message_data.get("is_privileged", False)
+                    script_execution_enabled = message_data.get(
+                        "script_execution_enabled", False
+                    )
+                    enabled_shells = message_data.get("enabled_shells")
+                    import json
+
+                    enabled_shells_json = (
+                        json.dumps(enabled_shells) if enabled_shells else None
+                    )
                     # Only set last_access for actual heartbeat/checkin messages, not queued data
                     last_access_value = None
                     if (
@@ -166,6 +213,8 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                         approval_status="pending",
                         last_access=last_access_value,
                         is_agent_privileged=is_privileged,
+                        script_execution_enabled=script_execution_enabled,
+                        enabled_shells=enabled_shells_json,
                     )
                     db.add(host)
                     db.commit()
@@ -226,6 +275,23 @@ async def handle_command_result(connection, message_data: dict):
         message_data,
     )
 
+    # Check if this is a script execution result
+    if "execution_id" in message_data:
+        debug_logger.info("Detected script execution result, routing to script handler")
+        # Import here to avoid circular imports
+        from backend.api.data_handlers import handle_script_execution_result
+        from backend.persistence.db import get_db
+
+        # Get database session and route to script handler
+        db_session = next(get_db())
+        try:
+            return await handle_script_execution_result(
+                db_session, connection, message_data
+            )
+        finally:
+            db_session.close()
+
+    # Regular command result - just acknowledge
     return {
         "message_type": "command_result_ack",
         "timestamp": datetime.now(timezone.utc).isoformat(),

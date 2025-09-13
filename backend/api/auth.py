@@ -6,7 +6,7 @@ server.
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, HTTPException, Request, Response
-from pyargon2 import hash as argon2_hash
+from argon2 import PasswordHasher
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import sessionmaker
 
@@ -15,6 +15,8 @@ from backend.config import config
 from backend.persistence import db, models
 from backend.i18n import _
 from backend.security.login_security import login_security
+
+argon2_hasher = PasswordHasher()
 
 router = APIRouter()
 
@@ -100,11 +102,6 @@ async def login(login_data: UserLogin, request: Request, response: Response):
 
     # Check if this is a valid user
     with session_local() as session:
-        # Hash the password passed in
-        hashed_value = argon2_hash(
-            login_data.password, the_config["security"]["password_salt"]
-        )
-
         # Query for the specific user
         user = (
             session.query(models.User)
@@ -123,8 +120,9 @@ async def login(login_data: UserLogin, request: Request, response: Response):
                     detail=_("Account is locked due to too many failed login attempts"),
                 )
 
-            # Verify password
-            if user.hashed_password == hashed_value:
+            # Verify password using argon2-cffi
+            try:
+                argon2_hasher.verify(user.hashed_password, login_data.password)
                 success = True
 
                 # Record successful login and reset failed attempts
@@ -162,6 +160,10 @@ async def login(login_data: UserLogin, request: Request, response: Response):
 
                 # Return success
                 return {"Authorization": auth_token}
+            except Exception:
+                # Wrong password - record failed attempt and potentially lock account
+                pass
+
             # Wrong password - record failed attempt and potentially lock account
             login_security.record_failed_login(
                 str(login_data.userid), client_ip, user_agent

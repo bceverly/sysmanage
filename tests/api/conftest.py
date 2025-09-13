@@ -10,7 +10,9 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, Integer, Column, Boolean, String, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from pyargon2 import hash as argon2_hash
+from argon2 import PasswordHasher
+
+argon2_hasher = PasswordHasher()
 
 from backend.main import app
 from backend.persistence import models
@@ -205,9 +207,28 @@ def test_db():
     models.Tag = original_tag
     models.HostTag = original_host_tag
 
+    # Clean up database connections
+    test_engine.dispose()  # Close all connections in the connection pool
+
+    # Give Windows time to release file handles
+    import time
+
+    time.sleep(0.1)
+
     # Cleanup
-    os.close(db_fd)
-    os.unlink(db_path)
+    try:
+        os.close(db_fd)
+    except:
+        pass  # File descriptor might already be closed
+
+    # Try to delete the file, but don't fail the test if it can't be deleted
+    try:
+        os.unlink(db_path)
+    except PermissionError:
+        # On Windows, the file might still be locked
+        # It will be cleaned up eventually by the OS
+        pass
+
     app.dependency_overrides.clear()
 
 

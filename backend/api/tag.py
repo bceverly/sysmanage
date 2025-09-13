@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import get_current_user
 from backend.persistence.db import get_db
-from backend.persistence.models import Tag, Host, HostTag
+from backend.persistence.models import Tag, HostTag
 from backend.i18n import _
 
 router = APIRouter()
@@ -234,7 +234,16 @@ async def delete_tag(
                 status_code=status.HTTP_404_NOT_FOUND, detail=_("Tag not found")
             )
 
-        db.delete(tag)
+        # Use SQL directly to avoid ORM relationship issues
+        from sqlalchemy import text
+
+        # Delete associated host_tags entries first
+        db.execute(
+            text("DELETE FROM host_tags WHERE tag_id = :tag_id"), {"tag_id": tag_id}
+        )
+
+        # Now delete the tag
+        db.execute(text("DELETE FROM tags WHERE id = :tag_id"), {"tag_id": tag_id})
         db.commit()
     except HTTPException:
         raise
@@ -254,34 +263,52 @@ async def get_tag_hosts(
 ):
     """Get all hosts associated with a specific tag"""
     try:
-        # Find the tag with hosts
-        tag = db.query(Tag).filter(Tag.id == tag_id).first()
-        if not tag:
+        from sqlalchemy import text
+
+        # Find the tag using raw SQL
+        tag_result = db.execute(
+            text(
+                "SELECT id, name, description, created_at, updated_at FROM tags WHERE id = :tag_id"
+            ),
+            {"tag_id": tag_id},
+        ).first()
+        if not tag_result:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=_("Tag not found")
             )
 
-        # Get associated hosts
-        hosts = tag.hosts.all()
+        # Get associated hosts using raw SQL to avoid ORM issues
+        host_results = db.execute(
+            text(
+                """
+            SELECT h.id, h.fqdn, h.ipv4, h.ipv6, h.active, h.status
+            FROM host h
+            JOIN host_tags ht ON h.id = ht.host_id
+            WHERE ht.tag_id = :tag_id
+        """
+            ),
+            {"tag_id": tag_id},
+        ).fetchall()
+
         host_list = []
-        for host in hosts:
+        for host_row in host_results:
             host_list.append(
                 {
-                    "id": host.id,
-                    "fqdn": host.fqdn,
-                    "ipv4": host.ipv4,
-                    "ipv6": host.ipv6,
-                    "active": host.active,
-                    "status": host.status,
+                    "id": host_row.id,
+                    "fqdn": host_row.fqdn,
+                    "ipv4": host_row.ipv4,
+                    "ipv6": host_row.ipv6,
+                    "active": host_row.active,
+                    "status": host_row.status,
                 }
             )
 
         return TagWithHostsResponse(
-            id=tag.id,
-            name=tag.name,
-            description=tag.description,
-            created_at=tag.created_at,
-            updated_at=tag.updated_at,
+            id=tag_result.id,
+            name=tag_result.name,
+            description=tag_result.description,
+            created_at=tag_result.created_at,
+            updated_at=tag_result.updated_at,
             hosts=host_list,
         )
     except HTTPException:
@@ -302,26 +329,33 @@ async def add_tag_to_host(
 ):
     """Add a tag to a host"""
     try:
-        # Verify host exists
-        host = db.query(Host).filter(Host.id == host_id).first()
-        if not host:
+        from sqlalchemy import text
+
+        # Verify host exists using raw SQL to avoid ORM issues
+        host_result = db.execute(
+            text("SELECT id FROM host WHERE id = :host_id"), {"host_id": host_id}
+        ).first()
+        if not host_result:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=_("Host not found")
             )
 
-        # Verify tag exists
-        tag = db.query(Tag).filter(Tag.id == tag_id).first()
-        if not tag:
+        # Verify tag exists using raw SQL
+        tag_result = db.execute(
+            text("SELECT id FROM tags WHERE id = :tag_id"), {"tag_id": tag_id}
+        ).first()
+        if not tag_result:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=_("Tag not found")
             )
 
-        # Check if association already exists
-        existing = (
-            db.query(HostTag)
-            .filter(and_(HostTag.host_id == host_id, HostTag.tag_id == tag_id))
-            .first()
-        )
+        # Check if association already exists using raw SQL
+        existing = db.execute(
+            text(
+                "SELECT 1 FROM host_tags WHERE host_id = :host_id AND tag_id = :tag_id"
+            ),
+            {"host_id": host_id, "tag_id": tag_id},
+        ).first()
         if existing:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -388,32 +422,49 @@ async def get_host_tags(
 ):
     """Get all tags for a specific host"""
     try:
-        # Verify host exists
-        host = db.query(Host).filter(Host.id == host_id).first()
-        if not host:
+        from sqlalchemy import text
+
+        # Verify host exists using raw SQL
+        host_result = db.execute(
+            text("SELECT id FROM host WHERE id = :host_id"), {"host_id": host_id}
+        ).first()
+        if not host_result:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=_("Host not found")
             )
 
-        # Get tags for this host
-        tags = host.tags.all()
+        # Get tags for this host using raw SQL to avoid ORM issues
+        tag_results = db.execute(
+            text(
+                """
+            SELECT t.id, t.name, t.description, t.created_at, t.updated_at
+            FROM tags t
+            JOIN host_tags ht ON t.id = ht.tag_id
+            WHERE ht.host_id = :host_id
+        """
+            ),
+            {"host_id": host_id},
+        ).fetchall()
+
         tag_responses = []
-        for tag in tags:
-            # Get host count safely
+        for tag_row in tag_results:
+            # Get host count for this tag using raw SQL
             try:
-                host_count = (
-                    tag.hosts.count() if hasattr(tag, "hosts") and tag.hosts else 0
-                )
+                host_count_result = db.execute(
+                    text("SELECT COUNT(*) FROM host_tags WHERE tag_id = :tag_id"),
+                    {"tag_id": tag_row.id},
+                ).scalar()
+                host_count = host_count_result or 0
             except Exception:
                 host_count = 0
 
             tag_responses.append(
                 TagResponse(
-                    id=tag.id,
-                    name=tag.name,
-                    description=tag.description,
-                    created_at=tag.created_at,
-                    updated_at=tag.updated_at,
+                    id=tag_row.id,
+                    name=tag_row.name,
+                    description=tag_row.description,
+                    created_at=tag_row.created_at,
+                    updated_at=tag_row.updated_at,
                     host_count=host_count,
                 )
             )

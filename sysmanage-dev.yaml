@@ -65,4 +65,13 @@ logging:
   # file: "/var/log/sysmanage.log"
   
   # Log format - customize the log message appearance
-  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  format: "[%(asctime)s UTC] %(name)s - %(levelname)s - %(message)s"
+
+message_queue:
+  # Message expiration timeout in minutes (default: 60)
+  # Messages older than this will be marked as expired and no longer processed
+  expiration_timeout_minutes: 60
+  
+  # Cleanup interval in minutes (default: 30) 
+  # How often to check for and clean up expired messages
+  cleanup_interval_minutes: 30

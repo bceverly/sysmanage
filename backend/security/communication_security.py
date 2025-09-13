@@ -27,6 +27,7 @@ class WebSocketSecurityManager:
         # In-memory store for connection tokens (in production, use Redis)
         self.active_connections: Dict[str, Dict[str, Any]] = {}
         self.connection_attempts: Dict[str, list] = {}
+        self._cleanup_expired_connections()
 
     def generate_connection_token(self, agent_hostname: str, client_ip: str) -> str:
         """
@@ -120,8 +121,10 @@ class WebSocketSecurityManager:
             # Check IP consistency (allow some flexibility for NAT/proxy scenarios)
             token_ip = payload.get("client_ip", "")
             if token_ip != client_ip:
-                logger.warning(
-                    "IP mismatch - Token: %s, Client: %s", token_ip, client_ip
+                logger.info(
+                    "IP mismatch (common with NAT/proxy) - Token: %s, Client: %s",
+                    token_ip,
+                    client_ip,
                 )
                 # Don't fail here, just log for monitoring
 
@@ -129,6 +132,9 @@ class WebSocketSecurityManager:
             if connection_id in self.active_connections:
                 self.active_connections[connection_id]["last_activity"] = current_time
                 self.active_connections[connection_id]["authenticated"] = True
+
+            # Clean up expired connections periodically
+            self._cleanup_expired_connections()
 
             return True, connection_id, "Token valid"
 
@@ -251,6 +257,30 @@ class WebSocketSecurityManager:
         for conn_id in stale_connections:
             del self.active_connections[conn_id]
             logger.info("Cleaned up stale connection: %s", conn_id)
+
+    def _cleanup_expired_connections(self):
+        """Remove expired connections from memory."""
+        current_time = int(time.time())
+        expired_connections = []
+
+        for conn_id, conn_info in self.active_connections.items():
+            # Remove connections older than 2 hours
+            if current_time - conn_info["created_at"] > 7200:
+                expired_connections.append(conn_id)
+
+        for conn_id in expired_connections:
+            del self.active_connections[conn_id]
+
+        # Also clean up old connection attempts
+        cutoff_time = current_time - 3600  # 1 hour
+        for client_ip in list(self.connection_attempts.keys()):
+            self.connection_attempts[client_ip] = [
+                timestamp
+                for timestamp in self.connection_attempts[client_ip]
+                if timestamp > cutoff_time
+            ]
+            if not self.connection_attempts[client_ip]:
+                del self.connection_attempts[client_ip]
 
     def get_connection_stats(self) -> Dict[str, Any]:
         """Get statistics about active connections."""

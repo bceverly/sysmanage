@@ -21,14 +21,9 @@ from backend.persistence.models import (
 )
 from backend.i18n import _
 
-# Logger for debugging
+# Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")
 debug_logger.setLevel(logging.DEBUG)
-file_handler = logging.FileHandler("logs/backend.log")
-file_handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-file_handler.setFormatter(formatter)
-debug_logger.addHandler(file_handler)
 
 
 async def handle_os_version_update(db: Session, connection, message_data: dict):
@@ -665,25 +660,57 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
     )
 
     try:
-        hostname = message_data.get("hostname")
         execution_id = message_data.get("execution_id")
-
-        if not hostname:
-            debug_logger.error("No hostname provided in script execution result")
-            return {"message_type": "error", "error": _("Hostname is required")}
+        execution_uuid = message_data.get("execution_uuid")
 
         if not execution_id:
             debug_logger.error("No execution_id provided in script execution result")
             return {"message_type": "error", "error": _("Execution ID is required")}
 
-        # Find the host (case-insensitive)
-        host = db.query(Host).filter(Host.fqdn.ilike(hostname)).first()
+        # Check for duplicate execution UUID to prevent duplicate processing
+        if execution_uuid:
+            from backend.persistence.models import ScriptExecutionLog
+
+            # Check if we've already processed this execution UUID
+            existing_execution = (
+                db.query(ScriptExecutionLog)
+                .filter(ScriptExecutionLog.execution_uuid == execution_uuid)
+                .filter(ScriptExecutionLog.status.in_(["completed", "failed"]))
+                .first()
+            )
+
+            if existing_execution:
+                debug_logger.error(
+                    "Duplicate script execution result received for UUID %s, ignoring",
+                    execution_uuid,
+                )
+                return {
+                    "message_type": "error",
+                    "error": _("Script execution result with UUID %s already processed")
+                    % execution_uuid,
+                }
+
+        # Use connection object's host_id if available (from message processor)
+        # Otherwise fall back to hostname lookup for direct WebSocket calls
+        host = None
+        if hasattr(connection, "host_id") and connection.host_id:
+            host = db.query(Host).filter(Host.id == connection.host_id).first()
+
+        # Fallback to hostname lookup if no host_id or host not found
         if not host:
-            debug_logger.error("Host not found: %s", hostname)
-            return {
-                "message_type": "error",
-                "error": _("Host not found: %s") % hostname,
-            }
+            hostname = message_data.get("hostname")
+            if not hostname:
+                debug_logger.error("No hostname provided and no host_id in connection")
+                return {"message_type": "error", "error": _("Hostname is required")}
+
+            # Find the host (case-insensitive)
+            host = db.query(Host).filter(Host.fqdn.ilike(hostname)).first()
+            if not host:
+                debug_logger.error("Host not found: %s", hostname)
+                return {
+                    "message_type": "error",
+                    "error": _("Host not found: %s") % hostname,
+                }
 
         # Find existing script execution log entry by execution_id
         from backend.persistence.models import ScriptExecutionLog
@@ -750,7 +777,7 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
 
         debug_logger.info(
             "Successfully stored script execution result for host %s (execution_id: %s)",
-            hostname,
+            host.fqdn,
             execution_id,
         )
 

@@ -48,7 +48,7 @@ const UserProfileDropdown: React.FC = () => {
         setImageLoading(true);
         try {
             // First check if user has a profile image via the profile endpoint
-            const profileResponse = await axiosInstance.get('/profile');
+            const profileResponse = await axiosInstance.get('/api/profile');
             
             if (!profileResponse.data.has_profile_image) {
                 // User doesn't have a profile image, don't try to fetch it
@@ -57,7 +57,7 @@ const UserProfileDropdown: React.FC = () => {
             }
 
             // User has a profile image, fetch it
-            const response = await axiosInstance.get('/profile/image', {
+            const response = await axiosInstance.get('/api/profile/image', {
                 responseType: 'blob'
             });
 

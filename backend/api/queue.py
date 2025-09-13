@@ -1,0 +1,187 @@
+"""
+Queue Management API endpoints for managing message queues.
+"""
+
+from typing import List, Dict, Any
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from backend.auth.auth_bearer import get_current_user
+from backend.persistence.db import get_db
+from backend.persistence.models import MessageQueue
+from backend.websocket.queue_manager import server_queue_manager
+
+router = APIRouter()
+
+
+@router.get("/failed")
+async def get_failed_messages(
+    db: Session = Depends(get_db), current_user=Depends(get_current_user)
+) -> List[Dict[str, Any]]:
+    """
+    Get all expired/failed messages from the queue.
+    """
+    try:
+        # Query for expired messages
+        failed_messages = (
+            db.query(MessageQueue)
+            .filter(MessageQueue.expired_at.is_not(None))
+            .order_by(MessageQueue.expired_at.desc())
+            .all()
+        )
+
+        result = []
+        for message in failed_messages:
+            # Deserialize message data to get type information
+            try:
+                message_data = server_queue_manager.deserialize_message_data(message)
+                message_type = message_data.get("type", "unknown")
+            except Exception:
+                message_type = "unknown"
+
+            result.append(
+                {
+                    "id": message.message_id,
+                    "type": message_type,
+                    "direction": (
+                        message.direction.value
+                        if hasattr(message.direction, "value")
+                        else message.direction
+                    ),
+                    "timestamp": (
+                        message.expired_at.isoformat() if message.expired_at else None
+                    ),
+                    "created_at": (
+                        message.created_at.isoformat() if message.created_at else None
+                    ),
+                    "host_id": message.host_id,
+                    "priority": message.priority,
+                    "data": message.message_data,  # Raw message data for viewing
+                }
+            )
+
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch failed messages: {str(e)}",
+        ) from e
+
+
+@router.delete("/failed")
+async def delete_failed_messages(
+    message_ids: List[str],
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """
+    Delete selected failed messages from the queue.
+    """
+    try:
+        if not message_ids:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No message IDs provided",
+            )
+
+        # Delete the specified messages
+        deleted_count = (
+            db.query(MessageQueue)
+            .filter(
+                MessageQueue.message_id.in_(message_ids),
+                MessageQueue.expired_at.is_not(
+                    None
+                ),  # Only allow deleting expired messages
+            )
+            .delete(synchronize_session=False)
+        )
+
+        db.commit()
+
+        return {
+            "deleted_count": deleted_count,
+            "message": f"Successfully deleted {deleted_count} expired messages",
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete failed messages: {str(e)}",
+        ) from e
+
+
+@router.get("/failed/{message_id}")
+async def get_message_details(
+    message_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+) -> Dict[str, Any]:
+    """
+    Get detailed information about a specific message.
+    """
+    try:
+        message = (
+            db.query(MessageQueue)
+            .filter(
+                MessageQueue.message_id == message_id,
+                MessageQueue.expired_at.is_not(None),
+            )
+            .first()
+        )
+
+        if not message:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Message not found or not expired",
+            )
+
+        # Deserialize and format message data for display
+        try:
+            message_data = server_queue_manager.deserialize_message_data(message)
+        except Exception as e:
+            message_data = {
+                "error": f"Failed to deserialize: {str(e)}",
+                "raw_data": message.data,
+            }
+
+        return {
+            "id": message.message_id,
+            "type": message_data.get("type", "unknown"),
+            "direction": (
+                message.direction.value
+                if hasattr(message.direction, "value")
+                else message.direction
+            ),
+            "status": (
+                message.status.value
+                if hasattr(message.status, "value")
+                else message.status
+            ),
+            "priority": message.priority,
+            "host_id": message.host_id,
+            "created_at": (
+                message.created_at.isoformat() if message.created_at else None
+            ),
+            "expired_at": (
+                message.expired_at.isoformat() if message.expired_at else None
+            ),
+            "started_at": (
+                message.started_at.isoformat() if message.started_at else None
+            ),
+            "completed_at": (
+                message.completed_at.isoformat() if message.completed_at else None
+            ),
+            "scheduled_at": (
+                message.scheduled_at.isoformat() if message.scheduled_at else None
+            ),
+            "data": message_data,  # Parsed message data
+            "raw_data": message.message_data,  # Raw message data
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch message details: {str(e)}",
+        ) from e

@@ -450,6 +450,7 @@ async def execute_script(
 
             # Prepare script execution data
             execution_id = str(uuid.uuid4())
+            execution_uuid = str(uuid.uuid4())  # Separate UUID for agent tracking
             script_content = execution_request.script_content
             shell_type = execution_request.shell_type
             script_name = execution_request.script_name
@@ -491,6 +492,7 @@ async def execute_script(
                 run_as_user=execution_request.run_as_user,
                 requested_by=current_user,
                 execution_id=execution_id,
+                execution_uuid=execution_uuid,
                 status="pending",
                 created_at=now,
                 updated_at=now,
@@ -502,6 +504,7 @@ async def execute_script(
             # Queue script execution command for outbound delivery to agent
             command_data = {
                 "execution_id": execution_id,
+                "execution_uuid": execution_uuid,  # Send the tracking UUID to agent
                 "script_content": script_content,
                 "shell_type": shell_type,
                 "run_as_user": execution_request.run_as_user,

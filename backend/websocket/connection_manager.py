@@ -126,10 +126,20 @@ class ConnectionManager:
         """Remove an agent connection."""
         if agent_id in self.active_connections:
             connection = self.active_connections[agent_id]
-            if connection.hostname and connection.hostname in self.hostname_to_agent:
-                del self.hostname_to_agent[connection.hostname]
+            hostname = connection.hostname
+            logger.info("Disconnecting agent %s with hostname %s", agent_id, hostname)
+
+            if hostname and hostname in self.hostname_to_agent:
+                logger.info("Removing hostname mapping: %s -> %s", hostname, agent_id)
+                del self.hostname_to_agent[hostname]
+
             del self.active_connections[agent_id]
-            # Agent disconnected
+
+            logger.info(
+                "Agent %s disconnected. Remaining hostnames: %s",
+                agent_id,
+                list(self.hostname_to_agent.keys()),
+            )
 
     def register_agent(  # pylint: disable=too-many-positional-arguments
         self,
@@ -140,12 +150,24 @@ class ConnectionManager:
         platform: str = None,
     ):
         """Register agent details for lookup."""
+        logger.info("Registering agent %s with hostname %s", agent_id, hostname)
+
         if agent_id in self.active_connections:
             connection = self.active_connections[agent_id]
             connection.update_info(hostname, ipv4, ipv6, platform)
             if hostname:
+                logger.info("Adding hostname mapping: %s -> %s", hostname, agent_id)
                 self.hostname_to_agent[hostname] = agent_id
+                logger.info(
+                    "Agent %s registered. All hostnames: %s",
+                    agent_id,
+                    list(self.hostname_to_agent.keys()),
+                )
             return connection
+
+        logger.warning(
+            "Cannot register agent %s - agent_id not in active_connections", agent_id
+        )
         return None
 
     async def send_to_agent(self, agent_id: str, message: dict) -> bool:

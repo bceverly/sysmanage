@@ -89,6 +89,12 @@ class Host(Base):
     # Agent privilege status
     is_agent_privileged = Column(Boolean, nullable=True, default=False)
 
+    # Script execution status
+    script_execution_enabled = Column(Boolean, nullable=True, default=False)
+
+    # Enabled shells for script execution (stored as JSON array)
+    enabled_shells = Column(String, nullable=True)
+
     # Relationships to normalized hardware tables
     storage_devices = relationship(
         "StorageDevice", back_populates="host", cascade="all, delete-orphan"
@@ -446,6 +452,9 @@ class MessageQueue(Base):
     error_message = Column(Text, nullable=True)
     last_error_at = Column(DateTime(timezone=True), nullable=True)
 
+    # Message expiration tracking
+    expired_at = Column(DateTime(timezone=True), nullable=True)
+
     # Metadata
     correlation_id = Column(
         String(36), nullable=True, index=True
@@ -584,6 +593,9 @@ class ScriptExecutionLog(Base):
     execution_id = Column(
         String(36), nullable=False, unique=True, index=True
     )  # UUID for tracking
+    execution_uuid = Column(
+        String(36), nullable=True, unique=True, index=True
+    )  # Separate UUID sent to agent to prevent duplicates
     status = Column(
         String(20), nullable=False, server_default="pending", index=True
     )  # pending, running, completed, failed, cancelled

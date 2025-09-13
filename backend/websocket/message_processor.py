@@ -118,6 +118,10 @@ class MessageProcessor:
         logger.info("Got database session")
 
         try:
+            # First, expire old messages to prevent infinite processing loops
+            expired_count = server_queue_manager.expire_old_messages(db)
+            if expired_count > 0:
+                logger.info("Expired %d old messages", expired_count)
             # Get all hosts with pending or stuck messages
             # For simplicity, we'll process messages for all hosts
             # In a more sophisticated implementation, we could process per-host
@@ -158,12 +162,14 @@ class MessageProcessor:
                 db.commit()
 
             # Now get all hosts with pending messages (including newly reset ones)
+            # Exclude expired messages from processing
             host_ids = (
                 db.query(MessageQueue.host_id)
                 .filter(
                     MessageQueue.direction == QueueDirection.INBOUND,
                     MessageQueue.status == QueueStatus.PENDING,
                     MessageQueue.host_id.is_not(None),
+                    MessageQueue.expired_at.is_(None),
                 )
                 .distinct()
                 .limit(10)
@@ -229,12 +235,14 @@ class MessageProcessor:
                     await self._process_validated_message(message, host, db)
 
             # Second, handle messages with NULL host_id by extracting hostname from message data
+            # Exclude expired messages from processing
             null_host_messages = (
                 db.query(MessageQueue)
                 .filter(
                     MessageQueue.direction == QueueDirection.INBOUND,
                     MessageQueue.status == QueueStatus.PENDING,
                     MessageQueue.host_id.is_(None),
+                    MessageQueue.expired_at.is_(None),
                 )
                 .limit(10)
                 .all()
@@ -315,6 +323,14 @@ class MessageProcessor:
             # Third, process outbound messages (from server to agents)
             await self._process_outbound_messages(db)
 
+            # Commit all changes made during this processing cycle
+            db.commit()
+            logger.debug("Committed all message processing changes to database")
+
+        except Exception as e:
+            logger.error("Error during message processing, rolling back: %s", str(e))
+            db.rollback()
+            raise
         finally:
             db.close()
 

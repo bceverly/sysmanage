@@ -37,6 +37,16 @@
   margin-left: auto;
 }
 
+/* Fix DataGrid cell vertical alignment for execution history */
+.scripts-container .MuiDataGrid-cell {
+  display: flex;
+  align-items: center;
+}
+
+.scripts-container .MuiDataGrid-cell .MuiTypography-root {
+  align-self: center;
+}
+
 @media (max-width: 768px) {
   .scripts-container {
     padding: 10px;

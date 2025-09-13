@@ -26,6 +26,7 @@ class QueueStatus:
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     FAILED = "failed"
+    EXPIRED = "expired"
 
 
 class QueueDirection:
@@ -118,6 +119,78 @@ class ServerMessageQueueManager:
                     raise ValueError(
                         _("Host ID {host_id} not found").format(host_id=host_id)
                     )
+
+            # Check for duplicate script execution commands to prevent multiple queuing
+            if (
+                message_type == "command"
+                and direction == QueueDirection.OUTBOUND
+                and host_id is not None
+                and "execution_id" in message_data
+            ):
+                execution_id = message_data.get("execution_id")
+                script_content = message_data.get("parameters", {}).get(
+                    "script_content"
+                )
+
+                # First check: Same execution_id already queued
+                existing_command = (
+                    db.query(MessageQueue)
+                    .filter(
+                        MessageQueue.host_id == host_id,
+                        MessageQueue.message_type == "command",
+                        MessageQueue.direction == QueueDirection.OUTBOUND,
+                        MessageQueue.status.in_(
+                            [QueueStatus.PENDING, QueueStatus.IN_PROGRESS]
+                        ),
+                        MessageQueue.message_data.contains(
+                            f'"execution_id": "{execution_id}"'
+                        ),
+                    )
+                    .first()
+                )
+
+                if existing_command:
+                    logger.warning(
+                        "Duplicate script execution command for execution_id %s already queued (message_id: %s), skipping",
+                        execution_id,
+                        existing_command.message_id,
+                    )
+                    return existing_command.message_id
+
+                # Second check: Same script content within 10 seconds (prevent rapid duplicate requests)
+                if script_content:
+                    recent_threshold = datetime.now(timezone.utc) - timedelta(
+                        seconds=10
+                    )
+
+                    similar_command = (
+                        db.query(MessageQueue)
+                        .filter(
+                            MessageQueue.host_id == host_id,
+                            MessageQueue.message_type == "command",
+                            MessageQueue.direction == QueueDirection.OUTBOUND,
+                            MessageQueue.status.in_(
+                                [
+                                    QueueStatus.PENDING,
+                                    QueueStatus.IN_PROGRESS,
+                                    QueueStatus.SENT,
+                                ]
+                            ),
+                            MessageQueue.created_at > recent_threshold,
+                            MessageQueue.message_data.contains(
+                                f'"script_content": "{script_content[:100]}"'
+                            ),  # Check first 100 chars
+                        )
+                        .first()
+                    )
+
+                    if similar_command:
+                        logger.warning(
+                            "Duplicate script execution with similar content within 10 seconds (message_id: %s), skipping new execution_id %s",
+                            similar_command.message_id,
+                            execution_id,
+                        )
+                        return similar_command.message_id
 
             queue_item = MessageQueue(
                 host_id=host_id,
@@ -276,6 +349,7 @@ class ServerMessageQueueManager:
                     MessageQueue.host_id == host_id,
                     MessageQueue.direction == direction,
                     MessageQueue.status == QueueStatus.PENDING,
+                    MessageQueue.expired_at.is_(None),
                     or_(
                         MessageQueue.scheduled_at.is_(None),
                         MessageQueue.scheduled_at <= now,
@@ -719,6 +793,171 @@ class ServerMessageQueueManager:
                 str(e),
             )
             return {}
+
+    def expire_old_messages(self, db: Session = None) -> int:
+        """
+        Mark old messages as expired based on configuration timeout.
+
+        This prevents old messages from being processed and helps maintain
+        queue health by avoiding infinite message loops.
+
+        Args:
+            db: Optional database session
+
+        Returns:
+            Number of messages marked as expired
+        """
+        from backend.config.config import config
+
+        session_provided = db is not None
+        if not session_provided:
+            db = next(get_db())
+
+        try:
+            # Get expiration timeout from config (default 60 minutes)
+            timeout_minutes = config.get("message_queue", {}).get(
+                "expiration_timeout_minutes", 60
+            )
+            cutoff_time = datetime.now(timezone.utc) - timedelta(
+                minutes=timeout_minutes
+            )
+
+            # Find messages that should be expired
+            # Only expire messages that are still pending or in_progress
+            # Don't touch completed, failed, or already expired messages
+            messages_to_expire = db.query(MessageQueue).filter(
+                and_(
+                    MessageQueue.created_at < cutoff_time,
+                    MessageQueue.status.in_(
+                        [QueueStatus.PENDING, QueueStatus.IN_PROGRESS]
+                    ),
+                    MessageQueue.expired_at.is_(None),  # Not already expired
+                )
+            )
+
+            count = messages_to_expire.count()
+            if count > 0:
+                # Mark messages as expired
+                messages_to_expire.update(
+                    {
+                        "status": QueueStatus.EXPIRED,
+                        "expired_at": datetime.now(timezone.utc),
+                        "error_message": f"Message expired after {timeout_minutes} minutes",
+                    },
+                    synchronize_session=False,
+                )
+
+                if not session_provided:
+                    db.commit()
+
+                logger.info(
+                    _("Marked %d old messages as expired (older than %d minutes)"),
+                    count,
+                    timeout_minutes,
+                )
+
+            return count
+
+        except Exception as e:
+            if not session_provided:
+                db.rollback()
+            logger.error(_("Failed to expire old messages: %s"), str(e))
+            return 0
+        finally:
+            if not session_provided:
+                db.close()
+
+    def get_failed_messages(
+        self, limit: int = 100, db: Session = None
+    ) -> List[MessageQueue]:
+        """
+        Get a list of failed and expired messages for management UI.
+
+        Args:
+            limit: Maximum number of messages to return
+            db: Optional database session
+
+        Returns:
+            List of failed/expired messages
+        """
+        session_provided = db is not None
+        if not session_provided:
+            db = next(get_db())
+
+        try:
+            messages = (
+                db.query(MessageQueue)
+                .filter(
+                    MessageQueue.status.in_([QueueStatus.FAILED, QueueStatus.EXPIRED])
+                )
+                .order_by(MessageQueue.created_at.desc())
+                .limit(limit)
+                .all()
+            )
+
+            return messages
+
+        except Exception as e:
+            logger.error(_("Failed to get failed messages: %s"), str(e))
+            return []
+        finally:
+            if not session_provided:
+                db.close()
+
+    def delete_failed_messages(self, message_ids: List[str], db: Session = None) -> int:
+        """
+        Delete specific failed/expired messages by their IDs.
+
+        Args:
+            message_ids: List of message IDs to delete
+            db: Optional database session
+
+        Returns:
+            Number of messages deleted
+        """
+        session_provided = db is not None
+        if not session_provided:
+            db = next(get_db())
+
+        try:
+            count = (
+                db.query(MessageQueue)
+                .filter(
+                    and_(
+                        MessageQueue.message_id.in_(message_ids),
+                        MessageQueue.status.in_(
+                            [QueueStatus.FAILED, QueueStatus.EXPIRED]
+                        ),
+                    )
+                )
+                .count()
+            )
+
+            if count > 0:
+                db.query(MessageQueue).filter(
+                    and_(
+                        MessageQueue.message_id.in_(message_ids),
+                        MessageQueue.status.in_(
+                            [QueueStatus.FAILED, QueueStatus.EXPIRED]
+                        ),
+                    )
+                ).delete(synchronize_session=False)
+
+                if not session_provided:
+                    db.commit()
+
+                logger.info(_("Deleted %d failed/expired messages"), count)
+
+            return count
+
+        except Exception as e:
+            if not session_provided:
+                db.rollback()
+            logger.error(_("Failed to delete failed messages: %s"), str(e))
+            return 0
+        finally:
+            if not session_provided:
+                db.close()
 
 
 # Global instance for server-wide use

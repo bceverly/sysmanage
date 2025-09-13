@@ -50,6 +50,13 @@ try:
             config["logging"][
                 "format"
             ] = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        # Message queue settings
+        if not "message_queue" in config.keys():
+            config["message_queue"] = {}
+        if not "expiration_timeout_minutes" in config["message_queue"].keys():
+            config["message_queue"]["expiration_timeout_minutes"] = 60
+        if not "cleanup_interval_minutes" in config["message_queue"].keys():
+            config["message_queue"]["cleanup_interval_minutes"] = 30
 except yaml.YAMLError as exc:
     if hasattr(exc, "problem_mark"):
         mark = exc.problem_mark
