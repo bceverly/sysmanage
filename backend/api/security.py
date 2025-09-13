@@ -84,7 +84,6 @@ def _check_security_configuration():
     """
     app_config = config.get_config()
     warnings = []
-    config_path = config.CONFIG_PATH  # /etc/sysmanage.yaml or fallback
 
     # Check default admin credentials
     admin_userid = app_config.get("security", {}).get("admin_userid")
@@ -92,7 +91,9 @@ def _check_security_configuration():
     has_default_credentials = bool(admin_userid and admin_password)
 
     if has_default_credentials:
-        logger.warning("SECURITY: Default admin credentials found in %s", config_path)
+        logger.warning(
+            "SECURITY: Default admin credentials found in configuration file"
+        )
         warnings.append(
             SecurityWarning(
                 type="default_credentials",
@@ -107,7 +108,7 @@ def _check_security_configuration():
     has_default_jwt = jwt_secret in DEFAULT_JWT_SECRETS
 
     if has_default_jwt:
-        logger.warning("SECURITY: Default JWT secret detected in %s", config_path)
+        logger.warning("SECURITY: Default JWT secret detected in configuration")
         warnings.append(
             SecurityWarning(
                 type="default_jwt_secret",
@@ -123,7 +124,7 @@ def _check_security_configuration():
     user_count = _get_database_user_count()
 
     if has_default_salt:
-        logger.warning("SECURITY: Default password salt detected in %s", config_path)
+        logger.warning("SECURITY: Default password salt detected in configuration")
         if user_count > 0:
             warnings.append(
                 SecurityWarning(
@@ -146,8 +147,7 @@ def _check_security_configuration():
     # Check for mixed security states
     if has_default_jwt and not has_default_salt:
         logger.warning(
-            "SECURITY: Mixed security state in %s: JWT secret is default but password salt is custom",
-            config_path,
+            "SECURITY: Mixed security state - JWT secret is default but password salt is custom"
         )
         warnings.append(
             SecurityWarning(
@@ -159,8 +159,7 @@ def _check_security_configuration():
         )
     elif not has_default_jwt and has_default_salt:
         logger.warning(
-            "SECURITY: Mixed security state in %s: Password salt is default but JWT secret is custom",
-            config_path,
+            "SECURITY: Mixed security state - Password salt is default but JWT secret is custom"
         )
         warnings.append(
             SecurityWarning(

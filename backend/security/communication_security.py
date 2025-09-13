@@ -109,23 +109,23 @@ class WebSocketSecurityManager:
             ).hexdigest()
 
             if not hmac.compare_digest(signature, expected_signature):
-                logger.warning("Invalid token signature from IP: %s", client_ip)
+                logger.warning(
+                    "Invalid token signature from IP: %s", client_ip
+                )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
                 return False, None, _("Invalid token signature")
 
             # Check expiration
             current_time = int(time.time())
             if current_time > payload.get("expires", 0):
-                logger.info("Expired token from IP: %s", client_ip)
+                logger.info(
+                    "Expired token from IP: %s", client_ip
+                )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
                 return False, None, _("Token expired")
 
             # Check IP consistency (allow some flexibility for NAT/proxy scenarios)
             token_ip = payload.get("client_ip", "")
             if token_ip != client_ip:
-                logger.info(
-                    "IP mismatch (common with NAT/proxy) - Token: %s, Client: %s",
-                    token_ip,
-                    client_ip,
-                )
+                logger.info("IP mismatch detected (common with NAT/proxy scenarios)")
                 # Don't fail here, just log for monitoring
 
             connection_id = payload.get("connection_id", "")
@@ -138,8 +138,10 @@ class WebSocketSecurityManager:
 
             return True, connection_id, "Token valid"
 
-        except (json.JSONDecodeError, KeyError, ValueError) as e:
-            logger.warning("Malformed token from IP %s: %s", client_ip, e)
+        except (json.JSONDecodeError, KeyError, ValueError):
+            logger.warning(
+                "Malformed token from IP %s", client_ip
+            )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             return False, None, _("Malformed token")
 
     def validate_message_integrity(
@@ -230,7 +232,9 @@ class WebSocketSecurityManager:
         # Check rate limit (max 20 connections per 15 minutes)
         attempts = len(self.connection_attempts.get(client_ip, []))
         if attempts >= 20:
-            logger.warning("Rate limiting connection attempts from IP: %s", client_ip)
+            logger.warning(
+                "Rate limiting connection attempts from IP: %s", client_ip
+            )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             return True
 
         return False

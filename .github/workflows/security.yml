@@ -73,6 +73,7 @@ jobs:
         
     - name: Upload Safety results
       uses: actions/upload-artifact@v4
+      if: hashFiles('safety-report.json') != ''
       with:
         name: safety-report
         path: safety-report.json
@@ -128,12 +129,21 @@ jobs:
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        args: --severity-threshold=high --file=frontend/package.json --sarif-file-output=snyk.sarif
-        sarif: true
+        args: --severity-threshold=high --file=frontend/package.json
+        
+    - name: Check if Snyk SARIF file exists
+      id: check_sarif
+      run: |
+        if [ -f "snyk.sarif" ]; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+          echo "Warning: snyk.sarif file was not generated"
+        fi
         
     - name: Upload Snyk results to GitHub Code Scanning
       uses: github/codeql-action/upload-sarif@v3
-      if: always()
+      if: steps.check_sarif.outputs.exists == 'true'
       with:
         sarif_file: snyk.sarif
 

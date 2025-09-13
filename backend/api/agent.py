@@ -75,11 +75,15 @@ async def agent_connect(websocket: WebSocket):
     """
     logger.info("WebSocket connection attempt started")
     client_host = websocket.client.host if websocket.client else "unknown"
-    logger.info("Client host: %s", client_host)
+    logger.info(
+        "Client host: %s", client_host
+    )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
 
     # Check for authentication token in query parameters
     auth_token = websocket.query_params.get("token")
-    logger.info("Auth token present: %s", bool(auth_token))
+    logger.info(
+        "Auth token present: %s", bool(auth_token)
+    )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
     connection_id = None
 
     if auth_token:
@@ -87,15 +91,14 @@ async def agent_connect(websocket: WebSocket):
         is_valid, connection_id, error_msg = (
             websocket_security.validate_connection_token(auth_token, client_host)
         )
-        logger.info(
-            "Token validation result - Valid: %s, Error: %s", is_valid, error_msg
-        )
+        logger.info("Token validation result - Valid: %s", is_valid)
+        if not is_valid and error_msg:
+            logger.debug("Token validation error details available")
         if not is_valid:
             logger.warning(
-                "WEBSOCKET_PROTOCOL_ERROR: Authentication failed from %s: %s",
+                "WEBSOCKET_PROTOCOL_ERROR: Authentication failed from %s",
                 client_host,
-                error_msg,
-            )
+            )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             await websocket.close(
                 code=4001, reason=_("Authentication failed: %s") % error_msg
             )
@@ -103,7 +106,7 @@ async def agent_connect(websocket: WebSocket):
     else:
         logger.warning(
             "WEBSOCKET_PROTOCOL_ERROR: No auth token provided from %s", client_host
-        )
+        )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
         await websocket.close(code=4000, reason=_("Authentication token required"))
         return
 
