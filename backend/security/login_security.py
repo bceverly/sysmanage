@@ -8,14 +8,14 @@ import hashlib
 import hmac
 import logging
 import time
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Tuple
-from collections import defaultdict
 
 from backend.config.config import (
+    get_account_lockout_duration,
     get_config,
     get_max_failed_logins,
-    get_account_lockout_duration,
 )
 from backend.persistence.models import User
 

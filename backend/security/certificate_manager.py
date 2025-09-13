@@ -6,12 +6,12 @@ certificates for both server and client (agent) authentication.
 """
 
 import hashlib
+import ipaddress
 import os
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional, Tuple
-import ipaddress
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization

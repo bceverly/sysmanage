@@ -11,12 +11,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
+from backend.api.host_utils import validate_host_approval_status
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.websocket.connection_manager import connection_manager
-from backend.websocket.messages import create_command_message, CommandType
-from backend.api.host_utils import validate_host_approval_status
+from backend.websocket.messages import CommandType, create_command_message
 
 router = APIRouter()
 

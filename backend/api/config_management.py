@@ -3,8 +3,9 @@ Configuration management API endpoints for SysManage server.
 Allows administrators to push configuration updates to agents.
 """
 
-from typing import Dict, Any, Optional
-from fastapi import APIRouter, HTTPException, Depends
+from typing import Any, Dict, Optional
+
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.auth.auth_bearer import JWTBearer

@@ -5,10 +5,10 @@ This module provides endpoints for certificate retrieval and management
 for mutual TLS authentication.
 """
 
+from cryptography import x509
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from sqlalchemy.orm import sessionmaker
-from cryptography import x509
 
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _

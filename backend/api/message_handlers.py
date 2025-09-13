@@ -10,8 +10,8 @@ from datetime import datetime, timezone
 from sqlalchemy import text, update
 from sqlalchemy.orm import Session
 
-from backend.persistence.models import Host
 from backend.i18n import _
+from backend.persistence.models import Host
 
 # Logger for debugging
 debug_logger = logging.getLogger("debug_logger")

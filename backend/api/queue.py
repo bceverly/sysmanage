@@ -2,7 +2,7 @@
 Queue Management API endpoints for managing message queues.
 """
 
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -141,11 +141,15 @@ async def get_message_details(
             message_data = server_queue_manager.deserialize_message_data(message)
         except Exception as e:
             # Log the full error for debugging but don't expose details to external users
-            from backend.utils.verbosity_logger import logger
-            logger.error(f"Failed to deserialize message {message.message_id}: {str(e)}")
+            from backend.utils.verbosity_logger import get_logger
+
+            logger = get_logger(__name__)
+            logger.error(
+                f"Failed to deserialize message {message.message_id}: {str(e)}"
+            )
             message_data = {
                 "error": "Failed to deserialize message data",
-                "type": "deserialization_error"
+                "type": "deserialization_error",
             }
 
         return {
@@ -184,8 +188,12 @@ async def get_message_details(
         raise
     except Exception as e:
         # Log the full error for debugging but don't expose details to external users
-        from backend.utils.verbosity_logger import logger
-        logger.error(f"Failed to fetch message details for message {message_id}: {str(e)}")
+        from backend.utils.verbosity_logger import get_logger
+
+        logger = get_logger(__name__)
+        logger.error(
+            f"Failed to fetch message details for message {message_id}: {str(e)}"
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to fetch message details",

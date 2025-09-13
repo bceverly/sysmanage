@@ -2,7 +2,7 @@
 This module ise used to verify the JWT token we use for authentication
 """
 
-from fastapi import HTTPException, Request, Depends
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from backend.auth.auth_handler import decode_jwt

@@ -5,12 +5,14 @@ Contains functions for processing various types of system data from agents.
 
 import logging
 from datetime import datetime, timezone
+
 from sqlalchemy.orm import Session
+
 from backend.persistence.models import (
+    SoftwarePackage,
     UserAccount,
     UserGroup,
     UserGroupMembership,
-    SoftwarePackage,
 )
 
 debug_logger = logging.getLogger("websocket_debug")

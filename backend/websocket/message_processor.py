@@ -5,28 +5,28 @@ Processes queued messages from agents asynchronously.
 
 import asyncio
 from datetime import timedelta
-from typing import Dict, Any
+from typing import Any, Dict
 
 from sqlalchemy.orm import Session
 
-from backend.persistence.db import get_db
-from backend.utils.verbosity_logger import get_logger
-from backend.websocket.queue_manager import (
-    server_queue_manager,
-    QueueDirection,
-    QueueStatus,
-)
-from backend.websocket.messages import MessageType
 from backend.api.data_handlers import (
-    handle_os_version_update,
     handle_hardware_update,
-    handle_user_access_update,
-    handle_software_update,
+    handle_os_version_update,
     handle_package_updates_update,
-    handle_script_execution_result,
     handle_reboot_status_update,
+    handle_script_execution_result,
+    handle_software_update,
+    handle_user_access_update,
 )
 from backend.i18n import _
+from backend.persistence.db import get_db
+from backend.utils.verbosity_logger import get_logger
+from backend.websocket.messages import MessageType
+from backend.websocket.queue_manager import (
+    QueueDirection,
+    QueueStatus,
+    server_queue_manager,
+)
 
 logger = get_logger(__name__)
 
@@ -126,8 +126,9 @@ class MessageProcessor:
             # For simplicity, we'll process messages for all hosts
             # In a more sophisticated implementation, we could process per-host
 
-            from backend.persistence.models import MessageQueue, Host
             from datetime import datetime, timezone
+
+            from backend.persistence.models import Host, MessageQueue
 
             # Define stuck message threshold (messages older than 30 seconds)
             stuck_threshold = datetime.now(timezone.utc) - timedelta(seconds=30)
@@ -694,7 +695,7 @@ class MessageProcessor:
         """Process outbound messages from the server to agents."""
         logger.info("Processing outbound messages")
 
-        from backend.persistence.models import MessageQueue, Host
+        from backend.persistence.models import Host, MessageQueue
 
         # Get outbound messages for all hosts
         outbound_messages = (
@@ -803,8 +804,8 @@ class MessageProcessor:
         self, command_data: dict, host, message_id: str
     ) -> bool:
         """Send a command message to an agent."""
-        from backend.websocket.messages import create_command_message
         from backend.websocket.connection_manager import connection_manager
+        from backend.websocket.messages import create_command_message
 
         try:
             # Create the command message

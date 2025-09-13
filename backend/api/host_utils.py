@@ -3,14 +3,14 @@ Utility functions for host management operations.
 Contains common database operations and helper functions for host API endpoints.
 """
 
-from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
 from fastapi import HTTPException
 from sqlalchemy.orm import sessionmaker
 
-from backend.persistence import db, models
 from backend.i18n import _
+from backend.persistence import db, models
 
 
 def get_host_by_id(host_id: int) -> Optional[models.Host]:

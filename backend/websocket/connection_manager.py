@@ -208,9 +208,10 @@ class ConnectionManager:
     async def send_to_host(self, host_id: int, message: dict) -> bool:
         """Send a message to an agent by database host ID."""
         # Import here to avoid circular imports
+        from sqlalchemy.orm import sessionmaker
+
         from backend.persistence.db import get_engine
         from backend.persistence.models import Host
-        from sqlalchemy.orm import sessionmaker
 
         session_local = sessionmaker(
             autocommit=False, autoflush=False, bind=get_engine()

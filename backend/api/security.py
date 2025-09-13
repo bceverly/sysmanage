@@ -5,9 +5,11 @@ Security API endpoints for checking system security status and configurations.
 import logging
 import platform
 from typing import List, Optional
+
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
+
 from backend.auth.auth_bearer import get_current_user
 from backend.config import config
 from backend.persistence import db, models

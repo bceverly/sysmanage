@@ -7,7 +7,8 @@ Supports custom formats and selective level filtering.
 
 import logging
 from typing import Set
-from backend.config.config import get_log_levels, get_log_format
+
+from backend.config.config import get_log_format, get_log_levels
 from backend.utils.logging_formatter import UTCTimestampFormatter
 
 

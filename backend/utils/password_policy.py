@@ -5,6 +5,7 @@ Validates passwords against configurable complexity rules.
 
 import re
 from typing import List, Tuple
+
 from backend.config import config
 
 

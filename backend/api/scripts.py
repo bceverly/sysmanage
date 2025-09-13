@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Body
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel, validator
 from sqlalchemy import and_, desc, or_
 from sqlalchemy.orm import sessionmaker
@@ -17,9 +17,9 @@ from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.websocket.queue_manager import (
-    server_queue_manager,
-    QueueDirection,
     Priority,
+    QueueDirection,
+    server_queue_manager,
 )
 
 logger = logging.getLogger(__name__)

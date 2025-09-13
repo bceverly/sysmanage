@@ -6,12 +6,12 @@ import io
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from fastapi.responses import Response
-from pydantic import BaseModel, Field
 from argon2 import PasswordHasher
-from sqlalchemy.orm import sessionmaker
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi.responses import Response
 from PIL import Image
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _

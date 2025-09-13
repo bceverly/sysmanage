@@ -22,25 +22,25 @@ from backend.api import (
     agent,
     auth,
     certificates,
+    config_management,
     diagnostics,
     fleet,
     host,
-    user,
-    config_management,
     profile,
-    updates,
+    queue,
     scripts,
     security,
     tag,
-    queue,
+    updates,
+    user,
 )
 from backend.config import config
-from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
 from backend.discovery.discovery_service import discovery_beacon
+from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
 from backend.security.certificate_manager import certificate_manager
-from backend.websocket.message_processor import message_processor
 from backend.utils.logging_formatter import UTCTimestampFormatter
 from backend.utils.verbosity_logger import get_logger
+from backend.websocket.message_processor import message_processor
 
 # Initialize logger for startup debugging
 startup_logger = get_logger("backend.startup")

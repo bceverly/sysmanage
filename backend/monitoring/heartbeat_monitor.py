@@ -7,9 +7,9 @@ import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 
+from backend.config.config import get_heartbeat_timeout_minutes
 from backend.persistence.db import get_db
 from backend.persistence.models import Host
-from backend.config.config import get_heartbeat_timeout_minutes
 
 logger = logging.getLogger(__name__)
 

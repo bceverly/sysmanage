@@ -4,19 +4,19 @@ This module contains the API implementation for the user object in the system.
 
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
-from fastapi.responses import Response
 from argon2 import PasswordHasher
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
+from fastapi.responses import Response
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import sessionmaker
 
+from backend.api.profile import validate_and_process_image
 from backend.auth.auth_bearer import JWTBearer
 from backend.auth.auth_handler import decode_jwt
 from backend.config import config
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.login_security import login_security
-from backend.api.profile import validate_and_process_image
 
 argon2_hasher = PasswordHasher()
 

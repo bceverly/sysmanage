@@ -9,7 +9,7 @@ import json
 import logging
 import socket
 from datetime import datetime, timezone
-from typing import Dict, Any, Tuple
+from typing import Any, Dict, Tuple
 
 try:
     import netifaces

@@ -5,9 +5,9 @@ This module houses the API routes for package update management in SysManage.
 import logging
 from datetime import datetime, timezone
 from typing import List, Optional
-from pydantic import BaseModel, validator
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, validator
 from sqlalchemy import and_, desc
 from sqlalchemy.orm import sessionmaker
 

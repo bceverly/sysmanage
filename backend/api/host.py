@@ -3,13 +3,23 @@ This module houses the API routes for the host object in SysManage.
 """
 
 from datetime import datetime, timezone
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
+from cryptography import x509
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
-from cryptography import x509
 
+from backend.api.host_utils import (
+    get_host_by_fqdn,
+    get_host_by_id,
+    get_host_network_interfaces,
+    get_host_software_packages,
+    get_host_storage_devices,
+    get_host_user_groups,
+    get_host_users_with_groups,
+    validate_host_approval_status,
+)
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import db, models
@@ -18,16 +28,6 @@ from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import (
     create_command_message,
     create_host_approved_message,
-)
-from backend.api.host_utils import (
-    get_host_by_id,
-    get_host_by_fqdn,
-    validate_host_approval_status,
-    get_host_storage_devices,
-    get_host_network_interfaces,
-    get_host_users_with_groups,
-    get_host_user_groups,
-    get_host_software_packages,
 )
 
 router = APIRouter()

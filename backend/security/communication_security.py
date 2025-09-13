@@ -11,7 +11,7 @@ import logging
 import secrets
 import time
 from datetime import datetime, timezone
-from typing import Dict, Optional, Tuple, Any
+from typing import Any, Dict, Optional, Tuple
 
 from backend.config.config import get_config
 from backend.i18n import _

@@ -8,12 +8,12 @@ from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
+    ForeignKey,
+    Index,
     Integer,
     LargeBinary,
     String,
     Text,
-    ForeignKey,
-    Index,
 )
 from sqlalchemy.orm import relationship
 

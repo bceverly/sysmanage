@@ -6,30 +6,26 @@ Enhanced with security validation and secure communication protocols.
 
 import json
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Request
-
-from backend.i18n import _
-from backend.utils.verbosity_logger import get_logger
-from backend.persistence.db import get_db
-from backend.websocket.connection_manager import connection_manager
-from backend.websocket.messages import ErrorMessage, MessageType, create_message
-from backend.websocket.queue_manager import server_queue_manager, QueueDirection
-from backend.api.message_handlers import (
-    handle_system_info,
-    handle_command_result,
-    handle_config_acknowledgment,
-    handle_heartbeat,
-    handle_diagnostic_result,
-)
-from backend.api.update_handlers import handle_update_apply_result
+from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 
 # pylint: disable=unused-import
-from backend.api.data_handlers import (
-    handle_os_version_update,
+from backend.api.data_handlers import handle_os_version_update
+from backend.api.message_handlers import (
+    handle_command_result,
+    handle_config_acknowledgment,
+    handle_diagnostic_result,
+    handle_heartbeat,
+    handle_system_info,
 )
-from backend.security.communication_security import websocket_security
+from backend.api.update_handlers import handle_update_apply_result
 from backend.config.config_push import config_push_manager
-
+from backend.i18n import _
+from backend.persistence.db import get_db
+from backend.security.communication_security import websocket_security
+from backend.utils.verbosity_logger import get_logger
+from backend.websocket.connection_manager import connection_manager
+from backend.websocket.messages import ErrorMessage, MessageType, create_message
+from backend.websocket.queue_manager import QueueDirection, server_queue_manager
 
 # Set up logger with verbosity support
 logger = get_logger("websocket.agent")

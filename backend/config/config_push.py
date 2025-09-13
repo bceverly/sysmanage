@@ -7,11 +7,11 @@ import hashlib
 import json
 import logging
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any, Dict
 
+from backend.security.communication_security import message_encryption
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import Message
-from backend.security.communication_security import message_encryption
 
 logger = logging.getLogger(__name__)
 

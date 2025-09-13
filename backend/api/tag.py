@@ -7,14 +7,14 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy import select, and_
+from sqlalchemy import and_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import get_current_user
-from backend.persistence.db import get_db
-from backend.persistence.models import Tag, HostTag
 from backend.i18n import _
+from backend.persistence.db import get_db
+from backend.persistence.models import HostTag, Tag
 
 router = APIRouter()
 

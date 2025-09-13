@@ -5,15 +5,15 @@ server.
 
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, HTTPException, Request, Response
 from argon2 import PasswordHasher
+from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import sessionmaker
 
 from backend.auth.auth_handler import decode_jwt, sign_jwt, sign_refresh_token
 from backend.config import config
-from backend.persistence import db, models
 from backend.i18n import _
+from backend.persistence import db, models
 from backend.security.login_security import login_security
 
 argon2_hasher = PasswordHasher()

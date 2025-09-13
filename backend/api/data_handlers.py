@@ -7,19 +7,19 @@ import json
 import logging
 from datetime import datetime, timezone
 
-from sqlalchemy import text, update, delete
+from sqlalchemy import delete, text, update
 from sqlalchemy.orm import Session
 
+from backend.i18n import _
 from backend.persistence.models import (
     Host,
     NetworkInterface,
+    PackageUpdate,
+    SoftwarePackage,
     StorageDevice,
     UserAccount,
     UserGroup,
-    SoftwarePackage,
-    PackageUpdate,
 )
-from backend.i18n import _
 
 # Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")
