@@ -1,30 +1,51 @@
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState } from 'react';
-import { 
-    Box, 
-    Card, 
-    CardContent, 
-    Typography, 
-    Grid, 
+import {
+    Box,
+    Card,
+    CardContent,
+    Typography,
+    Grid,
     Chip,
     Button,
     CircularProgress,
-    Paper
+    Paper,
+    Alert,
+    Snackbar,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonIcon from '@mui/icons-material/Person';
 import SecurityIcon from '@mui/icons-material/Security';
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
+import LockResetIcon from '@mui/icons-material/LockReset';
 import { useTranslation } from 'react-i18next';
 
 import { SysManageUser, doGetUsers } from '../Services/users';
+import axiosInstance from '../Services/api';
+
+interface AxiosError {
+    response?: {
+        data?: {
+            detail?: string;
+        };
+    };
+}
 
 const UserDetail = () => {
     const { userId } = useParams<{ userId: string }>();
     const [user, setUser] = useState<SysManageUser | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [resettingPassword, setResettingPassword] = useState<boolean>(false);
+    const [resetSuccess, setResetSuccess] = useState<string | null>(null);
+    const [resetError, setResetError] = useState<string | null>(null);
+    const [confirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -74,6 +95,40 @@ const UserDetail = () => {
         }
     };
 
+    const handlePasswordResetClick = () => {
+        setConfirmDialogOpen(true);
+    };
+
+    const handleConfirmPasswordReset = async () => {
+        if (!user) return;
+
+        setConfirmDialogOpen(false);
+        setResettingPassword(true);
+        setResetError(null);
+        setResetSuccess(null);
+
+        try {
+            const response = await axiosInstance.post(`/api/admin/reset-user-password/${user.id}`);
+
+            setResetSuccess(
+                response.data.message ||
+                t('userDetail.passwordResetSuccess', 'Password reset email has been sent to {email}', { email: user.userid })
+            );
+        } catch (err: unknown) {
+            console.error('Password reset error:', err);
+            const axiosErr = err as AxiosError;
+            const errorMessage = axiosErr?.response?.data?.detail ||
+                t('userDetail.passwordResetError', 'Failed to send password reset email. Please try again.');
+            setResetError(errorMessage);
+        } finally {
+            setResettingPassword(false);
+        }
+    };
+
+    const handleCancelPasswordReset = () => {
+        setConfirmDialogOpen(false);
+    };
+
     if (loading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -111,10 +166,25 @@ const UserDetail = () => {
                 {t('common.back')}
             </Button>
 
-            <Typography variant="h4" sx={{ mb: 3, display: 'flex', alignItems: 'center' }}>
-                <PersonIcon sx={{ mr: 2, fontSize: '2rem' }} />
-                {user.userid}
-            </Typography>
+            <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center' }}>
+                    <PersonIcon sx={{ mr: 2, fontSize: '2rem' }} />
+                    {user.userid}
+                </Typography>
+
+                <Button
+                    variant="outlined"
+                    color="warning"
+                    startIcon={<LockResetIcon />}
+                    onClick={handlePasswordResetClick}
+                    disabled={resettingPassword}
+                >
+                    {resettingPassword
+                        ? t('userDetail.resettingPassword', 'Sending Reset Email...')
+                        : t('userDetail.resetPassword', 'Reset Password')
+                    }
+                </Button>
+            </Box>
 
             <Grid container spacing={3}>
                 {/* Basic Information */}
@@ -219,6 +289,66 @@ const UserDetail = () => {
                     </Card>
                 </Grid>
             </Grid>
+
+            {/* Success Snackbar */}
+            <Snackbar
+                open={!!resetSuccess}
+                autoHideDuration={6000}
+                onClose={() => setResetSuccess(null)}
+            >
+                <Alert
+                    onClose={() => setResetSuccess(null)}
+                    severity="success"
+                    sx={{ width: '100%' }}
+                >
+                    {resetSuccess}
+                </Alert>
+            </Snackbar>
+
+            {/* Error Snackbar */}
+            <Snackbar
+                open={!!resetError}
+                autoHideDuration={6000}
+                onClose={() => setResetError(null)}
+            >
+                <Alert
+                    onClose={() => setResetError(null)}
+                    severity="error"
+                    sx={{ width: '100%' }}
+                >
+                    {resetError}
+                </Alert>
+            </Snackbar>
+
+            {/* Confirmation Dialog */}
+            <Dialog
+                open={confirmDialogOpen}
+                onClose={handleCancelPasswordReset}
+                aria-labelledby="password-reset-dialog-title"
+                aria-describedby="password-reset-dialog-description"
+            >
+                <DialogTitle id="password-reset-dialog-title">
+                    {t('userDetail.confirmResetTitle', 'Confirm Password Reset')}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="password-reset-dialog-description">
+                        {t('userDetail.confirmResetMessage', 'Are you sure you want to send a password reset email to {email}? This will allow the user to set a new password.', { email: user?.userid })}
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCancelPasswordReset} color="primary">
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button
+                        onClick={handleConfirmPasswordReset}
+                        color="warning"
+                        variant="contained"
+                        autoFocus
+                    >
+                        {t('userDetail.sendResetEmail', 'Send Reset Email')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };

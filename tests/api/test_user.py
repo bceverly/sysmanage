@@ -302,15 +302,24 @@ class TestUserCreate:
 
     def test_create_user_missing_fields(self, client, auth_headers):
         """Test creating user with missing required fields."""
-        # Missing password
-        response = client.post(
-            "/api/user",
-            json={"userid": "test@example.com", "active": True},
-            headers=auth_headers,
-        )
-        assert response.status_code == 422
+        # Missing password should now succeed (user gets setup email)
+        with patch(
+            "backend.api.password_reset.send_initial_setup_email", return_value=True
+        ), patch(
+            "backend.api.password_reset.create_password_reset_token",
+            return_value="fake-token",
+        ):
+            response = client.post(
+                "/api/user",
+                json={"userid": "test@example.com", "active": True},
+                headers=auth_headers,
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data["userid"] == "test@example.com"
+            assert data["active"] is True
 
-        # Missing userid
+        # Missing userid should still fail
         response = client.post(
             "/api/user",
             json={"password": "Password123!", "active": True},

@@ -723,3 +723,28 @@ class HostTag(Base):
 
     def __repr__(self):
         return f"<HostTag(host_id={self.host_id}, tag_id={self.tag_id})>"
+
+
+class PasswordResetToken(Base):
+    """
+    This class holds the object mapping for the password_reset_tokens table in the
+    PostgreSQL database. This stores tokens used for password reset functionality.
+    """
+
+    __tablename__ = "password_reset_tokens"
+
+    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(
+        BigInteger, ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
+    token = Column(String(255), unique=True, nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    used_at = Column(DateTime(timezone=True), nullable=True)
+    is_used = Column(Boolean, default=False, nullable=False)
+
+    # Relationship to User
+    user = relationship("User", backref="password_reset_tokens")
+
+    def __repr__(self):
+        return f"<PasswordResetToken(id={self.id}, user_id={self.user_id}, is_used={self.is_used})>"

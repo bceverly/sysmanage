@@ -24,6 +24,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import SearchBox from '../Components/SearchBox';
+import EmailConfigCard from '../Components/EmailConfigCard';
 import axiosInstance from '../Services/api';
 
 interface Tag {
@@ -436,6 +437,21 @@ const Settings: React.FC = () => {
     </Box>
   );
 
+  // Render Integrations tab content
+  const renderIntegrationsTab = () => (
+    <Box>
+      <Typography variant="h5" sx={{ mb: 2 }}>
+        {t('integrations.title', 'Integrations')}
+      </Typography>
+      
+      <Typography variant="body1" sx={{ mb: 3 }}>
+        {t('integrations.description', 'Configure external service integrations and settings.')}
+      </Typography>
+
+      <EmailConfigCard />
+    </Box>
+  );
+
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="h4" sx={{ mb: 3 }}>
@@ -447,6 +463,7 @@ const Settings: React.FC = () => {
         <Tabs value={activeTab} onChange={handleTabChange} aria-label="settings tabs">
           <Tab label={t('tags.title', 'Tags')} />
           <Tab label={t('queues.title', 'Queues')} />
+          <Tab label={t('integrations.title', 'Integrations')} />
         </Tabs>
       </Box>
 
@@ -454,6 +471,7 @@ const Settings: React.FC = () => {
       <Box sx={{ mt: 3 }}>
         {activeTab === 0 && renderTagsTab()}
         {activeTab === 1 && renderQueuesTab()}
+        {activeTab === 2 && renderIntegrationsTab()}
       </Box>
 
       {/* Add Tag Dialog */}

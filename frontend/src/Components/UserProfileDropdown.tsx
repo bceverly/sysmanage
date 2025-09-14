@@ -80,8 +80,7 @@ const UserProfileDropdown: React.FC = () => {
                 window.URL.revokeObjectURL(profileImageUrl);
             }
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [profileImageUrl]);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);

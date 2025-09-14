@@ -19,6 +19,7 @@ import Navbar from "./Components/Navbar"
 import ConnectionProvider from './Components/ConnectionProvider';
 import SecurityWarningBanner from './Components/SecurityWarningBanner';
 import Login from './Pages/Login';
+import ResetPassword from './Pages/ResetPassword';
 import Home from './Pages/Home';
 import Hosts from './Pages/Hosts';
 import HostDetail from './Pages/HostDetail';
@@ -91,6 +92,7 @@ function App() {
                 <main className="main-content">
                   <Routes>
                     <Route path="/login" element={<Login />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/" element={<Home />} />
                     <Route path="/hosts" element={<Hosts />} />
                     <Route path="/hosts/:hostId" element={<HostDetail />} />

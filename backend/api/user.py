@@ -3,6 +3,7 @@ This module contains the API implementation for the user object in the system.
 """
 
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING
 
 from argon2 import PasswordHasher
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
@@ -18,6 +19,14 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.login_security import login_security
 
+# Import will be added at runtime to avoid circular imports
+
+if TYPE_CHECKING:
+    from backend.api.password_reset import (
+        send_initial_setup_email,
+        create_password_reset_token,
+    )
+
 argon2_hasher = PasswordHasher()
 
 router = APIRouter()
@@ -30,7 +39,7 @@ class User(BaseModel):
 
     active: bool
     userid: EmailStr
-    password: str
+    password: str = None  # Optional for new user creation
     first_name: str = None
     last_name: str = None
 
@@ -214,7 +223,7 @@ async def get_all_users():
 
 
 @router.post("/user", dependencies=[Depends(JWTBearer())])
-async def add_user(new_user: User):
+async def add_user(new_user: User, request: Request):
     """
     This function adds a new user to the system.
     """
@@ -235,7 +244,16 @@ async def add_user(new_user: User):
             raise HTTPException(status_code=409, detail=_("User already exists"))
 
         # This is a unique user.  Proceed...
-        hashed_value = argon2_hasher.hash(new_user.password)
+        # If password is provided, use it; otherwise use a placeholder that forces reset
+        if new_user.password:
+            hashed_value = argon2_hasher.hash(new_user.password)
+        else:
+            # Use a random placeholder password that user cannot guess
+            import secrets
+
+            placeholder_password = secrets.token_urlsafe(32)
+            hashed_value = argon2_hasher.hash(placeholder_password)
+
         user = models.User(
             userid=new_user.userid,
             active=new_user.active,
@@ -246,6 +264,18 @@ async def add_user(new_user: User):
         )
         session.add(user)
         session.commit()
+
+        # Import here to avoid circular imports
+        from backend.api.password_reset import (
+            create_password_reset_token,
+            send_initial_setup_email,
+        )
+
+        # If no password was provided, create a password reset token and send initial setup email
+        if not new_user.password:
+            reset_token = create_password_reset_token(user.id, session)
+            send_initial_setup_email(str(user.userid), reset_token, request)
+
         ret_user = models.User(
             id=user.id,
             active=user.active,

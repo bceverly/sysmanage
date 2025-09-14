@@ -772,6 +772,100 @@ security:
     prevent_username_in_password: true # Prevent username/email in password
 ```
 
+### Email Configuration
+
+SysManage supports email functionality for password reset, notifications, and system alerts. Configure SMTP settings in the `email` section of your configuration file.
+
+#### Basic Configuration
+```yaml
+email:
+  # Enable or disable email functionality
+  enabled: true
+  
+  # SMTP server configuration
+  smtp:
+    host: "smtp.gmail.com"              # SMTP server hostname
+    port: 587                           # SMTP port (587 for STARTTLS, 465 for SSL)
+    use_tls: true                       # Enable STARTTLS (recommended for port 587)
+    use_ssl: false                      # Enable SSL/TLS (for port 465)
+    username: "your-email@gmail.com"    # SMTP authentication username
+    password: "your-app-password"       # SMTP authentication password
+    timeout: 30                         # Connection timeout in seconds
+  
+  # Default sender information
+  from_address: "noreply@your-domain.com"  # Default sender email address
+  from_name: "SysManage System"            # Default sender name
+  
+  # Email template settings
+  templates:
+    subject_prefix: "[SysManage]"          # Prefix for all email subjects
+```
+
+#### Common SMTP Configurations
+
+**Gmail (with App Password)**
+```yaml
+email:
+  enabled: true
+  smtp:
+    host: "smtp.gmail.com"
+    port: 587
+    use_tls: true
+    use_ssl: false
+    username: "your-email@gmail.com"
+    password: "your-16-digit-app-password"
+```
+> **Note**: For Gmail, you need to enable 2-Factor Authentication and generate an App Password. Visit [Google App Passwords](https://support.google.com/accounts/answer/185833) for instructions.
+
+**Microsoft Office 365**
+```yaml
+email:
+  enabled: true
+  smtp:
+    host: "smtp-mail.outlook.com"
+    port: 587
+    use_tls: true
+    use_ssl: false
+    username: "your-email@yourdomain.com"
+    password: "your-password"
+```
+
+**Microsoft Exchange (On-Premises)**
+```yaml
+email:
+  enabled: true
+  smtp:
+    host: "mail.yourdomain.com"
+    port: 587
+    use_tls: true
+    use_ssl: false
+    username: "your-email@yourdomain.com"
+    password: "your-password"
+```
+
+**Postfix (Self-Hosted)**
+```yaml
+email:
+  enabled: true
+  smtp:
+    host: "localhost"
+    port: 25
+    use_tls: false
+    use_ssl: false
+    username: ""    # Leave empty for localhost/no-auth
+    password: ""    # Leave empty for localhost/no-auth
+```
+
+#### Testing Email Configuration
+
+Once configured, you can test your email settings through the SysManage web interface:
+
+1. Navigate to **Settings** → **Integrations**
+2. Find the **Email Configuration** card
+3. Click **Test Configuration** 
+4. Enter a test email address
+5. Check your inbox for the test message
+
 #### Profile UI Enhancement
 The user profile interface has been reorganized for better security management:
 - **Account Information Tab**: Email change functionality

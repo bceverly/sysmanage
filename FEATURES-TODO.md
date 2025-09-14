@@ -151,7 +151,8 @@ like to add:
 23. Special Updates - Allow an agent to 
     manage Ubuntu Pro as well as any other
     special paid updates on other platforms.
-    Include syspatch on OpenBSD.
+    Include syspatch on OpenBSD.  Include
+    fwupd in Linux systems as well.
 
 24. SSH Keys - Manage SSH keys on the agents
     so that they can be pushed out from a
@@ -287,15 +288,15 @@ like to add:
     run reports and then turn them into
     PDF files.
 
-41. We need a password reset capability
+~~41. We need a password reset capability
     that uses email.  We should confirm
     the user's initial email via an
     email mechanism that won't allow them
-    to do anything until they have 
+    to do anything until they have
     clicked a link in an email we have
     sent them.  This should also be
     used any time they update the
-    email address we have on file.
+    email address we have on file.~~
 
 42. We need a MFA mechanism using an
     authenticator app on someone's

@@ -30,7 +30,8 @@ import sys
 import shutil
 import subprocess
 import yaml
-from datetime import datetime, timezone
+import uuid
+from datetime import datetime, timezone, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from argon2 import PasswordHasher
@@ -40,6 +41,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from backend.config import config
 from backend.persistence import models
+from backend.services.email_service import email_service
 
 
 def find_privilege_escalation_tool():
@@ -262,6 +264,117 @@ def get_database_users():
         sys.exit(1)
 
 
+def create_password_reset_token(user_id, session):
+    """Create a password reset token for a user."""
+    # Generate token
+    token = str(uuid.uuid4())
+
+    # Set expiration (24 hours from now)
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
+
+    # Create token record
+    reset_token = models.PasswordResetToken(
+        user_id=user_id,
+        token=token,
+        created_at=datetime.now(timezone.utc),
+        expires_at=expires_at,
+        is_used=False
+    )
+
+    session.add(reset_token)
+    return token
+
+
+def send_password_reset_emails(user_migrations, app_config):
+    """Send password reset emails to users after salt migration."""
+    if not email_service.is_enabled():
+        print("[WARNING] Email service is disabled - cannot send password reset emails")
+        print("   Users will need to request password reset manually through the UI")
+        return False
+
+    # Build reset URL
+    # Check if we have TLS configured to determine protocol
+    is_secure = (
+        app_config.get("api", {}).get("certFile") is not None
+        and len(app_config.get("api", {}).get("certFile", "")) > 0
+    )
+    protocol = "https" if is_secure else "http"
+
+    # Get configured hostname and frontend port
+    hostname = app_config.get("api", {}).get("hostname", "localhost")
+    frontend_port = app_config.get("frontend", {}).get("port", 3000)
+    base_url = f"{protocol}://{hostname}:{frontend_port}"
+
+    print(f"📧 Sending password reset emails to {len(user_migrations)} users...")
+
+    success_count = 0
+    failed_users = []
+
+    for migration in user_migrations:
+        reset_url = f"{base_url}/reset-password?token={migration['reset_token']}"
+
+        # Email content
+        subject = "Password Reset Required - SysManage Salt Update"
+
+        body = f"""Hello,
+
+Your SysManage account password has been reset due to a security configuration update.
+
+To set a new password, please click the following link:
+{reset_url}
+
+This link will expire in 24 hours.
+
+If you have any questions, please contact your system administrator.
+
+--
+SysManage System"""
+
+        html_body = f"""<html>
+<body>
+<p>Hello,</p>
+
+<p>Your SysManage account password has been reset due to a security configuration update.</p>
+
+<p>To set a new password, please click the following link:</p>
+<p><a href="{reset_url}">Set New Password</a></p>
+
+<p>This link will expire in 24 hours.</p>
+
+<p>If you have any questions, please contact your system administrator.</p>
+
+<hr>
+<p><em>SysManage System</em></p>
+</body>
+</html>"""
+
+        success = email_service.send_email(
+            to_addresses=[migration['userid']],
+            subject=subject,
+            body=body,
+            html_body=html_body
+        )
+
+        if success:
+            success_count += 1
+            print(f"   ✓ Email sent to {migration['userid']}")
+        else:
+            failed_users.append(migration['userid'])
+            print(f"   ✗ Failed to send email to {migration['userid']}")
+
+    print(f"\n📈 Email Results:")
+    print(f"   Successfully sent: {success_count}")
+    print(f"   Failed to send: {len(failed_users)}")
+
+    if failed_users:
+        print(f"\n[WARNING] Failed to send emails to the following users:")
+        for user in failed_users:
+            print(f"   - {user}")
+        print("   These users will need to request password reset manually through the UI")
+
+    return success_count > 0
+
+
 def migrate_user_passwords(old_salt, new_salt, dry_run=False):
     """Migrate user passwords from old salt to new salt."""
     users = get_database_users()
@@ -282,19 +395,19 @@ def migrate_user_passwords(old_salt, new_salt, dry_run=False):
         })
 
         if dry_run:
-            print(f"   - {userid} (ID: {user_id}) -> would get temporary password")
+            print(f"   - {userid} (ID: {user_id}) -> would receive password reset email")
         else:
             print(f"   - {userid} (ID: {user_id})")
 
     if dry_run:
-        print("[INFO] DRY RUN: Would generate temporary passwords for all users after salt change")
+        print("[INFO] DRY RUN: Would reset passwords and send password reset emails to all users")
         return migrations
 
-    print("[WARNING]  WARNING: Changing password salt will give all users new temporary passwords!")
+    print("[WARNING]  WARNING: Changing password salt will reset all user passwords!")
     print("   After running this script:")
-    print("   1. Users will receive new temporary passwords (shown below)")
-    print("   2. Users must log in with their temporary password")
-    print("   3. Users should immediately change their password in the UI")
+    print("   1. All user passwords will be reset to secure defaults")
+    print("   2. Password reset emails will be sent to users (if email is enabled)")
+    print("   3. Users must use the reset links to set new passwords")
 
     confirm = input("Continue with password salt migration? (yes/no): ")
     if confirm.lower() != 'yes':
@@ -318,14 +431,25 @@ def migrate_user_passwords(old_salt, new_salt, dry_run=False):
                     # Use a known invalid hash that forces password reset through UI
                     user.hashed_password = "RESET_REQUIRED_" + base64.b64encode(secrets.token_bytes(16)).decode()
                     user.is_locked = False  # Ensure user can use password reset
+
+                    # Create password reset token for this user
+                    reset_token = create_password_reset_token(user.id, session)
+                    migration['reset_token'] = reset_token
+
             session.commit()
 
             print(f"\n[OK] Updated {len(migrations)} users - passwords reset to secure defaults")
-            print("\n[KEY] PASSWORD RESET NOTIFICATION:")
-            print("   All user passwords have been reset for security.")
-            print("   Users should use the 'Forgot Password' feature to set new passwords.")
-            print("   Alternatively, admins can manually reset passwords through the UI.")
-            print("\n[WARNING]  Users MUST change temporary passwords immediately after logging in!")
+
+            # Send password reset emails if email service is enabled
+            if email_service.is_enabled():
+                send_password_reset_emails(migrations, app_config)
+            else:
+                print("\n[KEY] PASSWORD RESET NOTIFICATION:")
+                print("   All user passwords have been reset for security.")
+                print("   Email service is not enabled - users must use the 'Forgot Password' feature manually.")
+                print("   Alternatively, admins can manually reset passwords through the UI.")
+
+            print("\n[WARNING]  Users MUST set new passwords using the password reset links!")
 
     except Exception as e:
         print(f"[ERROR] Error updating user accounts: {e}")

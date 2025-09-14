@@ -36,13 +36,26 @@ function processError(error: AxiosError) {
 const doAddUser = async (active: boolean, userid: string, password: string, firstName?: string, lastName?: string) => {
     let result = {} as SysManageUser;
 
-    await api.post("/api/user", {
+    // Build the request payload
+    const payload: {
+        active: boolean;
+        userid: string;
+        first_name: string | null;
+        last_name: string | null;
+        password?: string;
+    } = {
         'active': active,
         'userid': userid,
-        'password': password,
         'first_name': firstName || null,
         'last_name': lastName || null,
-      })
+    };
+
+    // Only include password if it's provided and not empty
+    if (password && password.trim() !== '') {
+        payload['password'] = password;
+    }
+
+    await api.post("/api/user", payload)
     .then((response) => {
         // No error - process response
         result = response.data;

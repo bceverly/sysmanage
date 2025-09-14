@@ -353,10 +353,10 @@ const Users = () => {
                         const formData = new FormData(event.currentTarget);
                         const formJson = Object.fromEntries(formData.entries());
                         doAddUser(
-                            true, 
-                            formJson.email as string, 
-                            formJson.password as string, 
-                            formJson.firstName as string, 
+                            true,
+                            formJson.email as string,
+                            '', // No password - will be set via email
+                            formJson.firstName as string,
                             formJson.lastName as string
                         )
                         .then((result) => {
@@ -395,6 +395,9 @@ const Users = () => {
                     <DialogContentText>
                         {t('users.enterInfo', { defaultValue: 'Enter the new user\'s information below.' })}
                     </DialogContentText>
+                    <DialogContentText sx={{ mt: 2, fontSize: '0.875rem', color: 'text.secondary' }}>
+                        {t('users.emailNotification', { defaultValue: 'An email will be sent to the user with a secure link to set their initial password.' })}
+                    </DialogContentText>
                     <Box component="section">&nbsp;</Box>
                     <TextField
                         autoFocus
@@ -432,17 +435,6 @@ const Users = () => {
                         name="lastName"
                         label={t('users.lastName', 'Last Name')}
                         type="text"
-                        variant="standard"
-                    />
-                    <Box component="section">&nbsp;</Box>
-                    <TextField
-                        required
-                        fullWidth
-                        margin="normal"
-                        id="password"
-                        name="password"
-                        label={t('login.password')}
-                        type="password"
                         variant="standard"
                     />
                 </DialogContent>

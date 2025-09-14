@@ -57,6 +57,38 @@ try:
             config["message_queue"]["expiration_timeout_minutes"] = 60
         if not "cleanup_interval_minutes" in config["message_queue"].keys():
             config["message_queue"]["cleanup_interval_minutes"] = 30
+
+        # Email settings
+        if not "email" in config.keys():
+            config["email"] = {}
+        if not "enabled" in config["email"].keys():
+            config["email"]["enabled"] = False
+        if not "smtp" in config["email"].keys():
+            config["email"]["smtp"] = {}
+        if not "host" in config["email"]["smtp"].keys():
+            config["email"]["smtp"]["host"] = "localhost"
+        if not "port" in config["email"]["smtp"].keys():
+            config["email"]["smtp"]["port"] = 587
+        if not "use_tls" in config["email"]["smtp"].keys():
+            config["email"]["smtp"]["use_tls"] = True
+        if not "use_ssl" in config["email"]["smtp"].keys():
+            config["email"]["smtp"]["use_ssl"] = False
+        if not "username" in config["email"]["smtp"].keys():
+            config["email"]["smtp"]["username"] = ""
+        if not "password" in config["email"]["smtp"].keys():
+            config["email"]["smtp"][
+                "password"
+            ] = ""  # nosec B105 - empty default, not a hardcoded password
+        if not "timeout" in config["email"]["smtp"].keys():
+            config["email"]["smtp"]["timeout"] = 30
+        if not "from_address" in config["email"].keys():
+            config["email"]["from_address"] = "noreply@localhost"
+        if not "from_name" in config["email"].keys():
+            config["email"]["from_name"] = "SysManage System"
+        if not "templates" in config["email"].keys():
+            config["email"]["templates"] = {}
+        if not "subject_prefix" in config["email"]["templates"].keys():
+            config["email"]["templates"]["subject_prefix"] = "[SysManage]"
 except yaml.YAMLError as exc:
     if hasattr(exc, "problem_mark"):
         mark = exc.problem_mark
@@ -113,3 +145,24 @@ def get_log_file():
     Get the log file path if specified.
     """
     return config["logging"].get("file")
+
+
+def get_email_config():
+    """
+    Get the complete email configuration.
+    """
+    return config["email"]
+
+
+def is_email_enabled():
+    """
+    Check if email functionality is enabled.
+    """
+    return config["email"]["enabled"]
+
+
+def get_smtp_config():
+    """
+    Get SMTP server configuration.
+    """
+    return config["email"]["smtp"]

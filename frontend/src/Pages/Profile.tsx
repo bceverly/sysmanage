@@ -221,8 +221,7 @@ const Profile: React.FC = () => {
                 window.URL.revokeObjectURL(profileImageUrl);
             }
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [profileImageUrl]);
 
     const handleSave = async () => {
         try {

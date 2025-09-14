@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 
@@ -9,21 +9,34 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 
 import api from "../Services/api"
 import LanguageSelector from "../Components/LanguageSelector"
+import ForgotPasswordDialog from "../Components/ForgotPasswordDialog"
+import { saveRememberedEmail, getRememberedEmail, clearRememberedEmail } from "../utils/cookieUtils"
 
 const Login = () => {
     const [input, setInput] = useState({
       userid: "",
       password: "",
     });
+    const [rememberMe, setRememberMe] = useState(false);
+    const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
     const navigate = useNavigate();
     const { t } = useTranslation();
+
+    // Load remembered email on component mount
+    useEffect(() => {
+      const rememberedEmail = getRememberedEmail();
+      if (rememberedEmail) {
+        setInput(prev => ({ ...prev, userid: rememberedEmail }));
+        setRememberMe(true);
+      }
+    }, []);
+
     const handleSubmitEvent = (e: { preventDefault: () => void; }) => {
       e.preventDefault();
       if (input.userid !== "" && input.password !== "") {
@@ -35,6 +48,13 @@ const Login = () => {
           if (response.data.Authorization) {
             localStorage.setItem("userid", input.userid);
             localStorage.setItem("bearer_token", response.data.Authorization);
+
+            // Handle Remember Me functionality
+            if (rememberMe) {
+              saveRememberedEmail(input.userid);
+            } else {
+              clearRememberedEmail();
+            }
           }
 
           navigate("/");
@@ -94,6 +114,7 @@ const Login = () => {
             id="userid"
             label={t('login.username')}
             name="userid"
+            value={input.userid}
             autoComplete="email"
             autoFocus
             onChange={handleInput}
@@ -113,11 +134,18 @@ const Login = () => {
             label={t('login.password')}
             type="password"
             id="password"
+            value={input.password}
             autoComplete="current-password"
             onChange={handleInput}
           />
           <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
+            control={
+              <Checkbox
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                color="primary"
+              />
+            }
             label={t('login.remember', { defaultValue: 'Remember me' })}
           />
           <Button
@@ -128,21 +156,26 @@ const Login = () => {
           >
             {t('login.submit')}
           </Button>
-          <Grid container>
-            <Grid item xs>
-              <Link href="#" variant="body2">
-                {t('login.forgotPassword', { defaultValue: 'Forgot password?' })}
-              </Link>
-            </Grid>
-            <Grid item>
-              <Link href="#" variant="body2">
-                {t('login.signUp', { defaultValue: "Don't have an account? Sign Up" })}
-              </Link>
-            </Grid>
-          </Grid>
+          <Box sx={{ textAlign: 'center', mt: 2 }}>
+            <Link
+              component="button"
+              variant="body2"
+              onClick={(e) => {
+                e.preventDefault();
+                setForgotPasswordOpen(true);
+              }}
+            >
+              {t('login.forgotPassword', { defaultValue: 'Forgot password?' })}
+            </Link>
+          </Box>
         </Box>
       </Box>
     </Container>
+
+    <ForgotPasswordDialog
+      open={forgotPasswordOpen}
+      onClose={() => setForgotPasswordOpen(false)}
+    />
     </>
   );
 };

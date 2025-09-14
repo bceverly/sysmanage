@@ -24,8 +24,10 @@ from backend.api import (
     certificates,
     config_management,
     diagnostics,
+    email,
     fleet,
     host,
+    password_reset,
     profile,
     queue,
     scripts,
@@ -327,12 +329,16 @@ app.include_router(host.public_router)  # /host/register (no auth)
 app.include_router(
     certificates.public_router
 )  # /certificates/server-fingerprint, /certificates/ca-certificate (no auth)
+app.include_router(
+    password_reset.router
+)  # /forgot-password, /reset-password, /validate-reset-token (no auth)
 
 # Secure routes (with /api prefix and JWT authentication required)
 app.include_router(user.router, prefix="/api", tags=["users"])
 app.include_router(fleet.router, prefix="/api", tags=["fleet"])
 app.include_router(config_management.router, prefix="/api", tags=["config"])
 app.include_router(diagnostics.router, prefix="/api", tags=["diagnostics"])
+app.include_router(email.router, prefix="/api", tags=["email"])
 app.include_router(profile.router, prefix="/api", tags=["profile"])
 app.include_router(updates.router, prefix="/api/updates", tags=["updates"])
 app.include_router(scripts.router, prefix="/api/scripts", tags=["scripts"])
@@ -347,6 +353,9 @@ app.include_router(
 app.include_router(
     security.router, prefix="/api", tags=["security"]
 )  # /api/security/* (with auth)
+app.include_router(
+    password_reset.admin_router, prefix="/api", tags=["password_reset"]
+)  # /api/admin/reset-user-password (with auth)
 
 
 @app.get("/")

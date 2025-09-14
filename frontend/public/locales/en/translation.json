@@ -101,6 +101,7 @@
     "editUser": "Edit User",
     "enterInfo": "Enter the new user's information below.",
     "editInfo": "Edit the user's information below.",
+    "emailNotification": "An email will be sent to the user with a secure link to set their initial password.",
     "emailUnique": "Email address must be unique",
     "newPassword": "Enter new password",
     "locked": "Locked",
@@ -616,5 +617,48 @@
     "messageId": "Message ID",
     "messageContent": "Message Content",
     "placeholder": "Queue management interface will be implemented here."
+  },
+  "forgotPassword": {
+    "title": "Forgot Password",
+    "description": "Enter your email address and we'll send you a link to reset your password.",
+    "emailLabel": "Email Address",
+    "emailRequired": "Email is required",
+    "sendReset": "Send Reset Link",
+    "sending": "Sending...",
+    "error": "An error occurred while processing your request",
+    "emailSent": "Email Sent",
+    "checkEmail": "If an account with that email exists, a password reset link has been sent. Please check your email and follow the instructions to reset your password.",
+    "didntReceive": "Didn't receive an email? Check your spam folder or try again."
+  },
+  "resetPassword": {
+    "title": "Reset Your Password",
+    "description": "Please enter your new password below.",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "resetButton": "Reset Password",
+    "resetting": "Resetting Password...",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters long",
+    "fillAllFields": "Please fill in all fields",
+    "resetError": "An error occurred while resetting your password",
+    "successTitle": "Password Reset Complete",
+    "successMessage": "Your password has been successfully reset. You can now log in with your new password.",
+    "redirecting": "Redirecting to login page...",
+    "goToLogin": "Go to Login",
+    "backToLogin": "Back to Login",
+    "noToken": "No reset token provided",
+    "invalidToken": "This password reset link is invalid or has expired",
+    "invalidTitle": "Invalid Reset Link",
+    "invalidDescription": "This password reset link is either invalid or has expired. Please request a new password reset.",
+    "validatingToken": "Validating reset token..."
+  },
+  "userDetail": {
+    "resetPassword": "Reset Password",
+    "resettingPassword": "Sending Reset Email...",
+    "passwordResetSuccess": "Password reset email has been sent to {{email}}",
+    "passwordResetError": "Failed to send password reset email. Please try again.",
+    "confirmResetTitle": "Confirm Password Reset",
+    "confirmResetMessage": "Are you sure you want to send a password reset email to {{email}}? This will allow the user to set a new password.",
+    "sendResetEmail": "Send Reset Email"
   }
 }
