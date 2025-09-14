@@ -109,17 +109,15 @@ class WebSocketSecurityManager:
             ).hexdigest()
 
             if not hmac.compare_digest(signature, expected_signature):
-                logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
-                    "Invalid token signature from IP: %s", client_ip
+                logger.warning(
+                    "Invalid token signature from IP", extra={"client_ip": client_ip}
                 )
                 return False, None, _("Invalid token signature")
 
             # Check expiration
             current_time = int(time.time())
             if current_time > payload.get("expires", 0):
-                logger.info(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
-                    "Expired token from IP: %s", client_ip
-                )
+                logger.info("Expired token from IP", extra={"client_ip": client_ip})
                 return False, None, _("Token expired")
 
             # Check IP consistency (allow some flexibility for NAT/proxy scenarios)

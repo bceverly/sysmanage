@@ -679,6 +679,7 @@ const Updates: React.FC = () => {
             <option value="apt">APT</option>
             <option value="snap">Snap</option>
             <option value="flatpak">Flatpak</option>
+            <option value="fwupd">fwupd</option>
             <option value="homebrew">Homebrew</option>
             <option value="winget">Winget</option>
             <option value="chocolatey">Chocolatey</option>
