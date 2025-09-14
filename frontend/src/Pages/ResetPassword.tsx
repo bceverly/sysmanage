@@ -85,7 +85,7 @@ const ResetPassword: React.FC = () => {
 
         // Use constant-time comparison to prevent timing attacks
         const passwordsMatch = password.length === confirmPassword.length &&
-            password.split('').every((char, index) => char === confirmPassword[index]);
+            Array.from(password).every((char, index) => char === Array.from(confirmPassword)[index]);
         if (!passwordsMatch) {
             setError(t('resetPassword.passwordMismatch', 'Passwords do not match'));
             return;

@@ -308,7 +308,7 @@ const HostDetail = () => {
             maximumFractionDigits: unitIndex === 0 ? 0 : 1 
         });
         
-        const unit = (unitIndex >= 0 && unitIndex < units.length) ? units[unitIndex] : 'B';
+        const unit = units.at(unitIndex) ?? 'B';
         return `${formattedSize} ${unit}`;
     };
 

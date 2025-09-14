@@ -136,14 +136,21 @@ const Profile: React.FC = () => {
             errors.push(t('userProfile.passwordNeedsNumber', 'Password must contain at least one number'));
         }
         
-        // Safely escape special characters to prevent regex injection
-        const specialChars = config.special_chars || '';
-        const escapedChars = specialChars.replace(/[\\[\](){}.*+?^$|]/g, '\\$&');
-        // Additional validation to ensure safe regex construction
-        const safeChars = escapedChars.replace(/[^\w\s\\.-]/g, '\\$&');
-        const specialCharsRegex = safeChars ? new RegExp(`[${safeChars}]`) : /(?!)/;
-        if (config.require_special_chars && specialCharsRegex.test(password)) charTypes++;
-        else if (config.require_special_chars && !specialCharsRegex.test(password)) {
+        // Use a predefined safe set of special characters instead of dynamic regex
+        const defaultSpecialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+        const allowedSpecialChars = config.special_chars || defaultSpecialChars;
+        let hasSpecialChar = false;
+
+        // Check each character manually to avoid regex injection
+        for (const char of password) {
+            if (allowedSpecialChars.includes(char)) {
+                hasSpecialChar = true;
+                break;
+            }
+        }
+
+        if (config.require_special_chars && hasSpecialChar) charTypes++;
+        else if (config.require_special_chars && !hasSpecialChar) {
             errors.push(t('userProfile.passwordNeedsSpecial', 'Password must contain at least one special character'));
         }
         

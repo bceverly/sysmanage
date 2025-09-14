@@ -123,10 +123,9 @@ const Users = () => {
 
     const handleUnlock = () => {
         // Call the API to unlock the selected rows
-        for (let i=0 ; i<selection.length ; i++) {
-            const selectedItem = selection[i];
+        selection.forEach((selectedItem) => {
             if (!selectedItem || typeof selectedItem !== 'string' && typeof selectedItem !== 'number') {
-                continue;
+                return;
             }
             let theID = BigInt(selectedItem.toString());
             doUnlockUser(theID).then((updatedUser) => {
@@ -139,7 +138,7 @@ const Users = () => {
             }).catch(error => {
                 console.error('Error unlocking user:', error);
             });
-        }
+        });
         // Clear selection after unlock
         setSelection([]);
     }
@@ -363,13 +362,9 @@ const Users = () => {
                             formJson.lastName as string
                         )
                         .then((result) => {
-                            let newData: SysManageUser[] = [];
-                            for (let i=0 ; i<tableData.length ; i++) {
-                                const dataItem = tableData[i];
-                                if (dataItem && typeof dataItem === 'object' && dataItem.id) {
-                                    newData.push(dataItem);
-                                }
-                            }
+                            const newData: SysManageUser[] = tableData.filter(dataItem =>
+                                dataItem && typeof dataItem === 'object' && dataItem.id
+                            );
                             const newRow: SysManageUser = {
                                 id: result.id,
                                 active: result.active,
