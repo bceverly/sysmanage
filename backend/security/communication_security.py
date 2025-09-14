@@ -140,8 +140,7 @@ class WebSocketSecurityManager:
 
         except (json.JSONDecodeError, KeyError, ValueError):
             logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
-                           "Malformed token from IP ", 
-                           extra={"client_ip": client_ip}
+                "Malformed token from IP ", extra={"client_ip": client_ip}
             )
             return False, None, _("Malformed token")
 
