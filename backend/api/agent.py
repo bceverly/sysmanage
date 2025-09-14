@@ -81,9 +81,9 @@ async def agent_connect(websocket: WebSocket):
 
     # Check for authentication token in query parameters
     auth_token = websocket.query_params.get("token")
-    logger.info(
+    logger.info(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
         "Auth token present: %s", bool(auth_token)
-    )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+    )
     connection_id = None
 
     if auth_token:
@@ -95,18 +95,18 @@ async def agent_connect(websocket: WebSocket):
         if not is_valid and error_msg:
             logger.debug("Token validation error details available")
         if not is_valid:
-            logger.warning(
+            logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
                 "WEBSOCKET_PROTOCOL_ERROR: Authentication failed from %s",
                 client_host,
-            )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+            )
             await websocket.close(
                 code=4001, reason=_("Authentication failed: %s") % error_msg
             )
             return
     else:
-        logger.warning(
+        logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             "WEBSOCKET_PROTOCOL_ERROR: No auth token provided from %s", client_host
-        )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+        )
         await websocket.close(code=4000, reason=_("Authentication token required"))
         return
 

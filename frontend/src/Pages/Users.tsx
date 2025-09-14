@@ -125,7 +125,10 @@ const Users = () => {
         // Call the API to unlock the selected rows
         for (let i=0 ; i<selection.length ; i++) {
             const selectedItem = selection[i];
-            let theID = selectedItem ? BigInt(selectedItem.toString()) : BigInt(0);
+            if (!selectedItem || typeof selectedItem !== 'string' && typeof selectedItem !== 'number') {
+                continue;
+            }
+            let theID = BigInt(selectedItem.toString());
             doUnlockUser(theID).then((updatedUser) => {
                 // Update the tableData with the new status
                 setTableData(prevData => 
@@ -363,7 +366,7 @@ const Users = () => {
                             let newData: SysManageUser[] = [];
                             for (let i=0 ; i<tableData.length ; i++) {
                                 const dataItem = tableData[i];
-                                if (dataItem) {
+                                if (dataItem && typeof dataItem === 'object' && dataItem.id) {
                                     newData.push(dataItem);
                                 }
                             }

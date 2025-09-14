@@ -56,7 +56,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ theme = 'dark' }) =
       'hi-IN': 'hi'
     };
     
-    return Object.prototype.hasOwnProperty.call(langMap, browserLang) ? langMap[browserLang] : 'en';
+    return browserLang in langMap ? langMap[browserLang as keyof typeof langMap] : 'en';
   };
 
   useEffect(() => {

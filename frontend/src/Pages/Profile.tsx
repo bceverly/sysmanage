@@ -137,8 +137,11 @@ const Profile: React.FC = () => {
         }
         
         // Safely escape special characters to prevent regex injection
-        const escapedChars = (config.special_chars || '').replace(/[\\[\](){}.*+?^$|]/g, '\\$&');
-        const specialCharsRegex = new RegExp(`[${escapedChars}]`);
+        const specialChars = config.special_chars || '';
+        const escapedChars = specialChars.replace(/[\\[\](){}.*+?^$|]/g, '\\$&');
+        // Additional validation to ensure safe regex construction
+        const safeChars = escapedChars.replace(/[^\w\s\\.-]/g, '\\$&');
+        const specialCharsRegex = safeChars ? new RegExp(`[${safeChars}]`) : /(?!)/;
         if (config.require_special_chars && specialCharsRegex.test(password)) charTypes++;
         else if (config.require_special_chars && !specialCharsRegex.test(password)) {
             errors.push(t('userProfile.passwordNeedsSpecial', 'Password must contain at least one special character'));

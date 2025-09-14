@@ -109,17 +109,17 @@ class WebSocketSecurityManager:
             ).hexdigest()
 
             if not hmac.compare_digest(signature, expected_signature):
-                logger.warning(
+                logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
                     "Invalid token signature from IP: %s", client_ip
-                )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+                )
                 return False, None, _("Invalid token signature")
 
             # Check expiration
             current_time = int(time.time())
             if current_time > payload.get("expires", 0):
-                logger.info(
+                logger.info(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
                     "Expired token from IP: %s", client_ip
-                )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+                )
                 return False, None, _("Token expired")
 
             # Check IP consistency (allow some flexibility for NAT/proxy scenarios)
@@ -139,9 +139,9 @@ class WebSocketSecurityManager:
             return True, connection_id, "Token valid"
 
         except (json.JSONDecodeError, KeyError, ValueError):
-            logger.warning(
+            logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
                 "Malformed token from IP %s", client_ip
-            )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+            )
             return False, None, _("Malformed token")
 
     def validate_message_integrity(

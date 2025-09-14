@@ -169,8 +169,8 @@ like to add:
     newer servers and degrade gracefully.
 
 27. User Management - Ability to manage
-    add/edit/delete users of SysManage
-    with email integration.
+    add/edit/delete users and groups on
+    the agent hosts.
 
 28. ~~Get a proper logo~~
 

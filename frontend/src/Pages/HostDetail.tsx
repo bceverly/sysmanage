@@ -308,7 +308,8 @@ const HostDetail = () => {
             maximumFractionDigits: unitIndex === 0 ? 0 : 1 
         });
         
-        return `${formattedSize} ${unitIndex < units.length ? units[unitIndex] : 'B'}`;
+        const unit = (unitIndex >= 0 && unitIndex < units.length) ? units[unitIndex] : 'B';
+        return `${formattedSize} ${unit}`;
     };
 
     // Utility function to calculate and format capacity with percentage free
