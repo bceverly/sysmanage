@@ -34,7 +34,7 @@ platformdirs==4.4.0
 pluggy==1.6.0
 psycopg2-binary==2.9.10
 argon2-cffi==23.1.0
-pycparser==2.22
+pycparser==2.23
 pydantic>=2.6.0,<2.10.0
 pydantic-extra-types==2.10.5
 pydantic-settings==2.10.1
