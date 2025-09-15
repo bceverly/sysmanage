@@ -46,6 +46,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import axiosInstance from '../Services/api';
 
 import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService } from '../Services/hosts';
 
@@ -204,14 +205,10 @@ const HostDetail = () => {
         if (!hostId) return;
         
         try {
-            const response = await window.fetch(`/api/hosts/${hostId}/tags`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
-                },
-            });
+            const response = await axiosInstance.get(`/api/hosts/${hostId}/tags`);
             
-            if (response.ok) {
-                const tags = await response.json();
+            if (response.status === 200) {
+                const tags = response.data;
                 setHostTags(tags);
             }
         } catch (error) {
@@ -221,14 +218,10 @@ const HostDetail = () => {
 
     const loadAvailableTags = useCallback(async () => {
         try {
-            const response = await window.fetch('/api/tags', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
-                },
-            });
+            const response = await axiosInstance.get('/api/tags');
             
-            if (response.ok) {
-                const allTags = await response.json();
+            if (response.status === 200) {
+                const allTags = response.data;
                 // Filter out tags that are already assigned to this host
                 const available = allTags.filter((tag: {id: number, name: string, description: string | null}) => 
                     !hostTags.some(hostTag => hostTag.id === tag.id)
