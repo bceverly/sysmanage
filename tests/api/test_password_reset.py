@@ -796,7 +796,9 @@ class TestEmailTemplateGeneration:
     @patch("backend.api.password_reset.email_service.is_enabled")
     @patch("backend.api.password_reset.email_service.send_email")
     @patch("backend.config.config.get_config")
-    def test_send_password_reset_email(self, mock_config, mock_send_email, mock_is_enabled, mock_hostname):
+    def test_send_password_reset_email(
+        self, mock_config, mock_send_email, mock_is_enabled, mock_hostname
+    ):
         """Test password reset email generation."""
         from backend.api.password_reset import send_password_reset_email
         from fastapi import Request
@@ -837,7 +839,9 @@ class TestEmailTemplateGeneration:
     @patch("backend.api.password_reset.email_service.is_enabled")
     @patch("backend.api.password_reset.email_service.send_email")
     @patch("backend.config.config.get_config")
-    def test_send_initial_setup_email(self, mock_config, mock_send_email, mock_is_enabled, mock_hostname):
+    def test_send_initial_setup_email(
+        self, mock_config, mock_send_email, mock_is_enabled, mock_hostname
+    ):
         """Test initial setup email generation."""
         from backend.api.password_reset import send_initial_setup_email
         from fastapi import Request
