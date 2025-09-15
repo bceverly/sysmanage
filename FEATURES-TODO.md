@@ -317,14 +317,14 @@ like to add:
     JPG, GIF and other easily managed
     common graphics format.~~
 
-44. The agent should be able to run as
+44. ~~The agent should be able to run as
     a "regular" user account but have
     limitations imposed on it (can't
     run scripts as root, etc.) and it
     should also be able to run as root
     but that should require "extra"
     configuration effort on the part
-    of the person deploying it.
+    of the person deploying it.~~
 
 45. ~~For the server and the agent, add
     a debug log verbosity level feature
