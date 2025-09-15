@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Allow writing to update README badge
+      pull-requests: write  # Allow creating pull requests
     
     services:
       postgres:
@@ -109,21 +110,42 @@ jobs:
         echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
         echo "Coverage: $COVERAGE%"
 
+        # Determine color based on coverage
+        if [ $COVERAGE -ge 90 ]; then
+          COLOR="brightgreen"
+        elif [ $COVERAGE -ge 80 ]; then
+          COLOR="green"
+        elif [ $COVERAGE -ge 70 ]; then
+          COLOR="yellowgreen"
+        elif [ $COVERAGE -ge 60 ]; then
+          COLOR="yellow"
+        elif [ $COVERAGE -ge 40 ]; then
+          COLOR="orange"
+        else
+          COLOR="red"
+        fi
+        echo "color=$COLOR" >> $GITHUB_OUTPUT
+        echo "Badge color: $COLOR"
+
     - name: Update README badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
-        sed -i "s/test%20coverage-[0-9]*%25/test%20coverage-${{ steps.coverage.outputs.percentage }}%25/g" README.md
+        sed -i "s/test%20coverage-[0-9]*%25-[a-z]*/test%20coverage-${{ steps.coverage.outputs.percentage }}%25-${{ steps.coverage.outputs.color }}/g" README.md
 
-    - name: Commit updated README
+    - name: Create Pull Request for coverage badge update
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add README.md
-        if ! git diff --staged --quiet; then
-          git commit -m "Update test coverage badge to ${{ steps.coverage.outputs.percentage }}% [skip ci]"
-          git push
-        fi
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "Update test coverage badge to ${{ steps.coverage.outputs.percentage }}% [skip ci]"
+        title: "Update test coverage badge to ${{ steps.coverage.outputs.percentage }}%"
+        body: |
+          Automated update of test coverage badge based on latest test results.
+
+          Coverage: ${{ steps.coverage.outputs.percentage }}%
+          Badge color: ${{ steps.coverage.outputs.color }}
+        branch: update-coverage-badge-${{ github.run_number }}
+        delete-branch: true
 
     - name: Upload backend coverage to Codecov
       uses: codecov/codecov-action@v5

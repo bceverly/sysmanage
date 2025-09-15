@@ -162,7 +162,7 @@ except Exception as e:
 # Configure logging with UTC timestamp formatter
 startup_logger.info("=== CONFIGURING LOGGING ===")
 # Ensure logs directory exists
-logs_dir = "logs"
+logs_dir = "logs"  # pylint: disable=invalid-name
 startup_logger.info("Creating logs directory: %s", logs_dir)
 os.makedirs(logs_dir, exist_ok=True)
 startup_logger.info("Logs directory exists: %s", os.path.exists(logs_dir))
@@ -173,7 +173,7 @@ startup_logger.info("Added console handler")
 
 try:
     # Try to add file handler, but fallback gracefully if permission denied
-    log_file = "logs/backend.log"
+    log_file = "logs/backend.log"  # pylint: disable=invalid-name
     startup_logger.info("Attempting to create file handler for: %s", log_file)
     file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
     handlers.append(file_handler)
@@ -636,7 +636,7 @@ startup_logger.info("=== ALL ROUTES REGISTERED ===")
 
 # Log all registered routes for debugging
 startup_logger.info("=== ROUTE SUMMARY ===")
-route_count = 0
+route_count = 0  # pylint: disable=invalid-name
 for route in app.routes:
     if hasattr(route, "path") and hasattr(route, "methods"):
         startup_logger.info("Route: %s %s", list(route.methods), route.path)
@@ -725,8 +725,8 @@ if __name__ == "__main__":
     # Prepare uvicorn configuration
     host = app_config["api"]["host"]
     port = app_config["api"]["port"]
-    ws_ping_interval = 60.0
-    ws_ping_timeout = 60.0
+    ws_ping_interval = 60.0  # pylint: disable=invalid-name
+    ws_ping_timeout = 60.0  # pylint: disable=invalid-name
 
     startup_logger.info("=== UVICORN CONFIGURATION ===")
     startup_logger.info("Host: %s", host)
@@ -739,10 +739,8 @@ if __name__ == "__main__":
     # Test network binding before starting
     startup_logger.info("=== NETWORK BINDING TEST ===")
     try:
-        import socket as test_socket
-
-        test_sock = test_socket.socket(test_socket.AF_INET, test_socket.SOCK_STREAM)
-        test_sock.setsockopt(test_socket.SOL_SOCKET, test_socket.SO_REUSEADDR, 1)
+        test_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        test_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         startup_logger.info("Testing bind to %s:%s", host, port)
         test_sock.bind((host, port))
         test_sock.close()

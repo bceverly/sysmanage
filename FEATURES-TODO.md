@@ -285,7 +285,13 @@ like to add:
 40. We need a reporting infrastructure
     in the server UI that allows us to
     run reports and then turn them into
-    PDF files.
+    PDF files.  The first report will
+    be a host status report that lists
+    all of the hosts with the OS name,
+    version, number of needed security
+    updates and number of needed system
+    updates as well as whether a reboot
+    is needed.
 
 ~~41. We need a password reset capability
     that uses email.  We should confirm
@@ -424,3 +430,17 @@ like to add:
     migrations and do all necessary
     string externalization /
     translation.
+
+52. Master Ubuntu Pro Key - Add a
+    settings sub-tab for Ubuntu Pro
+    where you can save a master key
+    that can be used to enroll a
+    remote host into pro using the
+    stored key.  Obviously we will
+    need to add an alembic database
+    migration script to modify the
+    schema.  For the existing
+    dialog for enrolling a remote
+    host into pro, if there is a
+    master key, pre-fill the dialog
+    entry field with it
