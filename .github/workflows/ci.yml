@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Allow writing to update README badge
+      pull-requests: write  # Allow creating pull requests
     
     services:
       postgres:
