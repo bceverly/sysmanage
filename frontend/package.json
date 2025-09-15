@@ -10,7 +10,7 @@
     "@fontsource/roboto": "^5.0.13",
     "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^5.15.19",
-    "@mui/material": "^5.15.19",
+    "@mui/material": "^7.3.2",
     "@mui/system": "^5.15.19",
     "@mui/x-charts": "^7.6.0",
     "@mui/x-data-grid": "^7.5.1",
