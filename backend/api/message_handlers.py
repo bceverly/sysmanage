@@ -82,7 +82,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):
             if is_privileged is not None:
                 update_values["is_agent_privileged"] = is_privileged
 
-            # NOTE: Script execution status should not be updated from system_info messages  
+            # NOTE: Script execution status should not be updated from system_info messages
             # This prevents agent registration from overwriting the server-configured setting
             # Script execution capability should only be set through explicit admin configuration
             # or during initial host creation, not during agent reconnection/registration

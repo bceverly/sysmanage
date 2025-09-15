@@ -5,14 +5,13 @@
 import '@testing-library/jest-dom';
 import './__tests__/setup';
 
-// Fix for React 18 Scheduler compatibility in JSDOM environment
-// This addresses the "Cannot read properties of undefined (reading 'S')" error
+// Fix for React 19 compatibility in JSDOM environment
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean;
 }
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
-// Polyfill for React 18's scheduler in test environment
+// Polyfill for React 19's scheduler in test environment
 Object.defineProperty(window, 'MessageChannel', {
   writable: true,
   value: class MessageChannel {
@@ -26,3 +25,21 @@ Object.defineProperty(window, 'MessageChannel', {
     }
   }
 });
+
+// React 19 specific polyfills for test environment
+if (typeof globalThis !== 'undefined') {
+  // Ensure Scheduler is available
+  Object.defineProperty(globalThis, 'Scheduler', {
+    writable: true,
+    value: {
+      unstable_scheduleCallback: (callback: () => void) => setTimeout(callback, 0),
+      unstable_cancelCallback: () => {},
+      unstable_shouldYield: () => false,
+      unstable_requestPaint: () => {},
+      unstable_runWithPriority: (_priority: unknown, callback: () => void) => callback(),
+      get unstable_now() {
+        return (typeof globalThis.performance !== 'undefined' && globalThis.performance.now) || Date.now;
+      }
+    }
+  });
+}
