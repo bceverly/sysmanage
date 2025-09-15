@@ -328,11 +328,9 @@ async def register_host(registration_data: HostRegistration):
                 existing_host.ipv6 = registration_data.ipv6
                 existing_host.last_access = datetime.now(timezone.utc)
 
-                # Update script execution capability if provided
-                if registration_data.script_execution_enabled is not None:
-                    existing_host.script_execution_enabled = (
-                        registration_data.script_execution_enabled
-                    )
+                # NOTE: Script execution capability should not be overwritten during re-registration
+                # This prevents agents from overwriting server-configured script execution settings
+                # Script execution should only be set through explicit admin configuration
 
                 print(
                     f"Before commit - FQDN: {existing_host.fqdn}, Active: {existing_host.active}"
@@ -358,9 +356,9 @@ async def register_host(registration_data: HostRegistration):
         )
         host.approval_status = "pending"
 
-        # Set script execution capability if provided
-        if registration_data.script_execution_enabled is not None:
-            host.script_execution_enabled = registration_data.script_execution_enabled
+        # NOTE: Script execution capability defaults to False for new hosts
+        # This should only be enabled through explicit admin configuration after registration
+        host.script_execution_enabled = False
         session.add(host)
         session.commit()
         session.refresh(host)
