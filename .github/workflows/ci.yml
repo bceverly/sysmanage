@@ -14,7 +14,7 @@ jobs:
     name: Backend Tests
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write  # Allow writing to update README badge
     
     services:
       postgres:
@@ -95,6 +95,35 @@ jobs:
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+    - name: Extract coverage percentage
+      id: coverage
+      run: |
+        COVERAGE=$(python -c "
+        import xml.etree.ElementTree as ET
+        tree = ET.parse('coverage.xml')
+        root = tree.getroot()
+        coverage = float(root.attrib['line-rate']) * 100
+        print(f'{coverage:.0f}')
+        ")
+        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
+        echo "Coverage: $COVERAGE%"
+
+    - name: Update README badge
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        sed -i "s/test%20coverage-[0-9]*%25/test%20coverage-${{ steps.coverage.outputs.percentage }}%25/g" README.md
+
+    - name: Commit updated README
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add README.md
+        if ! git diff --staged --quiet; then
+          git commit -m "Update test coverage badge to ${{ steps.coverage.outputs.percentage }}% [skip ci]"
+          git push
+        fi
 
     - name: Upload backend coverage to Codecov
       uses: codecov/codecov-action@v5
