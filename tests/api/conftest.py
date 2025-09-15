@@ -161,6 +161,21 @@ def test_db():
         )
         created_at = Column(DateTime, nullable=False)
 
+    # Create test version of PasswordResetToken model with Integer ID for SQLite compatibility
+    class PasswordResetToken(TestBase):
+        __tablename__ = "password_reset_tokens"
+        id = Column(
+            Integer, primary_key=True, index=True, autoincrement=True
+        )  # Changed from BigInteger
+        user_id = Column(
+            Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+        )
+        token = Column(String(255), unique=True, nullable=False, index=True)
+        created_at = Column(DateTime, nullable=False)
+        expires_at = Column(DateTime, nullable=False)
+        used_at = Column(DateTime, nullable=True)
+        is_used = Column(Boolean, default=False, nullable=False)
+
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)
 
@@ -169,10 +184,12 @@ def test_db():
     original_user = models.User
     original_tag = models.Tag
     original_host_tag = models.HostTag
+    original_password_reset_token = models.PasswordResetToken
     models.Host = Host
     models.User = User
     models.Tag = Tag
     models.HostTag = HostTag
+    models.PasswordResetToken = PasswordResetToken
 
     # Override the get_engine dependency
     def override_get_engine():
@@ -206,6 +223,7 @@ def test_db():
     models.User = original_user
     models.Tag = original_tag
     models.HostTag = original_host_tag
+    models.PasswordResetToken = original_password_reset_token
 
     # Clean up database connections
     test_engine.dispose()  # Close all connections in the connection pool

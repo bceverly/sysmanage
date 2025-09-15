@@ -8,10 +8,11 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from argon2 import PasswordHasher
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import sessionmaker
 
+from backend.auth.auth_bearer import JWTBearer
 from backend.config import config
 from backend.i18n import _
 from backend.persistence import db, models
@@ -394,7 +395,9 @@ async def validate_reset_token(token: str) -> PasswordResetResponse:
     return PasswordResetResponse(success=True, message=_("Token is valid"))
 
 
-@admin_router.post("/admin/reset-user-password/{user_id}")
+@admin_router.post(
+    "/admin/reset-user-password/{user_id}", dependencies=[Depends(JWTBearer())]
+)
 async def admin_reset_user_password(
     user_id: int, request: Request
 ) -> PasswordResetResponse:
