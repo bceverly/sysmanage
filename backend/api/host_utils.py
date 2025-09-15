@@ -394,3 +394,68 @@ async def update_or_create_host(
     db_session.commit()
     db_session.refresh(host)
     return host
+
+
+def get_host_ubuntu_pro_info(host_id: int) -> Dict[str, Any]:
+    """Get Ubuntu Pro information for a specific host."""
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # First check if the host exists
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+        if not host:
+            raise HTTPException(status_code=404, detail=_("Host not found"))
+
+        # Get Ubuntu Pro info with services
+        ubuntu_pro_info = (
+            session.query(models.UbuntuProInfo)
+            .filter(models.UbuntuProInfo.host_id == host_id)
+            .first()
+        )
+
+        if not ubuntu_pro_info:
+            # Return empty structure if no Ubuntu Pro data
+            return {
+                "available": False,
+                "attached": False,
+                "version": None,
+                "expires": None,
+                "account_name": None,
+                "contract_name": None,
+                "tech_support_level": None,
+                "services": [],
+            }
+
+        # Get services
+        services = (
+            session.query(models.UbuntuProService)
+            .filter(models.UbuntuProService.ubuntu_pro_info_id == ubuntu_pro_info.id)
+            .all()
+        )
+
+        # Format service data
+        services_data = [
+            {
+                "name": service.name,
+                "description": service.description,
+                "available": service.available,
+                "status": service.status,
+                "entitled": service.entitled,
+            }
+            for service in services
+        ]
+
+        return {
+            "available": ubuntu_pro_info.available,
+            "attached": ubuntu_pro_info.attached,
+            "version": ubuntu_pro_info.version,
+            "expires": (
+                ubuntu_pro_info.expires.isoformat() if ubuntu_pro_info.expires else None
+            ),
+            "account_name": ubuntu_pro_info.account_name,
+            "contract_name": ubuntu_pro_info.contract_name,
+            "tech_support_level": ubuntu_pro_info.tech_support_level,
+            "services": services_data,
+        }

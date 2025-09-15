@@ -8,8 +8,11 @@ echo DEBUG: Script started
 rem Get the directory where this script is located
 set "SCRIPT_DIR=%~dp0"
 echo DEBUG: Script dir is %SCRIPT_DIR%
-cd /d "%SCRIPT_DIR%"
-echo DEBUG: Changed to directory
+rem Change to the project root directory (parent of scripts directory)
+for %%I in ("%SCRIPT_DIR%..") do set "PROJECT_ROOT=%%~fI"
+echo DEBUG: Project root is %PROJECT_ROOT%
+cd /d "%PROJECT_ROOT%"
+echo DEBUG: Changed to project root directory
 
 rem Create logs directory if it doesn't exist
 if not exist "logs" mkdir logs
@@ -118,10 +121,10 @@ if exist "stop_simple.cmd" (
     call stop_simple.cmd
     echo DEBUG: stop_simple.cmd completed with errorlevel %errorlevel%
     timeout /t 2 >NUL
-) else if exist "stop.cmd" (
-    echo DEBUG: Calling stop.cmd
-    call stop.cmd
-    echo DEBUG: stop.cmd completed with errorlevel %errorlevel%
+) else if exist "scripts\stop.cmd" (
+    echo DEBUG: Calling scripts\stop.cmd
+    call scripts\stop.cmd
+    echo DEBUG: scripts\stop.cmd completed with errorlevel %errorlevel%
     timeout /t 2 >NUL
 ) else (
     echo WARNING: No stop script found, continuing anyway...
@@ -247,6 +250,6 @@ echo Logs:
 echo   Backend:       type logs\backend.log
 echo   Frontend:      type logs\frontend.log
 echo.
-echo To stop the server: stop.cmd
+echo To stop the server: scripts\stop.cmd
 echo.
 echo Services are now running in the background.

@@ -5,7 +5,9 @@ Write-Host "Starting SysManage Server..." -ForegroundColor Green
 
 # Get the directory where this script is located
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-Set-Location $ScriptDir
+# Change to the project root directory (parent of scripts directory)
+$ProjectRoot = Split-Path -Parent $ScriptDir
+Set-Location $ProjectRoot
 
 # Create logs directory if it doesn't exist
 if (-not (Test-Path "logs")) {
@@ -139,11 +141,11 @@ function Wait-ForService {
 
 # Stop any existing processes first
 Write-Host "Stopping any existing SysManage processes..." -ForegroundColor Cyan
-if (Test-Path "stop.ps1") {
-    & ".\stop.ps1"
+if (Test-Path "scripts\stop.ps1") {
+    & ".\scripts\stop.ps1"
     Start-Sleep -Seconds 2
 } else {
-    Write-Host "WARNING: stop.ps1 not found, continuing anyway..." -ForegroundColor Yellow
+    Write-Host "WARNING: scripts\stop.ps1 not found, continuing anyway..." -ForegroundColor Yellow
 }
 
 # Get configuration values
@@ -263,6 +265,6 @@ Write-Host "Logs:" -ForegroundColor White
 Write-Host "  Backend:       Get-Content logs\backend.log -Tail 20 -Wait" -ForegroundColor Gray
 Write-Host "  Frontend:      Get-Content logs\frontend.log -Tail 20 -Wait" -ForegroundColor Gray
 Write-Host ""
-Write-Host "To stop the server: .\stop.ps1" -ForegroundColor White
+Write-Host "To stop the server: .\scripts\stop.ps1" -ForegroundColor White
 Write-Host ""
 Write-Host "Services are now running in the background." -ForegroundColor Green

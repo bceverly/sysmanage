@@ -208,6 +208,17 @@
     "diagnosticLoadFailed": "加载诊断详情失败",
     "processingDiagnostics": "处理中...",
     "lastRequested": "上次请求",
+    "ubuntuProTab": "Ubuntu Pro",
+    "ubuntuProInfo": "Ubuntu Pro 信息",
+    "subscriptionStatus": "订阅状态",
+    "attached": "已连接",
+    "expires": "到期时间",
+    "accountName": "账户名称",
+    "contractName": "合同名称",
+    "techSupportLevel": "技术支持级别",
+    "services": "服务",
+    "entitled": "已授权",
+    "noServices": "没有可用的服务",
     "tags": "标签",
     "noTags": "未分配标签",
     "addTag": "添加标签",
@@ -218,17 +229,21 @@
   },
   "userDetail": {
     "invalidId": "无效的用户ID",
-    "loadError": "加载用户详细信息失败",
-    "notFound": "未找到用户",
+    "loadError": "加载用户详情失败",
+    "notFound": "用户未找到",
     "basicInfo": "基本信息",
     "userId": "用户ID",
-    "firstName": "名字",
-    "lastName": "姓氏",
+    "firstName": "名",
+    "lastName": "姓",
     "active": "活跃",
     "lastAccess": "最后访问",
     "securityInfo": "安全信息",
-    "failedAttempts": "登录失败次数",
-    "lockedAt": "锁定时间"
+    "failedAttempts": "失败登录尝试",
+    "lockedAt": "锁定时间",
+    "resetPassword": "重置密码",
+    "resettingPassword": "正在发送重置邮件...",
+    "passwordResetSuccess": "密码重置邮件已发送至{{email}}",
+    "passwordResetError": "发送密码重置邮件失败。请重试。"
   },
   "logout": {
     "loading": "退出中..."
@@ -420,7 +435,9 @@
       "security": "安全",
       "system": "系统",
       "application": "应用程序"
-    }
+    },
+    "searchPlaceholder": "搜索软件包更新...",
+    "clearSearch": "清除搜索"
   },
   "notifications": {
     "bell": {
@@ -622,23 +639,5 @@
     "invalidTitle": "无效的重置链接",
     "invalidDescription": "此密码重置链接无效或已过期。请请求新的密码重置。",
     "validatingToken": "正在验证重置令牌..."
-  },
-  "userDetail": {
-    "invalidId": "无效的用户ID",
-    "loadError": "加载用户详情失败",
-    "notFound": "用户未找到",
-    "basicInfo": "基本信息",
-    "userId": "用户ID",
-    "firstName": "名",
-    "lastName": "姓",
-    "active": "活跃",
-    "lastAccess": "最后访问",
-    "securityInfo": "安全信息",
-    "failedAttempts": "失败登录尝试",
-    "lockedAt": "锁定时间",
-    "resetPassword": "重置密码",
-    "resettingPassword": "正在发送重置邮件...",
-    "passwordResetSuccess": "密码重置邮件已发送至{{email}}",
-    "passwordResetError": "发送密码重置邮件失败。请重试。"
   }
 }

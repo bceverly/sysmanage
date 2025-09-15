@@ -241,6 +241,17 @@
     "diagnosticLoadFailed": "Errore nel caricamento dettagli diagnostica",
     "processingDiagnostics": "Elaborazione...",
     "lastRequested": "Ultima richiesta",
+    "ubuntuProTab": "Ubuntu Pro",
+    "ubuntuProInfo": "Informazioni Ubuntu Pro",
+    "subscriptionStatus": "Stato dell'abbonamento",
+    "attached": "Collegato",
+    "expires": "Scade",
+    "accountName": "Nome dell'account",
+    "contractName": "Nome del contratto",
+    "techSupportLevel": "Livello di supporto tecnico",
+    "services": "Servizi",
+    "entitled": "Autorizzato",
+    "noServices": "Nessun servizio disponibile",
     "tags": "Tag",
     "noTags": "Nessun tag assegnato",
     "addTag": "Aggiungi tag",
@@ -251,17 +262,21 @@
   },
   "userDetail": {
     "invalidId": "ID utente non valido",
-    "loadError": "Errore nel caricamento dettagli utente",
+    "loadError": "Errore nel caricamento dei dettagli utente",
     "notFound": "Utente non trovato",
     "basicInfo": "Informazioni di base",
-    "userId": "ID Utente",
+    "userId": "ID utente",
     "firstName": "Nome",
     "lastName": "Cognome",
     "active": "Attivo",
     "lastAccess": "Ultimo accesso",
     "securityInfo": "Informazioni di sicurezza",
-    "failedAttempts": "Tentativi di login falliti",
-    "lockedAt": "Bloccato il"
+    "failedAttempts": "Tentativi di accesso falliti",
+    "lockedAt": "Bloccato il",
+    "resetPassword": "Reimposta password",
+    "resettingPassword": "Invio email di reimpostazione...",
+    "passwordResetSuccess": "L'email di reimpostazione della password è stata inviata a {{email}}",
+    "passwordResetError": "Errore nell'invio dell'email di reimpostazione della password. Riprova."
   },
   "logout": {
     "loading": "Disconnessione in corso..."
@@ -419,7 +434,9 @@
       "security": "Sicurezza",
       "system": "Sistema",
       "application": "Applicazione"
-    }
+    },
+    "searchPlaceholder": "Cerca aggiornamenti pacchetti...",
+    "clearSearch": "Cancella ricerca"
   },
   "notifications": {
     "bell": {
@@ -623,23 +640,5 @@
     "invalidTitle": "Link di reimpostazione non valido",
     "invalidDescription": "Questo link per la reimpostazione della password non è valido o è scaduto. Richiedi una nuova reimpostazione della password.",
     "validatingToken": "Convalida del token di reimpostazione..."
-  },
-  "userDetail": {
-    "invalidId": "ID utente non valido",
-    "loadError": "Errore nel caricamento dei dettagli utente",
-    "notFound": "Utente non trovato",
-    "basicInfo": "Informazioni di base",
-    "userId": "ID utente",
-    "firstName": "Nome",
-    "lastName": "Cognome",
-    "active": "Attivo",
-    "lastAccess": "Ultimo accesso",
-    "securityInfo": "Informazioni di sicurezza",
-    "failedAttempts": "Tentativi di accesso falliti",
-    "lockedAt": "Bloccato il",
-    "resetPassword": "Reimposta password",
-    "resettingPassword": "Invio email di reimpostazione...",
-    "passwordResetSuccess": "L'email di reimpostazione della password è stata inviata a {{email}}",
-    "passwordResetError": "Errore nell'invio dell'email di reimpostazione della password. Riprova."
   }
 }

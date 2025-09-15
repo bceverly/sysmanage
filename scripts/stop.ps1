@@ -5,7 +5,9 @@ Write-Host "Stopping SysManage Server..." -ForegroundColor Yellow
 
 # Get the directory where this script is located
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-Set-Location $ScriptDir
+# Change to the project root directory (parent of scripts directory)
+$ProjectRoot = Split-Path -Parent $ScriptDir
+Set-Location $ProjectRoot
 
 # Function to get configuration value
 function Get-ConfigValue {

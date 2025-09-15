@@ -563,7 +563,7 @@ const doRebootHost = async (hostId: number) => {
 
 const doShutdownHost = async (hostId: number) => {
     let result = {} as SuccessResponse;
-    
+
     await api.post("/api/host/shutdown/" + hostId)
     .then((response) => {
         result = response.data;
@@ -575,5 +575,100 @@ const doShutdownHost = async (hostId: number) => {
     return result;
 };
 
-export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse };
-export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost };
+const doGetHostUbuntuPro = async (hostId: number) => {
+    let result = {} as UbuntuProInfo;
+
+    await api.get("/api/host/" + hostId + "/ubuntu-pro")
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doAttachUbuntuPro = async (hostId: number, token: string) => {
+    let result = {} as SuccessResponse;
+
+    await api.post("/api/host/" + hostId + "/ubuntu-pro/attach", {
+        token: token
+    })
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doDetachUbuntuPro = async (hostId: number) => {
+    let result = {} as SuccessResponse;
+
+    await api.post("/api/host/" + hostId + "/ubuntu-pro/detach")
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doEnableUbuntuProService = async (hostId: number, service: string) => {
+    let result = {} as SuccessResponse;
+
+    await api.post("/api/host/" + hostId + "/ubuntu-pro/service/enable", {
+        service: service
+    })
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doDisableUbuntuProService = async (hostId: number, service: string) => {
+    let result = {} as SuccessResponse;
+
+    await api.post("/api/host/" + hostId + "/ubuntu-pro/service/disable", {
+        service: service
+    })
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+type UbuntuProService = {
+    name: string;
+    description: string;
+    available: boolean;
+    status: string;
+    entitled: boolean;
+}
+
+type UbuntuProInfo = {
+    available: boolean;
+    attached: boolean;
+    version: string | null;
+    expires: string | null;
+    account_name: string | null;
+    contract_name: string | null;
+    tech_support_level: string | null;
+    services: UbuntuProService[];
+}
+
+export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, UbuntuProService };
+export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService };

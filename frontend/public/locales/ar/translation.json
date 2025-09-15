@@ -240,6 +240,17 @@
     "diagnosticLoadFailed": "فشل في تحميل تفاصيل التشخيص",
     "processingDiagnostics": "جاري المعالجة...",
     "lastRequested": "آخر طلب",
+    "ubuntuProTab": "Ubuntu Pro",
+    "ubuntuProInfo": "معلومات Ubuntu Pro",
+    "subscriptionStatus": "حالة الاشتراك",
+    "attached": "مُرتبط",
+    "expires": "ينتهي في",
+    "accountName": "اسم الحساب",
+    "contractName": "اسم العقد",
+    "techSupportLevel": "مستوى الدعم التقني",
+    "services": "الخدمات",
+    "entitled": "مستحق",
+    "noServices": "لا توجد خدمات متاحة",
     "tags": "العلامات",
     "noTags": "لم يتم تعيين علامات",
     "addTag": "إضافة علامة",
@@ -260,7 +271,11 @@
     "lastAccess": "آخر وصول",
     "securityInfo": "معلومات الأمان",
     "failedAttempts": "محاولات تسجيل الدخول الفاشلة",
-    "lockedAt": "تم القفل في"
+    "lockedAt": "تم القفل في",
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "resettingPassword": "جاري إرسال بريد إعادة التعيين...",
+    "passwordResetSuccess": "تم إرسال بريد إعادة تعيين كلمة المرور إلى {{email}}",
+    "passwordResetError": "فشل في إرسال بريد إعادة تعيين كلمة المرور. حاول مرة أخرى."
   },
   "logout": {
     "loading": "جاري تسجيل الخروج..."
@@ -423,7 +438,9 @@
       "pending": "تم طلب التحديث",
       "success": "تم التحديث بنجاح",
       "failed": "فشل في التحديث"
-    }
+    },
+    "searchPlaceholder": "البحث عن تحديثات الحزم...",
+    "clearSearch": "مسح البحث"
   },
   "notifications": {
     "bell": {
@@ -581,17 +598,17 @@
     "searchTags": "البحث في العلامات"
   },
   "tags": {
-      "title": "العلامات",
-      "name": "الاسم",
-      "description": "الوصف",
-      "hostCount": "عدد المضيفات",
-      "lastUpdated": "آخر تحديث",
-      "addTag": "إضافة علامة",
-      "editTag": "تحرير علامة",
-      "viewHosts": "عرض المضيفات",
-      "hostsAssociatedWith": "المضيفات المرتبطة بـ",
-      "noHostsAssociated": "لا توجد مضيفات مرتبطة بهذه العلامة."
-    },
+    "title": "العلامات",
+    "name": "الاسم",
+    "description": "الوصف",
+    "hostCount": "عدد المضيفات",
+    "lastUpdated": "آخر تحديث",
+    "addTag": "إضافة علامة",
+    "editTag": "تحرير علامة",
+    "viewHosts": "عرض المضيفات",
+    "hostsAssociatedWith": "المضيفات المرتبطة بـ",
+    "noHostsAssociated": "لا توجد مضيفات مرتبطة بهذه العلامة."
+  },
   "forgotPassword": {
     "title": "نسيت كلمة المرور",
     "description": "أدخل عنوان بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.",
@@ -625,23 +642,5 @@
     "invalidTitle": "رابط إعادة تعيين غير صالح",
     "invalidDescription": "رابط إعادة تعيين كلمة المرور هذا إما غير صالح أو منتهي الصلاحية. الرجاء طلب إعادة تعيين كلمة مرور جديدة.",
     "validatingToken": "جاري التحقق من رمز إعادة التعيين..."
-  },
-  "userDetail": {
-    "invalidId": "معرف مستخدم غير صالح",
-    "loadError": "فشل في تحميل تفاصيل المستخدم",
-    "notFound": "لم يتم العثور على المستخدم",
-    "basicInfo": "المعلومات الأساسية",
-    "userId": "معرف المستخدم",
-    "firstName": "الاسم الأول",
-    "lastName": "اسم العائلة",
-    "active": "نشط",
-    "lastAccess": "آخر وصول",
-    "securityInfo": "معلومات الأمان",
-    "failedAttempts": "محاولات تسجيل الدخول الفاشلة",
-    "lockedAt": "تم القفل في",
-    "resetPassword": "إعادة تعيين كلمة المرور",
-    "resettingPassword": "جاري إرسال بريد إعادة التعيين...",
-    "passwordResetSuccess": "تم إرسال بريد إعادة تعيين كلمة المرور إلى {{email}}",
-    "passwordResetError": "فشل في إرسال بريد إعادة تعيين كلمة المرور. حاول مرة أخرى."
   }
 }

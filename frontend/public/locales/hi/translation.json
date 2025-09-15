@@ -240,6 +240,17 @@
     "diagnosticLoadFailed": "निदान विवरण लोड करने में विफल",
     "processingDiagnostics": "प्रसंस्करण हो रहा है...",
     "lastRequested": "अंतिम अनुरोध",
+    "ubuntuProTab": "Ubuntu Pro",
+    "ubuntuProInfo": "Ubuntu Pro जानकारी",
+    "subscriptionStatus": "सदस्यता स्थिति",
+    "attached": "जुड़ा हुआ",
+    "expires": "समाप्त होता है",
+    "accountName": "खाता नाम",
+    "contractName": "अनुबंध नाम",
+    "techSupportLevel": "तकनीकी सहायता स्तर",
+    "services": "सेवाएं",
+    "entitled": "अधिकारी",
+    "noServices": "कोई सेवाएं उपलब्ध नहीं",
     "tags": "टैग्स",
     "noTags": "कोई टैग नहीं लगाए गए",
     "addTag": "टैग जोड़ें",
@@ -257,10 +268,14 @@
     "firstName": "पहला नाम",
     "lastName": "अंतिम नाम",
     "active": "सक्रिय",
-    "lastAccess": "अंतिम एक्सेस",
+    "lastAccess": "अंतिम पहुंच",
     "securityInfo": "सुरक्षा जानकारी",
     "failedAttempts": "असफल लॉगिन प्रयास",
-    "lockedAt": "लॉक किया गया"
+    "lockedAt": "पर लॉक किया गया",
+    "resetPassword": "पासवर्ड रीसेट करें",
+    "resettingPassword": "रीसेट ईमेल भेजा जा रहा है...",
+    "passwordResetSuccess": "पासवर्ड रीसेट ईमेल {{email}} को भेजा गया",
+    "passwordResetError": "पासवर्ड रीसेट ईमेल भेजने में विफल। कृपया फिर से कोशिश करें।"
   },
   "logout": {
     "loading": "लॉगआउट हो रहा है..."
@@ -417,7 +432,9 @@
       "security": "सुरक्षा",
       "system": "सिस्टम",
       "application": "एप्लिकेशन"
-    }
+    },
+    "searchPlaceholder": "पैकेज अपडेट खोजें...",
+    "clearSearch": "खोज साफ़ करें"
   },
   "notifications": {
     "bell": {
@@ -619,23 +636,5 @@
     "invalidTitle": "अमान्य रीसेट लिंक",
     "invalidDescription": "यह पासवर्ड रीसेट लिंक अमान्य है या समाप्त हो गया है। कृपया नया पासवर्ड रीसेट का अनुरोध करें।",
     "validatingToken": "रीसेट टोकन सत्यापित कर रहे हैं..."
-  },
-  "userDetail": {
-    "invalidId": "अमान्य उपयोगकर्ता आईडी",
-    "loadError": "उपयोगकर्ता विवरण लोड करने में विफल",
-    "notFound": "उपयोगकर्ता नहीं मिला",
-    "basicInfo": "बुनियादी जानकारी",
-    "userId": "उपयोगकर्ता आईडी",
-    "firstName": "पहला नाम",
-    "lastName": "अंतिम नाम",
-    "active": "सक्रिय",
-    "lastAccess": "अंतिम पहुंच",
-    "securityInfo": "सुरक्षा जानकारी",
-    "failedAttempts": "असफल लॉगिन प्रयास",
-    "lockedAt": "पर लॉक किया गया",
-    "resetPassword": "पासवर्ड रीसेट करें",
-    "resettingPassword": "रीसेट ईमेल भेजा जा रहा है...",
-    "passwordResetSuccess": "पासवर्ड रीसेट ईमेल {{email}} को भेजा गया",
-    "passwordResetError": "पासवर्ड रीसेट ईमेल भेजने में विफल। कृपया फिर से कोशिश करें।"
   }
 }

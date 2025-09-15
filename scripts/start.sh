@@ -7,7 +7,9 @@ echo "Starting SysManage Server..."
 
 # Get the directory where this script is located (POSIX compatible)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$SCRIPT_DIR"
+# Change to the project root directory (parent of scripts directory)
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+cd "$PROJECT_ROOT"
 
 # Create logs directory if it doesn't exist
 mkdir -p logs
@@ -231,7 +233,7 @@ check_existing_processes() {
 
 # Stop any existing processes
 if check_existing_processes; then
-    ./stop.sh
+    ./scripts/stop.sh
     sleep 2
     
     # Verify they were stopped by checking ports directly
@@ -383,5 +385,5 @@ echo "Logs:"
 echo "  📄 Backend:       tail -f logs/backend.log"
 echo "  📄 Frontend:      tail -f logs/frontend.log"
 echo ""
-echo "To stop the server: ./stop.sh"
+echo "To stop the server: ./scripts/stop.sh"
 echo ""

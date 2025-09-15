@@ -242,6 +242,17 @@
     "diagnosticLoadFailed": "Échec du chargement des détails du diagnostic",
     "processingDiagnostics": "Traitement...",
     "lastRequested": "Dernière demande",
+    "ubuntuProTab": "Ubuntu Pro",
+    "ubuntuProInfo": "Informations Ubuntu Pro",
+    "subscriptionStatus": "Statut de l'abonnement",
+    "attached": "Attaché",
+    "expires": "Expire",
+    "accountName": "Nom du compte",
+    "contractName": "Nom du contrat",
+    "techSupportLevel": "Niveau du support technique",
+    "services": "Services",
+    "entitled": "Autorisé",
+    "noServices": "Aucun service disponible",
     "tags": "Balises",
     "noTags": "Aucune balise assignée",
     "addTag": "Ajouter une balise",
@@ -252,7 +263,7 @@
   },
   "userDetail": {
     "invalidId": "ID utilisateur invalide",
-    "loadError": "Échec du chargement des détails utilisateur",
+    "loadError": "Échec du chargement des détails de l'utilisateur",
     "notFound": "Utilisateur non trouvé",
     "basicInfo": "Informations de base",
     "userId": "ID utilisateur",
@@ -262,7 +273,11 @@
     "lastAccess": "Dernier accès",
     "securityInfo": "Informations de sécurité",
     "failedAttempts": "Tentatives de connexion échouées",
-    "lockedAt": "Verrouillé le"
+    "lockedAt": "Verrouillé à",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "resettingPassword": "Envoi de l'e-mail de réinitialisation...",
+    "passwordResetSuccess": "L'e-mail de réinitialisation de mot de passe a été envoyé à {{email}}",
+    "passwordResetError": "Échec de l'envoi de l'e-mail de réinitialisation de mot de passe. Veuillez réessayer."
   },
   "logout": {
     "loading": "Déconnexion en cours..."
@@ -420,7 +435,9 @@
       "security": "Sécurité",
       "system": "Système",
       "application": "Application"
-    }
+    },
+    "searchPlaceholder": "Rechercher des mises à jour de paquets...",
+    "clearSearch": "Effacer la recherche"
   },
   "notifications": {
     "bell": {
@@ -622,23 +639,5 @@
     "invalidTitle": "Lien de réinitialisation invalide",
     "invalidDescription": "Ce lien de réinitialisation de mot de passe est soit invalide soit expiré. Veuillez demander une nouvelle réinitialisation de mot de passe.",
     "validatingToken": "Validation du jeton de réinitialisation..."
-  },
-  "userDetail": {
-    "invalidId": "ID utilisateur invalide",
-    "loadError": "Échec du chargement des détails de l'utilisateur",
-    "notFound": "Utilisateur non trouvé",
-    "basicInfo": "Informations de base",
-    "userId": "ID utilisateur",
-    "firstName": "Prénom",
-    "lastName": "Nom de famille",
-    "active": "Actif",
-    "lastAccess": "Dernier accès",
-    "securityInfo": "Informations de sécurité",
-    "failedAttempts": "Tentatives de connexion échouées",
-    "lockedAt": "Verrouillé à",
-    "resetPassword": "Réinitialiser le mot de passe",
-    "resettingPassword": "Envoi de l'e-mail de réinitialisation...",
-    "passwordResetSuccess": "L'e-mail de réinitialisation de mot de passe a été envoyé à {{email}}",
-    "passwordResetError": "Échec de l'envoi de l'e-mail de réinitialisation de mot de passe. Veuillez réessayer."
   }
 }

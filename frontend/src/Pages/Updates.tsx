@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { 
-  IoRefresh, 
-  IoCheckbox, 
-  IoSquareOutline, 
-  IoWarning, 
+import {
+  IoRefresh,
+  IoCheckbox,
+  IoSquareOutline,
+  IoWarning,
   IoShieldCheckmark,
   IoHardwareChip,
   IoApps,
@@ -13,7 +13,8 @@ import {
   IoPlay,
   IoTime,
   IoCheckmarkCircle,
-  IoCloseCircle
+  IoCloseCircle,
+  IoSearch
 } from 'react-icons/io5';
 import { 
   updatesService, 
@@ -71,6 +72,7 @@ const Updates: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [hostsWithUpdates, setHostsWithUpdates] = useState<HostWithUpdates[]>([]);
   const [hostSpecificStats, setHostSpecificStats] = useState<HostUpdatesResponse | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     security_only: searchParams.get('securityOnly') === 'true' || searchParams.get('filter') === 'security',
     system_only: false,
@@ -140,7 +142,9 @@ const Updates: React.FC = () => {
   const fetchUpdates = useCallback(async (page = 0) => {
     try {
       setIsLoading(true);
-      
+
+      let fetchedUpdates: PackageUpdate[] = [];
+
       if (filters.host_id) {
         // Fetch host-specific updates
         const hostId = parseInt(filters.host_id);
@@ -150,9 +154,8 @@ const Updates: React.FC = () => {
           filters.security_only || undefined,
           filters.system_only || undefined
         );
-        
-        
-        setUpdates(response.updates);
+
+        fetchedUpdates = response.updates;
         setTotalCount(response.total_updates);
         setHostSpecificStats(response);
         setCurrentPage(0);
@@ -165,12 +168,22 @@ const Updates: React.FC = () => {
           ITEMS_PER_PAGE,
           page * ITEMS_PER_PAGE
         );
-        
-        setUpdates(response.updates);
+
+        fetchedUpdates = response.updates;
         setTotalCount(response.total_count);
         setHostSpecificStats(null);
         setCurrentPage(page);
       }
+
+      // Apply search filter if present
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        fetchedUpdates = fetchedUpdates.filter(update =>
+          update.package_name.toLowerCase().includes(query)
+        );
+      }
+
+      setUpdates(fetchedUpdates);
     } catch (error) {
       console.error('Failed to fetch updates:', error);
       setUpdates([]);
@@ -179,7 +192,7 @@ const Updates: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [filters]);
+  }, [filters, searchQuery]);
 
   const refreshAll = useCallback(async () => {
     setIsRefreshing(true);
@@ -252,7 +265,7 @@ const Updates: React.FC = () => {
       fetchHostsWithUpdates(),
       fetchUpdates(0)
     ]);
-  }, [filters, fetchUpdates, fetchHostsWithUpdates, fetchUpdatesSummary]);
+  }, [filters, searchQuery, fetchUpdates, fetchHostsWithUpdates, fetchUpdatesSummary]);
 
   // Check for active updates on component mount and when updateStatuses changes (disabled)
   // useEffect(() => {
@@ -644,6 +657,27 @@ const Updates: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Search Bar */}
+      <div className="updates__search">
+        <IoSearch className="updates__search-icon" />
+        <input
+          type="text"
+          placeholder={t('updates.searchPlaceholder', 'Search for package updates...')}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="updates__search-input"
+        />
+        {searchQuery && (
+          <button
+            className="updates__search-clear"
+            onClick={() => setSearchQuery('')}
+            aria-label={t('updates.clearSearch', 'Clear search')}
+          >
+            ×
+          </button>
+        )}
+      </div>
 
       {/* Filters */}
       <div className="updates__filters">

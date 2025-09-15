@@ -17,6 +17,8 @@ from backend.persistence.models import (
     PackageUpdate,
     SoftwarePackage,
     StorageDevice,
+    UbuntuProInfo,
+    UbuntuProService,
     UserAccount,
     UserGroup,
 )
@@ -94,6 +96,9 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
 
                 # Set timestamp
                 host.os_version_updated_at = datetime.now(timezone.utc)
+
+                # Process Ubuntu Pro information if present
+                await handle_ubuntu_pro_update(db, connection, message_data, host)
 
                 # Commit changes
                 db.commit()
@@ -844,3 +849,103 @@ async def handle_reboot_status_update(db: Session, connection, message_data: dic
             "message_type": "error",
             "error": _("Failed to update reboot status: %s") % str(e),
         }
+
+
+async def handle_ubuntu_pro_update(
+    db: Session, connection, message_data: dict, host: Host
+):
+    """Handle Ubuntu Pro information update from agent OS version message."""
+    try:
+        # Extract Ubuntu Pro information from the os_info nested data
+        os_details = message_data.get("os_info", {})
+        ubuntu_pro_data = os_details.get("ubuntu_pro")
+
+        if not ubuntu_pro_data:
+            debug_logger.debug("No Ubuntu Pro data found for host %s", host.id)
+            return
+
+        debug_logger.info("Processing Ubuntu Pro data for host %s", host.id)
+
+        # Clear existing Ubuntu Pro data for this host
+        db.execute(delete(UbuntuProInfo).where(UbuntuProInfo.host_id == host.id))
+
+        now = datetime.now(timezone.utc)
+
+        # Parse expires field if present
+        expires_at = None
+        if ubuntu_pro_data.get("expires"):
+            try:
+                # Handle potential date parsing if needed
+                expires_str = ubuntu_pro_data.get("expires")
+                if expires_str and expires_str != "n/a":
+                    # Ubuntu Pro dates are typically in ISO format
+                    expires_at = datetime.fromisoformat(
+                        expires_str.replace("Z", "+00:00")
+                    )
+            except (ValueError, AttributeError) as e:
+                debug_logger.warning("Failed to parse Ubuntu Pro expires date: %s", e)
+
+        # Create Ubuntu Pro info record
+        ubuntu_pro_info = UbuntuProInfo(
+            host_id=host.id,
+            available=ubuntu_pro_data.get("available", False),
+            attached=ubuntu_pro_data.get("attached", False),
+            version=ubuntu_pro_data.get("version"),
+            expires=expires_at,
+            account_name=ubuntu_pro_data.get("account_name"),
+            contract_name=ubuntu_pro_data.get("contract_name"),
+            tech_support_level=ubuntu_pro_data.get("tech_support_level"),
+            created_at=now,
+            updated_at=now,
+        )
+        db.add(ubuntu_pro_info)
+
+        # Flush to get the ID for services
+        db.flush()
+
+        # Process Ubuntu Pro services
+        services = ubuntu_pro_data.get("services", [])
+        debug_logger.debug(
+            "Processing %d Ubuntu Pro services for storage in database", len(services)
+        )
+
+        for i, service_data in enumerate(services):
+            service_name = service_data.get("name", "")
+            debug_logger.debug(
+                "Storing service %d/%d: %s (status=%s, available=%s)",
+                i + 1,
+                len(services),
+                service_name,
+                service_data.get("status", "disabled"),
+                service_data.get("available", False),
+            )
+
+            ubuntu_pro_service = UbuntuProService(
+                ubuntu_pro_info_id=ubuntu_pro_info.id,
+                name=service_name,
+                description=service_data.get("description", ""),
+                available=service_data.get("available", False),
+                status=service_data.get("status", "disabled"),
+                entitled=service_data.get("entitled", False),
+                created_at=now,
+                updated_at=now,
+            )
+            db.add(ubuntu_pro_service)
+
+        debug_logger.debug(
+            "Completed adding all %d Ubuntu Pro services to database session",
+            len(services),
+        )
+
+        debug_logger.info(
+            "Ubuntu Pro data processed for host %s: attached=%s, services=%d",
+            host.id,
+            ubuntu_pro_data.get("attached", False),
+            len(services),
+        )
+
+    except Exception as e:
+        debug_logger.error(
+            "Error processing Ubuntu Pro data for host %s: %s", host.id, e
+        )
+        # Don't re-raise - let the main OS update continue

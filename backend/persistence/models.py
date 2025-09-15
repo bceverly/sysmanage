@@ -129,6 +129,14 @@ class Host(Base):
         "PackageUpdate", back_populates="host", cascade="all, delete-orphan"
     )
 
+    # Relationship to Ubuntu Pro information
+    ubuntu_pro_info = relationship(
+        "UbuntuProInfo",
+        back_populates="host",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
+
 
 class User(Base):
     """
@@ -748,3 +756,78 @@ class PasswordResetToken(Base):
 
     def __repr__(self):
         return f"<PasswordResetToken(id={self.id}, user_id={self.user_id}, is_used={self.is_used})>"
+
+
+class UbuntuProInfo(Base):
+    """
+    This class holds the object mapping for the ubuntu_pro_info table in the
+    PostgreSQL database. Stores Ubuntu Pro subscription status and service information.
+    """
+
+    __tablename__ = "ubuntu_pro_info"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    host_id = Column(Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+
+    # Ubuntu Pro availability and status
+    available = Column(Boolean, nullable=False, default=False)
+    attached = Column(Boolean, nullable=False, default=False)
+    version = Column(String(50), nullable=True)
+    expires = Column(DateTime(timezone=True), nullable=True)
+
+    # Account and contract information
+    account_name = Column(String(255), nullable=True)
+    contract_name = Column(String(255), nullable=True)
+    tech_support_level = Column(String(50), nullable=True)
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Relationships
+    host = relationship("Host", back_populates="ubuntu_pro_info")
+    services = relationship(
+        "UbuntuProService",
+        back_populates="ubuntu_pro_info",
+        cascade="all, delete-orphan",
+    )
+
+    def __repr__(self):
+        return (
+            f"<UbuntuProInfo(id={self.id}, host_id={self.host_id}, "
+            f"attached={self.attached}, available={self.available})>"
+        )
+
+
+class UbuntuProService(Base):
+    """
+    This class holds the object mapping for the ubuntu_pro_services table in the
+    PostgreSQL database. Stores individual Ubuntu Pro service information.
+    """
+
+    __tablename__ = "ubuntu_pro_services"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    ubuntu_pro_info_id = Column(
+        Integer, ForeignKey("ubuntu_pro_info.id", ondelete="CASCADE"), nullable=False
+    )
+
+    # Service information
+    name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+    available = Column(Boolean, nullable=False, default=False)
+    status = Column(String(50), nullable=True)  # enabled, disabled, n/a
+    entitled = Column(Boolean, nullable=False, default=False)
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Relationship back to UbuntuProInfo
+    ubuntu_pro_info = relationship("UbuntuProInfo", back_populates="services")
+
+    def __repr__(self):
+        return (
+            f"<UbuntuProService(id={self.id}, name='{self.name}', "
+            f"status='{self.status}', available={self.available})>"
+        )

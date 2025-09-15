@@ -1,11 +1,13 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test lint lint-python lint-typescript security security-full security-python security-frontend security-secrets clean setup install-dev help
+.PHONY: test lint lint-python lint-typescript security security-full security-python security-frontend security-secrets clean setup install-dev help start stop
 
 # Default target
 help:
 	@echo "SysManage Server - Available targets:"
+	@echo "  make start         - Start SysManage server (auto-detects shell/platform)"
+	@echo "  make stop          - Stop SysManage server (auto-detects shell/platform)"
 	@echo "  make test          - Run all unit tests (Python + TypeScript)"
 	@echo "  make lint          - Run all linters (Python + TypeScript)"
 	@echo "  make lint-python   - Run Python linting only"
@@ -185,11 +187,50 @@ clean:
 	@cd frontend && rm -rf coverage/ 2>/dev/null || true
 	@echo "[OK] Clean completed"
 
-# Development server targets (bonus)
-run-dev: setup
-	@echo "Starting development servers..."
-	@./run.sh
+# Server management targets with shell detection
+start:
+	@echo "Starting SysManage server..."
+ifeq ($(OS),Windows_NT)
+	@if defined PSModulePath (powershell -ExecutionPolicy Bypass -File scripts/start.ps1) else (scripts\start.cmd)
+else
+	@if [ -n "$$ZSH_VERSION" ]; then \
+		echo "Detected zsh shell, using start.sh"; \
+		./scripts/start.sh; \
+	elif [ -n "$$BASH_VERSION" ]; then \
+		echo "Detected bash shell, using start.sh"; \
+		./scripts/start.sh; \
+	elif [ -n "$$KSH_VERSION" ]; then \
+		echo "Detected ksh shell, using start.sh"; \
+		./scripts/start.sh; \
+	else \
+		echo "Detected POSIX shell, using start.sh"; \
+		./scripts/start.sh; \
+	fi
+endif
 
-stop-dev:
-	@echo "Stopping development servers..."
-	@./stop.sh
+stop:
+	@echo "Stopping SysManage server..."
+ifeq ($(OS),Windows_NT)
+	@if defined PSModulePath (powershell -ExecutionPolicy Bypass -File scripts/stop.ps1) else (scripts\stop.cmd)
+else
+	@if [ -n "$$ZSH_VERSION" ]; then \
+		echo "Detected zsh shell, using stop.sh"; \
+		./scripts/stop.sh; \
+	elif [ -n "$$BASH_VERSION" ]; then \
+		echo "Detected bash shell, using stop.sh"; \
+		./scripts/stop.sh; \
+	elif [ -n "$$KSH_VERSION" ]; then \
+		echo "Detected ksh shell, using stop.sh"; \
+		./scripts/stop.sh; \
+	else \
+		echo "Detected POSIX shell, using stop.sh"; \
+		./scripts/stop.sh; \
+	fi
+endif
+
+# Development server targets (legacy compatibility)
+run-dev: start
+	@echo "Legacy run-dev target - use 'make start' instead"
+
+stop-dev: stop
+	@echo "Legacy stop-dev target - use 'make stop' instead"

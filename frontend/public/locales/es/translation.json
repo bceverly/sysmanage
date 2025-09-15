@@ -242,6 +242,17 @@
     "diagnosticLoadFailed": "Error al cargar los detalles del diagnóstico",
     "processingDiagnostics": "Procesando...",
     "lastRequested": "Último solicitado",
+    "ubuntuProTab": "Ubuntu Pro",
+    "ubuntuProInfo": "Información de Ubuntu Pro",
+    "subscriptionStatus": "Estado de la suscripción",
+    "attached": "Vinculado",
+    "expires": "Expira",
+    "accountName": "Nombre de la cuenta",
+    "contractName": "Nombre del contrato",
+    "techSupportLevel": "Nivel de soporte técnico",
+    "services": "Servicios",
+    "entitled": "Con derecho",
+    "noServices": "No hay servicios disponibles",
     "tags": "Etiquetas",
     "noTags": "Sin etiquetas asignadas",
     "addTag": "Agregar etiqueta",
@@ -254,15 +265,19 @@
     "invalidId": "ID de usuario inválido",
     "loadError": "Error al cargar detalles del usuario",
     "notFound": "Usuario no encontrado",
-    "basicInfo": "Información Básica",
-    "userId": "ID del Usuario",
+    "basicInfo": "Información básica",
+    "userId": "ID de usuario",
     "firstName": "Nombre",
     "lastName": "Apellido",
     "active": "Activo",
-    "lastAccess": "Último Acceso",
-    "securityInfo": "Información de Seguridad",
-    "failedAttempts": "Intentos de Inicio Fallidos",
-    "lockedAt": "Bloqueado el"
+    "lastAccess": "Último acceso",
+    "securityInfo": "Información de seguridad",
+    "failedAttempts": "Intentos de inicio de sesión fallidos",
+    "lockedAt": "Bloqueado en",
+    "resetPassword": "Restablecer contraseña",
+    "resettingPassword": "Enviando correo de restablecimiento...",
+    "passwordResetSuccess": "Se ha enviado el correo de restablecimiento de contraseña a {{email}}",
+    "passwordResetError": "Error al enviar el correo de restablecimiento de contraseña. Por favor intente de nuevo."
   },
   "logout": {
     "loading": "Cerrando sesión..."
@@ -420,7 +435,9 @@
       "security": "Seguridad",
       "system": "Sistema",
       "application": "Aplicación"
-    }
+    },
+    "searchPlaceholder": "Buscar actualizaciones de paquetes...",
+    "clearSearch": "Borrar búsqueda"
   },
   "notifications": {
     "bell": {
@@ -632,23 +649,5 @@
     "invalidTitle": "Enlace de restablecimiento inválido",
     "invalidDescription": "Este enlace de restablecimiento de contraseña es inválido o ha expirado. Por favor solicite un nuevo restablecimiento de contraseña.",
     "validatingToken": "Validando token de restablecimiento..."
-  },
-  "userDetail": {
-    "invalidId": "ID de usuario inválido",
-    "loadError": "Error al cargar detalles del usuario",
-    "notFound": "Usuario no encontrado",
-    "basicInfo": "Información básica",
-    "userId": "ID de usuario",
-    "firstName": "Nombre",
-    "lastName": "Apellido",
-    "active": "Activo",
-    "lastAccess": "Último acceso",
-    "securityInfo": "Información de seguridad",
-    "failedAttempts": "Intentos de inicio de sesión fallidos",
-    "lockedAt": "Bloqueado en",
-    "resetPassword": "Restablecer contraseña",
-    "resettingPassword": "Enviando correo de restablecimiento...",
-    "passwordResetSuccess": "Se ha enviado el correo de restablecimiento de contraseña a {{email}}",
-    "passwordResetError": "Error al enviar el correo de restablecimiento de contraseña. Por favor intente de nuevo."
   }
 }

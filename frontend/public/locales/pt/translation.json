@@ -241,6 +241,17 @@
     "diagnosticLoadFailed": "Falha ao carregar detalhes do diagnóstico",
     "processingDiagnostics": "Processando...",
     "lastRequested": "Último solicitado",
+    "ubuntuProTab": "Ubuntu Pro",
+    "ubuntuProInfo": "Informações do Ubuntu Pro",
+    "subscriptionStatus": "Status da Assinatura",
+    "attached": "Anexado",
+    "expires": "Expira",
+    "accountName": "Nome da Conta",
+    "contractName": "Nome do Contrato",
+    "techSupportLevel": "Nível de Suporte Técnico",
+    "services": "Serviços",
+    "entitled": "Autorizado",
+    "noServices": "Nenhum serviço disponível",
     "tags": "Tags",
     "noTags": "Nenhuma tag atribuída",
     "addTag": "Adicionar tag",
@@ -254,14 +265,18 @@
     "loadError": "Falha ao carregar detalhes do usuário",
     "notFound": "Usuário não encontrado",
     "basicInfo": "Informações básicas",
-    "userId": "ID do Usuário",
+    "userId": "ID do usuário",
     "firstName": "Nome",
     "lastName": "Sobrenome",
     "active": "Ativo",
     "lastAccess": "Último acesso",
     "securityInfo": "Informações de segurança",
     "failedAttempts": "Tentativas de login falharam",
-    "lockedAt": "Bloqueado em"
+    "lockedAt": "Bloqueado em",
+    "resetPassword": "Redefinir senha",
+    "resettingPassword": "Enviando email de redefinição...",
+    "passwordResetSuccess": "Email de redefinição de senha foi enviado para {{email}}",
+    "passwordResetError": "Falha ao enviar email de redefinição de senha. Tente novamente."
   },
   "logout": {
     "loading": "Fazendo logout..."
@@ -419,7 +434,9 @@
       "security": "Segurança",
       "system": "Sistema",
       "application": "Aplicação"
-    }
+    },
+    "searchPlaceholder": "Pesquisar atualizações de pacotes...",
+    "clearSearch": "Limpar pesquisa"
   },
   "notifications": {
     "bell": {
@@ -623,23 +640,5 @@
     "invalidTitle": "Link de redefinição inválido",
     "invalidDescription": "Este link de redefinição de senha é inválido ou expirou. Solicite uma nova redefinição de senha.",
     "validatingToken": "Validando token de redefinição..."
-  },
-  "userDetail": {
-    "invalidId": "ID de usuário inválido",
-    "loadError": "Falha ao carregar detalhes do usuário",
-    "notFound": "Usuário não encontrado",
-    "basicInfo": "Informações básicas",
-    "userId": "ID do usuário",
-    "firstName": "Nome",
-    "lastName": "Sobrenome",
-    "active": "Ativo",
-    "lastAccess": "Último acesso",
-    "securityInfo": "Informações de segurança",
-    "failedAttempts": "Tentativas de login falharam",
-    "lockedAt": "Bloqueado em",
-    "resetPassword": "Redefinir senha",
-    "resettingPassword": "Enviando email de redefinição...",
-    "passwordResetSuccess": "Email de redefinição de senha foi enviado para {{email}}",
-    "passwordResetError": "Falha ao enviar email de redefinição de senha. Tente novamente."
   }
 }

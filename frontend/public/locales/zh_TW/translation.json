@@ -241,6 +241,17 @@
     "diagnosticLoadFailed": "載入診斷詳情失敗",
     "processingDiagnostics": "處理中...",
     "lastRequested": "上次請求",
+    "ubuntuProTab": "Ubuntu Pro",
+    "ubuntuProInfo": "Ubuntu Pro 資訊",
+    "subscriptionStatus": "訂閱狀態",
+    "attached": "已連接",
+    "expires": "到期時間",
+    "accountName": "帳戶名稱",
+    "contractName": "合約名稱",
+    "techSupportLevel": "技術支援等級",
+    "services": "服務",
+    "entitled": "已授權",
+    "noServices": "沒有可用的服務",
     "tags": "標籤",
     "noTags": "未分配標籤",
     "addTag": "新增標籤",
@@ -250,18 +261,22 @@
     "tagRemoveFailed": "刪除標籤失敗"
   },
   "userDetail": {
-    "invalidId": "無效的用戶 ID",
-    "loadError": "載入用戶詳細資料失敗",
-    "notFound": "找不到用戶",
+    "invalidId": "無效的使用者ID",
+    "loadError": "載入使用者詳情失敗",
+    "notFound": "找不到使用者",
     "basicInfo": "基本資訊",
-    "userId": "用戶 ID",
+    "userId": "使用者ID",
     "firstName": "名字",
     "lastName": "姓氏",
     "active": "活躍",
     "lastAccess": "最後存取",
     "securityInfo": "安全資訊",
-    "failedAttempts": "登入失敗次數",
-    "lockedAt": "鎖定時間"
+    "failedAttempts": "失敗登入嘗試",
+    "lockedAt": "鎖定時間",
+    "resetPassword": "重設密碼",
+    "resettingPassword": "正在發送重設電子郵件...",
+    "passwordResetSuccess": "密碼重設電子郵件已發送至{{email}}",
+    "passwordResetError": "發送密碼重設電子郵件失敗。請重試。"
   },
   "logout": {
     "loading": "正在登出..."
@@ -418,7 +433,9 @@
       "security": "安全性",
       "system": "系統",
       "application": "應用程式"
-    }
+    },
+    "searchPlaceholder": "搜尋套件更新...",
+    "clearSearch": "清除搜尋"
   },
   "notifications": {
     "bell": {
@@ -620,23 +637,5 @@
     "invalidTitle": "無效的重設連結",
     "invalidDescription": "此密碼重設連結無效或已過期。請請求新的密碼重設。",
     "validatingToken": "正在驗證重設權杖..."
-  },
-  "userDetail": {
-    "invalidId": "無效的使用者ID",
-    "loadError": "載入使用者詳情失敗",
-    "notFound": "找不到使用者",
-    "basicInfo": "基本資訊",
-    "userId": "使用者ID",
-    "firstName": "名字",
-    "lastName": "姓氏",
-    "active": "活躍",
-    "lastAccess": "最後存取",
-    "securityInfo": "安全資訊",
-    "failedAttempts": "失敗登入嘗試",
-    "lockedAt": "鎖定時間",
-    "resetPassword": "重設密碼",
-    "resettingPassword": "正在發送重設電子郵件...",
-    "passwordResetSuccess": "密碼重設電子郵件已發送至{{email}}",
-    "passwordResetError": "發送密碼重設電子郵件失敗。請重試。"
   }
 }

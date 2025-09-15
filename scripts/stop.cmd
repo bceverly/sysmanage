@@ -6,7 +6,9 @@ echo Stopping SysManage Server...
 
 rem Get the directory where this script is located
 set "SCRIPT_DIR=%~dp0"
-cd /d "%SCRIPT_DIR%"
+rem Change to the project root directory (parent of scripts directory)
+for %%I in ("%SCRIPT_DIR%..") do set "PROJECT_ROOT=%%~fI"
+cd /d "%PROJECT_ROOT%"
 
 rem Function to get configuration value using Python
 set "BACKEND_PORT=8080"

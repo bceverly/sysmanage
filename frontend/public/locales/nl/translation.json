@@ -208,6 +208,17 @@
     "diagnosticLoadFailed": "Fout bij laden van diagnostische details",
     "processingDiagnostics": "Verwerken...",
     "lastRequested": "Laatst aangevraagd",
+    "ubuntuProTab": "Ubuntu Pro",
+    "ubuntuProInfo": "Ubuntu Pro Informatie",
+    "subscriptionStatus": "Abonnement Status",
+    "attached": "Gekoppeld",
+    "expires": "Verloopt",
+    "accountName": "Accountnaam",
+    "contractName": "Contractnaam",
+    "techSupportLevel": "Technische Ondersteuning Niveau",
+    "services": "Services",
+    "entitled": "Gerechtigd",
+    "noServices": "Geen services beschikbaar",
     "tags": "Tags",
     "noTags": "Geen tags toegewezen",
     "addTag": "Tag toevoegen",
@@ -217,18 +228,22 @@
     "tagRemoveFailed": "Verwijderen van tag mislukt"
   },
   "userDetail": {
-    "invalidId": "Ongeldig gebruiker-ID",
-    "loadError": "Laden van gebruikersdetails mislukt",
+    "invalidId": "Ongeldig gebruikers-ID",
+    "loadError": "Fout bij laden van gebruikersdetails",
     "notFound": "Gebruiker niet gevonden",
     "basicInfo": "Basisinformatie",
-    "userId": "Gebruiker-ID",
+    "userId": "Gebruikers-ID",
     "firstName": "Voornaam",
     "lastName": "Achternaam",
     "active": "Actief",
     "lastAccess": "Laatste toegang",
     "securityInfo": "Beveiligingsinformatie",
     "failedAttempts": "Mislukte inlogpogingen",
-    "lockedAt": "Vergrendeld op"
+    "lockedAt": "Vergrendeld op",
+    "resetPassword": "Wachtwoord resetten",
+    "resettingPassword": "Reset e-mail verzenden...",
+    "passwordResetSuccess": "Wachtwoord reset e-mail is verzonden naar {{email}}",
+    "passwordResetError": "Fout bij verzenden van wachtwoord reset e-mail. Probeer het opnieuw."
   },
   "logout": {
     "loading": "Uitloggen..."
@@ -420,7 +435,9 @@
       "security": "Beveiliging",
       "system": "Systeem",
       "application": "Applicatie"
-    }
+    },
+    "searchPlaceholder": "Zoeken naar pakketupdates...",
+    "clearSearch": "Zoekopdracht wissen"
   },
   "notifications": {
     "bell": {
@@ -622,23 +639,5 @@
     "invalidTitle": "Ongeldige resetlink",
     "invalidDescription": "Deze wachtwoord resetlink is ongeldig of verlopen. Vraag een nieuwe wachtwoord reset aan.",
     "validatingToken": "Reset token valideren..."
-  },
-  "userDetail": {
-    "invalidId": "Ongeldig gebruikers-ID",
-    "loadError": "Fout bij laden van gebruikersdetails",
-    "notFound": "Gebruiker niet gevonden",
-    "basicInfo": "Basisinformatie",
-    "userId": "Gebruikers-ID",
-    "firstName": "Voornaam",
-    "lastName": "Achternaam",
-    "active": "Actief",
-    "lastAccess": "Laatste toegang",
-    "securityInfo": "Beveiligingsinformatie",
-    "failedAttempts": "Mislukte inlogpogingen",
-    "lockedAt": "Vergrendeld op",
-    "resetPassword": "Wachtwoord resetten",
-    "resettingPassword": "Reset e-mail verzenden...",
-    "passwordResetSuccess": "Wachtwoord reset e-mail is verzonden naar {{email}}",
-    "passwordResetError": "Fout bij verzenden van wachtwoord reset e-mail. Probeer het opnieuw."
   }
 }

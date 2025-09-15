@@ -16,7 +16,11 @@ import {
     FormControl,
     InputLabel,
     Select,
-    MenuItem
+    MenuItem,
+    Checkbox,
+    FormControlLabel,
+    IconButton,
+    Alert
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ComputerIcon from '@mui/icons-material/Computer';
@@ -36,10 +40,14 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import { Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Alert, Snackbar } from '@mui/material';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost } from '../Services/hosts';
+import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService } from '../Services/hosts';
 
 // Use the service types directly - no need for local interfaces anymore
 
@@ -51,6 +59,7 @@ const HostDetail = () => {
     const [userAccounts, setUserAccounts] = useState<UserAccount[]>([]);
     const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
     const [softwarePackages, setSoftwarePackages] = useState<SoftwarePackage[]>([]);
+    const [ubuntuProInfo, setUbuntuProInfo] = useState<UbuntuProInfo | null>(null);
     const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticReport[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -75,7 +84,19 @@ const HostDetail = () => {
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
     const [diagnosticDetailOpen, setDiagnosticDetailOpen] = useState<boolean>(false);
     const [selectedDiagnostic, setSelectedDiagnostic] = useState<DiagnosticDetailResponse | null>(null);
-    
+
+    // Ubuntu Pro state
+    const [ubuntuProTokenDialog, setUbuntuProTokenDialog] = useState<boolean>(false);
+    const [ubuntuProToken, setUbuntuProToken] = useState<string>('');
+    const [ubuntuProAttaching, setUbuntuProAttaching] = useState<boolean>(false);
+    const [ubuntuProDetaching, setUbuntuProDetaching] = useState<boolean>(false);
+
+    // Ubuntu Pro service editing state
+    const [servicesEditMode, setServicesEditMode] = useState<boolean>(false);
+    const [editedServices, setEditedServices] = useState<{[serviceName: string]: boolean}>({});
+    const [servicesSaving, setServicesSaving] = useState<boolean>(false);
+    const [servicesMessage, setServicesMessage] = useState<string>('');
+
     // Tag-related state
     const [hostTags, setHostTags] = useState<Array<{id: number, name: string, description: string | null}>>([]);
     const [availableTags, setAvailableTags] = useState<Array<{id: number, name: string, description: string | null}>>([]);
@@ -83,6 +104,10 @@ const HostDetail = () => {
     const [diagnosticDetailLoading, setDiagnosticDetailLoading] = useState<boolean>(false);
     const navigate = useNavigate();
     const { t } = useTranslation();
+
+    // Helper functions to calculate dynamic tab indices
+    const getUbuntuProTabIndex = () => ubuntuProInfo?.available ? 4 : -1;
+    const getDiagnosticsTabIndex = () => ubuntuProInfo?.available ? 5 : 4;
 
     useEffect(() => {
         if (!localStorage.getItem('bearer_token')) {
@@ -142,9 +167,21 @@ const HostDetail = () => {
                     
                     // Set software data
                     setSoftwarePackages(softwareData);
-                    
+
                     // Set diagnostics data
                     setDiagnosticsData(diagnosticsData);
+
+                    // Fetch Ubuntu Pro data (only for Ubuntu hosts)
+                    try {
+                        if (hostData.platform?.toLowerCase().includes('ubuntu') ||
+                            hostData.platform_release?.toLowerCase().includes('ubuntu')) {
+                            const ubuntuProData = await doGetHostUbuntuPro(BigInt(hostId));
+                            setUbuntuProInfo(ubuntuProData);
+                        }
+                    } catch (error) {
+                        // Ubuntu Pro data is optional, don't fail the whole page load
+                        console.log('Ubuntu Pro data not available or failed to load:', error);
+                    }
                 } catch (hardwareErr) {
                     // Log but don't fail the whole request - hardware/software/diagnostics data is optional
                     console.warn('Failed to fetch hardware/software/diagnostics data:', hardwareErr);
@@ -213,6 +250,32 @@ const HostDetail = () => {
     useEffect(() => {
         loadAvailableTags();
     }, [hostTags, loadAvailableTags]);
+
+    // Auto-refresh Ubuntu Pro information every 30 seconds
+    useEffect(() => {
+        let interval: ReturnType<typeof window.setInterval> | null = null;
+
+        if (hostId && ubuntuProInfo?.available) {
+            interval = window.setInterval(async () => {
+                try {
+                    const ubuntuProData = await doGetHostUbuntuPro(BigInt(hostId));
+                    setUbuntuProInfo(ubuntuProData);
+                    // Clear service messages on refresh (as requested by user)
+                    if (servicesMessage) {
+                        setServicesMessage('');
+                    }
+                } catch {
+                    // Silently ignore errors during auto-refresh
+                }
+            }, 30000); // 30 seconds
+        }
+
+        return () => {
+            if (interval) {
+                window.clearInterval(interval);
+            }
+        };
+    }, [hostId, ubuntuProInfo?.available, servicesMessage]);
 
     const formatDate = (dateString: string | undefined) => {
         if (!dateString) return t('common.notAvailable', 'N/A');
@@ -746,6 +809,157 @@ const HostDetail = () => {
         setCurrentTab(newValue);
     };
 
+    // Ubuntu Pro handlers
+    const handleUbuntuProAttach = () => {
+        setUbuntuProTokenDialog(true);
+    };
+
+    const handleUbuntuProDetach = async () => {
+        if (!hostId || !host) return;
+
+        setUbuntuProDetaching(true);
+        try {
+            await doDetachUbuntuPro(BigInt(hostId));
+            setSnackbarMessage(t('hostDetail.ubuntuProDetachSuccess', 'Ubuntu Pro detached successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+
+            // Refresh Ubuntu Pro info after a short delay to allow agent to process
+            setTimeout(async () => {
+                try {
+                    const ubuntuProData = await doGetHostUbuntuPro(BigInt(hostId));
+                    setUbuntuProInfo(ubuntuProData);
+                } catch (refreshError) {
+                    console.log('Failed to refresh Ubuntu Pro data:', refreshError);
+                }
+            }, 2000);
+        } catch {
+            setSnackbarMessage(t('hostDetail.ubuntuProDetachError', 'Failed to detach Ubuntu Pro'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setUbuntuProDetaching(false);
+        }
+    };
+
+    const handleUbuntuProTokenSubmit = async () => {
+        if (!hostId || !host || !ubuntuProToken.trim()) return;
+
+        setUbuntuProAttaching(true);
+        setUbuntuProTokenDialog(false);
+
+        try {
+            await doAttachUbuntuPro(BigInt(hostId), ubuntuProToken.trim());
+            setSnackbarMessage(t('hostDetail.ubuntuProAttachSuccess', 'Ubuntu Pro attached successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+
+            // Refresh Ubuntu Pro info after a short delay to allow agent to process
+            setTimeout(async () => {
+                try {
+                    const ubuntuProData = await doGetHostUbuntuPro(BigInt(hostId));
+                    setUbuntuProInfo(ubuntuProData);
+                } catch (refreshError) {
+                    console.log('Failed to refresh Ubuntu Pro data:', refreshError);
+                }
+            }, 3000); // Longer delay for attach since it may take more time
+        } catch {
+            setSnackbarMessage(t('hostDetail.ubuntuProAttachError', 'Failed to attach Ubuntu Pro'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setUbuntuProAttaching(false);
+            setUbuntuProToken('');
+        }
+    };
+
+    const handleUbuntuProTokenCancel = () => {
+        setUbuntuProTokenDialog(false);
+        setUbuntuProToken('');
+    };
+
+    // Ubuntu Pro service management handlers
+    const handleServicesEditToggle = () => {
+        if (servicesEditMode) {
+            // Cancel editing - reset changes
+            setEditedServices({});
+            setServicesMessage('');
+        } else {
+            // Start editing - initialize with current service states
+            const currentStates: {[serviceName: string]: boolean} = {};
+            ubuntuProInfo?.services.forEach(service => {
+                if (service.status !== 'n/a') {
+                    currentStates[service.name] = service.status === 'enabled';
+                }
+            });
+            setEditedServices(currentStates);
+        }
+        setServicesEditMode(!servicesEditMode);
+    };
+
+    const handleServiceToggle = (serviceName: string, enabled: boolean) => {
+        setEditedServices(prev => ({
+            ...prev,
+            [serviceName]: enabled
+        }));
+    };
+
+    const handleServicesSave = async () => {
+        if (!hostId || !host || !ubuntuProInfo) return;
+
+        setServicesSaving(true);
+        setServicesMessage('');
+
+        try {
+            const servicesToChange: Array<{service: string, enable: boolean}> = [];
+
+            // Compare current states with edited states
+            ubuntuProInfo.services.forEach(service => {
+                if (service.status !== 'n/a') {
+                    const currentEnabled = service.status === 'enabled';
+                    const newEnabled = editedServices[service.name];
+
+                    if (newEnabled !== undefined && currentEnabled !== newEnabled) {
+                        servicesToChange.push({
+                            service: service.name,
+                            enable: newEnabled
+                        });
+                    }
+                }
+            });
+
+            // Apply changes
+            for (const change of servicesToChange) {
+                if (change.enable) {
+                    await doEnableUbuntuProService(parseInt(hostId), change.service);
+                } else {
+                    await doDisableUbuntuProService(parseInt(hostId), change.service);
+                }
+            }
+
+            if (servicesToChange.length > 0) {
+                setServicesMessage(`${servicesToChange.length} service(s) updated`);
+                setSnackbarMessage(t('hostDetail.servicesUpdateRequested', 'Ubuntu Pro services update requested'));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+            } else {
+                setServicesMessage('No changes made');
+            }
+
+            setServicesEditMode(false);
+            setEditedServices({});
+
+        } catch (error) {
+            console.error('Error updating Ubuntu Pro services:', error);
+            setServicesMessage('Error updating services');
+            setSnackbarMessage(t('hostDetail.servicesUpdateError', 'Error updating Ubuntu Pro services'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setServicesSaving(false);
+        }
+    };
+
     return (
         <Box>
             <Button 
@@ -804,15 +1018,23 @@ const HostDetail = () => {
                         iconPosition="start"
                         sx={{ textTransform: 'none' }}
                     />
-                    <Tab 
-                        icon={<SecurityIcon />} 
-                        label={t('hostDetail.accessTab', 'Access')} 
+                    <Tab
+                        icon={<SecurityIcon />}
+                        label={t('hostDetail.accessTab', 'Access')}
                         iconPosition="start"
                         sx={{ textTransform: 'none' }}
                     />
-                    <Tab 
-                        icon={<MedicalServicesIcon />} 
-                        label={t('hostDetail.diagnosticsTab', 'Diagnostics')} 
+                    {ubuntuProInfo?.available && (
+                        <Tab
+                            icon={<VerifiedUserIcon />}
+                            label={t('hostDetail.ubuntuProTab', 'Ubuntu Pro')}
+                            iconPosition="start"
+                            sx={{ textTransform: 'none' }}
+                        />
+                    )}
+                    <Tab
+                        icon={<MedicalServicesIcon />}
+                        label={t('hostDetail.diagnosticsTab', 'Diagnostics')}
                         iconPosition="start"
                         sx={{ textTransform: 'none' }}
                     />
@@ -1781,8 +2003,252 @@ const HostDetail = () => {
                 </Grid>
             )}
 
+            {/* Ubuntu Pro Tab */}
+            {currentTab === getUbuntuProTabIndex() && ubuntuProInfo?.available && (
+                <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                        <Card>
+                            <CardContent>
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <VerifiedUserIcon />
+                                        {t('hostDetail.ubuntuProInfo', 'Ubuntu Pro Information')}
+                                    </Typography>
+
+                                    {/* Attach/Detach Button - only show if agent is privileged */}
+                                    {host?.is_agent_privileged && (
+                                        <Box>
+                                            {ubuntuProAttaching && (
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <CircularProgress size={16} />
+                                                    <Typography variant="body2" color="textSecondary">
+                                                        {t('hostDetail.ubuntuProAttaching', 'Attaching...')}
+                                                    </Typography>
+                                                </Box>
+                                            )}
+                                            {ubuntuProDetaching && (
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <CircularProgress size={16} />
+                                                    <Typography variant="body2" color="textSecondary">
+                                                        {t('hostDetail.ubuntuProDetaching', 'Detaching...')}
+                                                    </Typography>
+                                                </Box>
+                                            )}
+                                            {!ubuntuProAttaching && !ubuntuProDetaching && (
+                                                <>
+                                                    {ubuntuProInfo.attached ? (
+                                                        <Button
+                                                            variant="outlined"
+                                                            color="warning"
+                                                            size="small"
+                                                            onClick={handleUbuntuProDetach}
+                                                            startIcon={<DeleteIcon />}
+                                                        >
+                                                            {t('hostDetail.ubuntuProDetach', 'Detach')}
+                                                        </Button>
+                                                    ) : (
+                                                        <Button
+                                                            variant="outlined"
+                                                            color="primary"
+                                                            size="small"
+                                                            onClick={handleUbuntuProAttach}
+                                                            startIcon={<VerifiedUserIcon />}
+                                                        >
+                                                            {t('hostDetail.ubuntuProAttach', 'Attach')}
+                                                        </Button>
+                                                    )}
+                                                </>
+                                            )}
+                                        </Box>
+                                    )}
+                                </Box>
+
+                                <Grid container spacing={2} sx={{ mt: 1 }}>
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ mb: 2 }}>
+                                            <CardContent>
+                                                <Typography variant="h6" gutterBottom>
+                                                    {t('hostDetail.subscriptionStatus', 'Subscription Status')}
+                                                </Typography>
+                                                <Table size="small">
+                                                    <TableBody>
+                                                        <TableRow>
+                                                            <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
+                                                                {t('hostDetail.attached', 'Attached')}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Chip
+                                                                    label={ubuntuProInfo.attached ? t('common.yes', 'Yes') : t('common.no', 'No')}
+                                                                    color={ubuntuProInfo.attached ? 'success' : 'default'}
+                                                                    size="small"
+                                                                />
+                                                            </TableCell>
+                                                        </TableRow>
+                                                        {ubuntuProInfo.version && (
+                                                            <TableRow>
+                                                                <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
+                                                                    {t('hostDetail.version', 'Version')}
+                                                                </TableCell>
+                                                                <TableCell>{ubuntuProInfo.version}</TableCell>
+                                                            </TableRow>
+                                                        )}
+                                                        {ubuntuProInfo.expires && (
+                                                            <TableRow>
+                                                                <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
+                                                                    {t('hostDetail.expires', 'Expires')}
+                                                                </TableCell>
+                                                                <TableCell>{new Date(ubuntuProInfo.expires).toLocaleDateString()}</TableCell>
+                                                            </TableRow>
+                                                        )}
+                                                        {ubuntuProInfo.account_name && (
+                                                            <TableRow>
+                                                                <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
+                                                                    {t('hostDetail.accountName', 'Account Name')}
+                                                                </TableCell>
+                                                                <TableCell>{ubuntuProInfo.account_name}</TableCell>
+                                                            </TableRow>
+                                                        )}
+                                                        {ubuntuProInfo.contract_name && (
+                                                            <TableRow>
+                                                                <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
+                                                                    {t('hostDetail.contractName', 'Contract Name')}
+                                                                </TableCell>
+                                                                <TableCell>{ubuntuProInfo.contract_name}</TableCell>
+                                                            </TableRow>
+                                                        )}
+                                                        {ubuntuProInfo.tech_support_level && (
+                                                            <TableRow>
+                                                                <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
+                                                                    {t('hostDetail.techSupportLevel', 'Tech Support Level')}
+                                                                </TableCell>
+                                                                <TableCell>{ubuntuProInfo.tech_support_level}</TableCell>
+                                                            </TableRow>
+                                                        )}
+                                                    </TableBody>
+                                                </Table>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined">
+                                            <CardContent>
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                                    <Typography variant="h6">
+                                                        {t('hostDetail.services', 'Services')}
+                                                    </Typography>
+                                                    <Box sx={{ display: 'flex', gap: 1 }}>
+                                                        {servicesEditMode ? (
+                                                            <>
+                                                                <Button
+                                                                    size="small"
+                                                                    variant="contained"
+                                                                    color="primary"
+                                                                    onClick={handleServicesSave}
+                                                                    disabled={servicesSaving || !host?.is_agent_privileged}
+                                                                    startIcon={servicesSaving ? <CircularProgress size={16} /> : <SaveIcon />}
+                                                                >
+                                                                    {t('common.save', 'Save')}
+                                                                </Button>
+                                                                <Button
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                    onClick={handleServicesEditToggle}
+                                                                    disabled={servicesSaving}
+                                                                    startIcon={<CancelIcon />}
+                                                                >
+                                                                    {t('common.cancel', 'Cancel')}
+                                                                </Button>
+                                                            </>
+                                                        ) : (
+                                                            host?.is_agent_privileged && ubuntuProInfo.attached && (
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={handleServicesEditToggle}
+                                                                    title={t('hostDetail.editServices', 'Edit services')}
+                                                                >
+                                                                    <EditIcon />
+                                                                </IconButton>
+                                                            )
+                                                        )}
+                                                    </Box>
+                                                </Box>
+                                                {servicesMessage && (
+                                                    <Alert severity="info" sx={{ mb: 2 }}>
+                                                        {servicesMessage}
+                                                    </Alert>
+                                                )}
+                                                {ubuntuProInfo.services.length > 0 ? (
+                                                    <Grid container spacing={1}>
+                                                        {ubuntuProInfo.services
+                                                            .sort((a, b) => {
+                                                                // Sort: enabled first, then disabled, then n/a
+                                                                const statusOrder = { 'enabled': 0, 'disabled': 1, 'n/a': 2 };
+                                                                return statusOrder[a.status as keyof typeof statusOrder] - statusOrder[b.status as keyof typeof statusOrder];
+                                                            })
+                                                            .map((service, index) => (
+                                                            <Grid item xs={12} key={index}>
+                                                                <Card variant="outlined" sx={{ p: 1 }}>
+                                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                        <Box sx={{ flex: 1 }}>
+                                                                            <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                                                                                {service.name}
+                                                                            </Typography>
+                                                                            {service.description && (
+                                                                                <Typography variant="caption" color="textSecondary">
+                                                                                    {service.description}
+                                                                                </Typography>
+                                                                            )}
+                                                                        </Box>
+                                                                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                                                            {servicesEditMode && service.status !== 'n/a' ? (
+                                                                                <FormControlLabel
+                                                                                    control={
+                                                                                        <Checkbox
+                                                                                            checked={editedServices[service.name] ?? (service.status === 'enabled')}
+                                                                                            onChange={(e) => handleServiceToggle(service.name, e.target.checked)}
+                                                                                            size="small"
+                                                                                        />
+                                                                                    }
+                                                                                    label={editedServices[service.name] ?? (service.status === 'enabled') ? t('hostDetail.enabled', 'Enabled') : t('hostDetail.disabled', 'Disabled')}
+                                                                                />
+                                                                            ) : (
+                                                                                <Chip
+                                                                                    label={service.status === 'n/a' ? 'N/A' : (service.status === 'enabled' ? t('hostDetail.enabled', 'Enabled') : t('hostDetail.disabled', 'Disabled'))}
+                                                                                    color={service.status === 'enabled' ? 'success' : service.status === 'n/a' ? 'default' : 'warning'}
+                                                                                    size="small"
+                                                                                />
+                                                                            )}
+                                                                            {service.entitled && (
+                                                                                <Chip
+                                                                                    label={t('hostDetail.entitled', 'Entitled')}
+                                                                                    color="primary"
+                                                                                    size="small"
+                                                                                />
+                                                                            )}
+                                                                        </Box>
+                                                                    </Box>
+                                                                </Card>
+                                                            </Grid>
+                                                        ))}
+                                                    </Grid>
+                                                ) : (
+                                                    <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
+                                                        {t('hostDetail.noServices', 'No services available')}
+                                                    </Typography>
+                                                )}
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                </Grid>
+            )}
+
             {/* Diagnostics Tab */}
-            {currentTab === 4 && (
+            {currentTab === getDiagnosticsTabIndex() && (
                 <Grid container spacing={3}>
                     <Grid item xs={12}>
                         <Card>
@@ -2180,6 +2646,45 @@ const HostDetail = () => {
                 <DialogActions>
                     <Button onClick={() => setDiagnosticDetailOpen(false)}>
                         {t('common.close', 'Close')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Ubuntu Pro Token Dialog */}
+            <Dialog
+                open={ubuntuProTokenDialog}
+                onClose={handleUbuntuProTokenCancel}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>
+                    {t('hostDetail.ubuntuProAttachTitle', 'Attach Ubuntu Pro')}
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" sx={{ mb: 2 }}>
+                        {t('hostDetail.ubuntuProAttachDescription', 'Enter your Ubuntu Pro token to attach this system to your subscription.')}
+                    </Typography>
+                    <TextField
+                        fullWidth
+                        label={t('hostDetail.ubuntuProToken', 'Ubuntu Pro Token')}
+                        value={ubuntuProToken}
+                        onChange={(e) => setUbuntuProToken(e.target.value)}
+                        placeholder="C1xxxxxxxxxxxxxxxxxxxxxxxxxx"
+                        variant="outlined"
+                        multiline={false}
+                        sx={{ mt: 1 }}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleUbuntuProTokenCancel}>
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button
+                        onClick={handleUbuntuProTokenSubmit}
+                        variant="contained"
+                        disabled={!ubuntuProToken.trim()}
+                    >
+                        {t('hostDetail.ubuntuProAttachConfirm', 'Attach')}
                     </Button>
                 </DialogActions>
             </Dialog>

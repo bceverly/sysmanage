@@ -148,11 +148,10 @@ like to add:
     detect this and communicate it back to
     the server where it can be stored.~~
 
-23. Special Updates - Allow an agent to 
+23. ~~Special Updates - Allow an agent to 
     manage Ubuntu Pro as well as any other
     special paid updates on other platforms.
-    Include syspatch on OpenBSD.  Include
-    fwupd in Linux systems as well.
+    Include fwupd in Linux systems as well.~~
 
 24. SSH Keys - Manage SSH keys on the agents
     so that they can be pushed out from a
@@ -388,4 +387,40 @@ like to add:
     We then need to, if one is 
     available, see if the user wants
     to upgrade.  If so, then we need
-    to apply the upgrade.
+    to apply the upgrade.  Include
+    syspatch on OpenBSD.
+
+51. Add an automation tab between
+    updates and scripts in the main
+    navbar.  on that tab, have an
+    "Updates" subtab that allows you
+    to see a list of the hosts and
+    their auto update status where
+    you get green pills for a package
+    manager if they are enabled for
+    auto-update for that package
+    manager or yellow if they are not
+    so enabled.  add an overall
+    "Security" pill that is either
+    green (enabled) or red (not
+    enabled) and put the "Security"
+    pill at the start of the list.
+    For each of these hosts, have
+    a pencil icon on the right that
+    is "edit" mode that allows you
+    to check on or off each of the
+    package managers (plus security)
+    that are enabled for that host
+    (since some won't support certain
+    package managers) with a save
+    button to save that row and go
+    back to the normal view of the
+    list.  don't have a dialog, make
+    the checkbox business inline with
+    the item in the list.  the entire
+    list should be in a data grid
+    like the rest of the app's UX.
+    Create the necessary alembic
+    migrations and do all necessary
+    string externalization /
+    translation.

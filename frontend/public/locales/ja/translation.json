@@ -208,6 +208,17 @@
     "diagnosticLoadFailed": "診断詳細の読み込みに失敗しました",
     "processingDiagnostics": "処理中...",
     "lastRequested": "最終リクエスト",
+    "ubuntuProTab": "Ubuntu Pro",
+    "ubuntuProInfo": "Ubuntu Pro 情報",
+    "subscriptionStatus": "サブスクリプション状況",
+    "attached": "アタッチ済み",
+    "expires": "期限",
+    "accountName": "アカウント名",
+    "contractName": "契約名",
+    "techSupportLevel": "テクニカルサポートレベル",
+    "services": "サービス",
+    "entitled": "有効",
+    "noServices": "利用可能なサービスなし",
     "tags": "タグ",
     "noTags": "タグが割り当てられていません",
     "addTag": "タグを追加",
@@ -218,7 +229,7 @@
   },
   "userDetail": {
     "invalidId": "無効なユーザーID",
-    "loadError": "ユーザー詳細の読み込みに失敗しました",
+    "loadError": "ユーザー詳細の読み込みに失敗",
     "notFound": "ユーザーが見つかりません",
     "basicInfo": "基本情報",
     "userId": "ユーザーID",
@@ -227,8 +238,12 @@
     "active": "アクティブ",
     "lastAccess": "最終アクセス",
     "securityInfo": "セキュリティ情報",
-    "failedAttempts": "ログイン失敗回数",
-    "lockedAt": "ロック日時"
+    "failedAttempts": "失敗したログイン試行",
+    "lockedAt": "ロック日時",
+    "resetPassword": "パスワードをリセット",
+    "resettingPassword": "リセットメールを送信中...",
+    "passwordResetSuccess": "パスワードリセットメールが{{email}}に送信されました",
+    "passwordResetError": "パスワードリセットメールの送信に失敗しました。再度お試しください。"
   },
   "logout": {
     "loading": "ログアウト中..."
@@ -420,7 +435,9 @@
       "security": "セキュリティ",
       "system": "システム",
       "application": "アプリケーション"
-    }
+    },
+    "searchPlaceholder": "パッケージ更新を検索...",
+    "clearSearch": "検索をクリア"
   },
   "notifications": {
     "bell": {
@@ -624,23 +641,5 @@
     "invalidTitle": "無効なリセットリンク",
     "invalidDescription": "このパスワードリセットリンクは無効または期限切れです。新しいパスワードリセットをリクエストしてください。",
     "validatingToken": "リセットトークンを検証中..."
-  },
-  "userDetail": {
-    "invalidId": "無効なユーザーID",
-    "loadError": "ユーザー詳細の読み込みに失敗",
-    "notFound": "ユーザーが見つかりません",
-    "basicInfo": "基本情報",
-    "userId": "ユーザーID",
-    "firstName": "名前",
-    "lastName": "姓",
-    "active": "アクティブ",
-    "lastAccess": "最終アクセス",
-    "securityInfo": "セキュリティ情報",
-    "failedAttempts": "失敗したログイン試行",
-    "lockedAt": "ロック日時",
-    "resetPassword": "パスワードをリセット",
-    "resettingPassword": "リセットメールを送信中...",
-    "passwordResetSuccess": "パスワードリセットメールが{{email}}に送信されました",
-    "passwordResetError": "パスワードリセットメールの送信に失敗しました。再度お試しください。"
   }
 }

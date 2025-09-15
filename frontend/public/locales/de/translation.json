@@ -242,6 +242,17 @@
     "diagnosticLoadFailed": "Fehler beim Laden der Diagnosedetails",
     "processingDiagnostics": "Verarbeitung...",
     "lastRequested": "Zuletzt angefordert",
+    "ubuntuProTab": "Ubuntu Pro",
+    "ubuntuProInfo": "Ubuntu Pro Informationen",
+    "subscriptionStatus": "Abonnement-Status",
+    "attached": "Verbunden",
+    "expires": "Läuft ab",
+    "accountName": "Kontoname",
+    "contractName": "Vertragsname",
+    "techSupportLevel": "Technischer Support-Level",
+    "services": "Dienste",
+    "entitled": "Berechtigt",
+    "noServices": "Keine Dienste verfügbar",
     "tags": "Tags",
     "noTags": "Keine Tags zugewiesen",
     "addTag": "Tag hinzufügen",
@@ -254,7 +265,7 @@
     "invalidId": "Ungültige Benutzer-ID",
     "loadError": "Fehler beim Laden der Benutzerdetails",
     "notFound": "Benutzer nicht gefunden",
-    "basicInfo": "Grundinformationen",
+    "basicInfo": "Grundlegende Informationen",
     "userId": "Benutzer-ID",
     "firstName": "Vorname",
     "lastName": "Nachname",
@@ -262,7 +273,11 @@
     "lastAccess": "Letzter Zugriff",
     "securityInfo": "Sicherheitsinformationen",
     "failedAttempts": "Fehlgeschlagene Anmeldeversuche",
-    "lockedAt": "Gesperrt am"
+    "lockedAt": "Gesperrt am",
+    "resetPassword": "Passwort zurücksetzen",
+    "resettingPassword": "Zurücksetzungs-E-Mail wird gesendet...",
+    "passwordResetSuccess": "Passwort-Zurücksetzungs-E-Mail wurde an {{email}} gesendet",
+    "passwordResetError": "Fehler beim Senden der Passwort-Zurücksetzungs-E-Mail. Bitte versuchen Sie es erneut."
   },
   "logout": {
     "loading": "Abmeldung läuft..."
@@ -420,7 +435,9 @@
       "security": "Sicherheit",
       "system": "System",
       "application": "Anwendung"
-    }
+    },
+    "searchPlaceholder": "Nach Paketaktualisierungen suchen...",
+    "clearSearch": "Suche löschen"
   },
   "notifications": {
     "bell": {
@@ -580,17 +597,17 @@
     "searchTags": "Tags suchen"
   },
   "tags": {
-      "title": "Tags",
-      "name": "Name",
-      "description": "Beschreibung",
-      "hostCount": "Host-Anzahl",
-      "lastUpdated": "Zuletzt aktualisiert",
-      "addTag": "Tag hinzufügen",
-      "editTag": "Tag bearbeiten",
-      "viewHosts": "Hosts anzeigen",
-      "hostsAssociatedWith": "Hosts verknüpft mit",
-      "noHostsAssociated": "Keine Hosts sind mit diesem Tag verknüpft."
-    },
+    "title": "Tags",
+    "name": "Name",
+    "description": "Beschreibung",
+    "hostCount": "Host-Anzahl",
+    "lastUpdated": "Zuletzt aktualisiert",
+    "addTag": "Tag hinzufügen",
+    "editTag": "Tag bearbeiten",
+    "viewHosts": "Hosts anzeigen",
+    "hostsAssociatedWith": "Hosts verknüpft mit",
+    "noHostsAssociated": "Keine Hosts sind mit diesem Tag verknüpft."
+  },
   "forgotPassword": {
     "title": "Passwort vergessen",
     "description": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.",
@@ -624,23 +641,5 @@
     "invalidTitle": "Ungültiger Zurücksetzungslink",
     "invalidDescription": "Dieser Passwort-Zurücksetzungslink ist entweder ungültig oder abgelaufen. Bitte fordern Sie eine neue Passwort-Zurücksetzung an.",
     "validatingToken": "Token wird validiert..."
-  },
-  "userDetail": {
-    "invalidId": "Ungültige Benutzer-ID",
-    "loadError": "Fehler beim Laden der Benutzerdetails",
-    "notFound": "Benutzer nicht gefunden",
-    "basicInfo": "Grundlegende Informationen",
-    "userId": "Benutzer-ID",
-    "firstName": "Vorname",
-    "lastName": "Nachname",
-    "active": "Aktiv",
-    "lastAccess": "Letzter Zugriff",
-    "securityInfo": "Sicherheitsinformationen",
-    "failedAttempts": "Fehlgeschlagene Anmeldeversuche",
-    "lockedAt": "Gesperrt am",
-    "resetPassword": "Passwort zurücksetzen",
-    "resettingPassword": "Zurücksetzungs-E-Mail wird gesendet...",
-    "passwordResetSuccess": "Passwort-Zurücksetzungs-E-Mail wurde an {{email}} gesendet",
-    "passwordResetError": "Fehler beim Senden der Passwort-Zurücksetzungs-E-Mail. Bitte versuchen Sie es erneut."
   }
 }
