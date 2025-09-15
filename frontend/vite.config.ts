@@ -78,15 +78,19 @@ function getNetworkHosts(): string[] {
   return uniqueHosts;
 }
 
+// Calculate final host and port values
+const finalHost = hasSSLCerts ? (config?.webui?.ssl_host || 'sysmanage.org') :
+                  (process.env.VITE_HOST || config?.webui?.host || 'localhost');
+const finalPort = hasSSLCerts ? (config?.webui?.ssl_port || 7443) :
+                  parseInt(process.env.VITE_PORT || config?.webui?.port?.toString() || '3000');
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
     // Use config-driven host and port with environment variable overrides
-    host: hasSSLCerts ? (config?.webui?.ssl_host || 'sysmanage.org') : 
-          (process.env.VITE_HOST || config?.webui?.host || 'localhost'),
-    port: hasSSLCerts ? (config?.webui?.ssl_port || 7443) : 
-          parseInt(process.env.VITE_PORT || config?.webui?.port?.toString() || '3000'),
+    host: finalHost,
+    port: finalPort,
     https: hasSSLCerts ? {
       key: fs.readFileSync(path.join(certPath, 'privkey.pem')),
       cert: fs.readFileSync(path.join(certPath, 'cert.pem'))

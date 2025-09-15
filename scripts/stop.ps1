@@ -133,6 +133,8 @@ Kill-ByPort $frontendPort "Frontend Web UI"
 if (Test-Path "logs") {
     Remove-Item "logs\backend.pid" -Force -ErrorAction SilentlyContinue
     Remove-Item "logs\frontend.pid" -Force -ErrorAction SilentlyContinue
+    Remove-Item "logs\start_backend.bat" -Force -ErrorAction SilentlyContinue
+    Remove-Item "logs\start_frontend.bat" -Force -ErrorAction SilentlyContinue
     Remove-Item "logs\processes.env" -Force -ErrorAction SilentlyContinue
 }
 

@@ -187,12 +187,38 @@ if (Test-Path "backend\main.py") {
     
     # Start the backend using the main.py configuration
     Write-Host "Starting backend on port $backendPort..." -ForegroundColor Gray
-    $backendJob = Start-Job -ScriptBlock {
-        param($projectRoot, $venvPath)
-        Set-Location $projectRoot
-        if ($venvPath) { & $venvPath }
-        python -m backend.main *>&1 | Out-File -FilePath "logs\backend.log" -Append -Encoding utf8
-    } -ArgumentList $ProjectRoot, $venvPath
+
+    # Build the command to run based on virtual environment availability
+    if ($venvPath) {
+        $pythonExe = ".venv\Scripts\python.exe"
+    } else {
+        $pythonExe = "python"
+    }
+
+    # Set up environment for backend
+    $env:PYTHONPATH = $ProjectRoot
+
+    # Create a batch file to run the backend with proper logging
+    $backendBatchContent = @"
+@echo off
+set PYTHONPATH=$ProjectRoot
+cd /d "$ProjectRoot"
+$pythonExe -m backend.main >> "$ProjectRoot\logs\backend.log" 2>&1
+"@
+
+    $backendBatchFile = "logs\start_backend.bat"
+    $backendBatchContent | Out-File $backendBatchFile -Encoding ascii
+
+    # Start backend process in background
+    $backendProcess = Start-Process -FilePath "cmd.exe" -ArgumentList "/c", $backendBatchFile -WindowStyle Hidden -PassThru -WorkingDirectory $ProjectRoot
+
+    # Store process ID for later cleanup
+    if ($backendProcess) {
+        $backendProcess.Id | Out-File "logs\backend.pid" -Encoding ascii
+        Write-Host "Backend process started with PID: $($backendProcess.Id)" -ForegroundColor Gray
+    } else {
+        Write-Host "ERROR: Failed to start backend process" -ForegroundColor Red
+    }
     
     # Wait for backend to be ready
     if (-not (Wait-ForService -Port $backendPort -ServiceName "Backend API")) {
@@ -219,18 +245,32 @@ if ((Test-Path "frontend") -and (Test-Path "frontend\package.json")) {
     
     # Start the React development server
     Write-Host "Starting frontend on port $frontendPort..." -ForegroundColor Gray
-    $env:FORCE_HTTP = "true"
-    $env:VITE_HOST = $webuiHost
-    $env:VITE_PORT = $frontendPort
-    
-    $frontendJob = Start-Job -ScriptBlock {
-        param($frontendDir, $webuiHost, $frontendPort)
-        Set-Location $frontendDir
-        $env:FORCE_HTTP = "true"
-        $env:VITE_HOST = $webuiHost
-        $env:VITE_PORT = $frontendPort
-        npm start *>&1 | Out-File -FilePath "..\logs\frontend.log" -Append -Encoding utf8
-    } -ArgumentList (Join-Path $ProjectRoot "frontend"), $webuiHost, $frontendPort
+
+    # Start npm directly with PowerShell without batch file
+    Write-Host "Starting npm directly from PowerShell..." -ForegroundColor Gray
+
+    # Change to frontend directory and start npm with output redirection
+    Push-Location "$ProjectRoot\frontend"
+
+    # Start npm as background process with output redirection using PowerShell
+    # Use npm.cmd on Windows instead of npm, with proper detachment from terminal
+    $frontendProcess = Start-Process -FilePath "npm.cmd" -ArgumentList "start" `
+        -WorkingDirectory "$ProjectRoot\frontend" `
+        -WindowStyle Hidden `
+        -PassThru `
+        -RedirectStandardOutput "$ProjectRoot\logs\frontend.log" `
+        -RedirectStandardError "$ProjectRoot\logs\frontend_error.log" `
+        -RedirectStandardInput "$ProjectRoot\logs\null_input.txt"
+
+    Pop-Location
+
+    # Store process ID for later cleanup
+    if ($frontendProcess) {
+        $frontendProcess.Id | Out-File "$ProjectRoot\logs\frontend.pid" -Encoding ascii
+        Write-Host "Frontend process started with PID: $($frontendProcess.Id)" -ForegroundColor Gray
+    } else {
+        Write-Host "ERROR: Failed to start frontend process" -ForegroundColor Red
+    }
     
     Set-Location $ProjectRoot
     
@@ -254,7 +294,7 @@ $wsUrl = ($backendUrl -replace "http://", "ws://") + "/api/agent/connect"
 Write-Host "  Backend API:      $backendUrl" -ForegroundColor Cyan
 Write-Host "  Agent WebSocket:  $wsUrl" -ForegroundColor Cyan
 
-if ($frontendJob) {
+if ($frontendProcess) {
     $frontendUrl = Get-ServiceUrl -ServiceType "webui" -Port $frontendPort
     Write-Host "  Frontend UI:      $frontendUrl" -ForegroundColor Cyan
 }
