@@ -792,12 +792,19 @@ class TestEmailService:
 class TestEmailTemplateGeneration:
     """Test cases for email template generation in password reset."""
 
+    @patch("backend.api.password_reset.get_dynamic_hostname")
+    @patch("backend.api.password_reset.email_service.is_enabled")
     @patch("backend.api.password_reset.email_service.send_email")
     @patch("backend.config.config.get_config")
-    def test_send_password_reset_email(self, mock_config, mock_send_email):
+    def test_send_password_reset_email(self, mock_config, mock_send_email, mock_is_enabled, mock_hostname):
         """Test password reset email generation."""
         from backend.api.password_reset import send_password_reset_email
         from fastapi import Request
+
+        # Mock email service and hostname
+        mock_is_enabled.return_value = True
+        mock_hostname.return_value = "test.example.com"
+        mock_send_email.return_value = True
 
         # Mock configuration
         mock_config.return_value = {
@@ -813,7 +820,6 @@ class TestEmailTemplateGeneration:
                 }
             },
         }
-        mock_send_email.return_value = True
 
         # Create mock request
         mock_request = Mock(spec=Request)
@@ -827,12 +833,19 @@ class TestEmailTemplateGeneration:
         assert "token123" in call_args["body"]
         assert "token123" in call_args["html_body"]
 
+    @patch("backend.api.password_reset.get_dynamic_hostname")
+    @patch("backend.api.password_reset.email_service.is_enabled")
     @patch("backend.api.password_reset.email_service.send_email")
     @patch("backend.config.config.get_config")
-    def test_send_initial_setup_email(self, mock_config, mock_send_email):
+    def test_send_initial_setup_email(self, mock_config, mock_send_email, mock_is_enabled, mock_hostname):
         """Test initial setup email generation."""
         from backend.api.password_reset import send_initial_setup_email
         from fastapi import Request
+
+        # Mock email service and hostname
+        mock_is_enabled.return_value = True
+        mock_hostname.return_value = "test.example.com"
+        mock_send_email.return_value = True
 
         # Mock configuration
         mock_config.return_value = {
@@ -848,7 +861,6 @@ class TestEmailTemplateGeneration:
                 }
             },
         }
-        mock_send_email.return_value = True
 
         # Create mock request
         mock_request = Mock(spec=Request)
