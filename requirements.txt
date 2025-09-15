@@ -58,7 +58,7 @@ watchfiles==1.1.0
 websocket==0.2.1
 websockets==15.0.1
 zope.event==5.0
-zope.interface==7.2
+zope.interface==8.0
 Babel==2.16.0
 safety==3.6.1
 safety-schemas==0.0.14
