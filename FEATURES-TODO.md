@@ -443,4 +443,4 @@ like to add:
     dialog for enrolling a remote
     host into pro, if there is a
     master key, pre-fill the dialog
-    entry field with it.
+    entry field with it
