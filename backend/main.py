@@ -57,7 +57,9 @@ startup_logger.info("Environment variables count: %d", len(os.environ))
 def get_cors_origins(web_ui_port, backend_api_port):
     """Generate CORS origins including dynamic hostname discovery."""
     startup_logger.info("=== CORS ORIGINS GENERATION START ===")
-    startup_logger.info("Web UI port: %s, Backend API port: %s", web_ui_port, backend_api_port)
+    startup_logger.info(
+        "Web UI port: %s, Backend API port: %s", web_ui_port, backend_api_port
+    )
     cors_origins = []
 
     # Always add localhost for development
@@ -106,8 +108,13 @@ def get_cors_origins(web_ui_port, backend_api_port):
         startup_logger.info("Testing hostname variations: %s", hostname_variations)
 
         for variation in hostname_variations:
-            variation_origins = [f"http://{variation}:{web_ui_port}", f"http://{variation}:{backend_api_port}"]
-            startup_logger.info("Adding variation origins for %s: %s", variation, variation_origins)
+            variation_origins = [
+                f"http://{variation}:{web_ui_port}",
+                f"http://{variation}:{backend_api_port}",
+            ]
+            startup_logger.info(
+                "Adding variation origins for %s: %s", variation, variation_origins
+            )
             cors_origins.extend(variation_origins)
     except Exception as e:  # nosec B110
         startup_logger.warning("Failed to process hostname variations: %s", e)
@@ -128,9 +135,13 @@ def get_cors_origins(web_ui_port, backend_api_port):
     except Exception as e:  # nosec B110
         startup_logger.warning("Failed to get network interface IPs: %s", e)
 
-    startup_logger.info("Total CORS origins before deduplication: %d", len(cors_origins))
+    startup_logger.info(
+        "Total CORS origins before deduplication: %d", len(cors_origins)
+    )
     unique_origins = list(set(cors_origins))  # Remove duplicates
-    startup_logger.info("Total CORS origins after deduplication: %d", len(unique_origins))
+    startup_logger.info(
+        "Total CORS origins after deduplication: %d", len(unique_origins)
+    )
     startup_logger.info("Final CORS origins: %s", unique_origins)
     startup_logger.info("=== CORS ORIGINS GENERATION COMPLETE ===")
     return unique_origins
@@ -151,7 +162,7 @@ except Exception as e:
 # Configure logging with UTC timestamp formatter
 startup_logger.info("=== CONFIGURING LOGGING ===")
 # Ensure logs directory exists
-logs_dir = "logs"
+logs_dir = "logs"  # pylint: disable=invalid-name
 startup_logger.info("Creating logs directory: %s", logs_dir)
 os.makedirs(logs_dir, exist_ok=True)
 startup_logger.info("Logs directory exists: %s", os.path.exists(logs_dir))
@@ -162,7 +173,7 @@ startup_logger.info("Added console handler")
 
 try:
     # Try to add file handler, but fallback gracefully if permission denied
-    log_file = "logs/backend.log"
+    log_file = "logs/backend.log"  # pylint: disable=invalid-name
     startup_logger.info("Attempting to create file handler for: %s", log_file)
     file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
     handlers.append(file_handler)
@@ -186,7 +197,9 @@ logging.basicConfig(
 startup_logger.info("Applying UTC timestamp formatter to all handlers")
 utc_formatter = UTCTimestampFormatter("%(levelname)s: %(name)s: %(message)s")
 for i, handler in enumerate(logging.root.handlers):
-    startup_logger.info("Setting formatter for handler %d: %s", i, type(handler).__name__)
+    startup_logger.info(
+        "Setting formatter for handler %d: %s", i, type(handler).__name__
+    )
     handler.setFormatter(utc_formatter)
 startup_logger.info("Logging configuration complete")
 
@@ -197,7 +210,9 @@ async def lifespan(_fastapi_app: FastAPI):
     Application lifespan manager to handle startup and shutdown events.
     """
     startup_logger.info("=== FASTAPI LIFESPAN STARTUP BEGIN ===")
-    startup_logger.info("lifespan function called with app: %s", type(_fastapi_app).__name__)
+    startup_logger.info(
+        "lifespan function called with app: %s", type(_fastapi_app).__name__
+    )
     startup_logger.info("FastAPI app instance ID: %s", id(_fastapi_app))
 
     heartbeat_task = None
@@ -210,9 +225,13 @@ async def lifespan(_fastapi_app: FastAPI):
             "About to call certificate_manager.ensure_server_certificate()",
             flush=True,
         )
-        startup_logger.info("About to call certificate_manager.ensure_server_certificate()")
+        startup_logger.info(
+            "About to call certificate_manager.ensure_server_certificate()"
+        )
         certificate_manager.ensure_server_certificate()
-        startup_logger.info("certificate_manager.ensure_server_certificate() completed successfully")
+        startup_logger.info(
+            "certificate_manager.ensure_server_certificate() completed successfully"
+        )
 
         # Startup: Start the heartbeat monitor service
         startup_logger.info("=== HEARTBEAT MONITOR STARTUP ===")
@@ -231,7 +250,9 @@ async def lifespan(_fastapi_app: FastAPI):
 
         # Create the task and schedule it with the event loop
         message_processor_task = loop.create_task(message_processor.start())
-        startup_logger.info("Created message processor task: %s", message_processor_task)
+        startup_logger.info(
+            "Created message processor task: %s", message_processor_task
+        )
         startup_logger.info("Message processor task ID: %s", id(message_processor_task))
 
         # Allow the event loop to process the task creation
@@ -264,7 +285,9 @@ async def lifespan(_fastapi_app: FastAPI):
                 print(f"Task exception: {task_e}")
                 raise
         else:
-            startup_logger.info("Message processor task scheduled and running successfully")
+            startup_logger.info(
+                "Message processor task scheduled and running successfully"
+            )
 
         # Startup: Start the discovery beacon service
         startup_logger.info("=== DISCOVERY BEACON STARTUP ===")
@@ -329,7 +352,11 @@ startup_logger.info("=== CREATING FASTAPI APPLICATION ===")
 startup_logger.info("Creating FastAPI app with lifespan manager")
 app = FastAPI(lifespan=lifespan)
 startup_logger.info("FastAPI app created successfully")
-startup_logger.info("App info - Title: %s, Version: %s", getattr(app, 'title', 'Not set'), getattr(app, 'version', 'Not set'))
+startup_logger.info(
+    "App info - Title: %s, Version: %s",
+    getattr(app, "title", "Not set"),
+    getattr(app, "version", "Not set"),
+)
 
 # Set up the CORS configuration - dynamically discover hostnames
 startup_logger.info("=== SETTING UP CORS CONFIGURATION ===")
@@ -394,12 +421,19 @@ startup_logger.info("CORS middleware added successfully")
 # Add exception handlers to ensure CORS headers are always present
 startup_logger.info("=== REGISTERING EXCEPTION HANDLERS ===")
 
+
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     """Handle HTTP exceptions and ensure CORS headers are included."""
-    startup_logger.warning("HTTP Exception occurred - Status: %s, Detail: %s, Path: %s",
-                          exc.status_code, exc.detail, request.url.path)
-    startup_logger.warning("Request method: %s, Headers: %s", request.method, dict(request.headers))
+    startup_logger.warning(
+        "HTTP Exception occurred - Status: %s, Detail: %s, Path: %s",
+        exc.status_code,
+        exc.detail,
+        request.url.path,
+    )
+    startup_logger.warning(
+        "Request method: %s, Headers: %s", request.method, dict(request.headers)
+    )
 
     response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
@@ -412,18 +446,28 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
         response.headers["Access-Control-Allow-Credentials"] = "true"
         response.headers["Access-Control-Expose-Headers"] = "Authorization"
     else:
-        startup_logger.warning("Origin %s not in allowed origins or not provided", request_origin)
+        startup_logger.warning(
+            "Origin %s not in allowed origins or not provided", request_origin
+        )
 
     return response
 
+
 startup_logger.info("HTTP exception handler registered")
+
 
 @app.exception_handler(500)
 async def internal_server_error_handler(request: Request, exc: Exception):
     """Handle internal server errors and ensure CORS headers are included."""
-    startup_logger.error("Internal Server Error occurred - Path: %s, Exception: %s",
-                        request.url.path, exc, exc_info=True)
-    startup_logger.error("Request method: %s, Headers: %s", request.method, dict(request.headers))
+    startup_logger.error(
+        "Internal Server Error occurred - Path: %s, Exception: %s",
+        request.url.path,
+        exc,
+        exc_info=True,
+    )
+    startup_logger.error(
+        "Request method: %s, Headers: %s", request.method, dict(request.headers)
+    )
     startup_logger.error("Exception type: %s", type(exc).__name__)
     startup_logger.error("Exception args: %s", exc.args)
 
@@ -435,24 +479,36 @@ async def internal_server_error_handler(request: Request, exc: Exception):
     request_origin = request.headers.get("origin")
     startup_logger.debug("Request origin for 500 error: %s", request_origin)
     if request_origin and request_origin in origins:
-        startup_logger.debug("Adding CORS headers for 500 error origin: %s", request_origin)
+        startup_logger.debug(
+            "Adding CORS headers for 500 error origin: %s", request_origin
+        )
         response.headers["Access-Control-Allow-Origin"] = request_origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
         response.headers["Access-Control-Expose-Headers"] = "Authorization"
     else:
-        startup_logger.warning("Origin %s not in allowed origins for 500 error", request_origin)
+        startup_logger.warning(
+            "Origin %s not in allowed origins for 500 error", request_origin
+        )
 
     return response
 
+
 startup_logger.info("Internal server error handler registered")
+
 
 # Add a general exception handler for any unhandled exceptions
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
     """Handle any unhandled exceptions."""
-    startup_logger.error("Unhandled Exception occurred - Path: %s, Exception: %s",
-                        request.url.path, exc, exc_info=True)
-    startup_logger.error("Request method: %s, Headers: %s", request.method, dict(request.headers))
+    startup_logger.error(
+        "Unhandled Exception occurred - Path: %s, Exception: %s",
+        request.url.path,
+        exc,
+        exc_info=True,
+    )
+    startup_logger.error(
+        "Request method: %s, Headers: %s", request.method, dict(request.headers)
+    )
     startup_logger.error("Exception type: %s", type(exc).__name__)
     startup_logger.error("Exception args: %s", exc.args)
 
@@ -464,12 +520,15 @@ async def general_exception_handler(request: Request, exc: Exception):
     request_origin = request.headers.get("origin")
     startup_logger.debug("Request origin for general exception: %s", request_origin)
     if request_origin and request_origin in origins:
-        startup_logger.debug("Adding CORS headers for general exception origin: %s", request_origin)
+        startup_logger.debug(
+            "Adding CORS headers for general exception origin: %s", request_origin
+        )
         response.headers["Access-Control-Allow-Origin"] = request_origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
         response.headers["Access-Control-Expose-Headers"] = "Authorization"
 
     return response
+
 
 startup_logger.info("General exception handler registered")
 startup_logger.info("=== EXCEPTION HANDLERS REGISTRATION COMPLETE ===")
@@ -577,18 +636,19 @@ startup_logger.info("=== ALL ROUTES REGISTERED ===")
 
 # Log all registered routes for debugging
 startup_logger.info("=== ROUTE SUMMARY ===")
-route_count = 0
+route_count = 0  # pylint: disable=invalid-name
 for route in app.routes:
-    if hasattr(route, 'path') and hasattr(route, 'methods'):
+    if hasattr(route, "path") and hasattr(route, "methods"):
         startup_logger.info("Route: %s %s", list(route.methods), route.path)
         route_count += 1
-    elif hasattr(route, 'path'):
+    elif hasattr(route, "path"):
         startup_logger.info("Route: %s", route.path)
         route_count += 1
 startup_logger.info("Total routes registered: %d", route_count)
 
 
 startup_logger.info("=== REGISTERING APPLICATION ROUTES ===")
+
 
 @app.get("/")
 async def root():
@@ -599,7 +659,9 @@ async def root():
     startup_logger.debug("Root endpoint called")
     return {"message": "Hello World"}
 
+
 startup_logger.info("Root route (/) registered")
+
 
 @app.get("/api/health")
 @app.head("/api/health")
@@ -609,6 +671,7 @@ async def health_check():
     """
     startup_logger.debug("Health check endpoint called")
     return {"status": "healthy"}
+
 
 startup_logger.info("Health check routes (/api/health) registered")
 startup_logger.info("=== APPLICATION ROUTES REGISTRATION COMPLETE ===")
@@ -662,8 +725,8 @@ if __name__ == "__main__":
     # Prepare uvicorn configuration
     host = app_config["api"]["host"]
     port = app_config["api"]["port"]
-    ws_ping_interval = 60.0
-    ws_ping_timeout = 60.0
+    ws_ping_interval = 60.0  # pylint: disable=invalid-name
+    ws_ping_timeout = 60.0  # pylint: disable=invalid-name
 
     startup_logger.info("=== UVICORN CONFIGURATION ===")
     startup_logger.info("Host: %s", host)
@@ -676,9 +739,8 @@ if __name__ == "__main__":
     # Test network binding before starting
     startup_logger.info("=== NETWORK BINDING TEST ===")
     try:
-        import socket as test_socket
-        test_sock = test_socket.socket(test_socket.AF_INET, test_socket.SOCK_STREAM)
-        test_sock.setsockopt(test_socket.SOL_SOCKET, test_socket.SO_REUSEADDR, 1)
+        test_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        test_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         startup_logger.info("Testing bind to %s:%s", host, port)
         test_sock.bind((host, port))
         test_sock.close()
