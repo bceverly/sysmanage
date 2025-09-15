@@ -50,6 +50,7 @@ class HostRegistration(BaseModel):
     hostname: str
     ipv4: Optional[str] = None
     ipv6: Optional[str] = None
+    script_execution_enabled: Optional[bool] = None
 
 
 class HostRegistrationLegacy(BaseModel):
@@ -302,6 +303,7 @@ async def register_host(registration_data: HostRegistration):
     print(f"Active: {registration_data.active}")
     print(f"IPv4: {registration_data.ipv4}")
     print(f"IPv6: {registration_data.ipv6}")
+    print(f"Script Execution Enabled: {registration_data.script_execution_enabled}")
     print("=== End Minimal Registration Data ===")
 
     # Get the SQLAlchemy session
@@ -326,6 +328,12 @@ async def register_host(registration_data: HostRegistration):
                 existing_host.ipv6 = registration_data.ipv6
                 existing_host.last_access = datetime.now(timezone.utc)
 
+                # Update script execution capability if provided
+                if registration_data.script_execution_enabled is not None:
+                    existing_host.script_execution_enabled = (
+                        registration_data.script_execution_enabled
+                    )
+
                 print(
                     f"Before commit - FQDN: {existing_host.fqdn}, Active: {existing_host.active}"
                 )
@@ -349,6 +357,10 @@ async def register_host(registration_data: HostRegistration):
             last_access=datetime.now(timezone.utc),
         )
         host.approval_status = "pending"
+
+        # Set script execution capability if provided
+        if registration_data.script_execution_enabled is not None:
+            host.script_execution_enabled = registration_data.script_execution_enabled
         session.add(host)
         session.commit()
         session.refresh(host)

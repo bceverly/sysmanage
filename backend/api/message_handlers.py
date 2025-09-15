@@ -161,10 +161,10 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                 if is_privileged is not None:
                     host.is_agent_privileged = is_privileged
 
-                # Update script execution status if provided in heartbeat
-                script_execution_enabled = message_data.get("script_execution_enabled")
-                if script_execution_enabled is not None:
-                    host.script_execution_enabled = script_execution_enabled
+                # NOTE: Script execution status should not be updated from heartbeats
+                # This prevents agent heartbeats from overwriting the server-configured setting
+                # Script execution capability should only be set during initial registration
+                # or through explicit admin configuration changes
 
                 # Update enabled shells if provided in heartbeat
                 enabled_shells = message_data.get("enabled_shells")
@@ -187,9 +187,9 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                 if has_hostname and has_ipv4 and has_ipv6:
                     # Create new host
                     is_privileged = message_data.get("is_privileged", False)
-                    script_execution_enabled = message_data.get(
-                        "script_execution_enabled", False
-                    )
+                    # NOTE: Script execution status should be False by default for new hosts
+                    # It will be properly set during registration or through admin configuration
+                    script_execution_enabled = False
                     enabled_shells = message_data.get("enabled_shells")
                     import json
 
