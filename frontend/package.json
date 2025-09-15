@@ -38,7 +38,7 @@
     "stylis": "^4.3.6",
     "stylis-plugin-rtl": "^2.1.1",
     "typescript": "^5.9.2",
-    "web-vitals": "^2.1.4",
+    "web-vitals": "^5.1.0",
     "yaml": "^2.8.1"
   },
   "scripts": {
