@@ -19,7 +19,9 @@ function Get-ConfigValue {
     param([string]$Key)
     
     $configFile = $null
-    if (Test-Path "/etc/sysmanage.yaml") {
+    if (Test-Path "C:\ProgramData\SysManage\sysmanage.yaml") {
+        $configFile = "C:\ProgramData\SysManage\sysmanage.yaml"
+    } elseif (Test-Path "/etc/sysmanage.yaml") {
         $configFile = "/etc/sysmanage.yaml"
     } elseif (Test-Path "sysmanage-dev.yaml") {
         $configFile = "sysmanage-dev.yaml"
@@ -186,11 +188,11 @@ if (Test-Path "backend\main.py") {
     # Start the backend using the main.py configuration
     Write-Host "Starting backend on port $backendPort..." -ForegroundColor Gray
     $backendJob = Start-Job -ScriptBlock {
-        param($scriptDir, $venvPath)
-        Set-Location $scriptDir
+        param($projectRoot, $venvPath)
+        Set-Location $projectRoot
         if ($venvPath) { & $venvPath }
         python -m backend.main *>&1 | Out-File -FilePath "logs\backend.log" -Append -Encoding utf8
-    } -ArgumentList $ScriptDir, $venvPath
+    } -ArgumentList $ProjectRoot, $venvPath
     
     # Wait for backend to be ready
     if (-not (Wait-ForService -Port $backendPort -ServiceName "Backend API")) {
@@ -228,9 +230,9 @@ if ((Test-Path "frontend") -and (Test-Path "frontend\package.json")) {
         $env:VITE_HOST = $webuiHost
         $env:VITE_PORT = $frontendPort
         npm start *>&1 | Out-File -FilePath "..\logs\frontend.log" -Append -Encoding utf8
-    } -ArgumentList (Join-Path $ScriptDir "frontend"), $webuiHost, $frontendPort
+    } -ArgumentList (Join-Path $ProjectRoot "frontend"), $webuiHost, $frontendPort
     
-    Set-Location $ScriptDir
+    Set-Location $ProjectRoot
     
     # Wait for frontend to be ready
     if (-not (Wait-ForService -Port $frontendPort -ServiceName "Frontend Web UI")) {
