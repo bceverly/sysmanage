@@ -9,7 +9,7 @@
     "@emotion/styled": "^11.11.5",
     "@fontsource/roboto": "^5.0.13",
     "@monaco-editor/react": "^4.7.0",
-    "@mui/icons-material": "^5.15.19",
+    "@mui/icons-material": "^7.3.2",
     "@mui/material": "^5.15.19",
     "@mui/system": "^5.15.19",
     "@mui/x-charts": "^7.6.0",
