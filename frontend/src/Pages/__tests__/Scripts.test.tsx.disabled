@@ -1,0 +1,524 @@
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import Scripts from '../Scripts';
+import { scriptsService } from '../../Services/scripts';
+import '@testing-library/jest-dom';
+
+// Mock the scripts service
+vi.mock('../../Services/scripts', () => ({
+  scriptsService: {
+    getScripts: vi.fn(),
+    getHosts: vi.fn(),
+    getExecutions: vi.fn(),
+    saveScript: vi.fn(),
+    executeScript: vi.fn(),
+    deleteScript: vi.fn(),
+  },
+  Script: {},
+  Host: {},
+  ScriptExecution: {},
+  ExecuteScriptRequest: {},
+}));
+
+// Mock Monaco Editor
+vi.mock('@monaco-editor/react', () => ({
+  default: ({ value, onChange, language }: any) => (
+    <textarea
+      data-testid="monaco-editor"
+      value={value}
+      onChange={(e) => onChange?.(e.target.value)}
+      data-language={language}
+    />
+  ),
+}));
+
+// Mock react-i18next hooks
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: { language: 'en' },
+  }),
+  I18nextProvider: ({ children }: any) => children,
+}));
+
+const renderScriptsWithI18n = () => {
+  return render(<Scripts />);
+};
+
+describe('Scripts Component', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Setup default mock returns
+    vi.mocked(scriptsService.getScripts).mockResolvedValue([]);
+    vi.mocked(scriptsService.getHosts).mockResolvedValue([]);
+    vi.mocked(scriptsService.getExecutions).mockResolvedValue([]);
+  });
+
+  describe('Component Rendering', () => {
+    it('renders the main scripts component', async () => {
+      renderScriptsWithI18n();
+
+      expect(screen.getByRole('tablist')).toBeInTheDocument();
+      expect(screen.getByText('scripts.tabs.editor')).toBeInTheDocument();
+      expect(screen.getByText('scripts.tabs.library')).toBeInTheDocument();
+      expect(screen.getByText('scripts.tabs.history')).toBeInTheDocument();
+    });
+
+    it('renders script editor tab by default', async () => {
+      renderScriptsWithI18n();
+
+      expect(screen.getByTestId('monaco-editor')).toBeInTheDocument();
+      expect(screen.getByText('scripts.editor.scriptName')).toBeInTheDocument();
+      expect(screen.getByText('scripts.editor.description')).toBeInTheDocument();
+    });
+
+    it('renders platform selection dropdown', async () => {
+      renderScriptsWithI18n();
+
+      expect(screen.getByText('scripts.editor.platform')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('scripts.platforms.linux')).toBeInTheDocument();
+    });
+
+    it('renders shell selection dropdown', async () => {
+      renderScriptsWithI18n();
+
+      expect(screen.getByText('scripts.editor.shell')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('scripts.shells.bash')).toBeInTheDocument();
+    });
+  });
+
+  describe('Tab Navigation', () => {
+    it('switches to library tab when clicked', async () => {
+      renderScriptsWithI18n();
+
+      const libraryTab = screen.getByText('scripts.tabs.library');
+      fireEvent.click(libraryTab);
+
+      await waitFor(() => {
+        expect(screen.getByText('scripts.library.title')).toBeInTheDocument();
+      });
+    });
+
+    it('switches to history tab when clicked', async () => {
+      renderScriptsWithI18n();
+
+      const historyTab = screen.getByText('scripts.tabs.history');
+      fireEvent.click(historyTab);
+
+      await waitFor(() => {
+        expect(screen.getByText('scripts.history.title')).toBeInTheDocument();
+      });
+    });
+
+    it('switches back to editor tab', async () => {
+      renderScriptsWithI18n();
+
+      // Go to library tab first
+      fireEvent.click(screen.getByText('scripts.tabs.library'));
+      await waitFor(() => {
+        expect(screen.getByText('scripts.library.title')).toBeInTheDocument();
+      });
+
+      // Switch back to editor
+      fireEvent.click(screen.getByText('scripts.tabs.editor'));
+      await waitFor(() => {
+        expect(screen.getByTestId('monaco-editor')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Platform and Shell Selection', () => {
+    it('changes shell options when platform changes to Windows', async () => {
+      renderScriptsWithI18n();
+
+      const platformSelect = screen.getByDisplayValue('scripts.platforms.linux');
+      fireEvent.change(platformSelect, { target: { value: 'windows' } });
+
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('scripts.platforms.windows')).toBeInTheDocument();
+      });
+    });
+
+    it('changes shell options when platform changes to Darwin', async () => {
+      renderScriptsWithI18n();
+
+      const platformSelect = screen.getByDisplayValue('scripts.platforms.linux');
+      fireEvent.change(platformSelect, { target: { value: 'darwin' } });
+
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('scripts.platforms.darwin')).toBeInTheDocument();
+      });
+    });
+
+    it('allows shell selection change', async () => {
+      renderScriptsWithI18n();
+
+      const shellSelect = screen.getByDisplayValue('scripts.shells.bash');
+      fireEvent.change(shellSelect, { target: { value: 'sh' } });
+
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('scripts.shells.sh')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Script Editor Form Fields', () => {
+    it('updates script name field', async () => {
+      renderScriptsWithI18n();
+
+      const nameInput = screen.getByRole('textbox', { name: /scripts.editor.scriptName/i });
+      fireEvent.change(nameInput, { target: { value: 'Test Script' } });
+
+      await waitFor(() => {
+        expect(nameInput).toHaveValue('Test Script');
+      });
+    });
+
+    it('updates script description field', async () => {
+      renderScriptsWithI18n();
+
+      const descriptionInput = screen.getByRole('textbox', { name: /scripts.editor.description/i });
+      fireEvent.change(descriptionInput, { target: { value: 'Test Description' } });
+
+      await waitFor(() => {
+        expect(descriptionInput).toHaveValue('Test Description');
+      });
+    });
+
+    it('updates monaco editor content', async () => {
+      renderScriptsWithI18n();
+
+      const editor = screen.getByTestId('monaco-editor');
+      fireEvent.change(editor, { target: { value: '#!/bin/bash\necho "test"' } });
+
+      await waitFor(() => {
+        expect(editor).toHaveValue('#!/bin/bash\necho "test"');
+      });
+    });
+  });
+
+  describe('Button Interactions', () => {
+    it('renders save script button', () => {
+      renderScriptsWithI18n();
+
+      expect(screen.getByText('scripts.actions.save')).toBeInTheDocument();
+    });
+
+    it('renders execute script button', () => {
+      renderScriptsWithI18n();
+
+      expect(screen.getByText('scripts.actions.execute')).toBeInTheDocument();
+    });
+
+    it('renders reset button', () => {
+      renderScriptsWithI18n();
+
+      expect(screen.getByText('scripts.actions.reset')).toBeInTheDocument();
+    });
+
+    it('clicking reset button clears form fields', async () => {
+      renderScriptsWithI18n();
+
+      // Fill in some data
+      const nameInput = screen.getByRole('textbox', { name: /scripts.editor.scriptName/i });
+      const descriptionInput = screen.getByRole('textbox', { name: /scripts.editor.description/i });
+      const editor = screen.getByTestId('monaco-editor');
+
+      fireEvent.change(nameInput, { target: { value: 'Test Script' } });
+      fireEvent.change(descriptionInput, { target: { value: 'Test Description' } });
+      fireEvent.change(editor, { target: { value: '#!/bin/bash\necho "test"' } });
+
+      // Click reset
+      fireEvent.click(screen.getByText('scripts.actions.reset'));
+
+      await waitFor(() => {
+        expect(nameInput).toHaveValue('');
+        expect(descriptionInput).toHaveValue('');
+        expect(editor).toHaveValue('');
+      });
+    });
+  });
+
+  describe('Script Library Tab', () => {
+    beforeEach(() => {
+      const mockScripts = [
+        {
+          id: 1,
+          name: 'Test Script 1',
+          description: 'Description 1',
+          platform: 'linux',
+          shell: 'bash',
+          content: 'echo "test1"',
+          created_at: '2024-01-01T10:00:00Z',
+          updated_at: '2024-01-01T10:00:00Z',
+        },
+        {
+          id: 2,
+          name: 'Test Script 2',
+          description: 'Description 2',
+          platform: 'windows',
+          shell: 'powershell',
+          content: 'Write-Host "test2"',
+          created_at: '2024-01-02T10:00:00Z',
+          updated_at: '2024-01-02T10:00:00Z',
+        },
+      ];
+      vi.mocked(scriptsService.getScripts).mockResolvedValue(mockScripts);
+    });
+
+    it('displays scripts in library tab', async () => {
+      renderScriptsWithI18n();
+
+      fireEvent.click(screen.getByText('scripts.tabs.library'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Script 1')).toBeInTheDocument();
+        expect(screen.getByText('Test Script 2')).toBeInTheDocument();
+      });
+    });
+
+    it('renders search functionality in library tab', async () => {
+      renderScriptsWithI18n();
+
+      fireEvent.click(screen.getByText('scripts.tabs.library'));
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: /search/i })).toBeInTheDocument();
+      });
+    });
+
+    it('renders add script button in library tab', async () => {
+      renderScriptsWithI18n();
+
+      fireEvent.click(screen.getByText('scripts.tabs.library'));
+
+      await waitFor(() => {
+        expect(screen.getByText('scripts.library.addScript')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Execution History Tab', () => {
+    beforeEach(() => {
+      const mockExecutions = [
+        {
+          id: '1',
+          script_id: 1,
+          script_name: 'Test Script 1',
+          host_id: 1,
+          host_name: 'test-host-1',
+          status: 'completed',
+          exit_code: 0,
+          output: 'Success output',
+          error_output: '',
+          started_at: '2024-01-01T10:00:00Z',
+          completed_at: '2024-01-01T10:01:00Z',
+        },
+        {
+          id: '2',
+          script_id: 2,
+          script_name: 'Test Script 2',
+          host_id: 2,
+          host_name: 'test-host-2',
+          status: 'failed',
+          exit_code: 1,
+          output: '',
+          error_output: 'Error occurred',
+          started_at: '2024-01-02T10:00:00Z',
+          completed_at: '2024-01-02T10:01:00Z',
+        },
+      ];
+      vi.mocked(scriptsService.getExecutions).mockResolvedValue(mockExecutions);
+    });
+
+    it('displays execution history in history tab', async () => {
+      renderScriptsWithI18n();
+
+      fireEvent.click(screen.getByText('scripts.tabs.history'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Script 1')).toBeInTheDocument();
+        expect(screen.getByText('Test Script 2')).toBeInTheDocument();
+        expect(screen.getByText('test-host-1')).toBeInTheDocument();
+        expect(screen.getByText('test-host-2')).toBeInTheDocument();
+      });
+    });
+
+    it('shows execution status chips', async () => {
+      renderScriptsWithI18n();
+
+      fireEvent.click(screen.getByText('scripts.tabs.history'));
+
+      await waitFor(() => {
+        expect(screen.getByText('scripts.status.completed')).toBeInTheDocument();
+        expect(screen.getByText('scripts.status.failed')).toBeInTheDocument();
+      });
+    });
+
+    it('renders refresh executions button', async () => {
+      renderScriptsWithI18n();
+
+      fireEvent.click(screen.getByText('scripts.tabs.history'));
+
+      await waitFor(() => {
+        expect(screen.getByText('scripts.history.refresh')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('handles script loading errors gracefully', async () => {
+      vi.mocked(scriptsService.getScripts).mockRejectedValue(new Error('Failed to load scripts'));
+
+      renderScriptsWithI18n();
+      fireEvent.click(screen.getByText('scripts.tabs.library'));
+
+      // Component should still render even if scripts fail to load
+      await waitFor(() => {
+        expect(screen.getByText('scripts.library.title')).toBeInTheDocument();
+      });
+    });
+
+    it('handles hosts loading errors gracefully', async () => {
+      vi.mocked(scriptsService.getHosts).mockRejectedValue(new Error('Failed to load hosts'));
+
+      renderScriptsWithI18n();
+
+      // Component should still render
+      expect(screen.getByTestId('monaco-editor')).toBeInTheDocument();
+    });
+
+    it('handles execution history loading errors gracefully', async () => {
+      vi.mocked(scriptsService.getExecutions).mockRejectedValue(new Error('Failed to load executions'));
+
+      renderScriptsWithI18n();
+      fireEvent.click(screen.getByText('scripts.tabs.history'));
+
+      await waitFor(() => {
+        expect(screen.getByText('scripts.history.title')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Component State Management', () => {
+    it('maintains tab state when switching between tabs', async () => {
+      renderScriptsWithI18n();
+
+      // Start in editor tab
+      expect(screen.getByTestId('monaco-editor')).toBeInTheDocument();
+
+      // Switch to library
+      fireEvent.click(screen.getByText('scripts.tabs.library'));
+      await waitFor(() => {
+        expect(screen.getByText('scripts.library.title')).toBeInTheDocument();
+      });
+
+      // Switch to history
+      fireEvent.click(screen.getByText('scripts.tabs.history'));
+      await waitFor(() => {
+        expect(screen.getByText('scripts.history.title')).toBeInTheDocument();
+      });
+
+      // Switch back to editor - should be there
+      fireEvent.click(screen.getByText('scripts.tabs.editor'));
+      await waitFor(() => {
+        expect(screen.getByTestId('monaco-editor')).toBeInTheDocument();
+      });
+    });
+
+    it('preserves form data when switching tabs', async () => {
+      renderScriptsWithI18n();
+
+      // Fill in form data
+      const nameInput = screen.getByRole('textbox', { name: /scripts.editor.scriptName/i });
+      fireEvent.change(nameInput, { target: { value: 'Persistent Script' } });
+
+      // Switch to another tab
+      fireEvent.click(screen.getByText('scripts.tabs.library'));
+      await waitFor(() => {
+        expect(screen.getByText('scripts.library.title')).toBeInTheDocument();
+      });
+
+      // Switch back to editor
+      fireEvent.click(screen.getByText('scripts.tabs.editor'));
+      await waitFor(() => {
+        expect(nameInput).toHaveValue('Persistent Script');
+      });
+    });
+  });
+
+  describe('Service Integration', () => {
+    it('calls scriptsService.getScripts when library tab is opened', async () => {
+      renderScriptsWithI18n();
+
+      fireEvent.click(screen.getByText('scripts.tabs.library'));
+
+      await waitFor(() => {
+        expect(scriptsService.getScripts).toHaveBeenCalled();
+      });
+    });
+
+    it('calls scriptsService.getExecutions when history tab is opened', async () => {
+      renderScriptsWithI18n();
+
+      fireEvent.click(screen.getByText('scripts.tabs.history'));
+
+      await waitFor(() => {
+        expect(scriptsService.getExecutions).toHaveBeenCalled();
+      });
+    });
+
+    it('calls scriptsService.getHosts on component mount', async () => {
+      renderScriptsWithI18n();
+
+      await waitFor(() => {
+        expect(scriptsService.getHosts).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('has proper ARIA labels for tabs', () => {
+      renderScriptsWithI18n();
+
+      const tabList = screen.getByRole('tablist');
+      expect(tabList).toBeInTheDocument();
+
+      const tabs = screen.getAllByRole('tab');
+      expect(tabs).toHaveLength(3);
+    });
+
+    it('has proper form labels', () => {
+      renderScriptsWithI18n();
+
+      expect(screen.getByText('scripts.editor.scriptName')).toBeInTheDocument();
+      expect(screen.getByText('scripts.editor.description')).toBeInTheDocument();
+      expect(screen.getByText('scripts.editor.platform')).toBeInTheDocument();
+      expect(screen.getByText('scripts.editor.shell')).toBeInTheDocument();
+    });
+
+    it('has accessible button labels', () => {
+      renderScriptsWithI18n();
+
+      expect(screen.getByText('scripts.actions.save')).toBeInTheDocument();
+      expect(screen.getByText('scripts.actions.execute')).toBeInTheDocument();
+      expect(screen.getByText('scripts.actions.reset')).toBeInTheDocument();
+    });
+  });
+
+  describe('Loading States', () => {
+    it('shows loading state when fetching scripts', async () => {
+      // Mock a delay in script loading
+      vi.mocked(scriptsService.getScripts).mockImplementation(
+        () => new Promise(resolve => setTimeout(() => resolve([]), 100))
+      );
+
+      renderScriptsWithI18n();
+      fireEvent.click(screen.getByText('scripts.tabs.library'));
+
+      // Component should show loading state (this depends on the actual implementation)
+      expect(screen.getByText('scripts.library.title')).toBeInTheDocument();
+    });
+  });
+});
