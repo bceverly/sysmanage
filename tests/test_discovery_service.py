@@ -242,6 +242,60 @@ class TestDiscoveryProtocol:
         # Should not raise exception, just log
         self.protocol.error_received(exc)
 
+    def test_datagram_received_exception_in_response_creation(self):
+        """Test error handling when response creation fails."""
+        request = {
+            "service": "sysmanage-agent",
+            "hostname": "test-agent",
+            "platform": "Linux",
+        }
+
+        # Mock the beacon to raise an exception during response creation
+        self.mock_beacon.create_discovery_response.side_effect = Exception(
+            "Response creation failed"
+        )
+
+        with patch.object(
+            self.protocol, "validate_discovery_request", return_value=True
+        ):
+            # This should not raise exception, should catch and log error
+            self.protocol.datagram_received(
+                json.dumps(request).encode("utf-8"), ("192.168.1.100", 12345)
+            )
+
+            # Response creation was attempted but failed
+            self.mock_beacon.create_discovery_response.assert_called_once_with(request)
+            # No response should be sent due to the error
+            self.protocol.transport.sendto.assert_not_called()
+
+    def test_datagram_received_exception_in_sendto(self):
+        """Test error handling when sendto fails."""
+        request = {
+            "service": "sysmanage-agent",
+            "hostname": "test-agent",
+            "platform": "Linux",
+        }
+
+        response = {
+            "service": "sysmanage-server",
+            "server_info": {"hostname": "localhost"},
+        }
+
+        self.mock_beacon.create_discovery_response.return_value = response
+        # Make sendto fail
+        self.protocol.transport.sendto.side_effect = Exception("Network send failed")
+
+        with patch.object(
+            self.protocol, "validate_discovery_request", return_value=True
+        ):
+            # This should not raise exception, should catch and log error
+            self.protocol.datagram_received(
+                json.dumps(request).encode("utf-8"), ("192.168.1.100", 12345)
+            )
+
+            self.mock_beacon.create_discovery_response.assert_called_once_with(request)
+            self.protocol.transport.sendto.assert_called_once()
+
 
 class TestNetworkScanner:
     """Test cases for NetworkScanner."""
@@ -329,6 +383,114 @@ class TestNetworkScanner:
         addresses = self.scanner.get_local_subnets()
 
         # Should return default addresses on error
+        expected_defaults = [
+            "192.168.1.255",
+            "192.168.0.255",
+            "10.0.0.255",
+            "172.16.255.255",
+        ]
+        assert len(addresses) == len(expected_defaults)
+        for addr in expected_defaults:
+            assert addr in addresses
+
+    @patch("backend.discovery.discovery_service.netifaces")
+    @patch("backend.discovery.discovery_service.ipaddress")
+    def test_get_local_subnets_ipaddress_exception(
+        self, mock_ipaddress, mock_netifaces
+    ):
+        """Test subnet detection with ipaddress exception handling."""
+        # Mock netifaces module
+        mock_netifaces.interfaces.return_value = ["eth0"]
+        mock_netifaces.ifaddresses.return_value = {
+            2: [{"addr": "192.168.1.10", "netmask": "255.255.255.0"}]  # AF_INET = 2
+        }
+        mock_netifaces.AF_INET = 2
+
+        # Make ipaddress.IPv4Network raise an exception
+        mock_ipaddress.IPv4Network.side_effect = Exception("Invalid network")
+
+        addresses = self.scanner.get_local_subnets()
+
+        # Should return default addresses when ipaddress fails
+        expected_defaults = [
+            "192.168.1.255",
+            "192.168.0.255",
+            "10.0.0.255",
+            "172.16.255.255",
+        ]
+        assert len(addresses) == len(expected_defaults)
+        for addr in expected_defaults:
+            assert addr in addresses
+
+    @patch("backend.discovery.discovery_service.netifaces")
+    def test_get_local_subnets_no_af_inet(self, mock_netifaces):
+        """Test subnet detection when interface has no AF_INET addresses."""
+        # Mock netifaces module - interface exists but has no AF_INET
+        mock_netifaces.interfaces.return_value = ["eth0"]
+        mock_netifaces.ifaddresses.return_value = {
+            # Only AF_INET6, no AF_INET
+            10: [{"addr": "fe80::1", "netmask": "ffff:ffff:ffff:ffff::"}]
+        }
+        mock_netifaces.AF_INET = 2  # Standard AF_INET value
+
+        addresses = self.scanner.get_local_subnets()
+
+        # Should return default addresses when no AF_INET found
+        expected_defaults = [
+            "192.168.1.255",
+            "192.168.0.255",
+            "10.0.0.255",
+            "172.16.255.255",
+        ]
+        assert len(addresses) == len(expected_defaults)
+        for addr in expected_defaults:
+            assert addr in addresses
+
+    @patch("backend.discovery.discovery_service.netifaces")
+    def test_get_local_subnets_invalid_addresses(self, mock_netifaces):
+        """Test subnet detection with invalid address data."""
+        # Mock netifaces module with various invalid address scenarios
+        mock_netifaces.interfaces.return_value = ["eth0", "eth1", "lo"]
+        mock_netifaces.ifaddresses.side_effect = [
+            # eth0: missing addr
+            {2: [{"netmask": "255.255.255.0"}]},
+            # eth1: missing netmask
+            {2: [{"addr": "192.168.1.10"}]},
+            # lo: localhost (should be skipped)
+            {2: [{"addr": "127.0.0.1", "netmask": "255.0.0.0"}]},
+        ]
+        mock_netifaces.AF_INET = 2
+
+        addresses = self.scanner.get_local_subnets()
+
+        # Should return default addresses when address validation fails
+        expected_defaults = [
+            "192.168.1.255",
+            "192.168.0.255",
+            "10.0.0.255",
+            "172.16.255.255",
+        ]
+        assert len(addresses) == len(expected_defaults)
+        for addr in expected_defaults:
+            assert addr in addresses
+
+    @patch("backend.discovery.discovery_service.netifaces")
+    @patch("backend.discovery.discovery_service.ipaddress")
+    def test_get_local_subnets_value_error(self, mock_ipaddress, mock_netifaces):
+        """Test subnet detection with ValueError from IPv4Network."""
+        # Mock netifaces module
+        mock_netifaces.interfaces.return_value = ["eth0"]
+        mock_netifaces.ifaddresses.return_value = {
+            2: [{"addr": "192.168.1.10", "netmask": "255.255.255.0"}]
+        }
+        mock_netifaces.AF_INET = 2
+
+        # Make ipaddress.IPv4Network raise ValueError (specific case)
+        mock_ipaddress.IPv4Network.side_effect = ValueError("Invalid network format")
+
+        addresses = self.scanner.get_local_subnets()
+
+        # Should return default addresses when ValueError occurs
         expected_defaults = [
             "192.168.1.255",
             "192.168.0.255",

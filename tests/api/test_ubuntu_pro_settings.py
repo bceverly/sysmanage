@@ -249,6 +249,24 @@ class TestUbuntuProSettingsUpdate:
         error_detail = response.json()
         assert "detail" in error_detail
 
+    def test_update_settings_empty_organization_name(
+        self, client, session, auth_headers
+    ):
+        """Test that empty organization name gets converted to None."""
+        update_data = {"organization_name": "   "}  # Empty string with spaces
+
+        response = client.put(
+            "/api/ubuntu-pro/", headers=auth_headers, json=update_data
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["organization_name"] is None  # Should be converted to None
+
+        # Verify in database
+        settings = session.query(models.UbuntuProSettings).first()
+        assert settings.organization_name is None
+
     def test_update_settings_unauthorized(self, client, session):
         """Test that unauthorized requests are rejected."""
         update_data = {"master_key": "C1234567890123456789012345"}

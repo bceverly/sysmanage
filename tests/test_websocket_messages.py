@@ -16,6 +16,12 @@ from backend.websocket.messages import (
     SystemInfoMessage,
     CommandMessage,
     CommandResultMessage,
+    create_message,
+    HardwareUpdateMessage,
+    UserAccessUpdateMessage,
+    SoftwareInventoryUpdateMessage,
+    HostApprovedMessage,
+    DiagnosticCollectionResultMessage,
 )
 
 
@@ -382,3 +388,90 @@ class TestMessageClassesIntegration:
         for msg in messages:
             assert isinstance(msg.timestamp, str)
             datetime.fromisoformat(msg.timestamp.replace("Z", "+00:00"))
+
+
+class TestCreateMessageMissingTypes:
+    """Test create_message function for missing coverage message types."""
+
+    def test_create_hardware_update_message(self):
+        """Test creating HARDWARE_UPDATE message to hit line 479-480."""
+        raw_data = {
+            "message_type": MessageType.HARDWARE_UPDATE,
+            "data": {
+                "cpu_vendor": "Intel",
+                "cpu_model": "Core i7",
+                "cpu_cores": 4,
+                "cpu_threads": 8,
+                "memory_total": 16777216,
+                "hostname": "test-host",
+            },
+        }
+
+        message = create_message(raw_data)
+        assert isinstance(message, HardwareUpdateMessage)
+
+    def test_create_user_access_update_message(self):
+        """Test creating USER_ACCESS_UPDATE message to hit line 508-509."""
+        raw_data = {
+            "message_type": MessageType.USER_ACCESS_UPDATE,
+            "data": {
+                "users": ["user1", "user2"],
+                "groups": ["group1", "group2"],
+                "platform": "Linux",
+                "total_users": 2,
+                "total_groups": 2,
+                "hostname": "test-host",
+            },
+        }
+
+        message = create_message(raw_data)
+        assert isinstance(message, UserAccessUpdateMessage)
+
+    def test_create_software_inventory_update_message(self):
+        """Test creating SOFTWARE_INVENTORY_UPDATE message to hit line 537-538."""
+        raw_data = {
+            "message_type": MessageType.SOFTWARE_INVENTORY_UPDATE,
+            "data": {
+                "software_packages": [{"name": "package1", "version": "1.0"}],
+                "platform": "Ubuntu",
+                "total_packages": 100,
+                "collection_timestamp": "2023-01-01T00:00:00Z",
+                "hostname": "test-host",
+            },
+        }
+
+        message = create_message(raw_data)
+        assert isinstance(message, SoftwareInventoryUpdateMessage)
+
+    def test_create_host_approved_message(self):
+        """Test creating HOST_APPROVED message to hit line 556-557."""
+        raw_data = {
+            "message_type": MessageType.HOST_APPROVED,
+            "data": {
+                "host_id": 123,
+                "approval_status": "approved",
+                "certificate": "cert-data",
+                "hostname": "test-host",
+            },
+        }
+
+        message = create_message(raw_data)
+        assert isinstance(message, HostApprovedMessage)
+
+    def test_create_diagnostic_collection_result_message(self):
+        """Test creating DIAGNOSTIC_COLLECTION_RESULT message to hit line 607-608."""
+        raw_data = {
+            "message_type": MessageType.DIAGNOSTIC_COLLECTION_RESULT,
+            "data": {
+                "collection_id": "diag-123",
+                "success": True,
+                "system_logs": {"syslog": "log data"},
+                "configuration_files": {"config": "config data"},
+                "network_info": {"interfaces": []},
+                "process_info": {"processes": []},
+                "hostname": "test-host",
+            },
+        }
+
+        message = create_message(raw_data)
+        assert isinstance(message, DiagnosticCollectionResultMessage)

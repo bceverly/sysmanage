@@ -640,3 +640,39 @@ class TestLoginSecurityIntegration:
         mock_time.return_value = 1234567890 + 43300  # Over 12 hours
         is_valid, user_id = manager.validate_session_token(token, "192.168.1.1")
         assert is_valid is False
+
+
+class TestLoginSecurityMissingCoverage:
+    """Test missing coverage paths in login security."""
+
+    def test_validate_session_token_malformed_token_logs_warning(self):
+        """Test that malformed session token logs warning."""
+        with patch("backend.security.login_security.get_config") as mock_config:
+            mock_config.return_value = {"security": {"session_secret": "secret"}}
+            manager = SessionSecurityManager()
+
+            with patch("backend.security.login_security.logger") as mock_logger:
+                # Test malformed tokens that trigger ValueError/IndexError (lines 366-368)
+
+                # Test token with insufficient parts (IndexError on line 333)
+                is_valid, user_id = manager.validate_session_token(
+                    "only:two:parts", "192.168.1.1"
+                )
+                assert is_valid is False
+                assert user_id is None
+
+                # Reset the mock for next test
+                mock_logger.reset_mock()
+
+                # Test with invalid timestamp that causes ValueError when converting to int
+                with patch("time.time", return_value=1234567890):
+                    # Create a token with non-numeric timestamp
+                    malformed_token = "user123:192.168.1.1:invalid_timestamp:signature"
+                    is_valid, user_id = manager.validate_session_token(
+                        malformed_token, "192.168.1.1"
+                    )
+                    assert is_valid is False
+                    assert user_id is None
+
+                # Should have logged warning about malformed token
+                mock_logger.warning.assert_called_with("Malformed session token")

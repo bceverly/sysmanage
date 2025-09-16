@@ -619,3 +619,26 @@ class TestMessageHandlersIntegration:
             assert "error" in result
             assert isinstance(result["error"], str)
             assert len(result["error"]) > 0
+
+
+class TestMessageHandlersLogging:
+    """Test message handlers module logging initialization."""
+
+    @patch("builtins.open", side_effect=OSError("Permission denied"))
+    @patch("os.makedirs")
+    def test_logging_fallback_on_os_error(self, mock_makedirs, mock_open):
+        """Test logging falls back to console when file logging fails."""
+        # Force module reload to trigger the logging initialization with mocked open
+        import importlib
+        import sys
+
+        # Remove module to force re-import and re-initialization
+        if "backend.api.message_handlers" in sys.modules:
+            del sys.modules["backend.api.message_handlers"]
+
+        # Import module which should trigger fallback logging due to OSError
+        import backend.api.message_handlers
+
+        # Verify that the module still loads successfully despite logging error
+        assert hasattr(backend.api.message_handlers, "handle_system_info")
+        assert hasattr(backend.api.message_handlers, "handle_heartbeat")

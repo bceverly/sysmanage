@@ -426,3 +426,206 @@ class TestCertificateManagerIntegration:
 
         # Serial numbers should be different
         assert client_cert_1.serial_number != client_cert_2.serial_number
+
+
+class TestCertificateManagerPlatformPaths:
+    """Test platform-specific certificate paths and error handling."""
+
+    @patch("backend.security.certificate_manager.get_config")
+    @patch("backend.security.certificate_manager.os.name", "nt")
+    @patch("backend.security.certificate_manager.Path")
+    def test_windows_default_cert_path(self, mock_path_class, mock_get_config):
+        """Test Windows default certificate path."""
+        mock_get_config.return_value = {"certificates": {}}
+
+        # Mock Path to avoid WindowsPath on Linux
+        mock_path = MagicMock()
+        mock_path_class.return_value = mock_path
+        mock_path.mkdir = MagicMock()
+
+        # Mock os.environ to prevent pytest temp dir override
+        with patch("backend.security.certificate_manager.os.environ", {}):
+            cert_manager = CertificateManager()
+            # Should have tried to use Windows path
+            mock_path_class.assert_called_with(r"C:\ProgramData\SysManage\certs")
+
+    @patch("backend.security.certificate_manager.get_config")
+    @patch("backend.security.certificate_manager.Path.mkdir")
+    def test_permission_error_fallback(self, mock_mkdir, mock_get_config):
+        """Test fallback path when permission denied on primary cert directory."""
+        mock_get_config.return_value = {
+            "certificates": {"path": "/etc/sysmanage/certs"}
+        }
+
+        # First mkdir call raises PermissionError, second succeeds
+        mock_mkdir.side_effect = [PermissionError("Permission denied"), None]
+
+        with patch("backend.security.certificate_manager.os.environ", {}):
+            with patch("builtins.print") as mock_print:
+                cert_manager = CertificateManager()
+
+                # Should have fallen back to project directory
+                assert ".sysmanage-certs" in str(cert_manager.cert_dir)
+                # Should have printed warning
+                mock_print.assert_called_once()
+                assert "Cannot access" in mock_print.call_args[0][0]
+
+
+class TestCertificateValidationErrors:
+    """Test certificate validation error paths."""
+
+    def setup_method(self):
+        """Set up test environment."""
+        self.temp_dir = tempfile.mkdtemp()
+        self.mock_config = {"certificates": {"path": self.temp_dir}}
+
+    def teardown_method(self):
+        """Clean up test environment."""
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
+
+    @patch("backend.security.certificate_manager.get_config")
+    def test_validate_certificate_wrong_issuer(self, mock_get_config):
+        """Test certificate validation failure when issuer doesn't match CA."""
+        mock_get_config.return_value = self.mock_config
+
+        with patch("backend.security.certificate_manager.os.environ", {}):
+            cert_manager = CertificateManager()
+
+            # Generate a client certificate normally
+            hostname = "test-host.example.com"
+            host_id = 12345
+            cert_pem, _ = cert_manager.generate_client_certificate(hostname, host_id)
+
+            # Create a different CA to simulate wrong issuer
+            different_ca_key = cert_manager.generate_private_key()
+
+            # Manually create a different CA certificate
+            subject = issuer = x509.Name(
+                [
+                    x509.NameAttribute(x509.NameOID.COMMON_NAME, "Different CA"),
+                    x509.NameAttribute(x509.NameOID.ORGANIZATION_NAME, "Different Org"),
+                ]
+            )
+
+            from cryptography.hazmat.primitives import hashes
+
+            different_ca_cert = (
+                x509.CertificateBuilder()
+                .subject_name(subject)
+                .issuer_name(issuer)
+                .public_key(different_ca_key.public_key())
+                .serial_number(1)
+                .not_valid_before(datetime.now(timezone.utc))
+                .not_valid_after(datetime.now(timezone.utc) + timedelta(days=365))
+                .add_extension(
+                    x509.BasicConstraints(ca=True, path_length=None), critical=True
+                )
+                .sign(different_ca_key, hashes.SHA256())
+            )
+
+            # Overwrite the CA cert file with the different CA
+            with open(cert_manager.ca_cert_path, "wb") as f:
+                f.write(different_ca_cert.public_bytes(serialization.Encoding.PEM))
+
+            # Validation should fail due to issuer mismatch
+            result = cert_manager.validate_client_certificate(cert_pem)
+            assert result is None
+
+    @patch("backend.security.certificate_manager.get_config")
+    def test_validate_certificate_invalid_host_id(self, mock_get_config):
+        """Test certificate validation with invalid host ID in organizational unit."""
+        mock_get_config.return_value = self.mock_config
+
+        with patch("backend.security.certificate_manager.os.environ", {}):
+            cert_manager = CertificateManager()
+
+            # Mock a certificate with invalid organizational unit (non-numeric host ID)
+            hostname = "test-host.example.com"
+
+            # Create certificate manually with invalid host ID
+            private_key = cert_manager.generate_private_key()
+
+            subject = x509.Name(
+                [
+                    x509.NameAttribute(x509.NameOID.COMMON_NAME, hostname),
+                    x509.NameAttribute(
+                        x509.NameOID.ORGANIZATIONAL_UNIT_NAME, "invalid-host-id"
+                    ),  # Non-numeric
+                    x509.NameAttribute(x509.NameOID.ORGANIZATION_NAME, "SysManage"),
+                ]
+            )
+
+            # Get CA cert and key
+            cert_manager.ensure_ca_certificate()
+            with open(cert_manager.ca_key_path, "rb") as key_file:
+                ca_key = serialization.load_pem_private_key(
+                    key_file.read(), password=None
+                )
+
+            cert_builder = x509.CertificateBuilder()
+            cert_builder = cert_builder.subject_name(subject)
+            cert_builder = cert_builder.issuer_name(
+                subject
+            )  # Self-signed for simplicity
+            cert_builder = cert_builder.public_key(private_key.public_key())
+            cert_builder = cert_builder.serial_number(1)
+            cert_builder = cert_builder.not_valid_before(datetime.now(timezone.utc))
+            cert_builder = cert_builder.not_valid_after(
+                datetime.now(timezone.utc) + timedelta(days=365)
+            )
+
+            from cryptography.hazmat.primitives import hashes
+
+            invalid_cert = cert_builder.sign(ca_key, hashes.SHA256())
+            cert_pem = invalid_cert.public_bytes(serialization.Encoding.PEM)
+
+            # Validation should fail due to ValueError when parsing host ID
+            result = cert_manager.validate_client_certificate(cert_pem)
+            assert result is None
+
+    @patch("backend.security.certificate_manager.get_config")
+    def test_validate_certificate_missing_fields(self, mock_get_config):
+        """Test certificate validation with missing hostname or host_id fields."""
+        mock_get_config.return_value = self.mock_config
+
+        with patch("backend.security.certificate_manager.os.environ", {}):
+            cert_manager = CertificateManager()
+            cert_manager.ensure_ca_certificate()
+
+            # Create certificate with missing organizational unit (host_id)
+            private_key = cert_manager.generate_private_key()
+
+            subject = x509.Name(
+                [
+                    x509.NameAttribute(
+                        x509.NameOID.COMMON_NAME, "test-host.example.com"
+                    ),
+                    # Missing ORGANIZATIONAL_UNIT_NAME (host_id)
+                    x509.NameAttribute(x509.NameOID.ORGANIZATION_NAME, "SysManage"),
+                ]
+            )
+
+            with open(cert_manager.ca_key_path, "rb") as key_file:
+                ca_key = serialization.load_pem_private_key(
+                    key_file.read(), password=None
+                )
+
+            cert_builder = x509.CertificateBuilder()
+            cert_builder = cert_builder.subject_name(subject)
+            cert_builder = cert_builder.issuer_name(subject)
+            cert_builder = cert_builder.public_key(private_key.public_key())
+            cert_builder = cert_builder.serial_number(1)
+            cert_builder = cert_builder.not_valid_before(datetime.now(timezone.utc))
+            cert_builder = cert_builder.not_valid_after(
+                datetime.now(timezone.utc) + timedelta(days=365)
+            )
+
+            from cryptography.hazmat.primitives import hashes
+
+            invalid_cert = cert_builder.sign(ca_key, hashes.SHA256())
+            cert_pem = invalid_cert.public_bytes(serialization.Encoding.PEM)
+
+            # Validation should fail and return None
+            result = cert_manager.validate_client_certificate(cert_pem)
+            assert result is None

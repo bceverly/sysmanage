@@ -96,6 +96,28 @@ class TestAgentConnection:
 
         assert result is False
 
+    @pytest.mark.asyncio
+    async def test_send_message_type_error(self, mock_websocket):
+        """Test message sending with TypeError (protocol error)."""
+        mock_websocket.send_text.side_effect = TypeError("Invalid type")
+        conn = AgentConnection(mock_websocket, "test-agent")
+        conn.hostname = "test-host"  # Set hostname for logging
+
+        result = await conn.send_message({"test": "data"})
+
+        assert result is True  # Protocol errors don't trigger disconnection
+
+    @pytest.mark.asyncio
+    async def test_send_message_value_error(self, mock_websocket):
+        """Test message sending with ValueError (protocol error)."""
+        mock_websocket.send_text.side_effect = ValueError("Invalid value")
+        conn = AgentConnection(mock_websocket, "test-agent")
+        conn.hostname = "test-host"  # Set hostname for logging
+
+        result = await conn.send_message({"test": "data"})
+
+        assert result is True  # Protocol errors don't trigger disconnection
+
     def test_update_info(self, mock_websocket):
         """Test updating agent information."""
         conn = AgentConnection(mock_websocket, "test-agent")
