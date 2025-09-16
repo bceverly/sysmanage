@@ -142,6 +142,37 @@ jobs:
           backend-coverage.txt
           backend-color.txt
 
+    - name: Checkout repository for backend badge update
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: actions/checkout@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Update backend coverage badge
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        # Update backend coverage badge
+        sed -i "s/backend%20test%20coverage-[0-9]*%25-[a-z]*/backend%20test%20coverage-${{ steps.coverage.outputs.percentage }}%25-${{ steps.coverage.outputs.color }}/g" README.md
+        # Also fix the broken badge if it exists
+        sed -i "s/backend%20test%20coverage-%25-\.svg/backend%20test%20coverage-${{ steps.coverage.outputs.percentage }}%25-${{ steps.coverage.outputs.color }}.svg/g" README.md
+
+    - name: Create PR for backend coverage badge
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "Update backend test coverage badge to ${{ steps.coverage.outputs.percentage }}% [skip ci]"
+        title: "Update backend coverage badge to ${{ steps.coverage.outputs.percentage }}%"
+        body: |
+          🔧 **Backend Test Coverage Update**
+
+          - **Coverage**: ${{ steps.coverage.outputs.percentage }}%
+          - **Badge Color**: ${{ steps.coverage.outputs.color }}
+
+          Generated automatically by CI pipeline.
+        branch: update-backend-coverage-badge-${{ github.run_number }}
+        delete-branch: true
+
     - name: Upload backend coverage to Codecov
       uses: codecov/codecov-action@v5
       with:
