@@ -11,7 +11,8 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 from cryptography import x509
-from cryptography.hazmat.primitives import serialization
+from cryptography.x509.oid import NameOID
+from cryptography.hazmat.primitives import serialization, hashes
 
 from backend.security.certificate_manager import CertificateManager
 
@@ -426,6 +427,119 @@ class TestCertificateManagerIntegration:
 
         # Serial numbers should be different
         assert client_cert_1.serial_number != client_cert_2.serial_number
+
+    @patch("backend.security.certificate_manager.get_config")
+    def test_validate_certificate_invalid_host_id_format(self, mock_get_config):
+        """Test certificate validation with non-numeric host_id (line 367-368)."""
+        mock_get_config.return_value = self.mock_config
+
+        with patch("backend.security.certificate_manager.os.environ", {}):
+            cert_manager = CertificateManager()
+
+            # Create a certificate with non-numeric OU (organizational unit)
+            ca_key = cert_manager.generate_private_key()
+
+            # Manually create a CA certificate
+            ca_subject = x509.Name(
+                [
+                    x509.NameAttribute(NameOID.COMMON_NAME, "Test CA"),
+                    x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Test Org"),
+                ]
+            )
+
+            ca_cert = (
+                x509.CertificateBuilder()
+                .subject_name(ca_subject)
+                .issuer_name(ca_subject)
+                .public_key(ca_key.public_key())
+                .serial_number(12345)
+                .not_valid_before(datetime.utcnow())
+                .not_valid_after(datetime.utcnow() + timedelta(days=365))
+                .sign(ca_key, hashes.SHA256())
+            )
+
+            client_key = cert_manager.generate_private_key()
+            subject = x509.Name(
+                [
+                    x509.NameAttribute(NameOID.COMMON_NAME, "test-host"),
+                    x509.NameAttribute(
+                        NameOID.ORGANIZATIONAL_UNIT_NAME, "invalid-host-id"
+                    ),  # Non-numeric
+                ]
+            )
+
+            client_cert = (
+                x509.CertificateBuilder()
+                .subject_name(subject)
+                .issuer_name(ca_cert.subject)
+                .public_key(client_key.public_key())
+                .serial_number(12345)
+                .not_valid_before(datetime.utcnow())
+                .not_valid_after(datetime.utcnow() + timedelta(days=365))
+                .sign(ca_key, hashes.SHA256())
+            )
+
+            cert_pem = client_cert.public_bytes(serialization.Encoding.PEM)
+
+            # Should return None due to ValueError parsing host_id
+            result = cert_manager.validate_client_certificate(cert_pem)
+            assert result is None
+
+    @patch("backend.security.certificate_manager.get_config")
+    def test_validate_certificate_missing_hostname(self, mock_get_config):
+        """Test certificate validation with missing hostname (line 373)."""
+        mock_get_config.return_value = self.mock_config
+
+        with patch("backend.security.certificate_manager.os.environ", {}):
+            cert_manager = CertificateManager()
+
+            # Create a certificate with only OU but no CN
+            ca_key = cert_manager.generate_private_key()
+
+            # Manually create a CA certificate
+            ca_subject = x509.Name(
+                [
+                    x509.NameAttribute(NameOID.COMMON_NAME, "Test CA"),
+                    x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Test Org"),
+                ]
+            )
+
+            ca_cert = (
+                x509.CertificateBuilder()
+                .subject_name(ca_subject)
+                .issuer_name(ca_subject)
+                .public_key(ca_key.public_key())
+                .serial_number(12345)
+                .not_valid_before(datetime.utcnow())
+                .not_valid_after(datetime.utcnow() + timedelta(days=365))
+                .sign(ca_key, hashes.SHA256())
+            )
+
+            client_key = cert_manager.generate_private_key()
+            subject = x509.Name(
+                [
+                    x509.NameAttribute(
+                        NameOID.ORGANIZATIONAL_UNIT_NAME, "12345"
+                    ),  # Only OU, no CN
+                ]
+            )
+
+            client_cert = (
+                x509.CertificateBuilder()
+                .subject_name(subject)
+                .issuer_name(ca_cert.subject)
+                .public_key(client_key.public_key())
+                .serial_number(12345)
+                .not_valid_before(datetime.utcnow())
+                .not_valid_after(datetime.utcnow() + timedelta(days=365))
+                .sign(ca_key, hashes.SHA256())
+            )
+
+            cert_pem = client_cert.public_bytes(serialization.Encoding.PEM)
+
+            # Should return None because hostname is missing
+            result = cert_manager.validate_client_certificate(cert_pem)
+            assert result is None
 
 
 class TestCertificateManagerPlatformPaths:
