@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test lint lint-python lint-typescript security security-full security-python security-frontend security-secrets clean setup install-dev help start stop
+.PHONY: test lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev help start stop
 
 # Default target
 help:
@@ -17,6 +17,7 @@ help:
 	@echo "  make security-python - Run Python security scanning (Bandit + Safety)"
 	@echo "  make security-frontend - Run frontend security scanning (ESLint)"
 	@echo "  make security-secrets - Run secrets detection"
+	@echo "  make security-upgrades - Check for security package upgrades"
 	@echo "  make setup         - Install development dependencies"
 	@echo "  make clean         - Clean test artifacts and cache"
 	@echo "  make install-dev   - Install all development tools"
@@ -101,6 +102,18 @@ lint: lint-python lint-typescript
 # Comprehensive security analysis (default)
 security: security-full
 
+# Show upgrade recommendations by checking outdated packages
+security-upgrades: $(VENV_ACTIVATE)
+	@echo "=== Security Upgrade Recommendations ==="
+	@echo "Current versions of security-critical packages:"
+	@$(PYTHON) -m pip list | grep -E "(cryptography|aiohttp|black|bandit|websockets|PyYAML|SQLAlchemy|alembic|safety|fastapi|starlette|jinja2|python-multipart|setuptools)"
+	@echo ""
+	@echo "Checking for outdated packages..."
+	@$(PYTHON) -m pip list --outdated --format=columns 2>/dev/null | grep -E "(cryptography|aiohttp|black|bandit|websockets|PyYAML|SQLAlchemy|alembic|safety|fastapi|starlette|jinja2|python-multipart|setuptools)" || echo "All security packages are up to date"
+	@echo ""
+	@echo "For detailed vulnerability info, check:"
+	@echo "  https://platform.safetycli.com/codebases/sysmanage/findings?branch=main"
+
 # Comprehensive security analysis - all tools
 security-full: security-python security-frontend security-secrets
 	@echo "[OK] Comprehensive security analysis completed!"
@@ -117,10 +130,19 @@ endif
 	@echo ""
 	@echo "Running Safety dependency vulnerability scan..."
 ifeq ($(OS),Windows_NT)
-	-@powershell -Command "$(PIP) freeze | $(PYTHON) -m safety scan --stdin" || echo "Safety scan completed with warnings"
+	-@$(PYTHON) -m safety scan --output screen || echo "Safety scan completed with issues"
+	-@echo ""
+	-@echo "=== Current dependency versions (for upgrade reference) ==="
+	-@$(PYTHON) -m pip list | grep -E "(cryptography|aiohttp|black|bandit|websockets|PyYAML|SQLAlchemy|alembic|safety|fastapi|starlette|jinja2|python-multipart|setuptools)" || echo "Package list completed"
 else
-	@$(PIP) freeze | $(PYTHON) -m safety scan --stdin || echo "Safety scan completed with warnings"
+	@$(PYTHON) -m safety scan --output screen || echo "Safety scan completed with issues"
+	@echo ""
+	@echo "=== Current dependency versions (for upgrade reference) ==="
+	@$(PYTHON) -m pip list | grep -E "(cryptography|aiohttp|black|bandit|websockets|PyYAML|SQLAlchemy|alembic|safety|fastapi|starlette|jinja2|python-multipart|setuptools)" || echo "Package list completed"
 endif
+	@echo ""
+	@echo "Note: Check Safety web UI at https://platform.safetycli.com/codebases/sysmanage/findings?branch=main"
+	@echo "      for specific version upgrade recommendations when vulnerabilities are found."
 	@echo "[OK] Python security analysis completed"
 
 # Frontend security analysis (ESLint security plugins)
