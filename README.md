@@ -13,7 +13,7 @@
 [![Linting](https://img.shields.io/badge/pylint-10.00/10-brightgreen.svg)](https://github.com/PyCQA/pylint)
 [![TypeScript](https://img.shields.io/badge/eslint-0%20warnings-brightgreen.svg)]()
 [![Backend Test Coverage](https://img.shields.io/badge/backend%20test%20coverage-62%25-yellow.svg)]()
-[![Frontend Test Coverage](https://img.shields.io/badge/frontend%20test%20coverage-%25-.svg)]()
+[![Frontend Test Coverage](https://img.shields.io/badge/frontend%20test%20coverage-0%25-red.svg)]()
 
 A modern, cross-platform system monitoring and management platform with real-time WebSocket communication, built with FastAPI and React.
 

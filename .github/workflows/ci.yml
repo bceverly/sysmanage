@@ -127,28 +127,20 @@ jobs:
         echo "color=$COLOR" >> $GITHUB_OUTPUT
         echo "Badge color: $COLOR"
 
-    - name: Update README badges
+    - name: Save backend coverage data
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
-        # Update backend coverage badge
-        sed -i "s/backend%20test%20coverage-[0-9]*%25-[a-z]*/backend%20test%20coverage-${{ steps.coverage.outputs.percentage }}%25-${{ steps.coverage.outputs.color }}/g" README.md
-        # Update frontend coverage badge
-        sed -i "s/frontend%20test%20coverage-[0-9]*%25-[a-z]*/frontend%20test%20coverage-${{ steps.frontend-coverage.outputs.percentage }}%25-${{ steps.frontend-coverage.outputs.color }}/g" README.md
+        echo '${{ steps.coverage.outputs.percentage }}' > backend-coverage.txt
+        echo '${{ steps.coverage.outputs.color }}' > backend-color.txt
 
-    - name: Create Pull Request for coverage badge updates
+    - name: Upload backend coverage data
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      uses: peter-evans/create-pull-request@v5
+      uses: actions/upload-artifact@v4
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        commit-message: "Update coverage badges - Backend: ${{ steps.coverage.outputs.percentage }}%, Frontend: ${{ steps.frontend-coverage.outputs.percentage }}% [skip ci]"
-        title: "Update coverage badges - Backend: ${{ steps.coverage.outputs.percentage }}%, Frontend: ${{ steps.frontend-coverage.outputs.percentage }}%"
-        body: |
-          Automated update of test coverage badges based on latest test results.
-
-          **Backend Coverage**: ${{ steps.coverage.outputs.percentage }}% (color: ${{ steps.coverage.outputs.color }})
-          **Frontend Coverage**: ${{ steps.frontend-coverage.outputs.percentage }}% (color: ${{ steps.frontend-coverage.outputs.color }})
-        branch: update-coverage-badges-${{ github.run_number }}
-        delete-branch: true
+        name: backend-coverage-data
+        path: |
+          backend-coverage.txt
+          backend-color.txt
 
     - name: Upload backend coverage to Codecov
       uses: codecov/codecov-action@v5
@@ -201,7 +193,8 @@ jobs:
     name: Frontend Tests
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write  # Allow writing to update README badge
+      pull-requests: write  # Allow creating pull requests
     
     steps:
     - uses: actions/checkout@v5
@@ -266,6 +259,21 @@ jobs:
         fi
         echo "color=$COLOR" >> $GITHUB_OUTPUT
         echo "Frontend Badge color: $COLOR"
+
+    - name: Save frontend coverage data
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        echo '${{ steps.frontend-coverage.outputs.percentage }}' > frontend-coverage.txt
+        echo '${{ steps.frontend-coverage.outputs.color }}' > frontend-color.txt
+
+    - name: Upload frontend coverage data
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-coverage-data
+        path: |
+          frontend-coverage.txt
+          frontend-color.txt
 
     - name: Upload frontend coverage to Codecov
       uses: codecov/codecov-action@v5
