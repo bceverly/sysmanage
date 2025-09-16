@@ -112,6 +112,25 @@ class TestEmailRoutes:
         assert result.from_address == ""
         assert result.from_name == ""
 
+    @patch("backend.api.email.config")
+    async def test_get_email_config_exception(self, mock_config):
+        """Test get_email_config with exception handling."""
+        # Mock config to raise an exception
+        mock_config.get_email_config.side_effect = Exception("Configuration error")
+
+        # Mock current user
+        mock_user = Mock()
+        mock_user.email = "admin@test.com"
+
+        from backend.api.email import get_email_config
+
+        # Should raise HTTPException due to configuration error
+        with pytest.raises(HTTPException) as exc_info:
+            await get_email_config(current_user=mock_user)
+
+        assert exc_info.value.status_code == 500
+        assert "Failed to get email configuration" in str(exc_info.value.detail)
+
     @patch("backend.api.email.email_service")
     async def test_test_email_success(self, mock_email_service):
         """Test successful email test."""

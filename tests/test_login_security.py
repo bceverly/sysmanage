@@ -1,217 +1,642 @@
 """
-Unit tests for login security functionality including user account locking.
+Comprehensive tests for backend/security/login_security.py module.
+Tests security validation and enhancement for SysManage server.
 """
 
-import pytest
-from datetime import datetime, timezone, timedelta
-from unittest.mock import Mock, patch, MagicMock
+import time
+from datetime import datetime, timedelta, timezone
+from unittest.mock import Mock, patch
 
-from backend.security.login_security import LoginSecurityValidator
-from backend.persistence.models import User
+import pytest
+
+from backend.security.login_security import (
+    LoginSecurityValidator,
+    PasswordSecurityValidator,
+    SessionSecurityManager,
+    login_security,
+    password_security,
+    session_security,
+)
+
+
+class MockUser:
+    """Mock user object for testing."""
+
+    def __init__(self, userid="testuser", is_locked=False, failed_attempts=0):
+        self.userid = userid
+        self.is_locked = is_locked
+        self.failed_login_attempts = failed_attempts
+        self.locked_at = None
+
+
+class MockDBSession:
+    """Mock database session."""
+
+    def __init__(self):
+        self.committed = False
+
+    def commit(self):
+        self.committed = True
 
 
 class TestLoginSecurityValidator:
-    """Test cases for LoginSecurityValidator."""
+    """Test LoginSecurityValidator class."""
 
-    def setup_method(self):
-        """Set up test fixtures."""
-        self.validator = LoginSecurityValidator()
+    def test_init(self):
+        """Test validator initialization."""
+        validator = LoginSecurityValidator()
+        assert isinstance(validator.failed_attempts, dict)
+        assert isinstance(validator.successful_logins, dict)
+        assert isinstance(validator.blocked_ips, dict)
 
     def test_validate_login_attempt_allowed(self):
-        """Test that valid login attempts are allowed."""
-        is_allowed, reason = self.validator.validate_login_attempt(
-            "test@example.com", "192.168.1.1"
-        )
+        """Test login attempt that should be allowed."""
+        validator = LoginSecurityValidator()
+        is_allowed, reason = validator.validate_login_attempt("user", "192.168.1.1")
+
         assert is_allowed is True
         assert reason == "Login attempt allowed"
 
-    def test_ip_blocking_after_multiple_failures(self):
-        """Test that IPs are blocked after multiple failed attempts."""
-        client_ip = "192.168.1.100"
+    def test_validate_login_attempt_blocked_ip(self):
+        """Test login attempt from blocked IP."""
+        validator = LoginSecurityValidator()
 
-        # Record 10 failed attempts (should trigger IP block)
-        for _ in range(10):
-            self.validator.record_failed_login("user@example.com", client_ip)
-
-        # Next attempt should be blocked
-        is_allowed, reason = self.validator.validate_login_attempt(
-            "user@example.com", client_ip
+        # Block the IP
+        validator.blocked_ips["192.168.1.100"] = datetime.now(timezone.utc) + timedelta(
+            hours=1
         )
+
+        is_allowed, reason = validator.validate_login_attempt("user", "192.168.1.100")
+
         assert is_allowed is False
-        assert "IP temporarily blocked" in reason
+        assert "blocked" in reason.lower()
 
-    def test_rate_limiting_for_ip(self):
-        """Test rate limiting based on IP address."""
-        client_ip = "192.168.1.101"
+    def test_validate_login_attempt_rate_limited(self):
+        """Test rate limited login attempt."""
+        validator = LoginSecurityValidator()
 
-        # Record 5 failed attempts within 5 minutes (should trigger rate limiting)
-        for _ in range(5):
-            self.validator.record_failed_login("user@example.com", client_ip)
+        # Add enough failed attempts to trigger rate limiting
+        current_time = datetime.now(timezone.utc)
+        for _ in range(6):  # More than the 5 attempt limit
+            validator.failed_attempts["192.168.1.200"].append(current_time)
 
-        # Check rate limiting
-        assert self.validator.is_rate_limited(client_ip) is True
+        is_allowed, reason = validator.validate_login_attempt("user", "192.168.1.200")
 
-    def test_successful_login_clears_ip_failures(self):
-        """Test that successful login clears failed attempts for IP."""
-        client_ip = "192.168.1.102"
+        assert is_allowed is False
+        assert "too many" in reason.lower()
 
-        # Record some failed attempts
-        for _ in range(3):
-            self.validator.record_failed_login("user@example.com", client_ip)
+    def test_validate_login_attempt_user_rate_limited(self):
+        """Test user-specific rate limiting."""
+        validator = LoginSecurityValidator()
+
+        # Add failed attempts for specific user
+        current_time = datetime.now(timezone.utc)
+        user_key = "user:testuser"
+        for _ in range(4):  # More than the 3 attempt limit
+            validator.failed_attempts[user_key].append(current_time)
+
+        is_allowed, reason = validator.validate_login_attempt(
+            "testuser", "192.168.1.50"
+        )
+
+        assert is_allowed is False
+        assert "too many failed attempts" in reason.lower()
+
+    def test_record_failed_login(self):
+        """Test recording failed login attempt."""
+        validator = LoginSecurityValidator()
+
+        validator.record_failed_login("testuser", "192.168.1.10", "TestAgent")
+
+        assert len(validator.failed_attempts["192.168.1.10"]) == 1
+
+    def test_record_failed_login_triggers_block(self):
+        """Test that too many failures trigger IP block."""
+        validator = LoginSecurityValidator()
+
+        # Record 10 failed attempts to trigger block
+        for _ in range(10):
+            validator.record_failed_login("testuser", "192.168.1.20", "TestAgent")
+
+        assert "192.168.1.20" in validator.blocked_ips
+        assert validator.is_ip_blocked("192.168.1.20") is True
+
+    def test_record_successful_login(self):
+        """Test recording successful login."""
+        validator = LoginSecurityValidator()
+
+        # First add some failed attempts
+        validator.failed_attempts["192.168.1.30"].append(datetime.now(timezone.utc))
 
         # Record successful login
-        self.validator.record_successful_login("user@example.com", client_ip)
+        validator.record_successful_login("testuser", "192.168.1.30", "TestAgent")
 
         # Failed attempts should be cleared
-        assert client_ip not in self.validator.failed_attempts
+        assert "192.168.1.30" not in validator.failed_attempts
+        assert len(validator.successful_logins["192.168.1.30"]) == 1
 
-    def test_user_account_not_locked_initially(self):
-        """Test that new user accounts are not locked."""
-        user = User(userid="test@example.com", is_locked=False, failed_login_attempts=0)
-        assert self.validator.is_user_account_locked(user) is False
+    def test_is_ip_blocked_false(self):
+        """Test IP not blocked."""
+        validator = LoginSecurityValidator()
+        assert validator.is_ip_blocked("192.168.1.40") is False
 
-    def test_user_account_locked_status(self):
-        """Test checking locked user account status."""
-        # Create locked user
-        user = User(
-            userid="test@example.com",
-            is_locked=True,
-            failed_login_attempts=5,
-            locked_at=datetime.now(timezone.utc),
+    def test_is_ip_blocked_expired(self):
+        """Test expired IP block."""
+        validator = LoginSecurityValidator()
+
+        # Set block that has already expired
+        validator.blocked_ips["192.168.1.50"] = datetime.now(timezone.utc) - timedelta(
+            hours=2
         )
-        assert self.validator.is_user_account_locked(user) is True
+
+        # Should return False and clean up the expired block
+        assert validator.is_ip_blocked("192.168.1.50") is False
+        assert "192.168.1.50" not in validator.blocked_ips
+
+    def test_is_rate_limited_false(self):
+        """Test IP not rate limited."""
+        validator = LoginSecurityValidator()
+        assert validator.is_rate_limited("192.168.1.60") is False
+
+    def test_is_rate_limited_old_attempts(self):
+        """Test rate limiting with old attempts."""
+        validator = LoginSecurityValidator()
+
+        # Add old attempts (more than 5 minutes ago)
+        old_time = datetime.now(timezone.utc) - timedelta(minutes=10)
+        for _ in range(6):
+            validator.failed_attempts["192.168.1.70"].append(old_time)
+
+        # Should not be rate limited due to age
+        assert validator.is_rate_limited("192.168.1.70") is False
+
+    def test_is_user_rate_limited_false(self):
+        """Test user not rate limited."""
+        validator = LoginSecurityValidator()
+        assert validator.is_user_rate_limited("testuser") is False
+
+    def test_clean_old_attempts(self):
+        """Test cleaning old attempts."""
+        validator = LoginSecurityValidator()
+
+        # Add old and new attempts
+        old_time = datetime.now(timezone.utc) - timedelta(hours=2)
+        new_time = datetime.now(timezone.utc)
+
+        key = "test-key"
+        validator.failed_attempts[key] = [old_time, new_time]
+
+        validator._clean_old_attempts(key, hours_to_keep=1)
+
+        # Only new attempt should remain
+        assert len(validator.failed_attempts[key]) == 1
+        assert validator.failed_attempts[key][0] == new_time
+
+    def test_clean_old_attempts_empty(self):
+        """Test cleaning removes empty lists."""
+        validator = LoginSecurityValidator()
+
+        # Add only old attempts
+        old_time = datetime.now(timezone.utc) - timedelta(hours=2)
+        key = "test-key-2"
+        validator.failed_attempts[key] = [old_time]
+
+        validator._clean_old_attempts(key, hours_to_keep=1)
+
+        # Key should be removed
+        assert key not in validator.failed_attempts
+
+    def test_is_user_account_locked_false(self):
+        """Test user account not locked."""
+        validator = LoginSecurityValidator()
+        user = MockUser(is_locked=False)
+
+        assert validator.is_user_account_locked(user) is False
 
     @patch("backend.security.login_security.get_account_lockout_duration")
-    def test_user_account_lock_expires(self, mock_lockout_duration):
-        """Test that user account locks expire after configured duration."""
-        mock_lockout_duration.return_value = 15  # 15 minutes
+    def test_is_user_account_locked_expired(self, mock_get_duration):
+        """Test expired user account lock."""
+        mock_get_duration.return_value = 30  # 30 minutes
 
-        # Create user locked 20 minutes ago (should be expired)
-        past_time = datetime.now(timezone.utc) - timedelta(minutes=20)
-        user = User(
-            userid="test@example.com",
-            is_locked=True,
-            failed_login_attempts=5,
-            locked_at=past_time,
-        )
+        validator = LoginSecurityValidator()
+        user = MockUser(is_locked=True)
+        user.locked_at = datetime.now(timezone.utc) - timedelta(
+            hours=1
+        )  # Locked 1 hour ago
 
-        assert self.validator.is_user_account_locked(user) is False
+        # Should not be locked anymore (lockout was 30 minutes)
+        assert validator.is_user_account_locked(user) is False
+
+    @patch("backend.security.login_security.get_account_lockout_duration")
+    def test_is_user_account_locked_active(self, mock_get_duration):
+        """Test active user account lock."""
+        mock_get_duration.return_value = 60  # 60 minutes
+
+        validator = LoginSecurityValidator()
+        user = MockUser(is_locked=True)
+        user.locked_at = datetime.now(timezone.utc) - timedelta(
+            minutes=10
+        )  # Locked 10 minutes ago
+
+        # Should still be locked (lockout is 60 minutes)
+        assert validator.is_user_account_locked(user) is True
 
     @patch("backend.security.login_security.get_max_failed_logins")
-    def test_record_failed_login_for_user_locks_account(self, mock_max_failed):
-        """Test that recording failed logins locks user account after max attempts."""
-        mock_max_failed.return_value = 3
+    def test_record_failed_login_for_user_lock(self, mock_max_logins):
+        """Test recording failed login locks user account."""
+        mock_max_logins.return_value = 3
 
-        user = User(userid="test@example.com", is_locked=False, failed_login_attempts=2)
-        mock_session = Mock()
+        validator = LoginSecurityValidator()
+        user = MockUser(failed_attempts=2)  # Will reach 3 after increment
+        db_session = MockDBSession()
 
-        # This should lock the account (3rd attempt)
-        account_locked = self.validator.record_failed_login_for_user(user, mock_session)
+        result = validator.record_failed_login_for_user(user, db_session)
 
-        assert account_locked is True
+        assert result is True  # Account was locked
         assert user.is_locked is True
         assert user.failed_login_attempts == 3
         assert user.locked_at is not None
-        mock_session.commit.assert_called()
+        assert db_session.committed is True
 
     @patch("backend.security.login_security.get_max_failed_logins")
-    def test_record_failed_login_for_user_no_lock(self, mock_max_failed):
-        """Test that failed login doesn't lock account before max attempts."""
-        mock_max_failed.return_value = 5
+    def test_record_failed_login_for_user_no_lock(self, mock_max_logins):
+        """Test recording failed login doesn't lock account yet."""
+        mock_max_logins.return_value = 5
 
-        user = User(userid="test@example.com", is_locked=False, failed_login_attempts=2)
-        mock_session = Mock()
+        validator = LoginSecurityValidator()
+        user = MockUser(failed_attempts=2)  # Will be 3, but limit is 5
+        db_session = MockDBSession()
 
-        # This should not lock the account (3rd of 5 attempts)
-        account_locked = self.validator.record_failed_login_for_user(user, mock_session)
+        result = validator.record_failed_login_for_user(user, db_session)
 
-        assert account_locked is False
+        assert result is False  # Account was not locked
         assert user.is_locked is False
         assert user.failed_login_attempts == 3
-        mock_session.commit.assert_called()
+        assert db_session.committed is True
 
-    def test_record_successful_login_for_user_resets_failures(self):
-        """Test that successful login resets failed login attempts."""
-        user = User(
-            userid="test@example.com",
-            is_locked=True,
-            failed_login_attempts=5,
-            locked_at=datetime.now(timezone.utc),
-        )
-        mock_session = Mock()
+    def test_reset_failed_login_attempts(self):
+        """Test resetting failed login attempts."""
+        validator = LoginSecurityValidator()
+        user = MockUser(failed_attempts=3, is_locked=True)
+        user.locked_at = datetime.now(timezone.utc)
+        db_session = MockDBSession()
 
-        self.validator.reset_failed_login_attempts(user, mock_session)
+        validator.reset_failed_login_attempts(user, db_session)
 
         assert user.failed_login_attempts == 0
         assert user.is_locked is False
         assert user.locked_at is None
-        mock_session.commit.assert_called()
+        assert db_session.committed is True
 
-    def test_unlock_user_account_manually(self):
-        """Test manual user account unlocking."""
-        user = User(
-            userid="test@example.com",
-            is_locked=True,
-            failed_login_attempts=5,
-            locked_at=datetime.now(timezone.utc),
-        )
-        mock_session = Mock()
+    def test_reset_failed_login_attempts_no_change(self):
+        """Test resetting when no changes needed."""
+        validator = LoginSecurityValidator()
+        user = MockUser(failed_attempts=0, is_locked=False)
+        db_session = MockDBSession()
 
-        self.validator.unlock_user_account(user, mock_session)
+        validator.reset_failed_login_attempts(user, db_session)
+
+        # Should not commit if no changes
+        assert db_session.committed is False
+
+    def test_unlock_user_account(self):
+        """Test manually unlocking user account."""
+        validator = LoginSecurityValidator()
+        user = MockUser(failed_attempts=5, is_locked=True)
+        user.locked_at = datetime.now(timezone.utc)
+        db_session = MockDBSession()
+
+        validator.unlock_user_account(user, db_session)
 
         assert user.is_locked is False
         assert user.failed_login_attempts == 0
         assert user.locked_at is None
-        mock_session.commit.assert_called()
+        assert db_session.committed is True
 
-    def test_unlock_user_account_already_unlocked(self):
-        """Test unlocking an already unlocked user account."""
-        user = User(userid="test@example.com", is_locked=False, failed_login_attempts=0)
-        mock_session = Mock()
+    def test_unlock_user_account_not_locked(self):
+        """Test unlocking already unlocked account."""
+        validator = LoginSecurityValidator()
+        user = MockUser(is_locked=False)
+        db_session = MockDBSession()
 
-        self.validator.unlock_user_account(user, mock_session)
+        validator.unlock_user_account(user, db_session)
 
-        # Should not call commit if user was already unlocked
-        mock_session.commit.assert_not_called()
+        # Should not commit if no changes
+        assert db_session.committed is False
 
-    def test_clean_old_attempts(self):
-        """Test cleaning of old failed attempts."""
-        client_ip = "192.168.1.103"
 
-        # Add old attempts (2 hours ago)
-        old_time = datetime.now(timezone.utc) - timedelta(hours=2)
-        self.validator.failed_attempts[client_ip] = [old_time]
+class TestPasswordSecurityValidator:
+    """Test PasswordSecurityValidator class."""
 
-        # Clean old attempts (keep last hour only)
-        self.validator._clean_old_attempts(client_ip, hours_to_keep=1)
+    def test_validate_password_strength_valid(self):
+        """Test valid password."""
+        is_valid, message = PasswordSecurityValidator.validate_password_strength(
+            "Test123!@#"
+        )
 
-        # Old attempts should be removed
-        assert client_ip not in self.validator.failed_attempts
+        assert is_valid is True
+        assert "meets security requirements" in message
 
-    def test_user_rate_limiting(self):
-        """Test user-specific rate limiting."""
-        username = "test@example.com"
-        user_key = f"user:{username}"
+    def test_validate_password_strength_too_short(self):
+        """Test password too short."""
+        is_valid, message = PasswordSecurityValidator.validate_password_strength(
+            "Test1!"
+        )
 
-        # Record multiple failed attempts for user
-        current_time = datetime.now(timezone.utc)
-        self.validator.failed_attempts[user_key] = [
-            current_time - timedelta(minutes=1),
-            current_time - timedelta(minutes=2),
-            current_time - timedelta(minutes=3),
+        assert is_valid is False
+        assert "at least 8 characters" in message
+
+    def test_validate_password_strength_too_long(self):
+        """Test password too long."""
+        long_password = "A" * 129  # 129 characters
+        is_valid, message = PasswordSecurityValidator.validate_password_strength(
+            long_password
+        )
+
+        assert is_valid is False
+        assert "less than 128 characters" in message
+
+    def test_validate_password_strength_no_lowercase(self):
+        """Test password without lowercase."""
+        is_valid, message = PasswordSecurityValidator.validate_password_strength(
+            "TEST123!@#"
+        )
+
+        assert is_valid is False
+        assert "lowercase letter" in message
+
+    def test_validate_password_strength_no_uppercase(self):
+        """Test password without uppercase."""
+        is_valid, message = PasswordSecurityValidator.validate_password_strength(
+            "test123!@#"
+        )
+
+        assert is_valid is False
+        assert "uppercase letter" in message
+
+    def test_validate_password_strength_no_digit(self):
+        """Test password without digit."""
+        is_valid, message = PasswordSecurityValidator.validate_password_strength(
+            "TestABC!@#"
+        )
+
+        assert is_valid is False
+        assert "number" in message
+
+    def test_validate_password_strength_no_special(self):
+        """Test password without special character."""
+        is_valid, message = PasswordSecurityValidator.validate_password_strength(
+            "Test123ABC"
+        )
+
+        assert is_valid is False
+        assert "special character" in message
+
+    def test_is_password_compromised_true(self):
+        """Test compromised password detection."""
+        assert PasswordSecurityValidator.is_password_compromised("password") is True
+        assert PasswordSecurityValidator.is_password_compromised("123456") is True
+        assert (
+            PasswordSecurityValidator.is_password_compromised("PASSWORD") is True
+        )  # Case insensitive
+
+    def test_is_password_compromised_false(self):
+        """Test secure password not compromised."""
+        assert (
+            PasswordSecurityValidator.is_password_compromised("SecurePass123!") is False
+        )
+
+
+class TestSessionSecurityManager:
+    """Test SessionSecurityManager class."""
+
+    @patch("backend.security.login_security.get_config")
+    def test_init(self, mock_config):
+        """Test session manager initialization."""
+        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+
+        manager = SessionSecurityManager()
+        assert manager.config is not None
+
+    @patch("backend.security.login_security.get_config")
+    @patch("time.time")
+    def test_create_secure_session_token(self, mock_time, mock_config):
+        """Test creating secure session token."""
+        mock_time.return_value = 1234567890
+        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+
+        manager = SessionSecurityManager()
+        token = manager.create_secure_session_token("user123", "192.168.1.1")
+
+        assert isinstance(token, str)
+        assert ":" in token
+        parts = token.split(":")
+        assert len(parts) == 4
+        assert parts[0] == "user123"
+        assert parts[1] == "192.168.1.1"
+        assert parts[2] == "1234567890"
+
+    @patch("backend.security.login_security.get_config")
+    @patch("time.time")
+    def test_validate_session_token_valid(self, mock_time, mock_config):
+        """Test validating valid session token."""
+        mock_time.return_value = 1234567890
+        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+
+        manager = SessionSecurityManager()
+
+        # Create token
+        token = manager.create_secure_session_token("user123", "192.168.1.1")
+
+        # Validate token (slightly in future to test age check)
+        mock_time.return_value = 1234567890 + 3600  # 1 hour later
+        is_valid, user_id = manager.validate_session_token(token, "192.168.1.1")
+
+        assert is_valid is True
+        assert user_id == "user123"
+
+    @patch("backend.security.login_security.get_config")
+    def test_validate_session_token_malformed(self, mock_config):
+        """Test validating malformed token."""
+        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+
+        manager = SessionSecurityManager()
+        is_valid, user_id = manager.validate_session_token(
+            "invalid:token", "192.168.1.1"
+        )
+
+        assert is_valid is False
+        assert user_id is None
+
+    @patch("backend.security.login_security.get_config")
+    @patch("time.time")
+    def test_validate_session_token_expired(self, mock_time, mock_config):
+        """Test validating expired token."""
+        mock_time.return_value = 1234567890
+        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+
+        manager = SessionSecurityManager()
+        token = manager.create_secure_session_token("user123", "192.168.1.1")
+
+        # Token expired (more than 12 hours old)
+        mock_time.return_value = 1234567890 + 50000  # ~14 hours later
+        is_valid, user_id = manager.validate_session_token(token, "192.168.1.1")
+
+        assert is_valid is False
+        assert user_id is None
+
+    @patch("backend.security.login_security.get_config")
+    @patch("time.time")
+    def test_validate_session_token_ip_mismatch(self, mock_time, mock_config):
+        """Test validating token with IP mismatch."""
+        mock_time.return_value = 1234567890
+        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+
+        manager = SessionSecurityManager()
+        token = manager.create_secure_session_token("user123", "192.168.1.1")
+
+        # Different IP but should still work (just logged)
+        mock_time.return_value = 1234567890 + 3600
+        is_valid, user_id = manager.validate_session_token(token, "192.168.1.2")
+
+        assert is_valid is True  # Should still work
+        assert user_id == "user123"
+
+    @patch("backend.security.login_security.get_config")
+    @patch("time.time")
+    def test_validate_session_token_invalid_signature(self, mock_time, mock_config):
+        """Test validating token with invalid signature."""
+        mock_time.return_value = 1234567890
+        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+
+        manager = SessionSecurityManager()
+
+        # Create token with one secret
+        token = manager.create_secure_session_token("user123", "192.168.1.1")
+
+        # Try to validate with different secret
+        mock_config.return_value = {"security": {"jwt_secret": "different_secret"}}
+        manager.config = mock_config.return_value
+
+        mock_time.return_value = 1234567890 + 3600
+        is_valid, user_id = manager.validate_session_token(token, "192.168.1.1")
+
+        assert is_valid is False
+        assert user_id is None
+
+
+class TestGlobalInstances:
+    """Test global instances are created correctly."""
+
+    def test_global_instances_exist(self):
+        """Test that global instances are available."""
+        assert login_security is not None
+        assert isinstance(login_security, LoginSecurityValidator)
+
+        assert password_security is not None
+        assert isinstance(password_security, PasswordSecurityValidator)
+
+        assert session_security is not None
+        assert isinstance(session_security, SessionSecurityManager)
+
+
+class TestLoginSecurityIntegration:
+    """Integration tests for login security."""
+
+    def test_full_login_flow_success(self):
+        """Test complete successful login flow."""
+        validator = LoginSecurityValidator()
+
+        # Validate login attempt
+        is_allowed, _ = validator.validate_login_attempt("testuser", "192.168.1.100")
+        assert is_allowed is True
+
+        # Record successful login
+        validator.record_successful_login("testuser", "192.168.1.100", "TestAgent")
+
+        # Verify no failed attempts recorded
+        assert "192.168.1.100" not in validator.failed_attempts
+
+    def test_full_login_flow_with_failures(self):
+        """Test login flow with failures leading to block."""
+        validator = LoginSecurityValidator()
+        ip = "192.168.1.200"
+
+        # Record multiple failures
+        for i in range(10):
+            validator.record_failed_login(f"user{i}", ip, "TestAgent")
+
+        # IP should now be blocked
+        is_allowed, reason = validator.validate_login_attempt("testuser", ip)
+        assert is_allowed is False
+        assert "blocked" in reason.lower()
+
+    @patch("backend.security.login_security.get_max_failed_logins")
+    def test_user_account_lockout_flow(self, mock_max_logins):
+        """Test user account lockout flow."""
+        mock_max_logins.return_value = 3
+
+        validator = LoginSecurityValidator()
+        user = MockUser(failed_attempts=0)
+        db_session = MockDBSession()
+
+        # Record failures until lockout
+        for _ in range(3):
+            locked = validator.record_failed_login_for_user(user, db_session)
+
+        # Last attempt should trigger lock
+        assert locked is True
+        assert user.is_locked is True
+
+        # Reset on successful login
+        validator.reset_failed_login_attempts(user, db_session)
+        assert user.is_locked is False
+
+    def test_password_validation_edge_cases(self):
+        """Test password validation edge cases."""
+        test_cases = [
+            ("", False),  # Empty
+            ("a", False),  # Too short
+            ("Test123!", True),  # Valid
+            ("test123!", False),  # No uppercase
+            ("TEST123!", False),  # No lowercase
+            ("TestABC!", False),  # No number
+            ("Test123", False),  # No special
+            ("password", False),  # Common
+            ("aaaa1!", False),  # Not diverse
         ]
 
-        # Should be rate limited
-        assert self.validator.is_user_rate_limited(username) is True
+        for password, expected_valid in test_cases:
+            is_valid, _ = PasswordSecurityValidator.validate_password_strength(password)
+            assert (
+                is_valid == expected_valid
+            ), f"Password '{password}' should be {expected_valid}"
 
-    def test_user_not_rate_limited_old_attempts(self):
-        """Test that old user attempts don't trigger rate limiting."""
-        username = "test@example.com"
-        user_key = f"user:{username}"
+    @patch("backend.security.login_security.get_config")
+    @patch("time.time")
+    def test_session_token_lifecycle(self, mock_time, mock_config):
+        """Test complete session token lifecycle."""
+        mock_time.return_value = 1234567890
+        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
 
-        # Record old failed attempts (20 minutes ago)
-        old_time = datetime.now(timezone.utc) - timedelta(minutes=20)
-        self.validator.failed_attempts[user_key] = [old_time, old_time, old_time]
+        manager = SessionSecurityManager()
 
-        # Should not be rate limited
-        assert self.validator.is_user_rate_limited(username) is False
+        # Create token
+        token = manager.create_secure_session_token("user123", "192.168.1.1")
+        assert isinstance(token, str)
+
+        # Validate immediately
+        mock_time.return_value = 1234567890 + 60  # 1 minute later
+        is_valid, user_id = manager.validate_session_token(token, "192.168.1.1")
+        assert is_valid is True
+        assert user_id == "user123"
+
+        # Validate near expiry
+        mock_time.return_value = 1234567890 + 43100  # Just under 12 hours
+        is_valid, user_id = manager.validate_session_token(token, "192.168.1.1")
+        assert is_valid is True
+
+        # Validate after expiry
+        mock_time.return_value = 1234567890 + 43300  # Over 12 hours
+        is_valid, user_id = manager.validate_session_token(token, "192.168.1.1")
+        assert is_valid is False

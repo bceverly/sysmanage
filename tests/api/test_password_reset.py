@@ -316,6 +316,34 @@ class TestResetPassword:
         data = response.json()
         assert "at least 8 characters" in data["detail"]
 
+    def test_reset_password_orphaned_token(self, client, session):
+        """Test password reset with token that has no associated user."""
+        # Create a reset token without an associated user
+        reset_token = models.PasswordResetToken(
+            id=1,
+            user_id=999,  # User ID that doesn't exist
+            token=str(uuid.uuid4()),
+            created_at=datetime.now(timezone.utc),
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
+            used_at=None,
+        )
+        session.add(reset_token)
+        session.commit()
+
+        # Try to reset password using the orphaned token
+        response = client.post(
+            "/reset-password",
+            json={
+                "token": reset_token.token,
+                "password": "newpassword123",
+                "confirm_password": "newpassword123",
+            },
+        )
+
+        assert response.status_code == 400
+        data = response.json()
+        assert "User not found" in data["detail"]
+
 
 class TestValidateResetToken:
     """Test cases for GET /validate-reset-token/{token} endpoint."""

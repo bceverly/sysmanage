@@ -61,6 +61,41 @@ class TestAgentConnection:
 
         assert result is False
 
+    @pytest.mark.asyncio
+    async def test_send_message_connection_closed(self, mock_websocket):
+        """Test message sending with ConnectionClosed exception."""
+        from websockets.exceptions import ConnectionClosed
+
+        mock_websocket.send_text.side_effect = ConnectionClosed(None, None)
+        conn = AgentConnection(mock_websocket, "test-agent")
+        conn.hostname = "test-host"  # Set hostname for logging
+
+        result = await conn.send_message({"test": "data"})
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_send_message_os_error(self, mock_websocket):
+        """Test message sending with OSError exception."""
+        mock_websocket.send_text.side_effect = OSError("Network error")
+        conn = AgentConnection(mock_websocket, "test-agent")
+        conn.hostname = "test-host"  # Set hostname for logging
+
+        result = await conn.send_message({"test": "data"})
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_send_message_runtime_error(self, mock_websocket):
+        """Test message sending with RuntimeError exception."""
+        mock_websocket.send_text.side_effect = RuntimeError("Runtime error")
+        conn = AgentConnection(mock_websocket, "test-agent")
+        conn.hostname = "test-host"  # Set hostname for logging
+
+        result = await conn.send_message({"test": "data"})
+
+        assert result is False
+
     def test_update_info(self, mock_websocket):
         """Test updating agent information."""
         conn = AgentConnection(mock_websocket, "test-agent")
