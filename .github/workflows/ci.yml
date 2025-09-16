@@ -131,9 +131,9 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
         # Update backend coverage badge
-        sed -i "s/backend%20coverage-[0-9]*%25-[a-z]*/backend%20coverage-${{ steps.coverage.outputs.percentage }}%25-${{ steps.coverage.outputs.color }}/g" README.md
+        sed -i "s/backend%20test%20coverage-[0-9]*%25-[a-z]*/backend%20test%20coverage-${{ steps.coverage.outputs.percentage }}%25-${{ steps.coverage.outputs.color }}/g" README.md
         # Update frontend coverage badge
-        sed -i "s/frontend%20coverage-[0-9]*%25-[a-z]*/frontend%20coverage-${{ steps.frontend-coverage.outputs.percentage }}%25-${{ steps.frontend-coverage.outputs.color }}/g" README.md
+        sed -i "s/frontend%20test%20coverage-[0-9]*%25-[a-z]*/frontend%20test%20coverage-${{ steps.frontend-coverage.outputs.percentage }}%25-${{ steps.frontend-coverage.outputs.color }}/g" README.md
 
     - name: Create Pull Request for coverage badge updates
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
