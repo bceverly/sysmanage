@@ -245,8 +245,8 @@ jobs:
       id: frontend-coverage
       working-directory: frontend
       run: |
-        # Extract coverage from vitest coverage report
-        COVERAGE=$(npm run test:coverage 2>&1 | grep "All files" | awk '{print $3}' | sed 's/%//' || echo "0")
+        # Extract coverage from vitest coverage report (% Stmts is in column 2)
+        COVERAGE=$(npm run test:coverage 2>&1 | grep "All files" | awk '{print $2}' | sed 's/%//' || echo "0")
         echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
         echo "Frontend Coverage: $COVERAGE%"
 
