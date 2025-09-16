@@ -9,9 +9,13 @@
 [![Node.js Version](https://img.shields.io/badge/node.js-20.x-green.svg)](https://nodejs.org)
 [![License](https://img.shields.io/badge/license-AGPLv3-blue.svg)](LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 [![Linting](https://img.shields.io/badge/pylint-10.00/10-brightgreen.svg)](https://github.com/PyCQA/pylint)
 [![TypeScript](https://img.shields.io/badge/eslint-0%20warnings-brightgreen.svg)]()
+[![Security: bandit](https://img.shields.io/badge/security-bandit-passing-brightgreen.svg)](https://github.com/PyCQA/bandit)
+[![Security: semgrep](https://img.shields.io/badge/security-semgrep-passing-brightgreen.svg)](https://semgrep.dev/)
+[![Security: safety](https://img.shields.io/badge/security-safety-passing-brightgreen.svg)](https://pypi.org/project/safety/)
+[![Security: snyk](https://img.shields.io/badge/security-snyk-monitored-brightgreen.svg)](https://snyk.io/)
+[![Security: secrets](https://img.shields.io/badge/security-secrets%20scan-clean-brightgreen.svg)](https://github.com/trufflesecurity/trufflehog)
 [![Backend Test Coverage](https://img.shields.io/badge/backend%20test%20coverage-62%25-yellow.svg)]()
 [![Frontend Test Coverage](https://img.shields.io/badge/frontend%20test%20coverage-14%25-red.svg)]()
 
@@ -1178,34 +1182,36 @@ docker-compose up -d
 
 ## Security Scanning Infrastructure
 
-SysManage implements comprehensive automated security scanning to protect against vulnerabilities and ensure code quality:
+SysManage implements comprehensive automated security scanning to protect against vulnerabilities and ensure code quality. Our multi-layered security approach is reflected in the security badges at the top of this README:
+
+![Security: bandit](https://img.shields.io/badge/security-bandit-passing-brightgreen.svg) ![Security: semgrep](https://img.shields.io/badge/security-semgrep-passing-brightgreen.svg) ![Security: safety](https://img.shields.io/badge/security-safety-passing-brightgreen.svg) ![Security: snyk](https://img.shields.io/badge/security-snyk-monitored-brightgreen.svg) ![Security: secrets](https://img.shields.io/badge/security-secrets%20scan-clean-brightgreen.svg)
 
 ### Continuous Integration Security Tools
 
 Our GitHub Actions CI/CD pipeline includes multiple security scanning tools that run automatically on every push and pull request:
 
 #### Backend Security (Python)
-- **[Bandit](https://bandit.readthedocs.io/)** - Static security analysis for Python code, detecting common vulnerabilities
-- **[Safety](https://pypi.org/project/safety/)** - Vulnerability scanning for Python dependencies
-- **[Semgrep](https://semgrep.dev/)** - Multi-language static analysis with OWASP Top 10 rule sets
+- **[Bandit](https://bandit.readthedocs.io/)** [![Security: bandit](https://img.shields.io/badge/security-bandit-passing-brightgreen.svg)](https://github.com/PyCQA/bandit) - Static security analysis for Python code, detecting common vulnerabilities
+- **[Safety](https://pypi.org/project/safety/)** [![Security: safety](https://img.shields.io/badge/security-safety-passing-brightgreen.svg)](https://pypi.org/project/safety/) - Vulnerability scanning for Python dependencies
+- **[Semgrep](https://semgrep.dev/)** [![Security: semgrep](https://img.shields.io/badge/security-semgrep-passing-brightgreen.svg)](https://semgrep.dev/) - Multi-language static analysis with OWASP Top 10 rule sets
 
 #### Frontend Security (JavaScript/React)
 - **[ESLint Security](https://github.com/eslint-community/eslint-plugin-security)** - Security-focused linting for JavaScript/TypeScript
 - **[eslint-plugin-no-unsanitized](https://github.com/mozilla/eslint-plugin-no-unsanitized)** - Prevents DOM XSS vulnerabilities
-- **[Snyk](https://snyk.io/)** - Vulnerability scanning for npm dependencies
+- **[Snyk](https://snyk.io/)** [![Security: snyk](https://img.shields.io/badge/security-snyk-monitored-brightgreen.svg)](https://snyk.io/) - Vulnerability scanning for npm dependencies
 - **[npm audit](https://docs.npmjs.com/cli/v8/commands/npm-audit)** - Built-in npm security auditing
 
 #### Cross-Language Security Tools
-- **[CodeQL](https://codeql.github.com/)** - GitHub's semantic code analysis for both Python and JavaScript
-- **[TruffleHog](https://github.com/trufflesecurity/trufflehog)** - Secrets detection to prevent credential leaks
+- **[CodeQL](https://codeql.github.com/)** - GitHub's semantic code analysis for both Python and JavaScript (SARIF integration)
+- **[TruffleHog](https://github.com/trufflesecurity/trufflehog)** [![Security: secrets](https://img.shields.io/badge/security-secrets%20scan-clean-brightgreen.svg)](https://github.com/trufflesecurity/trufflehog) - Secrets detection to prevent credential leaks
 
 ### Security Workflow Files
 
 Our security infrastructure is implemented through multiple GitHub Actions workflows:
 
-- **`.github/workflows/security.yml`** - Comprehensive security scanning with Semgrep, Snyk, Safety, and secrets detection
-- **`.github/workflows/codeql.yml`** - GitHub's native CodeQL security analysis
-- **`.github/workflows/ci.yml`** - Enhanced with security artifact uploads
+- **`.github/workflows/security.yml`** - Comprehensive security scanning with Semgrep, Snyk, Safety, TruffleHog secrets detection, and ESLint security analysis
+- **`.github/workflows/ci.yml`** - Enhanced with Bandit security scanning and security artifact uploads
+- **SARIF Integration** - Results from Semgrep, Snyk, and CodeQL are uploaded to GitHub Security tab for centralized vulnerability management
 
 ### Local Security Testing
 

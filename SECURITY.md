@@ -52,9 +52,143 @@ For general bugs and feature requests, please use [GitHub Issues](https://github
 
 ### Infrastructure Security
 - Regular security dependency updates via Dependabot
-- Automated security scanning via Bandit
+- Comprehensive automated security scanning (see Security Scanning section below)
 - Container security best practices
 - Principle of least privilege
+- Mutual TLS (mTLS) authentication for agent communication
+- Certificate-based host approval system
+
+## Security Scanning Infrastructure
+
+SysManage implements enterprise-grade automated security scanning through our CI/CD pipeline to proactively identify and prevent security vulnerabilities:
+
+### Continuous Security Monitoring
+
+All security scans run automatically on:
+- **Every push** to main and develop branches
+- **Every pull request**
+- **Weekly scheduled scans** (Sundays at 2 AM UTC)
+
+### Backend Security Tools (Python)
+
+#### Static Code Analysis
+- **[Bandit](https://bandit.readthedocs.io/)** - Detects common security issues in Python code
+  - Scans for SQL injection, hardcoded passwords, insecure random generators
+  - Identifies unsafe use of eval(), exec(), and shell commands
+  - Workflow: `.github/workflows/ci.yml`
+
+- **[Semgrep](https://semgrep.dev/)** - Multi-language static analysis with OWASP Top 10 rules
+  - Checks for security anti-patterns and vulnerabilities
+  - Uses community rules + OWASP Top 10 rule sets
+  - Generates SARIF reports for GitHub Security tab
+  - Workflow: `.github/workflows/security.yml`
+
+#### Dependency Vulnerability Scanning
+- **[Safety](https://pypi.org/project/safety/)** - Scans Python dependencies for known vulnerabilities
+  - Checks against Python security advisories database
+  - Identifies vulnerable package versions
+  - Generates JSON reports for artifact storage
+  - Workflow: `.github/workflows/security.yml`
+
+### Frontend Security Tools (JavaScript/React)
+
+#### Static Code Analysis
+- **[ESLint Security Plugin](https://github.com/eslint-community/eslint-plugin-security)** - Security-focused JavaScript/TypeScript linting
+  - Detects potential XSS vulnerabilities
+  - Identifies insecure random number generation
+  - Warns about dangerous RegExp patterns
+  - Configuration: `frontend/eslint.security.config.js`
+  - Workflow: `.github/workflows/security.yml`
+
+- **[eslint-plugin-no-unsanitized](https://github.com/mozilla/eslint-plugin-no-unsanitized)** - Prevents DOM XSS vulnerabilities
+  - Detects unsafe innerHTML usage
+  - Identifies unsanitized DOM manipulation
+  - Configuration: Integrated in security ESLint config
+
+#### Dependency Vulnerability Scanning
+- **[Snyk](https://snyk.io/)** - Advanced vulnerability scanning for npm dependencies
+  - Identifies known vulnerabilities in dependencies
+  - Provides fix recommendations and upgrade paths
+  - Generates SARIF reports for GitHub Security tab
+  - Workflow: `.github/workflows/security.yml`
+
+- **[npm audit](https://docs.npmjs.com/cli/v8/commands/npm-audit)** - Built-in npm security auditing
+  - Scans package-lock.json for vulnerabilities
+  - Provides severity ratings and fix guidance
+  - Runs in both CI and security workflows
+
+### Cross-Language Security Tools
+
+#### Semantic Code Analysis
+- **[CodeQL](https://codeql.github.com/)** - GitHub's native semantic security analysis
+  - Deep analysis of code flow and data dependencies
+  - Detects complex security vulnerabilities
+  - Supports both Python and JavaScript/TypeScript
+  - Integration: SARIF uploads from Semgrep and Snyk
+
+#### Secrets Detection
+- **[TruffleHog](https://github.com/trufflesecurity/trufflehog)** - Comprehensive secrets scanning
+  - Scans entire git history for leaked credentials
+  - Detects API keys, passwords, tokens, certificates
+  - Verifies secrets against live services
+  - Workflow: `.github/workflows/security.yml`
+
+### Security Workflow Files
+
+Our security infrastructure is organized across multiple workflow files:
+
+```
+.github/workflows/
+├── security.yml    # Comprehensive security scanning
+│   ├── Semgrep (OWASP Top 10 + security rules)
+│   ├── Safety (Python dependency scanning)
+│   ├── Snyk (npm dependency scanning)
+│   ├── ESLint Security (JavaScript security linting)
+│   └── TruffleHog (secrets detection)
+├── ci.yml          # CI pipeline with security integration
+│   ├── Bandit (Python static analysis)
+│   ├── npm audit (npm security auditing)
+│   └── Security artifact uploads
+└── (SARIF uploads to GitHub Security tab)
+```
+
+### Local Security Testing
+
+Developers can run security scans locally before committing:
+
+```bash
+# Individual security tools
+python -m bandit -r backend/ -f screen              # Python static analysis
+pip freeze | safety check --stdin                   # Python dependency check
+cd frontend && npm audit                             # npm dependency check
+cd frontend && npx eslint --config eslint.security.config.js src/  # JS security lint
+
+# Comprehensive local scanning (if Makefile targets exist)
+make security          # Run all security tools
+make security-python   # Python-only security tools
+make security-frontend # Frontend-only security tools
+make security-secrets  # Secrets detection
+```
+
+### Security Reporting and Integration
+
+All security scan results are integrated with GitHub's security infrastructure:
+
+- **GitHub Security Tab**: Centralized vulnerability management dashboard
+- **SARIF Reports**: Standardized security report format for tool interoperability
+- **Security Artifacts**: Downloadable detailed reports for each scan
+- **Pull Request Integration**: Security checks block merging if critical issues found
+- **Weekly Monitoring**: Scheduled scans catch newly disclosed vulnerabilities
+
+### Security Badge Status
+
+Our README displays real-time security status badges:
+
+- ![Security: bandit](https://img.shields.io/badge/security-bandit-passing-brightgreen.svg) **Bandit**: Python static analysis status
+- ![Security: semgrep](https://img.shields.io/badge/security-semgrep-passing-brightgreen.svg) **Semgrep**: Multi-language security analysis
+- ![Security: safety](https://img.shields.io/badge/security-safety-passing-brightgreen.svg) **Safety**: Python dependency vulnerability status
+- ![Security: snyk](https://img.shields.io/badge/security-snyk-monitored-brightgreen.svg) **Snyk**: npm dependency monitoring status
+- ![Security: secrets](https://img.shields.io/badge/security-secrets%20scan-clean-brightgreen.svg) **Secrets**: Repository secrets scan status
 
 ## Security Best Practices
 
