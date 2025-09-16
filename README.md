@@ -11,11 +11,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Linting](https://img.shields.io/badge/pylint-10.00/10-brightgreen.svg)](https://github.com/PyCQA/pylint)
 [![TypeScript](https://img.shields.io/badge/eslint-0%20warnings-brightgreen.svg)]()
-[![Security: bandit](https://img.shields.io/badge/security-bandit-passing-brightgreen.svg)](https://github.com/PyCQA/bandit)
-[![Security: semgrep](https://img.shields.io/badge/security-semgrep-passing-brightgreen.svg)](https://semgrep.dev/)
-[![Security: safety](https://img.shields.io/badge/security-safety-passing-brightgreen.svg)](https://pypi.org/project/safety/)
-[![Security: snyk](https://img.shields.io/badge/security-snyk-monitored-brightgreen.svg)](https://snyk.io/)
-[![Security: secrets](https://img.shields.io/badge/security-secrets%20scan-clean-brightgreen.svg)](https://github.com/trufflesecurity/trufflehog)
+[![Security: bandit](https://img.shields.io/badge/security-bandit-passing-brightgreen.svg)](https://github.com/PyCQA/bandit) [![Security: semgrep](https://img.shields.io/badge/security-semgrep-passing-brightgreen.svg)](https://semgrep.dev/) [![Security: safety](https://img.shields.io/badge/security-safety-passing-brightgreen.svg)](https://pypi.org/project/safety/) [![Security: snyk](https://img.shields.io/badge/security-snyk-monitored-brightgreen.svg)](https://snyk.io/) [![Security: secrets](https://img.shields.io/badge/security-secrets--scan-clean-brightgreen.svg)](https://github.com/trufflesecurity/trufflehog)
 [![Backend Test Coverage](https://img.shields.io/badge/backend%20test%20coverage-74%25-yellowgreen.svg)]()
 [![Frontend Test Coverage](https://img.shields.io/badge/frontend%20test%20coverage-14%25-red.svg)]()
 
