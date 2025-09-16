@@ -7,7 +7,7 @@ import tempfile
 from unittest.mock import Mock, patch
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, Integer, Column, Boolean, String, DateTime
+from sqlalchemy import create_engine, Integer, Column, Boolean, String, DateTime, Text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from argon2 import PasswordHasher
@@ -176,6 +176,34 @@ def test_db():
         used_at = Column(DateTime, nullable=True)
         is_used = Column(Boolean, default=False, nullable=False)
 
+    # Create test version of MessageQueue model with Integer ID for SQLite compatibility
+    class MessageQueue(TestBase):
+        __tablename__ = "message_queue"
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        host_id = Column(
+            Integer,
+            ForeignKey("host.id", ondelete="CASCADE"),
+            nullable=True,
+            index=True,
+        )
+        message_id = Column(String(36), unique=True, nullable=False, index=True)
+        direction = Column(String(10), nullable=False, index=True)
+        message_type = Column(String(50), nullable=False, index=True)
+        message_data = Column(Text, nullable=False)
+        status = Column(String(15), nullable=False, default="pending", index=True)
+        priority = Column(String(10), nullable=False, default="normal", index=True)
+        retry_count = Column(Integer, nullable=False, default=0)
+        max_retries = Column(Integer, nullable=False, default=3)
+        created_at = Column(DateTime, nullable=False)
+        scheduled_at = Column(DateTime, nullable=True)
+        started_at = Column(DateTime, nullable=True)
+        completed_at = Column(DateTime, nullable=True)
+        error_message = Column(Text, nullable=True)
+        last_error_at = Column(DateTime, nullable=True)
+        expired_at = Column(DateTime, nullable=True)
+        correlation_id = Column(String(36), nullable=True, index=True)
+        reply_to = Column(String(36), nullable=True, index=True)
+
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)
 
@@ -185,11 +213,13 @@ def test_db():
     original_tag = models.Tag
     original_host_tag = models.HostTag
     original_password_reset_token = models.PasswordResetToken
+    original_message_queue = models.MessageQueue
     models.Host = Host
     models.User = User
     models.Tag = Tag
     models.HostTag = HostTag
     models.PasswordResetToken = PasswordResetToken
+    models.MessageQueue = MessageQueue
 
     # Override the get_engine dependency
     def override_get_engine():
@@ -224,6 +254,7 @@ def test_db():
     models.Tag = original_tag
     models.HostTag = original_host_tag
     models.PasswordResetToken = original_password_reset_token
+    models.MessageQueue = original_message_queue
 
     # Clean up database connections
     test_engine.dispose()  # Close all connections in the connection pool
@@ -393,3 +424,23 @@ def mock_login_security():
     with patch("backend.api.auth.login_security", mock_security):
         with patch("backend.api.user.login_security", mock_security):
             yield mock_security
+
+
+@pytest.fixture
+def mock_current_user():
+    """Mock the current user dependency for authenticated tests."""
+    from backend.auth.auth_bearer import get_current_user
+
+    mock_user = Mock()
+    mock_user.id = 1
+    mock_user.userid = "test@example.com"
+    mock_user.active = True
+
+    def override_get_current_user():
+        return mock_user
+
+    app.dependency_overrides[get_current_user] = override_get_current_user
+    yield mock_user
+    # Clean up the override
+    if get_current_user in app.dependency_overrides:
+        del app.dependency_overrides[get_current_user]
