@@ -61,4 +61,4 @@ zope.event==5.0
 zope.interface==7.2
 Babel==2.16.0
 safety==3.6.1
-safety-schemas==0.0.15
+safety-schemas==0.0.14
