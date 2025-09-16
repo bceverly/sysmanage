@@ -127,24 +127,27 @@ jobs:
         echo "color=$COLOR" >> $GITHUB_OUTPUT
         echo "Badge color: $COLOR"
 
-    - name: Update README badge
+    - name: Update README badges
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
-        sed -i "s/test%20coverage-[0-9]*%25-[a-z]*/test%20coverage-${{ steps.coverage.outputs.percentage }}%25-${{ steps.coverage.outputs.color }}/g" README.md
+        # Update backend coverage badge
+        sed -i "s/backend%20coverage-[0-9]*%25-[a-z]*/backend%20coverage-${{ steps.coverage.outputs.percentage }}%25-${{ steps.coverage.outputs.color }}/g" README.md
+        # Update frontend coverage badge
+        sed -i "s/frontend%20coverage-[0-9]*%25-[a-z]*/frontend%20coverage-${{ steps.frontend-coverage.outputs.percentage }}%25-${{ steps.frontend-coverage.outputs.color }}/g" README.md
 
-    - name: Create Pull Request for coverage badge update
+    - name: Create Pull Request for coverage badge updates
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: peter-evans/create-pull-request@v5
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        commit-message: "Update test coverage badge to ${{ steps.coverage.outputs.percentage }}% [skip ci]"
-        title: "Update test coverage badge to ${{ steps.coverage.outputs.percentage }}%"
+        commit-message: "Update coverage badges - Backend: ${{ steps.coverage.outputs.percentage }}%, Frontend: ${{ steps.frontend-coverage.outputs.percentage }}% [skip ci]"
+        title: "Update coverage badges - Backend: ${{ steps.coverage.outputs.percentage }}%, Frontend: ${{ steps.frontend-coverage.outputs.percentage }}%"
         body: |
-          Automated update of test coverage badge based on latest test results.
+          Automated update of test coverage badges based on latest test results.
 
-          Coverage: ${{ steps.coverage.outputs.percentage }}%
-          Badge color: ${{ steps.coverage.outputs.color }}
-        branch: update-coverage-badge-${{ github.run_number }}
+          **Backend Coverage**: ${{ steps.coverage.outputs.percentage }}% (color: ${{ steps.coverage.outputs.color }})
+          **Frontend Coverage**: ${{ steps.frontend-coverage.outputs.percentage }}% (color: ${{ steps.frontend-coverage.outputs.color }})
+        branch: update-coverage-badges-${{ github.run_number }}
         delete-branch: true
 
     - name: Upload backend coverage to Codecov
@@ -234,18 +237,43 @@ jobs:
       working-directory: frontend
       run: npm run lint
 
-    - name: Run frontend tests
+    - name: Run frontend tests with coverage
       working-directory: frontend
-      run: npm test
+      run: npm run test:coverage
 
-    # Note: Frontend coverage disabled due to babel-plugin-istanbul Node.js compatibility issues
-    # - name: Upload frontend coverage to Codecov
-    #   uses: codecov/codecov-action@v5
-    #   with:
-    #     token: ${{ secrets.CODECOV_TOKEN }}
-    #     file: ./frontend/coverage/lcov.info
-    #     flags: frontend
-    #     name: frontend-coverage
+    - name: Extract frontend coverage percentage
+      id: frontend-coverage
+      working-directory: frontend
+      run: |
+        # Extract coverage from vitest coverage report
+        COVERAGE=$(npm run test:coverage 2>&1 | grep "All files" | awk '{print $3}' | sed 's/%//' || echo "0")
+        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
+        echo "Frontend Coverage: $COVERAGE%"
+
+        # Determine color based on coverage
+        if [ $(echo "$COVERAGE >= 90" | bc -l) -eq 1 ]; then
+          COLOR="brightgreen"
+        elif [ $(echo "$COVERAGE >= 80" | bc -l) -eq 1 ]; then
+          COLOR="green"
+        elif [ $(echo "$COVERAGE >= 70" | bc -l) -eq 1 ]; then
+          COLOR="yellowgreen"
+        elif [ $(echo "$COVERAGE >= 60" | bc -l) -eq 1 ]; then
+          COLOR="yellow"
+        elif [ $(echo "$COVERAGE >= 40" | bc -l) -eq 1 ]; then
+          COLOR="orange"
+        else
+          COLOR="red"
+        fi
+        echo "color=$COLOR" >> $GITHUB_OUTPUT
+        echo "Frontend Badge color: $COLOR"
+
+    - name: Upload frontend coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        directory: ./frontend/coverage
+        flags: frontend
+        name: frontend-coverage
 
   build:
     name: Build Check
