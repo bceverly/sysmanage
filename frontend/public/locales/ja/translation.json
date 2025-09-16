@@ -641,5 +641,56 @@
     "invalidTitle": "無効なリセットリンク",
     "invalidDescription": "このパスワードリセットリンクは無効または期限切れです。新しいパスワードリセットをリクエストしてください。",
     "validatingToken": "リセットトークンを検証中..."
+  },
+  "ubuntuPro": {
+    "title": "Ubuntu Pro",
+    "description": "Ubuntu Proサブスクリプション管理とバルク登録用マスターキーを設定します。",
+    "settings": {
+      "title": "Ubuntu Pro設定",
+      "description": "ホストのバルク登録用Ubuntu Proマスターキーを設定します。このキーは登録ダイアログで自動入力されます。"
+    },
+    "status": {
+      "keyConfigured": "マスターキーが設定されました",
+      "autoAttachEnabled": "自動アタッチが有効"
+    },
+    "fields": {
+      "organizationName": "組織名",
+      "organizationNameHelp": "Ubuntu Pro登録用のオプション組織名",
+      "masterKey": "Ubuntu Proマスターキー",
+      "masterKeyHelp": "「C」で始まるコントラクトベースのUbuntu Proキー。削除するには空にしてください。",
+      "autoAttachEnabled": "自動アタッチが有効",
+      "autoAttachEnabledHelp": "マスターキーを使用して新しいUbuntuホストを自動的にProにアタッチ"
+    },
+    "actions": {
+      "clearKey": "キーをクリア"
+    },
+    "messages": {
+      "saveSuccess": "Ubuntu Pro設定が正常に保存されました",
+      "keyCleared": "マスターキーが正常にクリアされました"
+    },
+    "errors": {
+      "loadFailed": "Ubuntu Pro設定の読み込みに失敗しました",
+      "saveFailed": "Ubuntu Pro設定の保存に失敗しました",
+      "clearFailed": "マスターキーのクリアに失敗しました",
+      "enrollmentFailed": "登録に失敗しました"
+    },
+    "validation": {
+      "invalidKey": "Ubuntu Proキーは「C」で始まり、少なくとも24文字である必要があります"
+    },
+    "enrollment": {
+      "title": "Ubuntu Pro登録",
+      "selectedHosts": "選択されたホスト",
+      "andMore": "その他 {{count}} 件...",
+      "keySource": "登録キーソース",
+      "useMasterKey": "設定されたマスターキーを使用",
+      "organization": "組織: {{name}}",
+      "noMasterKey": "マスターキーが設定されていません。以下にカスタムUbuntu Proキーを入力してください。",
+      "customKey": "Ubuntu Proキー",
+      "customKeyHelp": "「C」で始まるコントラクトベースのUbuntu Proキー",
+      "results": "登録結果",
+      "resultsNote": "登録プロセスの詳細については、ホストの詳細またはエージェントログを確認してください。",
+      "enrolling": "登録中...",
+      "enroll": "ホストを登録"
+    }
   }
 }

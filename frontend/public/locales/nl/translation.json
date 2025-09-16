@@ -639,5 +639,56 @@
     "invalidTitle": "Ongeldige resetlink",
     "invalidDescription": "Deze wachtwoord resetlink is ongeldig of verlopen. Vraag een nieuwe wachtwoord reset aan.",
     "validatingToken": "Reset token valideren..."
+  },
+  "ubuntuPro": {
+    "title": "Ubuntu Pro",
+    "description": "Configureer Ubuntu Pro abonnementsbeheer en hoofdsleutels voor bulk inschrijving.",
+    "settings": {
+      "title": "Ubuntu Pro Instellingen",
+      "description": "Configureer een Ubuntu Pro hoofdsleutel voor bulk inschrijving van hosts. Deze sleutel wordt vooraf ingevuld in inschrijvingsdialogen."
+    },
+    "status": {
+      "keyConfigured": "Hoofdsleutel geconfigureerd",
+      "autoAttachEnabled": "Automatisch koppelen ingeschakeld"
+    },
+    "fields": {
+      "organizationName": "Organisatienaam",
+      "organizationNameHelp": "Optionele organisatienaam voor Ubuntu Pro inschrijving",
+      "masterKey": "Ubuntu Pro Hoofdsleutel",
+      "masterKeyHelp": "Contract-gebaseerde Ubuntu Pro sleutel beginnend met \"C\". Laat leeg om te verwijderen.",
+      "autoAttachEnabled": "Automatisch koppelen ingeschakeld",
+      "autoAttachEnabledHelp": "Nieuwe Ubuntu hosts automatisch koppelen aan Pro met de hoofdsleutel"
+    },
+    "actions": {
+      "clearKey": "Sleutel wissen"
+    },
+    "messages": {
+      "saveSuccess": "Ubuntu Pro instellingen succesvol opgeslagen",
+      "keyCleared": "Hoofdsleutel succesvol gewist"
+    },
+    "errors": {
+      "loadFailed": "Laden van Ubuntu Pro instellingen mislukt",
+      "saveFailed": "Opslaan van Ubuntu Pro instellingen mislukt",
+      "clearFailed": "Wissen van hoofdsleutel mislukt",
+      "enrollmentFailed": "Inschrijving mislukt"
+    },
+    "validation": {
+      "invalidKey": "Ubuntu Pro sleutel moet beginnen met \"C\" en minstens 24 tekens lang zijn"
+    },
+    "enrollment": {
+      "title": "Ubuntu Pro Inschrijving",
+      "selectedHosts": "Geselecteerde hosts",
+      "andMore": "En {{count}} meer...",
+      "keySource": "Inschrijvingssleutel bron",
+      "useMasterKey": "Geconfigureerde hoofdsleutel gebruiken",
+      "organization": "Organisatie: {{name}}",
+      "noMasterKey": "Geen hoofdsleutel is geconfigureerd. Voer hieronder een aangepaste Ubuntu Pro sleutel in.",
+      "customKey": "Ubuntu Pro Sleutel",
+      "customKeyHelp": "Contract-gebaseerde Ubuntu Pro sleutel beginnend met \"C\"",
+      "results": "Inschrijvingsresultaten",
+      "resultsNote": "Controleer de host details of agent logs voor meer informatie over het inschrijvingsproces.",
+      "enrolling": "Inschrijven...",
+      "enroll": "Hosts inschrijven"
+    }
   }
 }

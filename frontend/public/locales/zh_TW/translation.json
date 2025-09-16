@@ -637,5 +637,56 @@
     "invalidTitle": "無效的重設連結",
     "invalidDescription": "此密碼重設連結無效或已過期。請請求新的密碼重設。",
     "validatingToken": "正在驗證重設權杖..."
+  },
+  "ubuntuPro": {
+    "title": "Ubuntu Pro",
+    "description": "設定Ubuntu Pro訂閱管理和用於批量註冊的主密鑰。",
+    "settings": {
+      "title": "Ubuntu Pro設定",
+      "description": "設定用於主機批量註冊的Ubuntu Pro主密鑰。此密鑰將在註冊對話框中預填入。"
+    },
+    "status": {
+      "keyConfigured": "主密鑰已設定",
+      "autoAttachEnabled": "自動附加已啟用"
+    },
+    "fields": {
+      "organizationName": "組織名稱",
+      "organizationNameHelp": "Ubuntu Pro註冊的可選組織名稱",
+      "masterKey": "Ubuntu Pro主密鑰",
+      "masterKeyHelp": "以\"C\"開頭的基於合約的Ubuntu Pro密鑰。留空以刪除。",
+      "autoAttachEnabled": "自動附加已啟用",
+      "autoAttachEnabledHelp": "使用主密鑰自動將新的Ubuntu主機附加到Pro"
+    },
+    "actions": {
+      "clearKey": "清除密鑰"
+    },
+    "messages": {
+      "saveSuccess": "Ubuntu Pro設定儲存成功",
+      "keyCleared": "主密鑰清除成功"
+    },
+    "errors": {
+      "loadFailed": "載入Ubuntu Pro設定失敗",
+      "saveFailed": "儲存Ubuntu Pro設定失敗",
+      "clearFailed": "清除主密鑰失敗",
+      "enrollmentFailed": "註冊失敗"
+    },
+    "validation": {
+      "invalidKey": "Ubuntu Pro密鑰必須以\"C\"開頭且至少24個字符長"
+    },
+    "enrollment": {
+      "title": "Ubuntu Pro註冊",
+      "selectedHosts": "選定的主機",
+      "andMore": "以及另外{{count}}個...",
+      "keySource": "註冊密鑰來源",
+      "useMasterKey": "使用設定的主密鑰",
+      "organization": "組織：{{name}}",
+      "noMasterKey": "未設定主密鑰。請在下方輸入自定義Ubuntu Pro密鑰。",
+      "customKey": "Ubuntu Pro密鑰",
+      "customKeyHelp": "以\"C\"開頭的基於合約的Ubuntu Pro密鑰",
+      "results": "註冊結果",
+      "resultsNote": "請檢查主機詳細資訊或代理程式記錄以獲取有關註冊程序的更多資訊。",
+      "enrolling": "正在註冊...",
+      "enroll": "註冊主機"
+    }
   }
 }

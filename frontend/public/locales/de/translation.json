@@ -641,5 +641,56 @@
     "invalidTitle": "Ungültiger Zurücksetzungslink",
     "invalidDescription": "Dieser Passwort-Zurücksetzungslink ist entweder ungültig oder abgelaufen. Bitte fordern Sie eine neue Passwort-Zurücksetzung an.",
     "validatingToken": "Token wird validiert..."
+  },
+  "ubuntuPro": {
+    "title": "Ubuntu Pro",
+    "description": "Konfigurieren Sie Ubuntu Pro-Abonnementverwaltung und Hauptschlüssel für Massenregistrierung.",
+    "settings": {
+      "title": "Ubuntu Pro-Einstellungen",
+      "description": "Konfigurieren Sie einen Ubuntu Pro-Hauptschlüssel für die Massenregistrierung von Hosts. Dieser Schlüssel wird in Registrierungsdialogen vorausgefüllt."
+    },
+    "status": {
+      "keyConfigured": "Hauptschlüssel konfiguriert",
+      "autoAttachEnabled": "Auto-Attach aktiviert"
+    },
+    "fields": {
+      "organizationName": "Organisationsname",
+      "organizationNameHelp": "Optionaler Organisationsname für Ubuntu Pro-Registrierung",
+      "masterKey": "Ubuntu Pro-Hauptschlüssel",
+      "masterKeyHelp": "Vertragsbasierter Ubuntu Pro-Schlüssel, der mit \"C\" beginnt. Leer lassen zum Entfernen.",
+      "autoAttachEnabled": "Auto-Attach aktiviert",
+      "autoAttachEnabledHelp": "Neue Ubuntu-Hosts automatisch mit Pro unter Verwendung des Hauptschlüssels verbinden"
+    },
+    "actions": {
+      "clearKey": "Schlüssel löschen"
+    },
+    "messages": {
+      "saveSuccess": "Ubuntu Pro-Einstellungen erfolgreich gespeichert",
+      "keyCleared": "Hauptschlüssel erfolgreich gelöscht"
+    },
+    "errors": {
+      "loadFailed": "Fehler beim Laden der Ubuntu Pro-Einstellungen",
+      "saveFailed": "Fehler beim Speichern der Ubuntu Pro-Einstellungen",
+      "clearFailed": "Fehler beim Löschen des Hauptschlüssels",
+      "enrollmentFailed": "Registrierung fehlgeschlagen"
+    },
+    "validation": {
+      "invalidKey": "Ubuntu Pro-Schlüssel muss mit \"C\" beginnen und mindestens 24 Zeichen lang sein"
+    },
+    "enrollment": {
+      "title": "Ubuntu Pro-Registrierung",
+      "selectedHosts": "Ausgewählte Hosts",
+      "andMore": "Und {{count}} weitere...",
+      "keySource": "Registrierungsschlüssel-Quelle",
+      "useMasterKey": "Konfigurierten Hauptschlüssel verwenden",
+      "organization": "Organisation: {{name}}",
+      "noMasterKey": "Kein Hauptschlüssel ist konfiguriert. Bitte geben Sie unten einen benutzerdefinierten Ubuntu Pro-Schlüssel ein.",
+      "customKey": "Ubuntu Pro-Schlüssel",
+      "customKeyHelp": "Vertragsbasierter Ubuntu Pro-Schlüssel, der mit \"C\" beginnt",
+      "results": "Registrierungsergebnisse",
+      "resultsNote": "Bitte überprüfen Sie die Host-Details oder Agent-Logs für weitere Informationen über den Registrierungsprozess.",
+      "enrolling": "Registrierung läuft...",
+      "enroll": "Hosts registrieren"
+    }
   }
 }

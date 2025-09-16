@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import SearchBox from '../Components/SearchBox';
 import EmailConfigCard from '../Components/EmailConfigCard';
+import UbuntuProSettings from '../Components/UbuntuProSettings';
 import axiosInstance from '../Services/api';
 
 interface Tag {
@@ -443,12 +444,26 @@ const Settings: React.FC = () => {
       <Typography variant="h5" sx={{ mb: 2 }}>
         {t('integrations.title', 'Integrations')}
       </Typography>
-      
+
       <Typography variant="body1" sx={{ mb: 3 }}>
         {t('integrations.description', 'Configure external service integrations and settings.')}
       </Typography>
 
       <EmailConfigCard />
+    </Box>
+  );
+
+  const renderUbuntuProTab = () => (
+    <Box>
+      <Typography variant="h5" sx={{ mb: 2 }}>
+        {t('ubuntuPro.title', 'Ubuntu Pro')}
+      </Typography>
+
+      <Typography variant="body1" sx={{ mb: 3 }}>
+        {t('ubuntuPro.description', 'Configure Ubuntu Pro subscription management and master keys for bulk enrollment.')}
+      </Typography>
+
+      <UbuntuProSettings />
     </Box>
   );
 
@@ -464,6 +479,7 @@ const Settings: React.FC = () => {
           <Tab label={t('tags.title', 'Tags')} />
           <Tab label={t('queues.title', 'Queues')} />
           <Tab label={t('integrations.title', 'Integrations')} />
+          <Tab label={t('ubuntuPro.title', 'Ubuntu Pro')} />
         </Tabs>
       </Box>
 
@@ -472,6 +488,7 @@ const Settings: React.FC = () => {
         {activeTab === 0 && renderTagsTab()}
         {activeTab === 1 && renderQueuesTab()}
         {activeTab === 2 && renderIntegrationsTab()}
+        {activeTab === 3 && renderUbuntuProTab()}
       </Box>
 
       {/* Add Tag Dialog */}

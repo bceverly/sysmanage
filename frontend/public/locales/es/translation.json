@@ -649,5 +649,56 @@
     "invalidTitle": "Enlace de restablecimiento inválido",
     "invalidDescription": "Este enlace de restablecimiento de contraseña es inválido o ha expirado. Por favor solicite un nuevo restablecimiento de contraseña.",
     "validatingToken": "Validando token de restablecimiento..."
+  },
+  "ubuntuPro": {
+    "title": "Ubuntu Pro",
+    "description": "Configurar la gestión de suscripciones de Ubuntu Pro y claves maestras para inscripción masiva.",
+    "settings": {
+      "title": "Configuración de Ubuntu Pro",
+      "description": "Configurar una clave maestra de Ubuntu Pro para inscripción masiva de hosts. Esta clave se completará automáticamente en los diálogos de inscripción."
+    },
+    "status": {
+      "keyConfigured": "Clave maestra configurada",
+      "autoAttachEnabled": "Conexión automática habilitada"
+    },
+    "fields": {
+      "organizationName": "Nombre de la Organización",
+      "organizationNameHelp": "Nombre opcional de la organización para inscripción en Ubuntu Pro",
+      "masterKey": "Clave Maestra de Ubuntu Pro",
+      "masterKeyHelp": "Clave de Ubuntu Pro basada en contrato que comience con \"C\". Dejar vacío para eliminar.",
+      "autoAttachEnabled": "Conexión Automática Habilitada",
+      "autoAttachEnabledHelp": "Conectar automáticamente nuevos hosts de Ubuntu a Pro usando la clave maestra"
+    },
+    "actions": {
+      "clearKey": "Limpiar Clave"
+    },
+    "messages": {
+      "saveSuccess": "Configuración de Ubuntu Pro guardada exitosamente",
+      "keyCleared": "Clave maestra limpiada exitosamente"
+    },
+    "errors": {
+      "loadFailed": "Error al cargar la configuración de Ubuntu Pro",
+      "saveFailed": "Error al guardar la configuración de Ubuntu Pro",
+      "clearFailed": "Error al limpiar la clave maestra",
+      "enrollmentFailed": "La inscripción falló"
+    },
+    "validation": {
+      "invalidKey": "La clave de Ubuntu Pro debe comenzar con \"C\" y tener al menos 24 caracteres"
+    },
+    "enrollment": {
+      "title": "Inscripción en Ubuntu Pro",
+      "selectedHosts": "Hosts Seleccionados",
+      "andMore": "Y {{count}} más...",
+      "keySource": "Fuente de Clave de Inscripción",
+      "useMasterKey": "Usar clave maestra configurada",
+      "organization": "Organización: {{name}}",
+      "noMasterKey": "No hay clave maestra configurada. Por favor ingrese una clave personalizada de Ubuntu Pro abajo.",
+      "customKey": "Clave de Ubuntu Pro",
+      "customKeyHelp": "Clave de Ubuntu Pro basada en contrato que comience con \"C\"",
+      "results": "Resultados de Inscripción",
+      "resultsNote": "Por favor revise los detalles del host o los registros del agente para más información sobre el proceso de inscripción.",
+      "enrolling": "Inscribiendo...",
+      "enroll": "Inscribir Hosts"
+    }
   }
 }

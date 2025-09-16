@@ -636,5 +636,56 @@
     "invalidTitle": "अमान्य रीसेट लिंक",
     "invalidDescription": "यह पासवर्ड रीसेट लिंक अमान्य है या समाप्त हो गया है। कृपया नया पासवर्ड रीसेट का अनुरोध करें।",
     "validatingToken": "रीसेट टोकन सत्यापित कर रहे हैं..."
+  },
+  "ubuntuPro": {
+    "title": "Ubuntu Pro",
+    "description": "Ubuntu Pro सब्सक्रिप्शन प्रबंधन और बल्क नामांकन के लिए मास्टर कीज़ कॉन्फ़िगर करें।",
+    "settings": {
+      "title": "Ubuntu Pro सेटिंग्स",
+      "description": "होस्ट्स के बल्क नामांकन के लिए एक Ubuntu Pro मास्टर की कॉन्फ़िगर करें। यह की नामांकन डायलॉग में पहले से भरी जाएगी।"
+    },
+    "status": {
+      "keyConfigured": "मास्टर की कॉन्फ़िगर की गई",
+      "autoAttachEnabled": "ऑटो-अटैच सक्षम"
+    },
+    "fields": {
+      "organizationName": "संगठन का नाम",
+      "organizationNameHelp": "Ubuntu Pro नामांकन के लिए वैकल्पिक संगठन नाम",
+      "masterKey": "Ubuntu Pro मास्टर की",
+      "masterKeyHelp": "\"C\" से शुरू होने वाली कॉन्ट्रैक्ट-आधारित Ubuntu Pro की। हटाने के लिए खाली छोड़ें।",
+      "autoAttachEnabled": "ऑटो-अटैच सक्षम",
+      "autoAttachEnabledHelp": "मास्टर की का उपयोग करके नए Ubuntu होस्ट्स को स्वचालित रूप से Pro से जोड़ें"
+    },
+    "actions": {
+      "clearKey": "की साफ़ करें"
+    },
+    "messages": {
+      "saveSuccess": "Ubuntu Pro सेटिंग्स सफलतापूर्वक सेव हो गईं",
+      "keyCleared": "मास्टर की सफलतापूर्वक साफ़ हो गई"
+    },
+    "errors": {
+      "loadFailed": "Ubuntu Pro सेटिंग्स लोड करने में विफल",
+      "saveFailed": "Ubuntu Pro सेटिंग्स सेव करने में विफल",
+      "clearFailed": "मास्टर की साफ़ करने में विफल",
+      "enrollmentFailed": "नामांकन विफल"
+    },
+    "validation": {
+      "invalidKey": "Ubuntu Pro की \"C\" से शुरू होनी चाहिए और कम से कम 24 वर्ण लंबी होनी चाहिए"
+    },
+    "enrollment": {
+      "title": "Ubuntu Pro नामांकन",
+      "selectedHosts": "चयनित होस्ट्स",
+      "andMore": "और {{count}} अधिक...",
+      "keySource": "नामांकन की स्रोत",
+      "useMasterKey": "कॉन्फ़िगर की गई मास्टर की का उपयोग करें",
+      "organization": "संगठन: {{name}}",
+      "noMasterKey": "कोई मास्टर की कॉन्फ़िगर नहीं है। कृपया नीचे एक कस्टम Ubuntu Pro की दर्ज करें।",
+      "customKey": "Ubuntu Pro की",
+      "customKeyHelp": "\"C\" से शुरू होने वाली कॉन्ट्रैक्ट-आधारित Ubuntu Pro की",
+      "results": "नामांकन परिणाम",
+      "resultsNote": "नामांकन प्रक्रिया के बारे में अधिक जानकारी के लिए कृपया होस्ट विवरण या एजेंट लॉग जांचें।",
+      "enrolling": "नामांकन हो रहा है...",
+      "enroll": "होस्ट्स नामांकित करें"
+    }
   }
 }

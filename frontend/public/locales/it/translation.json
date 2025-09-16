@@ -640,5 +640,56 @@
     "invalidTitle": "Link di reimpostazione non valido",
     "invalidDescription": "Questo link per la reimpostazione della password non è valido o è scaduto. Richiedi una nuova reimpostazione della password.",
     "validatingToken": "Convalida del token di reimpostazione..."
+  },
+  "ubuntuPro": {
+    "title": "Ubuntu Pro",
+    "description": "Configura la gestione degli abbonamenti Ubuntu Pro e le chiavi master per l'iscrizione in massa.",
+    "settings": {
+      "title": "Impostazioni Ubuntu Pro",
+      "description": "Configura una chiave master Ubuntu Pro per l'iscrizione in massa degli host. Questa chiave sarà precompilata nelle finestre di dialogo di iscrizione."
+    },
+    "status": {
+      "keyConfigured": "Chiave master configurata",
+      "autoAttachEnabled": "Collegamento automatico abilitato"
+    },
+    "fields": {
+      "organizationName": "Nome organizzazione",
+      "organizationNameHelp": "Nome organizzazione opzionale per l'iscrizione Ubuntu Pro",
+      "masterKey": "Chiave master Ubuntu Pro",
+      "masterKeyHelp": "Chiave Ubuntu Pro basata su contratto che inizia con \"C\". Lascia vuoto per rimuovere.",
+      "autoAttachEnabled": "Collegamento automatico abilitato",
+      "autoAttachEnabledHelp": "Collega automaticamente i nuovi host Ubuntu a Pro utilizzando la chiave master"
+    },
+    "actions": {
+      "clearKey": "Cancella chiave"
+    },
+    "messages": {
+      "saveSuccess": "Impostazioni Ubuntu Pro salvate con successo",
+      "keyCleared": "Chiave master cancellata con successo"
+    },
+    "errors": {
+      "loadFailed": "Caricamento delle impostazioni Ubuntu Pro fallito",
+      "saveFailed": "Salvataggio delle impostazioni Ubuntu Pro fallito",
+      "clearFailed": "Cancellazione della chiave master fallita",
+      "enrollmentFailed": "Iscrizione fallita"
+    },
+    "validation": {
+      "invalidKey": "La chiave Ubuntu Pro deve iniziare con \"C\" e essere lunga almeno 24 caratteri"
+    },
+    "enrollment": {
+      "title": "Iscrizione Ubuntu Pro",
+      "selectedHosts": "Host selezionati",
+      "andMore": "E {{count}} altri...",
+      "keySource": "Fonte della chiave di iscrizione",
+      "useMasterKey": "Usa la chiave master configurata",
+      "organization": "Organizzazione: {{name}}",
+      "noMasterKey": "Nessuna chiave master è configurata. Inserisci una chiave Ubuntu Pro personalizzata qui sotto.",
+      "customKey": "Chiave Ubuntu Pro",
+      "customKeyHelp": "Chiave Ubuntu Pro basata su contratto che inizia con \"C\"",
+      "results": "Risultati iscrizione",
+      "resultsNote": "Controlla i dettagli dell'host o i log dell'agente per maggiori informazioni sul processo di iscrizione.",
+      "enrolling": "Iscrizione in corso...",
+      "enroll": "Iscrivi host"
+    }
   }
 }

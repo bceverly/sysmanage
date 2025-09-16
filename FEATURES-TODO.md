@@ -124,16 +124,3 @@ like to add:
     string externalization /
     translation.
 
-14. Master Ubuntu Pro Key - Add a
-    settings sub-tab for Ubuntu Pro
-    where you can save a master key
-    that can be used to enroll a
-    remote host into pro using the
-    stored key.  Obviously we will
-    need to add an alembic database
-    migration script to modify the
-    schema.  For the existing
-    dialog for enrolling a remote
-    host into pro, if there is a
-    master key, pre-fill the dialog
-    entry field with it

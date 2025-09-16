@@ -639,5 +639,56 @@
     "invalidTitle": "无效的重置链接",
     "invalidDescription": "此密码重置链接无效或已过期。请请求新的密码重置。",
     "validatingToken": "正在验证重置令牌..."
+  },
+  "ubuntuPro": {
+    "title": "Ubuntu Pro",
+    "description": "配置Ubuntu Pro订阅管理和用于批量注册的主密钥。",
+    "settings": {
+      "title": "Ubuntu Pro设置",
+      "description": "配置用于主机批量注册的Ubuntu Pro主密钥。此密钥将在注册对话框中预填充。"
+    },
+    "status": {
+      "keyConfigured": "主密钥已配置",
+      "autoAttachEnabled": "自动附加已启用"
+    },
+    "fields": {
+      "organizationName": "组织名称",
+      "organizationNameHelp": "Ubuntu Pro注册的可选组织名称",
+      "masterKey": "Ubuntu Pro主密钥",
+      "masterKeyHelp": "以\"C\"开头的基于合约的Ubuntu Pro密钥。留空以删除。",
+      "autoAttachEnabled": "自动附加已启用",
+      "autoAttachEnabledHelp": "使用主密钥自动将新的Ubuntu主机附加到Pro"
+    },
+    "actions": {
+      "clearKey": "清除密钥"
+    },
+    "messages": {
+      "saveSuccess": "Ubuntu Pro设置保存成功",
+      "keyCleared": "主密钥清除成功"
+    },
+    "errors": {
+      "loadFailed": "加载Ubuntu Pro设置失败",
+      "saveFailed": "保存Ubuntu Pro设置失败",
+      "clearFailed": "清除主密钥失败",
+      "enrollmentFailed": "注册失败"
+    },
+    "validation": {
+      "invalidKey": "Ubuntu Pro密钥必须以\"C\"开头且至少24个字符长"
+    },
+    "enrollment": {
+      "title": "Ubuntu Pro注册",
+      "selectedHosts": "选定的主机",
+      "andMore": "以及另外{{count}}个...",
+      "keySource": "注册密钥来源",
+      "useMasterKey": "使用配置的主密钥",
+      "organization": "组织：{{name}}",
+      "noMasterKey": "未配置主密钥。请在下方输入自定义Ubuntu Pro密钥。",
+      "customKey": "Ubuntu Pro密钥",
+      "customKeyHelp": "以\"C\"开头的基于合约的Ubuntu Pro密钥",
+      "results": "注册结果",
+      "resultsNote": "请检查主机详细信息或代理日志以获取有关注册过程的更多信息。",
+      "enrolling": "正在注册...",
+      "enroll": "注册主机"
+    }
   }
 }

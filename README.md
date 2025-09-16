@@ -79,6 +79,7 @@ SysManage is a comprehensive system management solution that allows you to monit
 - ✅ **System Shutdown**: Remote system shutdown capability (privileged mode only)
 - ✅ **Update Management**: Detection and installation of system updates
 - ✅ **Special Updates**: Ubuntu Pro and fwupd support for specialized updates
+- ✅ **Ubuntu Pro Master Key Management**: Centralized Ubuntu Pro subscription key storage for bulk host enrollment
 
 #### 🏷️ Organization & Management
 - ✅ **Host Tagging System**: Flexible tagging system for host organization
@@ -945,6 +946,72 @@ SysManage automatically detects and warns about security configuration issues:
 - **Default Password Salt Detection**: Identifies default password salts
 - **Mixed Security States**: Warns about inconsistent security configurations
 - **Visual Security Banner**: Prominent warnings displayed in the UI until resolved
+
+### Ubuntu Pro Master Key Management
+
+SysManage includes comprehensive Ubuntu Pro subscription management with centralized master key storage for streamlined host enrollment:
+
+#### Features
+- **Centralized Key Storage**: Store Ubuntu Pro master keys securely in the database for reuse across multiple hosts
+- **Bulk Enrollment**: Enroll multiple hosts simultaneously using stored master keys or custom keys
+- **Organization Management**: Associate organization names with Ubuntu Pro subscriptions
+- **Auto-attach Configuration**: Enable automatic Ubuntu Pro attachment for new Ubuntu hosts
+- **Key Validation**: Comprehensive validation of Ubuntu Pro contract-based keys (C-prefix format)
+- **Secure Key Clearing**: Ability to safely clear stored master keys when needed
+
+#### Configuration Options
+Access Ubuntu Pro settings through **Settings** → **Ubuntu Pro** in the web interface:
+
+```yaml
+# Ubuntu Pro settings are stored in the database (not configuration files)
+# Accessible through the Settings → Ubuntu Pro tab
+- Master Key: Contract-based Ubuntu Pro key (starts with 'C', minimum 24 characters)
+- Organization Name: Optional organization identifier (max 255 characters)
+- Auto-attach Enabled: Automatically attach new Ubuntu hosts using the master key
+```
+
+#### Enrollment Workflow
+1. **Master Key Configuration**: Store your Ubuntu Pro master key in Settings → Ubuntu Pro
+2. **Host Selection**: Select one or more Ubuntu hosts from the Hosts page
+3. **Bulk Enrollment**: Use "Ubuntu Pro Enroll" action with either:
+   - **Master Key Mode**: Use the pre-configured master key (default)
+   - **Custom Key Mode**: Provide a specific key for this enrollment
+4. **Real-time Processing**: WebSocket-based communication provides instant enrollment status
+5. **Status Tracking**: Monitor enrollment results with detailed success/error reporting
+
+#### Security Features
+- **Encrypted Storage**: Master keys are securely stored in the database with proper encryption
+- **Access Control**: Only authenticated administrators can access Ubuntu Pro settings
+- **Key Validation**: Real-time validation ensures only valid contract-based keys are accepted
+- **Audit Logging**: All Ubuntu Pro operations are logged for security auditing
+- **Secure Transmission**: Keys are transmitted securely via encrypted WebSocket connections
+
+#### API Endpoints
+- **GET /api/ubuntu-pro/**: Retrieve current Ubuntu Pro settings
+- **PUT /api/ubuntu-pro/**: Update Ubuntu Pro configuration
+- **DELETE /api/ubuntu-pro/master-key**: Clear stored master key
+- **GET /api/ubuntu-pro/master-key/status**: Check if master key is configured
+- **POST /api/ubuntu-pro/enroll**: Enroll hosts in Ubuntu Pro service
+
+#### Database Schema
+The Ubuntu Pro feature includes a dedicated database table:
+```sql
+CREATE TABLE ubuntu_pro_settings (
+    id INTEGER PRIMARY KEY,
+    master_key TEXT,                    -- Encrypted Ubuntu Pro master key
+    organization_name VARCHAR(255),     -- Optional organization name
+    auto_attach_enabled BOOLEAN,        -- Auto-attach new hosts flag
+    created_at TIMESTAMP,               -- Record creation time
+    updated_at TIMESTAMP                -- Last modification time
+);
+```
+
+#### Multi-language Support
+The Ubuntu Pro interface is fully internationalized with translations available in all 14 supported languages, including:
+- Form field labels and help text
+- Validation error messages
+- Success/failure notifications
+- Status indicators and action buttons
 
 ## Project Structure
 

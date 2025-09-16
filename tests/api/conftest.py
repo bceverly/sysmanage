@@ -204,6 +204,16 @@ def test_db():
         correlation_id = Column(String(36), nullable=True, index=True)
         reply_to = Column(String(36), nullable=True, index=True)
 
+    # Create test version of UbuntuProSettings model for SQLite compatibility
+    class UbuntuProSettings(TestBase):
+        __tablename__ = "ubuntu_pro_settings"
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        master_key = Column(Text, nullable=True)
+        organization_name = Column(String(255), nullable=True)
+        auto_attach_enabled = Column(Boolean, nullable=False, default=False)
+        created_at = Column(DateTime, nullable=False)
+        updated_at = Column(DateTime, nullable=False)
+
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)
 
@@ -214,12 +224,14 @@ def test_db():
     original_host_tag = models.HostTag
     original_password_reset_token = models.PasswordResetToken
     original_message_queue = models.MessageQueue
+    original_ubuntu_pro_settings = models.UbuntuProSettings
     models.Host = Host
     models.User = User
     models.Tag = Tag
     models.HostTag = HostTag
     models.PasswordResetToken = PasswordResetToken
     models.MessageQueue = MessageQueue
+    models.UbuntuProSettings = UbuntuProSettings
 
     # Override the get_engine dependency
     def override_get_engine():
@@ -255,6 +267,7 @@ def test_db():
     models.HostTag = original_host_tag
     models.PasswordResetToken = original_password_reset_token
     models.MessageQueue = original_message_queue
+    models.UbuntuProSettings = original_ubuntu_pro_settings
 
     # Clean up database connections
     test_engine.dispose()  # Close all connections in the connection pool

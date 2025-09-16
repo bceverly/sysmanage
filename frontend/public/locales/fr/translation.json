@@ -639,5 +639,56 @@
     "invalidTitle": "Lien de réinitialisation invalide",
     "invalidDescription": "Ce lien de réinitialisation de mot de passe est soit invalide soit expiré. Veuillez demander une nouvelle réinitialisation de mot de passe.",
     "validatingToken": "Validation du jeton de réinitialisation..."
+  },
+  "ubuntuPro": {
+    "title": "Ubuntu Pro",
+    "description": "Configurez la gestion des abonnements Ubuntu Pro et les clés maîtresses pour l'inscription en masse.",
+    "settings": {
+      "title": "Paramètres Ubuntu Pro",
+      "description": "Configurez une clé maîtresse Ubuntu Pro pour l'inscription en masse des hôtes. Cette clé sera pré-remplie dans les dialogues d'inscription."
+    },
+    "status": {
+      "keyConfigured": "Clé maîtresse configurée",
+      "autoAttachEnabled": "Attachement automatique activé"
+    },
+    "fields": {
+      "organizationName": "Nom de l'organisation",
+      "organizationNameHelp": "Nom d'organisation optionnel pour l'inscription Ubuntu Pro",
+      "masterKey": "Clé maîtresse Ubuntu Pro",
+      "masterKeyHelp": "Clé Ubuntu Pro basée sur contrat commençant par \"C\". Laissez vide pour supprimer.",
+      "autoAttachEnabled": "Attachement automatique activé",
+      "autoAttachEnabledHelp": "Attacher automatiquement les nouveaux hôtes Ubuntu à Pro en utilisant la clé maîtresse"
+    },
+    "actions": {
+      "clearKey": "Effacer la clé"
+    },
+    "messages": {
+      "saveSuccess": "Paramètres Ubuntu Pro sauvegardés avec succès",
+      "keyCleared": "Clé maîtresse effacée avec succès"
+    },
+    "errors": {
+      "loadFailed": "Échec du chargement des paramètres Ubuntu Pro",
+      "saveFailed": "Échec de la sauvegarde des paramètres Ubuntu Pro",
+      "clearFailed": "Échec de l'effacement de la clé maîtresse",
+      "enrollmentFailed": "L'inscription a échoué"
+    },
+    "validation": {
+      "invalidKey": "La clé Ubuntu Pro doit commencer par \"C\" et avoir au moins 24 caractères"
+    },
+    "enrollment": {
+      "title": "Inscription Ubuntu Pro",
+      "selectedHosts": "Hôtes sélectionnés",
+      "andMore": "Et {{count}} de plus...",
+      "keySource": "Source de la clé d'inscription",
+      "useMasterKey": "Utiliser la clé maîtresse configurée",
+      "organization": "Organisation : {{name}}",
+      "noMasterKey": "Aucune clé maîtresse n'est configurée. Veuillez saisir une clé Ubuntu Pro personnalisée ci-dessous.",
+      "customKey": "Clé Ubuntu Pro",
+      "customKeyHelp": "Clé Ubuntu Pro basée sur contrat commençant par \"C\"",
+      "results": "Résultats de l'inscription",
+      "resultsNote": "Veuillez vérifier les détails de l'hôte ou les journaux de l'agent pour plus d'informations sur le processus d'inscription.",
+      "enrolling": "Inscription en cours...",
+      "enroll": "Inscrire les hôtes"
+    }
   }
 }

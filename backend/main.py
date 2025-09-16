@@ -33,6 +33,7 @@ from backend.api import (
     scripts,
     security,
     tag,
+    ubuntu_pro_settings,
     updates,
     user,
 )
@@ -607,6 +608,12 @@ startup_logger.info("Tag router added")
 startup_logger.info("Adding queue router with /api/queue prefix")
 app.include_router(queue.router, prefix="/api/queue", tags=["queue"])
 startup_logger.info("Queue router added")
+
+startup_logger.info("Adding Ubuntu Pro settings router with /api/ubuntu-pro prefix")
+app.include_router(
+    ubuntu_pro_settings.router, prefix="/api/ubuntu-pro", tags=["ubuntu-pro"]
+)
+startup_logger.info("Ubuntu Pro settings router added")
 
 startup_logger.info("Adding certificates auth router with /api prefix")
 app.include_router(

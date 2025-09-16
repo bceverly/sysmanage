@@ -831,3 +831,32 @@ class UbuntuProService(Base):
             f"<UbuntuProService(id={self.id}, name='{self.name}', "
             f"status='{self.status}', available={self.available})>"
         )
+
+
+class UbuntuProSettings(Base):
+    """
+    This class holds the object mapping for the ubuntu_pro_settings table in the
+    PostgreSQL database. Stores global Ubuntu Pro configuration like master keys.
+    """
+
+    __tablename__ = "ubuntu_pro_settings"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Master Ubuntu Pro key for bulk enrollment
+    master_key = Column(Text, nullable=True)
+
+    # Optional settings
+    organization_name = Column(String(255), nullable=True)
+    auto_attach_enabled = Column(Boolean, nullable=False, default=False)
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    def __repr__(self):
+        return (
+            f"<UbuntuProSettings(id={self.id}, "
+            f"has_master_key={self.master_key is not None}, "
+            f"organization_name='{self.organization_name}')>"
+        )

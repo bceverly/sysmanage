@@ -642,5 +642,56 @@
     "invalidTitle": "رابط إعادة تعيين غير صالح",
     "invalidDescription": "رابط إعادة تعيين كلمة المرور هذا إما غير صالح أو منتهي الصلاحية. الرجاء طلب إعادة تعيين كلمة مرور جديدة.",
     "validatingToken": "جاري التحقق من رمز إعادة التعيين..."
+  },
+  "ubuntuPro": {
+    "title": "Ubuntu Pro",
+    "description": "تكوين إدارة اشتراكات Ubuntu Pro والمفاتيح الرئيسية للتسجيل المجمع.",
+    "settings": {
+      "title": "إعدادات Ubuntu Pro",
+      "description": "تكوين مفتاح Ubuntu Pro الرئيسي للتسجيل المجمع للمضيفات. سيتم ملء هذا المفتاح مسبقاً في حوارات التسجيل."
+    },
+    "status": {
+      "keyConfigured": "تم تكوين المفتاح الرئيسي",
+      "autoAttachEnabled": "تم تفعيل الربط التلقائي"
+    },
+    "fields": {
+      "organizationName": "اسم المؤسسة",
+      "organizationNameHelp": "اسم المؤسسة الاختياري لتسجيل Ubuntu Pro",
+      "masterKey": "المفتاح الرئيسي لـ Ubuntu Pro",
+      "masterKeyHelp": "مفتاح Ubuntu Pro القائم على العقد والذي يبدأ بـ \"C\". اتركه فارغاً للحذف.",
+      "autoAttachEnabled": "تم تفعيل الربط التلقائي",
+      "autoAttachEnabledHelp": "ربط مضيفات Ubuntu الجديدة تلقائياً بـ Pro باستخدام المفتاح الرئيسي"
+    },
+    "actions": {
+      "clearKey": "مسح المفتاح"
+    },
+    "messages": {
+      "saveSuccess": "تم حفظ إعدادات Ubuntu Pro بنجاح",
+      "keyCleared": "تم مسح المفتاح الرئيسي بنجاح"
+    },
+    "errors": {
+      "loadFailed": "فشل في تحميل إعدادات Ubuntu Pro",
+      "saveFailed": "فشل في حفظ إعدادات Ubuntu Pro",
+      "clearFailed": "فشل في مسح المفتاح الرئيسي",
+      "enrollmentFailed": "فشل التسجيل"
+    },
+    "validation": {
+      "invalidKey": "يجب أن يبدأ مفتاح Ubuntu Pro بـ \"C\" ويكون 24 حرفاً على الأقل"
+    },
+    "enrollment": {
+      "title": "تسجيل Ubuntu Pro",
+      "selectedHosts": "المضيفات المحددة",
+      "andMore": "و {{count}} أكثر...",
+      "keySource": "مصدر مفتاح التسجيل",
+      "useMasterKey": "استخدام المفتاح الرئيسي المكون",
+      "organization": "المؤسسة: {{name}}",
+      "noMasterKey": "لم يتم تكوين مفتاح رئيسي. الرجاء إدخال مفتاح Ubuntu Pro مخصص أدناه.",
+      "customKey": "مفتاح Ubuntu Pro",
+      "customKeyHelp": "مفتاح Ubuntu Pro القائم على العقد والذي يبدأ بـ \"C\"",
+      "results": "نتائج التسجيل",
+      "resultsNote": "الرجاء مراجعة تفاصيل المضيف أو سجلات الوكيل للحصول على مزيد من المعلومات حول عملية التسجيل.",
+      "enrolling": "جاري التسجيل...",
+      "enroll": "تسجيل المضيفات"
+    }
   }
 }

@@ -685,5 +685,56 @@
     "confirmResetTitle": "Confirm Password Reset",
     "confirmResetMessage": "Are you sure you want to send a password reset email to {{email}}? This will allow the user to set a new password.",
     "sendResetEmail": "Send Reset Email"
+  },
+  "ubuntuPro": {
+    "title": "Ubuntu Pro",
+    "description": "Configure Ubuntu Pro subscription management and master keys for bulk enrollment.",
+    "settings": {
+      "title": "Ubuntu Pro Settings",
+      "description": "Configure a master Ubuntu Pro key for bulk enrollment of hosts. This key will be pre-filled in enrollment dialogs."
+    },
+    "status": {
+      "keyConfigured": "Master key configured",
+      "autoAttachEnabled": "Auto-attach enabled"
+    },
+    "fields": {
+      "organizationName": "Organization Name",
+      "organizationNameHelp": "Optional organization name for Ubuntu Pro enrollment",
+      "masterKey": "Ubuntu Pro Master Key",
+      "masterKeyHelp": "Contract-based Ubuntu Pro key starting with \"C\". Leave empty to remove.",
+      "autoAttachEnabled": "Auto-attach Enabled",
+      "autoAttachEnabledHelp": "Automatically attach new Ubuntu hosts to Pro using the master key"
+    },
+    "actions": {
+      "clearKey": "Clear Key"
+    },
+    "messages": {
+      "saveSuccess": "Ubuntu Pro settings saved successfully",
+      "keyCleared": "Master key cleared successfully"
+    },
+    "errors": {
+      "loadFailed": "Failed to load Ubuntu Pro settings",
+      "saveFailed": "Failed to save Ubuntu Pro settings",
+      "clearFailed": "Failed to clear master key",
+      "enrollmentFailed": "Enrollment failed"
+    },
+    "validation": {
+      "invalidKey": "Ubuntu Pro key must start with \"C\" and be at least 24 characters long"
+    },
+    "enrollment": {
+      "title": "Ubuntu Pro Enrollment",
+      "selectedHosts": "Selected Hosts",
+      "andMore": "And {{count}} more...",
+      "keySource": "Enrollment Key Source",
+      "useMasterKey": "Use configured master key",
+      "organization": "Organization: {{name}}",
+      "noMasterKey": "No master key is configured. Please enter a custom Ubuntu Pro key below.",
+      "customKey": "Ubuntu Pro Key",
+      "customKeyHelp": "Contract-based Ubuntu Pro key starting with \"C\"",
+      "results": "Enrollment Results",
+      "resultsNote": "Please check the host details or agent logs for more information about the enrollment process.",
+      "enrolling": "Enrolling...",
+      "enroll": "Enroll Hosts"
+    }
   }
 }
