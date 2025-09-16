@@ -28,7 +28,7 @@ We take security seriously. If you discover a security vulnerability, please fol
 
 ### 📋 For Non-Security Issues
 
-For general bugs and feature requests, please use [GitHub Issues](https://github.com/YOUR_USERNAME/sysmanage/issues).
+For general bugs and feature requests, please use [GitHub Issues](https://github.com/bceverly/sysmanage/issues).
 
 ## Security Measures
 
@@ -97,4 +97,4 @@ Currently, we do not offer a formal bug bounty program. However, we greatly appr
 
 - **Security Team**: security@sysmanage.org
 - **General Contact**: contact@sysmanage.org
-- **GitHub Issues**: https://github.com/YOUR_USERNAME/sysmanage/issues
+- **GitHub Issues**: https://github.com/bceverly/sysmanage/issues
