@@ -241,11 +241,11 @@ jobs:
         # Extract coverage from JSON report (more reliable than parsing text output)
         if [ -f "coverage/coverage-summary.json" ]; then
           COVERAGE=$(python3 -c "
-          import json
-          with open('coverage/coverage-summary.json') as f:
-              data = json.load(f)
-              print(int(data['total']['lines']['pct']))
-          ")
+import json
+with open('coverage/coverage-summary.json') as f:
+    data = json.load(f)
+    print(int(data['total']['lines']['pct']))
+")
         else
           echo "No coverage report found, using 0"
           COVERAGE=0
