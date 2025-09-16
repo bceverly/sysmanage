@@ -238,21 +238,32 @@ jobs:
       id: frontend-coverage
       working-directory: frontend
       run: |
-        # Extract coverage from vitest coverage report (% Stmts is in column 2)
-        COVERAGE=$(npm run test:coverage 2>&1 | grep "All files" | awk '{print $2}' | sed 's/%//' || echo "0")
+        # Extract coverage from JSON report (more reliable than parsing text output)
+        if [ -f "coverage/coverage-summary.json" ]; then
+          COVERAGE=$(python3 -c "
+          import json
+          with open('coverage/coverage-summary.json') as f:
+              data = json.load(f)
+              print(int(data['total']['lines']['pct']))
+          ")
+        else
+          echo "No coverage report found, using 0"
+          COVERAGE=0
+        fi
+
         echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
         echo "Frontend Coverage: $COVERAGE%"
 
         # Determine color based on coverage
-        if [ $(echo "$COVERAGE >= 90" | bc -l) -eq 1 ]; then
+        if [ $COVERAGE -ge 90 ]; then
           COLOR="brightgreen"
-        elif [ $(echo "$COVERAGE >= 80" | bc -l) -eq 1 ]; then
+        elif [ $COVERAGE -ge 80 ]; then
           COLOR="green"
-        elif [ $(echo "$COVERAGE >= 70" | bc -l) -eq 1 ]; then
+        elif [ $COVERAGE -ge 70 ]; then
           COLOR="yellowgreen"
-        elif [ $(echo "$COVERAGE >= 60" | bc -l) -eq 1 ]; then
+        elif [ $COVERAGE -ge 60 ]; then
           COLOR="yellow"
-        elif [ $(echo "$COVERAGE >= 40" | bc -l) -eq 1 ]; then
+        elif [ $COVERAGE -ge 40 ]; then
           COLOR="orange"
         else
           COLOR="red"
@@ -260,20 +271,36 @@ jobs:
         echo "color=$COLOR" >> $GITHUB_OUTPUT
         echo "Frontend Badge color: $COLOR"
 
-    - name: Save frontend coverage data
+    - name: Checkout repository for frontend badge update
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: actions/checkout@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Update frontend coverage badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
-        echo '${{ steps.frontend-coverage.outputs.percentage }}' > frontend-coverage.txt
-        echo '${{ steps.frontend-coverage.outputs.color }}' > frontend-color.txt
+        # Update frontend coverage badge
+        sed -i "s/frontend%20test%20coverage-[0-9]*%25-[a-z]*/frontend%20test%20coverage-${{ steps.frontend-coverage.outputs.percentage }}%25-${{ steps.frontend-coverage.outputs.color }}/g" README.md
+        # Also fix the broken badge if it exists
+        sed -i "s/frontend%20test%20coverage-%25-\.svg/frontend%20test%20coverage-${{ steps.frontend-coverage.outputs.percentage }}%25-${{ steps.frontend-coverage.outputs.color }}.svg/g" README.md
 
-    - name: Upload frontend coverage data
+    - name: Create PR for frontend coverage badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      uses: actions/upload-artifact@v4
+      uses: peter-evans/create-pull-request@v5
       with:
-        name: frontend-coverage-data
-        path: |
-          frontend-coverage.txt
-          frontend-color.txt
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "Update frontend test coverage badge to ${{ steps.frontend-coverage.outputs.percentage }}% [skip ci]"
+        title: "Update frontend coverage badge to ${{ steps.frontend-coverage.outputs.percentage }}%"
+        body: |
+          🔧 **Frontend Test Coverage Update**
+
+          - **Coverage**: ${{ steps.frontend-coverage.outputs.percentage }}%
+          - **Badge Color**: ${{ steps.frontend-coverage.outputs.color }}
+
+          Generated automatically by CI pipeline.
+        branch: update-frontend-coverage-badge-${{ github.run_number }}
+        delete-branch: true
 
     - name: Upload frontend coverage to Codecov
       uses: codecov/codecov-action@v5
