@@ -16,7 +16,7 @@
 [![Security: safety](https://img.shields.io/badge/security-safety-passing-brightgreen.svg)](https://pypi.org/project/safety/)
 [![Security: snyk](https://img.shields.io/badge/security-snyk-monitored-brightgreen.svg)](https://snyk.io/)
 [![Security: secrets](https://img.shields.io/badge/security-secrets%20scan-clean-brightgreen.svg)](https://github.com/trufflesecurity/trufflehog)
-[![Backend Test Coverage](https://img.shields.io/badge/backend%20test%20coverage-62%25-yellow.svg)]()
+[![Backend Test Coverage](https://img.shields.io/badge/backend%20test%20coverage-74%25-yellowgreen.svg)]()
 [![Frontend Test Coverage](https://img.shields.io/badge/frontend%20test%20coverage-14%25-red.svg)]()
 
 A modern, cross-platform system monitoring and management platform with real-time WebSocket communication, built with FastAPI and React.
