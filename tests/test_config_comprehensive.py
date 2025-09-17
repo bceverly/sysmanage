@@ -200,19 +200,29 @@ class TestConfigLoadingDefaults:
             if os.name == "nt":
                 assert config_path == expected_path
 
-    @patch("backend.config.config.os.name", "posix")  # Unix-like
-    @patch("backend.config.config.os.path.exists")
-    def test_config_path_unix(self, mock_exists):
+    def test_config_path_unix(self):
         """Test config path selection on Unix-like systems."""
-        mock_exists.return_value = False
+        mock_config = """api:
+  host: localhost
+  port: 8443
+webui:
+  host: localhost
+  port: 8080
+security:
+  max_failed_logins: 5
+  account_lockout_duration: 15
+"""
+        with patch("backend.config.config.os.name", "posix"), patch(
+            "backend.config.config.os.path.exists", return_value=True
+        ), patch("builtins.open", mock_open(read_data=mock_config)):
 
-        import importlib
-        from backend.config import config as config_module
+            import importlib
+            from backend.config import config as config_module
 
-        importlib.reload(config_module)
+            importlib.reload(config_module)
 
-        expected_path = "/etc/sysmanage.yaml"
-        assert config_module.CONFIG_PATH == expected_path
+            expected_path = "/etc/sysmanage.yaml"
+            assert config_module.CONFIG_PATH == expected_path
 
     @patch("backend.config.config.os.path.exists")
     def test_config_fallback_to_dev_config(self, mock_exists):

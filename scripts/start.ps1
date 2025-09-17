@@ -252,24 +252,35 @@ if ((Test-Path "frontend") -and (Test-Path "frontend\package.json")) {
     # Change to frontend directory and start npm with output redirection
     Push-Location "$ProjectRoot\frontend"
 
+    # Create null input file for process redirection
+    $nullInputFile = "$ProjectRoot\logs\null_input.txt"
+    if (-not (Test-Path $nullInputFile)) {
+        New-Item -ItemType File -Path $nullInputFile -Force | Out-Null
+    }
+
     # Start npm as background process with output redirection using PowerShell
     # Use npm.cmd on Windows instead of npm, with proper detachment from terminal
-    $frontendProcess = Start-Process -FilePath "npm.cmd" -ArgumentList "start" `
-        -WorkingDirectory "$ProjectRoot\frontend" `
-        -WindowStyle Hidden `
-        -PassThru `
-        -RedirectStandardOutput "$ProjectRoot\logs\frontend.log" `
-        -RedirectStandardError "$ProjectRoot\logs\frontend_error.log" `
-        -RedirectStandardInput "$ProjectRoot\logs\null_input.txt"
+    try {
+        $frontendProcess = Start-Process -FilePath "npm.cmd" -ArgumentList "start" `
+            -WorkingDirectory "$ProjectRoot\frontend" `
+            -WindowStyle Hidden `
+            -PassThru `
+            -RedirectStandardOutput "$ProjectRoot\logs\frontend.log" `
+            -RedirectStandardError "$ProjectRoot\logs\frontend_error.log" `
+            -RedirectStandardInput $nullInputFile
 
-    Pop-Location
+        Pop-Location
 
-    # Store process ID for later cleanup
-    if ($frontendProcess) {
-        $frontendProcess.Id | Out-File "$ProjectRoot\logs\frontend.pid" -Encoding ascii
-        Write-Host "Frontend process started with PID: $($frontendProcess.Id)" -ForegroundColor Gray
-    } else {
-        Write-Host "ERROR: Failed to start frontend process" -ForegroundColor Red
+        # Store process ID for later cleanup
+        if ($frontendProcess -and $frontendProcess.Id) {
+            $frontendProcess.Id | Out-File "$ProjectRoot\logs\frontend.pid" -Encoding ascii
+            Write-Host "Frontend process started with PID: $($frontendProcess.Id)" -ForegroundColor Gray
+        } else {
+            Write-Host "ERROR: Failed to start frontend process - no process ID returned" -ForegroundColor Red
+        }
+    } catch {
+        Pop-Location
+        Write-Host "ERROR: Failed to start frontend process - $($_.Exception.Message)" -ForegroundColor Red
     }
     
     Set-Location $ProjectRoot
