@@ -85,6 +85,21 @@ def _check_security_configuration():
     app_config = config.get_config()
     warnings = []
 
+    # Check email integration configuration
+    email_enabled = app_config.get("email", {}).get("enabled", False)
+    if not email_enabled:
+        logger.warning(
+            "SECURITY: Email integration is not enabled - users cannot receive password setup emails"
+        )
+        warnings.append(
+            SecurityWarning(
+                type="email_integration_required",
+                severity="warning",
+                message="Email integration must be configured before creating new users",
+                details="Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in.",
+            )
+        )
+
     # Check default admin credentials
     admin_userid = app_config.get("security", {}).get("admin_userid")
     admin_password = app_config.get("security", {}).get("admin_password")

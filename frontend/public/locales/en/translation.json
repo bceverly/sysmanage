@@ -604,6 +604,7 @@
     "criticalWarning": "CRITICAL SECURITY WARNING",
     "configWarning": "Configuration Security Warning",
     "securityWarning": "Security Warning",
+    "emailConfigurationWarning": "Email Configuration Required",
     "loggedInAsDefault": "You are logged in as the default admin user from the YAML configuration file. This is a critical security risk! Follow these steps in order:",
     "defaultCredentialsExist": "Default admin credentials are still configured in your YAML file. Please remove the admin_userid and admin_password from your configuration file and restart the server to improve security.",
     "securityStepsTitle": "Required Security Steps (in order):",

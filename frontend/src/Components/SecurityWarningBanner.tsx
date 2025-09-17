@@ -229,20 +229,22 @@ const SecurityWarningBanner: React.FC = () => {
               <Box key={index} sx={{ mb: index < securityStatus.securityWarnings.length - 1 ? 2.5 : 0 }}>
                 {securityStatus.securityWarnings.length === 1 && !hasCredentialsWarning && (
                   <AlertTitle sx={{ mb: 1.5, fontWeight: 'bold', fontSize: '18px' }}>
-                    {warning.severity === 'critical' 
+                    {warning.severity === 'critical'
                       ? t('security.criticalWarning', 'CRITICAL SECURITY WARNING')
-                      : t('security.securityWarning', 'Security Warning')
+                      : warning.type === 'email_integration_required'
+                        ? t('security.emailConfigurationWarning', 'Email Configuration Required')
+                        : t('security.securityWarning', 'Security Warning')
                     }
                   </AlertTitle>
                 )}
                 <Box sx={{ fontSize: hasCredentialsWarning ? '15px' : '16px', lineHeight: 1.5 }}>
                   {warning.message}
                   {warning.details && (
-                    <Box sx={{ 
-                      mt: 1, 
-                      fontSize: '14px', 
+                    <Box sx={{
+                      mt: 1,
+                      fontSize: '14px',
                       opacity: 0.95,
-                      fontFamily: 'monospace',
+                      fontFamily: warning.type === 'email_integration_required' ? 'inherit' : 'monospace',
                       backgroundColor: 'rgba(255,255,255,0.1)',
                       padding: '8px 12px',
                       borderRadius: '4px',
