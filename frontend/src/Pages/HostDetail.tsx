@@ -40,6 +40,7 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
@@ -969,6 +970,15 @@ const HostDetail = () => {
                     {host.fqdn}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        startIcon={<SystemUpdateAltIcon />}
+                        onClick={() => navigate(`/updates?host=${hostId}&securityOnly=false`)}
+                        disabled={!host.active || (host.security_updates_count || 0) + (host.system_updates_count || 0) === 0}
+                    >
+                        {t('hosts.updates', 'Updates')}
+                    </Button>
                     <Button
                         variant="outlined"
                         color="warning"

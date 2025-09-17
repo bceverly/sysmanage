@@ -11,8 +11,6 @@ from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
 from backend.api.host_utils import (
-    get_host_by_fqdn,
-    get_host_by_id,
     validate_host_approval_status,
 )
 from backend.auth.auth_bearer import JWTBearer
@@ -116,42 +114,66 @@ async def get_host(host_id: int):
     """
     This function retrieves a single host by its id
     """
-    host = get_host_by_id(host_id)
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
 
-    # Get tags using the dynamic relationship
-    host_tags = host.tags.all()
+    with session_local() as session:
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+        if not host:
+            raise HTTPException(status_code=404, detail=_("Host not found"))
 
-    # Return as dictionary with all fields
-    return {
-        "id": host.id,
-        "active": host.active,
-        "fqdn": host.fqdn,
-        "ipv4": host.ipv4,
-        "ipv6": host.ipv6,
-        "last_access": host.last_access.isoformat() if host.last_access else None,
-        "status": host.status,
-        "approval_status": host.approval_status,
-        "platform": host.platform,
-        "platform_release": host.platform_release,
-        "platform_version": host.platform_version,
-        "machine_architecture": host.machine_architecture,
-        "processor": host.processor,
-        "cpu_vendor": host.cpu_vendor,
-        "cpu_model": host.cpu_model,
-        "cpu_cores": host.cpu_cores,
-        "cpu_threads": host.cpu_threads,
-        "cpu_frequency_mhz": host.cpu_frequency_mhz,
-        "memory_total_mb": host.memory_total_mb,
-        "reboot_required": host.reboot_required,
-        "is_agent_privileged": host.is_agent_privileged,
-        "script_execution_enabled": getattr(host, "script_execution_enabled", False),
-        "enabled_shells": getattr(host, "enabled_shells", None),
-        # Include tags
-        "tags": [
-            {"id": tag.id, "name": tag.name, "description": tag.description}
-            for tag in host_tags
-        ],
-    }
+        # Get tags using the dynamic relationship
+        host_tags = host.tags.all()
+
+        # Calculate update counts from package_updates relationship
+        package_updates = host.package_updates
+        security_updates_count = sum(
+            1 for update in package_updates if update.is_security_update
+        )
+        system_updates_count = sum(
+            1 for update in package_updates if update.is_system_update
+        )
+        total_updates_count = len(package_updates)
+
+        # Return as dictionary with all fields
+        return {
+            "id": host.id,
+            "active": host.active,
+            "fqdn": host.fqdn,
+            "ipv4": host.ipv4,
+            "ipv6": host.ipv6,
+            "last_access": host.last_access.isoformat() if host.last_access else None,
+            "status": host.status,
+            "approval_status": host.approval_status,
+            "platform": host.platform,
+            "platform_release": host.platform_release,
+            "platform_version": host.platform_version,
+            "machine_architecture": host.machine_architecture,
+            "processor": host.processor,
+            "cpu_vendor": host.cpu_vendor,
+            "cpu_model": host.cpu_model,
+            "cpu_cores": host.cpu_cores,
+            "cpu_threads": host.cpu_threads,
+            "cpu_frequency_mhz": host.cpu_frequency_mhz,
+            "memory_total_mb": host.memory_total_mb,
+            "reboot_required": host.reboot_required,
+            "is_agent_privileged": host.is_agent_privileged,
+            "script_execution_enabled": getattr(
+                host, "script_execution_enabled", False
+            ),
+            "enabled_shells": getattr(host, "enabled_shells", None),
+            # Include update counts
+            "security_updates_count": security_updates_count,
+            "system_updates_count": system_updates_count,
+            "total_updates_count": total_updates_count,
+            # Include tags
+            "tags": [
+                {"id": tag.id, "name": tag.name, "description": tag.description}
+                for tag in host_tags
+            ],
+        }
 
 
 @auth_router.get("/host/by_fqdn/{fqdn}", dependencies=[Depends(JWTBearer())])
@@ -159,42 +181,66 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
     """
     This function retrieves a single host by fully qualified domain name
     """
-    host = get_host_by_fqdn(fqdn)
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
 
-    # Get tags using the dynamic relationship
-    host_tags = host.tags.all()
+    with session_local() as session:
+        host = session.query(models.Host).filter(models.Host.fqdn == fqdn).first()
+        if not host:
+            raise HTTPException(status_code=404, detail=_("Host not found"))
 
-    # Return as dictionary with all fields
-    return {
-        "id": host.id,
-        "active": host.active,
-        "fqdn": host.fqdn,
-        "ipv4": host.ipv4,
-        "ipv6": host.ipv6,
-        "last_access": host.last_access.isoformat() if host.last_access else None,
-        "status": host.status,
-        "approval_status": host.approval_status,
-        "platform": host.platform,
-        "platform_release": host.platform_release,
-        "platform_version": host.platform_version,
-        "machine_architecture": host.machine_architecture,
-        "processor": host.processor,
-        "cpu_vendor": host.cpu_vendor,
-        "cpu_model": host.cpu_model,
-        "cpu_cores": host.cpu_cores,
-        "cpu_threads": host.cpu_threads,
-        "cpu_frequency_mhz": host.cpu_frequency_mhz,
-        "memory_total_mb": host.memory_total_mb,
-        "reboot_required": host.reboot_required,
-        "is_agent_privileged": host.is_agent_privileged,
-        "script_execution_enabled": getattr(host, "script_execution_enabled", False),
-        "enabled_shells": getattr(host, "enabled_shells", None),
-        # Include tags
-        "tags": [
-            {"id": tag.id, "name": tag.name, "description": tag.description}
-            for tag in host_tags
-        ],
-    }
+        # Get tags using the dynamic relationship
+        host_tags = host.tags.all()
+
+        # Calculate update counts from package_updates relationship
+        package_updates = host.package_updates
+        security_updates_count = sum(
+            1 for update in package_updates if update.is_security_update
+        )
+        system_updates_count = sum(
+            1 for update in package_updates if update.is_system_update
+        )
+        total_updates_count = len(package_updates)
+
+        # Return as dictionary with all fields
+        return {
+            "id": host.id,
+            "active": host.active,
+            "fqdn": host.fqdn,
+            "ipv4": host.ipv4,
+            "ipv6": host.ipv6,
+            "last_access": host.last_access.isoformat() if host.last_access else None,
+            "status": host.status,
+            "approval_status": host.approval_status,
+            "platform": host.platform,
+            "platform_release": host.platform_release,
+            "platform_version": host.platform_version,
+            "machine_architecture": host.machine_architecture,
+            "processor": host.processor,
+            "cpu_vendor": host.cpu_vendor,
+            "cpu_model": host.cpu_model,
+            "cpu_cores": host.cpu_cores,
+            "cpu_threads": host.cpu_threads,
+            "cpu_frequency_mhz": host.cpu_frequency_mhz,
+            "memory_total_mb": host.memory_total_mb,
+            "reboot_required": host.reboot_required,
+            "is_agent_privileged": host.is_agent_privileged,
+            "script_execution_enabled": getattr(
+                host, "script_execution_enabled", False
+            ),
+            "enabled_shells": getattr(host, "enabled_shells", None),
+            # Include update counts
+            "security_updates_count": security_updates_count,
+            "system_updates_count": system_updates_count,
+            "total_updates_count": total_updates_count,
+            # Include tags
+            "tags": [
+                {"id": tag.id, "name": tag.name, "description": tag.description}
+                for tag in host_tags
+            ],
+        }
 
 
 @auth_router.get("/hosts", dependencies=[Depends(JWTBearer())])
@@ -216,6 +262,16 @@ async def get_all_hosts():
         for host in hosts:
             # Get tags using the dynamic relationship (.all() method)
             host_tags = host.tags.all()
+
+            # Calculate update counts from package_updates relationship
+            package_updates = host.package_updates
+            security_updates_count = sum(
+                1 for update in package_updates if update.is_security_update
+            )
+            system_updates_count = sum(
+                1 for update in package_updates if update.is_system_update
+            )
+            total_updates_count = len(package_updates)
 
             host_dict = {
                 "id": host.id,
@@ -245,6 +301,10 @@ async def get_all_hosts():
                     host, "script_execution_enabled", False
                 ),
                 "enabled_shells": getattr(host, "enabled_shells", None),
+                # Include update counts
+                "security_updates_count": security_updates_count,
+                "system_updates_count": system_updates_count,
+                "total_updates_count": total_updates_count,
                 # Include tags
                 "tags": [
                     {"id": tag.id, "name": tag.name, "description": tag.description}

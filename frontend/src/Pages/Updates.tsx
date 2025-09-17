@@ -77,7 +77,7 @@ const Updates: React.FC = () => {
     security_only: searchParams.get('securityOnly') === 'true' || searchParams.get('filter') === 'security',
     system_only: false,
     package_manager: '',
-    host_id: ''
+    host_id: searchParams.get('host') || ''
   });
 
   // Auto-refresh state (disabled)

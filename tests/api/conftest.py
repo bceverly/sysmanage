@@ -111,6 +111,7 @@ def test_db():
         tags = relationship(
             "Tag", secondary="host_tags", back_populates="hosts", lazy="dynamic"
         )
+        package_updates = relationship("PackageUpdate", back_populates="host")
 
     # Create test version of User model with Integer ID for SQLite compatibility
     class User(TestBase):
@@ -214,6 +215,30 @@ def test_db():
         created_at = Column(DateTime, nullable=False)
         updated_at = Column(DateTime, nullable=False)
 
+    class PackageUpdate(TestBase):
+        __tablename__ = "package_updates"
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        host_id = Column(Integer, ForeignKey("host.id"), nullable=False)
+        package_name = Column(String(255), nullable=False)
+        current_version = Column(String(100), nullable=True)
+        available_version = Column(String(100), nullable=False)
+        package_manager = Column(String(50), nullable=False)
+        source = Column(String(255), nullable=True)
+        is_security_update = Column(Boolean, nullable=False, default=False)
+        is_system_update = Column(Boolean, nullable=False, default=False)
+        requires_reboot = Column(Boolean, nullable=False, default=False)
+        update_size_bytes = Column(Integer, nullable=True)
+        bundle_id = Column(String(255), nullable=True)
+        repository = Column(String(255), nullable=True)
+        channel = Column(String(100), nullable=True)
+        status = Column(String(20), nullable=False, default="available")
+        detected_at = Column(DateTime, nullable=True)
+        updated_at = Column(DateTime, nullable=True)
+        last_checked_at = Column(DateTime, nullable=True)
+
+        # Add relationship back to host
+        host = relationship("Host", back_populates="package_updates")
+
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)
 
@@ -225,6 +250,7 @@ def test_db():
     original_password_reset_token = models.PasswordResetToken
     original_message_queue = models.MessageQueue
     original_ubuntu_pro_settings = models.UbuntuProSettings
+    original_package_update = models.PackageUpdate
     models.Host = Host
     models.User = User
     models.Tag = Tag
@@ -232,6 +258,7 @@ def test_db():
     models.PasswordResetToken = PasswordResetToken
     models.MessageQueue = MessageQueue
     models.UbuntuProSettings = UbuntuProSettings
+    models.PackageUpdate = PackageUpdate
 
     # Override the get_engine dependency
     def override_get_engine():
@@ -268,6 +295,7 @@ def test_db():
     models.PasswordResetToken = original_password_reset_token
     models.MessageQueue = original_message_queue
     models.UbuntuProSettings = original_ubuntu_pro_settings
+    models.PackageUpdate = original_package_update
 
     # Clean up database connections
     test_engine.dispose()  # Close all connections in the connection pool

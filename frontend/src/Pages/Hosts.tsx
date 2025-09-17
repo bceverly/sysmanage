@@ -49,7 +49,7 @@ const Hosts = () => {
         { 
             field: 'status', 
             headerName: t('hosts.status'), 
-            width: 200,  // Increased width for dual status chips
+            width: 280,  // Increased width for status and update chips
             renderCell: (params) => {
                 const row = params.row;
                 // Server returns timezone-aware timestamps  
@@ -90,12 +90,31 @@ const Hosts = () => {
                             />
                         )}
                         {row.reboot_required && (
-                            <Chip 
+                            <Chip
                                 label={t('hosts.rebootRequired')}
                                 color="error"
                                 size="small"
                                 variant="outlined"
                                 sx={{ ml: 0.5 }}
+                            />
+                        )}
+                        {(row.security_updates_count > 0 || row.system_updates_count > 0) && (
+                            <Chip
+                                label={t('hosts.updatesNeeded', 'Updates Needed')}
+                                color={row.security_updates_count > 0 ? 'error' : 'warning'}
+                                size="small"
+                                variant="outlined"
+                                sx={{ ml: 0.5 }}
+                                title={
+                                    row.security_updates_count > 0 && row.system_updates_count > 0
+                                        ? t('hosts.securityAndSystemUpdates', '{{security}} security, {{system}} system updates', {
+                                            security: row.security_updates_count,
+                                            system: row.system_updates_count
+                                        })
+                                        : row.security_updates_count > 0
+                                        ? t('hosts.securityUpdatesOnly', '{{count}} security updates', { count: row.security_updates_count })
+                                        : t('hosts.systemUpdatesOnly', '{{count}} system updates', { count: row.system_updates_count })
+                                }
                             />
                         )}
                     </Box>
@@ -390,7 +409,6 @@ const Hosts = () => {
             const response = await doGetHosts();
             setTableData(response);
             setLastRefresh(new Date());
-            console.log('Hosts refreshed:', response.length, 'hosts at', new Date().toISOString());
         } catch (error) {
             console.error('Error refreshing hosts:', error);
         }

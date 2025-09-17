@@ -106,7 +106,6 @@ export const useTablePageSize = (options: UseTablePageSizeOptions = {}) => {
       setPageSize(optimalRows);
       setPageSizeOptions(filteredOptions);
       
-      console.log(`Dynamic table sizing: Window height: ${windowHeight}px, Available: ${availableHeight}px, Optimal rows: ${optimalRows}`);
     };
 
     // Calculate initial page size

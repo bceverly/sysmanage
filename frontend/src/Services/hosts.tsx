@@ -93,6 +93,10 @@ type SysManageHost = {
     enabled_shells?: string;
     // Tags
     tags?: Array<{id: number, name: string, description?: string}>;
+    // Update status fields
+    security_updates_count?: number;
+    system_updates_count?: number;
+    total_updates_count?: number;
 }
 
 type StorageDevice = {
