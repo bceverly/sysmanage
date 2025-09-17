@@ -69,8 +69,11 @@ cd sysmanage
 # 2. Create virtual environment
 python3.11 -m venv .venv  # or python3.12
 source .venv/bin/activate
+# Note: On BSD systems (FreeBSD, OpenBSD, NetBSD), use: . .venv/bin/activate
 
 # 3. Install dependencies
+# Note: Rust is required for some Python dependencies
+# Install Rust: https://rustup.rs/ or use your package manager
 pip install --upgrade pip
 pip install -r requirements.txt
 
