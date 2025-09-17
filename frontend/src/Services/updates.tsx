@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axiosInstance from './api.js';
 
 export interface UpdateStatsSummary {
   total_hosts: number;
@@ -55,29 +55,10 @@ export interface UpdateResultsResponse {
 }
 
 class UpdatesService {
-  private baseURL: string;
-
-  constructor() {
-    const config = JSON.parse(localStorage.getItem('sysmanage_config') || '{}');
-    // Dynamically determine the backend URL based on current host
-    const currentHost = window.location.hostname;
-    const backendPort = 8080; // This should match your config file
-    this.baseURL = config.apiUrl || `http://${currentHost}:${backendPort}`;
-  }
-
-  private getAuthHeaders() {
-    const token = localStorage.getItem('bearer_token');
-    return {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    };
-  }
 
   async getUpdatesSummary(): Promise<UpdateStatsSummary> {
     try {
-      const response = await axios.get(`${this.baseURL}/api/updates/summary`, {
-        headers: this.getAuthHeaders(),
-      });
+      const response = await axiosInstance.get('/api/updates/summary');
       return response.data;
     } catch (error) {
       console.error('Failed to fetch updates summary:', error);
@@ -100,9 +81,7 @@ class UpdatesService {
       params.append('limit', limit.toString());
       params.append('offset', offset.toString());
 
-      const response = await axios.get(`${this.baseURL}/api/updates/?${params}`, {
-        headers: this.getAuthHeaders(),
-      });
+      const response = await axiosInstance.get(`/api/updates/?${params}`);
       return response.data;
     } catch (error) {
       console.error('Failed to fetch updates:', error);
@@ -122,9 +101,7 @@ class UpdatesService {
       if (securityOnly) params.append('security_only', 'true');
       if (systemOnly) params.append('system_only', 'true');
 
-      const response = await axios.get(`${this.baseURL}/api/updates/${hostId}?${params}`, {
-        headers: this.getAuthHeaders(),
-      });
+      const response = await axiosInstance.get(`/api/updates/${hostId}?${params}`);
       return response.data;
     } catch (error) {
       console.error('Failed to fetch host updates:', error);
@@ -140,13 +117,7 @@ class UpdatesService {
         package_managers: packageManagers,
       };
       
-      const response = await axios.post(
-        `${this.baseURL}/api/updates/execute`,
-        requestData,
-        {
-          headers: this.getAuthHeaders(),
-        }
-      );
+      const response = await axiosInstance.post('/api/updates/execute', requestData);
       return response.data;
     } catch (error) {
       console.error('Failed to execute updates:', error);
@@ -160,9 +131,7 @@ class UpdatesService {
       params.append('limit', limit.toString());
       params.append('offset', offset.toString());
 
-      const response = await axios.get(`${this.baseURL}/api/updates/execution-log/${hostId}?${params}`, {
-        headers: this.getAuthHeaders(),
-      });
+      const response = await axiosInstance.get(`/api/updates/execution-log/${hostId}?${params}`);
       return response.data;
     } catch (error) {
       console.error('Failed to fetch execution log:', error);
@@ -172,9 +141,7 @@ class UpdatesService {
 
   async getUpdateResults(): Promise<UpdateResultsResponse> {
     try {
-      const response = await axios.get(`${this.baseURL}/api/updates/summary`, {
-        headers: this.getAuthHeaders(),
-      });
+      const response = await axiosInstance.get('/api/updates/summary');
       // Return the actual response data which includes update results
       return response.data;
     } catch (error) {
