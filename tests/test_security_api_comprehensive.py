@@ -142,7 +142,18 @@ class TestCheckSecurityConfiguration:
                 "admin_password": None,
                 "jwt_secret": "custom_jwt_secret",
                 "password_salt": "custom_password_salt",
-            }
+            },
+            "email": {
+                "enabled": True,
+                "smtp": {
+                    "host": "localhost",
+                    "port": 587,
+                    "use_tls": True,
+                    "username": "test@example.com",
+                    "password": "test_password",
+                },
+                "from_address": "test@example.com",
+            },
         }
         mock_get_config.return_value = mock_config
         mock_get_user_count.return_value = 0
@@ -166,7 +177,18 @@ class TestCheckSecurityConfiguration:
                 "admin_password": "password123",
                 "jwt_secret": "custom_jwt_secret",
                 "password_salt": "custom_password_salt",
-            }
+            },
+            "email": {
+                "enabled": True,
+                "smtp": {
+                    "host": "localhost",
+                    "port": 587,
+                    "use_tls": True,
+                    "username": "test@example.com",
+                    "password": "test_password",
+                },
+                "from_address": "test@example.com",
+            },
         }
         mock_get_config.return_value = mock_config
         mock_get_user_count.return_value = 0
@@ -193,7 +215,18 @@ class TestCheckSecurityConfiguration:
                 "admin_password": None,
                 "jwt_secret": default_jwt,
                 "password_salt": "custom_password_salt",
-            }
+            },
+            "email": {
+                "enabled": True,
+                "smtp": {
+                    "host": "localhost",
+                    "port": 587,
+                    "use_tls": True,
+                    "username": "test@example.com",
+                    "password": "test_password",
+                },
+                "from_address": "test@example.com",
+            },
         }
         mock_get_config.return_value = mock_config
         mock_get_user_count.return_value = 0
@@ -222,7 +255,18 @@ class TestCheckSecurityConfiguration:
                 "admin_password": None,
                 "jwt_secret": "custom_jwt_secret",
                 "password_salt": default_salt,
-            }
+            },
+            "email": {
+                "enabled": True,
+                "smtp": {
+                    "host": "localhost",
+                    "port": 587,
+                    "use_tls": True,
+                    "username": "test@example.com",
+                    "password": "test_password",
+                },
+                "from_address": "test@example.com",
+            },
         }
         mock_get_config.return_value = mock_config
         mock_get_user_count.return_value = 0
@@ -251,7 +295,18 @@ class TestCheckSecurityConfiguration:
                 "admin_password": None,
                 "jwt_secret": "custom_jwt_secret",
                 "password_salt": default_salt,
-            }
+            },
+            "email": {
+                "enabled": True,
+                "smtp": {
+                    "host": "localhost",
+                    "port": 587,
+                    "use_tls": True,
+                    "username": "test@example.com",
+                    "password": "test_password",
+                },
+                "from_address": "test@example.com",
+            },
         }
         mock_get_config.return_value = mock_config
         mock_get_user_count.return_value = 3
@@ -282,7 +337,18 @@ class TestCheckSecurityConfiguration:
                 "admin_password": None,
                 "jwt_secret": default_jwt,
                 "password_salt": "custom_salt",
-            }
+            },
+            "email": {
+                "enabled": True,
+                "smtp": {
+                    "host": "localhost",
+                    "port": 587,
+                    "use_tls": True,
+                    "username": "test@example.com",
+                    "password": "test_password",
+                },
+                "from_address": "test@example.com",
+            },
         }
         mock_get_config.return_value = mock_config
         mock_get_user_count.return_value = 0
@@ -312,7 +378,18 @@ class TestCheckSecurityConfiguration:
                 "admin_password": None,
                 "jwt_secret": "custom_jwt",
                 "password_salt": default_salt,
-            }
+            },
+            "email": {
+                "enabled": True,
+                "smtp": {
+                    "host": "localhost",
+                    "port": 587,
+                    "use_tls": True,
+                    "username": "test@example.com",
+                    "password": "test_password",
+                },
+                "from_address": "test@example.com",
+            },
         }
         mock_get_config.return_value = mock_config
         mock_get_user_count.return_value = 0
@@ -343,7 +420,18 @@ class TestCheckSecurityConfiguration:
                 "admin_password": "password123",
                 "jwt_secret": default_jwt,
                 "password_salt": default_salt,
-            }
+            },
+            "email": {
+                "enabled": True,
+                "smtp": {
+                    "host": "localhost",
+                    "port": 587,
+                    "use_tls": True,
+                    "username": "test@example.com",
+                    "password": "test_password",
+                },
+                "from_address": "test@example.com",
+            },
         }
         mock_get_config.return_value = mock_config
         mock_get_user_count.return_value = 2
@@ -365,7 +453,19 @@ class TestCheckSecurityConfiguration:
         self, mock_get_config, mock_get_user_count
     ):
         """Test security check with missing security section."""
-        mock_config = {}
+        mock_config = {
+            "email": {
+                "enabled": True,
+                "smtp": {
+                    "host": "localhost",
+                    "port": 587,
+                    "use_tls": True,
+                    "username": "test@example.com",
+                    "password": "test_password",
+                },
+                "from_address": "test@example.com",
+            }
+        }
         mock_get_config.return_value = mock_config
         mock_get_user_count.return_value = 0
 
@@ -497,7 +597,18 @@ class TestSecurityConfigurationEdgeCases:
                 "admin_password": None,
                 "jwt_secret": None,
                 "password_salt": None,
-            }
+            },
+            "email": {
+                "enabled": True,
+                "smtp": {
+                    "host": "localhost",
+                    "port": 587,
+                    "use_tls": True,
+                    "username": "test@example.com",
+                    "password": "test_password",
+                },
+                "from_address": "test@example.com",
+            },
         }
         mock_get_config.return_value = mock_config
         mock_get_user_count.return_value = 0
@@ -520,7 +631,18 @@ class TestSecurityConfigurationEdgeCases:
                 "admin_password": "",
                 "jwt_secret": "",
                 "password_salt": "",
-            }
+            },
+            "email": {
+                "enabled": True,
+                "smtp": {
+                    "host": "localhost",
+                    "port": 587,
+                    "use_tls": True,
+                    "username": "test@example.com",
+                    "password": "test_password",
+                },
+                "from_address": "test@example.com",
+            },
         }
         mock_get_config.return_value = mock_config
         mock_get_user_count.return_value = 0

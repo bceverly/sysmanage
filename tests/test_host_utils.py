@@ -25,6 +25,7 @@ class MockHost:
         self.last_access = datetime.now(timezone.utc)
         self.active = True
         self.status = "up"
+        self.host_token = None  # For secure token support
 
 
 class MockStorageDevice:

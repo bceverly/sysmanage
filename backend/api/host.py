@@ -511,6 +511,7 @@ async def approve_host(host_id: int):  # pylint: disable=duplicate-code
         try:
             approval_message = create_host_approved_message(
                 host_id=host.id,
+                host_token=host.host_token,
                 approval_status="approved",
                 certificate=host.client_certificate,
             )

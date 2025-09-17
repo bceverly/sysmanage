@@ -395,6 +395,14 @@ async def update_or_create_host(
         host.status = "up"
         # Update script execution status from agent
         host.script_execution_enabled = script_execution_enabled
+
+        # Generate host_token for existing hosts that don't have one (migration support)
+        if not host.host_token:
+            from backend.persistence.models import generate_secure_host_token
+
+            host.host_token = generate_secure_host_token()
+            logger.info("Generated new host_token for existing host: %s", hostname)
+
         # Don't modify approval_status for existing hosts - preserve the current status
     else:
         # Create new host with pending approval status
@@ -402,10 +410,16 @@ async def update_or_create_host(
             "Creating new host with script_execution_enabled=%s",
             script_execution_enabled,
         )
+        # Generate secure host token
+        from backend.persistence.models import generate_secure_host_token
+
+        host_token = generate_secure_host_token()
+
         host = models.Host(
             fqdn=hostname,
             ipv4=ipv4,
             ipv6=ipv6,
+            host_token=host_token,  # Assign secure token
             last_access=datetime.now(timezone.utc),
             active=True,
             status="up",

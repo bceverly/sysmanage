@@ -706,7 +706,9 @@ class TestMessageFactory:
 
     def test_create_host_approved_message_function(self):
         """Test create_host_approved_message utility function."""
-        result = create_host_approved_message(123, "approved", "certificate-data")
+        result = create_host_approved_message(
+            123, approval_status="approved", certificate="certificate-data"
+        )
 
         assert result["message_type"] == MessageType.HOST_APPROVED
         assert result["data"]["host_id"] == 123

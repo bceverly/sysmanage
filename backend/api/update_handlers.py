@@ -42,6 +42,14 @@ update_results_cache = {}
 
 async def handle_update_apply_result(db: Session, connection, message_data: dict):
     """Handle update application result message from agent."""
+    # Import validation helper
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
+
     if not hasattr(connection, "host_id") or not connection.host_id:
         return {"message_type": "error", "error": _("Host not registered")}
 

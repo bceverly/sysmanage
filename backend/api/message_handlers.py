@@ -40,9 +40,65 @@ except (OSError, PermissionError):
     debug_logger.addHandler(console_handler)
 
 
+async def validate_host_authentication(
+    db: Session, connection, message_data: dict
+) -> tuple[bool, Host]:
+    """
+    Validate host authentication using either host_token (preferred) or host_id (legacy).
+
+    Returns (is_valid, host_instance) tuple.
+    Sends error message to agent if host doesn't exist.
+    """
+    host_token = message_data.get("host_token")
+    host_id = message_data.get("host_id")
+
+    # No authentication provided
+    if not host_token and not host_id:
+        return True, None  # No authentication to validate
+
+    # Try host_token first (preferred method)
+    if host_token:
+        host = db.query(Host).filter(Host.host_token == host_token).first()
+        if host:
+            return True, host
+
+        error_message = {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host with token is not registered. Please re-register."),
+            "data": {"host_token": host_token[:16] + "..."},
+        }
+        await connection.send_message(error_message)
+        return False, None
+
+    # Fall back to host_id (legacy method)
+    if host_id:
+        host = db.query(Host).filter(Host.id == host_id).first()
+        if host:
+            return True, host
+
+        error_message = {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host with ID %s is not registered. Please re-register.")
+            % host_id,
+            "data": {"host_id": host_id},
+        }
+        await connection.send_message(error_message)
+        return False, None
+
+    return False, None
+
+
 async def handle_system_info(db: Session, connection, message_data: dict):
     """Handle system info message from agent."""
     from backend.api.host_utils import update_or_create_host
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
 
     hostname = message_data.get("hostname")
     ipv4 = message_data.get("ipv4")
@@ -125,7 +181,8 @@ async def handle_system_info(db: Session, connection, message_data: dict):
                 "message_type": "registration_success",
                 "approved": True,
                 "hostname": hostname,
-                "host_id": host.id,
+                "host_token": host.host_token,  # Send secure token instead of integer ID
+                "host_id": host.id,  # Keep for backward compatibility temporarily
             }
 
         return {
@@ -139,6 +196,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):
 
 async def handle_heartbeat(db: Session, connection, message_data: dict):
     """Handle heartbeat message from agent."""
+    from backend.utils.host_validation import validate_host_id
 
     # Check if connection has no hostname - handle this case specially for tests
     if (
@@ -155,6 +213,11 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
         }
         await connection.send_message(ack_message)
         return {"message_type": "success"}
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
 
     if hasattr(connection, "host_id") and connection.host_id:
         try:

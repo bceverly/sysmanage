@@ -6,7 +6,6 @@ Handles OS version, hardware, user access, and software update messages.
 import json
 import logging
 from datetime import datetime, timezone
-
 from sqlalchemy import delete, text, update
 from sqlalchemy.orm import Session
 
@@ -30,6 +29,13 @@ debug_logger.setLevel(logging.DEBUG)
 
 async def handle_os_version_update(db: Session, connection, message_data: dict):
     """Handle OS version update message from agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
+
     # Check if we have any way to identify the host
     has_hostname = hasattr(connection, "hostname") and connection.hostname
     has_ipv4 = hasattr(connection, "ipv4") and connection.ipv4
@@ -137,6 +143,13 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
 
 async def handle_hardware_update(db: Session, connection, message_data: dict):
     """Handle hardware information update message from agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
+
     if not hasattr(connection, "host_id") or not connection.host_id:
         return {"message_type": "error", "error": _("Host not registered")}
 
@@ -305,6 +318,13 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
 
 async def handle_user_access_update(db: Session, connection, message_data: dict):
     """Handle user access information update message from agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
+
     if not hasattr(connection, "host_id") or not connection.host_id:
         return {"message_type": "error", "error": _("Host not registered")}
 
@@ -493,6 +513,13 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
 
 async def handle_software_update(db: Session, connection, message_data: dict):
     """Handle software inventory update message from agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
+
     if not hasattr(connection, "host_id") or not connection.host_id:
         return {"message_type": "error", "error": _("Host not registered")}
 
@@ -554,6 +581,13 @@ async def handle_software_update(db: Session, connection, message_data: dict):
 
 async def handle_package_updates_update(db: Session, connection, message_data: dict):
     """Handle package updates information from agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
+
     if not hasattr(connection, "host_id") or not connection.host_id:
         return {"message_type": "error", "error": _("Host not registered")}
 
@@ -660,6 +694,13 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
 
 async def handle_script_execution_result(db: Session, connection, message_data: dict):
     """Handle script execution result from agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
+
     debug_logger.info(
         "Processing script execution result from %s", message_data.get("hostname")
     )
@@ -803,6 +844,13 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
 
 async def handle_reboot_status_update(db: Session, connection, message_data: dict):
     """Handle reboot status update from an agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
+
     try:
         hostname = message_data.get("hostname")
         reboot_required = message_data.get("reboot_required", False)
@@ -943,7 +991,6 @@ async def handle_ubuntu_pro_update(
             ubuntu_pro_data.get("attached", False),
             len(services),
         )
-
     except Exception as e:
         debug_logger.error(
             "Error processing Ubuntu Pro data for host %s: %s", host.id, e

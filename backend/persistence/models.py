@@ -3,6 +3,8 @@ This module holds the various models that are persistence backed by the
 PostgreSQL database.
 """
 
+import secrets
+import uuid
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -18,6 +20,24 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from backend.persistence.db import Base
+
+
+def generate_secure_host_token() -> str:
+    """
+    Generate a cryptographically secure host token.
+
+    Uses a combination of UUID4 and additional entropy for maximum security.
+    Format: <uuid4>-<8-random-hex-bytes>
+    Example: 550e8400-e29b-41d4-a716-446655440000-a1b2c3d4e5f6g7h8
+    """
+    # Generate a UUID4 for uniqueness and structure
+    token_uuid = str(uuid.uuid4())
+
+    # Add additional entropy for security
+    additional_entropy = secrets.token_hex(8)
+
+    # Combine for final token
+    return f"{token_uuid}-{additional_entropy}"
 
 
 class BearerToken(Base):
@@ -39,6 +59,9 @@ class Host(Base):
 
     __tablename__ = "host"
     id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    host_token = Column(
+        String(64), unique=True, nullable=True, index=True
+    )  # Secure UUID-based token
     active = Column(Boolean, unique=False, index=False)
     fqdn = Column(String, index=True)
     ipv4 = Column(String)

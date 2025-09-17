@@ -300,12 +300,14 @@ class HostApprovedMessage(Message):
     def __init__(
         self,
         host_id: int,
+        host_token: str = None,
         approval_status: str = "approved",
         certificate: str = None,
         **kwargs
     ):
         data = {
-            "host_id": host_id,
+            "host_id": host_id,  # Keep for backward compatibility
+            "host_token": host_token,  # New secure token
             "approval_status": approval_status,
             "certificate": certificate,
             **kwargs,
@@ -657,10 +659,16 @@ def create_command_message(
 
 
 def create_host_approved_message(
-    host_id: int, approval_status: str = "approved", certificate: str = None
+    host_id: int,
+    host_token: str = None,
+    approval_status: str = "approved",
+    certificate: str = None,
 ) -> Dict[str, Any]:
     """Create a host approved message dictionary for sending to agents."""
     message = HostApprovedMessage(
-        host_id=host_id, approval_status=approval_status, certificate=certificate
+        host_id=host_id,
+        host_token=host_token,
+        approval_status=approval_status,
+        certificate=certificate,
     )
     return message.to_dict()

@@ -47,6 +47,7 @@ class MockHost:
         self.is_agent_privileged = False
         self.enabled_shells = None
         self.last_access = datetime.now(timezone.utc)
+        self.host_token = None  # For secure token support
 
 
 class MockSession:
