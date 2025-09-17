@@ -72,7 +72,8 @@ source .venv/bin/activate
 # Note: On BSD systems (FreeBSD, OpenBSD, NetBSD), use: . .venv/bin/activate
 
 # 3. Setup database (see documentation for detailed instructions)
-# Install PostgreSQL (required before installing Python dependencies)
+# Install PostgreSQL and SQLite3 (required before installing Python dependencies)
+# FreeBSD users also need: sudo pkg install py311-sqlite3
 # Create PostgreSQL database and user
 # Configure /etc/sysmanage.yaml
 
