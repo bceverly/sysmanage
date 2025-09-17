@@ -580,16 +580,30 @@
       "cannotDeleteActiveScript": "सक्रिय एक्सीक्यूशन वाली स्क्रिप्ट को डिलीट नहीं किया जा सकता",
       "hostNotConnected": "होस्ट कनेक्ट नहीं है - स्क्रिप्ट डिलीवरी के लिए क्यू में है",
       "scriptExecutionDisabled": "एजेंट कॉन्फ़िगरेशन में स्क्रिप्ट एक्सीक्यूशन अक्षम है"
-    },
-    "search": {
-      "search": "खोजें",
-      "searchTerm": "खोज की शर्त",
-      "searchColumn": "में खोजें",
-      "searchHosts": "होस्ट्स खोजें",
-      "searchUsers": "यूजर्स खोजें",
-      "searchScripts": "स्क्रिप्ट्स खोजें",
-      "searchTags": "टैग्स खोजें"
     }
+  },
+  "security": {
+    "criticalWarning": "महत्वपूर्ण सुरक्षा चेतावनी",
+    "configWarning": "कॉन्फ़िगरेशन सुरक्षा चेतावनी",
+    "securityWarning": "सुरक्षा चेतावनी",
+    "loggedInAsDefault": "आप YAML कॉन्फ़िगरेशन फ़ाइल से डिफ़ॉल्ट एडमिन यूज़र के रूप में लॉग इन हैं। यह एक गंभीर सुरक्षा जोखिम है! इन चरणों का क्रम में पालन करें:",
+    "defaultCredentialsExist": "डिफ़ॉल्ट एडमिन क्रेडेंशियल अभी भी आपकी YAML फ़ाइल में कॉन्फ़िगर किए गए हैं। कृपया अपनी कॉन्फ़िगरेशन फ़ाइल से admin_userid और admin_password हटाएं और सुरक्षा बेहतर बनाने के लिए सर्वर को पुनः आरंभ करें।",
+    "securityStepsTitle": "आवश्यक सुरक्षा चरण (क्रम में):",
+    "step1JwtSecret": "JWT सीक्रेट बदलें: चलाएं",
+    "step2PasswordSalt": "पासवर्ड साल्ट बदलें: चलाएं",
+    "step3CreateUser": "इस इंटरफ़ेस में यूज़र्स पेज के माध्यम से एक नया एडमिन यूज़र बनाएं",
+    "step4LoginNewUser": "लॉग आउट करें और अपने नए एडमिन खाते से लॉग इन करें",
+    "step5RemoveCredentials": "अपनी YAML कॉन्फ़िगरेशन फ़ाइल से admin_userid और admin_password हटाएं",
+    "step6RestartServer": "सर्वर को ./run.sh के साथ पुनः आरंभ करें"
+  },
+  "search": {
+    "search": "खोजें",
+    "searchTerm": "खोज की शर्त",
+    "searchColumn": "में खोजें",
+    "searchHosts": "होस्ट्स खोजें",
+    "searchUsers": "यूजर्स खोजें",
+    "searchScripts": "स्क्रिप्ट्स खोजें",
+    "searchTags": "टैग्स खोजें"
   },
   "tags": {
     "title": "टैग्स",

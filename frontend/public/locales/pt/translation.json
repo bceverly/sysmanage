@@ -584,16 +584,30 @@
       "cannotDeleteActiveScript": "Não é possível excluir script com execuções ativas",
       "hostNotConnected": "Host não conectado - script na fila para entrega",
       "scriptExecutionDisabled": "Execução de scripts está desabilitada na configuração do agente"
-    },
-    "search": {
-      "search": "Buscar",
-      "searchTerm": "Termo de busca",
-      "searchColumn": "Buscar em",
-      "searchHosts": "Buscar hosts",
-      "searchUsers": "Buscar usuários",
-      "searchScripts": "Buscar scripts",
-      "searchTags": "Pesquisar tags"
     }
+  },
+  "security": {
+    "criticalWarning": "AVISO DE SEGURANÇA CRÍTICO",
+    "configWarning": "Aviso de Segurança de Configuração",
+    "securityWarning": "Aviso de Segurança",
+    "loggedInAsDefault": "Você está conectado como o usuário administrador padrão do arquivo de configuração YAML. Este é um risco crítico de segurança! Siga estes passos em ordem:",
+    "defaultCredentialsExist": "As credenciais de administrador padrão ainda estão configuradas no seu arquivo YAML. Por favor, remova admin_userid e admin_password do seu arquivo de configuração e reinicie o servidor para melhorar a segurança.",
+    "securityStepsTitle": "Passos de Segurança Obrigatórios (em ordem):",
+    "step1JwtSecret": "Alterar segredo JWT: Executar",
+    "step2PasswordSalt": "Alterar salt da senha: Executar",
+    "step3CreateUser": "Criar um novo usuário administrador através da página de Usuários nesta interface",
+    "step4LoginNewUser": "Fazer logout e login com sua nova conta de administrador",
+    "step5RemoveCredentials": "Remover admin_userid e admin_password do seu arquivo de configuração YAML",
+    "step6RestartServer": "Reiniciar o servidor com ./run.sh"
+  },
+  "search": {
+    "search": "Buscar",
+    "searchTerm": "Termo de busca",
+    "searchColumn": "Buscar em",
+    "searchHosts": "Buscar hosts",
+    "searchUsers": "Buscar usuários",
+    "searchScripts": "Buscar scripts",
+    "searchTags": "Pesquisar tags"
   },
   "tags": {
     "title": "Tags",

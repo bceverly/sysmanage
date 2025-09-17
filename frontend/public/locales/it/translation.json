@@ -584,16 +584,30 @@
       "cannotDeleteActiveScript": "Impossibile eliminare script con esecuzioni attive",
       "hostNotConnected": "Host non connesso - script in coda per la consegna",
       "scriptExecutionDisabled": "L'esecuzione degli script è disabilitata nella configurazione dell'agent"
-    },
-    "search": {
-      "search": "Cerca",
-      "searchTerm": "Termine di ricerca",
-      "searchColumn": "Cerca in",
-      "searchHosts": "Cerca host",
-      "searchUsers": "Cerca utenti",
-      "searchScripts": "Cerca script",
-      "searchTags": "Cerca tag"
     }
+  },
+  "security": {
+    "criticalWarning": "AVVISO DI SICUREZZA CRITICO",
+    "configWarning": "Avviso di Sicurezza della Configurazione",
+    "securityWarning": "Avviso di Sicurezza",
+    "loggedInAsDefault": "Sei connesso come utente amministratore predefinito dal file di configurazione YAML. Questo è un rischio critico per la sicurezza! Segui questi passaggi nell'ordine:",
+    "defaultCredentialsExist": "Le credenziali amministratore predefinite sono ancora configurate nel tuo file YAML. Rimuovi admin_userid e admin_password dal tuo file di configurazione e riavvia il server per migliorare la sicurezza.",
+    "securityStepsTitle": "Passaggi di Sicurezza Richiesti (nell'ordine):",
+    "step1JwtSecret": "Cambia segreto JWT: Esegui",
+    "step2PasswordSalt": "Cambia salt password: Esegui",
+    "step3CreateUser": "Crea un nuovo utente amministratore tramite la pagina Utenti in questa interfaccia",
+    "step4LoginNewUser": "Disconnettiti e accedi con il tuo nuovo account amministratore",
+    "step5RemoveCredentials": "Rimuovi admin_userid e admin_password dal tuo file di configurazione YAML",
+    "step6RestartServer": "Riavvia il server con ./run.sh"
+  },
+  "search": {
+    "search": "Cerca",
+    "searchTerm": "Termine di ricerca",
+    "searchColumn": "Cerca in",
+    "searchHosts": "Cerca host",
+    "searchUsers": "Cerca utenti",
+    "searchScripts": "Cerca script",
+    "searchTags": "Cerca tag"
   },
   "tags": {
     "title": "Tag",

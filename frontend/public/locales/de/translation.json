@@ -587,6 +587,20 @@
       "scriptExecutionDisabled": "Skript-Ausführung ist in der Agent-Konfiguration deaktiviert"
     }
   },
+  "security": {
+    "criticalWarning": "KRITISCHE SICHERHEITSWARNUNG",
+    "configWarning": "Konfigurations-Sicherheitswarnung",
+    "securityWarning": "Sicherheitswarnung",
+    "loggedInAsDefault": "Sie sind als Standard-Admin-Benutzer aus der YAML-Konfigurationsdatei angemeldet. Das ist ein kritisches Sicherheitsrisiko! Befolgen Sie diese Schritte in der angegebenen Reihenfolge:",
+    "defaultCredentialsExist": "Standard-Admin-Anmeldedaten sind noch in Ihrer YAML-Datei konfiguriert. Bitte entfernen Sie admin_userid und admin_password aus Ihrer Konfigurationsdatei und starten Sie den Server neu, um die Sicherheit zu verbessern.",
+    "securityStepsTitle": "Erforderliche Sicherheitsschritte (in Reihenfolge):",
+    "step1JwtSecret": "JWT-Geheimnis ändern: Ausführen",
+    "step2PasswordSalt": "Passwort-Salt ändern: Ausführen",
+    "step3CreateUser": "Erstellen Sie einen neuen Admin-Benutzer über die Benutzerseite in dieser Oberfläche",
+    "step4LoginNewUser": "Melden Sie sich ab und melden Sie sich mit Ihrem neuen Admin-Konto an",
+    "step5RemoveCredentials": "Entfernen Sie admin_userid und admin_password aus Ihrer YAML-Konfigurationsdatei",
+    "step6RestartServer": "Starten Sie den Server mit ./run.sh neu"
+  },
   "search": {
     "search": "Suchen",
     "searchTerm": "Suchbegriff",

@@ -583,16 +583,30 @@
       "cannotDeleteActiveScript": "无法删除有活动执行的脚本",
       "hostNotConnected": "主机未连接 - 脚本已排队等待传送",
       "scriptExecutionDisabled": "代理配置中禁用了脚本执行"
-    },
-    "search": {
-      "search": "搜索",
-      "searchTerm": "搜索词",
-      "searchColumn": "搜索范围",
-      "searchHosts": "搜索主机",
-      "searchUsers": "搜索用户",
-      "searchScripts": "搜索脚本",
-      "searchTags": "搜索标签"
     }
+  },
+  "security": {
+    "criticalWarning": "重要安全警告",
+    "configWarning": "配置安全警告",
+    "securityWarning": "安全警告",
+    "loggedInAsDefault": "您以YAML配置文件中的默认管理员用户身份登录。这是一个严重的安全风险！请按顺序执行以下步骤：",
+    "defaultCredentialsExist": "默认管理员凭据仍在您的YAML文件中配置。请从您的配置文件中删除admin_userid和admin_password，并重启服务器以提高安全性。",
+    "securityStepsTitle": "必需的安全步骤（按顺序）：",
+    "step1JwtSecret": "更改JWT密钥：运行",
+    "step2PasswordSalt": "更改密码盐值：运行",
+    "step3CreateUser": "通过此界面中的用户页面创建新的管理员用户",
+    "step4LoginNewUser": "注销并使用您的新管理员账户登录",
+    "step5RemoveCredentials": "从您的YAML配置文件中删除admin_userid和admin_password",
+    "step6RestartServer": "使用./run.sh重启服务器"
+  },
+  "search": {
+    "search": "搜索",
+    "searchTerm": "搜索词",
+    "searchColumn": "搜索范围",
+    "searchHosts": "搜索主机",
+    "searchUsers": "搜索用户",
+    "searchScripts": "搜索脚本",
+    "searchTags": "搜索标签"
   },
   "tags": {
     "title": "标签",

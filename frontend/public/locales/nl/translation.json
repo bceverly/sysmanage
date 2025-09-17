@@ -583,16 +583,30 @@
       "cannotDeleteActiveScript": "Kan script met actieve uitvoeringen niet verwijderen",
       "hostNotConnected": "Host is niet verbonden - script in wachtrij voor levering",
       "scriptExecutionDisabled": "Script uitvoering is uitgeschakeld in agent configuratie"
-    },
-    "search": {
-      "search": "Zoeken",
-      "searchTerm": "Zoekterm",
-      "searchColumn": "Zoeken in",
-      "searchHosts": "Hosts zoeken",
-      "searchUsers": "Gebruikers zoeken",
-      "searchScripts": "Scripts zoeken",
-      "searchTags": "Tags zoeken"
     }
+  },
+  "security": {
+    "criticalWarning": "KRITIEKE BEVEILIGINGSWAARSCHUWING",
+    "configWarning": "Configuratie Beveiligingswaarschuwing",
+    "securityWarning": "Beveiligingswaarschuwing",
+    "loggedInAsDefault": "U bent ingelogd als de standaard beheerder van het YAML-configuratiebestand. Dit is een kritiek beveiligingsrisico! Volg deze stappen in volgorde:",
+    "defaultCredentialsExist": "Standaard beheerder inloggegevens zijn nog steeds geconfigureerd in uw YAML-bestand. Verwijder admin_userid en admin_password uit uw configuratiebestand en herstart de server om de beveiliging te verbeteren.",
+    "securityStepsTitle": "Vereiste beveiligingsstappen (op volgorde):",
+    "step1JwtSecret": "JWT-geheim wijzigen: Uitvoeren",
+    "step2PasswordSalt": "Wachtwoord-salt wijzigen: Uitvoeren",
+    "step3CreateUser": "Maak een nieuwe beheerder via de Gebruikers-pagina in deze interface",
+    "step4LoginNewUser": "Log uit en log in met uw nieuwe beheerdersaccount",
+    "step5RemoveCredentials": "Verwijder admin_userid en admin_password uit uw YAML-configuratiebestand",
+    "step6RestartServer": "Herstart de server met ./run.sh"
+  },
+  "search": {
+    "search": "Zoeken",
+    "searchTerm": "Zoekterm",
+    "searchColumn": "Zoeken in",
+    "searchHosts": "Hosts zoeken",
+    "searchUsers": "Gebruikers zoeken",
+    "searchScripts": "Scripts zoeken",
+    "searchTags": "Tags zoeken"
   },
   "tags": {
     "title": "Tags",

@@ -581,16 +581,30 @@
       "cannotDeleteActiveScript": "無法刪除有活動執行的腳本",
       "hostNotConnected": "主機未連接 - 腳本已排隊等待傳送",
       "scriptExecutionDisabled": "代理程式配置中停用了腳本執行"
-    },
-    "search": {
-      "search": "搜尋",
-      "searchTerm": "搜尋詞",
-      "searchColumn": "搜尋範圍",
-      "searchHosts": "搜尋主機",
-      "searchUsers": "搜尋使用者",
-      "searchScripts": "搜尋腳本",
-      "searchTags": "搜尋標籤"
     }
+  },
+  "security": {
+    "criticalWarning": "重要安全警告",
+    "configWarning": "配置安全警告",
+    "securityWarning": "安全警告",
+    "loggedInAsDefault": "您以YAML配置檔案中的預設管理員使用者身份登入。這是一個嚴重的安全風險！請按順序執行以下步驟：",
+    "defaultCredentialsExist": "預設管理員憑據仍在您的YAML檔案中配置。請從您的配置檔案中刪除admin_userid和admin_password，並重新啟動伺服器以提高安全性。",
+    "securityStepsTitle": "必需的安全步驟（按順序）：",
+    "step1JwtSecret": "更改JWT密鑰：執行",
+    "step2PasswordSalt": "更改密碼鹽值：執行",
+    "step3CreateUser": "透過此介面中的使用者頁面建立新的管理員使用者",
+    "step4LoginNewUser": "登出並使用您的新管理員帳戶登入",
+    "step5RemoveCredentials": "從您的YAML配置檔案中刪除admin_userid和admin_password",
+    "step6RestartServer": "使用./run.sh重新啟動伺服器"
+  },
+  "search": {
+    "search": "搜尋",
+    "searchTerm": "搜尋詞",
+    "searchColumn": "搜尋範圍",
+    "searchHosts": "搜尋主機",
+    "searchUsers": "搜尋使用者",
+    "searchScripts": "搜尋腳本",
+    "searchTags": "搜尋標籤"
   },
   "tags": {
     "title": "標籤",

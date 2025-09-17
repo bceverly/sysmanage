@@ -582,16 +582,30 @@
       "cannotDeleteActiveScript": "활성 실행이 있는 스크립트는 삭제할 수 없습니다",
       "hostNotConnected": "호스트가 연결되어 있지 않습니다 - 스크립트가 배달 대기 중입니다",
       "scriptExecutionDisabled": "에이전트 구성에서 스크립트 실행이 비활성화되었습니다"
-    },
-    "search": {
-      "search": "검색",
-      "searchTerm": "검색어",
-      "searchColumn": "검색 대상",
-      "searchHosts": "호스트 검색",
-      "searchUsers": "사용자 검색",
-      "searchScripts": "스크립트 검색",
-      "searchTags": "태그 검색"
     }
+  },
+  "security": {
+    "criticalWarning": "중요한 보안 경고",
+    "configWarning": "구성 보안 경고",
+    "securityWarning": "보안 경고",
+    "loggedInAsDefault": "YAML 구성 파일의 기본 관리자 사용자로 로그인되어 있습니다. 이는 중요한 보안 위험입니다! 다음 단계를 순서대로 따르세요:",
+    "defaultCredentialsExist": "기본 관리자 자격 증명이 여전히 YAML 파일에 구성되어 있습니다. 구성 파일에서 admin_userid 및 admin_password를 제거하고 보안을 향상시키기 위해 서버를 다시 시작하세요.",
+    "securityStepsTitle": "필수 보안 단계 (순서대로):",
+    "step1JwtSecret": "JWT 비밀 변경: 실행",
+    "step2PasswordSalt": "비밀번호 솔트 변경: 실행",
+    "step3CreateUser": "이 인터페이스의 사용자 페이지를 통해 새 관리자 사용자 생성",
+    "step4LoginNewUser": "로그아웃하고 새 관리자 계정으로 로그인",
+    "step5RemoveCredentials": "YAML 구성 파일에서 admin_userid 및 admin_password 제거",
+    "step6RestartServer": "./run.sh로 서버 다시 시작"
+  },
+  "search": {
+    "search": "검색",
+    "searchTerm": "검색어",
+    "searchColumn": "검색 대상",
+    "searchHosts": "호스트 검색",
+    "searchUsers": "사용자 검색",
+    "searchScripts": "스크립트 검색",
+    "searchTags": "태그 검색"
   },
   "tags": {
     "title": "태그",

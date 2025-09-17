@@ -604,8 +604,15 @@
     "criticalWarning": "CRITICAL SECURITY WARNING",
     "configWarning": "Configuration Security Warning",
     "securityWarning": "Security Warning",
-    "loggedInAsDefault": "You are logged in as the default admin user from the YAML configuration file. This is a security risk! Please create a new admin user, log in with that account, remove the admin credentials from your YAML configuration file, and restart the server.",
-    "defaultCredentialsExist": "Default admin credentials are still configured in your YAML file. Please remove the admin_userid and admin_password from your configuration file and restart the server to improve security."
+    "loggedInAsDefault": "You are logged in as the default admin user from the YAML configuration file. This is a critical security risk! Follow these steps in order:",
+    "defaultCredentialsExist": "Default admin credentials are still configured in your YAML file. Please remove the admin_userid and admin_password from your configuration file and restart the server to improve security.",
+    "securityStepsTitle": "Required Security Steps (in order):",
+    "step1JwtSecret": "Change JWT secret: Run",
+    "step2PasswordSalt": "Change password salt: Run",
+    "step3CreateUser": "Create a new admin user via the Users page in this interface",
+    "step4LoginNewUser": "Log out and log in with your new admin account",
+    "step5RemoveCredentials": "Remove admin_userid and admin_password from your YAML configuration file",
+    "step6RestartServer": "Restart the server with ./run.sh"
   },
   "search": {
     "search": "Search",

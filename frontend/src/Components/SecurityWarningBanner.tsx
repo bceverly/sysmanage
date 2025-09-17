@@ -55,7 +55,15 @@ const SecurityWarningBanner: React.FC = () => {
           
           // Add height for credentials warning
           if (hasCredentials) {
-            calculatedHeight += 90; // For credentials warning text with better spacing
+            // Check if user is logged in as default (needs step-by-step instructions)
+            const currentUserId = localStorage.getItem('userid');
+            const isLoggedInAsDefault = currentUserId === status.defaultUserId;
+
+            if (isLoggedInAsDefault) {
+              calculatedHeight += 280; // For detailed step-by-step instructions
+            } else {
+              calculatedHeight += 90; // For basic credentials warning
+            }
           }
           
           // Add height for each security warning (JWT, salt, etc.)
@@ -153,9 +161,50 @@ const SecurityWarningBanner: React.FC = () => {
                   {t('security.criticalWarning', 'CRITICAL SECURITY WARNING')}
                 </AlertTitle>
                 <Box sx={{ fontSize: '16px', lineHeight: 1.5 }}>
-                  {t('security.loggedInAsDefault', 
-                    'You are logged in as the default admin user from the YAML configuration file. This is a security risk! Please create a new admin user, log in with that account, remove the admin credentials from your YAML configuration file, and restart the server.'
+                  {t('security.loggedInAsDefault',
+                    'You are logged in as the default admin user from the YAML configuration file. This is a critical security risk! Follow these steps in order:'
                   )}
+                </Box>
+                <Box sx={{ mt: 2, fontSize: '15px', lineHeight: 1.6 }}>
+                  <Box sx={{ fontWeight: 'bold', mb: 1 }}>
+                    {t('security.securityStepsTitle', 'Required Security Steps (in order):')}
+                  </Box>
+                  <Box sx={{ ml: 2 }}>
+                    <Box sx={{ mb: 1 }}>
+                      1. {t('security.step1JwtSecret', 'Change JWT secret: Run')}{' '}
+                      <Box component="span" sx={{
+                        fontFamily: 'monospace',
+                        backgroundColor: 'rgba(255,255,255,0.2)',
+                        padding: '2px 6px',
+                        borderRadius: '3px'
+                      }}>
+                        python3 scripts/migrate-security-config.py --jwt-only
+                      </Box>
+                    </Box>
+                    <Box sx={{ mb: 1 }}>
+                      2. {t('security.step2PasswordSalt', 'Change password salt: Run')}{' '}
+                      <Box component="span" sx={{
+                        fontFamily: 'monospace',
+                        backgroundColor: 'rgba(255,255,255,0.2)',
+                        padding: '2px 6px',
+                        borderRadius: '3px'
+                      }}>
+                        python3 scripts/migrate-security-config.py --salt-only
+                      </Box>
+                    </Box>
+                    <Box sx={{ mb: 1 }}>
+                      3. {t('security.step3CreateUser', 'Create a new admin user via the Users page in this interface')}
+                    </Box>
+                    <Box sx={{ mb: 1 }}>
+                      4. {t('security.step4LoginNewUser', 'Log out and log in with your new admin account')}
+                    </Box>
+                    <Box sx={{ mb: 1 }}>
+                      5. {t('security.step5RemoveCredentials', 'Remove admin_userid and admin_password from your YAML configuration file')}
+                    </Box>
+                    <Box>
+                      6. {t('security.step6RestartServer', 'Restart the server with ./run.sh')}
+                    </Box>
+                  </Box>
                 </Box>
               </Box>
             )}

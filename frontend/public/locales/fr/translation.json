@@ -585,6 +585,20 @@
       "scriptExecutionDisabled": "L'exécution de scripts est désactivée dans la configuration de l'agent"
     }
   },
+  "security": {
+    "criticalWarning": "AVERTISSEMENT DE SÉCURITÉ CRITIQUE",
+    "configWarning": "Avertissement de Sécurité de Configuration",
+    "securityWarning": "Avertissement de Sécurité",
+    "loggedInAsDefault": "Vous êtes connecté en tant qu'utilisateur administrateur par défaut du fichier de configuration YAML. C'est un risque de sécurité critique ! Suivez ces étapes dans l'ordre :",
+    "defaultCredentialsExist": "Les identifiants d'administrateur par défaut sont toujours configurés dans votre fichier YAML. Veuillez supprimer admin_userid et admin_password de votre fichier de configuration et redémarrer le serveur pour améliorer la sécurité.",
+    "securityStepsTitle": "Étapes de Sécurité Requises (dans l'ordre) :",
+    "step1JwtSecret": "Changer le secret JWT : Exécuter",
+    "step2PasswordSalt": "Changer le sel de mot de passe : Exécuter",
+    "step3CreateUser": "Créer un nouvel utilisateur administrateur via la page Utilisateurs de cette interface",
+    "step4LoginNewUser": "Se déconnecter et se reconnecter avec votre nouveau compte administrateur",
+    "step5RemoveCredentials": "Supprimer admin_userid et admin_password de votre fichier de configuration YAML",
+    "step6RestartServer": "Redémarrer le serveur avec ./run.sh"
+  },
   "search": {
     "search": "Rechercher",
     "searchTerm": "Terme de recherche",

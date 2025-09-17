@@ -585,16 +585,30 @@
       "cannotDeleteActiveScript": "アクティブな実行があるスクリプトは削除できません",
       "hostNotConnected": "ホストが接続されていません - スクリプトは配信待ちです",
       "scriptExecutionDisabled": "エージェント設定でスクリプト実行が無効になっています"
-    },
-    "search": {
-      "search": "検索",
-      "searchTerm": "検索語",
-      "searchColumn": "検索対象",
-      "searchHosts": "ホストを検索",
-      "searchUsers": "ユーザーを検索",
-      "searchScripts": "スクリプトを検索",
-      "searchTags": "タグを検索"
     }
+  },
+  "security": {
+    "criticalWarning": "重要なセキュリティ警告",
+    "configWarning": "設定セキュリティ警告",
+    "securityWarning": "セキュリティ警告",
+    "loggedInAsDefault": "YAMLコンフィギュレーションファイルからデフォルトの管理者ユーザーとしてログインしています。これは重要なセキュリティリスクです！次の手順を順番に実行してください：",
+    "defaultCredentialsExist": "デフォルトの管理者認証情報がまだYAMLファイルに設定されています。コンフィギュレーションファイルからadmin_useridとadmin_passwordを削除し、セキュリティを向上させるためにサーバーを再起動してください。",
+    "securityStepsTitle": "必要なセキュリティ手順（順番に）：",
+    "step1JwtSecret": "JWTシークレットを変更：実行",
+    "step2PasswordSalt": "パスワードソルトを変更：実行",
+    "step3CreateUser": "このインターフェースのユーザーページで新しい管理者ユーザーを作成",
+    "step4LoginNewUser": "ログアウトして新しい管理者アカウントでログイン",
+    "step5RemoveCredentials": "YAMLコンフィギュレーションファイルからadmin_useridとadmin_passwordを削除",
+    "step6RestartServer": "./run.shでサーバーを再起動"
+  },
+  "search": {
+    "search": "検索",
+    "searchTerm": "検索語",
+    "searchColumn": "検索対象",
+    "searchHosts": "ホストを検索",
+    "searchUsers": "ユーザーを検索",
+    "searchScripts": "スクリプトを検索",
+    "searchTags": "タグを検索"
   },
   "tags": {
     "title": "タグ",

@@ -588,6 +588,20 @@
       "scriptExecutionDisabled": "تنفيذ السكريبتات معطل في إعدادات الوكيل"
     }
   },
+  "security": {
+    "criticalWarning": "تحذير أمني حرج",
+    "configWarning": "تحذير أمني للتكوين",
+    "securityWarning": "تحذير أمني",
+    "loggedInAsDefault": "أنت مسجل الدخول كمدير افتراضي من ملف تكوين YAML. هذا خطر أمني حرج! اتبع هذه الخطوات بالترتيب:",
+    "defaultCredentialsExist": "بيانات اعتماد المدير الافتراضية لا تزال مكونة في ملف YAML الخاص بك. يرجى إزالة admin_userid و admin_password من ملف التكوين الخاص بك وإعادة تشغيل الخادم لتحسين الأمان.",
+    "securityStepsTitle": "خطوات الأمان المطلوبة (بالترتيب):",
+    "step1JwtSecret": "تغيير سر JWT: شغل",
+    "step2PasswordSalt": "تغيير ملح كلمة المرور: شغل",
+    "step3CreateUser": "إنشاء مستخدم مدير جديد عبر صفحة المستخدمين في هذه الواجهة",
+    "step4LoginNewUser": "تسجيل الخروج وتسجيل الدخول بحساب المدير الجديد",
+    "step5RemoveCredentials": "إزالة admin_userid و admin_password من ملف تكوين YAML الخاص بك",
+    "step6RestartServer": "إعادة تشغيل الخادم باستخدام ./run.sh"
+  },
   "search": {
     "search": "بحث",
     "searchTerm": "بحث",
