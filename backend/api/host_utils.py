@@ -363,23 +363,45 @@ def update_host_timestamp(host_id: int, field_name: str) -> None:
 
 
 async def update_or_create_host(
-    db_session, hostname: str, ipv4: str = None, ipv6: str = None
+    db_session,
+    hostname: str,
+    ipv4: str = None,
+    ipv6: str = None,
+    script_execution_enabled: bool = False,
 ):
     """
     Update existing host record or create a new one.
     """
+    import logging
+
+    logger = logging.getLogger(__name__)
+    logger.info("=== HOST UTILS DEBUG ===")
+    logger.info("Hostname: %s", hostname)
+    logger.info("Script execution enabled parameter: %s", script_execution_enabled)
+
     host = db_session.query(models.Host).filter(models.Host.fqdn == hostname).first()
+    logger.info("Found existing host: %s", host is not None)
 
     if host:
         # Update existing host
+        logger.info(
+            "Updating existing host with script_execution_enabled=%s",
+            script_execution_enabled,
+        )
         host.ipv4 = ipv4
         host.ipv6 = ipv6
         host.last_access = datetime.now(timezone.utc)
         host.active = True
         host.status = "up"
+        # Update script execution status from agent
+        host.script_execution_enabled = script_execution_enabled
         # Don't modify approval_status for existing hosts - preserve the current status
     else:
         # Create new host with pending approval status
+        logger.info(
+            "Creating new host with script_execution_enabled=%s",
+            script_execution_enabled,
+        )
         host = models.Host(
             fqdn=hostname,
             ipv4=ipv4,
@@ -388,6 +410,7 @@ async def update_or_create_host(
             active=True,
             status="up",
             approval_status="pending",  # New hosts need approval
+            script_execution_enabled=script_execution_enabled,  # Set from agent message
         )
         db_session.add(host)
 
