@@ -50,10 +50,25 @@ async def handle_system_info(db: Session, connection, message_data: dict):
     platform = message_data.get("platform")
 
     # System info received from agent
+    debug_logger.info("=== SYSTEM INFO DEBUG ===")
+    debug_logger.info("Hostname: %s", hostname)
+    debug_logger.info("Message data keys: %s", list(message_data.keys()))
+    debug_logger.info(
+        "Script execution enabled in message: %s",
+        message_data.get("script_execution_enabled"),
+    )
+    debug_logger.info("========================")
 
     if hostname:
-        # Update database
-        host = await update_or_create_host(db, hostname, ipv4, ipv6)
+        # Update database - pass script execution status for new host creation
+        script_execution_enabled = message_data.get("script_execution_enabled", False)
+        debug_logger.info(
+            "Passing script_execution_enabled=%s to update_or_create_host",
+            script_execution_enabled,
+        )
+        host = await update_or_create_host(
+            db, hostname, ipv4, ipv6, script_execution_enabled
+        )
 
         # Check approval status
         debug_logger.info("Host %s approval status: %s", hostname, host.approval_status)
@@ -187,9 +202,10 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                 if has_hostname and has_ipv4 and has_ipv6:
                     # Create new host
                     is_privileged = message_data.get("is_privileged", False)
-                    # NOTE: Script execution status should be False by default for new hosts
-                    # It will be properly set during registration or through admin configuration
-                    script_execution_enabled = False
+                    # Get script execution status from agent message, default to False for security
+                    script_execution_enabled = message_data.get(
+                        "script_execution_enabled", False
+                    )
                     enabled_shells = message_data.get("enabled_shells")
                     import json
 
