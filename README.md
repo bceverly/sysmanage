@@ -71,15 +71,17 @@ python3.11 -m venv .venv  # or python3.12
 source .venv/bin/activate
 # Note: On BSD systems (FreeBSD, OpenBSD, NetBSD), use: . .venv/bin/activate
 
-# 3. Install dependencies
-# Note: Rust is required for some Python dependencies
-# Install Rust: https://rustup.rs/ or use your package manager
-pip install --upgrade pip
-pip install -r requirements.txt
-
-# 4. Setup database (see documentation for detailed instructions)
+# 3. Setup database (see documentation for detailed instructions)
+# Install PostgreSQL (required before installing Python dependencies)
 # Create PostgreSQL database and user
 # Configure /etc/sysmanage.yaml
+
+# 4. Install dependencies
+# Note: Rust is required for some Python dependencies
+# Install Rust: https://rustup.rs/ or use your package manager
+# FreeBSD users also need: sudo pkg install jpeg-turbo tiff freetype2 png webp lcms2
+pip install --upgrade pip
+pip install -r requirements.txt
 
 # 5. Run migrations
 alembic upgrade head
@@ -88,9 +90,7 @@ alembic upgrade head
 cd frontend && npm install && cd ..
 
 # 7. Start the application
-uvicorn backend.main:app --reload --host 0.0.0.0 --port 6443
-# In another terminal:
-cd frontend && npm run dev
+make start
 ```
 
 ## Development
