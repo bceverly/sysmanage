@@ -7,6 +7,10 @@ Run this after: pip install -r requirements.txt
 import subprocess
 import sys
 import os
+import warnings
+
+# Suppress urllib3 LibreSSL warning on OpenBSD
+warnings.filterwarnings('ignore', message='urllib3 v2 only supports OpenSSL')
 
 def install_webdriver():
     """Install Chrome WebDriver for screenshot capabilities."""
