@@ -63,4 +63,7 @@ Babel==2.16.0
 reportlab==4.0.9
 safety==3.6.1
 safety-schemas==0.0.14
-playwright>=1.40.0
+# playwright==1.55.0  # Not available on OpenBSD - use alternative tools
+selenium==4.25.0  # Use older version compatible with urllib3 v1.x
+webdriver-manager>=4.0.0
+urllib3<2.0.0  # Use v1.x for LibreSSL compatibility on OpenBSD
