@@ -62,3 +62,4 @@ zope.interface==7.2
 Babel==2.16.0
 safety==3.6.1
 safety-schemas==0.0.14
+playwright>=1.40.0

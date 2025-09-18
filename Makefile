@@ -20,7 +20,7 @@ help:
 	@echo "  make security-upgrades - Check for security package upgrades"
 	@echo "  make setup         - Install development dependencies"
 	@echo "  make clean         - Clean test artifacts and cache"
-	@echo "  make install-dev   - Install all development tools"
+	@echo "  make install-dev   - Install all development tools (includes Playwright browsers)"
 
 # Virtual environment activation
 VENV := .venv
@@ -52,6 +52,10 @@ endif
 install-dev: $(VENV_ACTIVATE)
 	@echo "Installing Python development dependencies..."
 	@$(PIP) install pytest pytest-cov pytest-asyncio pylint black isort bandit safety
+	@echo "Installing requirements.txt (includes Playwright)..."
+	@$(PIP) install -r requirements.txt
+	@echo "Installing Playwright browsers..."
+	@$(PYTHON) -m playwright install chromium
 	@echo "Installing TypeScript/React development dependencies..."
 	@cd frontend && npm install
 	@echo "Installing ESLint security plugins..."
