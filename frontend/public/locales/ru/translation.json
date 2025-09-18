@@ -3,11 +3,11 @@
     "dashboard": "Панель управления",
     "hosts": "Хосты",
     "users": "Пользователи",
-    "logout": "Выйти",
-    "logoAlt": "SysManage",
     "updates": "Обновления",
     "scripts": "Скрипты",
-    "settings": "Настройки"
+    "reports": "Отчеты",
+    "settings": "Настройки",
+    "logout": "Выйти"
   },
   "login": {
     "title": "Войти в SysManage",

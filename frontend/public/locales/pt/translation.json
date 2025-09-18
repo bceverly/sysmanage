@@ -3,10 +3,11 @@
     "dashboard": "Painel",
     "hosts": "Hosts",
     "users": "Usuários",
-    "logout": "Sair",
     "updates": "Atualizações",
     "scripts": "Scripts",
-    "settings": "Configurações"
+    "reports": "Relatórios",
+    "settings": "Configurações",
+    "logout": "Sair"
   },
   "login": {
     "title": "Entrar no SysManage",

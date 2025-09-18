@@ -3,11 +3,11 @@
     "dashboard": "대시보드",
     "hosts": "호스트",
     "users": "사용자",
-    "logout": "로그아웃",
-    "logoAlt": "SysManage",
     "updates": "업데이트",
     "scripts": "스크립트",
-    "settings": "설정"
+    "reports": "보고서",
+    "settings": "설정",
+    "logout": "로그아웃"
   },
   "login": {
     "title": "SysManage 로그인",

@@ -3,10 +3,11 @@
     "dashboard": "Dashboard",
     "hosts": "Host",
     "users": "Utenti",
-    "logout": "Esci",
     "updates": "Aggiornamenti",
     "scripts": "Script",
-    "settings": "Impostazioni"
+    "reports": "Rapporti",
+    "settings": "Impostazioni",
+    "logout": "Esci"
   },
   "login": {
     "title": "Accedi a SysManage",

@@ -3,11 +3,11 @@
     "dashboard": "Dashboard",
     "hosts": "Hosts",
     "users": "Gebruikers",
-    "logout": "Uitloggen",
-    "logoAlt": "SysManage",
     "updates": "Updates",
     "scripts": "Scripts",
-    "settings": "Instellingen"
+    "reports": "Rapporten",
+    "settings": "Instellingen",
+    "logout": "Uitloggen"
   },
   "login": {
     "title": "Inloggen bij SysManage",

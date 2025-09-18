@@ -5,9 +5,9 @@
     "users": "Benutzer",
     "updates": "Updates",
     "scripts": "Skripte",
+    "reports": "Berichte",
     "settings": "Einstellungen",
-    "logout": "Abmelden",
-    "logoAlt": "SysManage"
+    "logout": "Abmelden"
   },
   "login": {
     "title": "Bei SysManage anmelden",

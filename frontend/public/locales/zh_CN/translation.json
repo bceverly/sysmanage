@@ -3,11 +3,11 @@
     "dashboard": "仪表板",
     "hosts": "主机",
     "users": "用户",
-    "logout": "退出登录",
-    "logoAlt": "SysManage",
     "updates": "更新",
     "scripts": "脚本",
-    "settings": "设置"
+    "reports": "报告",
+    "settings": "设置",
+    "logout": "退出登录"
   },
   "login": {
     "title": "登录 SysManage",

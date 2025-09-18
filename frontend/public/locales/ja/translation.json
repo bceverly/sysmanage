@@ -3,11 +3,11 @@
     "dashboard": "ダッシュボード",
     "hosts": "ホスト",
     "users": "ユーザー",
-    "logout": "ログアウト",
-    "logoAlt": "SysManage",
     "updates": "アップデート",
     "scripts": "スクリプト",
-    "settings": "設定"
+    "reports": "レポート",
+    "settings": "設定",
+    "logout": "ログアウト"
   },
   "login": {
     "title": "SysManageにログイン",

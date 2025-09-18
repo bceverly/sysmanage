@@ -4,10 +4,10 @@
     "hosts": "Hosts",
     "users": "Usuarios",
     "updates": "Actualizaciones",
-    "logout": "Cerrar Sesión",
-    "logoAlt": "SysManage",
     "scripts": "Scripts",
-    "settings": "Configuración"
+    "reports": "Informes",
+    "settings": "Configuración",
+    "logout": "Cerrar Sesión"
   },
   "login": {
     "title": "Iniciar Sesión en SysManage",

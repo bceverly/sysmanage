@@ -3,11 +3,11 @@
     "dashboard": "Tableau de bord",
     "hosts": "Hôtes",
     "users": "Utilisateurs",
-    "logout": "Déconnexion",
-    "logoAlt": "SysManage",
     "updates": "Mises à jour",
     "scripts": "Scripts",
-    "settings": "Paramètres"
+    "reports": "Rapports",
+    "settings": "Paramètres",
+    "logout": "Déconnexion"
   },
   "login": {
     "title": "Connexion à SysManage",
