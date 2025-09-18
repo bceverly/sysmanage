@@ -404,3 +404,109 @@ msgstr "Error al quitar etiqueta del host: %(error)s"
 
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "Error al obtener etiquetas del host: %(error)s"
+
+# Reports-related strings
+msgid "Generated"
+msgstr "Generado"
+
+msgid "Total Hosts"
+msgstr "Total de Hosts"
+
+msgid "Total Users"
+msgstr "Total de Usuarios"
+
+msgid "No hosts are currently registered in the system."
+msgstr "No hay hosts registrados actualmente en el sistema."
+
+msgid "No users are currently registered in the system."
+msgstr "No hay usuarios registrados actualmente en el sistema."
+
+msgid "Hostname"
+msgstr "Nombre del host"
+
+msgid "FQDN"
+msgstr "FQDN"
+
+msgid "IPv4"
+msgstr "IPv4"
+
+msgid "IPv6"
+msgstr "IPv6"
+
+msgid "OS"
+msgstr "SO"
+
+msgid "Version"
+msgstr "Versión"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "Last Seen"
+msgstr "Visto por última vez"
+
+msgid "Tags"
+msgstr "Etiquetas"
+
+msgid "No tags"
+msgstr "Sin etiquetas"
+
+msgid "User ID"
+msgstr "ID de usuario"
+
+msgid "First Name"
+msgstr "Nombre"
+
+msgid "Last Name"
+msgstr "Apellido"
+
+msgid "Last Access"
+msgstr "Último acceso"
+
+msgid "Account Security"
+msgstr "Seguridad de la cuenta"
+
+msgid "Active"
+msgstr "Activo"
+
+msgid "Inactive"
+msgstr "Inactivo"
+
+msgid "Locked"
+msgstr "Bloqueado"
+
+msgid "Normal"
+msgstr "Normal"
+
+msgid "Never"
+msgstr "Nunca"
+
+msgid "N/A"
+msgstr "N/A"
+
+msgid "unknown"
+msgstr "desconocido"
+
+msgid "failed attempts"
+msgstr "intentos fallidos"
+
+msgid "Registered Hosts"
+msgstr "Hosts registrados"
+
+msgid "Hosts with Tags"
+msgstr "Hosts con etiquetas"
+
+msgid "SysManage Users"
+msgstr "Usuarios de SysManage"
+
+msgid "Report type '{report_type}' not found"
+msgstr "Tipo de informe '{report_type}' no encontrado"
+
+msgid "Error generating report: {error}"
+msgstr "Error generando informe: {error}"
+
+msgid "PDF generation not available"
+msgstr "Generación de PDF no disponible"
+
+msgid "PDF generation is not available. Please install reportlab package."
+msgstr "La generación de PDF no está disponible. Por favor instale el paquete reportlab."

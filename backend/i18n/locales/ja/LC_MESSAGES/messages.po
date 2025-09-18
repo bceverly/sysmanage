@@ -411,3 +411,109 @@ msgstr "ホストからのタグ削除に失敗しました: %(error)s"
 
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "ホストタグの取得に失敗しました: %(error)s"
+
+# Reports-related strings
+msgid "Generated"
+msgstr "生成済み"
+
+msgid "Total Hosts"
+msgstr "総ホスト数"
+
+msgid "Total Users"
+msgstr "総ユーザー数"
+
+msgid "No hosts are currently registered in the system."
+msgstr "現在システムに登録されているホストはありません。"
+
+msgid "No users are currently registered in the system."
+msgstr "現在システムに登録されているユーザーはいません。"
+
+msgid "Hostname"
+msgstr "ホスト名"
+
+msgid "FQDN"
+msgstr "FQDN"
+
+msgid "IPv4"
+msgstr "IPv4"
+
+msgid "IPv6"
+msgstr "IPv6"
+
+msgid "OS"
+msgstr "OS"
+
+msgid "Version"
+msgstr "バージョン"
+
+msgid "Status"
+msgstr "ステータス"
+
+msgid "Last Seen"
+msgstr "最終確認"
+
+msgid "Tags"
+msgstr "タグ"
+
+msgid "No tags"
+msgstr "タグなし"
+
+msgid "User ID"
+msgstr "ユーザーID"
+
+msgid "First Name"
+msgstr "名"
+
+msgid "Last Name"
+msgstr "姓"
+
+msgid "Last Access"
+msgstr "最終アクセス"
+
+msgid "Account Security"
+msgstr "アカウントセキュリティ"
+
+msgid "Active"
+msgstr "アクティブ"
+
+msgid "Inactive"
+msgstr "非アクティブ"
+
+msgid "Locked"
+msgstr "ロック済み"
+
+msgid "Normal"
+msgstr "通常"
+
+msgid "Never"
+msgstr "なし"
+
+msgid "N/A"
+msgstr "N/A"
+
+msgid "unknown"
+msgstr "不明"
+
+msgid "failed attempts"
+msgstr "失敗回数"
+
+msgid "Registered Hosts"
+msgstr "登録済みホスト"
+
+msgid "Hosts with Tags"
+msgstr "タグ付きホスト"
+
+msgid "SysManage Users"
+msgstr "SysManageユーザー"
+
+msgid "Report type '{report_type}' not found"
+msgstr "レポートタイプ '{report_type}' が見つかりません"
+
+msgid "Error generating report: {error}"
+msgstr "レポート生成エラー: {error}"
+
+msgid "PDF generation not available"
+msgstr "PDF生成は利用できません"
+
+msgid "PDF generation is not available. Please install reportlab package."
+msgstr "PDF生成は利用できません。reportlabパッケージをインストールしてください。"

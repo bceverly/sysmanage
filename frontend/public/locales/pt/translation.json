@@ -705,5 +705,32 @@
       "enrolling": "Inscrevendo...",
       "enroll": "Inscrever hosts"
     }
+  },
+  "reports": {
+    "title": "Relatórios",
+    "subtitle": "Gere relatórios abrangentes para hosts, usuários e análises de sistema",
+    "tabs": {
+      "hosts": "Hosts",
+      "users": "Usuários"
+    },
+    "search": {
+      "label": "Pesquisar relatórios",
+      "searchBy": "Pesquisar por",
+      "name": "Nome",
+      "description": "Descrição"
+    },
+    "viewReport": "Ver Relatório",
+    "generatePdf": "Gerar PDF",
+    "noResults": "Nenhum relatório encontrado correspondente à sua pesquisa",
+    "viewReportHtml": "Ver Relatório (HTML)",
+    "backToReports": "Voltar aos Relatórios",
+    "reportGenerationError": "Erro ao gerar relatório",
+    "reportLoadingError": "Falha ao carregar relatório",
+    "generatingPdf": "Gerando PDF...",
+    "loadingReport": "Carregando relatório...",
+    "reportNotFound": "Relatório não encontrado",
+    "registeredHostsDescription": "Lista completa de todos os hosts registrados mostrando informações básicas e detalhes do sistema operacional incluindo nome do host, endereços IP, versão do SO e status.",
+    "hostsWithTagsDescription": "Mostra todos os hosts registrados junto com suas tags atribuídas para fácil categorização e filtragem. Útil para organizar hosts por ambiente, propósito ou departamento.",
+    "sysmanageUsersDescription": "Lista abrangente de todos os usuários SysManage mostrando seus perfis, funções, permissões e status da conta. Inclui datas de criação de usuário e horários de último login."
   }
 }

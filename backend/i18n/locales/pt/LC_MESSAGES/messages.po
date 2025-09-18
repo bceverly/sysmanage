@@ -408,3 +408,109 @@ msgstr "Falha ao remover tag do host: %(error)s"
 
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "Falha ao buscar tags do host: %(error)s"
+
+# Reports-related strings
+msgid "Generated"
+msgstr "Gerado"
+
+msgid "Total Hosts"
+msgstr "Total de hosts"
+
+msgid "Total Users"
+msgstr "Total de usuários"
+
+msgid "No hosts are currently registered in the system."
+msgstr "Nenhum host está atualmente registrado no sistema."
+
+msgid "No users are currently registered in the system."
+msgstr "Nenhum usuário está atualmente registrado no sistema."
+
+msgid "Hostname"
+msgstr "Nome do host"
+
+msgid "FQDN"
+msgstr "FQDN"
+
+msgid "IPv4"
+msgstr "IPv4"
+
+msgid "IPv6"
+msgstr "IPv6"
+
+msgid "OS"
+msgstr "SO"
+
+msgid "Version"
+msgstr "Versão"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Last Seen"
+msgstr "Visto pela última vez"
+
+msgid "Tags"
+msgstr "Tags"
+
+msgid "No tags"
+msgstr "Sem tags"
+
+msgid "User ID"
+msgstr "ID do usuário"
+
+msgid "First Name"
+msgstr "Nome"
+
+msgid "Last Name"
+msgstr "Sobrenome"
+
+msgid "Last Access"
+msgstr "Último acesso"
+
+msgid "Account Security"
+msgstr "Segurança da conta"
+
+msgid "Active"
+msgstr "Ativo"
+
+msgid "Inactive"
+msgstr "Inativo"
+
+msgid "Locked"
+msgstr "Bloqueado"
+
+msgid "Normal"
+msgstr "Normal"
+
+msgid "Never"
+msgstr "Nunca"
+
+msgid "N/A"
+msgstr "N/A"
+
+msgid "unknown"
+msgstr "desconhecido"
+
+msgid "failed attempts"
+msgstr "tentativas falhadas"
+
+msgid "Registered Hosts"
+msgstr "Hosts registrados"
+
+msgid "Hosts with Tags"
+msgstr "Hosts com tags"
+
+msgid "SysManage Users"
+msgstr "Usuários SysManage"
+
+msgid "Report type '{report_type}' not found"
+msgstr "Tipo de relatório '{report_type}' não encontrado"
+
+msgid "Error generating report: {error}"
+msgstr "Erro ao gerar relatório: {error}"
+
+msgid "PDF generation not available"
+msgstr "Geração de PDF não disponível"
+
+msgid "PDF generation is not available. Please install reportlab package."
+msgstr "A geração de PDF não está disponível. Por favor instale o pacote reportlab."

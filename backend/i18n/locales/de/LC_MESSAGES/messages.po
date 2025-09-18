@@ -401,3 +401,109 @@ msgstr "Fehler beim Entfernen des Tags vom Host: %(error)s"
 
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "Fehler beim Abrufen der Host-Tags: %(error)s"
+
+# Reports-related strings
+msgid "Generated"
+msgstr "Generiert"
+
+msgid "Total Hosts"
+msgstr "Hosts insgesamt"
+
+msgid "Total Users"
+msgstr "Benutzer insgesamt"
+
+msgid "No hosts are currently registered in the system."
+msgstr "Derzeit sind keine Hosts im System registriert."
+
+msgid "No users are currently registered in the system."
+msgstr "Derzeit sind keine Benutzer im System registriert."
+
+msgid "Hostname"
+msgstr "Hostname"
+
+msgid "FQDN"
+msgstr "FQDN"
+
+msgid "IPv4"
+msgstr "IPv4"
+
+msgid "IPv6"
+msgstr "IPv6"
+
+msgid "OS"
+msgstr "BS"
+
+msgid "Version"
+msgstr "Version"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Last Seen"
+msgstr "Zuletzt gesehen"
+
+msgid "Tags"
+msgstr "Tags"
+
+msgid "No tags"
+msgstr "Keine Tags"
+
+msgid "User ID"
+msgstr "Benutzer-ID"
+
+msgid "First Name"
+msgstr "Vorname"
+
+msgid "Last Name"
+msgstr "Nachname"
+
+msgid "Last Access"
+msgstr "Letzter Zugriff"
+
+msgid "Account Security"
+msgstr "Kontosicherheit"
+
+msgid "Active"
+msgstr "Aktiv"
+
+msgid "Inactive"
+msgstr "Inaktiv"
+
+msgid "Locked"
+msgstr "Gesperrt"
+
+msgid "Normal"
+msgstr "Normal"
+
+msgid "Never"
+msgstr "Niemals"
+
+msgid "N/A"
+msgstr "N/A"
+
+msgid "unknown"
+msgstr "unbekannt"
+
+msgid "failed attempts"
+msgstr "fehlgeschlagene Versuche"
+
+msgid "Registered Hosts"
+msgstr "Registrierte Hosts"
+
+msgid "Hosts with Tags"
+msgstr "Hosts mit Tags"
+
+msgid "SysManage Users"
+msgstr "SysManage-Benutzer"
+
+msgid "Report type '{report_type}' not found"
+msgstr "Berichtstyp '{report_type}' nicht gefunden"
+
+msgid "Error generating report: {error}"
+msgstr "Fehler beim Generieren des Berichts: {error}"
+
+msgid "PDF generation not available"
+msgstr "PDF-Generierung nicht verfügbar"
+
+msgid "PDF generation is not available. Please install reportlab package."
+msgstr "PDF-Generierung ist nicht verfügbar. Bitte installieren Sie das reportlab-Paket."

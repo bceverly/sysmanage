@@ -38,34 +38,13 @@ like to add:
     add/edit/delete users and groups on
     the agent hosts.
 
-8.  Create a github pages hosted static
-    website for sysmanage.org domain that
-    documents the project, its location,
-    and has a "Docs" subsection that
-    stores a lot of the stuff we have
-    cluttering up the README.md files
-    currently.  slim the readme down to
-    the basics and direct the reader to
-    the url.
-
-9.  We need a reporting infrastructure
-    in the server UI that allows us to
-    run reports and then turn them into
-    PDF files.  The first report will
-    be a host status report that lists
-    all of the hosts with the OS name,
-    version, number of needed security
-    updates and number of needed system
-    updates as well as whether a reboot
-    is needed.
-
-10. We need a MFA mechanism using an
+8.  We need a MFA mechanism using an
     authenticator app on someone's
     mobile device as well as the ability
     to send a code via email to their
     registered email address.
 
-11. Have the agent and the server log
+9.  Have the agent and the server log
     their messages to the operating
     system appropriate location but
     fall back to the local logs dir-
@@ -78,7 +57,7 @@ like to add:
     sysmanage-agent subdirectory in
     which the logs should be placed.
 
-12. OS version upgrades - we need a
+10. OS version upgrades - we need a
     feature that will let us detect
     that there is a new operating
     system major version out there
@@ -89,7 +68,7 @@ like to add:
     to apply the upgrade.  Include
     syspatch on OpenBSD.
 
-13. Add an automation tab between
+11. Add an automation tab between
     updates and scripts in the main
     navbar.  on that tab, have an
     "Updates" subtab that allows you

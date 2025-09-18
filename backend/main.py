@@ -30,6 +30,7 @@ from backend.api import (
     password_reset,
     profile,
     queue,
+    reports,
     scripts,
     security,
     tag,
@@ -600,6 +601,10 @@ startup_logger.info("Updates router added")
 startup_logger.info("Adding scripts router with /api/scripts prefix")
 app.include_router(scripts.router, prefix="/api/scripts", tags=["scripts"])
 startup_logger.info("Scripts router added")
+
+startup_logger.info("Adding reports router")
+app.include_router(reports.router, tags=["reports"])
+startup_logger.info("Reports router added")
 
 startup_logger.info("Adding tag router with /api prefix")
 app.include_router(tag.router, prefix="/api", tags=["tags"])

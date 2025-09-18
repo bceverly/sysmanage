@@ -704,5 +704,32 @@
       "enrolling": "Inschrijven...",
       "enroll": "Hosts inschrijven"
     }
+  },
+  "reports": {
+    "title": "Rapporten",
+    "subtitle": "Genereer uitgebreide rapporten voor hosts, gebruikers en systeemanalyses",
+    "tabs": {
+      "hosts": "Hosts",
+      "users": "Gebruikers"
+    },
+    "search": {
+      "label": "Zoek rapporten",
+      "searchBy": "Zoeken op",
+      "name": "Naam",
+      "description": "Beschrijving"
+    },
+    "viewReport": "Rapport bekijken",
+    "generatePdf": "PDF genereren",
+    "noResults": "Geen rapporten gevonden die overeenkomen met uw zoekopdracht",
+    "viewReportHtml": "Rapport bekijken (HTML)",
+    "backToReports": "Terug naar Rapporten",
+    "reportGenerationError": "Fout bij genereren van rapport",
+    "reportLoadingError": "Rapport laden mislukt",
+    "generatingPdf": "PDF genereren...",
+    "loadingReport": "Rapport laden...",
+    "reportNotFound": "Rapport niet gevonden",
+    "registeredHostsDescription": "Volledige lijst van alle geregistreerde hosts met basisinformatie en besturingssysteemdetails inclusief hostnaam, IP-adressen, OS-versie en status.",
+    "hostsWithTagsDescription": "Toont alle geregistreerde hosts samen met hun toegewezen tags voor eenvoudige categorisering en filtering. Handig voor het organiseren van hosts per omgeving, doel of afdeling.",
+    "sysmanageUsersDescription": "Uitgebreide lijst van alle SysManage-gebruikers met hun profielen, rollen, machtigingen en accountstatus. Bevat gebruikersaanmaakdatums en laatste inlogtijden."
   }
 }

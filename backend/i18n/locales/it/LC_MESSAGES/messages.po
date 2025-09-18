@@ -408,3 +408,109 @@ msgstr "Impossibile rimuovere il tag dall'host: %(error)s"
 
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "Impossibile recuperare i tag dell'host: %(error)s"
+
+# Reports-related strings
+msgid "Generated"
+msgstr "Generato"
+
+msgid "Total Hosts"
+msgstr "Totale host"
+
+msgid "Total Users"
+msgstr "Totale utenti"
+
+msgid "No hosts are currently registered in the system."
+msgstr "Nessun host è attualmente registrato nel sistema."
+
+msgid "No users are currently registered in the system."
+msgstr "Nessun utente è attualmente registrato nel sistema."
+
+msgid "Hostname"
+msgstr "Nome host"
+
+msgid "FQDN"
+msgstr "FQDN"
+
+msgid "IPv4"
+msgstr "IPv4"
+
+msgid "IPv6"
+msgstr "IPv6"
+
+msgid "OS"
+msgstr "SO"
+
+msgid "Version"
+msgstr "Versione"
+
+msgid "Status"
+msgstr "Stato"
+
+msgid "Last Seen"
+msgstr "Visto l'ultima volta"
+
+msgid "Tags"
+msgstr "Tag"
+
+msgid "No tags"
+msgstr "Nessun tag"
+
+msgid "User ID"
+msgstr "ID utente"
+
+msgid "First Name"
+msgstr "Nome"
+
+msgid "Last Name"
+msgstr "Cognome"
+
+msgid "Last Access"
+msgstr "Ultimo accesso"
+
+msgid "Account Security"
+msgstr "Sicurezza account"
+
+msgid "Active"
+msgstr "Attivo"
+
+msgid "Inactive"
+msgstr "Inattivo"
+
+msgid "Locked"
+msgstr "Bloccato"
+
+msgid "Normal"
+msgstr "Normale"
+
+msgid "Never"
+msgstr "Mai"
+
+msgid "N/A"
+msgstr "N/A"
+
+msgid "unknown"
+msgstr "sconosciuto"
+
+msgid "failed attempts"
+msgstr "tentativi falliti"
+
+msgid "Registered Hosts"
+msgstr "Host registrati"
+
+msgid "Hosts with Tags"
+msgstr "Host con tag"
+
+msgid "SysManage Users"
+msgstr "Utenti SysManage"
+
+msgid "Report type '{report_type}' not found"
+msgstr "Tipo di report '{report_type}' non trovato"
+
+msgid "Error generating report: {error}"
+msgstr "Errore nella generazione del report: {error}"
+
+msgid "PDF generation not available"
+msgstr "Generazione PDF non disponibile"
+
+msgid "PDF generation is not available. Please install reportlab package."
+msgstr "La generazione PDF non è disponibile. Installare il pacchetto reportlab."

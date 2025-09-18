@@ -98,6 +98,15 @@ const Navbar = () => {
                 {t('nav.scripts')}
               </NavLink>
             </li>
+            <li className="nav__item">
+              <NavLink
+                to="/reports"
+                className="nav__link"
+                onClick={closeMenuOnMobile}
+              >
+                {t('nav.reports')}
+              </NavLink>
+            </li>
           </ul>
           <div className="nav__close" id="nav-close" onClick={toggleMenu}>
               <IoClose />

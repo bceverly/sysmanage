@@ -411,3 +411,109 @@ msgstr "Ошибка удаления тега с хоста: %(error)s"
 
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "Ошибка получения тегов хоста: %(error)s"
+
+# Reports-related strings
+msgid "Generated"
+msgstr "Создано"
+
+msgid "Total Hosts"
+msgstr "Всего хостов"
+
+msgid "Total Users"
+msgstr "Всего пользователей"
+
+msgid "No hosts are currently registered in the system."
+msgstr "В системе в настоящее время не зарегистрировано ни одного хоста."
+
+msgid "No users are currently registered in the system."
+msgstr "В системе в настоящее время не зарегистрировано ни одного пользователя."
+
+msgid "Hostname"
+msgstr "Имя хоста"
+
+msgid "FQDN"
+msgstr "FQDN"
+
+msgid "IPv4"
+msgstr "IPv4"
+
+msgid "IPv6"
+msgstr "IPv6"
+
+msgid "OS"
+msgstr "ОС"
+
+msgid "Version"
+msgstr "Версия"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "Last Seen"
+msgstr "Последний раз видели"
+
+msgid "Tags"
+msgstr "Теги"
+
+msgid "No tags"
+msgstr "Нет тегов"
+
+msgid "User ID"
+msgstr "ID пользователя"
+
+msgid "First Name"
+msgstr "Имя"
+
+msgid "Last Name"
+msgstr "Фамилия"
+
+msgid "Last Access"
+msgstr "Последний доступ"
+
+msgid "Account Security"
+msgstr "Безопасность аккаунта"
+
+msgid "Active"
+msgstr "Активный"
+
+msgid "Inactive"
+msgstr "Неактивный"
+
+msgid "Locked"
+msgstr "Заблокирован"
+
+msgid "Normal"
+msgstr "Обычный"
+
+msgid "Never"
+msgstr "Никогда"
+
+msgid "N/A"
+msgstr "Н/Д"
+
+msgid "unknown"
+msgstr "неизвестно"
+
+msgid "failed attempts"
+msgstr "неудачные попытки"
+
+msgid "Registered Hosts"
+msgstr "Зарегистрированные хосты"
+
+msgid "Hosts with Tags"
+msgstr "Хосты с тегами"
+
+msgid "SysManage Users"
+msgstr "Пользователи SysManage"
+
+msgid "Report type '{report_type}' not found"
+msgstr "Тип отчета '{report_type}' не найден"
+
+msgid "Error generating report: {error}"
+msgstr "Ошибка создания отчета: {error}"
+
+msgid "PDF generation not available"
+msgstr "Создание PDF недоступно"
+
+msgid "PDF generation is not available. Please install reportlab package."
+msgstr "Создание PDF недоступно. Пожалуйста, установите пакет reportlab."

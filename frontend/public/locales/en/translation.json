@@ -5,6 +5,7 @@
     "users": "Users",
     "updates": "Updates",
     "scripts": "Scripts",
+    "reports": "Reports",
     "settings": "Settings",
     "logout": "Logout"
   },
@@ -744,5 +745,32 @@
       "enrolling": "Enrolling...",
       "enroll": "Enroll Hosts"
     }
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Generate comprehensive reports for hosts, users, and system analytics",
+    "tabs": {
+      "hosts": "Hosts",
+      "users": "Users"
+    },
+    "search": {
+      "label": "Search reports",
+      "searchBy": "Search by",
+      "name": "Name",
+      "description": "Description"
+    },
+    "viewReport": "View Report",
+    "generatePdf": "Generate PDF",
+    "noResults": "No reports found matching your search",
+    "viewReportHtml": "View Report (HTML)",
+    "backToReports": "Back to Reports",
+    "reportGenerationError": "Error generating report",
+    "reportLoadingError": "Failed to load report",
+    "generatingPdf": "Generating PDF...",
+    "loadingReport": "Loading report...",
+    "reportNotFound": "Report not found",
+    "registeredHostsDescription": "Complete listing of all registered hosts showing basic information and operating system details including hostname, IP addresses, OS version, and status.",
+    "hostsWithTagsDescription": "Shows all registered hosts along with their assigned tags for easy categorization and filtering. Useful for organizing hosts by environment, purpose, or department.",
+    "sysmanageUsersDescription": "Comprehensive list of all SysManage users showing their profiles, roles, permissions, and account status. Includes user creation dates and last login times."
   }
 }
