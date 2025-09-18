@@ -26,6 +26,7 @@ A modern, cross-platform system monitoring and management platform with real-tim
 - **🛠️ [Installation Guide](https://sysmanage.org/docs/server/installation.html)** - Complete server installation
 - **⚙️ [Configuration](https://sysmanage.org/docs/server/configuration.html)** - Server configuration options
 - **📋 [Reports & PDF Generation](https://sysmanage.org/docs/server/reports.html)** - Comprehensive reporting system
+- **🧪 [Testing & Playwright](https://sysmanage.org/docs/server/testing.html)** - Testing strategy and E2E testing
 - **🔐 [Security](https://sysmanage.org/docs/security/)** - Security features and best practices
 - **🔌 [API Reference](https://sysmanage.org/docs/api/)** - REST API and WebSocket documentation
 
@@ -109,6 +110,10 @@ python -m pytest tests/ -v
 # Frontend tests only
 cd frontend && npm test
 
+# End-to-End tests (optional - requires Playwright)
+# Note: Playwright may not be available on all platforms (e.g., OpenBSD)
+npm run test:e2e
+
 # Linting
 make lint
 ```
@@ -117,7 +122,7 @@ make lint
 - **Backend**: Perfect 10.00/10 PyLint score, Black formatting, Bandit security scanning
 - **Frontend**: 0 ESLint warnings, TypeScript strict mode
 - **Security**: Comprehensive automated security scanning (Bandit, Semgrep, Safety, Snyk, TruffleHog)
-- **Testing**: 1,432 Python tests, 63 TypeScript tests (100% coverage both frontend and backend)
+- **Testing**: 1,432 Python tests (pytest), 63 TypeScript tests (Vitest), optional E2E tests (Playwright) - 100% coverage both frontend and backend
 
 ## Project Structure
 
