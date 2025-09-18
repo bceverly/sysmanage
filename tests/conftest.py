@@ -163,10 +163,16 @@ def authenticated_client(db_session, mock_config):
         # Override database dependency
         app.dependency_overrides[get_db] = override_get_db
 
-        # Mock JWT auth
-        with patch("backend.auth.auth_bearer.JWTBearer.__call__", mock_jwt_call):
-            with TestClient(app) as test_client:
-                yield test_client
+        # Override get_current_user dependency to bypass JWT entirely
+        from backend.auth.auth_bearer import get_current_user
+
+        def mock_get_current_user():
+            return "test_user"
+
+        app.dependency_overrides[get_current_user] = mock_get_current_user
+
+        with TestClient(app) as test_client:
+            yield test_client
 
         app.dependency_overrides.clear()
     finally:

@@ -706,5 +706,32 @@
       "enrolling": "登録中...",
       "enroll": "ホストを登録"
     }
+  },
+  "reports": {
+    "title": "レポート",
+    "subtitle": "ホスト、ユーザー、システム分析の包括的なレポートを生成",
+    "tabs": {
+      "hosts": "ホスト",
+      "users": "ユーザー"
+    },
+    "search": {
+      "label": "レポートを検索",
+      "searchBy": "検索条件",
+      "name": "名前",
+      "description": "説明"
+    },
+    "viewReport": "レポートを表示",
+    "generatePdf": "PDF生成",
+    "noResults": "検索に一致するレポートが見つかりません",
+    "viewReportHtml": "レポートを表示 (HTML)",
+    "backToReports": "レポートに戻る",
+    "reportGenerationError": "レポート生成エラー",
+    "reportLoadingError": "レポートの読み込みに失敗しました",
+    "generatingPdf": "PDF生成中...",
+    "loadingReport": "レポート読み込み中...",
+    "reportNotFound": "レポートが見つかりません",
+    "registeredHostsDescription": "ホスト名、IPアドレス、OSバージョン、ステータスを含む基本情報とオペレーティングシステムの詳細を表示する、登録されたすべてのホストの完全なリスト。",
+    "hostsWithTagsDescription": "簡単な分類とフィルタリングのために割り当てられたタグと一緒に登録されたすべてのホストを表示します。環境、目的、部門ごとにホストを整理するのに便利です。",
+    "sysmanageUsersDescription": "プロファイル、役割、権限、アカウントステータスを表示する、すべてのSysManageユーザーの包括的なリスト。ユーザー作成日と最後のログイン時間を含みます。"
   }
 }

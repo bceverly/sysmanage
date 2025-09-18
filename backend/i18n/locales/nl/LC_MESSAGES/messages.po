@@ -407,3 +407,109 @@ msgstr "Fout bij verwijderen van tag van host: %(error)s"
 
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "Fout bij ophalen van host tags: %(error)s"
+
+# Reports-related strings
+msgid "Generated"
+msgstr "Gegenereerd"
+
+msgid "Total Hosts"
+msgstr "Totaal hosts"
+
+msgid "Total Users"
+msgstr "Totaal gebruikers"
+
+msgid "No hosts are currently registered in the system."
+msgstr "Er zijn momenteel geen hosts geregistreerd in het systeem."
+
+msgid "No users are currently registered in the system."
+msgstr "Er zijn momenteel geen gebruikers geregistreerd in het systeem."
+
+msgid "Hostname"
+msgstr "Hostnaam"
+
+msgid "FQDN"
+msgstr "FQDN"
+
+msgid "IPv4"
+msgstr "IPv4"
+
+msgid "IPv6"
+msgstr "IPv6"
+
+msgid "OS"
+msgstr "OS"
+
+msgid "Version"
+msgstr "Versie"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Last Seen"
+msgstr "Laatst gezien"
+
+msgid "Tags"
+msgstr "Tags"
+
+msgid "No tags"
+msgstr "Geen tags"
+
+msgid "User ID"
+msgstr "Gebruikers-ID"
+
+msgid "First Name"
+msgstr "Voornaam"
+
+msgid "Last Name"
+msgstr "Achternaam"
+
+msgid "Last Access"
+msgstr "Laatste toegang"
+
+msgid "Account Security"
+msgstr "Accountbeveiliging"
+
+msgid "Active"
+msgstr "Actief"
+
+msgid "Inactive"
+msgstr "Inactief"
+
+msgid "Locked"
+msgstr "Vergrendeld"
+
+msgid "Normal"
+msgstr "Normaal"
+
+msgid "Never"
+msgstr "Nooit"
+
+msgid "N/A"
+msgstr "N/A"
+
+msgid "unknown"
+msgstr "onbekend"
+
+msgid "failed attempts"
+msgstr "mislukte pogingen"
+
+msgid "Registered Hosts"
+msgstr "Geregistreerde hosts"
+
+msgid "Hosts with Tags"
+msgstr "Hosts met tags"
+
+msgid "SysManage Users"
+msgstr "SysManage-gebruikers"
+
+msgid "Report type '{report_type}' not found"
+msgstr "Rapporttype '{report_type}' niet gevonden"
+
+msgid "Error generating report: {error}"
+msgstr "Fout bij genereren rapport: {error}"
+
+msgid "PDF generation not available"
+msgstr "PDF-generatie niet beschikbaar"
+
+msgid "PDF generation is not available. Please install reportlab package."
+msgstr "PDF-generatie is niet beschikbaar. Installeer het reportlab-pakket."

@@ -702,5 +702,32 @@
       "enrolling": "正在註冊...",
       "enroll": "註冊主機"
     }
+  },
+  "reports": {
+    "title": "報告",
+    "subtitle": "為主機、使用者和系統分析生成全面的報告",
+    "tabs": {
+      "hosts": "主機",
+      "users": "使用者"
+    },
+    "search": {
+      "label": "搜尋報告",
+      "searchBy": "搜尋依據",
+      "name": "名稱",
+      "description": "說明"
+    },
+    "viewReport": "檢視報告",
+    "generatePdf": "產生PDF",
+    "noResults": "找不到符合您搜尋條件的報告",
+    "viewReportHtml": "檢視報告 (HTML)",
+    "backToReports": "返回報告",
+    "reportGenerationError": "報告產生錯誤",
+    "reportLoadingError": "報告載入失敗",
+    "generatingPdf": "正在產生PDF...",
+    "loadingReport": "正在載入報告...",
+    "reportNotFound": "找不到報告",
+    "registeredHostsDescription": "所有已註冊主機的完整清單，顯示基本訊息和作業系統詳情，包括主機名稱、IP位址、作業系統版本和狀態。",
+    "hostsWithTagsDescription": "顯示所有已註冊主機及其指定的標籤，以便進行分類和篩選。有助於按環境、用途或部門組織主機。",
+    "sysmanageUsersDescription": "所有SysManage使用者的全面清單，顯示他們的資料、角色、權限和帳戶狀態。包括使用者建立日期和上次登入時間。"
   }
 }

@@ -400,3 +400,109 @@ msgstr "فشل في إزالة العلامة من المضيف: %(error)s"
 
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "فشل في جلب علامات المضيف: %(error)s"
+
+# Reports-related strings
+msgid "Generated"
+msgstr "تم الإنشاء"
+
+msgid "Total Hosts"
+msgstr "إجمالي المضيفين"
+
+msgid "Total Users"
+msgstr "إجمالي المستخدمين"
+
+msgid "No hosts are currently registered in the system."
+msgstr "لا توجد مضيفات مسجلة حالياً في النظام."
+
+msgid "No users are currently registered in the system."
+msgstr "لا يوجد مستخدمون مسجلون حالياً في النظام."
+
+msgid "Hostname"
+msgstr "اسم المضيف"
+
+msgid "FQDN"
+msgstr "FQDN"
+
+msgid "IPv4"
+msgstr "IPv4"
+
+msgid "IPv6"
+msgstr "IPv6"
+
+msgid "OS"
+msgstr "نظام التشغيل"
+
+msgid "Version"
+msgstr "الإصدار"
+
+msgid "Status"
+msgstr "الحالة"
+
+msgid "Last Seen"
+msgstr "آخر ظهور"
+
+msgid "Tags"
+msgstr "العلامات"
+
+msgid "No tags"
+msgstr "لا توجد علامات"
+
+msgid "User ID"
+msgstr "معرف المستخدم"
+
+msgid "First Name"
+msgstr "الاسم الأول"
+
+msgid "Last Name"
+msgstr "اسم العائلة"
+
+msgid "Last Access"
+msgstr "آخر وصول"
+
+msgid "Account Security"
+msgstr "أمان الحساب"
+
+msgid "Active"
+msgstr "نشط"
+
+msgid "Inactive"
+msgstr "غير نشط"
+
+msgid "Locked"
+msgstr "مقفل"
+
+msgid "Normal"
+msgstr "عادي"
+
+msgid "Never"
+msgstr "أبداً"
+
+msgid "N/A"
+msgstr "غير متوفر"
+
+msgid "unknown"
+msgstr "غير معروف"
+
+msgid "failed attempts"
+msgstr "محاولات فاشلة"
+
+msgid "Registered Hosts"
+msgstr "المضيفات المسجلة"
+
+msgid "Hosts with Tags"
+msgstr "المضيفات مع العلامات"
+
+msgid "SysManage Users"
+msgstr "مستخدمو SysManage"
+
+msgid "Report type '{report_type}' not found"
+msgstr "نوع التقرير '{report_type}' غير موجود"
+
+msgid "Error generating report: {error}"
+msgstr "خطأ في إنشاء التقرير: {error}"
+
+msgid "PDF generation not available"
+msgstr "إنشاء PDF غير متوفر"
+
+msgid "PDF generation is not available. Please install reportlab package."
+msgstr "إنشاء PDF غير متوفر. يرجى تثبيت حزمة reportlab."

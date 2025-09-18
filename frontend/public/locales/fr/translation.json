@@ -704,5 +704,32 @@
       "enrolling": "Inscription en cours...",
       "enroll": "Inscrire les hôtes"
     }
+  },
+  "reports": {
+    "title": "Rapports",
+    "subtitle": "Générez des rapports complets pour les hôtes, les utilisateurs et les analyses système",
+    "tabs": {
+      "hosts": "Hôtes",
+      "users": "Utilisateurs"
+    },
+    "search": {
+      "label": "Rechercher des rapports",
+      "searchBy": "Rechercher par",
+      "name": "Nom",
+      "description": "Description"
+    },
+    "viewReport": "Voir le rapport",
+    "generatePdf": "Générer PDF",
+    "noResults": "Aucun rapport trouvé correspondant à votre recherche",
+    "viewReportHtml": "Voir le rapport (HTML)",
+    "backToReports": "Retour aux rapports",
+    "reportGenerationError": "Erreur lors de la génération du rapport",
+    "reportLoadingError": "Échec du chargement du rapport",
+    "generatingPdf": "Génération du PDF...",
+    "loadingReport": "Chargement du rapport...",
+    "reportNotFound": "Rapport non trouvé",
+    "registeredHostsDescription": "Liste complète de tous les hôtes enregistrés montrant les informations de base et les détails du système d'exploitation incluant le nom d'hôte, les adresses IP, la version de l'OS et le statut.",
+    "hostsWithTagsDescription": "Affiche tous les hôtes enregistrés avec leurs étiquettes assignées pour une catégorisation et un filtrage faciles. Utile pour organiser les hôtes par environnement, objectif ou département.",
+    "sysmanageUsersDescription": "Liste complète de tous les utilisateurs SysManage montrant leurs profils, rôles, permissions et statut de compte. Inclut les dates de création d'utilisateur et les heures de dernière connexion."
   }
 }

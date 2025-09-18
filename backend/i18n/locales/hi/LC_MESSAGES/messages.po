@@ -407,3 +407,109 @@ msgstr "होस्ट से टैग हटाने में असफल:
 
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "होस्ट टैग प्राप्त करने में असफल: %(error)s"
+
+# Reports-related strings
+msgid "Generated"
+msgstr "उत्पन्न"
+
+msgid "Total Hosts"
+msgstr "कुल होस्ट"
+
+msgid "Total Users"
+msgstr "कुल उपयोगकर्ता"
+
+msgid "No hosts are currently registered in the system."
+msgstr "वर्तमान में सिस्टम में कोई होस्ट पंजीकृत नहीं है।"
+
+msgid "No users are currently registered in the system."
+msgstr "वर्तमान में सिस्टम में कोई उपयोगकर्ता पंजीकृत नहीं है।"
+
+msgid "Hostname"
+msgstr "होस्टनाम"
+
+msgid "FQDN"
+msgstr "FQDN"
+
+msgid "IPv4"
+msgstr "IPv4"
+
+msgid "IPv6"
+msgstr "IPv6"
+
+msgid "OS"
+msgstr "OS"
+
+msgid "Version"
+msgstr "संस्करण"
+
+msgid "Status"
+msgstr "स्थिति"
+
+msgid "Last Seen"
+msgstr "अंतिम बार देखा गया"
+
+msgid "Tags"
+msgstr "टैग"
+
+msgid "No tags"
+msgstr "कोई टैग नहीं"
+
+msgid "User ID"
+msgstr "उपयोगकर्ता ID"
+
+msgid "First Name"
+msgstr "पहला नाम"
+
+msgid "Last Name"
+msgstr "अंतिम नाम"
+
+msgid "Last Access"
+msgstr "अंतिम पहुंच"
+
+msgid "Account Security"
+msgstr "खाता सुरक्षा"
+
+msgid "Active"
+msgstr "सक्रिय"
+
+msgid "Inactive"
+msgstr "निष्क्रिय"
+
+msgid "Locked"
+msgstr "लॉक"
+
+msgid "Normal"
+msgstr "सामान्य"
+
+msgid "Never"
+msgstr "कभी नहीं"
+
+msgid "N/A"
+msgstr "लागू नहीं"
+
+msgid "unknown"
+msgstr "अज्ञात"
+
+msgid "failed attempts"
+msgstr "असफल प्रयास"
+
+msgid "Registered Hosts"
+msgstr "पंजीकृत होस्ट"
+
+msgid "Hosts with Tags"
+msgstr "टैग के साथ होस्ट"
+
+msgid "SysManage Users"
+msgstr "SysManage उपयोगकर्ता"
+
+msgid "Report type '{report_type}' not found"
+msgstr "रिपोर्ट प्रकार '{report_type}' नहीं मिला"
+
+msgid "Error generating report: {error}"
+msgstr "रिपोर्ट उत्पन्न करने में त्रुटि: {error}"
+
+msgid "PDF generation not available"
+msgstr "PDF उत्पादन उपलब्ध नहीं"
+
+msgid "PDF generation is not available. Please install reportlab package."
+msgstr "PDF उत्पादन उपलब्ध नहीं है। कृपया reportlab पैकेज इंस्टॉल करें।"

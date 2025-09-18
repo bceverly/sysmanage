@@ -407,3 +407,109 @@ msgstr "从主机移除标签失败: %(error)s"
 
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "获取主机标签失败: %(error)s"
+
+# Reports-related strings
+msgid "Generated"
+msgstr "已生成"
+
+msgid "Total Hosts"
+msgstr "主机总数"
+
+msgid "Total Users"
+msgstr "用户总数"
+
+msgid "No hosts are currently registered in the system."
+msgstr "系统中当前没有注册的主机。"
+
+msgid "No users are currently registered in the system."
+msgstr "系统中当前没有注册的用户。"
+
+msgid "Hostname"
+msgstr "主机名"
+
+msgid "FQDN"
+msgstr "FQDN"
+
+msgid "IPv4"
+msgstr "IPv4"
+
+msgid "IPv6"
+msgstr "IPv6"
+
+msgid "OS"
+msgstr "操作系统"
+
+msgid "Version"
+msgstr "版本"
+
+msgid "Status"
+msgstr "状态"
+
+msgid "Last Seen"
+msgstr "最后在线"
+
+msgid "Tags"
+msgstr "标签"
+
+msgid "No tags"
+msgstr "无标签"
+
+msgid "User ID"
+msgstr "用户ID"
+
+msgid "First Name"
+msgstr "名"
+
+msgid "Last Name"
+msgstr "姓"
+
+msgid "Last Access"
+msgstr "最后访问"
+
+msgid "Account Security"
+msgstr "账户安全"
+
+msgid "Active"
+msgstr "活跃"
+
+msgid "Inactive"
+msgstr "非活跃"
+
+msgid "Locked"
+msgstr "已锁定"
+
+msgid "Normal"
+msgstr "正常"
+
+msgid "Never"
+msgstr "从未"
+
+msgid "N/A"
+msgstr "不适用"
+
+msgid "unknown"
+msgstr "未知"
+
+msgid "failed attempts"
+msgstr "失败尝试"
+
+msgid "Registered Hosts"
+msgstr "已注册主机"
+
+msgid "Hosts with Tags"
+msgstr "带标签的主机"
+
+msgid "SysManage Users"
+msgstr "SysManage用户"
+
+msgid "Report type '{report_type}' not found"
+msgstr "报告类型 '{report_type}' 未找到"
+
+msgid "Error generating report: {error}"
+msgstr "生成报告时出错: {error}"
+
+msgid "PDF generation not available"
+msgstr "PDF生成不可用"
+
+msgid "PDF generation is not available. Please install reportlab package."
+msgstr "PDF生成不可用。请安装reportlab包。"

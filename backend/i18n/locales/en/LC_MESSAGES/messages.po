@@ -113,3 +113,109 @@ msgstr "Failed to remove tag from host: %(error)s"
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "Failed to fetch host tags: %(error)s"
 
+# Reports-related strings
+msgid "Generated"
+msgstr "Generated"
+
+msgid "Total Hosts"
+msgstr "Total Hosts"
+
+msgid "Total Users"
+msgstr "Total Users"
+
+msgid "No hosts are currently registered in the system."
+msgstr "No hosts are currently registered in the system."
+
+msgid "No users are currently registered in the system."
+msgstr "No users are currently registered in the system."
+
+msgid "Hostname"
+msgstr "Hostname"
+
+msgid "FQDN"
+msgstr "FQDN"
+
+msgid "IPv4"
+msgstr "IPv4"
+
+msgid "IPv6"
+msgstr "IPv6"
+
+msgid "OS"
+msgstr "OS"
+
+msgid "Version"
+msgstr "Version"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Last Seen"
+msgstr "Last Seen"
+
+msgid "Tags"
+msgstr "Tags"
+
+msgid "No tags"
+msgstr "No tags"
+
+msgid "User ID"
+msgstr "User ID"
+
+msgid "First Name"
+msgstr "First Name"
+
+msgid "Last Name"
+msgstr "Last Name"
+
+msgid "Last Access"
+msgstr "Last Access"
+
+msgid "Account Security"
+msgstr "Account Security"
+
+msgid "Active"
+msgstr "Active"
+
+msgid "Inactive"
+msgstr "Inactive"
+
+msgid "Locked"
+msgstr "Locked"
+
+msgid "Normal"
+msgstr "Normal"
+
+msgid "Never"
+msgstr "Never"
+
+msgid "N/A"
+msgstr "N/A"
+
+msgid "unknown"
+msgstr "unknown"
+
+msgid "failed attempts"
+msgstr "failed attempts"
+
+msgid "Registered Hosts"
+msgstr "Registered Hosts"
+
+msgid "Hosts with Tags"
+msgstr "Hosts with Tags"
+
+msgid "SysManage Users"
+msgstr "SysManage Users"
+
+msgid "Report type '{report_type}' not found"
+msgstr "Report type '{report_type}' not found"
+
+msgid "Error generating report: {error}"
+msgstr "Error generating report: {error}"
+
+msgid "PDF generation not available"
+msgstr "PDF generation not available"
+
+msgid "PDF generation is not available. Please install reportlab package."
+msgstr "PDF generation is not available. Please install reportlab package."
+

@@ -706,5 +706,32 @@
       "enrolling": "Registrierung läuft...",
       "enroll": "Hosts registrieren"
     }
+  },
+  "reports": {
+    "title": "Berichte",
+    "subtitle": "Erstellen Sie umfassende Berichte für Hosts, Benutzer und Systemanalysen",
+    "tabs": {
+      "hosts": "Hosts",
+      "users": "Benutzer"
+    },
+    "search": {
+      "label": "Berichte durchsuchen",
+      "searchBy": "Suchen nach",
+      "name": "Name",
+      "description": "Beschreibung"
+    },
+    "viewReport": "Bericht anzeigen",
+    "generatePdf": "PDF erstellen",
+    "noResults": "Keine Berichte gefunden, die Ihrer Suche entsprechen",
+    "viewReportHtml": "Bericht anzeigen (HTML)",
+    "backToReports": "Zurück zu Berichten",
+    "reportGenerationError": "Fehler beim Erstellen des Berichts",
+    "reportLoadingError": "Fehler beim Laden des Berichts",
+    "generatingPdf": "PDF wird erstellt...",
+    "loadingReport": "Bericht wird geladen...",
+    "reportNotFound": "Bericht nicht gefunden",
+    "registeredHostsDescription": "Vollständige Auflistung aller registrierten Hosts mit grundlegenden Informationen und Betriebssystemdetails einschließlich Hostname, IP-Adressen, OS-Version und Status.",
+    "hostsWithTagsDescription": "Zeigt alle registrierten Hosts zusammen mit ihren zugewiesenen Tags zur einfachen Kategorisierung und Filterung. Nützlich für die Organisation von Hosts nach Umgebung, Zweck oder Abteilung.",
+    "sysmanageUsersDescription": "Umfassende Liste aller SysManage-Benutzer mit ihren Profilen, Rollen, Berechtigungen und Kontostatus. Enthält Benutzererstellungsdaten und letzte Anmeldezeiten."
   }
 }

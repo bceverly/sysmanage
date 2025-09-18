@@ -704,5 +704,32 @@
       "enrolling": "正在注册...",
       "enroll": "注册主机"
     }
+  },
+  "reports": {
+    "title": "报告",
+    "subtitle": "生成主机、用户和系统分析的综合报告",
+    "tabs": {
+      "hosts": "主机",
+      "users": "用户"
+    },
+    "search": {
+      "label": "搜索报告",
+      "searchBy": "搜索条件",
+      "name": "名称",
+      "description": "描述"
+    },
+    "viewReport": "查看报告",
+    "generatePdf": "生成PDF",
+    "noResults": "未找到与您的搜索匹配的报告",
+    "viewReportHtml": "查看报告 (HTML)",
+    "backToReports": "返回报告",
+    "reportGenerationError": "报告生成错误",
+    "reportLoadingError": "报告加载失败",
+    "generatingPdf": "正在生成PDF...",
+    "loadingReport": "正在加载报告...",
+    "reportNotFound": "未找到报告",
+    "registeredHostsDescription": "所有已注册主机的完整列表，显示基本信息和操作系统详情，包括主机名、IP地址、操作系统版本和状态。",
+    "hostsWithTagsDescription": "显示所有已注册的主机及其分配的标签，以便进行类别分类和筛选。对于按环境、用途或部门组织主机很有用。",
+    "sysmanageUsersDescription": "所有SysManage用户的综合列表，显示他们的个人资料、角色、权限和帐户状态。包括用户创建日期和上次登录时间。"
   }
 }

@@ -407,3 +407,109 @@ msgstr "從主機移除標籤失敗: %(error)s"
 
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "獲取主機標籤失敗: %(error)s"
+
+# Reports-related strings
+msgid "Generated"
+msgstr "已產生"
+
+msgid "Total Hosts"
+msgstr "主機總數"
+
+msgid "Total Users"
+msgstr "使用者總數"
+
+msgid "No hosts are currently registered in the system."
+msgstr "系統中目前沒有註冊的主機。"
+
+msgid "No users are currently registered in the system."
+msgstr "系統中目前沒有註冊的使用者。"
+
+msgid "Hostname"
+msgstr "主機名稱"
+
+msgid "FQDN"
+msgstr "FQDN"
+
+msgid "IPv4"
+msgstr "IPv4"
+
+msgid "IPv6"
+msgstr "IPv6"
+
+msgid "OS"
+msgstr "作業系統"
+
+msgid "Version"
+msgstr "版本"
+
+msgid "Status"
+msgstr "狀態"
+
+msgid "Last Seen"
+msgstr "最後上線"
+
+msgid "Tags"
+msgstr "標籤"
+
+msgid "No tags"
+msgstr "無標籤"
+
+msgid "User ID"
+msgstr "使用者ID"
+
+msgid "First Name"
+msgstr "名字"
+
+msgid "Last Name"
+msgstr "姓氏"
+
+msgid "Last Access"
+msgstr "最後存取"
+
+msgid "Account Security"
+msgstr "帳戶安全"
+
+msgid "Active"
+msgstr "活躍"
+
+msgid "Inactive"
+msgstr "非活躍"
+
+msgid "Locked"
+msgstr "已鎖定"
+
+msgid "Normal"
+msgstr "正常"
+
+msgid "Never"
+msgstr "從未"
+
+msgid "N/A"
+msgstr "不適用"
+
+msgid "unknown"
+msgstr "未知"
+
+msgid "failed attempts"
+msgstr "失敗嘗試"
+
+msgid "Registered Hosts"
+msgstr "已註冊主機"
+
+msgid "Hosts with Tags"
+msgstr "帶標籤的主機"
+
+msgid "SysManage Users"
+msgstr "SysManage使用者"
+
+msgid "Report type '{report_type}' not found"
+msgstr "報告類型 '{report_type}' 未找到"
+
+msgid "Error generating report: {error}"
+msgstr "產生報告時發生錯誤: {error}"
+
+msgid "PDF generation not available"
+msgstr "PDF產生不可用"
+
+msgid "PDF generation is not available. Please install reportlab package."
+msgstr "PDF產生不可用。請安裝reportlab套件。"

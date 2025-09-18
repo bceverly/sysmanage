@@ -402,3 +402,109 @@ msgstr "Échec de la suppression de l'étiquette de l'hôte : %(error)s"
 
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "Échec de la récupération des étiquettes de l'hôte : %(error)s"
+
+# Reports-related strings
+msgid "Generated"
+msgstr "Généré"
+
+msgid "Total Hosts"
+msgstr "Total des hôtes"
+
+msgid "Total Users"
+msgstr "Total des utilisateurs"
+
+msgid "No hosts are currently registered in the system."
+msgstr "Aucun hôte n'est actuellement enregistré dans le système."
+
+msgid "No users are currently registered in the system."
+msgstr "Aucun utilisateur n'est actuellement enregistré dans le système."
+
+msgid "Hostname"
+msgstr "Nom d'hôte"
+
+msgid "FQDN"
+msgstr "FQDN"
+
+msgid "IPv4"
+msgstr "IPv4"
+
+msgid "IPv6"
+msgstr "IPv6"
+
+msgid "OS"
+msgstr "OS"
+
+msgid "Version"
+msgstr "Version"
+
+msgid "Status"
+msgstr "Statut"
+
+msgid "Last Seen"
+msgstr "Vu pour la dernière fois"
+
+msgid "Tags"
+msgstr "Étiquettes"
+
+msgid "No tags"
+msgstr "Aucune étiquette"
+
+msgid "User ID"
+msgstr "ID utilisateur"
+
+msgid "First Name"
+msgstr "Prénom"
+
+msgid "Last Name"
+msgstr "Nom de famille"
+
+msgid "Last Access"
+msgstr "Dernier accès"
+
+msgid "Account Security"
+msgstr "Sécurité du compte"
+
+msgid "Active"
+msgstr "Actif"
+
+msgid "Inactive"
+msgstr "Inactif"
+
+msgid "Locked"
+msgstr "Verrouillé"
+
+msgid "Normal"
+msgstr "Normal"
+
+msgid "Never"
+msgstr "Jamais"
+
+msgid "N/A"
+msgstr "N/A"
+
+msgid "unknown"
+msgstr "inconnu"
+
+msgid "failed attempts"
+msgstr "tentatives échouées"
+
+msgid "Registered Hosts"
+msgstr "Hôtes enregistrés"
+
+msgid "Hosts with Tags"
+msgstr "Hôtes avec étiquettes"
+
+msgid "SysManage Users"
+msgstr "Utilisateurs SysManage"
+
+msgid "Report type '{report_type}' not found"
+msgstr "Type de rapport '{report_type}' non trouvé"
+
+msgid "Error generating report: {error}"
+msgstr "Erreur lors de la génération du rapport : {error}"
+
+msgid "PDF generation not available"
+msgstr "Génération PDF non disponible"
+
+msgid "PDF generation is not available. Please install reportlab package."
+msgstr "La génération PDF n'est pas disponible. Veuillez installer le package reportlab."

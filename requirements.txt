@@ -60,5 +60,6 @@ websockets==15.0.1
 zope.event==5.0
 zope.interface==7.2
 Babel==2.16.0
+reportlab==4.0.9
 safety==3.6.1
 safety-schemas==0.0.14

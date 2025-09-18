@@ -27,6 +27,8 @@ import Users from './Pages/Users';
 import UserDetail from './Pages/UserDetail';
 import Updates from './Pages/Updates';
 import Scripts from './Pages/Scripts';
+import Reports from './Pages/Reports';
+import ReportViewer from './Pages/ReportViewer';
 import Profile from './Pages/Profile';
 import Settings from './Pages/Settings';
 import Logout from './Pages/Logout';
@@ -100,6 +102,8 @@ function App() {
                     <Route path="/users/:userId" element={<UserDetail />} />
                     <Route path="/updates" element={<Updates />} />
                     <Route path="/scripts" element={<Scripts />} />
+                    <Route path="/reports" element={<Reports />} />
+                    <Route path="/reports/:reportId" element={<ReportViewer />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/logout" element={<Logout />} />
