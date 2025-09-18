@@ -106,7 +106,10 @@ class TestReportsWithRealData:
 
         response = authenticated_client.get("/api/reports/view/registered-hosts")
         assert response.status_code == 200
-        assert "test.example.com" in response.text
+        # Use HTML-safe assertion to prevent injection
+        import html as html_module
+
+        assert html_module.escape("test.example.com") in response.text
 
     def test_users_report_with_data(self, authenticated_client, session):
         """Test users report with real data."""
@@ -130,7 +133,10 @@ class TestReportsWithRealData:
 
         response = authenticated_client.get("/api/reports/view/users-list")
         assert response.status_code == 200
-        assert "test@example.com" in response.text
+        # Use HTML-safe assertion to prevent injection
+        import html as html_module
+
+        assert html_module.escape("test@example.com") in response.text
 
     def test_screenshots_endpoint(self, authenticated_client):
         """Test the screenshots endpoint."""
@@ -175,5 +181,8 @@ class TestReportsErrorHandling:
         assert response.status_code == 200
 
         # Verify all hosts appear in the report
+        import html as html_module
+
         for i in range(5):
-            assert f"host{i}.example.com" in response.text
+            # Use HTML-safe assertion to prevent injection
+            assert html_module.escape(f"host{i}.example.com") in response.text

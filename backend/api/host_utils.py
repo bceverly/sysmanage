@@ -401,7 +401,7 @@ async def update_or_create_host(
             from backend.persistence.models import generate_secure_host_token
 
             host.host_token = generate_secure_host_token()
-            logger.info("Generated new host_token for existing host: %s", hostname)
+            logger.info("Generated new host_token for existing host")
 
         # Don't modify approval_status for existing hosts - preserve the current status
     else:
