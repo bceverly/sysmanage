@@ -7,7 +7,8 @@
     "scripts": "Scripts",
     "reports": "Relatórios",
     "settings": "Configurações",
-    "logout": "Sair"
+    "logout": "Sair",
+    "osUpgrades": "Atualizações do SO"
   },
   "login": {
     "title": "Entrar no SysManage",
@@ -80,7 +81,13 @@
     "rebootSelected": "Reiniciar Selecionados",
     "shutdownSelected": "Desligar Selecionados",
     "filterByTags": "Filtrar por tags",
-    "selectTags": "Selecionar tags"
+    "selectTags": "Selecionar tags",
+    "swUpdates": "Atualizações SW",
+    "osUpgrade": "Atualização SO",
+    "osUpgradeAvailable": "Atualização de SO disponível para este host",
+    "securityAndSystemUpdates": "{{security}} segurança, {{system}} atualizações do sistema",
+    "securityUpdatesOnly": "{{count}} atualizações de segurança",
+    "systemUpdatesOnly": "{{count}} atualizações do sistema"
   },
   "users": {
     "title": "Gerenciamento de Usuários",
@@ -733,5 +740,45 @@
     "registeredHostsDescription": "Lista completa de todos os hosts registrados mostrando informações básicas e detalhes do sistema operacional incluindo nome do host, endereços IP, versão do SO e status.",
     "hostsWithTagsDescription": "Mostra todos os hosts registrados junto com suas tags atribuídas para fácil categorização e filtragem. Útil para organizar hosts por ambiente, propósito ou departamento.",
     "sysmanageUsersDescription": "Lista abrangente de todos os usuários SysManage mostrando seus perfis, funções, permissões e status da conta. Inclui datas de criação de usuário e horários de último login."
+  },
+  "osUpgrades": {
+    "title": "Atualizações do Sistema Operacional",
+    "refresh": "Atualizar",
+    "loading": "Carregando atualizações do SO...",
+    "noUpgrades": "Nenhuma atualização do SO está disponível no momento",
+    "noMatchingUpgrades": "Nenhuma atualização do SO corresponde ao filtro atual",
+    "requiresReboot": "A atualização do SO requer reinicialização do sistema",
+    "selectAll": "Selecionar tudo",
+    "executeSelected": "Executar atualizações do SO selecionadas",
+    "stats": {
+      "total": "Total de atualizações do SO",
+      "security": "Atualizações de segurança",
+      "hosts": "Hosts afetados"
+    },
+    "filters": {
+      "allTypes": "Todos os tipos de SO",
+      "ubuntu": "Ubuntu/Debian",
+      "fedora": "Fedora",
+      "opensuse": "openSUSE",
+      "macos": "macOS",
+      "windows": "Windows",
+      "openbsd": "OpenBSD",
+      "freebsd": "FreeBSD"
+    },
+    "types": {
+      "ubuntu": "Atualização de versão Ubuntu",
+      "fedora": "Atualização de versão Fedora",
+      "opensuse": "Atualização de distribuição openSUSE",
+      "macos": "Atualização de versão macOS",
+      "windows": "Atualização de recursos Windows",
+      "openbsd": "Atualização de sistema OpenBSD",
+      "freebsd": "Atualização de versão FreeBSD",
+      "generic": "Atualização do SO"
+    },
+    "status": {
+      "pending": "Atualização solicitada",
+      "success": "Atualizado com sucesso",
+      "failed": "Atualização falhou"
+    }
   }
 }

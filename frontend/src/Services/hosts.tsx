@@ -97,6 +97,7 @@ type SysManageHost = {
     security_updates_count?: number;
     system_updates_count?: number;
     total_updates_count?: number;
+    os_upgrades_count?: number;
 }
 
 type StorageDevice = {

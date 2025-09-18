@@ -57,18 +57,7 @@ like to add:
     sysmanage-agent subdirectory in
     which the logs should be placed.
 
-10. OS version upgrades - we need a
-    feature that will let us detect
-    that there is a new operating
-    system major version out there
-    and show that fact to the user.
-    We then need to, if one is
-    available, see if the user wants
-    to upgrade.  If so, then we need
-    to apply the upgrade.  Include
-    syspatch on OpenBSD.
-
-11. Add an automation tab between
+10. Add an automation tab between
     updates and scripts in the main
     navbar.  on that tab, have an
     "Updates" subtab that allows you

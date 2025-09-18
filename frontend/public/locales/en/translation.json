@@ -4,6 +4,7 @@
     "hosts": "Hosts",
     "users": "Users",
     "updates": "Updates",
+    "osUpgrades": "OS Upgrades",
     "scripts": "Scripts",
     "reports": "Reports",
     "settings": "Settings",
@@ -87,7 +88,15 @@
     "shutdownRequested": "Shutdown requested successfully",
     "shutdownFailed": "Failed to request shutdown",
     "rebootSelected": "Reboot Selected",
-    "shutdownSelected": "Shutdown Selected"
+    "shutdownSelected": "Shutdown Selected",
+    "swUpdates": "SW Updates",
+    "osUpgrade": "OS Upgrade",
+    "osUpgradeAvailable": "OS upgrade available for this host",
+    "securityAndSystemUpdates": "{{security}} security, {{system}} system updates",
+    "securityUpdatesOnly": "{{count}} security updates",
+    "systemUpdatesOnly": "{{count}} system updates",
+    "filterByTags": "Filter by Tags",
+    "selectTags": "Select tags"
   },
   "users": {
     "title": "User Management",
@@ -450,6 +459,46 @@
       "pending": "Update Requested",
       "success": "Successfully Updated",
       "failed": "Update Failed"
+    }
+  },
+  "osUpgrades": {
+    "title": "Operating System Upgrades",
+    "refresh": "Refresh",
+    "loading": "Loading OS upgrades...",
+    "noUpgrades": "No OS upgrades are currently available",
+    "noMatchingUpgrades": "No OS upgrades match the current filter",
+    "requiresReboot": "OS upgrade requires system reboot",
+    "selectAll": "Select All",
+    "executeSelected": "Execute Selected OS Upgrades",
+    "stats": {
+      "total": "Total OS Upgrades",
+      "security": "Security Updates",
+      "hosts": "Affected Hosts"
+    },
+    "filters": {
+      "allTypes": "All OS Types",
+      "ubuntu": "Ubuntu/Debian",
+      "fedora": "Fedora",
+      "opensuse": "openSUSE",
+      "macos": "macOS",
+      "windows": "Windows",
+      "openbsd": "OpenBSD",
+      "freebsd": "FreeBSD"
+    },
+    "types": {
+      "ubuntu": "Ubuntu Release Upgrade",
+      "fedora": "Fedora Version Upgrade",
+      "opensuse": "openSUSE Distribution Upgrade",
+      "macos": "macOS Version Upgrade",
+      "windows": "Windows Feature Update",
+      "openbsd": "OpenBSD System Upgrade",
+      "freebsd": "FreeBSD Version Upgrade",
+      "generic": "OS Upgrade"
+    },
+    "status": {
+      "pending": "Upgrade Requested",
+      "success": "Successfully Upgraded",
+      "failed": "Upgrade Failed"
     }
   },
   "notifications": {

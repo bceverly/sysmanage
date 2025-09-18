@@ -7,7 +7,8 @@
     "scripts": "스크립트",
     "reports": "보고서",
     "settings": "설정",
-    "logout": "로그아웃"
+    "logout": "로그아웃",
+    "osUpgrades": "OS 업그레이드"
   },
   "login": {
     "title": "SysManage 로그인",
@@ -79,8 +80,14 @@
     "shutdownFailed": "종료 요청 실패",
     "rebootSelected": "선택된 항목 재부팅",
     "shutdownSelected": "선택된 항목 종료",
-    "filterByTags": "태그별 필터",
-    "selectTags": "태그 선택"
+    "filterByTags": "태그로 필터링",
+    "selectTags": "태그 선택",
+    "swUpdates": "SW 업데이트",
+    "osUpgrade": "OS 업그레이드",
+    "osUpgradeAvailable": "이 호스트에 OS 업그레이드 사용 가능",
+    "securityAndSystemUpdates": "{{security}} 보안, {{system}} 시스템 업데이트",
+    "securityUpdatesOnly": "{{count}} 보안 업데이트",
+    "systemUpdatesOnly": "{{count}} 시스템 업데이트"
   },
   "users": {
     "title": "사용자 관리",
@@ -730,5 +737,45 @@
     "registeredHostsDescription": "호스트명, IP 주소, OS 버전 및 상태를 포함한 기본 정보와 운영 체제 세부 사항을 보여주는 모든 등록된 호스트의 전체 목록입니다.",
     "hostsWithTagsDescription": "쉽게 분류하고 필터링할 수 있도록 할당된 태그와 함께 모든 등록된 호스트를 보여줍니다. 환경, 목적 또는 부서별로 호스트를 정리하는 데 유용합니다.",
     "sysmanageUsersDescription": "프로필, 역할, 권한 및 계정 상태를 보여주는 모든 SysManage 사용자의 종합적인 목록입니다. 사용자 생성 날짜와 마지막 로그인 시간을 포함합니다."
+  },
+  "osUpgrades": {
+    "title": "운영 체제 업그레이드",
+    "refresh": "새로 고침",
+    "loading": "OS 업그레이드 로딩 중...",
+    "noUpgrades": "현재 사용 가능한 OS 업그레이드가 없습니다",
+    "noMatchingUpgrades": "현재 필터와 일치하는 OS 업그레이드가 없습니다",
+    "requiresReboot": "OS 업그레이드에는 시스템 재부팅이 필요합니다",
+    "selectAll": "모두 선택",
+    "executeSelected": "선택된 OS 업그레이드 실행",
+    "stats": {
+      "total": "전체 OS 업그레이드",
+      "security": "보안 업데이트",
+      "hosts": "영향받는 호스트"
+    },
+    "filters": {
+      "allTypes": "모든 OS 유형",
+      "ubuntu": "Ubuntu/Debian",
+      "fedora": "Fedora",
+      "opensuse": "openSUSE",
+      "macos": "macOS",
+      "windows": "Windows",
+      "openbsd": "OpenBSD",
+      "freebsd": "FreeBSD"
+    },
+    "types": {
+      "ubuntu": "Ubuntu 릴리스 업그레이드",
+      "fedora": "Fedora 버전 업그레이드",
+      "opensuse": "openSUSE 배포판 업그레이드",
+      "macos": "macOS 버전 업그레이드",
+      "windows": "Windows 기능 업데이트",
+      "openbsd": "OpenBSD 시스템 업그레이드",
+      "freebsd": "FreeBSD 버전 업그레이드",
+      "generic": "OS 업그레이드"
+    },
+    "status": {
+      "pending": "업그레이드 요청됨",
+      "success": "성공적으로 업그레이드됨",
+      "failed": "업그레이드 실패"
+    }
   }
 }

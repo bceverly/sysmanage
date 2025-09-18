@@ -7,7 +7,8 @@
     "scripts": "スクリプト",
     "reports": "レポート",
     "settings": "設定",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "osUpgrades": "OSアップグレード"
   },
   "login": {
     "title": "SysManageにログイン",
@@ -80,7 +81,13 @@
     "rebootSelected": "選択した項目を再起動",
     "shutdownSelected": "選択した項目をシャットダウン",
     "filterByTags": "タグでフィルター",
-    "selectTags": "タグを選択"
+    "selectTags": "タグを選択",
+    "swUpdates": "SWアップデート",
+    "osUpgrade": "OSアップグレード",
+    "osUpgradeAvailable": "このホストでOSアップグレードが利用可能です",
+    "securityAndSystemUpdates": "{{security}} セキュリティ、{{system}} システムアップデート",
+    "securityUpdatesOnly": "{{count}} セキュリティアップデート",
+    "systemUpdatesOnly": "{{count}} システムアップデート"
   },
   "users": {
     "title": "ユーザー管理",
@@ -733,5 +740,45 @@
     "registeredHostsDescription": "ホスト名、IPアドレス、OSバージョン、ステータスを含む基本情報とオペレーティングシステムの詳細を表示する、登録されたすべてのホストの完全なリスト。",
     "hostsWithTagsDescription": "簡単な分類とフィルタリングのために割り当てられたタグと一緒に登録されたすべてのホストを表示します。環境、目的、部門ごとにホストを整理するのに便利です。",
     "sysmanageUsersDescription": "プロファイル、役割、権限、アカウントステータスを表示する、すべてのSysManageユーザーの包括的なリスト。ユーザー作成日と最後のログイン時間を含みます。"
+  },
+  "osUpgrades": {
+    "title": "オペレーティングシステムアップグレード",
+    "refresh": "更新",
+    "loading": "OSアップグレードを読み込み中...",
+    "noUpgrades": "現在利用可能なOSアップグレードはありません",
+    "noMatchingUpgrades": "現在のフィルターに一致するOSアップグレードがありません",
+    "requiresReboot": "OSアップグレードにはシステムの再起動が必要です",
+    "selectAll": "すべて選択",
+    "executeSelected": "選択されたOSアップグレードを実行",
+    "stats": {
+      "total": "OSアップグレード総数",
+      "security": "セキュリティアップデート",
+      "hosts": "影響を受けるホスト"
+    },
+    "filters": {
+      "allTypes": "すべてのOSタイプ",
+      "ubuntu": "Ubuntu/Debian",
+      "fedora": "Fedora",
+      "opensuse": "openSUSE",
+      "macos": "macOS",
+      "windows": "Windows",
+      "openbsd": "OpenBSD",
+      "freebsd": "FreeBSD"
+    },
+    "types": {
+      "ubuntu": "Ubuntuリリースアップグレード",
+      "fedora": "Fedoraバージョンアップグレード",
+      "opensuse": "openSUSEディストリビューションアップグレード",
+      "macos": "macOSバージョンアップグレード",
+      "windows": "Windows機能アップデート",
+      "openbsd": "OpenBSDシステムアップグレード",
+      "freebsd": "FreeBSDバージョンアップグレード",
+      "generic": "OSアップグレード"
+    },
+    "status": {
+      "pending": "アップグレード要求済み",
+      "success": "正常にアップグレードされました",
+      "failed": "アップグレードに失敗しました"
+    }
   }
 }

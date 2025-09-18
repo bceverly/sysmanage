@@ -514,3 +514,111 @@ msgstr "Generazione PDF non disponibile"
 
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "La generazione PDF non è disponibile. Installare il pacchetto reportlab."
+
+# OS Version Upgrade related strings
+
+msgid "Invalid package managers for OS upgrades: {}"
+msgstr "Gestori di pacchetti non validi per aggiornamenti OS: {}"
+
+msgid "No OS upgrades available for this host"
+msgstr "Nessun aggiornamento OS disponibile per questo host"
+
+msgid "OS upgrade command sent successfully"
+msgstr "Comando aggiornamento OS inviato con successo"
+
+msgid "Failed to send OS upgrade command to host"
+msgstr "Invio comando aggiornamento OS all'host fallito"
+
+msgid "Operating System Upgrades"
+msgstr "Aggiornamenti Sistema Operativo"
+
+msgid "OS Upgrade Available"
+msgstr "Aggiornamento OS Disponibile"
+
+msgid "Apply OS Upgrade"
+msgstr "Applica Aggiornamento OS"
+
+msgid "Execute OS Upgrades"
+msgstr "Esegui Aggiornamenti OS"
+
+msgid "OS upgrade requires system reboot"
+msgstr "L'aggiornamento OS richiede riavvio sistema"
+
+msgid "Current OS Version"
+msgstr "Versione OS Attuale"
+
+msgid "Available OS Version"
+msgstr "Versione OS Disponibile"
+
+msgid "OS Upgrade Type"
+msgstr "Tipo Aggiornamento OS"
+
+msgid "Ubuntu Release Upgrade"
+msgstr "Aggiornamento Release Ubuntu"
+
+msgid "Fedora Version Upgrade"
+msgstr "Aggiornamento Versione Fedora"
+
+msgid "openSUSE Distribution Upgrade"
+msgstr "Aggiornamento Distribuzione openSUSE"
+
+msgid "macOS Version Upgrade"
+msgstr "Aggiornamento Versione macOS"
+
+msgid "Windows Feature Update"
+msgstr "Aggiornamento Funzionalità Windows"
+
+msgid "OpenBSD System Upgrade"
+msgstr "Aggiornamento Sistema OpenBSD"
+
+msgid "FreeBSD Version Upgrade"
+msgstr "Aggiornamento Versione FreeBSD"
+
+msgid "Upgrade Size"
+msgstr "Dimensione Aggiornamento"
+
+msgid "Security Update"
+msgstr "Aggiornamento Sicurezza"
+
+msgid "System Reboot Required"
+msgstr "Riavvio Sistema Richiesto"
+
+msgid "Confirm OS Upgrade"
+msgstr "Conferma Aggiornamento OS"
+
+msgid "This action will upgrade the operating system and require a system reboot. Continue?"
+msgstr "Questa azione aggiornerà il sistema operativo e richiederà un riavvio sistema. Continuare?"
+
+msgid "OS upgrades are always security updates"
+msgstr "Gli aggiornamenti OS sono sempre aggiornamenti di sicurezza"
+
+msgid "View OS Upgrades"
+msgstr "Visualizza Aggiornamenti OS"
+
+msgid "Filter by OS Type"
+msgstr "Filtra per Tipo OS"
+
+msgid "All OS Types"
+msgstr "Tutti i Tipi OS"
+
+msgid "Ubuntu/Debian"
+msgstr "Ubuntu/Debian"
+
+msgid "Fedora"
+msgstr "Fedora"
+
+msgid "openSUSE"
+msgstr "openSUSE"
+
+msgid "macOS"
+msgstr "macOS"
+
+msgid "Windows"
+msgstr "Windows"
+
+msgid "OpenBSD"
+msgstr "OpenBSD"
+
+msgid "FreeBSD"
+msgstr "FreeBSD"
+

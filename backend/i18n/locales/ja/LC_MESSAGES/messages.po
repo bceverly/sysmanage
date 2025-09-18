@@ -517,3 +517,111 @@ msgstr "PDF生成は利用できません"
 
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF生成は利用できません。reportlabパッケージをインストールしてください。"
+
+# OS Version Upgrade related strings
+
+msgid "Invalid package managers for OS upgrades: {}"
+msgstr "OSアップグレードの無効なパッケージマネージャー: {}"
+
+msgid "No OS upgrades available for this host"
+msgstr "このホストには利用可能なOSアップグレードがありません"
+
+msgid "OS upgrade command sent successfully"
+msgstr "OSアップグレードコマンドが正常に送信されました"
+
+msgid "Failed to send OS upgrade command to host"
+msgstr "ホストへのOSアップグレードコマンド送信に失敗しました"
+
+msgid "Operating System Upgrades"
+msgstr "オペレーティングシステムアップグレード"
+
+msgid "OS Upgrade Available"
+msgstr "OSアップグレード利用可能"
+
+msgid "Apply OS Upgrade"
+msgstr "OSアップグレードを適用"
+
+msgid "Execute OS Upgrades"
+msgstr "OSアップグレードを実行"
+
+msgid "OS upgrade requires system reboot"
+msgstr "OSアップグレードにはシステム再起動が必要です"
+
+msgid "Current OS Version"
+msgstr "現在のOSバージョン"
+
+msgid "Available OS Version"
+msgstr "利用可能なOSバージョン"
+
+msgid "OS Upgrade Type"
+msgstr "OSアップグレードタイプ"
+
+msgid "Ubuntu Release Upgrade"
+msgstr "Ubuntuリリースアップグレード"
+
+msgid "Fedora Version Upgrade"
+msgstr "Fedoraバージョンアップグレード"
+
+msgid "openSUSE Distribution Upgrade"
+msgstr "openSUSEディストリビューションアップグレード"
+
+msgid "macOS Version Upgrade"
+msgstr "macOSバージョンアップグレード"
+
+msgid "Windows Feature Update"
+msgstr "Windows機能更新プログラム"
+
+msgid "OpenBSD System Upgrade"
+msgstr "OpenBSDシステムアップグレード"
+
+msgid "FreeBSD Version Upgrade"
+msgstr "FreeBSDバージョンアップグレード"
+
+msgid "Upgrade Size"
+msgstr "アップグレードサイズ"
+
+msgid "Security Update"
+msgstr "セキュリティ更新"
+
+msgid "System Reboot Required"
+msgstr "システム再起動が必要"
+
+msgid "Confirm OS Upgrade"
+msgstr "OSアップグレードの確認"
+
+msgid "This action will upgrade the operating system and require a system reboot. Continue?"
+msgstr "この操作はオペレーティングシステムをアップグレードし、システムの再起動が必要です。続行しますか？"
+
+msgid "OS upgrades are always security updates"
+msgstr "OSアップグレードは常にセキュリティ更新です"
+
+msgid "View OS Upgrades"
+msgstr "OSアップグレードを表示"
+
+msgid "Filter by OS Type"
+msgstr "OSタイプでフィルター"
+
+msgid "All OS Types"
+msgstr "すべてのOSタイプ"
+
+msgid "Ubuntu/Debian"
+msgstr "Ubuntu/Debian"
+
+msgid "Fedora"
+msgstr "Fedora"
+
+msgid "openSUSE"
+msgstr "openSUSE"
+
+msgid "macOS"
+msgstr "macOS"
+
+msgid "Windows"
+msgstr "Windows"
+
+msgid "OpenBSD"
+msgstr "OpenBSD"
+
+msgid "FreeBSD"
+msgstr "FreeBSD"
+

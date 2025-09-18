@@ -507,3 +507,111 @@ msgstr "PDF-Generierung nicht verfügbar"
 
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF-Generierung ist nicht verfügbar. Bitte installieren Sie das reportlab-Paket."
+
+# OS Version Upgrade related strings
+
+msgid "Invalid package managers for OS upgrades: {}"
+msgstr "Ungültige Paketmanager für OS-Upgrades: {}"
+
+msgid "No OS upgrades available for this host"
+msgstr "Keine OS-Upgrades für diesen Host verfügbar"
+
+msgid "OS upgrade command sent successfully"
+msgstr "OS-Upgrade-Befehl erfolgreich gesendet"
+
+msgid "Failed to send OS upgrade command to host"
+msgstr "Fehler beim Senden des OS-Upgrade-Befehls an Host"
+
+msgid "Operating System Upgrades"
+msgstr "Betriebssystem-Upgrades"
+
+msgid "OS Upgrade Available"
+msgstr "OS-Upgrade verfügbar"
+
+msgid "Apply OS Upgrade"
+msgstr "OS-Upgrade anwenden"
+
+msgid "Execute OS Upgrades"
+msgstr "OS-Upgrades ausführen"
+
+msgid "OS upgrade requires system reboot"
+msgstr "OS-Upgrade erfordert Systemneustart"
+
+msgid "Current OS Version"
+msgstr "Aktuelle OS-Version"
+
+msgid "Available OS Version"
+msgstr "Verfügbare OS-Version"
+
+msgid "OS Upgrade Type"
+msgstr "OS-Upgrade-Typ"
+
+msgid "Ubuntu Release Upgrade"
+msgstr "Ubuntu Release-Upgrade"
+
+msgid "Fedora Version Upgrade"
+msgstr "Fedora-Versions-Upgrade"
+
+msgid "openSUSE Distribution Upgrade"
+msgstr "openSUSE-Distributions-Upgrade"
+
+msgid "macOS Version Upgrade"
+msgstr "macOS-Versions-Upgrade"
+
+msgid "Windows Feature Update"
+msgstr "Windows-Feature-Update"
+
+msgid "OpenBSD System Upgrade"
+msgstr "OpenBSD-System-Upgrade"
+
+msgid "FreeBSD Version Upgrade"
+msgstr "FreeBSD-Versions-Upgrade"
+
+msgid "Upgrade Size"
+msgstr "Upgrade-Größe"
+
+msgid "Security Update"
+msgstr "Sicherheitsupdate"
+
+msgid "System Reboot Required"
+msgstr "Systemneustart erforderlich"
+
+msgid "Confirm OS Upgrade"
+msgstr "OS-Upgrade bestätigen"
+
+msgid "This action will upgrade the operating system and require a system reboot. Continue?"
+msgstr "Diese Aktion wird das Betriebssystem aktualisieren und einen Systemneustart erfordern. Fortfahren?"
+
+msgid "OS upgrades are always security updates"
+msgstr "OS-Upgrades sind immer Sicherheitsupdates"
+
+msgid "View OS Upgrades"
+msgstr "OS-Upgrades anzeigen"
+
+msgid "Filter by OS Type"
+msgstr "Nach OS-Typ filtern"
+
+msgid "All OS Types"
+msgstr "Alle OS-Typen"
+
+msgid "Ubuntu/Debian"
+msgstr "Ubuntu/Debian"
+
+msgid "Fedora"
+msgstr "Fedora"
+
+msgid "openSUSE"
+msgstr "openSUSE"
+
+msgid "macOS"
+msgstr "macOS"
+
+msgid "Windows"
+msgstr "Windows"
+
+msgid "OpenBSD"
+msgstr "OpenBSD"
+
+msgid "FreeBSD"
+msgstr "FreeBSD"
+

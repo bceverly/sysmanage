@@ -54,6 +54,25 @@ export interface UpdateResultsResponse {
   results: Record<string, unknown>;
 }
 
+export interface OSUpgradeResponse {
+  host_id: number;
+  hostname: string;
+  package_name: string;
+  current_version: string;
+  available_version: string;
+  package_manager: string;
+  is_security_update: boolean;
+  requires_reboot: boolean;
+  update_size_bytes: number | null;
+}
+
+export interface OSUpgradeSummary {
+  total_hosts: number;
+  hosts_with_os_upgrades: number;
+  total_os_upgrades: number;
+  os_upgrades_by_type: Record<string, number>;
+}
+
 class UpdatesService {
 
   async getUpdatesSummary(): Promise<UpdateStatsSummary> {
@@ -146,6 +165,42 @@ class UpdatesService {
       return response.data;
     } catch (error) {
       console.error('Failed to fetch update results:', error);
+      throw error;
+    }
+  }
+
+  // OS Upgrade Methods
+  async getOSUpgrades(): Promise<OSUpgradeResponse[]> {
+    try {
+      const response = await axiosInstance.get('/api/updates/os-upgrades');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch OS upgrades:', error);
+      throw error;
+    }
+  }
+
+  async getOSUpgradesSummary(): Promise<OSUpgradeSummary> {
+    try {
+      const response = await axiosInstance.get('/api/updates/os-upgrades/summary');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch OS upgrades summary:', error);
+      throw error;
+    }
+  }
+
+  async executeOSUpgrades(hostIds: number[], packageManagers?: string[]): Promise<unknown> {
+    try {
+      const requestData = {
+        host_ids: hostIds,
+        package_managers: packageManagers,
+      };
+
+      const response = await axiosInstance.post('/api/updates/execute-os-upgrades', requestData);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to execute OS upgrades:', error);
       throw error;
     }
   }

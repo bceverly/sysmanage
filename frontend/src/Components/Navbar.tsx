@@ -91,6 +91,15 @@ const Navbar = () => {
             </li>
             <li className="nav__item">
               <NavLink
+                to="/os-upgrades"
+                className="nav__link"
+                onClick={closeMenuOnMobile}
+              >
+                {t('nav.osUpgrades')}
+              </NavLink>
+            </li>
+            <li className="nav__item">
+              <NavLink
                 to="/scripts"
                 className="nav__link"
                 onClick={closeMenuOnMobile}

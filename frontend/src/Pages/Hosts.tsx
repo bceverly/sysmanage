@@ -100,7 +100,7 @@ const Hosts = () => {
                         )}
                         {(row.security_updates_count > 0 || row.system_updates_count > 0) && (
                             <Chip
-                                label={t('hosts.updatesNeeded', 'Updates Needed')}
+                                label={t('hosts.swUpdates', 'SW Updates')}
                                 color={row.security_updates_count > 0 ? 'error' : 'warning'}
                                 size="small"
                                 variant="outlined"
@@ -115,6 +115,16 @@ const Hosts = () => {
                                         ? t('hosts.securityUpdatesOnly', '{{count}} security updates', { count: row.security_updates_count })
                                         : t('hosts.systemUpdatesOnly', '{{count}} system updates', { count: row.system_updates_count })
                                 }
+                            />
+                        )}
+                        {(row.os_upgrades_count && row.os_upgrades_count > 0) && (
+                            <Chip
+                                label={t('hosts.osUpgrade', 'OS Upgrade')}
+                                color="info"
+                                size="small"
+                                variant="outlined"
+                                sx={{ ml: 0.5 }}
+                                title={t('hosts.osUpgradeAvailable', 'OS upgrade available for this host')}
                             />
                         )}
                     </Box>

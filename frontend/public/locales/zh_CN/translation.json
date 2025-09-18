@@ -7,7 +7,8 @@
     "scripts": "脚本",
     "reports": "报告",
     "settings": "设置",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "osUpgrades": "操作系统升级"
   },
   "login": {
     "title": "登录 SysManage",
@@ -80,7 +81,13 @@
     "rebootSelected": "重启所选",
     "shutdownSelected": "关闭所选",
     "filterByTags": "按标签筛选",
-    "selectTags": "选择标签"
+    "selectTags": "选择标签",
+    "swUpdates": "软件更新",
+    "osUpgrade": "操作系统升级",
+    "osUpgradeAvailable": "此主机可进行操作系统升级",
+    "securityAndSystemUpdates": "{{security}} 安全，{{system}} 系统更新",
+    "securityUpdatesOnly": "{{count}} 安全更新",
+    "systemUpdatesOnly": "{{count}} 系统更新"
   },
   "users": {
     "title": "用户管理",
@@ -731,5 +738,45 @@
     "registeredHostsDescription": "所有已注册主机的完整列表，显示基本信息和操作系统详情，包括主机名、IP地址、操作系统版本和状态。",
     "hostsWithTagsDescription": "显示所有已注册的主机及其分配的标签，以便进行类别分类和筛选。对于按环境、用途或部门组织主机很有用。",
     "sysmanageUsersDescription": "所有SysManage用户的综合列表，显示他们的个人资料、角色、权限和帐户状态。包括用户创建日期和上次登录时间。"
+  },
+  "osUpgrades": {
+    "title": "操作系统升级",
+    "refresh": "刷新",
+    "loading": "正在加载操作系统升级...",
+    "noUpgrades": "当前没有可用的操作系统升级",
+    "noMatchingUpgrades": "没有操作系统升级匹配当前过滤器",
+    "requiresReboot": "操作系统升级需要系统重启",
+    "selectAll": "全选",
+    "executeSelected": "执行选定的操作系统升级",
+    "stats": {
+      "total": "操作系统升级总数",
+      "security": "安全更新",
+      "hosts": "受影响的主机"
+    },
+    "filters": {
+      "allTypes": "所有操作系统类型",
+      "ubuntu": "Ubuntu/Debian",
+      "fedora": "Fedora",
+      "opensuse": "openSUSE",
+      "macos": "macOS",
+      "windows": "Windows",
+      "openbsd": "OpenBSD",
+      "freebsd": "FreeBSD"
+    },
+    "types": {
+      "ubuntu": "Ubuntu版本升级",
+      "fedora": "Fedora版本升级",
+      "opensuse": "openSUSE发行版升级",
+      "macos": "macOS版本升级",
+      "windows": "Windows功能更新",
+      "openbsd": "OpenBSD系统升级",
+      "freebsd": "FreeBSD版本升级",
+      "generic": "操作系统升级"
+    },
+    "status": {
+      "pending": "升级已请求",
+      "success": "升级成功",
+      "failed": "升级失败"
+    }
   }
 }

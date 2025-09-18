@@ -7,7 +7,8 @@
     "scripts": "स्क्रिप्ट्स",
     "reports": "रिपोर्ट्स",
     "settings": "सेटिंग्स",
-    "logout": "लॉगआउट"
+    "logout": "लॉगआउट",
+    "osUpgrades": "OS अपग्रेड"
   },
   "login": {
     "title": "सिसमैनेज में लॉगिन करें",
@@ -79,8 +80,14 @@
     "shutdownFailed": "बंद करने का अनुरोध विफल",
     "rebootSelected": "चयनित को पुनः आरंभ करें",
     "shutdownSelected": "चयनित को बंद करें",
-    "filterByTags": "टैग्स के अनुसार फिल्टर करें",
-    "selectTags": "टैग्स चुनें"
+    "filterByTags": "टैग द्वारा फ़िल्टर करें",
+    "selectTags": "टैग चुनें",
+    "swUpdates": "SW अपडेट",
+    "osUpgrade": "OS अपग्रेड",
+    "osUpgradeAvailable": "इस होस्ट के लिए OS अपग्रेड उपलब्ध है",
+    "securityAndSystemUpdates": "{{security}} सुरक्षा, {{system}} सिस्टम अपडेट",
+    "securityUpdatesOnly": "{{count}} सुरक्षा अपडेट",
+    "systemUpdatesOnly": "{{count}} सिस्टम अपडेट"
   },
   "users": {
     "title": "उपयोगकर्ता प्रबंधन",
@@ -729,5 +736,45 @@
     "registeredHostsDescription": "सभी पंजीकृत होस्ट्स की पूरी सूची जो होस्टनेम, IP पते, OS संस्करण और स्थिति सहित बुनियादी जानकारी और ऑपरेटिंग सिस्टम विवरण दिखाती है।",
     "hostsWithTagsDescription": "आसान वर्गीकरण और फ़िल्टरिंग के लिए अपने असाइन किए गए टैग के साथ सभी पंजीकृत होस्ट्स दिखाता है। वातावरण, उद्देश्य या विभाग के अनुसार होस्ट्स को व्यवस्थित करने के लिए उपयोगी।",
     "sysmanageUsersDescription": "सभी SysManage उपयोगकर्ताओं की व्यापक सूची जो उनकी प्रोफाइल, भूमिकाएं, अनुमतियां और खाता स्थिति दिखाती है। उपयोगकर्ता निर्माण दिनांक और अंतिम लॉगिन समय शामिल हैं।"
+  },
+  "osUpgrades": {
+    "title": "ऑपरेटिंग सिस्टम अपग्रेड",
+    "refresh": "रीफ्रेश",
+    "loading": "OS अपग्रेड लोड हो रहे हैं...",
+    "noUpgrades": "वर्तमान में कोई OS अपग्रेड उपलब्ध नहीं हैं",
+    "noMatchingUpgrades": "वर्तमान फ़िल्टर से कोई OS अपग्रेड मेल नहीं खाते",
+    "requiresReboot": "OS अपग्रेड के लिए सिस्टम रीबूट की आवश्यकता है",
+    "selectAll": "सभी चुनें",
+    "executeSelected": "चयनित OS अपग्रेड निष्पादित करें",
+    "stats": {
+      "total": "कुल OS अपग्रेड",
+      "security": "सुरक्षा अपडेट",
+      "hosts": "प्रभावित होस्ट"
+    },
+    "filters": {
+      "allTypes": "सभी OS प्रकार",
+      "ubuntu": "Ubuntu/Debian",
+      "fedora": "Fedora",
+      "opensuse": "openSUSE",
+      "macos": "macOS",
+      "windows": "Windows",
+      "openbsd": "OpenBSD",
+      "freebsd": "FreeBSD"
+    },
+    "types": {
+      "ubuntu": "Ubuntu रिलीज अपग्रेड",
+      "fedora": "Fedora संस्करण अपग्रेड",
+      "opensuse": "openSUSE वितरण अपग्रेड",
+      "macos": "macOS संस्करण अपग्रेड",
+      "windows": "Windows फीचर अपडेट",
+      "openbsd": "OpenBSD सिस्टम अपग्रेड",
+      "freebsd": "FreeBSD संस्करण अपग्रेड",
+      "generic": "OS अपग्रेड"
+    },
+    "status": {
+      "pending": "अपग्रेड का अनुरोध किया गया",
+      "success": "सफलतापूर्वक अपग्रेड किया गया",
+      "failed": "अपग्रेड असफल"
+    }
   }
 }

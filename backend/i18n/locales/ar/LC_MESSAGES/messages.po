@@ -506,3 +506,111 @@ msgstr "إنشاء PDF غير متوفر"
 
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "إنشاء PDF غير متوفر. يرجى تثبيت حزمة reportlab."
+
+# OS Version Upgrade related strings
+
+msgid "Invalid package managers for OS upgrades: {}"
+msgstr "مديرو الحزم غير صالحين لترقيات نظام التشغيل: {}"
+
+msgid "No OS upgrades available for this host"
+msgstr "لا توجد ترقيات نظام التشغيل متاحة لهذا المضيف"
+
+msgid "OS upgrade command sent successfully"
+msgstr "تم إرسال أمر ترقية نظام التشغيل بنجاح"
+
+msgid "Failed to send OS upgrade command to host"
+msgstr "فشل في إرسال أمر ترقية نظام التشغيل إلى المضيف"
+
+msgid "Operating System Upgrades"
+msgstr "ترقيات نظام التشغيل"
+
+msgid "OS Upgrade Available"
+msgstr "ترقية نظام التشغيل متاحة"
+
+msgid "Apply OS Upgrade"
+msgstr "تطبيق ترقية نظام التشغيل"
+
+msgid "Execute OS Upgrades"
+msgstr "تنفيذ ترقيات نظام التشغيل"
+
+msgid "OS upgrade requires system reboot"
+msgstr "ترقية نظام التشغيل تتطلب إعادة تشغيل النظام"
+
+msgid "Current OS Version"
+msgstr "إصدار نظام التشغيل الحالي"
+
+msgid "Available OS Version"
+msgstr "إصدار نظام التشغيل المتاح"
+
+msgid "OS Upgrade Type"
+msgstr "نوع ترقية نظام التشغيل"
+
+msgid "Ubuntu Release Upgrade"
+msgstr "ترقية إصدار Ubuntu"
+
+msgid "Fedora Version Upgrade"
+msgstr "ترقية إصدار Fedora"
+
+msgid "openSUSE Distribution Upgrade"
+msgstr "ترقية توزيعة openSUSE"
+
+msgid "macOS Version Upgrade"
+msgstr "ترقية إصدار macOS"
+
+msgid "Windows Feature Update"
+msgstr "تحديث ميزة Windows"
+
+msgid "OpenBSD System Upgrade"
+msgstr "ترقية نظام OpenBSD"
+
+msgid "FreeBSD Version Upgrade"
+msgstr "ترقية إصدار FreeBSD"
+
+msgid "Upgrade Size"
+msgstr "حجم الترقية"
+
+msgid "Security Update"
+msgstr "تحديث أمني"
+
+msgid "System Reboot Required"
+msgstr "مطلوب إعادة تشغيل النظام"
+
+msgid "Confirm OS Upgrade"
+msgstr "تأكيد ترقية نظام التشغيل"
+
+msgid "This action will upgrade the operating system and require a system reboot. Continue?"
+msgstr "هذا الإجراء سيرقي نظام التشغيل ويتطلب إعادة تشغيل النظام. متابعة؟"
+
+msgid "OS upgrades are always security updates"
+msgstr "ترقيات نظام التشغيل هي دائماً تحديثات أمنية"
+
+msgid "View OS Upgrades"
+msgstr "عرض ترقيات نظام التشغيل"
+
+msgid "Filter by OS Type"
+msgstr "تصفية حسب نوع نظام التشغيل"
+
+msgid "All OS Types"
+msgstr "جميع أنواع أنظمة التشغيل"
+
+msgid "Ubuntu/Debian"
+msgstr "Ubuntu/Debian"
+
+msgid "Fedora"
+msgstr "Fedora"
+
+msgid "openSUSE"
+msgstr "openSUSE"
+
+msgid "macOS"
+msgstr "macOS"
+
+msgid "Windows"
+msgstr "Windows"
+
+msgid "OpenBSD"
+msgstr "OpenBSD"
+
+msgid "FreeBSD"
+msgstr "FreeBSD"
+

@@ -513,3 +513,111 @@ msgstr "PDF產生不可用"
 
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF產生不可用。請安裝reportlab套件。"
+
+# OS Version Upgrade related strings
+
+msgid "Invalid package managers for OS upgrades: {}"
+msgstr "作業系統升級的無效套件管理器：{}"
+
+msgid "No OS upgrades available for this host"
+msgstr "此主機沒有可用的作業系統升級"
+
+msgid "OS upgrade command sent successfully"
+msgstr "作業系統升級命令發送成功"
+
+msgid "Failed to send OS upgrade command to host"
+msgstr "向主機發送作業系統升級命令失敗"
+
+msgid "Operating System Upgrades"
+msgstr "作業系統升級"
+
+msgid "OS Upgrade Available"
+msgstr "作業系統升級可用"
+
+msgid "Apply OS Upgrade"
+msgstr "應用作業系統升級"
+
+msgid "Execute OS Upgrades"
+msgstr "執行作業系統升級"
+
+msgid "OS upgrade requires system reboot"
+msgstr "作業系統升級需要系統重新啟動"
+
+msgid "Current OS Version"
+msgstr "目前作業系統版本"
+
+msgid "Available OS Version"
+msgstr "可用作業系統版本"
+
+msgid "OS Upgrade Type"
+msgstr "作業系統升級類型"
+
+msgid "Ubuntu Release Upgrade"
+msgstr "Ubuntu發行版升級"
+
+msgid "Fedora Version Upgrade"
+msgstr "Fedora版本升級"
+
+msgid "openSUSE Distribution Upgrade"
+msgstr "openSUSE發行版升級"
+
+msgid "macOS Version Upgrade"
+msgstr "macOS版本升級"
+
+msgid "Windows Feature Update"
+msgstr "Windows功能更新"
+
+msgid "OpenBSD System Upgrade"
+msgstr "OpenBSD系統升級"
+
+msgid "FreeBSD Version Upgrade"
+msgstr "FreeBSD版本升級"
+
+msgid "Upgrade Size"
+msgstr "升級大小"
+
+msgid "Security Update"
+msgstr "安全更新"
+
+msgid "System Reboot Required"
+msgstr "需要系統重新啟動"
+
+msgid "Confirm OS Upgrade"
+msgstr "確認作業系統升級"
+
+msgid "This action will upgrade the operating system and require a system reboot. Continue?"
+msgstr "此動作將升級作業系統並需要系統重新啟動。繼續？"
+
+msgid "OS upgrades are always security updates"
+msgstr "作業系統升級總是安全更新"
+
+msgid "View OS Upgrades"
+msgstr "檢視作業系統升級"
+
+msgid "Filter by OS Type"
+msgstr "按作業系統類型篩選"
+
+msgid "All OS Types"
+msgstr "所有作業系統類型"
+
+msgid "Ubuntu/Debian"
+msgstr "Ubuntu/Debian"
+
+msgid "Fedora"
+msgstr "Fedora"
+
+msgid "openSUSE"
+msgstr "openSUSE"
+
+msgid "macOS"
+msgstr "macOS"
+
+msgid "Windows"
+msgstr "Windows"
+
+msgid "OpenBSD"
+msgstr "OpenBSD"
+
+msgid "FreeBSD"
+msgstr "FreeBSD"
+

@@ -26,6 +26,7 @@ import HostDetail from './Pages/HostDetail';
 import Users from './Pages/Users';
 import UserDetail from './Pages/UserDetail';
 import Updates from './Pages/Updates';
+import OSUpgrades from './Pages/OSUpgrades';
 import Scripts from './Pages/Scripts';
 import Reports from './Pages/Reports';
 import ReportViewer from './Pages/ReportViewer';
@@ -101,6 +102,7 @@ function App() {
                     <Route path="/users" element={<Users />} />
                     <Route path="/users/:userId" element={<UserDetail />} />
                     <Route path="/updates" element={<Updates />} />
+                    <Route path="/os-upgrades" element={<OSUpgrades />} />
                     <Route path="/scripts" element={<Scripts />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/reports/:reportId" element={<ReportViewer />} />

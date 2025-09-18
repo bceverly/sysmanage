@@ -7,7 +7,8 @@
     "scripts": "Scripts",
     "reports": "Informes",
     "settings": "Configuración",
-    "logout": "Cerrar Sesión"
+    "logout": "Cerrar Sesión",
+    "osUpgrades": "Actualizaciones de SO"
   },
   "login": {
     "title": "Iniciar Sesión en SysManage",
@@ -80,7 +81,13 @@
     "rebootSelected": "Reiniciar Seleccionados",
     "shutdownSelected": "Apagar Seleccionados",
     "filterByTags": "Filtrar por etiquetas",
-    "selectTags": "Seleccionar etiquetas"
+    "selectTags": "Seleccionar etiquetas",
+    "swUpdates": "Actualizaciones SW",
+    "osUpgrade": "Actualización SO",
+    "osUpgradeAvailable": "Actualización de SO disponible para este host",
+    "securityAndSystemUpdates": "{{security}} seguridad, {{system}} actualizaciones del sistema",
+    "securityUpdatesOnly": "{{count}} actualizaciones de seguridad",
+    "systemUpdatesOnly": "{{count}} actualizaciones del sistema"
   },
   "users": {
     "title": "Gestión de Usuarios",
@@ -733,5 +740,45 @@
     "registeredHostsDescription": "Lista completa de todos los hosts registrados que muestra información básica y detalles del sistema operativo incluyendo nombre del host, direcciones IP, versión del SO y estado.",
     "hostsWithTagsDescription": "Muestra todos los hosts registrados junto con sus etiquetas asignadas para facilitar la categorización y el filtrado. Útil para organizar hosts por entorno, propósito o departamento.",
     "sysmanageUsersDescription": "Lista integral de todos los usuarios de SysManage que muestra sus perfiles, roles, permisos y estado de cuenta. Incluye fechas de creación de usuarios y tiempos de último inicio de sesión."
+  },
+  "osUpgrades": {
+    "title": "Actualizaciones del Sistema Operativo",
+    "refresh": "Actualizar",
+    "loading": "Cargando actualizaciones de SO...",
+    "noUpgrades": "No hay actualizaciones de SO disponibles actualmente",
+    "noMatchingUpgrades": "No hay actualizaciones de SO que coincidan con el filtro actual",
+    "requiresReboot": "La actualización del SO requiere reinicio del sistema",
+    "selectAll": "Seleccionar todo",
+    "executeSelected": "Ejecutar actualizaciones de SO seleccionadas",
+    "stats": {
+      "total": "Total de actualizaciones de SO",
+      "security": "Actualizaciones de seguridad",
+      "hosts": "Hosts afectados"
+    },
+    "filters": {
+      "allTypes": "Todos los tipos de SO",
+      "ubuntu": "Ubuntu/Debian",
+      "fedora": "Fedora",
+      "opensuse": "openSUSE",
+      "macos": "macOS",
+      "windows": "Windows",
+      "openbsd": "OpenBSD",
+      "freebsd": "FreeBSD"
+    },
+    "types": {
+      "ubuntu": "Actualización de versión Ubuntu",
+      "fedora": "Actualización de versión Fedora",
+      "opensuse": "Actualización de distribución openSUSE",
+      "macos": "Actualización de versión macOS",
+      "windows": "Actualización de características Windows",
+      "openbsd": "Actualización de sistema OpenBSD",
+      "freebsd": "Actualización de versión FreeBSD",
+      "generic": "Actualización de SO"
+    },
+    "status": {
+      "pending": "Actualización solicitada",
+      "success": "Actualizado exitosamente",
+      "failed": "Falló la actualización"
+    }
   }
 }

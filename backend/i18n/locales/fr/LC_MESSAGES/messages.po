@@ -508,3 +508,111 @@ msgstr "Génération PDF non disponible"
 
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "La génération PDF n'est pas disponible. Veuillez installer le package reportlab."
+
+# OS Version Upgrade related strings
+
+msgid "Invalid package managers for OS upgrades: {}"
+msgstr "Gestionnaires de paquets invalides pour les mises à jour d'OS : {}"
+
+msgid "No OS upgrades available for this host"
+msgstr "Aucune mise à jour d'OS disponible pour cet hôte"
+
+msgid "OS upgrade command sent successfully"
+msgstr "Commande de mise à jour d'OS envoyée avec succès"
+
+msgid "Failed to send OS upgrade command to host"
+msgstr "Échec de l'envoi de la commande de mise à jour d'OS à l'hôte"
+
+msgid "Operating System Upgrades"
+msgstr "Mises à jour du Système d'Exploitation"
+
+msgid "OS Upgrade Available"
+msgstr "Mise à jour d'OS Disponible"
+
+msgid "Apply OS Upgrade"
+msgstr "Appliquer la Mise à jour d'OS"
+
+msgid "Execute OS Upgrades"
+msgstr "Exécuter les Mises à jour d'OS"
+
+msgid "OS upgrade requires system reboot"
+msgstr "La mise à jour d'OS nécessite un redémarrage système"
+
+msgid "Current OS Version"
+msgstr "Version Actuelle de l'OS"
+
+msgid "Available OS Version"
+msgstr "Version Disponible de l'OS"
+
+msgid "OS Upgrade Type"
+msgstr "Type de Mise à jour d'OS"
+
+msgid "Ubuntu Release Upgrade"
+msgstr "Mise à jour de Release Ubuntu"
+
+msgid "Fedora Version Upgrade"
+msgstr "Mise à jour de Version Fedora"
+
+msgid "openSUSE Distribution Upgrade"
+msgstr "Mise à jour de Distribution openSUSE"
+
+msgid "macOS Version Upgrade"
+msgstr "Mise à jour de Version macOS"
+
+msgid "Windows Feature Update"
+msgstr "Mise à jour de Fonctionnalité Windows"
+
+msgid "OpenBSD System Upgrade"
+msgstr "Mise à jour Système OpenBSD"
+
+msgid "FreeBSD Version Upgrade"
+msgstr "Mise à jour de Version FreeBSD"
+
+msgid "Upgrade Size"
+msgstr "Taille de la Mise à jour"
+
+msgid "Security Update"
+msgstr "Mise à jour de Sécurité"
+
+msgid "System Reboot Required"
+msgstr "Redémarrage Système Requis"
+
+msgid "Confirm OS Upgrade"
+msgstr "Confirmer la Mise à jour d'OS"
+
+msgid "This action will upgrade the operating system and require a system reboot. Continue?"
+msgstr "Cette action mettra à jour le système d'exploitation et nécessitera un redémarrage système. Continuer ?"
+
+msgid "OS upgrades are always security updates"
+msgstr "Les mises à jour d'OS sont toujours des mises à jour de sécurité"
+
+msgid "View OS Upgrades"
+msgstr "Voir les Mises à jour d'OS"
+
+msgid "Filter by OS Type"
+msgstr "Filtrer par Type d'OS"
+
+msgid "All OS Types"
+msgstr "Tous les Types d'OS"
+
+msgid "Ubuntu/Debian"
+msgstr "Ubuntu/Debian"
+
+msgid "Fedora"
+msgstr "Fedora"
+
+msgid "openSUSE"
+msgstr "openSUSE"
+
+msgid "macOS"
+msgstr "macOS"
+
+msgid "Windows"
+msgstr "Windows"
+
+msgid "OpenBSD"
+msgstr "OpenBSD"
+
+msgid "FreeBSD"
+msgstr "FreeBSD"
+

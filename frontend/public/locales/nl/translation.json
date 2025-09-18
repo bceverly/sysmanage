@@ -7,7 +7,8 @@
     "scripts": "Scripts",
     "reports": "Rapporten",
     "settings": "Instellingen",
-    "logout": "Uitloggen"
+    "logout": "Uitloggen",
+    "osUpgrades": "OS-upgrades"
   },
   "login": {
     "title": "Inloggen bij SysManage",
@@ -80,7 +81,13 @@
     "rebootSelected": "Geselecteerde Herstarten",
     "shutdownSelected": "Geselecteerde Afsluiten",
     "filterByTags": "Filteren op tags",
-    "selectTags": "Tags selecteren"
+    "selectTags": "Tags selecteren",
+    "swUpdates": "SW Updates",
+    "osUpgrade": "OS Upgrade",
+    "osUpgradeAvailable": "OS upgrade beschikbaar voor deze host",
+    "securityAndSystemUpdates": "{{security}} beveiliging, {{system}} systeem updates",
+    "securityUpdatesOnly": "{{count}} beveiligingsupdates",
+    "systemUpdatesOnly": "{{count}} systeemupdates"
   },
   "users": {
     "title": "Gebruikersbeheer",
@@ -731,5 +738,45 @@
     "registeredHostsDescription": "Volledige lijst van alle geregistreerde hosts met basisinformatie en besturingssysteemdetails inclusief hostnaam, IP-adressen, OS-versie en status.",
     "hostsWithTagsDescription": "Toont alle geregistreerde hosts samen met hun toegewezen tags voor eenvoudige categorisering en filtering. Handig voor het organiseren van hosts per omgeving, doel of afdeling.",
     "sysmanageUsersDescription": "Uitgebreide lijst van alle SysManage-gebruikers met hun profielen, rollen, machtigingen en accountstatus. Bevat gebruikersaanmaakdatums en laatste inlogtijden."
+  },
+  "osUpgrades": {
+    "title": "Besturingssysteem-upgrades",
+    "refresh": "Vernieuwen",
+    "loading": "OS-upgrades laden...",
+    "noUpgrades": "Er zijn momenteel geen OS-upgrades beschikbaar",
+    "noMatchingUpgrades": "Geen OS-upgrades komen overeen met het huidige filter",
+    "requiresReboot": "OS-upgrade vereist systeemherstart",
+    "selectAll": "Alles selecteren",
+    "executeSelected": "Geselecteerde OS-upgrades uitvoeren",
+    "stats": {
+      "total": "Totaal OS-upgrades",
+      "security": "Beveiligingsupdates",
+      "hosts": "Getroffen hosts"
+    },
+    "filters": {
+      "allTypes": "Alle OS-typen",
+      "ubuntu": "Ubuntu/Debian",
+      "fedora": "Fedora",
+      "opensuse": "openSUSE",
+      "macos": "macOS",
+      "windows": "Windows",
+      "openbsd": "OpenBSD",
+      "freebsd": "FreeBSD"
+    },
+    "types": {
+      "ubuntu": "Ubuntu release-upgrade",
+      "fedora": "Fedora versie-upgrade",
+      "opensuse": "openSUSE distributie-upgrade",
+      "macos": "macOS versie-upgrade",
+      "windows": "Windows functie-update",
+      "openbsd": "OpenBSD systeem-upgrade",
+      "freebsd": "FreeBSD versie-upgrade",
+      "generic": "OS-upgrade"
+    },
+    "status": {
+      "pending": "Upgrade aangevraagd",
+      "success": "Succesvol geüpgraded",
+      "failed": "Upgrade mislukt"
+    }
   }
 }

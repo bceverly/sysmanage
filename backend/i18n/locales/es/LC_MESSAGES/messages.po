@@ -510,3 +510,111 @@ msgstr "Generación de PDF no disponible"
 
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "La generación de PDF no está disponible. Por favor instale el paquete reportlab."
+
+# OS Version Upgrade related strings
+
+msgid "Invalid package managers for OS upgrades: {}"
+msgstr "Gestores de paquetes inválidos para actualizaciones de SO: {}"
+
+msgid "No OS upgrades available for this host"
+msgstr "No hay actualizaciones de SO disponibles para este host"
+
+msgid "OS upgrade command sent successfully"
+msgstr "Comando de actualización de SO enviado exitosamente"
+
+msgid "Failed to send OS upgrade command to host"
+msgstr "Error al enviar comando de actualización de SO al host"
+
+msgid "Operating System Upgrades"
+msgstr "Actualizaciones del Sistema Operativo"
+
+msgid "OS Upgrade Available"
+msgstr "Actualización de SO Disponible"
+
+msgid "Apply OS Upgrade"
+msgstr "Aplicar Actualización de SO"
+
+msgid "Execute OS Upgrades"
+msgstr "Ejecutar Actualizaciones de SO"
+
+msgid "OS upgrade requires system reboot"
+msgstr "La actualización de SO requiere reinicio del sistema"
+
+msgid "Current OS Version"
+msgstr "Versión Actual del SO"
+
+msgid "Available OS Version"
+msgstr "Versión Disponible del SO"
+
+msgid "OS Upgrade Type"
+msgstr "Tipo de Actualización de SO"
+
+msgid "Ubuntu Release Upgrade"
+msgstr "Actualización de Release de Ubuntu"
+
+msgid "Fedora Version Upgrade"
+msgstr "Actualización de Versión de Fedora"
+
+msgid "openSUSE Distribution Upgrade"
+msgstr "Actualización de Distribución openSUSE"
+
+msgid "macOS Version Upgrade"
+msgstr "Actualización de Versión de macOS"
+
+msgid "Windows Feature Update"
+msgstr "Actualización de Característica de Windows"
+
+msgid "OpenBSD System Upgrade"
+msgstr "Actualización de Sistema OpenBSD"
+
+msgid "FreeBSD Version Upgrade"
+msgstr "Actualización de Versión FreeBSD"
+
+msgid "Upgrade Size"
+msgstr "Tamaño de Actualización"
+
+msgid "Security Update"
+msgstr "Actualización de Seguridad"
+
+msgid "System Reboot Required"
+msgstr "Reinicio del Sistema Requerido"
+
+msgid "Confirm OS Upgrade"
+msgstr "Confirmar Actualización de SO"
+
+msgid "This action will upgrade the operating system and require a system reboot. Continue?"
+msgstr "Esta acción actualizará el sistema operativo y requerirá un reinicio del sistema. ¿Continuar?"
+
+msgid "OS upgrades are always security updates"
+msgstr "Las actualizaciones de SO siempre son actualizaciones de seguridad"
+
+msgid "View OS Upgrades"
+msgstr "Ver Actualizaciones de SO"
+
+msgid "Filter by OS Type"
+msgstr "Filtrar por Tipo de SO"
+
+msgid "All OS Types"
+msgstr "Todos los Tipos de SO"
+
+msgid "Ubuntu/Debian"
+msgstr "Ubuntu/Debian"
+
+msgid "Fedora"
+msgstr "Fedora"
+
+msgid "openSUSE"
+msgstr "openSUSE"
+
+msgid "macOS"
+msgstr "macOS"
+
+msgid "Windows"
+msgstr "Windows"
+
+msgid "OpenBSD"
+msgstr "OpenBSD"
+
+msgid "FreeBSD"
+msgstr "FreeBSD"
+

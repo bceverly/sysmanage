@@ -513,3 +513,111 @@ msgstr "PDF उत्पादन उपलब्ध नहीं"
 
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF उत्पादन उपलब्ध नहीं है। कृपया reportlab पैकेज इंस्टॉल करें।"
+
+# OS Version Upgrade related strings
+
+msgid "Invalid package managers for OS upgrades: {}"
+msgstr "OS अपग्रेड के लिए अमान्य पैकेज प्रबंधक: {}"
+
+msgid "No OS upgrades available for this host"
+msgstr "इस होस्ट के लिए कोई OS अपग्रेड उपलब्ध नहीं"
+
+msgid "OS upgrade command sent successfully"
+msgstr "OS अपग्रेड कमांड सफलतापूर्वक भेजा गया"
+
+msgid "Failed to send OS upgrade command to host"
+msgstr "होस्ट को OS अपग्रेड कमांड भेजने में विफल"
+
+msgid "Operating System Upgrades"
+msgstr "ऑपरेटिंग सिस्टम अपग्रेड"
+
+msgid "OS Upgrade Available"
+msgstr "OS अपग्रेड उपलब्ध"
+
+msgid "Apply OS Upgrade"
+msgstr "OS अपग्रेड लागू करें"
+
+msgid "Execute OS Upgrades"
+msgstr "OS अपग्रेड निष्पादित करें"
+
+msgid "OS upgrade requires system reboot"
+msgstr "OS अपग्रेड के लिए सिस्टम रीबूट आवश्यक है"
+
+msgid "Current OS Version"
+msgstr "वर्तमान OS संस्करण"
+
+msgid "Available OS Version"
+msgstr "उपलब्ध OS संस्करण"
+
+msgid "OS Upgrade Type"
+msgstr "OS अपग्रेड प्रकार"
+
+msgid "Ubuntu Release Upgrade"
+msgstr "Ubuntu रिलीज़ अपग्रेड"
+
+msgid "Fedora Version Upgrade"
+msgstr "Fedora संस्करण अपग्रेड"
+
+msgid "openSUSE Distribution Upgrade"
+msgstr "openSUSE वितरण अपग्रेड"
+
+msgid "macOS Version Upgrade"
+msgstr "macOS संस्करण अपग्रेड"
+
+msgid "Windows Feature Update"
+msgstr "Windows फीचर अपडेट"
+
+msgid "OpenBSD System Upgrade"
+msgstr "OpenBSD सिस्टम अपग्रेड"
+
+msgid "FreeBSD Version Upgrade"
+msgstr "FreeBSD संस्करण अपग्रेड"
+
+msgid "Upgrade Size"
+msgstr "अपग्रेड आकार"
+
+msgid "Security Update"
+msgstr "सुरक्षा अपडेट"
+
+msgid "System Reboot Required"
+msgstr "सिस्टम रीबूट आवश्यक"
+
+msgid "Confirm OS Upgrade"
+msgstr "OS अपग्रेड की पुष्टि करें"
+
+msgid "This action will upgrade the operating system and require a system reboot. Continue?"
+msgstr "यह क्रिया ऑपरेटिंग सिस्टम को अपग्रेड करेगी और सिस्टम रीबूट की आवश्यकता होगी। जारी रखें?"
+
+msgid "OS upgrades are always security updates"
+msgstr "OS अपग्रेड हमेशा सुरक्षा अपडेट होते हैं"
+
+msgid "View OS Upgrades"
+msgstr "OS अपग्रेड देखें"
+
+msgid "Filter by OS Type"
+msgstr "OS प्रकार द्वारा फ़िल्टर करें"
+
+msgid "All OS Types"
+msgstr "सभी OS प्रकार"
+
+msgid "Ubuntu/Debian"
+msgstr "Ubuntu/Debian"
+
+msgid "Fedora"
+msgstr "Fedora"
+
+msgid "openSUSE"
+msgstr "openSUSE"
+
+msgid "macOS"
+msgstr "macOS"
+
+msgid "Windows"
+msgstr "Windows"
+
+msgid "OpenBSD"
+msgstr "OpenBSD"
+
+msgid "FreeBSD"
+msgstr "FreeBSD"
+

@@ -7,7 +7,8 @@
     "scripts": "Script",
     "reports": "Rapporti",
     "settings": "Impostazioni",
-    "logout": "Esci"
+    "logout": "Esci",
+    "osUpgrades": "Aggiornamenti OS"
   },
   "login": {
     "title": "Accedi a SysManage",
@@ -80,7 +81,13 @@
     "rebootSelected": "Riavvia Selezionati",
     "shutdownSelected": "Spegni Selezionati",
     "filterByTags": "Filtra per tag",
-    "selectTags": "Seleziona tag"
+    "selectTags": "Seleziona tag",
+    "swUpdates": "Aggiornamenti SW",
+    "osUpgrade": "Aggiornamento OS",
+    "osUpgradeAvailable": "Aggiornamento OS disponibile per questo host",
+    "securityAndSystemUpdates": "{{security}} sicurezza, {{system}} aggiornamenti sistema",
+    "securityUpdatesOnly": "{{count}} aggiornamenti di sicurezza",
+    "systemUpdatesOnly": "{{count}} aggiornamenti sistema"
   },
   "users": {
     "title": "Gestione Utenti",
@@ -733,5 +740,45 @@
     "registeredHostsDescription": "Elenco completo di tutti gli host registrati che mostra informazioni di base e dettagli del sistema operativo inclusi hostname, indirizzi IP, versione OS e stato.",
     "hostsWithTagsDescription": "Mostra tutti gli host registrati insieme ai loro tag assegnati per una facile categorizzazione e filtraggio. Utile per organizzare gli host per ambiente, scopo o dipartimento.",
     "sysmanageUsersDescription": "Elenco completo di tutti gli utenti SysManage che mostra i loro profili, ruoli, permessi e stato dell'account. Include date di creazione utente e orari di ultimo accesso."
+  },
+  "osUpgrades": {
+    "title": "Aggiornamenti del Sistema Operativo",
+    "refresh": "Aggiorna",
+    "loading": "Caricamento aggiornamenti OS...",
+    "noUpgrades": "Nessun aggiornamento OS attualmente disponibile",
+    "noMatchingUpgrades": "Nessun aggiornamento OS corrisponde al filtro attuale",
+    "requiresReboot": "L'aggiornamento OS richiede il riavvio del sistema",
+    "selectAll": "Seleziona tutto",
+    "executeSelected": "Esegui aggiornamenti OS selezionati",
+    "stats": {
+      "total": "Totale aggiornamenti OS",
+      "security": "Aggiornamenti di sicurezza",
+      "hosts": "Host interessati"
+    },
+    "filters": {
+      "allTypes": "Tutti i tipi di OS",
+      "ubuntu": "Ubuntu/Debian",
+      "fedora": "Fedora",
+      "opensuse": "openSUSE",
+      "macos": "macOS",
+      "windows": "Windows",
+      "openbsd": "OpenBSD",
+      "freebsd": "FreeBSD"
+    },
+    "types": {
+      "ubuntu": "Aggiornamento versione Ubuntu",
+      "fedora": "Aggiornamento versione Fedora",
+      "opensuse": "Aggiornamento distribuzione openSUSE",
+      "macos": "Aggiornamento versione macOS",
+      "windows": "Aggiornamento funzionalità Windows",
+      "openbsd": "Aggiornamento sistema OpenBSD",
+      "freebsd": "Aggiornamento versione FreeBSD",
+      "generic": "Aggiornamento OS"
+    },
+    "status": {
+      "pending": "Aggiornamento richiesto",
+      "success": "Aggiornato con successo",
+      "failed": "Aggiornamento fallito"
+    }
   }
 }

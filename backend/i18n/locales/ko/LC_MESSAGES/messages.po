@@ -514,3 +514,111 @@ msgstr "PDF 생성 사용 불가"
 
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF 생성을 사용할 수 없습니다. reportlab 패키지를 설치하세요."
+
+# OS Version Upgrade related strings
+
+msgid "Invalid package managers for OS upgrades: {}"
+msgstr "OS 업그레이드에 유효하지 않은 패키지 관리자: {}"
+
+msgid "No OS upgrades available for this host"
+msgstr "이 호스트에 사용 가능한 OS 업그레이드가 없습니다"
+
+msgid "OS upgrade command sent successfully"
+msgstr "OS 업그레이드 명령이 성공적으로 전송되었습니다"
+
+msgid "Failed to send OS upgrade command to host"
+msgstr "호스트에 OS 업그레이드 명령 전송 실패"
+
+msgid "Operating System Upgrades"
+msgstr "운영 체제 업그레이드"
+
+msgid "OS Upgrade Available"
+msgstr "OS 업그레이드 사용 가능"
+
+msgid "Apply OS Upgrade"
+msgstr "OS 업그레이드 적용"
+
+msgid "Execute OS Upgrades"
+msgstr "OS 업그레이드 실행"
+
+msgid "OS upgrade requires system reboot"
+msgstr "OS 업그레이드는 시스템 재부팅이 필요합니다"
+
+msgid "Current OS Version"
+msgstr "현재 OS 버전"
+
+msgid "Available OS Version"
+msgstr "사용 가능한 OS 버전"
+
+msgid "OS Upgrade Type"
+msgstr "OS 업그레이드 유형"
+
+msgid "Ubuntu Release Upgrade"
+msgstr "Ubuntu 릴리스 업그레이드"
+
+msgid "Fedora Version Upgrade"
+msgstr "Fedora 버전 업그레이드"
+
+msgid "openSUSE Distribution Upgrade"
+msgstr "openSUSE 배포판 업그레이드"
+
+msgid "macOS Version Upgrade"
+msgstr "macOS 버전 업그레이드"
+
+msgid "Windows Feature Update"
+msgstr "Windows 기능 업데이트"
+
+msgid "OpenBSD System Upgrade"
+msgstr "OpenBSD 시스템 업그레이드"
+
+msgid "FreeBSD Version Upgrade"
+msgstr "FreeBSD 버전 업그레이드"
+
+msgid "Upgrade Size"
+msgstr "업그레이드 크기"
+
+msgid "Security Update"
+msgstr "보안 업데이트"
+
+msgid "System Reboot Required"
+msgstr "시스템 재부팅 필요"
+
+msgid "Confirm OS Upgrade"
+msgstr "OS 업그레이드 확인"
+
+msgid "This action will upgrade the operating system and require a system reboot. Continue?"
+msgstr "이 작업은 운영 체제를 업그레이드하고 시스템 재부팅이 필요합니다. 계속하시겠습니까?"
+
+msgid "OS upgrades are always security updates"
+msgstr "OS 업그레이드는 항상 보안 업데이트입니다"
+
+msgid "View OS Upgrades"
+msgstr "OS 업그레이드 보기"
+
+msgid "Filter by OS Type"
+msgstr "OS 유형별 필터링"
+
+msgid "All OS Types"
+msgstr "모든 OS 유형"
+
+msgid "Ubuntu/Debian"
+msgstr "Ubuntu/Debian"
+
+msgid "Fedora"
+msgstr "Fedora"
+
+msgid "openSUSE"
+msgstr "openSUSE"
+
+msgid "macOS"
+msgstr "macOS"
+
+msgid "Windows"
+msgstr "Windows"
+
+msgid "OpenBSD"
+msgstr "OpenBSD"
+
+msgid "FreeBSD"
+msgstr "FreeBSD"
+

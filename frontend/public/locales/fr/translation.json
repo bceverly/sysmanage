@@ -7,7 +7,8 @@
     "scripts": "Scripts",
     "reports": "Rapports",
     "settings": "Paramètres",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "osUpgrades": "Mises à jour OS"
   },
   "login": {
     "title": "Connexion à SysManage",
@@ -79,8 +80,14 @@
     "shutdownFailed": "Échec de la demande d'arrêt",
     "rebootSelected": "Redémarrer Sélectionnés",
     "shutdownSelected": "Arrêter Sélectionnés",
-    "filterByTags": "Filtrer par balises",
-    "selectTags": "Sélectionner des balises"
+    "filterByTags": "Filtrer par tags",
+    "selectTags": "Sélectionner les tags",
+    "swUpdates": "Mises à jour SW",
+    "osUpgrade": "Mise à jour OS",
+    "osUpgradeAvailable": "Mise à jour OS disponible pour cet hôte",
+    "securityAndSystemUpdates": "{{security}} sécurité, {{system}} mises à jour système",
+    "securityUpdatesOnly": "{{count}} mises à jour de sécurité",
+    "systemUpdatesOnly": "{{count}} mises à jour système"
   },
   "users": {
     "title": "Gestion des utilisateurs",
@@ -731,5 +738,45 @@
     "registeredHostsDescription": "Liste complète de tous les hôtes enregistrés montrant les informations de base et les détails du système d'exploitation incluant le nom d'hôte, les adresses IP, la version de l'OS et le statut.",
     "hostsWithTagsDescription": "Affiche tous les hôtes enregistrés avec leurs étiquettes assignées pour une catégorisation et un filtrage faciles. Utile pour organiser les hôtes par environnement, objectif ou département.",
     "sysmanageUsersDescription": "Liste complète de tous les utilisateurs SysManage montrant leurs profils, rôles, permissions et statut de compte. Inclut les dates de création d'utilisateur et les heures de dernière connexion."
+  },
+  "osUpgrades": {
+    "title": "Mises à jour du système d'exploitation",
+    "refresh": "Actualiser",
+    "loading": "Chargement des mises à jour OS...",
+    "noUpgrades": "Aucune mise à jour OS n'est actuellement disponible",
+    "noMatchingUpgrades": "Aucune mise à jour OS ne correspond au filtre actuel",
+    "requiresReboot": "La mise à jour OS nécessite un redémarrage du système",
+    "selectAll": "Tout sélectionner",
+    "executeSelected": "Exécuter les mises à jour OS sélectionnées",
+    "stats": {
+      "total": "Total des mises à jour OS",
+      "security": "Mises à jour de sécurité",
+      "hosts": "Hôtes affectés"
+    },
+    "filters": {
+      "allTypes": "Tous les types d'OS",
+      "ubuntu": "Ubuntu/Debian",
+      "fedora": "Fedora",
+      "opensuse": "openSUSE",
+      "macos": "macOS",
+      "windows": "Windows",
+      "openbsd": "OpenBSD",
+      "freebsd": "FreeBSD"
+    },
+    "types": {
+      "ubuntu": "Mise à jour de version Ubuntu",
+      "fedora": "Mise à jour de version Fedora",
+      "opensuse": "Mise à jour de distribution openSUSE",
+      "macos": "Mise à jour de version macOS",
+      "windows": "Mise à jour de fonctionnalités Windows",
+      "openbsd": "Mise à jour système OpenBSD",
+      "freebsd": "Mise à jour de version FreeBSD",
+      "generic": "Mise à jour OS"
+    },
+    "status": {
+      "pending": "Mise à jour demandée",
+      "success": "Mis à jour avec succès",
+      "failed": "Échec de la mise à jour"
+    }
   }
 }

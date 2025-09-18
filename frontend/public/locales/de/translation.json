@@ -7,7 +7,8 @@
     "scripts": "Skripte",
     "reports": "Berichte",
     "settings": "Einstellungen",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "osUpgrades": "OS-Upgrades"
   },
   "login": {
     "title": "Bei SysManage anmelden",
@@ -80,7 +81,13 @@
     "rebootSelected": "Ausgewählte Neustarten",
     "shutdownSelected": "Ausgewählte Herunterfahren",
     "filterByTags": "Nach Tags filtern",
-    "selectTags": "Tags auswählen"
+    "selectTags": "Tags auswählen",
+    "swUpdates": "SW-Updates",
+    "osUpgrade": "OS-Upgrade",
+    "osUpgradeAvailable": "OS-Upgrade für diesen Host verfügbar",
+    "securityAndSystemUpdates": "{{security}} Sicherheits-, {{system}} System-Updates",
+    "securityUpdatesOnly": "{{count}} Sicherheitsupdates",
+    "systemUpdatesOnly": "{{count}} Systemupdates"
   },
   "users": {
     "title": "Benutzerverwaltung",
@@ -733,5 +740,45 @@
     "registeredHostsDescription": "Vollständige Auflistung aller registrierten Hosts mit grundlegenden Informationen und Betriebssystemdetails einschließlich Hostname, IP-Adressen, OS-Version und Status.",
     "hostsWithTagsDescription": "Zeigt alle registrierten Hosts zusammen mit ihren zugewiesenen Tags zur einfachen Kategorisierung und Filterung. Nützlich für die Organisation von Hosts nach Umgebung, Zweck oder Abteilung.",
     "sysmanageUsersDescription": "Umfassende Liste aller SysManage-Benutzer mit ihren Profilen, Rollen, Berechtigungen und Kontostatus. Enthält Benutzererstellungsdaten und letzte Anmeldezeiten."
+  },
+  "osUpgrades": {
+    "title": "Betriebssystem-Upgrades",
+    "refresh": "Aktualisieren",
+    "loading": "Lade OS-Upgrades...",
+    "noUpgrades": "Derzeit sind keine OS-Upgrades verfügbar",
+    "noMatchingUpgrades": "Keine OS-Upgrades entsprechen dem aktuellen Filter",
+    "requiresReboot": "OS-Upgrade erfordert Systemneustart",
+    "selectAll": "Alle auswählen",
+    "executeSelected": "Ausgewählte OS-Upgrades ausführen",
+    "stats": {
+      "total": "Gesamt OS-Upgrades",
+      "security": "Sicherheitsupdates",
+      "hosts": "Betroffene Hosts"
+    },
+    "filters": {
+      "allTypes": "Alle OS-Typen",
+      "ubuntu": "Ubuntu/Debian",
+      "fedora": "Fedora",
+      "opensuse": "openSUSE",
+      "macos": "macOS",
+      "windows": "Windows",
+      "openbsd": "OpenBSD",
+      "freebsd": "FreeBSD"
+    },
+    "types": {
+      "ubuntu": "Ubuntu Release-Upgrade",
+      "fedora": "Fedora Versions-Upgrade",
+      "opensuse": "openSUSE Distributions-Upgrade",
+      "macos": "macOS Versions-Upgrade",
+      "windows": "Windows Feature-Update",
+      "openbsd": "OpenBSD System-Upgrade",
+      "freebsd": "FreeBSD Versions-Upgrade",
+      "generic": "OS-Upgrade"
+    },
+    "status": {
+      "pending": "Upgrade angefordert",
+      "success": "Erfolgreich aktualisiert",
+      "failed": "Upgrade fehlgeschlagen"
+    }
   }
 }

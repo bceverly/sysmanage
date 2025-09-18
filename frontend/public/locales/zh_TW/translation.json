@@ -7,7 +7,8 @@
     "scripts": "腳本",
     "reports": "報告",
     "settings": "設定",
-    "logout": "登出"
+    "logout": "登出",
+    "osUpgrades": "作業系統升級"
   },
   "login": {
     "title": "登入 SysManage",
@@ -78,8 +79,14 @@
     "shutdownFailed": "關機請求失敗",
     "rebootSelected": "重新啟動所選",
     "shutdownSelected": "關閉所選",
-    "filterByTags": "按標籤篩選",
-    "selectTags": "選擇標籤"
+    "filterByTags": "依標籤篩選",
+    "selectTags": "選擇標籤",
+    "swUpdates": "軟體更新",
+    "osUpgrade": "作業系統升級",
+    "osUpgradeAvailable": "此主機可進行作業系統升級",
+    "securityAndSystemUpdates": "{{security}} 安全性，{{system}} 系統更新",
+    "securityUpdatesOnly": "{{count}} 安全性更新",
+    "systemUpdatesOnly": "{{count}} 系統更新"
   },
   "users": {
     "title": "用戶管理",
@@ -729,5 +736,45 @@
     "registeredHostsDescription": "所有已註冊主機的完整清單，顯示基本訊息和作業系統詳情，包括主機名稱、IP位址、作業系統版本和狀態。",
     "hostsWithTagsDescription": "顯示所有已註冊主機及其指定的標籤，以便進行分類和篩選。有助於按環境、用途或部門組織主機。",
     "sysmanageUsersDescription": "所有SysManage使用者的全面清單，顯示他們的資料、角色、權限和帳戶狀態。包括使用者建立日期和上次登入時間。"
+  },
+  "osUpgrades": {
+    "title": "作業系統升級",
+    "refresh": "重新整理",
+    "loading": "正在載入作業系統升級...",
+    "noUpgrades": "目前沒有可用的作業系統升級",
+    "noMatchingUpgrades": "沒有作業系統升級符合目前的篩選器",
+    "requiresReboot": "作業系統升級需要系統重新啟動",
+    "selectAll": "全選",
+    "executeSelected": "執行選定的作業系統升級",
+    "stats": {
+      "total": "作業系統升級總數",
+      "security": "安全性更新",
+      "hosts": "受影響的主機"
+    },
+    "filters": {
+      "allTypes": "所有作業系統類型",
+      "ubuntu": "Ubuntu/Debian",
+      "fedora": "Fedora",
+      "opensuse": "openSUSE",
+      "macos": "macOS",
+      "windows": "Windows",
+      "openbsd": "OpenBSD",
+      "freebsd": "FreeBSD"
+    },
+    "types": {
+      "ubuntu": "Ubuntu版本升級",
+      "fedora": "Fedora版本升級",
+      "opensuse": "openSUSE發行版升級",
+      "macos": "macOS版本升級",
+      "windows": "Windows功能更新",
+      "openbsd": "OpenBSD系統升級",
+      "freebsd": "FreeBSD版本升級",
+      "generic": "作業系統升級"
+    },
+    "status": {
+      "pending": "升級已請求",
+      "success": "升級成功",
+      "failed": "升級失敗"
+    }
   }
 }

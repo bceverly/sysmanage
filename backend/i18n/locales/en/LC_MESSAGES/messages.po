@@ -219,3 +219,110 @@ msgstr "PDF generation not available"
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF generation is not available. Please install reportlab package."
 
+# OS Version Upgrade related strings
+
+msgid "Invalid package managers for OS upgrades: {}"
+msgstr "Invalid package managers for OS upgrades: {}"
+
+msgid "No OS upgrades available for this host"
+msgstr "No OS upgrades available for this host"
+
+msgid "OS upgrade command sent successfully"
+msgstr "OS upgrade command sent successfully"
+
+msgid "Failed to send OS upgrade command to host"
+msgstr "Failed to send OS upgrade command to host"
+
+msgid "Operating System Upgrades"
+msgstr "Operating System Upgrades"
+
+msgid "OS Upgrade Available"
+msgstr "OS Upgrade Available"
+
+msgid "Apply OS Upgrade"
+msgstr "Apply OS Upgrade"
+
+msgid "Execute OS Upgrades"
+msgstr "Execute OS Upgrades"
+
+msgid "OS upgrade requires system reboot"
+msgstr "OS upgrade requires system reboot"
+
+msgid "Current OS Version"
+msgstr "Current OS Version"
+
+msgid "Available OS Version"
+msgstr "Available OS Version"
+
+msgid "OS Upgrade Type"
+msgstr "OS Upgrade Type"
+
+msgid "Ubuntu Release Upgrade"
+msgstr "Ubuntu Release Upgrade"
+
+msgid "Fedora Version Upgrade"
+msgstr "Fedora Version Upgrade"
+
+msgid "openSUSE Distribution Upgrade"
+msgstr "openSUSE Distribution Upgrade"
+
+msgid "macOS Version Upgrade"
+msgstr "macOS Version Upgrade"
+
+msgid "Windows Feature Update"
+msgstr "Windows Feature Update"
+
+msgid "OpenBSD System Upgrade"
+msgstr "OpenBSD System Upgrade"
+
+msgid "FreeBSD Version Upgrade"
+msgstr "FreeBSD Version Upgrade"
+
+msgid "Upgrade Size"
+msgstr "Upgrade Size"
+
+msgid "Security Update"
+msgstr "Security Update"
+
+msgid "System Reboot Required"
+msgstr "System Reboot Required"
+
+msgid "Confirm OS Upgrade"
+msgstr "Confirm OS Upgrade"
+
+msgid "This action will upgrade the operating system and require a system reboot. Continue?"
+msgstr "This action will upgrade the operating system and require a system reboot. Continue?"
+
+msgid "OS upgrades are always security updates"
+msgstr "OS upgrades are always security updates"
+
+msgid "View OS Upgrades"
+msgstr "View OS Upgrades"
+
+msgid "Filter by OS Type"
+msgstr "Filter by OS Type"
+
+msgid "All OS Types"
+msgstr "All OS Types"
+
+msgid "Ubuntu/Debian"
+msgstr "Ubuntu/Debian"
+
+msgid "Fedora"
+msgstr "Fedora"
+
+msgid "openSUSE"
+msgstr "openSUSE"
+
+msgid "macOS"
+msgstr "macOS"
+
+msgid "Windows"
+msgstr "Windows"
+
+msgid "OpenBSD"
+msgstr "OpenBSD"
+
+msgid "FreeBSD"
+msgstr "FreeBSD"
+

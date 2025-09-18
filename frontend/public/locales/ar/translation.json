@@ -7,7 +7,8 @@
     "scripts": "السكريبتات",
     "reports": "التقارير",
     "settings": "الإعدادات",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "osUpgrades": "ترقيات نظام التشغيل"
   },
   "login": {
     "title": "تسجيل الدخول إلى سيس مانج",
@@ -79,8 +80,14 @@
     "shutdownFailed": "فشل طلب إيقاف التشغيل",
     "rebootSelected": "إعادة تشغيل المحدد",
     "shutdownSelected": "إيقاف تشغيل المحدد",
-    "filterByTags": "تصفية حسب العلامات",
-    "selectTags": "اختيار العلامات"
+    "filterByTags": "تصفية بالعلامات",
+    "selectTags": "اختر العلامات",
+    "swUpdates": "تحديثات البرمجيات",
+    "osUpgrade": "ترقية نظام التشغيل",
+    "osUpgradeAvailable": "ترقية نظام التشغيل متاحة لهذا المضيف",
+    "securityAndSystemUpdates": "{{security}} أمنية، {{system}} تحديثات نظام",
+    "securityUpdatesOnly": "{{count}} تحديثات أمنية",
+    "systemUpdatesOnly": "{{count}} تحديثات نظام"
   },
   "users": {
     "title": "إدارة المستخدمين",
@@ -735,5 +742,45 @@
     "registeredHostsDescription": "قائمة كاملة بجميع المضيفين المسجلين تُظهر المعلومات الأساسية وتفاصيل نظام التشغيل بما في ذلك اسم المضيف وعناوين IP وإصدار نظام التشغيل والحالة.",
     "hostsWithTagsDescription": "يُظهر جميع المضيفين المسجلين مع العلامات المخصصة لهم لسهولة التصنيف والتصفية. مفيد لتنظيم المضيفين حسب البيئة أو الغرض أو القسم.",
     "sysmanageUsersDescription": "قائمة شاملة بجميع مستخدمي SysManage تُظهر ملفاتهم الشخصية والأدوار والصلاحيات وحالة الحساب. تتضمن تواريخ إنشاء المستخدمين وأوقات آخر تسجيل دخول."
+  },
+  "osUpgrades": {
+    "title": "ترقيات نظام التشغيل",
+    "refresh": "تحديث",
+    "loading": "جارٍ تحميل ترقيات نظام التشغيل...",
+    "noUpgrades": "لا توجد ترقيات لنظام التشغيل متاحة حالياً",
+    "noMatchingUpgrades": "لا توجد ترقيات لنظام التشغيل تطابق المرشح الحالي",
+    "requiresReboot": "ترقية نظام التشغيل تتطلب إعادة تشغيل النظام",
+    "selectAll": "تحديد الكل",
+    "executeSelected": "تنفيذ ترقيات نظام التشغيل المحددة",
+    "stats": {
+      "total": "إجمالي ترقيات نظام التشغيل",
+      "security": "التحديثات الأمنية",
+      "hosts": "المضيفات المتأثرة"
+    },
+    "filters": {
+      "allTypes": "جميع أنواع أنظمة التشغيل",
+      "ubuntu": "Ubuntu/Debian",
+      "fedora": "Fedora",
+      "opensuse": "openSUSE",
+      "macos": "macOS",
+      "windows": "Windows",
+      "openbsd": "OpenBSD",
+      "freebsd": "FreeBSD"
+    },
+    "types": {
+      "ubuntu": "ترقية إصدار Ubuntu",
+      "fedora": "ترقية إصدار Fedora",
+      "opensuse": "ترقية توزيعة openSUSE",
+      "macos": "ترقية إصدار macOS",
+      "windows": "تحديث ميزات Windows",
+      "openbsd": "ترقية نظام OpenBSD",
+      "freebsd": "ترقية إصدار FreeBSD",
+      "generic": "ترقية نظام التشغيل"
+    },
+    "status": {
+      "pending": "طُلب الترقية",
+      "success": "تم الترقية بنجاح",
+      "failed": "فشل في الترقية"
+    }
   }
 }
