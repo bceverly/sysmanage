@@ -22,6 +22,7 @@ class MessageType(str, Enum):
     USER_ACCESS_UPDATE = "user_access_update"
     SOFTWARE_INVENTORY_UPDATE = "software_inventory_update"
     PACKAGE_UPDATES_UPDATE = "package_updates_update"
+    AVAILABLE_PACKAGES_UPDATE = "available_packages_update"
     UPDATE_APPLY_RESULT = "update_apply_result"
     SCRIPT_EXECUTION_RESULT = "script_execution_result"
     REBOOT_STATUS_UPDATE = "reboot_status_update"

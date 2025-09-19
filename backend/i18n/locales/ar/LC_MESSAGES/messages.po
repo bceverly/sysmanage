@@ -614,3 +614,38 @@ msgstr "OpenBSD"
 msgid "FreeBSD"
 msgstr "FreeBSD"
 
+msgid "Failed to retrieve package summary: %s"
+msgstr "فشل في استرداد ملخص الحزم: %s"
+
+msgid "Failed to retrieve package managers: %s"
+msgstr "فشل في استرداد مديري الحزم: %s"
+
+msgid "Failed to search packages: %s"
+msgstr "فشل في البحث عن الحزم: %s"
+
+msgid "Failed to retrieve OS versions: %s"
+msgstr "فشل في استرداد إصدارات نظام التشغيل: %s"
+
+msgid "Failed to retrieve packages for manager %s: %s"
+msgstr "فشل في استرداد الحزم للمدير %s: %s"
+
+msgid "Failed to process available packages: %s"
+msgstr "فشل في معالجة الحزم المتاحة: %s"
+
+msgid "Host not registered"
+msgstr "المضيف غير مسجل"
+
+msgid "Host not found"
+msgstr "المضيف غير موجود"
+
+
+
+
+
+
+
+
+
+
+
+

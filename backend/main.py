@@ -27,6 +27,7 @@ from backend.api import (
     email,
     fleet,
     host,
+    packages,
     password_reset,
     profile,
     queue,
@@ -643,6 +644,12 @@ app.include_router(
     password_reset.admin_router, prefix="/api", tags=["password_reset"]
 )  # /api/admin/reset-user-password (with auth)
 startup_logger.info("Password reset admin router added")
+
+startup_logger.info("Adding packages router with /api/packages prefix")
+app.include_router(
+    packages.router, prefix="/api/packages", tags=["packages"]
+)  # /api/packages/* (with auth)
+startup_logger.info("Packages router added")
 
 startup_logger.info("=== ALL ROUTES REGISTERED ===")
 

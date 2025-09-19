@@ -622,3 +622,38 @@ msgstr "OpenBSD"
 msgid "FreeBSD"
 msgstr "FreeBSD"
 
+msgid "Failed to retrieve package summary: %s"
+msgstr "패키지 요약 검색 실패: %s"
+
+msgid "Failed to retrieve package managers: %s"
+msgstr "패키지 관리자 검색 실패: %s"
+
+msgid "Failed to search packages: %s"
+msgstr "패키지 검색 실패: %s"
+
+msgid "Failed to retrieve OS versions: %s"
+msgstr "운영체제 버전 검색 실패: %s"
+
+msgid "Failed to retrieve packages for manager %s: %s"
+msgstr "관리자 %s의 패키지 검색 실패: %s"
+
+msgid "Failed to process available packages: %s"
+msgstr "사용 가능한 패키지 처리 실패: %s"
+
+msgid "Host not registered"
+msgstr "호스트가 등록되지 않음"
+
+msgid "Host not found"
+msgstr "호스트를 찾을 수 없음"
+
+
+
+
+
+
+
+
+
+
+
+

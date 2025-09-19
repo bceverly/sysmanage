@@ -625,3 +625,38 @@ msgstr "OpenBSD"
 msgid "FreeBSD"
 msgstr "FreeBSD"
 
+msgid "Failed to retrieve package summary: %s"
+msgstr "パッケージ概要の取得に失敗しました: %s"
+
+msgid "Failed to retrieve package managers: %s"
+msgstr "パッケージマネージャーの取得に失敗しました: %s"
+
+msgid "Failed to search packages: %s"
+msgstr "パッケージの検索に失敗しました: %s"
+
+msgid "Failed to retrieve OS versions: %s"
+msgstr "OSバージョンの取得に失敗しました: %s"
+
+msgid "Failed to retrieve packages for manager %s: %s"
+msgstr "マネージャー %s のパッケージ取得に失敗しました: %s"
+
+msgid "Failed to process available packages: %s"
+msgstr "利用可能なパッケージの処理に失敗しました: %s"
+
+msgid "Host not registered"
+msgstr "ホストが登録されていません"
+
+msgid "Host not found"
+msgstr "ホストが見つかりません"
+
+
+
+
+
+
+
+
+
+
+
+

@@ -3,15 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import api from '../Services/api';
 
-/* eslint-disable no-undef */
-declare const Blob: {
-  new (array: BlobPart[], options?: BlobPropertyBag): Blob;
-};
-
-interface HTMLImageElement extends HTMLElement {
-  src: string;
-}
-/* eslint-enable no-undef */
 import {
   Box,
   Typography,

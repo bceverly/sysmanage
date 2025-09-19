@@ -780,5 +780,21 @@
       "success": "正常にアップグレードされました",
       "failed": "アップグレードに失敗しました"
     }
+  },
+  "availablePackages": {
+    "title": "利用可能なパッケージ",
+    "description": "説明",
+    "summary": "OS別パッケージ概要",
+    "totalPackages": "総パッケージ数",
+    "search": "パッケージ検索",
+    "searchTerm": "パッケージを検索",
+    "filterByOS": "OSでフィルター",
+    "filterByManager": "マネージャーでフィルター",
+    "results": "検索結果",
+    "packageName": "パッケージ名",
+    "version": "バージョン",
+    "manager": "マネージャー",
+    "noResults": "検索条件に一致するパッケージが見つかりません。",
+    "noData": "パッケージデータが利用できません。パッケージは管理対象ホストから自動的に収集されます。"
   }
 }

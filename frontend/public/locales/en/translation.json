@@ -821,5 +821,22 @@
     "registeredHostsDescription": "Complete listing of all registered hosts showing basic information and operating system details including hostname, IP addresses, OS version, and status.",
     "hostsWithTagsDescription": "Shows all registered hosts along with their assigned tags for easy categorization and filtering. Useful for organizing hosts by environment, purpose, or department.",
     "sysmanageUsersDescription": "Comprehensive list of all SysManage users showing their profiles, roles, permissions, and account status. Includes user creation dates and last login times."
+  },
+  "availablePackages": {
+    "title": "Available Packages",
+    "description": "View and search available packages collected from your managed hosts across different operating systems and package managers.",
+    "summary": "Package Summary by OS",
+    "totalPackages": "Total Packages",
+    "search": "Search Packages",
+    "searchTerm": "Search packages",
+    "filterByOS": "Filter by OS",
+    "filterByManager": "Filter by Manager",
+    "results": "Search Results",
+    "packageName": "Package Name",
+    "version": "Version",
+    "manager": "Manager",
+    "description": "Description",
+    "noResults": "No packages found matching your search criteria.",
+    "noData": "No package data available. Packages will be collected from your managed hosts automatically."
   }
 }

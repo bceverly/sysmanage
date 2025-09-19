@@ -780,5 +780,21 @@
       "success": "Aggiornato con successo",
       "failed": "Aggiornamento fallito"
     }
+  },
+  "availablePackages": {
+    "title": "Pacchetti Disponibili",
+    "description": "Descrizione",
+    "summary": "Riepilogo Pacchetti per OS",
+    "totalPackages": "Pacchetti Totali",
+    "search": "Cerca Pacchetti",
+    "searchTerm": "Cerca pacchetti",
+    "filterByOS": "Filtra per OS",
+    "filterByManager": "Filtra per Gestore",
+    "results": "Risultati di Ricerca",
+    "packageName": "Nome Pacchetto",
+    "version": "Versione",
+    "manager": "Gestore",
+    "noResults": "Nessun pacchetto trovato che corrisponda ai tuoi criteri di ricerca.",
+    "noData": "Nessun dato pacchetto disponibile. I pacchetti verranno raccolti automaticamente dai tuoi host gestiti."
   }
 }

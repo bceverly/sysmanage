@@ -48,23 +48,39 @@ class TestReportsBasicFunctionality:
         assert "Test Report" in hosts_html
         assert "Test Report" in users_html
 
-    def test_authentication_required(self, client):
+    def test_authentication_required(self):
         """Test that endpoints require authentication."""
-        # Test that protected endpoints return 403 without auth
-        protected_endpoints = [
-            "/api/reports/view/registered-hosts",
-            "/api/reports/view/users-list",
-            "/api/reports/generate/hosts",
-            "/api/reports/generate/users",
-        ]
+        # Create an unauthenticated client without the auth fixture
+        from fastapi.testclient import TestClient
+        from backend.main import app
+        from contextlib import asynccontextmanager
 
-        for endpoint in protected_endpoints:
-            response = client.get(endpoint)
-            assert response.status_code == 403
+        @asynccontextmanager
+        async def mock_lifespan(app):
+            yield
 
-        # Screenshots endpoint is public for UI cards
-        response = client.get("/api/reports/screenshots/test")
-        assert response.status_code == 200
+        original_lifespan = app.router.lifespan_context
+        app.router.lifespan_context = mock_lifespan
+
+        try:
+            with TestClient(app) as unauthenticated_client:
+                # Test that protected endpoints return 403 without auth
+                protected_endpoints = [
+                    "/api/reports/view/registered-hosts",
+                    "/api/reports/view/users-list",
+                    "/api/reports/generate/hosts",
+                    "/api/reports/generate/users",
+                ]
+
+                for endpoint in protected_endpoints:
+                    response = unauthenticated_client.get(endpoint)
+                    assert response.status_code == 403
+
+                # Screenshots endpoint is public for UI cards
+                response = unauthenticated_client.get("/api/reports/screenshots/test")
+                assert response.status_code == 200
+        finally:
+            app.router.lifespan_context = original_lifespan
 
     def test_invalid_report_types(self, authenticated_client):
         """Test handling of invalid report types."""

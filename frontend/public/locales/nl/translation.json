@@ -778,5 +778,21 @@
       "success": "Succesvol geüpgraded",
       "failed": "Upgrade mislukt"
     }
+  },
+  "availablePackages": {
+    "title": "Beschikbare Pakketten",
+    "description": "Beschrijving",
+    "summary": "Pakket Overzicht per OS",
+    "totalPackages": "Totaal Pakketten",
+    "search": "Zoek Pakketten",
+    "searchTerm": "Zoek pakketten",
+    "filterByOS": "Filter op OS",
+    "filterByManager": "Filter op Beheerder",
+    "results": "Zoekresultaten",
+    "packageName": "Pakketnaam",
+    "version": "Versie",
+    "manager": "Beheerder",
+    "noResults": "Geen pakketten gevonden die overeenkomen met uw zoekcriteria.",
+    "noData": "Geen pakketgegevens beschikbaar. Pakketten worden automatisch verzameld van uw beheerde hosts."
   }
 }

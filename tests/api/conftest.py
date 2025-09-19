@@ -1,5 +1,20 @@
 """
 Test configuration and fixtures for API tests.
+
+⚠️  CRITICAL MAINTENANCE WARNING ⚠️
+
+This file uses MANUAL model definitions for fast, focused API testing.
+When adding new database models, you MUST update BOTH:
+
+1. Main conftest (/tests/conftest.py) - automatic via Alembic migrations
+2. This file (/tests/api/conftest.py) - manual SQLite-compatible models
+
+SQLite Compatibility Rules:
+- ✅ Use Integer primary keys (not BigInteger) for auto-increment
+- ✅ Use String instead of Text for better performance
+- ✅ Omit timezone info in DateTime columns
+
+See README.md and TESTING.md for detailed guidelines.
 """
 
 import os
@@ -239,10 +254,25 @@ def test_db():
         # Add relationship back to host
         host = relationship("Host", back_populates="package_updates")
 
+    # Create test version of AvailablePackage model for SQLite compatibility
+    # ⚠️  ADD NEW MODELS HERE: When adding models, follow this pattern with Integer primary keys!
+    class AvailablePackage(TestBase):
+        __tablename__ = "available_packages"
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        package_name = Column(String(255), nullable=False, index=True)
+        package_version = Column(String(100), nullable=False)
+        package_description = Column(Text, nullable=True)
+        package_manager = Column(String(50), nullable=False, index=True)
+        os_name = Column(String(100), nullable=False, index=True)
+        os_version = Column(String(100), nullable=False, index=True)
+        last_updated = Column(DateTime, nullable=False)
+        created_at = Column(DateTime, nullable=False)
+
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)
 
     # Monkey patch models to use test models during testing
+    # ⚠️  ADD NEW MODEL MONKEY PATCHES HERE: Store original and patch models!
     original_host = models.Host
     original_user = models.User
     original_tag = models.Tag
@@ -251,6 +281,7 @@ def test_db():
     original_message_queue = models.MessageQueue
     original_ubuntu_pro_settings = models.UbuntuProSettings
     original_package_update = models.PackageUpdate
+    original_available_package = models.AvailablePackage
     models.Host = Host
     models.User = User
     models.Tag = Tag
@@ -259,6 +290,7 @@ def test_db():
     models.MessageQueue = MessageQueue
     models.UbuntuProSettings = UbuntuProSettings
     models.PackageUpdate = PackageUpdate
+    models.AvailablePackage = AvailablePackage
 
     # Override the get_engine dependency
     def override_get_engine():
@@ -288,6 +320,7 @@ def test_db():
     yield test_engine
 
     # Restore original models
+    # ⚠️  ADD NEW MODEL CLEANUP HERE: Restore original model classes!
     models.Host = original_host
     models.User = original_user
     models.Tag = original_tag
@@ -296,6 +329,7 @@ def test_db():
     models.MessageQueue = original_message_queue
     models.UbuntuProSettings = original_ubuntu_pro_settings
     models.PackageUpdate = original_package_update
+    models.AvailablePackage = original_available_package
 
     # Clean up database connections
     test_engine.dispose()  # Close all connections in the connection pool

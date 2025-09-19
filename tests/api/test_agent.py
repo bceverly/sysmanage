@@ -169,7 +169,7 @@ class TestAgentWebSocket:
         assert "Invalid or expired token" in validation_result["error"]
 
     @patch("backend.api.agent.connection_manager")
-    def test_websocket_connection_management(self, mock_connection_manager):
+    async def test_websocket_connection_management(self, mock_connection_manager):
         """Test WebSocket connection management integration."""
         # Test connection manager integration
         mock_websocket = Mock()
@@ -187,8 +187,8 @@ class TestAgentWebSocket:
 
         # Test message sending
         test_message = {"type": "ping", "data": {}}
-        result = mock_connection_manager.send_to_agent(agent_id, test_message)
-        # Since this is an AsyncMock, we need to await it in a real scenario
+        result = await mock_connection_manager.send_to_agent(agent_id, test_message)
+        assert result is True
 
         # Test disconnection
         disconnect_result = mock_connection_manager.disconnect_agent(agent_id)

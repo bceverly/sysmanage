@@ -778,5 +778,21 @@
       "success": "升级成功",
       "failed": "升级失败"
     }
+  },
+  "availablePackages": {
+    "title": "可用软件包",
+    "description": "描述",
+    "summary": "操作系统软件包概要",
+    "totalPackages": "软件包总数",
+    "search": "搜索软件包",
+    "searchTerm": "搜索软件包",
+    "filterByOS": "按操作系统筛选",
+    "filterByManager": "按管理器筛选",
+    "results": "搜索结果",
+    "packageName": "软件包名称",
+    "version": "版本",
+    "manager": "管理器",
+    "noResults": "找不到符合您搜索条件的软件包。",
+    "noData": "无可用的软件包数据。软件包将从您的管理主机自动收集。"
   }
 }

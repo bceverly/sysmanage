@@ -30,8 +30,10 @@ export default [
         HTMLElement: 'readonly',
         HTMLInputElement: 'readonly',
         HTMLFormElement: 'readonly',
+        HTMLImageElement: 'readonly',
         FormData: 'readonly',
-        AbortController: 'readonly'
+        AbortController: 'readonly',
+        Blob: 'readonly'
       }
     },
     plugins: {

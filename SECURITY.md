@@ -159,6 +159,7 @@ Developers can run security scans locally before committing:
 ```bash
 # Individual security tools
 python -m bandit -r backend/ -f screen              # Python static analysis
+semgrep scan --config="p/security-audit" --config="p/python" --config="p/owasp-top-ten"  # Multi-language static analysis
 pip freeze | safety check --stdin                   # Python dependency check
 cd frontend && npm audit                             # npm dependency check
 cd frontend && npx eslint --config eslint.security.config.js src/  # JS security lint

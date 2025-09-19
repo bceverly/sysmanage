@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,11 +8,6 @@ import {
   Alert,
 } from '@mui/material';
 
-/* eslint-disable no-undef */
-declare const Blob: {
-  new (array: BlobPart[], options?: BlobPropertyBag): Blob;
-};
-/* eslint-enable no-undef */
 import {
   ArrowBack as BackIcon,
   GetApp as DownloadIcon,
@@ -26,6 +21,7 @@ const ReportViewer: React.FC = () => {
   const [htmlContent, setHtmlContent] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   const fetchReportHtml = useCallback(async () => {
     try {
@@ -54,6 +50,15 @@ const ReportViewer: React.FC = () => {
     }
   }, [reportId, fetchReportHtml]);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleGeneratePdf = async () => {
     try {
       const response = await api.get(`/api/reports/generate/${reportId}`, {
@@ -68,7 +73,7 @@ const ReportViewer: React.FC = () => {
       window.open(url, '_blank');
 
       // Clean up the URL object
-      setTimeout(() => window.URL.revokeObjectURL(url), 100);
+      timeoutRef.current = setTimeout(() => window.URL.revokeObjectURL(url), 100);
 
     } catch (error: unknown) {
       console.error('Error generating PDF:', error);

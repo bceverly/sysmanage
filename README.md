@@ -204,6 +204,38 @@ cd frontend && npm run build
 
 **📖 For detailed deployment instructions, visit [sysmanage.org/docs/server/deployment.html](https://sysmanage.org/docs/server/deployment.html)**
 
+## 🧪 Testing
+
+This project uses a **dual conftest architecture** for optimal test performance and database isolation:
+
+- **`/tests/conftest.py`**: Integration tests with full schema (Alembic migrations)
+- **`/tests/api/conftest.py`**: Fast API tests with minimal dependencies (manual models)
+
+### Running Tests
+
+```bash
+# Run all tests (target: 99.8% pass rate)
+make test
+
+# Run specific test suites
+python -m pytest tests/api/test_packages.py -v
+python -m pytest tests/api/ -q --tb=no
+```
+
+### ⚠️ Adding New Database Models
+
+**CRITICAL**: When adding new models, update BOTH conftest files:
+
+1. **Main conftest** (automatic): `alembic revision --autogenerate -m "Add NewModel"`
+2. **API conftest** (manual): Add SQLite-compatible model definition if API tests need it
+
+**SQLite Compatibility Rules**:
+- ✅ Use `Integer` primary keys (not `BigInteger`) for auto-increment
+- ✅ Use `String` instead of `Text` for better performance
+- ✅ Omit timezone info in `DateTime` columns
+
+See `TESTING.md` for detailed guidelines.
+
 ## Contributing
 
 1. Fork the repository

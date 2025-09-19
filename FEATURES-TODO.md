@@ -92,3 +92,15 @@ like to add:
     string externalization /
     translation.
 
+11. Add OpenTelemetry support to
+    sysmanage and sysmanage-agent
+    so that the performance can be
+    monitoried in a large-scale
+    production environment.
+
+12. Add the ability to deploy an
+    antivirus solution that is
+    platform approriate to the
+    hosts along with centralized
+    configuration file management
+    of it.

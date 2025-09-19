@@ -21,6 +21,7 @@ help:
 	@echo "  make setup         - Install development dependencies"
 	@echo "  make clean         - Clean test artifacts and cache"
 	@echo "  make install-dev   - Install all development tools (includes WebDriver for screenshots)"
+	@echo "  make check-test-models - Check test model synchronization between conftest files"
 
 # Virtual environment activation
 VENV := .venv
@@ -51,7 +52,7 @@ endif
 # Install development dependencies
 install-dev: $(VENV_ACTIVATE)
 	@echo "Installing Python development dependencies..."
-	@$(PIP) install pytest pytest-cov pytest-asyncio pylint black isort bandit safety
+	@$(PIP) install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep
 	@echo "Installing requirements.txt (includes Selenium WebDriver)..."
 	@$(PIP) install -r requirements.txt
 	@echo "Setting up WebDriver for screenshots..."
@@ -132,6 +133,14 @@ else
 	@$(PYTHON) -m bandit -r backend/ -f screen -x backend/tests/ || true
 endif
 	@echo ""
+	@echo "Running Semgrep static analysis..."
+	@echo "Tip: Export SEMGREP_APP_TOKEN for access to Pro rules and features"
+ifeq ($(OS),Windows_NT)
+	-@semgrep scan --config="p/default" --config="p/security-audit" --config="p/javascript" --config="p/typescript" --config="p/react" --config="p/python" --config="p/django" --config="p/flask" --config="p/owasp-top-ten" || echo "Semgrep scan completed"
+else
+	@semgrep scan --config="p/default" --config="p/security-audit" --config="p/javascript" --config="p/typescript" --config="p/react" --config="p/python" --config="p/django" --config="p/flask" --config="p/owasp-top-ten" || true
+endif
+	@echo ""
 	@echo "Running Safety dependency vulnerability scan..."
 ifeq ($(OS),Windows_NT)
 	-@$(PYTHON) -m safety scan --output screen || echo "Safety scan completed with issues"
@@ -162,22 +171,22 @@ security-secrets:
 	@echo "Scanning for potential secrets and credentials..."
 ifeq ($(OS),Windows_NT)
 	@echo "Checking for common secret patterns..."
-	@powershell -Command "Get-ChildItem -Recurse -File -Exclude '*.pyc' | Where-Object { $$_.DirectoryName -notmatch '(\\.git|\\.venv|\\node_modules|\\__pycache__)' } | Select-String -Pattern '(password|secret|key|token)\s*[:=]\s*[\x27\x22][^\x27\x22\s]{8,}' -AllMatches" || echo "No obvious secrets found in patterns"
+	@powershell -Command "Get-ChildItem -Recurse -File -Exclude '*.pyc' | Where-Object { $$_.DirectoryName -notmatch '(\\.git|\\.venv|\\node_modules|\\__pycache__|\\build)' } | Select-String -Pattern '(password|secret|key|token)\s*[:=]\s*[\x27\x22][^\x27\x22\s]{8,}' -AllMatches" || echo "No obvious secrets found in patterns"
 	@echo ""
 	@echo "Checking for hardcoded API keys..."
-	@powershell -Command "Get-ChildItem -Recurse -File -Exclude '*.pyc' | Where-Object { $$_.DirectoryName -notmatch '(\\.git|\\.venv|\\node_modules|\\__pycache__)' } | Select-String -Pattern '(api_?key|access_?token|auth_?token)\s*[:=]\s*[\x27\x22][A-Za-z0-9+/=]{20,}' -AllMatches" || echo "No obvious API keys found"
+	@powershell -Command "Get-ChildItem -Recurse -File -Exclude '*.pyc' | Where-Object { $$_.DirectoryName -notmatch '(\\.git|\\.venv|\\node_modules|\\__pycache__|\\build)' } | Select-String -Pattern '(api_?key|access_?token|auth_?token)\s*[:=]\s*[\x27\x22][A-Za-z0-9+/=]{20,}' -AllMatches" || echo "No obvious API keys found"
 	@echo ""
 	@echo "Checking for AWS credentials..."
-	@powershell -Command "Get-ChildItem -Recurse -File -Exclude '*.pyc' | Where-Object { $$_.DirectoryName -notmatch '(\\.git|\\.venv|\\node_modules|\\__pycache__)' } | Select-String -Pattern '(AKIA[0-9A-Z]{16}|aws_secret_access_key)' -AllMatches" || echo "No AWS credentials found"
+	@powershell -Command "Get-ChildItem -Recurse -File -Exclude '*.pyc' | Where-Object { $$_.DirectoryName -notmatch '(\\.git|\\.venv|\\node_modules|\\__pycache__|\\build)' } | Select-String -Pattern '(AKIA[0-9A-Z]{16}|aws_secret_access_key)' -AllMatches" || echo "No AWS credentials found"
 else
 	@echo "Checking for common secret patterns..."
-	@grep -r -i --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=__pycache__ --exclude="*.pyc" -E "(password|secret|key|token)\s*[:=]\s*['\"][^'\"\s]{8,}" . || echo "No obvious secrets found in patterns"
+	@grep -r -i --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=__pycache__ --exclude-dir=build --exclude="*.pyc" -E "(password|secret|key|token)\s*[:=]\s*['\"][^'\"\s]{8,}" . || echo "No obvious secrets found in patterns"
 	@echo ""
 	@echo "Checking for hardcoded API keys..."
-	@grep -r -i --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=__pycache__ --exclude="*.pyc" -E "(api_?key|access_?token|auth_?token)\s*[:=]\s*['\"][A-Za-z0-9+/=]{20,}" . || echo "No obvious API keys found"
+	@grep -r -i --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=__pycache__ --exclude-dir=build --exclude="*.pyc" -E "(api_?key|access_?token|auth_?token)\s*[:=]\s*['\"][A-Za-z0-9+/=]{20,}" . || echo "No obvious API keys found"
 	@echo ""
 	@echo "Checking for AWS credentials..."
-	@grep -r -i --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=__pycache__ --exclude="*.pyc" -E "(AKIA[0-9A-Z]{16}|aws_secret_access_key)" . || echo "No AWS credentials found"
+	@grep -r -i --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=__pycache__ --exclude-dir=build --exclude="*.pyc" -E "(AKIA[0-9A-Z]{16}|aws_secret_access_key)" . || echo "No AWS credentials found"
 endif
 	@echo "[OK] Basic secrets detection completed"
 
@@ -189,6 +198,10 @@ format-python: $(VENV_ACTIVATE) clean-whitespace
 # Python tests
 test-python: $(VENV_ACTIVATE) clean-whitespace
 	@echo "=== Running Python Tests ==="
+	@echo "Cleaning old SQLite test databases..."
+	@find . -name "*.db" -type f -delete 2>/dev/null || true
+	@find /tmp -name "*sysmanage*.db" -type f -delete 2>/dev/null || true
+	@find /tmp -name "tmp*.db" -type f -delete 2>/dev/null || true
 	@$(PYTHON) -m pytest tests/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html
 	@echo "[OK] Python tests completed"
 
@@ -197,6 +210,11 @@ test-typescript:
 	@echo "=== Running TypeScript/React Tests ==="
 	@cd frontend && npm test
 	@echo "[OK] TypeScript tests completed"
+
+# Model synchronization check
+check-test-models:
+	@echo "=== Checking Test Model Synchronization ==="
+	@$(PYTHON) scripts/check_test_models.py
 
 # Combined testing
 test: test-python test-typescript

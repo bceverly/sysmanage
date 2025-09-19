@@ -621,3 +621,38 @@ msgstr "OpenBSD"
 msgid "FreeBSD"
 msgstr "FreeBSD"
 
+msgid "Failed to retrieve package summary: %s"
+msgstr "無法擷取套件摘要：%s"
+
+msgid "Failed to retrieve package managers: %s"
+msgstr "無法擷取套件管理器：%s"
+
+msgid "Failed to search packages: %s"
+msgstr "無法搜尋套件：%s"
+
+msgid "Failed to retrieve OS versions: %s"
+msgstr "無法擷取作業系統版本：%s"
+
+msgid "Failed to retrieve packages for manager %s: %s"
+msgstr "無法為管理器 %s 擷取套件：%s"
+
+msgid "Failed to process available packages: %s"
+msgstr "無法處理可用套件：%s"
+
+msgid "Host not registered"
+msgstr "主機未註冊"
+
+msgid "Host not found"
+msgstr "找不到主機"
+
+
+
+
+
+
+
+
+
+
+
+

@@ -621,3 +621,38 @@ msgstr "OpenBSD"
 msgid "FreeBSD"
 msgstr "FreeBSD"
 
+msgid "Failed to retrieve package summary: %s"
+msgstr "पैकेज सारांश प्राप्त करने में विफल: %s"
+
+msgid "Failed to retrieve package managers: %s"
+msgstr "पैकेज प्रबंधकों को प्राप्त करने में विफल: %s"
+
+msgid "Failed to search packages: %s"
+msgstr "पैकेज खोजने में विफल: %s"
+
+msgid "Failed to retrieve OS versions: %s"
+msgstr "OS संस्करण प्राप्त करने में विफल: %s"
+
+msgid "Failed to retrieve packages for manager %s: %s"
+msgstr "प्रबंधक %s के लिए पैकेज प्राप्त करने में विफल: %s"
+
+msgid "Failed to process available packages: %s"
+msgstr "उपलब्ध पैकेज प्रसंस्करण में विफल: %s"
+
+msgid "Host not registered"
+msgstr "होस्ट पंजीकृत नहीं है"
+
+msgid "Host not found"
+msgstr "होस्ट नहीं मिला"
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,6 +1,17 @@
 """
 This module holds the various models that are persistence backed by the
 PostgreSQL database.
+
+⚠️  TESTING ARCHITECTURE WARNING ⚠️
+
+When adding new models to this file, you MUST also update:
+- /tests/api/conftest.py (if API tests need the model)
+
+Follow SQLite compatibility rules for test models:
+- ✅ Use Integer primary keys (not BigInteger) for auto-increment in test models
+- ✅ Use String instead of Text in test models for better performance
+
+See README.md and TESTING.md for complete guidelines.
 """
 
 import secrets
@@ -17,6 +28,7 @@ from sqlalchemy import (
     String,
     Text,
 )
+import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
 from backend.persistence.db import Base
@@ -882,4 +894,51 @@ class UbuntuProSettings(Base):
             f"<UbuntuProSettings(id={self.id}, "
             f"has_master_key={self.master_key is not None}, "
             f"organization_name='{self.organization_name}')>"
+        )
+
+
+class AvailablePackage(Base):
+    """Model for storing available packages from different package managers across OS versions."""
+
+    __tablename__ = "available_packages"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    os_name = Column(String(100), nullable=False)
+    os_version = Column(String(100), nullable=False)
+    package_manager = Column(String(50), nullable=False)
+    package_name = Column(String(255), nullable=False, index=True)
+    package_version = Column(String(100), nullable=False)
+    package_description = Column(Text, nullable=True)
+    last_updated = Column(DateTime(timezone=True), nullable=False, index=True)
+    created_at = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=sa.text("CURRENT_TIMESTAMP"),
+    )
+
+    # Additional indexes to match PostgreSQL schema
+    __table_args__ = (
+        Index(
+            "ix_available_packages_os_version_pm",
+            "os_name",
+            "os_version",
+            "package_manager",
+        ),
+        Index(
+            "ix_available_packages_unique",
+            "os_name",
+            "os_version",
+            "package_manager",
+            "package_name",
+            unique=True,
+        ),
+    )
+
+    def __repr__(self):
+        return (
+            f"<AvailablePackage(id={self.id}, "
+            f"name='{self.package_name}', "
+            f"version='{self.package_version}', "
+            f"manager='{self.package_manager}', "
+            f"os='{self.os_name} {self.os_version}')>"
         )

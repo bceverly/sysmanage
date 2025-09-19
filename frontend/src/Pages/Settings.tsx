@@ -13,13 +13,23 @@ import {
   IconButton,
   Chip,
   Tabs,
-  Tab
+  Tab,
+  Card,
+  CardContent,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Grid,
+  Alert
 } from '@mui/material';
-import { 
-  Add as AddIcon, 
-  Delete as DeleteIcon, 
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
   Edit as EditIcon,
-  Visibility as VisibilityIcon
+  Visibility as VisibilityIcon,
+  Search as SearchIcon,
+  Storage as StorageIcon
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useTablePageSize } from '../hooks/useTablePageSize';
@@ -46,6 +56,25 @@ interface TagWithHosts extends Tag {
     active: boolean;
     status: string;
   }>;
+}
+
+interface PackageInfo {
+  name: string;
+  version: string;
+  description?: string;
+  package_manager: string;
+}
+
+interface PackageManagerSummary {
+  package_manager: string;
+  package_count: number;
+}
+
+interface OSPackageSummary {
+  os_name: string;
+  os_version: string;
+  package_managers: PackageManagerSummary[];
+  total_packages: number;
 }
 
 interface QueueMessage {
@@ -88,6 +117,15 @@ const Settings: React.FC = () => {
   const [queueLoading, setQueueLoading] = useState(false);
   const [messageDetailOpen, setMessageDetailOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<QueueMessage | null>(null);
+
+  // Package management state
+  const [packageSummary, setPackageSummary] = useState<OSPackageSummary[]>([]);
+  const [packageManagers, setPackageManagers] = useState<string[]>([]);
+  const [selectedOS, setSelectedOS] = useState<string>('');
+  const [selectedManager, setSelectedManager] = useState<string>('');
+  const [packages, setPackages] = useState<PackageInfo[]>([]);
+  const [packageLoading, setPackageLoading] = useState(false);
+  const [packageSearchTerm, setPackageSearchTerm] = useState('');
 
   const { pageSize, pageSizeOptions } = useTablePageSize({
     reservedHeight: 350,
@@ -225,6 +263,11 @@ const Settings: React.FC = () => {
     if (newValue === 1) {
       loadQueueMessages();
     }
+    // Load package data when switching to Available Packages tab
+    if (newValue === 4) {
+      loadPackageSummary();
+      loadPackageManagers();
+    }
   };
 
   // Load queue messages from API
@@ -266,6 +309,63 @@ const Settings: React.FC = () => {
       console.error('Error fetching message details:', error);
     }
   };
+
+  // Package management functions
+  const loadPackageSummary = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get('/api/packages/summary');
+      setPackageSummary(response.data);
+    } catch (error) {
+      console.error('Error fetching package summary:', error);
+    }
+  }, []);
+
+  const loadPackageManagers = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get('/api/packages/managers');
+      setPackageManagers(response.data);
+    } catch (error) {
+      console.error('Error fetching package managers:', error);
+    }
+  }, []);
+
+  const searchPackages = useCallback(async () => {
+    if (!packageSearchTerm.trim()) {
+      setPackages([]);
+      return;
+    }
+
+    setPackageLoading(true);
+    try {
+      const params: {
+        query: string;
+        limit: number;
+        os_name?: string;
+        os_version?: string;
+        package_manager?: string;
+      } = {
+        query: packageSearchTerm,
+        limit: 50
+      };
+
+      if (selectedOS) {
+        const [osName, osVersion] = selectedOS.split(':');
+        params.os_name = osName;
+        params.os_version = osVersion;
+      }
+
+      if (selectedManager) {
+        params.package_manager = selectedManager;
+      }
+
+      const response = await axiosInstance.get('/api/packages/search', { params });
+      setPackages(response.data);
+    } catch (error) {
+      console.error('Error searching packages:', error);
+    } finally {
+      setPackageLoading(false);
+    }
+  }, [packageSearchTerm, selectedOS, selectedManager]);
 
   // DataGrid columns
   const columns: GridColDef[] = [
@@ -467,6 +567,181 @@ const Settings: React.FC = () => {
     </Box>
   );
 
+  const renderAvailablePackagesTab = () => (
+    <Box>
+      <Typography variant="h5" sx={{ mb: 2 }}>
+        {t('availablePackages.title', 'Available Packages')}
+      </Typography>
+
+      <Typography variant="body1" sx={{ mb: 3 }}>
+        {t('availablePackages.description', 'View and search available packages collected from your managed hosts across different operating systems and package managers.')}
+      </Typography>
+
+      {/* Package Summary Cards */}
+      {packageSummary.length > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            {t('availablePackages.summary', 'Package Summary by OS')}
+          </Typography>
+          <Grid container spacing={2}>
+            {packageSummary.map((summary) => (
+              <Grid item xs={12} sm={6} md={4} key={`${summary.os_name}:${summary.os_version}`}>
+                <Card>
+                  <CardContent>
+                    <Box display="flex" alignItems="center" mb={1}>
+                      <StorageIcon sx={{ mr: 1, color: 'primary.main' }} />
+                      <Typography variant="h6">
+                        {summary.os_name} {summary.os_version}
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      {t('availablePackages.totalPackages', 'Total Packages')}: {summary.total_packages}
+                    </Typography>
+                    <Box>
+                      {summary.package_managers.map((manager) => (
+                        <Chip
+                          key={manager.package_manager}
+                          label={`${manager.package_manager}: ${manager.package_count}`}
+                          size="small"
+                          variant="outlined"
+                          sx={{ mr: 0.5, mb: 0.5 }}
+                        />
+                      ))}
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
+
+      {/* Search Controls */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          {t('availablePackages.search', 'Search Packages')}
+        </Typography>
+        <Grid container spacing={2} alignItems="end">
+          <Grid item xs={12} md={4}>
+            <TextField
+              fullWidth
+              label={t('availablePackages.searchTerm', 'Search packages')}
+              value={packageSearchTerm}
+              onChange={(e) => setPackageSearchTerm(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && searchPackages()}
+              InputProps={{
+                endAdornment: (
+                  <IconButton onClick={searchPackages}>
+                    <SearchIcon />
+                  </IconButton>
+                )
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <FormControl fullWidth>
+              <InputLabel>{t('availablePackages.filterByOS', 'Filter by OS')}</InputLabel>
+              <Select
+                value={selectedOS}
+                label={t('availablePackages.filterByOS', 'Filter by OS')}
+                onChange={(e) => setSelectedOS(e.target.value)}
+              >
+                <MenuItem value="">
+                  <em>{t('common.all', 'All')}</em>
+                </MenuItem>
+                {packageSummary.map((summary) => (
+                  <MenuItem key={`${summary.os_name}:${summary.os_version}`} value={`${summary.os_name}:${summary.os_version}`}>
+                    {summary.os_name} {summary.os_version}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <FormControl fullWidth>
+              <InputLabel>{t('availablePackages.filterByManager', 'Filter by Manager')}</InputLabel>
+              <Select
+                value={selectedManager}
+                label={t('availablePackages.filterByManager', 'Filter by Manager')}
+                onChange={(e) => setSelectedManager(e.target.value)}
+              >
+                <MenuItem value="">
+                  <em>{t('common.all', 'All')}</em>
+                </MenuItem>
+                {packageManagers.map((manager) => (
+                  <MenuItem key={manager} value={manager}>
+                    {manager}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={2}>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={searchPackages}
+              disabled={!packageSearchTerm.trim()}
+              startIcon={<SearchIcon />}
+            >
+              {t('common.search', 'Search')}
+            </Button>
+          </Grid>
+        </Grid>
+      </Box>
+
+      {/* Search Results */}
+      {packages.length > 0 && (
+        <Box>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            {t('availablePackages.results', 'Search Results')} ({packages.length})
+          </Typography>
+          <div style={{ height: 400, width: '100%' }}>
+            <DataGrid
+              rows={packages.map((pkg, index) => ({ id: index, ...pkg }))}
+              columns={[
+                { field: 'name', headerName: t('availablePackages.packageName', 'Package Name'), width: 250 },
+                { field: 'version', headerName: t('availablePackages.version', 'Version'), width: 150 },
+                { field: 'package_manager', headerName: t('availablePackages.manager', 'Manager'), width: 120 },
+                {
+                  field: 'description',
+                  headerName: t('availablePackages.description', 'Description'),
+                  width: 400,
+                  renderCell: (params) => (
+                    <Typography variant="body2" noWrap title={params.value}>
+                      {params.value || t('common.noDescription', 'No description')}
+                    </Typography>
+                  )
+                }
+              ]}
+              loading={packageLoading}
+              initialState={{
+                pagination: {
+                  paginationModel: { page: 0, pageSize: 25 },
+                },
+              }}
+              pageSizeOptions={[25, 50, 100]}
+            />
+          </div>
+        </Box>
+      )}
+
+      {/* Empty State */}
+      {packageSearchTerm && packages.length === 0 && !packageLoading && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          {t('availablePackages.noResults', 'No packages found matching your search criteria.')}
+        </Alert>
+      )}
+
+      {/* Initial State */}
+      {!packageSearchTerm && packageSummary.length === 0 && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          {t('availablePackages.noData', 'No package data available. Packages will be collected from your managed hosts automatically.')}
+        </Alert>
+      )}
+    </Box>
+  );
+
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="h4" sx={{ mb: 3 }}>
@@ -480,6 +755,7 @@ const Settings: React.FC = () => {
           <Tab label={t('queues.title', 'Queues')} />
           <Tab label={t('integrations.title', 'Integrations')} />
           <Tab label={t('ubuntuPro.title', 'Ubuntu Pro')} />
+          <Tab label={t('availablePackages.title', 'Available Packages')} />
         </Tabs>
       </Box>
 
@@ -489,6 +765,7 @@ const Settings: React.FC = () => {
         {activeTab === 1 && renderQueuesTab()}
         {activeTab === 2 && renderIntegrationsTab()}
         {activeTab === 3 && renderUbuntuProTab()}
+        {activeTab === 4 && renderAvailablePackagesTab()}
       </Box>
 
       {/* Add Tag Dialog */}

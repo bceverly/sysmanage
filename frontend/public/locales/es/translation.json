@@ -780,5 +780,21 @@
       "success": "Actualizado exitosamente",
       "failed": "Falló la actualización"
     }
+  },
+  "availablePackages": {
+    "title": "Paquetes Disponibles",
+    "description": "Descripción",
+    "summary": "Resumen de Paquetes por SO",
+    "totalPackages": "Total de Paquetes",
+    "search": "Buscar Paquetes",
+    "searchTerm": "Buscar paquetes",
+    "filterByOS": "Filtrar por SO",
+    "filterByManager": "Filtrar por Gestor",
+    "results": "Resultados de Búsqueda",
+    "packageName": "Nombre del Paquete",
+    "version": "Versión",
+    "manager": "Gestor",
+    "noResults": "No se encontraron paquetes que coincidan con sus criterios de búsqueda.",
+    "noData": "No hay datos de paquetes disponibles. Los paquetes se recolectarán automáticamente de sus hosts gestionados."
   }
 }

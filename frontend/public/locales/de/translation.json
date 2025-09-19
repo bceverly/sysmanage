@@ -780,5 +780,21 @@
       "success": "Erfolgreich aktualisiert",
       "failed": "Upgrade fehlgeschlagen"
     }
+  },
+  "availablePackages": {
+    "title": "Verfügbare Pakete",
+    "description": "Beschreibung",
+    "summary": "Paketübersicht nach OS",
+    "totalPackages": "Pakete Gesamt",
+    "search": "Pakete Suchen",
+    "searchTerm": "Pakete durchsuchen",
+    "filterByOS": "Nach OS Filtern",
+    "filterByManager": "Nach Manager Filtern",
+    "results": "Suchergebnisse",
+    "packageName": "Paketname",
+    "version": "Version",
+    "manager": "Manager",
+    "noResults": "Keine Pakete gefunden, die Ihren Suchkriterien entsprechen.",
+    "noData": "Keine Paketdaten verfügbar. Pakete werden automatisch von Ihren verwalteten Hosts gesammelt."
   }
 }

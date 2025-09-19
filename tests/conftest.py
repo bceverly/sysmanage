@@ -15,6 +15,7 @@ from sqlalchemy.orm import sessionmaker
 from backend.auth.auth_bearer import JWTBearer
 from backend.main import app
 from backend.persistence.db import Base, get_db
+from backend.persistence.models import *  # Import all models explicitly
 from backend.websocket.connection_manager import ConnectionManager
 
 # Test database URL - using temporary SQLite file for tests
@@ -82,8 +83,47 @@ def engine():
 @pytest.fixture(scope="function")
 def db_session(engine):
     """Create a test database session."""
+    # Ensure all models are imported before creating tables
+    from backend.persistence.db import Base
+    from backend.persistence import models  # Import all models
+
+    # Drop and recreate all tables to ensure all models are included
+    Base.metadata.drop_all(bind=engine)
+
+    # Use Alembic migration to create test database with proper schema
+    # This ensures SQLite test database matches production PostgreSQL schema
+    from alembic.config import Config
+    from alembic import command
+    import tempfile
+    import os
+
+    # Create Alembic config for this specific SQLite database
+    alembic_cfg = Config()
+    alembic_cfg.set_main_option("script_location", "alembic")
+    alembic_cfg.set_main_option("sqlalchemy.url", str(engine.url))
+
+    # Run the migration to create proper schema
+    command.upgrade(alembic_cfg, "head")
+
+    # Debug: Check what was actually created
+    from sqlalchemy import text
+
+    with engine.connect() as conn:
+        result = conn.execute(
+            text(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='available_packages'"
+            )
+        )
+        table_exists = len(result.fetchall()) > 0
+        print(f"DEBUG: available_packages table created in test DB: {table_exists}")
+        print(f"DEBUG: Test database URL: {engine.url}")
+
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     session = TestingSessionLocal()
+
+    # Commit the session to ensure any pending transactions are finalized
+    session.commit()
+
     try:
         yield session
     finally:
@@ -104,6 +144,7 @@ def client(db_session, mock_config):
 
     def override_get_db():
         try:
+            # Ensure the same session and engine are used throughout the test
             yield db_session
         finally:
             pass
@@ -123,8 +164,18 @@ def client(db_session, mock_config):
 
     try:
         app.dependency_overrides[get_db] = override_get_db
-        with TestClient(app) as test_client:
-            yield test_client
+
+        # Patch JWTBearer to always succeed for authenticated endpoints
+        with patch("backend.auth.auth_bearer.JWTBearer.__call__") as mock_jwt:
+
+            async def mock_jwt_call(*args, **kwargs):
+                return "test_token"
+
+            mock_jwt.side_effect = mock_jwt_call
+
+            with TestClient(app) as test_client:
+                yield test_client
+
         app.dependency_overrides.clear()
     finally:
         # Restore original lifespan
@@ -163,16 +214,28 @@ def authenticated_client(db_session, mock_config):
         # Override database dependency
         app.dependency_overrides[get_db] = override_get_db
 
-        # Override get_current_user dependency to bypass JWT entirely
-        from backend.auth.auth_bearer import get_current_user
+        # Override get_current_user dependency
+        from backend.auth.auth_bearer import get_current_user, JWTBearer
 
-        def mock_get_current_user():
-            return "test_user"
+        def override_get_current_user():
+            return "test_user@example.com"
 
-        app.dependency_overrides[get_current_user] = mock_get_current_user
+        app.dependency_overrides[get_current_user] = override_get_current_user
 
-        with TestClient(app) as test_client:
-            yield test_client
+        # Override JWTBearer dependency to return a test token
+        def override_jwt_bearer():
+            return "test_token"
+
+        # Create an instance to override
+        jwt_bearer_instance = JWTBearer()
+        app.dependency_overrides[jwt_bearer_instance] = override_jwt_bearer
+
+        # Patch JWTBearer to always succeed
+        with patch("backend.auth.auth_bearer.JWTBearer.__call__") as mock_jwt:
+            mock_jwt.return_value = "test_token"
+
+            with TestClient(app) as test_client:
+                yield test_client
 
         app.dependency_overrides.clear()
     finally:

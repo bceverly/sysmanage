@@ -615,3 +615,38 @@ msgstr "OpenBSD"
 msgid "FreeBSD"
 msgstr "FreeBSD"
 
+msgid "Failed to retrieve package summary: %s"
+msgstr "Fehler beim Abrufen der Paket-Zusammenfassung: %s"
+
+msgid "Failed to retrieve package managers: %s"
+msgstr "Fehler beim Abrufen der Paketmanager: %s"
+
+msgid "Failed to search packages: %s"
+msgstr "Fehler beim Suchen von Paketen: %s"
+
+msgid "Failed to retrieve OS versions: %s"
+msgstr "Fehler beim Abrufen der OS-Versionen: %s"
+
+msgid "Failed to retrieve packages for manager %s: %s"
+msgstr "Fehler beim Abrufen der Pakete für Manager %s: %s"
+
+msgid "Failed to process available packages: %s"
+msgstr "Fehler beim Verarbeiten verfügbarer Pakete: %s"
+
+msgid "Host not registered"
+msgstr "Host nicht registriert"
+
+msgid "Host not found"
+msgstr "Host nicht gefunden"
+
+
+
+
+
+
+
+
+
+
+
+

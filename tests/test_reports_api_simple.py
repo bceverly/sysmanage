@@ -184,17 +184,35 @@ class TestReportsAPIEndpointsSimple:
         assert response.status_code == 200
         assert response.headers["content-type"] == "image/svg+xml"
 
-    def test_unauthenticated_access(self, client):
+    def test_unauthenticated_access(self):
         """Test that unauthenticated requests are rejected."""
-        response = client.get("/api/reports/view/registered-hosts")
-        assert response.status_code == 403
+        # Create an unauthenticated client without the auth fixture
+        from fastapi.testclient import TestClient
+        from backend.main import app
+        from contextlib import asynccontextmanager
 
-        response = client.get("/api/reports/generate/hosts")
-        assert response.status_code == 403
+        @asynccontextmanager
+        async def mock_lifespan(app):
+            yield
 
-        # Screenshots endpoint is public for UI cards
-        response = client.get("/api/reports/screenshots/test")
-        assert response.status_code == 200
+        original_lifespan = app.router.lifespan_context
+        app.router.lifespan_context = mock_lifespan
+
+        try:
+            with TestClient(app) as unauthenticated_client:
+                response = unauthenticated_client.get(
+                    "/api/reports/view/registered-hosts"
+                )
+                assert response.status_code == 403
+
+                response = unauthenticated_client.get("/api/reports/generate/hosts")
+                assert response.status_code == 403
+
+                # Screenshots endpoint is public for UI cards
+                response = unauthenticated_client.get("/api/reports/screenshots/test")
+                assert response.status_code == 200
+        finally:
+            app.router.lifespan_context = original_lifespan
 
     @patch("backend.api.reports.REPORTLAB_AVAILABLE", False)
     def test_generate_pdf_without_reportlab(self, authenticated_client):

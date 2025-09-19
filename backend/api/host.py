@@ -598,8 +598,8 @@ async def request_os_version_update(host_id: int):
     Request an agent to update its OS version information.
     This sends a message via WebSocket to the agent requesting fresh OS data.
     """
-    # Get the SQLAlchemy session
-    session_local = sessionmaker(  # pylint: disable=duplicate-code
+    # Get a fresh session to avoid transaction warnings
+    session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
 

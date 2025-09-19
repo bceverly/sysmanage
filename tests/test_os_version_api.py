@@ -85,16 +85,19 @@ class TestOSVersionAPI:
         with patch("backend.api.host.connection_manager") as mock_conn_mgr, patch(
             "backend.api.host.create_command_message"
         ) as mock_create_msg, patch(
-            "backend.api.host.sessionmaker"
+            "sqlalchemy.orm.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.host.db.get_engine"
         ):
 
             mock_conn_mgr.send_to_host = AsyncMock(return_value=True)
             mock_create_msg.return_value = {"command": "update_os_version"}
-            mock_sessionmaker.return_value.return_value.__enter__.return_value = (
-                mock_session
-            )
+
+            # Set up the sessionmaker mock properly for context manager
+            mock_session_instance = Mock()
+            mock_session_instance.__enter__ = Mock(return_value=mock_session)
+            mock_session_instance.__exit__ = Mock(return_value=None)
+            mock_sessionmaker.return_value = Mock(return_value=mock_session_instance)
 
             from backend.api.host import request_os_version_update
 
@@ -114,13 +117,14 @@ class TestOSVersionAPI:
         # Mock the query to return no host
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
-        with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
+        with patch("sqlalchemy.orm.sessionmaker") as mock_sessionmaker, patch(
             "backend.api.host.db.get_engine"
         ):
-
-            mock_sessionmaker.return_value.return_value.__enter__.return_value = (
-                mock_session
-            )
+            # Set up the sessionmaker mock properly for context manager
+            mock_session_instance = Mock()
+            mock_session_instance.__enter__ = Mock(return_value=mock_session)
+            mock_session_instance.__exit__ = Mock(return_value=None)
+            mock_sessionmaker.return_value = Mock(return_value=mock_session_instance)
 
             from backend.api.host import request_os_version_update
             from fastapi import HTTPException
@@ -142,7 +146,15 @@ class TestOSVersionAPI:
             mock_host
         )
 
-        with patch("backend.api.host.db.get_engine"):
+        with patch("sqlalchemy.orm.sessionmaker") as mock_sessionmaker, patch(
+            "backend.api.host.db.get_engine"
+        ):
+            # Set up the sessionmaker mock properly for context manager
+            mock_session_instance = Mock()
+            mock_session_instance.__enter__ = Mock(return_value=mock_session)
+            mock_session_instance.__exit__ = Mock(return_value=None)
+            mock_sessionmaker.return_value = Mock(return_value=mock_session_instance)
+
             from backend.api.host import request_os_version_update
             from fastapi import HTTPException
 

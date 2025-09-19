@@ -18,6 +18,7 @@ from backend.api.data_handlers import (
     handle_software_update,
     handle_user_access_update,
 )
+from backend.api.package_handlers import handle_packages_update
 from backend.i18n import _
 from backend.persistence.db import get_db
 from backend.utils.verbosity_logger import get_logger
@@ -388,6 +389,10 @@ class MessageProcessor:
                 await handle_package_updates_update(db, mock_connection, message_data)
                 success = True
 
+            elif message.message_type == MessageType.AVAILABLE_PACKAGES_UPDATE:
+                await handle_packages_update(db, mock_connection, message_data)
+                success = True
+
             elif message.message_type == MessageType.SCRIPT_EXECUTION_RESULT:
                 logger.info("Processing SCRIPT_EXECUTION_RESULT")
                 await handle_script_execution_result(db, mock_connection, message_data)
@@ -614,6 +619,15 @@ class MessageProcessor:
                 await handle_package_updates_update(db, mock_connection, message_data)
                 success = True
                 print("Successfully processed package updates", flush=True)
+
+            elif message.message_type == MessageType.AVAILABLE_PACKAGES_UPDATE:
+                print(
+                    "About to call handle_packages_update",
+                    flush=True,
+                )
+                await handle_packages_update(db, mock_connection, message_data)
+                success = True
+                print("Successfully processed available packages", flush=True)
 
             elif message.message_type == MessageType.SCRIPT_EXECUTION_RESULT:
                 print(
