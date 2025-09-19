@@ -199,9 +199,15 @@ format-python: $(VENV_ACTIVATE) clean-whitespace
 test-python: $(VENV_ACTIVATE) clean-whitespace
 	@echo "=== Running Python Tests ==="
 	@echo "Cleaning old SQLite test databases..."
+ifeq ($(OS),Windows_NT)
+	-@del /s /q *.db >nul 2>&1
+	-@del /q "%TEMP%\*sysmanage*.db" >nul 2>&1
+	-@del /q "%TEMP%\tmp*.db" >nul 2>&1
+else
 	@find . -name "*.db" -type f -delete 2>/dev/null || true
 	@find /tmp -name "*sysmanage*.db" -type f -delete 2>/dev/null || true
 	@find /tmp -name "tmp*.db" -type f -delete 2>/dev/null || true
+endif
 	@$(PYTHON) -m pytest tests/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html
 	@echo "[OK] Python tests completed"
 
@@ -223,12 +229,21 @@ test: test-python test-typescript
 # Clean artifacts
 clean:
 	@echo "Cleaning test artifacts and cache..."
+ifeq ($(OS),Windows_NT)
+	-@del /s /q *.pyc >nul 2>&1
+	-@rmdir /s /q __pycache__ >nul 2>&1
+	-@rmdir /s /q .pytest_cache >nul 2>&1
+	-@rmdir /s /q htmlcov >nul 2>&1
+	-@del /q .coverage >nul 2>&1
+	-@rmdir /s /q frontend\coverage >nul 2>&1
+else
 	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
 	@find . -name "*.pyc" -delete 2>/dev/null || true
 	@rm -rf htmlcov/ .coverage
 	@cd frontend && rm -rf coverage/ 2>/dev/null || true
+endif
 	@echo "[OK] Clean completed"
 
 # Server management targets with shell detection

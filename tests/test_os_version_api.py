@@ -73,31 +73,56 @@ class TestOSVersionAPI:
             HostRegistration(**os_data)
 
     @pytest.mark.asyncio
-    async def test_request_os_version_update_endpoint(self, mock_db, mock_host):
+    async def test_request_os_version_update_endpoint(self, mock_host):
         """Test the request OS version update endpoint."""
-        mock_db_func, mock_session = mock_db
 
-        # Mock the query to return our test host
-        mock_session.query.return_value.filter.return_value.first.return_value = (
-            mock_host
-        )
+        # Use the MockSession pattern from test_host_operations.py
+        class MockSession:
+            def query(self, model):
+                return MockQuery([mock_host])  # Return the mock host
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                pass
+
+        class MockQuery:
+            def __init__(self, hosts):
+                self.hosts = hosts
+
+            def filter(self, *args):
+                return self
+
+            def first(self):
+                return self.hosts[0] if self.hosts else None
+
+        class MockSessionLocal:
+            def __init__(self, mock_session):
+                self.mock_session = mock_session
+
+            def __call__(self):
+                return self.mock_session
+
+        # Ensure mock host is approved
+        mock_host.approval_status = "approved"
+        mock_session = MockSession()
 
         with patch("backend.api.host.connection_manager") as mock_conn_mgr, patch(
             "backend.api.host.create_command_message"
         ) as mock_create_msg, patch(
-            "sqlalchemy.orm.sessionmaker"
+            "backend.api.host.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.host.db.get_engine"
-        ):
+        ), patch(
+            "backend.api.host.validate_host_approval_status"
+        ) as mock_validate:
 
             mock_conn_mgr.send_to_host = AsyncMock(return_value=True)
             mock_create_msg.return_value = {"command": "update_os_version"}
-
-            # Set up the sessionmaker mock properly for context manager
-            mock_session_instance = Mock()
-            mock_session_instance.__enter__ = Mock(return_value=mock_session)
-            mock_session_instance.__exit__ = Mock(return_value=None)
-            mock_sessionmaker.return_value = Mock(return_value=mock_session_instance)
+            # Mock the validation to pass for approved host
+            mock_validate.return_value = None
+            mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
             from backend.api.host import request_os_version_update
 
@@ -108,23 +133,52 @@ class TestOSVersionAPI:
             mock_conn_mgr.send_to_host.assert_called_once_with(
                 1, {"command": "update_os_version"}
             )
+            # Validation should be called once
+            mock_validate.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_request_os_version_host_not_found(self, mock_db):
+    async def test_request_os_version_host_not_found(self):
         """Test request OS version update with non-existent host."""
-        mock_db_func, mock_session = mock_db
 
-        # Mock the query to return no host
-        mock_session.query.return_value.filter.return_value.first.return_value = None
+        # Use the MockSession pattern from test_host_operations.py
+        class MockSession:
+            def query(self, model):
+                return MockQuery([])  # Empty list = no hosts found
 
-        with patch("sqlalchemy.orm.sessionmaker") as mock_sessionmaker, patch(
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                pass
+
+        class MockQuery:
+            def __init__(self, hosts):
+                self.hosts = hosts
+
+            def filter(self, *args):
+                return self
+
+            def first(self):
+                return self.hosts[0] if self.hosts else None
+
+        class MockSessionLocal:
+            def __init__(self, mock_session):
+                self.mock_session = mock_session
+
+            def __call__(self):
+                return self.mock_session
+
+        mock_session = MockSession()
+        with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
             "backend.api.host.db.get_engine"
-        ):
-            # Set up the sessionmaker mock properly for context manager
-            mock_session_instance = Mock()
-            mock_session_instance.__enter__ = Mock(return_value=mock_session)
-            mock_session_instance.__exit__ = Mock(return_value=None)
-            mock_sessionmaker.return_value = Mock(return_value=mock_session_instance)
+        ), patch(
+            "backend.api.host.validate_host_approval_status"
+        ) as mock_validate, patch(
+            "backend.api.host.connection_manager"
+        ) as mock_conn_mgr:
+            # Mock connection manager to avoid the 503 error
+            mock_conn_mgr.send_to_host = AsyncMock(return_value=False)
+            mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
             from backend.api.host import request_os_version_update
             from fastapi import HTTPException
@@ -134,6 +188,10 @@ class TestOSVersionAPI:
 
             assert exc_info.value.status_code == 404
             assert "Host not found" in str(exc_info.value.detail)
+            # Validation should not be called if host is not found
+            mock_validate.assert_not_called()
+            # Connection manager should not be called if host is not found
+            mock_conn_mgr.send_to_host.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_request_os_version_host_not_approved(self, mock_db, mock_host):
@@ -146,7 +204,7 @@ class TestOSVersionAPI:
             mock_host
         )
 
-        with patch("sqlalchemy.orm.sessionmaker") as mock_sessionmaker, patch(
+        with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
             "backend.api.host.db.get_engine"
         ):
             # Set up the sessionmaker mock properly for context manager
