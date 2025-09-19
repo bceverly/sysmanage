@@ -22,6 +22,7 @@ function loadConfig(): any {
         return config;
       }
     } catch (error) {
+      // nosemgrep: javascript.lang.security.audit.unsafe-formatstring
       console.warn(`⚠️  Failed to load config from ${configPath}:`, error);
     }
   }

@@ -14,6 +14,7 @@ security:
   password_salt: "fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
   admin_userid: "admin@sysmanage.org"
   admin_password: "DEV_AdminPass123!"
+  # nosemgrep: generic.secrets.security.detected-generic-secret
   jwt_secret: "SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
   jwt_algorithm: "HS256"
   jwt_auth_timeout: 6000

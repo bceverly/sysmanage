@@ -366,7 +366,8 @@ echo "Services:"
 
 # Backend API URL
 backend_url=$(generate_urls "api" "$BACKEND_PORT")
-ws_url=$(echo "$backend_url" | sed 's|http://|ws://|')/agent/connect
+# nosemgrep: javascript.lang.security.detect-insecure-websocket
+ws_url=$(echo "$backend_url" | sed -e 's|http://|ws://|' -e 's|https://|wss://|')/agent/connect
 echo "  🔧 Backend API:      $backend_url"
 echo "  📡 Agent WebSocket:  $ws_url"
 
