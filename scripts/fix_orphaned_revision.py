@@ -24,11 +24,12 @@ sys.path.insert(0, project_root)
 
 def get_database_url():
     """Get database URL from sysmanage.yaml config file."""
-    # Try multiple potential config locations
+    # Try multiple potential config locations (cross-platform)
     config_paths = [
-        "/etc/sysmanage.yaml",
-        os.path.join(project_root, "sysmanage.yaml"),
-        os.path.join(project_root, "sysmanage-dev.yaml"),
+        "/etc/sysmanage.yaml",  # Linux system config
+        "C:\\ProgramData\\SysManage\\sysmanage.yaml",  # Windows system config
+        os.path.join(project_root, "sysmanage.yaml"),  # Local dev
+        os.path.join(project_root, "sysmanage-dev.yaml"),  # Local dev
     ]
 
     config_path = None
@@ -52,8 +53,8 @@ def get_database_url():
         # Build PostgreSQL URL
         host = db_config.get('host', 'localhost')
         port = db_config.get('port', 5432)
-        database = db_config.get('database', 'sysmanage')
-        username = db_config.get('username', 'sysmanage')
+        database = db_config.get('name', 'sysmanage')  # 'name' not 'database' in config
+        username = db_config.get('user', 'sysmanage')  # 'user' not 'username' in config
         password = db_config.get('password', '')
 
         return f"postgresql://{username}:{password}@{host}:{port}/{database}"
