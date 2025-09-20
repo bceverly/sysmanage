@@ -67,6 +67,15 @@ const Reports: React.FC = () => {
   const [searchField, setSearchField] = useState<'name' | 'description'>('name');
 
   const filteredReports = useMemo(() => {
+    // Get the backend base URL for screenshots
+    const getBackendBaseURL = () => {
+      const currentHost = window.location.hostname;
+      const backendPort = 8080; // This should match your config file
+      return `http://${currentHost}:${backendPort}`;
+    };
+
+    const baseURL = getBackendBaseURL();
+
     // Mock data for reports - in real implementation, this would come from API
     const availableReports: ReportCard[] = [
       {
@@ -74,7 +83,7 @@ const Reports: React.FC = () => {
         name: 'Registered Hosts',
         description: 'Complete listing of all registered hosts showing basic information and operating system details including hostname, IP addresses, OS version, and status.',
         category: 'hosts',
-        screenshot: '/api/reports/screenshots/registered-hosts.png',
+        screenshot: `${baseURL}/api/reports/screenshots/registered-hosts.png`,
         tags: ['hosts', 'system info', 'basic']
       },
       {
@@ -82,7 +91,7 @@ const Reports: React.FC = () => {
         name: 'Hosts with Tags',
         description: 'Shows all registered hosts along with their assigned tags for easy categorization and filtering. Useful for organizing hosts by environment, purpose, or department.',
         category: 'hosts',
-        screenshot: '/api/reports/screenshots/hosts-with-tags.png',
+        screenshot: `${baseURL}/api/reports/screenshots/hosts-with-tags.png`,
         tags: ['hosts', 'tags', 'organization']
       },
       {
@@ -90,7 +99,7 @@ const Reports: React.FC = () => {
         name: 'SysManage Users',
         description: 'Comprehensive list of all SysManage users showing their profiles, roles, permissions, and account status. Includes user creation dates and last login times.',
         category: 'users',
-        screenshot: '/api/reports/screenshots/users-list.png',
+        screenshot: `${baseURL}/api/reports/screenshots/users-list.png`,
         tags: ['users', 'accounts', 'permissions']
       }
     ];
