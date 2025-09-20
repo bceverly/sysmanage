@@ -314,7 +314,7 @@ async def get_packages_by_manager(
         ) from e
 
 
-@router.post("/refresh/{os_name}/{os_version}")
+@router.post("/refresh/{os_name}/{os_version:path}")
 async def refresh_packages_for_os_version(
     os_name: str, os_version: str, db: Session = Depends(get_db)
 ):
