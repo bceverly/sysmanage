@@ -118,6 +118,7 @@ def client_nonexistent_user():
 @pytest.fixture
 def mock_jwt_token():
     """Mock JWT token for authentication"""
+    # nosemgrep: generic.secrets.security.detected-jwt-token.detected-jwt-token
     return "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidGVzdEBleGFtcGxlLmNvbSJ9.mock"
 
 

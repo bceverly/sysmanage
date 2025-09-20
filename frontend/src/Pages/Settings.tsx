@@ -446,7 +446,7 @@ const Settings: React.FC = () => {
               errorCount++;
             }
           } catch (error) {
-            console.error(`Error refreshing packages for ${summary.os_name} ${summary.os_version}:`, error);
+            console.error('Error refreshing packages for', summary.os_name, summary.os_version, ':', error);
             errorCount++;
           }
         }
@@ -475,7 +475,7 @@ const Settings: React.FC = () => {
                 errorCount++;
               }
             } catch (error) {
-              console.error(`Error refreshing packages for ${osName} ${osVersion}:`, error);
+              console.error('Error refreshing packages for', osName, osVersion, ':', error);
               errorCount++;
             }
           }

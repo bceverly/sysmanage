@@ -301,7 +301,7 @@ Write-Host "Services:" -ForegroundColor White
 
 # Generate URLs
 $backendUrl = Get-ServiceUrl -ServiceType "api" -Port $backendPort
-# nosemgrep: javascript.lang.security.detect-insecure-websocket
+# nosemgrep: javascript.lang.security.detect-insecure-websocket.detect-insecure-websocket
 $wsUrl = ($backendUrl -replace "http://", "ws://" -replace "https://", "wss://") + "/api/agent/connect"
 Write-Host "  Backend API:      $backendUrl" -ForegroundColor Cyan
 Write-Host "  Agent WebSocket:  $wsUrl" -ForegroundColor Cyan
