@@ -22,6 +22,8 @@ help:
 	@echo "  make clean         - Clean test artifacts and cache"
 	@echo "  make install-dev   - Install all development tools (includes WebDriver for screenshots)"
 	@echo "  make check-test-models - Check test model synchronization between conftest files"
+	@echo ""
+	@echo "OpenBSD users: install-dev will check for C tracer dependencies (gcc, py3-cffi)"
 
 # Virtual environment activation
 VENV := .venv
@@ -55,6 +57,8 @@ install-dev: $(VENV_ACTIVATE)
 	@$(PIP) install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep
 	@echo "Installing requirements.txt (includes Selenium WebDriver)..."
 	@$(PIP) install -r requirements.txt
+	@echo "Checking for OpenBSD C tracer requirements..."
+	@$(PYTHON) scripts/check-openbsd-deps.py
 	@echo "Setting up WebDriver for screenshots..."
 	@$(PYTHON) scripts/install-browsers.py
 	@echo "Installing TypeScript/React development dependencies..."

@@ -64,6 +64,10 @@ reportlab==4.0.9
 safety==3.6.1
 safety-schemas==0.0.14
 semgrep==1.95.0
+
+# Note: On OpenBSD 7.7, coverage.py C tracer requires gcc and py3-cffi
+# Install with: doas pkg_add gcc py3-cffi
+# The install-dev target will automatically handle C tracer setup
 # playwright==1.55.0  # Not available on OpenBSD - use alternative tools
 selenium>=4.0.0
 webdriver-manager>=4.0.0
