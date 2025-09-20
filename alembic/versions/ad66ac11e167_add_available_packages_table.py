@@ -45,6 +45,15 @@ def upgrade() -> None:
         # Don't fail the migration if cleanup fails
         print(f"Warning: Could not clean up orphaned .pyc files: {e}")
 
+    # Check if table already exists before creating it
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    existing_tables = inspector.get_table_names()
+
+    if 'available_packages' in existing_tables:
+        print("Table 'available_packages' already exists, skipping creation")
+        return
+
     # Create available_packages table
     op.create_table('available_packages',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
