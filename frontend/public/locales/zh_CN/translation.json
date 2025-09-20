@@ -785,14 +785,17 @@
     "summary": "操作系统软件包概要",
     "totalPackages": "软件包总数",
     "search": "搜索软件包",
-    "searchTerm": "搜索软件包",
-    "filterByOS": "按操作系统筛选",
-    "filterByManager": "按管理器筛选",
+    "searchTerm": "软件包名称",
+    "filterByOS": "操作系统 / 版本",
+    "filterByManager": "软件包管理器",
     "results": "搜索结果",
     "packageName": "软件包名称",
     "version": "版本",
     "manager": "管理器",
     "noResults": "找不到符合您搜索条件的软件包。",
-    "noData": "无可用的软件包数据。软件包将从您的管理主机自动收集。"
+    "noData": "无可用的软件包数据。软件包将从您的管理主机自动收集。",
+    "refreshPackages": "从代理刷新软件包",
+    "refresh": "刷新",
+    "refreshAll": "全部刷新"
   }
 }

@@ -3,6 +3,8 @@ Data handlers for SysManage agent communication.
 Handles OS version, hardware, user access, and software update messages.
 """
 
+# pylint: disable=too-many-lines
+
 import json
 import logging
 from datetime import datetime, timezone
@@ -11,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from backend.i18n import _
 from backend.persistence.models import (
+    AvailablePackage,
     Host,
     NetworkInterface,
     PackageUpdate,
@@ -996,3 +999,115 @@ async def handle_ubuntu_pro_update(
             "Error processing Ubuntu Pro data for host %s: %s", host.id, e
         )
         # Don't re-raise - let the main OS update continue
+
+
+async def handle_package_collection(db: Session, connection, message_data: dict):
+    """Handle package collection result from agent."""
+    debug_logger.info(
+        "Processing package collection result from %s",
+        getattr(connection, "hostname", "unknown"),
+    )
+
+    try:
+        # Extract package data from the message
+        packages = message_data.get("packages", {})
+        os_name = message_data.get("os_name", "Unknown")
+        os_version = message_data.get("os_version", "Unknown")
+        hostname = message_data.get("hostname")
+        total_packages = message_data.get("total_packages", 0)
+
+        debug_logger.info(
+            "Package collection data: OS=%s %s, hostname=%s, total_packages=%d, package_managers=%s",
+            os_name,
+            os_version,
+            hostname,
+            total_packages,
+            list(packages.keys()) if packages else "none",
+        )
+
+        if not packages:
+            debug_logger.warning("No package data received in command result")
+            return {
+                "message_type": "package_collection_result_ack",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "status": "no_data",
+            }
+
+        # Clear existing packages for this OS/version combination
+        debug_logger.info("Clearing existing packages for %s %s", os_name, os_version)
+        delete_stmt = delete(AvailablePackage).where(
+            AvailablePackage.os_name == os_name,
+            AvailablePackage.os_version == os_version,
+        )
+        db.execute(delete_stmt)
+
+        # Process each package manager's packages
+        total_inserted = 0
+        now = datetime.now(timezone.utc)
+
+        for package_manager, package_list in packages.items():
+            debug_logger.info(
+                "Processing %d packages from %s", len(package_list), package_manager
+            )
+
+            batch_packages = []
+            for package in package_list:
+                available_package = AvailablePackage(
+                    os_name=os_name,
+                    os_version=os_version,
+                    package_manager=package_manager,
+                    package_name=package.get("name", ""),
+                    package_version=package.get("version", ""),
+                    package_description=package.get("description", ""),
+                    last_updated=now,
+                )
+                batch_packages.append(available_package)
+
+                # Insert in batches to avoid memory issues
+                if len(batch_packages) >= 1000:
+                    db.add_all(batch_packages)
+                    db.flush()
+                    total_inserted += len(batch_packages)
+                    batch_packages = []
+
+            # Insert remaining packages
+            if batch_packages:
+                db.add_all(batch_packages)
+                db.flush()
+                total_inserted += len(batch_packages)
+
+            debug_logger.info(
+                "Completed processing %s packages, total inserted so far: %d",
+                package_manager,
+                total_inserted,
+            )
+
+        # Commit all changes
+        db.commit()
+
+        debug_logger.info(
+            "Successfully stored %d packages for %s %s",
+            total_inserted,
+            os_name,
+            os_version,
+        )
+
+        return {
+            "message_type": "package_collection_result_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "status": "processed",
+            "packages_stored": total_inserted,
+        }
+
+    except Exception as e:
+        debug_logger.error(
+            "Error processing package collection result from %s: %s",
+            getattr(connection, "hostname", "unknown"),
+            e,
+        )
+        db.rollback()
+
+        return {
+            "message_type": "error",
+            "error": f"Failed to process package collection result: {str(e)}",
+        }

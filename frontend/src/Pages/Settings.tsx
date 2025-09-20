@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { 
   Typography, 
@@ -21,7 +22,7 @@ import {
   Select,
   MenuItem,
   Grid,
-  Alert
+  Alert,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -29,7 +30,8 @@ import {
   Edit as EditIcon,
   Visibility as VisibilityIcon,
   Search as SearchIcon,
-  Storage as StorageIcon
+  Storage as StorageIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useTablePageSize } from '../hooks/useTablePageSize';
@@ -77,6 +79,17 @@ interface OSPackageSummary {
   total_packages: number;
 }
 
+interface Host {
+  id: number;
+  fqdn: string;
+  ipv4: string;
+  ipv6: string;
+  active: boolean;
+  approval_status: string;
+  platform?: string;
+  platform_version?: string;
+}
+
 interface QueueMessage {
   id: string;
   type: string;
@@ -120,12 +133,14 @@ const Settings: React.FC = () => {
 
   // Package management state
   const [packageSummary, setPackageSummary] = useState<OSPackageSummary[]>([]);
-  const [packageManagers, setPackageManagers] = useState<string[]>([]);
   const [selectedOS, setSelectedOS] = useState<string>('');
   const [selectedManager, setSelectedManager] = useState<string>('');
   const [packages, setPackages] = useState<PackageInfo[]>([]);
   const [packageLoading, setPackageLoading] = useState(false);
   const [packageSearchTerm, setPackageSearchTerm] = useState('');
+  const [packageTotalCount, setPackageTotalCount] = useState(0);
+  const [packageRefreshInterval, setPackageRefreshInterval] = useState<number | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const { pageSize, pageSizeOptions } = useTablePageSize({
     reservedHeight: 350,
@@ -180,6 +195,15 @@ const Settings: React.FC = () => {
   useEffect(() => {
     loadTags();
   }, [loadTags]);
+
+  // Cleanup package refresh interval on unmount
+  useEffect(() => {
+    return () => {
+      if (packageRefreshInterval) {
+        window.clearInterval(packageRefreshInterval);
+      }
+    };
+  }, [packageRefreshInterval]);
 
   // Handle create tag
   const handleCreateTag = async () => {
@@ -266,7 +290,20 @@ const Settings: React.FC = () => {
     // Load package data when switching to Available Packages tab
     if (newValue === 4) {
       loadPackageSummary();
-      loadPackageManagers();
+      // Start 30-second auto-refresh timer for package cards
+      if (packageRefreshInterval) {
+        window.clearInterval(packageRefreshInterval);
+      }
+      const interval = window.setInterval(() => {
+        loadPackageSummary();
+      }, 30000);
+      setPackageRefreshInterval(interval);
+    } else {
+      // Clear interval when switching away from Available Packages tab
+      if (packageRefreshInterval) {
+        window.clearInterval(packageRefreshInterval);
+        setPackageRefreshInterval(null);
+      }
     }
   };
 
@@ -320,32 +357,27 @@ const Settings: React.FC = () => {
     }
   }, []);
 
-  const loadPackageManagers = useCallback(async () => {
-    try {
-      const response = await axiosInstance.get('/api/packages/managers');
-      setPackageManagers(response.data);
-    } catch (error) {
-      console.error('Error fetching package managers:', error);
-    }
-  }, []);
 
-  const searchPackages = useCallback(async () => {
+  const searchPackages = useCallback(async (page = 0, pageSize = 25) => {
     if (!packageSearchTerm.trim()) {
       setPackages([]);
+      setPackageTotalCount(0);
+      setHasSearched(false);
       return;
     }
 
     setPackageLoading(true);
+    setHasSearched(true);
     try {
       const params: {
         query: string;
-        limit: number;
+        limit?: number;
+        offset?: number;
         os_name?: string;
         os_version?: string;
         package_manager?: string;
       } = {
         query: packageSearchTerm,
-        limit: 50
       };
 
       if (selectedOS) {
@@ -358,14 +390,111 @@ const Settings: React.FC = () => {
         params.package_manager = selectedManager;
       }
 
-      const response = await axiosInstance.get('/api/packages/search', { params });
+      // Get total count for proper pagination
+      const countResponse = await axiosInstance.get('/api/packages/search/count', { params });
+      setPackageTotalCount(countResponse.data.total_count);
+
+      // Get the actual page data
+      const searchParams = {
+        ...params,
+        limit: pageSize,
+        offset: page * pageSize
+      };
+
+      const response = await axiosInstance.get('/api/packages/search', { params: searchParams });
       setPackages(response.data);
     } catch (error) {
       console.error('Error searching packages:', error);
+      setPackages([]);
+      setPackageTotalCount(0);
     } finally {
       setPackageLoading(false);
     }
   }, [packageSearchTerm, selectedOS, selectedManager]);
+
+  // Refresh packages for a specific OS/version
+  const refreshPackagesForOS = useCallback(async (osName: string, osVersion: string) => {
+    try {
+      const response = await axiosInstance.post(`/api/packages/refresh/${encodeURIComponent(osName)}/${encodeURIComponent(osVersion)}`);
+      if (response.data.success) {
+        // Show success message and reload package summary
+        console.log('Package refresh requested successfully:', response.data.message);
+        // Reload package summary after a short delay to allow processing
+        setTimeout(() => {
+          loadPackageSummary();
+            }, 2000);
+      }
+    } catch (error) {
+      console.error('Error refreshing packages:', error);
+    }
+  }, [loadPackageSummary]);
+
+  const refreshAllPackages = useCallback(async () => {
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+
+      // If we have existing package summaries, use those
+      if (packageSummary.length > 0) {
+        // Refresh packages for all known OS/version combinations from package summaries
+        for (const summary of packageSummary) {
+          try {
+            const response = await axiosInstance.post(`/api/packages/refresh/${encodeURIComponent(summary.os_name)}/${encodeURIComponent(summary.os_version)}`);
+            if (response.data?.success) {
+              successCount++;
+            } else {
+              errorCount++;
+            }
+          } catch (error) {
+            console.error(`Error refreshing packages for ${summary.os_name} ${summary.os_version}:`, error);
+            errorCount++;
+          }
+        }
+      } else {
+        // No package summaries exist yet, discover active hosts and trigger collection
+        try {
+          const hostsResponse = await axiosInstance.get('/api/hosts');
+          const activeHosts = hostsResponse.data.filter((host: Host) => host.active && host.approval_status === 'approved');
+
+          // Create unique OS/version combinations
+          const osVersionCombinations = new Set();
+          activeHosts.forEach((host: Host) => {
+            if (host.platform && host.platform_version) {
+              osVersionCombinations.add(`${host.platform}|${host.platform_version}`);
+            }
+          });
+
+          // Trigger package collection for each unique OS/version combination
+          for (const combination of osVersionCombinations) {
+            const [osName, osVersion] = (combination as string).split('|');
+            try {
+              const response = await axiosInstance.post(`/api/packages/refresh/${encodeURIComponent(osName)}/${encodeURIComponent(osVersion)}`);
+              if (response.data?.success) {
+                successCount++;
+              } else {
+                errorCount++;
+              }
+            } catch (error) {
+              console.error(`Error refreshing packages for ${osName} ${osVersion}:`, error);
+              errorCount++;
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching hosts for package refresh:', error);
+          errorCount++;
+        }
+      }
+
+      console.log(`Refresh All completed: ${successCount} successful, ${errorCount} errors`);
+
+      // Reload package summary after a short delay
+      setTimeout(() => {
+        loadPackageSummary();
+        }, 3000);
+    } catch (error: unknown) {
+      console.error('Error refreshing all packages:', error);
+    }
+  }, [packageSummary, loadPackageSummary]);
 
   // DataGrid columns
   const columns: GridColDef[] = [
@@ -569,20 +698,24 @@ const Settings: React.FC = () => {
 
   const renderAvailablePackagesTab = () => (
     <Box>
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        {t('availablePackages.title', 'Available Packages')}
-      </Typography>
-
-      <Typography variant="body1" sx={{ mb: 3 }}>
-        {t('availablePackages.description', 'View and search available packages collected from your managed hosts across different operating systems and package managers.')}
-      </Typography>
+      {/* Header with title and refresh button */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h5">
+          {t('availablePackages.title', 'Available Packages')}
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<RefreshIcon />}
+          onClick={refreshAllPackages}
+          sx={{ minWidth: 150 }}
+        >
+          {t('availablePackages.refreshAll', 'Refresh All')}
+        </Button>
+      </Box>
 
       {/* Package Summary Cards */}
       {packageSummary.length > 0 && (
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            {t('availablePackages.summary', 'Package Summary by OS')}
-          </Typography>
           <Grid container spacing={2}>
             {packageSummary.map((summary) => (
               <Grid item xs={12} sm={6} md={4} key={`${summary.os_name}:${summary.os_version}`}>
@@ -595,18 +728,29 @@ const Settings: React.FC = () => {
                       </Typography>
                     </Box>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      {t('availablePackages.totalPackages', 'Total Packages')}: {summary.total_packages}
+                      {t('availablePackages.totalPackages', 'Total Packages')}: {summary.total_packages.toLocaleString()}
                     </Typography>
                     <Box>
                       {summary.package_managers.map((manager) => (
                         <Chip
                           key={manager.package_manager}
-                          label={`${manager.package_manager}: ${manager.package_count}`}
+                          label={`${manager.package_manager}: ${manager.package_count.toLocaleString()}`}
                           size="small"
                           variant="outlined"
                           sx={{ mr: 0.5, mb: 0.5 }}
                         />
                       ))}
+                    </Box>
+                    <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<RefreshIcon />}
+                        onClick={() => refreshPackagesForOS(summary.os_name, summary.os_version)}
+                        sx={{ fontSize: '0.75rem' }}
+                      >
+                        {t('availablePackages.refresh', 'Refresh')}
+                      </Button>
                     </Box>
                   </CardContent>
                 </Card>
@@ -625,13 +769,13 @@ const Settings: React.FC = () => {
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
-              label={t('availablePackages.searchTerm', 'Search packages')}
+              label={t('availablePackages.searchTerm', 'Package name')}
               value={packageSearchTerm}
               onChange={(e) => setPackageSearchTerm(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && searchPackages()}
+              onKeyPress={(e) => e.key === 'Enter' && searchPackages(0, 25)}
               InputProps={{
                 endAdornment: (
-                  <IconButton onClick={searchPackages}>
+                  <IconButton onClick={() => searchPackages(0, 25)}>
                     <SearchIcon />
                   </IconButton>
                 )
@@ -640,10 +784,10 @@ const Settings: React.FC = () => {
           </Grid>
           <Grid item xs={12} md={3}>
             <FormControl fullWidth>
-              <InputLabel>{t('availablePackages.filterByOS', 'Filter by OS')}</InputLabel>
+              <InputLabel>{t('availablePackages.filterByOS', 'Operating System / Version')}</InputLabel>
               <Select
                 value={selectedOS}
-                label={t('availablePackages.filterByOS', 'Filter by OS')}
+                label={t('availablePackages.filterByOS', 'Operating System / Version')}
                 onChange={(e) => setSelectedOS(e.target.value)}
               >
                 <MenuItem value="">
@@ -659,20 +803,27 @@ const Settings: React.FC = () => {
           </Grid>
           <Grid item xs={12} md={3}>
             <FormControl fullWidth>
-              <InputLabel>{t('availablePackages.filterByManager', 'Filter by Manager')}</InputLabel>
+              <InputLabel>{t('availablePackages.filterByManager', 'Package Manager')}</InputLabel>
               <Select
                 value={selectedManager}
-                label={t('availablePackages.filterByManager', 'Filter by Manager')}
+                label={t('availablePackages.filterByManager', 'Package Manager')}
                 onChange={(e) => setSelectedManager(e.target.value)}
               >
                 <MenuItem value="">
-                  <em>{t('common.all', 'All')}</em>
+                  <em>{t('updates.filters.allManagers', 'All Package Managers')}</em>
                 </MenuItem>
-                {packageManagers.map((manager) => (
-                  <MenuItem key={manager} value={manager}>
-                    {manager}
-                  </MenuItem>
-                ))}
+                <MenuItem value="apt">APT</MenuItem>
+                <MenuItem value="snap">Snap</MenuItem>
+                <MenuItem value="flatpak">Flatpak</MenuItem>
+                <MenuItem value="fwupd">fwupd</MenuItem>
+                <MenuItem value="homebrew">Homebrew</MenuItem>
+                <MenuItem value="winget">Winget</MenuItem>
+                <MenuItem value="chocolatey">Chocolatey</MenuItem>
+                <MenuItem value="pkg">PKG</MenuItem>
+                <MenuItem value="yum">YUM</MenuItem>
+                <MenuItem value="dnf">DNF</MenuItem>
+                <MenuItem value="zypper">Zypper</MenuItem>
+                <MenuItem value="pacman">Pacman</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -680,9 +831,10 @@ const Settings: React.FC = () => {
             <Button
               fullWidth
               variant="contained"
-              onClick={searchPackages}
+              onClick={() => searchPackages(0, 25)}
               disabled={!packageSearchTerm.trim()}
               startIcon={<SearchIcon />}
+              sx={{ height: '56px' }}
             >
               {t('common.search', 'Search')}
             </Button>
@@ -694,7 +846,7 @@ const Settings: React.FC = () => {
       {packages.length > 0 && (
         <Box>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            {t('availablePackages.results', 'Search Results')} ({packages.length})
+            {t('availablePackages.results', 'Search Results')} ({packageTotalCount.toLocaleString()} total, showing {packages.length})
           </Typography>
           <div style={{ height: 400, width: '100%' }}>
             <DataGrid
@@ -715,6 +867,11 @@ const Settings: React.FC = () => {
                 }
               ]}
               loading={packageLoading}
+              rowCount={packageTotalCount}
+              paginationMode="server"
+              onPaginationModelChange={(model) => {
+                searchPackages(model.page, model.pageSize);
+              }}
               initialState={{
                 pagination: {
                   paginationModel: { page: 0, pageSize: 25 },
@@ -727,7 +884,7 @@ const Settings: React.FC = () => {
       )}
 
       {/* Empty State */}
-      {packageSearchTerm && packages.length === 0 && !packageLoading && (
+      {hasSearched && packages.length === 0 && !packageLoading && (
         <Alert severity="info" sx={{ mt: 2 }}>
           {t('availablePackages.noResults', 'No packages found matching your search criteria.')}
         </Alert>

@@ -783,14 +783,17 @@
     "summary": "作業系統套件摘要",
     "totalPackages": "套件總數",
     "search": "搜尋套件",
-    "searchTerm": "搜尋套件",
-    "filterByOS": "依作業系統篩選",
-    "filterByManager": "依管理員篩選",
+    "searchTerm": "套件名稱",
+    "filterByOS": "作業系統 / 版本",
+    "filterByManager": "套件管理器",
     "results": "搜尋結果",
     "packageName": "套件名稱",
     "version": "版本",
     "manager": "管理員",
     "noResults": "找不到符合您搜尋条件的套件。",
-    "noData": "無可用的套件資料。套件將從您的管理主機自動收集。"
+    "noData": "無可用的套件資料。套件將從您的管理主機自動收集。",
+    "refreshPackages": "從代理重新整理套件",
+    "refresh": "重新整理",
+    "refreshAll": "全部重新整理"
   }
 }

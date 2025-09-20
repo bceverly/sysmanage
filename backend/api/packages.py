@@ -13,7 +13,9 @@ from sqlalchemy.sql.functions import count
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence.db import get_db
-from backend.persistence.models import AvailablePackage
+from backend.persistence.models import AvailablePackage, Host
+from backend.websocket.connection_manager import connection_manager
+from backend.websocket.messages import create_command_message
 
 # Authenticated router for package management
 router = APIRouter(dependencies=[Depends(JWTBearer())])
@@ -130,6 +132,47 @@ async def get_package_managers(
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve package managers: %s") % str(e),
+        ) from e
+
+
+@router.get("/search/count", response_model=dict)
+async def search_packages_count(
+    *,
+    query: str = Query(..., min_length=1, description="Search term for package name"),
+    os_name: Optional[str] = Query(None, description="Filter by OS name"),
+    os_version: Optional[str] = Query(None, description="Filter by OS version"),
+    package_manager: Optional[str] = Query(
+        None, description="Filter by package manager"
+    ),
+    db: Session = Depends(get_db),
+):
+    """
+    Get count of packages matching search criteria.
+
+    This endpoint returns only the count of matching packages for pagination.
+    """
+    try:
+        db_query = db.query(AvailablePackage).filter(
+            AvailablePackage.package_name.ilike(f"%{query}%")
+        )
+
+        if os_name:
+            db_query = db_query.filter(AvailablePackage.os_name == os_name)
+
+        if os_version:
+            db_query = db_query.filter(AvailablePackage.os_version == os_version)
+
+        if package_manager:
+            db_query = db_query.filter(
+                AvailablePackage.package_manager == package_manager
+            )
+
+        total_count = db_query.count()
+        return {"total_count": total_count}
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=_("Failed to count packages: %s") % str(e)
         ) from e
 
 
@@ -268,4 +311,128 @@ async def get_packages_by_manager(
             status_code=500,
             detail=_("Failed to retrieve packages for manager %s: %s")
             % (manager_name, str(e)),
+        ) from e
+
+
+@router.post("/refresh/{os_name}/{os_version}")
+async def refresh_packages_for_os_version(
+    os_name: str, os_version: str, db: Session = Depends(get_db)
+):
+    """
+    Trigger package collection refresh for a specific OS/version combination.
+
+    Finds a random online host with the specified OS/version and requests
+    it to collect and transmit updated package information.
+    """
+    try:
+        # Find an active host with this OS/version combination
+        # Handle the mapping between UI OS names and database platform info
+        if os_name == "Ubuntu":
+            # For Ubuntu hosts, platform is stored as "Linux" and we need to check platform_version for Ubuntu
+            hosts = (
+                db.query(Host)
+                .filter(
+                    Host.platform == "Linux",
+                    Host.platform_version.contains("Ubuntu"),
+                    Host.active.is_(True),
+                    Host.approval_status == "approved",
+                )
+                .all()
+            )
+        else:
+            # For other OS types, use direct matching
+            hosts = (
+                db.query(Host)
+                .filter(
+                    Host.platform == os_name,
+                    Host.platform_version.like(f"{os_version}%"),
+                    Host.active.is_(True),
+                    Host.approval_status == "approved",
+                )
+                .all()
+            )
+
+        if not hosts:
+            raise HTTPException(
+                status_code=404,
+                detail=_("No active hosts found for %s %s") % (os_name, os_version),
+            )
+
+        # Select host with bias towards those with more package managers
+        import random
+        import json
+
+        # Score hosts based on number of package managers they have
+        def score_host(host):
+            """Score a host based on the number of package managers available."""
+            base_score = 1  # Every host gets a base score
+
+            # Parse enabled shells to count package managers
+            if host.enabled_shells:
+                try:
+                    enabled_shells = json.loads(host.enabled_shells)
+                    # Count optional package managers (homebrew, chocolatey, etc.)
+                    optional_managers = 0
+                    for shell_name in enabled_shells:
+                        shell_lower = shell_name.lower()
+                        if any(
+                            mgr in shell_lower
+                            for mgr in [
+                                "brew",
+                                "homebrew",
+                                "choco",
+                                "chocolatey",
+                                "winget",
+                                "scoop",
+                            ]
+                        ):
+                            optional_managers += 1
+
+                    # Boost score for hosts with optional package managers
+                    base_score += (
+                        optional_managers * 3
+                    )  # 3x weight for optional managers
+                except (json.JSONDecodeError, TypeError):
+                    pass  # Fall back to base score if shell data is invalid
+
+            return base_score
+
+        # Calculate scores for all hosts
+        host_scores = [(host, score_host(host)) for host in hosts]
+
+        # Create weighted selection - hosts with higher scores are more likely to be chosen
+        weights = [score for _, score in host_scores]
+        selected_host = random.choices(
+            [host for host, _ in host_scores], weights=weights, k=1
+        )[0]
+
+        # Create command message to collect packages
+        command_message = create_command_message(
+            command_type="collect_available_packages", parameters={}
+        )
+
+        # Send command to the selected host
+        success = await connection_manager.send_to_host(
+            selected_host.id, command_message
+        )
+
+        if not success:
+            raise HTTPException(
+                status_code=503,
+                detail=_("Host %s is not currently connected") % selected_host.fqdn,
+            )
+
+        return {
+            "success": True,
+            "message": _("Package collection requested from host %s")
+            % selected_host.fqdn,
+            "host_id": selected_host.id,
+            "host_fqdn": selected_host.fqdn,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=_("Failed to request package refresh: %s") % str(e)
         ) from e

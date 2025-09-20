@@ -787,14 +787,17 @@
     "summary": "Paketübersicht nach OS",
     "totalPackages": "Pakete Gesamt",
     "search": "Pakete Suchen",
-    "searchTerm": "Pakete durchsuchen",
-    "filterByOS": "Nach OS Filtern",
-    "filterByManager": "Nach Manager Filtern",
+    "searchTerm": "Paketname",
+    "filterByOS": "Betriebssystem / Version",
+    "filterByManager": "Paket-Manager",
     "results": "Suchergebnisse",
     "packageName": "Paketname",
     "version": "Version",
     "manager": "Manager",
     "noResults": "Keine Pakete gefunden, die Ihren Suchkriterien entsprechen.",
-    "noData": "Keine Paketdaten verfügbar. Pakete werden automatisch von Ihren verwalteten Hosts gesammelt."
+    "noData": "Keine Paketdaten verfügbar. Pakete werden automatisch von Ihren verwalteten Hosts gesammelt.",
+    "refreshPackages": "Pakete von Agenten aktualisieren",
+    "refresh": "Aktualisieren",
+    "refreshAll": "Alle aktualisieren"
   }
 }

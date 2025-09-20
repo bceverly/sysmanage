@@ -785,14 +785,17 @@
     "summary": "Résumé des Paquets par OS",
     "totalPackages": "Total des Paquets",
     "search": "Rechercher des Paquets",
-    "searchTerm": "Rechercher des paquets",
-    "filterByOS": "Filtrer par OS",
-    "filterByManager": "Filtrer par Gestionnaire",
+    "searchTerm": "Nom du paquet",
+    "filterByOS": "Système d'Exploitation / Version",
+    "filterByManager": "Gestionnaire de Paquets",
     "results": "Résultats de Recherche",
     "packageName": "Nom du Paquet",
     "version": "Version",
     "manager": "Gestionnaire",
     "noResults": "Aucun paquet trouvé correspondant à vos critères de recherche.",
-    "noData": "Aucune donnée de paquet disponible. Les paquets seront collectés automatiquement depuis vos hôtes gérés."
+    "noData": "Aucune donnée de paquet disponible. Les paquets seront collectés automatiquement depuis vos hôtes gérés.",
+    "refreshPackages": "Actualiser les paquets depuis les agents",
+    "refresh": "Actualiser",
+    "refreshAll": "Tout actualiser"
   }
 }

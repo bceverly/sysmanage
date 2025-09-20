@@ -283,18 +283,13 @@
     "ubuntuProDetachError": "Failed to detach Ubuntu Pro"
   },
   "userDetail": {
-    "invalidId": "Invalid user ID",
-    "loadError": "Failed to load user details",
-    "notFound": "User not found",
-    "basicInfo": "Basic Information",
-    "userId": "User ID",
-    "firstName": "First Name",
-    "lastName": "Last Name",
-    "active": "Active",
-    "lastAccess": "Last Access",
-    "securityInfo": "Security Information",
-    "failedAttempts": "Failed Login Attempts",
-    "lockedAt": "Locked At"
+    "resetPassword": "Reset Password",
+    "resettingPassword": "Sending Reset Email...",
+    "passwordResetSuccess": "Password reset email has been sent to {{email}}",
+    "passwordResetError": "Failed to send password reset email. Please try again.",
+    "confirmResetTitle": "Confirm Password Reset",
+    "confirmResetMessage": "Are you sure you want to send a password reset email to {{email}}? This will allow the user to set a new password.",
+    "sendResetEmail": "Send Reset Email"
   },
   "logout": {
     "loading": "Logging out..."
@@ -735,15 +730,6 @@
     "invalidDescription": "This password reset link is either invalid or has expired. Please request a new password reset.",
     "validatingToken": "Validating reset token..."
   },
-  "userDetail": {
-    "resetPassword": "Reset Password",
-    "resettingPassword": "Sending Reset Email...",
-    "passwordResetSuccess": "Password reset email has been sent to {{email}}",
-    "passwordResetError": "Failed to send password reset email. Please try again.",
-    "confirmResetTitle": "Confirm Password Reset",
-    "confirmResetMessage": "Are you sure you want to send a password reset email to {{email}}? This will allow the user to set a new password.",
-    "sendResetEmail": "Send Reset Email"
-  },
   "ubuntuPro": {
     "title": "Ubuntu Pro",
     "description": "Configure Ubuntu Pro subscription management and master keys for bulk enrollment.",
@@ -824,19 +810,21 @@
   },
   "availablePackages": {
     "title": "Available Packages",
-    "description": "View and search available packages collected from your managed hosts across different operating systems and package managers.",
+    "description": "Description",
     "summary": "Package Summary by OS",
     "totalPackages": "Total Packages",
     "search": "Search Packages",
-    "searchTerm": "Search packages",
-    "filterByOS": "Filter by OS",
-    "filterByManager": "Filter by Manager",
+    "searchTerm": "Package name",
+    "filterByOS": "Operating System / Version",
+    "filterByManager": "Package Manager",
     "results": "Search Results",
     "packageName": "Package Name",
     "version": "Version",
     "manager": "Manager",
-    "description": "Description",
     "noResults": "No packages found matching your search criteria.",
-    "noData": "No package data available. Packages will be collected from your managed hosts automatically."
+    "noData": "No package data available. Packages will be collected from your managed hosts automatically.",
+    "refreshPackages": "Refresh packages from agents",
+    "refresh": "Refresh",
+    "refreshAll": "Refresh All"
   }
 }

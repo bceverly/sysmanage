@@ -787,14 +787,17 @@
     "summary": "OS別パッケージ概要",
     "totalPackages": "総パッケージ数",
     "search": "パッケージ検索",
-    "searchTerm": "パッケージを検索",
-    "filterByOS": "OSでフィルター",
-    "filterByManager": "マネージャーでフィルター",
+    "searchTerm": "パッケージ名",
+    "filterByOS": "オペレーティングシステム / バージョン",
+    "filterByManager": "パッケージマネージャー",
     "results": "検索結果",
     "packageName": "パッケージ名",
     "version": "バージョン",
     "manager": "マネージャー",
     "noResults": "検索条件に一致するパッケージが見つかりません。",
-    "noData": "パッケージデータが利用できません。パッケージは管理対象ホストから自動的に収集されます。"
+    "noData": "パッケージデータが利用できません。パッケージは管理対象ホストから自動的に収集されます。",
+    "refreshPackages": "エージェントからパッケージを更新",
+    "refresh": "更新",
+    "refreshAll": "すべて更新"
   }
 }

@@ -784,14 +784,17 @@
     "summary": "OS별 패키지 요약",
     "totalPackages": "총 패키지 수",
     "search": "패키지 검색",
-    "searchTerm": "패키지 검색",
-    "filterByOS": "OS로 필터링",
-    "filterByManager": "관리자로 필터링",
+    "searchTerm": "패키지 이름",
+    "filterByOS": "운영 체제 / 버전",
+    "filterByManager": "패키지 관리자",
     "results": "검색 결과",
     "packageName": "패키지 이름",
     "version": "버전",
     "manager": "관리자",
     "noResults": "검색 조건에 맞는 패키지를 찾을 수 없습니다.",
-    "noData": "사용 가능한 패키지 데이터가 없습니다. 패키지는 관리 대상 호스트에서 자동으로 수집됩니다."
+    "noData": "사용 가능한 패키지 데이터가 없습니다. 패키지는 관리 대상 호스트에서 자동으로 수집됩니다.",
+    "refreshPackages": "에이전트에서 패키지 새로 고침",
+    "refresh": "새로 고침",
+    "refreshAll": "모두 새로고침"
   }
 }

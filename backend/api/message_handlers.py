@@ -351,7 +351,10 @@ async def handle_command_result(connection, message_data: dict):
     debug_logger.info(
         "Command result from %s: %s",
         getattr(connection, "hostname", "unknown"),
-        message_data,
+        {
+            k: v if k not in ["packages", "package_managers"] else f"<{len(v)} items>"
+            for k, v in message_data.items()
+        },
     )
 
     # Check if this is a script execution result
@@ -366,6 +369,44 @@ async def handle_command_result(connection, message_data: dict):
         try:
             return await handle_script_execution_result(
                 db_session, connection, message_data
+            )
+        finally:
+            db_session.close()
+
+    # Check if this is a package collection result
+    result_data = message_data.get("result", {})
+    debug_logger.info("PACKAGE_DEBUG: message_data keys: %s", list(message_data.keys()))
+    debug_logger.info(
+        "PACKAGE_DEBUG: result_data type: %s, keys: %s",
+        type(result_data),
+        list(result_data.keys()) if isinstance(result_data, dict) else "N/A",
+    )
+    if (
+        "packages" in message_data
+        or "package_managers" in message_data
+        or "packages" in result_data
+        or "package_managers" in result_data
+    ):
+        debug_logger.info(
+            "Detected package collection result, routing to package handler"
+        )
+        # Import here to avoid circular imports
+        from backend.api.data_handlers import handle_package_collection
+        from backend.persistence.db import get_db
+
+        # For new message format, merge result data into message_data for backwards compatibility
+        if result_data and (
+            "packages" in result_data or "package_managers" in result_data
+        ):
+            combined_data = {**message_data, **result_data}
+        else:
+            combined_data = message_data
+
+        # Get database session and route to package handler
+        db_session = next(get_db())
+        try:
+            return await handle_package_collection(
+                db_session, connection, combined_data
             )
         finally:
             db_session.close()

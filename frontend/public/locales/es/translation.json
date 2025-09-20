@@ -787,14 +787,17 @@
     "summary": "Resumen de Paquetes por SO",
     "totalPackages": "Total de Paquetes",
     "search": "Buscar Paquetes",
-    "searchTerm": "Buscar paquetes",
-    "filterByOS": "Filtrar por SO",
-    "filterByManager": "Filtrar por Gestor",
+    "searchTerm": "Nombre del paquete",
+    "filterByOS": "Sistema Operativo / Versión",
+    "filterByManager": "Gestor de Paquetes",
     "results": "Resultados de Búsqueda",
     "packageName": "Nombre del Paquete",
     "version": "Versión",
     "manager": "Gestor",
     "noResults": "No se encontraron paquetes que coincidan con sus criterios de búsqueda.",
-    "noData": "No hay datos de paquetes disponibles. Los paquetes se recolectarán automáticamente de sus hosts gestionados."
+    "noData": "No hay datos de paquetes disponibles. Los paquetes se recolectarán automáticamente de sus hosts gestionados.",
+    "refreshPackages": "Actualizar paquetes desde agentes",
+    "refresh": "Actualizar",
+    "refreshAll": "Actualizar todo"
   }
 }
