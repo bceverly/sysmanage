@@ -402,9 +402,11 @@ async def refresh_packages_for_os_version(
 
         # Create weighted selection - hosts with higher scores are more likely to be chosen
         weights = [score for _, score in host_scores]
-        selected_host = random.choices(
+        selected_host = random.choices(  # nosec B311 - random.choices is appropriate for non-cryptographic host selection/load balancing
             [host for host, _ in host_scores], weights=weights, k=1
-        )[0]
+        )[
+            0
+        ]
 
         # Create command message to collect packages
         command_message = create_command_message(
