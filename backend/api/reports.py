@@ -842,6 +842,8 @@ async def generate_report(
 
 
 @router.get("/screenshots/{report_id}")
+@router.head("/screenshots/{report_id}")
+@router.options("/screenshots/{report_id}")
 async def get_report_screenshot(report_id: str):
     """
     Serve report screenshots for the UI cards
@@ -866,7 +868,13 @@ async def get_report_screenshot(report_id: str):
     return Response(
         content=placeholder_svg,
         media_type="image/svg+xml",
-        headers={"Cache-Control": "public, max-age=3600"},
+        headers={
+            "Cache-Control": "public, max-age=3600",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Content-Length": str(len(placeholder_svg.encode("utf-8"))),
+        },
     )
 
 
