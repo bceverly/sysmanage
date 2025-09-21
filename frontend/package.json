@@ -78,6 +78,7 @@
     "eslint-plugin-security": "^3.0.1",
     "identity-obj-proxy": "^3.0.0",
     "jsdom": "^26.1.0",
+    "msw": "^2.11.3",
     "stylelint": "^16.24.0",
     "stylelint-config-standard": "^36.0.1",
     "vite": "^7.1.3",
@@ -88,5 +89,10 @@
     "postcss": "^8.4.47",
     "svgo": "^3.3.2",
     "rollup": "npm:@rollup/wasm-node@^4"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

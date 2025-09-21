@@ -20,7 +20,7 @@ help:
 	@echo "  make security-upgrades - Check for security package upgrades"
 	@echo "  make setup         - Install development dependencies"
 	@echo "  make clean         - Clean test artifacts and cache"
-	@echo "  make install-dev   - Install all development tools (includes WebDriver for screenshots)"
+	@echo "  make install-dev   - Install all development tools (includes WebDriver + MSW for testing)"
 	@echo "  make check-test-models - Check test model synchronization between conftest files"
 	@echo ""
 	@echo "OpenBSD users: install-dev will check for C tracer dependencies (gcc, py3-cffi)"
@@ -65,6 +65,10 @@ install-dev: $(VENV_ACTIVATE)
 	@cd frontend && npm install
 	@echo "Installing ESLint security plugins..."
 	@cd frontend && npm install eslint-plugin-security eslint-plugin-no-unsanitized
+	@echo "Setting up MSW (Mock Service Worker) for API mocking..."
+	@cd frontend && npm install --save-dev msw
+	@echo "Initializing MSW browser setup (for optional development use)..."
+	@cd frontend && npx msw init public/ --save
 ifeq ($(OS),Windows_NT)
 	@echo "Checking for grep installation on Windows..."
 	@where grep >nul 2>nul || (echo "Installing grep via chocolatey (requires admin privileges)..." && powershell -Command "Start-Process powershell -ArgumentList '-Command choco install grep -y' -Verb RunAs -Wait" || echo "Failed to install grep - you may need to run as administrator or install chocolatey first")
