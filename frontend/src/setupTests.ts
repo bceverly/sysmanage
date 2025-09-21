@@ -5,6 +5,40 @@
 import '@testing-library/jest-dom';
 import './__tests__/setup';
 
+// Setup MSW for all tests
+import { beforeAll, afterEach, afterAll } from 'vitest';
+import { server } from './mocks/node';
+
+// Start MSW server before all tests
+beforeAll(() => {
+  // Enable MSW request logging in CI
+  const isCI = process.env.CI === 'true';
+
+  server.listen({
+    onUnhandledRequest: 'warn', // Warn about unhandled requests
+  });
+
+  if (isCI) {
+    console.log('🚀 MSW server started for CI environment');
+  }
+});
+
+// Reset handlers after each test `important for test isolation`
+afterEach(() => {
+  server.resetHandlers();
+});
+
+// Clean up after all tests are done
+afterAll(() => {
+  const isCI = process.env.CI === 'true';
+
+  if (isCI) {
+    console.log('🔚 MSW server stopped - CI test run completed');
+  }
+
+  server.close();
+});
+
 // Fix for React 19 compatibility in JSDOM environment
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean;

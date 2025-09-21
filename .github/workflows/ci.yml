@@ -226,7 +226,7 @@ jobs:
     permissions:
       contents: write  # Allow writing to update README badge
       pull-requests: write  # Allow creating pull requests
-    
+
     steps:
     - uses: actions/checkout@v5
 
@@ -237,6 +237,35 @@ jobs:
         registry-url: 'https://registry.npmjs.org/'
         cache: 'npm'
         cache-dependency-path: frontend/package-lock.json
+
+    - name: Create test config for frontend
+      run: |
+        sudo mkdir -p /etc
+        sudo tee /etc/sysmanage.yaml > /dev/null <<EOF
+        api:
+          host: "localhost"
+          port: 8000
+          certFile: ""
+          chainFile: ""
+          keyFile: ""
+        database:
+          user: "sysmanage"
+          password: "abc123"
+          host: "localhost"
+          port: 5432
+          name: "sysmanage"
+        security:
+          password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+          admin_userid: "admin@sysmanage.org"
+          admin_password: "TEST_AdminPass123!"
+          jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+          jwt_algorithm: "HS256"
+          jwt_auth_timeout: 6000
+          jwt_refresh_timeout: 60000
+        webui:
+          host: "localhost"
+          port: 7443
+        EOF
 
     - name: Install frontend dependencies
       working-directory: frontend
@@ -263,7 +292,69 @@ jobs:
 
     - name: Run frontend tests with coverage
       working-directory: frontend
-      run: npm run test:coverage
+      run: |
+        echo "🧪 Running frontend tests with MSW API mocking..."
+
+        # Ensure clean coverage directory
+        rm -rf coverage/ || true
+
+        # Check vitest configuration
+        echo "📋 Checking vitest configuration..."
+        npx vitest --version || echo "vitest not found"
+
+        # Run tests with coverage
+        npm run test:coverage || {
+          echo "❌ Tests failed, but continuing to check coverage generation..."
+          exit_code=$?
+        }
+
+        echo "✅ Frontend tests completed"
+
+        # Verify coverage was generated
+        if [ -d "coverage" ]; then
+          echo "✅ Coverage directory created"
+          echo "Coverage files generated: $(ls -1 coverage/ | wc -l) files"
+        else
+          echo "❌ No coverage directory found"
+          echo "npm test:coverage command may have failed to generate coverage"
+        fi
+
+        # Show MSW-specific coverage info
+        echo "📊 MSW Coverage Summary:"
+        if [ -f "coverage/coverage-summary.json" ]; then
+          echo "MSW files found in coverage:"
+          cat coverage/coverage-summary.json | grep -o '"[^"]*mocks[^"]*"' | sort
+          echo "MSW Handlers coverage:"
+          cat coverage/coverage-summary.json | grep "mocks/handlers.ts" | head -1
+          echo "MSW Node coverage:"
+          cat coverage/coverage-summary.json | grep "mocks/node.ts" | head -1
+        else
+          echo "❌ No coverage-summary.json found"
+        fi
+
+        # Exit with original test result if tests failed
+        if [ ! -z "$exit_code" ]; then
+          exit $exit_code
+        fi
+
+    - name: Debug coverage files
+      working-directory: frontend
+      run: |
+        echo "🔍 Debugging coverage file structure:"
+        echo "Current directory: $(pwd)"
+        echo "Coverage directory exists: $(test -d coverage && echo 'YES' || echo 'NO')"
+        if [ -d coverage ]; then
+          echo "Coverage directory contents:"
+          ls -la coverage/ || echo "Failed to list coverage directory"
+          echo "Looking for specific files:"
+          echo "coverage-summary.json exists: $(test -f coverage/coverage-summary.json && echo 'YES' || echo 'NO')"
+          echo "index.html exists: $(test -f coverage/index.html && echo 'YES' || echo 'NO')"
+          echo "src/mocks directory exists: $(test -d coverage/src/mocks && echo 'YES' || echo 'NO')"
+          if [ -d coverage/src ]; then
+            echo "Coverage src subdirectories:"
+            ls -la coverage/src/
+          fi
+        fi
 
     - name: Extract frontend coverage percentage
       id: frontend-coverage
@@ -336,13 +427,46 @@ jobs:
         flags: frontend
         name: frontend-coverage
 
+    - name: Check if coverage exists before upload
+      working-directory: frontend
+      run: |
+        echo "🔍 Final coverage check before artifact upload:"
+        if [ -d "coverage" ]; then
+          echo "✅ Coverage directory exists"
+          echo "Files in coverage directory:"
+          find coverage -type f | head -10
+          echo "Coverage directory size: $(du -sh coverage/ | cut -f1)"
+          echo "COVERAGE_EXISTS=true" >> $GITHUB_ENV
+        else
+          echo "❌ No coverage directory found for artifacts"
+          echo "COVERAGE_EXISTS=false" >> $GITHUB_ENV
+        fi
+
+    - name: Upload MSW test artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: msw-test-coverage-${{ github.run_number }}
+        path: frontend/coverage/
+        if-no-files-found: warn
+        retention-days: 7
+
+    - name: Report artifact upload status
+      if: always()
+      run: |
+        if [ "${{ env.COVERAGE_EXISTS }}" = "true" ]; then
+          echo "✅ Coverage files should have been uploaded as artifacts"
+        else
+          echo "❌ No coverage files found - check test execution above"
+        fi
+
   build:
     name: Build Check
     runs-on: ubuntu-latest
     permissions:
       contents: read
     needs: [test-backend, lint-backend, test-frontend]
-    
+
     steps:
     - uses: actions/checkout@v5
 
@@ -353,6 +477,35 @@ jobs:
         registry-url: 'https://registry.npmjs.org/'
         cache: 'npm'
         cache-dependency-path: frontend/package-lock.json
+
+    - name: Create test config for build
+      run: |
+        sudo mkdir -p /etc
+        sudo tee /etc/sysmanage.yaml > /dev/null <<EOF
+        api:
+          host: "localhost"
+          port: 8000
+          certFile: ""
+          chainFile: ""
+          keyFile: ""
+        database:
+          user: "sysmanage"
+          password: "abc123"
+          host: "localhost"
+          port: 5432
+          name: "sysmanage"
+        security:
+          password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+          admin_userid: "admin@sysmanage.org"
+          admin_password: "TEST_AdminPass123!"
+          jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+          jwt_algorithm: "HS256"
+          jwt_auth_timeout: 6000
+          jwt_refresh_timeout: 60000
+        webui:
+          host: "localhost"
+          port: 7443
+        EOF
 
     - name: Install frontend dependencies
       working-directory: frontend

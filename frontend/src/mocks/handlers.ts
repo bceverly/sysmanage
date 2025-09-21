@@ -1,70 +1,152 @@
 import { http, HttpResponse } from 'msw';
 
-const API_BASE_URL = 'http://localhost:8080/api';
-
+// Simplified approach - use broad patterns and check URLs in the handler
 export const handlers = [
-  // Mock login endpoint
-  http.post(`${API_BASE_URL}/login`, () => {
-    return HttpResponse.json({
-      token: 'mock-jwt-token',
-      user: {
-        id: 1,
-        userid: 'test@example.com',
-        active: true
-      }
-    });
-  }),
+  // Catch all /api/ requests and handle them dynamically
+  http.get('http://localhost:8080/api/*', ({ request }) => {
+    const url = new globalThis.URL(request.url);
+    const path = url.pathname;
 
-  // Mock hosts endpoints
-  http.get(`${API_BASE_URL}/hosts`, () => {
-    return HttpResponse.json([
-      {
+    const logPrefix = process.env.CI === 'true' ? '🔄 MSW-CI:' : 'MSW:';
+    console.log(`${logPrefix} Handling GET ${path}`);
+
+    // Host data
+    if (path === '/api/host/1' || path === '/api/hosts/1') {
+      return HttpResponse.json({
         id: 1,
         fqdn: 'test-host.example.com',
         ipv4: '192.168.1.100',
+        ipv6: '::1',
         active: true,
-        status: 'up'
+        status: 'up',
+        approval_status: 'approved',
+        platform: 'Linux',
+        last_access: '2023-01-01T12:00:00Z',
+        created_at: '2023-01-01T10:00:00Z',
+        updated_at: '2023-01-01T12:00:00Z',
+        hardware_updated_at: '2023-01-01T11:00:00Z',
+        software_updated_at: '2023-01-01T11:30:00Z',
+        user_access_updated_at: '2023-01-01T11:15:00Z',
+        cpu_vendor: 'Intel',
+        cpu_model: 'Intel Core i7-8700K',
+        cpu_cores: 6,
+        cpu_threads: 12,
+        cpu_frequency_mhz: 3700,
+        memory_total_mb: 16384,
+        is_agent_privileged: true,
+        diagnostics_request_status: 'idle',
+      });
+    }
+
+    // User data
+    if (path === '/api/user/me' || path === '/api/users/me') {
+      return HttpResponse.json({
+        id: 1,
+        username: 'current_user',
+        email: 'user@example.com',
+        first_name: 'Test',
+        last_name: 'User',
+        is_active: true,
+        is_superuser: false,
+        created_at: '2023-01-01T10:00:00Z',
+        updated_at: '2023-01-01T12:00:00Z',
+      });
+    }
+
+    // Software packages
+    if (path === '/api/host/1/software' || path === '/api/hosts/1/software') {
+      return HttpResponse.json([
+        {
+          id: 1,
+          package_name: 'vim',
+          version: '8.2',
+          package_manager: 'apt',
+          description: 'Vi IMproved - enhanced vi editor',
+          status: 'installed'
+        },
+        {
+          id: 2,
+          package_name: 'curl',
+          version: '7.68.0',
+          package_manager: 'apt',
+          description: 'Command line tool for transferring data',
+          status: 'installed'
+        }
+      ]);
+    }
+
+    // Package search
+    if (path === '/api/packages/search') {
+      const query = url.searchParams.get('query');
+      if (!query || query.length < 2) {
+        return HttpResponse.json([]);
       }
-    ]);
-  }),
 
-  // Mock host detail endpoint
-  http.get(`${API_BASE_URL}/hosts/:id`, ({ params }) => {
-    const { id } = params;
-    return HttpResponse.json({
-      id: Number(id),
-      fqdn: 'test-host.example.com',
-      ipv4: '192.168.1.100',
-      active: true,
-      status: 'up'
-    });
-  }),
+      const availablePackages = [
+        { name: 'htop', description: 'Interactive process viewer', version: '3.0.5' },
+        { name: 'htop-dev', description: 'Development files for htop', version: '3.0.5' },
+        { name: 'nginx', description: 'HTTP and reverse proxy server', version: '1.18.0' },
+        { name: 'nodejs', description: 'JavaScript runtime', version: '18.17.0' },
+        { name: 'python3', description: 'Python 3 interpreter', version: '3.9.2' },
+      ];
 
-  // Mock packages search endpoint
-  http.get(`${API_BASE_URL}/packages/search`, ({ request }) => {
-    const url = new URL(request.url);
-    const query = url.searchParams.get('query');
+      const results = availablePackages.filter(pkg =>
+        pkg.name.toLowerCase().includes(query.toLowerCase()) ||
+        pkg.description.toLowerCase().includes(query.toLowerCase())
+      );
 
-    if (!query || query.length < 2) {
+      return HttpResponse.json(results);
+    }
+
+    // Empty arrays for other endpoints
+    if (path.includes('/storage') ||
+        path.includes('/network') ||
+        path.includes('/users') ||
+        path.includes('/groups') ||
+        path.includes('/diagnostics') ||
+        path.includes('/tags') ||
+        path.includes('/installation-history')) {
       return HttpResponse.json([]);
     }
 
-    return HttpResponse.json([
-      {
-        name: `${query}`,
-        version: '1.0.0',
-        description: `Mock package for ${query}`
-      }
-    ]);
+    // Ubuntu Pro (null response)
+    if (path.includes('/ubuntu-pro')) {
+      return HttpResponse.json(null);
+    }
+
+    // Default: return empty array for API endpoints
+    console.log(`MSW: Unhandled API endpoint ${path}, returning empty array`);
+    return HttpResponse.json([]);
   }),
 
-  // Mock package installation endpoint
-  http.post(`${API_BASE_URL}/packages/install/:hostId`, ({ request }) => {
-    console.log('Package installation request:', request.url);
+  // Handle POST requests for package installation
+  http.post('http://localhost:8080/api/packages/install/*', async ({ request }) => {
+    const body = await request.json() as { package_names: string[]; requested_by: string };
+
     return HttpResponse.json({
       success: true,
-      message: 'Package installation queued',
-      installation_ids: ['mock-uuid']
+      message: 'Package installation has been queued',
+      installation_ids: body.package_names.map(() => `uuid-${Math.random().toString(36).substr(2, 9)}`)
     });
-  })
+  }),
+
+  // Handle POST requests for package uninstallation
+  http.post('http://localhost:8080/api/packages/uninstall/*', async () => {
+    return HttpResponse.json({
+      success: true,
+      message: 'Package uninstallation has been queued',
+      uninstallation_id: `uuid-${Math.random().toString(36).substr(2, 9)}`
+    });
+  }),
+
+  // Fallback for non-API requests
+  http.all('*', ({ request }) => {
+    const url = new globalThis.URL(request.url);
+    if (!url.pathname.startsWith('/api/')) {
+      return HttpResponse.json({}, { status: 200 });
+    }
+
+    console.warn(`MSW: Truly unhandled request: ${request.method} ${request.url}`);
+    return HttpResponse.json([], { status: 200 });
+  }),
 ];
