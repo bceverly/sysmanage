@@ -226,7 +226,7 @@ jobs:
     permissions:
       contents: write  # Allow writing to update README badge
       pull-requests: write  # Allow creating pull requests
-    
+
     steps:
     - uses: actions/checkout@v5
 
@@ -237,6 +237,35 @@ jobs:
         registry-url: 'https://registry.npmjs.org/'
         cache: 'npm'
         cache-dependency-path: frontend/package-lock.json
+
+    - name: Create test config for frontend
+      run: |
+        sudo mkdir -p /etc
+        sudo tee /etc/sysmanage.yaml > /dev/null <<EOF
+        api:
+          host: "localhost"
+          port: 8000
+          certFile: ""
+          chainFile: ""
+          keyFile: ""
+        database:
+          user: "sysmanage"
+          password: "abc123"
+          host: "localhost"
+          port: 5432
+          name: "sysmanage"
+        security:
+          password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+          admin_userid: "admin@sysmanage.org"
+          admin_password: "TEST_AdminPass123!"
+          jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+          jwt_algorithm: "HS256"
+          jwt_auth_timeout: 6000
+          jwt_refresh_timeout: 60000
+        webui:
+          host: "localhost"
+          port: 7443
+        EOF
 
     - name: Install frontend dependencies
       working-directory: frontend
@@ -342,7 +371,7 @@ jobs:
     permissions:
       contents: read
     needs: [test-backend, lint-backend, test-frontend]
-    
+
     steps:
     - uses: actions/checkout@v5
 
@@ -353,6 +382,35 @@ jobs:
         registry-url: 'https://registry.npmjs.org/'
         cache: 'npm'
         cache-dependency-path: frontend/package-lock.json
+
+    - name: Create test config for build
+      run: |
+        sudo mkdir -p /etc
+        sudo tee /etc/sysmanage.yaml > /dev/null <<EOF
+        api:
+          host: "localhost"
+          port: 8000
+          certFile: ""
+          chainFile: ""
+          keyFile: ""
+        database:
+          user: "sysmanage"
+          password: "abc123"
+          host: "localhost"
+          port: 5432
+          name: "sysmanage"
+        security:
+          password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+          admin_userid: "admin@sysmanage.org"
+          admin_password: "TEST_AdminPass123!"
+          jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+          jwt_algorithm: "HS256"
+          jwt_auth_timeout: 6000
+          jwt_refresh_timeout: 60000
+        webui:
+          host: "localhost"
+          port: 7443
+        EOF
 
     - name: Install frontend dependencies
       working-directory: frontend
