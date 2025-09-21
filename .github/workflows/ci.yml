@@ -292,7 +292,10 @@ jobs:
 
     - name: Run frontend tests with coverage
       working-directory: frontend
-      run: npm run test:coverage
+      run: |
+        echo "🧪 Running frontend tests with MSW API mocking..."
+        npm run test:coverage
+        echo "✅ Frontend tests completed"
 
     - name: Extract frontend coverage percentage
       id: frontend-coverage
@@ -364,6 +367,14 @@ jobs:
         directory: ./frontend/coverage
         flags: frontend
         name: frontend-coverage
+
+    - name: Upload MSW test artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: msw-test-coverage
+        path: |
+          frontend/coverage/coverage-summary.json
+          frontend/coverage/lcov-report/index.html
 
   build:
     name: Build Check

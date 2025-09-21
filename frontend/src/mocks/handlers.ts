@@ -7,7 +7,8 @@ export const handlers = [
     const url = new globalThis.URL(request.url);
     const path = url.pathname;
 
-    console.log(`MSW: Handling GET ${path}`);
+    const logPrefix = process.env.CI === 'true' ? '🔄 MSW-CI:' : 'MSW:';
+    console.log(`${logPrefix} Handling GET ${path}`);
 
     // Host data
     if (path === '/api/host/1' || path === '/api/hosts/1') {

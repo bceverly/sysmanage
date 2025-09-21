@@ -11,9 +11,16 @@ import { server } from './mocks/node';
 
 // Start MSW server before all tests
 beforeAll(() => {
+  // Enable MSW request logging in CI
+  const isCI = process.env.CI === 'true';
+
   server.listen({
     onUnhandledRequest: 'warn', // Warn about unhandled requests
   });
+
+  if (isCI) {
+    console.log('🚀 MSW server started for CI environment');
+  }
 });
 
 // Reset handlers after each test `important for test isolation`
@@ -23,6 +30,12 @@ afterEach(() => {
 
 // Clean up after all tests are done
 afterAll(() => {
+  const isCI = process.env.CI === 'true';
+
+  if (isCI) {
+    console.log('🔚 MSW server stopped - CI test run completed');
+  }
+
   server.close();
 });
 
