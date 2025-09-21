@@ -44,19 +44,23 @@ class TestModelReprMethods:
 
     def test_queue_metrics_repr(self):
         """Test QueueMetrics __repr__ method (line 542)."""
+        from datetime import datetime, timezone
+
         metrics = QueueMetrics(
             id=1,
-            metric_name="test_metric",
-            direction="inbound",
-            count=100,
-            host_id=24,
+            queue_name="test_queue",
+            metric_type="throughput",
+            metric_value="100",
+            aggregation_period="hour",
+            period_start=datetime.now(timezone.utc),
+            period_end=datetime.now(timezone.utc),
+            created_at=datetime.now(timezone.utc),
         )
         repr_str = repr(metrics)
         assert "QueueMetrics" in repr_str
-        assert "test_metric" in repr_str
-        assert "inbound" in repr_str
+        assert "test_queue" in repr_str
+        assert "throughput" in repr_str
         assert "100" in repr_str
-        assert "24" in repr_str
 
     def test_saved_script_repr(self):
         """Test SavedScript __repr__ method (line 573)."""
@@ -106,7 +110,16 @@ class TestModelReprMethods:
 
     def test_ubuntu_pro_service_repr(self):
         """Test UbuntuProService __repr__ method (line 830)."""
-        service = UbuntuProService(name="esm-infra", status="enabled")
+        from datetime import datetime, timezone
+
+        service = UbuntuProService(
+            id=1,
+            ubuntu_pro_info_id=123,
+            service_name="esm-infra",
+            status="enabled",
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
+        )
         repr_str = repr(service)
         assert "UbuntuProService" in repr_str
         assert "esm-infra" in repr_str

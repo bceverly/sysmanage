@@ -433,10 +433,10 @@ class TestUserUpdate:
             f"/api/user/{user2.id}", json=update_data, headers=auth_headers
         )
 
-        # API allows duplicate userids on update
-        assert response.status_code == 200
+        # Should return 409 error for duplicate userid
+        assert response.status_code == 409
         data = response.json()
-        assert data["userid"] == "user1@example.com"
+        assert "already exists" in data["detail"]
 
     def test_update_user_unauthorized(self, client):
         """Test updating user without authentication."""

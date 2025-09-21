@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import Response
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import IntegrityError
 
 from backend.api.profile import validate_and_process_image
 from backend.auth.auth_bearer import JWTBearer
@@ -89,7 +90,8 @@ async def get_logged_in_user(request: Request):
 
     # Check for special case admin user
     the_config = config.get_config()
-    if userid == the_config["security"]["admin_userid"]:
+    admin_userid = the_config.get("security", {}).get("admin_userid")
+    if admin_userid and userid == admin_userid:
         ret_user = models.User(
             id=0,
             active=True,
@@ -308,19 +310,27 @@ async def update_user(user_id: int, user_data: User):
         if len(users) != 1:
             raise HTTPException(status_code=404, detail=_("User not found"))
 
+        # No need to check for userid duplicates explicitly - the database unique constraint will handle this
+
         # Update the values
         hashed_value = argon2_hasher.hash(user_data.password)
-        session.query(models.User).filter(models.User.id == user_id).update(
-            {
-                models.User.active: user_data.active,
-                models.User.userid: user_data.userid,
-                models.User.first_name: user_data.first_name,
-                models.User.last_name: user_data.last_name,
-                models.User.hashed_password: hashed_value,
-                models.User.last_access: datetime.now(timezone.utc),
-            }
-        )
-        session.commit()
+        try:
+            session.query(models.User).filter(models.User.id == user_id).update(
+                {
+                    models.User.active: user_data.active,
+                    models.User.userid: user_data.userid,
+                    models.User.first_name: user_data.first_name,
+                    models.User.last_name: user_data.last_name,
+                    models.User.hashed_password: hashed_value,
+                    models.User.last_access: datetime.now(timezone.utc),
+                }
+            )
+            session.commit()
+        except IntegrityError as exc:
+            session.rollback()
+            raise HTTPException(
+                status_code=409, detail=_("User already exists")
+            ) from exc
 
         # Get updated user data to return current lock status
         updated_user = (

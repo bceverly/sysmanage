@@ -11,7 +11,7 @@ from sqlalchemy import text, update
 from sqlalchemy.orm import Session
 
 from backend.i18n import _
-from backend.persistence.models import Host
+from backend.persistence.models import Host, SoftwareInstallationLog
 
 # Logger for debugging
 debug_logger = logging.getLogger("debug_logger")
@@ -489,4 +489,100 @@ async def handle_diagnostic_result(db: Session, connection, message_data: dict):
         return {
             "message_type": "error",
             "error": f"Failed to process diagnostic result: {str(e)}",
+        }
+
+
+async def handle_installation_status(db: Session, connection, message_data: dict):
+    """Handle package installation status update from agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
+
+    installation_id = message_data.get("installation_id")
+    status = message_data.get("status")
+    package_name = message_data.get("package_name")
+    error_message = message_data.get("error_message")
+    installed_version = message_data.get("installed_version")
+    installation_log = message_data.get("installation_log")
+
+    debug_logger.info(
+        "Package installation status from %s: %s - %s (%s)",
+        getattr(connection, "hostname", "unknown"),
+        package_name,
+        status,
+        installation_id,
+    )
+
+    if not installation_id:
+        debug_logger.error("Package installation status missing installation_id")
+        return {
+            "message_type": "error",
+            "error": "Missing installation_id in package installation status",
+        }
+
+    try:
+        # Find the installation log entry
+        installation_log_entry = (
+            db.query(SoftwareInstallationLog)
+            .filter(SoftwareInstallationLog.installation_id == installation_id)
+            .first()
+        )
+
+        if not installation_log_entry:
+            debug_logger.warning(
+                "Installation log entry not found for installation_id: %s",
+                installation_id,
+            )
+            return {
+                "message_type": "error",
+                "error": f"Installation log entry not found for ID: {installation_id}",
+            }
+
+        # Update the installation log with the new status
+        now = datetime.now(timezone.utc)
+
+        installation_log_entry.status = status
+        installation_log_entry.updated_at = now
+
+        if status == "installing":
+            installation_log_entry.started_at = now
+        elif status in ["completed", "failed"]:
+            installation_log_entry.completed_at = now
+            installation_log_entry.success = status == "completed"
+
+            if error_message:
+                installation_log_entry.error_message = error_message
+            if installed_version:
+                installation_log_entry.installed_version = installed_version
+            if installation_log:
+                installation_log_entry.installation_log = installation_log
+
+        # Commit the changes
+        db.commit()
+
+        debug_logger.info(
+            "Updated package installation status: %s -> %s (ID: %s)",
+            package_name,
+            status,
+            installation_id,
+        )
+
+        return {
+            "message_type": "package_installation_status_ack",
+            "timestamp": now.isoformat(),
+            "installation_id": installation_id,
+            "status": "updated",
+        }
+
+    except Exception as e:
+        db.rollback()
+        debug_logger.error(
+            "Error updating package installation status for %s: %s", installation_id, e
+        )
+        return {
+            "message_type": "error",
+            "error": f"Failed to update package installation status: {str(e)}",
         }

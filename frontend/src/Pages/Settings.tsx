@@ -586,7 +586,7 @@ const Settings: React.FC = () => {
       />
 
       {/* Data Grid */}
-      <div style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px`, width: '100%' }}>
+      <div style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px` }}>
         <DataGrid
           rows={filteredTags}
           columns={columns}
@@ -636,7 +636,7 @@ const Settings: React.FC = () => {
       </Typography>
 
       {/* Data Grid */}
-      <div style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px`, width: '100%' }}>
+      <div style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px` }}>
         <DataGrid
           rows={queueMessages}
           columns={queueColumns}
@@ -848,7 +848,7 @@ const Settings: React.FC = () => {
           <Typography variant="h6" sx={{ mb: 2 }}>
             {t('availablePackages.results', 'Search Results')} ({packageTotalCount.toLocaleString()} total, showing {packages.length})
           </Typography>
-          <div style={{ height: 400, width: '100%' }}>
+          <div style={{ height: 400 }}>
             <DataGrid
               rows={packages.map((pkg, index) => ({ id: index, ...pkg }))}
               columns={[

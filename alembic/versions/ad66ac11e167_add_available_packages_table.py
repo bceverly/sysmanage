@@ -56,7 +56,7 @@ def upgrade() -> None:
 
     # Create available_packages table
     op.create_table('available_packages',
-        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('id', sa.Integer(), primary_key=True, autoincrement=True, nullable=False),
         sa.Column('os_name', sa.String(length=100), nullable=False),
         sa.Column('os_version', sa.String(length=100), nullable=False),
         sa.Column('package_manager', sa.String(length=50), nullable=False),
@@ -64,8 +64,7 @@ def upgrade() -> None:
         sa.Column('package_version', sa.String(length=100), nullable=False),
         sa.Column('package_description', sa.Text(), nullable=True),
         sa.Column('last_updated', sa.DateTime(timezone=True), nullable=False),
-        sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.PrimaryKeyConstraint('id')
+        sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP'))
     )
 
     # Create indexes

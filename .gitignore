@@ -182,3 +182,8 @@ nul
 
 # Certificate directories
 .sysmanage-certs/
+
+# Temporary debugging files
+data.sqlite
+token.json
+*.temp

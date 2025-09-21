@@ -109,24 +109,19 @@ def process_software_packages(db: Session, host_id: int, packages_data: list):
             software_package = SoftwarePackage(
                 host_id=host_id,
                 package_name=package_data.get("package_name"),
-                version=package_data.get("version"),
-                description=package_data.get("description"),
+                package_version=package_data.get("version"),
+                package_description=package_data.get("description"),
                 package_manager=package_data.get("package_manager"),
-                source=package_data.get("source"),
                 architecture=package_data.get("architecture"),
                 size_bytes=package_data.get("size_bytes"),
                 install_date=package_data.get("install_date"),
                 vendor=package_data.get("vendor"),
                 category=package_data.get("category"),
-                license_type=package_data.get("license_type"),
-                bundle_id=package_data.get("bundle_id"),
-                app_store_id=package_data.get("app_store_id"),
-                installation_path=package_data.get("installation_path"),
+                license=package_data.get("license_type"),
+                install_path=package_data.get("installation_path"),
                 is_system_package=package_data.get("is_system_package", False),
-                is_user_installed=package_data.get("is_user_installed", True),
                 created_at=datetime.now(timezone.utc),
                 updated_at=datetime.now(timezone.utc),
-                software_updated_at=datetime.now(timezone.utc),
             )
             db.add(software_package)
             package_count += 1

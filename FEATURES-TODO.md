@@ -15,36 +15,31 @@ like to add:
     sends linearly with the number of
     registered agents.
 
-3.  Install Software - Allow the server to
-    request that an agent install a particular
-    piece of software or particular version
-    locally.
-
-4.  SSH Keys - Manage SSH keys on the agents
+3.  SSH Keys - Manage SSH keys on the agents
     so that they can be pushed out from a
     central location.  Keys must be stored
     in a secure vault - use the open source
     version of the Hashicorp vault to store
     them.
 
-5.  Firewall Rules - Manage firewall rules
+4.  Firewall Rules - Manage firewall rules
     on the agent machines.
 
-6.  Versioning of the API - We need to make
+5.  Versioning of the API - We need to make
     sure that older clients can talk to
     newer servers and degrade gracefully.
 
-7.  User Management - Ability to manage
+6.  User Management - Ability to manage
     add/edit/delete users and groups on
     the agent hosts.
 
-8.  We need a MFA mechanism using an
+7.  We need a MFA mechanism using an
     authenticator app on someone's
     mobile device as well as the ability
     to send a code via email to their
     registered email address.
 
-9.  Have the agent and the server log
+8.  Have the agent and the server log
     their messages to the operating
     system appropriate location but
     fall back to the local logs dir-
@@ -57,7 +52,7 @@ like to add:
     sysmanage-agent subdirectory in
     which the logs should be placed.
 
-10. Add an automation tab between
+9.  Add an automation tab between
     updates and scripts in the main
     navbar.  on that tab, have an
     "Updates" subtab that allows you
@@ -92,15 +87,31 @@ like to add:
     string externalization /
     translation.
 
-11. Add OpenTelemetry support to
+10. Add OpenTelemetry support to
     sysmanage and sysmanage-agent
     so that the performance can be
     monitoried in a large-scale
     production environment.
 
-12. Add the ability to deploy an
+11. Add the ability to deploy an
     antivirus solution that is
     platform approriate to the
     hosts along with centralized
     configuration file management
     of it.
+
+12. It would be cool for sysmanage-
+    docs to have a sysmanage.yaml
+    and sysmanage-agent.yaml inter-
+    active config builder screen
+    where you get to choose your
+    values / options from a list
+    and press a button and it
+    generates the yaml in a window
+    that you can then copy from.
+
+13. For Ubuntu (and possibly other
+    Linux platforms?) we need to
+    be able to push a request to
+    add a PPA to a remote host
+    from a UI on the server.

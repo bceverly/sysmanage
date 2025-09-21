@@ -568,7 +568,7 @@ const Hosts = () => {
                 </Typography>
             </Box>
             
-            <div  style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px`, width: '99%' }}>
+            <div  style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px` }}>
                 <DataGrid
                     rows={filteredData}
                     columns={columns}

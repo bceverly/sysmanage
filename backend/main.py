@@ -548,9 +548,15 @@ startup_logger.info("Adding auth router (no prefix)")
 app.include_router(auth.router)  # /login, /refresh
 startup_logger.info("Auth router added")
 
-startup_logger.info("Adding agent router (no prefix)")
-app.include_router(agent.router)  # /agent/auth, /api/agent/connect
-startup_logger.info("Agent router added")
+startup_logger.info("Adding agent public router (no prefix)")
+app.include_router(agent.public_router)  # /agent/auth (no auth required)
+startup_logger.info("Agent public router added")
+
+startup_logger.info("Adding agent authenticated router with /api prefix")
+app.include_router(
+    agent.router, prefix="/api"
+)  # /api/agent/connect, /api/agent/installation-complete
+startup_logger.info("Agent authenticated router added")
 
 startup_logger.info("Adding host public router (no prefix)")
 app.include_router(host.public_router)  # /host/register (no auth)

@@ -16,54 +16,31 @@ from backend.persistence import db, models
 
 
 @pytest.fixture
-def test_engine():
-    """Create a shared in-memory SQLite database for testing"""
-    # Use shared cache and check_same_thread=False to allow sharing between sessions
-    engine = create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    models.Base.metadata.create_all(bind=engine)
-    return engine
-
-
-@pytest.fixture
-def test_session(test_engine):
-    """Create a test database session"""
-    TestingSessionLocal = sessionmaker(
-        autocommit=False, autoflush=False, bind=test_engine
-    )
-    session = TestingSessionLocal()
-    yield session
-    session.close()
-
-
-@pytest.fixture
-def test_user(test_session, test_engine):
+def test_user(session):
     """Create a test user in the database"""
-    # Directly insert user with explicit id using raw SQL to work around autoincrement issue
-    connection = test_engine.connect()
-    connection.execute(
-        models.User.__table__.insert(),
-        {
-            "id": 1,
-            "userid": "test@example.com",
-            "first_name": "John",
-            "last_name": "Doe",
-            "active": True,
-            "hashed_password": "hashed_password_123",
-            "last_access": datetime.now(timezone.utc),
-            "is_locked": False,
-            "failed_login_attempts": 0,
-            "locked_at": None,
-        },
+    # Create user using the test session with the proper test models
+    user = models.User(
+        id=1,
+        userid="test@example.com",
+        first_name="John",
+        last_name="Doe",
+        active=True,
+        hashed_password="hashed_password_123",
+        last_access=datetime.now(timezone.utc),
+        is_locked=False,
+        failed_login_attempts=0,
+        locked_at=None,
+        profile_image=None,
+        profile_image_type=None,
+        profile_image_uploaded_at=None,
+        is_admin=False,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+        last_login_at=None,
     )
-    connection.commit()
-    connection.close()
-
-    # Now query it back using the session
-    user = test_session.query(models.User).filter(models.User.id == 1).first()
+    session.add(user)
+    session.commit()
+    session.refresh(user)
     return user
 
 
@@ -132,8 +109,8 @@ class TestProfileAPI:
         mock_get_engine,
         mock_decode_jwt,
         client,
-        test_engine,
-        test_session,
+        test_db,
+        session,
         test_user,
         mock_jwt_token,
     ):
@@ -147,7 +124,7 @@ class TestProfileAPI:
         }
 
         # Mock database engine
-        mock_get_engine.return_value = test_engine
+        mock_get_engine.return_value = test_db
 
         headers = {"Authorization": f"Bearer {mock_jwt_token}"}
         response = client.get("/api/profile", headers=headers)
@@ -166,7 +143,7 @@ class TestProfileAPI:
         mock_get_engine,
         mock_decode_jwt,
         client_nonexistent_user,
-        test_engine,
+        test_db,
         mock_jwt_token,
     ):
         """Test profile retrieval when user doesn't exist"""
@@ -179,7 +156,7 @@ class TestProfileAPI:
         }
 
         # Mock database engine
-        mock_get_engine.return_value = test_engine
+        mock_get_engine.return_value = test_db
 
         headers = {"Authorization": f"Bearer {mock_jwt_token}"}
         response = client_nonexistent_user.get("/api/profile", headers=headers)
@@ -210,8 +187,8 @@ class TestProfileAPI:
         mock_get_engine,
         mock_decode_jwt,
         client,
-        test_engine,
-        test_session,
+        test_db,
+        session,
         test_user,
         mock_jwt_token,
     ):
@@ -225,7 +202,7 @@ class TestProfileAPI:
         }
 
         # Mock database engine
-        mock_get_engine.return_value = test_engine
+        mock_get_engine.return_value = test_db
 
         update_data = {"first_name": "Jane", "last_name": "Smith"}
 
@@ -246,8 +223,8 @@ class TestProfileAPI:
         mock_get_engine,
         mock_decode_jwt,
         client,
-        test_engine,
-        test_session,
+        test_db,
+        session,
         test_user,
         mock_jwt_token,
     ):
@@ -261,7 +238,7 @@ class TestProfileAPI:
         }
 
         # Mock database engine
-        mock_get_engine.return_value = test_engine
+        mock_get_engine.return_value = test_db
 
         update_data = {"first_name": "Jane"}
 
@@ -282,8 +259,8 @@ class TestProfileAPI:
         mock_get_engine,
         mock_decode_jwt,
         client,
-        test_engine,
-        test_session,
+        test_db,
+        session,
         test_user,
         mock_jwt_token,
     ):
@@ -297,7 +274,7 @@ class TestProfileAPI:
         }
 
         # Mock database engine
-        mock_get_engine.return_value = test_engine
+        mock_get_engine.return_value = test_db
 
         update_data = {}
 
@@ -318,8 +295,8 @@ class TestProfileAPI:
         mock_get_engine,
         mock_decode_jwt,
         client,
-        test_engine,
-        test_session,
+        test_db,
+        session,
         test_user,
         mock_jwt_token,
     ):
@@ -333,7 +310,7 @@ class TestProfileAPI:
         }
 
         # Mock database engine
-        mock_get_engine.return_value = test_engine
+        mock_get_engine.return_value = test_db
 
         update_data = {"first_name": None, "last_name": None}
 
@@ -354,7 +331,7 @@ class TestProfileAPI:
         mock_get_engine,
         mock_decode_jwt,
         client,
-        test_engine,
+        test_db,
         mock_jwt_token,
     ):
         """Test profile update when user doesn't exist"""
@@ -367,7 +344,7 @@ class TestProfileAPI:
         }
 
         # Mock database engine
-        mock_get_engine.return_value = test_engine
+        mock_get_engine.return_value = test_db
 
         update_data = {"first_name": "Jane", "last_name": "Smith"}
 
@@ -404,8 +381,8 @@ class TestProfileAPI:
         mock_get_engine,
         mock_decode_jwt,
         client,
-        test_engine,
-        test_session,
+        test_db,
+        session,
         test_user,
         mock_jwt_token,
     ):
@@ -419,7 +396,7 @@ class TestProfileAPI:
         }
 
         # Mock database engine
-        mock_get_engine.return_value = test_engine
+        mock_get_engine.return_value = test_db
 
         original_last_access = test_user.last_access
 
@@ -431,7 +408,7 @@ class TestProfileAPI:
         assert response.status_code == 200
 
         # Refresh user from database to get updated last_access
-        test_session.refresh(test_user)
+        session.refresh(test_user)
         assert test_user.last_access > original_last_access
 
     def test_profile_model_validation(self):

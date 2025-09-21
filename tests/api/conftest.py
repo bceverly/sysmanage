@@ -19,10 +19,20 @@ See README.md and TESTING.md for detailed guidelines.
 
 import os
 import tempfile
+from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, Integer, Column, Boolean, String, DateTime, Text
+from sqlalchemy import (
+    create_engine,
+    Integer,
+    Column,
+    Boolean,
+    String,
+    DateTime,
+    Text,
+    BigInteger,
+)
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from argon2 import PasswordHasher
@@ -61,6 +71,7 @@ def test_db():
         fqdn = Column(String, index=True)
         ipv4 = Column(String)
         ipv6 = Column(String)
+        host_token = Column(String(256), nullable=True, unique=True)
         last_access = Column(DateTime)
         status = Column(String(20), nullable=False, server_default="up")
         approval_status = Column(String(20), nullable=False, server_default="pending")
@@ -122,11 +133,22 @@ def test_db():
         # Agent privilege status
         is_agent_privileged = Column(Boolean, nullable=True, default=False)
 
+        # Script execution permission
+        script_execution_enabled = Column(Boolean, nullable=False, default=False)
+
+        # Available shells on the host (JSON)
+        enabled_shells = Column(
+            String, nullable=True
+        )  # Using String instead of Text for SQLite
+
         # Add relationship
         tags = relationship(
             "Tag", secondary="host_tags", back_populates="hosts", lazy="dynamic"
         )
         package_updates = relationship("PackageUpdate", back_populates="host")
+        software_installation_logs = relationship(
+            "SoftwareInstallationLog", back_populates="host"
+        )
 
     # Create test version of User model with Integer ID for SQLite compatibility
     class User(TestBase):
@@ -135,14 +157,27 @@ def test_db():
             Integer, primary_key=True, index=True, autoincrement=True
         )  # Changed from BigInteger
         active = Column(Boolean, unique=False, index=False)
-        userid = Column(String, index=True)
+        userid = Column(String, unique=True, index=True)
+        hashed_password = Column(String)
+        last_access = Column(DateTime, nullable=True)
+        is_locked = Column(Boolean, nullable=False, default=False)
+        failed_login_attempts = Column(Integer, nullable=False, default=0)
+        locked_at = Column(DateTime, nullable=True)
         first_name = Column(String(100), nullable=True)
         last_name = Column(String(100), nullable=True)
-        hashed_password = Column(String)
-        last_access = Column(DateTime)
-        is_locked = Column(Boolean, default=False, nullable=False)
-        failed_login_attempts = Column(Integer, default=0, nullable=False)
-        locked_at = Column(DateTime, nullable=True)
+        profile_image = Column(
+            String, nullable=True
+        )  # Using String instead of LargeBinary for SQLite
+        profile_image_type = Column(String(10), nullable=True)
+        profile_image_uploaded_at = Column(DateTime, nullable=True)
+        is_admin = Column(Boolean, nullable=False, default=False)
+        last_login_at = Column(DateTime, nullable=True)
+        created_at = Column(
+            DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+        )
+        updated_at = Column(
+            DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+        )
 
     # Create test version of Tag model with Integer ID for SQLite compatibility
     class Tag(TestBase):
@@ -163,19 +198,20 @@ def test_db():
     # Create test version of HostTag junction table for SQLite compatibility
     class HostTag(TestBase):
         __tablename__ = "host_tags"
+        id = Column(Integer, primary_key=True, autoincrement=True)
         host_id = Column(
             Integer,
             ForeignKey("host.id", ondelete="CASCADE"),
-            primary_key=True,
             nullable=False,
         )
         tag_id = Column(
             Integer,
             ForeignKey("tags.id", ondelete="CASCADE"),
-            primary_key=True,
             nullable=False,
         )
-        created_at = Column(DateTime, nullable=False)
+        created_at = Column(
+            DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+        )
 
     # Create test version of PasswordResetToken model with Integer ID for SQLite compatibility
     class PasswordResetToken(TestBase):
@@ -210,7 +246,9 @@ def test_db():
         priority = Column(String(10), nullable=False, default="normal", index=True)
         retry_count = Column(Integer, nullable=False, default=0)
         max_retries = Column(Integer, nullable=False, default=3)
-        created_at = Column(DateTime, nullable=False)
+        created_at = Column(
+            DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+        )
         scheduled_at = Column(DateTime, nullable=True)
         started_at = Column(DateTime, nullable=True)
         completed_at = Column(DateTime, nullable=True)
@@ -219,6 +257,68 @@ def test_db():
         expired_at = Column(DateTime, nullable=True)
         correlation_id = Column(String(36), nullable=True, index=True)
         reply_to = Column(String(36), nullable=True, index=True)
+
+    # Create test version of SavedScript model for SQLite compatibility
+    class SavedScript(TestBase):
+        __tablename__ = "saved_scripts"
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        name = Column(String(255), nullable=False, index=True)
+        description = Column(
+            String, nullable=True
+        )  # Using String instead of Text for SQLite
+        content = Column(
+            String, nullable=False
+        )  # Using String instead of Text for SQLite
+        shell_type = Column(String(50), nullable=False)
+        platform = Column(String(50), nullable=True)
+        run_as_user = Column(String(100), nullable=True)
+        is_active = Column(Boolean, nullable=False, default=True, index=True)
+        created_by = Column(String(255), nullable=False)
+        created_at = Column(
+            DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+        )
+        updated_at = Column(
+            DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+        )
+
+    # Create test version of ScriptExecutionLog model for SQLite compatibility
+    class ScriptExecutionLog(TestBase):
+        __tablename__ = "script_execution_log"
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        execution_id = Column(String(36), nullable=False, unique=True, index=True)
+        host_id = Column(
+            Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False
+        )
+        saved_script_id = Column(
+            Integer, ForeignKey("saved_scripts.id", ondelete="SET NULL"), nullable=True
+        )
+        script_name = Column(String(255), nullable=True)
+        script_content = Column(
+            String, nullable=False
+        )  # Using String instead of Text for SQLite
+        shell_type = Column(String(50), nullable=False)
+        run_as_user = Column(String(100), nullable=True)
+        status = Column(String(20), nullable=False, default="pending")
+        requested_by = Column(String(255), nullable=False)
+        started_at = Column(DateTime, nullable=True)
+        completed_at = Column(DateTime, nullable=True)
+        exit_code = Column(Integer, nullable=True)
+        stdout_output = Column(
+            String, nullable=True
+        )  # Using String instead of Text for SQLite
+        stderr_output = Column(
+            String, nullable=True
+        )  # Using String instead of Text for SQLite
+        error_message = Column(
+            String, nullable=True
+        )  # Using String instead of Text for SQLite
+        created_at = Column(
+            DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+        )
+        updated_at = Column(
+            DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+        )
+        execution_uuid = Column(String(36), nullable=True, unique=True, index=True)
 
     # Create test version of UbuntuProSettings model for SQLite compatibility
     class UbuntuProSettings(TestBase):
@@ -268,6 +368,72 @@ def test_db():
         last_updated = Column(DateTime, nullable=False)
         created_at = Column(DateTime, nullable=False)
 
+    class InstallationRequest(TestBase):
+        __tablename__ = "installation_requests"
+        id = Column(String(36), primary_key=True)  # UUID
+        host_id = Column(
+            Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False
+        )
+        requested_by = Column(String(100), nullable=False)
+        requested_at = Column(DateTime(timezone=True), nullable=False, index=True)
+        completed_at = Column(DateTime(timezone=True), nullable=True)
+        status = Column(
+            String(20), nullable=False, server_default="pending", index=True
+        )
+        operation_type = Column(
+            String(20), nullable=False, server_default="install", index=True
+        )
+        result_log = Column(Text, nullable=True)
+        created_at = Column(DateTime(timezone=True), nullable=False)
+        updated_at = Column(DateTime(timezone=True), nullable=False)
+        host = relationship("Host")
+        packages = relationship(
+            "InstallationPackage",
+            back_populates="installation_request",
+            cascade="all, delete-orphan",
+        )
+
+    class InstallationPackage(TestBase):
+        __tablename__ = "installation_packages"
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        installation_request_id = Column(
+            String(36),
+            ForeignKey("installation_requests.id", ondelete="CASCADE"),
+            nullable=False,
+            index=True,
+        )
+        package_name = Column(String(255), nullable=False)
+        package_manager = Column(String(50), nullable=False)
+        installation_request = relationship(
+            "InstallationRequest", back_populates="packages"
+        )
+
+    class SoftwareInstallationLog(TestBase):
+        __tablename__ = "software_installation_log"
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        host_id = Column(
+            Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False
+        )
+        package_name = Column(String(255), nullable=False)
+        package_manager = Column(String(50), nullable=False)
+        requested_version = Column(String(100), nullable=True)
+        requested_by = Column(String(100), nullable=False)
+        installation_id = Column(String(36), nullable=False, unique=True, index=True)
+        status = Column(
+            String(20), nullable=False, server_default="pending", index=True
+        )
+        requested_at = Column(DateTime(timezone=True), nullable=False, index=True)
+        queued_at = Column(DateTime(timezone=True), nullable=True)
+        started_at = Column(DateTime(timezone=True), nullable=True)
+        completed_at = Column(DateTime(timezone=True), nullable=True)
+        installed_version = Column(String(100), nullable=True)
+        success = Column(Boolean, nullable=True)
+        error_message = Column(Text, nullable=True)
+        installation_log = Column(Text, nullable=True)
+        created_at = Column(DateTime(timezone=True), nullable=False)
+        updated_at = Column(DateTime(timezone=True), nullable=False)
+        host = relationship("Host", back_populates="software_installation_logs")
+
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)
 
@@ -282,6 +448,9 @@ def test_db():
     original_ubuntu_pro_settings = models.UbuntuProSettings
     original_package_update = models.PackageUpdate
     original_available_package = models.AvailablePackage
+    original_installation_request = models.InstallationRequest
+    original_installation_package = models.InstallationPackage
+    original_software_installation_log = models.SoftwareInstallationLog
     models.Host = Host
     models.User = User
     models.Tag = Tag
@@ -291,6 +460,9 @@ def test_db():
     models.UbuntuProSettings = UbuntuProSettings
     models.PackageUpdate = PackageUpdate
     models.AvailablePackage = AvailablePackage
+    models.InstallationRequest = InstallationRequest
+    models.InstallationPackage = InstallationPackage
+    models.SoftwareInstallationLog = SoftwareInstallationLog
 
     # Override the get_engine dependency
     def override_get_engine():
@@ -330,6 +502,9 @@ def test_db():
     models.UbuntuProSettings = original_ubuntu_pro_settings
     models.PackageUpdate = original_package_update
     models.AvailablePackage = original_available_package
+    models.InstallationRequest = original_installation_request
+    models.InstallationPackage = original_installation_package
+    models.SoftwareInstallationLog = original_software_installation_log
 
     # Clean up database connections
     test_engine.dispose()  # Close all connections in the connection pool

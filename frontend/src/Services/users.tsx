@@ -84,7 +84,7 @@ const doDeleteUser = async (id: BigInt) => {
     return successResponse;
 };
 
-const doGetMe = async () => {
+const doGetMe = async (): Promise<SysManageUser> => {
     let result = {} as SysManageUser;
     await api.get<SysManageUser>("/api/user/me")
     .then((response) => {
@@ -96,6 +96,7 @@ const doGetMe = async () => {
         processError(error);
         return Promise.reject(error);
     });
+    return result;
 };
 
 const doGetUserByID = async (id: BigInt) => {

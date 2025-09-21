@@ -3,7 +3,10 @@ API routes for package management in SysManage.
 Provides endpoints for retrieving available packages from different package managers.
 """
 
+import uuid
+from datetime import datetime, timezone
 from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import distinct
@@ -13,9 +16,19 @@ from sqlalchemy.sql.functions import count
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence.db import get_db
-from backend.persistence.models import AvailablePackage, Host
+from backend.persistence.models import (
+    AvailablePackage,
+    Host,
+    InstallationRequest,
+    InstallationPackage,
+)
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
+from backend.websocket.queue_manager import (
+    server_queue_manager,
+    QueueDirection,
+    Priority,
+)
 
 # Authenticated router for package management
 router = APIRouter(dependencies=[Depends(JWTBearer())])
@@ -44,6 +57,36 @@ class OSPackageSummary(BaseModel):
     os_version: str
     package_managers: List[PackageManagerSummary]
     total_packages: int
+
+
+class PackageInstallRequest(BaseModel):
+    """Request model for package installation."""
+
+    package_names: List[str]
+    requested_by: str
+
+
+class PackageInstallResponse(BaseModel):
+    """Response model for package installation."""
+
+    success: bool
+    message: str
+    request_id: str  # The UUID that groups all packages in this request
+
+
+class PackageUninstallRequest(BaseModel):
+    """Request model for package uninstallation."""
+
+    package_names: List[str]
+    requested_by: str
+
+
+class PackageUninstallResponse(BaseModel):
+    """Response model for package uninstallation."""
+
+    success: bool
+    message: str
+    request_id: str  # The UUID that groups all packages in this request
 
 
 @router.get("/summary", response_model=List[OSPackageSummary])
@@ -437,4 +480,448 @@ async def refresh_packages_for_os_version(
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=_("Failed to request package refresh: %s") % str(e)
+        ) from e
+
+
+@router.post("/install/{host_id}", response_model=PackageInstallResponse)
+async def install_packages(
+    host_id: int,
+    request: PackageInstallRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Queue package installation for a specific host using UUID-based grouping.
+
+    Creates a single installation request with multiple packages grouped under one UUID.
+    The agent will receive this UUID and return it when reporting completion.
+    """
+    try:
+        # Validate host exists and is active
+        host = (
+            db.query(Host)
+            .filter(
+                Host.id == host_id,
+                Host.active.is_(True),
+                Host.approval_status == "approved",
+            )
+            .first()
+        )
+
+        if not host:
+            raise HTTPException(
+                status_code=404,
+                detail=_("Host not found or not active"),
+            )
+
+        # Validate that packages are not empty
+        if not request.package_names:
+            raise HTTPException(
+                status_code=400,
+                detail=_("No packages specified for installation"),
+            )
+
+        now = datetime.now(timezone.utc)
+
+        # Generate a single UUID for this entire installation request
+        request_id = str(uuid.uuid4())
+
+        # Create the primary installation request record
+        installation_request = InstallationRequest(
+            id=request_id,
+            host_id=host_id,
+            requested_by=request.requested_by,
+            requested_at=now,
+            status="pending",
+            operation_type="install",
+            created_at=now,
+            updated_at=now,
+        )
+        db.add(installation_request)
+
+        # Create package records for each package in the request
+        for package_name in request.package_names:
+            package_record = InstallationPackage(
+                installation_request_id=request_id,
+                package_name=package_name,
+                package_manager="auto",  # Let the agent determine the best package manager
+            )
+            db.add(package_record)
+
+        # Commit the installation records first
+        db.commit()
+
+        # Create a single message for the entire package installation request
+        message_data = {
+            "command_type": "generic_command",
+            "parameters": {
+                "command_type": "install_packages",  # New command type for multiple packages
+                "parameters": {
+                    "request_id": request_id,  # The UUID that groups everything
+                    "packages": [
+                        {"package_name": pkg_name, "package_manager": "auto"}
+                        for pkg_name in request.package_names
+                    ],
+                    "requested_by": request.requested_by,
+                    "requested_at": now.isoformat(),
+                },
+            },
+        }
+
+        # Queue the single message using the server queue manager
+        server_queue_manager.enqueue_message(
+            message_type="command",
+            message_data=message_data,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            priority=Priority.NORMAL,
+            db=db,
+        )
+
+        # Update request status to in_progress
+        installation_request.status = "in_progress"
+        installation_request.updated_at = now
+
+        # Final commit for status updates
+        db.commit()
+
+        return PackageInstallResponse(
+            success=True,
+            message=_("Successfully queued %d packages for installation")
+            % len(request.package_names),
+            request_id=request_id,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=_("Failed to queue package installation: %s") % str(e),
+        ) from e
+
+
+@router.post("/uninstall/{host_id}", response_model=PackageUninstallResponse)
+async def uninstall_packages(
+    host_id: int,
+    request: PackageUninstallRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Queue package uninstallation for a specific host using UUID-based grouping.
+
+    Creates a single uninstallation request with multiple packages grouped under one UUID.
+    The agent will receive this UUID and return it when reporting completion.
+    """
+    try:
+        # Validate host exists and is active
+        host = (
+            db.query(Host)
+            .filter(
+                Host.id == host_id,
+                Host.active.is_(True),
+                Host.approval_status == "approved",
+            )
+            .first()
+        )
+
+        if not host:
+            raise HTTPException(
+                status_code=404,
+                detail=_("Host not found or not active"),
+            )
+
+        # Validate that packages are not empty
+        if not request.package_names:
+            raise HTTPException(
+                status_code=400,
+                detail=_("No packages specified for uninstallation"),
+            )
+
+        now = datetime.now(timezone.utc)
+
+        # Generate a single UUID for this entire uninstallation request
+        request_id = str(uuid.uuid4())
+
+        # Create the primary uninstallation request record
+        installation_request = InstallationRequest(
+            id=request_id,
+            host_id=host_id,
+            requested_by=request.requested_by,
+            requested_at=now,
+            status="pending",
+            operation_type="uninstall",
+            created_at=now,
+            updated_at=now,
+        )
+        db.add(installation_request)
+
+        # Create package records for each package in the request
+        for package_name in request.package_names:
+            package_record = InstallationPackage(
+                installation_request_id=request_id,
+                package_name=package_name,
+                package_manager="auto",  # Let the agent determine the best package manager
+            )
+            db.add(package_record)
+
+        # Commit the uninstallation records first
+        db.commit()
+
+        # Create a single message for the entire package uninstallation request
+        message_data = {
+            "command_type": "generic_command",
+            "parameters": {
+                "command_type": "uninstall_packages",  # New command type for multiple package uninstallation
+                "parameters": {
+                    "request_id": request_id,  # The UUID that groups everything
+                    "packages": [
+                        {"package_name": pkg_name, "package_manager": "auto"}
+                        for pkg_name in request.package_names
+                    ],
+                    "requested_by": request.requested_by,
+                    "requested_at": now.isoformat(),
+                },
+            },
+        }
+
+        # Queue the single message using the server queue manager
+        server_queue_manager.enqueue_message(
+            message_type="command",
+            message_data=message_data,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            priority=Priority.NORMAL,
+            db=db,
+        )
+
+        # Update request status to in_progress
+        installation_request.status = "in_progress"
+        installation_request.updated_at = now
+
+        # Final commit for status updates
+        db.commit()
+
+        return PackageUninstallResponse(
+            success=True,
+            message=_("Successfully queued %d packages for uninstallation")
+            % len(request.package_names),
+            request_id=request_id,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=_("Failed to queue package uninstallation: %s") % str(e),
+        ) from e
+
+
+class PackageItem(BaseModel):
+    """Individual package within an installation request."""
+
+    package_name: str
+    package_manager: str
+
+
+class InstallationHistoryItem(BaseModel):
+    """Response model for installation history item - now UUID-based."""
+
+    request_id: str  # The UUID that groups packages
+    requested_by: str
+    status: str
+    operation_type: str  # install or uninstall
+    requested_at: datetime
+    completed_at: Optional[datetime] = None
+    installation_log: Optional[str] = None
+    package_names: str  # Comma-separated list of package names
+
+
+class InstallationHistoryResponse(BaseModel):
+    """Response model for installation history."""
+
+    installations: List[InstallationHistoryItem]
+    total_count: int
+
+
+@router.get(
+    "/installation-history/{host_id}", response_model=InstallationHistoryResponse
+)
+async def get_installation_history(
+    host_id: int,
+    db: Session = Depends(get_db),
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+) -> InstallationHistoryResponse:
+    """
+    Get installation history for a specific host using UUID-based grouping.
+
+    Args:
+        host_id: ID of the host to get installation history for
+        db: Database session
+        limit: Maximum number of records to return (1-100)
+        offset: Number of records to skip for pagination
+
+    Returns:
+        InstallationHistoryResponse with list of installation requests (each containing multiple packages)
+    """
+    try:
+        # Verify host exists
+        host = db.query(Host).filter(Host.id == host_id).first()
+        if not host:
+            raise HTTPException(status_code=404, detail=_("Host not found"))
+
+        # Get total count of installation requests for this host
+        total_count = (
+            db.query(InstallationRequest)
+            .filter(InstallationRequest.host_id == host_id)
+            .count()
+        )
+
+        # Get installation requests with pagination, ordered by most recent first
+        installation_requests = (
+            db.query(InstallationRequest)
+            .filter(InstallationRequest.host_id == host_id)
+            .order_by(InstallationRequest.requested_at.desc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+
+        # Convert to response format, creating comma-separated package names
+        installation_items = []
+        for request in installation_requests:
+            # Create comma-separated list of package names
+            package_names = ", ".join([pkg.package_name for pkg in request.packages])
+
+            installation_items.append(
+                InstallationHistoryItem(
+                    request_id=request.id,
+                    requested_by=request.requested_by,
+                    status=request.status,
+                    operation_type=request.operation_type,
+                    requested_at=request.requested_at,
+                    completed_at=request.completed_at,
+                    installation_log=request.result_log,
+                    package_names=package_names,
+                )
+            )
+
+        return InstallationHistoryResponse(
+            installations=installation_items,
+            total_count=total_count,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=_("Failed to retrieve installation history: %s") % str(e),
+        ) from e
+
+
+class InstallationCompletionRequest(BaseModel):
+    """Request from agent when installation completes."""
+
+    request_id: str
+    success: bool
+    result_log: str
+
+
+@router.post("/installation-complete")
+async def handle_installation_completion(
+    request: InstallationCompletionRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Handle completion notification from agent.
+
+    This endpoint is called by the agent when a package installation request completes.
+    The agent passes back the request_id (UUID) and the result log.
+    """
+    try:
+        # Find the installation request
+        installation_request = (
+            db.query(InstallationRequest)
+            .filter(InstallationRequest.id == request.request_id)
+            .first()
+        )
+
+        if not installation_request:
+            raise HTTPException(
+                status_code=404,
+                detail=_("Installation request not found: %s") % request.request_id,
+            )
+
+        # Update the request with completion data
+        now = datetime.now(timezone.utc)
+        installation_request.completed_at = now
+        installation_request.status = "completed" if request.success else "failed"
+        installation_request.result_log = request.result_log
+        installation_request.updated_at = now
+
+        db.commit()
+
+        return {"success": True, "message": _("Installation completion recorded")}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=_("Failed to record installation completion: %s") % str(e),
+        ) from e
+
+
+@router.delete("/installation-history/{request_id}")
+async def delete_installation_record(
+    request_id: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Delete an installation record and all its associated packages.
+    Args:
+        request_id: UUID of the installation request to delete
+        db: Database session
+    Returns:
+        Success message
+    """
+    try:
+        # Find the installation request
+        installation_request = (
+            db.query(InstallationRequest)
+            .filter(InstallationRequest.id == request_id)
+            .first()
+        )
+
+        if not installation_request:
+            raise HTTPException(
+                status_code=404, detail=_("Installation record not found")
+            )
+
+        # Delete associated packages first (due to foreign key constraint)
+        db.query(InstallationPackage).filter(
+            InstallationPackage.installation_request_id == request_id
+        ).delete()
+
+        # Delete the installation request
+        db.delete(installation_request)
+        db.commit()
+
+        return {
+            "success": True,
+            "message": _("Installation record deleted successfully"),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=_("Failed to delete installation record: %s") % str(e),
         ) from e

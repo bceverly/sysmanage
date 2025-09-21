@@ -106,7 +106,7 @@ async def handle_packages_update(db: Session, connection, message_data: dict):
                     last_updated=now,
                     created_at=now,
                 )
-                db.merge(available_package)
+                db.add(available_package)
                 total_packages += 1
 
         # Commit the changes

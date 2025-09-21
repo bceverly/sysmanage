@@ -6,8 +6,8 @@ import Box from '@mui/material/Box';
 import { useTranslation } from 'react-i18next';
 import { Typography, Grid, Skeleton, CircularProgress } from "@mui/material";
 
-import { SysManageHost, doGetHosts } from '../Services/hosts'
-import { updatesService, UpdateStatsSummary } from '../Services/updates';
+import { doGetHosts } from '../Services/hosts'
+import { updatesService } from '../Services/updates';
 
 const Dashboard = () => {
     const [hostsTotal, setHostsTotal] = useState<number>(0);
@@ -97,12 +97,14 @@ const Dashboard = () => {
         fetchData(true);
 
         // Set up auto-refresh every 30 seconds
+        // eslint-disable-next-line no-undef
         const refreshInterval = setInterval(() => {
             fetchData(false);
         }, 30000);
 
         // Cleanup interval on component unmount
         return () => {
+            // eslint-disable-next-line no-undef
             clearInterval(refreshInterval);
         };
     }, [navigate]);

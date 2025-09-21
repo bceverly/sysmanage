@@ -5,8 +5,18 @@ Enhanced with security validation and secure communication protocols.
 """
 
 import json
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
+from fastapi import (
+    APIRouter,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+    HTTPException,
+    Depends,
+)
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 # pylint: disable=unused-import
 from backend.api.data_handlers import handle_os_version_update
@@ -15,12 +25,15 @@ from backend.api.message_handlers import (
     handle_config_acknowledgment,
     handle_diagnostic_result,
     handle_heartbeat,
+    handle_installation_status,
     handle_system_info,
+    validate_host_authentication,
 )
 from backend.api.update_handlers import handle_update_apply_result
 from backend.config.config_push import config_push_manager
 from backend.i18n import _
 from backend.persistence.db import get_db
+from backend.persistence.models import InstallationRequest, InstallationPackage
 from backend.security.communication_security import websocket_security
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.connection_manager import connection_manager
@@ -35,10 +48,11 @@ logger.info("Agent WebSocket module initialized")
 __all__ = ["config_push_manager"]
 
 
-router = APIRouter()
+router = APIRouter()  # For authenticated endpoints (will get /api prefix)
+public_router = APIRouter()  # For public endpoints (no prefix)
 
 
-@router.post("/agent/auth")
+@public_router.post("/agent/auth")
 async def authenticate_agent(request: Request):
     """
     Generate authentication token for agent WebSocket connection.
@@ -67,7 +81,7 @@ async def authenticate_agent(request: Request):
     }
 
 
-@router.websocket("/api/agent/connect")
+@router.websocket("/agent/connect")
 async def agent_connect(websocket: WebSocket):
     """
     Handle secure WebSocket connections from agents with full bidirectional communication.
@@ -243,6 +257,10 @@ async def _handle_message_by_type(message, connection, db):
 
     elif message.message_type == MessageType.DIAGNOSTIC_COLLECTION_RESULT:
         await _handle_diagnostic_result_msg(message, connection, db)
+
+    elif message.message_type == "package_installation_status":
+        logger.info("Calling handle_installation_status")
+        await handle_installation_status(db, connection, message.data)
 
     else:
         # Unknown message type - send error
@@ -567,3 +585,103 @@ async def _process_inventory_message(message, connection, db):
         logger.error("Error enqueueing message %s: %s", message.message_type, e)
         error_msg = ErrorMessage("queue_error", f"Failed to queue message: {str(e)}")
         await connection.send_message(error_msg.to_dict())
+
+
+class InstallationCompletionRequest(BaseModel):
+    """Request from agent when installation completes."""
+
+    request_id: str
+    success: bool
+    result_log: str
+
+
+@router.post("/agent/installation-complete")
+async def handle_installation_completion(
+    request: InstallationCompletionRequest,
+    agent_request: Request,
+    db: Session = Depends(get_db),
+):
+    """
+    Handle completion notification from agent using host token authentication.
+
+    This endpoint is called by the agent when a package installation request completes.
+    The agent passes back the request_id (UUID) and the result log.
+    """
+    try:
+        # Extract host token from Authorization header
+        auth_header = agent_request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise HTTPException(
+                status_code=401, detail=_("Missing or invalid authorization header")
+            )
+
+        host_token = auth_header.replace("Bearer ", "")
+
+        # Create mock message data for validation
+        message_data = {
+            "host_token": host_token,
+            "hostname": "agent",  # This will be validated against stored hostname
+        }
+
+        # Create mock connection object for validation
+        class MockConnection:
+            def __init__(self):
+                self.client_host = (
+                    agent_request.client.host if agent_request.client else "unknown"
+                )
+
+        # Validate host authentication
+        validation_result = await validate_host_authentication(
+            db, MockConnection(), message_data
+        )
+        is_valid = validation_result[0]
+        if not is_valid:
+            raise HTTPException(
+                status_code=403, detail=_("Invalid host authentication")
+            )
+
+        # Find the installation request
+        installation_request = (
+            db.query(InstallationRequest)
+            .filter(InstallationRequest.id == request.request_id)
+            .first()
+        )
+
+        if not installation_request:
+            raise HTTPException(
+                status_code=404,
+                detail=_("Installation request not found: %s") % request.request_id,
+            )
+
+        # Update the request with completion data
+        now = datetime.now(timezone.utc)
+        installation_request.completed_at = now
+        installation_request.status = "completed" if request.success else "failed"
+        installation_request.result_log = request.result_log
+
+        # Update individual package statuses
+        packages = (
+            db.query(InstallationPackage)
+            .filter(InstallationPackage.installation_request_id == request.request_id)
+            .all()
+        )
+
+        for package in packages:
+            package.status = "completed" if request.success else "failed"
+            package.completed_at = now
+
+        db.commit()
+
+        logger.info(
+            "Installation completion processed for request %s: %s",
+            request.request_id,
+            "success" if request.success else "failed",
+        )
+
+        return {"status": "success", "message": _("Installation completion recorded")}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Error processing installation completion: %s", e)
+        raise HTTPException(status_code=500, detail=_("Internal server error")) from e

@@ -1,12 +1,13 @@
 .main-content {
   padding-top: calc(7rem + var(--security-banner-height, 0px));
   padding-left: 1rem;
+  padding-right: 1rem;
   transition: padding-top 0.3s ease;
 }
 
 /* RTL support for Arabic */
 [dir="rtl"] .main-content {
-  padding-left: 0;
+  padding-left: 1rem;
   padding-right: 1rem;
 }
 
@@ -17,4 +18,15 @@
 
 [dir="ltr"] {
   text-align: left;
+}
+
+/* Ensure DataGrids and other full-width components respect container padding */
+.main-content .MuiDataGrid-root {
+  max-width: 100%;
+}
+
+/* Ensure all direct children of main-content don't overflow */
+.main-content > * {
+  max-width: 100%;
+  box-sizing: border-box;
 }

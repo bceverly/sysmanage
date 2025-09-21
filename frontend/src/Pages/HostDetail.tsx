@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { 
     Box, 
     Card, 
@@ -45,11 +45,15 @@ import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import HistoryIcon from '@mui/icons-material/History';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField, List, ListItem, ListItemText, Divider, TableContainer, TableHead } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
 
 import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService } from '../Services/hosts';
+import { SysManageUser, doGetMe } from '../Services/users';
 
 // Use the service types directly - no need for local interfaces anymore
 
@@ -99,17 +103,51 @@ const HostDetail = () => {
     const [servicesSaving, setServicesSaving] = useState<boolean>(false);
     const [servicesMessage, setServicesMessage] = useState<string>('');
 
+    // Package installation modal state
+    const [packageInstallDialogOpen, setPackageInstallDialogOpen] = useState<boolean>(false);
+    const packageSearchInputRef = useRef<HTMLInputElement>(null);
+    const [searchResults, setSearchResults] = useState<Array<{name: string, description?: string, version?: string}>>([]);
+    const [selectedPackages, setSelectedPackages] = useState<Set<string>>(new Set());
+    const [isSearching, setIsSearching] = useState<boolean>(false);
+
     // Tag-related state
     const [hostTags, setHostTags] = useState<Array<{id: number, name: string, description: string | null}>>([]);
     const [availableTags, setAvailableTags] = useState<Array<{id: number, name: string, description: string | null}>>([]);
     const [selectedTagToAdd, setSelectedTagToAdd] = useState<number | string>('');
     const [diagnosticDetailLoading, setDiagnosticDetailLoading] = useState<boolean>(false);
+
+    // Installation history state
+    interface InstallationHistoryItem {
+        request_id: string;  // UUID that groups packages
+        requested_by: string;
+        status: string;
+        operation_type: string;  // install or uninstall
+        requested_at: string;
+        completed_at?: string;
+        result_log?: string;
+        package_names: string;  // Comma-separated list of package names
+    }
+    const [installationHistory, setInstallationHistory] = useState<InstallationHistoryItem[]>([]);
+    const [installationHistoryLoading, setInstallationHistoryLoading] = useState<boolean>(false);
+    const [selectedInstallationLog, setSelectedInstallationLog] = useState<InstallationHistoryItem | null>(null);
+    const [installationLogDialogOpen, setInstallationLogDialogOpen] = useState<boolean>(false);
+    const [installationDeleteConfirmOpen, setInstallationDeleteConfirmOpen] = useState<boolean>(false);
+    const [installationToDelete, setInstallationToDelete] = useState<InstallationHistoryItem | null>(null);
+
+    // Uninstallation state
+    const [uninstallConfirmOpen, setUninstallConfirmOpen] = useState<boolean>(false);
+    const [packageToUninstall, setPackageToUninstall] = useState<SoftwarePackage | null>(null);
+
+    // Current user state
+    const [currentUser, setCurrentUser] = useState<SysManageUser | null>(null);
     const navigate = useNavigate();
     const { t } = useTranslation();
 
     // Helper functions to calculate dynamic tab indices
-    const getUbuntuProTabIndex = () => ubuntuProInfo?.available ? 4 : -1;
-    const getDiagnosticsTabIndex = () => ubuntuProInfo?.available ? 5 : 4;
+    const getSoftwareInstallsTabIndex = () => 3;
+    const getAccessTabIndex = () => 4;
+    const getUbuntuProTabIndex = () => ubuntuProInfo?.available ? 5 : -1;
+    const getDiagnosticsTabIndex = () => ubuntuProInfo?.available ? 6 : 5;
 
     useEffect(() => {
         if (!localStorage.getItem('bearer_token')) {
@@ -131,13 +169,14 @@ const HostDetail = () => {
                 
                 // Fetch normalized storage, network, user access, software, and diagnostics data
                 try {
-                    const [storageData, networkData, usersData, groupsData, softwareData, diagnosticsData] = await Promise.all([
+                    const [storageData, networkData, usersData, groupsData, softwareData, diagnosticsData, currentUserData] = await Promise.all([
                         doGetHostStorage(BigInt(hostId)),
                         doGetHostNetwork(BigInt(hostId)),
                         doGetHostUsers(BigInt(hostId)),
                         doGetHostGroups(BigInt(hostId)),
                         doGetHostSoftware(BigInt(hostId)),
-                        doGetHostDiagnostics(BigInt(hostId))
+                        doGetHostDiagnostics(BigInt(hostId)),
+                        doGetMe()
                     ]);
                     
                     // If normalized data is empty, try to parse JSON fallback data
@@ -172,6 +211,9 @@ const HostDetail = () => {
 
                     // Set diagnostics data
                     setDiagnosticsData(diagnosticsData);
+
+                    // Set current user data
+                    setCurrentUser(currentUserData);
 
                     // Fetch Ubuntu Pro data (only for Ubuntu hosts)
                     try {
@@ -234,6 +276,22 @@ const HostDetail = () => {
         }
     }, [hostTags]);
 
+    // Installation history function
+    const fetchInstallationHistory = useCallback(async () => {
+        if (!hostId) return;
+
+        setInstallationHistoryLoading(true);
+        try {
+            const response = await axiosInstance.get(`/api/packages/installation-history/${hostId}`);
+            setInstallationHistory(response.data.installations || []);
+        } catch (error) {
+            console.error('Error fetching installation history:', error);
+            setInstallationHistory([]);
+        } finally {
+            setInstallationHistoryLoading(false);
+        }
+    }, [hostId]);
+
     // Load tags when component mounts and when hostTags change
     useEffect(() => {
         if (hostId) {
@@ -244,6 +302,32 @@ const HostDetail = () => {
     useEffect(() => {
         loadAvailableTags();
     }, [hostTags, loadAvailableTags]);
+
+    // Load installation history when Software Changes tab is selected
+    useEffect(() => {
+        if (currentTab === getSoftwareInstallsTabIndex()) {
+            fetchInstallationHistory();
+        }
+    }, [currentTab, hostId, fetchInstallationHistory]);
+
+    // Auto-refresh installation history every 30 seconds when on Software Changes tab
+    useEffect(() => {
+        let interval: ReturnType<typeof window.setInterval> | null = null;
+        if (hostId && currentTab === getSoftwareInstallsTabIndex()) {
+            interval = window.setInterval(async () => {
+                try {
+                    await fetchInstallationHistory();
+                } catch (error) {
+                    console.error('Auto-refresh error for installation history:', error);
+                }
+            }, 30000); // 30 seconds
+        }
+        return () => {
+            if (interval) {
+                window.clearInterval(interval);
+            }
+        };
+    }, [hostId, currentTab, fetchInstallationHistory]);
 
     // Auto-refresh Ubuntu Pro information every 30 seconds
     useEffect(() => {
@@ -410,10 +494,18 @@ const HostDetail = () => {
         return 'error';                                 // Red: scary close to full or full
     };
 
+    // Helper function to assign priority to mount points (lower = higher priority)
+    const getMountPointPriority = useCallback((mountPoint: string): number => {
+        if (mountPoint === '/') return 1;                           // Root - highest priority
+        if (mountPoint.includes('/System/Volumes')) return 3;      // System volumes - lower priority
+        if (mountPoint.includes('/Library')) return 4;             // Library volumes - even lower
+        return 2;                                                   // Other mounts - medium priority
+    }, []);
+
     // Utility function to deduplicate storage devices by name, preferring root mounts
-    const deduplicateStorageDevices = (devices: StorageDeviceType[]): StorageDeviceType[] => {
+    const deduplicateStorageDevices = useCallback((devices: StorageDeviceType[]): StorageDeviceType[] => {
         const devicesByName = new Map<string, StorageDeviceType[]>();
-        
+
         // Group devices by name
         devices.forEach(device => {
             const deviceName = device.name || 'Unknown Device';
@@ -422,7 +514,7 @@ const HostDetail = () => {
             }
             devicesByName.get(deviceName)!.push(device);
         });
-        
+
         // For each name, select the best representative device
         const deduplicatedDevices: StorageDeviceType[] = [];
         devicesByName.forEach((deviceGroup) => {
@@ -437,26 +529,18 @@ const HostDetail = () => {
                     const bMountPriority = getMountPointPriority(b.mount_point || '');
                     return aMountPriority - bMountPriority;
                 });
-                
+
                 deduplicatedDevices.push(prioritized[0]);
             }
         });
-        
-        return deduplicatedDevices;
-    };
-    
-    // Helper function to assign priority to mount points (lower = higher priority)
-    const getMountPointPriority = (mountPoint: string): number => {
-        if (mountPoint === '/') return 1;                           // Root - highest priority
-        if (mountPoint.includes('/System/Volumes')) return 3;      // System volumes - lower priority
-        if (mountPoint.includes('/Library')) return 4;             // Library volumes - even lower
-        return 2;                                                   // Other mounts - medium priority
-    };
 
-    // Filter storage devices based on physical/logical selection
-    const getFilteredStorageDevices = (devices: StorageDeviceType[]): StorageDeviceType[] => {
-        const deduplicatedDevices = deduplicateStorageDevices(devices);
-        
+        return deduplicatedDevices;
+    }, [getMountPointPriority]);
+
+    // Filter storage devices based on physical/logical selection (memoized)
+    const filteredStorageDevices = useMemo(() => {
+        const deduplicatedDevices = deduplicateStorageDevices(storageDevices);
+
         switch (storageFilter) {
             case 'physical':
                 return deduplicatedDevices.filter(device => device.is_physical === true);
@@ -470,81 +554,138 @@ const HostDetail = () => {
                     return a.is_physical ? -1 : 1;
                 });
         }
-    };
+    }, [storageDevices, storageFilter, deduplicateStorageDevices]);
 
-    // Filter user accounts based on system/regular selection
-    const getFilteredUsers = (users: UserAccount[]): UserAccount[] => {
+    // Filter user accounts based on system/regular selection (memoized)
+    const filteredUsers = useMemo(() => {
         switch (userFilter) {
             case 'system':
-                return users.filter(user => user.is_system_user === true);
+                return userAccounts.filter(user => user.is_system_user === true);
             case 'regular':
-                return users.filter(user => user.is_system_user === false);
+                return userAccounts.filter(user => user.is_system_user === false);
             case 'all':
             default:
                 // Sort regular users first, then system
-                return users.sort((a, b) => {
+                return userAccounts.sort((a, b) => {
                     if (a.is_system_user === b.is_system_user) return 0;
                     return a.is_system_user ? 1 : -1;
                 });
         }
-    };
+    }, [userAccounts, userFilter]);
 
-    // Filter user groups based on system/regular selection
-    const getFilteredGroups = (groups: UserGroup[]): UserGroup[] => {
+    // Filter user groups based on system/regular selection (memoized)
+    const filteredGroups = useMemo(() => {
         switch (groupFilter) {
             case 'system':
-                return groups.filter(group => group.is_system_group === true);
+                return userGroups.filter(group => group.is_system_group === true);
             case 'regular':
-                return groups.filter(group => group.is_system_group === false);
+                return userGroups.filter(group => group.is_system_group === false);
             case 'all':
             default:
                 // Sort regular groups first, then system
-                return groups.sort((a, b) => {
+                return userGroups.sort((a, b) => {
                     if (a.is_system_group === b.is_system_group) return 0;
                     return a.is_system_group ? 1 : -1;
                 });
         }
-    };
+    }, [userGroups, groupFilter]);
 
-    // Filter network interfaces based on active/inactive selection
-    const getFilteredNetworkInterfaces = (interfaces: NetworkInterfaceType[]): NetworkInterfaceType[] => {
+    // Filter network interfaces based on active/inactive selection (memoized)
+    const filteredNetworkInterfaces = useMemo(() => {
         switch (networkFilter) {
             case 'active':
-                return interfaces.filter(iface => !!(iface.ipv4_address || iface.ipv6_address));
+                return networkInterfaces.filter(iface => !!(iface.ipv4_address || iface.ipv6_address));
             case 'inactive':
-                return interfaces.filter(iface => !(iface.ipv4_address || iface.ipv6_address));
+                return networkInterfaces.filter(iface => !(iface.ipv4_address || iface.ipv6_address));
             case 'all':
             default:
                 // Sort active interfaces first, then inactive
-                return interfaces.sort((a, b) => {
+                return networkInterfaces.sort((a, b) => {
                     const aHasIP = !!(a.ipv4_address || a.ipv6_address);
                     const bHasIP = !!(b.ipv4_address || b.ipv6_address);
                     if (aHasIP === bHasIP) return 0;
                     return aHasIP ? -1 : 1;
                 });
         }
-    };
+    }, [networkInterfaces, networkFilter]);
 
-    // Get unique package managers from software packages
-    const getPackageManagers = (packages: SoftwarePackage[]): string[] => {
+    // Get unique package managers from software packages (memoized)
+    const packageManagers = useMemo(() => {
         const managers = new Set<string>();
-        packages.forEach(pkg => {
+        softwarePackages.forEach(pkg => {
             if (pkg.package_manager) {
                 managers.add(pkg.package_manager);
             }
         });
         return Array.from(managers).sort();
-    };
+    }, [softwarePackages]);
 
-    // Filter software packages based on package manager selection
-    const getFilteredSoftwarePackages = (packages: SoftwarePackage[]): SoftwarePackage[] => {
+    // Filter software packages based on package manager selection (memoized)
+    const filteredSoftwarePackages = useMemo(() => {
         if (packageManagerFilter === 'all') {
-            return packages.sort((a, b) => (a.package_name || '').localeCompare(b.package_name || ''));
+            return softwarePackages.sort((a, b) => (a.package_name || '').localeCompare(b.package_name || ''));
         }
-        return packages
+        return softwarePackages
             .filter(pkg => pkg.package_manager === packageManagerFilter)
             .sort((a, b) => (a.package_name || '').localeCompare(b.package_name || ''));
-    };
+    }, [softwarePackages, packageManagerFilter]);
+
+    // Package search function (defined before useEffect to avoid hoisting issues)
+    const performPackageSearch = useCallback(async (query: string) => {
+        if (!hostId || !query.trim()) return;
+
+        setIsSearching(true);
+        try {
+            // Get host information to determine OS for package search
+            const response = await axiosInstance.get(`/api/packages/search?query=${encodeURIComponent(query)}&limit=20`);
+
+            if (response.data && Array.isArray(response.data)) {
+                // Get list of already installed package names
+                const installedPackageNames = new Set(
+                    softwarePackages
+                        .filter(pkg => pkg.name) // Filter out packages without names
+                        .map(pkg => pkg.name.toLowerCase())
+                );
+
+                // Filter out already installed packages
+                const results = response.data
+                    .filter((pkg: { name: string; description: string; version: string }) =>
+                        !installedPackageNames.has(pkg.name.toLowerCase())
+                    )
+                    .map((pkg: { name: string; description: string; version: string }) => ({
+                        name: pkg.name,
+                        description: pkg.description,
+                        version: pkg.version
+                    }));
+                setSearchResults(results);
+            } else {
+                setSearchResults([]);
+            }
+        } catch (error) {
+            console.error('Error searching packages:', error);
+            // Check if it's an authentication error
+            const axiosError = error as { response?: { status?: number; data?: { detail?: string } } };
+            if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
+                console.error('Authentication error while searching packages. User may need to log in again.');
+                // You could trigger a re-login here or show an auth error message
+            }
+            // Fall back to empty results on error
+            setSearchResults([]);
+        } finally {
+            setIsSearching(false);
+        }
+    }, [hostId, softwarePackages]);
+
+    // Parse enabled shells (memoized to avoid JSON.parse on every render)
+    const enabledShells = useMemo(() => {
+        if (!host?.enabled_shells) return [];
+        try {
+            const shells = JSON.parse(host.enabled_shells);
+            return Array.isArray(shells) ? shells : [];
+        } catch {
+            return [];
+        }
+    }, [host?.enabled_shells]);
 
     // Check if diagnostics are currently being processed based on persistent state
     const isDiagnosticsProcessing = host?.diagnostics_request_status === 'pending';
@@ -872,6 +1013,184 @@ const HostDetail = () => {
         setUbuntuProToken('');
     };
 
+    // Package installation handlers
+
+    const handlePackageSelect = (packageName: string) => {
+        const newSelected = new Set(selectedPackages);
+        if (newSelected.has(packageName)) {
+            newSelected.delete(packageName);
+        } else {
+            newSelected.add(packageName);
+        }
+        setSelectedPackages(newSelected);
+    };
+
+    const handleInstallPackages = async () => {
+        if (!hostId || selectedPackages.size === 0) return;
+
+        try {
+            const response = await axiosInstance.post(`/api/packages/install/${hostId}`, {
+                package_names: Array.from(selectedPackages),
+                requested_by: currentUser ? `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || currentUser.userid : 'Unknown User'
+            });
+
+            if (response.data.success) {
+                // Close dialog and reset state
+                setPackageInstallDialogOpen(false);
+                if (packageSearchInputRef.current) {
+                    packageSearchInputRef.current.value = '';
+                }
+                setSearchResults([]);
+                setSelectedPackages(new Set());
+
+                // Navigate to Software Changes tab to show progress
+                setCurrentTab(getSoftwareInstallsTabIndex());
+
+                // Show success message
+                setSnackbarMessage(response.data.message || t('hostDetail.packagesInstallQueued', 'Package installation has been queued'));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+            } else {
+                throw new Error(response.data.message || 'Unknown error');
+            }
+        } catch (error: unknown) {
+            console.error('Error installing packages:', error);
+            const axiosError = error as { response?: { data?: { detail?: string } }; message?: string };
+            const errorMessage = axiosError.response?.data?.detail || axiosError.message || t('hostDetail.packagesInstallError', 'Error queueing package installation');
+            setSnackbarMessage(errorMessage);
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        }
+    };
+
+    const handleClosePackageDialog = () => {
+        setPackageInstallDialogOpen(false);
+        if (packageSearchInputRef.current) {
+            packageSearchInputRef.current.value = '';
+        }
+        setSearchResults([]);
+        setSelectedPackages(new Set());
+    };
+
+    // Uninstall handlers
+    const handleUninstallPackage = (pkg: SoftwarePackage) => {
+        setPackageToUninstall(pkg);
+        setUninstallConfirmOpen(true);
+    };
+
+    const handleUninstallConfirm = async () => {
+        if (!hostId || !packageToUninstall) return;
+
+        try {
+            const response = await axiosInstance.post(`/api/packages/uninstall/${hostId}`, {
+                package_names: [packageToUninstall.package_name],
+                requested_by: currentUser ? `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || currentUser.userid : 'Unknown User'
+            });
+
+            if (response.data.success) {
+                // Close dialog and reset state
+                setUninstallConfirmOpen(false);
+                setPackageToUninstall(null);
+
+                // Navigate to Software Changes tab to show progress
+                setCurrentTab(getSoftwareInstallsTabIndex());
+
+                // Show success message
+                setSnackbarMessage(response.data.message || t('hostDetail.packageUninstallQueued', 'Package uninstallation has been queued'));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+            } else {
+                throw new Error(response.data.message || 'Unknown error');
+            }
+        } catch (error: unknown) {
+            const axiosError = error as { response?: { data?: { detail?: string } }; message?: string };
+            const errorMessage = axiosError.response?.data?.detail || axiosError.message || t('hostDetail.packageUninstallError', 'Error queueing package uninstallation');
+            setSnackbarMessage(errorMessage);
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        }
+    };
+
+    const handleUninstallCancel = () => {
+        setUninstallConfirmOpen(false);
+        setPackageToUninstall(null);
+    };
+
+    // Installation history handlers
+
+    const handleViewInstallationLog = (installation: InstallationHistoryItem) => {
+        setSelectedInstallationLog(installation);
+        setInstallationLogDialogOpen(true);
+    };
+
+    const handleCloseInstallationLogDialog = () => {
+        setInstallationLogDialogOpen(false);
+        setSelectedInstallationLog(null);
+    };
+
+    const handleDeleteInstallation = (installation: InstallationHistoryItem) => {
+        setInstallationToDelete(installation);
+        setInstallationDeleteConfirmOpen(true);
+    };
+
+    const handleConfirmDeleteInstallation = async () => {
+        if (!installationToDelete) return;
+
+        try {
+            await axiosInstance.delete(`/api/packages/installation-history/${installationToDelete.request_id}`);
+            setSnackbarMessage(t('hostDetail.installationDeleted', 'Installation record deleted successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            // Refresh the installation history
+            fetchInstallationHistory();
+        } catch (error) {
+            console.error('Error deleting installation record:', error);
+            setSnackbarMessage(t('hostDetail.installationDeleteError', 'Failed to delete installation record'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setInstallationDeleteConfirmOpen(false);
+            setInstallationToDelete(null);
+        }
+    };
+
+    const handleCancelDeleteInstallation = () => {
+        setInstallationDeleteConfirmOpen(false);
+        setInstallationToDelete(null);
+    };
+
+    // Format datetime for display
+    const formatDateTime = (dateString: string) => {
+        return new Date(dateString).toLocaleString();
+    };
+
+    // Get installation status color
+    const getInstallationStatusColor = (status: string): 'success' | 'error' | 'warning' | 'default' => {
+        switch (status.toLowerCase()) {
+            case 'completed':
+                return 'success';
+            case 'failed':
+                return 'error';
+            case 'pending':
+            case 'queued':
+            case 'installing':
+            case 'in_progress':
+                return 'warning';
+            default:
+                return 'default';
+        }
+    };
+
+    // Get translated status text
+    const getTranslatedStatus = (status: string) => {
+        const translationKey = `scripts.status.${status.toLowerCase()}`;
+        const translated = t(translationKey);
+        // If translation not found, return capitalized status
+        return translated === translationKey ?
+            status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ') :
+            translated;
+    };
+
     // Ubuntu Pro service management handlers
     const handleServicesEditToggle = () => {
         if (servicesEditMode) {
@@ -1015,9 +1334,15 @@ const HostDetail = () => {
                         iconPosition="start"
                         sx={{ textTransform: 'none' }}
                     />
-                    <Tab 
-                        icon={<AppsIcon />} 
-                        label={t('hostDetail.softwareTab', 'Software')} 
+                    <Tab
+                        icon={<AppsIcon />}
+                        label={t('hostDetail.softwareTab', 'Software')}
+                        iconPosition="start"
+                        sx={{ textTransform: 'none' }}
+                    />
+                    <Tab
+                        icon={<HistoryIcon />}
+                        label={t('hostDetail.softwareChangesTab', 'Software Changes')}
                         iconPosition="start"
                         sx={{ textTransform: 'none' }}
                     />
@@ -1152,34 +1477,15 @@ const HostDetail = () => {
                                     </Typography>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                                         {/* Enabled Shells */}
-                                        {host.enabled_shells ? (() => {
-                                            try {
-                                                const shells = JSON.parse(host.enabled_shells);
-                                                if (shells && shells.length > 0) {
-                                                    return shells.map((shell: string) => (
-                                                        <Chip
-                                                            key={shell}
-                                                            label={shell}
-                                                            color="success"
-                                                            size="small"
-                                                            variant="filled"
-                                                        />
-                                                    ));
-                                                } else {
-                                                    return (
-                                                        <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                                                            None
-                                                        </Typography>
-                                                    );
-                                                }
-                                            } catch {
-                                                return (
-                                                    <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                                                        None
-                                                    </Typography>
-                                                );
-                                            }
-                                        })() : (
+                                        {enabledShells.length > 0 ? enabledShells.map((shell: string) => (
+                                            <Chip
+                                                key={shell}
+                                                label={shell}
+                                                color="success"
+                                                size="small"
+                                                variant="filled"
+                                            />
+                                        )) : (
                                             <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
                                                 None
                                             </Typography>
@@ -1408,7 +1714,7 @@ const HostDetail = () => {
                                                 </ToggleButton>
                                             </ToggleButtonGroup>
                                         </Box>
-                                        {getFilteredStorageDevices(storageDevices).map((device: StorageDeviceType, index: number) => (
+                                        {filteredStorageDevices.map((device: StorageDeviceType, index: number) => (
                                             <Box key={device.id || index} sx={{ mb: 3, p: 2, pb: 3, backgroundColor: 'grey.900', borderRadius: 1, minHeight: '140px', display: 'flex', flexDirection: 'column' }}>
                                                 <Grid container spacing={2} alignItems="flex-start">
                                                     <Grid item xs={12} md={3}>
@@ -1521,7 +1827,7 @@ const HostDetail = () => {
                                                 </ToggleButton>
                                             </ToggleButtonGroup>
                                         </Box>
-                                        {getFilteredNetworkInterfaces(networkInterfaces).map((iface: NetworkInterfaceType, index: number) => (
+                                        {filteredNetworkInterfaces.map((iface: NetworkInterfaceType, index: number) => (
                                             <Box key={iface.id || index} sx={{ mb: 3, p: 2, pb: 3, backgroundColor: 'grey.900', borderRadius: 1, minHeight: '140px', display: 'flex', flexDirection: 'column' }}>
                                                 <Grid container spacing={2} alignItems="flex-start">
                                                     <Grid item xs={12} md={3}>
@@ -1634,40 +1940,54 @@ const HostDetail = () => {
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                         <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
                                             <AppsIcon sx={{ mr: 1 }} />
-                                            {t('hostDetail.softwarePackages', 'Software Packages')} ({getFilteredSoftwarePackages(softwarePackages).length})
+                                            {t('hostDetail.softwarePackages', 'Software Packages')} ({filteredSoftwarePackages.length})
                                         </Typography>
                                         <Typography variant="caption" color="textSecondary">
                                             {t('hosts.updated', 'Updated')}: {formatTimestamp(host.software_updated_at)}
                                         </Typography>
                                     </Box>
-                                    <ToggleButtonGroup
-                                        value={packageManagerFilter}
-                                        exclusive
-                                        onChange={(_, newFilter) => {
-                                            if (newFilter !== null) {
-                                                setPackageManagerFilter(newFilter);
-                                            }
-                                        }}
-                                        size="small"
-                                        sx={{ ml: 2 }}
-                                    >
-                                        <ToggleButton value="all" aria-label="all packages">
-                                            {t('common.all', 'All')}
-                                        </ToggleButton>
-                                        {getPackageManagers(softwarePackages).map((manager) => (
-                                            <ToggleButton key={manager} value={manager} aria-label={`${manager} packages`}>
-                                                {manager}
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                        <Button
+                                            variant="contained"
+                                            startIcon={<AddIcon />}
+                                            sx={{
+                                                backgroundColor: 'primary.main',
+                                                '&:hover': { backgroundColor: 'primary.dark' },
+                                                height: '40px', // Match ToggleButtonGroup height for small size
+                                                minHeight: '40px'
+                                            }}
+                                            onClick={() => setPackageInstallDialogOpen(true)}
+                                        >
+                                            {t('hostDetail.addPackage', 'Add Package')}
+                                        </Button>
+                                        <ToggleButtonGroup
+                                            value={packageManagerFilter}
+                                            exclusive
+                                            onChange={(_, newFilter) => {
+                                                if (newFilter !== null) {
+                                                    setPackageManagerFilter(newFilter);
+                                                }
+                                            }}
+                                            size="small"
+                                        >
+                                            <ToggleButton value="all" aria-label="all packages">
+                                                {t('common.all', 'All')}
                                             </ToggleButton>
-                                        ))}
-                                    </ToggleButtonGroup>
+                                            {packageManagers.map((manager) => (
+                                                <ToggleButton key={manager} value={manager} aria-label={`${manager} packages`}>
+                                                    {manager}
+                                                </ToggleButton>
+                                            ))}
+                                        </ToggleButtonGroup>
+                                    </Box>
                                 </Box>
-                                {getFilteredSoftwarePackages(softwarePackages).length === 0 ? (
+                                {filteredSoftwarePackages.length === 0 ? (
                                     <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 2 }}>
                                         {t('hostDetail.noSoftwareFound', 'No software packages found')}
                                     </Typography>
                                 ) : (
                                     <Grid container spacing={2}>
-                                        {getFilteredSoftwarePackages(softwarePackages).map((pkg: SoftwarePackage, index: number) => (
+                                        {filteredSoftwarePackages.map((pkg: SoftwarePackage, index: number) => (
                                             <Grid item xs={12} sm={6} md={4} key={pkg.id || index}>
                                                 <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
                                                     <CardContent sx={{ p: 2 }}>
@@ -1719,6 +2039,18 @@ const HostDetail = () => {
                                                                 )}
                                                             </Box>
                                                         )}
+                                                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                                                            <Button
+                                                                variant="contained"
+                                                                color="error"
+                                                                size="small"
+                                                                disabled={!host?.active || !host?.is_agent_privileged}
+                                                                onClick={() => handleUninstallPackage(pkg)}
+                                                                sx={{ minWidth: 'auto' }}
+                                                            >
+                                                                {t('hostDetail.uninstall', 'Uninstall')}
+                                                            </Button>
+                                                        </Box>
                                                     </CardContent>
                                                 </Card>
                                             </Grid>
@@ -1732,7 +2064,7 @@ const HostDetail = () => {
             )}
 
             {/* Access Tab */}
-            {currentTab === 3 && (
+            {currentTab === getAccessTabIndex() && (
                 <Grid container spacing={3}>
                     {/* User Accounts */}
                     <Grid item xs={12}>
@@ -1742,7 +2074,7 @@ const HostDetail = () => {
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                         <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
                                             <PersonIcon sx={{ mr: 1 }} />
-                                            {t('hostDetail.userAccounts', 'User Accounts')} ({getFilteredUsers(userAccounts).length})
+                                            {t('hostDetail.userAccounts', 'User Accounts')} ({filteredUsers.length})
                                         </Typography>
                                         <Typography variant="caption" color="textSecondary">
                                             {t('hosts.updated', 'Updated')}: {formatTimestamp(host.user_access_updated_at)}
@@ -1770,13 +2102,13 @@ const HostDetail = () => {
                                         </ToggleButton>
                                     </ToggleButtonGroup>
                                 </Box>
-                                {getFilteredUsers(userAccounts).length === 0 ? (
+                                {filteredUsers.length === 0 ? (
                                     <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 2 }}>
                                         {t('hostDetail.noUsersFound', 'No user accounts found')}
                                     </Typography>
                                 ) : (
                                     <Grid container spacing={2}>
-                                        {getFilteredUsers(userAccounts).map((user: UserAccount, index: number) => (
+                                        {filteredUsers.map((user: UserAccount, index: number) => (
                                             <Grid item xs={12} sm={6} md={4} key={user.id || index}>
                                                 <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
                                                     <CardContent sx={{ p: 2 }}>
@@ -1882,7 +2214,7 @@ const HostDetail = () => {
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                         <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
                                             <GroupIcon sx={{ mr: 1 }} />
-                                            {t('hostDetail.userGroups', 'User Groups')} ({getFilteredGroups(userGroups).length})
+                                            {t('hostDetail.userGroups', 'User Groups')} ({filteredGroups.length})
                                         </Typography>
                                         <Typography variant="caption" color="textSecondary">
                                             {t('hosts.updated', 'Updated')}: {formatTimestamp(host.user_access_updated_at)}
@@ -1910,13 +2242,13 @@ const HostDetail = () => {
                                         </ToggleButton>
                                     </ToggleButtonGroup>
                                 </Box>
-                                {getFilteredGroups(userGroups).length === 0 ? (
+                                {filteredGroups.length === 0 ? (
                                     <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 2 }}>
                                         {t('hostDetail.noGroupsFound', 'No user groups found')}
                                     </Typography>
                                 ) : (
                                     <Grid container spacing={2}>
-                                        {getFilteredGroups(userGroups).map((group: UserGroup, index: number) => (
+                                        {filteredGroups.map((group: UserGroup, index: number) => (
                                             <Grid item xs={12} sm={6} md={4} key={group.id || index}>
                                                 <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
                                                     <CardContent sx={{ p: 2 }}>
@@ -1999,6 +2331,96 @@ const HostDetail = () => {
                                             </Grid>
                                         ))}
                                     </Grid>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                </Grid>
+            )}
+
+            {/* Software Changes Tab */}
+            {currentTab === getSoftwareInstallsTabIndex() && (
+                <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                        <Card>
+                            <CardContent>
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                                    <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                        <HistoryIcon sx={{ mr: 1 }} />
+                                        {t('hostDetail.softwareInstallationHistory', 'Software Installation History')}
+                                    </Typography>
+                                </Box>
+
+                                {installationHistoryLoading ? (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                                        <CircularProgress />
+                                    </Box>
+                                ) : installationHistory.length === 0 ? (
+                                    <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'center', py: 4 }}>
+                                        {t('hostDetail.noInstallationHistory', 'No software installation history found for this host.')}
+                                    </Typography>
+                                ) : (
+                                    <TableContainer>
+                                        <Table>
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell>{t('hostDetail.packageNames', 'Package Names')}</TableCell>
+                                                    <TableCell>{t('hostDetail.operation', 'Operation')}</TableCell>
+                                                    <TableCell>{t('hostDetail.requestedBy', 'Requested By')}</TableCell>
+                                                    <TableCell>{t('hostDetail.requestedAt', 'Requested At')}</TableCell>
+                                                    <TableCell>{t('hostDetail.status', 'Status')}</TableCell>
+                                                    <TableCell>{t('hostDetail.completedAt', 'Completed At')}</TableCell>
+                                                    <TableCell>{t('hostDetail.actions', 'Actions')}</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {installationHistory.map((installation) => (
+                                                    <TableRow key={installation.request_id}>
+                                                        <TableCell>{installation.package_names}</TableCell>
+                                                        <TableCell>
+                                                            <Chip
+                                                                label={(installation.operation_type || 'install') === 'install' ? t('hostDetail.install', 'Install') : t('hostDetail.uninstall', 'Uninstall')}
+                                                                color={(installation.operation_type || 'install') === 'install' ? 'primary' : 'error'}
+                                                                size="small"
+                                                                variant="outlined"
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>{installation.requested_by}</TableCell>
+                                                        <TableCell>{formatDateTime(installation.requested_at)}</TableCell>
+                                                        <TableCell>
+                                                            <Chip
+                                                                label={getTranslatedStatus(installation.status)}
+                                                                color={getInstallationStatusColor(installation.status)}
+                                                                size="small"
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {installation.completed_at ? formatDateTime(installation.completed_at) : '-'}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => handleViewInstallationLog(installation)}
+                                                                disabled={installation.status === 'pending' || installation.status === 'queued' || installation.status === 'in_progress' || installation.status === 'installing'}
+                                                                title={t('hostDetail.viewInstallationLog', 'View Installation Log')}
+                                                                sx={{ mr: 1 }}
+                                                            >
+                                                                <VisibilityIcon />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => handleDeleteInstallation(installation)}
+                                                                title={t('hostDetail.deleteInstallation', 'Delete Installation Record')}
+                                                                color="error"
+                                                            >
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
                                 )}
                             </CardContent>
                         </Card>
@@ -2688,6 +3110,330 @@ const HostDetail = () => {
                         disabled={!ubuntuProToken.trim()}
                     >
                         {t('hostDetail.ubuntuProAttachConfirm', 'Attach')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Package Installation Dialog */}
+            <Dialog
+                open={packageInstallDialogOpen}
+                onClose={handleClosePackageDialog}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{
+                    sx: { backgroundColor: 'grey.900', minHeight: '500px' }
+                }}
+            >
+                <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold', fontSize: '1.25rem' }}>
+                    {t('hostDetail.installPackagesTitle', 'Install Packages')}
+                    <IconButton onClick={handleClosePackageDialog} size="small">
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent sx={{ p: 3 }}>
+                    <Box sx={{ mb: 3 }}>
+                        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                            <TextField
+                                fullWidth
+                                placeholder="Enter package name to search..."
+                                variant="outlined"
+                                inputRef={packageSearchInputRef}
+                            />
+                            <Button
+                                variant="contained"
+                                onClick={() => {
+                                    const query = packageSearchInputRef.current?.value || '';
+                                    if (query.length >= 2) {
+                                        performPackageSearch(query);
+                                    }
+                                }}
+                                sx={{ height: '56px', minWidth: '100px' }}
+                            >
+                                {isSearching ? <CircularProgress size={20} /> : 'Search'}
+                            </Button>
+                        </Box>
+                    </Box>
+
+                    {searchResults.length > 0 && (
+                        <Box sx={{ mb: 3 }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                {t('hostDetail.searchResults', 'Search Results')}
+                            </Typography>
+                            <List sx={{ bgcolor: 'grey.800', borderRadius: 1, maxHeight: 300, overflow: 'auto' }}>
+                                {searchResults.map((pkg, index) => (
+                                    <React.Fragment key={pkg.name}>
+                                        <ListItem
+                                            sx={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                py: 1
+                                            }}
+                                        >
+                                            <ListItemText
+                                                primary={pkg.name}
+                                                secondary={
+                                                    <span>
+                                                        {pkg.description && (
+                                                            <Typography variant="body2" color="textSecondary" component="span" display="block">
+                                                                {pkg.description}
+                                                            </Typography>
+                                                        )}
+                                                        {pkg.version && (
+                                                            <Typography variant="caption" color="textSecondary" component="span" display="block">
+                                                                {t('hostDetail.version', 'Version')}: {pkg.version}
+                                                            </Typography>
+                                                        )}
+                                                    </span>
+                                                }
+                                            />
+                                            <Button
+                                                variant="contained"
+                                                size="small"
+                                                onClick={() => handlePackageSelect(pkg.name)}
+                                                disabled={selectedPackages.has(pkg.name)}
+                                                sx={{ ml: 2, minWidth: '80px' }}
+                                            >
+                                                {selectedPackages.has(pkg.name) ?
+                                                    t('hostDetail.added', 'Added') :
+                                                    t('hostDetail.install', 'Install')
+                                                }
+                                            </Button>
+                                        </ListItem>
+                                        {index < searchResults.length - 1 && <Divider />}
+                                    </React.Fragment>
+                                ))}
+                            </List>
+                        </Box>
+                    )}
+
+                    {searchResults.length === 0 && !isSearching && (
+                        <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'center', py: 2 }}>
+                            {t('hostDetail.noPackagesFound', 'No packages found matching your search')}
+                        </Typography>
+                    )}
+
+                    <Box sx={{ mt: 3, mb: 3 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                            {t('hostDetail.packagesToInstall', 'Packages to install')} ({selectedPackages.size})
+                        </Typography>
+                        {selectedPackages.size > 0 ? (
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                {Array.from(selectedPackages).map((pkg) => (
+                                    <Chip
+                                        key={pkg}
+                                        label={pkg}
+                                        onDelete={() => handlePackageSelect(pkg)}
+                                        color="primary"
+                                        variant="outlined"
+                                    />
+                                ))}
+                            </Box>
+                        ) : (
+                            <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
+                                {t('hostDetail.noPackagesSelected', 'No packages selected for installation')}
+                            </Typography>
+                        )}
+                    </Box>
+                </DialogContent>
+                <DialogActions sx={{ p: 3, pt: 0 }}>
+                    <Button onClick={handleClosePackageDialog}>
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button
+                        onClick={handleInstallPackages}
+                        variant="contained"
+                        disabled={selectedPackages.size === 0}
+                        startIcon={<SystemUpdateAltIcon />}
+                    >
+                        {t('hostDetail.installSelectedPackages', 'Install Selected Packages')} ({selectedPackages.size})
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Installation Log Dialog */}
+            <Dialog
+                open={installationLogDialogOpen}
+                onClose={handleCloseInstallationLogDialog}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    {t('hostDetail.installationLogTitle', 'Installation Log')} - {selectedInstallationLog?.package_name}
+                    <IconButton
+                        edge="end"
+                        color="inherit"
+                        onClick={handleCloseInstallationLogDialog}
+                        aria-label="close"
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent sx={{ p: 3 }}>
+                    {selectedInstallationLog && (
+                        <Box>
+                            <Grid container spacing={2} sx={{ mb: 3 }}>
+                                <Grid item xs={6}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('hostDetail.status', 'Status')}:
+                                    </Typography>
+                                    <Chip
+                                        label={getTranslatedStatus(selectedInstallationLog.status)}
+                                        color={getInstallationStatusColor(selectedInstallationLog.status)}
+                                        size="small"
+                                        sx={{ mt: 0.5 }}
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('hostDetail.requestedBy', 'Requested By')}:
+                                    </Typography>
+                                    <Typography variant="body1">
+                                        {selectedInstallationLog.requested_by}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('hostDetail.requestedAt', 'Requested At')}:
+                                    </Typography>
+                                    <Typography variant="body1">
+                                        {formatDateTime(selectedInstallationLog.requested_at)}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('hostDetail.completedAt', 'Completed At')}:
+                                    </Typography>
+                                    <Typography variant="body1">
+                                        {selectedInstallationLog.completed_at
+                                            ? formatDateTime(selectedInstallationLog.completed_at)
+                                            : t('common.notAvailable', 'N/A')
+                                        }
+                                    </Typography>
+                                </Grid>
+                                {selectedInstallationLog.installed_version && (
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2" color="textSecondary">
+                                            {t('hostDetail.installedVersion', 'Installed Version')}:
+                                        </Typography>
+                                        <Typography variant="body1">
+                                            {selectedInstallationLog.installed_version}
+                                        </Typography>
+                                    </Grid>
+                                )}
+                            </Grid>
+
+                            {selectedInstallationLog.error_message && (
+                                <Box sx={{ mb: 3 }}>
+                                    <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                                        {t('hostDetail.errorMessage', 'Error Message')}:
+                                    </Typography>
+                                    <Alert severity="error">
+                                        {selectedInstallationLog.error_message}
+                                    </Alert>
+                                </Box>
+                            )}
+
+                            {selectedInstallationLog.installation_log && (
+                                <Box>
+                                    <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                                        {t('hostDetail.installationLog', 'Installation Log')}:
+                                    </Typography>
+                                    <Paper
+                                        sx={{
+                                            p: 2,
+                                            backgroundColor: 'grey.900',
+                                            maxHeight: 400,
+                                            overflow: 'auto',
+                                            fontFamily: 'monospace',
+                                            fontSize: '0.875rem',
+                                            whiteSpace: 'pre-wrap',
+                                        }}
+                                    >
+                                        {selectedInstallationLog.installation_log}
+                                    </Paper>
+                                </Box>
+                            )}
+
+                            {!selectedInstallationLog.installation_log && !selectedInstallationLog.error_message && (
+                                <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'center', py: 2 }}>
+                                    {t('hostDetail.noLogDataAvailable', 'No log data available for this installation.')}
+                                </Typography>
+                            )}
+                        </Box>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseInstallationLogDialog}>
+                        {t('common.close', 'Close')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Installation Delete Confirmation Dialog */}
+            <Dialog
+                open={installationDeleteConfirmOpen}
+                onClose={handleCancelDeleteInstallation}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>
+                    {t('hostDetail.confirmDeleteInstallation', 'Delete Installation Record')}
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        {t('hostDetail.confirmDeleteInstallationMessage', 'Are you sure you want to delete this installation record? This action cannot be undone.')}
+                    </Typography>
+                    {installationToDelete && (
+                        <Typography variant="body2" sx={{ mt: 2, fontWeight: 'bold' }}>
+                            {t('hostDetail.packages', 'Packages')}: {installationToDelete.package_names}
+                        </Typography>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCancelDeleteInstallation}>
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button
+                        onClick={handleConfirmDeleteInstallation}
+                        color="error"
+                        variant="contained"
+                    >
+                        {t('common.delete', 'Delete')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Package Uninstall Confirmation Dialog */}
+            <Dialog
+                open={uninstallConfirmOpen}
+                onClose={handleUninstallCancel}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>
+                    {t('hostDetail.confirmUninstallPackage', 'Uninstall Package')}
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        {t('hostDetail.confirmUninstallMessage', 'Are you sure you want to uninstall this package? This action will remove the package from the system.')}
+                    </Typography>
+                    {packageToUninstall && (
+                        <Typography variant="body2" sx={{ mt: 2, fontWeight: 'bold' }}>
+                            {t('hostDetail.package', 'Package')}: {packageToUninstall.package_name}
+                        </Typography>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleUninstallCancel}>
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button
+                        onClick={handleUninstallConfirm}
+                        color="error"
+                        variant="contained"
+                    >
+                        {t('hostDetail.uninstall', 'Uninstall')}
                     </Button>
                 </DialogActions>
             </Dialog>

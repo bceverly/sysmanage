@@ -116,7 +116,7 @@ class TestAgentWebSocket:
         from backend.api import agent
 
         routes = [route.path for route in agent.router.routes]
-        assert "/api/agent/connect" in routes
+        assert "/agent/connect" in routes
 
     @patch("backend.api.agent.websocket_security")
     @patch("backend.api.agent.connection_manager")

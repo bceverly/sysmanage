@@ -508,24 +508,19 @@ class TestProcessSoftwarePackages:
             assert isinstance(first_call, SoftwarePackage)
             assert first_call.host_id == 999
             assert first_call.package_name == "vim"
-            assert first_call.version == "8.2.1234"
-            assert first_call.description == "Vi IMproved text editor"
+            assert first_call.package_version == "8.2.1234"
+            assert first_call.package_description == "Vi IMproved text editor"
             assert first_call.package_manager == "apt"
-            assert first_call.source == "ubuntu"
             assert first_call.architecture == "amd64"
             assert first_call.size_bytes == 1234567
             assert first_call.install_date == "2023-01-01"
             assert first_call.vendor == "Ubuntu"
             assert first_call.category == "editors"
-            assert first_call.license_type == "GPL"
-            assert first_call.bundle_id is None
-            assert first_call.app_store_id is None
-            assert first_call.installation_path == "/usr/bin/vim"
+            assert first_call.license == "GPL"
+            assert first_call.install_path == "/usr/bin/vim"
             assert first_call.is_system_package is True
-            assert first_call.is_user_installed is False
             assert first_call.created_at == mock_now
             assert first_call.updated_at == mock_now
-            assert first_call.software_updated_at == mock_now
 
     @patch("backend.websocket.data_processors.debug_logger")
     def test_process_software_packages_with_errors(self, mock_logger):
@@ -583,11 +578,10 @@ class TestProcessSoftwarePackages:
 
         package = mock_db.add.call_args_list[0][0][0]
         assert package.package_name == "minimal_package"
-        assert package.version is None
-        assert package.description is None
+        assert package.package_version is None
+        assert package.package_description is None
         assert package.package_manager is None
         assert package.is_system_package is False  # Default
-        assert package.is_user_installed is True  # Default
 
         # Verify logging
         mock_logger.info.assert_called_with("Added %d software packages to database", 1)

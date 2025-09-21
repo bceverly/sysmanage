@@ -194,6 +194,9 @@ class TestReportsAPIEndpoints:
         # Create a real user object in the database
         from backend.persistence.models import User
 
+        from datetime import datetime, timezone
+
+        now = datetime.now(timezone.utc)
         user = User(
             id=1,
             userid="test@example.com",
@@ -203,6 +206,8 @@ class TestReportsAPIEndpoints:
             active=True,
             is_locked=False,
             failed_login_attempts=0,
+            created_at=now,
+            updated_at=now,
         )
         session.add(user)
         session.commit()

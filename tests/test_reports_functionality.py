@@ -133,6 +133,7 @@ class TestReportsWithRealData:
         from datetime import datetime, timezone
 
         # Create a test user
+        now = datetime.now(timezone.utc)
         user = User(
             id=1,
             userid="test@example.com",
@@ -142,7 +143,9 @@ class TestReportsWithRealData:
             active=True,
             is_locked=False,
             failed_login_attempts=0,
-            last_access=datetime.now(timezone.utc),
+            last_access=now,
+            created_at=now,
+            updated_at=now,
         )
         session.add(user)
         session.commit()

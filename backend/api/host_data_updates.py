@@ -68,16 +68,14 @@ async def update_host_hardware(host_id: int, hardware_data: dict):
                 if not device_data.get("error"):  # Skip error entries
                     storage_device = models.StorageDevice(
                         host_id=host_id,
-                        name=device_data.get("name"),
-                        device_path=device_data.get("device_path"),
+                        device_name=device_data.get("name"),
                         mount_point=device_data.get("mount_point"),
-                        file_system=device_data.get("file_system"),
+                        filesystem=device_data.get("file_system"),
                         device_type=device_data.get("device_type"),
-                        capacity_bytes=device_data.get("capacity_bytes"),
-                        used_bytes=device_data.get("used_bytes"),
-                        available_bytes=device_data.get("available_bytes"),
-                        created_at=datetime.now(timezone.utc),
-                        updated_at=datetime.now(timezone.utc),
+                        total_size_bytes=device_data.get("capacity_bytes"),
+                        used_size_bytes=device_data.get("used_bytes"),
+                        available_size_bytes=device_data.get("available_bytes"),
+                        last_updated=datetime.now(timezone.utc),
                     )
                     session.add(storage_device)
 
@@ -93,17 +91,16 @@ async def update_host_hardware(host_id: int, hardware_data: dict):
                 if not interface_data.get("error"):  # Skip error entries
                     network_interface = models.NetworkInterface(
                         host_id=host_id,
-                        name=interface_data.get("name"),
-                        interface_type=interface_data.get("interface_type"),
-                        hardware_type=interface_data.get("hardware_type"),
+                        interface_name=interface_data.get("name"),
+                        interface_type=interface_data.get("interface_type")
+                        or interface_data.get("hardware_type"),
                         mac_address=interface_data.get("mac_address"),
                         ipv4_address=interface_data.get("ipv4_address"),
                         ipv6_address=interface_data.get("ipv6_address"),
-                        subnet_mask=interface_data.get("subnet_mask"),
-                        is_active=interface_data.get("is_active", False),
+                        netmask=interface_data.get("subnet_mask"),
+                        is_up=interface_data.get("is_active", False),
                         speed_mbps=interface_data.get("speed_mbps"),
-                        created_at=datetime.now(timezone.utc),
-                        updated_at=datetime.now(timezone.utc),
+                        last_updated=datetime.now(timezone.utc),
                     )
                     session.add(network_interface)
 

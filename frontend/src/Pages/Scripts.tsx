@@ -1011,7 +1011,7 @@ const Scripts: React.FC = () => {
           placeholder={t('search.searchScripts', 'Search scripts')}
         />
 
-        <div style={{ height: 400, width: '100%' }}>
+        <div style={{ height: 400 }}>
           <DataGrid
             rows={filteredScripts}
             columns={columns}
@@ -1325,7 +1325,7 @@ const Scripts: React.FC = () => {
 
       {/* Script Executions Tab */}
       <TabPanel value={tabValue} index={2}>
-        <div style={{ height: 400, width: '100%' }}>
+        <div style={{ height: 400 }}>
           <DataGrid
             rows={executions}
             columns={executionColumns}
