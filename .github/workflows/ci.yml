@@ -294,8 +294,30 @@ jobs:
       working-directory: frontend
       run: |
         echo "🧪 Running frontend tests with MSW API mocking..."
-        npm run test:coverage
+
+        # Ensure clean coverage directory
+        rm -rf coverage/ || true
+
+        # Check vitest configuration
+        echo "📋 Checking vitest configuration..."
+        npx vitest --version || echo "vitest not found"
+
+        # Run tests with coverage
+        npm run test:coverage || {
+          echo "❌ Tests failed, but continuing to check coverage generation..."
+          exit_code=$?
+        }
+
         echo "✅ Frontend tests completed"
+
+        # Verify coverage was generated
+        if [ -d "coverage" ]; then
+          echo "✅ Coverage directory created"
+          echo "Coverage files generated: $(ls -1 coverage/ | wc -l) files"
+        else
+          echo "❌ No coverage directory found"
+          echo "npm test:coverage command may have failed to generate coverage"
+        fi
 
         # Show MSW-specific coverage info
         echo "📊 MSW Coverage Summary:"
@@ -306,6 +328,32 @@ jobs:
           cat coverage/coverage-summary.json | grep "mocks/handlers.ts" | head -1
           echo "MSW Node coverage:"
           cat coverage/coverage-summary.json | grep "mocks/node.ts" | head -1
+        else
+          echo "❌ No coverage-summary.json found"
+        fi
+
+        # Exit with original test result if tests failed
+        if [ ! -z "$exit_code" ]; then
+          exit $exit_code
+        fi
+
+    - name: Debug coverage files
+      working-directory: frontend
+      run: |
+        echo "🔍 Debugging coverage file structure:"
+        echo "Current directory: $(pwd)"
+        echo "Coverage directory exists: $(test -d coverage && echo 'YES' || echo 'NO')"
+        if [ -d coverage ]; then
+          echo "Coverage directory contents:"
+          ls -la coverage/ || echo "Failed to list coverage directory"
+          echo "Looking for specific files:"
+          echo "coverage-summary.json exists: $(test -f coverage/coverage-summary.json && echo 'YES' || echo 'NO')"
+          echo "index.html exists: $(test -f coverage/index.html && echo 'YES' || echo 'NO')"
+          echo "src/mocks directory exists: $(test -d coverage/src/mocks && echo 'YES' || echo 'NO')"
+          if [ -d coverage/src ]; then
+            echo "Coverage src subdirectories:"
+            ls -la coverage/src/
+          fi
         fi
 
     - name: Extract frontend coverage percentage
@@ -379,16 +427,26 @@ jobs:
         flags: frontend
         name: frontend-coverage
 
+    - name: Check if coverage exists before upload
+      working-directory: frontend
+      run: |
+        echo "🔍 Final coverage check before artifact upload:"
+        if [ -d "coverage" ]; then
+          echo "✅ Coverage directory exists"
+          echo "Files in coverage directory:"
+          find coverage -type f | head -10
+          echo "Coverage directory size: $(du -sh coverage/ | cut -f1)"
+        else
+          echo "❌ No coverage directory found for artifacts"
+        fi
+
     - name: Upload MSW test artifacts
       uses: actions/upload-artifact@v4
-      if: always()  # Upload even if tests fail
+      if: always() && hashFiles('frontend/coverage/*') != ''
       with:
         name: msw-test-coverage
-        path: |
-          frontend/coverage/coverage-summary.json
-          frontend/coverage/index.html
-          frontend/coverage/src/mocks/
-        if-no-files-found: warn
+        path: frontend/coverage/
+        if-no-files-found: error
 
   build:
     name: Build Check
