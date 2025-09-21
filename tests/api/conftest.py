@@ -338,6 +338,9 @@ def test_db():
         current_version = Column(String(100), nullable=True)
         available_version = Column(String(100), nullable=False)
         package_manager = Column(String(50), nullable=False)
+        update_type = Column(
+            String(20), nullable=False
+        )  # security, bugfix, enhancement
         source = Column(String(255), nullable=True)
         is_security_update = Column(Boolean, nullable=False, default=False)
         is_system_update = Column(Boolean, nullable=False, default=False)

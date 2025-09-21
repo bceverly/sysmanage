@@ -113,24 +113,27 @@ async def report_updates(
 
             # Store new updates
             for update_info in updates_report.available_updates:
+                # Map old agent fields to new schema
+                update_type = "package"  # default
+                if update_info.is_security_update:
+                    update_type = "security"
+                elif update_info.is_system_update:
+                    update_type = "system"
+
                 package_update = models.PackageUpdate(
                     host_id=host_id,
                     package_name=update_info.package_name,
                     current_version=update_info.current_version,
                     available_version=update_info.available_version,
                     package_manager=update_info.package_manager,
-                    source=update_info.source,
-                    is_security_update=update_info.is_security_update,
-                    is_system_update=update_info.is_system_update,
+                    update_type=update_type,
+                    priority=None,  # Not provided by agent
+                    description=None,  # Not provided by agent
+                    size_bytes=update_info.update_size_bytes,
                     requires_reboot=update_info.requires_reboot,
-                    update_size_bytes=update_info.update_size_bytes,
-                    bundle_id=update_info.bundle_id,
-                    repository=update_info.repository,
-                    channel=update_info.channel,
-                    status="available",
-                    detected_at=now,
+                    discovered_at=now,
+                    created_at=now,
                     updated_at=now,
-                    last_checked_at=now,
                 )
                 session.add(package_update)
 
@@ -165,29 +168,24 @@ async def get_update_summary(dependencies=Depends(JWTBearer())):
             # Count total updates
             total_updates = session.query(models.PackageUpdate).count()
 
-            # Count security updates
+            # Count security updates (based on update_type)
             security_updates = (
                 session.query(models.PackageUpdate)
-                .filter(models.PackageUpdate.is_security_update.is_(True))
+                .filter(models.PackageUpdate.update_type == "security")
                 .count()
             )
 
-            # Count system updates
+            # Count system updates (based on update_type)
             system_updates = (
                 session.query(models.PackageUpdate)
-                .filter(models.PackageUpdate.is_system_update.is_(True))
+                .filter(models.PackageUpdate.update_type == "system")
                 .count()
             )
 
-            # Count application updates
+            # Count application updates (based on update_type)
             application_updates = (
                 session.query(models.PackageUpdate)
-                .filter(
-                    and_(
-                        models.PackageUpdate.is_security_update.is_(False),
-                        models.PackageUpdate.is_system_update.is_(False),
-                    )
-                )
+                .filter(models.PackageUpdate.update_type == "package")
                 .count()
             )
 
@@ -249,10 +247,10 @@ async def get_host_updates(
                 )
 
             if security_only:
-                query = query.filter(models.PackageUpdate.is_security_update.is_(True))
+                query = query.filter(models.PackageUpdate.update_type == "security")
 
             if system_only:
-                query = query.filter(models.PackageUpdate.is_system_update.is_(True))
+                query = query.filter(models.PackageUpdate.update_type == "system")
 
             updates = query.order_by(models.PackageUpdate.package_name).all()
 
@@ -267,17 +265,14 @@ async def get_host_updates(
                     "current_version": update.current_version,
                     "available_version": update.available_version,
                     "package_manager": update.package_manager,
-                    "source": update.source,
-                    "is_security_update": update.is_security_update,
-                    "is_system_update": update.is_system_update,
+                    "update_type": update.update_type,
+                    "priority": update.priority,
+                    "description": update.description,
                     "requires_reboot": update.requires_reboot,
-                    "update_size_bytes": update.update_size_bytes,
-                    "bundle_id": update.bundle_id,
-                    "repository": update.repository,
-                    "channel": update.channel,
-                    "status": update.status,
-                    "detected_at": update.detected_at,
-                    "last_checked_at": update.last_checked_at,
+                    "size_bytes": update.size_bytes,
+                    "discovered_at": update.discovered_at,
+                    "created_at": update.created_at,
+                    "updated_at": update.updated_at,
                 }
                 update_list.append(update_dict)
 
@@ -286,14 +281,14 @@ async def get_host_updates(
                 "hostname": host.fqdn,
                 "updates": update_list,
                 "total_updates": len(update_list),
-                "security_updates": len([u for u in updates if u.is_security_update]),
-                "system_updates": len([u for u in updates if u.is_system_update]),
+                "security_updates": len(
+                    [u for u in updates if u.update_type == "security"]
+                ),
+                "system_updates": len(
+                    [u for u in updates if u.update_type == "system"]
+                ),
                 "application_updates": len(
-                    [
-                        u
-                        for u in updates
-                        if not u.is_security_update and not u.is_system_update
-                    ]
+                    [u for u in updates if u.update_type == "package"]
                 ),
             }
 
@@ -323,10 +318,10 @@ async def get_all_updates(  # pylint: disable=too-many-positional-arguments
 
             # Apply filters
             if security_only:
-                query = query.filter(models.PackageUpdate.is_security_update.is_(True))
+                query = query.filter(models.PackageUpdate.update_type == "security")
 
             if system_only:
-                query = query.filter(models.PackageUpdate.is_system_update.is_(True))
+                query = query.filter(models.PackageUpdate.update_type == "system")
 
             if package_manager:
                 query = query.filter(
@@ -339,7 +334,7 @@ async def get_all_updates(  # pylint: disable=too-many-positional-arguments
             # Apply pagination and ordering
             updates_with_hosts = (
                 query.order_by(
-                    desc(models.PackageUpdate.is_security_update),
+                    models.PackageUpdate.update_type,
                     models.Host.fqdn,
                     models.PackageUpdate.package_name,
                 )
@@ -359,14 +354,14 @@ async def get_all_updates(  # pylint: disable=too-many-positional-arguments
                     "current_version": update.current_version,
                     "available_version": update.available_version,
                     "package_manager": update.package_manager,
-                    "source": update.source,
-                    "is_security_update": update.is_security_update,
-                    "is_system_update": update.is_system_update,
+                    "update_type": update.update_type,
+                    "priority": update.priority,
+                    "description": update.description,
                     "requires_reboot": update.requires_reboot,
-                    "update_size_bytes": update.update_size_bytes,
-                    "status": update.status,
-                    "detected_at": update.detected_at,
-                    "last_checked_at": update.last_checked_at,
+                    "size_bytes": update.size_bytes,
+                    "discovered_at": update.discovered_at,
+                    "created_at": update.created_at,
+                    "updated_at": update.updated_at,
                 }
                 update_list.append(update_dict)
 
@@ -424,7 +419,6 @@ async def execute_updates(
                     and_(
                         models.PackageUpdate.host_id == host_id,
                         models.PackageUpdate.package_name.in_(request.package_names),
-                        models.PackageUpdate.status == "available",
                     )
                 )
 
@@ -498,8 +492,9 @@ async def execute_updates(
 
                 except (ConnectionError, ValueError, RuntimeError) as e:
                     # Rollback execution status on WebSocket failure
-                    for update in updates:
-                        update.status = "available"
+                    # Note: status column was removed in new schema
+                    # for update in updates:
+                    #     update.status = "available"
                     for log in execution_logs:
                         log.status = "failed"
                         log.error_message = _("Failed to send command: %s") % str(e)
@@ -677,16 +672,14 @@ async def get_os_upgrades(
                         "current_version": update.current_version,
                         "available_version": update.available_version,
                         "package_manager": update.package_manager,
-                        "is_security_update": update.is_security_update,
-                        "is_system_update": update.is_system_update,
+                        "update_type": update.update_type,
                         "requires_reboot": update.requires_reboot,
-                        "update_size_bytes": update.update_size_bytes,
-                        "detected_at": (
-                            update.detected_at.isoformat()
-                            if update.detected_at
+                        "size_bytes": update.size_bytes,
+                        "discovered_at": (
+                            update.discovered_at.isoformat()
+                            if update.discovered_at
                             else None
                         ),
-                        "status": update.status,
                     }
                 )
 
@@ -820,7 +813,6 @@ async def execute_os_upgrades(
                         models.PackageUpdate.package_manager.in_(
                             OS_UPGRADE_PACKAGE_MANAGERS
                         ),
-                        models.PackageUpdate.status == "available",
                     )
                 )
 
@@ -880,9 +872,9 @@ async def execute_os_upgrades(
                 )
 
                 if success:
-                    # Mark updates as in progress
+                    # Mark updates as in progress (status column removed)
                     for update in available_upgrades:
-                        update.status = "updating"
+                        # update.status = "updating"  # status column removed
                         update.updated_at = datetime.now(timezone.utc)
 
                     session.commit()

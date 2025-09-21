@@ -8,6 +8,9 @@ import './__tests__/setup';
 // Fix for React 19 compatibility in JSDOM environment
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean;
+  function beforeAll(fn: () => void | Promise<void>): void;
+  function afterEach(fn: () => void | Promise<void>): void;
+  function afterAll(fn: () => void | Promise<void>): void;
 }
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 

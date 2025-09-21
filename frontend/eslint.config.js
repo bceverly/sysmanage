@@ -33,7 +33,9 @@ export default [
         HTMLImageElement: 'readonly',
         FormData: 'readonly',
         AbortController: 'readonly',
-        Blob: 'readonly'
+        Blob: 'readonly',
+        URL: 'readonly',
+        console: 'readonly'
       }
     },
     plugins: {
@@ -78,7 +80,8 @@ export default [
         document: 'readonly',
         localStorage: 'readonly',
         HTMLInputElement: 'readonly',
-        setTimeout: 'readonly'
+        setTimeout: 'readonly',
+        URL: 'readonly'
       }
     },
     plugins: {

@@ -115,3 +115,7 @@ like to add:
     be able to push a request to
     add a PPA to a remote host
     from a UI on the server.
+
+14. Get rid of all integer primary
+    keys in the database and
+    replace them with UUIDs.

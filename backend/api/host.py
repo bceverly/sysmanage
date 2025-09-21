@@ -130,10 +130,14 @@ async def get_host(host_id: int):
         # Calculate update counts from package_updates relationship
         package_updates = host.package_updates
         security_updates_count = sum(
-            1 for update in package_updates if update.is_security_update
+            1
+            for update in package_updates
+            if getattr(update, "is_security_update", False)
         )
         system_updates_count = sum(
-            1 for update in package_updates if update.is_system_update
+            1
+            for update in package_updates
+            if getattr(update, "is_system_update", False)
         )
         total_updates_count = len(package_updates)
 
@@ -197,10 +201,14 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
         # Calculate update counts from package_updates relationship
         package_updates = host.package_updates
         security_updates_count = sum(
-            1 for update in package_updates if update.is_security_update
+            1
+            for update in package_updates
+            if getattr(update, "is_security_update", False)
         )
         system_updates_count = sum(
-            1 for update in package_updates if update.is_system_update
+            1
+            for update in package_updates
+            if getattr(update, "is_system_update", False)
         )
         total_updates_count = len(package_updates)
 
@@ -266,10 +274,14 @@ async def get_all_hosts():
             # Calculate update counts from package_updates relationship
             package_updates = host.package_updates
             security_updates_count = sum(
-                1 for update in package_updates if update.is_security_update
+                1
+                for update in package_updates
+                if getattr(update, "is_security_update", False)
             )
             system_updates_count = sum(
-                1 for update in package_updates if update.is_system_update
+                1
+                for update in package_updates
+                if getattr(update, "is_system_update", False)
             )
             total_updates_count = len(package_updates)
 
