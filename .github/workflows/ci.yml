@@ -297,6 +297,17 @@ jobs:
         npm run test:coverage
         echo "✅ Frontend tests completed"
 
+        # Show MSW-specific coverage info
+        echo "📊 MSW Coverage Summary:"
+        if [ -f "coverage/coverage-summary.json" ]; then
+          echo "MSW files found in coverage:"
+          cat coverage/coverage-summary.json | grep -o '"[^"]*mocks[^"]*"' | sort
+          echo "MSW Handlers coverage:"
+          cat coverage/coverage-summary.json | grep "mocks/handlers.ts" | head -1
+          echo "MSW Node coverage:"
+          cat coverage/coverage-summary.json | grep "mocks/node.ts" | head -1
+        fi
+
     - name: Extract frontend coverage percentage
       id: frontend-coverage
       working-directory: frontend
@@ -370,11 +381,14 @@ jobs:
 
     - name: Upload MSW test artifacts
       uses: actions/upload-artifact@v4
+      if: always()  # Upload even if tests fail
       with:
         name: msw-test-coverage
         path: |
           frontend/coverage/coverage-summary.json
-          frontend/coverage/lcov-report/index.html
+          frontend/coverage/index.html
+          frontend/coverage/src/mocks/
+        if-no-files-found: warn
 
   build:
     name: Build Check
