@@ -436,17 +436,29 @@ jobs:
           echo "Files in coverage directory:"
           find coverage -type f | head -10
           echo "Coverage directory size: $(du -sh coverage/ | cut -f1)"
+          echo "COVERAGE_EXISTS=true" >> $GITHUB_ENV
         else
           echo "❌ No coverage directory found for artifacts"
+          echo "COVERAGE_EXISTS=false" >> $GITHUB_ENV
         fi
 
     - name: Upload MSW test artifacts
       uses: actions/upload-artifact@v4
-      if: always() && hashFiles('frontend/coverage/*') != ''
+      if: always()
       with:
-        name: msw-test-coverage
+        name: msw-test-coverage-${{ github.run_number }}
         path: frontend/coverage/
-        if-no-files-found: error
+        if-no-files-found: warn
+        retention-days: 7
+
+    - name: Report artifact upload status
+      if: always()
+      run: |
+        if [ "${{ env.COVERAGE_EXISTS }}" = "true" ]; then
+          echo "✅ Coverage files should have been uploaded as artifacts"
+        else
+          echo "❌ No coverage files found - check test execution above"
+        fi
 
   build:
     name: Build Check
