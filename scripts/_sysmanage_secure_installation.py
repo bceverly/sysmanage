@@ -269,14 +269,68 @@ def update_config_file(salt, jwt_secret):
         if 'security' not in config:
             config['security'] = {}
 
-        config['security']['salt'] = salt
+        config['security']['password_salt'] = salt
         config['security']['jwt_secret'] = jwt_secret
 
-        # Write updated config
-        with open(config_path, 'w') as f:
-            yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+        # Try to write directly first
+        try:
+            with open(config_path, 'w') as f:
+                yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+            print("  Configuration updated successfully.")
+        except PermissionError:
+            # If permission denied, use privilege escalation
+            print("  Requires elevated privileges to update system config file...")
 
-        print("  Configuration updated successfully.")
+            # Create temporary file with updated config
+            import tempfile
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as tmp_file:
+                yaml.dump(config, tmp_file, default_flow_style=False, sort_keys=False)
+                tmp_path = tmp_file.name
+
+            try:
+                # Detect privilege escalation command
+                priv_cmd = None
+                if platform.system() in ['OpenBSD', 'FreeBSD', 'NetBSD']:
+                    import subprocess
+                    try:
+                        subprocess.run(['doas', 'true'], check=True, capture_output=True)
+                        priv_cmd = 'doas'
+                    except (subprocess.CalledProcessError, FileNotFoundError):
+                        try:
+                            subprocess.run(['sudo', '-n', 'true'], check=True, capture_output=True)
+                            priv_cmd = 'sudo'
+                        except (subprocess.CalledProcessError, FileNotFoundError):
+                            pass
+                else:
+                    import subprocess
+                    try:
+                        subprocess.run(['sudo', '-n', 'true'], check=True, capture_output=True)
+                        priv_cmd = 'sudo'
+                    except (subprocess.CalledProcessError, FileNotFoundError):
+                        pass
+
+                if priv_cmd:
+                    print(f"  Using {priv_cmd} to update configuration file...")
+                    import subprocess
+                    result = subprocess.run([priv_cmd, 'cp', tmp_path, config_path],
+                                          capture_output=True, text=True)
+
+                    if result.returncode == 0:
+                        print("  Configuration updated successfully with elevated privileges.")
+                    else:
+                        print(f"Error updating configuration with {priv_cmd}: {result.stderr}")
+                        sys.exit(1)
+                else:
+                    print("Error: No privilege escalation method available (doas/sudo).")
+                    print("Please run with appropriate privileges or copy the config manually.")
+                    sys.exit(1)
+
+            finally:
+                # Clean up temporary file
+                try:
+                    os.unlink(tmp_path)
+                except:
+                    pass
 
     except Exception as e:
         print(f"Error updating configuration: {e}")

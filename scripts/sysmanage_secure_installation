@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 # SysManage Secure Installation Wrapper
 # Handles privilege elevation and virtual environment setup across platforms
 
 # Get the directory where this script is located
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
 PYTHON_SCRIPT="$SCRIPT_DIR/_sysmanage_secure_installation.py"
 
