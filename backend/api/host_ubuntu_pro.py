@@ -39,7 +39,7 @@ class UbuntuProServiceRequest(BaseModel):
 
 
 @router.post("/host/{host_id}/ubuntu-pro/attach", dependencies=[Depends(JWTBearer())])
-async def attach_ubuntu_pro(host_id: int, request: UbuntuProAttachRequest):
+async def attach_ubuntu_pro(host_id: str, request: UbuntuProAttachRequest):
     """
     Attach Ubuntu Pro subscription to a host using the provided token.
     """
@@ -47,96 +47,104 @@ async def attach_ubuntu_pro(host_id: int, request: UbuntuProAttachRequest):
     if not token:
         raise HTTPException(status_code=400, detail=_("Ubuntu Pro token is required"))
 
-    db_session = db.SessionLocal()
-    try:
-        # Get host to verify it exists
-        host = get_host_by_id(host_id)
+    from sqlalchemy.orm import sessionmaker
 
-        # Prepare command data for Ubuntu Pro attach
-        command_data = {
-            "command_type": "ubuntu_pro_attach",
-            "parameters": {"token": token},
-        }
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
 
-        # Enqueue the message for processing by message processor
-        queue_message_id = server_queue_manager.enqueue_message(
-            message_type="command",
-            message_data=command_data,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host.id,
-            priority=Priority.HIGH,
-            db=db_session,
-        )
+    with session_local() as db_session:
+        try:
+            # Get host to verify it exists
+            host = get_host_by_id(host_id)
 
-        # Commit the database session to persist the enqueued message
-        db_session.commit()
+            # Prepare command data for Ubuntu Pro attach
+            command_data = {
+                "command_type": "ubuntu_pro_attach",
+                "parameters": {"token": token},
+            }
 
-        return {
-            "result": True,
-            "message": _("Ubuntu Pro attach requested"),
-            "queue_id": queue_message_id,
-        }
+            # Enqueue the message for processing by message processor
+            queue_message_id = server_queue_manager.enqueue_message(
+                message_type="command",
+                message_data=command_data,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host.id,
+                priority=Priority.HIGH,
+                db=db_session,
+            )
 
-    except HTTPException:
-        raise
-    except Exception as e:
-        db_session.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail=_("Failed to request Ubuntu Pro attach: %s") % str(e),
-        ) from e
-    finally:
-        db_session.close()
+            # Commit the database session to persist the enqueued message
+            db_session.commit()
+
+            return {
+                "result": True,
+                "message": _("Ubuntu Pro attach requested"),
+                "queue_id": queue_message_id,
+            }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            db_session.rollback()
+            raise HTTPException(
+                status_code=500,
+                detail=_("Failed to request Ubuntu Pro attach: %s") % str(e),
+            ) from e
 
 
 @router.post("/host/{host_id}/ubuntu-pro/detach", dependencies=[Depends(JWTBearer())])
-async def detach_ubuntu_pro(host_id: int):
+async def detach_ubuntu_pro(host_id: str):
     """
     Detach Ubuntu Pro subscription from a host.
     """
-    db_session = db.SessionLocal()
-    try:
-        # Get host to verify it exists
-        host = get_host_by_id(host_id)
+    from sqlalchemy.orm import sessionmaker
 
-        # Prepare command data for Ubuntu Pro detach
-        command_data = {"command_type": "ubuntu_pro_detach", "parameters": {}}
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
 
-        # Enqueue the message for processing by message processor
-        queue_message_id = server_queue_manager.enqueue_message(
-            message_type="command",
-            message_data=command_data,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host.id,
-            priority=Priority.HIGH,
-            db=db_session,
-        )
+    with session_local() as db_session:
+        try:
+            # Get host to verify it exists
+            host = get_host_by_id(host_id)
 
-        # Commit the database session to persist the enqueued message
-        db_session.commit()
+            # Prepare command data for Ubuntu Pro detach
+            command_data = {"command_type": "ubuntu_pro_detach", "parameters": {}}
 
-        return {
-            "result": True,
-            "message": _("Ubuntu Pro detach requested"),
-            "queue_id": queue_message_id,
-        }
+            # Enqueue the message for processing by message processor
+            queue_message_id = server_queue_manager.enqueue_message(
+                message_type="command",
+                message_data=command_data,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host.id,
+                priority=Priority.HIGH,
+                db=db_session,
+            )
 
-    except HTTPException:
-        raise
-    except Exception as e:
-        db_session.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail=_("Failed to request Ubuntu Pro detach: %s") % str(e),
-        ) from e
-    finally:
-        db_session.close()
+            # Commit the database session to persist the enqueued message
+            db_session.commit()
+
+            return {
+                "result": True,
+                "message": _("Ubuntu Pro detach requested"),
+                "queue_id": queue_message_id,
+            }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            db_session.rollback()
+            raise HTTPException(
+                status_code=500,
+                detail=_("Failed to request Ubuntu Pro detach: %s") % str(e),
+            ) from e
 
 
 @router.post(
     "/host/{host_id}/ubuntu-pro/service/enable", dependencies=[Depends(JWTBearer())]
 )
-async def enable_ubuntu_pro_service(host_id: int, request: UbuntuProServiceRequest):
+async def enable_ubuntu_pro_service(host_id: str, request: UbuntuProServiceRequest):
     """
     Enable Ubuntu Pro service on a host.
     """
@@ -144,52 +152,56 @@ async def enable_ubuntu_pro_service(host_id: int, request: UbuntuProServiceReque
     if not service:
         raise HTTPException(status_code=400, detail=_("Service name is required"))
 
-    db_session = db.SessionLocal()
-    try:
-        # Get host to verify it exists
-        host = get_host_by_id(host_id)
+    from sqlalchemy.orm import sessionmaker
 
-        # Prepare command data for Ubuntu Pro service enable
-        command_data = {
-            "command_type": "ubuntu_pro_enable_service",
-            "parameters": {"service": service},
-        }
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
 
-        # Enqueue the message for processing by message processor
-        queue_message_id = server_queue_manager.enqueue_message(
-            message_type="command",
-            message_data=command_data,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host.id,
-            priority=Priority.HIGH,
-            db=db_session,
-        )
+    with session_local() as db_session:
+        try:
+            # Get host to verify it exists
+            host = get_host_by_id(host_id)
 
-        # Commit the database session to persist the enqueued message
-        db_session.commit()
+            # Prepare command data for Ubuntu Pro service enable
+            command_data = {
+                "command_type": "ubuntu_pro_enable_service",
+                "parameters": {"service": service},
+            }
 
-        return {
-            "result": True,
-            "message": _("Ubuntu Pro service enable requested"),
-            "queue_id": queue_message_id,
-        }
+            # Enqueue the message for processing by message processor
+            queue_message_id = server_queue_manager.enqueue_message(
+                message_type="command",
+                message_data=command_data,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host.id,
+                priority=Priority.HIGH,
+                db=db_session,
+            )
 
-    except HTTPException:
-        raise
-    except Exception as e:
-        db_session.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail=_("Failed to request Ubuntu Pro service enable: %s") % str(e),
-        ) from e
-    finally:
-        db_session.close()
+            # Commit the database session to persist the enqueued message
+            db_session.commit()
+
+            return {
+                "result": True,
+                "message": _("Ubuntu Pro service enable requested"),
+                "queue_id": queue_message_id,
+            }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            db_session.rollback()
+            raise HTTPException(
+                status_code=500,
+                detail=_("Failed to request Ubuntu Pro service enable: %s") % str(e),
+            ) from e
 
 
 @router.post(
     "/host/{host_id}/ubuntu-pro/service/disable", dependencies=[Depends(JWTBearer())]
 )
-async def disable_ubuntu_pro_service(host_id: int, request: UbuntuProServiceRequest):
+async def disable_ubuntu_pro_service(host_id: str, request: UbuntuProServiceRequest):
     """
     Disable Ubuntu Pro service on a host.
     """
@@ -197,43 +209,47 @@ async def disable_ubuntu_pro_service(host_id: int, request: UbuntuProServiceRequ
     if not service:
         raise HTTPException(status_code=400, detail=_("Service name is required"))
 
-    db_session = db.SessionLocal()
-    try:
-        # Get host to verify it exists
-        host = get_host_by_id(host_id)
+    from sqlalchemy.orm import sessionmaker
 
-        # Prepare command data for Ubuntu Pro service disable
-        command_data = {
-            "command_type": "ubuntu_pro_disable_service",
-            "parameters": {"service": service},
-        }
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
 
-        # Enqueue the message for processing by message processor
-        queue_message_id = server_queue_manager.enqueue_message(
-            message_type="command",
-            message_data=command_data,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host.id,
-            priority=Priority.HIGH,
-            db=db_session,
-        )
+    with session_local() as db_session:
+        try:
+            # Get host to verify it exists
+            host = get_host_by_id(host_id)
 
-        # Commit the database session to persist the enqueued message
-        db_session.commit()
+            # Prepare command data for Ubuntu Pro service disable
+            command_data = {
+                "command_type": "ubuntu_pro_disable_service",
+                "parameters": {"service": service},
+            }
 
-        return {
-            "result": True,
-            "message": _("Ubuntu Pro service disable requested"),
-            "queue_id": queue_message_id,
-        }
+            # Enqueue the message for processing by message processor
+            queue_message_id = server_queue_manager.enqueue_message(
+                message_type="command",
+                message_data=command_data,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host.id,
+                priority=Priority.HIGH,
+                db=db_session,
+            )
 
-    except HTTPException:
-        raise
-    except Exception as e:
-        db_session.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail=_("Failed to request Ubuntu Pro service disable: %s") % str(e),
-        ) from e
-    finally:
-        db_session.close()
+            # Commit the database session to persist the enqueued message
+            db_session.commit()
+
+            return {
+                "result": True,
+                "message": _("Ubuntu Pro service disable requested"),
+                "queue_id": queue_message_id,
+            }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            db_session.rollback()
+            raise HTTPException(
+                status_code=500,
+                detail=_("Failed to request Ubuntu Pro service disable: %s") % str(e),
+            ) from e

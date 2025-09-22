@@ -232,7 +232,7 @@ class CertificateManager:
         os.chmod(self.server_cert_path, 0o644)
 
     def generate_client_certificate(
-        self, hostname: str, host_id: int
+        self, hostname: str, host_id: str
     ) -> Tuple[bytes, bytes]:
         """Generate client certificate for agent authentication."""
         self.ensure_ca_certificate()
@@ -362,10 +362,7 @@ class CertificateManager:
                 if attribute.oid == NameOID.COMMON_NAME:
                     hostname = attribute.value
                 elif attribute.oid == NameOID.ORGANIZATIONAL_UNIT_NAME:
-                    try:
-                        host_id = int(attribute.value)
-                    except ValueError:
-                        return None
+                    host_id = attribute.value  # Keep as UUID string
 
             if hostname and host_id:
                 return hostname, host_id

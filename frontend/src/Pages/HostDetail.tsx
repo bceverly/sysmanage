@@ -48,7 +48,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import AddIcon from '@mui/icons-material/Add';
 import HistoryIcon from '@mui/icons-material/History';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField, List, ListItem, ListItemText, Divider, TableContainer, TableHead } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField, List, ListItem, ListItemText, Divider, TableContainer, TableHead } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
 
@@ -79,10 +79,10 @@ const HostDetail = () => {
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [dialogContent, setDialogContent] = useState<string>('');
     const [dialogTitle, setDialogTitle] = useState<string>('');
-    const [expandedUserGroups, setExpandedUserGroups] = useState<Set<number>>(new Set());
-    const [expandedGroupUsers, setExpandedGroupUsers] = useState<Set<number>>(new Set());
+    const [expandedUserGroups, setExpandedUserGroups] = useState<Set<string>>(new Set());
+    const [expandedGroupUsers, setExpandedGroupUsers] = useState<Set<string>>(new Set());
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false);
-    const [diagnosticToDelete, setDiagnosticToDelete] = useState<number | null>(null);
+    const [diagnosticToDelete, setDiagnosticToDelete] = useState<string | null>(null);
     const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
     const [snackbarMessage, setSnackbarMessage] = useState<string>('');
     const [rebootConfirmOpen, setRebootConfirmOpen] = useState<boolean>(false);
@@ -96,6 +96,7 @@ const HostDetail = () => {
     const [ubuntuProToken, setUbuntuProToken] = useState<string>('');
     const [ubuntuProAttaching, setUbuntuProAttaching] = useState<boolean>(false);
     const [ubuntuProDetaching, setUbuntuProDetaching] = useState<boolean>(false);
+    const [ubuntuProDetachConfirmOpen, setUbuntuProDetachConfirmOpen] = useState<boolean>(false);
 
     // Ubuntu Pro service editing state
     const [servicesEditMode, setServicesEditMode] = useState<boolean>(false);
@@ -111,9 +112,9 @@ const HostDetail = () => {
     const [isSearching, setIsSearching] = useState<boolean>(false);
 
     // Tag-related state
-    const [hostTags, setHostTags] = useState<Array<{id: number, name: string, description: string | null}>>([]);
-    const [availableTags, setAvailableTags] = useState<Array<{id: number, name: string, description: string | null}>>([]);
-    const [selectedTagToAdd, setSelectedTagToAdd] = useState<number | string>('');
+    const [hostTags, setHostTags] = useState<Array<{id: string, name: string, description: string | null}>>([]);
+    const [availableTags, setAvailableTags] = useState<Array<{id: string, name: string, description: string | null}>>([]);
+    const [selectedTagToAdd, setSelectedTagToAdd] = useState<string>('');
     const [diagnosticDetailLoading, setDiagnosticDetailLoading] = useState<boolean>(false);
 
     // Installation history state
@@ -164,18 +165,18 @@ const HostDetail = () => {
         const fetchHost = async () => {
             try {
                 setLoading(true);
-                const hostData = await doGetHostByID(BigInt(hostId));
+                const hostData = await doGetHostByID(hostId);
                 setHost(hostData);
                 
                 // Fetch normalized storage, network, user access, software, and diagnostics data
                 try {
                     const [storageData, networkData, usersData, groupsData, softwareData, diagnosticsData, currentUserData] = await Promise.all([
-                        doGetHostStorage(BigInt(hostId)),
-                        doGetHostNetwork(BigInt(hostId)),
-                        doGetHostUsers(BigInt(hostId)),
-                        doGetHostGroups(BigInt(hostId)),
-                        doGetHostSoftware(BigInt(hostId)),
-                        doGetHostDiagnostics(BigInt(hostId)),
+                        doGetHostStorage(hostId),
+                        doGetHostNetwork(hostId),
+                        doGetHostUsers(hostId),
+                        doGetHostGroups(hostId),
+                        doGetHostSoftware(hostId),
+                        doGetHostDiagnostics(hostId),
                         doGetMe()
                     ]);
                     
@@ -219,7 +220,7 @@ const HostDetail = () => {
                     try {
                         if (hostData.platform?.toLowerCase().includes('ubuntu') ||
                             hostData.platform_release?.toLowerCase().includes('ubuntu')) {
-                            const ubuntuProData = await doGetHostUbuntuPro(BigInt(hostId));
+                            const ubuntuProData = await doGetHostUbuntuPro(hostId);
                             setUbuntuProInfo(ubuntuProData);
                         }
                     } catch (error) {
@@ -266,7 +267,7 @@ const HostDetail = () => {
             if (response.status === 200) {
                 const allTags = response.data;
                 // Filter out tags that are already assigned to this host
-                const available = allTags.filter((tag: {id: number, name: string, description: string | null}) => 
+                const available = allTags.filter((tag: {id: string, name: string, description: string | null}) =>
                     !hostTags.some(hostTag => hostTag.id === tag.id)
                 );
                 setAvailableTags(available);
@@ -336,7 +337,7 @@ const HostDetail = () => {
         if (hostId && ubuntuProInfo?.available) {
             interval = window.setInterval(async () => {
                 try {
-                    const ubuntuProData = await doGetHostUbuntuPro(BigInt(hostId));
+                    const ubuntuProData = await doGetHostUbuntuPro(hostId);
                     setUbuntuProInfo(ubuntuProData);
                     // Clear service messages on refresh (as requested by user)
                     if (servicesMessage) {
@@ -643,8 +644,8 @@ const HostDetail = () => {
                 // Get list of already installed package names
                 const installedPackageNames = new Set(
                     softwarePackages
-                        .filter(pkg => pkg.name) // Filter out packages without names
-                        .map(pkg => pkg.name.toLowerCase())
+                        .filter(pkg => pkg.package_name) // Filter out packages without names
+                        .map(pkg => pkg.package_name.toLowerCase())
                 );
 
                 // Filter out already installed packages
@@ -695,13 +696,13 @@ const HostDetail = () => {
         
         try {
             setDiagnosticsLoading(true);
-            await doRequestHostDiagnostics(BigInt(hostId));
+            await doRequestHostDiagnostics(hostId);
             
             // Show success message
             console.log('Diagnostics collection requested successfully');
             
             // Refresh host data to get updated diagnostics request status
-            const updatedHost = await doGetHostByID(BigInt(hostId));
+            const updatedHost = await doGetHostByID(hostId);
             setHost(updatedHost);
             
             // Start polling for completion if request is pending
@@ -714,12 +715,12 @@ const HostDetail = () => {
                     
                     setTimeout(async () => {
                         try {
-                            const currentHost = await doGetHostByID(BigInt(hostId));
+                            const currentHost = await doGetHostByID(hostId);
                             setHost(currentHost);
                             
                             // If status changed from pending, also refresh diagnostics data
                             if (currentHost?.diagnostics_request_status !== 'pending') {
-                                const updatedDiagnostics = await doGetHostDiagnostics(BigInt(hostId));
+                                const updatedDiagnostics = await doGetHostDiagnostics(hostId);
                                 setDiagnosticsData(updatedDiagnostics);
                                 console.log('Diagnostics request completed');
                             } else {
@@ -742,12 +743,12 @@ const HostDetail = () => {
         }
     };
 
-    const handleDeleteDiagnostic = (diagnosticId: number) => {
+    const handleDeleteDiagnostic = (diagnosticId: string) => {
         setDiagnosticToDelete(diagnosticId);
         setDeleteConfirmOpen(true);
     };
 
-    const handleViewDiagnosticDetail = async (diagnosticId: number) => {
+    const handleViewDiagnosticDetail = async (diagnosticId: string) => {
         try {
             setDiagnosticDetailLoading(true);
             setDiagnosticDetailOpen(true);
@@ -813,13 +814,13 @@ const HostDetail = () => {
             // Refresh diagnostics data after deletion
             if (hostId) {
                 try {
-                    const updatedDiagnostics = await doGetHostDiagnostics(BigInt(hostId));
+                    const updatedDiagnostics = await doGetHostDiagnostics(hostId);
                     setDiagnosticsData(updatedDiagnostics);
                     console.log('Diagnostics data refreshed:', updatedDiagnostics.length, 'reports');
                     
                     // Also refresh host data to update the processing pill status
                     // This is especially important if we just deleted the last diagnostic
-                    const updatedHost = await doGetHostByID(BigInt(hostId));
+                    const updatedHost = await doGetHostByID(hostId);
                     setHost(updatedHost);
                     console.log('Host data refreshed, diagnostics_request_status:', updatedHost?.diagnostics_request_status);
                 } catch (refreshError) {
@@ -879,7 +880,7 @@ const HostDetail = () => {
         }
     };
 
-    const handleRemoveTag = async (tagId: number) => {
+    const handleRemoveTag = async (tagId: string) => {
         if (!hostId) return;
         
         try {
@@ -945,16 +946,33 @@ const HostDetail = () => {
     };
 
     // Ubuntu Pro handlers
-    const handleUbuntuProAttach = () => {
+    const handleUbuntuProAttach = async () => {
+        // Try to load master Ubuntu Pro token
+        try {
+            const response = await axiosInstance.get('/api/ubuntu-pro/');
+            const masterKey = response.data.master_key;
+            if (masterKey && masterKey.trim()) {
+                setUbuntuProToken(masterKey);
+            }
+        } catch (error) {
+            console.log('No master Ubuntu Pro token configured or error loading:', error);
+            // Don't show error to user - this is optional functionality
+        }
+
         setUbuntuProTokenDialog(true);
     };
 
-    const handleUbuntuProDetach = async () => {
+    const handleUbuntuProDetach = () => {
+        setUbuntuProDetachConfirmOpen(true);
+    };
+
+    const handleConfirmUbuntuProDetach = async () => {
         if (!hostId || !host) return;
 
+        setUbuntuProDetachConfirmOpen(false);
         setUbuntuProDetaching(true);
         try {
-            await doDetachUbuntuPro(BigInt(hostId));
+            await doDetachUbuntuPro(hostId);
             setSnackbarMessage(t('hostDetail.ubuntuProDetachSuccess', 'Ubuntu Pro detached successfully'));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
@@ -962,7 +980,7 @@ const HostDetail = () => {
             // Refresh Ubuntu Pro info after a short delay to allow agent to process
             setTimeout(async () => {
                 try {
-                    const ubuntuProData = await doGetHostUbuntuPro(BigInt(hostId));
+                    const ubuntuProData = await doGetHostUbuntuPro(hostId);
                     setUbuntuProInfo(ubuntuProData);
                 } catch (refreshError) {
                     console.log('Failed to refresh Ubuntu Pro data:', refreshError);
@@ -977,6 +995,10 @@ const HostDetail = () => {
         }
     };
 
+    const handleCancelUbuntuProDetach = () => {
+        setUbuntuProDetachConfirmOpen(false);
+    };
+
     const handleUbuntuProTokenSubmit = async () => {
         if (!hostId || !host || !ubuntuProToken.trim()) return;
 
@@ -984,7 +1006,7 @@ const HostDetail = () => {
         setUbuntuProTokenDialog(false);
 
         try {
-            await doAttachUbuntuPro(BigInt(hostId), ubuntuProToken.trim());
+            await doAttachUbuntuPro(hostId, ubuntuProToken.trim());
             setSnackbarMessage(t('hostDetail.ubuntuProAttachSuccess', 'Ubuntu Pro attached successfully'));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
@@ -992,7 +1014,7 @@ const HostDetail = () => {
             // Refresh Ubuntu Pro info after a short delay to allow agent to process
             setTimeout(async () => {
                 try {
-                    const ubuntuProData = await doGetHostUbuntuPro(BigInt(hostId));
+                    const ubuntuProData = await doGetHostUbuntuPro(hostId);
                     setUbuntuProInfo(ubuntuProData);
                 } catch (refreshError) {
                     console.log('Failed to refresh Ubuntu Pro data:', refreshError);
@@ -1244,9 +1266,9 @@ const HostDetail = () => {
             // Apply changes
             for (const change of servicesToChange) {
                 if (change.enable) {
-                    await doEnableUbuntuProService(parseInt(hostId), change.service);
+                    await doEnableUbuntuProService(hostId, change.service);
                 } else {
-                    await doDisableUbuntuProService(parseInt(hostId), change.service);
+                    await doDisableUbuntuProService(hostId, change.service);
                 }
             }
 
@@ -1589,7 +1611,7 @@ const HostDetail = () => {
                                     <InputLabel>{t('hostDetail.addTag', 'Add Tag')}</InputLabel>
                                     <Select
                                         value={selectedTagToAdd}
-                                        onChange={(e) => setSelectedTagToAdd(Number(e.target.value))}
+                                        onChange={(e) => setSelectedTagToAdd(e.target.value)}
                                         label={t('hostDetail.addTag', 'Add Tag')}
                                     >
                                         {availableTags.map(tag => (
@@ -3075,6 +3097,38 @@ const HostDetail = () => {
                 </DialogActions>
             </Dialog>
 
+            {/* Ubuntu Pro Detach Confirmation Dialog */}
+            <Dialog
+                open={ubuntuProDetachConfirmOpen}
+                onClose={handleCancelUbuntuProDetach}
+                aria-labelledby="ubuntu-pro-detach-dialog-title"
+                aria-describedby="ubuntu-pro-detach-dialog-description"
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle id="ubuntu-pro-detach-dialog-title">
+                    {t('hostDetail.ubuntuProDetachConfirmTitle', 'Confirm Ubuntu Pro Detach')}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="ubuntu-pro-detach-dialog-description">
+                        {t('hostDetail.ubuntuProDetachConfirmMessage', 'Are you sure you want to detach Ubuntu Pro from this system? This will remove all Ubuntu Pro benefits and services for this host.')}
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCancelUbuntuProDetach} color="primary">
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button
+                        onClick={handleConfirmUbuntuProDetach}
+                        color="warning"
+                        variant="contained"
+                        autoFocus
+                    >
+                        {t('hostDetail.ubuntuProDetachConfirm', 'Detach')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             {/* Ubuntu Pro Token Dialog */}
             <Dialog
                 open={ubuntuProTokenDialog}
@@ -3089,6 +3143,11 @@ const HostDetail = () => {
                     <Typography variant="body2" sx={{ mb: 2 }}>
                         {t('hostDetail.ubuntuProAttachDescription', 'Enter your Ubuntu Pro token to attach this system to your subscription.')}
                     </Typography>
+                    {ubuntuProToken && (
+                        <Alert severity="info" sx={{ mb: 2 }}>
+                            {t('hostDetail.ubuntuProMasterTokenPreFilled', 'Master Ubuntu Pro token has been pre-filled from settings.')}
+                        </Alert>
+                    )}
                     <TextField
                         fullWidth
                         label={t('hostDetail.ubuntuProToken', 'Ubuntu Pro Token')}

@@ -7,7 +7,7 @@ type SuccessResponse = {
 }
 
 type SysManageUser = {
-    id: BigInt;
+    id: string;
     active: boolean;
     userid: string;
     password: string;
@@ -68,7 +68,7 @@ const doAddUser = async (active: boolean, userid: string, password: string, firs
     return result;
 };
 
-const doDeleteUser = async (id: BigInt) => {
+const doDeleteUser = async (id: string) => {
     let successResponse = {} as SuccessResponse;
 
     await api.delete<SuccessResponse>("/api/user/" + id)
@@ -99,7 +99,7 @@ const doGetMe = async (): Promise<SysManageUser> => {
     return result;
 };
 
-const doGetUserByID = async (id: BigInt) => {
+const doGetUserByID = async (id: string) => {
     let result = {} as SysManageUser;
 
     await api.get<SysManageUser>("/api/user/" + id)
@@ -147,7 +147,7 @@ const doGetUserByUserid = async (userid: string) => {
     return result;
 };
 
-const doUpdateUser = async (id: BigInt, active: boolean, userid: string, password: string, firstName?: string, lastName?: string) => {
+const doUpdateUser = async (id: string, active: boolean, userid: string, password: string, firstName?: string, lastName?: string) => {
     let successResponse = {} as SuccessResponse;
 
     await api.put<SuccessResponse>("/api/user/" + id, {
@@ -169,7 +169,7 @@ const doUpdateUser = async (id: BigInt, active: boolean, userid: string, passwor
     return successResponse;
 };
 
-const doUnlockUser = async (id: BigInt) => {
+const doUnlockUser = async (id: string) => {
     let result = {} as SysManageUser;
 
     await api.post<SysManageUser>("/api/user/" + id + "/unlock")
@@ -185,7 +185,23 @@ const doUnlockUser = async (id: BigInt) => {
     return result;
 };
 
-const doUploadUserImage = async (userId: BigInt, file: globalThis.File) => {
+const doLockUser = async (id: string) => {
+    let result = {} as SysManageUser;
+
+    await api.post<SysManageUser>("/api/user/" + id + "/lock")
+    .then((response) => {
+        // No error - process response
+        result = response.data;
+        return Promise.resolve(result);
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doUploadUserImage = async (userId: string, file: globalThis.File) => {
     const formData = new FormData();
     formData.append('file', file);
 
@@ -202,7 +218,7 @@ const doUploadUserImage = async (userId: BigInt, file: globalThis.File) => {
     }
 };
 
-const doGetUserImage = async (userId: BigInt): Promise<globalThis.Blob> => {
+const doGetUserImage = async (userId: string): Promise<globalThis.Blob> => {
     try {
         const response = await api.get(`/api/user/${userId}/image`, {
             responseType: 'blob'
@@ -214,7 +230,7 @@ const doGetUserImage = async (userId: BigInt): Promise<globalThis.Blob> => {
     }
 };
 
-const doDeleteUserImage = async (userId: BigInt) => {
+const doDeleteUserImage = async (userId: string) => {
     try {
         const response = await api.delete(`/api/user/${userId}/image`);
         return response.data;
@@ -225,4 +241,4 @@ const doDeleteUserImage = async (userId: BigInt) => {
 };
 
 export type { SuccessResponse, SysManageUser };
-export { doAddUser, doDeleteUser, doGetMe, doGetUserByID, doGetUserByUserid, doGetUsers, doUpdateUser, doUnlockUser, doUploadUserImage, doGetUserImage, doDeleteUserImage };
+export { doAddUser, doDeleteUser, doGetMe, doGetUserByID, doGetUserByUserid, doGetUsers, doUpdateUser, doUnlockUser, doLockUser, doUploadUserImage, doGetUserImage, doDeleteUserImage };

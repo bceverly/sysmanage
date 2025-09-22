@@ -160,7 +160,6 @@ class TestTagHostAssociation:
         """Test adding a tag to a host"""
         # Create test host using API models
         host = models.Host(
-            id=1,
             fqdn="test.example.com",
             ipv4="192.168.1.100",
             ipv6="2001:db8::1",
@@ -201,7 +200,6 @@ class TestTagHostAssociation:
         """Test adding same tag to host twice fails"""
         # Create test host
         host = models.Host(
-            id=1,
             fqdn="test.example.com",
             ipv4="192.168.1.100",
             active=True,
@@ -261,7 +259,6 @@ class TestTagHostAssociation:
         """Test adding non-existent tag to host"""
         # Create test host
         host = models.Host(
-            id=1,
             fqdn="test.example.com",
             ipv4="192.168.1.100",
             active=True,
@@ -283,7 +280,6 @@ class TestTagHostAssociation:
         """Test removing a tag from a host"""
         # Create test host and tag
         host = models.Host(
-            id=1,
             fqdn="test.example.com",
             ipv4="192.168.1.100",
             active=True,
@@ -330,7 +326,6 @@ class TestTagHostAssociation:
         """Test removing tag that isn't associated with host"""
         # Create test host and tag
         host = models.Host(
-            id=1,
             fqdn="test.example.com",
             ipv4="192.168.1.100",
             active=True,
@@ -360,7 +355,6 @@ class TestTagHostAssociation:
         """Test getting all tags for a specific host"""
         # Create test host
         host = models.Host(
-            id=1,
             fqdn="test.example.com",
             ipv4="192.168.1.100",
             active=True,
@@ -413,7 +407,6 @@ class TestTagHostAssociation:
         """Test getting all hosts associated with a specific tag"""
         # Create test host
         host = models.Host(
-            id=1,
             fqdn="test.example.com",
             ipv4="192.168.1.100",
             active=True,
@@ -446,10 +439,10 @@ class TestTagHostAssociation:
             print(f"Error response: {response.json()}")
         assert response.status_code == 200
         data = response.json()
-        assert data["id"] == tag.id
+        assert data["id"] == str(tag.id)
         assert data["name"] == "Host Tag"
         assert len(data["hosts"]) == 1
-        assert data["hosts"][0]["id"] == host.id
+        assert data["hosts"][0]["id"] == str(host.id)
 
 
 class TestTagEndpointsAuth:

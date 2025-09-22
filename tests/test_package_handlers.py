@@ -1,13 +1,17 @@
 """
 Unit tests for package data handlers.
-Tests the handle_packages_update function and related functionality.
+Tests the batch package handlers (handle_packages_batch_start, handle_packages_batch, handle_packages_batch_end).
 """
 
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone
 
-from backend.api.package_handlers import handle_packages_update
+from backend.api.package_handlers import (
+    handle_packages_batch_start,
+    handle_packages_batch,
+    handle_packages_batch_end,
+)
 from backend.persistence import models
 
 
@@ -20,7 +24,7 @@ class TestPackageHandlers:
         from unittest.mock import AsyncMock
 
         connection = Mock()
-        connection.host_id = 1
+        connection.host_id = "550e8400-e29b-41d4-a716-446655440001"
         connection.hostname = "test-host"
         connection.send_message = AsyncMock()
         return connection
@@ -29,7 +33,7 @@ class TestPackageHandlers:
     def sample_host(self, session):
         """Create a sample host for testing."""
         host = models.Host(
-            id=1,
+            id="550e8400-e29b-41d4-a716-446655440001",
             fqdn="test-host.example.com",
             ipv4="192.168.1.100",
             ipv6="::1",
@@ -42,12 +46,22 @@ class TestPackageHandlers:
         return host
 
     @pytest.fixture
-    def sample_message_data(self):
-        """Create sample message data for testing."""
+    def sample_batch_start_data(self):
+        """Create sample batch start message data for testing."""
         return {
-            "host_id": 1,
+            "host_id": "550e8400-e29b-41d4-a716-446655440001",
+            "batch_id": "test-batch-123",
             "os_name": "Ubuntu",
             "os_version": "22.04",
+            "package_managers": ["apt", "snap"],
+        }
+
+    @pytest.fixture
+    def sample_batch_data(self):
+        """Create sample batch message data for testing."""
+        return {
+            "host_id": "550e8400-e29b-41d4-a716-446655440001",
+            "batch_id": "test-batch-123",
             "package_managers": {
                 "apt": [
                     {
@@ -71,23 +85,104 @@ class TestPackageHandlers:
             },
         }
 
+    @pytest.fixture
+    def sample_batch_end_data(self):
+        """Create sample batch end message data for testing."""
+        return {
+            "host_id": "550e8400-e29b-41d4-a716-446655440001",
+            "batch_id": "test-batch-123",
+        }
+
     @pytest.mark.asyncio
-    async def test_handle_packages_update_success(
-        self, session, mock_connection, sample_host, sample_message_data
+    async def test_handle_packages_batch_start_success(
+        self, session, mock_connection, sample_host, sample_batch_start_data
     ):
-        """Test successful package update handling."""
+        """Test successful batch start handling."""
         with patch(
             "backend.utils.host_validation.validate_host_id", new_callable=AsyncMock
         ) as mock_validate:
             mock_validate.return_value = True
 
-            result = await handle_packages_update(
-                session, mock_connection, sample_message_data
+            result = await handle_packages_batch_start(
+                session, mock_connection, sample_batch_start_data
             )
 
             assert result["message_type"] == "acknowledgment"
-            assert result["status"] == "success"
-            assert result["packages_processed"] == 3
+            assert result["status"] == "batch_started"
+            assert result["batch_id"] == "test-batch-123"
+
+    @pytest.mark.asyncio
+    async def test_handle_packages_batch_start_no_host_id(
+        self, session, sample_batch_start_data
+    ):
+        """Test batch start handling without host_id in connection."""
+        from unittest.mock import AsyncMock
+
+        connection = Mock()
+        connection.host_id = None
+        connection.send_message = AsyncMock()
+
+        result = await handle_packages_batch_start(
+            session, connection, sample_batch_start_data
+        )
+
+        assert result["message_type"] == "error"
+        assert "host_not_registered" in result["error"]
+
+    @pytest.mark.asyncio
+    async def test_handle_packages_batch_start_missing_batch_id(
+        self, session, mock_connection, sample_host
+    ):
+        """Test batch start handling with missing batch_id."""
+        message_data = {
+            "host_id": "550e8400-e29b-41d4-a716-446655440001",
+            "os_name": "Ubuntu",
+            "os_version": "22.04",
+            # Missing batch_id
+        }
+
+        with patch(
+            "backend.utils.host_validation.validate_host_id", new_callable=AsyncMock
+        ) as mock_validate:
+            mock_validate.return_value = True
+
+            result = await handle_packages_batch_start(
+                session, mock_connection, message_data
+            )
+
+            assert result["message_type"] == "error"
+            assert "Missing batch_id" in result["error"]
+
+    @pytest.mark.asyncio
+    async def test_handle_packages_batch_success(
+        self, session, mock_connection, sample_host, sample_batch_data
+    ):
+        """Test successful batch handling."""
+        # First start a batch to set up the session
+        from backend.api.package_handlers import _batch_sessions
+
+        _batch_sessions["test-batch-123"] = {
+            "host_id": "550e8400-e29b-41d4-a716-446655440001",
+            "os_name": "Ubuntu",
+            "os_version": "22.04",
+            "package_managers": ["apt", "snap"],
+            "total_packages": 0,
+            "started_at": datetime.now(timezone.utc),
+        }
+
+        with patch(
+            "backend.utils.host_validation.validate_host_id", new_callable=AsyncMock
+        ) as mock_validate:
+            mock_validate.return_value = True
+
+            result = await handle_packages_batch(
+                session, mock_connection, sample_batch_data
+            )
+
+            assert result["message_type"] == "acknowledgment"
+            assert result["status"] == "batch_processed"
+            assert result["batch_id"] == "test-batch-123"
+            assert result["packages_in_batch"] == 3
 
             # Verify packages were stored in database
             packages = session.query(models.AvailablePackage).all()
@@ -106,84 +201,128 @@ class TestPackageHandlers:
             assert nginx_package.os_version == "22.04"
 
     @pytest.mark.asyncio
-    async def test_handle_packages_update_no_host_id(
-        self, session, sample_message_data
+    async def test_handle_packages_batch_invalid_batch_id(
+        self, session, mock_connection, sample_host, sample_batch_data
     ):
-        """Test package update handling without host_id in connection."""
-        from unittest.mock import AsyncMock
-
-        connection = Mock()
-        connection.host_id = None
-        connection.send_message = AsyncMock()
-
-        result = await handle_packages_update(session, connection, sample_message_data)
-
-        assert result["message_type"] == "error"
-        assert result["error"] == "host_not_registered"
-
-    @pytest.mark.asyncio
-    async def test_handle_packages_update_invalid_host_id(
-        self, session, mock_connection, sample_message_data
-    ):
-        """Test package update handling with invalid host_id."""
-        with patch(
-            "backend.utils.host_validation.validate_host_id", new_callable=AsyncMock
-        ) as mock_validate:
-            mock_validate.return_value = False
-            sample_message_data["host_id"] = 999
-
-            result = await handle_packages_update(
-                session, mock_connection, sample_message_data
-            )
-
-            assert result["message_type"] == "error"
-            assert result["error"] == "host_not_registered"
-
-    @pytest.mark.asyncio
-    async def test_handle_packages_update_host_not_found(
-        self, session, mock_connection, sample_message_data
-    ):
-        """Test package update handling when host not found in database."""
-        with patch(
-            "backend.utils.host_validation.validate_host_id", new_callable=AsyncMock
-        ) as mock_validate:
-            mock_validate.return_value = True
-            mock_connection.host_id = 999  # Non-existent host
-
-            result = await handle_packages_update(
-                session, mock_connection, sample_message_data
-            )
-
-            assert result["message_type"] == "error"
-            assert result["error"] == "Host not found"
-
-    @pytest.mark.asyncio
-    async def test_handle_packages_update_empty_packages(
-        self, session, mock_connection, sample_host
-    ):
-        """Test package update handling with empty package list."""
-        message_data = {"host_id": 1, "package_managers": {}}
+        """Test batch handling with invalid batch_id."""
+        # Don't set up batch session - batch_id will be invalid
+        sample_batch_data["batch_id"] = "invalid-batch-id"
 
         with patch(
             "backend.utils.host_validation.validate_host_id", new_callable=AsyncMock
         ) as mock_validate:
             mock_validate.return_value = True
 
-            result = await handle_packages_update(
-                session, mock_connection, message_data
+            result = await handle_packages_batch(
+                session, mock_connection, sample_batch_data
+            )
+
+            assert result["message_type"] == "error"
+            assert "Invalid or expired batch_id" in result["error"]
+
+    @pytest.mark.asyncio
+    async def test_handle_packages_batch_end_success(
+        self, session, mock_connection, sample_host, sample_batch_end_data
+    ):
+        """Test successful batch end handling."""
+        # First set up a batch session
+        from backend.api.package_handlers import _batch_sessions
+
+        _batch_sessions["test-batch-123"] = {
+            "host_id": "550e8400-e29b-41d4-a716-446655440001",
+            "os_name": "Ubuntu",
+            "os_version": "22.04",
+            "package_managers": ["apt", "snap"],
+            "total_packages": 5,
+            "started_at": datetime.now(timezone.utc),
+        }
+
+        with patch(
+            "backend.utils.host_validation.validate_host_id", new_callable=AsyncMock
+        ) as mock_validate:
+            mock_validate.return_value = True
+
+            result = await handle_packages_batch_end(
+                session, mock_connection, sample_batch_end_data
             )
 
             assert result["message_type"] == "acknowledgment"
-            assert result["status"] == "success"
-            assert result["packages_processed"] == 0
+            assert result["status"] == "batch_completed"
+            assert result["batch_id"] == "test-batch-123"
+            assert result["total_packages_processed"] == 5
+
+            # Verify batch session was cleaned up
+            assert "test-batch-123" not in _batch_sessions
 
     @pytest.mark.asyncio
-    async def test_handle_packages_update_invalid_packages(
+    async def test_handle_packages_batch_end_invalid_batch_id(
+        self, session, mock_connection, sample_host, sample_batch_end_data
+    ):
+        """Test batch end handling with invalid batch_id."""
+        # Don't set up batch session - batch_id will be invalid
+        sample_batch_end_data["batch_id"] = "invalid-batch-id"
+
+        with patch(
+            "backend.utils.host_validation.validate_host_id", new_callable=AsyncMock
+        ) as mock_validate:
+            mock_validate.return_value = True
+
+            result = await handle_packages_batch_end(
+                session, mock_connection, sample_batch_end_data
+            )
+
+            assert result["message_type"] == "error"
+            assert "Invalid or expired batch_id" in result["error"]
+
+    @pytest.mark.asyncio
+    async def test_handle_packages_batch_wrong_host(
+        self, session, mock_connection, sample_host, sample_batch_data
+    ):
+        """Test batch handling with wrong host for batch."""
+        # Set up batch session for different host
+        from backend.api.package_handlers import _batch_sessions
+
+        _batch_sessions["test-batch-123"] = {
+            "host_id": "different-host-id",  # Different from mock_connection.host_id
+            "os_name": "Ubuntu",
+            "os_version": "22.04",
+            "package_managers": ["apt"],
+            "total_packages": 0,
+            "started_at": datetime.now(timezone.utc),
+        }
+
+        with patch(
+            "backend.utils.host_validation.validate_host_id", new_callable=AsyncMock
+        ) as mock_validate:
+            mock_validate.return_value = True
+
+            result = await handle_packages_batch(
+                session, mock_connection, sample_batch_data
+            )
+
+            assert result["message_type"] == "error"
+            assert "Batch belongs to different host" in result["error"]
+
+    @pytest.mark.asyncio
+    async def test_handle_packages_batch_invalid_packages(
         self, session, mock_connection, sample_host
     ):
-        """Test package update handling with invalid package data."""
+        """Test batch handling with invalid package data."""
+        # Set up batch session
+        from backend.api.package_handlers import _batch_sessions
+
+        _batch_sessions["test-batch-123"] = {
+            "host_id": "550e8400-e29b-41d4-a716-446655440001",
+            "os_name": "Ubuntu",
+            "os_version": "22.04",
+            "package_managers": ["apt"],
+            "total_packages": 0,
+            "started_at": datetime.now(timezone.utc),
+        }
+
         message_data = {
-            "host_id": 1,
+            "host_id": "550e8400-e29b-41d4-a716-446655440001",
+            "batch_id": "test-batch-123",
             "package_managers": {
                 "apt": [
                     {
@@ -210,13 +349,11 @@ class TestPackageHandlers:
         ) as mock_validate:
             mock_validate.return_value = True
 
-            result = await handle_packages_update(
-                session, mock_connection, message_data
-            )
+            result = await handle_packages_batch(session, mock_connection, message_data)
 
             assert result["message_type"] == "acknowledgment"
-            assert result["status"] == "success"
-            assert result["packages_processed"] == 1  # Only valid package processed
+            assert result["status"] == "batch_processed"
+            assert result["packages_in_batch"] == 1  # Only valid package processed
 
             # Verify only valid package was stored
             packages = session.query(models.AvailablePackage).all()
@@ -224,13 +361,26 @@ class TestPackageHandlers:
             assert packages[0].package_name == "another-valid-package"
 
     @pytest.mark.asyncio
-    async def test_handle_packages_update_long_description(
+    async def test_handle_packages_batch_long_description(
         self, session, mock_connection, sample_host
     ):
-        """Test package update handling with long description."""
+        """Test batch handling with long description."""
+        # Set up batch session
+        from backend.api.package_handlers import _batch_sessions
+
+        _batch_sessions["test-batch-123"] = {
+            "host_id": "550e8400-e29b-41d4-a716-446655440001",
+            "os_name": "Ubuntu",
+            "os_version": "22.04",
+            "package_managers": ["apt"],
+            "total_packages": 0,
+            "started_at": datetime.now(timezone.utc),
+        }
+
         long_description = "A" * 1500  # Longer than 1000 chars
         message_data = {
-            "host_id": 1,
+            "host_id": "550e8400-e29b-41d4-a716-446655440001",
+            "batch_id": "test-batch-123",
             "package_managers": {
                 "apt": [
                     {
@@ -247,161 +397,12 @@ class TestPackageHandlers:
         ) as mock_validate:
             mock_validate.return_value = True
 
-            result = await handle_packages_update(
-                session, mock_connection, message_data
-            )
+            result = await handle_packages_batch(session, mock_connection, message_data)
 
             assert result["message_type"] == "acknowledgment"
-            assert result["status"] == "success"
+            assert result["status"] == "batch_processed"
 
             # Verify description was truncated
             package = session.query(models.AvailablePackage).first()
             assert len(package.package_description) == 1000
             assert package.package_description.endswith("...")
-
-    @pytest.mark.asyncio
-    async def test_handle_packages_update_replaces_existing(
-        self, session, mock_connection, sample_host
-    ):
-        """Test that package update replaces existing packages for same OS/manager."""
-        # First, add some existing packages
-        now = datetime.now(timezone.utc)
-        existing_package = models.AvailablePackage(
-            os_name="Ubuntu",
-            os_version="22.04",
-            package_manager="apt",
-            package_name="old-package",
-            package_version="1.0.0",
-            package_description="Old package",
-            last_updated=now,
-            created_at=now,
-        )
-        session.add(existing_package)
-        session.commit()
-
-        # Now send new package data
-        message_data = {
-            "host_id": 1,
-            "package_managers": {
-                "apt": [
-                    {
-                        "name": "new-package",
-                        "version": "2.0.0",
-                        "description": "New package",
-                    }
-                ]
-            },
-        }
-
-        with patch(
-            "backend.utils.host_validation.validate_host_id", new_callable=AsyncMock
-        ) as mock_validate:
-            mock_validate.return_value = True
-
-            result = await handle_packages_update(
-                session, mock_connection, message_data
-            )
-
-            assert result["message_type"] == "acknowledgment"
-            assert result["status"] == "success"
-
-            # Verify old package was replaced
-            packages = (
-                session.query(models.AvailablePackage)
-                .filter_by(os_name="Ubuntu", os_version="22.04", package_manager="apt")
-                .all()
-            )
-            assert len(packages) == 1
-            assert packages[0].package_name == "new-package"
-
-    @pytest.mark.asyncio
-    async def test_handle_packages_update_uses_host_os_fallback(
-        self, session, mock_connection, sample_host
-    ):
-        """Test that handler uses host OS info when not in message."""
-        message_data = {
-            "host_id": 1,
-            # No os_name or os_version in message
-            "package_managers": {
-                "apt": [
-                    {
-                        "name": "test-package",
-                        "version": "1.0.0",
-                        "description": "Test package",
-                    }
-                ]
-            },
-        }
-
-        with patch(
-            "backend.utils.host_validation.validate_host_id", new_callable=AsyncMock
-        ) as mock_validate:
-            mock_validate.return_value = True
-
-            result = await handle_packages_update(
-                session, mock_connection, message_data
-            )
-
-            assert result["message_type"] == "acknowledgment"
-            assert result["status"] == "success"
-
-            # Verify package used host OS info
-            package = session.query(models.AvailablePackage).first()
-            assert package.os_name == "Ubuntu"  # From sample_host
-            assert package.os_version == "22.04"  # From sample_host
-
-    @pytest.mark.asyncio
-    async def test_handle_packages_update_database_error(
-        self, mock_connection, sample_message_data
-    ):
-        """Test package update handling with database error."""
-        # Mock session that raises an exception
-        mock_session = Mock()
-        mock_session.query.side_effect = Exception("Database error")
-
-        with patch(
-            "backend.utils.host_validation.validate_host_id", new_callable=AsyncMock
-        ) as mock_validate:
-            mock_validate.return_value = True
-
-            result = await handle_packages_update(
-                mock_session, mock_connection, sample_message_data
-            )
-
-            assert result["message_type"] == "error"
-            assert "Failed to process available packages" in result["error"]
-
-    @pytest.mark.asyncio
-    async def test_handle_packages_update_no_description(
-        self, session, mock_connection, sample_host
-    ):
-        """Test package update handling with packages that have no description."""
-        message_data = {
-            "host_id": 1,
-            "package_managers": {
-                "apt": [
-                    {
-                        "name": "test-package",
-                        "version": "1.0.0",
-                        # No description field
-                    }
-                ]
-            },
-        }
-
-        with patch(
-            "backend.utils.host_validation.validate_host_id", new_callable=AsyncMock
-        ) as mock_validate:
-            mock_validate.return_value = True
-
-            result = await handle_packages_update(
-                session, mock_connection, message_data
-            )
-
-            assert result["message_type"] == "acknowledgment"
-            assert result["status"] == "success"
-
-            # Verify package was stored with None description
-            package = session.query(models.AvailablePackage).first()
-            assert package.package_name == "test-package"
-            assert package.package_description is None

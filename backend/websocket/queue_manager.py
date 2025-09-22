@@ -62,7 +62,7 @@ class ServerMessageQueueManager:
         message_type: str,
         message_data: Dict[str, Any],
         direction: Union[str, QueueDirection],
-        host_id: int = None,
+        host_id: str = None,
         priority: Union[str, Priority] = Priority.NORMAL,
         message_id: str = None,
         scheduled_at: datetime = None,
@@ -315,7 +315,7 @@ class ServerMessageQueueManager:
 
     def dequeue_messages_for_host(  # pylint: disable=too-many-positional-arguments
         self,
-        host_id: int,
+        host_id: str,
         direction: Union[str, QueueDirection] = QueueDirection.OUTBOUND,
         limit: int = 10,
         priority_order: bool = True,
@@ -608,7 +608,7 @@ class ServerMessageQueueManager:
 
     def get_queue_stats(
         self,
-        host_id: int = None,
+        host_id: str = None,
         direction: Union[str, QueueDirection] = None,
         db: Session = None,
     ) -> Dict[str, Any]:
@@ -733,7 +733,7 @@ class ServerMessageQueueManager:
             if not session_provided:
                 db.close()
 
-    def delete_messages_for_host(self, host_id: int, db: Session = None) -> int:
+    def delete_messages_for_host(self, host_id: str, db: Session = None) -> int:
         """
         Delete all messages for a specific host from the queue.
 

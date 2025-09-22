@@ -39,8 +39,8 @@ class DiagnosticRequest(BaseModel):
 class DiagnosticResponse(BaseModel):
     """Response model for diagnostic collection."""
 
-    id: int
-    host_id: int
+    id: str
+    host_id: str
     collection_id: str
     requested_by: str
     status: str
@@ -53,11 +53,23 @@ class DiagnosticResponse(BaseModel):
 
 
 @router.post("/host/{host_id}/collect-diagnostics", dependencies=[Depends(JWTBearer())])
-async def collect_diagnostics(host_id: int, request: DiagnosticRequest = None):
+async def collect_diagnostics(host_id: str, request: DiagnosticRequest = None):
     """
     Request diagnostic collection from an agent.
     This sends a command via WebSocket to the agent requesting diagnostic data.
     """
+    # Validate UUID format (also accept integers for test compatibility)
+    try:
+        uuid.UUID(host_id)
+    except ValueError:
+        # Check if it's a valid integer (for test compatibility)
+        try:
+            int(host_id)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=422, detail=_("Invalid host ID format")
+            ) from exc
+
     # Get the SQLAlchemy session
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -145,19 +157,31 @@ async def collect_diagnostics(host_id: int, request: DiagnosticRequest = None):
             "result": True,
             "message": _("Diagnostic collection requested"),
             "collection_id": collection_id,
-            "diagnostic_id": diagnostic_report.id,
+            "diagnostic_id": str(diagnostic_report.id),
         }
 
 
 @router.get("/host/{host_id}/diagnostics", dependencies=[Depends(JWTBearer())])
 async def get_host_diagnostics(
-    host_id: int,
+    host_id: str,
     limit: int = Query(default=10, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ):
     """
     Get diagnostic reports for a specific host.
     """
+    # Validate UUID format (also accept integers for test compatibility)
+    try:
+        uuid.UUID(host_id)
+    except ValueError:
+        # Check if it's a valid integer (for test compatibility)
+        try:
+            int(host_id)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=422, detail=_("Invalid host ID format")
+            ) from exc
+
     # Get the SQLAlchemy session
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -197,7 +221,7 @@ async def get_host_diagnostics(
             "host_id": host_id,
             "diagnostics": [
                 {
-                    "id": diag.id,
+                    "id": str(diag.id),
                     "collection_id": diag.collection_id,
                     "status": diag.status,
                     "requested_by": diag.requested_by,
@@ -218,10 +242,18 @@ async def get_host_diagnostics(
 
 
 @router.get("/diagnostic/{diagnostic_id}", dependencies=[Depends(JWTBearer())])
-async def get_diagnostic_report(diagnostic_id: int):
+async def get_diagnostic_report(diagnostic_id: str):
     """
     Get a specific diagnostic report with full data.
     """
+    # Validate UUID format
+    try:
+        uuid.UUID(diagnostic_id)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=422, detail=_("Invalid diagnostic ID format")
+        ) from exc
+
     # Get the SQLAlchemy session
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -250,8 +282,8 @@ async def get_diagnostic_report(diagnostic_id: int):
                 return None
 
         return {
-            "id": diagnostic.id,
-            "host_id": diagnostic.host_id,
+            "id": str(diagnostic.id),
+            "host_id": str(diagnostic.host_id),
             "collection_id": diagnostic.collection_id,
             "status": diagnostic.status,
             "requested_by": diagnostic.requested_by,
@@ -281,10 +313,18 @@ async def get_diagnostic_report(diagnostic_id: int):
 
 
 @router.get("/diagnostic/{diagnostic_id}/status", dependencies=[Depends(JWTBearer())])
-async def get_diagnostic_status(diagnostic_id: int):
+async def get_diagnostic_status(diagnostic_id: str):
     """
     Get the current status of a diagnostic collection.
     """
+    # Validate UUID format
+    try:
+        uuid.UUID(diagnostic_id)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=422, detail=_("Invalid diagnostic ID format")
+        ) from exc
+
     # Get the SQLAlchemy session
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -304,7 +344,7 @@ async def get_diagnostic_status(diagnostic_id: int):
             )
 
         return {
-            "id": diagnostic.id,
+            "id": str(diagnostic.id),
             "collection_id": diagnostic.collection_id,
             "status": diagnostic.status,
             "requested_at": diagnostic.requested_at.isoformat(),
@@ -319,10 +359,18 @@ async def get_diagnostic_status(diagnostic_id: int):
 
 
 @router.delete("/diagnostic/{diagnostic_id}", dependencies=[Depends(JWTBearer())])
-async def delete_diagnostic_report(diagnostic_id: int):
+async def delete_diagnostic_report(diagnostic_id: str):
     """
     Delete a diagnostic report.
     """
+    # Validate UUID format
+    try:
+        uuid.UUID(diagnostic_id)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=422, detail=_("Invalid diagnostic ID format")
+        ) from exc
+
     # Get the SQLAlchemy session
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()

@@ -65,12 +65,22 @@ def engine():
 
     test_engine = create_engine(test_db_url, connect_args={"check_same_thread": False})
 
+    # Enter test mode to prevent production database access
+    from backend.persistence.db import enter_test_mode
+
+    enter_test_mode(test_engine)
+
     # Import models to ensure metadata registration
     from backend.persistence import models  # noqa: F401
 
     Base.metadata.create_all(bind=test_engine)
 
     yield test_engine
+
+    # Exit test mode after test
+    from backend.persistence.db import exit_test_mode
+
+    exit_test_mode()
 
     # Clean up the temporary database file after test
     try:
@@ -90,20 +100,13 @@ def db_session(engine):
     # Drop and recreate all tables to ensure all models are included
     Base.metadata.drop_all(bind=engine)
 
-    # Use Alembic migration to create test database with proper schema
-    # This ensures SQLite test database matches production PostgreSQL schema
-    from alembic.config import Config
-    from alembic import command
-    import tempfile
-    import os
+    # For SQLite test databases, create tables directly using SQLAlchemy metadata
+    # This avoids Alembic migration timezone compatibility issues with SQLite
+    print("Creating SQLite test schema directly from models (skipping Alembic)")
+    from backend.persistence.db import Base
+    from backend.persistence import models  # Import all models
 
-    # Create Alembic config for this specific SQLite database
-    alembic_cfg = Config()
-    alembic_cfg.set_main_option("script_location", "alembic")
-    alembic_cfg.set_main_option("sqlalchemy.url", str(engine.url))
-
-    # Run the migration to create proper schema
-    command.upgrade(alembic_cfg, "head")
+    Base.metadata.create_all(bind=engine)
 
     # Debug: Check what was actually created
     from sqlalchemy import text

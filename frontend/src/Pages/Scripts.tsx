@@ -110,7 +110,9 @@ const Scripts: React.FC = () => {
   const [selectedExecutions, setSelectedExecutions] = useState<GridRowSelectionModel>([]);
   const [viewingExecution, setViewingExecution] = useState<ScriptExecution | null>(null);
   const [showExecutionDialog, setShowExecutionDialog] = useState(false);
-  
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [scriptToDelete, setScriptToDelete] = useState<number | null>(null);
+
   // Table pagination
   const { pageSize, pageSizeOptions } = useTablePageSize();
   
@@ -433,18 +435,29 @@ const Scripts: React.FC = () => {
   };
 
 
-  const handleDeleteScript = async (scriptId: number) => {
-    if (!window.confirm(t('scripts.delete') + '?')) {
-      return;
-    }
+  const handleDeleteScript = (scriptId: number) => {
+    setScriptToDelete(scriptId);
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!scriptToDelete) return;
 
     try {
-      await scriptsService.deleteScript(scriptId);
+      await scriptsService.deleteScript(scriptToDelete);
       showNotification(t('scripts.deleteSuccess'), 'success');
       loadScripts();
     } catch {
       showNotification(t('scripts.deleteError'), 'error');
+    } finally {
+      setShowDeleteDialog(false);
+      setScriptToDelete(null);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteDialog(false);
+    setScriptToDelete(null);
   };
 
   const handleExecuteScript = async () => {
@@ -469,11 +482,11 @@ const Scripts: React.FC = () => {
     }
 
     const executeRequest: ExecuteScriptRequest = {
-      host_id: selectedHost as number
+      host_id: selectedHost as string
     };
 
     if (savedScriptId) {
-      executeRequest.saved_script_id = savedScriptId as number;
+      executeRequest.saved_script_id = savedScriptId as string;
     } else {
       if (!scriptContent.trim()) {
         showNotification(t('scripts.scriptContentRequired'), 'error');
@@ -612,6 +625,16 @@ const Scripts: React.FC = () => {
       setScriptContent(getShellHeader('bash', 'linux'));
     }
   }, [scriptContent, getShellHeader]);
+
+  // Cleanup effect to clear execution result when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clear execution state when component unmounts
+      setExecutionResult(null);
+      setCurrentExecutionId(null);
+      setIsExecuting(false);
+    };
+  }, []);
 
   // Handle platform change
   const handlePlatformChange = (newPlatform: string) => {
@@ -872,7 +895,7 @@ const Scripts: React.FC = () => {
     setLoading(true);
     try {
       for (const scriptId of selectedScripts) {
-        await scriptsService.deleteScript(scriptId as number);
+        await scriptsService.deleteScript(scriptId as string);
       }
       showNotification(
         selectedScripts.length === 1 
@@ -1688,6 +1711,31 @@ const Scripts: React.FC = () => {
             disabled={loading}
           >
             {isEditMode ? t('scripts.update') : t('scripts.save')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={showDeleteDialog}
+        onClose={handleCancelDelete}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>
+          {t('scripts.confirmDelete', 'Confirm Delete')}
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            {t('scripts.confirmDeleteMessage', 'Are you sure you want to delete this script? This action cannot be undone.')}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete}>
+            {t('common.cancel', 'Cancel')}
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">
+            {t('scripts.delete', 'Delete')}
           </Button>
         </DialogActions>
       </Dialog>

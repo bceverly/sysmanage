@@ -36,7 +36,7 @@ SysManage is a comprehensive system management solution that allows you to monit
 
 - **Backend API**: FastAPI-based REST API with WebSocket support
 - **Frontend Web UI**: Modern React application built with Vite
-- **Database**: PostgreSQL with Alembic migrations
+- **Database**: PostgreSQL with Alembic migrations and UUID-based primary keys for enhanced security
 - **Real-time Communication**: WebSocket-based agent communication
 
 ### Key Features
@@ -59,6 +59,8 @@ SysManage is a comprehensive system management solution that allows you to monit
 - **Node.js**: 20.x or higher
 - **PostgreSQL**: 14 or higher
 - **OS**: Linux, macOS, Windows, FreeBSD, or OpenBSD
+
+> **🔐 Security Note**: After installation, you MUST run the `scripts/sysmanage_secure_installation` script to create the initial admin user and configure unique security tokens for your installation.
 
 **📖 For detailed platform-specific installation instructions, visit [sysmanage.org/docs/server/installation.html](https://sysmanage.org/docs/server/installation.html)**
 
@@ -93,7 +95,11 @@ alembic upgrade head
 # 6. Install frontend dependencies
 cd frontend && npm install && cd ..
 
-# 7. Start the application
+# 7. Run secure installation script (REQUIRED for new installations)
+scripts/sysmanage_secure_installation
+# This script creates the initial admin user and sets unique security tokens
+
+# 8. Start the application
 make start
 ```
 
@@ -172,6 +178,20 @@ SysManage supports 14 languages with full localization:
 
 SysManage implements enterprise-grade security features:
 
+### 🔐 Secure Installation
+- **Secure Installation Script**: `scripts/sysmanage_secure_installation` must be run on new installations
+- **Unique Security Tokens**: Generates unique JWT secrets and salt values for each installation
+- **Initial Admin User**: Creates the first administrative user with secure credentials
+- **Configuration Hardening**: Applies security best practices to configuration files
+
+### 🛡️ Database Security
+- **UUID-Based Primary Keys**: All database tables use UUIDs instead of sequential integers
+- **Prevents Information Leakage**: UUIDs eliminate predictable ID enumeration attacks
+- **Replay Attack Protection**: Non-sequential identifiers prevent replay attacks
+- **Enhanced Privacy**: Resource URLs cannot be easily guessed or scraped
+- **GDPR Compliance**: Supports data anonymization through non-correlatable identifiers
+
+### 🔒 Core Security Features
 - **Authentication**: JWT-based with token rotation and refresh
 - **Authorization**: Role-based access control (RBAC)
 - **Communication**: Mutual TLS (mTLS) for agent connections

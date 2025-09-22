@@ -2,19 +2,74 @@
 Software management models for SysManage - packages, updates, and installations.
 """
 
+import uuid
 from sqlalchemy import (
     BigInteger,
     Boolean,
     Column,
     DateTime,
     ForeignKey,
-    Integer,
     String,
     Text,
 )
+from sqlalchemy.types import TypeDecorator
 from sqlalchemy.orm import relationship
 
 from backend.persistence.db import Base
+from backend.persistence.models.core import GUID
+
+
+class CrossPlatformDateTime(TypeDecorator):  # pylint: disable=too-many-ancestors
+    """
+    Cross-platform DateTime type that handles timezone differences between PostgreSQL and SQLite.
+    """
+
+    impl = DateTime
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == "postgresql":
+            return dialect.type_descriptor(DateTime(timezone=True))
+        # For SQLite, use plain DateTime without timezone
+        return dialect.type_descriptor(DateTime(timezone=False))
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+
+        # Ensure we have a datetime object
+        from datetime import datetime
+
+        if not isinstance(value, datetime):
+            return value
+
+        if dialect.name == "sqlite":
+            # For SQLite, ensure datetime is naive (no timezone)
+            if hasattr(value, "tzinfo") and value.tzinfo is not None:
+                # Convert timezone-aware to naive UTC datetime
+                import datetime as dt
+
+                utc_dt = value.astimezone(dt.timezone.utc)
+                return utc_dt.replace(tzinfo=None)
+            return value
+
+        # For PostgreSQL, keep as-is (timezone-aware preferred)
+        return value
+
+    def process_result_value(self, value, dialect):
+        """Process values retrieved from the database."""
+        return value
+
+    def process_literal_param(self, value, dialect):
+        """Process literal parameters."""
+        return repr(value)
+
+    @property
+    def python_type(self):
+        """Return the Python type."""
+        from datetime import datetime
+
+        return datetime
 
 
 class SoftwarePackage(Base):
@@ -24,10 +79,8 @@ class SoftwarePackage(Base):
     """
 
     __tablename__ = "software_package"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    host_id = Column(
-        BigInteger, ForeignKey("host.id", ondelete="CASCADE"), nullable=False
-    )
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     package_name = Column(String(255), nullable=False, index=True)
     package_version = Column(String(100), nullable=False)
     package_description = Column(Text, nullable=True)
@@ -57,10 +110,8 @@ class PackageUpdate(Base):
     """
 
     __tablename__ = "package_update"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    host_id = Column(
-        BigInteger, ForeignKey("host.id", ondelete="CASCADE"), nullable=False
-    )
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     package_name = Column(String(255), nullable=False, index=True)
     current_version = Column(String(100), nullable=False)
     available_version = Column(String(100), nullable=False)
@@ -89,15 +140,15 @@ class AvailablePackage(Base):
     """
 
     __tablename__ = "available_packages"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     package_name = Column(String(255), nullable=False, index=True)
     package_version = Column(String(100), nullable=False)
     package_description = Column(Text, nullable=True)
     package_manager = Column(String(50), nullable=False, index=True)
     os_name = Column(String(100), nullable=False, index=True)
     os_version = Column(String(100), nullable=False, index=True)
-    last_updated = Column(DateTime(timezone=True), nullable=False)
-    created_at = Column(DateTime(timezone=True), nullable=False)
+    last_updated = Column(DateTime(), nullable=False)
+    created_at = Column(DateTime(), nullable=False)
 
     def __repr__(self):
         return f"<AvailablePackage(id={self.id}, package_name='{self.package_name}', version='{self.package_version}', os='{self.os_name} {self.os_version}')>"
@@ -111,8 +162,8 @@ class SoftwareInstallationLog(Base):
 
     __tablename__ = "software_installation_log"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    host_id = Column(Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
 
     # Installation request details
     package_name = Column(String(255), nullable=False)
@@ -164,8 +215,8 @@ class InstallationRequest(Base):
 
     __tablename__ = "installation_requests"
 
-    id = Column(String(36), primary_key=True)  # UUID
-    host_id = Column(Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
 
     # Request metadata
     requested_by = Column(
@@ -214,9 +265,9 @@ class InstallationPackage(Base):
 
     __tablename__ = "installation_packages"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     installation_request_id = Column(
-        String(36),
+        GUID(),
         ForeignKey("installation_requests.id", ondelete="CASCADE"),
         nullable=False,
         index=True,

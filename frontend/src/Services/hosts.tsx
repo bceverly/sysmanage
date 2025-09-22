@@ -7,7 +7,7 @@ type SuccessResponse = {
 }
 
 type DiagnosticReport = {
-    id: number;
+    id: string;
     collection_id: string;
     status: string;
     requested_by: string;
@@ -20,8 +20,8 @@ type DiagnosticReport = {
 }
 
 type DiagnosticDetailResponse = {
-    id: number;
-    host_id: number;
+    id: string;
+    host_id: string;
     collection_id: string;
     status: string;
     requested_by: string;
@@ -44,7 +44,7 @@ type DiagnosticDetailResponse = {
 }
 
 type SysManageHost = {
-    id: BigInt;
+    id: string;
     active: boolean;
     fqdn: string;
     ipv4: string;
@@ -92,7 +92,7 @@ type SysManageHost = {
     // Enabled shells for script execution
     enabled_shells?: string;
     // Tags
-    tags?: Array<{id: number, name: string, description?: string}>;
+    tags?: Array<{id: string, name: string, description?: string}>;
     // Update status fields
     security_updates_count?: number;
     system_updates_count?: number;
@@ -101,7 +101,7 @@ type SysManageHost = {
 }
 
 type StorageDevice = {
-    id: number;
+    id: string;
     name?: string;
     device_path?: string;
     mount_point?: string;
@@ -116,7 +116,7 @@ type StorageDevice = {
 }
 
 type NetworkInterface = {
-    id: number;
+    id: string;
     name?: string;
     interface_type?: string;
     hardware_type?: string;
@@ -131,7 +131,7 @@ type NetworkInterface = {
 }
 
 type UserAccount = {
-    id: number;
+    id: string;
     username: string;
     uid?: number;
     home_directory?: string;
@@ -143,7 +143,7 @@ type UserAccount = {
 }
 
 type UserGroup = {
-    id: number;
+    id: string;
     group_name: string;
     gid?: number;
     is_system_group: boolean;
@@ -153,7 +153,7 @@ type UserGroup = {
 }
 
 type SoftwarePackage = {
-    id: number;
+    id: string;
     package_name: string;
     version?: string;
     description?: string;
@@ -210,7 +210,7 @@ const doAddHost = async (active: boolean, fqdn: string, ipv4: string, ipv6: stri
     return result;
 };
 
-const doDeleteHost = async (id: BigInt) => {
+const doDeleteHost = async (id: string) => {
     let successResponse = {} as SuccessResponse;
 
     await api.delete<SuccessResponse>("/api/host/" + id)
@@ -226,7 +226,7 @@ const doDeleteHost = async (id: BigInt) => {
     return successResponse;
 };
 
-const doGetHostByID = async (id: BigInt) => {
+const doGetHostByID = async (id: string) => {
     let result = {} as SysManageHost;
 
     await api.get<SysManageHost>("/api/host/" + id)
@@ -274,7 +274,7 @@ const doGetHostByFQDN = async (fqdn: string) => {
     return result;
 };
 
-const doUpdateHost = async (id: BigInt, active: boolean, fqdn: string, ipv4: string, ipv6: string) => {
+const doUpdateHost = async (id: string, active: boolean, fqdn: string, ipv4: string, ipv6: string) => {
     let successResponse = {} as SuccessResponse;
     await api.put<SuccessResponse>("/api/host/" + id, {
         'active': active,
@@ -294,7 +294,7 @@ const doUpdateHost = async (id: BigInt, active: boolean, fqdn: string, ipv4: str
     return successResponse;
 };
 
-const doApproveHost = async (id: BigInt) => {
+const doApproveHost = async (id: string) => {
     let result = {} as SysManageHost;
 
     await api.put<SysManageHost>("/api/host/" + id + "/approve")
@@ -310,7 +310,7 @@ const doApproveHost = async (id: BigInt) => {
     return result;
 };
 
-const doRejectHost = async (id: BigInt) => {
+const doRejectHost = async (id: string) => {
     let result = {} as SysManageHost;
 
     await api.put<SysManageHost>("/api/host/" + id + "/reject")
@@ -326,7 +326,7 @@ const doRejectHost = async (id: BigInt) => {
     return result;
 };
 
-const doRefreshHostData = async (id: BigInt) => {
+const doRefreshHostData = async (id: string) => {
     let result = {} as SuccessResponse;
 
     await api.post<SuccessResponse>("/api/host/" + id + "/request-os-update")
@@ -342,7 +342,7 @@ const doRefreshHostData = async (id: BigInt) => {
     return result;
 };
 
-const doRefreshHardwareData = async (id: BigInt) => {
+const doRefreshHardwareData = async (id: string) => {
     let result = {} as SuccessResponse;
 
     await api.post<SuccessResponse>("/api/host/" + id + "/request-hardware-update")
@@ -358,7 +358,7 @@ const doRefreshHardwareData = async (id: BigInt) => {
     return result;
 };
 
-const doRefreshUpdatesCheck = async (id: BigInt) => {
+const doRefreshUpdatesCheck = async (id: string) => {
     let result = {} as SuccessResponse;
 
     await api.post<SuccessResponse>("/api/host/" + id + "/request-updates-check")
@@ -374,7 +374,7 @@ const doRefreshUpdatesCheck = async (id: BigInt) => {
     return result;
 };
 
-const doRefreshAllHostData = async (id: BigInt) => {
+const doRefreshAllHostData = async (id: string) => {
     // Request OS, hardware updates, and updates check
     const promises = [
         doRefreshHostData(id),
@@ -386,7 +386,7 @@ const doRefreshAllHostData = async (id: BigInt) => {
     return { result: true } as SuccessResponse;
 };
 
-const doGetHostStorage = async (id: BigInt): Promise<StorageDevice[]> => {
+const doGetHostStorage = async (id: string): Promise<StorageDevice[]> => {
     let result: StorageDevice[] = [];
 
     await api.get<StorageDevice[]>("/api/host/" + id + "/storage")
@@ -402,7 +402,7 @@ const doGetHostStorage = async (id: BigInt): Promise<StorageDevice[]> => {
     return result;
 };
 
-const doGetHostNetwork = async (id: BigInt): Promise<NetworkInterface[]> => {
+const doGetHostNetwork = async (id: string): Promise<NetworkInterface[]> => {
     let result: NetworkInterface[] = [];
 
     await api.get<NetworkInterface[]>("/api/host/" + id + "/network")
@@ -418,7 +418,7 @@ const doGetHostNetwork = async (id: BigInt): Promise<NetworkInterface[]> => {
     return result;
 };
 
-const doGetHostUsers = async (id: BigInt): Promise<UserAccount[]> => {
+const doGetHostUsers = async (id: string): Promise<UserAccount[]> => {
     let result: UserAccount[] = [];
 
     await api.get<UserAccount[]>("/api/host/" + id + "/users")
@@ -434,7 +434,7 @@ const doGetHostUsers = async (id: BigInt): Promise<UserAccount[]> => {
     return result;
 };
 
-const doGetHostGroups = async (id: BigInt): Promise<UserGroup[]> => {
+const doGetHostGroups = async (id: string): Promise<UserGroup[]> => {
     let result: UserGroup[] = [];
 
     await api.get<UserGroup[]>("/api/host/" + id + "/groups")
@@ -450,7 +450,7 @@ const doGetHostGroups = async (id: BigInt): Promise<UserGroup[]> => {
     return result;
 };
 
-const doRefreshUserAccessData = async (id: BigInt) => {
+const doRefreshUserAccessData = async (id: string) => {
     let result = {} as SuccessResponse;
 
     await api.post<SuccessResponse>("/api/host/" + id + "/request-user-access-update")
@@ -466,7 +466,7 @@ const doRefreshUserAccessData = async (id: BigInt) => {
     return result;
 };
 
-const doGetHostSoftware = async (id: BigInt) => {
+const doGetHostSoftware = async (id: string) => {
     let result = [] as SoftwarePackage[];
     
     await api.get("/api/host/" + id + "/software")
@@ -480,7 +480,7 @@ const doGetHostSoftware = async (id: BigInt) => {
     return result;
 };
 
-const doRefreshSoftwareData = async (id: BigInt) => {
+const doRefreshSoftwareData = async (id: string) => {
     let result = {} as SuccessResponse;
 
     await api.post("/api/host/refresh/software/" + id)
@@ -494,12 +494,12 @@ const doRefreshSoftwareData = async (id: BigInt) => {
     return result;
 };
 
-const doGetHostDiagnostics = async (id: BigInt) => {
+const doGetHostDiagnostics = async (id: string) => {
     let result = [] as DiagnosticReport[];
     
     await api.get("/api/host/" + id + "/diagnostics")
     .then((response) => {
-        // The API returns {host_id: number, diagnostics: array}
+        // The API returns {host_id: string, diagnostics: array}
         // Extract the diagnostics array from the response
         result = response.data.diagnostics || [];
     })
@@ -510,7 +510,7 @@ const doGetHostDiagnostics = async (id: BigInt) => {
     return result;
 };
 
-const doRequestHostDiagnostics = async (id: BigInt) => {
+const doRequestHostDiagnostics = async (id: string) => {
     let result = {} as SuccessResponse;
     
     await api.post("/api/host/" + id + "/collect-diagnostics")
@@ -524,7 +524,7 @@ const doRequestHostDiagnostics = async (id: BigInt) => {
     return result;
 };
 
-const doGetDiagnosticDetail = async (diagnosticId: number) => {
+const doGetDiagnosticDetail = async (diagnosticId: string) => {
     let result = {} as DiagnosticDetailResponse;
     
     await api.get("/api/diagnostic/" + diagnosticId)
@@ -538,7 +538,7 @@ const doGetDiagnosticDetail = async (diagnosticId: number) => {
     return result;
 };
 
-const doDeleteDiagnostic = async (diagnosticId: number) => {
+const doDeleteDiagnostic = async (diagnosticId: string) => {
     let result = {} as SuccessResponse;
     
     await api.delete("/api/diagnostic/" + diagnosticId)
@@ -552,7 +552,7 @@ const doDeleteDiagnostic = async (diagnosticId: number) => {
     return result;
 };
 
-const doRebootHost = async (hostId: number) => {
+const doRebootHost = async (hostId: string) => {
     let result = {} as SuccessResponse;
     
     await api.post("/api/host/reboot/" + hostId)
@@ -566,7 +566,7 @@ const doRebootHost = async (hostId: number) => {
     return result;
 };
 
-const doShutdownHost = async (hostId: number) => {
+const doShutdownHost = async (hostId: string) => {
     let result = {} as SuccessResponse;
 
     await api.post("/api/host/shutdown/" + hostId)
@@ -580,7 +580,7 @@ const doShutdownHost = async (hostId: number) => {
     return result;
 };
 
-const doGetHostUbuntuPro = async (hostId: number) => {
+const doGetHostUbuntuPro = async (hostId: string) => {
     let result = {} as UbuntuProInfo;
 
     await api.get("/api/host/" + hostId + "/ubuntu-pro")
@@ -594,7 +594,7 @@ const doGetHostUbuntuPro = async (hostId: number) => {
     return result;
 };
 
-const doAttachUbuntuPro = async (hostId: number, token: string) => {
+const doAttachUbuntuPro = async (hostId: string, token: string) => {
     let result = {} as SuccessResponse;
 
     await api.post("/api/host/" + hostId + "/ubuntu-pro/attach", {
@@ -610,7 +610,7 @@ const doAttachUbuntuPro = async (hostId: number, token: string) => {
     return result;
 };
 
-const doDetachUbuntuPro = async (hostId: number) => {
+const doDetachUbuntuPro = async (hostId: string) => {
     let result = {} as SuccessResponse;
 
     await api.post("/api/host/" + hostId + "/ubuntu-pro/detach")
@@ -624,7 +624,7 @@ const doDetachUbuntuPro = async (hostId: number) => {
     return result;
 };
 
-const doEnableUbuntuProService = async (hostId: number, service: string) => {
+const doEnableUbuntuProService = async (hostId: string, service: string) => {
     let result = {} as SuccessResponse;
 
     await api.post("/api/host/" + hostId + "/ubuntu-pro/service/enable", {
@@ -640,7 +640,7 @@ const doEnableUbuntuProService = async (hostId: number, service: string) => {
     return result;
 };
 
-const doDisableUbuntuProService = async (hostId: number, service: string) => {
+const doDisableUbuntuProService = async (hostId: string, service: string) => {
     let result = {} as SuccessResponse;
 
     await api.post("/api/host/" + hostId + "/ubuntu-pro/service/disable", {

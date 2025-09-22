@@ -107,7 +107,10 @@
     "newPassword": "Digite nova senha",
     "locked": "Bloqueado",
     "unlocked": "Desbloqueado",
-    "unlock": "Desbloquear"
+    "unlock": "Desbloquear",
+    "lock": "Bloquear",
+    "lockSelected": "Bloquear Usuários Selecionados",
+    "unlockSelected": "Desbloquear Usuários Selecionados"
   },
   "common": {
     "save": "Salvar",

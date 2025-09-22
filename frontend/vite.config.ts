@@ -85,9 +85,17 @@ const finalHost = hasSSLCerts ? (config?.webui?.ssl_host || 'sysmanage.org') :
 const finalPort = hasSSLCerts ? (config?.webui?.ssl_port || 7443) :
                   parseInt(process.env.VITE_PORT || config?.webui?.port?.toString() || '3000');
 
+// Calculate client-accessible host for HMR (WebSocket needs a real hostname, not 0.0.0.0)
+const clientHost = finalHost === '0.0.0.0' ? 'localhost' : finalHost;
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // Development-specific settings
+  define: {
+    // Suppress some common development warnings
+    __DEV__: JSON.stringify(process.env.NODE_ENV !== 'production')
+  },
   server: {
     // Use config-driven host and port with environment variable overrides
     host: finalHost,
@@ -98,6 +106,12 @@ export default defineConfig({
     } : undefined,
     // Dynamically allow connections from discovered network hosts
     allowedHosts: getNetworkHosts(),
+    // HMR configuration to fix WebSocket connection issues
+    hmr: {
+      port: finalPort,
+      // Let Vite auto-detect the host from the browser location
+      clientPort: finalPort // Ensure client connects to the same port
+    },
     // Proxy API requests to backend server
     proxy: {
       '/api': {
@@ -108,7 +122,10 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: 'build'
+    outDir: 'build',
+    sourcemap: process.env.NODE_ENV === 'development' ? 'inline' : false,
+    // Reduce console noise in production
+    minify: process.env.NODE_ENV === 'production'
   },
   test: {
     globals: true,

@@ -19,7 +19,6 @@ class TestUserDelete:
         """Test successful user deletion."""
         # Create a test user
         user = models.User(
-            id=1,
             userid="delete_me@example.com",
             hashed_password="hashed_password",
             active=True,
@@ -63,7 +62,6 @@ class TestUserMe:
         """Test getting current user info."""
         # Create a test user
         user = models.User(
-            id=1,
             userid="admin@sysmanage.org",  # Use admin user like in other tests
             hashed_password="hashed_password",
             active=True,
@@ -94,7 +92,6 @@ class TestUserGet:
         """Test getting user by ID."""
         # Create a test user
         user = models.User(
-            id=1,
             userid="getme@example.com",
             hashed_password="hashed_password",
             active=True,
@@ -133,7 +130,6 @@ class TestUserGetByUserid:
         """Test getting user by userid (email)."""
         # Create a test user
         user = models.User(
-            id=1,
             userid="findme@example.com",
             hashed_password="hashed_password",
             active=True,
@@ -176,13 +172,13 @@ class TestUsersList:
         # Create multiple test users
         users = [
             models.User(
-                id=1, userid="user1@example.com", hashed_password="pass1", active=True
+                userid="user1@example.com", hashed_password="pass1", active=True
             ),
             models.User(
-                id=2, userid="user2@example.com", hashed_password="pass2", active=False
+                userid="user2@example.com", hashed_password="pass2", active=False
             ),
             models.User(
-                id=3, userid="user3@example.com", hashed_password="pass3", active=True
+                userid="user3@example.com", hashed_password="pass3", active=True
             ),
         ]
         for user in users:
@@ -262,7 +258,6 @@ class TestUserCreate:
         """Test creating user with duplicate userid."""
         # Create existing user
         existing_user = models.User(
-            id=1,
             userid="duplicate@example.com",
             hashed_password="existing_password",
             active=True,
@@ -347,7 +342,6 @@ class TestUserUpdate:
         """Test successful user update."""
         # Create a test user
         user = models.User(
-            id=1,
             userid="update@example.com",
             hashed_password="old_password",
             active=False,
@@ -402,7 +396,6 @@ class TestUserUpdate:
         """Test updating user with duplicate userid."""
         # Create two users
         user1 = models.User(
-            id=1,
             userid="user1@example.com",
             hashed_password="pass1",
             active=True,
@@ -410,7 +403,6 @@ class TestUserUpdate:
             last_name="One",
         )
         user2 = models.User(
-            id=2,
             userid="user2@example.com",
             hashed_password="pass2",
             active=True,
@@ -460,7 +452,6 @@ class TestUserUnlock:
         """Test successful user unlock."""
         # Create a locked user
         user = models.User(
-            id=1,
             userid="locked@example.com",
             hashed_password="password",
             active=True,

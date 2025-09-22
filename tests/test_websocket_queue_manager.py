@@ -29,7 +29,7 @@ class TestServerMessageQueueManager(unittest.TestCase):
         mock_get_db.return_value = iter([mock_db])
 
         message_id = self.queue_manager.enqueue_message(
-            host_id=1,
+            host_id="550e8400-e29b-41d4-a716-446655440011",
             message_type="test",
             message_data={"key": "value"},
             direction=QueueDirection.OUTBOUND,
@@ -120,7 +120,9 @@ class TestServerMessageQueueManager(unittest.TestCase):
         mock_db.query.return_value.all.return_value = mock_messages
         mock_db.query.return_value.filter.return_value.all.return_value = mock_messages
 
-        stats = self.queue_manager.get_queue_stats(host_id=1)
+        stats = self.queue_manager.get_queue_stats(
+            host_id="550e8400-e29b-41d4-a716-446655440011"
+        )
 
         assert stats["pending"] == 5
         assert stats["in_progress"] == 3

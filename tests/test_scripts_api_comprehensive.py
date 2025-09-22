@@ -327,13 +327,13 @@ class TestScriptExecutionRequestModel:
         """Test ScriptExecutionRequest using a saved script."""
         request_data = {
             "host_id": 1,
-            "saved_script_id": 10,
+            "saved_script_id": "550e8400-e29b-41d4-a716-446655440010",
         }
 
         request = ScriptExecutionRequest(**request_data)
 
-        assert request.host_id == 1
-        assert request.saved_script_id == 10
+        assert request.host_id == "1"
+        assert request.saved_script_id == "550e8400-e29b-41d4-a716-446655440010"
         assert request.script_name is None
         assert request.script_content is None
         assert request.shell_type is None
@@ -351,7 +351,7 @@ class TestScriptExecutionRequestModel:
 
         request = ScriptExecutionRequest(**request_data)
 
-        assert request.host_id == 1
+        assert request.host_id == "1"
         assert request.saved_script_id is None
         assert request.script_name == "Ad-hoc Test"
         assert request.script_content == "echo 'Hello World'"
@@ -453,19 +453,19 @@ class TestScriptExecutionRequestModel:
         """Test shell_type not required when using saved_script_id."""
         request_data = {
             "host_id": 1,
-            "saved_script_id": 10,
+            "saved_script_id": "550e8400-e29b-41d4-a716-446655440010",
             # No shell_type provided
         }
 
         request = ScriptExecutionRequest(**request_data)
-        assert request.host_id == 1
-        assert request.saved_script_id == 10
+        assert request.host_id == "1"
+        assert request.saved_script_id == "550e8400-e29b-41d4-a716-446655440010"
         assert request.shell_type is None
 
     def test_script_execution_request_missing_host_id(self):
         """Test validation fails when host_id is missing."""
         request_data = {
-            "saved_script_id": 10,
+            "saved_script_id": "550e8400-e29b-41d4-a716-446655440010",
         }
 
         with pytest.raises(ValidationError):
@@ -480,7 +480,7 @@ class TestSavedScriptResponseModel:
         now = datetime.now(timezone.utc)
 
         response_data = {
-            "id": 1,
+            "id": "550e8400-e29b-41d4-a716-446655440001",
             "name": "Test Script",
             "description": "A test script",
             "content": "#!/bin/bash\necho 'Hello World'",
@@ -495,7 +495,7 @@ class TestSavedScriptResponseModel:
 
         response = SavedScriptResponse(**response_data)
 
-        assert response.id == 1
+        assert response.id == "550e8400-e29b-41d4-a716-446655440001"
         assert response.name == "Test Script"
         assert response.description == "A test script"
         assert response.content == "#!/bin/bash\necho 'Hello World'"
@@ -512,7 +512,7 @@ class TestSavedScriptResponseModel:
         now = datetime.now(timezone.utc)
 
         response_data = {
-            "id": 1,
+            "id": "550e8400-e29b-41d4-a716-446655440001",
             "name": "Test Script",
             "description": None,
             "content": "echo 'test'",
@@ -527,7 +527,7 @@ class TestSavedScriptResponseModel:
 
         response = SavedScriptResponse(**response_data)
 
-        assert response.id == 1
+        assert response.id == "550e8400-e29b-41d4-a716-446655440001"
         assert response.name == "Test Script"
         assert response.description is None
         assert response.content == "echo 'test'"
@@ -557,7 +557,7 @@ class TestSavedScriptResponseModel:
             },
             # Missing name
             {
-                "id": 1,
+                "id": "550e8400-e29b-41d4-a716-446655440001",
                 "content": "echo 'test'",
                 "shell_type": "bash",
                 "is_active": True,
@@ -567,7 +567,7 @@ class TestSavedScriptResponseModel:
             },
             # Missing content
             {
-                "id": 1,
+                "id": "550e8400-e29b-41d4-a716-446655440001",
                 "name": "Test Script",
                 "shell_type": "bash",
                 "is_active": True,
@@ -626,18 +626,18 @@ fi
         """Test ScriptExecutionRequest handles different integer types for host_id."""
         request_data = {
             "host_id": 12345,
-            "saved_script_id": 67890,
+            "saved_script_id": "550e8400-e29b-41d4-a716-446655467890",
         }
 
         request = ScriptExecutionRequest(**request_data)
-        assert request.host_id == 12345
-        assert request.saved_script_id == 67890
+        assert request.host_id == "12345"
+        assert request.saved_script_id == "550e8400-e29b-41d4-a716-446655467890"
 
     def test_all_models_field_type_validation(self):
         """Test all models validate field types correctly."""
-        # Test with wrong type for host_id in ScriptExecutionRequest
+        # Test with wrong type for saved_script_id in ScriptExecutionRequest
         with pytest.raises(ValidationError):
-            ScriptExecutionRequest(host_id="not_an_integer", saved_script_id=1)
+            ScriptExecutionRequest(host_id=1, saved_script_id=123)
 
         # Test with wrong type for is_active in SavedScriptUpdate
         with pytest.raises(ValidationError):

@@ -17,8 +17,8 @@ Object.defineProperty(window, 'localStorage', {
 // Mock the hosts service
 vi.mock('../../Services/hosts', () => ({
   doGetHosts: vi.fn(() => Promise.resolve([
-    { id: BigInt(1), active: true, status: 'up', fqdn: 'test1.example.com', ipv4: '192.168.1.1', ipv6: '::1' },
-    { id: BigInt(2), active: true, status: 'up', fqdn: 'test2.example.com', ipv4: '192.168.1.2', ipv6: '::2' }
+    { id: '550e8400-e29b-41d4-a716-446655440001', active: true, status: 'up', fqdn: 'test1.example.com', ipv4: '192.168.1.1', ipv6: '::1' },
+    { id: '550e8400-e29b-41d4-a716-446655440002', active: true, status: 'up', fqdn: 'test2.example.com', ipv4: '192.168.1.2', ipv6: '::2' }
   ]))
 }));
 

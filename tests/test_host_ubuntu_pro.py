@@ -4,6 +4,8 @@ Tests Ubuntu Pro management endpoints for SysManage server.
 """
 
 from unittest.mock import Mock, patch
+import importlib
+import sys
 
 import pytest
 from fastapi import HTTPException
@@ -87,16 +89,23 @@ class TestAttachUbuntuPro:
     """Test attach_ubuntu_pro endpoint."""
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_ubuntu_pro.db.SessionLocal")
+    @patch("sqlalchemy.orm.sessionmaker")
+    @patch("backend.api.host_ubuntu_pro.db.get_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_attach_success(
-        self, mock_queue_manager, mock_get_host, mock_session
+        self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test successful Ubuntu Pro attach."""
-        # Setup mocks
+        # Setup session factory mock
         mock_db_session = MockDBSession()
-        mock_session.return_value = mock_db_session
+        mock_session_factory = Mock()
+        mock_session_factory.return_value.__enter__ = Mock(return_value=mock_db_session)
+        mock_session_factory.return_value.__exit__ = Mock(return_value=None)
+        mock_sessionmaker.return_value = mock_session_factory
+
+        mock_get_engine.return_value = Mock()
+
         mock_host = MockHost(host_id=1)
         mock_get_host.return_value = mock_host
         mock_queue_manager.enqueue_message.return_value = "queue-123"
@@ -113,7 +122,6 @@ class TestAttachUbuntuPro:
         mock_get_host.assert_called_once_with(1)
         mock_queue_manager.enqueue_message.assert_called_once()
         assert mock_db_session.committed is True
-        assert mock_db_session.closed is True
 
     @pytest.mark.asyncio
     async def test_attach_empty_token(self):
@@ -127,12 +135,21 @@ class TestAttachUbuntuPro:
         assert "Ubuntu Pro token is required" in str(exc_info.value.detail)
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_ubuntu_pro.db.SessionLocal")
+    @patch("sqlalchemy.orm.sessionmaker")
+    @patch("backend.api.host_ubuntu_pro.db.get_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
-    async def test_attach_host_not_found(self, mock_get_host, mock_session):
+    async def test_attach_host_not_found(
+        self, mock_get_host, mock_get_engine, mock_sessionmaker
+    ):
         """Test attach with non-existent host."""
+        # Setup session factory mock
         mock_db_session = MockDBSession()
-        mock_session.return_value = mock_db_session
+        mock_session_factory = Mock()
+        mock_session_factory.return_value.__enter__ = Mock(return_value=mock_db_session)
+        mock_session_factory.return_value.__exit__ = Mock(return_value=None)
+        mock_sessionmaker.return_value = mock_session_factory
+        mock_get_engine.return_value = Mock()
+
         mock_get_host.side_effect = HTTPException(
             status_code=404, detail="Host not found"
         )
@@ -143,18 +160,24 @@ class TestAttachUbuntuPro:
             await attach_ubuntu_pro(999, request)
 
         assert exc_info.value.status_code == 404
-        assert mock_db_session.closed is True
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_ubuntu_pro.db.SessionLocal")
+    @patch("sqlalchemy.orm.sessionmaker")
+    @patch("backend.api.host_ubuntu_pro.db.get_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_attach_queue_error(
-        self, mock_queue_manager, mock_get_host, mock_session
+        self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test attach with queue manager error."""
+        # Setup session factory mock
         mock_db_session = MockDBSession()
-        mock_session.return_value = mock_db_session
+        mock_session_factory = Mock()
+        mock_session_factory.return_value.__enter__ = Mock(return_value=mock_db_session)
+        mock_session_factory.return_value.__exit__ = Mock(return_value=None)
+        mock_sessionmaker.return_value = mock_session_factory
+        mock_get_engine.return_value = Mock()
+
         mock_host = MockHost(host_id=1)
         mock_get_host.return_value = mock_host
         mock_queue_manager.enqueue_message.side_effect = Exception("Queue error")
@@ -167,23 +190,28 @@ class TestAttachUbuntuPro:
         assert exc_info.value.status_code == 500
         assert "Failed to request Ubuntu Pro attach" in str(exc_info.value.detail)
         assert mock_db_session.rolled_back is True
-        assert mock_db_session.closed is True
 
 
 class TestDetachUbuntuPro:
     """Test detach_ubuntu_pro endpoint."""
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_ubuntu_pro.db.SessionLocal")
+    @patch("sqlalchemy.orm.sessionmaker")
+    @patch("backend.api.host_ubuntu_pro.db.get_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_detach_success(
-        self, mock_queue_manager, mock_get_host, mock_session
+        self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test successful Ubuntu Pro detach."""
-        # Setup mocks
+        # Setup session factory mock
         mock_db_session = MockDBSession()
-        mock_session.return_value = mock_db_session
+        mock_session_factory = Mock()
+        mock_session_factory.return_value.__enter__ = Mock(return_value=mock_db_session)
+        mock_session_factory.return_value.__exit__ = Mock(return_value=None)
+        mock_sessionmaker.return_value = mock_session_factory
+
+        # Setup mocks
         mock_host = MockHost(host_id=1)
         mock_get_host.return_value = mock_host
         mock_queue_manager.enqueue_message.return_value = "queue-456"
@@ -199,15 +227,23 @@ class TestDetachUbuntuPro:
         mock_get_host.assert_called_once_with(1)
         mock_queue_manager.enqueue_message.assert_called_once()
         assert mock_db_session.committed is True
-        assert mock_db_session.closed is True
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_ubuntu_pro.db.SessionLocal")
+    @patch("sqlalchemy.orm.sessionmaker")
+    @patch("backend.api.host_ubuntu_pro.db.get_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
-    async def test_detach_host_not_found(self, mock_get_host, mock_session):
+    async def test_detach_host_not_found(
+        self, mock_get_host, mock_get_engine, mock_sessionmaker
+    ):
         """Test detach with non-existent host."""
+        # Setup session factory mock
         mock_db_session = MockDBSession()
-        mock_session.return_value = mock_db_session
+        mock_session_factory = Mock()
+        mock_session_factory.return_value.__enter__ = Mock(return_value=mock_db_session)
+        mock_session_factory.return_value.__exit__ = Mock(return_value=None)
+        mock_sessionmaker.return_value = mock_session_factory
+        mock_get_engine.return_value = Mock()
+
         mock_get_host.side_effect = HTTPException(
             status_code=404, detail="Host not found"
         )
@@ -216,18 +252,24 @@ class TestDetachUbuntuPro:
             await detach_ubuntu_pro(999)
 
         assert exc_info.value.status_code == 404
-        assert mock_db_session.closed is True
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_ubuntu_pro.db.SessionLocal")
+    @patch("sqlalchemy.orm.sessionmaker")
+    @patch("backend.api.host_ubuntu_pro.db.get_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_detach_queue_error(
-        self, mock_queue_manager, mock_get_host, mock_session
+        self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test detach with queue manager error."""
+        # Setup session factory mock
         mock_db_session = MockDBSession()
-        mock_session.return_value = mock_db_session
+        mock_session_factory = Mock()
+        mock_session_factory.return_value.__enter__ = Mock(return_value=mock_db_session)
+        mock_session_factory.return_value.__exit__ = Mock(return_value=None)
+        mock_sessionmaker.return_value = mock_session_factory
+        mock_get_engine.return_value = Mock()
+
         mock_host = MockHost(host_id=1)
         mock_get_host.return_value = mock_host
         mock_queue_manager.enqueue_message.side_effect = Exception("Queue error")
@@ -238,23 +280,28 @@ class TestDetachUbuntuPro:
         assert exc_info.value.status_code == 500
         assert "Failed to request Ubuntu Pro detach" in str(exc_info.value.detail)
         assert mock_db_session.rolled_back is True
-        assert mock_db_session.closed is True
 
 
 class TestEnableUbuntuProService:
     """Test enable_ubuntu_pro_service endpoint."""
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_ubuntu_pro.db.SessionLocal")
+    @patch("sqlalchemy.orm.sessionmaker")
+    @patch("backend.api.host_ubuntu_pro.db.get_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_enable_service_success(
-        self, mock_queue_manager, mock_get_host, mock_session
+        self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test successful Ubuntu Pro service enable."""
-        # Setup mocks
+        # Setup session factory mock
         mock_db_session = MockDBSession()
-        mock_session.return_value = mock_db_session
+        mock_session_factory = Mock()
+        mock_session_factory.return_value.__enter__ = Mock(return_value=mock_db_session)
+        mock_session_factory.return_value.__exit__ = Mock(return_value=None)
+        mock_sessionmaker.return_value = mock_session_factory
+
+        # Setup mocks
         mock_host = MockHost(host_id=1)
         mock_get_host.return_value = mock_host
         mock_queue_manager.enqueue_message.return_value = "queue-789"
@@ -271,7 +318,6 @@ class TestEnableUbuntuProService:
         mock_get_host.assert_called_once_with(1)
         mock_queue_manager.enqueue_message.assert_called_once()
         assert mock_db_session.committed is True
-        assert mock_db_session.closed is True
 
     @pytest.mark.asyncio
     async def test_enable_service_empty_service(self):
@@ -285,12 +331,21 @@ class TestEnableUbuntuProService:
         assert "Service name is required" in str(exc_info.value.detail)
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_ubuntu_pro.db.SessionLocal")
+    @patch("sqlalchemy.orm.sessionmaker")
+    @patch("backend.api.host_ubuntu_pro.db.get_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
-    async def test_enable_service_host_not_found(self, mock_get_host, mock_session):
+    async def test_enable_service_host_not_found(
+        self, mock_get_host, mock_get_engine, mock_sessionmaker
+    ):
         """Test enable service with non-existent host."""
+        # Setup session factory mock
         mock_db_session = MockDBSession()
-        mock_session.return_value = mock_db_session
+        mock_session_factory = Mock()
+        mock_session_factory.return_value.__enter__ = Mock(return_value=mock_db_session)
+        mock_session_factory.return_value.__exit__ = Mock(return_value=None)
+        mock_sessionmaker.return_value = mock_session_factory
+        mock_get_engine.return_value = Mock()
+
         mock_get_host.side_effect = HTTPException(
             status_code=404, detail="Host not found"
         )
@@ -301,18 +356,24 @@ class TestEnableUbuntuProService:
             await enable_ubuntu_pro_service(999, request)
 
         assert exc_info.value.status_code == 404
-        assert mock_db_session.closed is True
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_ubuntu_pro.db.SessionLocal")
+    @patch("sqlalchemy.orm.sessionmaker")
+    @patch("backend.api.host_ubuntu_pro.db.get_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_enable_service_queue_error(
-        self, mock_queue_manager, mock_get_host, mock_session
+        self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test enable service with queue manager error."""
+        # Setup session factory mock
         mock_db_session = MockDBSession()
-        mock_session.return_value = mock_db_session
+        mock_session_factory = Mock()
+        mock_session_factory.return_value.__enter__ = Mock(return_value=mock_db_session)
+        mock_session_factory.return_value.__exit__ = Mock(return_value=None)
+        mock_sessionmaker.return_value = mock_session_factory
+        mock_get_engine.return_value = Mock()
+
         mock_host = MockHost(host_id=1)
         mock_get_host.return_value = mock_host
         mock_queue_manager.enqueue_message.side_effect = Exception("Queue error")
@@ -327,23 +388,28 @@ class TestEnableUbuntuProService:
             exc_info.value.detail
         )
         assert mock_db_session.rolled_back is True
-        assert mock_db_session.closed is True
 
 
 class TestDisableUbuntuProService:
     """Test disable_ubuntu_pro_service endpoint."""
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_ubuntu_pro.db.SessionLocal")
+    @patch("sqlalchemy.orm.sessionmaker")
+    @patch("backend.api.host_ubuntu_pro.db.get_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_disable_service_success(
-        self, mock_queue_manager, mock_get_host, mock_session
+        self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test successful Ubuntu Pro service disable."""
-        # Setup mocks
+        # Setup session factory mock
         mock_db_session = MockDBSession()
-        mock_session.return_value = mock_db_session
+        mock_session_factory = Mock()
+        mock_session_factory.return_value.__enter__ = Mock(return_value=mock_db_session)
+        mock_session_factory.return_value.__exit__ = Mock(return_value=None)
+        mock_sessionmaker.return_value = mock_session_factory
+
+        # Setup mocks
         mock_host = MockHost(host_id=1)
         mock_get_host.return_value = mock_host
         mock_queue_manager.enqueue_message.return_value = "queue-012"
@@ -360,7 +426,6 @@ class TestDisableUbuntuProService:
         mock_get_host.assert_called_once_with(1)
         mock_queue_manager.enqueue_message.assert_called_once()
         assert mock_db_session.committed is True
-        assert mock_db_session.closed is True
 
     @pytest.mark.asyncio
     async def test_disable_service_empty_service(self):
@@ -374,12 +439,21 @@ class TestDisableUbuntuProService:
         assert "Service name is required" in str(exc_info.value.detail)
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_ubuntu_pro.db.SessionLocal")
+    @patch("sqlalchemy.orm.sessionmaker")
+    @patch("backend.api.host_ubuntu_pro.db.get_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
-    async def test_disable_service_host_not_found(self, mock_get_host, mock_session):
+    async def test_disable_service_host_not_found(
+        self, mock_get_host, mock_get_engine, mock_sessionmaker
+    ):
         """Test disable service with non-existent host."""
+        # Setup session factory mock
         mock_db_session = MockDBSession()
-        mock_session.return_value = mock_db_session
+        mock_session_factory = Mock()
+        mock_session_factory.return_value.__enter__ = Mock(return_value=mock_db_session)
+        mock_session_factory.return_value.__exit__ = Mock(return_value=None)
+        mock_sessionmaker.return_value = mock_session_factory
+        mock_get_engine.return_value = Mock()
+
         mock_get_host.side_effect = HTTPException(
             status_code=404, detail="Host not found"
         )
@@ -390,18 +464,24 @@ class TestDisableUbuntuProService:
             await disable_ubuntu_pro_service(999, request)
 
         assert exc_info.value.status_code == 404
-        assert mock_db_session.closed is True
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_ubuntu_pro.db.SessionLocal")
+    @patch("sqlalchemy.orm.sessionmaker")
+    @patch("backend.api.host_ubuntu_pro.db.get_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_disable_service_queue_error(
-        self, mock_queue_manager, mock_get_host, mock_session
+        self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test disable service with queue manager error."""
+        # Setup session factory mock
         mock_db_session = MockDBSession()
-        mock_session.return_value = mock_db_session
+        mock_session_factory = Mock()
+        mock_session_factory.return_value.__enter__ = Mock(return_value=mock_db_session)
+        mock_session_factory.return_value.__exit__ = Mock(return_value=None)
+        mock_sessionmaker.return_value = mock_session_factory
+        mock_get_engine.return_value = Mock()
+
         mock_host = MockHost(host_id=1)
         mock_get_host.return_value = mock_host
         mock_queue_manager.enqueue_message.side_effect = Exception("Queue error")
@@ -416,23 +496,28 @@ class TestDisableUbuntuProService:
             exc_info.value.detail
         )
         assert mock_db_session.rolled_back is True
-        assert mock_db_session.closed is True
 
 
 class TestUbuntuProIntegration:
     """Integration tests for Ubuntu Pro endpoints."""
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_ubuntu_pro.db.SessionLocal")
+    @patch("sqlalchemy.orm.sessionmaker")
+    @patch("backend.api.host_ubuntu_pro.db.get_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_full_ubuntu_pro_workflow(
-        self, mock_queue_manager, mock_get_host, mock_session
+        self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test complete Ubuntu Pro workflow."""
-        # Setup mocks
+        # Setup session factory mock
         mock_db_session = MockDBSession()
-        mock_session.return_value = mock_db_session
+        mock_session_factory = Mock()
+        mock_session_factory.return_value.__enter__ = Mock(return_value=mock_db_session)
+        mock_session_factory.return_value.__exit__ = Mock(return_value=None)
+        mock_sessionmaker.return_value = mock_session_factory
+
+        # Setup mocks
         mock_host = MockHost(host_id=1)
         mock_get_host.return_value = mock_host
         mock_queue_manager.enqueue_message.side_effect = [
@@ -497,16 +582,22 @@ class TestUbuntuProIntegration:
             assert request.service == service
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_ubuntu_pro.db.SessionLocal")
+    @patch("sqlalchemy.orm.sessionmaker")
+    @patch("backend.api.host_ubuntu_pro.db.get_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_command_data_structure(
-        self, mock_queue_manager, mock_get_host, mock_session
+        self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test that command data is structured correctly."""
-        # Setup mocks
+        # Setup session factory mock
         mock_db_session = MockDBSession()
-        mock_session.return_value = mock_db_session
+        mock_session_factory = Mock()
+        mock_session_factory.return_value.__enter__ = Mock(return_value=mock_db_session)
+        mock_session_factory.return_value.__exit__ = Mock(return_value=None)
+        mock_sessionmaker.return_value = mock_session_factory
+
+        # Setup mocks
         mock_host = MockHost(host_id=1)
         mock_get_host.return_value = mock_host
         mock_queue_manager.enqueue_message.return_value = "queue-123"

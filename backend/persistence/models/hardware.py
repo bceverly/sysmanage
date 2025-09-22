@@ -2,6 +2,7 @@
 Hardware inventory models for SysManage - storage devices and network interfaces.
 """
 
+import uuid
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -15,6 +16,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from backend.persistence.db import Base
+from backend.persistence.models.core import GUID
 
 
 class StorageDevice(Base):
@@ -23,10 +25,8 @@ class StorageDevice(Base):
     """
 
     __tablename__ = "storage_device"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    host_id = Column(
-        BigInteger, ForeignKey("host.id", ondelete="CASCADE"), nullable=False
-    )
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     device_name = Column(String(255), nullable=False)
     device_type = Column(String(50), nullable=True)  # e.g., "SSD", "HDD", "NVMe"
     mount_point = Column(String(255), nullable=True)
@@ -50,10 +50,8 @@ class NetworkInterface(Base):
     """
 
     __tablename__ = "network_interface"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    host_id = Column(
-        BigInteger, ForeignKey("host.id", ondelete="CASCADE"), nullable=False
-    )
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     interface_name = Column(String(255), nullable=False)
     interface_type = Column(
         String(50), nullable=True

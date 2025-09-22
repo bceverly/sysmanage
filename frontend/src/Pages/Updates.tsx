@@ -11,9 +11,6 @@ import {
   IoApps,
   IoFilter,
   IoPlay,
-  IoTime,
-  IoCheckmarkCircle,
-  IoCloseCircle,
   IoSearch
 } from 'react-icons/io5';
 import { 
@@ -76,6 +73,7 @@ const Updates: React.FC = () => {
   const [filters, setFilters] = useState({
     security_only: searchParams.get('securityOnly') === 'true' || searchParams.get('filter') === 'security',
     system_only: false,
+    application_only: false,
     package_manager: '',
     host_id: searchParams.get('host') || ''
   });
@@ -147,12 +145,13 @@ const Updates: React.FC = () => {
 
       if (filters.host_id) {
         // Fetch host-specific updates
-        const hostId = parseInt(filters.host_id);
+        const hostId = filters.host_id;
         const response: HostUpdatesResponse = await updatesService.getHostUpdates(
           hostId,
           filters.package_manager || undefined,
           filters.security_only || undefined,
-          filters.system_only || undefined
+          filters.system_only || undefined,
+          filters.application_only || undefined
         );
 
         fetchedUpdates = response.updates;
@@ -164,6 +163,7 @@ const Updates: React.FC = () => {
         const response: UpdatesResponse = await updatesService.getAllUpdates(
           filters.security_only || undefined,
           filters.system_only || undefined,
+          filters.application_only || undefined,
           filters.package_manager || undefined,
           ITEMS_PER_PAGE,
           page * ITEMS_PER_PAGE
@@ -503,45 +503,6 @@ const Updates: React.FC = () => {
     }
   };
 
-  const getUpdateIcon = (update: PackageUpdate) => {
-    const key = `${update.host_id}-${update.package_name}-${update.package_manager}`;
-    const localStatus = updateStatuses.get(key);
-    
-    // First check local state (for immediate feedback after clicking execute)
-    if (localStatus) {
-      switch (localStatus.status) {
-        case 'pending':
-          return <IoTime className="update-icon pending" />;
-        case 'success':
-          return <IoCheckmarkCircle className="update-icon success" />;
-        case 'failed':
-          return <IoCloseCircle className="update-icon failed" />;
-      }
-    }
-    
-    // Then check backend status from the update object itself
-    if (update.status) {
-      switch (update.status) {
-        case 'updating':
-          return <IoTime className="update-icon pending" />;
-        case 'completed':
-        case 'success':
-          return <IoCheckmarkCircle className="update-icon success" />;
-        case 'failed':
-        case 'error':
-          return <IoCloseCircle className="update-icon failed" />;
-      }
-    }
-    
-    // Default icons based on update type
-    if (update.is_security_update) {
-      return <IoShieldCheckmark className="update-icon security" />;
-    } else if (update.is_system_update) {
-      return <IoHardwareChip className="update-icon system" />;
-    } else {
-      return <IoApps className="update-icon application" />;
-    }
-  };
 
   const getUpdateTypeText = (update: PackageUpdate) => {
     if (update.is_security_update) {
@@ -645,7 +606,17 @@ const Updates: React.FC = () => {
               <div className="updates__stat-label">{t('updates.stats.system', 'System Updates')}</div>
             </div>
           </div>
-          
+
+          <div className="updates__stat-card">
+            <div className="updates__stat-icon">
+              <IoApps />
+            </div>
+            <div className="updates__stat-content">
+              <div className="updates__stat-number">{displayStats.application_updates}</div>
+              <div className="updates__stat-label">{t('updates.stats.application', 'Application Updates')}</div>
+            </div>
+          </div>
+
           <div className="updates__stat-card">
             <div className="updates__stat-icon">
               <IoWarning />
@@ -703,7 +674,18 @@ const Updates: React.FC = () => {
             {t('updates.filters.systemOnly', 'System Updates Only')}
           </label>
         </div>
-        
+
+        <div className="updates__filter">
+          <label>
+            <input
+              type="checkbox"
+              checked={filters.application_only}
+              onChange={(e) => handleFilterChange('application_only', e.target.checked)}
+            />
+            {t('updates.filters.applicationOnly', 'Application Updates Only')}
+          </label>
+        </div>
+
         <div className="updates__filter">
           <select
             value={filters.package_manager}
@@ -766,14 +748,33 @@ const Updates: React.FC = () => {
       <div className="updates__content">
         {updates.length === 0 && !isLoading ? (
           <div className="updates__empty">
-            {filters.security_only || filters.system_only || filters.package_manager || filters.host_id ? 
+            {filters.security_only || filters.system_only || filters.application_only || filters.package_manager || filters.host_id ? 
               t('updates.noMatchingUpdates', 'No updates match the current filters') :
               t('updates.noUpdates', 'All systems are up to date')
             }
           </div>
         ) : (
           <div className="updates__list">
-            {updates.map(update => {
+            {updates
+              .sort((a, b) => {
+                // Sort priority: security (0), system (1), application (2)
+                const getTypePriority = (update: PackageUpdate) => {
+                  if (update.is_security_update) return 0;
+                  if (update.is_system_update) return 1;
+                  return 2;
+                };
+
+                const priorityA = getTypePriority(a);
+                const priorityB = getTypePriority(b);
+
+                if (priorityA !== priorityB) {
+                  return priorityA - priorityB;
+                }
+
+                // If same type, sort by package name
+                return a.package_name.localeCompare(b.package_name);
+              })
+              .map(update => {
               const key = `${update.host_id}-${update.package_name}-${update.package_manager}`;
               const isSelected = selectedUpdates.has(key);
               
@@ -791,7 +792,13 @@ const Updates: React.FC = () => {
                   </div>
                   
                   <div className="updates__item-icon">
-                    {getUpdateIcon(update)}
+                    {update.is_security_update ? (
+                      <IoShieldCheckmark className="update-icon security" />
+                    ) : update.is_system_update ? (
+                      <IoHardwareChip className="update-icon system" />
+                    ) : (
+                      <IoApps className="update-icon application" />
+                    )}
                   </div>
                   
                   <div className="updates__item-content">

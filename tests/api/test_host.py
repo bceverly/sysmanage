@@ -16,7 +16,6 @@ class TestHostDelete:
         """Test successful host deletion."""
         # Create a test host
         host = models.Host(
-            id=1,
             fqdn="delete.example.com",
             ipv4="192.168.1.100",
             ipv6="2001:db8::1",
@@ -60,7 +59,6 @@ class TestHostGet:
         """Test getting host by ID."""
         # Create a test host
         host = models.Host(
-            id=1,
             fqdn="get.example.com",
             ipv4="192.168.1.101",
             ipv6="2001:db8::2",
@@ -101,21 +99,18 @@ class TestHostsList:
         # Create multiple test hosts
         hosts = [
             models.Host(
-                id=1,
                 fqdn="host1.example.com",
                 ipv4="192.168.1.10",
                 ipv6="2001:db8::10",
                 active=True,
             ),
             models.Host(
-                id=2,
                 fqdn="host2.example.com",
                 ipv4="192.168.1.11",
                 ipv6="2001:db8::11",
                 active=False,
             ),
             models.Host(
-                id=3,
                 fqdn="host3.example.com",
                 ipv4="192.168.1.12",
                 ipv6="2001:db8::12",
@@ -195,7 +190,6 @@ class TestHostCreate:
         """Test creating host with duplicate FQDN."""
         # Create existing host
         existing_host = models.Host(
-            id=1,
             fqdn="duplicate.example.com",
             ipv4="192.168.1.100",
             ipv6="2001:db8::100",
@@ -256,7 +250,6 @@ class TestHostUpdate:
         """Test successful host update."""
         # Create a test host
         host = models.Host(
-            id=1,
             fqdn="update.example.com",
             ipv4="192.168.1.100",
             ipv6="2001:db8::100",
@@ -311,7 +304,6 @@ class TestHostUpdate:
         """Test updating host with duplicate FQDN."""
         # Create two hosts
         host1 = models.Host(
-            id=1,
             fqdn="host1.example.com",
             ipv4="192.168.1.1",
             ipv6="2001:db8::1",
@@ -319,7 +311,6 @@ class TestHostUpdate:
         )
         host1.approval_status = "approved"
         host2 = models.Host(
-            id=2,
             fqdn="host2.example.com",
             ipv4="192.168.1.2",
             ipv6="2001:db8::2",
@@ -394,7 +385,6 @@ class TestHostRegister:
         """Test successful registration of existing host (update)."""
         # Create existing host
         existing_host = models.Host(
-            id=1,
             fqdn="existing.example.com",
             ipv4="192.168.1.100",
             ipv6="2001:db8::100",
@@ -499,7 +489,6 @@ class TestHostUpdateCounts:
         """Test getting host with no package updates."""
         # Create a test host
         host = models.Host(
-            id=1,
             fqdn="noupdates.example.com",
             ipv4="192.168.1.101",
             ipv6="2001:db8::2",
@@ -522,7 +511,6 @@ class TestHostUpdateCounts:
         """Test getting host with mixed security and system updates."""
         # Create a test host
         host = models.Host(
-            id=1,
             fqdn="mixedupdates.example.com",
             ipv4="192.168.1.102",
             ipv6="2001:db8::3",
@@ -603,7 +591,6 @@ class TestHostUpdateCounts:
         """Test getting hosts list with update counts included."""
         # Create multiple test hosts with different update scenarios
         host1 = models.Host(
-            id=1,
             fqdn="host1.example.com",
             ipv4="192.168.1.10",
             ipv6="2001:db8::10",
@@ -612,7 +599,6 @@ class TestHostUpdateCounts:
         host1.approval_status = "approved"
 
         host2 = models.Host(
-            id=2,
             fqdn="host2.example.com",
             ipv4="192.168.1.11",
             ipv6="2001:db8::11",
@@ -681,7 +667,6 @@ class TestHostUpdateCounts:
         """Test getting host by FQDN includes update counts."""
         # Create a test host
         host = models.Host(
-            id=1,
             fqdn="byname.example.com",
             ipv4="192.168.1.103",
             ipv6="2001:db8::4",
@@ -742,7 +727,6 @@ class TestHostUpdateCounts:
         """Test edge cases in update count calculation."""
         # Create a test host
         host = models.Host(
-            id=1,
             fqdn="edgecase.example.com",
             ipv4="192.168.1.104",
             ipv6="2001:db8::5",
@@ -810,7 +794,6 @@ class TestHostUpdateCounts:
         hosts = []
         for i in range(3):
             host = models.Host(
-                id=i + 1,
                 fqdn=f"isolated{i+1}.example.com",
                 ipv4=f"192.168.1.{110+i}",
                 ipv6=f"2001:db8::{110+i}",
@@ -825,7 +808,7 @@ class TestHostUpdateCounts:
         # Host 1: 2 security, 1 system, 4 total
         host1_updates = [
             models.PackageUpdate(
-                host_id=1,
+                host_id=hosts[0].id,
                 package_name="sec1",
                 current_version="1.0",
                 available_version="1.1",
@@ -836,7 +819,7 @@ class TestHostUpdateCounts:
                 status="available",
             ),
             models.PackageUpdate(
-                host_id=1,
+                host_id=hosts[0].id,
                 package_name="sec2",
                 current_version="2.0",
                 available_version="2.1",
@@ -847,7 +830,7 @@ class TestHostUpdateCounts:
                 status="available",
             ),
             models.PackageUpdate(
-                host_id=1,
+                host_id=hosts[0].id,
                 package_name="sys1",
                 current_version="1.0",
                 available_version="1.1",
@@ -858,7 +841,7 @@ class TestHostUpdateCounts:
                 status="available",
             ),
             models.PackageUpdate(
-                host_id=1,
+                host_id=hosts[0].id,
                 package_name="app1",
                 current_version="1.0",
                 available_version="1.1",
@@ -873,7 +856,7 @@ class TestHostUpdateCounts:
         # Host 2: 1 security, 2 system, 3 total (with overlap)
         host2_updates = [
             models.PackageUpdate(
-                host_id=2,
+                host_id=hosts[1].id,
                 package_name="both1",
                 current_version="1.0",
                 available_version="1.1",
@@ -884,7 +867,7 @@ class TestHostUpdateCounts:
                 status="available",
             ),
             models.PackageUpdate(
-                host_id=2,
+                host_id=hosts[1].id,
                 package_name="sys2",
                 current_version="1.0",
                 available_version="1.1",
@@ -895,7 +878,7 @@ class TestHostUpdateCounts:
                 status="available",
             ),
             models.PackageUpdate(
-                host_id=2,
+                host_id=hosts[1].id,
                 package_name="app2",
                 current_version="1.0",
                 available_version="1.1",
@@ -915,14 +898,14 @@ class TestHostUpdateCounts:
         session.commit()
 
         # Test individual host endpoints
-        for i, expected_counts in enumerate(
-            [
-                (2, 1, 4),  # Host 1: 2 security, 1 system, 4 total
-                (1, 2, 3),  # Host 2: 1 security, 2 system, 3 total
-                (0, 0, 0),  # Host 3: 0 security, 0 system, 0 total
-            ]
-        ):
-            response = client.get(f"/api/host/{i+1}", headers=auth_headers)
+        expected_counts_list = [
+            (2, 1, 4),  # Host 1: 2 security, 1 system, 4 total
+            (1, 2, 3),  # Host 2: 1 security, 2 system, 3 total
+            (0, 0, 0),  # Host 3: 0 security, 0 system, 0 total
+        ]
+
+        for host, expected_counts in zip(hosts, expected_counts_list):
+            response = client.get(f"/api/host/{host.id}", headers=auth_headers)
             assert response.status_code == 200
             data = response.json()
             assert data["security_updates_count"] == expected_counts[0]

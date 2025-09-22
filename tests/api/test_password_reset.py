@@ -28,7 +28,6 @@ class TestForgotPassword:
         """Test forgot password for existing user."""
         # Create test user
         user = models.User(
-            id=1,
             userid="test@example.com",
             hashed_password=argon2_hasher.hash("password123"),
             active=True,
@@ -83,7 +82,6 @@ class TestForgotPassword:
         """Test forgot password when email sending fails."""
         # Create test user
         user = models.User(
-            id=1,
             userid="test@example.com",
             hashed_password=argon2_hasher.hash("password123"),
             active=True,
@@ -116,7 +114,6 @@ class TestResetPassword:
         """Test successful password reset with valid token."""
         # Create test user
         user = models.User(
-            id=1,
             userid="test@example.com",
             hashed_password=argon2_hasher.hash("oldpassword"),
             active=True,
@@ -130,7 +127,7 @@ class TestResetPassword:
             token="valid-token-123",
             created_at=datetime.now(timezone.utc),
             expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
-            is_used=False,
+            used_at=None,
         )
         session.add(reset_token)
         session.commit()
@@ -155,7 +152,6 @@ class TestResetPassword:
 
         # Verify token was marked as used
         session.refresh(reset_token)
-        assert reset_token.is_used is True
         assert reset_token.used_at is not None
 
     def test_reset_password_invalid_token(self, client):
@@ -177,7 +173,6 @@ class TestResetPassword:
         """Test password reset with expired token."""
         # Create test user
         user = models.User(
-            id=1,
             userid="test@example.com",
             hashed_password=argon2_hasher.hash("oldpassword"),
             active=True,
@@ -191,7 +186,7 @@ class TestResetPassword:
             token="expired-token-123",
             created_at=datetime.now(timezone.utc) - timedelta(hours=25),
             expires_at=datetime.now(timezone.utc) - timedelta(hours=1),
-            is_used=False,
+            used_at=None,
         )
         session.add(reset_token)
         session.commit()
@@ -213,7 +208,6 @@ class TestResetPassword:
         """Test password reset with already used token."""
         # Create test user
         user = models.User(
-            id=1,
             userid="test@example.com",
             hashed_password=argon2_hasher.hash("oldpassword"),
             active=True,
@@ -227,7 +221,6 @@ class TestResetPassword:
             token="used-token-123",
             created_at=datetime.now(timezone.utc),
             expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
-            is_used=True,
             used_at=datetime.now(timezone.utc),
         )
         session.add(reset_token)
@@ -250,7 +243,6 @@ class TestResetPassword:
         """Test password reset with mismatched passwords."""
         # Create test user and valid token
         user = models.User(
-            id=1,
             userid="test@example.com",
             hashed_password=argon2_hasher.hash("oldpassword"),
             active=True,
@@ -263,7 +255,7 @@ class TestResetPassword:
             token="valid-token-123",
             created_at=datetime.now(timezone.utc),
             expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
-            is_used=False,
+            used_at=None,
         )
         session.add(reset_token)
         session.commit()
@@ -285,7 +277,6 @@ class TestResetPassword:
         """Test password reset with password too short."""
         # Create test user and valid token
         user = models.User(
-            id=1,
             userid="test@example.com",
             hashed_password=argon2_hasher.hash("oldpassword"),
             active=True,
@@ -298,7 +289,7 @@ class TestResetPassword:
             token="valid-token-123",
             created_at=datetime.now(timezone.utc),
             expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
-            is_used=False,
+            used_at=None,
         )
         session.add(reset_token)
         session.commit()
@@ -320,8 +311,7 @@ class TestResetPassword:
         """Test password reset with token that has no associated user."""
         # Create a reset token without an associated user
         reset_token = models.PasswordResetToken(
-            id=1,
-            user_id=999,  # User ID that doesn't exist
+            user_id="550e8400-e29b-41d4-a716-446655440999",  # User ID that doesn't exist
             token=str(uuid.uuid4()),
             created_at=datetime.now(timezone.utc),
             expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
@@ -352,7 +342,6 @@ class TestValidateResetToken:
         """Test validating a valid token."""
         # Create test user and valid token
         user = models.User(
-            id=1,
             userid="test@example.com",
             hashed_password=argon2_hasher.hash("password123"),
             active=True,
@@ -365,7 +354,7 @@ class TestValidateResetToken:
             token="valid-token-123",
             created_at=datetime.now(timezone.utc),
             expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
-            is_used=False,
+            used_at=None,
         )
         session.add(reset_token)
         session.commit()
@@ -389,7 +378,6 @@ class TestValidateResetToken:
         """Test validating an expired token."""
         # Create test user and expired token
         user = models.User(
-            id=1,
             userid="test@example.com",
             hashed_password=argon2_hasher.hash("password123"),
             active=True,
@@ -402,7 +390,7 @@ class TestValidateResetToken:
             token="expired-token-123",
             created_at=datetime.now(timezone.utc) - timedelta(hours=25),
             expires_at=datetime.now(timezone.utc) - timedelta(hours=1),
-            is_used=False,
+            used_at=None,
         )
         session.add(reset_token)
         session.commit()
@@ -425,7 +413,6 @@ class TestAdminResetUserPassword:
         """Test admin triggering password reset for user."""
         # Create test user
         user = models.User(
-            id=1,
             userid="test@example.com",
             hashed_password=argon2_hasher.hash("password123"),
             active=True,
@@ -471,7 +458,6 @@ class TestAdminResetUserPassword:
         """Test admin reset when email sending fails."""
         # Create test user
         user = models.User(
-            id=1,
             userid="test@example.com",
             hashed_password=argon2_hasher.hash("password123"),
             active=True,
@@ -494,7 +480,6 @@ class TestAdminResetUserPassword:
     def test_admin_reset_user_password_unauthorized(self, client, session):
         """Test admin reset without authentication."""
         user = models.User(
-            id=1,
             userid="test@example.com",
             hashed_password=argon2_hasher.hash("password123"),
             active=True,
@@ -534,7 +519,6 @@ class TestPasswordResetUtilityFunctions:
 
         # Create test user
         user = models.User(
-            id=1,
             userid="test@example.com",
             hashed_password=argon2_hasher.hash("password123"),
             active=True,
@@ -556,7 +540,7 @@ class TestPasswordResetUtilityFunctions:
         )
         assert db_token is not None
         assert db_token.user_id == user.id
-        assert db_token.is_used is False
+        assert db_token.used_at is None
         # Compare without timezone for SQLite compatibility
         now_naive = datetime.now(timezone.utc).replace(tzinfo=None)
         expires_naive = (
@@ -572,7 +556,6 @@ class TestPasswordResetUtilityFunctions:
 
         # Create test user
         user = models.User(
-            id=1,
             userid="test@example.com",
             hashed_password=argon2_hasher.hash("password123"),
             active=True,
@@ -586,7 +569,7 @@ class TestPasswordResetUtilityFunctions:
             token="valid-token-123",
             created_at=datetime.now(timezone.utc),
             expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
-            is_used=False,
+            used_at=None,
         )
         session.add(valid_token)
         session.commit()

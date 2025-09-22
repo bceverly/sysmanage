@@ -1,7 +1,7 @@
 import axiosInstance from './api.js';
 
 export interface Script {
-  id?: number;
+  id?: string;
   name: string;
   description: string;
   content: string;
@@ -9,21 +9,21 @@ export interface Script {
   platform?: string;
   run_as_user?: string;
   is_active: boolean;
-  created_by?: number;
+  created_by?: string;
   created_at?: string;
   updated_at?: string;
 }
 
 export interface ScriptExecution {
-  id: number;
-  script_id?: number;
-  host_id: number;
+  id: string;
+  script_id?: string;
+  host_id: string;
   host_fqdn: string;
   script_name: string;
   script_content: string;
   shell_type: string;
   status: 'pending' | 'running' | 'completed' | 'failed' | 'timeout';
-  requested_by: number;
+  requested_by: string;
   started_at?: string;
   completed_at?: string;
   exit_code?: number;
@@ -34,7 +34,7 @@ export interface ScriptExecution {
 }
 
 export interface Host {
-  id: number;
+  id: string;
   fqdn: string;
   status: string;
   active: boolean;
@@ -46,8 +46,8 @@ export interface Host {
 }
 
 export interface ExecuteScriptRequest {
-  host_id: number;
-  saved_script_id?: number;
+  host_id: string;
+  saved_script_id?: string;
   script_name?: string;
   script_content?: string;
   shell_type?: string;
@@ -70,16 +70,16 @@ export const scriptsService = {
     return response.data;
   },
 
-  async updateScript(id: number, script: Partial<Script>): Promise<Script> {
+  async updateScript(id: string, script: Partial<Script>): Promise<Script> {
     const response = await axiosInstance.put(`/api/scripts/${id}`, script);
     return response.data;
   },
 
-  async deleteScript(id: number): Promise<void> {
+  async deleteScript(id: string): Promise<void> {
     await axiosInstance.delete(`/api/scripts/${id}`);
   },
 
-  async getScript(id: number): Promise<Script> {
+  async getScript(id: string): Promise<Script> {
     const response = await axiosInstance.get(`/api/scripts/${id}`);
     return response.data;
   },

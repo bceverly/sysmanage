@@ -107,7 +107,10 @@
     "newPassword": "输入新密码",
     "locked": "已锁定",
     "unlocked": "已解锁",
-    "unlock": "解锁"
+    "unlock": "解锁",
+    "lock": "锁定",
+    "lockSelected": "锁定选中用户",
+    "unlockSelected": "解锁选中用户"
   },
   "hostDetail": {
     "invalidId": "无效的主机ID",

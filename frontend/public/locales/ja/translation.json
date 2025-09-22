@@ -107,7 +107,10 @@
     "newPassword": "新しいパスワードを入力",
     "locked": "ロック済み",
     "unlocked": "ロック解除済み",
-    "unlock": "ロック解除"
+    "unlock": "ロック解除",
+    "lock": "ロック",
+    "lockSelected": "選択したユーザーをロック",
+    "unlockSelected": "選択したユーザーのロック解除"
   },
   "hostDetail": {
     "invalidId": "無効なホストID",

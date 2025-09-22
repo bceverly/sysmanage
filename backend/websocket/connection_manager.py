@@ -205,7 +205,7 @@ class ConnectionManager:
         logger.warning("Hostname %s not found in hostname_to_agent mapping", hostname)
         return False
 
-    async def send_to_host(self, host_id: int, message: dict) -> bool:
+    async def send_to_host(self, host_id: str, message: dict) -> bool:
         """Send a message to an agent by database host ID."""
         # Import here to avoid circular imports
         from sqlalchemy.orm import sessionmaker

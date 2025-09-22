@@ -107,7 +107,10 @@
     "newPassword": "새 비밀번호 입력",
     "locked": "잠김",
     "unlocked": "잠금 해제됨",
-    "unlock": "잠금 해제"
+    "unlock": "잠금 해제",
+    "lock": "잠금",
+    "lockSelected": "선택된 사용자 잠금",
+    "unlockSelected": "선택된 사용자 잠금 해제"
   },
   "hostDetail": {
     "invalidId": "잘못된 호스트 ID",

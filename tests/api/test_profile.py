@@ -20,7 +20,6 @@ def test_user(session):
     """Create a test user in the database"""
     # Create user using the test session with the proper test models
     user = models.User(
-        id=1,
         userid="test@example.com",
         first_name="John",
         last_name="Doe",

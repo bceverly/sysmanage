@@ -124,7 +124,7 @@ class TestReportsAPIEndpointsSimple:
         from backend.persistence.models import Host
 
         host = Host(
-            id=1,
+            id="550e8400-e29b-41d4-a716-446655440001",
             fqdn="test.example.com",
             ipv4="192.168.1.1",
             platform="Linux",
@@ -152,7 +152,7 @@ class TestReportsAPIEndpointsSimple:
 
         now = datetime.now(timezone.utc)
         user = User(
-            id=1,
+            id="550e8400-e29b-41d4-a716-446655440002",
             userid="test@example.com",
             first_name="Test",
             last_name="User",

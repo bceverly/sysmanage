@@ -65,11 +65,18 @@ const EmailConfigCard: React.FC = () => {
       setTestResult(null);
       const result = await emailService.sendTestEmail(testEmail);
       setTestResult(result);
+
+      // Auto-close dialog after successful email send
+      if (result.success) {
+        setTimeout(() => {
+          handleCloseTestDialog();
+        }, 2000); // Close after 2 seconds to show success message
+      }
     } catch (err) {
       console.error('Failed to send test email:', err);
-      setTestResult({ 
-        success: false, 
-        message: 'Failed to send test email. Please check your configuration.' 
+      setTestResult({
+        success: false,
+        message: 'Failed to send test email. Please check your configuration.'
       });
     } finally {
       setTestLoading(false);

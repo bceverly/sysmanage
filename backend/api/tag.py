@@ -36,7 +36,7 @@ class TagUpdate(BaseModel):
 class TagResponse(BaseModel):
     """Schema for tag response"""
 
-    id: int
+    id: str
     name: str
     description: Optional[str]
     created_at: datetime
@@ -50,7 +50,7 @@ class TagResponse(BaseModel):
 class TagWithHostsResponse(BaseModel):
     """Schema for tag with associated hosts"""
 
-    id: int
+    id: str
     name: str
     description: Optional[str]
     created_at: datetime
@@ -64,8 +64,8 @@ class TagWithHostsResponse(BaseModel):
 class HostTagRequest(BaseModel):
     """Schema for adding/removing tag from host"""
 
-    host_id: int
-    tag_id: int
+    host_id: str
+    tag_id: str
 
 
 @router.get("/tags", response_model=List[TagResponse])
@@ -92,7 +92,7 @@ async def get_tags(
                 host_count = 0
 
             tag_dict = {
-                "id": tag.id,
+                "id": str(tag.id),
                 "name": tag.name,
                 "description": tag.description,
                 "created_at": tag.created_at,
@@ -138,7 +138,7 @@ async def create_tag(
         db.refresh(new_tag)
 
         return TagResponse(
-            id=new_tag.id,
+            id=str(new_tag.id),
             name=new_tag.name,
             description=new_tag.description,
             created_at=new_tag.created_at,
@@ -163,7 +163,7 @@ async def create_tag(
 
 @router.put("/tags/{tag_id}", response_model=TagResponse)
 async def update_tag(
-    tag_id: int,
+    tag_id: str,
     tag_data: TagUpdate,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -202,7 +202,7 @@ async def update_tag(
             host_count = 0
 
         return TagResponse(
-            id=tag.id,
+            id=str(tag.id),
             name=tag.name,
             description=tag.description,
             created_at=tag.created_at,
@@ -221,7 +221,7 @@ async def update_tag(
 
 @router.delete("/tags/{tag_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_tag(
-    tag_id: int,
+    tag_id: str,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
@@ -257,7 +257,7 @@ async def delete_tag(
 
 @router.get("/tags/{tag_id}/hosts", response_model=TagWithHostsResponse)
 async def get_tag_hosts(
-    tag_id: int,
+    tag_id: str,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
@@ -294,7 +294,7 @@ async def get_tag_hosts(
         for host_row in host_results:
             host_list.append(
                 {
-                    "id": host_row.id,
+                    "id": str(host_row.id),
                     "fqdn": host_row.fqdn,
                     "ipv4": host_row.ipv4,
                     "ipv6": host_row.ipv6,
@@ -304,7 +304,7 @@ async def get_tag_hosts(
             )
 
         return TagWithHostsResponse(
-            id=tag_result.id,
+            id=str(tag_result.id),
             name=tag_result.name,
             description=tag_result.description,
             created_at=tag_result.created_at,
@@ -322,8 +322,8 @@ async def get_tag_hosts(
 
 @router.post("/hosts/{host_id}/tags/{tag_id}", status_code=status.HTTP_201_CREATED)
 async def add_tag_to_host(
-    host_id: int,
-    tag_id: int,
+    host_id: str,
+    tag_id: str,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
@@ -382,8 +382,8 @@ async def add_tag_to_host(
 
 @router.delete("/hosts/{host_id}/tags/{tag_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_tag_from_host(
-    host_id: int,
-    tag_id: int,
+    host_id: str,
+    tag_id: str,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
@@ -416,7 +416,7 @@ async def remove_tag_from_host(
 
 @router.get("/hosts/{host_id}/tags", response_model=List[TagResponse])
 async def get_host_tags(
-    host_id: int,
+    host_id: str,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
@@ -460,7 +460,7 @@ async def get_host_tags(
 
             tag_responses.append(
                 TagResponse(
-                    id=tag_row.id,
+                    id=str(tag_row.id),
                     name=tag_row.name,
                     description=tag_row.description,
                     created_at=tag_row.created_at,

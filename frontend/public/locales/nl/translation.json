@@ -107,7 +107,10 @@
     "newPassword": "Voer nieuw wachtwoord in",
     "locked": "Vergrendeld",
     "unlocked": "Ontgrendeld",
-    "unlock": "Ontgrendelen"
+    "unlock": "Ontgrendelen",
+    "lock": "Vergrendelen",
+    "lockSelected": "Geselecteerde Gebruikers Vergrendelen",
+    "unlockSelected": "Geselecteerde Gebruikers Ontgrendelen"
   },
   "hostDetail": {
     "invalidId": "Ongeldig host-ID",

@@ -223,6 +223,15 @@ class LoginSecurityValidator:
             db_session.commit()
             logger.info("User account '%s' manually unlocked", user.userid)
 
+    def lock_user_account(self, user: User, db_session) -> None:
+        """Manually lock a user account."""
+        if not user.is_locked:
+            user.is_locked = True
+            user.failed_login_attempts = 0
+            user.locked_at = datetime.now(timezone.utc)
+            db_session.commit()
+            logger.info("User account '%s' manually locked", user.userid)
+
 
 class PasswordSecurityValidator:
     """Validates password security policies."""

@@ -19,6 +19,7 @@ See README.md and TESTING.md for detailed guidelines.
 
 import os
 import tempfile
+import uuid
 from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 import pytest
@@ -32,6 +33,7 @@ from sqlalchemy import (
     DateTime,
     Text,
     BigInteger,
+    ForeignKey,
 )
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -42,6 +44,7 @@ argon2_hasher = PasswordHasher()
 from backend.main import app
 from backend.persistence import models
 from backend.persistence.db import get_engine
+from backend.persistence.models.core import GUID
 from backend.auth.auth_handler import sign_jwt
 
 
@@ -64,9 +67,7 @@ def test_db():
     # Create test version of Host model with Integer ID for SQLite compatibility
     class Host(TestBase):
         __tablename__ = "host"
-        id = Column(
-            Integer, primary_key=True, index=True, autoincrement=True
-        )  # Changed from BigInteger
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
         active = Column(Boolean, unique=False, index=False)
         fqdn = Column(String, index=True)
         ipv4 = Column(String)
@@ -153,9 +154,7 @@ def test_db():
     # Create test version of User model with Integer ID for SQLite compatibility
     class User(TestBase):
         __tablename__ = "user"
-        id = Column(
-            Integer, primary_key=True, index=True, autoincrement=True
-        )  # Changed from BigInteger
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
         active = Column(Boolean, unique=False, index=False)
         userid = Column(String, unique=True, index=True)
         hashed_password = Column(String)
@@ -179,12 +178,10 @@ def test_db():
             DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
         )
 
-    # Create test version of Tag model with Integer ID for SQLite compatibility
+    # Create test version of Tag model with UUID for consistency with production
     class Tag(TestBase):
         __tablename__ = "tags"
-        id = Column(
-            Integer, primary_key=True, index=True, autoincrement=True
-        )  # Changed from BigInteger
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
         name = Column(String(100), nullable=False, unique=True, index=True)
         description = Column(String(500), nullable=True)
         created_at = Column(DateTime, nullable=False)
@@ -195,17 +192,17 @@ def test_db():
             "Host", secondary="host_tags", back_populates="tags", lazy="dynamic"
         )
 
-    # Create test version of HostTag junction table for SQLite compatibility
+    # Create test version of HostTag junction table with UUID foreign keys
     class HostTag(TestBase):
         __tablename__ = "host_tags"
-        id = Column(Integer, primary_key=True, autoincrement=True)
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
         host_id = Column(
-            Integer,
+            GUID(),
             ForeignKey("host.id", ondelete="CASCADE"),
             nullable=False,
         )
         tag_id = Column(
-            Integer,
+            GUID(),
             ForeignKey("tags.id", ondelete="CASCADE"),
             nullable=False,
         )
@@ -216,22 +213,19 @@ def test_db():
     # Create test version of PasswordResetToken model with Integer ID for SQLite compatibility
     class PasswordResetToken(TestBase):
         __tablename__ = "password_reset_tokens"
-        id = Column(
-            Integer, primary_key=True, index=True, autoincrement=True
-        )  # Changed from BigInteger
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
         user_id = Column(
-            Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+            GUID(), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
         )
         token = Column(String(255), unique=True, nullable=False, index=True)
         created_at = Column(DateTime, nullable=False)
         expires_at = Column(DateTime, nullable=False)
         used_at = Column(DateTime, nullable=True)
-        is_used = Column(Boolean, default=False, nullable=False)
 
     # Create test version of MessageQueue model with Integer ID for SQLite compatibility
     class MessageQueue(TestBase):
         __tablename__ = "message_queue"
-        id = Column(Integer, primary_key=True, autoincrement=True)
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
         host_id = Column(
             Integer,
             ForeignKey("host.id", ondelete="CASCADE"),
@@ -261,7 +255,7 @@ def test_db():
     # Create test version of SavedScript model for SQLite compatibility
     class SavedScript(TestBase):
         __tablename__ = "saved_scripts"
-        id = Column(Integer, primary_key=True, autoincrement=True)
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
         name = Column(String(255), nullable=False, index=True)
         description = Column(
             String, nullable=True
@@ -284,13 +278,13 @@ def test_db():
     # Create test version of ScriptExecutionLog model for SQLite compatibility
     class ScriptExecutionLog(TestBase):
         __tablename__ = "script_execution_log"
-        id = Column(Integer, primary_key=True, autoincrement=True)
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
         execution_id = Column(String(36), nullable=False, unique=True, index=True)
         host_id = Column(
-            Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False
+            GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False
         )
         saved_script_id = Column(
-            Integer, ForeignKey("saved_scripts.id", ondelete="SET NULL"), nullable=True
+            GUID(), ForeignKey("saved_scripts.id", ondelete="SET NULL"), nullable=True
         )
         script_name = Column(String(255), nullable=True)
         script_content = Column(
@@ -323,7 +317,7 @@ def test_db():
     # Create test version of UbuntuProSettings model for SQLite compatibility
     class UbuntuProSettings(TestBase):
         __tablename__ = "ubuntu_pro_settings"
-        id = Column(Integer, primary_key=True, autoincrement=True)
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
         master_key = Column(Text, nullable=True)
         organization_name = Column(String(255), nullable=True)
         auto_attach_enabled = Column(Boolean, nullable=False, default=False)
@@ -332,8 +326,8 @@ def test_db():
 
     class PackageUpdate(TestBase):
         __tablename__ = "package_updates"
-        id = Column(Integer, primary_key=True, autoincrement=True)
-        host_id = Column(Integer, ForeignKey("host.id"), nullable=False)
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        host_id = Column(GUID(), ForeignKey("host.id"), nullable=False)
         package_name = Column(String(255), nullable=False)
         current_version = Column(String(100), nullable=True)
         available_version = Column(String(100), nullable=False)
@@ -361,7 +355,7 @@ def test_db():
     # ⚠️  ADD NEW MODELS HERE: When adding models, follow this pattern with Integer primary keys!
     class AvailablePackage(TestBase):
         __tablename__ = "available_packages"
-        id = Column(Integer, primary_key=True, autoincrement=True)
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
         package_name = Column(String(255), nullable=False, index=True)
         package_version = Column(String(100), nullable=False)
         package_description = Column(Text, nullable=True)
@@ -375,7 +369,7 @@ def test_db():
         __tablename__ = "installation_requests"
         id = Column(String(36), primary_key=True)  # UUID
         host_id = Column(
-            Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False
+            GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False
         )
         requested_by = Column(String(100), nullable=False)
         requested_at = Column(DateTime(timezone=True), nullable=False, index=True)
@@ -398,7 +392,7 @@ def test_db():
 
     class InstallationPackage(TestBase):
         __tablename__ = "installation_packages"
-        id = Column(Integer, primary_key=True, autoincrement=True)
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
         installation_request_id = Column(
             String(36),
             ForeignKey("installation_requests.id", ondelete="CASCADE"),
@@ -413,9 +407,9 @@ def test_db():
 
     class SoftwareInstallationLog(TestBase):
         __tablename__ = "software_installation_log"
-        id = Column(Integer, primary_key=True, autoincrement=True)
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
         host_id = Column(
-            Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False
+            GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False
         )
         package_name = Column(String(255), nullable=False)
         package_manager = Column(String(50), nullable=False)

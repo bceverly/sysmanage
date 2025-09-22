@@ -485,7 +485,7 @@ async def refresh_packages_for_os_version(
 
 @router.post("/install/{host_id}", response_model=PackageInstallResponse)
 async def install_packages(
-    host_id: int,
+    host_id: str,
     request: PackageInstallRequest,
     db: Session = Depends(get_db),
 ):
@@ -603,7 +603,7 @@ async def install_packages(
 
 @router.post("/uninstall/{host_id}", response_model=PackageUninstallResponse)
 async def uninstall_packages(
-    host_id: int,
+    host_id: str,
     request: PackageUninstallRequest,
     db: Session = Depends(get_db),
 ):
@@ -750,7 +750,7 @@ class InstallationHistoryResponse(BaseModel):
     "/installation-history/{host_id}", response_model=InstallationHistoryResponse
 )
 async def get_installation_history(
-    host_id: int,
+    host_id: str,
     db: Session = Depends(get_db),
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -798,7 +798,7 @@ async def get_installation_history(
 
             installation_items.append(
                 InstallationHistoryItem(
-                    request_id=request.id,
+                    request_id=str(request.id),
                     requested_by=request.requested_by,
                     status=request.status,
                     operation_type=request.operation_type,

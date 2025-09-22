@@ -46,7 +46,7 @@ class User(BaseModel):
 
 
 @router.delete("/user/{user_id}", dependencies=[Depends(JWTBearer())])
-async def delete_user(user_id: int):
+async def delete_user(user_id: str):
     """
     This function deletes a single user given an id
     """
@@ -129,7 +129,7 @@ async def get_logged_in_user(request: Request):
 
 
 @router.get("/user/{user_id}", dependencies=[Depends(JWTBearer())])
-async def get_user(user_id: int):
+async def get_user(user_id: str):
     """
     This function retrieves a single user by its id
     """
@@ -291,7 +291,7 @@ async def add_user(new_user: User, request: Request):
 
 
 @router.put("/user/{user_id}", dependencies=[Depends(JWTBearer())])
-async def update_user(user_id: int, user_data: User):
+async def update_user(user_id: str, user_data: User):
     """
     This function updates an existing user by id
     """
@@ -349,7 +349,7 @@ async def update_user(user_id: int, user_data: User):
 
 
 @router.post("/user/{user_id}/unlock", dependencies=[Depends(JWTBearer())])
-async def unlock_user(user_id: int):
+async def unlock_user(user_id: str):
     """
     This function unlocks a user account manually
     """
@@ -381,8 +381,41 @@ async def unlock_user(user_id: int):
     return ret_user
 
 
+@router.post("/user/{user_id}/lock", dependencies=[Depends(JWTBearer())])
+async def lock_user(user_id: str):
+    """
+    This function locks a user account manually
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # See if we were passed a valid id
+        user = session.query(models.User).filter(models.User.id == user_id).first()
+
+        # Check for failure
+        if not user:
+            raise HTTPException(status_code=404, detail=_("User not found"))
+
+        # Lock the account
+        login_security.lock_user_account(user, session)
+
+        ret_user = models.User(
+            id=user.id,
+            active=user.active,
+            userid=user.userid,
+            is_locked=user.is_locked,
+            failed_login_attempts=user.failed_login_attempts,
+            locked_at=user.locked_at,
+        )
+
+    return ret_user
+
+
 @router.post("/user/{user_id}/image", dependencies=[Depends(JWTBearer())])
-async def upload_user_profile_image(user_id: int, file: UploadFile = File(...)):
+async def upload_user_profile_image(user_id: str, file: UploadFile = File(...)):
     """
     Upload a profile image for a specific user (admin function).
 
@@ -436,7 +469,7 @@ async def upload_user_profile_image(user_id: int, file: UploadFile = File(...)):
 
 
 @router.get("/user/{user_id}/image", dependencies=[Depends(JWTBearer())])
-async def get_user_profile_image(user_id: int):
+async def get_user_profile_image(user_id: str):
     """
     Get a specific user's profile image (admin function).
     """
@@ -477,7 +510,7 @@ async def get_user_profile_image(user_id: int):
 
 
 @router.delete("/user/{user_id}/image", dependencies=[Depends(JWTBearer())])
-async def delete_user_profile_image(user_id: int):
+async def delete_user_profile_image(user_id: str):
     """
     Delete a specific user's profile image (admin function).
     """

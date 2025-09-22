@@ -262,6 +262,15 @@ async def _handle_message_by_type(message, connection, db):
         logger.info("Calling handle_installation_status")
         await handle_installation_status(db, connection, message.data)
 
+    elif message.message_type == "available_packages_batch_start":
+        await _handle_packages_batch_message(message, connection, db)
+
+    elif message.message_type == "available_packages_batch":
+        await _handle_packages_batch_message(message, connection, db)
+
+    elif message.message_type == "available_packages_batch_end":
+        await _handle_packages_batch_message(message, connection, db)
+
     else:
         # Unknown message type - send error
         error_msg = ErrorMessage(
@@ -584,6 +593,57 @@ async def _process_inventory_message(message, connection, db):
     except Exception as e:
         logger.error("Error enqueueing message %s: %s", message.message_type, e)
         error_msg = ErrorMessage("queue_error", f"Failed to queue message: {str(e)}")
+        await connection.send_message(error_msg.to_dict())
+
+
+async def _handle_packages_batch_message(message, connection, db):
+    """Handle packages batch messages by enqueueing them for ordered processing."""
+    hostname = getattr(connection, "hostname", "unknown")
+    logger.info("Enqueueing %s message for host: %s", message.message_type, hostname)
+
+    # Get host information for validation
+    from backend.persistence.models import Host
+
+    host = db.query(Host).filter(Host.fqdn == hostname).first()
+    if not host:
+        logger.error("Host %s not found for batch message", hostname)
+        error_msg = ErrorMessage("host_not_found", f"Host {hostname} not found")
+        await connection.send_message(error_msg.to_dict())
+        return
+
+    # Enqueue the message for processing by message processor with HIGH priority
+    # to ensure batch messages are processed quickly and in order
+    from backend.websocket.queue_manager import Priority
+
+    try:
+        queue_message_id = server_queue_manager.enqueue_message(
+            message_type=message.message_type,
+            message_data=message.data,
+            direction=QueueDirection.INBOUND,
+            host_id=host.id,
+            priority=Priority.HIGH,
+            db=db,
+        )
+        logger.info(
+            "Enqueued %s from host %s (queue_id: %s)",
+            message.message_type,
+            hostname,
+            queue_message_id,
+        )
+
+        # Send acknowledgment back to agent
+        ack_msg = {
+            "message_type": f"{message.message_type}_queued",
+            "message_id": queue_message_id,
+            "status": "queued",
+        }
+        await connection.send_message(ack_msg)
+
+    except Exception as e:
+        logger.error("Error enqueueing %s: %s", message.message_type, e)
+        error_msg = ErrorMessage(
+            "queue_error", f"Failed to queue {message.message_type}: {str(e)}"
+        )
         await connection.send_message(error_msg.to_dict())
 
 

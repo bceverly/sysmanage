@@ -107,7 +107,10 @@
     "newPassword": "Inserisci nuova password",
     "locked": "Bloccato",
     "unlocked": "Sbloccato",
-    "unlock": "Sbloccare"
+    "unlock": "Sbloccare",
+    "lock": "Bloccare",
+    "lockSelected": "Bloccare Utenti Selezionati",
+    "unlockSelected": "Sbloccare Utenti Selezionati"
   },
   "common": {
     "save": "Salva",

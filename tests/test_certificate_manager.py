@@ -141,7 +141,7 @@ class TestCertificateManager:
 
         cert_manager = CertificateManager()
         hostname = "test-host.example.com"
-        host_id = 12345
+        host_id = "550e8400-e29b-41d4-a716-446655440001"
 
         cert_pem, key_pem = cert_manager.generate_client_certificate(hostname, host_id)
 
@@ -216,7 +216,7 @@ class TestCertificateManager:
         with patch("backend.security.certificate_manager.os.environ", {}):
             cert_manager = CertificateManager()
             hostname = "test-host.example.com"
-            host_id = 12345
+            host_id = "550e8400-e29b-41d4-a716-446655440001"
 
             cert_pem, _ = cert_manager.generate_client_certificate(hostname, host_id)
             result = cert_manager.validate_client_certificate(cert_pem)
@@ -235,7 +235,7 @@ class TestCertificateManager:
             cert_manager = CertificateManager()
 
             hostname = "test-host.example.com"
-            host_id = 12345
+            host_id = "550e8400-e29b-41d4-a716-446655440001"
 
             # Generate certificate normally
             cert_pem, _ = cert_manager.generate_client_certificate(hostname, host_id)
@@ -386,7 +386,7 @@ class TestCertificateManagerIntegration:
 
             # 3. Generate client certificate
             hostname = "integration-test.example.com"
-            host_id = 99999
+            host_id = "550e8400-e29b-41d4-a716-446655440002"
             cert_pem, key_pem = cert_manager.generate_client_certificate(
                 hostname, host_id
             )
@@ -608,7 +608,7 @@ class TestCertificateValidationErrors:
 
             # Generate a client certificate normally
             hostname = "test-host.example.com"
-            host_id = 12345
+            host_id = "550e8400-e29b-41d4-a716-446655440001"
             cert_pem, _ = cert_manager.generate_client_certificate(hostname, host_id)
 
             # Create a different CA to simulate wrong issuer

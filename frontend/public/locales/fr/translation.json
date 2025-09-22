@@ -107,7 +107,10 @@
     "newPassword": "Entrez un nouveau mot de passe",
     "locked": "Verrouillé",
     "unlocked": "Déverrouillé",
-    "unlock": "Déverrouiller"
+    "unlock": "Déverrouiller",
+    "lock": "Verrouiller",
+    "lockSelected": "Verrouiller les Utilisateurs Sélectionnés",
+    "unlockSelected": "Déverrouiller les Utilisateurs Sélectionnés"
   },
   "common": {
     "save": "Enregistrer",

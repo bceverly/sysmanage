@@ -18,7 +18,7 @@ from backend.persistence.models import (
 debug_logger = logging.getLogger("websocket_debug")
 
 
-def process_user_accounts(db: Session, host_id: int, users_data: list):
+def process_user_accounts(db: Session, host_id: str, users_data: list):
     """Process user accounts data for a host."""
     for user_data in users_data:
         if not user_data.get("error"):  # Skip error entries
@@ -35,7 +35,7 @@ def process_user_accounts(db: Session, host_id: int, users_data: list):
             db.add(user_account)
 
 
-def process_user_groups(db: Session, host_id: int, groups_data: list):
+def process_user_groups(db: Session, host_id: str, groups_data: list):
     """Process user groups data for a host."""
     for group_data in groups_data:
         if not group_data.get("error"):  # Skip error entries
@@ -51,7 +51,7 @@ def process_user_groups(db: Session, host_id: int, groups_data: list):
 
 
 def process_user_group_memberships(
-    db: Session, host_id: int, users_data: list, user_id_map: dict, group_id_map: dict
+    db: Session, host_id: str, users_data: list, user_id_map: dict, group_id_map: dict
 ):
     """Process user-group memberships for a host."""
     debug_logger.info("Processing memberships for %d users", len(users_data))
@@ -101,7 +101,7 @@ def process_user_group_memberships(
     debug_logger.info("Added %d memberships to database", membership_count)
 
 
-def process_software_packages(db: Session, host_id: int, packages_data: list):
+def process_software_packages(db: Session, host_id: str, packages_data: list):
     """Process software packages data for a host."""
     package_count = 0
     for package_data in packages_data:

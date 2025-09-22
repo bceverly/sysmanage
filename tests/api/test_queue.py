@@ -3,6 +3,7 @@ Unit tests for backend.api.queue module.
 Tests the queue management API endpoints.
 """
 
+import uuid
 import pytest
 from unittest.mock import Mock, patch
 from fastapi import status
@@ -17,13 +18,14 @@ class TestQueueAPI:
     def test_get_failed_messages_success(self, client, session, mock_current_user):
         """Test successful retrieval of failed messages."""
         # Create a test failed message in the database
+        test_host_id = uuid.uuid4()
         test_message = MessageQueue(
             message_id="test-msg-123",
             message_type="test_heartbeat",
             direction="outbound",
             status="failed",
             priority="normal",
-            host_id="test-host",
+            host_id=test_host_id,
             message_data='{"type": "heartbeat", "data": "test"}',
             created_at=datetime.utcnow(),
             expired_at=datetime.utcnow(),  # Mark as expired/failed
@@ -138,13 +140,14 @@ class TestQueueAPI:
     def test_get_message_details_success(self, client, session, mock_current_user):
         """Test successful retrieval of message details."""
         # Create a test failed message
+        test_host_id = uuid.uuid4()
         test_message = MessageQueue(
             message_id="test-msg-detail",
             message_type="test_command",
             direction="outbound",
             status="failed",
             priority="high",
-            host_id="test-host-1",
+            host_id=test_host_id,
             message_data='{"type": "command", "command": "ls"}',
             created_at=datetime.utcnow(),
             expired_at=datetime.utcnow(),
@@ -170,7 +173,7 @@ class TestQueueAPI:
             assert data["direction"] == "outbound"
             assert data["status"] == "failed"
             assert data["priority"] == "high"
-            assert data["host_id"] == "test-host-1"
+            assert data["host_id"] == str(test_host_id)
             assert "data" in data
 
     def test_get_message_details_not_found(self, client, session, mock_current_user):

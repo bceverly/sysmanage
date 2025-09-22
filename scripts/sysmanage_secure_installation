@@ -1,0 +1,104 @@
+#!/bin/bash
+# SysManage Secure Installation Wrapper
+# Handles privilege elevation and virtual environment setup across platforms
+
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
+PYTHON_SCRIPT="$SCRIPT_DIR/_sysmanage_secure_installation.py"
+
+# Detect the operating system
+OS_TYPE=$(uname -s)
+
+# Function to find the Python interpreter
+find_python() {
+    # First, try the virtual environment
+    if [ -f "$PROJECT_ROOT/.venv/bin/python3" ]; then
+        echo "$PROJECT_ROOT/.venv/bin/python3"
+    elif [ -f "$PROJECT_ROOT/.venv/bin/python" ]; then
+        echo "$PROJECT_ROOT/.venv/bin/python"
+    elif [ -f "$PROJECT_ROOT/.venv/Scripts/python.exe" ]; then
+        # Windows virtual environment
+        echo "$PROJECT_ROOT/.venv/Scripts/python.exe"
+    else
+        echo "Error: Virtual environment not found at $PROJECT_ROOT/.venv" >&2
+        echo "Please run 'make install-dev' first to set up the environment." >&2
+        exit 1
+    fi
+}
+
+# Function to check if we have root/admin privileges
+check_privileges() {
+    case "$OS_TYPE" in
+        Linux|Darwin|FreeBSD|OpenBSD|NetBSD)
+            if [ "$EUID" -eq 0 ]; then
+                return 0
+            else
+                return 1
+            fi
+            ;;
+        MINGW*|MSYS*|CYGWIN*)
+            # Windows - check if running as Administrator
+            net session >/dev/null 2>&1
+            return $?
+            ;;
+        *)
+            echo "Warning: Unknown operating system '$OS_TYPE'" >&2
+            # Assume we need privileges and aren't elevated
+            return 1
+            ;;
+    esac
+}
+
+# Find the Python interpreter
+PYTHON_BIN=$(find_python)
+
+# Check if we're already running with elevated privileges
+if check_privileges; then
+    # We already have privileges, just run the script
+    exec "$PYTHON_BIN" "$PYTHON_SCRIPT" "$@"
+else
+    # We need to elevate privileges
+    echo "This script requires elevated privileges to run."
+
+    case "$OS_TYPE" in
+        Linux|Darwin)
+            # Check for sudo
+            if command -v sudo >/dev/null 2>&1; then
+                echo "Running with sudo..."
+                exec sudo "$PYTHON_BIN" "$PYTHON_SCRIPT" "$@"
+            else
+                echo "Error: sudo is not available. Please run as root." >&2
+                exit 1
+            fi
+            ;;
+
+        FreeBSD|OpenBSD|NetBSD)
+            # BSDs might use doas instead of sudo
+            if command -v doas >/dev/null 2>&1; then
+                echo "Running with doas..."
+                exec doas "$PYTHON_BIN" "$PYTHON_SCRIPT" "$@"
+            elif command -v sudo >/dev/null 2>&1; then
+                echo "Running with sudo..."
+                exec sudo "$PYTHON_BIN" "$PYTHON_SCRIPT" "$@"
+            else
+                echo "Error: Neither sudo nor doas is available. Please run as root." >&2
+                exit 1
+            fi
+            ;;
+
+        MINGW*|MSYS*|CYGWIN*)
+            # Windows - try to re-run with elevation
+            echo "Please run this script as Administrator." >&2
+            echo "Right-click on your terminal and select 'Run as Administrator'" >&2
+            exit 1
+            ;;
+
+        *)
+            echo "Error: Unsupported operating system '$OS_TYPE'" >&2
+            echo "Please run the Python script directly with appropriate privileges:" >&2
+            echo "  $PYTHON_BIN $PYTHON_SCRIPT" >&2
+            exit 1
+            ;;
+    esac
+fi

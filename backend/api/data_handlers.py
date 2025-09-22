@@ -221,6 +221,7 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
                 .values(**hardware_updates)
             )
             db.execute(stmt)
+            db.commit()  # Commit hardware updates immediately
 
             debug_logger.info(
                 "Hardware fields updated for host %s: %s",
@@ -543,10 +544,11 @@ async def handle_software_update(db: Session, connection, message_data: dict):
                 software_package = SoftwarePackage(
                     host_id=connection.host_id,
                     package_name=package.get("package_name"),
-                    version=package.get("version"),
+                    package_version=package.get("version"),
                     package_manager=package.get("package_manager", "unknown"),
-                    bundle_id=package.get("bundle_id"),
-                    installation_path=package.get("installation_path"),
+                    package_description=package.get("description"),
+                    architecture=package.get("architecture"),
+                    install_path=package.get("installation_path"),
                     created_at=now,
                     updated_at=now,
                 )
@@ -644,21 +646,47 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
                 )
                 continue
 
+            # Map agent data to database model fields
+            is_security = package_update.get("is_security_update", False)
+            is_system = package_update.get("is_system_update", False)
+
+            # Determine update type based on agent flags
+            if is_security:
+                update_type = "security"
+            elif is_system:
+                update_type = "system"
+            else:
+                update_type = "enhancement"
+
             package_update_record = PackageUpdate(
                 host_id=connection.host_id,
                 package_name=package_update.get("package_name"),
                 current_version=package_update.get("current_version"),
                 available_version=new_version,  # Use validated version
                 package_manager=package_update.get("package_manager", "unknown"),
-                is_security_update=package_update.get("is_security_update", False),
-                status="available",
+                update_type=update_type,
+                size_bytes=package_update.get("update_size"),
+                requires_reboot=False,  # Default, could be enhanced later
                 # Required timestamp fields
-                detected_at=now,
+                discovered_at=now,
+                created_at=now,
                 updated_at=now,
-                last_checked_at=now,
             )
-            db.add(package_update_record)
-            # Note: Removed duplicate 'db.add(package_update)' line
+            try:
+                db.add(package_update_record)
+                debug_logger.info(
+                    "Added package update: %s %s -> %s (%s)",
+                    package_update.get("package_name"),
+                    package_update.get("current_version"),
+                    new_version,
+                    update_type,
+                )
+            except Exception as e:
+                debug_logger.error(
+                    "Failed to add package update %s: %s",
+                    package_update.get("package_name", "unknown"),
+                    str(e),
+                )
 
         # Only update host's last access timestamp if this is from a live connection
         # (not from background queue processing of old messages)
@@ -939,9 +967,8 @@ async def handle_ubuntu_pro_update(
         # Create Ubuntu Pro info record
         ubuntu_pro_info = UbuntuProInfo(
             host_id=host.id,
-            available=ubuntu_pro_data.get("available", False),
             attached=ubuntu_pro_data.get("attached", False),
-            version=ubuntu_pro_data.get("version"),
+            subscription_name=ubuntu_pro_data.get("version"),
             expires=expires_at,
             account_name=ubuntu_pro_data.get("account_name"),
             contract_name=ubuntu_pro_data.get("contract_name"),
@@ -973,11 +1000,9 @@ async def handle_ubuntu_pro_update(
 
             ubuntu_pro_service = UbuntuProService(
                 ubuntu_pro_info_id=ubuntu_pro_info.id,
-                name=service_name,
-                description=service_data.get("description", ""),
-                available=service_data.get("available", False),
+                service_name=service_name,
                 status=service_data.get("status", "disabled"),
-                entitled=service_data.get("entitled", False),
+                entitled=str(service_data.get("entitled", False)).lower(),
                 created_at=now,
                 updated_at=now,
             )

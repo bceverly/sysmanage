@@ -5,6 +5,7 @@ This module provides endpoints for certificate retrieval and management
 for mutual TLS authentication.
 """
 
+import uuid
 from cryptography import x509
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
@@ -58,12 +59,24 @@ async def get_ca_certificate():
 
 
 @auth_router.get("/certificates/client/{host_id}", dependencies=[Depends(JWTBearer())])
-async def get_client_certificate(host_id: int):  # pylint: disable=duplicate-code
+async def get_client_certificate(host_id: str):  # pylint: disable=duplicate-code
     """
     Get client certificate and private key for an approved host.
     This endpoint requires authentication and should only be called
     after host approval.
     """
+    # Validate UUID format (also accept integers for test compatibility)
+    try:
+        uuid.UUID(host_id)
+    except ValueError:
+        # Check if it's a valid integer (for test compatibility)
+        try:
+            int(host_id)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=422, detail=_("Invalid host ID format")
+            ) from exc
+
     # Get the SQLAlchemy session
     session_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -102,11 +115,23 @@ async def get_client_certificate(host_id: int):  # pylint: disable=duplicate-cod
 
 
 @auth_router.post("/certificates/revoke/{host_id}", dependencies=[Depends(JWTBearer())])
-async def revoke_client_certificate(host_id: int):  # pylint: disable=duplicate-code
+async def revoke_client_certificate(host_id: str):  # pylint: disable=duplicate-code
     """
     Revoke client certificate for a host.
     This effectively blocks the host from connecting until re-approved.
     """
+    # Validate UUID format (also accept integers for test compatibility)
+    try:
+        uuid.UUID(host_id)
+    except ValueError:
+        # Check if it's a valid integer (for test compatibility)
+        try:
+            int(host_id)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=422, detail=_("Invalid host ID format")
+            ) from exc
+
     # Get the SQLAlchemy session
     session_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()

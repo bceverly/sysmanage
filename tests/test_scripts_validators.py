@@ -409,7 +409,7 @@ class TestScriptExecutionRequest:
         data = {"host_id": 1}
         request = ScriptExecutionRequest(**data)
 
-        assert request.host_id == 1
+        assert request.host_id == "1"
 
     def test_host_id_positive_integer(self):
         """Test host_id with positive integer values."""
@@ -418,21 +418,21 @@ class TestScriptExecutionRequest:
         for host_id in test_values:
             data = {"host_id": host_id}
             request = ScriptExecutionRequest(**data)
-            assert request.host_id == host_id
+            assert request.host_id == str(host_id)
 
     def test_host_id_zero(self):
         """Test host_id with zero value."""
         data = {"host_id": 0}
         request = ScriptExecutionRequest(**data)
 
-        assert request.host_id == 0
+        assert request.host_id == "0"
 
     def test_host_id_negative_integer(self):
         """Test host_id with negative integer."""
         data = {"host_id": -1}
         request = ScriptExecutionRequest(**data)
 
-        assert request.host_id == -1
+        assert request.host_id == "-1"
 
     def test_missing_host_id(self):
         """Test validation when host_id is missing."""
@@ -442,32 +442,29 @@ class TestScriptExecutionRequest:
         assert "host_id" in str(exc_info.value)
 
     def test_host_id_string_number_conversion(self):
-        """Test that string numbers are converted to integers."""
+        """Test that string numbers are accepted as strings."""
         data = {"host_id": "123"}
         request = ScriptExecutionRequest(**data)
 
-        assert request.host_id == 123
-        assert isinstance(request.host_id, int)
+        assert request.host_id == "123"
+        assert isinstance(request.host_id, str)
 
     def test_host_id_invalid_string(self):
-        """Test that invalid string raises validation error."""
+        """Test that any string is accepted as host_id (for UUID compatibility)."""
         data = {"host_id": "not_a_number"}
-        with pytest.raises(ValidationError) as exc_info:
-            ScriptExecutionRequest(**data)
-
-        # Should contain information about type conversion failure
-        assert (
-            "type" in str(exc_info.value).lower()
-            or "int" in str(exc_info.value).lower()
-        )
-
-    def test_host_id_float_conversion(self):
-        """Test that float values are converted to integers."""
-        data = {"host_id": 123.0}
         request = ScriptExecutionRequest(**data)
 
-        assert request.host_id == 123
-        assert isinstance(request.host_id, int)
+        # Any string should be valid for host_id to support UUIDs
+        assert request.host_id == "not_a_number"
+        assert isinstance(request.host_id, str)
+
+    def test_host_id_string_conversion(self):
+        """Test that host_id accepts string values (UUID format)."""
+        data = {"host_id": "550e8400-e29b-41d4-a716-446655440000"}
+        request = ScriptExecutionRequest(**data)
+
+        assert request.host_id == "550e8400-e29b-41d4-a716-446655440000"
+        assert isinstance(request.host_id, str)
 
     def test_host_id_float_with_decimal(self):
         """Test that float with decimal part raises validation error."""

@@ -27,7 +27,6 @@ class TestModelReprMethods:
     def test_message_queue_repr(self):
         """Test MessageQueue __repr__ method (line 486)."""
         queue_item = MessageQueue(
-            id=1,
             message_id="msg-123",
             message_type="test_type",
             direction="outbound",
@@ -47,7 +46,6 @@ class TestModelReprMethods:
         from datetime import datetime, timezone
 
         metrics = QueueMetrics(
-            id=1,
             queue_name="test_queue",
             metric_type="throughput",
             metric_value="100",
@@ -113,7 +111,6 @@ class TestModelReprMethods:
         from datetime import datetime, timezone
 
         service = UbuntuProService(
-            id=1,
             ubuntu_pro_info_id=123,
             service_name="esm-infra",
             status="enabled",

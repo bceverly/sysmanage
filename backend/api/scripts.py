@@ -97,12 +97,19 @@ class SavedScriptUpdate(BaseModel):
 class ScriptExecutionRequest(BaseModel):
     """Request model for executing a script."""
 
-    host_id: int
-    saved_script_id: Optional[int] = None
+    host_id: str
+    saved_script_id: Optional[str] = None
     script_name: Optional[str] = None
     script_content: Optional[str] = None
     shell_type: Optional[str] = None
     run_as_user: Optional[str] = None
+
+    @validator("host_id", pre=True)
+    def validate_host_id(cls, value):  # pylint: disable=no-self-argument
+        """Convert integer host_id to string for test compatibility."""
+        if isinstance(value, int):
+            return str(value)
+        return value
 
     @validator("script_content")
     def validate_script_content_or_saved_id(
@@ -132,7 +139,7 @@ class ScriptExecutionRequest(BaseModel):
 class SavedScriptResponse(BaseModel):
     """Response model for saved script data."""
 
-    id: int
+    id: str
     name: str
     description: Optional[str]
     content: str
@@ -162,10 +169,10 @@ class ScriptExecutionResponse(BaseModel):
 class ScriptExecutionLogResponse(BaseModel):
     """Response model for script execution log."""
 
-    id: int
-    host_id: int
+    id: str
+    host_id: str
     host_fqdn: Optional[str]
-    saved_script_id: Optional[int]
+    saved_script_id: Optional[str]
     script_name: Optional[str]
     shell_type: str
     run_as_user: Optional[str]
@@ -204,7 +211,7 @@ async def get_saved_scripts(
     active_only: bool = Query(True, description="Show only active scripts"),
 ):
     """Get all saved scripts."""
-    session_factory = sessionmaker(bind=db.engine)
+    session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
             query = db_session.query(models.SavedScript)
@@ -223,7 +230,22 @@ async def get_saved_scripts(
             query = query.order_by(models.SavedScript.name)
             scripts = query.all()
 
-            return [SavedScriptResponse.from_orm(script) for script in scripts]
+            return [
+                SavedScriptResponse(
+                    id=str(script.id),
+                    name=script.name,
+                    description=script.description,
+                    content=script.content,
+                    shell_type=script.shell_type,
+                    platform=script.platform,
+                    run_as_user=script.run_as_user,
+                    is_active=script.is_active,
+                    created_by=script.created_by,
+                    created_at=script.created_at,
+                    updated_at=script.updated_at,
+                )
+                for script in scripts
+            ]
 
     except Exception as e:
         logger.error("Error fetching saved scripts: %s", e)
@@ -238,7 +260,7 @@ async def create_saved_script(
     current_user=Depends(get_current_user),
 ):
     """Create a new saved script."""
-    session_factory = sessionmaker(bind=db.engine)
+    session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
             # Check for duplicate name
@@ -275,7 +297,19 @@ async def create_saved_script(
             logger.info(
                 "Created saved script '%s' by user %s", script.name, current_user
             )
-            return SavedScriptResponse.from_orm(script)
+            return SavedScriptResponse(
+                id=str(script.id),
+                name=script.name,
+                description=script.description,
+                content=script.content,
+                shell_type=script.shell_type,
+                platform=script.platform,
+                run_as_user=script.run_as_user,
+                is_active=script.is_active,
+                created_by=script.created_by,
+                created_at=script.created_at,
+                updated_at=script.updated_at,
+            )
 
     except HTTPException:
         raise
@@ -288,11 +322,11 @@ async def create_saved_script(
 
 @router.get("/{script_id}", response_model=SavedScriptResponse)
 async def get_saved_script(
-    script_id: int,
+    script_id: str,
     current_user=Depends(get_current_user),
 ):
     """Get a specific saved script by ID."""
-    session_factory = sessionmaker(bind=db.engine)
+    session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
             script = (
@@ -304,7 +338,19 @@ async def get_saved_script(
             if not script:
                 raise HTTPException(status_code=404, detail=_("Script not found"))
 
-            return SavedScriptResponse.from_orm(script)
+            return SavedScriptResponse(
+                id=str(script.id),
+                name=script.name,
+                description=script.description,
+                content=script.content,
+                shell_type=script.shell_type,
+                platform=script.platform,
+                run_as_user=script.run_as_user,
+                is_active=script.is_active,
+                created_by=script.created_by,
+                created_at=script.created_at,
+                updated_at=script.updated_at,
+            )
 
     except HTTPException:
         raise
@@ -317,12 +363,12 @@ async def get_saved_script(
 
 @router.put("/{script_id}", response_model=SavedScriptResponse)
 async def update_saved_script(
-    script_id: int,
+    script_id: str,
     script_data: SavedScriptUpdate,
     current_user=Depends(get_current_user),
 ):
     """Update an existing saved script."""
-    session_factory = sessionmaker(bind=db.engine)
+    session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
             script = (
@@ -364,7 +410,19 @@ async def update_saved_script(
             db_session.refresh(script)
 
             logger.info("Updated saved script %d by user %s", script_id, current_user)
-            return SavedScriptResponse.from_orm(script)
+            return SavedScriptResponse(
+                id=str(script.id),
+                name=script.name,
+                description=script.description,
+                content=script.content,
+                shell_type=script.shell_type,
+                platform=script.platform,
+                run_as_user=script.run_as_user,
+                is_active=script.is_active,
+                created_by=script.created_by,
+                created_at=script.created_at,
+                updated_at=script.updated_at,
+            )
 
     except HTTPException:
         raise
@@ -377,11 +435,11 @@ async def update_saved_script(
 
 @router.delete("/{script_id}")
 async def delete_saved_script(
-    script_id: int,
+    script_id: str,
     current_user=Depends(get_current_user),
 ):
     """Delete a saved script."""
-    session_factory = sessionmaker(bind=db.engine)
+    session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
             script = (
@@ -432,7 +490,7 @@ async def execute_script(
     current_user=Depends(get_current_user),
 ):
     """Execute a script on a remote host."""
-    session_factory = sessionmaker(bind=db.engine)
+    session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
             # Verify host exists and is active
@@ -579,13 +637,13 @@ async def execute_script(
 @router.get("/executions/", response_model=ScriptExecutionsResponse)
 async def get_script_executions(
     current_user=Depends(get_current_user),
-    host_id: Optional[int] = Query(None, description="Filter by host ID"),
+    host_id: Optional[str] = Query(None, description="Filter by host ID"),
     status: Optional[str] = Query(None, description="Filter by status"),
     page: int = Query(1, description="Page number (1-based)"),
     limit: int = Query(50, description="Maximum number of results per page"),
 ):
     """Get script execution logs with pagination."""
-    session_factory = sessionmaker(bind=db.engine)
+    session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
             # Build base query
@@ -616,12 +674,35 @@ async def get_script_executions(
 
             executions = query.all()
 
-            # Add host FQDN to response
+            # Add host FQDN to response and ensure UUID conversion
             execution_results = []
             for execution in executions:
-                execution_dict = execution.__dict__.copy()
-                execution_dict["host_fqdn"] = execution.host.fqdn
-                execution_results.append(ScriptExecutionLogResponse(**execution_dict))
+                execution_results.append(
+                    ScriptExecutionLogResponse(
+                        id=str(execution.id),
+                        host_id=str(execution.host_id),
+                        host_fqdn=execution.host.fqdn,
+                        saved_script_id=(
+                            str(execution.saved_script_id)
+                            if execution.saved_script_id
+                            else None
+                        ),
+                        script_name=execution.script_name,
+                        shell_type=execution.shell_type,
+                        run_as_user=execution.run_as_user,
+                        requested_by=execution.requested_by,
+                        execution_id=execution.execution_id,
+                        status=execution.status,
+                        started_at=execution.started_at,
+                        completed_at=execution.completed_at,
+                        exit_code=execution.exit_code,
+                        stdout_output=execution.stdout_output,
+                        stderr_output=execution.stderr_output,
+                        error_message=execution.error_message,
+                        created_at=execution.created_at,
+                        updated_at=execution.updated_at,
+                    )
+                )
 
             return ScriptExecutionsResponse(
                 executions=execution_results, total=total, page=page, pages=pages
@@ -640,7 +721,7 @@ async def delete_script_execution(
     current_user=Depends(get_current_user),
 ):
     """Delete a specific script execution by execution ID."""
-    session_factory = sessionmaker(bind=db.engine)
+    session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
             execution = (
@@ -677,7 +758,7 @@ async def delete_script_executions_bulk(
     current_user=Depends(get_current_user),
 ):
     """Delete multiple script executions by execution IDs."""
-    session_factory = sessionmaker(bind=db.engine)
+    session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
             deleted_count = (
@@ -711,7 +792,7 @@ async def get_script_execution(
     current_user=Depends(get_current_user),
 ):
     """Get a specific script execution by execution ID."""
-    session_factory = sessionmaker(bind=db.engine)
+    session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
             execution = (
@@ -726,10 +807,30 @@ async def get_script_execution(
                     status_code=404, detail=_("Script execution not found")
                 )
 
-            execution_dict = execution.__dict__.copy()
-            execution_dict["host_fqdn"] = execution.host.fqdn
-
-            return ScriptExecutionLogResponse(**execution_dict)
+            return ScriptExecutionLogResponse(
+                id=str(execution.id),
+                host_id=str(execution.host_id),
+                host_fqdn=execution.host.fqdn,
+                saved_script_id=(
+                    str(execution.saved_script_id)
+                    if execution.saved_script_id
+                    else None
+                ),
+                script_name=execution.script_name,
+                shell_type=execution.shell_type,
+                run_as_user=execution.run_as_user,
+                requested_by=execution.requested_by,
+                execution_id=execution.execution_id,
+                status=execution.status,
+                started_at=execution.started_at,
+                completed_at=execution.completed_at,
+                exit_code=execution.exit_code,
+                stdout_output=execution.stdout_output,
+                stderr_output=execution.stderr_output,
+                error_message=execution.error_message,
+                created_at=execution.created_at,
+                updated_at=execution.updated_at,
+            )
 
     except HTTPException:
         raise

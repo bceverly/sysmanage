@@ -2,6 +2,7 @@
 Operations and management models for SysManage - user accounts, scripts, diagnostics, etc.
 """
 
+import uuid
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -16,6 +17,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from backend.persistence.db import Base
+from backend.persistence.models.core import GUID
 
 
 class UserAccount(Base):
@@ -25,8 +27,8 @@ class UserAccount(Base):
     """
 
     __tablename__ = "user_accounts"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    host_id = Column(Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     username = Column(String(255), nullable=False)
     uid = Column(Integer, nullable=True)  # Linux/macOS user ID
     home_directory = Column(String(500), nullable=True)
@@ -46,8 +48,8 @@ class UserGroup(Base):
     """
 
     __tablename__ = "user_groups"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    host_id = Column(Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     group_name = Column(String(255), nullable=False)
     gid = Column(Integer, nullable=True)  # Linux/macOS group ID
     is_system_group = Column(Boolean, nullable=False, default=False)
@@ -66,13 +68,13 @@ class UserGroupMembership(Base):
     """
 
     __tablename__ = "user_group_memberships"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    host_id = Column(Integer, ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     user_account_id = Column(
-        Integer, ForeignKey("user_accounts.id", ondelete="CASCADE"), nullable=False
+        GUID(), ForeignKey("user_accounts.id", ondelete="CASCADE"), nullable=False
     )
     user_group_id = Column(
-        Integer, ForeignKey("user_groups.id", ondelete="CASCADE"), nullable=False
+        GUID(), ForeignKey("user_groups.id", ondelete="CASCADE"), nullable=False
     )
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True), nullable=False)
@@ -90,10 +92,8 @@ class UpdateExecutionLog(Base):
     """
 
     __tablename__ = "update_execution_log"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    host_id = Column(
-        BigInteger, ForeignKey("host.id", ondelete="CASCADE"), nullable=False
-    )
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     package_name = Column(String(255), nullable=False, index=True)
     from_version = Column(String(100), nullable=False)
     to_version = Column(String(100), nullable=False)
@@ -127,8 +127,8 @@ class MessageQueue(Base):
     """
 
     __tablename__ = "message_queue"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    host_id = Column(BigInteger, nullable=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), nullable=True)
     message_id = Column(String(36), nullable=False, index=True)  # UUID
     direction = Column(String(10), nullable=False, index=True)
     message_type = Column(String(50), nullable=False, index=True)
@@ -177,7 +177,7 @@ class QueueMetrics(Base):
     """
 
     __tablename__ = "queue_metrics"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     queue_name = Column(String(100), nullable=False, index=True)
     metric_type = Column(
         String(50), nullable=False, index=True
@@ -205,7 +205,7 @@ class SavedScript(Base):
     """
 
     __tablename__ = "saved_scripts"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     name = Column(String(255), nullable=False, index=True)
     description = Column(Text, nullable=True)
     content = Column(Text, nullable=False)
@@ -228,13 +228,11 @@ class ScriptExecutionLog(Base):
     """
 
     __tablename__ = "script_execution_log"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     execution_id = Column(String(36), nullable=False, unique=True, index=True)  # UUID
-    host_id = Column(
-        BigInteger, ForeignKey("host.id", ondelete="CASCADE"), nullable=False
-    )
+    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     saved_script_id = Column(
-        BigInteger, ForeignKey("saved_scripts.id", ondelete="SET NULL"), nullable=True
+        GUID(), ForeignKey("saved_scripts.id", ondelete="SET NULL"), nullable=True
     )
     script_name = Column(
         String(255), nullable=True
@@ -271,11 +269,9 @@ class DiagnosticReport(Base):
     """
 
     __tablename__ = "diagnostic_report"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     collection_id = Column(String(36), nullable=False, unique=True, index=True)  # UUID
-    host_id = Column(
-        BigInteger, ForeignKey("host.id", ondelete="CASCADE"), nullable=False
-    )
+    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     requested_by = Column(String(255), nullable=False)
     collection_status = Column(
         String(20), nullable=False, default="pending"
@@ -314,7 +310,7 @@ class Tag(Base):
     """
 
     __tablename__ = "tags"
-    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     name = Column(String(100), unique=True, nullable=False, index=True)
     description = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False)
@@ -337,13 +333,9 @@ class HostTag(Base):
     """
 
     __tablename__ = "host_tags"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    host_id = Column(
-        BigInteger, ForeignKey("host.id", ondelete="CASCADE"), nullable=False
-    )
-    tag_id = Column(
-        BigInteger, ForeignKey("tags.id", ondelete="CASCADE"), nullable=False
-    )
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    tag_id = Column(GUID(), ForeignKey("tags.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False)
 
     def __repr__(self):
@@ -357,10 +349,8 @@ class PasswordResetToken(Base):
     """
 
     __tablename__ = "password_reset_token"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    user_id = Column(
-        BigInteger, ForeignKey("user.id", ondelete="CASCADE"), nullable=False
-    )
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID(), ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     token = Column(String(255), unique=True, nullable=False, index=True)
     expires_at = Column(DateTime(timezone=True), nullable=False)
     used_at = Column(DateTime(timezone=True), nullable=True)
@@ -380,9 +370,9 @@ class UbuntuProInfo(Base):
     """
 
     __tablename__ = "ubuntu_pro_info"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     host_id = Column(
-        BigInteger,
+        GUID(),
         ForeignKey("host.id", ondelete="CASCADE"),
         nullable=False,
         unique=True,
@@ -415,9 +405,9 @@ class UbuntuProService(Base):
     """
 
     __tablename__ = "ubuntu_pro_service"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     ubuntu_pro_info_id = Column(
-        BigInteger, ForeignKey("ubuntu_pro_info.id", ondelete="CASCADE"), nullable=False
+        GUID(), ForeignKey("ubuntu_pro_info.id", ondelete="CASCADE"), nullable=False
     )
     service_name = Column(String(100), nullable=False)
     entitled = Column(String(20), nullable=True)  # "yes", "no", etc.
@@ -439,7 +429,7 @@ class UbuntuProSettings(Base):
     """
 
     __tablename__ = "ubuntu_pro_settings"
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     organization_name = Column(String(255), nullable=True)
     master_key = Column(String(255), nullable=True)  # Encrypted Ubuntu Pro key
     auto_attach_enabled = Column(Boolean, nullable=False, default=False)

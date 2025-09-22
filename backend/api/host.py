@@ -84,7 +84,7 @@ class Host(BaseModel):
 
 
 @auth_router.delete("/host/{host_id}", dependencies=[Depends(JWTBearer())])
-async def delete_host(host_id: int):
+async def delete_host(host_id: str):
     """
     This function deletes a single host given an id
     """
@@ -110,7 +110,7 @@ async def delete_host(host_id: int):
 
 
 @auth_router.get("/host/{host_id}", dependencies=[Depends(JWTBearer())])
-async def get_host(host_id: int):
+async def get_host(host_id: str):
     """
     This function retrieves a single host by its id
     """
@@ -143,7 +143,7 @@ async def get_host(host_id: int):
 
         # Return as dictionary with all fields
         return {
-            "id": host.id,
+            "id": str(host.id),
             "active": host.active,
             "fqdn": host.fqdn,
             "ipv4": host.ipv4,
@@ -174,7 +174,7 @@ async def get_host(host_id: int):
             "total_updates_count": total_updates_count,
             # Include tags
             "tags": [
-                {"id": tag.id, "name": tag.name, "description": tag.description}
+                {"id": str(tag.id), "name": tag.name, "description": tag.description}
                 for tag in host_tags
             ],
         }
@@ -214,7 +214,7 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
 
         # Return as dictionary with all fields
         return {
-            "id": host.id,
+            "id": str(host.id),
             "active": host.active,
             "fqdn": host.fqdn,
             "ipv4": host.ipv4,
@@ -245,7 +245,7 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
             "total_updates_count": total_updates_count,
             # Include tags
             "tags": [
-                {"id": tag.id, "name": tag.name, "description": tag.description}
+                {"id": str(tag.id), "name": tag.name, "description": tag.description}
                 for tag in host_tags
             ],
         }
@@ -286,7 +286,7 @@ async def get_all_hosts():
             total_updates_count = len(package_updates)
 
             host_dict = {
-                "id": host.id,
+                "id": str(host.id),
                 "active": host.active,
                 "fqdn": host.fqdn,
                 "ipv4": host.ipv4,
@@ -319,7 +319,11 @@ async def get_all_hosts():
                 "total_updates_count": total_updates_count,
                 # Include tags
                 "tags": [
-                    {"id": tag.id, "name": tag.name, "description": tag.description}
+                    {
+                        "id": str(tag.id),
+                        "name": tag.name,
+                        "description": tag.description,
+                    }
                     for tag in host_tags
                 ],
             }
@@ -439,7 +443,7 @@ async def register_host(registration_data: HostRegistration):
 
 
 @auth_router.put("/host/{host_id}", dependencies=[Depends(JWTBearer())])
-async def update_host(host_id: int, host_data: Host):
+async def update_host(host_id: str, host_data: Host):
     """
     This function updates an existing host by id
     """
@@ -479,7 +483,7 @@ async def update_host(host_id: int, host_data: Host):
 
 
 @auth_router.put("/host/{host_id}/approve", dependencies=[Depends(JWTBearer())])
-async def approve_host(host_id: int):  # pylint: disable=duplicate-code
+async def approve_host(host_id: str):  # pylint: disable=duplicate-code
     """
     Approve a pending host registration
     """
@@ -562,7 +566,7 @@ async def approve_host(host_id: int):  # pylint: disable=duplicate-code
 
 
 @auth_router.put("/host/{host_id}/reject", dependencies=[Depends(JWTBearer())])
-async def reject_host(host_id: int):  # pylint: disable=duplicate-code
+async def reject_host(host_id: str):  # pylint: disable=duplicate-code
     """
     Reject a pending host registration
     """
@@ -605,7 +609,7 @@ async def reject_host(host_id: int):  # pylint: disable=duplicate-code
 @auth_router.post(
     "/host/{host_id}/request-os-update", dependencies=[Depends(JWTBearer())]
 )
-async def request_os_version_update(host_id: int):
+async def request_os_version_update(host_id: str):
     """
     Request an agent to update its OS version information.
     This sends a message via WebSocket to the agent requesting fresh OS data.
@@ -641,7 +645,7 @@ async def request_os_version_update(host_id: int):
 @auth_router.post(
     "/host/{host_id}/request-updates-check", dependencies=[Depends(JWTBearer())]
 )
-async def request_updates_check(host_id: int):
+async def request_updates_check(host_id: str):
     """
     Request an agent to check for available updates.
     This sends a message via WebSocket to the agent requesting an update check.

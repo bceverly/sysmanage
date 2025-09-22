@@ -9,7 +9,7 @@ from backend.i18n import _
 from backend.persistence.models import Host
 
 
-async def validate_host_id(db: Session, connection, host_id: int) -> bool:
+async def validate_host_id(db: Session, connection, host_id: str) -> bool:
     """
     Validate that a host_id exists in the database.
     Returns True if host exists, False if not.

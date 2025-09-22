@@ -107,7 +107,10 @@
     "newPassword": "Neues Passwort eingeben",
     "locked": "Gesperrt",
     "unlocked": "Entsperrt",
-    "unlock": "Entsperren"
+    "unlock": "Entsperren",
+    "lock": "Sperren",
+    "lockSelected": "Ausgewählte Benutzer Sperren",
+    "unlockSelected": "Ausgewählte Benutzer Entsperren"
   },
   "common": {
     "save": "Speichern",

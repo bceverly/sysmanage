@@ -243,7 +243,7 @@ class TestCreateTag:
 
         # Mock the added tag to have an ID after commit
         def mock_refresh(obj):
-            obj.id = 1
+            obj.id = "550e8400-e29b-41d4-a716-446655440001"
 
         mock_db.refresh = mock_refresh
 
@@ -480,7 +480,7 @@ class TestGetTagHosts:
         mock_get_user.return_value = "test@example.com"
 
         tag_result = MockResultRow(
-            id=1,
+            id="550e8400-e29b-41d4-a716-446655440001",
             name="test-tag",
             description="Test tag",
             created_at=datetime.now(timezone.utc),
@@ -489,7 +489,7 @@ class TestGetTagHosts:
 
         host_results = [
             MockResultRow(
-                id=1,
+                id="550e8400-e29b-41d4-a716-446655440011",
                 fqdn="host1.example.com",
                 ipv4="192.168.1.1",
                 ipv6=None,
@@ -497,7 +497,7 @@ class TestGetTagHosts:
                 status="up",
             ),
             MockResultRow(
-                id=2,
+                id="550e8400-e29b-41d4-a716-446655440012",
                 fqdn="host2.example.com",
                 ipv4="192.168.1.2",
                 ipv6=None,
@@ -513,9 +513,11 @@ class TestGetTagHosts:
             ]
         )
 
-        result = await get_tag_hosts(1, mock_db, "test@example.com")
+        result = await get_tag_hosts(
+            "550e8400-e29b-41d4-a716-446655440001", mock_db, "test@example.com"
+        )
 
-        assert result.id == 1
+        assert result.id == "550e8400-e29b-41d4-a716-446655440001"
         assert result.name == "test-tag"
         assert len(result.hosts) == 2
         assert result.hosts[0]["fqdn"] == "host1.example.com"
@@ -529,7 +531,9 @@ class TestGetTagHosts:
         mock_db = MockDB(execute_results=[MockExecuteResult(first_result=None)])
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_tag_hosts(999, mock_db, "test@example.com")
+            await get_tag_hosts(
+                "550e8400-e29b-41d4-a716-446655440999", mock_db, "test@example.com"
+            )
 
         assert exc_info.value.status_code == 404
 
@@ -543,8 +547,8 @@ class TestAddTagToHost:
         """Test successfully adding tag to host."""
         mock_get_user.return_value = "test@example.com"
 
-        host_result = MockResultRow(id=1)
-        tag_result = MockResultRow(id=1)
+        host_result = MockResultRow(id="550e8400-e29b-41d4-a716-446655440011")
+        tag_result = MockResultRow(id="550e8400-e29b-41d4-a716-446655440001")
 
         mock_db = MockDB(
             execute_results=[
@@ -554,7 +558,12 @@ class TestAddTagToHost:
             ]
         )
 
-        result = await add_tag_to_host(1, 1, mock_db, "test@example.com")
+        result = await add_tag_to_host(
+            "550e8400-e29b-41d4-a716-446655440011",
+            "550e8400-e29b-41d4-a716-446655440001",
+            mock_db,
+            "test@example.com",
+        )
 
         assert "Tag added to host successfully" in result["message"]
         assert mock_db.committed is True
@@ -571,7 +580,12 @@ class TestAddTagToHost:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await add_tag_to_host(999, 1, mock_db, "test@example.com")
+            await add_tag_to_host(
+                "550e8400-e29b-41d4-a716-446655440999",
+                "550e8400-e29b-41d4-a716-446655440001",
+                mock_db,
+                "test@example.com",
+            )
 
         assert exc_info.value.status_code == 404
 
@@ -581,7 +595,7 @@ class TestAddTagToHost:
         """Test adding non-existent tag to host."""
         mock_get_user.return_value = "test@example.com"
 
-        host_result = MockResultRow(id=1)
+        host_result = MockResultRow(id="550e8400-e29b-41d4-a716-446655440011")
 
         mock_db = MockDB(
             execute_results=[
@@ -591,7 +605,12 @@ class TestAddTagToHost:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await add_tag_to_host(1, 999, mock_db, "test@example.com")
+            await add_tag_to_host(
+                "550e8400-e29b-41d4-a716-446655440011",
+                "550e8400-e29b-41d4-a716-446655440999",
+                mock_db,
+                "test@example.com",
+            )
 
         assert exc_info.value.status_code == 404
 
@@ -601,9 +620,9 @@ class TestAddTagToHost:
         """Test adding tag to host when already associated."""
         mock_get_user.return_value = "test@example.com"
 
-        host_result = MockResultRow(id=1)
-        tag_result = MockResultRow(id=1)
-        existing_association = MockResultRow(id=1)
+        host_result = MockResultRow(id="550e8400-e29b-41d4-a716-446655440011")
+        tag_result = MockResultRow(id="550e8400-e29b-41d4-a716-446655440001")
+        existing_association = MockResultRow(id="550e8400-e29b-41d4-a716-446655440021")
 
         mock_db = MockDB(
             execute_results=[
@@ -616,7 +635,12 @@ class TestAddTagToHost:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await add_tag_to_host(1, 1, mock_db, "test@example.com")
+            await add_tag_to_host(
+                "550e8400-e29b-41d4-a716-446655440011",
+                "550e8400-e29b-41d4-a716-446655440001",
+                mock_db,
+                "test@example.com",
+            )
 
         assert exc_info.value.status_code == 400
 
@@ -632,7 +656,12 @@ class TestRemoveTagFromHost:
         existing_association = MockHostTag(1, 1)
         mock_db = MockDB(host_tags=[existing_association])
 
-        await remove_tag_from_host(1, 1, mock_db, "test@example.com")
+        await remove_tag_from_host(
+            "550e8400-e29b-41d4-a716-446655440011",
+            "550e8400-e29b-41d4-a716-446655440001",
+            mock_db,
+            "test@example.com",
+        )
 
         assert mock_db.committed is True
         assert len(mock_db.deleted_objects) == 1
@@ -645,7 +674,12 @@ class TestRemoveTagFromHost:
         mock_db = MockDB(host_tags=[])  # No associations
 
         with pytest.raises(HTTPException) as exc_info:
-            await remove_tag_from_host(1, 1, mock_db, "test@example.com")
+            await remove_tag_from_host(
+                "550e8400-e29b-41d4-a716-446655440011",
+                "550e8400-e29b-41d4-a716-446655440001",
+                mock_db,
+                "test@example.com",
+            )
 
         assert exc_info.value.status_code == 404
 
@@ -659,17 +693,17 @@ class TestGetHostTags:
         """Test successfully getting host tags."""
         mock_get_user.return_value = "test@example.com"
 
-        host_result = MockResultRow(id=1)
+        host_result = MockResultRow(id="550e8400-e29b-41d4-a716-446655440011")
         tag_results = [
             MockResultRow(
-                id=1,
+                id="550e8400-e29b-41d4-a716-446655440001",
                 name="tag1",
                 description="Tag 1",
                 created_at=datetime.now(timezone.utc),
                 updated_at=datetime.now(timezone.utc),
             ),
             MockResultRow(
-                id=2,
+                id="550e8400-e29b-41d4-a716-446655440002",
                 name="tag2",
                 description="Tag 2",
                 created_at=datetime.now(timezone.utc),
@@ -715,10 +749,10 @@ class TestGetHostTags:
         """Test getting host tags when count query fails."""
         mock_get_user.return_value = "test@example.com"
 
-        host_result = MockResultRow(id=1)
+        host_result = MockResultRow(id="550e8400-e29b-41d4-a716-446655440011")
         tag_results = [
             MockResultRow(
-                id=1,
+                id="550e8400-e29b-41d4-a716-446655440001",
                 name="tag1",
                 description="Tag 1",
                 created_at=datetime.now(timezone.utc),
@@ -776,9 +810,12 @@ class TestModels:
 
     def test_host_tag_request(self):
         """Test HostTagRequest model."""
-        request = HostTagRequest(host_id=1, tag_id=2)
-        assert request.host_id == 1
-        assert request.tag_id == 2
+        request = HostTagRequest(
+            host_id="550e8400-e29b-41d4-a716-446655440001",
+            tag_id="550e8400-e29b-41d4-a716-446655440002",
+        )
+        assert request.host_id == "550e8400-e29b-41d4-a716-446655440001"
+        assert request.tag_id == "550e8400-e29b-41d4-a716-446655440002"
 
 
 class TestIntegration:
@@ -796,7 +833,7 @@ class TestIntegration:
     def test_tag_response_structure(self):
         """Test TagResponse structure."""
         tag_data = {
-            "id": 1,
+            "id": "550e8400-e29b-41d4-a716-446655440003",
             "name": "test-tag",
             "description": "Test tag",
             "created_at": datetime.now(timezone.utc),
@@ -805,6 +842,6 @@ class TestIntegration:
         }
 
         response = TagResponse(**tag_data)
-        assert response.id == 1
+        assert response.id == "550e8400-e29b-41d4-a716-446655440003"
         assert response.name == "test-tag"
         assert response.host_count == 5

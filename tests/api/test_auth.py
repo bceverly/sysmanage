@@ -22,7 +22,6 @@ class TestAuthLogin:
         # Create a test user in the database
         hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
-            id=1,
             userid=test_user_data["userid"],
             hashed_password=hashed_password,
             active=True,
@@ -57,7 +56,6 @@ class TestAuthLogin:
         # Create a test user in the database
         hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
-            id=1,
             userid=test_user_data["userid"],
             hashed_password=hashed_password,
             active=True,
@@ -102,7 +100,6 @@ class TestAuthLogin:
         # Create an inactive test user
         hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
-            id=1,
             userid=test_user_data["userid"],
             hashed_password=hashed_password,
             active=False,
@@ -170,7 +167,6 @@ class TestAuthLogin:
         # Create a locked test user
         hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
-            id=1,
             userid=test_user_data["userid"],
             hashed_password=hashed_password,
             active=True,
@@ -206,7 +202,6 @@ class TestAuthRefresh:
         # Create a test user
         hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
-            id=1,
             userid=test_user_data["userid"],
             hashed_password=hashed_password,
             active=True,
@@ -257,7 +252,6 @@ class TestAuthRefresh:
         # Create an inactive test user
         hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
-            id=1,
             userid=test_user_data["userid"],
             hashed_password=hashed_password,
             active=False,
@@ -287,7 +281,6 @@ class TestAuthRefresh:
         # Create a locked test user
         hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
-            id=1,
             userid=test_user_data["userid"],
             hashed_password=hashed_password,
             active=True,

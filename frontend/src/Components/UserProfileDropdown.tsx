@@ -17,6 +17,13 @@ import {
     Logout as LogoutIcon
 } from '@mui/icons-material';
 
+// Extend window interface for global function
+declare global {
+    interface Window {
+        refreshUserProfileImage?: () => void;
+    }
+}
+
 const UserProfileDropdown: React.FC = () => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
@@ -81,6 +88,19 @@ const UserProfileDropdown: React.FC = () => {
             }
         };
     }, [profileImageUrl]);
+
+    // Add refresh function for external use
+    const refreshProfileImage = useCallback(() => {
+        fetchProfileImage();
+    }, [fetchProfileImage]);
+
+    // Expose refresh function globally for other components to use
+    useEffect(() => {
+        window.refreshUserProfileImage = refreshProfileImage;
+        return () => {
+            delete window.refreshUserProfileImage;
+        };
+    }, [refreshProfileImage]);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);

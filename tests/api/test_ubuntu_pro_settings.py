@@ -17,7 +17,6 @@ class TestUbuntuProSettingsGet:
         # Create existing settings
         now = datetime.now(timezone.utc)
         settings = models.UbuntuProSettings(
-            id=1,
             master_key="C1234567890123456789012345",
             organization_name="Test Organization",
             auto_attach_enabled=True,
@@ -32,7 +31,7 @@ class TestUbuntuProSettingsGet:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["id"] == 1
+        assert "id" in data and len(data["id"]) > 0
         assert data["master_key"] == "C1234567890123456789012345"
         assert data["organization_name"] == "Test Organization"
         assert data["auto_attach_enabled"] is True
@@ -51,7 +50,7 @@ class TestUbuntuProSettingsGet:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["id"] == 1
+        assert "id" in data and len(data["id"]) > 0
         assert data["master_key"] is None
         assert data["organization_name"] is None
         assert data["auto_attach_enabled"] is False
@@ -73,7 +72,7 @@ class TestUbuntuProSettingsGet:
         data = response.json()
 
         # Verify the default settings structure
-        assert data["id"] == 1
+        assert "id" in data and len(data["id"]) > 0
         assert data["master_key"] is None
         assert data["organization_name"] is None
         assert data["auto_attach_enabled"] is False
@@ -97,7 +96,6 @@ class TestUbuntuProSettingsUpdate:
         # Create existing settings
         now = datetime.now(timezone.utc)
         settings = models.UbuntuProSettings(
-            id=1,
             master_key="C1111111111111111111111111",
             organization_name="Old Organization",
             auto_attach_enabled=False,
@@ -120,7 +118,7 @@ class TestUbuntuProSettingsUpdate:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["id"] == 1
+        assert "id" in data and len(data["id"]) > 0
         assert data["master_key"] == "C2222222222222222222222222"
         assert data["organization_name"] == "New Organization"
         assert data["auto_attach_enabled"] is True
@@ -151,7 +149,7 @@ class TestUbuntuProSettingsUpdate:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["id"] == 1
+        assert "id" in data and len(data["id"]) > 0
         assert data["master_key"] == "C3333333333333333333333333"
         assert data["organization_name"] == "New Organization"
         assert data["auto_attach_enabled"] is True
@@ -164,7 +162,6 @@ class TestUbuntuProSettingsUpdate:
         # Create existing settings
         now = datetime.now(timezone.utc)
         settings = models.UbuntuProSettings(
-            id=1,
             master_key="C1111111111111111111111111",
             organization_name="Test Organization",
             auto_attach_enabled=False,
@@ -192,7 +189,6 @@ class TestUbuntuProSettingsUpdate:
         # Create existing settings with master key
         now = datetime.now(timezone.utc)
         settings = models.UbuntuProSettings(
-            id=1,
             master_key="C1111111111111111111111111",
             organization_name="Test Organization",
             auto_attach_enabled=True,
@@ -283,7 +279,6 @@ class TestUbuntuProSettingsClearKey:
         # Create settings with master key
         now = datetime.now(timezone.utc)
         settings = models.UbuntuProSettings(
-            id=1,
             master_key="C1234567890123456789012345",
             organization_name="Test Organization",
             auto_attach_enabled=True,
@@ -329,7 +324,6 @@ class TestUbuntuProSettingsKeyStatus:
         # Create settings with master key
         now = datetime.now(timezone.utc)
         settings = models.UbuntuProSettings(
-            id=1,
             master_key="C1234567890123456789012345",
             organization_name="Test Organization",
             auto_attach_enabled=True,
@@ -353,7 +347,6 @@ class TestUbuntuProSettingsKeyStatus:
         # Create settings without master key
         now = datetime.now(timezone.utc)
         settings = models.UbuntuProSettings(
-            id=1,
             master_key=None,
             organization_name=None,
             auto_attach_enabled=False,
@@ -395,7 +388,6 @@ class TestUbuntuProEnrollment:
         # Create Ubuntu Pro settings with master key
         now = datetime.now(timezone.utc)
         settings = models.UbuntuProSettings(
-            id=1,
             master_key="C1234567890123456789012345",
             organization_name="Test Organization",
             auto_attach_enabled=True,
@@ -405,11 +397,13 @@ class TestUbuntuProEnrollment:
         session.add(settings)
 
         # Create test hosts
-        host1 = models.Host(id=1, active=True, fqdn="test1.example.com", status="up")
-        host2 = models.Host(id=2, active=True, fqdn="test2.example.com", status="up")
+        host1 = models.Host(active=True, fqdn="test1.example.com", status="up")
+        host2 = models.Host(active=True, fqdn="test2.example.com", status="up")
         session.add(host1)
         session.add(host2)
         session.commit()
+        session.refresh(host1)
+        session.refresh(host2)
 
         # Mock WebSocket connection manager
         with patch(
@@ -422,7 +416,7 @@ class TestUbuntuProEnrollment:
 
             # Test enrollment
             enrollment_data = {
-                "host_ids": [1, 2],
+                "host_ids": [str(host1.id), str(host2.id)],
                 "use_master_key": True,
             }
 
@@ -447,9 +441,10 @@ class TestUbuntuProEnrollment:
     def test_enroll_with_custom_key_success(self, client, session, auth_headers):
         """Test successful enrollment using custom key."""
         # Create test host
-        host = models.Host(id=1, active=True, fqdn="test.example.com", status="up")
+        host = models.Host(active=True, fqdn="test.example.com", status="up")
         session.add(host)
         session.commit()
+        session.refresh(host)
 
         # Mock WebSocket connection manager
         with patch(
@@ -462,7 +457,7 @@ class TestUbuntuProEnrollment:
 
             # Test enrollment with custom key
             enrollment_data = {
-                "host_ids": [1],
+                "host_ids": [str(host.id)],
                 "use_master_key": False,
                 "custom_key": "C9876543210987654321098765",
             }
@@ -479,13 +474,14 @@ class TestUbuntuProEnrollment:
     def test_enroll_no_master_key_configured(self, client, session, auth_headers):
         """Test enrollment failure when no master key is configured."""
         # Create test host
-        host = models.Host(id=1, active=True, fqdn="test.example.com", status="up")
+        host = models.Host(active=True, fqdn="test.example.com", status="up")
         session.add(host)
         session.commit()
+        session.refresh(host)
 
         # Test enrollment without master key configured
         enrollment_data = {
-            "host_ids": [1],
+            "host_ids": [str(host.id)],
             "use_master_key": True,
         }
 
@@ -500,7 +496,7 @@ class TestUbuntuProEnrollment:
         """Test enrollment with invalid custom key."""
         # Test with key that doesn't start with 'C'
         enrollment_data = {
-            "host_ids": [1],
+            "host_ids": ["550e8400-e29b-41d4-a716-446655440001"],
             "use_master_key": False,
             "custom_key": "INVALID123",
         }
@@ -514,7 +510,7 @@ class TestUbuntuProEnrollment:
     def test_enroll_missing_custom_key(self, client, session, auth_headers):
         """Test enrollment without custom key when not using master key."""
         enrollment_data = {
-            "host_ids": [1],
+            "host_ids": ["550e8400-e29b-41d4-a716-446655440002"],
             "use_master_key": False,
             # Missing custom_key
         }
@@ -525,12 +521,11 @@ class TestUbuntuProEnrollment:
 
         assert response.status_code == 422  # Validation error
 
-    def test_enroll_host_not_found(self, client, session, auth_headers):
+    def test_enroll_nonexistent_host(self, client, session, auth_headers):
         """Test enrollment with non-existent host."""
         # Create Ubuntu Pro settings
         now = datetime.now(timezone.utc)
         settings = models.UbuntuProSettings(
-            id=1,
             master_key="C1234567890123456789012345",
             organization_name="Test Organization",
             auto_attach_enabled=True,
@@ -542,7 +537,9 @@ class TestUbuntuProEnrollment:
 
         # Test enrollment with non-existent host
         enrollment_data = {
-            "host_ids": [999],  # Non-existent host ID
+            "host_ids": [
+                "550e8400-e29b-41d4-a716-446655440999"
+            ],  # Non-existent host ID
             "use_master_key": True,
         }
 
@@ -555,22 +552,22 @@ class TestUbuntuProEnrollment:
         assert data["results"][0]["success"] is False
         assert "Host not found or inactive" in data["results"][0]["error"]
 
-    def test_enroll_websocket_connection_error(self, client, session, auth_headers):
+    def test_enroll_websocket_error(self, client, session, auth_headers):
         """Test enrollment when WebSocket connection fails."""
         # Create Ubuntu Pro settings and host
         now = datetime.now(timezone.utc)
         settings = models.UbuntuProSettings(
-            id=1,
             master_key="C1234567890123456789012345",
             organization_name="Test Organization",
             auto_attach_enabled=True,
             created_at=now,
             updated_at=now,
         )
-        host = models.Host(id=1, active=True, fqdn="test.example.com", status="up")
+        host = models.Host(active=True, fqdn="test.example.com", status="up")
         session.add(settings)
         session.add(host)
         session.commit()
+        session.refresh(host)
 
         # Mock WebSocket connection failure
         with patch(
@@ -583,7 +580,7 @@ class TestUbuntuProEnrollment:
 
             # Test enrollment
             enrollment_data = {
-                "host_ids": [1],
+                "host_ids": [str(host.id)],
                 "use_master_key": True,
             }
 
@@ -612,7 +609,7 @@ class TestUbuntuProEnrollment:
     def test_enroll_unauthorized(self, client, session):
         """Test that unauthorized requests are rejected."""
         enrollment_data = {
-            "host_ids": [1],
+            "host_ids": ["550e8400-e29b-41d4-a716-446655440003"],
             "use_master_key": True,
         }
 

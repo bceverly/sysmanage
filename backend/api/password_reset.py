@@ -49,7 +49,7 @@ def generate_reset_token() -> str:
     return str(uuid.uuid4())
 
 
-def create_password_reset_token(user_id: int, session) -> str:
+def create_password_reset_token(user_id: str, session) -> str:
     """Create a password reset token for a user."""
     # Generate token
     token = generate_reset_token()
@@ -63,7 +63,7 @@ def create_password_reset_token(user_id: int, session) -> str:
         token=token,
         created_at=datetime.now(timezone.utc),
         expires_at=expires_at,
-        is_used=False,
+        used_at=None,
     )
 
     session.add(reset_token)
@@ -78,7 +78,7 @@ def get_valid_reset_token(token: str, session) -> Optional[models.PasswordResetT
         session.query(models.PasswordResetToken)
         .filter(
             models.PasswordResetToken.token == token,
-            models.PasswordResetToken.is_used.is_(False),
+            models.PasswordResetToken.used_at.is_(None),
             models.PasswordResetToken.expires_at > datetime.now(timezone.utc),
         )
         .first()
@@ -362,7 +362,6 @@ async def reset_password(request_data: ResetPasswordRequest) -> PasswordResetRes
         user.hashed_password = hashed_password
 
         # Mark token as used
-        reset_token.is_used = True
         reset_token.used_at = datetime.now(timezone.utc)
 
         session.commit()
@@ -399,7 +398,7 @@ async def validate_reset_token(token: str) -> PasswordResetResponse:
     "/admin/reset-user-password/{user_id}", dependencies=[Depends(JWTBearer())]
 )
 async def admin_reset_user_password(
-    user_id: int, request: Request
+    user_id: str, request: Request
 ) -> PasswordResetResponse:
     """
     Admin endpoint to trigger password reset for a specific user.

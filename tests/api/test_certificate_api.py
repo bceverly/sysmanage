@@ -72,7 +72,7 @@ class TestCertificateEndpoints:
             text(
                 """
             INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access, reboot_required, script_execution_enabled)
-            VALUES (101, 'success-test.example.com', 1, '192.168.1.100', 'approved', :timestamp, 0, 0)
+            VALUES ('550e8400-e29b-41d4-a716-446655440001', 'success-test.example.com', 1, '192.168.1.100', 'approved', :timestamp, 0, 0)
         """
             ),
             {"timestamp": datetime.now(timezone.utc)},
@@ -105,7 +105,8 @@ class TestCertificateEndpoints:
                 mock_x509.load_pem_x509_certificate.return_value = mock_cert
 
                 response = client.get(
-                    "/api/certificates/client/101", headers=auth_headers
+                    "/api/certificates/client/550e8400-e29b-41d4-a716-446655440001",
+                    headers=auth_headers,
                 )
 
                 assert response.status_code == 200
@@ -133,21 +134,26 @@ class TestCertificateEndpoints:
             text(
                 """
             INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access, reboot_required, script_execution_enabled)
-            VALUES (102, 'pending-test.example.com', 1, '192.168.1.100', 'pending', :timestamp, 0, 0)
+            VALUES ('550e8400-e29b-41d4-a716-446655440002', 'pending-test.example.com', 1, '192.168.1.100', 'pending', :timestamp, 0, 0)
         """
             ),
             {"timestamp": datetime.now(timezone.utc)},
         )
         session.commit()
 
-        response = client.get("/api/certificates/client/102", headers=auth_headers)
+        response = client.get(
+            "/api/certificates/client/550e8400-e29b-41d4-a716-446655440002",
+            headers=auth_headers,
+        )
 
         assert response.status_code == 403
         assert "Host is not approved" in response.json()["detail"]
 
     def test_get_client_certificate_requires_auth(self, client):
         """Test that client certificate endpoint requires authentication."""
-        response = client.get("/api/certificates/client/123")
+        response = client.get(
+            "/api/certificates/client/550e8400-e29b-41d4-a716-446655440003"
+        )
 
         assert response.status_code in [401, 403]
 
@@ -161,14 +167,17 @@ class TestCertificateEndpoints:
             text(
                 """
             INSERT INTO host (id, fqdn, active, ipv4, approval_status, client_certificate, certificate_serial, certificate_issued_at, last_access, reboot_required, script_execution_enabled)
-            VALUES (103, 'revoke-test.example.com', 1, '192.168.1.100', 'approved', 'existing cert', '12345', :timestamp, :timestamp, 0, 0)
+            VALUES ('550e8400-e29b-41d4-a716-446655440004', 'revoke-test.example.com', 1, '192.168.1.100', 'approved', 'existing cert', '12345', :timestamp, :timestamp, 0, 0)
         """
             ),
             {"timestamp": timestamp},
         )
         session.commit()
 
-        response = client.post("/api/certificates/revoke/103", headers=auth_headers)
+        response = client.post(
+            "/api/certificates/revoke/550e8400-e29b-41d4-a716-446655440004",
+            headers=auth_headers,
+        )
 
         assert response.status_code == 200
         assert "Certificate revoked successfully" in response.json()["result"]
@@ -176,7 +185,11 @@ class TestCertificateEndpoints:
         # Query the host to verify changes
         from backend.persistence.models import Host
 
-        host = session.query(Host).filter(Host.id == 103).first()
+        host = (
+            session.query(Host)
+            .filter(Host.id == "550e8400-e29b-41d4-a716-446655440004")
+            .first()
+        )
         assert host is not None
         assert host.client_certificate is None
         assert host.certificate_serial is None
@@ -185,14 +198,19 @@ class TestCertificateEndpoints:
 
     def test_revoke_client_certificate_host_not_found(self, client, auth_headers):
         """Test certificate revocation when host not found."""
-        response = client.post("/api/certificates/revoke/999", headers=auth_headers)
+        response = client.post(
+            "/api/certificates/revoke/550e8400-e29b-41d4-a716-446655440999",
+            headers=auth_headers,
+        )
 
         assert response.status_code == 404
         assert "Host not found" in response.json()["detail"]
 
     def test_revoke_client_certificate_requires_auth(self, client):
         """Test that certificate revocation requires authentication."""
-        response = client.post("/api/certificates/revoke/123")
+        response = client.post(
+            "/api/certificates/revoke/550e8400-e29b-41d4-a716-446655440005"
+        )
 
         assert response.status_code in [401, 403]
 
@@ -209,7 +227,7 @@ class TestCertificateEndpointsIntegration:
             text(
                 """
             INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access, reboot_required, script_execution_enabled)
-            VALUES (104, 'integration-test.example.com', 1, '192.168.1.100', 'approved', :timestamp, 0, 0)
+            VALUES ('550e8400-e29b-41d4-a716-446655440006', 'integration-test.example.com', 1, '192.168.1.100', 'approved', :timestamp, 0, 0)
         """
             ),
             {"timestamp": datetime.now(timezone.utc)},
@@ -243,13 +261,15 @@ class TestCertificateEndpointsIntegration:
 
                 # 3. Get client certificate (authenticated)
                 client_response = client.get(
-                    "/api/certificates/client/104", headers=auth_headers
+                    "/api/certificates/client/550e8400-e29b-41d4-a716-446655440006",
+                    headers=auth_headers,
                 )
                 assert client_response.status_code == 200
 
                 # 4. Revoke certificate (authenticated)
                 revoke_response = client.post(
-                    "/api/certificates/revoke/104", headers=auth_headers
+                    "/api/certificates/revoke/550e8400-e29b-41d4-a716-446655440006",
+                    headers=auth_headers,
                 )
                 assert revoke_response.status_code == 200
 

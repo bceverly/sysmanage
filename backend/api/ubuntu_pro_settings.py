@@ -3,6 +3,7 @@ This module houses the API routes for Ubuntu Pro settings management in SysManag
 """
 
 import logging
+import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -23,12 +24,19 @@ router = APIRouter()
 class UbuntuProSettingsResponse(BaseModel):
     """Response model for Ubuntu Pro settings."""
 
-    id: int
+    id: str
     master_key: Optional[str] = None
     organization_name: Optional[str] = None
     auto_attach_enabled: bool = False
     created_at: datetime
     updated_at: datetime
+
+    @validator("id", pre=True)
+    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+        """Convert UUID objects to strings."""
+        if isinstance(value, uuid.UUID):
+            return str(value)
+        return value
 
     class Config:
         from_attributes = True
@@ -76,17 +84,12 @@ async def get_ubuntu_pro_settings(
     """Get current Ubuntu Pro settings."""
     try:
         # Get or create the singleton settings record
-        settings = (
-            db.query(models.UbuntuProSettings)
-            .filter(models.UbuntuProSettings.id == 1)
-            .first()
-        )
+        settings = db.query(models.UbuntuProSettings).first()
 
         if not settings:
             # Create default settings if they don't exist
             now = datetime.now(timezone.utc)
             settings = models.UbuntuProSettings(
-                id=1,
                 auto_attach_enabled=False,
                 created_at=now,
                 updated_at=now,
@@ -113,17 +116,12 @@ async def update_ubuntu_pro_settings(
     """Update Ubuntu Pro settings."""
     try:
         # Get or create the singleton settings record
-        settings = (
-            db.query(models.UbuntuProSettings)
-            .filter(models.UbuntuProSettings.id == 1)
-            .first()
-        )
+        settings = db.query(models.UbuntuProSettings).first()
 
         if not settings:
             # Create new settings record
             now = datetime.now(timezone.utc)
             settings = models.UbuntuProSettings(
-                id=1,
                 master_key=settings_update.master_key,
                 organization_name=settings_update.organization_name,
                 auto_attach_enabled=settings_update.auto_attach_enabled or False,
@@ -174,11 +172,7 @@ async def clear_master_key(
 ):
     """Clear the stored Ubuntu Pro master key."""
     try:
-        settings = (
-            db.query(models.UbuntuProSettings)
-            .filter(models.UbuntuProSettings.id == 1)
-            .first()
-        )
+        settings = db.query(models.UbuntuProSettings).first()
 
         if settings:
             settings.master_key = None
@@ -204,11 +198,7 @@ async def get_master_key_status(
 ):
     """Get the status of the master key (exists or not) without exposing the key."""
     try:
-        settings = (
-            db.query(models.UbuntuProSettings)
-            .filter(models.UbuntuProSettings.id == 1)
-            .first()
-        )
+        settings = db.query(models.UbuntuProSettings).first()
 
         has_master_key = settings is not None and settings.master_key is not None
         organization_name = settings.organization_name if settings else None
@@ -232,7 +222,7 @@ async def get_master_key_status(
 class UbuntuProEnrollmentRequest(BaseModel):
     """Request model for Ubuntu Pro enrollment."""
 
-    host_ids: list[int]
+    host_ids: list[str]
     use_master_key: bool = True
     custom_key: Optional[str] = None
 
@@ -279,11 +269,7 @@ async def enroll_hosts_in_ubuntu_pro(
         enrollment_key = None
 
         if request.use_master_key:
-            settings = (
-                db.query(models.UbuntuProSettings)
-                .filter(models.UbuntuProSettings.id == 1)
-                .first()
-            )
+            settings = db.query(models.UbuntuProSettings).first()
 
             if not settings or not settings.master_key:
                 raise HTTPException(

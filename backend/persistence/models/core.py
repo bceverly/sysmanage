@@ -4,6 +4,7 @@ Core models for SysManage - Host, User, and authentication related models.
 
 import secrets
 import uuid
+from datetime import datetime, timezone
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -14,9 +15,50 @@ from sqlalchemy import (
     String,
     Text,
 )
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+from sqlalchemy.types import TypeDecorator
 
 from backend.persistence.db import Base
+
+
+class GUID(TypeDecorator):  # pylint: disable=too-many-ancestors
+    """
+    Platform-independent GUID type.
+    Uses PostgreSQL's UUID type when available, otherwise stores as string.
+    """
+
+    impl = String
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == "postgresql":
+            return dialect.type_descriptor(UUID(as_uuid=True))
+        return dialect.type_descriptor(String(36))
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        if dialect.name == "postgresql":
+            return str(value) if not isinstance(value, uuid.UUID) else value
+        return str(value)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        if not isinstance(value, uuid.UUID):
+            return uuid.UUID(value)
+        return value
+
+    def process_literal_param(self, value, dialect):
+        """Process literal parameter for inline SQL compilation."""
+        if value is None:
+            return None
+        return str(value)
+
+    @property
+    def python_type(self):
+        return uuid.UUID
 
 
 def generate_secure_host_token() -> str:
@@ -42,7 +84,7 @@ class BearerToken(Base):
     """
 
     __tablename__ = "bearer_token"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     token = Column(String(256), unique=True, nullable=False)
     created_at = Column(DateTime, nullable=False)
 
@@ -54,7 +96,7 @@ class Host(Base):
     """
 
     __tablename__ = "host"
-    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
     active = Column(Boolean, unique=False, index=False)
     fqdn = Column(String, index=True)
     ipv4 = Column(String)
@@ -134,7 +176,7 @@ class User(Base):
     """
 
     __tablename__ = "user"
-    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
     active = Column(Boolean, unique=False, index=False)
     userid = Column(String, unique=True, index=True)
     hashed_password = Column(String)
@@ -149,8 +191,16 @@ class User(Base):
     profile_image_uploaded_at = Column(DateTime(timezone=True), nullable=True)
     is_admin = Column(Boolean, nullable=False, default=False)
     last_login_at = Column(DateTime(timezone=True), nullable=True)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
+    updated_at = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
 
     def __repr__(self):
         return f"<User(id={self.id}, userid='{self.userid}', active={self.active}, is_admin={self.is_admin})>"

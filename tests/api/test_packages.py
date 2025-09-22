@@ -3,6 +3,7 @@ Tests all package-related endpoints using database fixtures.
 """
 
 import pytest
+import uuid
 from datetime import datetime, timezone
 from backend.persistence.models import AvailablePackage
 
@@ -13,52 +14,69 @@ class TestPackagesAPI:
     @pytest.fixture
     def sample_packages(self, session):
         """Create sample packages in the database."""
-        now = datetime.now(timezone.utc)
-        packages = [
-            AvailablePackage(
-                package_name="nginx",
-                package_version="1.18.0",
-                package_description="High performance web server",
-                package_manager="apt",
-                os_name="Ubuntu",
-                os_version="22.04",
-                last_updated=now,
-                created_at=now,
+        import uuid
+
+        # Check database type and create appropriate datetime
+        engine = session.get_bind()
+        is_sqlite = "sqlite" in str(engine.url)
+
+        # Force table recreation for available_packages to ensure correct schema
+        if is_sqlite:
+            from sqlalchemy import text
+            from backend.persistence.db import Base
+            from backend.persistence.models.software import AvailablePackage
+
+            # Drop and recreate the available_packages table specifically
+            with engine.connect() as conn:
+                conn.execute(text("DROP TABLE IF EXISTS available_packages"))
+                conn.commit()
+            AvailablePackage.__table__.create(engine, checkfirst=True)
+
+        if is_sqlite:
+            # For SQLite, use naive datetime
+            now = datetime.now()
+        else:
+            # For PostgreSQL, use timezone-aware datetime
+            now = datetime.now(timezone.utc)
+
+        packages_data = [
+            (
+                "nginx",
+                "1.18.0",
+                "High performance web server",
+                "apt",
+                "Ubuntu",
+                "22.04",
             ),
-            AvailablePackage(
-                package_name="python3",
-                package_version="3.10.12",
-                package_description="Python 3 programming language",
-                package_manager="apt",
-                os_name="Ubuntu",
-                os_version="22.04",
-                last_updated=now,
-                created_at=now,
+            (
+                "python3",
+                "3.10.12",
+                "Python 3 programming language",
+                "apt",
+                "Ubuntu",
+                "22.04",
             ),
-            AvailablePackage(
-                package_name="docker",
-                package_version="24.0.5",
-                package_description="Container platform",
-                package_manager="snap",
-                os_name="Ubuntu",
-                os_version="22.04",
-                last_updated=now,
-                created_at=now,
-            ),
-            AvailablePackage(
-                package_name="httpd",
-                package_version="2.4.37",
-                package_description="Apache HTTP Server",
-                package_manager="yum",
-                os_name="CentOS",
-                os_version="8",
-                last_updated=now,
-                created_at=now,
-            ),
+            ("docker", "24.0.5", "Container platform", "snap", "Ubuntu", "22.04"),
+            ("httpd", "2.4.37", "Apache HTTP Server", "yum", "CentOS", "8"),
         ]
 
-        for package in packages:
-            session.add(package)
+        packages = []
+        for name, version, description, manager, os_name, os_version in packages_data:
+            pkg = AvailablePackage(
+                package_name=name,
+                package_version=version,
+                package_description=description,
+                package_manager=manager,
+                os_name=os_name,
+                os_version=os_version,
+                last_updated=now,
+                created_at=now,
+            )
+            session.add(pkg)
+            packages.append(
+                (str(pkg.id), name, version, description, manager, os_name, os_version)
+            )
+
         session.commit()
         return packages
 

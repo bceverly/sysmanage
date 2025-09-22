@@ -23,6 +23,9 @@ class MessageType(str, Enum):
     SOFTWARE_INVENTORY_UPDATE = "software_inventory_update"
     PACKAGE_UPDATES_UPDATE = "package_updates_update"
     AVAILABLE_PACKAGES_UPDATE = "available_packages_update"
+    AVAILABLE_PACKAGES_BATCH_START = "available_packages_batch_start"
+    AVAILABLE_PACKAGES_BATCH = "available_packages_batch"
+    AVAILABLE_PACKAGES_BATCH_END = "available_packages_batch_end"
     UPDATE_APPLY_RESULT = "update_apply_result"
     SCRIPT_EXECUTION_RESULT = "script_execution_result"
     REBOOT_STATUS_UPDATE = "reboot_status_update"
@@ -300,7 +303,7 @@ class HostApprovedMessage(Message):
 
     def __init__(
         self,
-        host_id: int,
+        host_id: str,
         host_token: str = None,
         approval_status: str = "approved",
         certificate: str = None,
@@ -321,7 +324,7 @@ class ScriptExecutionResultMessage(Message):
 
     def __init__(  # pylint: disable=too-many-positional-arguments
         self,
-        script_id: int = None,
+        script_id: str = None,
         execution_id: str = None,
         success: bool = True,
         exit_code: int = None,
@@ -660,7 +663,7 @@ def create_command_message(
 
 
 def create_host_approved_message(
-    host_id: int,
+    host_id: str,
     host_token: str = None,
     approval_status: str = "approved",
     certificate: str = None,

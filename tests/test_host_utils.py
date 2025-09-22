@@ -16,7 +16,12 @@ from backend.persistence import models
 class MockHost:
     """Mock host object for testing."""
 
-    def __init__(self, host_id=1, fqdn="test.example.com", approval_status="approved"):
+    def __init__(
+        self,
+        host_id="550e8400-e29b-41d4-a716-446655440001",
+        fqdn="test.example.com",
+        approval_status="approved",
+    ):
         self.id = host_id
         self.fqdn = fqdn
         self.approval_status = approval_status
@@ -31,7 +36,12 @@ class MockHost:
 class MockStorageDevice:
     """Mock storage device object for testing."""
 
-    def __init__(self, device_id=1, name="/dev/sda1", host_id=1):
+    def __init__(
+        self,
+        device_id="550e8400-e29b-41d4-a716-446655440001",
+        name="/dev/sda1",
+        host_id="550e8400-e29b-41d4-a716-446655440001",
+    ):
         self.id = device_id
         self.name = name
         self.host_id = host_id
@@ -50,7 +60,12 @@ class MockStorageDevice:
 class MockNetworkInterface:
     """Mock network interface object for testing."""
 
-    def __init__(self, interface_id=1, name="eth0", host_id=1):
+    def __init__(
+        self,
+        interface_id="550e8400-e29b-41d4-a716-446655440002",
+        name="eth0",
+        host_id="550e8400-e29b-41d4-a716-446655440001",
+    ):
         self.id = interface_id
         self.name = name
         self.host_id = host_id
@@ -69,7 +84,12 @@ class MockNetworkInterface:
 class MockUserAccount:
     """Mock user account object for testing."""
 
-    def __init__(self, user_id=1, username="testuser", host_id=1):
+    def __init__(
+        self,
+        user_id="550e8400-e29b-41d4-a716-446655440003",
+        username="testuser",
+        host_id="550e8400-e29b-41d4-a716-446655440001",
+    ):
         self.id = user_id
         self.username = username
         self.host_id = host_id
@@ -89,7 +109,12 @@ class MockUserAccount:
 class MockUserGroup:
     """Mock user group object for testing."""
 
-    def __init__(self, group_id=1, group_name="testgroup", host_id=1):
+    def __init__(
+        self,
+        group_id="550e8400-e29b-41d4-a716-446655440004",
+        group_name="testgroup",
+        host_id="550e8400-e29b-41d4-a716-446655440001",
+    ):
         self.id = group_id
         self.group_name = group_name
         self.host_id = host_id
@@ -102,7 +127,11 @@ class MockUserGroup:
 class MockUserGroupMembership:
     """Mock user group membership object for testing."""
 
-    def __init__(self, user_account_id=1, user_group_id=1):
+    def __init__(
+        self,
+        user_account_id="550e8400-e29b-41d4-a716-446655440003",
+        user_group_id="550e8400-e29b-41d4-a716-446655440004",
+    ):
         self.user_account_id = user_account_id
         self.user_group_id = user_group_id
 
@@ -110,12 +139,17 @@ class MockUserGroupMembership:
 class MockSoftwarePackage:
     """Mock software package object for testing."""
 
-    def __init__(self, package_id=1, package_name="testpkg", host_id=1):
+    def __init__(
+        self,
+        package_id="550e8400-e29b-41d4-a716-446655440005",
+        package_name="testpkg",
+        host_id="550e8400-e29b-41d4-a716-446655440001",
+    ):
         self.id = package_id
         self.package_name = package_name
         self.host_id = host_id
-        self.version = "1.0.0"
-        self.description = "Test package"
+        self.package_version = "1.0.0"
+        self.package_description = "Test package"
         self.package_manager = "apt"
         self.source = "ubuntu"
         self.architecture = "amd64"
@@ -123,10 +157,10 @@ class MockSoftwarePackage:
         self.install_date = datetime.now(timezone.utc)
         self.vendor = "Test Vendor"
         self.category = "utilities"
-        self.license_type = "GPL"
+        self.license = "GPL"
         self.bundle_id = None
         self.app_store_id = None
-        self.installation_path = "/usr/bin/testpkg"
+        self.install_path = "/usr/bin/testpkg"
         self.is_system_package = False
         self.is_user_installed = True
         self.created_at = datetime.now(timezone.utc)
@@ -137,12 +171,12 @@ class MockSoftwarePackage:
 class MockUbuntuProInfo:
     """Mock Ubuntu Pro info object for testing."""
 
-    def __init__(self, host_id=1):
-        self.id = 1
+    def __init__(self, host_id="550e8400-e29b-41d4-a716-446655440001"):
+        self.id = "550e8400-e29b-41d4-a716-446655440006"
         self.host_id = host_id
         self.available = True
         self.attached = True
-        self.version = "27.13.6"
+        self.subscription_name = "27.13.6"
         self.expires = datetime(2025, 12, 31, tzinfo=timezone.utc)
         self.account_name = "Test Account"
         self.contract_name = "Test Contract"
@@ -152,13 +186,13 @@ class MockUbuntuProInfo:
 class MockUbuntuProService:
     """Mock Ubuntu Pro service object for testing."""
 
-    def __init__(self, ubuntu_pro_info_id=1, name="esm-infra"):
+    def __init__(self, ubuntu_pro_info_id=1, service_name="esm-infra"):
         self.ubuntu_pro_info_id = ubuntu_pro_info_id
-        self.name = name
+        self.service_name = service_name
         self.description = "Expanded Security Maintenance for Infrastructure"
         self.available = True
         self.status = "enabled"
-        self.entitled = True
+        self.entitled = "true"
 
 
 class TestGetHostById:
@@ -643,7 +677,7 @@ class TestGetHostSoftwarePackages:
         package = result[0]
         assert package["id"] == mock_package.id
         assert package["package_name"] == mock_package.package_name
-        assert package["version"] == mock_package.version
+        assert package["version"] == mock_package.package_version
         assert package["package_manager"] == mock_package.package_manager
         assert package["is_system_package"] == mock_package.is_system_package
 
@@ -788,12 +822,12 @@ class TestGetHostUbuntuProInfo:
 
         assert result["available"] == mock_pro_info.available
         assert result["attached"] == mock_pro_info.attached
-        assert result["version"] == mock_pro_info.version
+        assert result["version"] == mock_pro_info.subscription_name
         assert result["account_name"] == mock_pro_info.account_name
         assert result["contract_name"] == mock_pro_info.contract_name
         assert result["tech_support_level"] == mock_pro_info.tech_support_level
         assert len(result["services"]) == 1
-        assert result["services"][0]["name"] == mock_service.name
+        assert result["services"][0]["name"] == mock_service.service_name
         assert result["services"][0]["status"] == mock_service.status
 
     @patch("backend.api.host_utils.sessionmaker")

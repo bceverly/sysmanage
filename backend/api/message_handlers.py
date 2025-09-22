@@ -182,7 +182,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):
                 "approved": True,
                 "hostname": hostname,
                 "host_token": host.host_token,  # Send secure token instead of integer ID
-                "host_id": host.id,  # Keep for backward compatibility temporarily
+                "host_id": str(host.id),  # Send as UUID string
             }
 
         return {

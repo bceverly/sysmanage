@@ -18,7 +18,7 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import { SysManageUser, doAddUser, doDeleteUser, doGetUsers, doUnlockUser, doUpdateUser, doUploadUserImage, doGetUserImage, doDeleteUserImage } from '../Services/users'
+import { SysManageUser, doAddUser, doDeleteUser, doGetUsers, doUnlockUser, doLockUser, doUpdateUser, doUploadUserImage, doGetUserImage, doDeleteUserImage } from '../Services/users'
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
@@ -104,8 +104,7 @@ const Users = () => {
         try {
             // Call the API to remove the selected rows
             const deletePromises = selection.map(id => {
-                const theID = BigInt(id.toString());
-                return doDeleteUser(theID);
+                return doDeleteUser(id.toString());
             });
             
             await Promise.all(deletePromises);
@@ -121,33 +120,68 @@ const Users = () => {
         }
     }
 
-    const handleUnlock = () => {
+    const handleUnlock = async () => {
         // Call the API to unlock the selected rows
-        selection.forEach((selectedItem) => {
+        const promises = selection.map(async (selectedItem) => {
             if (!selectedItem || typeof selectedItem !== 'string' && typeof selectedItem !== 'number') {
                 return;
             }
-            let theID = BigInt(selectedItem.toString());
-            doUnlockUser(theID).then((updatedUser) => {
+            let theID = selectedItem.toString();
+            try {
+                const updatedUser = await doUnlockUser(theID);
                 // Update the tableData with the new status
-                setTableData(prevData => 
-                    prevData.map(user => 
+                setTableData(prevData =>
+                    prevData.map(user =>
                         user.id === updatedUser.id ? updatedUser : user
                     )
                 );
-            }).catch(error => {
+            } catch (error) {
                 console.error('Error unlocking user:', error);
-            });
+            }
         });
-        // Clear selection after unlock
+
+        // Wait for all operations to complete, then clear selection
+        await Promise.all(promises);
+        setSelection([]);
+    }
+
+    const handleLock = async () => {
+        // Call the API to lock the selected rows
+        const promises = selection.map(async (selectedItem) => {
+            if (!selectedItem || typeof selectedItem !== 'string' && typeof selectedItem !== 'number') {
+                return;
+            }
+            let theID = selectedItem.toString();
+            try {
+                const updatedUser = await doLockUser(theID);
+                // Update the tableData with the new status
+                setTableData(prevData =>
+                    prevData.map(user =>
+                        user.id === updatedUser.id ? updatedUser : user
+                    )
+                );
+            } catch (error) {
+                console.error('Error locking user:', error);
+            }
+        });
+
+        // Wait for all operations to complete, then clear selection
+        await Promise.all(promises);
         setSelection([]);
     }
 
     const getSelectedUsersLockStatus = () => {
-        const selectedUsers = filteredData.filter(user => 
-            selection.includes(Number(user.id))
+        const selectedUsers = filteredData.filter(user =>
+            selection.includes(user.id)
         );
         return selectedUsers.some(user => user.is_locked);
+    };
+
+    const getSelectedUsersUnlockStatus = () => {
+        const selectedUsers = filteredData.filter(user =>
+            selection.includes(user.id)
+        );
+        return selectedUsers.some(user => !user.is_locked);
     };
 
     // Search functionality
@@ -181,7 +215,7 @@ const Users = () => {
         setAddDialogOpen(true);
     };
 
-    const fetchEditUserImage = async (userId: BigInt) => {
+    const fetchEditUserImage = async (userId: string) => {
         if (editImageLoading) return;
         
         setEditImageLoading(true);
@@ -315,6 +349,7 @@ const Users = () => {
                     }}
                     pageSizeOptions={pageSizeOptions}
                     checkboxSelection
+                    rowSelectionModel={selection}
                     onRowSelectionModelChange={setSelection}
                     localeText={{
                         MuiTablePagination: {
@@ -333,13 +368,21 @@ const Users = () => {
                 <Button variant="outlined" startIcon={<EditIcon />} disabled={selection.length !== 1} onClick={handleEditClickOpen}>
                     {t('common.edit')}
                 </Button>
-                <Button 
-                    variant="outlined" 
-                    startIcon={<LockOpenIcon />} 
-                    disabled={selection.length === 0 || !getSelectedUsersLockStatus()} 
+                <Button
+                    variant="outlined"
+                    startIcon={<LockIcon />}
+                    disabled={selection.length === 0 || !getSelectedUsersUnlockStatus()}
+                    onClick={handleLock}
+                >
+                    {t('users.lockSelected')}
+                </Button>
+                <Button
+                    variant="outlined"
+                    startIcon={<LockOpenIcon />}
+                    disabled={selection.length === 0 || !getSelectedUsersLockStatus()}
                     onClick={handleUnlock}
                 >
-                    {t('users.unlock')} {t('common.selected')}
+                    {t('users.unlockSelected')}
                 </Button>
                 <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
                     {t('common.delete')} {t('common.selected')}

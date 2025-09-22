@@ -36,7 +36,12 @@ class MockConnection:
 class MockHost:
     """Mock host object for database operations."""
 
-    def __init__(self, host_id=1, hostname="test-host", approval_status="approved"):
+    def __init__(
+        self,
+        host_id="550e8400-e29b-41d4-a716-446655440001",
+        hostname="test-host",
+        approval_status="approved",
+    ):
         self.id = host_id
         self.hostname = hostname
         self.fqdn = f"{hostname}.example.com"
@@ -98,7 +103,9 @@ class TestHandleSystemInfo:
     @patch("backend.api.host_utils.update_or_create_host")
     async def test_system_info_new_host_approved(self, mock_update_host):
         """Test system info handling for new approved host."""
-        mock_host = MockHost(1, "test-host", "approved")
+        mock_host = MockHost(
+            "550e8400-e29b-41d4-a716-446655440001", "test-host", "approved"
+        )
         mock_update_host.return_value = mock_host
         mock_session = MockSession()
         connection = MockConnection()
@@ -119,8 +126,8 @@ class TestHandleSystemInfo:
         assert result["message_type"] == "registration_success"
         assert result["approved"] is True
         assert result["hostname"] == "test-host"
-        assert result["host_id"] == 1
-        assert connection.host_id == 1
+        assert result["host_id"] == "550e8400-e29b-41d4-a716-446655440001"
+        assert connection.host_id == "550e8400-e29b-41d4-a716-446655440001"
         assert connection.hostname == "test-host"
         assert mock_session.committed
         assert mock_session.flushed
@@ -164,7 +171,9 @@ class TestHandleSystemInfo:
     @patch("backend.api.host_utils.update_or_create_host")
     async def test_system_info_with_enabled_shells(self, mock_update_host):
         """Test system info handling with enabled shells."""
-        mock_host = MockHost(1, "test-host", "approved")
+        mock_host = MockHost(
+            "550e8400-e29b-41d4-a716-446655440001", "test-host", "approved"
+        )
         mock_update_host.return_value = mock_host
         mock_session = MockSession()
         connection = MockConnection()
@@ -187,7 +196,9 @@ class TestHandleSystemInfo:
     @patch("backend.api.host_utils.update_or_create_host")
     async def test_system_info_mock_connection(self, mock_update_host):
         """Test system info handling with mock connection."""
-        mock_host = MockHost(1, "test-host", "approved")
+        mock_host = MockHost(
+            "550e8400-e29b-41d4-a716-446655440001", "test-host", "approved"
+        )
         mock_update_host.return_value = mock_host
         mock_session = MockSession()
         connection = MockConnection()
@@ -568,7 +579,9 @@ class TestMessageHandlersIntegration:
     @patch("backend.api.host_utils.update_or_create_host")
     async def test_system_info_to_heartbeat_flow(self, mock_update_host):
         """Test flow from system info registration to heartbeat."""
-        mock_host = MockHost(1, "test-host", "approved")
+        mock_host = MockHost(
+            "550e8400-e29b-41d4-a716-446655440001", "test-host", "approved"
+        )
         mock_update_host.return_value = mock_host
         mock_session = MockSession()
         connection = MockConnection()
@@ -586,7 +599,7 @@ class TestMessageHandlersIntegration:
             )
 
         assert sys_result["message_type"] == "registration_success"
-        assert connection.host_id == 1
+        assert connection.host_id == "550e8400-e29b-41d4-a716-446655440001"
 
         mock_session.hosts = [mock_host]
         heartbeat_data = {"message_id": "hb_1"}

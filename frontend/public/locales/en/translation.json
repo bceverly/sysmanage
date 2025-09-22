@@ -116,7 +116,10 @@
     "newPassword": "Enter new password",
     "locked": "Locked",
     "unlocked": "Unlocked",
-    "unlock": "Unlock"
+    "unlock": "Unlock",
+    "lock": "Lock",
+    "lockSelected": "Lock Selected Users",
+    "unlockSelected": "Unlock Selected Users"
   },
   "common": {
     "save": "Save",
@@ -282,6 +285,10 @@
     "ubuntuProAttachError": "Failed to attach Ubuntu Pro",
     "ubuntuProDetachSuccess": "Ubuntu Pro detached successfully",
     "ubuntuProDetachError": "Failed to detach Ubuntu Pro",
+    "ubuntuProDetachConfirmTitle": "Confirm Ubuntu Pro Detach",
+    "ubuntuProDetachConfirmMessage": "Are you sure you want to detach Ubuntu Pro from this system? This will remove all Ubuntu Pro benefits and services for this host.",
+    "ubuntuProDetachConfirm": "Detach",
+    "ubuntuProMasterTokenPreFilled": "Master Ubuntu Pro token has been pre-filled from settings.",
     "addPackage": "Add Package",
     "installPackagesTitle": "Install Packages",
     "searchPackages": "Search for packages",

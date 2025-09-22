@@ -13,7 +13,7 @@ from backend.i18n import _
 from backend.persistence import db, models
 
 
-def get_host_by_id(host_id: int) -> Optional[models.Host]:
+def get_host_by_id(host_id: str) -> Optional[models.Host]:
     """Get a host by ID, raising HTTPException if not found."""
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -45,7 +45,7 @@ def validate_host_approval_status(host: models.Host) -> None:
         raise HTTPException(status_code=400, detail=_("Host is not approved"))
 
 
-def get_host_storage_devices(host_id: int) -> List[Dict[str, Any]]:
+def get_host_storage_devices(host_id: str) -> List[Dict[str, Any]]:
     """Get storage devices for a host."""
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -66,7 +66,7 @@ def get_host_storage_devices(host_id: int) -> List[Dict[str, Any]]:
 
         return [
             {
-                "id": device.id,
+                "id": str(device.id),
                 "name": device.name,
                 "device_path": device.device_path,
                 "mount_point": device.mount_point,
@@ -106,7 +106,7 @@ def get_host_storage_devices(host_id: int) -> List[Dict[str, Any]]:
         ]
 
 
-def get_host_network_interfaces(host_id: int) -> List[Dict[str, Any]]:
+def get_host_network_interfaces(host_id: str) -> List[Dict[str, Any]]:
     """Get network interfaces for a host."""
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -127,7 +127,7 @@ def get_host_network_interfaces(host_id: int) -> List[Dict[str, Any]]:
 
         return [
             {
-                "id": interface.id,
+                "id": str(interface.id),
                 "name": interface.name,
                 "interface_type": interface.interface_type,
                 "hardware_type": interface.hardware_type,
@@ -148,7 +148,7 @@ def get_host_network_interfaces(host_id: int) -> List[Dict[str, Any]]:
         ]
 
 
-def get_host_user_accounts(host_id: int) -> List[Dict[str, Any]]:
+def get_host_user_accounts(host_id: str) -> List[Dict[str, Any]]:
     """Get user accounts for a host."""
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -169,7 +169,7 @@ def get_host_user_accounts(host_id: int) -> List[Dict[str, Any]]:
 
         return [
             {
-                "id": user.id,
+                "id": str(user.id),
                 "username": user.username,
                 "full_name": user.full_name,
                 "home_directory": user.home_directory,
@@ -184,7 +184,7 @@ def get_host_user_accounts(host_id: int) -> List[Dict[str, Any]]:
         ]
 
 
-def get_host_users_with_groups(host_id: int) -> List[Dict[str, Any]]:
+def get_host_users_with_groups(host_id: str) -> List[Dict[str, Any]]:
     """Get user accounts with group memberships for a host."""
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -221,7 +221,7 @@ def get_host_users_with_groups(host_id: int) -> List[Dict[str, Any]]:
 
             users.append(
                 {
-                    "id": user.id,
+                    "id": str(user.id),
                     "username": user.username,
                     "uid": user.uid,
                     "home_directory": user.home_directory,
@@ -240,7 +240,7 @@ def get_host_users_with_groups(host_id: int) -> List[Dict[str, Any]]:
         return users
 
 
-def get_host_user_groups(host_id: int) -> List[Dict[str, Any]]:
+def get_host_user_groups(host_id: str) -> List[Dict[str, Any]]:
     """Get user groups for a host."""
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -275,7 +275,7 @@ def get_host_user_groups(host_id: int) -> List[Dict[str, Any]]:
             user_names = [user.username for _, user in user_memberships]
             groups.append(
                 {
-                    "id": group.id,
+                    "id": str(group.id),
                     "group_name": group.group_name,
                     "gid": group.gid,
                     "is_system_group": group.is_system_group,
@@ -292,7 +292,7 @@ def get_host_user_groups(host_id: int) -> List[Dict[str, Any]]:
         return groups
 
 
-def get_host_software_packages(host_id: int) -> List[Dict[str, Any]]:
+def get_host_software_packages(host_id: str) -> List[Dict[str, Any]]:
     """Get software packages for a host."""
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -314,42 +314,33 @@ def get_host_software_packages(host_id: int) -> List[Dict[str, Any]]:
 
         return [
             {
-                "id": package.id,
+                "id": str(package.id),
                 "package_name": package.package_name,
-                "version": package.version,
-                "description": package.description,
+                "version": package.package_version,
+                "description": package.package_description,
                 "package_manager": package.package_manager,
-                "source": package.source,
                 "architecture": package.architecture,
                 "size_bytes": package.size_bytes,
+                "vendor": package.vendor,
+                "category": package.category,
+                "license": package.license,
+                "install_path": package.install_path,
                 "install_date": (
                     package.install_date.isoformat() if package.install_date else None
                 ),
-                "vendor": package.vendor,
-                "category": package.category,
-                "license_type": package.license_type,
-                "bundle_id": package.bundle_id,
-                "app_store_id": package.app_store_id,
-                "installation_path": package.installation_path,
                 "is_system_package": package.is_system_package,
-                "is_user_installed": package.is_user_installed,
                 "created_at": (
                     package.created_at.isoformat() if package.created_at else None
                 ),
                 "updated_at": (
                     package.updated_at.isoformat() if package.updated_at else None
                 ),
-                "software_updated_at": (
-                    package.software_updated_at.isoformat()
-                    if package.software_updated_at
-                    else None
-                ),
             }
             for package in packages
         ]
 
 
-def update_host_timestamp(host_id: int, field_name: str) -> None:
+def update_host_timestamp(host_id: str, field_name: str) -> None:
     """Update a timestamp field for a host."""
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -433,7 +424,7 @@ async def update_or_create_host(
     return host
 
 
-def get_host_ubuntu_pro_info(host_id: int) -> Dict[str, Any]:
+def get_host_ubuntu_pro_info(host_id: str) -> Dict[str, Any]:
     """Get Ubuntu Pro information for a specific host."""
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -475,19 +466,19 @@ def get_host_ubuntu_pro_info(host_id: int) -> Dict[str, Any]:
         # Format service data
         services_data = [
             {
-                "name": service.name,
-                "description": service.description,
-                "available": service.available,
+                "name": service.service_name,
+                "description": "",  # Not stored in database
+                "available": service.status != "n/a",  # Available if status is not n/a
                 "status": service.status,
-                "entitled": service.entitled,
+                "entitled": service.entitled == "true",
             }
             for service in services
         ]
 
         return {
-            "available": ubuntu_pro_info.available,
+            "available": True,  # If we have Ubuntu Pro data, it's available
             "attached": ubuntu_pro_info.attached,
-            "version": ubuntu_pro_info.version,
+            "version": ubuntu_pro_info.subscription_name,
             "expires": (
                 ubuntu_pro_info.expires.isoformat() if ubuntu_pro_info.expires else None
             ),

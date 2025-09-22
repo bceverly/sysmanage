@@ -10,10 +10,10 @@ export const handlers = [
     const logPrefix = process.env.CI === 'true' ? '🔄 MSW-CI:' : 'MSW:';
     console.log(`${logPrefix} Handling GET ${path}`);
 
-    // Host data
-    if (path === '/api/host/1' || path === '/api/hosts/1') {
+    // Host data - using pattern matching for UUID
+    if (path.match(/^\/api\/hosts?\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/) || path === '/api/host/550e8400-e29b-41d4-a716-446655440000' || path === '/api/hosts/550e8400-e29b-41d4-a716-446655440000') {
       return HttpResponse.json({
-        id: 1,
+        id: '550e8400-e29b-41d4-a716-446655440000',
         fqdn: 'test-host.example.com',
         ipv4: '192.168.1.100',
         ipv6: '::1',
@@ -41,7 +41,7 @@ export const handlers = [
     // User data
     if (path === '/api/user/me' || path === '/api/users/me') {
       return HttpResponse.json({
-        id: 1,
+        id: '550e8400-e29b-41d4-a716-446655440001',
         username: 'current_user',
         email: 'user@example.com',
         first_name: 'Test',
@@ -53,11 +53,11 @@ export const handlers = [
       });
     }
 
-    // Software packages
-    if (path === '/api/host/1/software' || path === '/api/hosts/1/software') {
+    // Software packages - using pattern matching for UUID
+    if (path.match(/^\/api\/hosts?\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/software$/) || path === '/api/host/550e8400-e29b-41d4-a716-446655440000/software' || path === '/api/hosts/550e8400-e29b-41d4-a716-446655440000/software') {
       return HttpResponse.json([
         {
-          id: 1,
+          id: '550e8400-e29b-41d4-a716-446655440002',
           package_name: 'vim',
           version: '8.2',
           package_manager: 'apt',
@@ -65,7 +65,7 @@ export const handlers = [
           status: 'installed'
         },
         {
-          id: 2,
+          id: '550e8400-e29b-41d4-a716-446655440003',
           package_name: 'curl',
           version: '7.68.0',
           package_manager: 'apt',

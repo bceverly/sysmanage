@@ -54,7 +54,7 @@ class UpdatesReport(BaseModel):
 class UpdateExecutionRequest(BaseModel):
     """Request to execute package updates."""
 
-    host_ids: List[int]
+    host_ids: List[str]
     package_names: List[str]
     package_managers: Optional[List[str]] = None
 
@@ -93,11 +93,11 @@ class UpdateStatsSummary(BaseModel):
 
 @router.post("/report/{host_id}")
 async def report_updates(
-    host_id: int, updates_report: UpdatesReport, dependencies=Depends(JWTBearer())
+    host_id: str, updates_report: UpdatesReport, dependencies=Depends(JWTBearer())
 ):
     """Receive and store update information from agents."""
     try:
-        session_factory = sessionmaker(bind=db.engine)
+        session_factory = sessionmaker(bind=db.get_engine())
         with session_factory() as session:
             # Verify host exists
             host = session.query(models.Host).filter(models.Host.id == host_id).first()
@@ -153,7 +153,7 @@ async def report_updates(
 async def get_update_summary(dependencies=Depends(JWTBearer())):
     """Get summary statistics for package updates across all hosts, including update results."""
     try:
-        session_factory = sessionmaker(bind=db.engine)
+        session_factory = sessionmaker(bind=db.get_engine())
         with session_factory() as session:
             # Count total hosts
             total_hosts = (
@@ -185,7 +185,7 @@ async def get_update_summary(dependencies=Depends(JWTBearer())):
             # Count application updates (based on update_type)
             application_updates = (
                 session.query(models.PackageUpdate)
-                .filter(models.PackageUpdate.update_type == "package")
+                .filter(models.PackageUpdate.update_type == "enhancement")
                 .count()
             )
 
@@ -221,15 +221,17 @@ async def get_update_summary(dependencies=Depends(JWTBearer())):
 
 @router.get("/{host_id}")
 async def get_host_updates(
-    host_id: int,
+    host_id: str,
+    *,
     package_manager: Optional[str] = Query(None),
     security_only: Optional[bool] = Query(None),
     system_only: Optional[bool] = Query(None),
+    application_only: Optional[bool] = Query(None),
     dependencies=Depends(JWTBearer()),
 ):
     """Get package updates for a specific host."""
     try:
-        session_factory = sessionmaker(bind=db.engine)
+        session_factory = sessionmaker(bind=db.get_engine())
         with session_factory() as session:
             # Verify host exists
             host = session.query(models.Host).filter(models.Host.id == host_id).first()
@@ -252,13 +254,16 @@ async def get_host_updates(
             if system_only:
                 query = query.filter(models.PackageUpdate.update_type == "system")
 
+            if application_only:
+                query = query.filter(models.PackageUpdate.update_type == "enhancement")
+
             updates = query.order_by(models.PackageUpdate.package_name).all()
 
             # Convert to dict format
             update_list = []
             for update in updates:
                 update_dict = {
-                    "id": update.id,
+                    "id": str(update.id),
                     "host_id": host_id,  # Add missing host_id
                     "hostname": host.fqdn,  # Add missing hostname
                     "package_name": update.package_name,
@@ -266,13 +271,24 @@ async def get_host_updates(
                     "available_version": update.available_version,
                     "package_manager": update.package_manager,
                     "update_type": update.update_type,
+                    # Add frontend-expected boolean fields
+                    "is_security_update": update.update_type == "security",
+                    "is_system_update": update.update_type == "system",
                     "priority": update.priority,
                     "description": update.description,
                     "requires_reboot": update.requires_reboot,
                     "size_bytes": update.size_bytes,
-                    "discovered_at": update.discovered_at,
-                    "created_at": update.created_at,
-                    "updated_at": update.updated_at,
+                    "discovered_at": (
+                        update.discovered_at.isoformat()
+                        if update.discovered_at
+                        else None
+                    ),
+                    "created_at": (
+                        update.created_at.isoformat() if update.created_at else None
+                    ),
+                    "updated_at": (
+                        update.updated_at.isoformat() if update.updated_at else None
+                    ),
                 }
                 update_list.append(update_dict)
 
@@ -288,7 +304,7 @@ async def get_host_updates(
                     [u for u in updates if u.update_type == "system"]
                 ),
                 "application_updates": len(
-                    [u for u in updates if u.update_type == "package"]
+                    [u for u in updates if u.update_type == "enhancement"]
                 ),
             }
 
@@ -302,6 +318,7 @@ async def get_host_updates(
 async def get_all_updates(  # pylint: disable=too-many-positional-arguments
     security_only: Optional[bool] = Query(None),
     system_only: Optional[bool] = Query(None),
+    application_only: Optional[bool] = Query(None),
     package_manager: Optional[str] = Query(None),
     limit: Optional[int] = Query(100),
     offset: Optional[int] = Query(0),
@@ -309,7 +326,7 @@ async def get_all_updates(  # pylint: disable=too-many-positional-arguments
 ):
     """Get package updates across all hosts."""
     try:
-        session_factory = sessionmaker(bind=db.engine)
+        session_factory = sessionmaker(bind=db.get_engine())
         with session_factory() as session:
             # Build base query
             query = session.query(models.PackageUpdate, models.Host.fqdn).join(
@@ -322,6 +339,9 @@ async def get_all_updates(  # pylint: disable=too-many-positional-arguments
 
             if system_only:
                 query = query.filter(models.PackageUpdate.update_type == "system")
+
+            if application_only:
+                query = query.filter(models.PackageUpdate.update_type == "enhancement")
 
             if package_manager:
                 query = query.filter(
@@ -347,21 +367,32 @@ async def get_all_updates(  # pylint: disable=too-many-positional-arguments
             update_list = []
             for update, hostname in updates_with_hosts:
                 update_dict = {
-                    "id": update.id,
-                    "host_id": update.host_id,
+                    "id": str(update.id),
+                    "host_id": str(update.host_id),
                     "hostname": hostname,
                     "package_name": update.package_name,
                     "current_version": update.current_version,
                     "available_version": update.available_version,
                     "package_manager": update.package_manager,
                     "update_type": update.update_type,
+                    # Add frontend-expected boolean fields
+                    "is_security_update": update.update_type == "security",
+                    "is_system_update": update.update_type == "system",
                     "priority": update.priority,
                     "description": update.description,
                     "requires_reboot": update.requires_reboot,
                     "size_bytes": update.size_bytes,
-                    "discovered_at": update.discovered_at,
-                    "created_at": update.created_at,
-                    "updated_at": update.updated_at,
+                    "discovered_at": (
+                        update.discovered_at.isoformat()
+                        if update.discovered_at
+                        else None
+                    ),
+                    "created_at": (
+                        update.created_at.isoformat() if update.created_at else None
+                    ),
+                    "updated_at": (
+                        update.updated_at.isoformat() if update.updated_at else None
+                    ),
                 }
                 update_list.append(update_dict)
 
@@ -390,7 +421,7 @@ async def execute_updates(
             request.package_names,
             request.package_managers,
         )
-        session_factory = sessionmaker(bind=db.engine)
+        session_factory = sessionmaker(bind=db.get_engine())
         with session_factory() as session:
             results = []
 
@@ -524,14 +555,14 @@ async def execute_updates(
 
 @router.get("/execution-log/{host_id}")
 async def get_execution_log(
-    host_id: int,
+    host_id: str,
     limit: Optional[int] = Query(50),
     offset: Optional[int] = Query(0),
     dependencies=Depends(JWTBearer()),
 ):
     """Get update execution log for a host."""
     try:
-        session_factory = sessionmaker(bind=db.engine)
+        session_factory = sessionmaker(bind=db.get_engine())
         with session_factory() as session:
             # Verify host exists
             host = session.query(models.Host).filter(models.Host.id == host_id).first()
@@ -551,7 +582,7 @@ async def get_execution_log(
             log_list = []
             for log in logs:
                 log_dict = {
-                    "id": log.id,
+                    "id": str(log.id),
                     "package_name": log.package_name,
                     "package_manager": log.package_manager,
                     "from_version": log.from_version,
@@ -631,11 +662,11 @@ OS_UPGRADE_PACKAGE_MANAGERS = [
 
 @router.get("/os-upgrades")
 async def get_os_upgrades(
-    host_id: Optional[int] = Query(None), dependencies=Depends(JWTBearer())
+    host_id: Optional[str] = Query(None), dependencies=Depends(JWTBearer())
 ):
     """Get available OS version upgrades for all hosts or a specific host."""
     try:
-        session_factory = sessionmaker(bind=db.engine)
+        session_factory = sessionmaker(bind=db.get_engine())
         with session_factory() as session:
             # Build query for OS upgrades
             query = session.query(models.PackageUpdate).filter(
@@ -664,8 +695,8 @@ async def get_os_upgrades(
                 host = update.host
                 results.append(
                     {
-                        "id": update.id,
-                        "host_id": update.host_id,
+                        "id": str(update.id),
+                        "host_id": str(update.host_id),
                         "host_fqdn": host.fqdn,
                         "host_platform": host.platform,
                         "package_name": update.package_name,
@@ -700,7 +731,7 @@ async def get_os_upgrades(
 async def get_os_upgrades_summary(dependencies=Depends(JWTBearer())):
     """Get summary of OS upgrades across all hosts."""
     try:
-        session_factory = sessionmaker(bind=db.engine)
+        session_factory = sessionmaker(bind=db.get_engine())
         with session_factory() as session:
             # Get OS upgrades by package manager (OS type)
             query = session.query(models.PackageUpdate).filter(
@@ -782,7 +813,7 @@ async def execute_os_upgrades(
                     ),
                 )
 
-        session_factory = sessionmaker(bind=db.engine)
+        session_factory = sessionmaker(bind=db.get_engine())
         with session_factory() as session:
             results = []
 

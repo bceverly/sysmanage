@@ -30,7 +30,7 @@ import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
 
 interface Host {
-  id: number;
+  id: string;
   fqdn: string;
   ipv4?: string;
   ipv6?: string;
@@ -46,7 +46,7 @@ interface UbuntuProEnrollmentDialogProps {
 }
 
 interface EnrollmentResult {
-  host_id: number;
+  host_id: string;
   hostname?: string;
   success: boolean;
   message?: string;
@@ -141,7 +141,7 @@ const UbuntuProEnrollmentDialog: React.FC<UbuntuProEnrollmentDialogProps> = ({
 
       // Show error as a result
       setEnrollmentResults([{
-        host_id: 0,
+        host_id: '',
         hostname: 'Error',
         success: false,
         error: errorMessage,

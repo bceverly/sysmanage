@@ -106,7 +106,10 @@
     "newPassword": "輸入新密碼",
     "locked": "已鎖定",
     "unlocked": "未鎖定",
-    "unlock": "解鎖"
+    "unlock": "解鎖",
+    "lock": "鎖定",
+    "lockSelected": "鎖定選中用戶",
+    "unlockSelected": "解鎖選中用戶"
   },
   "common": {
     "save": "儲存",

@@ -14,7 +14,7 @@ import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import { Chip, Typography, IconButton, Autocomplete, TextField } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost } from '../Services/hosts'
+import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost, doRequestHostDiagnostics } from '../Services/hosts'
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
 import SearchBox from '../Components/SearchBox';
@@ -27,8 +27,8 @@ const Hosts = () => {
     const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [searchColumn, setSearchColumn] = useState<string>('fqdn');
-    const [selectedTags, setSelectedTags] = useState<number[]>([]);
-    const [allTags, setAllTags] = useState<Array<{id: number, name: string}>>([]);
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);
+    const [allTags, setAllTags] = useState<Array<{id: string, name: string}>>([]);
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { triggerRefresh } = useNotificationRefresh();
@@ -253,13 +253,13 @@ const Hosts = () => {
     const handleApprove = async () => {
         try {
             // Get selected hosts that need approval
-            const selectedHosts = filteredData.filter(host => 
-                selection.includes(Number(host.id)) && host.approval_status === 'pending'
+            const selectedHosts = filteredData.filter(host =>
+                selection.includes(host.id.toString()) && host.approval_status === 'pending'
             );
             
             // Approve each selected pending host
             const approvePromises = selectedHosts.map(host => 
-                doApproveHost(BigInt(host.id.toString()))
+                doApproveHost(host.id.toString())
             );
             
             await Promise.all(approvePromises);
@@ -284,8 +284,7 @@ const Hosts = () => {
         try {
             // Call the API to remove the selected rows
             const deletePromises = selection.map(id => {
-                const theID = BigInt(id.toString());
-                return doDeleteHost(theID);
+                return doDeleteHost(id.toString());
             });
             
             await Promise.all(deletePromises);
@@ -376,8 +375,7 @@ const Hosts = () => {
         try {
             // Request comprehensive data refresh (OS + hardware) for selected hosts
             const refreshPromises = selection.map(id => {
-                const theID = BigInt(id.toString());
-                return doRefreshAllHostData(theID);
+                return doRefreshAllHostData(id.toString());
             });
             
             await Promise.all(refreshPromises);
@@ -396,20 +394,23 @@ const Hosts = () => {
 
     const handleGetDiagnostics = async () => {
         try {
-            // For now, we'll just collect diagnostics for the first selected host
-            // TODO: Add modal dialog for progress tracking and results display
             if (selection.length === 0) return;
-            
-            const hostId = Number(selection[0]);
+
+            const hostId = String(selection[0]);
             console.log(`Requesting diagnostics for host ${hostId}`);
-            
-            // TODO: Implement diagnostics API call and modal display
-            alert('Diagnostics collection will be implemented. This is a placeholder.');
-            
+
+            // Request diagnostics collection
+            await doRequestHostDiagnostics(hostId);
+            console.log('Diagnostics collection requested successfully');
+
+            // Show success message
+            alert(`Diagnostics collection requested for host ${hostId}. Check the host details page to view results when available.`);
+
             // Clear selection
             setSelection([]);
         } catch (error) {
             console.error('Error requesting diagnostics:', error);
+            alert('Failed to request diagnostics collection. Please try again.');
             setSelection([]);
         }
     }
@@ -450,8 +451,8 @@ const Hosts = () => {
     };
 
     // Check if any selected hosts need approval
-    const hasPendingSelection = filteredData.some(host => 
-        selection.includes(Number(host.id)) && host.approval_status === 'pending'
+    const hasPendingSelection = filteredData.some(host =>
+        selection.includes(host.id.toString()) && host.approval_status === 'pending'
     );
 
 

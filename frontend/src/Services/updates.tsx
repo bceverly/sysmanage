@@ -10,8 +10,8 @@ export interface UpdateStatsSummary {
 }
 
 export interface PackageUpdate {
-  id: number;
-  host_id: number;
+  id: string;
+  host_id: string;
   hostname: string;
   package_name: string;
   current_version: string | null;
@@ -35,7 +35,7 @@ export interface UpdatesResponse {
 }
 
 export interface HostUpdatesResponse {
-  host_id: number;
+  host_id: string;
   hostname: string;
   updates: PackageUpdate[];
   total_updates: number;
@@ -55,7 +55,7 @@ export interface UpdateResultsResponse {
 }
 
 export interface OSUpgradeResponse {
-  host_id: number;
+  host_id: string;
   hostname: string;
   package_name: string;
   current_version: string;
@@ -88,6 +88,7 @@ class UpdatesService {
   async getAllUpdates(
     securityOnly?: boolean,
     systemOnly?: boolean,
+    applicationOnly?: boolean,
     packageManager?: string,
     limit = 100,
     offset = 0
@@ -96,6 +97,7 @@ class UpdatesService {
       const params = new window.URLSearchParams();
       if (securityOnly) params.append('security_only', 'true');
       if (systemOnly) params.append('system_only', 'true');
+      if (applicationOnly) params.append('application_only', 'true');
       if (packageManager) params.append('package_manager', packageManager);
       params.append('limit', limit.toString());
       params.append('offset', offset.toString());
@@ -109,16 +111,18 @@ class UpdatesService {
   }
 
   async getHostUpdates(
-    hostId: number,
+    hostId: string,
     packageManager?: string,
     securityOnly?: boolean,
-    systemOnly?: boolean
+    systemOnly?: boolean,
+    applicationOnly?: boolean
   ): Promise<HostUpdatesResponse> {
     try {
       const params = new window.URLSearchParams();
       if (packageManager) params.append('package_manager', packageManager);
       if (securityOnly) params.append('security_only', 'true');
       if (systemOnly) params.append('system_only', 'true');
+      if (applicationOnly) params.append('application_only', 'true');
 
       const response = await axiosInstance.get(`/api/updates/${hostId}?${params}`);
       return response.data;
@@ -128,7 +132,7 @@ class UpdatesService {
     }
   }
 
-  async executeUpdates(hostIds: number[], packageNames: string[], packageManagers?: string[]): Promise<unknown> {
+  async executeUpdates(hostIds: string[], packageNames: string[], packageManagers?: string[]): Promise<unknown> {
     try {
       const requestData = {
         host_ids: hostIds,
@@ -144,7 +148,7 @@ class UpdatesService {
     }
   }
 
-  async getExecutionLog(hostId: number, limit = 50, offset = 0): Promise<unknown> {
+  async getExecutionLog(hostId: string, limit = 50, offset = 0): Promise<unknown> {
     try {
       const params = new window.URLSearchParams();
       params.append('limit', limit.toString());
@@ -190,7 +194,7 @@ class UpdatesService {
     }
   }
 
-  async executeOSUpgrades(hostIds: number[], packageManagers?: string[]): Promise<unknown> {
+  async executeOSUpgrades(hostIds: string[], packageManagers?: string[]): Promise<unknown> {
     try {
       const requestData = {
         host_ids: hostIds,

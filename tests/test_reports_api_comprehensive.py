@@ -171,7 +171,6 @@ class TestReportsAPIEndpoints:
         from backend.persistence.models import Host
 
         host = Host(
-            id=1,
             fqdn="test.example.com",
             active=True,
             host_token="test-token",
@@ -198,7 +197,6 @@ class TestReportsAPIEndpoints:
 
         now = datetime.now(timezone.utc)
         user = User(
-            id=1,
             userid="test@example.com",
             first_name="Test",
             last_name="User",
@@ -246,7 +244,6 @@ class TestReportsAPIEndpoints:
         from backend.persistence.models import Host
 
         host = Host(
-            id=1,
             fqdn="test.example.com",
             ipv4="192.168.1.1",
             platform="Linux",
@@ -437,7 +434,6 @@ class TestReportsErrorHandling:
         from backend.persistence.models import Host
 
         host = Host(
-            id=1,
             fqdn="test.example.com",
             active=True,
             host_token="test-token",

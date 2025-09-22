@@ -26,7 +26,7 @@ router = APIRouter()
 
 
 @router.post("/host/{host_id}/update-hardware", dependencies=[Depends(JWTBearer())])
-async def update_host_hardware(host_id: int, hardware_data: dict):
+async def update_host_hardware(host_id: str, hardware_data: dict):
     """
     Update hardware information for a specific host.
     This endpoint receives hardware data from the agent and stores it in the database.
@@ -125,7 +125,7 @@ async def update_host_hardware(host_id: int, hardware_data: dict):
 
 
 @router.get("/host/{host_id}/storage", dependencies=[Depends(JWTBearer())])
-async def get_host_storage(host_id: int):
+async def get_host_storage(host_id: str):
     """
     Get storage devices for a specific host from the normalized storage_devices table.
     """
@@ -133,7 +133,7 @@ async def get_host_storage(host_id: int):
 
 
 @router.get("/host/{host_id}/network", dependencies=[Depends(JWTBearer())])
-async def get_host_network(host_id: int):
+async def get_host_network(host_id: str):
     """
     Get network interfaces for a specific host from the normalized network_interfaces table.
     """
@@ -143,7 +143,7 @@ async def get_host_network(host_id: int):
 @router.post(
     "/host/{host_id}/request-hardware-update", dependencies=[Depends(JWTBearer())]
 )
-async def request_hardware_update(host_id: int):
+async def request_hardware_update(host_id: str):
     """
     Request an agent to update its hardware information.
     This sends a message via WebSocket to the agent requesting fresh hardware data.
@@ -177,7 +177,7 @@ async def request_hardware_update(host_id: int):
 
 
 @router.post("/hosts/request-hardware-update", dependencies=[Depends(JWTBearer())])
-async def request_hardware_update_bulk(host_ids: list[int]):
+async def request_hardware_update_bulk(host_ids: list[str]):
     """
     Request multiple agents to update their hardware information.
     This sends messages via WebSocket to the selected agents requesting fresh hardware data.
@@ -239,7 +239,7 @@ async def request_hardware_update_bulk(host_ids: list[int]):
 
 
 @router.get("/host/{host_id}/users", dependencies=[Depends(JWTBearer())])
-async def get_host_users(host_id: int):
+async def get_host_users(host_id: str):
     """
     Get user accounts for a specific host from the normalized user_accounts table.
     """
@@ -247,7 +247,7 @@ async def get_host_users(host_id: int):
 
 
 @router.get("/host/{host_id}/groups", dependencies=[Depends(JWTBearer())])
-async def get_host_groups(host_id: int):
+async def get_host_groups(host_id: str):
     """
     Get user groups for a specific host from the normalized user_groups table.
     """
@@ -257,7 +257,7 @@ async def get_host_groups(host_id: int):
 @router.post(
     "/host/{host_id}/request-user-access-update", dependencies=[Depends(JWTBearer())]
 )
-async def request_user_access_update(host_id: int):
+async def request_user_access_update(host_id: str):
     """
     Request an agent to update its user access information.
     This sends a message via WebSocket to the agent requesting fresh user and group data.
@@ -291,7 +291,7 @@ async def request_user_access_update(host_id: int):
 
 
 @router.get("/host/{host_id}/software", dependencies=[Depends(JWTBearer())])
-async def get_host_software(host_id: int):
+async def get_host_software(host_id: str):
     """
     Get software packages for a specific host from the software_packages table.
     """
@@ -299,7 +299,7 @@ async def get_host_software(host_id: int):
 
 
 @router.get("/host/{host_id}/ubuntu-pro", dependencies=[Depends(JWTBearer())])
-async def get_host_ubuntu_pro(host_id: int):
+async def get_host_ubuntu_pro(host_id: str):
     """
     Get Ubuntu Pro information for a specific host from the ubuntu_pro_info table.
     """

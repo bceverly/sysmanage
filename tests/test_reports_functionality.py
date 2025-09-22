@@ -110,7 +110,6 @@ class TestReportsWithRealData:
 
         # Create a test host
         host = Host(
-            id=1,
             fqdn="test.example.com",
             ipv4="192.168.1.1",
             platform="Linux",
@@ -135,7 +134,6 @@ class TestReportsWithRealData:
         # Create a test user
         now = datetime.now(timezone.utc)
         user = User(
-            id=1,
             userid="test@example.com",
             first_name="Test",
             last_name="User",
@@ -184,7 +182,6 @@ class TestReportsErrorHandling:
         hosts = []
         for i in range(5):  # Small number for test speed
             host = Host(
-                id=i + 1,
                 fqdn=f"host{i}.example.com",
                 ipv4=f"192.168.1.{i+10}",
                 platform="Linux",

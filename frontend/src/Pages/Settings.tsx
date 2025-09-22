@@ -41,7 +41,7 @@ import UbuntuProSettings from '../Components/UbuntuProSettings';
 import axiosInstance from '../Services/api';
 
 interface Tag {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   created_at: string;
@@ -51,7 +51,7 @@ interface Tag {
 
 interface TagWithHosts extends Tag {
   hosts: Array<{
-    id: number;
+    id: string;
     fqdn: string;
     ipv4: string;
     ipv6: string;
@@ -80,7 +80,7 @@ interface OSPackageSummary {
 }
 
 interface Host {
-  id: number;
+  id: string;
   fqdn: string;
   ipv4: string;
   ipv6: string;
@@ -96,7 +96,7 @@ interface QueueMessage {
   direction: string;
   timestamp: string;
   created_at: string;
-  host_id: number | null;
+  host_id: string | null;
   priority: string;
   data: Record<string, unknown>;
 }

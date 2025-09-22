@@ -15,7 +15,7 @@ router = APIRouter()
 
 
 @router.post("/host/refresh/software/{host_id}", dependencies=[Depends(JWTBearer())])
-async def refresh_host_software(host_id: int):
+async def refresh_host_software(host_id: str):
     """
     Request software inventory refresh for a specific host.
     """
@@ -45,7 +45,7 @@ async def refresh_host_software(host_id: int):
 
 
 @router.post("/host/reboot/{host_id}", dependencies=[Depends(JWTBearer())])
-async def reboot_host(host_id: int):
+async def reboot_host(host_id: str):
     """
     Request a system reboot for a specific host.
     """
@@ -75,7 +75,7 @@ async def reboot_host(host_id: int):
 
 
 @router.post("/host/shutdown/{host_id}", dependencies=[Depends(JWTBearer())])
-async def shutdown_host(host_id: int):
+async def shutdown_host(host_id: str):
     """
     Request a system shutdown for a specific host.
     """

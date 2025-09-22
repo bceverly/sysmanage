@@ -18,7 +18,11 @@ from backend.api.data_handlers import (
     handle_software_update,
     handle_user_access_update,
 )
-from backend.api.package_handlers import handle_packages_update
+from backend.api.package_handlers import (
+    handle_packages_batch_start,
+    handle_packages_batch,
+    handle_packages_batch_end,
+)
 from backend.i18n import _
 from backend.persistence.db import get_db
 from backend.utils.verbosity_logger import get_logger
@@ -389,8 +393,18 @@ class MessageProcessor:
                 await handle_package_updates_update(db, mock_connection, message_data)
                 success = True
 
-            elif message.message_type == MessageType.AVAILABLE_PACKAGES_UPDATE:
-                await handle_packages_update(db, mock_connection, message_data)
+            # OLD NON-PAGINATED HANDLER REMOVED - USE PAGINATED HANDLERS ONLY
+
+            elif message.message_type == MessageType.AVAILABLE_PACKAGES_BATCH_START:
+                await handle_packages_batch_start(db, mock_connection, message_data)
+                success = True
+
+            elif message.message_type == MessageType.AVAILABLE_PACKAGES_BATCH:
+                await handle_packages_batch(db, mock_connection, message_data)
+                success = True
+
+            elif message.message_type == MessageType.AVAILABLE_PACKAGES_BATCH_END:
+                await handle_packages_batch_end(db, mock_connection, message_data)
                 success = True
 
             elif message.message_type == MessageType.SCRIPT_EXECUTION_RESULT:
@@ -620,14 +634,34 @@ class MessageProcessor:
                 success = True
                 print("Successfully processed package updates", flush=True)
 
-            elif message.message_type == MessageType.AVAILABLE_PACKAGES_UPDATE:
+            # OLD NON-PAGINATED HANDLER REMOVED - USE PAGINATED HANDLERS ONLY
+
+            elif message.message_type == MessageType.AVAILABLE_PACKAGES_BATCH_START:
                 print(
-                    "About to call handle_packages_update",
+                    "About to call handle_packages_batch_start",
                     flush=True,
                 )
-                await handle_packages_update(db, mock_connection, message_data)
+                await handle_packages_batch_start(db, mock_connection, message_data)
                 success = True
-                print("Successfully processed available packages", flush=True)
+                print("Successfully processed packages batch start", flush=True)
+
+            elif message.message_type == MessageType.AVAILABLE_PACKAGES_BATCH:
+                print(
+                    "About to call handle_packages_batch",
+                    flush=True,
+                )
+                await handle_packages_batch(db, mock_connection, message_data)
+                success = True
+                print("Successfully processed packages batch", flush=True)
+
+            elif message.message_type == MessageType.AVAILABLE_PACKAGES_BATCH_END:
+                print(
+                    "About to call handle_packages_batch_end",
+                    flush=True,
+                )
+                await handle_packages_batch_end(db, mock_connection, message_data)
+                success = True
+                print("Successfully processed packages batch end", flush=True)
 
             elif message.message_type == MessageType.SCRIPT_EXECUTION_RESULT:
                 print(
@@ -855,7 +889,7 @@ class MessageProcessor:
 class MockConnection:
     """Mock connection object for message handlers that expect a WebSocket connection."""
 
-    def __init__(self, host_id: int):
+    def __init__(self, host_id: str):
         self.host_id = host_id
         self.hostname = None  # Will be populated by handlers if needed
         self.is_mock_connection = True  # Flag to prevent last_access updates

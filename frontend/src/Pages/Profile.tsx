@@ -379,9 +379,14 @@ const Profile: React.FC = () => {
             });
 
             setImageSuccess(t('userProfile.imageUploadSuccess', 'Profile image uploaded successfully'));
-            
+
             // Refresh the profile image
             await fetchProfileImage();
+
+            // Refresh the user menu profile image
+            if (window.refreshUserProfileImage) {
+                window.refreshUserProfileImage();
+            }
             
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -406,8 +411,13 @@ const Profile: React.FC = () => {
                 window.URL.revokeObjectURL(profileImageUrl);
             }
             setProfileImageUrl(null);
-            
+
             setImageSuccess(t('userProfile.imageDeleteSuccess', 'Profile image deleted successfully'));
+
+            // Refresh the user menu profile image
+            if (window.refreshUserProfileImage) {
+                window.refreshUserProfileImage();
+            }
             
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';

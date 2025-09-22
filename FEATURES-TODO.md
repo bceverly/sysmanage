@@ -116,6 +116,6 @@ like to add:
     add a PPA to a remote host
     from a UI on the server.
 
-14. Get rid of all integer primary
-    keys in the database and
-    replace them with UUIDs.
+14. Figure out why the descriptions
+    aren't flowing through for
+    available packages.
