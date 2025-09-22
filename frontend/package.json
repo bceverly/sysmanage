@@ -7,7 +7,7 @@
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
-    "@fontsource/roboto": "^5.0.13",
+    "@fontsource/roboto": "^5.2.8",
     "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^6.1.0",
     "@mui/material": "^6.1.0",
