@@ -1,2 +1,17 @@
 # Development certificates - not for production use
 .sysmanage-certs/
+
+# Test files with mock JWT tokens (not real secrets)
+tests/api/test_profile.py
+frontend/src/__tests__/utils/testUtils.tsx
+
+# Development configuration with known test secrets
+sysmanage-dev.yaml
+
+# Start scripts with intentional websocket URL generation
+scripts/start.sh
+scripts/start.ps1
+
+# Frontend files with safe console logging
+frontend/vite.config.ts
+frontend/src/Services/connectionMonitor.ts

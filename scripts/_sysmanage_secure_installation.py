@@ -176,6 +176,7 @@ def drop_all_tables(config):
         for table in tables:
             table_name = table[0]
             print(f"  Dropping table: {table_name}")
+            # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
             cur.execute(sql.SQL("DROP TABLE IF EXISTS {} CASCADE").format(
                 sql.Identifier(table_name)
             ))
@@ -366,7 +367,8 @@ def create_admin_user(user_data, salt):
             db.add(admin_user)
             db.commit()
 
-            print(f"  Admin user '{user_data['email']}' created successfully.")
+            # nosemgrep: generic.secrets.security.detected-clear-text-logging-sensitive-data.detected-clear-text-logging-sensitive-data
+        print(f"  Admin user '{user_data['email']}' created successfully.")
 
         finally:
             db.close()
@@ -415,6 +417,7 @@ def main():
         print("Installation completed successfully!")
         print("="*60)
         print(f"\nYou can now log in with:")
+        # nosemgrep: generic.secrets.security.detected-clear-text-logging-sensitive-data.detected-clear-text-logging-sensitive-data
         print(f"  Email: {user_data['email']}")
         print(f"  Password: [the password you provided]")
         print("\nStart the SysManage server with: make start")
