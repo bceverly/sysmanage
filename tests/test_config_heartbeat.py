@@ -2,12 +2,13 @@
 Test heartbeat configuration functionality on the server.
 """
 
-import pytest
-import tempfile
 import os
-from unittest.mock import patch, mock_open
+import tempfile
+from unittest.mock import mock_open, patch
 
-from backend.config.config import get_heartbeat_timeout_minutes, get_config
+import pytest
+
+from backend.config.config import get_config, get_heartbeat_timeout_minutes
 
 
 class TestHeartbeatConfiguration:

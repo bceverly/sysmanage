@@ -3,9 +3,10 @@ Unit tests for agent communication API endpoints.
 Tests agent authentication and WebSocket connection endpoints.
 """
 
-import pytest
-from unittest.mock import Mock, patch, AsyncMock
 import json
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from backend.websocket.messages import MessageType
 
@@ -231,7 +232,7 @@ class TestAgentWebSocket:
 
     def test_websocket_message_validation(self):
         """Test WebSocket message format validation."""
-        from backend.websocket.messages import create_message, MessageType
+        from backend.websocket.messages import MessageType, create_message
 
         # Test valid message creation
         raw_message = {

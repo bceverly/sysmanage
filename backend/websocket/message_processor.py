@@ -19,9 +19,9 @@ from backend.api.data_handlers import (
     handle_user_access_update,
 )
 from backend.api.package_handlers import (
-    handle_packages_batch_start,
     handle_packages_batch,
     handle_packages_batch_end,
+    handle_packages_batch_start,
 )
 from backend.i18n import _
 from backend.persistence.db import get_db

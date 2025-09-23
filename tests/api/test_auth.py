@@ -3,8 +3,9 @@ Unit tests for authentication API endpoints.
 Tests /login and /refresh endpoints with various scenarios.
 """
 
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import patch, Mock
 from argon2 import PasswordHasher
 
 argon2_hasher = PasswordHasher()

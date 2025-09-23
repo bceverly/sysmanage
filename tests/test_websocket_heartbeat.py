@@ -2,10 +2,11 @@
 Test WebSocket heartbeat message handling.
 """
 
-import pytest
 import json
-from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from backend.websocket.messages import HeartbeatMessage, MessageType, create_message
 
@@ -122,8 +123,9 @@ class TestConnectionManagerHeartbeat:
     def test_connection_info_update(self, mock_connection):
         """Test updating connection info."""
         # Since mock_connection is a Mock, we need to test the actual update_info method
-        from backend.websocket.connection_manager import AgentConnection
         from unittest.mock import Mock
+
+        from backend.websocket.connection_manager import AgentConnection
 
         # Create a real connection to test the update functionality
         websocket_mock = Mock()

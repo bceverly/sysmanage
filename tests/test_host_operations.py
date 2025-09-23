@@ -3,14 +3,14 @@ Comprehensive tests for backend/api/host_operations.py module.
 Tests host system operations endpoints (reboot, shutdown, software refresh).
 """
 
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
 
 from backend.api.host_operations import (
-    refresh_host_software,
     reboot_host,
+    refresh_host_software,
     shutdown_host,
 )
 

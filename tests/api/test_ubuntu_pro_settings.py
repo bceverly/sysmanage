@@ -3,9 +3,11 @@ Unit tests for Ubuntu Pro settings API endpoints.
 Tests the /api/ubuntu-pro/ endpoints with various scenarios.
 """
 
-import pytest
-from unittest.mock import patch, Mock
 from datetime import datetime, timezone
+from unittest.mock import Mock, patch
+
+import pytest
+
 from backend.persistence import models
 
 

@@ -2,9 +2,10 @@
 Unit tests for backend.api.reports module - focused on core functionality.
 """
 
-import pytest
 from datetime import datetime, timezone
 from unittest.mock import Mock, patch
+
+import pytest
 
 from backend.api.reports import generate_hosts_html, generate_users_html
 
@@ -146,9 +147,9 @@ class TestReportsAPIEndpointsSimple:
     def test_view_users_report_success(self, authenticated_client, session):
         """Test viewing users report with authentication."""
         # Create a real user object in the database
-        from backend.persistence.models import User
-
         from datetime import datetime, timezone
+
+        from backend.persistence.models import User
 
         now = datetime.now(timezone.utc)
         user = User(
@@ -192,9 +193,11 @@ class TestReportsAPIEndpointsSimple:
     def test_unauthenticated_access(self):
         """Test that unauthenticated requests are rejected."""
         # Create an unauthenticated client without the auth fixture
-        from fastapi.testclient import TestClient
-        from backend.main import app
         from contextlib import asynccontextmanager
+
+        from fastapi.testclient import TestClient
+
+        from backend.main import app
 
         @asynccontextmanager
         async def mock_lifespan(app):

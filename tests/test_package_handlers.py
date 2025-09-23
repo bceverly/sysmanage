@@ -3,14 +3,15 @@ Unit tests for package data handlers.
 Tests the batch package handlers (handle_packages_batch_start, handle_packages_batch, handle_packages_batch_end).
 """
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from backend.api.package_handlers import (
-    handle_packages_batch_start,
     handle_packages_batch,
     handle_packages_batch_end,
+    handle_packages_batch_start,
 )
 from backend.persistence import models
 

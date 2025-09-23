@@ -3,17 +3,10 @@ Software management models for SysManage - packages, updates, and installations.
 """
 
 import uuid
-from sqlalchemy import (
-    BigInteger,
-    Boolean,
-    Column,
-    DateTime,
-    ForeignKey,
-    String,
-    Text,
-)
-from sqlalchemy.types import TypeDecorator
+
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
+from sqlalchemy.types import TypeDecorator
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID

@@ -5,14 +5,12 @@ Handles available packages messages from agents.
 
 import logging
 from datetime import datetime, timezone
+
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from backend.i18n import _
-from backend.persistence.models import (
-    AvailablePackage,
-    Host,
-)
+from backend.persistence.models import AvailablePackage, Host
 
 # Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")

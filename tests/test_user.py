@@ -5,26 +5,26 @@ Tests user management functionality for SysManage server.
 
 import json
 from datetime import datetime, timezone
-from unittest.mock import Mock, patch, AsyncMock
 from io import BytesIO
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException, UploadFile
 from fastapi.testclient import TestClient
 
 from backend.api.user import (
+    User,
+    add_user,
     delete_user,
+    delete_user_profile_image,
+    get_all_users,
     get_logged_in_user,
     get_user,
     get_user_by_userid,
-    get_all_users,
-    add_user,
-    update_user,
-    unlock_user,
-    upload_user_profile_image,
     get_user_profile_image,
-    delete_user_profile_image,
-    User,
+    unlock_user,
+    update_user,
+    upload_user_profile_image,
 )
 
 

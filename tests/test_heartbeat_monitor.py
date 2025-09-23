@@ -2,15 +2,16 @@
 Test heartbeat monitoring functionality on the server.
 """
 
-import pytest
 import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 from sqlalchemy.orm import Session
 
+from backend.config.config import get_heartbeat_timeout_minutes
 from backend.monitoring.heartbeat_monitor import check_host_heartbeats
 from backend.persistence.models import Host
-from backend.config.config import get_heartbeat_timeout_minutes
 
 
 class TestHeartbeatMonitor:

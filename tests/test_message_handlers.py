@@ -4,16 +4,16 @@ Tests WebSocket message handling functions for agent communication.
 """
 
 from datetime import datetime, timezone
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
 from backend.api.message_handlers import (
-    handle_system_info,
-    handle_heartbeat,
     handle_command_result,
     handle_config_acknowledgment,
     handle_diagnostic_result,
+    handle_heartbeat,
+    handle_system_info,
 )
 
 

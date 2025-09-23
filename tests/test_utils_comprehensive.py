@@ -5,8 +5,9 @@ Tests the logging formatter and password policy utilities.
 
 import datetime
 import logging
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 from backend.utils.logging_formatter import UTCTimestampFormatter
 from backend.utils.password_policy import PasswordPolicy, password_policy

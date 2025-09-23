@@ -3,29 +3,30 @@ Comprehensive unit tests for backend.websocket.messages module.
 Tests the message classes and factory functions for WebSocket communication.
 """
 
-import pytest
 from datetime import datetime, timezone
 from unittest.mock import patch
 
+import pytest
+
 from backend.websocket.messages import (
-    MessageType,
-    CommandType,
-    Message,
-    SystemInfoMessage,
     CommandMessage,
     CommandResultMessage,
-    HeartbeatMessage,
-    ErrorMessage,
-    OSVersionUpdateMessage,
-    HardwareUpdateMessage,
-    UserAccessUpdateMessage,
-    SoftwareInventoryUpdateMessage,
-    HostApprovedMessage,
-    ScriptExecutionResultMessage,
+    CommandType,
     DiagnosticCollectionResultMessage,
-    create_message,
+    ErrorMessage,
+    HardwareUpdateMessage,
+    HeartbeatMessage,
+    HostApprovedMessage,
+    Message,
+    MessageType,
+    OSVersionUpdateMessage,
+    ScriptExecutionResultMessage,
+    SoftwareInventoryUpdateMessage,
+    SystemInfoMessage,
+    UserAccessUpdateMessage,
     create_command_message,
     create_host_approved_message,
+    create_message,
 )
 
 

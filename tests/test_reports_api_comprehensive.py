@@ -4,9 +4,10 @@ Tests HTML generation, PDF generation, and API endpoint logic.
 """
 
 import io
-import pytest
 from datetime import datetime, timezone
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 from fastapi import HTTPException
 
 from backend.api.reports import generate_hosts_html, generate_users_html
@@ -191,9 +192,9 @@ class TestReportsAPIEndpoints:
     def test_view_users_report_success(self, authenticated_client, session):
         """Test viewing users report with authentication."""
         # Create a real user object in the database
-        from backend.persistence.models import User
-
         from datetime import datetime, timezone
+
+        from backend.persistence.models import User
 
         now = datetime.now(timezone.utc)
         user = User(
@@ -237,8 +238,9 @@ class TestReportsAPIEndpoints:
     @patch("backend.api.reports.REPORTLAB_AVAILABLE", True)
     def test_generate_pdf_hosts_success(self, authenticated_client, session):
         """Test successful PDF generation for hosts."""
-        from backend.api.reports import HostsReportGenerator
         import io
+
+        from backend.api.reports import HostsReportGenerator
 
         # Create real host data in database
         from backend.persistence.models import Host
@@ -285,9 +287,11 @@ class TestReportsAPIEndpoints:
     def test_unauthenticated_access(self):
         """Test that unauthenticated requests are rejected."""
         # Create an unauthenticated client without the auth fixture
-        from fastapi.testclient import TestClient
-        from backend.main import app
         from contextlib import asynccontextmanager
+
+        from fastapi.testclient import TestClient
+
+        from backend.main import app
 
         @asynccontextmanager
         async def mock_lifespan(app):

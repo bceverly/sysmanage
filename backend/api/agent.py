@@ -9,11 +9,11 @@ from datetime import datetime, timezone
 
 from fastapi import (
     APIRouter,
+    Depends,
+    HTTPException,
     Request,
     WebSocket,
     WebSocketDisconnect,
-    HTTPException,
-    Depends,
 )
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -33,7 +33,7 @@ from backend.api.update_handlers import handle_update_apply_result
 from backend.config.config_push import config_push_manager
 from backend.i18n import _
 from backend.persistence.db import get_db
-from backend.persistence.models import InstallationRequest, InstallationPackage
+from backend.persistence.models import InstallationPackage, InstallationRequest
 from backend.security.communication_security import websocket_security
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.connection_manager import connection_manager

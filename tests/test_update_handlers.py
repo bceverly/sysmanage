@@ -5,15 +5,12 @@ Tests update result handling functionality for SysManage server.
 
 import json
 from datetime import datetime, timezone
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, call, patch
 
 import pytest
 from sqlalchemy import and_, text, update
 
-from backend.api.update_handlers import (
-    handle_update_apply_result,
-    update_results_cache,
-)
+from backend.api.update_handlers import handle_update_apply_result, update_results_cache
 
 
 class MockConnection:

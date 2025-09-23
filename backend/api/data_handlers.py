@@ -8,6 +8,7 @@ Handles OS version, hardware, user access, and software update messages.
 import json
 import logging
 from datetime import datetime, timezone
+
 from sqlalchemy import delete, text, update
 from sqlalchemy.orm import Session
 
@@ -244,18 +245,17 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
                 now = datetime.now(timezone.utc)
                 network_interface = NetworkInterface(
                     host_id=connection.host_id,
-                    name=interface.get("name"),
+                    interface_name=interface.get("name"),
                     ipv4_address=interface.get("ipv4_address"),
                     ipv6_address=interface.get("ipv6_address"),
                     mac_address=interface.get("mac_address"),
                     # Note: 'status' field doesn't exist in NetworkInterface model - removed
-                    is_active=(
+                    is_up=(
                         interface.get("status") == "active"
                         if interface.get("status")
                         else False
                     ),
-                    created_at=now,
-                    updated_at=now,
+                    last_updated=now,
                 )
                 db.add(network_interface)
 
@@ -274,31 +274,21 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
                 # Determine if device is physical based on device type
                 device_type = device.get("device_type", "unknown")
 
-                # Logic to determine physical vs logical storage
-                # Per requirements: disk image = logical, everything else = physical
-                is_physical = True
-                if device_type and device_type.lower() == "disk image":
-                    is_physical = False
+                # Note: Physical vs logical detection is now handled in host_utils.py
+                # This legacy logic is kept for backwards compatibility
 
                 storage_device = StorageDevice(
                     host_id=connection.host_id,
-                    name=device.get("name"),  # Use correct field name
-                    device_path=device.get("device_path"),  # Add device_path
+                    device_name=device.get("name"),
                     device_type=device_type,
-                    capacity_bytes=device.get(
-                        "total_size"
-                    ),  # Map total_size to capacity_bytes
-                    used_bytes=device.get("used_size"),
-                    available_bytes=device.get(
-                        "available_size"
-                    ),  # Map available_size to available_bytes
-                    file_system=device.get(
-                        "filesystem"
-                    ),  # Map filesystem to file_system
+                    total_size_bytes=device.get("total_size")
+                    or device.get("capacity_bytes"),
+                    used_size_bytes=device.get("used_size") or device.get("used_bytes"),
+                    available_size_bytes=device.get("available_size")
+                    or device.get("available_bytes"),
+                    filesystem=device.get("filesystem"),
                     mount_point=device.get("mount_point"),
-                    is_physical=is_physical,  # Set based on device analysis
-                    created_at=now,
-                    updated_at=now,
+                    last_updated=now,
                 )
                 db.add(storage_device)
 

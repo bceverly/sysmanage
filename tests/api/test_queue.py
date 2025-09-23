@@ -4,10 +4,11 @@ Tests the queue management API endpoints.
 """
 
 import uuid
-import pytest
-from unittest.mock import Mock, patch
-from fastapi import status
 from datetime import datetime
+from unittest.mock import Mock, patch
+
+import pytest
+from fastapi import status
 
 from backend.persistence.models import MessageQueue
 

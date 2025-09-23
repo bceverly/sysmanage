@@ -43,12 +43,21 @@ class MockStorageDevice:
         host_id="550e8400-e29b-41d4-a716-446655440001",
     ):
         self.id = device_id
-        self.name = name
+        self.device_name = name  # Match actual model field name
         self.host_id = host_id
-        self.device_path = "/dev/sda1"
         self.mount_point = "/"
-        self.file_system = "ext4"
+        self.filesystem = "ext4"  # Match actual model field name
         self.device_type = "disk"
+        self.total_size_bytes = 1000000000000  # 1TB - Match actual model field name
+        self.used_size_bytes = 500000000000  # 500GB - Match actual model field name
+        self.available_size_bytes = (
+            500000000000  # 500GB - Match actual model field name
+        )
+        self.last_updated = datetime.now(timezone.utc)  # Match actual model field name
+        # Legacy compatibility fields for tests that expect old names
+        self.name = name
+        self.device_path = "/dev/sda1"
+        self.file_system = "ext4"
         self.capacity_bytes = 1000000000000  # 1TB
         self.used_bytes = 500000000000  # 500GB
         self.available_bytes = 500000000000  # 500GB
@@ -63,22 +72,25 @@ class MockNetworkInterface:
     def __init__(
         self,
         interface_id="550e8400-e29b-41d4-a716-446655440002",
-        name="eth0",
+        interface_name="eth0",
         host_id="550e8400-e29b-41d4-a716-446655440001",
     ):
         self.id = interface_id
-        self.name = name
+        self.interface_name = interface_name
         self.host_id = host_id
         self.interface_type = "ethernet"
         self.hardware_type = "physical"
         self.mac_address = "00:11:22:33:44:55"
         self.ipv4_address = "192.168.1.100"
         self.ipv6_address = "::1"
-        self.subnet_mask = "255.255.255.0"
-        self.is_active = True
+        self.netmask = "255.255.255.0"
+        self.broadcast = "192.168.1.255"
+        self.mtu = 1500
+        self.is_up = True
         self.speed_mbps = 1000
-        self.created_at = datetime.now(timezone.utc)
-        self.updated_at = datetime.now(timezone.utc)
+        self.last_updated = datetime.now(timezone.utc)
+        # For backward compatibility
+        self.is_active = self.is_up
 
 
 class MockUserAccount:
@@ -333,13 +345,14 @@ class TestGetHostStorageDevices:
         assert len(result) == 1
         device = result[0]
         assert device["id"] == mock_device.id
-        assert device["name"] == mock_device.name
-        assert device["device_path"] == mock_device.device_path
+        assert device["name"] == mock_device.device_name
         assert device["mount_point"] == mock_device.mount_point
-        assert device["file_system"] == mock_device.file_system
-        assert device["capacity_bytes"] == mock_device.capacity_bytes
-        assert device["used_bytes"] == mock_device.used_bytes
-        assert device["available_bytes"] == mock_device.available_bytes
+        assert device["file_system"] == mock_device.filesystem
+        assert device["device_type"] == "physical"  # /dev/sda1 should be physical
+        assert device["is_physical"] == True  # New field we added
+        assert device["capacity_bytes"] == mock_device.total_size_bytes
+        assert device["used_bytes"] == mock_device.used_size_bytes
+        assert device["available_bytes"] == mock_device.available_size_bytes
         assert device["size_gb"] == 931.32  # 1TB in GB
         assert device["used_gb"] == 465.66  # 500GB in GB
         assert device["available_gb"] == 465.66  # 500GB in GB
@@ -396,9 +409,14 @@ class TestGetHostStorageDevices:
 
         mock_host = MockHost(host_id=1)
         mock_device = MockStorageDevice()
+        # Set both new and legacy field names to None
+        mock_device.total_size_bytes = None
+        mock_device.used_size_bytes = None
+        mock_device.available_size_bytes = None
         mock_device.capacity_bytes = None
         mock_device.used_bytes = None
         mock_device.available_bytes = None
+        mock_device.last_updated = None
         mock_device.created_at = None
         mock_device.updated_at = None
 
@@ -413,11 +431,11 @@ class TestGetHostStorageDevices:
 
         assert len(result) == 1
         device = result[0]
+        # Check the actual field names returned by the function
         assert device["capacity_bytes"] is None
         assert device["used_bytes"] is None
         assert device["available_bytes"] is None
-        assert device["created_at"] is None
-        assert device["updated_at"] is None
+        assert device["last_updated"] is None
         assert device["size_gb"] == 0
         assert device["used_gb"] == 0
         assert device["available_gb"] == 0
@@ -453,11 +471,11 @@ class TestGetHostNetworkInterfaces:
         assert len(result) == 1
         interface = result[0]
         assert interface["id"] == mock_interface.id
-        assert interface["name"] == mock_interface.name
+        assert interface["name"] == mock_interface.interface_name
         assert interface["interface_type"] == mock_interface.interface_type
         assert interface["mac_address"] == mock_interface.mac_address
         assert interface["ipv4_address"] == mock_interface.ipv4_address
-        assert interface["is_active"] == mock_interface.is_active
+        assert interface["is_up"] == mock_interface.is_up
 
     @patch("backend.api.host_utils.sessionmaker")
     @patch("backend.api.host_utils.db.get_engine")
@@ -916,9 +934,9 @@ class TestHostUtilsIntegration:
 
         mock_host = MockHost(host_id=1)
         mock_device = MockStorageDevice()
-        mock_device.capacity_bytes = 1000000000000  # 1TB
-        mock_device.used_bytes = 250000000000  # 250GB
-        mock_device.available_bytes = 750000000000  # 750GB
+        mock_device.total_size_bytes = 1000000000000  # 1TB
+        mock_device.used_size_bytes = 250000000000  # 250GB
+        mock_device.available_size_bytes = 750000000000  # 750GB
 
         mock_session.query.return_value.filter.return_value.first.return_value = (
             mock_host

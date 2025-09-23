@@ -10,9 +10,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
-from backend.api.host_utils import (
-    validate_host_approval_status,
-)
+# Import the new router modules
+from backend.api import host_data_updates, host_operations, host_ubuntu_pro
+from backend.api.host_utils import validate_host_approval_status
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import db, models
@@ -22,9 +22,6 @@ from backend.websocket.messages import (
     create_command_message,
     create_host_approved_message,
 )
-
-# Import the new router modules
-from backend.api import host_data_updates, host_operations, host_ubuntu_pro
 
 # Split into separate routers for different authentication requirements
 public_router = APIRouter()  # Unauthenticated endpoints (no /api prefix)

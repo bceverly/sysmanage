@@ -3,9 +3,10 @@ Tests for hardware inventory API endpoints.
 """
 
 import json
+from unittest.mock import MagicMock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
 
 from backend.main import app
 from backend.persistence import models

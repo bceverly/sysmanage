@@ -4,8 +4,12 @@ Pytest configuration and shared fixtures for SysManage server tests.
 
 import asyncio
 import os
+
+# Test database URL - using temporary SQLite file for tests
+import tempfile
+import time
 from typing import Generator
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -17,11 +21,6 @@ from backend.main import app
 from backend.persistence.db import Base, get_db
 from backend.persistence.models import *  # Import all models explicitly
 from backend.websocket.connection_manager import ConnectionManager
-
-# Test database URL - using temporary SQLite file for tests
-import tempfile
-import os
-import time
 
 # Use secure temporary file for test database
 _test_db_fd, _test_db_file = tempfile.mkstemp(suffix=f"_{int(time.time())}.db")
@@ -94,8 +93,8 @@ def engine():
 def db_session(engine):
     """Create a test database session."""
     # Ensure all models are imported before creating tables
-    from backend.persistence.db import Base
     from backend.persistence import models  # Import all models
+    from backend.persistence.db import Base
 
     # Drop and recreate all tables to ensure all models are included
     Base.metadata.drop_all(bind=engine)
@@ -103,8 +102,8 @@ def db_session(engine):
     # For SQLite test databases, create tables directly using SQLAlchemy metadata
     # This avoids Alembic migration timezone compatibility issues with SQLite
     print("Creating SQLite test schema directly from models (skipping Alembic)")
-    from backend.persistence.db import Base
     from backend.persistence import models  # Import all models
+    from backend.persistence.db import Base
 
     Base.metadata.create_all(bind=engine)
 
@@ -218,7 +217,7 @@ def authenticated_client(db_session, mock_config):
         app.dependency_overrides[get_db] = override_get_db
 
         # Override get_current_user dependency
-        from backend.auth.auth_bearer import get_current_user, JWTBearer
+        from backend.auth.auth_bearer import JWTBearer, get_current_user
 
         def override_get_current_user():
             return "test_user@example.com"

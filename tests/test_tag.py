@@ -11,19 +11,19 @@ from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 
 from backend.api.tag import (
-    get_tags,
-    create_tag,
-    update_tag,
-    delete_tag,
-    get_tag_hosts,
-    add_tag_to_host,
-    remove_tag_from_host,
-    get_host_tags,
-    TagCreate,
-    TagUpdate,
-    TagResponse,
-    TagWithHostsResponse,
     HostTagRequest,
+    TagCreate,
+    TagResponse,
+    TagUpdate,
+    TagWithHostsResponse,
+    add_tag_to_host,
+    create_tag,
+    delete_tag,
+    get_host_tags,
+    get_tag_hosts,
+    get_tags,
+    remove_tag_from_host,
+    update_tag,
 )
 
 

@@ -64,46 +64,97 @@ def get_host_storage_devices(host_id: str) -> List[Dict[str, Any]]:
             .all()
         )
 
-        return [
-            {
-                "id": str(device.id),
-                "name": device.name,
-                "device_path": device.device_path,
-                "mount_point": device.mount_point,
-                "file_system": device.file_system,
-                "device_type": device.device_type,
-                "capacity_bytes": device.capacity_bytes,
-                "used_bytes": device.used_bytes,
-                "available_bytes": device.available_bytes,
-                "is_physical": device.is_physical,
-                "created_at": (
-                    device.created_at.isoformat() if device.created_at else None
-                ),
-                "updated_at": (
-                    device.updated_at.isoformat() if device.updated_at else None
-                ),
-                # Legacy fields for backward compatibility
-                "size_gb": (
-                    round(device.capacity_bytes / (1024**3), 2)
-                    if device.capacity_bytes
-                    else 0
-                ),
-                "used_gb": (
-                    round(device.used_bytes / (1024**3), 2) if device.used_bytes else 0
-                ),
-                "available_gb": (
-                    round(device.available_bytes / (1024**3), 2)
-                    if device.available_bytes
-                    else 0
-                ),
-                "usage_percent": (
-                    round((device.used_bytes / device.capacity_bytes) * 100, 1)
-                    if device.capacity_bytes and device.used_bytes
-                    else 0
-                ),
-            }
-            for device in storage_devices
-        ]
+        def determine_device_type(device_name: str, stored_type: str) -> str:
+            """Determine if device is physical or logical based on its name and type."""
+            # Note: We always determine physical vs logical, not relying on stored_type
+            # because stored_type might contain device types like "disk", "SSD", etc.
+            # rather than "physical" or "logical"
+
+            device_lower = device_name.lower() if device_name else ""
+
+            # Logical volume patterns (check first as they're more specific)
+            logical_patterns = [
+                "tmpfs",
+                "mfs",
+                "procfs",
+                "kernfs",
+                "devfs",
+                "zroot/",
+                "tank/",
+                "rpool/",  # ZFS datasets
+            ]
+
+            # Check for logical volumes first
+            for pattern in logical_patterns:
+                if pattern in device_lower:
+                    return "logical"
+
+            # Physical device patterns for FreeBSD/BSD systems
+            # These patterns match device names like ada0, cd0, nvd0, etc.
+            physical_device_types = ["ada", "da", "cd", "nvd", "wd", "sd"]
+
+            # Check if it's a physical device
+            for dev_type in physical_device_types:
+                # Check /dev/ prefixed names
+                if device_lower.startswith(f"/dev/{dev_type}"):
+                    return "physical"
+                # Check bare device names like "ada0", "cd0"
+                if device_lower.startswith(dev_type):
+                    # Make sure it's followed by a number
+                    remainder = device_lower[len(dev_type) :]
+                    if remainder and remainder[0].isdigit():
+                        return "physical"
+
+            # Network mounts are logical
+            if ":/" in device_name:  # NFS-style mounts
+                return "logical"
+
+            # Default for /dev/ devices is physical, everything else logical
+            return "physical" if device_name.startswith("/dev/") else "logical"
+
+        result = []
+        for device in storage_devices:
+            device_type = determine_device_type(device.device_name, device.device_type)
+            result.append(
+                {
+                    "id": str(device.id),
+                    "name": device.device_name,
+                    "mount_point": device.mount_point,
+                    "file_system": device.filesystem,
+                    "device_type": device_type,
+                    "is_physical": bool(device_type == "physical"),  # Ensure boolean
+                    "capacity_bytes": device.total_size_bytes,
+                    "used_bytes": device.used_size_bytes,
+                    "available_bytes": device.available_size_bytes,
+                    "last_updated": (
+                        device.last_updated.isoformat() if device.last_updated else None
+                    ),
+                    # Legacy fields for backward compatibility
+                    "size_gb": (
+                        round(device.total_size_bytes / (1024**3), 2)
+                        if device.total_size_bytes
+                        else 0
+                    ),
+                    "used_gb": (
+                        round(device.used_size_bytes / (1024**3), 2)
+                        if device.used_size_bytes
+                        else 0
+                    ),
+                    "available_gb": (
+                        round(device.available_size_bytes / (1024**3), 2)
+                        if device.available_size_bytes
+                        else 0
+                    ),
+                    "usage_percent": (
+                        round(
+                            (device.used_size_bytes / device.total_size_bytes) * 100, 1
+                        )
+                        if device.total_size_bytes and device.used_size_bytes
+                        else 0
+                    ),
+                }
+            )
+        return result
 
 
 def get_host_network_interfaces(host_id: str) -> List[Dict[str, Any]]:
@@ -128,20 +179,20 @@ def get_host_network_interfaces(host_id: str) -> List[Dict[str, Any]]:
         return [
             {
                 "id": str(interface.id),
-                "name": interface.name,
+                "name": interface.interface_name,
                 "interface_type": interface.interface_type,
-                "hardware_type": interface.hardware_type,
                 "mac_address": interface.mac_address,
                 "ipv4_address": interface.ipv4_address,
                 "ipv6_address": interface.ipv6_address,
-                "subnet_mask": interface.subnet_mask,
-                "is_active": interface.is_active,
+                "netmask": interface.netmask,
+                "broadcast": interface.broadcast,
+                "mtu": interface.mtu,
+                "is_up": interface.is_up,
                 "speed_mbps": interface.speed_mbps,
-                "created_at": (
-                    interface.created_at.isoformat() if interface.created_at else None
-                ),
-                "updated_at": (
-                    interface.updated_at.isoformat() if interface.updated_at else None
+                "last_updated": (
+                    interface.last_updated.isoformat()
+                    if interface.last_updated
+                    else None
                 ),
             }
             for interface in interfaces

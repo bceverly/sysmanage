@@ -10,18 +10,18 @@ from unittest.mock import patch
 import pytest
 
 from backend.websocket.messages import (
-    MessageType,
-    CommandType,
-    Message,
-    SystemInfoMessage,
     CommandMessage,
     CommandResultMessage,
-    create_message,
-    HardwareUpdateMessage,
-    UserAccessUpdateMessage,
-    SoftwareInventoryUpdateMessage,
-    HostApprovedMessage,
+    CommandType,
     DiagnosticCollectionResultMessage,
+    HardwareUpdateMessage,
+    HostApprovedMessage,
+    Message,
+    MessageType,
+    SoftwareInventoryUpdateMessage,
+    SystemInfoMessage,
+    UserAccessUpdateMessage,
+    create_message,
 )
 
 

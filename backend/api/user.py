@@ -9,8 +9,8 @@ from argon2 import PasswordHasher
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import Response
 from pydantic import BaseModel, EmailStr
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import sessionmaker
 
 from backend.api.profile import validate_and_process_image
 from backend.auth.auth_bearer import JWTBearer
@@ -24,8 +24,8 @@ from backend.security.login_security import login_security
 
 if TYPE_CHECKING:
     from backend.api.password_reset import (
-        send_initial_setup_email,
         create_password_reset_token,
+        send_initial_setup_email,
     )
 
 argon2_hasher = PasswordHasher()

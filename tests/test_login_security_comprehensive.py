@@ -5,9 +5,10 @@ Tests the LoginSecurityValidator class methods including rate limiting,
 IP blocking, user validation, and security monitoring.
 """
 
-import pytest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
+
+import pytest
 
 from backend.security.login_security import LoginSecurityValidator
 

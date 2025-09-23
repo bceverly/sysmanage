@@ -3,8 +3,9 @@ Basic functionality tests for the Reports feature.
 Tests the core functionality without complex mocking.
 """
 
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 
 class TestReportsBasicFunctionality:
@@ -51,9 +52,11 @@ class TestReportsBasicFunctionality:
     def test_authentication_required(self):
         """Test that endpoints require authentication."""
         # Create an unauthenticated client without the auth fixture
-        from fastapi.testclient import TestClient
-        from backend.main import app
         from contextlib import asynccontextmanager
+
+        from fastapi.testclient import TestClient
+
+        from backend.main import app
 
         @asynccontextmanager
         async def mock_lifespan(app):
@@ -105,8 +108,9 @@ class TestReportsWithRealData:
 
     def test_hosts_report_with_data(self, authenticated_client, session):
         """Test hosts report with real data."""
-        from backend.persistence.models import Host
         from datetime import datetime, timezone
+
+        from backend.persistence.models import Host
 
         # Create a test host
         host = Host(
@@ -128,8 +132,9 @@ class TestReportsWithRealData:
 
     def test_users_report_with_data(self, authenticated_client, session):
         """Test users report with real data."""
-        from backend.persistence.models import User
         from datetime import datetime, timezone
+
+        from backend.persistence.models import User
 
         # Create a test user
         now = datetime.now(timezone.utc)
@@ -175,8 +180,9 @@ class TestReportsErrorHandling:
 
     def test_large_dataset_handling(self, authenticated_client, session):
         """Test that reports can handle reasonable datasets."""
-        from backend.persistence.models import Host
         from datetime import datetime, timezone
+
+        from backend.persistence.models import Host
 
         # Create multiple hosts
         hosts = []

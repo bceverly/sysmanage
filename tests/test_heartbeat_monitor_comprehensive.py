@@ -3,10 +3,11 @@ Comprehensive unit tests for backend.monitoring.heartbeat_monitor module.
 Tests heartbeat monitoring service and host status checking.
 """
 
-import pytest
 import asyncio
 from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from backend.monitoring.heartbeat_monitor import (
     check_host_heartbeats,

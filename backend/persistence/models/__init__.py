@@ -8,8 +8,8 @@ All models are re-exported here for backward compatibility.
 # Re-export all models for backward compatibility
 from .core import *
 from .hardware import *
-from .software import *
 from .operations import *
+from .software import *
 
 __all__ = [
     # Core models

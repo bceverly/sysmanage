@@ -9,19 +9,19 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 
-from backend.persistence.db import get_db
-from backend.persistence.models import Host, User
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
+from backend.persistence.db import get_db
+from backend.persistence.models import Host, User
 
 # PDF generation imports
 try:
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.platypus import (
-        SimpleDocTemplate,
         Paragraph,
+        SimpleDocTemplate,
         Spacer,
         Table,
         TableStyle,

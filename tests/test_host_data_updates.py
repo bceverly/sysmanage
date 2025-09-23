@@ -4,22 +4,22 @@ Tests host data update endpoints for hardware, users, and software information.
 """
 
 from datetime import datetime, timezone
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
 
 from backend.api.host_data_updates import (
-    update_host_hardware,
-    get_host_storage,
+    get_host_groups,
     get_host_network,
+    get_host_software,
+    get_host_storage,
+    get_host_ubuntu_pro,
+    get_host_users,
     request_hardware_update,
     request_hardware_update_bulk,
-    get_host_users,
-    get_host_groups,
     request_user_access_update,
-    get_host_software,
-    get_host_ubuntu_pro,
+    update_host_hardware,
 )
 
 

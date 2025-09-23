@@ -3,10 +3,11 @@ Comprehensive unit tests for backend.config.config module.
 Tests configuration loading and accessor functions.
 """
 
-import pytest
 import os
+from unittest.mock import Mock, mock_open, patch
+
+import pytest
 import yaml
-from unittest.mock import patch, mock_open, Mock
 
 from backend.config import config
 
@@ -122,6 +123,7 @@ class TestConfigLoadingDefaults:
 
         # Import the module to trigger config loading
         import importlib
+
         from backend.config import config as config_module
 
         importlib.reload(config_module)
@@ -157,6 +159,7 @@ class TestConfigLoadingDefaults:
         mock_yaml.return_value = existing_config
 
         import importlib
+
         from backend.config import config as config_module
 
         importlib.reload(config_module)
@@ -217,6 +220,7 @@ security:
         ), patch("builtins.open", mock_open(read_data=mock_config)):
 
             import importlib
+
             from backend.config import config as config_module
 
             importlib.reload(config_module)
@@ -238,6 +242,7 @@ security:
         mock_exists.side_effect = mock_exists_side_effect
 
         import importlib
+
         from backend.config import config as config_module
 
         importlib.reload(config_module)
@@ -256,6 +261,7 @@ security:
         mock_yaml.return_value = empty_config
 
         import importlib
+
         from backend.config import config as config_module
 
         importlib.reload(config_module)
@@ -323,6 +329,7 @@ security:
         mock_yaml.side_effect = yaml_error
 
         import importlib
+
         from backend.config import config as config_module
 
         importlib.reload(config_module)
@@ -344,6 +351,7 @@ security:
         mock_yaml.side_effect = yaml_error
 
         import importlib
+
         from backend.config import config as config_module
 
         importlib.reload(config_module)
@@ -367,6 +375,7 @@ security:
         mock_yaml.return_value = minimal_config
 
         import importlib
+
         from backend.config import config as config_module
 
         importlib.reload(config_module)

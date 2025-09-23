@@ -4,7 +4,7 @@ Test OS version API functionality on the server side.
 
 import json
 from datetime import datetime, timezone
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -180,8 +180,9 @@ class TestOSVersionAPI:
             mock_conn_mgr.send_to_host = AsyncMock(return_value=False)
             mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
-            from backend.api.host import request_os_version_update
             from fastapi import HTTPException
+
+            from backend.api.host import request_os_version_update
 
             with pytest.raises(HTTPException) as exc_info:
                 await request_os_version_update(999)
@@ -213,8 +214,9 @@ class TestOSVersionAPI:
             mock_session_instance.__exit__ = Mock(return_value=None)
             mock_sessionmaker.return_value = Mock(return_value=mock_session_instance)
 
-            from backend.api.host import request_os_version_update
             from fastapi import HTTPException
+
+            from backend.api.host import request_os_version_update
 
             with pytest.raises(HTTPException) as exc_info:
                 await request_os_version_update(1)

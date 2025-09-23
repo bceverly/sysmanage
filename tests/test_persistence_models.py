@@ -7,14 +7,14 @@ from datetime import datetime, timezone
 import pytest
 
 from backend.persistence.models import (
+    DiagnosticReport,
+    HostTag,
     MessageQueue,
+    PasswordResetToken,
     QueueMetrics,
     SavedScript,
     ScriptExecutionLog,
-    DiagnosticReport,
     Tag,
-    HostTag,
-    PasswordResetToken,
     UbuntuProInfo,
     UbuntuProService,
     UbuntuProSettings,

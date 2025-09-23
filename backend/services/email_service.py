@@ -5,8 +5,8 @@ Supports various SMTP configurations including Gmail app passwords.
 
 import logging
 import smtplib
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from typing import List, Optional
 
 from backend.config import config

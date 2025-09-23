@@ -3,8 +3,9 @@ Unit tests for configuration management API endpoints.
 Tests config push, logging config, WebSocket config, and server config endpoints.
 """
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 
 
 @pytest.fixture(autouse=True)

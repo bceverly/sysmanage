@@ -3,21 +3,22 @@ Comprehensive unit tests for backend auth modules.
 Tests JWT authentication, authorization, and token handling.
 """
 
-import pytest
 import time
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
+
+import pytest
 from fastapi import HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials
 
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.auth.auth_handler import (
-    token_response,
+    JWT_ALGORITHM,
+    JWT_SECRET,
+    decode_jwt,
     sign_jwt,
     sign_refresh_token,
-    decode_jwt,
-    JWT_SECRET,
-    JWT_ALGORITHM,
+    token_response,
 )
-from backend.auth.auth_bearer import JWTBearer, get_current_user
 
 
 class TestAuthHandler:

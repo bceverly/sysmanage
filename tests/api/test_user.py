@@ -3,8 +3,9 @@ Unit tests for user management API endpoints.
 Tests all user CRUD operations and authentication-required endpoints.
 """
 
-import pytest
 from unittest.mock import patch
+
+import pytest
 from argon2 import PasswordHasher
 
 argon2_hasher = PasswordHasher()

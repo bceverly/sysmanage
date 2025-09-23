@@ -18,5 +18,5 @@ See README.md and TESTING.md for complete guidelines.
 # pylint: disable=wildcard-import,unused-wildcard-import
 from backend.persistence.models.core import *
 from backend.persistence.models.hardware import *
-from backend.persistence.models.software import *
 from backend.persistence.models.operations import *
+from backend.persistence.models.software import *

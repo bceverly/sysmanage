@@ -22,30 +22,31 @@ import tempfile
 import uuid
 from datetime import datetime, timezone
 from unittest.mock import Mock, patch
+
 import pytest
+from argon2 import PasswordHasher
 from fastapi.testclient import TestClient
 from sqlalchemy import (
-    create_engine,
-    Integer,
-    Column,
-    Boolean,
-    String,
-    DateTime,
-    Text,
     BigInteger,
+    Boolean,
+    Column,
+    DateTime,
     ForeignKey,
+    Integer,
+    String,
+    Text,
+    create_engine,
 )
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from argon2 import PasswordHasher
+from sqlalchemy.orm import sessionmaker
 
 argon2_hasher = PasswordHasher()
 
+from backend.auth.auth_handler import sign_jwt
 from backend.main import app
 from backend.persistence import models
 from backend.persistence.db import get_engine
 from backend.persistence.models.core import GUID
-from backend.auth.auth_handler import sign_jwt
 
 
 # Test database setup
@@ -58,7 +59,7 @@ def test_db():
 
     # For SQLite, we need to modify BigInteger columns to Integer for autoincrement to work
     # Create a copy of metadata with modified column types
-    from sqlalchemy import Integer, Column, ForeignKey
+    from sqlalchemy import Column, ForeignKey, Integer
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy.orm import relationship
 
@@ -597,6 +598,7 @@ def test_host_data():
 def admin_token(mock_config):
     """Create a valid admin JWT token for testing."""
     import time
+
     import jwt
 
     # Use the mocked config to create token

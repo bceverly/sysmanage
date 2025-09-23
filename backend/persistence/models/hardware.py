@@ -3,6 +3,7 @@ Hardware inventory models for SysManage - storage devices and network interfaces
 """
 
 import uuid
+
 from sqlalchemy import (
     BigInteger,
     Boolean,

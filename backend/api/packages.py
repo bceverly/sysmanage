@@ -19,15 +19,15 @@ from backend.persistence.db import get_db
 from backend.persistence.models import (
     AvailablePackage,
     Host,
-    InstallationRequest,
     InstallationPackage,
+    InstallationRequest,
 )
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
-    server_queue_manager,
-    QueueDirection,
     Priority,
+    QueueDirection,
+    server_queue_manager,
 )
 
 # Authenticated router for package management
@@ -402,8 +402,8 @@ async def refresh_packages_for_os_version(
             )
 
         # Select host with bias towards those with more package managers
-        import random
         import json
+        import random
 
         # Score hosts based on number of package managers they have
         def score_host(host):

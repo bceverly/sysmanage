@@ -2,7 +2,7 @@
 Simple test for config path determination to achieve full coverage.
 """
 
-from unittest.mock import patch, mock_open
+from unittest.mock import mock_open, patch
 
 # Sample config data to mock file reading
 MOCK_CONFIG_DATA = """
@@ -35,6 +35,7 @@ def test_windows_config_path():
     ), patch("builtins.open", mock_open(read_data=MOCK_CONFIG_DATA)):
         # Import the module after patching
         import importlib
+
         import backend.config.config
 
         importlib.reload(backend.config.config)
@@ -53,6 +54,7 @@ def test_unix_config_path():
     ), patch("builtins.open", mock_open(read_data=MOCK_CONFIG_DATA)):
         # Import the module after patching
         import importlib
+
         import backend.config.config
 
         importlib.reload(backend.config.config)

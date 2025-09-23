@@ -4,15 +4,15 @@ Test server-side data separation functionality.
 
 import json
 from datetime import datetime, timezone
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
 from backend.api.host import HostRegistration, HostRegistrationLegacy
 from backend.persistence import models
 from backend.websocket.messages import (
-    OSVersionUpdateMessage,
     MessageType,
+    OSVersionUpdateMessage,
     create_message,
 )
 

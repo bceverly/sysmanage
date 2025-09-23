@@ -3,16 +3,16 @@ Tests for certificate management functionality.
 """
 
 import os
-import tempfile
 import shutil
-from pathlib import Path
+import tempfile
 from datetime import datetime, timedelta, timezone
-from unittest.mock import patch, MagicMock
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
 from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.x509.oid import NameOID
-from cryptography.hazmat.primitives import serialization, hashes
 
 from backend.security.certificate_manager import CertificateManager
 

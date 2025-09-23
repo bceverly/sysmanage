@@ -2,9 +2,11 @@
 Tests all package-related endpoints using database fixtures.
 """
 
-import pytest
 import uuid
 from datetime import datetime, timezone
+
+import pytest
+
 from backend.persistence.models import AvailablePackage
 
 
@@ -23,6 +25,7 @@ class TestPackagesAPI:
         # Force table recreation for available_packages to ensure correct schema
         if is_sqlite:
             from sqlalchemy import text
+
             from backend.persistence.db import Base
             from backend.persistence.models.software import AvailablePackage
 
@@ -388,9 +391,11 @@ class TestPackagesAPI:
     def test_unauthorized_requests_fail_properly(self):
         """Test that requests fail properly when not using authentication."""
         # This test deliberately doesn't use authentication to test auth failure
-        from fastapi.testclient import TestClient
-        from backend.main import app
         from contextlib import asynccontextmanager
+
+        from fastapi.testclient import TestClient
+
+        from backend.main import app
 
         @asynccontextmanager
         async def mock_lifespan(app):

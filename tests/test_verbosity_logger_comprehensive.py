@@ -4,8 +4,9 @@ Tests the FlexibleLogger class and logging configuration.
 """
 
 import logging
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 from backend.utils.verbosity_logger import FlexibleLogger, get_logger
 

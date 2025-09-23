@@ -7,10 +7,6 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import sessionmaker
 
-from backend.api.host_utils import validate_host_approval_status
-from backend.auth.auth_bearer import JWTBearer
-from backend.i18n import _
-from backend.persistence import db, models
 from backend.api.host_utils import (
     get_host_network_interfaces,
     get_host_software_packages,
@@ -18,7 +14,11 @@ from backend.api.host_utils import (
     get_host_ubuntu_pro_info,
     get_host_user_groups,
     get_host_users_with_groups,
+    validate_host_approval_status,
 )
+from backend.auth.auth_bearer import JWTBearer
+from backend.i18n import _
+from backend.persistence import db, models
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
 

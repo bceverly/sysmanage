@@ -4,11 +4,15 @@ All tests properly mocked to avoid database dependencies.
 """
 
 import unittest
-from unittest.mock import Mock, patch
 from datetime import datetime, timezone
+from unittest.mock import Mock, patch
 
-from backend.websocket.queue_manager import ServerMessageQueueManager
-from backend.websocket.queue_manager import QueueDirection, QueueStatus, Priority
+from backend.websocket.queue_manager import (
+    Priority,
+    QueueDirection,
+    QueueStatus,
+    ServerMessageQueueManager,
+)
 
 
 class TestServerMessageQueueManager(unittest.TestCase):

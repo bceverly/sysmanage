@@ -3,20 +3,21 @@ Comprehensive unit tests for backend.i18n internationalization module.
 Tests language selection, translation loading, and message translation.
 """
 
-import pytest
 import gettext
-from unittest.mock import patch, Mock, mock_open
 import os
+from unittest.mock import Mock, mock_open, patch
+
+import pytest
 
 from backend.i18n import (
-    DEFAULT_LANGUAGE,
     CURRENT_LANGUAGE,
+    DEFAULT_LANGUAGE,
     TRANSLATIONS,
-    set_language,
+    _,
     get_language,
     get_translation,
-    _,
     ngettext,
+    set_language,
 )
 
 

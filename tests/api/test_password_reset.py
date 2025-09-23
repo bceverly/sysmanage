@@ -811,8 +811,9 @@ class TestEmailTemplateGeneration:
         self, mock_config, mock_send_email, mock_is_enabled, mock_hostname
     ):
         """Test password reset email generation."""
-        from backend.api.password_reset import send_password_reset_email
         from fastapi import Request
+
+        from backend.api.password_reset import send_password_reset_email
 
         # Mock email service and hostname
         mock_is_enabled.return_value = True
@@ -854,8 +855,9 @@ class TestEmailTemplateGeneration:
         self, mock_config, mock_send_email, mock_is_enabled, mock_hostname
     ):
         """Test initial setup email generation."""
-        from backend.api.password_reset import send_initial_setup_email
         from fastapi import Request
+
+        from backend.api.password_reset import send_initial_setup_email
 
         # Mock email service and hostname
         mock_is_enabled.return_value = True
@@ -894,11 +896,12 @@ class TestEmailTemplateGeneration:
     @patch("backend.api.password_reset.email_service.is_enabled")
     def test_email_disabled_fallback(self, mock_enabled):
         """Test email sending when service is disabled."""
-        from backend.api.password_reset import (
-            send_password_reset_email,
-            send_initial_setup_email,
-        )
         from fastapi import Request
+
+        from backend.api.password_reset import (
+            send_initial_setup_email,
+            send_password_reset_email,
+        )
 
         mock_enabled.return_value = False
         mock_request = Mock(spec=Request)

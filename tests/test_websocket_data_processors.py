@@ -3,21 +3,22 @@ Comprehensive unit tests for websocket data processors.
 Tests data processing utilities for WebSocket agent communication.
 """
 
-import pytest
 from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 
-from backend.websocket.data_processors import (
-    process_user_accounts,
-    process_user_groups,
-    process_user_group_memberships,
-    process_software_packages,
-)
+import pytest
+
 from backend.persistence.models import (
     SoftwarePackage,
     UserAccount,
     UserGroup,
     UserGroupMembership,
+)
+from backend.websocket.data_processors import (
+    process_software_packages,
+    process_user_accounts,
+    process_user_group_memberships,
+    process_user_groups,
 )
 
 

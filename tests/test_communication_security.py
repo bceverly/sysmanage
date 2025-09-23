@@ -12,8 +12,8 @@ from unittest.mock import Mock, patch
 import pytest
 
 from backend.security.communication_security import (
-    WebSocketSecurityManager,
     MessageEncryption,
+    WebSocketSecurityManager,
 )
 
 
@@ -178,8 +178,8 @@ class TestWebSocketSecurityManager:
         # Create valid signature for expired token
         secret_key = "test_secret_key_123"
         payload_json = json.dumps(payload, sort_keys=True)
-        import hmac
         import hashlib
+        import hmac
 
         signature = hmac.new(
             secret_key.encode(), payload_json.encode(), hashlib.sha256

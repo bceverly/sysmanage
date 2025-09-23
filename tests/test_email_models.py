@@ -6,11 +6,7 @@ Tests email request/response models and validation.
 import pytest
 from pydantic import ValidationError
 
-from backend.api.email import (
-    EmailTestRequest,
-    EmailConfigResponse,
-    EmailTestResponse,
-)
+from backend.api.email import EmailConfigResponse, EmailTestRequest, EmailTestResponse
 
 
 class TestEmailTestRequest:

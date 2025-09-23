@@ -4,9 +4,10 @@ Unit tests for server-side discovery beacon service.
 
 import json
 import socket
-import pytest
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from datetime import datetime, timezone
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
 
 from backend.discovery.discovery_service import (
     DiscoveryBeaconService,

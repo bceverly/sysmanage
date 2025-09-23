@@ -13,8 +13,8 @@ from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
-from backend.persistence.db import get_db
 from backend.persistence import models
+from backend.persistence.db import get_db
 
 logger = logging.getLogger(__name__)
 
