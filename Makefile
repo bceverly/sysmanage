@@ -69,6 +69,11 @@ install-dev: $(VENV_ACTIVATE)
 	@cd frontend && npm install --save-dev msw
 	@echo "Initializing MSW browser setup (for optional development use)..."
 	@cd frontend && npx msw init public/ --save
+	@echo "Checking for FreeBSD esbuild binary..."
+	@if [ "$$(uname)" = "FreeBSD" ]; then \
+		echo "FreeBSD detected - installing esbuild FreeBSD binary..."; \
+		cd frontend && npm install @esbuild/freebsd-x64; \
+	fi
 ifeq ($(OS),Windows_NT)
 	@echo "Checking for grep installation on Windows..."
 	@where grep >nul 2>nul || (echo "Installing grep via chocolatey (requires admin privileges)..." && powershell -Command "Start-Process powershell -ArgumentList '-Command choco install grep -y' -Verb RunAs -Wait" || echo "Failed to install grep - you may need to run as administrator or install chocolatey first")
