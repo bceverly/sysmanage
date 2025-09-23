@@ -368,7 +368,7 @@ def create_admin_user(user_data, salt):
             db.commit()
 
             # nosemgrep: generic.secrets.security.detected-clear-text-logging-sensitive-data.detected-clear-text-logging-sensitive-data
-        print(f"  Admin user '{user_data['email']}' created successfully.")
+            print(f"  Admin user '{user_data['email']}' created successfully.")
 
         finally:
             db.close()
