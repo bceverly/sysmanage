@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -39,8 +39,8 @@ const OpenBAOStatusCard: React.FC = () => {
   const [operationResult, setOperationResult] = useState<OpenBAOOperationResult | null>(null);
   const [showLogs, setShowLogs] = useState(false);
 
-  // Load OpenBAO status and config
-  const loadData = async () => {
+  // Load OpenBAO status and config (initial load with loading state)
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -58,18 +58,29 @@ const OpenBAOStatusCard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
+
+  // Refresh only status data (background refresh without loading state)
+  const refreshStatus = useCallback(async () => {
+    try {
+      setError(null);
+      const statusData = await openBAOService.getStatus();
+      setStatus(statusData);
+    } catch (err) {
+      console.error('Failed to refresh OpenBAO status:', err);
+      // Don't show error for background refresh, just log it
+    }
+  }, []);
 
   useEffect(() => {
     loadData();
 
-    // Auto-refresh every 30 seconds when component is active
-    const interval = setInterval(loadData, 30000);
+    // Auto-refresh status only (not config) every 30 seconds to reduce flicker
+    const interval = setInterval(refreshStatus, 30000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadData, refreshStatus]);
 
-  const handleStart = async () => {
+  const handleStart = useCallback(async () => {
     try {
       setOperationLoading(true);
       setOperationResult(null);
@@ -94,9 +105,9 @@ const OpenBAOStatusCard: React.FC = () => {
     } finally {
       setOperationLoading(false);
     }
-  };
+  }, [status, t]);
 
-  const handleStop = async () => {
+  const handleStop = useCallback(async () => {
     try {
       setOperationLoading(true);
       setOperationResult(null);
@@ -121,13 +132,13 @@ const OpenBAOStatusCard: React.FC = () => {
     } finally {
       setOperationLoading(false);
     }
-  };
+  }, [status, t]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     loadData();
-  };
+  }, [loadData]);
 
-  const getStatusIcon = () => {
+  const getStatusIcon = useMemo(() => {
     if (!status) return <WarningIcon color="disabled" />;
 
     if (!config?.enabled) {
@@ -139,9 +150,9 @@ const OpenBAOStatusCard: React.FC = () => {
     }
 
     return <CheckCircleIcon color="success" />;
-  };
+  }, [status, config]);
 
-  const getStatusText = () => {
+  const getStatusText = useMemo(() => {
     if (!status) return t('openbao.unknown', 'Unknown');
 
     if (!config?.enabled) {
@@ -153,18 +164,18 @@ const OpenBAOStatusCard: React.FC = () => {
     }
 
     return t('openbao.running', 'Running');
-  };
+  }, [status, config, t]);
 
-  const getStatusColor = (): 'default' | 'success' | 'warning' | 'error' => {
+  const getStatusColor = useMemo((): 'default' | 'success' | 'warning' | 'error' => {
     if (!status) return 'default';
 
     if (!config?.enabled) return 'warning';
     if (!status.running) return 'error';
 
     return 'success';
-  };
+  }, [status, config]);
 
-  const formatHealthInfo = (health: OpenBAOHealth | null) => {
+  const formatHealthInfo = useCallback((health: OpenBAOHealth | null) => {
     if (!health) return null;
 
     if (health.error) {
@@ -194,7 +205,53 @@ const OpenBAOStatusCard: React.FC = () => {
         </Grid>
       </Box>
     );
-  };
+  }, [t]);
+
+  // Memoize action buttons to prevent unnecessary re-renders
+  const actionButtons = useMemo(() => (
+    <Box mt={2} display="flex" gap={1} flexWrap="wrap">
+      {status?.running ? (
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={handleStop}
+          disabled={operationLoading || !config?.enabled}
+          startIcon={operationLoading ? <CircularProgress size={16} /> : <StopIcon />}
+        >
+          {operationLoading ? t('openbao.stopping', 'Stopping...') : t('openbao.stop', 'Stop')}
+        </Button>
+      ) : (
+        <Button
+          variant="contained"
+          color="success"
+          onClick={handleStart}
+          disabled={operationLoading || !config?.enabled}
+          startIcon={operationLoading ? <CircularProgress size={16} /> : <PlayIcon />}
+        >
+          {operationLoading ? t('openbao.starting', 'Starting...') : t('openbao.start', 'Start')}
+        </Button>
+      )}
+
+      <Button
+        variant="outlined"
+        onClick={handleRefresh}
+        disabled={operationLoading}
+        startIcon={<RefreshIcon />}
+      >
+        {t('common.refresh', 'Refresh')}
+      </Button>
+
+      {status?.recent_logs && status.recent_logs.length > 0 && (
+        <Button
+          variant="outlined"
+          onClick={() => setShowLogs(!showLogs)}
+          startIcon={showLogs ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        >
+          {showLogs ? t('openbao.hideLogs', 'Hide Logs') : t('openbao.showLogs', 'Show Logs')}
+        </Button>
+      )}
+    </Box>
+  ), [status?.running, status?.recent_logs, config?.enabled, operationLoading, showLogs, handleStart, handleStop, handleRefresh, t]);
 
   if (loading) {
     return (
@@ -241,10 +298,10 @@ const OpenBAOStatusCard: React.FC = () => {
         subheader={t('openbao.subtitle', 'Secrets management and SSH key storage')}
         action={
           <Box display="flex" alignItems="center" gap={1}>
-            {getStatusIcon()}
+            {getStatusIcon}
             <Chip
-              label={getStatusText()}
-              color={getStatusColor()}
+              label={getStatusText}
+              color={getStatusColor}
               size="small"
             />
           </Box>
@@ -307,48 +364,7 @@ const OpenBAOStatusCard: React.FC = () => {
 
             {/* Action Buttons */}
             <Grid item xs={12}>
-              <Box mt={2} display="flex" gap={1} flexWrap="wrap">
-                {status.running ? (
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    onClick={handleStop}
-                    disabled={operationLoading || !config.enabled}
-                    startIcon={operationLoading ? <CircularProgress size={16} /> : <StopIcon />}
-                  >
-                    {operationLoading ? t('openbao.stopping', 'Stopping...') : t('openbao.stop', 'Stop')}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="contained"
-                    color="success"
-                    onClick={handleStart}
-                    disabled={operationLoading || !config.enabled}
-                    startIcon={operationLoading ? <CircularProgress size={16} /> : <PlayIcon />}
-                  >
-                    {operationLoading ? t('openbao.starting', 'Starting...') : t('openbao.start', 'Start')}
-                  </Button>
-                )}
-
-                <Button
-                  variant="outlined"
-                  onClick={handleRefresh}
-                  disabled={operationLoading}
-                  startIcon={<RefreshIcon />}
-                >
-                  {t('common.refresh', 'Refresh')}
-                </Button>
-
-                {status.recent_logs && status.recent_logs.length > 0 && (
-                  <Button
-                    variant="outlined"
-                    onClick={() => setShowLogs(!showLogs)}
-                    startIcon={showLogs ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                  >
-                    {showLogs ? t('openbao.hideLogs', 'Hide Logs') : t('openbao.showLogs', 'Show Logs')}
-                  </Button>
-                )}
-              </Box>
+              {actionButtons}
 
               {!config.enabled && (
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
