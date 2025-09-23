@@ -5,6 +5,7 @@ This module contains the API implementation for OpenBAO (Vault) management in th
 import subprocess  # nosec B404 - Required for OpenBAO process management
 import os
 import json
+import platform
 from typing import Dict, Any, Optional
 from fastapi import APIRouter, HTTPException, Depends
 from backend.auth.auth_bearer import JWTBearer
@@ -51,10 +52,26 @@ def get_openbao_status() -> Dict[str, Any]:
         }
 
     # Check if process is running
+    process_running = False
     try:
-        os.kill(pid, 0)  # This doesn't kill, just checks if process exists
-        process_running = True
-    except OSError:
+        if platform.system() == "Windows":
+            # Windows-specific process check using tasklist
+            result = subprocess.run(
+                ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            # If process exists, tasklist will include it in output (check for quoted PID)
+            process_running = f'"{pid}"' in result.stdout or str(pid) in result.stdout
+        else:
+            # Unix-specific process check
+            os.kill(pid, 0)  # This doesn't kill, just checks if process exists
+            process_running = True
+    except (OSError, subprocess.SubprocessError):
+        process_running = False
+
+    if not process_running:
         # Process not found, clean up stale PID file
         try:
             os.remove(pid_file)
@@ -176,25 +193,125 @@ def start_openbao() -> Dict[str, Any]:
     project_dir = os.path.dirname(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     )
-    start_script = os.path.join(project_dir, "scripts", "start-openbao.sh")
+
+    # Choose script based on operating system
+    if platform.system() == "Windows":
+        # Use PowerShell script with proper background execution
+        start_script = os.path.join(project_dir, "scripts", "start-openbao.ps1")
+        start_script_fallback = os.path.join(
+            project_dir, "scripts", "start-openbao.cmd"
+        )
+    else:
+        start_script = os.path.join(project_dir, "scripts", "start-openbao.sh")
+        start_script_fallback = None
 
     if not os.path.exists(start_script):
-        raise HTTPException(
-            status_code=500,
-            detail=_("openbao.script_not_found", "OpenBAO start script not found"),
-        )
+        if start_script_fallback and os.path.exists(start_script_fallback):
+            start_script = start_script_fallback
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail=_("openbao.script_not_found", "OpenBAO start script not found"),
+            )
 
     try:
         # Run the start script
         # start_script path is validated above, located in trusted project directory
-        result = subprocess.run(  # nosec B603
-            [start_script],
-            capture_output=True,
-            text=True,
-            timeout=30,
-            cwd=project_dir,
-            check=False,
-        )
+        if platform.system() == "Windows":
+            if start_script.endswith(".ps1"):
+                # Use scheduled task approach to completely isolate from Python process
+                try:
+                    import uuid
+                    import time
+
+                    # Generate unique task name
+                    task_name = f"SysManage_OpenBao_Start_{uuid.uuid4().hex[:8]}"
+
+                    # Create one-time scheduled task to run the script
+                    schtasks_cmd = [
+                        "schtasks",
+                        "/create",
+                        "/tn",
+                        task_name,
+                        "/tr",
+                        f'powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File "{start_script}"',
+                        "/sc",
+                        "once",
+                        "/st",
+                        "00:00",
+                        "/sd",
+                        "01/01/2025",
+                        "/f",  # Force overwrite if exists
+                    ]
+
+                    # Create the task
+                    create_result = subprocess.run(
+                        schtasks_cmd, capture_output=True, text=True, check=False
+                    )
+
+                    if create_result.returncode == 0:
+                        # Run the task immediately
+                        run_result = subprocess.run(
+                            ["schtasks", "/run", "/tn", task_name],
+                            capture_output=True,
+                            text=True,
+                            check=False,
+                        )
+
+                        # Wait a moment for it to start
+                        time.sleep(3)
+
+                        # Clean up the task
+                        subprocess.run(
+                            ["schtasks", "/delete", "/tn", task_name, "/f"],
+                            capture_output=True,
+                            text=True,
+                            check=False,
+                        )
+
+                        # Create success result
+                        class Result:
+                            def __init__(self):
+                                self.returncode = 0
+                                self.stdout = "OpenBao started via scheduled task"
+                                self.stderr = ""
+
+                        result = Result()
+                    else:
+                        raise Exception(
+                            f"Failed to create scheduled task: {create_result.stderr}"
+                        )
+
+                except Exception as e:
+
+                    class Result:
+                        def __init__(self, error):
+                            self.returncode = 1
+                            self.stdout = ""
+                            self.stderr = str(error)
+
+                    result = Result(e)
+            else:
+                # CMD script fallback
+                result = subprocess.run(  # nosec B603
+                    [start_script],
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
+                    cwd=project_dir,
+                    check=False,
+                    shell=True,
+                )
+        else:
+            # Unix shell script
+            result = subprocess.run(  # nosec B603
+                [start_script],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                cwd=project_dir,
+                check=False,
+            )
 
         if result.returncode == 0:
             # Wait a moment for startup and get status
@@ -249,25 +366,68 @@ def stop_openbao() -> Dict[str, Any]:
     project_dir = os.path.dirname(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     )
-    stop_script = os.path.join(project_dir, "scripts", "stop-openbao.sh")
+
+    # Choose script based on operating system
+    if platform.system() == "Windows":
+        # Use PowerShell script with proper background execution
+        stop_script = os.path.join(project_dir, "scripts", "stop-openbao.ps1")
+        stop_script_fallback = os.path.join(project_dir, "scripts", "stop-openbao.cmd")
+    else:
+        stop_script = os.path.join(project_dir, "scripts", "stop-openbao.sh")
+        stop_script_fallback = None
 
     if not os.path.exists(stop_script):
-        raise HTTPException(
-            status_code=500,
-            detail=_("openbao.script_not_found", "OpenBAO stop script not found"),
-        )
+        if stop_script_fallback and os.path.exists(stop_script_fallback):
+            stop_script = stop_script_fallback
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail=_("openbao.script_not_found", "OpenBAO stop script not found"),
+            )
 
     try:
         # Run the stop script
         # stop_script path is validated above, located in trusted project directory
-        result = subprocess.run(  # nosec B603
-            [stop_script],
-            capture_output=True,
-            text=True,
-            timeout=15,
-            cwd=project_dir,
-            check=False,
-        )
+        if platform.system() == "Windows":
+            if stop_script.endswith(".ps1"):
+                # PowerShell script
+                result = subprocess.run(  # nosec B603
+                    [
+                        "powershell",
+                        "-WindowStyle",
+                        "Hidden",
+                        "-ExecutionPolicy",
+                        "Bypass",
+                        "-File",
+                        stop_script,
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=15,
+                    cwd=project_dir,
+                    check=False,
+                )
+            else:
+                # CMD script fallback
+                result = subprocess.run(  # nosec B603
+                    [stop_script],
+                    capture_output=True,
+                    text=True,
+                    timeout=15,
+                    cwd=project_dir,
+                    check=False,
+                    shell=True,
+                )
+        else:
+            # Unix shell script
+            result = subprocess.run(  # nosec B603
+                [stop_script],
+                capture_output=True,
+                text=True,
+                timeout=15,
+                cwd=project_dir,
+                check=False,
+            )
 
         if result.returncode == 0:
             # Wait a moment for shutdown and get status

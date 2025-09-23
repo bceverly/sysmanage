@@ -272,7 +272,11 @@ endif
 # Server management targets with shell detection
 start:
 	@echo "Starting OpenBAO development server..."
+ifeq ($(OS),Windows_NT)
+	@powershell -ExecutionPolicy Bypass -File scripts/start-openbao.ps1 || scripts\start-openbao.cmd
+else
 	@./scripts/start-openbao.sh
+endif
 	@echo ""
 	@echo "Starting SysManage server..."
 ifeq ($(OS),Windows_NT)
@@ -314,19 +318,35 @@ else
 endif
 	@echo ""
 	@echo "Stopping OpenBAO development server..."
+ifeq ($(OS),Windows_NT)
+	@powershell -ExecutionPolicy Bypass -File scripts/stop-openbao.ps1 || scripts\stop-openbao.cmd
+else
 	@./scripts/stop-openbao.sh
+endif
 
 # OpenBAO (Vault) management targets
 start-openbao:
 	@echo "Starting OpenBAO development server..."
+ifeq ($(OS),Windows_NT)
+	@powershell -ExecutionPolicy Bypass -File scripts/start-openbao.ps1 || scripts\start-openbao.cmd
+else
 	@./scripts/start-openbao.sh
+endif
 
 stop-openbao:
 	@echo "Stopping OpenBAO development server..."
+ifeq ($(OS),Windows_NT)
+	@powershell -ExecutionPolicy Bypass -File scripts/stop-openbao.ps1 || scripts\stop-openbao.cmd
+else
 	@./scripts/stop-openbao.sh
+endif
 
 status-openbao:
+ifeq ($(OS),Windows_NT)
+	@powershell -ExecutionPolicy Bypass -File scripts/status-openbao.ps1 || scripts\status-openbao.cmd
+else
 	@./scripts/status-openbao.sh
+endif
 
 # Development server targets (legacy compatibility)
 run-dev: start

@@ -241,20 +241,37 @@ def install_from_binary():
         base_url = f"https://github.com/openbao/openbao/releases/download/{version}"
 
         # Try different filename patterns based on actual releases
-        possible_filenames = [
+        possible_filenames = []
+
+        # Windows-specific patterns (capital W and x86_64 instead of amd64)
+        if platform_str.startswith('windows'):
+            arch = platform_str.split('_')[1]  # extract amd64 from windows_amd64
+            # Map Windows amd64 to x86_64 for GitHub release naming
+            if arch == 'amd64':
+                github_arch = 'x86_64'
+            elif arch == 'arm64':
+                github_arch = 'arm64'
+            elif arch == 'arm':
+                github_arch = 'armv6'
+            else:
+                github_arch = arch
+            possible_filenames.append(f"bao_{version.lstrip('v')}_Windows_{github_arch}.zip")
+
+        # FreeBSD-specific tar.gz patterns (FreeBSD has capital F in filename)
+        elif platform_str.startswith('freebsd'):
+            arch = platform_str.split('_')[1]  # extract amd64 from freebsd_amd64
+            # Map FreeBSD amd64 to x86_64 for GitHub release naming
+            github_arch = 'x86_64' if arch == 'amd64' else arch
+            possible_filenames.append(f"bao_{version.lstrip('v')}_Freebsd_{github_arch}.tar.gz")
+
+        # Generic patterns for other platforms
+        possible_filenames.extend([
             f"bao-hsm_{version.lstrip('v')}_{platform_str}.deb",  # Debian package
             f"bao-hsm_{version.lstrip('v')}_{platform_str}.pkg.tar.zst",  # Arch package
             f"bao_{platform_str}.zip",  # Generic zip
             f"openbao_{version.lstrip('v')}_{platform_str}.zip",  # Alternative naming
             f"openbao_{platform_str}.zip",  # Alternative naming
-        ]
-
-        # Add FreeBSD-specific tar.gz patterns (FreeBSD has capital F in filename)
-        if platform_str.startswith('freebsd'):
-            arch = platform_str.split('_')[1]  # extract amd64 from freebsd_amd64
-            # Map FreeBSD amd64 to x86_64 for GitHub release naming
-            github_arch = 'x86_64' if arch == 'amd64' else arch
-            possible_filenames.insert(0, f"bao_{version.lstrip('v')}_Freebsd_{github_arch}.tar.gz")  # Add to beginning for priority
+        ])
 
         downloaded_file = None
 
