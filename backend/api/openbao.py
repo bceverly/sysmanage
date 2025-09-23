@@ -55,9 +55,16 @@ def get_openbao_status() -> Dict[str, Any]:
     process_running = False
     try:
         if platform.system() == "Windows":
-            # Windows-specific process check using tasklist
-            result = subprocess.run(
-                ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"],
+            # Windows-specific process check using tasklist with full path
+            result = subprocess.run(  # nosec B607 B603
+                [
+                    "C:\\Windows\\System32\\tasklist.exe",
+                    "/FI",
+                    f"PID eq {pid}",
+                    "/FO",
+                    "CSV",
+                    "/NH",
+                ],
                 capture_output=True,
                 text=True,
                 check=False,
@@ -229,12 +236,12 @@ def start_openbao() -> Dict[str, Any]:
 
                     # Create one-time scheduled task to run the script
                     schtasks_cmd = [
-                        "schtasks",
+                        "C:\\Windows\\System32\\schtasks.exe",
                         "/create",
                         "/tn",
                         task_name,
                         "/tr",
-                        f'powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File "{start_script}"',
+                        f'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File "{start_script}"',
                         "/sc",
                         "once",
                         "/st",
@@ -245,14 +252,19 @@ def start_openbao() -> Dict[str, Any]:
                     ]
 
                     # Create the task
-                    create_result = subprocess.run(
+                    create_result = subprocess.run(  # nosec B607 B603
                         schtasks_cmd, capture_output=True, text=True, check=False
                     )
 
                     if create_result.returncode == 0:
                         # Run the task immediately
-                        run_result = subprocess.run(
-                            ["schtasks", "/run", "/tn", task_name],
+                        run_result = subprocess.run(  # nosec B607 B603
+                            [
+                                "C:\\Windows\\System32\\schtasks.exe",
+                                "/run",
+                                "/tn",
+                                task_name,
+                            ],
                             capture_output=True,
                             text=True,
                             check=False,
@@ -262,8 +274,14 @@ def start_openbao() -> Dict[str, Any]:
                         time.sleep(3)
 
                         # Clean up the task
-                        subprocess.run(
-                            ["schtasks", "/delete", "/tn", task_name, "/f"],
+                        subprocess.run(  # nosec B607 B603
+                            [
+                                "C:\\Windows\\System32\\schtasks.exe",
+                                "/delete",
+                                "/tn",
+                                task_name,
+                                "/f",
+                            ],
                             capture_output=True,
                             text=True,
                             check=False,
@@ -292,15 +310,14 @@ def start_openbao() -> Dict[str, Any]:
 
                     result = Result(e)
             else:
-                # CMD script fallback
-                result = subprocess.run(  # nosec B603
-                    [start_script],
+                # CMD script fallback - avoid shell=True for security
+                result = subprocess.run(  # nosec B607 B603
+                    ["C:\\Windows\\System32\\cmd.exe", "/c", start_script],
                     capture_output=True,
                     text=True,
                     timeout=60,
                     cwd=project_dir,
                     check=False,
-                    shell=True,
                 )
         else:
             # Unix shell script
@@ -390,10 +407,10 @@ def stop_openbao() -> Dict[str, Any]:
         # stop_script path is validated above, located in trusted project directory
         if platform.system() == "Windows":
             if stop_script.endswith(".ps1"):
-                # PowerShell script
-                result = subprocess.run(  # nosec B603
+                # PowerShell script with full path
+                result = subprocess.run(  # nosec B607 B603
                     [
-                        "powershell",
+                        "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
                         "-WindowStyle",
                         "Hidden",
                         "-ExecutionPolicy",
@@ -408,15 +425,14 @@ def stop_openbao() -> Dict[str, Any]:
                     check=False,
                 )
             else:
-                # CMD script fallback
-                result = subprocess.run(  # nosec B603
-                    [stop_script],
+                # CMD script fallback - avoid shell=True for security
+                result = subprocess.run(  # nosec B607 B603
+                    ["C:\\Windows\\System32\\cmd.exe", "/c", stop_script],
                     capture_output=True,
                     text=True,
                     timeout=15,
                     cwd=project_dir,
                     check=False,
-                    shell=True,
                 )
         else:
             # Unix shell script
