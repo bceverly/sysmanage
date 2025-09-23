@@ -27,6 +27,7 @@ from backend.api import (
     email,
     fleet,
     host,
+    openbao,
     packages,
     password_reset,
     profile,
@@ -656,6 +657,12 @@ app.include_router(
     packages.router, prefix="/api/packages", tags=["packages"]
 )  # /api/packages/* (with auth)
 startup_logger.info("Packages router added")
+
+startup_logger.info("Adding OpenBAO router with /api prefix")
+app.include_router(
+    openbao.router, prefix="/api", tags=["openbao"]
+)  # /api/openbao/* (with auth)
+startup_logger.info("OpenBAO router added")
 
 startup_logger.info("=== ALL ROUTES REGISTERED ===")
 

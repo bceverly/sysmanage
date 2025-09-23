@@ -58,6 +58,26 @@ try:
         if not "cleanup_interval_minutes" in config["message_queue"].keys():
             config["message_queue"]["cleanup_interval_minutes"] = 30
 
+        # Vault (OpenBAO) settings
+        if not "vault" in config.keys():
+            config["vault"] = {}
+        if not "enabled" in config["vault"].keys():
+            config["vault"]["enabled"] = False
+        if not "url" in config["vault"].keys():
+            config["vault"]["url"] = "http://localhost:8200"
+        if not "token" in config["vault"].keys():
+            config["vault"][
+                "token"
+            ] = ""  # nosec B105 - empty default, not a hardcoded token
+        if not "mount_path" in config["vault"].keys():
+            config["vault"]["mount_path"] = "secret"
+        if not "timeout" in config["vault"].keys():
+            config["vault"]["timeout"] = 30
+        if not "verify_ssl" in config["vault"].keys():
+            config["vault"]["verify_ssl"] = True
+        if not "dev_mode" in config["vault"].keys():
+            config["vault"]["dev_mode"] = False
+
         # Email settings
         if not "email" in config.keys():
             config["email"] = {}
@@ -166,3 +186,59 @@ def get_smtp_config():
     Get SMTP server configuration.
     """
     return config["email"]["smtp"]
+
+
+def get_vault_config():
+    """
+    Get the complete vault configuration.
+    """
+    return config["vault"]
+
+
+def is_vault_enabled():
+    """
+    Check if vault functionality is enabled.
+    """
+    return config["vault"]["enabled"]
+
+
+def get_vault_url():
+    """
+    Get the vault server URL.
+    """
+    return config["vault"]["url"]
+
+
+def get_vault_token():
+    """
+    Get the vault authentication token.
+    """
+    return config["vault"]["token"]
+
+
+def get_vault_mount_path():
+    """
+    Get the vault KV secrets engine mount path.
+    """
+    return config["vault"]["mount_path"]
+
+
+def get_vault_timeout():
+    """
+    Get the vault connection timeout in seconds.
+    """
+    return config["vault"]["timeout"]
+
+
+def is_vault_ssl_verification_enabled():
+    """
+    Check if SSL certificate verification is enabled for vault connections.
+    """
+    return config["vault"]["verify_ssl"]
+
+
+def is_vault_dev_mode():
+    """
+    Check if vault is running in development mode.
+    """
+    return config["vault"]["dev_mode"]

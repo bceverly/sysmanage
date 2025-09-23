@@ -37,6 +37,7 @@ import { useTranslation } from 'react-i18next';
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import SearchBox from '../Components/SearchBox';
 import EmailConfigCard from '../Components/EmailConfigCard';
+import OpenBAOStatusCard from '../Components/OpenBAOStatusCard';
 import UbuntuProSettings from '../Components/UbuntuProSettings';
 import axiosInstance from '../Services/api';
 
@@ -678,7 +679,13 @@ const Settings: React.FC = () => {
         {t('integrations.description', 'Configure external service integrations and settings.')}
       </Typography>
 
-      <EmailConfigCard />
+      <Box sx={{ mb: 3 }}>
+        <EmailConfigCard />
+      </Box>
+
+      <Box>
+        <OpenBAOStatusCard />
+      </Box>
     </Box>
   );
 

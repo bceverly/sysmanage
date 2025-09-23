@@ -1,0 +1,361 @@
+#!/usr/bin/env python3
+"""
+OpenBAO installation script for sysmanage development environment.
+Automatically detects platform and installs OpenBAO accordingly.
+"""
+
+import os
+import platform
+import subprocess
+import sys
+import urllib.request
+import zipfile
+import tempfile
+import shutil
+from pathlib import Path
+
+
+def detect_platform():
+    """Detect the current platform and return appropriate OpenBAO binary info."""
+    system = platform.system().lower()
+    machine = platform.machine().lower()
+
+    # Map Python's machine names to OpenBAO's naming convention
+    if machine in ['x86_64', 'amd64']:
+        arch = 'amd64'
+    elif machine in ['aarch64', 'arm64']:
+        arch = 'arm64'
+    elif machine in ['armv7l', 'armv6l']:
+        arch = 'arm'
+    else:
+        arch = machine
+
+    if system == 'linux':
+        return f'linux_{arch}'
+    elif system == 'darwin':
+        return f'darwin_{arch}'
+    elif system == 'windows':
+        return f'windows_{arch}'
+    elif system == 'freebsd':
+        return f'freebsd_{arch}'
+    elif system == 'openbsd':
+        return f'openbsd_{arch}'
+    else:
+        raise ValueError(f"Unsupported platform: {system}_{arch}")
+
+
+def check_openbao_installed():
+    """Check if OpenBAO is already installed and accessible."""
+    try:
+        result = subprocess.run(['bao', 'version'], capture_output=True, text=True)
+        if result.returncode == 0:
+            print(f"OpenBAO already installed: {result.stdout.strip()}")
+            return True
+    except FileNotFoundError:
+        pass
+    return False
+
+
+def install_via_package_manager():
+    """Try to install OpenBAO via platform-specific package managers."""
+    system = platform.system().lower()
+
+    try:
+        if system == 'darwin':
+            # Try Homebrew on macOS
+            print("Attempting to install OpenBAO via Homebrew...")
+            result = subprocess.run(['brew', 'install', 'openbao'],
+                                  capture_output=True, text=True)
+            if result.returncode == 0:
+                print("OpenBAO installed successfully via Homebrew!")
+                return True
+            else:
+                print(f"Homebrew installation failed: {result.stderr}")
+
+        elif system == 'freebsd':
+            # Try pkg on FreeBSD
+            print("Attempting to install OpenBAO via pkg...")
+            result = subprocess.run(['pkg', 'install', '-y', 'openbao'],
+                                  capture_output=True, text=True)
+            if result.returncode == 0:
+                print("OpenBAO installed successfully via pkg!")
+                return True
+            else:
+                print(f"pkg installation failed: {result.stderr}")
+
+    except FileNotFoundError:
+        print(f"Package manager not found for {system}")
+
+    return False
+
+
+def install_from_binary():
+    """Download and install OpenBAO from precompiled binary."""
+    try:
+        platform_str = detect_platform()
+        print(f"Detected platform: {platform_str}")
+
+        # Get the latest release version
+        try:
+            import json
+            api_url = "https://api.github.com/repos/openbao/openbao/releases/latest"
+            with urllib.request.urlopen(api_url) as response:
+                release_data = json.loads(response.read().decode())
+                version = release_data['tag_name']
+                print(f"Latest version: {version}")
+        except Exception as e:
+            print(f"Could not fetch latest version: {e}")
+            version = "v2.4.1"  # fallback to known version
+            print(f"Using fallback version: {version}")
+
+        # OpenBAO download URL pattern - try different naming conventions
+        base_url = f"https://github.com/openbao/openbao/releases/download/{version}"
+
+        # Try different filename patterns based on actual releases
+        possible_filenames = [
+            f"bao-hsm_{version.lstrip('v')}_{platform_str}.deb",  # Debian package
+            f"bao-hsm_{version.lstrip('v')}_{platform_str}.pkg.tar.zst",  # Arch package
+            f"bao_{platform_str}.zip",  # Generic zip
+            f"openbao_{version.lstrip('v')}_{platform_str}.zip",  # Alternative naming
+            f"openbao_{platform_str}.zip",  # Alternative naming
+        ]
+
+        downloaded_file = None
+
+        # Create temporary directory
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Try each filename pattern
+            for filename in possible_filenames:
+                download_url = f"{base_url}/{filename}"
+                file_path = os.path.join(temp_dir, filename)
+
+                print(f"Trying: {download_url}")
+                try:
+                    urllib.request.urlretrieve(download_url, file_path)
+                    print("Download completed successfully!")
+                    downloaded_file = file_path
+                    break
+                except Exception as e:
+                    print(f"Failed: {e}")
+                    continue
+
+            if not downloaded_file:
+                print("All download attempts failed.")
+                print("You may need to download OpenBAO manually from:")
+                print("https://github.com/openbao/openbao/releases")
+                return False
+
+            # Handle different file types
+            if downloaded_file.endswith('.deb'):
+                return install_deb_package(downloaded_file)
+            elif downloaded_file.endswith('.pkg.tar.zst'):
+                print("Arch package format not yet supported in this script")
+                print("Please install manually with: sudo pacman -U " + downloaded_file)
+                return False
+            elif downloaded_file.endswith('.zip'):
+                # Extract the binary from zip
+                with zipfile.ZipFile(downloaded_file, 'r') as zip_ref:
+                    zip_ref.extractall(temp_dir)
+
+                # Find the binary (should be named 'bao' or 'bao.exe')
+                binary_name = 'bao.exe' if platform.system().lower() == 'windows' else 'bao'
+                binary_path = os.path.join(temp_dir, binary_name)
+
+                if not os.path.exists(binary_path):
+                    print(f"Binary {binary_name} not found in downloaded archive")
+                    return False
+
+                # Make binary executable (Unix-like systems)
+                if platform.system().lower() != 'windows':
+                    os.chmod(binary_path, 0o755)
+
+                # Install to appropriate location
+                install_path = get_install_path()
+                if install_path:
+                    target_path = os.path.join(install_path, binary_name)
+                    try:
+                        shutil.copy2(binary_path, target_path)
+                        print(f"OpenBAO installed to: {target_path}")
+                        return True
+                    except PermissionError:
+                        print(f"Permission denied installing to {install_path}")
+                        print("You may need to run with appropriate privileges or install manually")
+                        return False
+                else:
+                    print("Could not determine appropriate installation path")
+                    return False
+            else:
+                print(f"Unsupported file format: {downloaded_file}")
+                return False
+
+    except Exception as e:
+        print(f"Binary installation failed: {e}")
+        return False
+
+
+def install_deb_package(deb_file):
+    """Install OpenBAO from .deb package."""
+    try:
+        print("Installing OpenBAO .deb package...")
+        result = subprocess.run(['sudo', 'dpkg', '-i', deb_file],
+                               capture_output=True, text=True)
+        if result.returncode == 0:
+            print("OpenBAO installed successfully via dpkg!")
+            return True
+        else:
+            print(f"dpkg installation failed: {result.stderr}")
+            # If sudo failed, try extracting manually
+            if "sudo:" in result.stderr or "password" in result.stderr.lower():
+                print("Cannot use sudo in this environment. Trying manual extraction...")
+                return extract_from_deb(deb_file)
+
+            # Try to fix dependencies
+            print("Attempting to fix dependencies...")
+            subprocess.run(['sudo', 'apt-get', 'install', '-f'],
+                          capture_output=True)
+            return check_openbao_installed()
+    except FileNotFoundError:
+        print("dpkg not found - not a Debian/Ubuntu system")
+        return False
+    except Exception as e:
+        print(f"Error installing .deb package: {e}")
+        return extract_from_deb(deb_file)
+
+
+def extract_from_deb(deb_file):
+    """Extract binary from .deb package manually."""
+    try:
+        import tempfile
+        print("Extracting binary from .deb package...")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Extract .deb file (which is an ar archive)
+            result = subprocess.run(['ar', 'x', deb_file],
+                                   cwd=temp_dir, capture_output=True, text=True)
+            if result.returncode != 0:
+                print("ar command not available, trying alternative method...")
+                return False
+
+            # Find and extract data.tar.* file
+            data_files = [f for f in os.listdir(temp_dir) if f.startswith('data.tar')]
+            if not data_files:
+                print("No data.tar file found in .deb package")
+                return False
+
+            data_file = os.path.join(temp_dir, data_files[0])
+            extract_dir = os.path.join(temp_dir, 'extracted')
+            os.makedirs(extract_dir)
+
+            # Extract the data archive
+            if data_file.endswith('.xz'):
+                subprocess.run(['tar', 'xf', data_file, '-C', extract_dir])
+            elif data_file.endswith('.gz'):
+                subprocess.run(['tar', 'xzf', data_file, '-C', extract_dir])
+            else:
+                subprocess.run(['tar', 'xf', data_file, '-C', extract_dir])
+
+            # Find the bao binary
+            for root, dirs, files in os.walk(extract_dir):
+                if 'bao' in files:
+                    binary_path = os.path.join(root, 'bao')
+
+                    # Make executable
+                    os.chmod(binary_path, 0o755)
+
+                    # Install to user's local bin
+                    install_path = os.path.expanduser("~/.local/bin")
+                    os.makedirs(install_path, exist_ok=True)
+                    target_path = os.path.join(install_path, 'bao')
+
+                    shutil.copy2(binary_path, target_path)
+                    print(f"OpenBAO extracted and installed to: {target_path}")
+                    print("You may need to add ~/.local/bin to your PATH")
+                    return True
+
+            print("bao binary not found in .deb package")
+            return False
+
+    except Exception as e:
+        print(f"Error extracting from .deb package: {e}")
+        return False
+
+
+def get_install_path():
+    """Get appropriate installation path for the binary."""
+    system = platform.system().lower()
+
+    if system == 'windows':
+        # Try common Windows paths
+        paths = [
+            os.path.expanduser("~/AppData/Local/bin"),
+            "C:/Program Files/OpenBAO",
+        ]
+    else:
+        # Unix-like systems
+        paths = [
+            "/usr/local/bin",
+            os.path.expanduser("~/.local/bin"),
+            "/opt/openbao/bin",
+        ]
+
+    # Check if any of these paths exist and are writable
+    for path in paths:
+        if os.path.exists(path) and os.access(path, os.W_OK):
+            return path
+        elif not os.path.exists(path):
+            try:
+                os.makedirs(path, exist_ok=True)
+                if os.access(path, os.W_OK):
+                    return path
+            except:
+                continue
+
+    # Fallback to first path that we can create
+    for path in paths:
+        try:
+            os.makedirs(path, exist_ok=True)
+            return path
+        except:
+            continue
+
+    return None
+
+
+def main():
+    """Main installation function."""
+    print("OpenBAO Installation Script")
+    print("=" * 40)
+
+    # Check if already installed
+    if check_openbao_installed():
+        return 0
+
+    # Try package manager first
+    if install_via_package_manager():
+        # Verify installation
+        if check_openbao_installed():
+            return 0
+
+    # Fall back to binary installation
+    print("\nFalling back to binary installation...")
+    if install_from_binary():
+        # Verify installation
+        if check_openbao_installed():
+            print("\nOpenBAO installation completed successfully!")
+            print("You may need to restart your shell or update your PATH.")
+            return 0
+        else:
+            print("Installation completed but 'bao' command not found in PATH")
+            print("You may need to add the installation directory to your PATH")
+            return 1
+    else:
+        print("\nAutomatic installation failed.")
+        print("Please install OpenBAO manually:")
+        print("1. Visit: https://github.com/openbao/openbao/releases")
+        print("2. Download the appropriate binary for your platform")
+        print("3. Extract and place 'bao' binary in your PATH")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

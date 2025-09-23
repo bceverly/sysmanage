@@ -1,13 +1,13 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev help start stop
+.PHONY: test lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev help start stop start-openbao stop-openbao status-openbao
 
 # Default target
 help:
 	@echo "SysManage Server - Available targets:"
-	@echo "  make start         - Start SysManage server (auto-detects shell/platform)"
-	@echo "  make stop          - Stop SysManage server (auto-detects shell/platform)"
+	@echo "  make start         - Start SysManage server + OpenBAO (auto-detects shell/platform)"
+	@echo "  make stop          - Stop SysManage server + OpenBAO (auto-detects shell/platform)"
 	@echo "  make test          - Run all unit tests (Python + TypeScript)"
 	@echo "  make lint          - Run all linters (Python + TypeScript)"
 	@echo "  make lint-python   - Run Python linting only"
@@ -22,6 +22,11 @@ help:
 	@echo "  make clean         - Clean test artifacts and cache"
 	@echo "  make install-dev   - Install all development tools (includes WebDriver + MSW for testing)"
 	@echo "  make check-test-models - Check test model synchronization between conftest files"
+	@echo ""
+	@echo "OpenBAO (Vault) targets:"
+	@echo "  make start-openbao - Start OpenBAO development server only"
+	@echo "  make stop-openbao  - Stop OpenBAO development server only"
+	@echo "  make status-openbao - Check OpenBAO server status"
 	@echo ""
 	@echo "OpenBSD users: install-dev will check for C tracer dependencies (gcc, py3-cffi)"
 
@@ -59,6 +64,8 @@ install-dev: $(VENV_ACTIVATE)
 	@$(PIP) install -r requirements.txt
 	@echo "Checking for OpenBSD C tracer requirements..."
 	@$(PYTHON) scripts/check-openbsd-deps.py
+	@echo "Installing OpenBAO for secrets management..."
+	@$(PYTHON) scripts/install-openbao.py
 	@echo "Setting up WebDriver for screenshots..."
 	@$(PYTHON) scripts/install-browsers.py
 	@echo "Installing TypeScript/React development dependencies..."
@@ -264,6 +271,9 @@ endif
 
 # Server management targets with shell detection
 start:
+	@echo "Starting OpenBAO development server..."
+	@./scripts/start-openbao.sh
+	@echo ""
 	@echo "Starting SysManage server..."
 ifeq ($(OS),Windows_NT)
 	@if defined PSModulePath (powershell -ExecutionPolicy Bypass -File scripts/start.ps1) else (scripts\start.cmd)
@@ -302,6 +312,21 @@ else
 		./scripts/stop.sh; \
 	fi
 endif
+	@echo ""
+	@echo "Stopping OpenBAO development server..."
+	@./scripts/stop-openbao.sh
+
+# OpenBAO (Vault) management targets
+start-openbao:
+	@echo "Starting OpenBAO development server..."
+	@./scripts/start-openbao.sh
+
+stop-openbao:
+	@echo "Stopping OpenBAO development server..."
+	@./scripts/stop-openbao.sh
+
+status-openbao:
+	@./scripts/status-openbao.sh
 
 # Development server targets (legacy compatibility)
 run-dev: start

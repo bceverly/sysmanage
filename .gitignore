@@ -187,3 +187,6 @@ nul
 data.sqlite
 token.json
 *.temp
+
+# OpenBAO runtime files
+.openbao.pid

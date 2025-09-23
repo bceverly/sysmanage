@@ -80,6 +80,30 @@ message_queue:
   # How often to check for and clean up expired messages
   cleanup_interval_minutes: 30
 
+vault:
+  # OpenBAO (HashiCorp Vault fork) configuration for secrets management
+  # Set enabled to false to disable vault functionality entirely
+  enabled: true
+
+  # OpenBAO server connection details
+  url: "http://localhost:8200"
+
+  # Authentication token for connecting to OpenBAO
+  # WARNING: Development token only - NEVER use in production
+  # Generate with: bao auth -method=userpass username=dev
+  token: "dev-only-token-change-me"
+
+  # KV secrets engine mount path for storing SSH keys and other secrets
+  # Default mount path for KV v2 secrets engine
+  mount_path: "secret"
+
+  # Connection settings
+  timeout: 30  # Connection timeout in seconds
+  verify_ssl: false  # Set to true in production with proper certificates
+
+  # Development settings
+  dev_mode: true  # Enables development-specific features and logging
+
 email:
   # SMTP server configuration for sending emails (password resets, notifications, etc.)
   # Set enabled to false to disable email functionality entirely
