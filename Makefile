@@ -62,7 +62,9 @@ install-dev: $(VENV_ACTIVATE)
 	@echo "Setting up WebDriver for screenshots..."
 	@$(PYTHON) scripts/install-browsers.py
 	@echo "Installing TypeScript/React development dependencies..."
-	@cd frontend && npm install
+	@cd frontend && npm install --include=optional
+	@echo "Ensuring esbuild optional dependencies are installed..."
+	@cd frontend && npm uninstall esbuild && npm install esbuild
 	@echo "Installing ESLint security plugins..."
 	@cd frontend && npm install eslint-plugin-security eslint-plugin-no-unsanitized
 	@echo "Setting up MSW (Mock Service Worker) for API mocking..."
