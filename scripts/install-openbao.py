@@ -8,7 +8,8 @@ import os
 import platform
 import subprocess
 import sys
-import urllib.request
+import urllib.parse
+import requests
 import zipfile
 import tempfile
 import shutil
@@ -243,7 +244,20 @@ def install_from_binary():
 
                 print(f"Trying: {download_url}")
                 try:
-                    urllib.request.urlretrieve(download_url, file_path)
+                    # Validate URL to ensure it's from official OpenBAO releases
+                    parsed_url = urllib.parse.urlparse(download_url)
+                    if not (parsed_url.scheme in ['https'] and
+                           parsed_url.netloc == 'github.com' and
+                           '/openbao/openbao/releases/download/' in parsed_url.path):
+                        raise ValueError("Invalid download URL - not from official OpenBAO releases")
+
+                    # Use requests library for better security
+                    response = requests.get(download_url, timeout=30, stream=True)
+                    response.raise_for_status()
+
+                    with open(file_path, 'wb') as f:
+                        for chunk in response.iter_content(chunk_size=8192):
+                            f.write(chunk)
                     print("Download completed successfully!")
                     downloaded_file = file_path
                     break
@@ -279,7 +293,7 @@ def install_from_binary():
 
                 # Make binary executable (Unix-like systems)
                 if platform.system().lower() != 'windows':
-                    os.chmod(binary_path, 0o755)
+                    os.chmod(binary_path, 0o700)  # Owner only execute permissions for security
 
                 # Install to appropriate location
                 install_path = get_install_path()
@@ -372,7 +386,7 @@ def extract_from_deb(deb_file):
                     binary_path = os.path.join(root, 'bao')
 
                     # Make executable
-                    os.chmod(binary_path, 0o755)
+                    os.chmod(binary_path, 0o700)  # Owner only execute permissions for security
 
                     # Install to user's local bin
                     install_path = os.path.expanduser("~/.local/bin")

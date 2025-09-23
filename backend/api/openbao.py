@@ -2,7 +2,7 @@
 This module contains the API implementation for OpenBAO (Vault) management in the system.
 """
 
-import subprocess
+import subprocess  # nosec B404 - Required for OpenBAO process management
 import os
 import json
 from typing import Dict, Any, Optional
@@ -83,7 +83,8 @@ def get_openbao_status() -> Dict[str, Any]:
             env["BAO_ADDR"] = server_url
             env["BAO_TOKEN"] = vault_config.get("token", "")
 
-            result = subprocess.run(
+            # bao_cmd is validated by find_bao_binary, status is a safe fixed argument
+            result = subprocess.run(  # nosec B603
                 [bao_cmd, "status"],
                 capture_output=True,
                 text=True,
@@ -142,16 +143,17 @@ def find_bao_binary() -> Optional[str]:
         try:
             if location == "bao":
                 # Check if it's in PATH
-                result = subprocess.run(
-                    ["which", "bao"], capture_output=True, text=True, check=False
-                )
-                if result.returncode == 0:
+                # Use shutil.which for safe path lookup instead of subprocess
+                import shutil
+
+                which_result = shutil.which("bao")
+                if which_result:
                     return "bao"
             else:
                 # Check if file exists and is executable
                 if os.path.isfile(location) and os.access(location, os.X_OK):
                     return location
-        except:
+        except (OSError, FileNotFoundError, PermissionError):
             continue
 
     return None
@@ -184,7 +186,8 @@ def start_openbao() -> Dict[str, Any]:
 
     try:
         # Run the start script
-        result = subprocess.run(
+        # start_script path is validated above, located in trusted project directory
+        result = subprocess.run(  # nosec B603
             [start_script],
             capture_output=True,
             text=True,
@@ -256,7 +259,8 @@ def stop_openbao() -> Dict[str, Any]:
 
     try:
         # Run the stop script
-        result = subprocess.run(
+        # stop_script path is validated above, located in trusted project directory
+        result = subprocess.run(  # nosec B603
             [stop_script],
             capture_output=True,
             text=True,
@@ -314,7 +318,23 @@ async def start_server():
     """
     Start the OpenBAO development server.
     """
-    return start_openbao()
+    try:
+        result = start_openbao()
+        # Sanitize potentially sensitive information from response
+        if not result.get("success", True) and "error" in result:
+            # Remove detailed error messages that might contain sensitive info
+            result = result.copy()
+            result["error"] = _("openbao.start_failed", "Failed to start OpenBAO")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:  # pylint: disable=broad-except
+        raise HTTPException(  # pylint: disable=raise-missing-from
+            status_code=500,
+            detail=_(
+                "openbao.generic_error", "An error occurred while starting OpenBAO"
+            ),
+        )
 
 
 @router.post("/openbao/stop", dependencies=[Depends(JWTBearer())])
@@ -322,7 +342,23 @@ async def stop_server():
     """
     Stop the OpenBAO development server.
     """
-    return stop_openbao()
+    try:
+        result = stop_openbao()
+        # Sanitize potentially sensitive information from response
+        if not result.get("success", True) and "error" in result:
+            # Remove detailed error messages that might contain sensitive info
+            result = result.copy()
+            result["error"] = _("openbao.stop_failed", "Failed to stop OpenBAO")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:  # pylint: disable=broad-except
+        raise HTTPException(  # pylint: disable=raise-missing-from
+            status_code=500,
+            detail=_(
+                "openbao.generic_error", "An error occurred while stopping OpenBAO"
+            ),
+        )
 
 
 @router.get("/openbao/config", dependencies=[Depends(JWTBearer())])
