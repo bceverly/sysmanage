@@ -100,22 +100,8 @@ like to add:
     configuration file management
     of it.
 
-12. It would be cool for sysmanage-
-    docs to have a sysmanage.yaml
-    and sysmanage-agent.yaml inter-
-    active config builder screen
-    where you get to choose your
-    values / options from a list
-    and press a button and it
-    generates the yaml in a window
-    that you can then copy from.
-
-13. For Ubuntu (and possibly other
+12. For Ubuntu (and possibly other
     Linux platforms?) we need to
     be able to push a request to
     add a PPA to a remote host
     from a UI on the server.
-
-14. Figure out why the descriptions
-    aren't flowing through for
-    available packages.
