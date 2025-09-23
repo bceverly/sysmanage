@@ -66,11 +66,20 @@ def get_host_storage_devices(host_id: str) -> List[Dict[str, Any]]:
 
         def determine_device_type(device_name: str, stored_type: str) -> str:
             """Determine if device is physical or logical based on its name and type."""
-            # Note: We always determine physical vs logical, not relying on stored_type
-            # because stored_type might contain device types like "disk", "SSD", etc.
-            # rather than "physical" or "logical"
+            # If the stored_type is already "physical" or "logical", use it directly
+            # (this handles cases where the agent correctly determines the type)
+            if stored_type in ["physical", "logical"]:
+                return stored_type
 
             device_lower = device_name.lower() if device_name else ""
+
+            # Windows physical drive patterns
+            if "physicaldrive" in device_lower:
+                return "physical"
+
+            # Windows logical drive patterns (drive letters)
+            if device_name and len(device_name) == 2 and device_name[1] == ":":
+                return "logical"
 
             # Logical volume patterns (check first as they're more specific)
             logical_patterns = [

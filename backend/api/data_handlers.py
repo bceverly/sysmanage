@@ -243,18 +243,27 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
             # Add new interfaces
             for interface in network_interfaces:
                 now = datetime.now(timezone.utc)
+                # Extract IPv4 and IPv6 addresses from agent's ip_addresses list
+                ip_addresses = interface.get("ip_addresses", [])
+                ipv4_address = None
+                ipv6_address = None
+
+                for ip in ip_addresses:
+                    if ":" in ip:  # IPv6
+                        if not ipv6_address:  # Take first IPv6
+                            ipv6_address = ip
+                    elif "." in ip:  # IPv4
+                        if not ipv4_address:  # Take first IPv4
+                            ipv4_address = ip
+
                 network_interface = NetworkInterface(
                     host_id=connection.host_id,
                     interface_name=interface.get("name"),
-                    ipv4_address=interface.get("ipv4_address"),
-                    ipv6_address=interface.get("ipv6_address"),
+                    ipv4_address=ipv4_address or interface.get("ipv4_address"),
+                    ipv6_address=ipv6_address or interface.get("ipv6_address"),
                     mac_address=interface.get("mac_address"),
-                    # Note: 'status' field doesn't exist in NetworkInterface model - removed
-                    is_up=(
-                        interface.get("status") == "active"
-                        if interface.get("status")
-                        else False
-                    ),
+                    # Map agent's is_active field to database's is_up field
+                    is_up=interface.get("is_active", False),
                     last_updated=now,
                 )
                 db.add(network_interface)
