@@ -57,6 +57,22 @@ def check_openbao_installed():
     return False
 
 
+def check_openbao_at_path(install_path):
+    """Check if OpenBAO is installed at a specific path."""
+    binary_name = 'bao.exe' if platform.system().lower() == 'windows' else 'bao'
+    binary_path = os.path.join(install_path, binary_name)
+
+    if os.path.exists(binary_path):
+        try:
+            result = subprocess.run([binary_path, 'version'], capture_output=True, text=True)
+            if result.returncode == 0:
+                print(f"OpenBAO installed at {binary_path}: {result.stdout.strip()}")
+                return True
+        except:
+            pass
+    return False
+
+
 def install_via_package_manager():
     """Try to install OpenBAO via platform-specific package managers."""
     system = platform.system().lower()
@@ -76,7 +92,7 @@ def install_via_package_manager():
         elif system == 'freebsd':
             # Try pkg on FreeBSD
             print("Attempting to install OpenBAO via pkg...")
-            result = subprocess.run(['pkg', 'install', '-y', 'openbao'],
+            result = subprocess.run(['sudo', 'pkg', 'install', '-y', 'openbao'],
                                   capture_output=True, text=True)
             if result.returncode == 0:
                 print("OpenBAO installed successfully via pkg!")
@@ -233,6 +249,13 @@ def install_from_binary():
             f"openbao_{platform_str}.zip",  # Alternative naming
         ]
 
+        # Add FreeBSD-specific tar.gz patterns (FreeBSD has capital F in filename)
+        if platform_str.startswith('freebsd'):
+            arch = platform_str.split('_')[1]  # extract amd64 from freebsd_amd64
+            # Map FreeBSD amd64 to x86_64 for GitHub release naming
+            github_arch = 'x86_64' if arch == 'amd64' else arch
+            possible_filenames.insert(0, f"bao_{version.lstrip('v')}_Freebsd_{github_arch}.tar.gz")  # Add to beginning for priority
+
         downloaded_file = None
 
         # Create temporary directory
@@ -294,6 +317,39 @@ def install_from_binary():
                 # Make binary executable (Unix-like systems)
                 if platform.system().lower() != 'windows':
                     os.chmod(binary_path, 0o700)  # Owner only execute permissions for security
+
+                # Install to appropriate location
+                install_path = get_install_path()
+                if install_path:
+                    target_path = os.path.join(install_path, binary_name)
+                    try:
+                        shutil.copy2(binary_path, target_path)
+                        print(f"OpenBAO installed to: {target_path}")
+                        return True
+                    except PermissionError:
+                        print(f"Permission denied installing to {install_path}")
+                        print("You may need to run with appropriate privileges or install manually")
+                        return False
+                else:
+                    print("Could not determine appropriate installation path")
+                    return False
+            elif downloaded_file.endswith('.tar.gz'):
+                # Extract the binary from tar.gz (used by FreeBSD)
+                import tarfile
+                with tarfile.open(downloaded_file, 'r:gz') as tar_ref:
+                    tar_ref.extractall(temp_dir)
+
+                # Find the binary (should be named 'bao' or 'bao.exe')
+                binary_name = 'bao.exe' if platform.system().lower() == 'windows' else 'bao'
+                binary_path = os.path.join(temp_dir, binary_name)
+
+                if not os.path.exists(binary_path):
+                    print(f"Binary {binary_name} not found in downloaded archive")
+                    return False
+
+                # Make binary executable (Unix-like systems)
+                if platform.system().lower() != 'windows':
+                    os.chmod(binary_path, 0o755)  # Standard executable permissions
 
                 # Install to appropriate location
                 install_path = get_install_path()
@@ -481,10 +537,17 @@ def main():
     # Fall back to binary installation
     print("\nFalling back to binary installation...")
     if install_from_binary():
-        # Verify installation
+        # First check if it's accessible via PATH
         if check_openbao_installed():
             print("\nOpenBAO installation completed successfully!")
-            print("You may need to restart your shell or update your PATH.")
+            return 0
+
+        # If not in PATH, check if it was installed to the expected location
+        install_path = get_install_path()
+        if install_path and check_openbao_at_path(install_path):
+            print("\nOpenBAO installation completed successfully!")
+            print(f"Note: OpenBAO installed to {install_path} but not in current PATH")
+            print(f"Add {install_path} to your PATH or use the full path: {os.path.join(install_path, 'bao')}")
             return 0
         else:
             print("Installation completed but 'bao' command not found in PATH")

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # OpenBAO Development Server Stop Script
 # Stops the OpenBAO development server
@@ -6,7 +6,7 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 PID_FILE="$PROJECT_DIR/.openbao.pid"
 
@@ -31,13 +31,15 @@ echo "Stopping OpenBAO (PID $PID)..."
 # Try graceful shutdown first
 if kill -TERM "$PID" 2>/dev/null; then
     # Wait up to 10 seconds for graceful shutdown
-    for i in {1..10}; do
+    i=1
+    while [ $i -le 10 ]; do
         if ! kill -0 "$PID" 2>/dev/null; then
             echo "OpenBAO stopped gracefully"
             rm -f "$PID_FILE"
             exit 0
         fi
         sleep 1
+        i=$((i + 1))
     done
 
     # If still running, force kill
