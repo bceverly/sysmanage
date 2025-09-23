@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # OpenBAO Development Server Start Script
 # Starts OpenBAO in development mode for sysmanage integration
@@ -6,7 +6,7 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 PID_FILE="$PROJECT_DIR/.openbao.pid"
 LOG_FILE="$PROJECT_DIR/logs/openbao.log"
@@ -26,16 +26,22 @@ if [ -f "$PID_FILE" ]; then
     fi
 fi
 
-# Find OpenBAO binary
+# Find OpenBAO or Vault binary
 BAO_CMD=""
 if command -v bao >/dev/null 2>&1; then
     BAO_CMD="bao"
 elif [ -f "$HOME/.local/bin/bao" ]; then
     BAO_CMD="$HOME/.local/bin/bao"
+elif command -v vault >/dev/null 2>&1; then
+    echo "Note: Using 'vault' as fallback (OpenBAO not found)"
+    BAO_CMD="vault"
 else
-    echo "Error: OpenBAO (bao) not found in PATH or ~/.local/bin"
-    echo "Please run 'make install-dev' to install OpenBAO"
-    exit 1
+    echo "Warning: OpenBAO/Vault not found in PATH or ~/.local/bin"
+    echo "SysManage will run with vault.enabled=false in config"
+    echo "To install OpenBAO, run: make install-dev"
+    echo ""
+    echo "Continuing without OpenBAO/Vault..."
+    exit 0  # Exit gracefully so make start continues
 fi
 
 echo "Starting OpenBAO development server..."

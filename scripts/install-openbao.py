@@ -83,6 +83,112 @@ def install_via_package_manager():
             else:
                 print(f"pkg installation failed: {result.stderr}")
 
+        elif system == 'openbsd':
+            print("OpenBSD detected - checking for existing installations...")
+
+            # Check if OpenBAO is already installed manually
+            if shutil.which('bao'):
+                print("OpenBAO (bao) found in PATH!")
+                return True
+
+            # Check if vault is already installed
+            if shutil.which('vault'):
+                print("HashiCorp Vault found in PATH!")
+                print("Note: You can use 'vault' instead of 'bao' for development")
+                # Try to create symlink for compatibility if we have privileges
+                if shutil.which('doas'):
+                    try:
+                        subprocess.run(['doas', 'ln', '-sf', '/usr/local/bin/vault', '/usr/local/bin/bao'],
+                                     capture_output=True, text=True, check=False)
+                        print("Created 'bao' symlink to vault for compatibility")
+                    except:
+                        pass
+                return True
+
+            # OpenBSD doesn't have OpenBAO in packages - offer to build from source
+            print("OpenBAO is not available in OpenBSD packages.")
+            print("Would you like to build OpenBAO from source? This requires Go and Git.")
+            print("(This will take 5-10 minutes depending on your system)")
+            print("")
+
+            # Check for required dependencies first
+            if not shutil.which('go'):
+                print("Go is required to build OpenBAO from source.")
+                print("")
+                print("Install Go with:")
+                print("  doas pkg_add go")
+                print("")
+                print("Then re-run: make install-dev")
+                return False
+
+            # Check Go version and warn if potentially incompatible
+            try:
+                result = subprocess.run(['go', 'version'], capture_output=True, text=True)
+                if result.returncode == 0:
+                    version_output = result.stdout.strip()
+                    # Extract version number (e.g., "go version go1.24.1 openbsd/amd64" -> "1.24.1")
+                    import re
+                    version_match = re.search(r'go(\d+\.\d+\.\d+)', version_output)
+                    if version_match:
+                        current_version = version_match.group(1)
+                        print(f"Found Go version: {current_version}")
+
+                        # Check if version is at least 1.24.6
+                        version_parts = [int(x) for x in current_version.split('.')]
+                        required_parts = [1, 24, 6]
+
+                        if (version_parts[0] < required_parts[0] or
+                            (version_parts[0] == required_parts[0] and version_parts[1] < required_parts[1]) or
+                            (version_parts[0] == required_parts[0] and version_parts[1] == required_parts[1] and version_parts[2] < required_parts[2])):
+                            print(f"Note: Latest OpenBAO prefers Go 1.24.6+, but trying with {current_version}")
+                            print("Will attempt to build an older compatible version...")
+            except Exception as e:
+                print(f"Could not check Go version: {e}")
+                print("Continuing with build attempt...")
+
+            if not shutil.which('git'):
+                print("Git is required to download OpenBAO source.")
+                print("")
+                print("Install Git with:")
+                print("  doas pkg_add git")
+                print("")
+                print("Then re-run: make install-dev")
+                return False
+
+            if not shutil.which('gmake'):
+                print("GNU make is required to build OpenBAO from source.")
+                print("")
+                print("Install GNU make with:")
+                print("  doas pkg_add gmake")
+                print("")
+                print("Then re-run: make install-dev")
+                return False
+
+            try:
+                response = input("Build OpenBAO from source? [y/N]: ").strip().lower()
+                if response in ['y', 'yes']:
+                    print("Building OpenBAO from source...")
+
+                    # Run the build script
+                    build_script = os.path.join(os.path.dirname(__file__), 'build-openbao.sh')
+                    result = subprocess.run(['sh', build_script],
+                                          capture_output=False, text=True)
+
+                    if result.returncode == 0:
+                        print("OpenBAO built and installed successfully!")
+                        return True
+                    else:
+                        print("Build failed. You can try building manually or use vault.enabled=false")
+                        sys.exit(1)  # Exit with error code to fail make install-dev
+                else:
+                    print("Skipping OpenBAO build.")
+                    print("The development environment will work fine with vault.enabled=false")
+                    return False
+            except (KeyboardInterrupt, EOFError):
+                print("\nSkipping OpenBAO build.")
+                print("The development environment will work fine with vault.enabled=false")
+                return False
+
     except FileNotFoundError:
         print(f"Package manager not found for {system}")
 
@@ -94,6 +200,12 @@ def install_from_binary():
     try:
         platform_str = detect_platform()
         print(f"Detected platform: {platform_str}")
+
+        # OpenBSD doesn't have precompiled binaries available
+        if platform_str.startswith('openbsd'):
+            print("OpenBSD precompiled binaries are not available from OpenBAO releases.")
+            print("Please install manually or use the package manager option.")
+            return False
 
         # Get the latest release version
         try:
@@ -330,7 +442,23 @@ def main():
     if check_openbao_installed():
         return 0
 
-    # Try package manager first
+    # Special handling for OpenBSD
+    system = platform.system().lower()
+    if system == 'openbsd':
+        print("OpenBSD detected - trying package installation...")
+
+        # Try package manager first (this will handle the build-from-source option)
+        if install_via_package_manager():
+            # Verify installation
+            if check_openbao_installed():
+                print("\nOpenBAO installation completed successfully!")
+                return 0
+
+        # If package manager returns False, it already handled the messaging
+        print("\nContinuing with development setup (OpenBAO optional)...")
+        return 0  # Exit gracefully instead of failing
+
+    # For other platforms, try package manager first
     if install_via_package_manager():
         # Verify installation
         if check_openbao_installed():

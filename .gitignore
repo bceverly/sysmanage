@@ -190,3 +190,6 @@ token.json
 
 # OpenBAO runtime files
 .openbao.pid
+
+# Build directories
+.build/
