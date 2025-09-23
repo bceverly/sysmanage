@@ -315,7 +315,13 @@ async def start_server():
     Start the OpenBAO development server.
     """
     try:
-        return start_openbao()
+        result = start_openbao()
+        # Sanitize potentially sensitive information from response
+        if not result.get("success", True) and "error" in result:
+            # Remove detailed error messages that might contain sensitive info
+            result = result.copy()
+            result["error"] = _("openbao.start_failed", "Failed to start OpenBAO")
+        return result
     except HTTPException:
         raise
     except Exception as e:  # pylint: disable=broad-except
@@ -333,7 +339,13 @@ async def stop_server():
     Stop the OpenBAO development server.
     """
     try:
-        return stop_openbao()
+        result = stop_openbao()
+        # Sanitize potentially sensitive information from response
+        if not result.get("success", True) and "error" in result:
+            # Remove detailed error messages that might contain sensitive info
+            result = result.copy()
+            result["error"] = _("openbao.stop_failed", "Failed to stop OpenBAO")
+        return result
     except HTTPException:
         raise
     except Exception as e:  # pylint: disable=broad-except
