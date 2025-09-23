@@ -33,8 +33,6 @@ if venv_path.exists():
         sys.path.insert(0, str(site_packages))
 
 try:
-    import psycopg2
-    from psycopg2 import sql
     from argon2 import PasswordHasher
     import yaml
     from alembic import command
@@ -144,47 +142,31 @@ def get_user_input():
     }
 
 def drop_all_tables(config):
-    """Drop all tables including alembic version table."""
+    """Drop all tables using SQLAlchemy metadata reflection."""
     print("\n--- Dropping existing database tables ---")
 
-    db_config = config.get('database', {})
-
-    # Build connection string
-    conn_params = {
-        'host': db_config.get('host', 'localhost'),
-        'port': db_config.get('port', 5432),
-        'database': db_config.get('database', 'sysmanage'),
-        'user': db_config.get('user', 'sysmanage'),
-        'password': db_config.get('password', 'sysmanage')
-    }
-
     try:
-        # Connect to the database
-        conn = psycopg2.connect(**conn_params)
-        conn.autocommit = True
-        cur = conn.cursor()
+        # Use SQLAlchemy's metadata reflection to safely drop all tables
+        from sqlalchemy import MetaData
 
-        # Get all table names
-        cur.execute("""
-            SELECT tablename
-            FROM pg_tables
-            WHERE schemaname = 'public'
-        """)
-        tables = cur.fetchall()
+        metadata = MetaData()
 
-        # Drop each table
-        for table in tables:
-            table_name = table[0]
-            print(f"  Dropping table: {table_name}")
-            # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
-            cur.execute(sql.SQL("DROP TABLE IF EXISTS {} CASCADE").format(
-                sql.Identifier(table_name)
-            ))
+        # Reflect existing tables from the database
+        metadata.reflect(bind=engine)
 
-        print(f"  Dropped {len(tables)} tables successfully.")
+        # Get list of table names for logging
+        table_names = list(metadata.tables.keys())
 
-        cur.close()
-        conn.close()
+        if table_names:
+            print(f"  Found {len(table_names)} tables to drop:")
+            for table_name in table_names:
+                print(f"    - {table_name}")
+
+            # Drop all tables (including foreign key constraints)
+            metadata.drop_all(bind=engine)
+            print(f"  Dropped {len(table_names)} tables successfully.")
+        else:
+            print("  No tables found to drop.")
 
     except Exception as e:
         print(f"Error dropping tables: {e}")
