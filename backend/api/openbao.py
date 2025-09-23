@@ -314,7 +314,17 @@ async def start_server():
     """
     Start the OpenBAO development server.
     """
-    return start_openbao()
+    try:
+        return start_openbao()
+    except HTTPException:
+        raise
+    except Exception as e:  # pylint: disable=broad-except
+        raise HTTPException(  # pylint: disable=raise-missing-from
+            status_code=500,
+            detail=_(
+                "openbao.generic_error", "An error occurred while starting OpenBAO"
+            ),
+        )
 
 
 @router.post("/openbao/stop", dependencies=[Depends(JWTBearer())])
@@ -322,7 +332,17 @@ async def stop_server():
     """
     Stop the OpenBAO development server.
     """
-    return stop_openbao()
+    try:
+        return stop_openbao()
+    except HTTPException:
+        raise
+    except Exception as e:  # pylint: disable=broad-except
+        raise HTTPException(  # pylint: disable=raise-missing-from
+            status_code=500,
+            detail=_(
+                "openbao.generic_error", "An error occurred while stopping OpenBAO"
+            ),
+        )
 
 
 @router.get("/openbao/config", dependencies=[Depends(JWTBearer())])

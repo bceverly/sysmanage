@@ -9,6 +9,7 @@ import platform
 import subprocess
 import sys
 import urllib.request
+import urllib.parse
 import zipfile
 import tempfile
 import shutil
@@ -131,6 +132,13 @@ def install_from_binary():
 
                 print(f"Trying: {download_url}")
                 try:
+                    # Validate URL to ensure it's from official OpenBAO releases
+                    parsed_url = urllib.parse.urlparse(download_url)
+                    if not (parsed_url.scheme in ['https'] and
+                           parsed_url.netloc == 'github.com' and
+                           '/openbao/openbao/releases/download/' in parsed_url.path):
+                        raise ValueError("Invalid download URL - not from official OpenBAO releases")
+
                     urllib.request.urlretrieve(download_url, file_path)
                     print("Download completed successfully!")
                     downloaded_file = file_path
@@ -167,7 +175,7 @@ def install_from_binary():
 
                 # Make binary executable (Unix-like systems)
                 if platform.system().lower() != 'windows':
-                    os.chmod(binary_path, 0o755)
+                    os.chmod(binary_path, 0o750)  # Owner and group execute, no world permissions
 
                 # Install to appropriate location
                 install_path = get_install_path()
@@ -260,7 +268,7 @@ def extract_from_deb(deb_file):
                     binary_path = os.path.join(root, 'bao')
 
                     # Make executable
-                    os.chmod(binary_path, 0o755)
+                    os.chmod(binary_path, 0o750)  # Owner and group execute, no world permissions
 
                     # Install to user's local bin
                     install_path = os.path.expanduser("~/.local/bin")
