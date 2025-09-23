@@ -97,14 +97,12 @@ const Dashboard = () => {
         fetchData(true);
 
         // Set up auto-refresh every 30 seconds
-        // eslint-disable-next-line no-undef
         const refreshInterval = setInterval(() => {
             fetchData(false);
         }, 30000);
 
         // Cleanup interval on component unmount
         return () => {
-            // eslint-disable-next-line no-undef
             clearInterval(refreshInterval);
         };
     }, [navigate]);

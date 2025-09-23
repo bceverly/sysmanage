@@ -144,11 +144,17 @@ else
 endif
 	@echo ""
 	@echo "Running Semgrep static analysis..."
-	@echo "Tip: Export SEMGREP_APP_TOKEN for access to Pro rules and features"
+	@echo "Tip: Export SEMGREP_APP_TOKEN for access to Pro rules and supply chain analysis"
 ifeq ($(OS),Windows_NT)
-	-@semgrep scan --config="p/default" --config="p/security-audit" --config="p/javascript" --config="p/typescript" --config="p/react" --config="p/python" --config="p/django" --config="p/flask" --config="p/owasp-top-ten" || echo "Semgrep scan completed"
+	-@if defined SEMGREP_APP_TOKEN (semgrep ci) else (semgrep scan --config="p/default" --config="p/security-audit" --config="p/javascript" --config="p/typescript" --config="p/react" --config="p/python" --config="p/django" --config="p/flask" --config="p/owasp-top-ten") || echo "Semgrep scan completed"
 else
-	@semgrep scan --config="p/default" --config="p/security-audit" --config="p/javascript" --config="p/typescript" --config="p/react" --config="p/python" --config="p/django" --config="p/flask" --config="p/owasp-top-ten" || true
+	@if [ -n "$$SEMGREP_APP_TOKEN" ]; then \
+		echo "Using Semgrep CI with supply chain analysis..."; \
+		semgrep ci || true; \
+	else \
+		echo "Using basic Semgrep scan (set SEMGREP_APP_TOKEN for supply chain analysis)..."; \
+		semgrep scan --config="p/default" --config="p/security-audit" --config="p/javascript" --config="p/typescript" --config="p/react" --config="p/python" --config="p/django" --config="p/flask" --config="p/owasp-top-ten" || true; \
+	fi
 endif
 	@echo ""
 	@echo "Running Safety dependency vulnerability scan..."

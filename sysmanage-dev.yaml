@@ -5,6 +5,7 @@ api:
 
 database:
   user: "sysmanage"
+  # WARNING: Development credentials only - NEVER use in production
   password: "DEV_Change_Me_ABC123!"
   host: "localhost"
   port: 5432
@@ -13,7 +14,9 @@ database:
 security:
   password_salt: "fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
   admin_userid: "admin@sysmanage.org"
+  # WARNING: Development credentials only - NEVER use in production
   admin_password: "DEV_AdminPass123!"
+  # WARNING: Development secret only - NEVER use in production
   # nosemgrep: generic.secrets.security.detected-generic-secret
   jwt_secret: "SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
   jwt_algorithm: "HS256"
@@ -96,8 +99,9 @@ email:
     # Use SSL encryption (typically for port 465)
     use_ssl: false
     
-    # Authentication credentials
+    # Authentication credentials - UPDATE THESE FOR YOUR ENVIRONMENT
     username: "your-email@gmail.com"
+    # WARNING: Replace with actual app password for production use
     password: "your-app-password"  # For Gmail, generate an App Password
     
     # Connection timeout in seconds
