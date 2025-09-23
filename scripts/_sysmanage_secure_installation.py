@@ -367,8 +367,7 @@ def create_admin_user(user_data, salt):
             db.add(admin_user)
             db.commit()
 
-            # nosemgrep: generic.secrets.security.detected-clear-text-logging-sensitive-data.detected-clear-text-logging-sensitive-data
-            print(f"  Admin user '{user_data['email']}' created successfully.")
+            print("  Admin user created successfully.")
 
         finally:
             db.close()
@@ -416,10 +415,7 @@ def main():
         print("\n" + "="*60)
         print("Installation completed successfully!")
         print("="*60)
-        print(f"\nYou can now log in with:")
-        # nosemgrep: generic.secrets.security.detected-clear-text-logging-sensitive-data.detected-clear-text-logging-sensitive-data
-        print(f"  Email: {user_data['email']}")
-        print(f"  Password: [the password you provided]")
+        print(f"\nYou can now log in with the credentials you provided")
         print("\nStart the SysManage server with: make start")
         print("Access the web interface at: http://localhost:3000")
 
