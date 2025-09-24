@@ -20,8 +20,19 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # Rename key_visibility column to secret_subtype
-    op.alter_column('secrets', 'key_visibility',
-                    new_column_name='secret_subtype')
+    # Check if the old column exists before attempting to rename it
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+
+    if inspector.has_table('secrets'):
+        columns = inspector.get_columns('secrets')
+        column_names = [col['name'] for col in columns]
+
+        if 'key_visibility' in column_names:
+            # Old column exists, rename it
+            op.alter_column('secrets', 'key_visibility',
+                           new_column_name='secret_subtype')
+        # If key_visibility doesn't exist, assume it's already been renamed or never existed
 
 
 def downgrade() -> None:

@@ -19,6 +19,9 @@ class Secret(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False
     )
     name = Column(String(255), nullable=False, index=True)
+    filename = Column(
+        String(255), nullable=True
+    )  # Filename for the secret (e.g., id_rsa.pub, server.crt)
     secret_type = Column(
         String(50), nullable=False, index=True
     )  # 'ssh_key', 'ssl_certificate', 'database_credentials', 'api_keys', etc.
@@ -56,6 +59,7 @@ class Secret(Base):
         return {
             "id": str(self.id),
             "name": self.name,
+            "filename": self.filename,
             "secret_type": self.secret_type,
             "secret_subtype": self.secret_subtype,
             "created_at": self.created_at.isoformat() if self.created_at else None,

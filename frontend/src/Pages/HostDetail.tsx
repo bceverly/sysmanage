@@ -48,12 +48,15 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import AddIcon from '@mui/icons-material/Add';
 import HistoryIcon from '@mui/icons-material/History';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField, List, ListItem, ListItemText, Divider, TableContainer, TableHead } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField, List, ListItem, ListItemText, Divider, TableContainer, TableHead, InputAdornment } from '@mui/material';
+import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
+import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
 
 import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService } from '../Services/hosts';
 import { SysManageUser, doGetMe } from '../Services/users';
+import { SecretResponse } from '../Services/secrets';
 
 // Use the service types directly - no need for local interfaces anymore
 
@@ -107,6 +110,14 @@ const HostDetail = () => {
     // Package installation modal state
     const [packageInstallDialogOpen, setPackageInstallDialogOpen] = useState<boolean>(false);
     const packageSearchInputRef = useRef<HTMLInputElement>(null);
+
+    // SSH Key management state
+    const [sshKeyDialogOpen, setSshKeyDialogOpen] = useState<boolean>(false);
+    const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
+    const [availableSSHKeys, setAvailableSSHKeys] = useState<SecretResponse[]>([]);
+    const [filteredSSHKeys, setFilteredSSHKeys] = useState<SecretResponse[]>([]);
+    const [selectedSSHKeys, setSelectedSSHKeys] = useState<string[]>([]);
+    const [sshKeySearchTerm, setSshKeySearchTerm] = useState<string>('');
     const [searchResults, setSearchResults] = useState<Array<{name: string, description?: string, version?: string}>>([]);
     const [selectedPackages, setSelectedPackages] = useState<Set<string>>(new Set());
     const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -431,6 +442,120 @@ const HostDetail = () => {
         setDialogOpen(false);
         setDialogContent('');
         setDialogTitle('');
+    };
+
+    const handleAddSSHKey = async (user: UserAccount) => {
+        setSelectedUser(user);
+        try {
+            // Load available SSH keys
+            const response = await axiosInstance.get('/api/secrets?type=ssh_key');
+            const secrets = response.data;
+            const sshKeys = secrets.filter((secret: SecretResponse) => secret.secret_type === 'ssh_key');
+            setAvailableSSHKeys(sshKeys);
+            setFilteredSSHKeys(sshKeys);
+            setSelectedSSHKeys([]);
+            setSshKeySearchTerm('');
+            setSshKeyDialogOpen(true);
+        } catch (error) {
+            console.error('Failed to load SSH keys:', error);
+            setSnackbarMessage(t('hostDetail.failedToLoadSSHKeys', 'Failed to load SSH keys'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        }
+    };
+
+    const handleSSHKeyDialogClose = () => {
+        setSshKeyDialogOpen(false);
+        setSelectedUser(null);
+        setAvailableSSHKeys([]);
+        setFilteredSSHKeys([]);
+        setSelectedSSHKeys([]);
+        setSshKeySearchTerm('');
+    };
+
+    const handleSSHKeySearch = () => {
+        const searchTerm = sshKeySearchTerm.toLowerCase().trim();
+        if (searchTerm === '') {
+            setFilteredSSHKeys(availableSSHKeys);
+        } else {
+            const filtered = availableSSHKeys.filter((key) =>
+                key.name.toLowerCase().includes(searchTerm) ||
+                (key.filename && key.filename.toLowerCase().includes(searchTerm))
+            );
+            setFilteredSSHKeys(filtered);
+        }
+    };
+
+    // SSH Key DataGrid columns definition
+    const sshKeyColumns: GridColDef[] = [
+        {
+            field: 'name',
+            headerName: t('secrets.secretName', 'Secret Name'),
+            width: 250,
+            flex: 1,
+        },
+        {
+            field: 'filename',
+            headerName: t('secrets.secretFilename', 'Filename'),
+            width: 250,
+            flex: 1,
+        },
+        {
+            field: 'secret_subtype',
+            headerName: t('secrets.secretSubtype', 'Secret Subtype'),
+            width: 150,
+            renderCell: (params) => (
+                <Typography variant="body2">
+                    {t(`secrets.key_type.${params.value}`, params.value)}
+                </Typography>
+            ),
+        },
+        {
+            field: 'created_at',
+            headerName: t('secrets.createdAt', 'Created'),
+            width: 180,
+            renderCell: (params) => (
+                <Typography variant="body2">
+                    {new Date(params.value).toLocaleString()}
+                </Typography>
+            ),
+        },
+    ];
+
+    const handleDeploySSHKeys = async () => {
+        if (!selectedUser || selectedSSHKeys.length === 0 || !host) return;
+
+        try {
+            const deployData = {
+                host_id: host.id,
+                username: selectedUser.username,
+                secret_ids: selectedSSHKeys
+            };
+
+            const response = await axiosInstance.post('/api/secrets/deploy-ssh-keys', deployData);
+            const result = response.data;
+            console.log('SSH key deployment queued:', result);
+
+            setSnackbarMessage(t('hostDetail.sshKeysDeployedSuccess', 'SSH keys deployment queued successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+
+            handleSSHKeyDialogClose();
+        } catch (error: unknown) {
+            console.error('Failed to deploy SSH keys:', error);
+            let errorMessage = t('hostDetail.sshKeysDeployedError', 'Failed to deploy SSH keys');
+
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { data?: { detail?: string } } };
+                if (axiosError.response?.data?.detail) {
+                    errorMessage = axiosError.response.data.detail;
+                }
+            }
+
+            setSnackbarMessage(errorMessage);
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        }
     };
 
     // Utility function to format bytes with appropriate units
@@ -2134,9 +2259,21 @@ const HostDetail = () => {
                                             <Grid item xs={12} sm={6} md={4} key={user.id || index}>
                                                 <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
                                                     <CardContent sx={{ p: 2 }}>
-                                                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                                            {user.username}
-                                                        </Typography>
+                                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                                                            <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                                                                {user.username}
+                                                            </Typography>
+                                                            <Button
+                                                                size="small"
+                                                                variant="outlined"
+                                                                color="primary"
+                                                                onClick={() => handleAddSSHKey(user)}
+                                                                disabled={!host?.active || !host?.is_agent_privileged}
+                                                                sx={{ minWidth: 'auto', fontSize: '0.7rem', py: 0.25, px: 1 }}
+                                                            >
+                                                                {t('hostDetail.addSSHKey', 'Add SSH Key')}
+                                                            </Button>
+                                                        </Box>
                                                         <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
                                                             UID: {user.uid !== undefined ? user.uid : t('common.notAvailable')}
                                                         </Typography>
@@ -3508,6 +3645,95 @@ const HostDetail = () => {
                     {snackbarMessage}
                 </Alert>
             </Snackbar>
+
+            {/* SSH Key Selection Dialog */}
+            <Dialog
+                open={sshKeyDialogOpen}
+                onClose={handleSSHKeyDialogClose}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>
+                    {t('hostDetail.addSSHKeyToUser', 'Add SSH Key to {user}').replace('{user}', selectedUser?.username || '')}
+                </DialogTitle>
+                <DialogContent sx={{ minHeight: '500px' }}>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                        {t('hostDetail.selectSSHKeysToAdd', 'Select the SSH keys you want to add to this user:')}
+                    </Typography>
+
+                    {/* Search Field */}
+                    <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+                        <TextField
+                            fullWidth
+                            placeholder={t('hostDetail.searchSSHKeys', 'Search SSH keys by name or filename...')}
+                            value={sshKeySearchTerm}
+                            onChange={(e) => setSshKeySearchTerm(e.target.value)}
+                            size="small"
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                    handleSSHKeySearch();
+                                }
+                            }}
+                        />
+                        <Button
+                            variant="outlined"
+                            onClick={handleSSHKeySearch}
+                            sx={{ minWidth: 'auto', px: 3 }}
+                        >
+                            {t('common.search', 'Search')}
+                        </Button>
+                    </Box>
+
+                    {availableSSHKeys.length === 0 ? (
+                        <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                            {t('hostDetail.noSSHKeysAvailable', 'No SSH keys available. Create SSH keys in the Secrets section first.')}
+                        </Typography>
+                    ) : (
+                        <Box sx={{ height: 350, width: '100%' }}>
+                            <DataGrid
+                                rows={filteredSSHKeys}
+                                columns={sshKeyColumns}
+                                checkboxSelection
+                                disableRowSelectionOnClick
+                                rowSelectionModel={selectedSSHKeys}
+                                onRowSelectionModelChange={(newSelection: GridRowSelectionModel) => {
+                                    setSelectedSSHKeys(newSelection as string[]);
+                                }}
+                                initialState={{
+                                    pagination: {
+                                        paginationModel: { pageSize: 10, page: 0 },
+                                    },
+                                }}
+                                pageSizeOptions={[10, 25, 50]}
+                                sx={{
+                                    '& .MuiDataGrid-root': {
+                                        border: 'none',
+                                    },
+                                }}
+                            />
+                        </Box>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleSSHKeyDialogClose}>
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleDeploySSHKeys}
+                        disabled={selectedSSHKeys.length === 0}
+                    >
+                        {t('common.add', 'Add')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };

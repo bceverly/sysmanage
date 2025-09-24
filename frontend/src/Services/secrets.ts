@@ -3,6 +3,7 @@ import axiosInstance from './api.js';
 export interface SecretResponse {
   id: string;
   name: string;
+  filename?: string;
   secret_type: string;
   secret_subtype?: string;
   created_at: string;
@@ -32,6 +33,7 @@ export interface SecretTypesResponse {
 
 export interface CreateSecretRequest {
   name: string;
+  filename?: string;
   secret_type: string;
   content: string;
   secret_subtype: string;

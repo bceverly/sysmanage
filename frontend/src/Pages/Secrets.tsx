@@ -44,6 +44,7 @@ const Secrets: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingSecretId, setEditingSecretId] = useState<string | null>(null);
   const [secretName, setSecretName] = useState('');
+  const [secretFilename, setSecretFilename] = useState('');
   const [selectedSecretType, setSelectedSecretType] = useState('api_keys');
   const [secretContent, setSecretContent] = useState('');
   const [keyVisibility, setKeyVisibility] = useState('github');
@@ -166,6 +167,7 @@ const Secrets: React.FC = () => {
 
   const handleAddSecret = () => {
     setSecretName('');
+    setSecretFilename('');
     setSelectedSecretType('api_keys');
     setSecretContent('');
     setKeyVisibility('github');
@@ -179,6 +181,7 @@ const Secrets: React.FC = () => {
       // Get secret metadata
       const secretData = await secretsService.getSecret(secretId);
       setSecretName(secretData.name);
+      setSecretFilename(secretData.filename || '');
       setSelectedSecretType(secretData.secret_type);
       setKeyVisibility(secretData.secret_subtype || 'private');
       setSecretContent(''); // Don't pre-fill content for security
@@ -220,6 +223,7 @@ const Secrets: React.FC = () => {
       setLoading(true);
       const secretData = {
         name: secretName,
+        filename: secretFilename,
         secret_type: selectedSecretType,
         content: secretContent,
         secret_subtype: keyVisibility
@@ -314,6 +318,7 @@ const Secrets: React.FC = () => {
   const handleCloseAddSecretDialog = () => {
     setShowAddSecretDialog(false);
     setSecretName('');
+    setSecretFilename('');
     setSecretContent('');
     setKeyVisibility('github');
     setIsEditMode(false);
@@ -332,6 +337,18 @@ const Secrets: React.FC = () => {
       headerName: t('secrets.secretName', 'Secret Name'),
       width: 200,
       flex: 1,
+    },
+    {
+      field: 'filename',
+      headerName: t('secrets.secretFilename', 'Filename'),
+      width: 150,
+      renderCell: (params) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+          <Typography variant="body2">
+            {params.value || '-'}
+          </Typography>
+        </Box>
+      ),
     },
     {
       field: 'secret_type',
@@ -494,6 +511,15 @@ const Secrets: React.FC = () => {
               required
             />
 
+            <TextField
+              fullWidth
+              label={t('secrets.secretFilename', 'Filename')}
+              value={secretFilename}
+              onChange={(e) => setSecretFilename(e.target.value)}
+              margin="normal"
+              placeholder="e.g., id_rsa.pub, server.crt, database.conf"
+            />
+
             <FormControl fullWidth margin="normal">
               <InputLabel>{t('secrets.secretType', 'Secret Type')}</InputLabel>
               <Select
@@ -592,6 +618,13 @@ const Secrets: React.FC = () => {
                       <strong>{t('secrets.secretType', 'Secret Type')}:</strong> {t(`secrets.type.${viewingSecret.secret_type}`, viewingSecret.secret_type)}
                     </Typography>
                   </Grid>
+                  {viewingSecret.filename && (
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="body2" gutterBottom>
+                        <strong>{t('secrets.secretFilename', 'Filename')}:</strong> {viewingSecret.filename}
+                      </Typography>
+                    </Grid>
+                  )}
                   {viewingSecret.secret_subtype && (
                     <Grid item xs={12} md={6}>
                       <Typography variant="body2" gutterBottom>
