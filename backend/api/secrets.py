@@ -636,7 +636,7 @@ async def deploy_ssh_keys(
                 detail=_("secrets.some_not_found", "Some secrets not found"),
             )
 
-        ssh_keys = [s for s in secrets if s.secret_type == "ssh_key"]
+        ssh_keys = [s for s in secrets if s.secret_type == "ssh_key"]  # nosec B105
         if len(ssh_keys) != len(secrets):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -657,7 +657,7 @@ async def deploy_ssh_keys(
                         "id": str(secret.id),
                         "name": secret.name,
                         "filename": secret.filename
-                        or f"id_rsa{'_pub' if secret.secret_subtype == 'public' else ''}",
+                        or f"id_rsa{'_pub' if secret.secret_subtype == 'public' else ''}",  # nosec B105
                         "content": vault_data.get("content", ""),
                         "subtype": secret.secret_subtype,
                     }
