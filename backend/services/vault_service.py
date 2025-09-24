@@ -112,7 +112,7 @@ class VaultService:
         secret_name: str,
         secret_data: str,
         secret_type: str,
-        key_visibility: Optional[str] = None,
+        secret_subtype: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Store a secret in the vault and return metadata for database storage.
@@ -121,14 +121,61 @@ class VaultService:
             secret_name: Name of the secret
             secret_data: The actual secret content
             secret_type: Type of secret (e.g., 'ssh_key')
-            key_visibility: For SSH keys: 'public' or 'private'
+            secret_subtype: For SSH keys: 'public' or 'private'
 
         Returns:
             Dictionary with vault_path and vault_token for database storage
         """
-        # Generate unique path for this secret
+        # Generate unique path for this secret with proper subpath structure
         secret_id = str(uuid.uuid4())
-        vault_path = f"{self.mount_path}/data/secrets/{secret_type}/{secret_id}"
+
+        # Create subpath based on secret type and visibility
+        if secret_type == "ssh_key":
+            # SSH keys: ssh/public, ssh/private, ssh/ca
+            base_path = "ssh"
+            if secret_subtype in ["public", "private", "ca"]:
+                subpath = secret_subtype
+            else:
+                subpath = "private"  # Default fallback
+        elif secret_type == "ssl_certificate":
+            # SSL certificates: pki/root, pki/intermediate, pki/chain, pki/key_file, pki/certificate
+            base_path = "pki"
+            if secret_subtype in [
+                "root",
+                "intermediate",
+                "chain",
+                "key_file",
+                "certificate",
+            ]:
+                subpath = secret_subtype
+            else:
+                subpath = "certificate"  # Default fallback
+        elif secret_type == "database_credentials":
+            # Database credentials: db/postgresql, db/mysql, db/oracle, db/sqlserver, db/sqlite
+            base_path = "db"
+            if secret_subtype in [
+                "postgresql",
+                "mysql",
+                "oracle",
+                "sqlserver",
+                "sqlite",
+            ]:
+                subpath = secret_subtype
+            else:
+                subpath = "postgresql"  # Default fallback
+        elif secret_type == "api_keys":
+            # API keys: api/github, api/salesforce
+            base_path = "api"
+            if secret_subtype in ["github", "salesforce"]:
+                subpath = secret_subtype
+            else:
+                subpath = "github"  # Default fallback
+        else:
+            # Fallback for unknown types
+            base_path = secret_type
+            subpath = secret_subtype or "default"
+
+        vault_path = f"{self.mount_path}/data/secrets/{base_path}/{subpath}/{secret_id}"
 
         # Prepare secret data for vault storage
         vault_data = {
@@ -136,7 +183,7 @@ class VaultService:
                 "name": secret_name,
                 "secret_type": secret_type,
                 "content": secret_data,
-                "key_visibility": key_visibility,
+                "secret_subtype": secret_subtype,
                 "created_at": datetime.utcnow().isoformat(),
             }
         }
@@ -222,6 +269,7 @@ class VaultService:
             self.session.headers["X-Vault-Token"] = vault_token
 
         try:
+            logger.info("Starting vault deletion for path: %s", vault_path)
             # For KV v2, we need to permanently delete (destroy) the secret
             # First, get the current version number
             try:
@@ -237,22 +285,47 @@ class VaultService:
 
             # Soft delete first
             delete_path = vault_path.replace("/data/", "/delete/")
+            logger.info("Step 1: Soft delete at path: %s", delete_path)
             try:
                 self._make_request("DELETE", delete_path)
+                logger.info("Soft delete successful")
             except Exception as e:
                 # Continue with destroy even if soft delete fails
-                logger.debug("Soft delete failed for path %s: %s", delete_path, str(e))
+                logger.warning(
+                    "Soft delete failed for path %s: %s", delete_path, str(e)
+                )
 
             # Then permanently destroy it to completely remove from vault
             destroy_path = vault_path.replace("/data/", "/destroy/")
             destroy_data = {"versions": [current_version]}
+            logger.info(
+                "Step 2: Destroy at path: %s with versions: %s",
+                destroy_path,
+                destroy_data,
+            )
             try:
                 self._make_request("PUT", destroy_path, destroy_data)
+                logger.info("Destroy successful")
             except Exception as e:
                 # If both operations failed because secret doesn't exist, that's ok
                 if "not found" in str(e).lower():
+                    logger.info("Secret not found during destroy - considering deleted")
                     return True
+                logger.error("Destroy failed: %s", str(e))
                 raise
+
+            # Finally, delete the metadata to completely remove all traces
+            metadata_path = vault_path.replace("/data/", "/metadata/")
+            logger.info("Step 3: Metadata delete at path: %s", metadata_path)
+            try:
+                self._make_request("DELETE", metadata_path)
+                logger.info("Metadata delete successful")
+            except Exception as e:
+                # If metadata delete fails, log but don't fail the whole operation
+                # since the data is already destroyed
+                logger.warning(
+                    "Metadata delete failed for path %s: %s", metadata_path, str(e)
+                )
 
             return True
 

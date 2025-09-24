@@ -494,6 +494,9 @@
     "savedSecrets": "저장된 비밀",
     "secretName": "비밀 이름",
     "secretType": "비밀 유형",
+    "secretSubtype": "비밀 하위 유형",
+    "databaseEngine": "데이터베이스 엔진",
+    "apiProvider": "API 제공자",
     "secretContent": "비밀 내용",
     "createdDatetime": "생성 일시",
     "createdAt": "생성일",
@@ -521,13 +524,47 @@
     "pasteSecretHint": "여기에 비밀 내용을 붙여넣으세요",
     "keyVisibility": "키 가시성",
     "type": {
-      "ssh_key": "SSH 키"
+      "api_keys": "API 키",
+      "database_credentials": "데이터베이스 자격 증명",
+      "ssh_key": "SSH 키",
+      "ssl_certificate": "SSL 인증서"
     },
     "visibility": {
       "public": "공개",
-      "private": "비공개"
+      "private": "비공개",
+      "ca": "인증 기관",
+      "root": "루트",
+      "intermediate": "중간",
+      "chain": "체인",
+      "key_file": "키 파일",
+      "certificate": "인증서"
     },
-    "contentHidden": "[보안상 내용 숨김]"
+    "contentHidden": "[보안상 내용 숨김]",
+    "keyType": "키 유형",
+    "certificateType": "인증서 유형",
+    "key_type": {
+      "public": "공개",
+      "private": "개인",
+      "ca": "인증 기관"
+    },
+    "certificate_type": {
+      "root": "루트 인증서",
+      "intermediate": "중간 인증서",
+      "chain": "체인 인증서",
+      "key_file": "키 파일",
+      "certificate": "발급 인증서"
+    },
+    "database_engine": {
+      "mysql": "mysql",
+      "oracle": "Oracle",
+      "postgresql": "PostgreSQL",
+      "sqlserver": "Microsoft SQL Server",
+      "sqlite": "sqlite3"
+    },
+    "api_provider": {
+      "github": "Github",
+      "salesforce": "Salesforce"
+    }
   },
   "scripts": {
     "title": "스크립트 관리",

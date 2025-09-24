@@ -25,8 +25,9 @@ class SecretCreate(BaseModel):
     )
     secret_type: str = Field(..., description="Type of secret (e.g., 'ssh_key')")
     content: str = Field(..., min_length=1, description="The secret content")
-    key_visibility: Optional[str] = Field(
-        None, description="For SSH keys: 'public' or 'private'"
+    secret_subtype: Optional[str] = Field(
+        None,
+        description="For SSH keys: 'public', 'private', 'ca' | For SSL certificates: 'root', 'intermediate', 'chain', 'key_file', 'certificate' | For Database credentials: 'postgresql', 'mysql', 'oracle', 'sqlserver', 'sqlite' | For API keys: 'github', 'salesforce'",
     )
 
 
@@ -37,8 +38,9 @@ class SecretUpdate(BaseModel):
         None, min_length=1, max_length=255, description="Name of the secret"
     )
     content: Optional[str] = Field(None, min_length=1, description="The secret content")
-    key_visibility: Optional[str] = Field(
-        None, description="For SSH keys: 'public' or 'private'"
+    secret_subtype: Optional[str] = Field(
+        None,
+        description="For SSH keys: 'public', 'private', 'ca' | For SSL certificates: 'root', 'intermediate', 'chain', 'key_file', 'certificate' | For Database credentials: 'postgresql', 'mysql', 'oracle', 'sqlserver', 'sqlite' | For API keys: 'github', 'salesforce'",
     )
 
 
@@ -48,7 +50,7 @@ class SecretResponse(BaseModel):
     id: str
     name: str
     secret_type: str
-    key_visibility: Optional[str]
+    secret_subtype: Optional[str]
     created_at: str
     updated_at: str
     created_by: str
@@ -84,20 +86,106 @@ async def get_secret_types():
     return {
         "types": [
             {
+                "value": "api_keys",
+                "label": _("secrets.type.api_keys", "API Keys"),
+                "supports_visibility": True,
+                "visibility_label": _("secrets.apiProvider", "API Provider"),
+                "visibility_options": [
+                    {
+                        "value": "github",
+                        "label": _("secrets.api_provider.github", "Github"),
+                    },
+                    {
+                        "value": "salesforce",
+                        "label": _("secrets.api_provider.salesforce", "Salesforce"),
+                    },
+                ],
+            },
+            {
+                "value": "database_credentials",
+                "label": _("secrets.type.database_credentials", "Database Credentials"),
+                "supports_visibility": True,
+                "visibility_label": _("secrets.databaseEngine", "Database Engine"),
+                "visibility_options": [
+                    {
+                        "value": "mysql",
+                        "label": _("secrets.database_engine.mysql", "mysql"),
+                    },
+                    {
+                        "value": "oracle",
+                        "label": _("secrets.database_engine.oracle", "Oracle"),
+                    },
+                    {
+                        "value": "postgresql",
+                        "label": _("secrets.database_engine.postgresql", "PostgreSQL"),
+                    },
+                    {
+                        "value": "sqlserver",
+                        "label": _(
+                            "secrets.database_engine.sqlserver", "Microsoft SQL Server"
+                        ),
+                    },
+                    {
+                        "value": "sqlite",
+                        "label": _("secrets.database_engine.sqlite", "sqlite3"),
+                    },
+                ],
+            },
+            {
                 "value": "ssh_key",
                 "label": _("secrets.type.ssh_key", "SSH Key"),
                 "supports_visibility": True,
+                "visibility_label": _("secrets.keyType", "Key Type"),
                 "visibility_options": [
                     {
                         "value": "public",
-                        "label": _("secrets.visibility.public", "Public"),
+                        "label": _("secrets.key_type.public", "Public"),
                     },
                     {
                         "value": "private",
-                        "label": _("secrets.visibility.private", "Private"),
+                        "label": _("secrets.key_type.private", "Private"),
+                    },
+                    {
+                        "value": "ca",
+                        "label": _("secrets.key_type.ca", "CA"),
                     },
                 ],
-            }
+            },
+            {
+                "value": "ssl_certificate",
+                "label": _("secrets.type.ssl_certificate", "SSL Certificate"),
+                "supports_visibility": True,
+                "visibility_label": _("secrets.certificateType", "Certificate Type"),
+                "visibility_options": [
+                    {
+                        "value": "root",
+                        "label": _("secrets.certificate_type.root", "Root Certificate"),
+                    },
+                    {
+                        "value": "intermediate",
+                        "label": _(
+                            "secrets.certificate_type.intermediate",
+                            "Intermediate Certificate",
+                        ),
+                    },
+                    {
+                        "value": "chain",
+                        "label": _(
+                            "secrets.certificate_type.chain", "Chain Certificate"
+                        ),
+                    },
+                    {
+                        "value": "key_file",
+                        "label": _("secrets.certificate_type.key_file", "Key File"),
+                    },
+                    {
+                        "value": "certificate",
+                        "label": _(
+                            "secrets.certificate_type.certificate", "Issued Certificate"
+                        ),
+                    },
+                ],
+            },
         ]
     }
 
@@ -214,7 +302,7 @@ async def create_secret(
                 secret_data.name,
                 secret_data.content,
                 secret_data.secret_type,
-                secret_data.key_visibility,
+                secret_data.secret_subtype,
             )
         except VaultError as e:
             raise HTTPException(
@@ -229,7 +317,7 @@ async def create_secret(
         secret = Secret(
             name=secret_data.name,
             secret_type=secret_data.secret_type,
-            key_visibility=secret_data.key_visibility,
+            secret_subtype=secret_data.secret_subtype,
             vault_token=vault_info["vault_token"],
             vault_path=vault_info["vault_path"],
             created_by=current_user,
@@ -299,7 +387,7 @@ async def update_secret(
                     secret_data.name or secret.name,
                     secret_data.content,
                     secret.secret_type,
-                    secret_data.key_visibility or secret.key_visibility,
+                    secret_data.secret_subtype or secret.secret_subtype,
                 )
 
                 # Update vault references
@@ -317,8 +405,8 @@ async def update_secret(
         # Update database record
         if secret_data.name:
             secret.name = secret_data.name
-        if secret_data.key_visibility is not None:
-            secret.key_visibility = secret_data.key_visibility
+        if secret_data.secret_subtype is not None:
+            secret.secret_subtype = secret_data.secret_subtype
 
         secret.updated_by = current_user
 

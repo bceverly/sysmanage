@@ -495,6 +495,9 @@
     "savedSecrets": "已保存的机密",
     "secretName": "机密名称",
     "secretType": "机密类型",
+    "secretSubtype": "机密子类型",
+    "databaseEngine": "数据库引擎",
+    "apiProvider": "API提供商",
     "secretContent": "机密内容",
     "createdDatetime": "创建日期时间",
     "createdAt": "创建于",
@@ -522,13 +525,47 @@
     "pasteSecretHint": "在此粘贴您的机密内容",
     "keyVisibility": "密钥可见性",
     "type": {
-      "ssh_key": "SSH 密钥"
+      "api_keys": "API密钥",
+      "database_credentials": "数据库凭据",
+      "ssh_key": "SSH 密钥",
+      "ssl_certificate": "SSL 证书"
     },
     "visibility": {
       "public": "公开",
-      "private": "私有"
+      "private": "私有",
+      "ca": "证书颁发机构",
+      "root": "根证书",
+      "intermediate": "中间证书",
+      "chain": "证书链",
+      "key_file": "密钥文件",
+      "certificate": "证书"
     },
-    "contentHidden": "[出于安全考虑内容已隐藏]"
+    "contentHidden": "[出于安全考虑内容已隐藏]",
+    "keyType": "密钥类型",
+    "certificateType": "证书类型",
+    "key_type": {
+      "public": "公开",
+      "private": "私有",
+      "ca": "证书颁发机构"
+    },
+    "certificate_type": {
+      "root": "根证书",
+      "intermediate": "中间证书",
+      "chain": "链证书",
+      "key_file": "密钥文件",
+      "certificate": "已签发证书"
+    },
+    "database_engine": {
+      "mysql": "mysql",
+      "oracle": "Oracle",
+      "postgresql": "PostgreSQL",
+      "sqlserver": "Microsoft SQL Server",
+      "sqlite": "sqlite3"
+    },
+    "api_provider": {
+      "github": "Github",
+      "salesforce": "Salesforce"
+    }
   },
   "scripts": {
     "title": "脚本管理",

@@ -495,6 +495,9 @@
     "savedSecrets": "Segredos Salvos",
     "secretName": "Nome do Segredo",
     "secretType": "Tipo de Segredo",
+    "secretSubtype": "Subtipo de Segredo",
+    "databaseEngine": "Motor de Banco de Dados",
+    "apiProvider": "Provedor de API",
     "secretContent": "Conteúdo do Segredo",
     "createdDatetime": "Data de Criação",
     "createdAt": "Criado em",
@@ -522,13 +525,47 @@
     "pasteSecretHint": "Cole o conteúdo do seu segredo aqui",
     "keyVisibility": "Visibilidade da Chave",
     "type": {
-      "ssh_key": "Chave SSH"
+      "api_keys": "Chaves de API",
+      "database_credentials": "Credenciais de Banco de Dados",
+      "ssh_key": "Chave SSH",
+      "ssl_certificate": "Certificado SSL"
     },
     "visibility": {
       "public": "Público",
-      "private": "Privado"
+      "private": "Privado",
+      "ca": "Autoridade Certificadora",
+      "root": "Raiz",
+      "intermediate": "Intermediário",
+      "chain": "Cadeia",
+      "key_file": "Arquivo de Chave",
+      "certificate": "Certificado"
     },
-    "contentHidden": "[Conteúdo oculto por segurança]"
+    "contentHidden": "[Conteúdo oculto por segurança]",
+    "keyType": "Tipo de Chave",
+    "certificateType": "Tipo de Certificado",
+    "key_type": {
+      "public": "Pública",
+      "private": "Privada",
+      "ca": "Autoridade Certificadora"
+    },
+    "certificate_type": {
+      "root": "Certificado Raiz",
+      "intermediate": "Certificado Intermediário",
+      "chain": "Certificado de Cadeia",
+      "key_file": "Arquivo de Chave",
+      "certificate": "Certificado Emitido"
+    },
+    "database_engine": {
+      "mysql": "mysql",
+      "oracle": "Oracle",
+      "postgresql": "PostgreSQL",
+      "sqlserver": "Microsoft SQL Server",
+      "sqlite": "sqlite3"
+    },
+    "api_provider": {
+      "github": "Github",
+      "salesforce": "Salesforce"
+    }
   },
   "scripts": {
     "title": "Gestão de Scripts",

@@ -495,6 +495,9 @@
     "savedSecrets": "Segreti Salvati",
     "secretName": "Nome del Segreto",
     "secretType": "Tipo di Segreto",
+    "secretSubtype": "Sottotipo di Segreto",
+    "databaseEngine": "Motore Database",
+    "apiProvider": "Fornitore API",
     "secretContent": "Contenuto del Segreto",
     "createdDatetime": "Data di Creazione",
     "createdAt": "Creato il",
@@ -522,13 +525,47 @@
     "pasteSecretHint": "Incolla il contenuto del tuo segreto qui",
     "keyVisibility": "Visibilità della Chiave",
     "type": {
-      "ssh_key": "Chiave SSH"
+      "api_keys": "Chiavi API",
+      "database_credentials": "Credenziali Database",
+      "ssh_key": "Chiave SSH",
+      "ssl_certificate": "Certificato SSL"
     },
     "visibility": {
       "public": "Pubblico",
-      "private": "Privato"
+      "private": "Privato",
+      "ca": "Autorità di Certificazione",
+      "root": "Radice",
+      "intermediate": "Intermedio",
+      "chain": "Catena",
+      "key_file": "File Chiave",
+      "certificate": "Certificato"
     },
-    "contentHidden": "[Contenuto nascosto per sicurezza]"
+    "contentHidden": "[Contenuto nascosto per sicurezza]",
+    "keyType": "Tipo Chiave",
+    "certificateType": "Tipo Certificato",
+    "key_type": {
+      "public": "Pubblica",
+      "private": "Privata",
+      "ca": "Autorità Certificazione"
+    },
+    "certificate_type": {
+      "root": "Certificato Radice",
+      "intermediate": "Certificato Intermedio",
+      "chain": "Certificato Catena",
+      "key_file": "File Chiave",
+      "certificate": "Certificato Emesso"
+    },
+    "database_engine": {
+      "mysql": "mysql",
+      "oracle": "Oracle",
+      "postgresql": "PostgreSQL",
+      "sqlserver": "Microsoft SQL Server",
+      "sqlite": "sqlite3"
+    },
+    "api_provider": {
+      "github": "Github",
+      "salesforce": "Salesforce"
+    }
   },
   "scripts": {
     "title": "Gestione Script",

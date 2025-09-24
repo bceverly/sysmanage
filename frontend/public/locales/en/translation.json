@@ -560,6 +560,7 @@
     "savedSecrets": "Saved Secrets",
     "secretName": "Secret Name",
     "secretType": "Secret Type",
+    "secretSubtype": "Secret Subtype",
     "secretContent": "Secret Content",
     "createdDatetime": "Created Datetime",
     "createdAt": "Created At",
@@ -586,12 +587,48 @@
     "replaceExistingSecretHint": "Enter new secret content to replace the existing secret",
     "pasteSecretHint": "Paste your secret content here",
     "keyVisibility": "Key Visibility",
+    "keyType": "Key Type",
+    "certificateType": "Certificate Type",
+    "databaseEngine": "Database Engine",
+    "apiProvider": "API Provider",
     "type": {
-      "ssh_key": "SSH Key"
+      "api_keys": "API Keys",
+      "database_credentials": "Database Credentials",
+      "ssh_key": "SSH Key",
+      "ssl_certificate": "SSL Certificate"
+    },
+    "key_type": {
+      "public": "Public",
+      "private": "Private",
+      "ca": "CA"
+    },
+    "certificate_type": {
+      "root": "Root Certificate",
+      "intermediate": "Intermediate Certificate",
+      "chain": "Chain Certificate",
+      "key_file": "Key File",
+      "certificate": "Issued Certificate"
+    },
+    "database_engine": {
+      "mysql": "mysql",
+      "oracle": "Oracle",
+      "postgresql": "PostgreSQL",
+      "sqlserver": "Microsoft SQL Server",
+      "sqlite": "sqlite3"
+    },
+    "api_provider": {
+      "github": "Github",
+      "salesforce": "Salesforce"
     },
     "visibility": {
       "public": "Public",
-      "private": "Private"
+      "private": "Private",
+      "ca": "Certificate Authority",
+      "root": "Root",
+      "intermediate": "Intermediate",
+      "chain": "Chain",
+      "key_file": "Key File",
+      "certificate": "Certificate"
     },
     "contentHidden": "[Content Hidden for Security]"
   },
