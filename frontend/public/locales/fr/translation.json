@@ -8,7 +8,8 @@
     "reports": "Rapports",
     "settings": "Paramètres",
     "logout": "Déconnexion",
-    "osUpgrades": "Mises à jour OS"
+    "osUpgrades": "Mises à jour OS",
+    "secrets": "Secrets"
   },
   "login": {
     "title": "Connexion à SysManage",
@@ -144,7 +145,8 @@
     "less": "moins",
     "noDescription": "Aucune description",
     "close": "Fermer",
-    "id": "ID"
+    "id": "ID",
+    "confirmAction": "Confirmer l'action"
   },
   "hostDetail": {
     "invalidId": "ID d'hôte invalide",
@@ -487,6 +489,46 @@
     "noUpdates": "Tous les systèmes sont à jour",
     "viewSecurity": "Voir les Mises à jour de Sécurité",
     "viewAll": "Voir Toutes les Mises à jour"
+  },
+  "secrets": {
+    "title": "Secrets",
+    "savedSecrets": "Secrets Sauvegardés",
+    "secretName": "Nom du Secret",
+    "secretType": "Type de Secret",
+    "secretContent": "Contenu du Secret",
+    "createdDatetime": "Date de Création",
+    "createdAt": "Créé le",
+    "updatedAt": "Mis à jour le",
+    "addSecret": "Ajouter un Secret",
+    "editSecret": "Modifier le Secret",
+    "viewSecret": "Voir le Secret",
+    "deleteSelected": "Supprimer la Sélection",
+    "noSecrets": "Aucun secret trouvé",
+    "nameRequired": "Le nom du secret est requis",
+    "contentRequired": "Le contenu du secret est requis",
+    "loadError": "Échec du chargement des secrets",
+    "loadContentError": "Échec du chargement du contenu du secret",
+    "createSuccess": "Secret créé avec succès",
+    "createError": "Échec de la création du secret",
+    "updateSuccess": "Secret mis à jour avec succès",
+    "updateError": "Échec de la mise à jour du secret",
+    "deleteSuccess": "Secret supprimé avec succès",
+    "deleteMultipleSuccess": "Secrets supprimés avec succès",
+    "deleteError": "Échec de la suppression des secrets",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce secret ?",
+    "confirmDeleteMultiple": "Êtes-vous sûr de vouloir supprimer {count} secrets ?",
+    "replaceExistingSecret": "Remplacer le secret existant",
+    "replaceExistingSecretHint": "Entrez le nouveau contenu du secret pour remplacer le secret existant",
+    "pasteSecretHint": "Collez le contenu de votre secret ici",
+    "keyVisibility": "Visibilité de la Clé",
+    "type": {
+      "ssh_key": "Clé SSH"
+    },
+    "visibility": {
+      "public": "Public",
+      "private": "Privé"
+    },
+    "contentHidden": "[Contenu masqué pour des raisons de sécurité]"
   },
   "scripts": {
     "title": "Gestion des Scripts",
@@ -845,5 +887,20 @@
     "package": "Paquet",
     "packageUninstallQueued": "La désinstallation du paquet a été mise en file d'attente",
     "packageUninstallError": "Erreur lors de la mise en file d'attente de la désinstallation du paquet"
+  },
+  "openbao": {
+    "devModeChip": "Dév",
+    "operationalMode": "Mode Opérationnel",
+    "development": "Développement",
+    "production": "Production",
+    "sealStatus": "État du Sceau",
+    "sealed": "Scellé",
+    "unsealed": "Descellé",
+    "seal": "Sceller",
+    "unseal": "Desceller",
+    "sealing": "Scellement en cours...",
+    "unsealing": "Descellement en cours...",
+    "sealError": "Échec du scellement d'OpenBAO",
+    "unsealError": "Échec du descellement d'OpenBAO"
   }
 }

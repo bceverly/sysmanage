@@ -8,7 +8,8 @@
     "reports": "レポート",
     "settings": "設定",
     "logout": "ログアウト",
-    "osUpgrades": "OSアップグレード"
+    "osUpgrades": "OSアップグレード",
+    "secrets": "シークレット"
   },
   "login": {
     "title": "SysManageにログイン",
@@ -314,7 +315,8 @@
     "less": "少なく",
     "noDescription": "説明なし",
     "close": "閉じる",
-    "id": "ID"
+    "id": "ID",
+    "confirmAction": "アクションを確認"
   },
   "serverDown": {
     "title": "接続が中断されました",
@@ -487,6 +489,46 @@
     "noUpdates": "すべてのシステムが最新です",
     "viewSecurity": "セキュリティアップデートを表示",
     "viewAll": "すべてのアップデートを表示"
+  },
+  "secrets": {
+    "title": "シークレット",
+    "savedSecrets": "保存済みシークレット",
+    "secretName": "シークレット名",
+    "secretType": "シークレットタイプ",
+    "secretContent": "シークレットコンテンツ",
+    "createdDatetime": "作成日時",
+    "createdAt": "作成日",
+    "updatedAt": "更新日",
+    "addSecret": "シークレットを追加",
+    "editSecret": "シークレットを編集",
+    "viewSecret": "シークレットを表示",
+    "deleteSelected": "選択したものを削除",
+    "noSecrets": "シークレットが見つかりません",
+    "nameRequired": "シークレット名が必要です",
+    "contentRequired": "シークレットコンテンツが必要です",
+    "loadError": "シークレットの読み込みに失敗しました",
+    "loadContentError": "シークレットコンテンツの読み込みに失敗しました",
+    "createSuccess": "シークレットが正常に作成されました",
+    "createError": "シークレットの作成に失敗しました",
+    "updateSuccess": "シークレットが正常に更新されました",
+    "updateError": "シークレットの更新に失敗しました",
+    "deleteSuccess": "シークレットが正常に削除されました",
+    "deleteMultipleSuccess": "シークレットが正常に削除されました",
+    "deleteError": "シークレットの削除に失敗しました",
+    "confirmDelete": "このシークレットを削除してよろしいですか？",
+    "confirmDeleteMultiple": "{count}個のシークレットを削除してよろしいですか？",
+    "replaceExistingSecret": "既存のシークレットを置き換え",
+    "replaceExistingSecretHint": "既存のシークレットを置き換えるために新しいシークレットコンテンツを入力してください",
+    "pasteSecretHint": "ここにシークレットコンテンツを貼り付けてください",
+    "keyVisibility": "キーの可視性",
+    "type": {
+      "ssh_key": "SSHキー"
+    },
+    "visibility": {
+      "public": "パブリック",
+      "private": "プライベート"
+    },
+    "contentHidden": "[セキュリティのため内容を非表示]"
   },
   "scripts": {
     "title": "スクリプト管理",
@@ -847,5 +889,20 @@
     "package": "パッケージ",
     "packageUninstallQueued": "パッケージアンインストールがキューに追加されました",
     "packageUninstallError": "パッケージアンインストールのキューイングでエラーが発生しました"
+  },
+  "openbao": {
+    "devModeChip": "開発",
+    "operationalMode": "動作モード",
+    "development": "開発",
+    "production": "本番",
+    "sealStatus": "シール状態",
+    "sealed": "シール済み",
+    "unsealed": "シール解除済み",
+    "seal": "シール",
+    "unseal": "シール解除",
+    "sealing": "シール中...",
+    "unsealing": "シール解除中...",
+    "sealError": "OpenBAOのシールに失敗しました",
+    "unsealError": "OpenBAOのシール解除に失敗しました"
   }
 }

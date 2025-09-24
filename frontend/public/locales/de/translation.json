@@ -8,7 +8,8 @@
     "reports": "Berichte",
     "settings": "Einstellungen",
     "logout": "Abmelden",
-    "osUpgrades": "OS-Upgrades"
+    "osUpgrades": "OS-Upgrades",
+    "secrets": "Geheimnisse"
   },
   "login": {
     "title": "Bei SysManage anmelden",
@@ -144,7 +145,8 @@
     "less": "weniger",
     "noDescription": "Keine Beschreibung",
     "close": "Schließen",
-    "id": "ID"
+    "id": "ID",
+    "confirmAction": "Aktion bestätigen"
   },
   "hostDetail": {
     "invalidId": "Ungültige Host-ID",
@@ -487,6 +489,46 @@
     "noUpdates": "Alle Systeme sind auf dem neuesten Stand",
     "viewSecurity": "Sicherheits-Updates Anzeigen",
     "viewAll": "Alle Updates Anzeigen"
+  },
+  "secrets": {
+    "title": "Geheimnisse",
+    "savedSecrets": "Gespeicherte Geheimnisse",
+    "secretName": "Geheimnis-Name",
+    "secretType": "Geheimnis-Typ",
+    "secretContent": "Geheimnis-Inhalt",
+    "createdDatetime": "Erstellungsdatum",
+    "createdAt": "Erstellt am",
+    "updatedAt": "Aktualisiert am",
+    "addSecret": "Geheimnis hinzufügen",
+    "editSecret": "Geheimnis bearbeiten",
+    "viewSecret": "Geheimnis anzeigen",
+    "deleteSelected": "Ausgewählte löschen",
+    "noSecrets": "Keine Geheimnisse gefunden",
+    "nameRequired": "Geheimnis-Name ist erforderlich",
+    "contentRequired": "Geheimnis-Inhalt ist erforderlich",
+    "loadError": "Fehler beim Laden der Geheimnisse",
+    "loadContentError": "Fehler beim Laden des Geheimnis-Inhalts",
+    "createSuccess": "Geheimnis erfolgreich erstellt",
+    "createError": "Fehler beim Erstellen des Geheimnisses",
+    "updateSuccess": "Geheimnis erfolgreich aktualisiert",
+    "updateError": "Fehler beim Aktualisieren des Geheimnisses",
+    "deleteSuccess": "Geheimnis erfolgreich gelöscht",
+    "deleteMultipleSuccess": "Geheimnisse erfolgreich gelöscht",
+    "deleteError": "Fehler beim Löschen der Geheimnisse",
+    "confirmDelete": "Sind Sie sicher, dass Sie dieses Geheimnis löschen möchten?",
+    "confirmDeleteMultiple": "Sind Sie sicher, dass Sie {count} Geheimnisse löschen möchten?",
+    "replaceExistingSecret": "Vorhandenes Geheimnis ersetzen",
+    "replaceExistingSecretHint": "Neuen Geheimnis-Inhalt eingeben, um das vorhandene Geheimnis zu ersetzen",
+    "pasteSecretHint": "Ihren Geheimnis-Inhalt hier einfügen",
+    "keyVisibility": "Schlüssel-Sichtbarkeit",
+    "type": {
+      "ssh_key": "SSH-Schlüssel"
+    },
+    "visibility": {
+      "public": "Öffentlich",
+      "private": "Privat"
+    },
+    "contentHidden": "[Inhalt aus Sicherheitsgründen verborgen]"
   },
   "scripts": {
     "title": "Skript-Verwaltung",
@@ -847,5 +889,20 @@
     "package": "Paket",
     "packageUninstallQueued": "Paket-Deinstallation wurde in die Warteschlange eingereiht",
     "packageUninstallError": "Fehler beim Einreihen der Paket-Deinstallation"
+  },
+  "openbao": {
+    "devModeChip": "Entw",
+    "operationalMode": "Betriebsmodus",
+    "development": "Entwicklung",
+    "production": "Produktion",
+    "sealStatus": "Versiegelungsstatus",
+    "sealed": "Versiegelt",
+    "unsealed": "Entsiegelt",
+    "seal": "Versiegeln",
+    "unseal": "Entsiegeln",
+    "sealing": "Versiegelung läuft...",
+    "unsealing": "Entsiegelung läuft...",
+    "sealError": "Fehler beim Versiegeln von OpenBAO",
+    "unsealError": "Fehler beim Entsiegeln von OpenBAO"
   }
 }

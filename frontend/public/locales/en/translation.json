@@ -5,6 +5,7 @@
     "users": "Users",
     "updates": "Updates",
     "osUpgrades": "OS Upgrades",
+    "secrets": "Secrets",
     "scripts": "Scripts",
     "reports": "Reports",
     "settings": "Settings",
@@ -153,7 +154,8 @@
     "unassigned": "Unassigned",
     "less": "less",
     "noDescription": "No description",
-    "close": "Close"
+    "close": "Close",
+    "confirmAction": "Confirm Action"
   },
   "hostDetail": {
     "invalidId": "Invalid host ID",
@@ -553,6 +555,46 @@
     "viewSecurity": "View Security Updates",
     "viewAll": "View All Updates"
   },
+  "secrets": {
+    "title": "Secrets",
+    "savedSecrets": "Saved Secrets",
+    "secretName": "Secret Name",
+    "secretType": "Secret Type",
+    "secretContent": "Secret Content",
+    "createdDatetime": "Created Datetime",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "addSecret": "Add Secret",
+    "editSecret": "Edit Secret",
+    "viewSecret": "View Secret",
+    "deleteSelected": "Delete Selected",
+    "noSecrets": "No secrets found",
+    "nameRequired": "Secret name is required",
+    "contentRequired": "Secret content is required",
+    "loadError": "Failed to load secrets",
+    "loadContentError": "Failed to load secret content",
+    "createSuccess": "Secret created successfully",
+    "createError": "Failed to create secret",
+    "updateSuccess": "Secret updated successfully",
+    "updateError": "Failed to update secret",
+    "deleteSuccess": "Secret deleted successfully",
+    "deleteMultipleSuccess": "Secrets deleted successfully",
+    "deleteError": "Failed to delete secrets",
+    "confirmDelete": "Are you sure you want to delete this secret?",
+    "confirmDeleteMultiple": "Are you sure you want to delete {count} secrets?",
+    "replaceExistingSecret": "Replace existing secret",
+    "replaceExistingSecretHint": "Enter new secret content to replace the existing secret",
+    "pasteSecretHint": "Paste your secret content here",
+    "keyVisibility": "Key Visibility",
+    "type": {
+      "ssh_key": "SSH Key"
+    },
+    "visibility": {
+      "public": "Public",
+      "private": "Private"
+    },
+    "contentHidden": "[Content Hidden for Security]"
+  },
   "scripts": {
     "title": "Script Management",
     "newScript": "New Script",
@@ -896,5 +938,20 @@
     "softwareInstallationHistory": "Software Installation History",
     "softwareInstallsComingSoon": "Software installation tracking coming soon. This feature will show the history and status of package installations requested through the software manager.",
     "version": "Version"
+  },
+  "openbao": {
+    "devModeChip": "Dev",
+    "operationalMode": "Operational Mode",
+    "development": "Development",
+    "production": "Production",
+    "sealStatus": "Seal Status",
+    "sealed": "Sealed",
+    "unsealed": "Unsealed",
+    "seal": "Seal",
+    "unseal": "Unseal",
+    "sealing": "Sealing...",
+    "unsealing": "Unsealing...",
+    "sealError": "Failed to seal OpenBAO",
+    "unsealError": "Failed to unseal OpenBAO"
   }
 }

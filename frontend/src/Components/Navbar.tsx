@@ -100,6 +100,15 @@ const Navbar = () => {
             </li>
             <li className="nav__item">
               <NavLink
+                to="/secrets"
+                className="nav__link"
+                onClick={closeMenuOnMobile}
+              >
+                {t('nav.secrets')}
+              </NavLink>
+            </li>
+            <li className="nav__item">
+              <NavLink
                 to="/scripts"
                 className="nav__link"
                 onClick={closeMenuOnMobile}

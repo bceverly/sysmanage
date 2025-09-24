@@ -8,7 +8,8 @@
     "reports": "보고서",
     "settings": "설정",
     "logout": "로그아웃",
-    "osUpgrades": "OS 업그레이드"
+    "osUpgrades": "OS 업그레이드",
+    "secrets": "비밀"
   },
   "login": {
     "title": "SysManage 로그인",
@@ -314,7 +315,8 @@
     "less": "적게",
     "noDescription": "설명 없음",
     "close": "닫기",
-    "id": "ID"
+    "id": "ID",
+    "confirmAction": "작업 확인"
   },
   "serverDown": {
     "title": "연결이 중단됨",
@@ -486,6 +488,46 @@
     "noUpdates": "모든 시스템이 최신 상태입니다",
     "viewSecurity": "보안 업데이트 보기",
     "viewAll": "모든 업데이트 보기"
+  },
+  "secrets": {
+    "title": "비밀",
+    "savedSecrets": "저장된 비밀",
+    "secretName": "비밀 이름",
+    "secretType": "비밀 유형",
+    "secretContent": "비밀 내용",
+    "createdDatetime": "생성 일시",
+    "createdAt": "생성일",
+    "updatedAt": "업데이트일",
+    "addSecret": "비밀 추가",
+    "editSecret": "비밀 편집",
+    "viewSecret": "비밀 보기",
+    "deleteSelected": "선택한 항목 삭제",
+    "noSecrets": "비밀을 찾을 수 없습니다",
+    "nameRequired": "비밀 이름이 필요합니다",
+    "contentRequired": "비밀 내용이 필요합니다",
+    "loadError": "비밀 로드에 실패했습니다",
+    "loadContentError": "비밀 내용 로드에 실패했습니다",
+    "createSuccess": "비밀이 성공적으로 생성되었습니다",
+    "createError": "비밀 생성에 실패했습니다",
+    "updateSuccess": "비밀이 성공적으로 업데이트되었습니다",
+    "updateError": "비밀 업데이트에 실패했습니다",
+    "deleteSuccess": "비밀이 성공적으로 삭제되었습니다",
+    "deleteMultipleSuccess": "비밀들이 성공적으로 삭제되었습니다",
+    "deleteError": "비밀 삭제에 실패했습니다",
+    "confirmDelete": "이 비밀을 삭제하시겠습니까?",
+    "confirmDeleteMultiple": "{count}개의 비밀을 삭제하시겠습니까?",
+    "replaceExistingSecret": "기존 비밀 교체",
+    "replaceExistingSecretHint": "기존 비밀을 교체하려면 새 비밀 내용을 입력하세요",
+    "pasteSecretHint": "여기에 비밀 내용을 붙여넣으세요",
+    "keyVisibility": "키 가시성",
+    "type": {
+      "ssh_key": "SSH 키"
+    },
+    "visibility": {
+      "public": "공개",
+      "private": "비공개"
+    },
+    "contentHidden": "[보안상 내용 숨김]"
   },
   "scripts": {
     "title": "스크립트 관리",
@@ -844,5 +886,20 @@
     "package": "패키지",
     "packageUninstallQueued": "패키지 제거가 대기열에 추가되었습니다",
     "packageUninstallError": "패키지 제거를 대기열에 추가하는 중 오류가 발생했습니다"
+  },
+  "openbao": {
+    "devModeChip": "개발",
+    "operationalMode": "운영 모드",
+    "development": "개발",
+    "production": "운영",
+    "sealStatus": "봉인 상태",
+    "sealed": "봉인됨",
+    "unsealed": "봉인 해제됨",
+    "seal": "봉인",
+    "unseal": "봉인 해제",
+    "sealing": "봉인 중...",
+    "unsealing": "봉인 해제 중...",
+    "sealError": "OpenBAO 봉인에 실패했습니다",
+    "unsealError": "OpenBAO 봉인 해제에 실패했습니다"
   }
 }

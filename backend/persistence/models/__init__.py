@@ -9,6 +9,7 @@ All models are re-exported here for backward compatibility.
 from .core import *
 from .hardware import *
 from .operations import *
+from .secret import *
 from .software import *
 
 __all__ = [
@@ -45,4 +46,6 @@ __all__ = [
     "UbuntuProInfo",
     "UbuntuProService",
     "UbuntuProSettings",
+    # Secret models
+    "Secret",
 ]

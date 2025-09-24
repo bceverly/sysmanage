@@ -24,10 +24,12 @@ import {
   Stop as StopIcon,
   Refresh as RefreshIcon,
   ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon
+  ExpandLess as ExpandLessIcon,
+  Lock as LockIcon,
+  LockOpen as LockOpenIcon
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import { openBAOService, OpenBAOStatus, OpenBAOConfig, OpenBAOOperationResult, OpenBAOHealth } from '../Services/openBAOService';
+import { openBAOService, OpenBAOStatus, OpenBAOConfig, OpenBAOOperationResult } from '../Services/openBAOService';
 
 const OpenBAOStatusCard: React.FC = () => {
   const { t } = useTranslation();
@@ -138,6 +140,60 @@ const OpenBAOStatusCard: React.FC = () => {
     loadData();
   }, [loadData]);
 
+  const handleSeal = useCallback(async () => {
+    try {
+      setOperationLoading(true);
+      setOperationResult(null);
+
+      const result = await openBAOService.seal();
+      setOperationResult(result);
+
+      // Update status immediately
+      setStatus(result.status);
+
+      // Auto-clear result after 5 seconds
+      setTimeout(() => {
+        setOperationResult(null);
+      }, 5000);
+    } catch (err) {
+      console.error('Failed to seal OpenBAO:', err);
+      setOperationResult({
+        success: false,
+        message: t('openbao.sealError', 'Failed to seal OpenBAO'),
+        status: status!
+      });
+    } finally {
+      setOperationLoading(false);
+    }
+  }, [status, t]);
+
+  const handleUnseal = useCallback(async () => {
+    try {
+      setOperationLoading(true);
+      setOperationResult(null);
+
+      const result = await openBAOService.unseal();
+      setOperationResult(result);
+
+      // Update status immediately
+      setStatus(result.status);
+
+      // Auto-clear result after 5 seconds
+      setTimeout(() => {
+        setOperationResult(null);
+      }, 5000);
+    } catch (err) {
+      console.error('Failed to unseal OpenBAO:', err);
+      setOperationResult({
+        success: false,
+        message: t('openbao.unsealError', 'Failed to unseal OpenBAO'),
+        status: status!
+      });
+    } finally {
+      setOperationLoading(false);
+    }
+  }, [status, t]);
+
   const getStatusIcon = useMemo(() => {
     if (!status) return <WarningIcon color="disabled" />;
 
@@ -175,37 +231,6 @@ const OpenBAOStatusCard: React.FC = () => {
     return 'success';
   }, [status, config]);
 
-  const formatHealthInfo = useCallback((health: OpenBAOHealth | null) => {
-    if (!health) return null;
-
-    if (health.error) {
-      return (
-        <Alert severity="warning" sx={{ mt: 1 }}>
-          {health.error}
-        </Alert>
-      );
-    }
-
-    return (
-      <Box sx={{ mt: 1 }}>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
-          {t('openbao.serverHealth', 'Server Health')}:
-        </Typography>
-        <Grid container spacing={1}>
-          {Object.entries(health).map(([key, value]) => (
-            <Grid item xs={12} sm={6} key={key}>
-              <Typography variant="caption" color="text.secondary">
-                {key}:
-              </Typography>
-              <Typography variant="body2" sx={{ ml: 1 }}>
-                {String(value)}
-              </Typography>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-    );
-  }, [t]);
 
   // Memoize action buttons to prevent unnecessary re-renders
   const actionButtons = useMemo(() => (
@@ -232,6 +257,31 @@ const OpenBAOStatusCard: React.FC = () => {
         </Button>
       )}
 
+      {/* Seal/Unseal button - only show when running */}
+      {status?.running && status.sealed !== null && (
+        status.sealed ? (
+          <Button
+            variant="outlined"
+            color="warning"
+            onClick={handleUnseal}
+            disabled={operationLoading || !config?.enabled || !config?.dev_mode}
+            startIcon={operationLoading ? <CircularProgress size={16} /> : <LockOpenIcon />}
+          >
+            {operationLoading ? t('openbao.unsealing', 'Unsealing...') : t('openbao.unseal', 'Unseal')}
+          </Button>
+        ) : (
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={handleSeal}
+            disabled={operationLoading || !config?.enabled}
+            startIcon={operationLoading ? <CircularProgress size={16} /> : <LockIcon />}
+          >
+            {operationLoading ? t('openbao.sealing', 'Sealing...') : t('openbao.seal', 'Seal')}
+          </Button>
+        )
+      )}
+
       <Button
         variant="outlined"
         onClick={handleRefresh}
@@ -251,7 +301,7 @@ const OpenBAOStatusCard: React.FC = () => {
         </Button>
       )}
     </Box>
-  ), [status?.running, status?.recent_logs, config?.enabled, operationLoading, showLogs, handleStart, handleStop, handleRefresh, t]);
+  ), [status?.running, status?.recent_logs, status?.sealed, config?.enabled, config?.dev_mode, operationLoading, showLogs, handleStart, handleStop, handleSeal, handleUnseal, handleRefresh, t]);
 
   if (loading) {
     return (
@@ -332,26 +382,70 @@ const OpenBAOStatusCard: React.FC = () => {
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 {t('openbao.mountPath', 'Mount Path')}
               </Typography>
-              <Typography variant="body1">
+              <Typography variant="body1" mb={2}>
                 {config.mount_path}
               </Typography>
+
+              {/* Server Health - only show when running and health data is available */}
+              {status?.running && status.health && (
+                <Box>
+                  {status.health.error ? (
+                    <Alert severity="warning" sx={{ mt: 1 }}>
+                      {status.health.error}
+                    </Alert>
+                  ) : (
+                    <Box>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        {t('openbao.serverHealth', 'Server Health')}:
+                      </Typography>
+                      <Grid container spacing={1}>
+                        {Object.entries(status.health).map(([key, value]) => (
+                          <Grid item xs={12} key={key}>
+                            <Typography variant="caption" color="text.secondary">
+                              {key}:
+                            </Typography>
+                            <Typography variant="body2" sx={{ ml: 1 }}>
+                              {String(value)}
+                            </Typography>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </Box>
+                  )}
+                </Box>
+              )}
             </Grid>
 
             <Grid item xs={12} sm={6}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                {t('openbao.devMode', 'Development Mode')}
+                {t('openbao.operationalMode', 'Operational Mode')}
               </Typography>
-              <Typography variant="body1">
-                {config.dev_mode ? t('common.yes', 'Yes') : t('common.no', 'No')}
-              </Typography>
+              <Box display="flex" alignItems="center" gap={1} mb={1}>
+                <Chip
+                  label={config.dev_mode ? t('openbao.development', 'Development') : t('openbao.production', 'Production')}
+                  size="small"
+                  color={config.dev_mode ? "warning" : "success"}
+                />
+              </Box>
+
+              {/* Seal Status - only show when running and sealed status is available */}
+              {status?.running && status.sealed !== null && (
+                <Box>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    {t('openbao.sealStatus', 'Seal Status')}
+                  </Typography>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Chip
+                      label={status.sealed ? t('openbao.sealed', 'Sealed') : t('openbao.unsealed', 'Unsealed')}
+                      size="small"
+                      color={status.sealed ? 'error' : 'success'}
+                      icon={status.sealed ? <LockIcon /> : <LockOpenIcon />}
+                    />
+                  </Box>
+                </Box>
+              )}
             </Grid>
 
-            {/* Health Information */}
-            {status.running && status.health && (
-              <Grid item xs={12}>
-                {formatHealthInfo(status.health)}
-              </Grid>
-            )}
 
             {/* Operation Result */}
             {operationResult && (

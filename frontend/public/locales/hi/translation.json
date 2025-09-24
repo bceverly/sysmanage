@@ -8,7 +8,8 @@
     "reports": "रिपोर्ट्स",
     "settings": "सेटिंग्स",
     "logout": "लॉगआउट",
-    "osUpgrades": "OS अपग्रेड"
+    "osUpgrades": "OS अपग्रेड",
+    "secrets": "गुप्त"
   },
   "login": {
     "title": "सिसमैनेज में लॉगिन करें",
@@ -143,7 +144,8 @@
     "unassigned": "असाइन नहीं किया गया",
     "less": "कम",
     "noDescription": "कोई विवरण नहीं",
-    "close": "बंद करें"
+    "close": "बंद करें",
+    "confirmAction": "कार्रवाई की पुष्टि करें"
   },
   "hostDetail": {
     "invalidId": "अमान्य होस्ट आईडी",
@@ -485,6 +487,46 @@
     "noUpdates": "सभी सिस्टम अप टू डेट हैं",
     "viewSecurity": "सुरक्षा अपडेट देखें",
     "viewAll": "सभी अपडेट देखें"
+  },
+  "secrets": {
+    "title": "गुप्त",
+    "savedSecrets": "सेव किए गए गुप्त",
+    "secretName": "गुप्त नाम",
+    "secretType": "गुप्त प्रकार",
+    "secretContent": "गुप्त सामग्री",
+    "createdDatetime": "बनाने का दिनांक और समय",
+    "createdAt": "बनाया गया",
+    "updatedAt": "अपडेट किया गया",
+    "addSecret": "गुप्त जोड़ें",
+    "editSecret": "गुप्त संपादित करें",
+    "viewSecret": "गुप्त देखें",
+    "deleteSelected": "चयनित को हटाएं",
+    "noSecrets": "कोई गुप्त नहीं मिला",
+    "nameRequired": "गुप्त नाम आवश्यक है",
+    "contentRequired": "गुप्त सामग्री आवश्यक है",
+    "loadError": "गुप्त लोड करने में विफल",
+    "loadContentError": "गुप्त सामग्री लोड करने में विफल",
+    "createSuccess": "गुप्त सफलतापूर्वक बनाया गया",
+    "createError": "गुप्त बनाने में विफल",
+    "updateSuccess": "गुप्त सफलतापूर्वक अपडेट किया गया",
+    "updateError": "गुप्त अपडेट करने में विफल",
+    "deleteSuccess": "गुप्त सफलतापूर्वक हटा दिया गया",
+    "deleteMultipleSuccess": "गुप्त सफलतापूर्वक हटा दिए गए",
+    "deleteError": "गुप्त हटाने में विफल",
+    "confirmDelete": "क्या आप वाकई इस गुप्त को हटाना चाहते हैं?",
+    "confirmDeleteMultiple": "क्या आप वाकई {count} गुप्त हटाना चाहते हैं?",
+    "replaceExistingSecret": "मौजूदा गुप्त को बदलें",
+    "replaceExistingSecretHint": "मौजूदा गुप्त को बदलने के लिए नई गुप्त सामग्री दर्ज करें",
+    "pasteSecretHint": "यहां अपनी गुप्त सामग्री चिपकाएं",
+    "keyVisibility": "कुंजी दृश्यता",
+    "type": {
+      "ssh_key": "SSH कुंजी"
+    },
+    "visibility": {
+      "public": "सार्वजनिक",
+      "private": "निजी"
+    },
+    "contentHidden": "[सुरक्षा के लिए सामग्री छुपाई गई]"
   },
   "scripts": {
     "title": "स्क्रिप्ट प्रबंधन",
@@ -843,5 +885,20 @@
     "package": "पैकेज",
     "packageUninstallQueued": "पैकेज अनइंस्टॉलेशन को कतार में जोड़ा गया है",
     "packageUninstallError": "पैकेज अनइंस्टॉलेशन को कतार में जोड़ने में त्रुटि"
+  },
+  "openbao": {
+    "devModeChip": "डेव",
+    "operationalMode": "परिचालन मोड",
+    "development": "विकास",
+    "production": "उत्पादन",
+    "sealStatus": "सील स्थिति",
+    "sealed": "सील",
+    "unsealed": "अनसील",
+    "seal": "सील करें",
+    "unseal": "अनसील करें",
+    "sealing": "सील हो रहा है...",
+    "unsealing": "अनसील हो रहा है...",
+    "sealError": "OpenBAO को सील करने में विफल",
+    "unsealError": "OpenBAO को अनसील करने में विफल"
   }
 }

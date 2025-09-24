@@ -35,6 +35,7 @@ def get_openbao_status() -> Dict[str, Any]:
             "pid": None,
             "server_url": None,
             "health": None,
+            "sealed": None,
         }
 
     # Read PID
@@ -49,6 +50,7 @@ def get_openbao_status() -> Dict[str, Any]:
             "pid": None,
             "server_url": None,
             "health": None,
+            "sealed": None,
         }
 
     # Check if process is running
@@ -91,14 +93,16 @@ def get_openbao_status() -> Dict[str, Any]:
             "pid": None,
             "server_url": None,
             "health": None,
+            "sealed": None,
         }
 
     # Process is running, get additional info
     vault_config = config.get_vault_config()
     server_url = vault_config.get("url", "http://127.0.0.1:8200")
 
-    # Try to get health status from OpenBAO API
+    # Try to get health status and seal status from OpenBAO API
     health_info = None
+    seal_status = None
     try:
         # Find OpenBAO binary
         bao_cmd = find_bao_binary()
@@ -124,11 +128,20 @@ def get_openbao_status() -> Dict[str, Any]:
                 for line in status_lines:
                     if ":" in line:
                         key, value = line.split(":", 1)
-                        health_info[key.strip()] = value.strip()
+                        key_clean = key.strip()
+                        value_clean = value.strip()
+                        health_info[key_clean] = value_clean
+
+                        # Extract seal status
+                        if key_clean.lower() == "sealed":
+                            seal_status = value_clean.lower() in ["true", "yes", "1"]
             else:
                 health_info = {
                     "error": result.stderr.strip() if result.stderr else "Unknown error"
                 }
+                # If we can't get status due to sealed vault, try to determine seal status
+                if "sealed" in result.stderr.lower():
+                    seal_status = True
     except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
         health_info = {"error": "Unable to connect to OpenBAO server"}
 
@@ -150,6 +163,7 @@ def get_openbao_status() -> Dict[str, Any]:
         "server_url": server_url,
         "health": health_info,
         "recent_logs": recent_logs,
+        "sealed": seal_status,
     }
 
 
@@ -481,6 +495,189 @@ def stop_openbao() -> Dict[str, Any]:
         }
 
 
+def seal_openbao() -> Dict[str, Any]:
+    """
+    Seal the OpenBAO vault.
+    """
+    # Check if running
+    status = get_openbao_status()
+    if not status["running"]:
+        return {
+            "success": False,
+            "message": _("openbao.not_running", "OpenBAO is not running"),
+            "status": status,
+        }
+
+    # Check if already sealed
+    if status.get("sealed") is True:
+        return {
+            "success": True,
+            "message": _("openbao.already_sealed", "OpenBAO is already sealed"),
+            "status": status,
+        }
+
+    try:
+        # Find OpenBAO binary
+        bao_cmd = find_bao_binary()
+        if not bao_cmd:
+            return {
+                "success": False,
+                "message": _("openbao.binary_not_found", "OpenBAO binary not found"),
+                "status": status,
+            }
+
+        vault_config = config.get_vault_config()
+        env = os.environ.copy()
+        env["BAO_ADDR"] = vault_config.get("url", "http://127.0.0.1:8200")
+        env["BAO_TOKEN"] = vault_config.get("token", "")
+
+        # bao_cmd is validated by find_bao_binary, operator seal is a safe fixed argument
+        result = subprocess.run(  # nosec B603
+            [bao_cmd, "operator", "seal"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            env=env,
+            check=False,
+        )
+
+        if result.returncode == 0:
+            # Wait a moment and get updated status
+            import time
+
+            time.sleep(1)
+            new_status = get_openbao_status()
+
+            return {
+                "success": True,
+                "message": _("openbao.sealed", "OpenBAO sealed successfully"),
+                "status": new_status,
+                "output": result.stdout,
+            }
+        else:
+            return {
+                "success": False,
+                "message": _("openbao.seal_failed", "Failed to seal OpenBAO"),
+                "error": result.stderr or result.stdout,
+                "status": get_openbao_status(),
+            }
+
+    except subprocess.TimeoutExpired:
+        return {
+            "success": False,
+            "message": _("openbao.seal_timeout", "OpenBAO seal operation timed out"),
+            "status": get_openbao_status(),
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "message": _("openbao.seal_error", "Error sealing OpenBAO: {error}").format(
+                error=str(e)
+            ),
+            "status": get_openbao_status(),
+        }
+
+
+def unseal_openbao() -> Dict[str, Any]:
+    """
+    Unseal the OpenBAO vault using the configured dev token.
+    Note: This is for development mode only.
+    """
+    # Check if running
+    status = get_openbao_status()
+    if not status["running"]:
+        return {
+            "success": False,
+            "message": _("openbao.not_running", "OpenBAO is not running"),
+            "status": status,
+        }
+
+    # Check if already unsealed
+    if status.get("sealed") is False:
+        return {
+            "success": True,
+            "message": _("openbao.already_unsealed", "OpenBAO is already unsealed"),
+            "status": status,
+        }
+
+    vault_config = config.get_vault_config()
+
+    # Check if we're in dev mode
+    if not vault_config.get("dev_mode", False):
+        return {
+            "success": False,
+            "message": _(
+                "openbao.unseal_prod_mode",
+                "Automatic unseal is only supported in development mode",
+            ),
+            "status": status,
+        }
+
+    try:
+        # Find OpenBAO binary
+        bao_cmd = find_bao_binary()
+        if not bao_cmd:
+            return {
+                "success": False,
+                "message": _("openbao.binary_not_found", "OpenBAO binary not found"),
+                "status": status,
+            }
+
+        env = os.environ.copy()
+        env["BAO_ADDR"] = vault_config.get("url", "http://127.0.0.1:8200")
+        env["BAO_TOKEN"] = vault_config.get("token", "")
+
+        # In dev mode, try to use the dev token to unseal
+        # This works because dev mode typically uses a fixed unseal key
+        result = subprocess.run(  # nosec B603
+            [bao_cmd, "operator", "unseal", "-address", env["BAO_ADDR"]],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            env=env,
+            check=False,
+            input="dev-only-token-change-me\n",  # Dev mode unseal key
+        )
+
+        if result.returncode == 0:
+            # Wait a moment and get updated status
+            import time
+
+            time.sleep(1)
+            new_status = get_openbao_status()
+
+            return {
+                "success": True,
+                "message": _("openbao.unsealed", "OpenBAO unsealed successfully"),
+                "status": new_status,
+                "output": result.stdout,
+            }
+        else:
+            return {
+                "success": False,
+                "message": _("openbao.unseal_failed", "Failed to unseal OpenBAO"),
+                "error": result.stderr or result.stdout,
+                "status": get_openbao_status(),
+            }
+
+    except subprocess.TimeoutExpired:
+        return {
+            "success": False,
+            "message": _(
+                "openbao.unseal_timeout", "OpenBAO unseal operation timed out"
+            ),
+            "status": get_openbao_status(),
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "message": _(
+                "openbao.unseal_error", "Error unsealing OpenBAO: {error}"
+            ).format(error=str(e)),
+            "status": get_openbao_status(),
+        }
+
+
 @router.get("/openbao/status", dependencies=[Depends(JWTBearer())])
 async def get_status():
     """
@@ -556,3 +753,47 @@ async def get_config():
     }
 
     return safe_config
+
+
+@router.post("/openbao/seal", dependencies=[Depends(JWTBearer())])
+async def seal_vault():
+    """
+    Seal the OpenBAO vault.
+    """
+    try:
+        result = seal_openbao()
+        if not result.get("success", True) and "error" in result:
+            result = result.copy()
+            result["error"] = _("openbao.seal_failed", "Failed to seal OpenBAO")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:  # pylint: disable=broad-except
+        raise HTTPException(  # pylint: disable=raise-missing-from
+            status_code=500,
+            detail=_(
+                "openbao.generic_error", "An error occurred while sealing OpenBAO"
+            ),
+        )
+
+
+@router.post("/openbao/unseal", dependencies=[Depends(JWTBearer())])
+async def unseal_vault():
+    """
+    Unseal the OpenBAO vault.
+    """
+    try:
+        result = unseal_openbao()
+        if not result.get("success", True) and "error" in result:
+            result = result.copy()
+            result["error"] = _("openbao.unseal_failed", "Failed to unseal OpenBAO")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:  # pylint: disable=broad-except
+        raise HTTPException(  # pylint: disable=raise-missing-from
+            status_code=500,
+            detail=_(
+                "openbao.generic_error", "An error occurred while unsealing OpenBAO"
+            ),
+        )

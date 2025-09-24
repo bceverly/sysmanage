@@ -8,7 +8,8 @@
     "reports": "报告",
     "settings": "设置",
     "logout": "退出登录",
-    "osUpgrades": "操作系统升级"
+    "osUpgrades": "操作系统升级",
+    "secrets": "机密"
   },
   "login": {
     "title": "登录 SysManage",
@@ -314,7 +315,8 @@
     "less": "更少",
     "noDescription": "无描述",
     "close": "关闭",
-    "id": "ID"
+    "id": "ID",
+    "confirmAction": "确认操作"
   },
   "serverDown": {
     "title": "连接中断",
@@ -487,6 +489,46 @@
     "noUpdates": "所有系统都是最新的",
     "viewSecurity": "查看安全更新",
     "viewAll": "查看所有更新"
+  },
+  "secrets": {
+    "title": "机密",
+    "savedSecrets": "已保存的机密",
+    "secretName": "机密名称",
+    "secretType": "机密类型",
+    "secretContent": "机密内容",
+    "createdDatetime": "创建日期时间",
+    "createdAt": "创建于",
+    "updatedAt": "更新于",
+    "addSecret": "添加机密",
+    "editSecret": "编辑机密",
+    "viewSecret": "查看机密",
+    "deleteSelected": "删除选中的",
+    "noSecrets": "未找到机密",
+    "nameRequired": "机密名称是必需的",
+    "contentRequired": "机密内容是必需的",
+    "loadError": "加载机密失败",
+    "loadContentError": "加载机密内容失败",
+    "createSuccess": "机密创建成功",
+    "createError": "机密创建失败",
+    "updateSuccess": "机密更新成功",
+    "updateError": "机密更新失败",
+    "deleteSuccess": "机密删除成功",
+    "deleteMultipleSuccess": "机密删除成功",
+    "deleteError": "机密删除失败",
+    "confirmDelete": "您确定要删除这个机密吗？",
+    "confirmDeleteMultiple": "您确定要删除 {count} 个机密吗？",
+    "replaceExistingSecret": "替换现有机密",
+    "replaceExistingSecretHint": "输入新的机密内容来替换现有机密",
+    "pasteSecretHint": "在此粘贴您的机密内容",
+    "keyVisibility": "密钥可见性",
+    "type": {
+      "ssh_key": "SSH 密钥"
+    },
+    "visibility": {
+      "public": "公开",
+      "private": "私有"
+    },
+    "contentHidden": "[出于安全考虑内容已隐藏]"
   },
   "scripts": {
     "title": "脚本管理",
@@ -845,5 +887,20 @@
     "package": "软件包",
     "packageUninstallQueued": "软件包卸载已加入队列",
     "packageUninstallError": "软件包卸载加入队列时出错"
+  },
+  "openbao": {
+    "devModeChip": "开发",
+    "operationalMode": "运行模式",
+    "development": "开发",
+    "production": "生产",
+    "sealStatus": "封印状态",
+    "sealed": "已封印",
+    "unsealed": "已解封",
+    "seal": "封印",
+    "unseal": "解封",
+    "sealing": "封印中...",
+    "unsealing": "解封中...",
+    "sealError": "封印 OpenBAO 失败",
+    "unsealError": "解封 OpenBAO 失败"
   }
 }

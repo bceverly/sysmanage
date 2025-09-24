@@ -12,6 +12,7 @@ export interface OpenBAOStatus {
   server_url: string | null;
   health: OpenBAOHealth | null;
   recent_logs: string[];
+  sealed: boolean | null;
 }
 
 export interface OpenBAOConfig {
@@ -50,6 +51,16 @@ class OpenBAOService {
 
   async stop(): Promise<OpenBAOOperationResult> {
     const response = await axiosInstance.post('/api/openbao/stop');
+    return response.data;
+  }
+
+  async seal(): Promise<OpenBAOOperationResult> {
+    const response = await axiosInstance.post('/api/openbao/seal');
+    return response.data;
+  }
+
+  async unseal(): Promise<OpenBAOOperationResult> {
+    const response = await axiosInstance.post('/api/openbao/unseal');
     return response.data;
   }
 }

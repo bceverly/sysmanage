@@ -8,7 +8,8 @@
     "reports": "Relatórios",
     "settings": "Configurações",
     "logout": "Sair",
-    "osUpgrades": "Atualizações do SO"
+    "osUpgrades": "Atualizações do SO",
+    "secrets": "Segredos"
   },
   "login": {
     "title": "Entrar no SysManage",
@@ -144,7 +145,8 @@
     "less": "menos",
     "noDescription": "Sem descrição",
     "close": "Fechar",
-    "id": "ID"
+    "id": "ID",
+    "confirmAction": "Confirmar ação"
   },
   "hostDetail": {
     "invalidId": "ID do host inválido",
@@ -487,6 +489,46 @@
     "noUpdates": "Todos os sistemas estão atualizados",
     "viewSecurity": "Ver Atualizações de Segurança",
     "viewAll": "Ver Todas as Atualizações"
+  },
+  "secrets": {
+    "title": "Segredos",
+    "savedSecrets": "Segredos Salvos",
+    "secretName": "Nome do Segredo",
+    "secretType": "Tipo de Segredo",
+    "secretContent": "Conteúdo do Segredo",
+    "createdDatetime": "Data de Criação",
+    "createdAt": "Criado em",
+    "updatedAt": "Atualizado em",
+    "addSecret": "Adicionar Segredo",
+    "editSecret": "Editar Segredo",
+    "viewSecret": "Ver Segredo",
+    "deleteSelected": "Excluir Selecionados",
+    "noSecrets": "Nenhum segredo encontrado",
+    "nameRequired": "Nome do segredo é obrigatório",
+    "contentRequired": "Conteúdo do segredo é obrigatório",
+    "loadError": "Erro ao carregar segredos",
+    "loadContentError": "Erro ao carregar conteúdo do segredo",
+    "createSuccess": "Segredo criado com sucesso",
+    "createError": "Erro ao criar segredo",
+    "updateSuccess": "Segredo atualizado com sucesso",
+    "updateError": "Erro ao atualizar segredo",
+    "deleteSuccess": "Segredo excluído com sucesso",
+    "deleteMultipleSuccess": "Segredos excluídos com sucesso",
+    "deleteError": "Erro ao excluir segredos",
+    "confirmDelete": "Tem certeza de que deseja excluir este segredo?",
+    "confirmDeleteMultiple": "Tem certeza de que deseja excluir {count} segredos?",
+    "replaceExistingSecret": "Substituir segredo existente",
+    "replaceExistingSecretHint": "Digite o novo conteúdo do segredo para substituir o existente",
+    "pasteSecretHint": "Cole o conteúdo do seu segredo aqui",
+    "keyVisibility": "Visibilidade da Chave",
+    "type": {
+      "ssh_key": "Chave SSH"
+    },
+    "visibility": {
+      "public": "Público",
+      "private": "Privado"
+    },
+    "contentHidden": "[Conteúdo oculto por segurança]"
   },
   "scripts": {
     "title": "Gestão de Scripts",
@@ -847,5 +889,20 @@
     "package": "Pacote",
     "packageUninstallQueued": "A desinstalação do pacote foi enfileirada",
     "packageUninstallError": "Erro ao enfileirar a desinstalação do pacote"
+  },
+  "openbao": {
+    "devModeChip": "Dev",
+    "operationalMode": "Modo Operacional",
+    "development": "Desenvolvimento",
+    "production": "Produção",
+    "sealStatus": "Status do Selo",
+    "sealed": "Selado",
+    "unsealed": "Deselado",
+    "seal": "Selar",
+    "unseal": "Desselar",
+    "sealing": "Selando...",
+    "unsealing": "Desselando...",
+    "sealError": "Falha ao selar o OpenBAO",
+    "unsealError": "Falha ao desselar o OpenBAO"
   }
 }

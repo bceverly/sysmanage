@@ -34,6 +34,7 @@ from backend.api import (
     queue,
     reports,
     scripts,
+    secrets,
     security,
     tag,
     ubuntu_pro_settings,
@@ -663,6 +664,12 @@ app.include_router(
     openbao.router, prefix="/api", tags=["openbao"]
 )  # /api/openbao/* (with auth)
 startup_logger.info("OpenBAO router added")
+
+startup_logger.info("Adding secrets router with /api prefix")
+app.include_router(
+    secrets.router, prefix="/api", tags=["secrets"]
+)  # /api/secrets/* (with auth)
+startup_logger.info("Secrets router added")
 
 startup_logger.info("=== ALL ROUTES REGISTERED ===")
 

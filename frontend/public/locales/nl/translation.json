@@ -8,7 +8,8 @@
     "reports": "Rapporten",
     "settings": "Instellingen",
     "logout": "Uitloggen",
-    "osUpgrades": "OS-upgrades"
+    "osUpgrades": "OS-upgrades",
+    "secrets": "Geheimen"
   },
   "login": {
     "title": "Inloggen bij SysManage",
@@ -314,7 +315,8 @@
     "less": "minder",
     "noDescription": "Geen beschrijving",
     "close": "Sluiten",
-    "id": "ID"
+    "id": "ID",
+    "confirmAction": "Actie bevestigen"
   },
   "serverDown": {
     "title": "Verbinding Onderbroken",
@@ -487,6 +489,46 @@
     "noUpdates": "Alle systemen zijn bijgewerkt",
     "viewSecurity": "Beveiligingsupdates Bekijken",
     "viewAll": "Alle Updates Bekijken"
+  },
+  "secrets": {
+    "title": "Geheimen",
+    "savedSecrets": "Opgeslagen Geheimen",
+    "secretName": "Geheim Naam",
+    "secretType": "Geheim Type",
+    "secretContent": "Geheim Inhoud",
+    "createdDatetime": "Aanmaakdatum",
+    "createdAt": "Aangemaakt op",
+    "updatedAt": "Bijgewerkt op",
+    "addSecret": "Geheim Toevoegen",
+    "editSecret": "Geheim Bewerken",
+    "viewSecret": "Geheim Bekijken",
+    "deleteSelected": "Geselecteerde Verwijderen",
+    "noSecrets": "Geen geheimen gevonden",
+    "nameRequired": "Geheim naam is verplicht",
+    "contentRequired": "Geheim inhoud is verplicht",
+    "loadError": "Fout bij laden van geheimen",
+    "loadContentError": "Fout bij laden van geheim inhoud",
+    "createSuccess": "Geheim succesvol aangemaakt",
+    "createError": "Fout bij aanmaken van geheim",
+    "updateSuccess": "Geheim succesvol bijgewerkt",
+    "updateError": "Fout bij bijwerken van geheim",
+    "deleteSuccess": "Geheim succesvol verwijderd",
+    "deleteMultipleSuccess": "Geheimen succesvol verwijderd",
+    "deleteError": "Fout bij verwijderen van geheimen",
+    "confirmDelete": "Weet je zeker dat je dit geheim wilt verwijderen?",
+    "confirmDeleteMultiple": "Weet je zeker dat je {count} geheimen wilt verwijderen?",
+    "replaceExistingSecret": "Bestaand geheim vervangen",
+    "replaceExistingSecretHint": "Voer nieuwe geheim inhoud in om het bestaande geheim te vervangen",
+    "pasteSecretHint": "Plak je geheim inhoud hier",
+    "keyVisibility": "Sleutel Zichtbaarheid",
+    "type": {
+      "ssh_key": "SSH Sleutel"
+    },
+    "visibility": {
+      "public": "Openbaar",
+      "private": "Privé"
+    },
+    "contentHidden": "[Inhoud verborgen om veiligheidsredenen]"
   },
   "scripts": {
     "title": "Script Beheer",
@@ -845,5 +887,20 @@
     "package": "Pakket",
     "packageUninstallQueued": "Pakket deïnstallatie is in de wachtrij geplaatst",
     "packageUninstallError": "Fout bij het in de wachtrij plaatsen van pakket deïnstallatie"
+  },
+  "openbao": {
+    "devModeChip": "Dev",
+    "operationalMode": "Bedrijfsmodus",
+    "development": "Ontwikkeling",
+    "production": "Productie",
+    "sealStatus": "Zegel Status",
+    "sealed": "Verzegeld",
+    "unsealed": "Onverzegeld",
+    "seal": "Verzegelen",
+    "unseal": "Ontzegelen",
+    "sealing": "Verzegelen...",
+    "unsealing": "Ontzegelen...",
+    "sealError": "Verzegelen van OpenBAO mislukt",
+    "unsealError": "Ontzegelen van OpenBAO mislukt"
   }
 }

@@ -8,7 +8,8 @@
     "reports": "التقارير",
     "settings": "الإعدادات",
     "logout": "تسجيل الخروج",
-    "osUpgrades": "ترقيات نظام التشغيل"
+    "osUpgrades": "ترقيات نظام التشغيل",
+    "secrets": "الأسرار"
   },
   "login": {
     "title": "تسجيل الدخول إلى سيس مانج",
@@ -143,7 +144,8 @@
     "unassigned": "غير مخصص",
     "less": "أقل",
     "noDescription": "لا يوجد وصف",
-    "close": "إغلاق"
+    "close": "إغلاق",
+    "confirmAction": "تأكيد الإجراء"
   },
   "hostDetail": {
     "invalidId": "معرف مضيف غير صالح",
@@ -490,6 +492,46 @@
     "noUpdates": "جميع الأنظمة محدثة",
     "viewSecurity": "عرض تحديثات الأمان",
     "viewAll": "عرض جميع التحديثات"
+  },
+  "secrets": {
+    "title": "الأسرار",
+    "savedSecrets": "الأسرار المحفوظة",
+    "secretName": "اسم السر",
+    "secretType": "نوع السر",
+    "secretContent": "محتوى السر",
+    "createdDatetime": "تاريخ الإنشاء",
+    "createdAt": "تم الإنشاء في",
+    "updatedAt": "تم التحديث في",
+    "addSecret": "إضافة سر",
+    "editSecret": "تحرير السر",
+    "viewSecret": "عرض السر",
+    "deleteSelected": "حذف المحدد",
+    "noSecrets": "لا توجد أسرار",
+    "nameRequired": "اسم السر مطلوب",
+    "contentRequired": "محتوى السر مطلوب",
+    "loadError": "فشل في تحميل الأسرار",
+    "loadContentError": "فشل في تحميل محتوى السر",
+    "createSuccess": "تم إنشاء السر بنجاح",
+    "createError": "فشل في إنشاء السر",
+    "updateSuccess": "تم تحديث السر بنجاح",
+    "updateError": "فشل في تحديث السر",
+    "deleteSuccess": "تم حذف السر بنجاح",
+    "deleteMultipleSuccess": "تم حذف الأسرار بنجاح",
+    "deleteError": "فشل في حذف الأسرار",
+    "confirmDelete": "هل أنت متأكد من أنك تريد حذف هذا السر؟",
+    "confirmDeleteMultiple": "هل أنت متأكد من أنك تريد حذف {count} أسرار؟",
+    "replaceExistingSecret": "استبدال السر الموجود",
+    "replaceExistingSecretHint": "أدخل محتوى السر الجديد لاستبدال السر الموجود",
+    "pasteSecretHint": "الصق محتوى السر هنا",
+    "keyVisibility": "رؤية المفتاح",
+    "type": {
+      "ssh_key": "مفتاح SSH"
+    },
+    "visibility": {
+      "public": "عام",
+      "private": "خاص"
+    },
+    "contentHidden": "[المحتوى مخفي لأسباب أمنية]"
   },
   "scripts": {
     "title": "إدارة السكريبتات",
@@ -849,5 +891,20 @@
     "operation": "العملية",
     "packageUninstallQueued": "تم إدراج إلغاء تثبيت الحزمة في الطابور",
     "packageUninstallError": "خطأ في إدراج إلغاء تثبيت الحزمة في الطابور"
+  },
+  "openbao": {
+    "devModeChip": "تطوير",
+    "operationalMode": "وضع التشغيل",
+    "development": "تطوير",
+    "production": "إنتاج",
+    "sealStatus": "حالة الختم",
+    "sealed": "مختوم",
+    "unsealed": "غير مختوم",
+    "seal": "ختم",
+    "unseal": "إلغاء الختم",
+    "sealing": "جاري الختم...",
+    "unsealing": "جاري إلغاء الختم...",
+    "sealError": "فشل في ختم OpenBAO",
+    "unsealError": "فشل في إلغاء ختم OpenBAO"
   }
 }

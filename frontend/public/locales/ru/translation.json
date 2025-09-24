@@ -8,7 +8,8 @@
     "reports": "Отчеты",
     "settings": "Настройки",
     "logout": "Выйти",
-    "osUpgrades": "Обновления ОС"
+    "osUpgrades": "Обновления ОС",
+    "secrets": "Секреты"
   },
   "login": {
     "title": "Войти в SysManage",
@@ -312,7 +313,8 @@
     "less": "меньше",
     "noDescription": "Без описания",
     "close": "Закрыть",
-    "id": "ID"
+    "id": "ID",
+    "confirmAction": "Подтвердить действие"
   },
   "serverDown": {
     "title": "Соединение прервано",
@@ -485,6 +487,46 @@
     "noUpdates": "Все системы обновлены",
     "viewSecurity": "Просмотр Обновлений Безопасности",
     "viewAll": "Просмотр Всех Обновлений"
+  },
+  "secrets": {
+    "title": "Секреты",
+    "savedSecrets": "Сохраненные Секреты",
+    "secretName": "Имя Секрета",
+    "secretType": "Тип Секрета",
+    "secretContent": "Содержимое Секрета",
+    "createdDatetime": "Дата Создания",
+    "createdAt": "Создано",
+    "updatedAt": "Обновлено",
+    "addSecret": "Добавить Секрет",
+    "editSecret": "Редактировать Секрет",
+    "viewSecret": "Просмотреть Секрет",
+    "deleteSelected": "Удалить Выбранные",
+    "noSecrets": "Секреты не найдены",
+    "nameRequired": "Имя секрета обязательно",
+    "contentRequired": "Содержимое секрета обязательно",
+    "loadError": "Ошибка загрузки секретов",
+    "loadContentError": "Ошибка загрузки содержимого секрета",
+    "createSuccess": "Секрет успешно создан",
+    "createError": "Ошибка создания секрета",
+    "updateSuccess": "Секрет успешно обновлен",
+    "updateError": "Ошибка обновления секрета",
+    "deleteSuccess": "Секрет успешно удален",
+    "deleteMultipleSuccess": "Секреты успешно удалены",
+    "deleteError": "Ошибка удаления секретов",
+    "confirmDelete": "Вы уверены, что хотите удалить этот секрет?",
+    "confirmDeleteMultiple": "Вы уверены, что хотите удалить {count} секретов?",
+    "replaceExistingSecret": "Заменить существующий секрет",
+    "replaceExistingSecretHint": "Введите новое содержимое секрета для замены существующего",
+    "pasteSecretHint": "Вставьте содержимое вашего секрета здесь",
+    "keyVisibility": "Видимость Ключа",
+    "type": {
+      "ssh_key": "SSH Ключ"
+    },
+    "visibility": {
+      "public": "Публичный",
+      "private": "Приватный"
+    },
+    "contentHidden": "[Содержимое скрыто из соображений безопасности]"
   },
   "scripts": {
     "title": "Управление скриптами",
@@ -843,5 +885,20 @@
     "package": "Пакет",
     "packageUninstallQueued": "Удаление пакета поставлено в очередь",
     "packageUninstallError": "Ошибка при постановке удаления пакета в очередь"
+  },
+  "openbao": {
+    "devModeChip": "Разр",
+    "operationalMode": "Операционный Режим",
+    "development": "Разработка",
+    "production": "Производство",
+    "sealStatus": "Статус Печати",
+    "sealed": "Запечатано",
+    "unsealed": "Распечатано",
+    "seal": "Запечатать",
+    "unseal": "Распечатать",
+    "sealing": "Запечатывание...",
+    "unsealing": "Распечатывание...",
+    "sealError": "Не удалось запечатать OpenBAO",
+    "unsealError": "Не удалось распечатать OpenBAO"
   }
 }

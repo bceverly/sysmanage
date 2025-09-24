@@ -27,6 +27,7 @@ import Users from './Pages/Users';
 import UserDetail from './Pages/UserDetail';
 import Updates from './Pages/Updates';
 import OSUpgrades from './Pages/OSUpgrades';
+import Secrets from './Pages/Secrets';
 import Scripts from './Pages/Scripts';
 import Reports from './Pages/Reports';
 import ReportViewer from './Pages/ReportViewer';
@@ -103,6 +104,7 @@ function App() {
                     <Route path="/users/:userId" element={<UserDetail />} />
                     <Route path="/updates" element={<Updates />} />
                     <Route path="/os-upgrades" element={<OSUpgrades />} />
+                    <Route path="/secrets" element={<Secrets />} />
                     <Route path="/scripts" element={<Scripts />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/reports/:reportId" element={<ReportViewer />} />
