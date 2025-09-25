@@ -213,6 +213,14 @@
     "regularGroup": "नियमित",
     "memberOfGroups": "समूह",
     "groupMembers": "सदस्य",
+    "addSSHKey": "SSH की जोड़ें",
+    "addSSHKeyToUser": "{user} में SSH की जोड़ें",
+    "selectSSHKeysToAdd": "इस उपयोगकर्ता में जोड़ने के लिए SSH की का चयन करें:",
+    "noSSHKeysAvailable": "कोई SSH की उपलब्ध नहीं है। पहले गुप्त अनुभाग में SSH की बनाएं।",
+    "sshKeysDeployedSuccess": "SSH की सफलतापूर्वक तैनात की गईं",
+    "sshKeysDeployedError": "SSH की तैनात करने में विफल",
+    "failedToLoadSSHKeys": "SSH की लोड करने में विफल",
+    "searchSSHKeys": "नाम या फाइल नाम से SSH कीज़ खोजें...",
     "physicalVolumes": "भौतिक",
     "logicalVolumes": "तार्किक",
     "allVolumes": "सभी",
@@ -492,7 +500,11 @@
     "title": "गुप्त",
     "savedSecrets": "सेव किए गए गुप्त",
     "secretName": "गुप्त नाम",
+    "secretFilename": "फ़ाइल नाम",
     "secretType": "गुप्त प्रकार",
+    "secretSubtype": "गुप्त उपप्रकार",
+    "databaseEngine": "डेटाबेस इंजिन",
+    "apiProvider": "API प्रदाता",
     "secretContent": "गुप्त सामग्री",
     "createdDatetime": "बनाने का दिनांक और समय",
     "createdAt": "बनाया गया",
@@ -520,13 +532,47 @@
     "pasteSecretHint": "यहां अपनी गुप्त सामग्री चिपकाएं",
     "keyVisibility": "कुंजी दृश्यता",
     "type": {
-      "ssh_key": "SSH कुंजी"
+      "api_keys": "API कुंजियाँ",
+      "database_credentials": "डेटाबेस प्रमाण पत्र",
+      "ssh_key": "SSH कुंजी",
+      "ssl_certificate": "SSL प्रमाणपत्र"
     },
     "visibility": {
       "public": "सार्वजनिक",
-      "private": "निजी"
+      "private": "निजी",
+      "ca": "प्रमाणपत्र प्राधिकरण",
+      "root": "रूट",
+      "intermediate": "मध्यवर्ती",
+      "chain": "श्रृंखला",
+      "key_file": "कुंजी फ़ाइल",
+      "certificate": "प्रमाणपत्र"
     },
-    "contentHidden": "[सुरक्षा के लिए सामग्री छुपाई गई]"
+    "contentHidden": "[सुरक्षा के लिए सामग्री छुपाई गई]",
+    "keyType": "कुंजी प्रकार",
+    "certificateType": "प्रमाणपत्र प्रकार",
+    "key_type": {
+      "public": "सार्वजनिक",
+      "private": "निजी",
+      "ca": "प्रमाण प्राधिकरण"
+    },
+    "certificate_type": {
+      "root": "रूट प्रमाणपत्र",
+      "intermediate": "मध्यवर्ती प्रमाणपत्र",
+      "chain": "चेन प्रमाणपत्र",
+      "key_file": "कुंजी फाइल",
+      "certificate": "जारी प्रमाणपत्र"
+    },
+    "database_engine": {
+      "mysql": "mysql",
+      "oracle": "Oracle",
+      "postgresql": "PostgreSQL",
+      "sqlserver": "Microsoft SQL Server",
+      "sqlite": "sqlite3"
+    },
+    "api_provider": {
+      "github": "Github",
+      "salesforce": "Salesforce"
+    }
   },
   "scripts": {
     "title": "स्क्रिप्ट प्रबंधन",

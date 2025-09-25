@@ -213,6 +213,14 @@
     "regularGroup": "مجموعة عادية",
     "memberOfGroups": "المجموعات",
     "groupMembers": "الأعضاء",
+    "addSSHKey": "إضافة مفتاح SSH",
+    "addSSHKeyToUser": "إضافة مفتاح SSH إلى {user}",
+    "selectSSHKeysToAdd": "حدد مفاتيح SSH التي تريد إضافتها إلى هذا المستخدم:",
+    "noSSHKeysAvailable": "لا توجد مفاتيح SSH متاحة. قم بإنشاء مفاتيح SSH في قسم الأسرار أولاً.",
+    "sshKeysDeployedSuccess": "تم نشر مفاتيح SSH بنجاح",
+    "sshKeysDeployedError": "فشل في نشر مفاتيح SSH",
+    "failedToLoadSSHKeys": "فشل في تحميل مفاتيح SSH",
+    "searchSSHKeys": "البحث في مفاتيح SSH بالاسم أو اسم الملف...",
     "physicalVolumes": "فيزيائي",
     "logicalVolumes": "منطقي",
     "allVolumes": "الجميع",
@@ -497,7 +505,11 @@
     "title": "الأسرار",
     "savedSecrets": "الأسرار المحفوظة",
     "secretName": "اسم السر",
+    "secretFilename": "اسم الملف",
     "secretType": "نوع السر",
+    "secretSubtype": "نوع فرعي للسر",
+    "databaseEngine": "محرك قاعدة البيانات",
+    "apiProvider": "مزود API",
     "secretContent": "محتوى السر",
     "createdDatetime": "تاريخ الإنشاء",
     "createdAt": "تم الإنشاء في",
@@ -525,13 +537,47 @@
     "pasteSecretHint": "الصق محتوى السر هنا",
     "keyVisibility": "رؤية المفتاح",
     "type": {
-      "ssh_key": "مفتاح SSH"
+      "api_keys": "مفاتيح API",
+      "database_credentials": "بيانات اعتماد قاعدة البيانات",
+      "ssh_key": "مفتاح SSH",
+      "ssl_certificate": "شهادة SSL"
     },
     "visibility": {
       "public": "عام",
-      "private": "خاص"
+      "private": "خاص",
+      "ca": "سلطة الشهادات",
+      "root": "جذر",
+      "intermediate": "وسطي",
+      "chain": "سلسلة",
+      "key_file": "ملف المفتاح",
+      "certificate": "شهادة"
     },
-    "contentHidden": "[المحتوى مخفي لأسباب أمنية]"
+    "contentHidden": "[المحتوى مخفي لأسباب أمنية]",
+    "keyType": "نوع المفتاح",
+    "certificateType": "نوع الشهادة",
+    "key_type": {
+      "public": "عام",
+      "private": "خاص",
+      "ca": "مرجع الشهادات"
+    },
+    "certificate_type": {
+      "root": "شهادة الجذر",
+      "intermediate": "شهادة وسطية",
+      "chain": "شهادة السلسلة",
+      "key_file": "ملف المفتاح",
+      "certificate": "شهادة صادرة"
+    },
+    "database_engine": {
+      "mysql": "mysql",
+      "oracle": "Oracle",
+      "postgresql": "PostgreSQL",
+      "sqlserver": "Microsoft SQL Server",
+      "sqlite": "sqlite3"
+    },
+    "api_provider": {
+      "github": "Github",
+      "salesforce": "Salesforce"
+    }
   },
   "scripts": {
     "title": "إدارة السكريبتات",

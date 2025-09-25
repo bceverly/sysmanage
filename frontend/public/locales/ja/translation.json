@@ -185,6 +185,14 @@
     "allInterfaces": "すべて",
     "memberOfGroups": "グループ",
     "groupMembers": "メンバー",
+    "addSSHKey": "SSHキーを追加",
+    "addSSHKeyToUser": "{user}にSSHキーを追加",
+    "selectSSHKeysToAdd": "このユーザーに追加したいSSHキーを選択してください:",
+    "noSSHKeysAvailable": "利用可能なSSHキーがありません。最初にシークレットセクションでSSHキーを作成してください。",
+    "sshKeysDeployedSuccess": "SSHキーのデプロイが成功しました",
+    "sshKeysDeployedError": "SSHキーのデプロイに失敗しました",
+    "failedToLoadSSHKeys": "SSHキーの読み込みに失敗しました",
+    "searchSSHKeys": "名前またはファイル名でSSHキーを検索...",
     "diagnosticsTab": "診断",
     "diagnosticsData": "診断データ",
     "requestHostData": "ホストデータをリクエスト",
@@ -494,7 +502,11 @@
     "title": "シークレット",
     "savedSecrets": "保存済みシークレット",
     "secretName": "シークレット名",
+    "secretFilename": "ファイル名",
     "secretType": "シークレットタイプ",
+    "secretSubtype": "シークレットサブタイプ",
+    "databaseEngine": "データベースエンジン",
+    "apiProvider": "APIプロバイダー",
     "secretContent": "シークレットコンテンツ",
     "createdDatetime": "作成日時",
     "createdAt": "作成日",
@@ -522,13 +534,47 @@
     "pasteSecretHint": "ここにシークレットコンテンツを貼り付けてください",
     "keyVisibility": "キーの可視性",
     "type": {
-      "ssh_key": "SSHキー"
+      "api_keys": "APIキー",
+      "database_credentials": "データベース認証情報",
+      "ssh_key": "SSHキー",
+      "ssl_certificate": "SSL証明書"
     },
     "visibility": {
       "public": "パブリック",
-      "private": "プライベート"
+      "private": "プライベート",
+      "ca": "認証局",
+      "root": "ルート",
+      "intermediate": "中間",
+      "chain": "チェーン",
+      "key_file": "キーファイル",
+      "certificate": "証明書"
     },
-    "contentHidden": "[セキュリティのため内容を非表示]"
+    "contentHidden": "[セキュリティのため内容を非表示]",
+    "keyType": "キータイプ",
+    "certificateType": "証明書タイプ",
+    "key_type": {
+      "public": "パブリック",
+      "private": "プライベート",
+      "ca": "認証局"
+    },
+    "certificate_type": {
+      "root": "ルート証明書",
+      "intermediate": "中間証明書",
+      "chain": "チェーン証明書",
+      "key_file": "キーファイル",
+      "certificate": "発行証明書"
+    },
+    "database_engine": {
+      "mysql": "mysql",
+      "oracle": "Oracle",
+      "postgresql": "PostgreSQL",
+      "sqlserver": "Microsoft SQL Server",
+      "sqlite": "sqlite3"
+    },
+    "api_provider": {
+      "github": "Github",
+      "salesforce": "Salesforce"
+    }
   },
   "scripts": {
     "title": "スクリプト管理",

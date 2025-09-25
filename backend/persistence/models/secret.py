@@ -19,10 +19,15 @@ class Secret(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False
     )
     name = Column(String(255), nullable=False, index=True)
-    secret_type = Column(String(50), nullable=False, index=True)  # 'ssh_key', etc.
-    key_visibility = Column(
-        String(20), nullable=True
-    )  # For SSH keys: 'public' or 'private'
+    filename = Column(
+        String(255), nullable=True
+    )  # Filename for the secret (e.g., id_rsa.pub, server.crt)
+    secret_type = Column(
+        String(50), nullable=False, index=True
+    )  # 'ssh_key', 'ssl_certificate', 'database_credentials', 'api_keys', etc.
+    secret_subtype = Column(
+        String(30), nullable=True
+    )  # SSH keys: 'public', 'private', 'ca' | SSL certificates: 'root', 'intermediate', 'chain', 'key_file', 'certificate' | Database credentials: 'postgresql', 'mysql', 'oracle', 'sqlserver', 'sqlite' | API keys: 'github', 'salesforce'
     vault_token = Column(Text, nullable=False)  # Token to retrieve secret from OpenBAO
     vault_path = Column(
         String(500), nullable=False
@@ -54,8 +59,9 @@ class Secret(Base):
         return {
             "id": str(self.id),
             "name": self.name,
+            "filename": self.filename,
             "secret_type": self.secret_type,
-            "key_visibility": self.key_visibility,
+            "secret_subtype": self.secret_subtype,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "created_by": self.created_by,

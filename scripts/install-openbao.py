@@ -16,6 +16,22 @@ import shutil
 from pathlib import Path
 
 
+def safe_extract(tar, path):
+    """Safely extract tar file, preventing path traversal attacks."""
+    def is_within_directory(directory, target):
+        abs_directory = os.path.abspath(directory)
+        abs_target = os.path.abspath(target)
+        prefix = os.path.commonpath([abs_directory, abs_target])
+        return prefix == abs_directory
+
+    def safe_members(tar):
+        for member in tar.getmembers():
+            if is_within_directory(path, os.path.join(path, member.name)):
+                yield member
+
+    tar.extractall(path, members=safe_members(tar))
+
+
 def detect_platform():
     """Detect the current platform and return appropriate OpenBAO binary info."""
     system = platform.system().lower()
@@ -333,7 +349,7 @@ def install_from_binary():
 
                 # Make binary executable (Unix-like systems)
                 if platform.system().lower() != 'windows':
-                    os.chmod(binary_path, 0o700)  # Owner only execute permissions for security
+                    os.chmod(binary_path, 0o700)  # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
 
                 # Install to appropriate location
                 install_path = get_install_path()
@@ -354,7 +370,8 @@ def install_from_binary():
                 # Extract the binary from tar.gz (used by FreeBSD)
                 import tarfile
                 with tarfile.open(downloaded_file, 'r:gz') as tar_ref:
-                    tar_ref.extractall(temp_dir)
+                    # Safe extraction to prevent path traversal attacks
+                    safe_extract(tar_ref, temp_dir)
 
                 # Find the binary (should be named 'bao' or 'bao.exe')
                 binary_name = 'bao.exe' if platform.system().lower() == 'windows' else 'bao'
@@ -366,7 +383,7 @@ def install_from_binary():
 
                 # Make binary executable (Unix-like systems)
                 if platform.system().lower() != 'windows':
-                    os.chmod(binary_path, 0o755)  # Standard executable permissions
+                    os.chmod(binary_path, 0o755)  # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
 
                 # Install to appropriate location
                 install_path = get_install_path()
@@ -459,7 +476,7 @@ def extract_from_deb(deb_file):
                     binary_path = os.path.join(root, 'bao')
 
                     # Make executable
-                    os.chmod(binary_path, 0o700)  # Owner only execute permissions for security
+                    os.chmod(binary_path, 0o700)  # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
 
                     # Install to user's local bin
                     install_path = os.path.expanduser("~/.local/bin")

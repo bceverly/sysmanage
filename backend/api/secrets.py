@@ -3,6 +3,7 @@ API endpoints for secrets management.
 """
 
 import uuid
+import logging
 from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, HTTPException, Depends, status
 from pydantic import BaseModel, Field
@@ -11,10 +12,17 @@ from sqlalchemy.orm import Session
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.persistence.db import get_db
 from backend.persistence.models.secret import Secret
+from backend.persistence.models import Host
 from backend.services.vault_service import VaultService, VaultError
+from backend.websocket.queue_manager import (
+    server_queue_manager,
+    QueueDirection,
+    Priority,
+)
 from backend.i18n import _
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 class SecretCreate(BaseModel):
@@ -23,10 +31,16 @@ class SecretCreate(BaseModel):
     name: str = Field(
         ..., min_length=1, max_length=255, description="Name of the secret"
     )
+    filename: Optional[str] = Field(
+        None,
+        max_length=255,
+        description="Filename for the secret (e.g., id_rsa.pub, server.crt)",
+    )
     secret_type: str = Field(..., description="Type of secret (e.g., 'ssh_key')")
     content: str = Field(..., min_length=1, description="The secret content")
-    key_visibility: Optional[str] = Field(
-        None, description="For SSH keys: 'public' or 'private'"
+    secret_subtype: Optional[str] = Field(
+        None,
+        description="For SSH keys: 'public', 'private', 'ca' | For SSL certificates: 'root', 'intermediate', 'chain', 'key_file', 'certificate' | For Database credentials: 'postgresql', 'mysql', 'oracle', 'sqlserver', 'sqlite' | For API keys: 'github', 'salesforce'",
     )
 
 
@@ -36,9 +50,15 @@ class SecretUpdate(BaseModel):
     name: Optional[str] = Field(
         None, min_length=1, max_length=255, description="Name of the secret"
     )
+    filename: Optional[str] = Field(
+        None,
+        max_length=255,
+        description="Filename for the secret (e.g., id_rsa.pub, server.crt)",
+    )
     content: Optional[str] = Field(None, min_length=1, description="The secret content")
-    key_visibility: Optional[str] = Field(
-        None, description="For SSH keys: 'public' or 'private'"
+    secret_subtype: Optional[str] = Field(
+        None,
+        description="For SSH keys: 'public', 'private', 'ca' | For SSL certificates: 'root', 'intermediate', 'chain', 'key_file', 'certificate' | For Database credentials: 'postgresql', 'mysql', 'oracle', 'sqlserver', 'sqlite' | For API keys: 'github', 'salesforce'",
     )
 
 
@@ -47,8 +67,9 @@ class SecretResponse(BaseModel):
 
     id: str
     name: str
+    filename: Optional[str]
     secret_type: str
-    key_visibility: Optional[str]
+    secret_subtype: Optional[str]
     created_at: str
     updated_at: str
     created_by: str
@@ -84,20 +105,106 @@ async def get_secret_types():
     return {
         "types": [
             {
+                "value": "api_keys",
+                "label": _("secrets.type.api_keys", "API Keys"),
+                "supports_visibility": True,
+                "visibility_label": _("secrets.apiProvider", "API Provider"),
+                "visibility_options": [
+                    {
+                        "value": "github",
+                        "label": _("secrets.api_provider.github", "Github"),
+                    },
+                    {
+                        "value": "salesforce",
+                        "label": _("secrets.api_provider.salesforce", "Salesforce"),
+                    },
+                ],
+            },
+            {
+                "value": "database_credentials",
+                "label": _("secrets.type.database_credentials", "Database Credentials"),
+                "supports_visibility": True,
+                "visibility_label": _("secrets.databaseEngine", "Database Engine"),
+                "visibility_options": [
+                    {
+                        "value": "mysql",
+                        "label": _("secrets.database_engine.mysql", "mysql"),
+                    },
+                    {
+                        "value": "oracle",
+                        "label": _("secrets.database_engine.oracle", "Oracle"),
+                    },
+                    {
+                        "value": "postgresql",
+                        "label": _("secrets.database_engine.postgresql", "PostgreSQL"),
+                    },
+                    {
+                        "value": "sqlserver",
+                        "label": _(
+                            "secrets.database_engine.sqlserver", "Microsoft SQL Server"
+                        ),
+                    },
+                    {
+                        "value": "sqlite",
+                        "label": _("secrets.database_engine.sqlite", "sqlite3"),
+                    },
+                ],
+            },
+            {
                 "value": "ssh_key",
                 "label": _("secrets.type.ssh_key", "SSH Key"),
                 "supports_visibility": True,
+                "visibility_label": _("secrets.keyType", "Key Type"),
                 "visibility_options": [
                     {
                         "value": "public",
-                        "label": _("secrets.visibility.public", "Public"),
+                        "label": _("secrets.key_type.public", "Public"),
                     },
                     {
                         "value": "private",
-                        "label": _("secrets.visibility.private", "Private"),
+                        "label": _("secrets.key_type.private", "Private"),
+                    },
+                    {
+                        "value": "ca",
+                        "label": _("secrets.key_type.ca", "CA"),
                     },
                 ],
-            }
+            },
+            {
+                "value": "ssl_certificate",
+                "label": _("secrets.type.ssl_certificate", "SSL Certificate"),
+                "supports_visibility": True,
+                "visibility_label": _("secrets.certificateType", "Certificate Type"),
+                "visibility_options": [
+                    {
+                        "value": "root",
+                        "label": _("secrets.certificate_type.root", "Root Certificate"),
+                    },
+                    {
+                        "value": "intermediate",
+                        "label": _(
+                            "secrets.certificate_type.intermediate",
+                            "Intermediate Certificate",
+                        ),
+                    },
+                    {
+                        "value": "chain",
+                        "label": _(
+                            "secrets.certificate_type.chain", "Chain Certificate"
+                        ),
+                    },
+                    {
+                        "value": "key_file",
+                        "label": _("secrets.certificate_type.key_file", "Key File"),
+                    },
+                    {
+                        "value": "certificate",
+                        "label": _(
+                            "secrets.certificate_type.certificate", "Issued Certificate"
+                        ),
+                    },
+                ],
+            },
         ]
     }
 
@@ -214,7 +321,7 @@ async def create_secret(
                 secret_data.name,
                 secret_data.content,
                 secret_data.secret_type,
-                secret_data.key_visibility,
+                secret_data.secret_subtype,
             )
         except VaultError as e:
             raise HTTPException(
@@ -228,8 +335,9 @@ async def create_secret(
         # Create database record
         secret = Secret(
             name=secret_data.name,
+            filename=secret_data.filename,
             secret_type=secret_data.secret_type,
-            key_visibility=secret_data.key_visibility,
+            secret_subtype=secret_data.secret_subtype,
             vault_token=vault_info["vault_token"],
             vault_path=vault_info["vault_path"],
             created_by=current_user,
@@ -299,7 +407,7 @@ async def update_secret(
                     secret_data.name or secret.name,
                     secret_data.content,
                     secret.secret_type,
-                    secret_data.key_visibility or secret.key_visibility,
+                    secret_data.secret_subtype or secret.secret_subtype,
                 )
 
                 # Update vault references
@@ -317,8 +425,10 @@ async def update_secret(
         # Update database record
         if secret_data.name:
             secret.name = secret_data.name
-        if secret_data.key_visibility is not None:
-            secret.key_visibility = secret_data.key_visibility
+        if secret_data.filename is not None:
+            secret.filename = secret_data.filename
+        if secret_data.secret_subtype is not None:
+            secret.secret_subtype = secret_data.secret_subtype
 
         secret.updated_by = current_user
 
@@ -459,4 +569,152 @@ async def delete_multiple_secrets(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=_("secrets.delete_multiple_error", "Failed to delete secrets"),
+        ) from e
+
+
+class SSHKeyDeployRequest(BaseModel):
+    """Model for SSH key deployment request."""
+
+    host_id: str = Field(..., description="Target host ID")
+    username: str = Field(..., description="Target username")
+    secret_ids: List[str] = Field(
+        ..., min_items=1, description="List of secret IDs to deploy"
+    )
+
+
+@router.post("/secrets/deploy-ssh-keys", dependencies=[Depends(JWTBearer())])
+async def deploy_ssh_keys(
+    deploy_request: SSHKeyDeployRequest,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Deploy SSH keys to a user on a target host via agent."""
+    try:
+        # Validate host exists and is active
+        host = (
+            db.query(Host).filter(Host.id == uuid.UUID(deploy_request.host_id)).first()
+        )
+        if not host:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=_("hosts.not_found", "Host not found"),
+            )
+
+        if not host.active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=_("hosts.not_active", "Host is not active"),
+            )
+
+        if not host.is_agent_privileged:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=_(
+                    "hosts.not_privileged",
+                    "Host agent is not running in privileged mode",
+                ),
+            )
+
+        # Convert string IDs to UUIDs and validate secrets exist
+        uuid_ids = []
+        for secret_id in deploy_request.secret_ids:
+            try:
+                uuid_ids.append(uuid.UUID(secret_id))
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=_("secrets.invalid_id", "Invalid secret ID: {id}").format(
+                        id=secret_id
+                    ),
+                ) from exc
+
+        # Get secrets and validate they are SSH keys
+        secrets = db.query(Secret).filter(Secret.id.in_(uuid_ids)).all()
+        if len(secrets) != len(uuid_ids):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=_("secrets.some_not_found", "Some secrets not found"),
+            )
+
+        ssh_keys = [s for s in secrets if s.secret_type == "ssh_key"]  # nosec B105
+        if len(ssh_keys) != len(secrets):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=_("secrets.not_ssh_keys", "All secrets must be SSH keys"),
+            )
+
+        # Retrieve secret contents from vault
+        vault_service = VaultService()
+        ssh_key_data = []
+
+        for secret in ssh_keys:
+            try:
+                vault_data = vault_service.retrieve_secret(
+                    secret.vault_path, secret.vault_token
+                )
+                ssh_key_data.append(
+                    {
+                        "id": str(secret.id),
+                        "name": secret.name,
+                        "filename": secret.filename
+                        or f"id_rsa{'_pub' if secret.secret_subtype == 'public' else ''}",  # nosec B105
+                        "content": vault_data.get("content", ""),
+                        "subtype": secret.secret_subtype,
+                    }
+                )
+            except VaultError as e:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=_(
+                        "secrets.vault_error",
+                        "Failed to retrieve secret from vault: {error}",
+                    ).format(error=str(e)),
+                ) from e
+
+        # Create message data for agent
+        from datetime import datetime, timezone
+
+        now = datetime.now(timezone.utc)
+
+        message_data = {
+            "command_type": "deploy_ssh_keys",
+            "parameters": {
+                "username": deploy_request.username,
+                "ssh_keys": ssh_key_data,
+                "requested_by": current_user,
+                "requested_at": now.isoformat(),
+            },
+        }
+
+        # Queue the message for the agent
+        try:
+            message_id = server_queue_manager.enqueue_message(
+                message_type="command",
+                message_data=message_data,
+                direction=QueueDirection.OUTBOUND,
+                host_id=str(host.id),
+                priority=Priority.NORMAL,
+                db=None,  # Let queue manager create its own session
+            )
+        except Exception as e:
+            logger.error("Failed to enqueue SSH deployment message: %s", str(e))
+            raise
+
+        return {
+            "message": _(
+                "secrets.ssh_keys_deployment_queued",
+                "SSH keys deployment queued successfully",
+            ),
+            "message_id": message_id,
+            "host_id": str(host.id),
+            "username": deploy_request.username,
+            "key_count": len(ssh_key_data),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=_("secrets.deploy_ssh_keys_error", "Failed to deploy SSH keys"),
         ) from e

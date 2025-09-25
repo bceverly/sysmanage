@@ -44,9 +44,10 @@ const Secrets: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingSecretId, setEditingSecretId] = useState<string | null>(null);
   const [secretName, setSecretName] = useState('');
-  const [selectedSecretType, setSelectedSecretType] = useState('ssh_key');
+  const [secretFilename, setSecretFilename] = useState('');
+  const [selectedSecretType, setSelectedSecretType] = useState('api_keys');
   const [secretContent, setSecretContent] = useState('');
-  const [keyVisibility, setKeyVisibility] = useState('private');
+  const [keyVisibility, setKeyVisibility] = useState('github');
 
   // Secret viewing state
   const [viewingSecret, setViewingSecret] = useState<SecretWithContent | null>(null);
@@ -101,12 +102,50 @@ const Secrets: React.FC = () => {
       // Fallback to default types
       setSecretTypes([
         {
+          value: 'api_keys',
+          label: t('secrets.type.api_keys', 'API Keys'),
+          supports_visibility: true,
+          visibility_label: t('secrets.apiProvider', 'API Provider'),
+          visibility_options: [
+            { value: 'github', label: t('secrets.api_provider.github', 'Github') },
+            { value: 'salesforce', label: t('secrets.api_provider.salesforce', 'Salesforce') }
+          ]
+        },
+        {
+          value: 'database_credentials',
+          label: t('secrets.type.database_credentials', 'Database Credentials'),
+          supports_visibility: true,
+          visibility_label: t('secrets.databaseEngine', 'Database Engine'),
+          visibility_options: [
+            { value: 'mysql', label: t('secrets.database_engine.mysql', 'mysql') },
+            { value: 'oracle', label: t('secrets.database_engine.oracle', 'Oracle') },
+            { value: 'postgresql', label: t('secrets.database_engine.postgresql', 'PostgreSQL') },
+            { value: 'sqlserver', label: t('secrets.database_engine.sqlserver', 'Microsoft SQL Server') },
+            { value: 'sqlite', label: t('secrets.database_engine.sqlite', 'sqlite3') }
+          ]
+        },
+        {
           value: 'ssh_key',
           label: t('secrets.type.ssh_key', 'SSH Key'),
           supports_visibility: true,
+          visibility_label: t('secrets.keyType', 'Key Type'),
           visibility_options: [
-            { value: 'public', label: t('secrets.visibility.public', 'Public') },
-            { value: 'private', label: t('secrets.visibility.private', 'Private') }
+            { value: 'public', label: t('secrets.key_type.public', 'Public') },
+            { value: 'private', label: t('secrets.key_type.private', 'Private') },
+            { value: 'ca', label: t('secrets.key_type.ca', 'CA') }
+          ]
+        },
+        {
+          value: 'ssl_certificate',
+          label: t('secrets.type.ssl_certificate', 'SSL Certificate'),
+          supports_visibility: true,
+          visibility_label: t('secrets.certificateType', 'Certificate Type'),
+          visibility_options: [
+            { value: 'root', label: t('secrets.certificate_type.root', 'Root Certificate') },
+            { value: 'intermediate', label: t('secrets.certificate_type.intermediate', 'Intermediate Certificate') },
+            { value: 'chain', label: t('secrets.certificate_type.chain', 'Chain Certificate') },
+            { value: 'key_file', label: t('secrets.certificate_type.key_file', 'Key File') },
+            { value: 'certificate', label: t('secrets.certificate_type.certificate', 'Issued Certificate') }
           ]
         }
       ]);
@@ -128,9 +167,10 @@ const Secrets: React.FC = () => {
 
   const handleAddSecret = () => {
     setSecretName('');
-    setSelectedSecretType('ssh_key');
+    setSecretFilename('');
+    setSelectedSecretType('api_keys');
     setSecretContent('');
-    setKeyVisibility('private');
+    setKeyVisibility('github');
     setIsEditMode(false);
     setEditingSecretId(null);
     setShowAddSecretDialog(true);
@@ -141,8 +181,9 @@ const Secrets: React.FC = () => {
       // Get secret metadata
       const secretData = await secretsService.getSecret(secretId);
       setSecretName(secretData.name);
+      setSecretFilename(secretData.filename || '');
       setSelectedSecretType(secretData.secret_type);
-      setKeyVisibility(secretData.key_visibility || 'private');
+      setKeyVisibility(secretData.secret_subtype || 'private');
       setSecretContent(''); // Don't pre-fill content for security
       setIsEditMode(true);
       setEditingSecretId(secretId);
@@ -182,9 +223,10 @@ const Secrets: React.FC = () => {
       setLoading(true);
       const secretData = {
         name: secretName,
+        filename: secretFilename,
         secret_type: selectedSecretType,
         content: secretContent,
-        key_visibility: keyVisibility
+        secret_subtype: keyVisibility
       };
 
       if (isEditMode && editingSecretId) {
@@ -276,8 +318,9 @@ const Secrets: React.FC = () => {
   const handleCloseAddSecretDialog = () => {
     setShowAddSecretDialog(false);
     setSecretName('');
+    setSecretFilename('');
     setSecretContent('');
-    setKeyVisibility('private');
+    setKeyVisibility('github');
     setIsEditMode(false);
     setEditingSecretId(null);
   };
@@ -296,11 +339,43 @@ const Secrets: React.FC = () => {
       flex: 1,
     },
     {
+      field: 'filename',
+      headerName: t('secrets.secretFilename', 'Filename'),
+      width: 150,
+      renderCell: (params) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+          <Typography variant="body2">
+            {params.value || '-'}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
       field: 'secret_type',
       headerName: t('secrets.secretType', 'Secret Type'),
       width: 150,
       renderCell: (params) => {
         return t(`secrets.type.${params.value}`, params.value);
+      },
+    },
+    {
+      field: 'secret_subtype',
+      headerName: t('secrets.secretSubtype', 'Secret Subtype'),
+      width: 150,
+      renderCell: (params) => {
+        if (!params.value || !params.row.secret_type) return '';
+
+        // Map the subtype based on the secret type
+        if (params.row.secret_type === 'ssh_key') {
+          return t(`secrets.key_type.${params.value}`, params.value);
+        } else if (params.row.secret_type === 'ssl_certificate') {
+          return t(`secrets.certificate_type.${params.value}`, params.value);
+        } else if (params.row.secret_type === 'database_credentials') {
+          return t(`secrets.database_engine.${params.value}`, params.value);
+        } else if (params.row.secret_type === 'api_keys') {
+          return t(`secrets.api_provider.${params.value}`, params.value);
+        }
+        return params.value;
       },
     },
     {
@@ -436,6 +511,15 @@ const Secrets: React.FC = () => {
               required
             />
 
+            <TextField
+              fullWidth
+              label={t('secrets.secretFilename', 'Filename')}
+              value={secretFilename}
+              onChange={(e) => setSecretFilename(e.target.value)}
+              margin="normal"
+              placeholder="e.g., id_rsa.pub, server.crt, database.conf"
+            />
+
             <FormControl fullWidth margin="normal">
               <InputLabel>{t('secrets.secretType', 'Secret Type')}</InputLabel>
               <Select
@@ -471,15 +555,26 @@ const Secrets: React.FC = () => {
 
             {getSelectedSecretType()?.supports_visibility && (
               <FormControl fullWidth margin="normal">
-                <InputLabel>{t('secrets.keyVisibility', 'Key Visibility')}</InputLabel>
+                <InputLabel>{t(getSelectedSecretType()?.visibility_label || 'secrets.keyVisibility')}</InputLabel>
                 <Select
                   value={keyVisibility}
-                  label={t('secrets.keyVisibility', 'Key Visibility')}
+                  label={t(getSelectedSecretType()?.visibility_label || 'secrets.keyVisibility')}
                   onChange={(e) => setKeyVisibility(e.target.value)}
                 >
                   {getSelectedSecretType()?.visibility_options?.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
-                      {t(`secrets.visibility.${option.value}`, option.value)}
+                      {(() => {
+                        if (selectedSecretType === 'ssh_key') {
+                          return t(`secrets.key_type.${option.value}`, option.value);
+                        } else if (selectedSecretType === 'ssl_certificate') {
+                          return t(`secrets.certificate_type.${option.value}`, option.value);
+                        } else if (selectedSecretType === 'database_credentials') {
+                          return t(`secrets.database_engine.${option.value}`, option.value);
+                        } else if (selectedSecretType === 'api_keys') {
+                          return t(`secrets.api_provider.${option.value}`, option.value);
+                        }
+                        return option.value;
+                      })()}
                     </MenuItem>
                   ))}
                 </Select>
@@ -523,10 +618,31 @@ const Secrets: React.FC = () => {
                       <strong>{t('secrets.secretType', 'Secret Type')}:</strong> {t(`secrets.type.${viewingSecret.secret_type}`, viewingSecret.secret_type)}
                     </Typography>
                   </Grid>
-                  {viewingSecret.key_visibility && (
+                  {viewingSecret.filename && (
                     <Grid item xs={12} md={6}>
                       <Typography variant="body2" gutterBottom>
-                        <strong>{t('secrets.keyVisibility', 'Key Visibility')}:</strong> {t(`secrets.visibility.${viewingSecret.key_visibility}`, viewingSecret.key_visibility)}
+                        <strong>{t('secrets.secretFilename', 'Filename')}:</strong> {viewingSecret.filename}
+                      </Typography>
+                    </Grid>
+                  )}
+                  {viewingSecret.secret_subtype && (
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="body2" gutterBottom>
+                        <strong>
+                          {t(secretTypes.find(t => t.value === viewingSecret.secret_type)?.visibility_label || 'secrets.keyVisibility')}:
+                        </strong>{' '}
+                        {(() => {
+                          if (viewingSecret.secret_type === 'ssh_key') {
+                            return t(`secrets.key_type.${viewingSecret.secret_subtype}`, viewingSecret.secret_subtype);
+                          } else if (viewingSecret.secret_type === 'ssl_certificate') {
+                            return t(`secrets.certificate_type.${viewingSecret.secret_subtype}`, viewingSecret.secret_subtype);
+                          } else if (viewingSecret.secret_type === 'database_credentials') {
+                            return t(`secrets.database_engine.${viewingSecret.secret_subtype}`, viewingSecret.secret_subtype);
+                          } else if (viewingSecret.secret_type === 'api_keys') {
+                            return t(`secrets.api_provider.${viewingSecret.secret_subtype}`, viewingSecret.secret_subtype);
+                          }
+                          return viewingSecret.secret_subtype;
+                        })()}
                       </Typography>
                     </Grid>
                   )}

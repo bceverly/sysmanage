@@ -220,6 +220,14 @@
     "allInterfaces": "Alle",
     "memberOfGroups": "Gruppen",
     "groupMembers": "Mitglieder",
+    "addSSHKey": "SSH-Schlüssel Hinzufügen",
+    "addSSHKeyToUser": "SSH-Schlüssel zu {user} Hinzufügen",
+    "selectSSHKeysToAdd": "Wählen Sie die SSH-Schlüssel aus, die Sie diesem Benutzer hinzufügen möchten:",
+    "noSSHKeysAvailable": "Keine SSH-Schlüssel verfügbar. Erstellen Sie zuerst SSH-Schlüssel im Bereich Geheimnisse.",
+    "sshKeysDeployedSuccess": "SSH-Schlüssel erfolgreich bereitgestellt",
+    "sshKeysDeployedError": "Bereitstellung von SSH-Schlüsseln fehlgeschlagen",
+    "failedToLoadSSHKeys": "Laden von SSH-Schlüsseln fehlgeschlagen",
+    "searchSSHKeys": "SSH-Schlüssel nach Name oder Dateiname suchen...",
     "diagnosticsTab": "Diagnose",
     "diagnosticsData": "Diagnosedaten",
     "requestHostData": "Host-Daten Anfordern",
@@ -494,7 +502,11 @@
     "title": "Geheimnisse",
     "savedSecrets": "Gespeicherte Geheimnisse",
     "secretName": "Geheimnis-Name",
+    "secretFilename": "Dateiname",
     "secretType": "Geheimnis-Typ",
+    "secretSubtype": "Geheimnis-Untertyp",
+    "databaseEngine": "Datenbank-Engine",
+    "apiProvider": "API-Anbieter",
     "secretContent": "Geheimnis-Inhalt",
     "createdDatetime": "Erstellungsdatum",
     "createdAt": "Erstellt am",
@@ -522,13 +534,47 @@
     "pasteSecretHint": "Ihren Geheimnis-Inhalt hier einfügen",
     "keyVisibility": "Schlüssel-Sichtbarkeit",
     "type": {
-      "ssh_key": "SSH-Schlüssel"
+      "api_keys": "API-Schlüssel",
+      "database_credentials": "Datenbank-Anmeldedaten",
+      "ssh_key": "SSH-Schlüssel",
+      "ssl_certificate": "SSL-Zertifikat"
     },
     "visibility": {
       "public": "Öffentlich",
-      "private": "Privat"
+      "private": "Privat",
+      "ca": "Zertifizierungsstelle",
+      "root": "Root",
+      "intermediate": "Zwischenzertifikat",
+      "chain": "Zertifikatskette",
+      "key_file": "Schlüsseldatei",
+      "certificate": "Zertifikat"
     },
-    "contentHidden": "[Inhalt aus Sicherheitsgründen verborgen]"
+    "contentHidden": "[Inhalt aus Sicherheitsgründen verborgen]",
+    "keyType": "Schlüsseltyp",
+    "certificateType": "Zertifikatstyp",
+    "key_type": {
+      "public": "Öffentlich",
+      "private": "Privat",
+      "ca": "Zertifizierungsstelle"
+    },
+    "certificate_type": {
+      "root": "Stammzertifikat",
+      "intermediate": "Zwischenzertifikat",
+      "chain": "Kettenzertifikat",
+      "key_file": "Schlüsseldatei",
+      "certificate": "Ausgestelltes Zertifikat"
+    },
+    "database_engine": {
+      "mysql": "mysql",
+      "oracle": "Oracle",
+      "postgresql": "PostgreSQL",
+      "sqlserver": "Microsoft SQL Server",
+      "sqlite": "sqlite3"
+    },
+    "api_provider": {
+      "github": "Github",
+      "salesforce": "Salesforce"
+    }
   },
   "scripts": {
     "title": "Skript-Verwaltung",

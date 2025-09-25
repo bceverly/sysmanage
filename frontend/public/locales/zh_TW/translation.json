@@ -219,6 +219,14 @@
     "allInterfaces": "全部",
     "memberOfGroups": "群組",
     "groupMembers": "成員",
+    "addSSHKey": "新增SSH金鑰",
+    "addSSHKeyToUser": "為{user}新增SSH金鑰",
+    "selectSSHKeysToAdd": "選擇要新增到此使用者的SSH金鑰：",
+    "noSSHKeysAvailable": "沒有可用的SSH金鑰。請先在機密區段建立SSH金鑰。",
+    "sshKeysDeployedSuccess": "SSH金鑰部署成功",
+    "sshKeysDeployedError": "SSH金鑰部署失敗",
+    "failedToLoadSSHKeys": "載入SSH金鑰失敗",
+    "searchSSHKeys": "按名稱或檔案名稱搜索SSH金鑰...",
     "diagnosticsTab": "診斷",
     "diagnosticsData": "診斷數據",
     "requestHostData": "請求主機數據",
@@ -492,7 +500,11 @@
     "title": "機密",
     "savedSecrets": "已儲存的機密",
     "secretName": "機密名稱",
+    "secretFilename": "檔案名稱",
     "secretType": "機密類型",
+    "secretSubtype": "機密子類型",
+    "databaseEngine": "資料庫引擎",
+    "apiProvider": "API提供商",
     "secretContent": "機密內容",
     "createdDatetime": "建立日期時間",
     "createdAt": "建立於",
@@ -520,13 +532,47 @@
     "pasteSecretHint": "在此貼上您的機密內容",
     "keyVisibility": "金鑰可見性",
     "type": {
-      "ssh_key": "SSH 金鑰"
+      "api_keys": "API金鑰",
+      "database_credentials": "資料庫憑據",
+      "ssh_key": "SSH 金鑰",
+      "ssl_certificate": "SSL 憑證"
     },
     "visibility": {
       "public": "公開",
-      "private": "私人"
+      "private": "私人",
+      "ca": "憑證授權機構",
+      "root": "根憑證",
+      "intermediate": "中級憑證",
+      "chain": "憑證鏈",
+      "key_file": "金鑰檔案",
+      "certificate": "憑證"
     },
-    "contentHidden": "[基於安全考量內容已隱藏]"
+    "contentHidden": "[基於安全考量內容已隱藏]",
+    "keyType": "金鑰類型",
+    "certificateType": "憑證類型",
+    "key_type": {
+      "public": "公開",
+      "private": "私有",
+      "ca": "憑證頒發機構"
+    },
+    "certificate_type": {
+      "root": "根憑證",
+      "intermediate": "中繼憑證",
+      "chain": "鏈憑證",
+      "key_file": "金鑰檔案",
+      "certificate": "已簽發憑證"
+    },
+    "database_engine": {
+      "mysql": "mysql",
+      "oracle": "Oracle",
+      "postgresql": "PostgreSQL",
+      "sqlserver": "Microsoft SQL Server",
+      "sqlite": "sqlite3"
+    },
+    "api_provider": {
+      "github": "Github",
+      "salesforce": "Salesforce"
+    }
   },
   "scripts": {
     "title": "腳本管理",

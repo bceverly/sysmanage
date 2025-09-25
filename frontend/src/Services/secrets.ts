@@ -3,8 +3,9 @@ import axiosInstance from './api.js';
 export interface SecretResponse {
   id: string;
   name: string;
+  filename?: string;
   secret_type: string;
-  key_visibility?: string;
+  secret_subtype?: string;
   created_at: string;
   updated_at: string;
   created_by: string;
@@ -19,6 +20,7 @@ export interface SecretType {
   value: string;
   label: string;
   supports_visibility: boolean;
+  visibility_label?: string;
   visibility_options?: Array<{
     value: string;
     label: string;
@@ -31,9 +33,10 @@ export interface SecretTypesResponse {
 
 export interface CreateSecretRequest {
   name: string;
+  filename?: string;
   secret_type: string;
   content: string;
-  key_visibility: string;
+  secret_subtype: string;
 }
 
 export type UpdateSecretRequest = CreateSecretRequest;

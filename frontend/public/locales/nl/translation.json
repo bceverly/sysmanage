@@ -185,6 +185,14 @@
     "allInterfaces": "Alle",
     "memberOfGroups": "Groepen",
     "groupMembers": "Leden",
+    "addSSHKey": "SSH-sleutel Toevoegen",
+    "addSSHKeyToUser": "SSH-sleutel Toevoegen aan {user}",
+    "selectSSHKeysToAdd": "Selecteer de SSH-sleutels die u wilt toevoegen aan deze gebruiker:",
+    "noSSHKeysAvailable": "Geen SSH-sleutels beschikbaar. Maak eerst SSH-sleutels in de sectie Geheimen.",
+    "sshKeysDeployedSuccess": "SSH-sleutels succesvol uitgerold",
+    "sshKeysDeployedError": "Uitrollen van SSH-sleutels mislukt",
+    "failedToLoadSSHKeys": "Laden van SSH-sleutels mislukt",
+    "searchSSHKeys": "Zoek SSH-sleutels op naam of bestandsnaam...",
     "diagnosticsTab": "Diagnostiek",
     "diagnosticsData": "Diagnostische Gegevens",
     "requestHostData": "Hostgegevens Opvragen",
@@ -494,7 +502,11 @@
     "title": "Geheimen",
     "savedSecrets": "Opgeslagen Geheimen",
     "secretName": "Geheim Naam",
+    "secretFilename": "Bestandsnaam",
     "secretType": "Geheim Type",
+    "secretSubtype": "Geheim Subtype",
+    "databaseEngine": "Database Engine",
+    "apiProvider": "API Provider",
     "secretContent": "Geheim Inhoud",
     "createdDatetime": "Aanmaakdatum",
     "createdAt": "Aangemaakt op",
@@ -522,13 +534,47 @@
     "pasteSecretHint": "Plak je geheim inhoud hier",
     "keyVisibility": "Sleutel Zichtbaarheid",
     "type": {
-      "ssh_key": "SSH Sleutel"
+      "api_keys": "API Sleutels",
+      "database_credentials": "Database Inloggegevens",
+      "ssh_key": "SSH Sleutel",
+      "ssl_certificate": "SSL Certificaat"
     },
     "visibility": {
       "public": "Openbaar",
-      "private": "Privé"
+      "private": "Privé",
+      "ca": "Certificaatautoriteit",
+      "root": "Root",
+      "intermediate": "Tussenliggend",
+      "chain": "Keten",
+      "key_file": "Sleutelbestand",
+      "certificate": "Certificaat"
     },
-    "contentHidden": "[Inhoud verborgen om veiligheidsredenen]"
+    "contentHidden": "[Inhoud verborgen om veiligheidsredenen]",
+    "keyType": "Sleuteltype",
+    "certificateType": "Certificaattype",
+    "key_type": {
+      "public": "Openbaar",
+      "private": "Privé",
+      "ca": "Certificaatautoriteit"
+    },
+    "certificate_type": {
+      "root": "Root Certificaat",
+      "intermediate": "Tussenliggend Certificaat",
+      "chain": "Keten Certificaat",
+      "key_file": "Sleutelbestand",
+      "certificate": "Uitgegeven Certificaat"
+    },
+    "database_engine": {
+      "mysql": "mysql",
+      "oracle": "Oracle",
+      "postgresql": "PostgreSQL",
+      "sqlserver": "Microsoft SQL Server",
+      "sqlite": "sqlite3"
+    },
+    "api_provider": {
+      "github": "Github",
+      "salesforce": "Salesforce"
+    }
   },
   "scripts": {
     "title": "Script Beheer",

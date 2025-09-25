@@ -220,6 +220,14 @@
     "allInterfaces": "Todas",
     "memberOfGroups": "Grupos",
     "groupMembers": "Miembros",
+    "addSSHKey": "Agregar Clave SSH",
+    "addSSHKeyToUser": "Agregar Clave SSH a {user}",
+    "selectSSHKeysToAdd": "Seleccione las claves SSH que desea agregar a este usuario:",
+    "noSSHKeysAvailable": "No hay claves SSH disponibles. Cree claves SSH en la sección Secretos primero.",
+    "sshKeysDeployedSuccess": "Claves SSH desplegadas con éxito",
+    "sshKeysDeployedError": "Error al desplegar claves SSH",
+    "failedToLoadSSHKeys": "Error al cargar claves SSH",
+    "searchSSHKeys": "Buscar claves SSH por nombre o nombre de archivo...",
     "diagnosticsTab": "Diagnósticos",
     "diagnosticsData": "Datos de Diagnóstico",
     "requestHostData": "Solicitar Datos del Host",
@@ -494,7 +502,11 @@
     "title": "Secretos",
     "savedSecrets": "Secretos Guardados",
     "secretName": "Nombre del Secreto",
+    "secretFilename": "Nombre del Archivo",
     "secretType": "Tipo de Secreto",
+    "secretSubtype": "Subtipo de Secreto",
+    "databaseEngine": "Motor de Base de Datos",
+    "apiProvider": "Proveedor de API",
     "secretContent": "Contenido del Secreto",
     "createdDatetime": "Fecha de Creación",
     "createdAt": "Creado en",
@@ -522,13 +534,47 @@
     "pasteSecretHint": "Pegue el contenido de su secreto aquí",
     "keyVisibility": "Visibilidad de Clave",
     "type": {
-      "ssh_key": "Clave SSH"
+      "api_keys": "Claves API",
+      "database_credentials": "Credenciales de Base de Datos",
+      "ssh_key": "Clave SSH",
+      "ssl_certificate": "Certificado SSL"
     },
     "visibility": {
       "public": "Público",
-      "private": "Privado"
+      "private": "Privado",
+      "ca": "Autoridad de Certificación",
+      "root": "Raíz",
+      "intermediate": "Intermedio",
+      "chain": "Cadena",
+      "key_file": "Archivo de Clave",
+      "certificate": "Certificado"
     },
-    "contentHidden": "[Contenido oculto por seguridad]"
+    "contentHidden": "[Contenido oculto por seguridad]",
+    "keyType": "Tipo de Clave",
+    "certificateType": "Tipo de Certificado",
+    "key_type": {
+      "public": "Pública",
+      "private": "Privada",
+      "ca": "Autoridad Certificadora"
+    },
+    "certificate_type": {
+      "root": "Certificado Raíz",
+      "intermediate": "Certificado Intermedio",
+      "chain": "Certificado de Cadena",
+      "key_file": "Archivo de Clave",
+      "certificate": "Certificado Emitido"
+    },
+    "database_engine": {
+      "mysql": "mysql",
+      "oracle": "Oracle",
+      "postgresql": "PostgreSQL",
+      "sqlserver": "Microsoft SQL Server",
+      "sqlite": "sqlite3"
+    },
+    "api_provider": {
+      "github": "Github",
+      "salesforce": "Salesforce"
+    }
   },
   "scripts": {
     "title": "Gestión de Scripts",

@@ -183,6 +183,14 @@
     "allInterfaces": "Все",
     "memberOfGroups": "Группы",
     "groupMembers": "Участники",
+    "addSSHKey": "Добавить SSH-ключ",
+    "addSSHKeyToUser": "Добавить SSH-ключ для {user}",
+    "selectSSHKeysToAdd": "Выберите SSH-ключи, которые вы хотите добавить этому пользователю:",
+    "noSSHKeysAvailable": "SSH-ключи недоступны. Сначала создайте SSH-ключи в разделе Секреты.",
+    "sshKeysDeployedSuccess": "SSH-ключи успешно развернуты",
+    "sshKeysDeployedError": "Не удалось развернуть SSH-ключи",
+    "failedToLoadSSHKeys": "Не удалось загрузить SSH-ключи",
+    "searchSSHKeys": "Поиск SSH-ключей по имени или имени файла...",
     "diagnosticsTab": "Диагностика",
     "diagnosticsData": "Данные Диагностики",
     "requestHostData": "Запросить Данные Хоста",
@@ -492,7 +500,11 @@
     "title": "Секреты",
     "savedSecrets": "Сохраненные Секреты",
     "secretName": "Имя Секрета",
+    "secretFilename": "Имя Файла",
     "secretType": "Тип Секрета",
+    "secretSubtype": "Подтип Секрета",
+    "databaseEngine": "Движок Базы Данных",
+    "apiProvider": "Провайдер API",
     "secretContent": "Содержимое Секрета",
     "createdDatetime": "Дата Создания",
     "createdAt": "Создано",
@@ -520,13 +532,47 @@
     "pasteSecretHint": "Вставьте содержимое вашего секрета здесь",
     "keyVisibility": "Видимость Ключа",
     "type": {
-      "ssh_key": "SSH Ключ"
+      "api_keys": "API Ключи",
+      "database_credentials": "Учётные Данные БД",
+      "ssh_key": "SSH Ключ",
+      "ssl_certificate": "SSL Сертификат"
     },
     "visibility": {
       "public": "Публичный",
-      "private": "Приватный"
+      "private": "Приватный",
+      "ca": "Центр Сертификации",
+      "root": "Корневой",
+      "intermediate": "Промежуточный",
+      "chain": "Цепочка",
+      "key_file": "Файл Ключа",
+      "certificate": "Сертификат"
     },
-    "contentHidden": "[Содержимое скрыто из соображений безопасности]"
+    "contentHidden": "[Содержимое скрыто из соображений безопасности]",
+    "keyType": "Тип Ключа",
+    "certificateType": "Тип Сертификата",
+    "key_type": {
+      "public": "Публичный",
+      "private": "Приватный",
+      "ca": "Центр Сертификации"
+    },
+    "certificate_type": {
+      "root": "Корневой Сертификат",
+      "intermediate": "Промежуточный Сертификат",
+      "chain": "Цепочка Сертификатов",
+      "key_file": "Файл Ключа",
+      "certificate": "Выданный Сертификат"
+    },
+    "database_engine": {
+      "mysql": "mysql",
+      "oracle": "Oracle",
+      "postgresql": "PostgreSQL",
+      "sqlserver": "Microsoft SQL Server",
+      "sqlite": "sqlite3"
+    },
+    "api_provider": {
+      "github": "Github",
+      "salesforce": "Salesforce"
+    }
   },
   "scripts": {
     "title": "Управление скриптами",
