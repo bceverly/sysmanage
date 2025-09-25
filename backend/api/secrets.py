@@ -808,8 +808,8 @@ async def deploy_certificates(
             )
 
         certificates = [
-            s for s in secrets if s.secret_type == "ssl_certificate"
-        ]  # nosec B105
+            s for s in secrets if s.secret_type == "ssl_certificate"  # nosec B105
+        ]
         if len(certificates) != len(secrets):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
