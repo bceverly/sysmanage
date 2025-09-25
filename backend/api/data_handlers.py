@@ -565,7 +565,9 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
                             # Create a consistent hash of the SID that fits in integer range
                             import hashlib
 
-                            hash_object = hashlib.md5(gid.encode(), usedforsecurity=False)  # nosec B324
+                            hash_object = hashlib.md5(
+                                gid.encode(), usedforsecurity=False
+                            )  # nosec B324
                             # Convert to positive integer within reasonable range
                             gid_value = int(hash_object.hexdigest()[:8], 16)
                             debug_logger.info(
