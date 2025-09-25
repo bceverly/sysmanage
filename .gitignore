@@ -195,5 +195,11 @@ token.json
 .vault_credentials
 data/
 
+# HashiCorp Vault tokens and secrets (prevent accidental commits)
+*.vault_token
+*vault_token*
+*unseal_key*
+*.vault_key
+
 # Build directories
 .build/
