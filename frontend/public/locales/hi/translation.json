@@ -119,6 +119,7 @@
     "delete": "हटाएं",
     "edit": "संपादित करें",
     "add": "जोड़ें",
+    "search": "खोजें",
     "selected": "चयनित",
     "status": "स्थिति",
     "loading": "लोड हो रहा है...",
@@ -309,7 +310,14 @@
     "certificateCollectionRequested": "प्रमाणपत्र संग्रह का अनुरोध किया गया",
     "certificateCollectionError": "प्रमाणपत्र संग्रह अनुरोध में त्रुटि",
     "noCertificates": "कोई प्रमाणपत्र नहीं मिला",
-    "noCertificatesHint": "इस होस्ट पर SSL प्रमाणपत्रों को स्कैन करने के लिए 'एकत्र करें' पर क्लिक करें"
+    "noCertificatesHint": "इस होस्ट पर SSL प्रमाणपत्रों को स्कैन करने के लिए 'एकत्र करें' पर क्लिक करें",
+    "certificateName": "प्रमाणपत्र नाम",
+    "issuer": "जारीकर्ता",
+    "expiryDate": "समाप्ति तिथि",
+    "location": "स्थान",
+    "serialNumber": "क्रम संख्या",
+    "expired": "समाप्त हो गया",
+    "daysUntilExpiry": "{{days}} दिन"
   },
   "userDetail": {
     "invalidId": "अमान्य उपयोगकर्ता आईडी",

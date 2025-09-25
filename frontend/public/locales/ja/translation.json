@@ -275,7 +275,14 @@
     "certificateCollectionRequested": "証明書収集が要求されました",
     "certificateCollectionError": "証明書収集の要求エラー",
     "noCertificates": "証明書が見つかりません",
-    "noCertificatesHint": "このホストでSSL証明書をスキャンするには「収集」をクリックしてください"
+    "noCertificatesHint": "このホストでSSL証明書をスキャンするには「収集」をクリックしてください",
+    "certificateName": "証明書名",
+    "issuer": "発行者",
+    "expiryDate": "有効期限",
+    "location": "場所",
+    "serialNumber": "シリアル番号",
+    "expired": "期限切れ",
+    "daysUntilExpiry": "{{days}}日"
   },
   "userDetail": {
     "invalidId": "無効なユーザーID",
@@ -304,6 +311,7 @@
     "delete": "削除",
     "edit": "編集",
     "add": "追加",
+    "search": "検索",
     "selected": "選択済み",
     "status": "ステータス",
     "loading": "読み込み中...",

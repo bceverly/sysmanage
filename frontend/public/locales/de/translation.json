@@ -119,6 +119,7 @@
     "delete": "Löschen",
     "edit": "Bearbeiten",
     "add": "Hinzufügen",
+    "search": "Suchen",
     "selected": "Ausgewählt",
     "status": "Status",
     "loading": "Laden...",
@@ -310,7 +311,14 @@
     "certificateCollectionRequested": "Zertifikatsammlung angefordert",
     "certificateCollectionError": "Fehler bei der Anforderung der Zertifikatsammlung",
     "noCertificates": "Keine Zertifikate gefunden",
-    "noCertificatesHint": "Klicken Sie auf 'Sammeln', um nach SSL-Zertifikaten auf diesem Host zu suchen"
+    "noCertificatesHint": "Klicken Sie auf 'Sammeln', um nach SSL-Zertifikaten auf diesem Host zu suchen",
+    "certificateName": "Zertifikatsname",
+    "issuer": "Aussteller",
+    "expiryDate": "Ablaufdatum",
+    "location": "Standort",
+    "serialNumber": "Seriennummer",
+    "expired": "Abgelaufen",
+    "daysUntilExpiry": "{{days}} Tage"
   },
   "userDetail": {
     "invalidId": "Ungültige Benutzer-ID",

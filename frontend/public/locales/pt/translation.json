@@ -119,6 +119,7 @@
     "delete": "Excluir",
     "edit": "Editar",
     "add": "Adicionar",
+    "search": "Pesquisar",
     "selected": "Selecionado",
     "status": "Estado",
     "loading": "Carregando...",
@@ -310,7 +311,14 @@
     "certificateCollectionRequested": "Coleta de certificados solicitada",
     "certificateCollectionError": "Erro ao solicitar coleta de certificados",
     "noCertificates": "Nenhum certificado encontrado",
-    "noCertificatesHint": "Clique em 'Coletar' para escanear certificados SSL neste host"
+    "noCertificatesHint": "Clique em 'Coletar' para escanear certificados SSL neste host",
+    "certificateName": "Nome do Certificado",
+    "issuer": "Emissor",
+    "expiryDate": "Data de Vencimento",
+    "location": "Local",
+    "serialNumber": "Número de Série",
+    "expired": "Expirado",
+    "daysUntilExpiry": "{{days}} dias"
   },
   "userDetail": {
     "invalidId": "ID de usuário inválido",

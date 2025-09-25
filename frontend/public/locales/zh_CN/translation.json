@@ -275,7 +275,14 @@
     "certificateCollectionRequested": "已请求证书收集",
     "certificateCollectionError": "请求证书收集时出错",
     "noCertificates": "未找到证书",
-    "noCertificatesHint": "点击"收集"以扫描此主机上的SSL证书"
+    "noCertificatesHint": "点击\"收集\"以扫描此主机上的SSL证书",
+    "certificateName": "证书名称",
+    "issuer": "颁发者",
+    "expiryDate": "到期日期",
+    "location": "位置",
+    "serialNumber": "序列号",
+    "expired": "已过期",
+    "daysUntilExpiry": "{{days}}天"
   },
   "userDetail": {
     "invalidId": "无效的用户ID",
@@ -304,6 +311,7 @@
     "delete": "删除",
     "edit": "编辑",
     "add": "添加",
+    "search": "搜索",
     "selected": "已选择",
     "status": "状态",
     "loading": "加载中...",

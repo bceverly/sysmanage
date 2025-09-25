@@ -119,6 +119,7 @@
     "delete": "حذف",
     "edit": "تحرير",
     "add": "إضافة",
+    "search": "بحث",
     "selected": "محدد",
     "status": "الحالة",
     "loading": "جاري التحميل...",
@@ -308,7 +309,14 @@
     "certificateCollectionRequested": "تم طلب جمع الشهادات",
     "certificateCollectionError": "خطأ في طلب جمع الشهادات",
     "noCertificates": "لم يتم العثور على شهادات",
-    "noCertificatesHint": "انقر على 'جمع' للبحث عن شهادات SSL على هذا المضيف"
+    "noCertificatesHint": "انقر على 'جمع' للبحث عن شهادات SSL على هذا المضيف",
+    "certificateName": "اسم الشهادة",
+    "issuer": "المُصدر",
+    "expiryDate": "تاريخ الانتهاء",
+    "location": "الموقع",
+    "serialNumber": "الرقم التسلسلي",
+    "expired": "منتهية الصلاحية",
+    "daysUntilExpiry": "{{days}} يوم"
   },
   "userDetail": {
     "invalidId": "معرف مستخدم غير صالح",
