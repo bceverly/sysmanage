@@ -268,7 +268,14 @@
     "installationDeleted": "설치 기록이 성공적으로 삭제되었습니다",
     "installationDeleteError": "설치 기록 삭제에 실패했습니다",
     "viewInstallationLog": "설치 로그 보기",
-    "version": "버전"
+    "version": "버전",
+    "certificatesTab": "인증서",
+    "certificates": "SSL 인증서",
+    "collectCertificates": "수집",
+    "certificateCollectionRequested": "인증서 수집이 요청되었습니다",
+    "certificateCollectionError": "인증서 수집 요청 오류",
+    "noCertificates": "인증서를 찾을 수 없습니다",
+    "noCertificatesHint": "이 호스트에서 SSL 인증서를 스캔하려면 '수집'을 클릭하세요"
   },
   "userDetail": {
     "invalidId": "유효하지 않은 사용자 ID",

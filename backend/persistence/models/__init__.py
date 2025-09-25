@@ -10,6 +10,7 @@ from .core import *
 from .hardware import *
 from .operations import *
 from .secret import *
+from .host_certificate import *
 from .software import *
 
 __all__ = [
@@ -48,4 +49,6 @@ __all__ = [
     "UbuntuProSettings",
     # Secret models
     "Secret",
+    # Certificate models
+    "HostCertificate",
 ]

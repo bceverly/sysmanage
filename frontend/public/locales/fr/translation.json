@@ -303,7 +303,14 @@
     "installationDeleted": "Enregistrement d'installation supprimé avec succès",
     "installationDeleteError": "Échec de la suppression de l'enregistrement d'installation",
     "viewInstallationLog": "Voir le Journal d'Installation",
-    "version": "Version"
+    "version": "Version",
+    "certificatesTab": "Certificats",
+    "certificates": "Certificats SSL",
+    "collectCertificates": "Collecter",
+    "certificateCollectionRequested": "Collecte de certificats demandée",
+    "certificateCollectionError": "Erreur lors de la demande de collecte de certificats",
+    "noCertificates": "Aucun certificat trouvé",
+    "noCertificatesHint": "Cliquez sur 'Collecter' pour rechercher des certificats SSL sur cet hôte"
   },
   "userDetail": {
     "invalidId": "ID utilisateur invalide",

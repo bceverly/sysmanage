@@ -165,6 +165,9 @@ class Host(Base):
     software_packages = relationship("SoftwarePackage", back_populates="host")
     user_accounts = relationship("UserAccount", back_populates="host")
     user_groups = relationship("UserGroup", back_populates="host")
+    certificates = relationship(
+        "HostCertificate", back_populates="host", cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"<Host(id={self.id}, fqdn='{self.fqdn}', active={self.active})>"

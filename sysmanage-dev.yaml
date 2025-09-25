@@ -104,6 +104,14 @@ vault:
   # Development settings
   dev_mode: true  # Enables development-specific features and logging
 
+  # Server configuration
+  server:
+    enabled: false  # Don't start OpenBAO server in dev mode (use external dev server)
+    config_file: "./openbao.hcl"  # Path to OpenBAO configuration file
+    data_path: "./data/openbao"  # Path to store vault data
+    unseal_keys: []  # Unseal keys (populated during initialization)
+    initialized: false  # Whether vault has been initialized
+
 email:
   # SMTP server configuration for sending emails (password resets, notifications, etc.)
   # Set enabled to false to disable email functionality entirely

@@ -48,19 +48,47 @@ echo "Starting OpenBAO development server..."
 echo "Log file: $LOG_FILE"
 echo "PID file: $PID_FILE"
 
-# Start OpenBAO in development mode
-# -dev: Development mode (in-memory, unsealed)
-# -dev-root-token-id: Set a predictable root token for development
-# -dev-listen-address: Bind to localhost:8200 (matches sysmanage config)
-nohup "$BAO_CMD" server \
-    -dev \
-    -dev-root-token-id="dev-only-token-change-me" \
-    -dev-listen-address="127.0.0.1:8200" \
-    -log-level="info" \
-    > "$LOG_FILE" 2>&1 &
+# Check if production config exists
+VAULT_CONFIG="$PROJECT_DIR/openbao.hcl"
+VAULT_CREDS="$PROJECT_DIR/.vault_credentials"
 
-# Save PID
-echo $! > "$PID_FILE"
+if [ -f "$VAULT_CONFIG" ] && [ -f "$VAULT_CREDS" ]; then
+    echo "Starting OpenBAO in production mode with persistent storage..."
+    # Start OpenBAO with production config
+    nohup "$BAO_CMD" server -config="$VAULT_CONFIG" > "$LOG_FILE" 2>&1 &
+    SERVER_PID=$!
+    echo $SERVER_PID > "$PID_FILE"
+
+    # Wait for server startup
+    sleep 3
+
+    # Source credentials and unseal
+    . "$VAULT_CREDS"
+    export BAO_ADDR="http://127.0.0.1:8200"
+
+    # Check if vault needs unsealing
+    if "$BAO_CMD" status 2>&1 | grep -q "Sealed.*true"; then
+        echo "Unsealing vault..."
+        "$BAO_CMD" operator unseal "$UNSEAL_KEY"
+    fi
+else
+    echo "Production config not found, starting in development mode..."
+    # Start OpenBAO in development mode
+    # -dev: Development mode (in-memory, unsealed)
+    # -dev-root-token-id: Set a predictable root token for development
+    # -dev-listen-address: Bind to localhost:8200 (matches sysmanage config)
+    nohup "$BAO_CMD" server \
+        -dev \
+        -dev-root-token-id="dev-only-token-change-me" \
+        -dev-listen-address="127.0.0.1:8200" \
+        -log-level="info" \
+        > "$LOG_FILE" 2>&1 &
+fi
+
+# Save PID (only for dev mode, production mode already saved PID)
+if [ ! -f "$VAULT_CONFIG" ] || [ ! -f "$VAULT_CREDS" ]; then
+    echo $! > "$PID_FILE"
+fi
 
 # Wait a moment for startup
 sleep 2
@@ -76,7 +104,25 @@ fi
 PID=$(cat "$PID_FILE")
 echo "OpenBAO started successfully with PID $PID"
 echo "Server URL: http://127.0.0.1:8200"
-echo "Root token: dev-only-token-change-me"
+
+# Display appropriate token message based on mode
+if [ -f "$VAULT_CONFIG" ] && [ -f "$VAULT_CREDS" ]; then
+    # Production mode - read actual token from credentials
+    if [ -f "$VAULT_CREDS" ]; then
+        PROD_TOKEN=$(grep "ROOT_TOKEN=" "$VAULT_CREDS" | cut -d'=' -f2)
+        if [ -n "$PROD_TOKEN" ]; then
+            echo "Root token: $PROD_TOKEN (production mode)"
+        else
+            echo "Root token: [check .vault_credentials file] (production mode)"
+        fi
+    else
+        echo "Root token: [check .vault_credentials file] (production mode)"
+    fi
+else
+    # Development mode
+    echo "Root token: dev-only-token-change-me (development mode)"
+fi
+
 echo ""
 echo "To stop OpenBAO: make stop-openbao"
 echo "To check status: make status-openbao"

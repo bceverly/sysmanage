@@ -302,7 +302,14 @@
     "installationDeleted": "इंस्टॉलेशन रिकॉर्ड सफलतापूर्वक हटा दिया गया",
     "installationDeleteError": "इंस्टॉलेशन रिकॉर्ड हटाने में विफल",
     "viewInstallationLog": "इंस्टॉलेशन लॉग देखें",
-    "version": "संस्करण"
+    "version": "संस्करण",
+    "certificatesTab": "प्रमाणपत्र",
+    "certificates": "SSL प्रमाणपत्र",
+    "collectCertificates": "एकत्र करें",
+    "certificateCollectionRequested": "प्रमाणपत्र संग्रह का अनुरोध किया गया",
+    "certificateCollectionError": "प्रमाणपत्र संग्रह अनुरोध में त्रुटि",
+    "noCertificates": "कोई प्रमाणपत्र नहीं मिला",
+    "noCertificatesHint": "इस होस्ट पर SSL प्रमाणपत्रों को स्कैन करने के लिए 'एकत्र करें' पर क्लिक करें"
   },
   "userDetail": {
     "invalidId": "अमान्य उपयोगकर्ता आईडी",

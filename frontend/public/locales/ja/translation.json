@@ -268,7 +268,14 @@
     "installationDeleted": "インストール記録が正常に削除されました",
     "installationDeleteError": "インストール記録の削除に失敗しました",
     "viewInstallationLog": "インストールログを表示",
-    "version": "バージョン"
+    "version": "バージョン",
+    "certificatesTab": "証明書",
+    "certificates": "SSL証明書",
+    "collectCertificates": "収集",
+    "certificateCollectionRequested": "証明書収集が要求されました",
+    "certificateCollectionError": "証明書収集の要求エラー",
+    "noCertificates": "証明書が見つかりません",
+    "noCertificatesHint": "このホストでSSL証明書をスキャンするには「収集」をクリックしてください"
   },
   "userDetail": {
     "invalidId": "無効なユーザーID",

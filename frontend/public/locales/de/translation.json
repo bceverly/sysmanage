@@ -303,7 +303,14 @@
     "installationDeleted": "Installationsdatensatz erfolgreich gelöscht",
     "installationDeleteError": "Fehler beim Löschen des Installationsdatensatzes",
     "viewInstallationLog": "Installationsprotokoll anzeigen",
-    "version": "Version"
+    "version": "Version",
+    "certificatesTab": "Zertifikate",
+    "certificates": "SSL-Zertifikate",
+    "collectCertificates": "Sammeln",
+    "certificateCollectionRequested": "Zertifikatsammlung angefordert",
+    "certificateCollectionError": "Fehler bei der Anforderung der Zertifikatsammlung",
+    "noCertificates": "Keine Zertifikate gefunden",
+    "noCertificatesHint": "Klicken Sie auf 'Sammeln', um nach SSL-Zertifikaten auf diesem Host zu suchen"
   },
   "userDetail": {
     "invalidId": "Ungültige Benutzer-ID",

@@ -572,6 +572,30 @@ async def delete_multiple_secrets(
         ) from e
 
 
+@router.get(
+    "/secrets/ssh-keys",
+    response_model=List[SecretResponse],
+    dependencies=[Depends(JWTBearer())],
+)
+async def list_ssh_keys(
+    db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)
+):
+    """List SSH key secrets."""
+    try:
+        secrets = (
+            db.query(Secret)
+            .filter(Secret.secret_type == "ssh_key")
+            .order_by(Secret.created_at.desc())
+            .all()
+        )
+        return [SecretResponse(**secret.to_dict()) for secret in secrets]
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=_("secrets.list_error", "Failed to retrieve SSH keys"),
+        ) from e
+
+
 class SSHKeyDeployRequest(BaseModel):
     """Model for SSH key deployment request."""
 
@@ -717,4 +741,152 @@ async def deploy_ssh_keys(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=_("secrets.deploy_ssh_keys_error", "Failed to deploy SSH keys"),
+        ) from e
+
+
+class CertificateDeployRequest(BaseModel):
+    """Model for certificate deployment request."""
+
+    host_id: str = Field(..., description="Target host ID")
+    secret_ids: List[str] = Field(
+        ..., min_items=1, description="List of certificate secret IDs to deploy"
+    )
+
+
+@router.post("/secrets/deploy-certificates", dependencies=[Depends(JWTBearer())])
+async def deploy_certificates(
+    deploy_request: CertificateDeployRequest,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Deploy SSL certificates to a target host via agent."""
+    try:
+        # Validate host exists and is active
+        host = (
+            db.query(Host).filter(Host.id == uuid.UUID(deploy_request.host_id)).first()
+        )
+        if not host:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=_("hosts.not_found", "Host not found"),
+            )
+
+        if not host.active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=_("hosts.not_active", "Host is not active"),
+            )
+
+        if not host.is_agent_privileged:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=_(
+                    "hosts.not_privileged",
+                    "Host agent is not running in privileged mode",
+                ),
+            )
+
+        # Convert string IDs to UUIDs and validate secrets exist
+        uuid_ids = []
+        for secret_id in deploy_request.secret_ids:
+            try:
+                uuid_ids.append(uuid.UUID(secret_id))
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=_("secrets.invalid_id", "Invalid secret ID: {id}").format(
+                        id=secret_id
+                    ),
+                ) from exc
+
+        # Get secrets and validate they are SSL certificates
+        secrets = db.query(Secret).filter(Secret.id.in_(uuid_ids)).all()
+        if len(secrets) != len(uuid_ids):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=_("secrets.some_not_found", "Some secrets not found"),
+            )
+
+        certificates = [s for s in secrets if s.secret_type == "ssl_certificate"]
+        if len(certificates) != len(secrets):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=_(
+                    "secrets.not_certificates", "All secrets must be SSL certificates"
+                ),
+            )
+
+        # Retrieve secret contents from vault
+        vault_service = VaultService()
+        certificate_data = []
+
+        for secret in certificates:
+            try:
+                vault_data = vault_service.retrieve_secret(
+                    secret.vault_path, secret.vault_token
+                )
+                certificate_data.append(
+                    {
+                        "id": str(secret.id),
+                        "name": secret.name,
+                        "filename": secret.filename or f"{secret.name}.crt",
+                        "content": vault_data.get("content", ""),
+                        "subtype": secret.secret_subtype,
+                    }
+                )
+            except VaultError as e:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=_(
+                        "secrets.vault_error",
+                        "Failed to retrieve secret from vault: {error}",
+                    ).format(error=str(e)),
+                ) from e
+
+        # Create message data for agent
+        from datetime import datetime, timezone
+
+        now = datetime.now(timezone.utc)
+
+        message_data = {
+            "command_type": "deploy_certificates",
+            "parameters": {
+                "certificates": certificate_data,
+                "requested_by": current_user,
+                "requested_at": now.isoformat(),
+            },
+        }
+
+        # Queue the message for the agent
+        try:
+            message_id = server_queue_manager.enqueue_message(
+                message_type="command",
+                message_data=message_data,
+                direction=QueueDirection.OUTBOUND,
+                host_id=str(host.id),
+                priority=Priority.NORMAL,
+                db=None,  # Let queue manager create its own session
+            )
+        except Exception as e:
+            logger.error("Failed to enqueue certificate deployment message: %s", str(e))
+            raise
+
+        return {
+            "message": _(
+                "secrets.certificates_deployment_queued",
+                "Certificates deployment queued successfully",
+            ),
+            "message_id": message_id,
+            "host_id": str(host.id),
+            "certificate_count": len(certificate_data),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=_(
+                "secrets.deploy_certificates_error", "Failed to deploy certificates"
+            ),
         ) from e

@@ -48,6 +48,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import AddIcon from '@mui/icons-material/Add';
 import HistoryIcon from '@mui/icons-material/History';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import CertificateIcon from '@mui/icons-material/AdminPanelSettings';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField, List, ListItem, ListItemText, Divider, TableContainer, TableHead, InputAdornment } from '@mui/material';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
@@ -58,7 +59,24 @@ import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as 
 import { SysManageUser, doGetMe } from '../Services/users';
 import { SecretResponse } from '../Services/secrets';
 
-// Use the service types directly - no need for local interfaces anymore
+// Certificate interface
+interface Certificate {
+    id: string;
+    certificate_name: string;
+    subject: string;
+    issuer: string;
+    not_before: string | null;
+    not_after: string | null;
+    serial_number: string;
+    fingerprint_sha256: string;
+    is_ca: boolean;
+    key_usage: string | null;
+    file_path: string;
+    collected_at: string | null;
+    is_expired: boolean;
+    days_until_expiry: number | null;
+    common_name: string | null;
+}
 
 const HostDetail = () => {
     const { hostId } = useParams<{ hostId: string }>();
@@ -68,12 +86,17 @@ const HostDetail = () => {
     const [userAccounts, setUserAccounts] = useState<UserAccount[]>([]);
     const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
     const [softwarePackages, setSoftwarePackages] = useState<SoftwarePackage[]>([]);
+    const [certificates, setCertificates] = useState<Certificate[]>([]);
     const [ubuntuProInfo, setUbuntuProInfo] = useState<UbuntuProInfo | null>(null);
     const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticReport[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [currentTab, setCurrentTab] = useState<number>(0);
     const [diagnosticsLoading, setDiagnosticsLoading] = useState<boolean>(false);
+    const [certificatesLoading, setCertificatesLoading] = useState<boolean>(false);
+    const [certificateFilter, setCertificateFilter] = useState<'all' | 'ca' | 'server' | 'client'>('server');
+    const [certificatePaginationModel, setCertificatePaginationModel] = useState({ page: 0, pageSize: 10 });
+    const [certificateSearchTerm, setCertificateSearchTerm] = useState<string>('');
     const [storageFilter, setStorageFilter] = useState<'all' | 'physical' | 'logical'>('physical');
     const [networkFilter, setNetworkFilter] = useState<'all' | 'active' | 'inactive'>('active');
     const [userFilter, setUserFilter] = useState<'all' | 'system' | 'regular'>('regular');
@@ -117,6 +140,14 @@ const HostDetail = () => {
     const [availableSSHKeys, setAvailableSSHKeys] = useState<SecretResponse[]>([]);
     const [filteredSSHKeys, setFilteredSSHKeys] = useState<SecretResponse[]>([]);
     const [selectedSSHKeys, setSelectedSSHKeys] = useState<string[]>([]);
+
+    // Certificate management state
+    const [addCertificateDialogOpen, setAddCertificateDialogOpen] = useState<boolean>(false);
+    const [availableCertificates, setAvailableCertificates] = useState<SecretResponse[]>([]);
+    const [filteredCertificates, setFilteredCertificates] = useState<SecretResponse[]>([]);
+    const [selectedCertificates, setSelectedCertificates] = useState<string[]>([]);
+    const [certificateDialogSearchTerm, setCertificateDialogSearchTerm] = useState<string>('');
+    const [isCertificateSearching, setIsCertificateSearching] = useState<boolean>(false);
     const [sshKeySearchTerm, setSshKeySearchTerm] = useState<string>('');
     const [searchResults, setSearchResults] = useState<Array<{name: string, description?: string, version?: string}>>([]);
     const [selectedPackages, setSelectedPackages] = useState<Set<string>>(new Set());
@@ -158,8 +189,56 @@ const HostDetail = () => {
     // Helper functions to calculate dynamic tab indices
     const getSoftwareInstallsTabIndex = () => 3;
     const getAccessTabIndex = () => 4;
-    const getUbuntuProTabIndex = () => ubuntuProInfo?.available ? 5 : -1;
-    const getDiagnosticsTabIndex = () => ubuntuProInfo?.available ? 6 : 5;
+    const getCertificatesTabIndex = () => 5;
+    const getUbuntuProTabIndex = () => ubuntuProInfo?.available ? 6 : -1;
+    const getDiagnosticsTabIndex = () => ubuntuProInfo?.available ? 7 : 6;
+
+    // Certificate-related functions
+    const fetchCertificates = useCallback(async () => {
+        if (!hostId) return;
+
+        try {
+            setCertificatesLoading(true);
+            const response = await axiosInstance.get(`/api/host/${hostId}/certificates`);
+
+            if (response.status === 200) {
+                setCertificates(response.data.certificates || []);
+            }
+        } catch (error) {
+            console.error('Error fetching certificates:', error);
+            // Don't fail the whole page load for certificate errors
+            setCertificates([]);
+        } finally {
+            setCertificatesLoading(false);
+        }
+    }, [hostId]);
+
+    const requestCertificatesCollection = useCallback(async () => {
+        if (!hostId) return;
+
+        try {
+            setCertificatesLoading(true);
+            const response = await axiosInstance.post(`/api/host/${hostId}/request-certificates-collection`);
+
+            if (response.status === 200) {
+                setSnackbarMessage(t('hostDetail.certificateCollectionRequested', 'Certificate collection requested'));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+
+                // Refetch certificates after a short delay to allow collection to complete
+                setTimeout(() => {
+                    fetchCertificates();
+                }, 3000);
+            }
+        } catch (error) {
+            console.error('Error requesting certificate collection:', error);
+            setSnackbarMessage(t('hostDetail.certificateCollectionError', 'Error requesting certificate collection'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setCertificatesLoading(false);
+        }
+    }, [hostId, fetchCertificates, t]);
 
     useEffect(() => {
         if (!localStorage.getItem('bearer_token')) {
@@ -238,6 +317,14 @@ const HostDetail = () => {
                         // Ubuntu Pro data is optional, don't fail the whole page load
                         console.log('Ubuntu Pro data not available or failed to load:', error);
                     }
+
+                    // Fetch certificates data
+                    try {
+                        await fetchCertificates();
+                    } catch (error) {
+                        // Certificates data is optional, don't fail the whole page load
+                        console.log('Certificates data not available or failed to load:', error);
+                    }
                 } catch (hardwareErr) {
                     // Log but don't fail the whole request - hardware/software/diagnostics data is optional
                     console.warn('Failed to fetch hardware/software/diagnostics data:', hardwareErr);
@@ -253,15 +340,15 @@ const HostDetail = () => {
         };
 
         fetchHost();
-    }, [hostId, navigate, t]);
+    }, [hostId, navigate, t, fetchCertificates]);
 
     // Tag-related functions
     const loadHostTags = useCallback(async () => {
         if (!hostId) return;
-        
+
         try {
             const response = await axiosInstance.get(`/api/hosts/${hostId}/tags`);
-            
+
             if (response.status === 200) {
                 const tags = response.data;
                 setHostTags(tags);
@@ -485,6 +572,115 @@ const HostDetail = () => {
             setFilteredSSHKeys(filtered);
         }
     };
+
+    // Certificate management functions
+    const handleCertificateDialogClose = () => {
+        setAddCertificateDialogOpen(false);
+        setAvailableCertificates([]);
+        setFilteredCertificates([]);
+        setSelectedCertificates([]);
+        setCertificateDialogSearchTerm('');
+    };
+
+    const handleCertificateSearch = () => {
+        const searchTerm = certificateDialogSearchTerm.toLowerCase().trim();
+        if (searchTerm === '') {
+            setFilteredCertificates(availableCertificates);
+        } else {
+            const filtered = availableCertificates.filter((cert) =>
+                cert.name.toLowerCase().includes(searchTerm) ||
+                (cert.filename && cert.filename.toLowerCase().includes(searchTerm))
+            );
+            setFilteredCertificates(filtered);
+        }
+    };
+
+    const handleDeployCertificates = async () => {
+        if (selectedCertificates.length === 0 || !host) return;
+
+        try {
+            const deployData = {
+                host_id: host.id,
+                secret_ids: selectedCertificates
+            };
+
+            await axiosInstance.post('/api/secrets/deploy-certificates', deployData);
+
+            setSnackbarMessage(t('hostDetail.certificatesDeployedSuccess', 'Certificates deployment queued successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+
+            handleCertificateDialogClose();
+        } catch (error: unknown) {
+            console.error('Failed to deploy certificates:', error);
+            let errorMessage = t('hostDetail.certificatesDeployedError', 'Failed to deploy certificates');
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { data?: { detail?: string } } };
+                if (axiosError.response?.data?.detail) {
+                    errorMessage = axiosError.response.data.detail;
+                }
+            }
+
+            setSnackbarMessage(errorMessage);
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        }
+    };
+
+    const loadAvailableCertificates = async () => {
+        try {
+            setIsCertificateSearching(true);
+            // Load available SSL certificates - same pattern as SSH keys
+            const response = await axiosInstance.get('/api/secrets?type=ssl_certificate');
+            const secrets = response.data;
+            const certificates = secrets.filter((secret: SecretResponse) => secret.secret_type === 'ssl_certificate');
+            setAvailableCertificates(certificates);
+            setFilteredCertificates(certificates);
+        } catch (error: unknown) {
+            console.error('Failed to load certificates:', error);
+            setSnackbarMessage(t('hostDetail.certificatesLoadError', 'Failed to load certificates from vault'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setIsCertificateSearching(false);
+        }
+    };
+
+    // Certificate DataGrid columns definition for vault certificates
+    const vaultCertificateColumns: GridColDef[] = [
+        {
+            field: 'name',
+            headerName: t('secrets.secretName', 'Secret Name'),
+            width: 250,
+            flex: 1,
+        },
+        {
+            field: 'filename',
+            headerName: t('secrets.secretFilename', 'Filename'),
+            width: 250,
+            flex: 1,
+        },
+        {
+            field: 'secret_subtype',
+            headerName: t('secrets.secretSubtype', 'Secret Subtype'),
+            width: 150,
+            renderCell: (params) => (
+                <Typography variant="body2">
+                    {t(`secrets.cert_type.${params.value}`, params.value)}
+                </Typography>
+            ),
+        },
+        {
+            field: 'created_at',
+            headerName: t('secrets.createdAt', 'Created'),
+            width: 180,
+            renderCell: (params) => (
+                <Typography variant="body2">
+                    {new Date(params.value).toLocaleString()}
+                </Typography>
+            ),
+        },
+    ];
 
     // SSH Key DataGrid columns definition
     const sshKeyColumns: GridColDef[] = [
@@ -1420,6 +1616,153 @@ const HostDetail = () => {
         }
     };
 
+    // Define certificate DataGrid columns
+    const certificateColumns: GridColDef[] = [
+        {
+            field: 'certificate_name',
+            headerName: t('hostDetail.certificateName', 'Certificate Name'),
+            minWidth: 200,
+            flex: 1,
+            renderCell: (params) => (
+                <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {params.value || params.row.common_name || t('common.unknown', 'Unknown')}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 0.5, mt: 0.25 }}>
+                        {params.row.is_expired && (
+                            <Chip
+                                label={t('hostDetail.expired', 'Expired')}
+                                size="small"
+                                color="error"
+                                sx={{
+                                    fontSize: '0.7rem',
+                                    height: '18px'
+                                }}
+                            />
+                        )}
+                        {!params.row.is_expired && params.row.days_until_expiry !== null && params.row.days_until_expiry <= 30 && (
+                            <Chip
+                                label={t('hostDetail.expiringSoon', 'Expiring Soon')}
+                                size="small"
+                                color="warning"
+                                sx={{
+                                    fontSize: '0.7rem',
+                                    height: '18px'
+                                }}
+                            />
+                        )}
+                        {params.row.is_ca && (
+                            <Chip
+                                label="CA"
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                                sx={{
+                                    fontSize: '0.7rem',
+                                    height: '18px'
+                                }}
+                            />
+                        )}
+                    </Box>
+                </Box>
+            ),
+        },
+        {
+            field: 'issuer',
+            headerName: t('hostDetail.issuer', 'Issuer'),
+            minWidth: 250,
+            flex: 1,
+            renderCell: (params) => (
+                <Typography
+                    variant="body2"
+                    sx={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                    }}
+                    title={params.value}
+                >
+                    {params.value}
+                </Typography>
+            ),
+        },
+        {
+            field: 'not_after',
+            headerName: t('hostDetail.expiryDate', 'Expiry Date'),
+            minWidth: 130,
+            renderCell: (params) => {
+                if (!params.value) return t('common.unknown', 'Unknown');
+
+                const expiryDate = new Date(params.value);
+                const isExpired = params.row.is_expired;
+                const daysUntilExpiry = params.row.days_until_expiry;
+
+                return (
+                    <Box>
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                color: isExpired ? 'error.main' :
+                                       (daysUntilExpiry !== null && daysUntilExpiry <= 30) ? 'warning.main' : 'text.primary'
+                            }}
+                        >
+                            {expiryDate.toLocaleDateString()}
+                        </Typography>
+                        {daysUntilExpiry !== null && (
+                            <Typography variant="caption" sx={{ display: 'block', lineHeight: 1 }}>
+                                {isExpired ?
+                                    t('hostDetail.expired', 'Expired') :
+                                    t('hostDetail.daysUntilExpiry', '{{days}} days', { days: daysUntilExpiry })
+                                }
+                            </Typography>
+                        )}
+                    </Box>
+                );
+            },
+        },
+        {
+            field: 'file_path',
+            headerName: t('hostDetail.location', 'Location'),
+            minWidth: 300,
+            flex: 1,
+            renderCell: (params) => (
+                <Typography
+                    variant="body2"
+                    sx={{
+                        fontFamily: 'monospace',
+                        fontSize: '0.85rem',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                    }}
+                    title={params.value}
+                >
+                    {params.value}
+                </Typography>
+            ),
+        },
+        {
+            field: 'serial_number',
+            headerName: t('hostDetail.serialNumber', 'Serial'),
+            minWidth: 120,
+            renderCell: (params) => (
+                <Typography
+                    variant="body2"
+                    sx={{
+                        fontFamily: 'monospace',
+                        fontSize: '0.8rem',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                    }}
+                    title={params.value}
+                >
+                    {params.value}
+                </Typography>
+            ),
+        },
+    ];
+
     return (
         <Box>
             <Button 
@@ -1496,6 +1839,12 @@ const HostDetail = () => {
                     <Tab
                         icon={<SecurityIcon />}
                         label={t('hostDetail.accessTab', 'Access')}
+                        iconPosition="start"
+                        sx={{ textTransform: 'none' }}
+                    />
+                    <Tab
+                        icon={<CertificateIcon />}
+                        label={t('hostDetail.certificatesTab', 'Certificates')}
                         iconPosition="start"
                         sx={{ textTransform: 'none' }}
                     />
@@ -2490,6 +2839,148 @@ const HostDetail = () => {
                                             </Grid>
                                         ))}
                                     </Grid>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                </Grid>
+            )}
+
+            {/* Certificates Tab */}
+            {currentTab === getCertificatesTabIndex() && (
+                <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                        <Card>
+                            <CardContent>
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                                    <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                        <CertificateIcon sx={{ mr: 1 }} />
+                                        {t('hostDetail.certificates', 'SSL Certificates')} ({certificates.length})
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                                        <TextField
+                                            size="small"
+                                            placeholder={t('hostDetail.searchCertificates', 'Search certificates...')}
+                                            value={certificateSearchTerm}
+                                            onChange={(e) => {
+                                                setCertificateSearchTerm(e.target.value);
+                                                setCertificatePaginationModel({ page: 0, pageSize: certificatePaginationModel.pageSize });
+                                            }}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <SearchIcon />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                            sx={{ width: 350 }}
+                                        />
+                                        <ToggleButtonGroup
+                                            value={certificateFilter}
+                                            exclusive
+                                            onChange={(_, newFilter) => {
+                                                if (newFilter !== null) {
+                                                    setCertificateFilter(newFilter);
+                                                    setCertificatePaginationModel({ page: 0, pageSize: certificatePaginationModel.pageSize });
+                                                }
+                                            }}
+                                            size="small"
+                                            sx={{ height: '36.5px' }}
+                                        >
+                                            <ToggleButton value="server" sx={{ px: 2 }}>
+                                                {t('hostDetail.server', 'Server')}
+                                            </ToggleButton>
+                                            <ToggleButton value="client" sx={{ px: 2 }}>
+                                                {t('hostDetail.client', 'Client')}
+                                            </ToggleButton>
+                                            <ToggleButton value="ca" sx={{ px: 2 }}>
+                                                CA
+                                            </ToggleButton>
+                                            <ToggleButton value="all" sx={{ px: 2 }}>
+                                                {t('common.all', 'All')}
+                                            </ToggleButton>
+                                        </ToggleButtonGroup>
+                                        <Button
+                                            variant="outlined"
+                                            startIcon={<AddIcon />}
+                                            onClick={() => {
+                                                setAddCertificateDialogOpen(true);
+                                                loadAvailableCertificates();
+                                            }}
+                                            disabled={!host.active || !host.is_agent_privileged}
+                                            sx={{ minWidth: 100, height: '36.5px' }}
+                                        >
+                                            {t('hostDetail.addCertificate', 'Add')}
+                                        </Button>
+                                        <Button
+                                            variant="outlined"
+                                            startIcon={<RefreshIcon />}
+                                            onClick={requestCertificatesCollection}
+                                            disabled={certificatesLoading || !host.active}
+                                            sx={{ minWidth: 120, height: '36.5px' }}
+                                        >
+                                            {certificatesLoading ?
+                                                <CircularProgress size={20} /> :
+                                                t('hostDetail.collectCertificates', 'Collect')
+                                            }
+                                        </Button>
+                                    </Box>
+                                </Box>
+
+                                {/* Certificates will be implemented in the next step */}
+                                {certificatesLoading && (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                                        <CircularProgress />
+                                    </Box>
+                                )}
+
+                                {/* Certificate DataGrid */}
+                                {!certificatesLoading && (
+                                    <DataGrid
+                                        rows={certificates.filter(cert => {
+                                            // Apply search filter first
+                                            if (certificateSearchTerm) {
+                                                const searchLower = certificateSearchTerm.toLowerCase();
+                                                const nameMatch = cert.certificate_name?.toLowerCase().includes(searchLower);
+                                                const subjectMatch = cert.subject?.toLowerCase().includes(searchLower);
+                                                const issuerMatch = cert.issuer?.toLowerCase().includes(searchLower);
+                                                if (!nameMatch && !subjectMatch && !issuerMatch) {
+                                                    return false;
+                                                }
+                                            }
+
+                                            // Apply type filter
+                                            if (certificateFilter === 'all') return true;
+                                            if (certificateFilter === 'ca') {
+                                                return cert.is_ca || cert.key_usage === 'CA';
+                                            }
+                                            if (certificateFilter === 'server') {
+                                                return cert.key_usage === 'Server';
+                                            }
+                                            if (certificateFilter === 'client') {
+                                                return cert.key_usage === 'Client';
+                                            }
+                                            return true;
+                                        })}
+                                        columns={certificateColumns}
+                                        initialState={{
+                                            sorting: {
+                                                sortModel: [{ field: 'days_until_expiry', sort: 'asc' }],
+                                            },
+                                        }}
+                                        paginationModel={certificatePaginationModel}
+                                        onPaginationModelChange={setCertificatePaginationModel}
+                                        pageSizeOptions={[5, 10, 25]}
+                                        disableRowSelectionOnClick
+                                        autoHeight
+                                        sx={{
+                                            '& .MuiDataGrid-row': {
+                                                '&:hover': {
+                                                    backgroundColor: 'action.hover',
+                                                },
+                                            },
+                                        }}
+                                    />
                                 )}
                             </CardContent>
                         </Card>
@@ -3729,6 +4220,105 @@ const HostDetail = () => {
                         variant="contained"
                         onClick={handleDeploySSHKeys}
                         disabled={selectedSSHKeys.length === 0}
+                    >
+                        {t('common.add', 'Add')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Certificate Selection Dialog */}
+            <Dialog
+                open={addCertificateDialogOpen}
+                onClose={handleCertificateDialogClose}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>
+                    {t('hostDetail.addCertificateToHost', 'Add Certificate to {host}').replace('{host}', host?.fqdn || '')}
+                </DialogTitle>
+                <DialogContent sx={{ minHeight: '500px' }}>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                        {t('hostDetail.selectCertificatesToAdd', 'Select the certificates you want to add to this host:')}
+                    </Typography>
+
+                    {/* Search Field */}
+                    <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+                        <TextField
+                            fullWidth
+                            placeholder={t('hostDetail.searchCertificates', 'Search certificates by name or filename...')}
+                            value={certificateDialogSearchTerm}
+                            onChange={(e) => setCertificateDialogSearchTerm(e.target.value)}
+                            size="small"
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                    handleCertificateSearch();
+                                }
+                            }}
+                        />
+                        <Button
+                            variant="outlined"
+                            onClick={handleCertificateSearch}
+                            sx={{ minWidth: 'auto', px: 3 }}
+                        >
+                            {t('common.search', 'Search')}
+                        </Button>
+                    </Box>
+
+                    {availableCertificates.length === 0 ? (
+                        <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 3 }}>
+                            {isCertificateSearching ?
+                                t('hostDetail.loadingCertificates', 'Loading certificates...') :
+                                t('hostDetail.noCertificatesFound', 'No certificates found in vault')
+                            }
+                        </Typography>
+                    ) : (
+                        <>
+                            <Typography variant="body2" sx={{ mb: 1 }}>
+                                {t('hostDetail.certificateCount', 'Found {count} certificates').replace('{count}', String(filteredCertificates.length))}
+                            </Typography>
+                            <DataGrid
+                                rows={filteredCertificates}
+                                columns={vaultCertificateColumns}
+                                initialState={{
+                                    pagination: {
+                                        paginationModel: { pageSize: 10, page: 0 },
+                                    },
+                                }}
+                                pageSizeOptions={[5, 10, 25]}
+                                checkboxSelection
+                                disableRowSelectionOnClick
+                                autoHeight
+                                sx={{
+                                    maxHeight: 400,
+                                    '& .MuiDataGrid-row': {
+                                        '&:hover': {
+                                            backgroundColor: 'action.hover',
+                                        },
+                                    },
+                                }}
+                                onRowSelectionModelChange={(newSelectionModel) => {
+                                    setSelectedCertificates(newSelectionModel as string[]);
+                                }}
+                                rowSelectionModel={selectedCertificates}
+                            />
+                        </>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCertificateDialogClose} color="primary">
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleDeployCertificates}
+                        disabled={selectedCertificates.length === 0}
                     >
                         {t('common.add', 'Add')}
                     </Button>

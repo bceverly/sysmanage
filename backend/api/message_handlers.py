@@ -95,12 +95,14 @@ async def handle_system_info(db: Session, connection, message_data: dict):
     from backend.api.host_utils import update_or_create_host
     from backend.utils.host_validation import validate_host_id
 
+    hostname = message_data.get("hostname")
+
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
-    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+    if agent_host_id and not await validate_host_id(
+        db, connection, agent_host_id, hostname
+    ):
         return {"message_type": "error", "error": "host_not_registered"}
-
-    hostname = message_data.get("hostname")
     ipv4 = message_data.get("ipv4")
     ipv6 = message_data.get("ipv6")
     platform = message_data.get("platform")

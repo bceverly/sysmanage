@@ -16,6 +16,7 @@ from backend.i18n import _
 from backend.persistence.models import (
     AvailablePackage,
     Host,
+    HostCertificate,
     NetworkInterface,
     PackageUpdate,
     SoftwarePackage,
@@ -29,6 +30,31 @@ from backend.persistence.models import (
 # Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")
 debug_logger.setLevel(logging.DEBUG)
+
+
+async def is_new_os_version_combination(
+    db: Session, os_name: str, os_version: str
+) -> bool:
+    """
+    Check if the given OS name and version combination represents a new combination
+    that hasn't been seen before in the available packages.
+
+    Returns True if this is a new combination that should trigger automatic package collection.
+    """
+    if not os_name or not os_version:
+        return False
+
+    # Check if we have any available packages for this OS/version combination
+    existing_packages = (
+        db.query(AvailablePackage)
+        .filter(
+            AvailablePackage.os_name == os_name,
+            AvailablePackage.os_version == os_version,
+        )
+        .first()
+    )
+
+    return existing_packages is None
 
 
 async def handle_os_version_update(db: Session, connection, message_data: dict):
@@ -113,6 +139,71 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
                 # Commit changes
                 db.commit()
                 db.refresh(host)
+
+                # Check if this is a new OS/version combination and trigger automatic package collection
+                # Use the same logic as package handlers to determine OS name from os_details JSON
+                os_name = None
+                os_version = None
+
+                # Try to extract OS name from os_details JSON first (agent sends this)
+                os_details = message_data.get("os_info")
+                if os_details:
+                    # Look for distribution name in os_info
+                    os_name = os_details.get("distribution") or os_details.get("name")
+
+                # Fall back to platform fields if not found in os_info
+                if not os_name:
+                    os_name = message_data.get("platform") or host.platform
+                if not os_version:
+                    os_version = (
+                        message_data.get("platform_release") or host.platform_release
+                    )
+
+                if os_name and os_version:
+                    is_new_combination = await is_new_os_version_combination(
+                        db, os_name, os_version
+                    )
+                    if is_new_combination:
+                        debug_logger.info(
+                            "New OS/version combination detected: %s %s - triggering automatic package collection",
+                            os_name,
+                            os_version,
+                        )
+
+                        # Import necessary modules for sending command
+                        from backend.websocket.connection_manager import (
+                            connection_manager,
+                        )
+                        from backend.websocket.messages import create_command_message
+
+                        # Create command message to collect packages
+                        command_message = create_command_message(
+                            command_type="collect_available_packages", parameters={}
+                        )
+
+                        # Send command to this host
+                        try:
+                            success = await connection_manager.send_to_host(
+                                host.id, command_message
+                            )
+                            if success:
+                                debug_logger.info(
+                                    "Automatic package collection command sent to host %s (%s %s)",
+                                    host.fqdn,
+                                    os_name,
+                                    os_version,
+                                )
+                            else:
+                                debug_logger.warning(
+                                    "Failed to send automatic package collection command to host %s - host may not be connected",
+                                    host.fqdn,
+                                )
+                        except Exception as e:
+                            debug_logger.error(
+                                "Error sending automatic package collection command to host %s: %s",
+                                host.fqdn,
+                                str(e),
+                            )
 
             debug_logger.info(
                 "OS version updated for host %s: %s", connection.host_id, os_info
@@ -1134,4 +1225,124 @@ async def handle_package_collection(db: Session, connection, message_data: dict)
         return {
             "message_type": "error",
             "error": f"Failed to process package collection result: {str(e)}",
+        }
+
+
+async def handle_host_certificates_update(db: Session, connection, message_data: dict):
+    """Handle host certificates update message from agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    try:
+        # Check for host_id in message data (agent-provided)
+        agent_host_id = message_data.get("host_id")
+        if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+            return {"message_type": "error", "error": "host_not_registered"}
+
+        # Find the host by hostname or other connection attributes
+        host = None
+        if hasattr(connection, "hostname") and connection.hostname:
+            host = db.query(Host).filter(Host.fqdn == connection.hostname).first()
+
+        if not host and agent_host_id:
+            host = db.query(Host).filter(Host.id == agent_host_id).first()
+
+        if not host:
+            debug_logger.warning(
+                "Could not identify host for certificates update from connection %s",
+                getattr(connection, "hostname", "unknown"),
+            )
+            return {"message_type": "error", "error": "host_identification_failed"}
+
+        # Get certificates data from message
+        certificates_data = message_data.get("certificates", [])
+        collected_at = message_data.get("collected_at")
+
+        debug_logger.info(
+            "Processing %d certificates for host %s (%s)",
+            len(certificates_data),
+            host.fqdn,
+            host.id,
+        )
+
+        # Clear existing certificates for this host
+        db.query(HostCertificate).filter(HostCertificate.host_id == host.id).delete()
+
+        # Process and store new certificates
+        certificates_processed = 0
+        for cert_data in certificates_data:
+            try:
+                # Parse dates
+                not_before = None
+                not_after = None
+
+                if cert_data.get("not_before"):
+                    not_before = datetime.fromisoformat(
+                        cert_data["not_before"].replace("Z", "+00:00")
+                    )
+                if cert_data.get("not_after"):
+                    not_after = datetime.fromisoformat(
+                        cert_data["not_after"].replace("Z", "+00:00")
+                    )
+
+                collected_at_dt = None
+                if collected_at:
+                    collected_at_dt = datetime.fromisoformat(
+                        collected_at.replace("Z", "+00:00")
+                    )
+
+                # Create certificate record
+                certificate = HostCertificate(
+                    host_id=host.id,
+                    file_path=cert_data.get("file_path", ""),
+                    certificate_name=cert_data.get("certificate_name"),
+                    subject=cert_data.get("subject"),
+                    issuer=cert_data.get("issuer"),
+                    not_before=not_before,
+                    not_after=not_after,
+                    serial_number=cert_data.get("serial_number"),
+                    fingerprint_sha256=cert_data.get("fingerprint_sha256"),
+                    is_ca=cert_data.get("is_ca", False),
+                    key_usage=cert_data.get("key_usage"),
+                    collected_at=collected_at_dt or datetime.now(timezone.utc),
+                )
+
+                db.add(certificate)
+                certificates_processed += 1
+
+            except Exception as e:
+                debug_logger.warning(
+                    "Failed to process certificate %s for host %s: %s",
+                    cert_data.get("file_path", "unknown"),
+                    host.fqdn,
+                    e,
+                )
+                continue
+
+        # Commit all changes
+        db.commit()
+
+        debug_logger.info(
+            "Successfully stored %d certificates for host %s",
+            certificates_processed,
+            host.fqdn,
+        )
+
+        return {
+            "message_type": "certificates_update_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "status": "processed",
+            "certificates_stored": certificates_processed,
+        }
+
+    except Exception as e:
+        debug_logger.error(
+            "Error processing certificates update from %s: %s",
+            getattr(connection, "hostname", "unknown"),
+            e,
+        )
+        db.rollback()
+
+        return {
+            "message_type": "error",
+            "error": f"Failed to process certificates update: {str(e)}",
         }

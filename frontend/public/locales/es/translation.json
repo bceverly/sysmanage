@@ -303,7 +303,14 @@
     "installationDeleted": "Registro de instalación eliminado exitosamente",
     "installationDeleteError": "Error al eliminar el registro de instalación",
     "viewInstallationLog": "Ver Registro de Instalación",
-    "version": "Versión"
+    "version": "Versión",
+    "certificatesTab": "Certificados",
+    "certificates": "Certificados SSL",
+    "collectCertificates": "Recopilar",
+    "certificateCollectionRequested": "Recopilación de certificados solicitada",
+    "certificateCollectionError": "Error al solicitar la recopilación de certificados",
+    "noCertificates": "No se encontraron certificados",
+    "noCertificatesHint": "Haga clic en 'Recopilar' para escanear certificados SSL en este host"
   },
   "userDetail": {
     "invalidId": "ID de usuario inválido",

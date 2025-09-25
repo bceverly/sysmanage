@@ -30,6 +30,7 @@ class MessageType(str, Enum):
     SCRIPT_EXECUTION_RESULT = "script_execution_result"
     REBOOT_STATUS_UPDATE = "reboot_status_update"
     DIAGNOSTIC_COLLECTION_RESULT = "diagnostic_collection_result"
+    HOST_CERTIFICATES_UPDATE = "host_certificates_update"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -54,6 +55,7 @@ class CommandType(str, Enum):
     EXECUTE_SCRIPT = "execute_script"
     CHECK_REBOOT_STATUS = "check_reboot_status"
     COLLECT_DIAGNOSTICS = "collect_diagnostics"
+    COLLECT_CERTIFICATES = "collect_certificates"
 
 
 class Message:

@@ -382,6 +382,13 @@ const Scripts: React.FC = () => {
       setCurrentExecutionId(null);
       setIsExecuting(false);
     }
+
+    // When entering the Execute Script tab, ensure clean state if nothing is selected
+    if (newValue === 1 && (!savedScriptId || !selectedHost)) {
+      setExecutionResult(null);
+      setCurrentExecutionId(null);
+    }
+
     setTabValue(newValue);
   };
 
@@ -1125,8 +1132,10 @@ const Scripts: React.FC = () => {
                     onChange={(e) => {
                       const scriptId = e.target.value as number;
                       setSavedScriptId(scriptId);
-                      // Clear host selection when script changes
+                      // Clear host selection and execution result when script changes
                       setSelectedHost('');
+                      setExecutionResult(null);
+                      setCurrentExecutionId(null);
                       if (scriptId) {
                         handleSavedScriptSelect(scriptId);
                       }
@@ -1146,7 +1155,12 @@ const Scripts: React.FC = () => {
                   <Select
                     value={selectedHost}
                     label={t('scripts.selectHost')}
-                    onChange={(e) => setSelectedHost(e.target.value as number)}
+                    onChange={(e) => {
+                      setSelectedHost(e.target.value as number);
+                      // Clear execution result when host changes
+                      setExecutionResult(null);
+                      setCurrentExecutionId(null);
+                    }}
                     disabled={isExecuting || !savedScriptId}
                   >
                     {getCompatibleHosts().map((host) => (
@@ -1212,7 +1226,7 @@ const Scripts: React.FC = () => {
                   {t('scripts.executionOutput')}
                 </Typography>
                 
-                {!executionResult && !isExecuting && (
+                {(!executionResult || !savedScriptId || !selectedHost) && !isExecuting && (
                   <Box sx={{ 
                     height: 400, 
                     display: 'flex', 
@@ -1263,7 +1277,7 @@ const Scripts: React.FC = () => {
                   </Box>
                 )}
 
-                {executionResult && (
+                {executionResult && savedScriptId && selectedHost && (
                   <Box>
                     {/* Execution Status */}
                     <Box sx={{ mb: 2 }}>

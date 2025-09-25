@@ -301,7 +301,14 @@
     "installationDeleted": "تم حذف سجل التثبيت بنجاح",
     "installationDeleteError": "فشل في حذف سجل التثبيت",
     "viewInstallationLog": "عرض سجل التثبيت",
-    "version": "الإصدار"
+    "version": "الإصدار",
+    "certificatesTab": "الشهادات",
+    "certificates": "شهادات SSL",
+    "collectCertificates": "جمع",
+    "certificateCollectionRequested": "تم طلب جمع الشهادات",
+    "certificateCollectionError": "خطأ في طلب جمع الشهادات",
+    "noCertificates": "لم يتم العثور على شهادات",
+    "noCertificatesHint": "انقر على 'جمع' للبحث عن شهادات SSL على هذا المضيف"
   },
   "userDetail": {
     "invalidId": "معرف مستخدم غير صالح",

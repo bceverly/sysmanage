@@ -332,7 +332,21 @@
     "installationDeleted": "Installation record deleted successfully",
     "installationDeleteError": "Failed to delete installation record",
     "viewInstallationLog": "View Installation Log",
-    "version": "Version"
+    "version": "Version",
+    "certificatesTab": "Certificates",
+    "certificates": "SSL Certificates",
+    "collectCertificates": "Collect",
+    "certificateCollectionRequested": "Certificate collection requested",
+    "certificateCollectionError": "Error requesting certificate collection",
+    "noCertificates": "No certificates found",
+    "noCertificatesHint": "Click \"Collect\" to scan for SSL certificates on this host",
+    "certificateName": "Certificate Name",
+    "issuer": "Issuer",
+    "expiryDate": "Expiry Date",
+    "location": "Location",
+    "serialNumber": "Serial Number",
+    "expired": "Expired",
+    "daysUntilExpiry": "{{days}} days"
   },
   "userDetail": {
     "resetPassword": "Reset Password",

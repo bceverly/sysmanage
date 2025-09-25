@@ -446,6 +446,13 @@ async def update_or_create_host(
         host.status = "up"
         # Update script execution status from agent
         host.script_execution_enabled = script_execution_enabled
+        # If agent can enable script execution, it's running in privileged mode
+        host.is_agent_privileged = script_execution_enabled
+        logger.info(
+            "Set is_agent_privileged=%s, script_execution_enabled=%s",
+            script_execution_enabled,
+            script_execution_enabled,
+        )
 
         # Generate host_token for existing hosts that don't have one (migration support)
         if not host.host_token:
@@ -476,6 +483,7 @@ async def update_or_create_host(
             status="up",
             approval_status="pending",  # New hosts need approval
             script_execution_enabled=script_execution_enabled,  # Set from agent message
+            is_agent_privileged=script_execution_enabled,  # If agent can enable scripts, it's privileged
         )
         db_session.add(host)
 

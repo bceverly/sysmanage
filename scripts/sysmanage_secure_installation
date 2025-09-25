@@ -31,7 +31,7 @@ find_python() {
 check_privileges() {
     case "$OS_TYPE" in
         Linux|Darwin|FreeBSD|OpenBSD|NetBSD)
-            if [ "$EUID" -eq 0 ]; then
+            if [ "$(id -u)" -eq 0 ]; then
                 return 0
             else
                 return 1

@@ -191,5 +191,9 @@ token.json
 # OpenBAO runtime files
 .openbao.pid
 
+# Vault credentials and data (sensitive)
+.vault_credentials
+data/
+
 # Build directories
 .build/

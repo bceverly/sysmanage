@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev help start stop start-openbao stop-openbao status-openbao
+.PHONY: test lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev migrate help start stop start-openbao stop-openbao status-openbao
 
 # Default target
 help:
@@ -21,6 +21,7 @@ help:
 	@echo "  make setup         - Install development dependencies"
 	@echo "  make clean         - Clean test artifacts and cache"
 	@echo "  make install-dev   - Install all development tools (includes WebDriver + MSW for testing)"
+	@echo "  make migrate       - Run database migrations (alembic upgrade head)"
 	@echo "  make check-test-models - Check test model synchronization between conftest files"
 	@echo ""
 	@echo "OpenBAO (Vault) targets:"
@@ -90,6 +91,12 @@ else
 		npm install -g eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin; \
 	fi
 endif
+
+# Database migration target
+migrate: $(VENV_ACTIVATE)
+	@echo "Running database migrations..."
+	@$(PYTHON) -m alembic upgrade head
+	@echo "[OK] Database migrations completed"
 
 # Setup target that ensures everything is ready
 setup: install-dev

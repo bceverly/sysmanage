@@ -432,23 +432,14 @@ const Settings: React.FC = () => {
 
   const refreshAllPackages = useCallback(async () => {
     try {
-      let successCount = 0;
-      let errorCount = 0;
-
       // If we have existing package summaries, use those
       if (packageSummary.length > 0) {
         // Refresh packages for all known OS/version combinations from package summaries
         for (const summary of packageSummary) {
           try {
-            const response = await axiosInstance.post(`/api/packages/refresh/${encodeURIComponent(summary.os_name)}/${encodeURIComponent(summary.os_version)}`);
-            if (response.data?.success) {
-              successCount++;
-            } else {
-              errorCount++;
-            }
+            await axiosInstance.post(`/api/packages/refresh/${encodeURIComponent(summary.os_name)}/${encodeURIComponent(summary.os_version)}`);
           } catch (error) {
             console.error('Error refreshing packages for', summary.os_name, summary.os_version, ':', error);
-            errorCount++;
           }
         }
       } else {
@@ -469,24 +460,16 @@ const Settings: React.FC = () => {
           for (const combination of osVersionCombinations) {
             const [osName, osVersion] = (combination as string).split('|');
             try {
-              const response = await axiosInstance.post(`/api/packages/refresh/${encodeURIComponent(osName)}/${encodeURIComponent(osVersion)}`);
-              if (response.data?.success) {
-                successCount++;
-              } else {
-                errorCount++;
-              }
+              await axiosInstance.post(`/api/packages/refresh/${encodeURIComponent(osName)}/${encodeURIComponent(osVersion)}`);
             } catch (error) {
               console.error('Error refreshing packages for', osName, osVersion, ':', error);
-              errorCount++;
             }
           }
         } catch (error) {
           console.error('Error fetching hosts for package refresh:', error);
-          errorCount++;
         }
       }
 
-      console.log(`Refresh All completed: ${successCount} successful, ${errorCount} errors`);
 
       // Reload package summary after a short delay
       setTimeout(() => {

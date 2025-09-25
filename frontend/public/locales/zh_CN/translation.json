@@ -268,7 +268,14 @@
     "installationDeleted": "安装记录删除成功",
     "installationDeleteError": "删除安装记录失败",
     "viewInstallationLog": "查看安装日志",
-    "version": "版本"
+    "version": "版本",
+    "certificatesTab": "证书",
+    "certificates": "SSL证书",
+    "collectCertificates": "收集",
+    "certificateCollectionRequested": "已请求证书收集",
+    "certificateCollectionError": "请求证书收集时出错",
+    "noCertificates": "未找到证书",
+    "noCertificatesHint": "点击"收集"以扫描此主机上的SSL证书"
   },
   "userDetail": {
     "invalidId": "无效的用户ID",

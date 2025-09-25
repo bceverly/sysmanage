@@ -219,6 +219,16 @@ const Secrets: React.FC = () => {
       return;
     }
 
+    // Validate secret subtype is selected when the secret type supports visibility
+    const selectedType = getSelectedSecretType();
+    if (selectedType?.supports_visibility) {
+      const isValidSubtype = selectedType.visibility_options?.some(opt => opt.value === keyVisibility);
+      if (!isValidSubtype) {
+        showNotification(t('secrets.subtypeRequired', 'Secret subtype is required'), 'error');
+        return;
+      }
+    }
+
     try {
       setLoading(true);
       const secretData = {
@@ -554,12 +564,13 @@ const Secrets: React.FC = () => {
             />
 
             {getSelectedSecretType()?.supports_visibility && (
-              <FormControl fullWidth margin="normal">
+              <FormControl fullWidth margin="normal" required>
                 <InputLabel>{t(getSelectedSecretType()?.visibility_label || 'secrets.keyVisibility')}</InputLabel>
                 <Select
-                  value={keyVisibility}
+                  value={getSelectedSecretType()?.visibility_options?.some(opt => opt.value === keyVisibility) ? keyVisibility : ''}
                   label={t(getSelectedSecretType()?.visibility_label || 'secrets.keyVisibility')}
                   onChange={(e) => setKeyVisibility(e.target.value)}
+                  required
                 >
                   {getSelectedSecretType()?.visibility_options?.map((option) => (
                     <MenuItem key={option.value} value={option.value}>

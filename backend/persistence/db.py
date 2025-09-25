@@ -130,3 +130,19 @@ SessionLocal = get_session_local
 
 # Module-level engine accessor for backward compatibility
 engine = get_engine
+
+
+# Expose the database URL for alembic migrations
+def get_database_url():
+    """Get the current database URL for alembic and other external tools."""
+    if IS_TEST_MODE:
+        if TEST_ENGINE is None:
+            raise RuntimeError("Test mode is active but no test engine is configured")
+        return str(TEST_ENGINE.url)
+
+    _init_production_database()
+    return PROD_DATABASE_URL
+
+
+# Export for alembic
+SQLALCHEMY_DATABASE_URL = get_database_url()
