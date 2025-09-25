@@ -584,7 +584,7 @@ async def list_ssh_keys(
     try:
         secrets = (
             db.query(Secret)
-            .filter(Secret.secret_type == "ssh_key")
+            .filter(Secret.secret_type == "ssh_key")  # nosec B105
             .order_by(Secret.created_at.desc())
             .all()
         )
@@ -807,7 +807,9 @@ async def deploy_certificates(
                 detail=_("secrets.some_not_found", "Some secrets not found"),
             )
 
-        certificates = [s for s in secrets if s.secret_type == "ssl_certificate"]
+        certificates = [
+            s for s in secrets if s.secret_type == "ssl_certificate"  # nosec B105
+        ]
         if len(certificates) != len(secrets):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
