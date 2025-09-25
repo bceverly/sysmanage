@@ -364,7 +364,12 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
                     # Handle both integer UIDs (Unix) and string SIDs (Windows)
                     try:
                         uid_int = int(uid)
-                        debug_logger.info(f"DEBUG: Successfully converted uid {uid} to int {uid_int} (type: {type(uid_int)})")
+                        debug_logger.info(
+                            "DEBUG: Successfully converted uid %s to int %s (type: %s)",
+                            uid,
+                            uid_int,
+                            type(uid_int),
+                        )
                         # macOS: UIDs < 500 are typically system users
                         # Linux: UIDs < 1000 are typically system users
                         # Force reload trigger
@@ -373,13 +378,18 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
                     except (ValueError, TypeError) as e:
                         # For Windows SIDs (strings), use different logic
                         # Windows system accounts typically have well-known SIDs
-                        debug_logger.info(f"DEBUG: Failed to convert uid {uid} to int: {e} (type: {type(uid)})")
+                        debug_logger.info(
+                            "DEBUG: Failed to convert uid %s to int: %s (type: %s)",
+                            uid,
+                            e,
+                            type(uid),
+                        )
                         uid_str = str(uid)
                         # Windows system account classification by SID pattern
-                        if uid_str.startswith('S-1-5-'):
+                        if uid_str.startswith("S-1-5-"):
                             # Check RID (last part of SID) - system accounts typically have RIDs < 1000
                             try:
-                                rid = int(uid_str.split('-')[-1])
+                                rid = int(uid_str.split("-")[-1])
                                 if rid < 1000:
                                     is_system_user = True
                             except (ValueError, IndexError):
@@ -473,20 +483,33 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
                 shell_value = account.get("shell")  # Default shell value
 
                 # DEBUG: Log what we received
-                debug_logger.info(f"DEBUG: User {username} - uid received: {uid} (type: {type(uid)})")
+                debug_logger.info(
+                    "DEBUG: User %s - uid received: %s (type: %s)",
+                    username,
+                    uid,
+                    type(uid),
+                )
 
                 if uid is not None:
                     try:
                         uid_value = int(uid)
-                        debug_logger.info(f"DEBUG: User {username} - converted to integer UID: {uid_value}")
+                        debug_logger.info(
+                            "DEBUG: User %s - converted to integer UID: %s",
+                            username,
+                            uid_value,
+                        )
                     except (ValueError, TypeError):
                         # Windows SIDs are strings, store in shell field for later retrieval
                         # since shell field is unused for Windows and can hold string data
                         uid_value = None
                         shell_value = str(uid)  # Store Windows SID in shell field
-                        debug_logger.info(f"DEBUG: User {username} - storing SID in shell field: {shell_value}")
+                        debug_logger.info(
+                            "DEBUG: User %s - storing SID in shell field: %s",
+                            username,
+                            shell_value,
+                        )
                 else:
-                    debug_logger.info(f"DEBUG: User {username} - uid is None/empty")
+                    debug_logger.info("DEBUG: User %s - uid is None/empty", username)
 
                 user_account = UserAccount(
                     host_id=connection.host_id,
@@ -520,27 +543,47 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
                 # Handle gid field - store integers for Unix, for Windows store a hash of the SID
                 gid_value = None
                 gid = group.get("gid")
-                debug_logger.info(f"DEBUG: Processing group {group.get('group_name')} with gid: {gid} (type: {type(gid)})")
+                debug_logger.info(
+                    "DEBUG: Processing group %s with gid: %s (type: %s)",
+                    group.get("group_name"),
+                    gid,
+                    type(gid),
+                )
 
                 if gid is not None:
                     try:
                         gid_value = int(gid)
-                        debug_logger.info(f"DEBUG: Group {group.get('group_name')} - stored integer GID: {gid_value}")
+                        debug_logger.info(
+                            "DEBUG: Group %s - stored integer GID: %s",
+                            group.get("group_name"),
+                            gid_value,
+                        )
                     except (ValueError, TypeError):
                         # For Windows SIDs, create a numeric hash to store in the integer gid field
                         # This allows us to distinguish between groups while maintaining schema compatibility
-                        if isinstance(gid, str) and gid.startswith('S-1-'):
+                        if isinstance(gid, str) and gid.startswith("S-1-"):
                             # Create a consistent hash of the SID that fits in integer range
                             import hashlib
+
                             hash_object = hashlib.md5(gid.encode())
                             # Convert to positive integer within reasonable range
                             gid_value = int(hash_object.hexdigest()[:8], 16)
-                            debug_logger.info(f"DEBUG: Group {group.get('group_name')} - Windows SID {gid} hashed to GID: {gid_value}")
+                            debug_logger.info(
+                                "DEBUG: Group %s - Windows SID %s hashed to GID: %s",
+                                group.get("group_name"),
+                                gid,
+                                gid_value,
+                            )
                         else:
                             gid_value = None
-                            debug_logger.info(f"DEBUG: Group {group.get('group_name')} - unknown gid format, storing as None")
+                            debug_logger.info(
+                                "DEBUG: Group %s - unknown gid format, storing as None",
+                                group.get("group_name"),
+                            )
                 else:
-                    debug_logger.info(f"DEBUG: Group {group.get('group_name')} - no gid provided")
+                    debug_logger.info(
+                        "DEBUG: Group %s - no gid provided", group.get("group_name")
+                    )
 
                 user_group = UserGroup(
                     host_id=connection.host_id,
