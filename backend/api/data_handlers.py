@@ -452,10 +452,39 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
                 # System user detection logic
                 is_system_user = False
                 if uid is not None:
-                    # macOS: UIDs < 500 are typically system users
-                    # Linux: UIDs < 1000 are typically system users
-                    if uid < 500:
-                        is_system_user = True
+                    # Handle both integer UIDs (Unix) and string SIDs (Windows)
+                    try:
+                        uid_int = int(uid)
+                        debug_logger.info(
+                            "DEBUG: Successfully converted uid %s to int %s (type: %s)",
+                            uid,
+                            uid_int,
+                            type(uid_int),
+                        )
+                        # macOS: UIDs < 500 are typically system users
+                        # Linux: UIDs < 1000 are typically system users
+                        # Force reload trigger
+                        if uid_int < 500:
+                            is_system_user = True
+                    except (ValueError, TypeError) as e:
+                        # For Windows SIDs (strings), use different logic
+                        # Windows system accounts typically have well-known SIDs
+                        debug_logger.info(
+                            "DEBUG: Failed to convert uid %s to int: %s (type: %s)",
+                            uid,
+                            e,
+                            type(uid),
+                        )
+                        uid_str = str(uid)
+                        # Windows system account classification by SID pattern
+                        if uid_str.startswith("S-1-5-"):
+                            # Check RID (last part of SID) - system accounts typically have RIDs < 1000
+                            try:
+                                rid = int(uid_str.split("-")[-1])
+                                if rid < 1000:
+                                    is_system_user = True
+                            except (ValueError, IndexError):
+                                pass
 
                 # Also check for common system usernames
                 system_usernames = {
@@ -539,12 +568,46 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
                 if username in system_usernames or username.startswith("_"):
                     is_system_user = True
 
+                # Handle uid field - only store integers, Windows SIDs in shell field
+                # Fixed: Type error when comparing string SIDs with integer column
+                uid_value = None
+                shell_value = account.get("shell")  # Default shell value
+
+                # DEBUG: Log what we received
+                debug_logger.info(
+                    "DEBUG: User %s - uid received: %s (type: %s)",
+                    username,
+                    uid,
+                    type(uid),
+                )
+
+                if uid is not None:
+                    try:
+                        uid_value = int(uid)
+                        debug_logger.info(
+                            "DEBUG: User %s - converted to integer UID: %s",
+                            username,
+                            uid_value,
+                        )
+                    except (ValueError, TypeError):
+                        # Windows SIDs are strings, store in shell field for later retrieval
+                        # since shell field is unused for Windows and can hold string data
+                        uid_value = None
+                        shell_value = str(uid)  # Store Windows SID in shell field
+                        debug_logger.info(
+                            "DEBUG: User %s - storing SID in shell field: %s",
+                            username,
+                            shell_value,
+                        )
+                else:
+                    debug_logger.info("DEBUG: User %s - uid is None/empty", username)
+
                 user_account = UserAccount(
                     host_id=connection.host_id,
                     username=username,
-                    uid=uid,
+                    uid=uid_value,
                     home_directory=account.get("home_directory"),
-                    shell=account.get("shell"),  # nosec B604
+                    shell=shell_value,  # nosec B604 - May contain Windows SID
                     is_system_user=is_system_user,  # Set proper classification
                     created_at=now,
                     updated_at=now,
@@ -567,10 +630,58 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
             # Add new user groups
             for group in user_groups:
                 now = datetime.now(timezone.utc)
+
+                # Handle gid field - store integers for Unix, for Windows store a hash of the SID
+                gid_value = None
+                gid = group.get("gid")
+                debug_logger.info(
+                    "DEBUG: Processing group %s with gid: %s (type: %s)",
+                    group.get("group_name"),
+                    gid,
+                    type(gid),
+                )
+
+                if gid is not None:
+                    try:
+                        gid_value = int(gid)
+                        debug_logger.info(
+                            "DEBUG: Group %s - stored integer GID: %s",
+                            group.get("group_name"),
+                            gid_value,
+                        )
+                    except (ValueError, TypeError):
+                        # For Windows SIDs, create a numeric hash to store in the integer gid field
+                        # This allows us to distinguish between groups while maintaining schema compatibility
+                        if isinstance(gid, str) and gid.startswith("S-1-"):
+                            # Create a consistent hash of the SID that fits in integer range
+                            import hashlib
+
+                            hash_object = hashlib.md5(
+                                gid.encode(), usedforsecurity=False
+                            )  # nosec B324
+                            # Convert to positive integer within reasonable range
+                            gid_value = int(hash_object.hexdigest()[:8], 16)
+                            debug_logger.info(
+                                "DEBUG: Group %s - Windows SID %s hashed to GID: %s",
+                                group.get("group_name"),
+                                gid,
+                                gid_value,
+                            )
+                        else:
+                            gid_value = None
+                            debug_logger.info(
+                                "DEBUG: Group %s - unknown gid format, storing as None",
+                                group.get("group_name"),
+                            )
+                else:
+                    debug_logger.info(
+                        "DEBUG: Group %s - no gid provided", group.get("group_name")
+                    )
+
                 user_group = UserGroup(
                     host_id=connection.host_id,
                     group_name=group.get("group_name"),
-                    gid=group.get("gid"),
+                    gid=gid_value,
                     is_system_group=group.get("is_system_group", False),
                     # Note: members field doesn't exist in UserGroup model - removed
                     # (use UserGroupMembership table for members relationships)

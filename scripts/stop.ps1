@@ -59,28 +59,35 @@ function Kill-ByPidFile {
     }
 }
 
-# Function to kill processes by name pattern
-function Kill-ByPattern {
-    param([string]$Pattern, [string]$ServiceName)
-    
-    $processes = Get-Process | Where-Object { $_.ProcessName -like $Pattern } -ErrorAction SilentlyContinue
+# Function to kill processes by command line pattern
+function Kill-ByCommandLine {
+    param([string]$CommandPattern, [string]$ServiceName)
+
+    $processes = Get-WmiObject Win32_Process | Where-Object {
+        $_.CommandLine -and $_.CommandLine -match $CommandPattern
+    } -ErrorAction SilentlyContinue
+
     if ($processes) {
         $count = ($processes | Measure-Object).Count
         Write-Host "Found $count $ServiceName process(es), stopping them..." -ForegroundColor Cyan
         foreach ($proc in $processes) {
-            Write-Host "  Stopping PID $($proc.Id): $($proc.ProcessName)" -ForegroundColor Gray
-            Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+            Write-Host "  Stopping PID $($proc.ProcessId): $($proc.Name)" -ForegroundColor Gray
+            Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
         }
-        Start-Sleep -Seconds 2
-        
-        # Check for remaining processes
-        $remaining = Get-Process | Where-Object { $_.ProcessName -like $Pattern } -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 3
+
+        # Check for remaining processes with more time
+        $remaining = Get-WmiObject Win32_Process | Where-Object {
+            $_.CommandLine -and $_.CommandLine -match $CommandPattern
+        } -ErrorAction SilentlyContinue
+
         if ($remaining) {
             $remainingCount = ($remaining | Measure-Object).Count
             Write-Host "WARNING: $remainingCount $ServiceName process(es) still running, force stopping..." -ForegroundColor Yellow
             foreach ($proc in $remaining) {
-                Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+                Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
             }
+            Start-Sleep -Seconds 2
         }
     }
 }
@@ -106,10 +113,10 @@ if (Test-Path "logs") {
     Kill-ByPidFile "logs\frontend.pid" "Frontend Web UI"
 }
 
-# Fallback: kill by process patterns
-Kill-ByPattern "*uvicorn*" "Backend API (uvicorn)"
-Kill-ByPattern "*python*" "Backend API (Python)"
-Kill-ByPattern "*react-scripts*" "Frontend Web UI (React)"
+# Fallback: kill by command line patterns - target specific SysManage processes
+Kill-ByCommandLine "uvicorn.*backend\.main:app" "Backend API (uvicorn)"
+Kill-ByCommandLine "react-scripts.*start" "Frontend Web UI (React)"
+Kill-ByCommandLine "npm.*start.*sysmanage" "Frontend Web UI (npm)"
 
 # Kill any processes on the specific ports
 Write-Host "Checking for processes on SysManage ports..." -ForegroundColor Cyan

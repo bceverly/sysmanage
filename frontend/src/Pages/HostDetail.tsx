@@ -55,7 +55,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
 
-import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService } from '../Services/hosts';
+import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData } from '../Services/hosts';
 import { SysManageUser, doGetMe } from '../Services/users';
 import { SecretResponse } from '../Services/secrets';
 
@@ -99,7 +99,7 @@ const HostDetail = () => {
     const [certificateSearchTerm, setCertificateSearchTerm] = useState<string>('');
     const [storageFilter, setStorageFilter] = useState<'all' | 'physical' | 'logical'>('physical');
     const [networkFilter, setNetworkFilter] = useState<'all' | 'active' | 'inactive'>('active');
-    const [userFilter, setUserFilter] = useState<'all' | 'system' | 'regular'>('regular');
+    const [userFilter, setUserFilter] = useState<'all' | 'system' | 'regular'>('all');
     const [groupFilter, setGroupFilter] = useState<'all' | 'system' | 'regular'>('regular');
     const [packageManagerFilter, setPackageManagerFilter] = useState<string>('all');
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
@@ -1017,10 +1017,15 @@ const HostDetail = () => {
         
         try {
             setDiagnosticsLoading(true);
-            await doRequestHostDiagnostics(hostId);
-            
+
+            // Request both diagnostics and user access data collection
+            await Promise.all([
+                doRequestHostDiagnostics(hostId),
+                doRefreshUserAccessData(hostId)
+            ]);
+
             // Show success message
-            console.log('Diagnostics collection requested successfully');
+            console.log('Diagnostics and user access data collection requested successfully');
             
             // Refresh host data to get updated diagnostics request status
             const updatedHost = await doGetHostByID(hostId);
@@ -2624,7 +2629,7 @@ const HostDetail = () => {
                                                             </Button>
                                                         </Box>
                                                         <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                                                            UID: {user.uid !== undefined ? user.uid : t('common.notAvailable')}
+                                                            {host?.platform?.toLowerCase().includes('windows') ? 'SID' : 'UID'}: {user.uid !== undefined ? user.uid : t('common.notAvailable')}
                                                         </Typography>
                                                         {user.home_directory && (
                                                             <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5, wordBreak: 'break-all' }}>
@@ -2764,7 +2769,7 @@ const HostDetail = () => {
                                                             {group.group_name}
                                                         </Typography>
                                                         <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                                                            GID: {group.gid !== undefined ? group.gid : t('common.notAvailable')}
+                                                            {host?.platform?.toLowerCase().includes('windows') ? 'SID' : 'GID'}: {group.gid !== undefined && group.gid !== null ? group.gid : t('common.notAvailable')}
                                                         </Typography>
                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, mb: 1 }}>
                                                             <Chip 

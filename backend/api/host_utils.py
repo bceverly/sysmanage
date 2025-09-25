@@ -279,13 +279,26 @@ def get_host_users_with_groups(host_id: str) -> List[Dict[str, Any]]:
 
             group_names = [group.group_name for _, group in group_memberships]
 
+            # For Windows hosts, check if shell field contains Windows SID
+            uid_value = user.uid
+            shell_value = user.shell
+            if (
+                hasattr(host, "platform")
+                and host.platform
+                and "windows" in host.platform.lower()
+            ):
+                # Windows SIDs are stored in shell field if uid is None
+                if user.uid is None and user.shell and user.shell.startswith("S-1-"):
+                    uid_value = user.shell  # Return Windows SID as uid for frontend
+                    shell_value = None  # Don't show shell for Windows
+
             users.append(
                 {
                     "id": str(user.id),
                     "username": user.username,
-                    "uid": user.uid,
+                    "uid": uid_value,
                     "home_directory": user.home_directory,
-                    "shell": user.shell,
+                    "shell": shell_value,
                     "is_system_user": user.is_system_user,
                     "groups": group_names,
                     "created_at": (
