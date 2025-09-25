@@ -280,7 +280,7 @@ endif
 	@echo ""
 	@echo "Starting SysManage server..."
 ifeq ($(OS),Windows_NT)
-	@if defined PSModulePath (powershell -ExecutionPolicy Bypass -File scripts/start.ps1) else (scripts\start.cmd)
+	@powershell -ExecutionPolicy Bypass -File scripts/start.ps1 || scripts\start.cmd
 else
 	@if [ -n "$$ZSH_VERSION" ]; then \
 		echo "Detected zsh shell, using start.sh"; \
@@ -300,7 +300,7 @@ endif
 stop:
 	@echo "Stopping SysManage server..."
 ifeq ($(OS),Windows_NT)
-	@if defined PSModulePath (powershell -ExecutionPolicy Bypass -File scripts/stop.ps1) else (scripts\stop.cmd)
+	@powershell -ExecutionPolicy Bypass -File scripts/stop.ps1 || scripts\stop.cmd
 else
 	@if [ -n "$$ZSH_VERSION" ]; then \
 		echo "Detected zsh shell, using stop.sh"; \
