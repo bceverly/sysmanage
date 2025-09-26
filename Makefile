@@ -1,14 +1,17 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev migrate help start stop start-openbao stop-openbao status-openbao
+.PHONY: test test-python test-vite test-playwright lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev migrate help start stop start-openbao stop-openbao status-openbao
 
 # Default target
 help:
 	@echo "SysManage Server - Available targets:"
 	@echo "  make start         - Start SysManage server + OpenBAO (auto-detects shell/platform)"
 	@echo "  make stop          - Stop SysManage server + OpenBAO (auto-detects shell/platform)"
-	@echo "  make test          - Run all unit tests (Python + TypeScript)"
+	@echo "  make test          - Run all tests (Python + TypeScript + UI integration)"
+	@echo "  make test-python   - Run Python backend tests only"
+	@echo "  make test-vite     - Run Vite/TypeScript frontend tests only"
+	@echo "  make test-playwright - Run Playwright UI tests only"
 	@echo "  make lint          - Run all linters (Python + TypeScript)"
 	@echo "  make lint-python   - Run Python linting only"
 	@echo "  make lint-typescript - Run TypeScript linting only"
@@ -20,7 +23,7 @@ help:
 	@echo "  make security-upgrades - Check for security package upgrades"
 	@echo "  make setup         - Install development dependencies"
 	@echo "  make clean         - Clean test artifacts and cache"
-	@echo "  make install-dev   - Install all development tools (includes WebDriver + MSW for testing)"
+	@echo "  make install-dev   - Install all development tools (includes Playwright + WebDriver + MSW for testing)"
 	@echo "  make migrate       - Run database migrations (alembic upgrade head)"
 	@echo "  make check-test-models - Check test model synchronization between conftest files"
 	@echo ""
@@ -69,6 +72,29 @@ install-dev: $(VENV_ACTIVATE)
 	@$(PYTHON) scripts/install-openbao.py
 	@echo "Setting up WebDriver for screenshots..."
 	@$(PYTHON) scripts/install-browsers.py
+	@echo "Installing Playwright browsers..."
+	@$(PYTHON) -m playwright install chromium firefox webkit || echo "Playwright browser installation failed - continuing with Selenium fallback"
+	@echo "Checking Playwright browser dependencies..."
+	@$(PYTHON) -c "from playwright.sync_api import sync_playwright; exec('with sync_playwright() as p: browser = p.chromium.launch(headless=True); browser.close(); print(\"✓ Playwright dependencies working\")')" 2>/dev/null || ( \
+		echo "Installing Playwright system dependencies..."; \
+		echo "This may prompt for sudo password to install system packages..."; \
+		sudo $(PYTHON) -m playwright install-deps 2>/dev/null || ( \
+			echo ""; \
+			echo "❌ Playwright automatic dependency installation failed."; \
+			echo "   Installing manually for Ubuntu $(shell lsb_release -rs)..."; \
+			echo ""; \
+			sudo apt-get update -qq && \
+			sudo apt-get install -y \
+				libicu76 libavif16 libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 \
+				libatspi2.0-0t64 libcairo2 libcups2t64 libdbus-1-3 libdrm2 libgbm1 \
+				libglib2.0-0t64 libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 \
+				libxcomposite1 libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2 \
+				libcairo-gobject2 libfontconfig1 libfreetype6 libgdk-pixbuf-2.0-0 \
+				libgtk-3-0t64 libpangocairo-1.0-0 libx11-xcb1 libxcb-shm0 libxcursor1 \
+				libxi6 libxrender1 fonts-liberation xvfb && \
+			echo "✓ Comprehensive dependency installation completed" \
+		) \
+	)
 	@echo "Installing TypeScript/React development dependencies..."
 	@cd frontend && npm install --include=optional
 	@echo "Ensuring esbuild optional dependencies are installed..."
@@ -79,6 +105,8 @@ install-dev: $(VENV_ACTIVATE)
 	@cd frontend && npm install --save-dev msw
 	@echo "Initializing MSW browser setup (for optional development use)..."
 	@cd frontend && npx msw init public/ --save
+	@echo "Running database migrations to ensure tables exist..."
+	@$(PYTHON) -m alembic upgrade head || echo "Database migration failed - you may need to configure the database first"
 ifeq ($(OS),Windows_NT)
 	@echo "Checking for grep installation on Windows..."
 	@where grep >nul 2>nul || (echo "Installing grep via chocolatey (requires admin privileges)..." && powershell -Command "Start-Process powershell -ArgumentList '-Command choco install grep -y' -Verb RunAs -Wait" || echo "Failed to install grep - you may need to run as administrator or install chocolatey first")
@@ -238,7 +266,7 @@ else
 	@find /tmp -name "*sysmanage*.db" -type f -delete 2>/dev/null || true
 	@find /tmp -name "tmp*.db" -type f -delete 2>/dev/null || true
 endif
-	@$(PYTHON) -m pytest tests/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html
+	@$(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html
 	@echo "[OK] Python tests completed"
 
 # TypeScript/React tests
@@ -247,13 +275,25 @@ test-typescript:
 	@cd frontend && npm test
 	@echo "[OK] TypeScript tests completed"
 
+# UI integration tests
+test-ui: $(VENV_ACTIVATE)
+	@echo "=== Running UI Integration Tests ==="
+	@$(PYTHON) -m pytest tests/ui/ -v --tb=short
+	@echo "[OK] UI integration tests completed"
+
+# Playwright tests only (alias for test-ui)
+test-playwright: test-ui
+
+# Vite tests only (alias for test-typescript)
+test-vite: test-typescript
+
 # Model synchronization check
 check-test-models:
 	@echo "=== Checking Test Model Synchronization ==="
 	@$(PYTHON) scripts/check_test_models.py
 
 # Combined testing
-test: test-python test-typescript
+test: test-python test-typescript test-ui
 	@echo "[OK] All tests completed successfully!"
 
 # Clean artifacts
