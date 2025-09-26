@@ -134,6 +134,7 @@ type UserAccount = {
     id: string;
     username: string;
     uid?: number;
+    security_id?: string;  // Windows SID string
     home_directory?: string;
     shell?: string;
     is_system_user: boolean;
@@ -146,6 +147,7 @@ type UserGroup = {
     id: string;
     group_name: string;
     gid?: number;
+    security_id?: string;  // Windows SID string
     is_system_group: boolean;
     users: string[];
     created_at?: string;

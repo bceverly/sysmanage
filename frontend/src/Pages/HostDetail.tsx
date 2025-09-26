@@ -2629,7 +2629,7 @@ const HostDetail = () => {
                                                             </Button>
                                                         </Box>
                                                         <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                                                            {host?.platform?.toLowerCase().includes('windows') ? 'SID' : 'UID'}: {user.uid !== undefined ? user.uid : t('common.notAvailable')}
+                                                            {host?.platform?.toLowerCase().includes('windows') ? 'SID' : 'UID'}: {host?.platform?.toLowerCase().includes('windows') ? (user.security_id || t('common.notAvailable')) : (user.uid !== undefined ? user.uid : t('common.notAvailable'))}
                                                         </Typography>
                                                         {user.home_directory && (
                                                             <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5, wordBreak: 'break-all' }}>
@@ -2769,7 +2769,7 @@ const HostDetail = () => {
                                                             {group.group_name}
                                                         </Typography>
                                                         <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                                                            {host?.platform?.toLowerCase().includes('windows') ? 'SID' : 'GID'}: {group.gid !== undefined && group.gid !== null ? group.gid : t('common.notAvailable')}
+                                                            {host?.platform?.toLowerCase().includes('windows') ? 'SID' : 'GID'}: {host?.platform?.toLowerCase().includes('windows') ? (group.security_id || t('common.notAvailable')) : (group.gid !== undefined && group.gid !== null ? group.gid : t('common.notAvailable'))}
                                                         </Typography>
                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, mb: 1 }}>
                                                             <Chip 

@@ -279,24 +279,35 @@ def get_host_users_with_groups(host_id: str) -> List[Dict[str, Any]]:
 
             group_names = [group.group_name for _, group in group_memberships]
 
-            # For Windows hosts, check if shell field contains Windows SID
-            uid_value = user.uid
+            # Handle both Unix UIDs and Windows SIDs
+            uid_value = user.uid  # Integer for Unix systems
+            security_id_value = getattr(
+                user, "security_id", None
+            )  # String for Windows SIDs
             shell_value = user.shell
+
+            # For backwards compatibility: check if Windows SID was stored in shell field
             if (
                 hasattr(host, "platform")
                 and host.platform
                 and "windows" in host.platform.lower()
             ):
-                # Windows SIDs are stored in shell field if uid is None
-                if user.uid is None and user.shell and user.shell.startswith("S-1-"):
-                    uid_value = user.shell  # Return Windows SID as uid for frontend
-                    shell_value = None  # Don't show shell for Windows
+                if (
+                    user.uid is None
+                    and user.shell
+                    and user.shell.startswith("S-1-")
+                    and not security_id_value
+                ):
+                    # Legacy: Windows SID stored in shell field
+                    security_id_value = user.shell
+                    shell_value = None
 
             users.append(
                 {
                     "id": str(user.id),
                     "username": user.username,
-                    "uid": uid_value,
+                    "uid": uid_value,  # Unix UID (integer) or None for Windows
+                    "security_id": security_id_value,  # Windows SID (string) or None for Unix
                     "home_directory": user.home_directory,
                     "shell": shell_value,
                     "is_system_user": user.is_system_user,
@@ -346,11 +357,19 @@ def get_host_user_groups(host_id: str) -> List[Dict[str, Any]]:
             )
 
             user_names = [user.username for _, user in user_memberships]
+
+            # Handle both Unix GIDs and Windows SIDs
+            gid_value = group.gid  # Integer for Unix systems
+            security_id_value = getattr(
+                group, "security_id", None
+            )  # String for Windows SIDs
+
             groups.append(
                 {
                     "id": str(group.id),
                     "group_name": group.group_name,
-                    "gid": group.gid,
+                    "gid": gid_value,  # Unix GID (integer) or None for Windows
+                    "security_id": security_id_value,  # Windows SID (string) or None for Unix
                     "is_system_group": group.is_system_group,
                     "users": user_names,
                     "created_at": (

@@ -32,6 +32,7 @@ class UserAccount(Base):
     host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     username = Column(String(255), nullable=False)
     uid = Column(Integer, nullable=True)  # Linux/macOS user ID
+    security_id = Column(String(255), nullable=True)  # Windows SID
     home_directory = Column(String(500), nullable=True)
     shell = Column(String(255), nullable=True)
     is_system_user = Column(Boolean, nullable=False, default=False)
@@ -53,6 +54,7 @@ class UserGroup(Base):
     host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     group_name = Column(String(255), nullable=False)
     gid = Column(Integer, nullable=True)  # Linux/macOS group ID
+    security_id = Column(String(255), nullable=True)  # Windows SID
     is_system_group = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True), nullable=False)
