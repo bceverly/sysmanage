@@ -91,7 +91,11 @@ like to add:
     sysmanage and sysmanage-agent
     so that the performance can be
     monitoried in a large-scale
-    production environment.
+    production environment.  Also,
+    add the ability to deploy
+    open telemetry to the remote
+    hosts and connect them to
+    the grafana system.
 
 11. Add the ability to deploy an
     antivirus solution that is
