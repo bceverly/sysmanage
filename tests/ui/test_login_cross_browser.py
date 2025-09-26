@@ -245,64 +245,63 @@ async def test_invalid_login_firefox(page: Page, ui_config, start_server):
     print("  ✓ Invalid login correctly rejected (Firefox)")
 
 
-@pytest.mark.asyncio
-async def test_invalid_login_webkit(page: Page, ui_config, start_server):
-    """Test invalid login handling on WebKit/Safari (macOS only)"""
-    if platform.system() != "Darwin":
-        pytest.skip("WebKit tests only run on macOS")
+# Only define WebKit test on macOS to avoid "skipped" status on other platforms
+if platform.system() == "Darwin":
+    @pytest.mark.asyncio
+    async def test_invalid_login_webkit(page: Page, ui_config, start_server):
+        """Test invalid login handling on WebKit/Safari (macOS only)"""
+        print("\n=== Testing invalid login handling (WebKit/Safari) ===")
 
-    print("\n=== Testing invalid login handling (WebKit/Safari) ===")
+        # Navigate to login page
+        await page.goto(f"{ui_config.base_url}/login")
+        await page.wait_for_load_state("networkidle")
 
-    # Navigate to login page
-    await page.goto(f"{ui_config.base_url}/login")
-    await page.wait_for_load_state("networkidle")
+        # Try invalid credentials
+        username_input = page.locator('input[type="text"]').first
+        password_input = page.locator('input[type="password"]').first
 
-    # Try invalid credentials
-    username_input = page.locator('input[type="text"]').first
-    password_input = page.locator('input[type="password"]').first
+        await username_input.fill("invalid_user_webkit")
+        await password_input.fill("invalid_password_webkit")
 
-    await username_input.fill("invalid_user_webkit")
-    await password_input.fill("invalid_password_webkit")
+        login_button = page.locator(
+            'button[type="submit"], button:has-text("LOGIN"), button:has-text("Login")'
+        ).first
+        await login_button.click()
 
-    login_button = page.locator(
-        'button[type="submit"], button:has-text("LOGIN"), button:has-text("Login")'
-    ).first
-    await login_button.click()
+        # Wait a moment for error handling
+        await page.wait_for_timeout(3000)
 
-    # Wait a moment for error handling
-    await page.wait_for_timeout(3000)
+        # Verify we're still on login page (unsuccessful login)
+        current_url = page.url
+        assert (
+            "/login" in current_url or page.url == f"{ui_config.base_url}/"
+        ), f"Expected to stay on login page, but went to: {current_url}"
 
-    # Verify we're still on login page (unsuccessful login)
-    current_url = page.url
-    assert (
-        "/login" in current_url or page.url == f"{ui_config.base_url}/"
-    ), f"Expected to stay on login page, but went to: {current_url}"
+        # Look for error message (optional, depends on implementation)
+        error_indicators = [
+            'text="Invalid credentials"',
+            'text="Login failed"',
+            'text="Invalid username or password"',
+            '[role="alert"]',
+            ".error",
+            ".alert-danger",
+        ]
 
-    # Look for error message (optional, depends on implementation)
-    error_indicators = [
-        'text="Invalid credentials"',
-        'text="Login failed"',
-        'text="Invalid username or password"',
-        '[role="alert"]',
-        ".error",
-        ".alert-danger",
-    ]
+        error_found = False
+        for error_selector in error_indicators:
+            try:
+                error_element = page.locator(error_selector).first
+                await expect(error_element).to_be_visible(timeout=2000)
+                error_found = True
+                print("  ✓ Error message displayed for invalid login")
+                break
+            except:
+                continue
 
-    error_found = False
-    for error_selector in error_indicators:
-        try:
-            error_element = page.locator(error_selector).first
-            await expect(error_element).to_be_visible(timeout=2000)
-            error_found = True
-            print("  ✓ Error message displayed for invalid login")
-            break
-        except:
-            continue
+        if not error_found:
+            print("  - No specific error message found (may not be implemented)")
 
-    if not error_found:
-        print("  - No specific error message found (may not be implemented)")
-
-    print("  ✓ Invalid login correctly rejected (WebKit/Safari)")
+        print("  ✓ Invalid login correctly rejected (WebKit/Safari)")
 
 
 if __name__ == "__main__":
