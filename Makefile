@@ -72,7 +72,7 @@ install-dev: $(VENV_ACTIVATE)
 	@$(PYTHON) scripts/install-openbao.py
 	@echo "Setting up WebDriver for screenshots..."
 	@$(PYTHON) scripts/install-browsers.py
-	@if [ "$(shell uname -s)" != "OpenBSD" ]; then \
+	@if [ "$(shell uname -s)" != "OpenBSD" ] && [ "$(shell uname -s)" != "FreeBSD" ]; then \
 		echo "Installing Playwright browsers..."; \
 		$(PYTHON) -m playwright install chromium firefox webkit 2>/dev/null || echo "Playwright browser installation failed - continuing with Selenium fallback"; \
 		echo "Checking Playwright browser dependencies..."; \
@@ -101,7 +101,7 @@ install-dev: $(VENV_ACTIVATE)
 			fi \
 		); \
 	else \
-		echo "Skipping Playwright installation on OpenBSD - using Selenium with system browser"; \
+		echo "Skipping Playwright installation on OpenBSD/FreeBSD - using Selenium with system browser"; \
 	fi
 	@echo "Installing TypeScript/React development dependencies..."
 	@cd frontend && npm install --include=optional
@@ -285,13 +285,13 @@ test-typescript:
 
 # UI integration tests
 test-ui: $(VENV_ACTIVATE)
-	@if [ "$(shell uname -s)" != "OpenBSD" ]; then \
+	@if [ "$(shell uname -s)" != "OpenBSD" ] && [ "$(shell uname -s)" != "FreeBSD" ]; then \
 		echo "=== Running UI Integration Tests (Playwright) ==="; \
 		$(PYTHON) -m pytest tests/ui/test_login_cross_browser.py -v --tb=short; \
 		echo "[OK] Playwright UI integration tests completed"; \
 	else \
 		echo "=== Running UI Integration Tests (Selenium) ==="; \
-		echo "[INFO] Using Selenium fallback on OpenBSD"; \
+		echo "[INFO] Using Selenium fallback on OpenBSD/FreeBSD"; \
 		mv tests/ui/conftest.py tests/ui/conftest_playwright.py 2>/dev/null || true; \
 		cp tests/ui/conftest_selenium.py tests/ui/conftest.py; \
 		$(PYTHON) -m pytest tests/ui/test_login_selenium.py -v --tb=short; \
