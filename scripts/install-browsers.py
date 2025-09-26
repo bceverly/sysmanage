@@ -28,14 +28,14 @@ def install_webdriver():
         # Try to set up ChromeDriver automatically
         from webdriver_manager.chrome import ChromeDriverManager
         driver_path = ChromeDriverManager().install()
-        print(f"✅ ChromeDriver installed at: {driver_path}")
+        print(f"[OK] ChromeDriver installed at: {driver_path}")
         return True
 
     except ImportError:
-        print("❌ webdriver-manager not found. Make sure you've installed requirements.txt first")
+        print("[ERROR] webdriver-manager not found. Make sure you've installed requirements.txt first")
         return False
     except Exception as e:
-        print(f"⚠️  ChromeDriver setup failed: {e}")
+        print(f"[WARN]  ChromeDriver setup failed: {e}")
         print("Falling back to system browser detection...")
         return detect_system_browser()
 
@@ -48,12 +48,12 @@ def detect_system_browser():
             result = subprocess.run(['which', browser], capture_output=True)
             if result.returncode == 0:
                 browser_path = result.stdout.decode().strip()
-                print(f"✅ Found system browser: {browser_path}")
+                print(f"[OK] Found system browser: {browser_path}")
                 return True
         except:
             continue
 
-    print("❌ No suitable browser found")
+    print("[ERROR] No suitable browser found")
     print("Please install a browser:")
     print("  - On OpenBSD: pkg_add chromium")
     print("  - On FreeBSD: pkg install chromium")
@@ -68,19 +68,19 @@ def main():
     # Check if selenium is installed
     try:
         import selenium
-        print(f"✅ Selenium {selenium.__version__} found")
+        print(f"[OK] Selenium {selenium.__version__} found")
     except ImportError:
-        print("❌ Selenium not installed. Run: pip install -r requirements.txt")
+        print("[ERROR] Selenium not installed. Run: pip install -r requirements.txt")
         sys.exit(1)
 
     # Install WebDriver
     success = install_webdriver()
 
     if success:
-        print("\n🎉 WebDriver setup complete!")
+        print("\n[SUCCESS] WebDriver setup complete!")
         print("You can now use screenshot capabilities in SysManage")
     else:
-        print("\n⚠️  WebDriver setup failed")
+        print("\n[WARN]  WebDriver setup failed")
         print("Screenshot capabilities may not work properly")
         print("You may need to install Chrome/Chromium manually:")
         print("  - On OpenBSD: pkg_add chromium")

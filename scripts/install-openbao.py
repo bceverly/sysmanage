@@ -355,13 +355,29 @@ def install_from_binary():
                 install_path = get_install_path()
                 if install_path:
                     target_path = os.path.join(install_path, binary_name)
+                    print(f"Attempting to install to: {target_path}")
                     try:
+                        # Ensure the directory exists
+                        os.makedirs(install_path, exist_ok=True)
                         shutil.copy2(binary_path, target_path)
                         print(f"OpenBAO installed to: {target_path}")
                         return True
-                    except PermissionError:
-                        print(f"Permission denied installing to {install_path}")
+                    except PermissionError as e:
+                        print(f"Permission denied installing to {install_path}: {e}")
                         print("You may need to run with appropriate privileges or install manually")
+                        # Try alternative location
+                        alt_path = os.path.normpath(os.path.expanduser("~/bin"))
+                        if alt_path != install_path:
+                            print(f"Trying alternative location: {alt_path}")
+                            try:
+                                os.makedirs(alt_path, exist_ok=True)
+                                alt_target = os.path.join(alt_path, binary_name)
+                                shutil.copy2(binary_path, alt_target)
+                                print(f"OpenBAO installed to: {alt_target}")
+                                print(f"Add {alt_path} to your PATH to use 'bao' command")
+                                return True
+                            except Exception as e2:
+                                print(f"Alternative location also failed: {e2}")
                         return False
                 else:
                     print("Could not determine appropriate installation path")
@@ -501,10 +517,11 @@ def get_install_path():
     system = platform.system().lower()
 
     if system == 'windows':
-        # Try common Windows paths
+        # Try common Windows paths with proper Windows path separators
         paths = [
-            os.path.expanduser("~/AppData/Local/bin"),
-            "C:/Program Files/OpenBAO",
+            os.path.normpath(os.path.expanduser("~/AppData/Local/bin")),
+            os.path.normpath("C:/Program Files/OpenBAO"),
+            os.path.normpath(os.path.expanduser("~/bin")),
         ]
     else:
         # Unix-like systems
