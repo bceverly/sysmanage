@@ -92,7 +92,13 @@ jobs:
 
     - name: Run backend tests
       run: |
-        make test-python
+        # Clean old test databases
+        find . -name "*.db" -type f -delete 2>/dev/null || true
+        find /tmp -name "*sysmanage*.db" -type f -delete 2>/dev/null || true
+        find /tmp -name "tmp*.db" -type f -delete 2>/dev/null || true
+
+        # Run Python tests (excluding UI tests)
+        python -m pytest tests/ --ignore=tests/ui/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
@@ -619,7 +625,7 @@ jobs:
       id: ui-tests
       run: |
         echo "🎭 Running Playwright UI tests..."
-        if make test-playwright; then
+        if python -m pytest tests/ui/ -v --tb=short; then
           echo "status=passing" >> $GITHUB_OUTPUT
           echo "color=brightgreen" >> $GITHUB_OUTPUT
           echo "✅ All UI tests passed"
