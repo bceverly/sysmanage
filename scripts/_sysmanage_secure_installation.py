@@ -782,10 +782,16 @@ ui = true
     data_dir = project_root / 'data' / 'openbao'
     data_dir.mkdir(parents=True, exist_ok=True)
 
+    # Fix ownership of data directory (if running under sudo)
+    fix_file_ownership(data_dir)
+
     # Start vault server
     print("  Starting OpenBAO server...")
     log_file = project_root / 'logs' / 'openbao.log'
     log_file.parent.mkdir(exist_ok=True)
+
+    # Fix ownership of logs directory (if running under sudo)
+    fix_file_ownership(log_file.parent)
 
     vault_process = subprocess.Popen([
         vault_cmd, 'server', f'-config={vault_config_path}'
