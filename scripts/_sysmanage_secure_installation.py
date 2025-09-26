@@ -84,17 +84,35 @@ def validate_email(email):
     pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return re.match(pattern, email) is not None
 
+def get_make_command():
+    """Get the appropriate make command for the current platform."""
+    system = platform.system()
+
+    # On BSD systems, prefer gmake if available for GNU Make compatibility
+    if system in ["OpenBSD", "FreeBSD", "NetBSD"]:
+        try:
+            # Check if gmake is available
+            subprocess.run(['gmake', '--version'], capture_output=True, text=True, timeout=5)
+            return 'gmake'
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+            # Fall back to make if gmake is not available
+            return 'make'
+
+    # For Linux, macOS, and other systems, use make
+    return 'make'
+
 def run_make_install_dev():
     """Run make install-dev to set up dependencies."""
     print("\n--- Installing Development Dependencies ---")
-    print("This will run 'make install-dev' to install Python dependencies,")
+    make_cmd = get_make_command()
+    print(f"This will run '{make_cmd} install-dev' to install Python dependencies,")
     print("set up the virtual environment, and install OpenBAO if needed.")
 
     confirm = input("\nPress Enter to continue or Ctrl+C to cancel...")
 
     try:
-        print("Running make install-dev...")
-        result = subprocess.run(['make', 'install-dev'], cwd=project_root,
+        print(f"Running {make_cmd} install-dev...")
+        result = subprocess.run([make_cmd, 'install-dev'], cwd=project_root,
                               capture_output=True, text=True, timeout=300)
 
         if result.returncode != 0:
@@ -366,7 +384,8 @@ def run_database_migrations():
 
         elif strategy == "upgrade":
             print("Running incremental database migrations...")
-            result = subprocess.run(['make', 'migrate'], cwd=project_root,
+            make_cmd = get_make_command()
+            result = subprocess.run([make_cmd, 'migrate'], cwd=project_root,
                                   capture_output=True, text=True, timeout=120, env=env)
             if result.returncode == 0:
                 print("  Incremental migrations completed successfully!")
@@ -971,7 +990,8 @@ def main():
         # Stop SysManage server to release database locks
         print("\n--- Stopping SysManage Server ---")
         try:
-            result = subprocess.run(['make', 'stop'], cwd=project_root,
+            make_cmd = get_make_command()
+            result = subprocess.run([make_cmd, 'stop'], cwd=project_root,
                                   capture_output=True, text=True, timeout=30)
             if result.returncode == 0:
                 print("  SysManage server stopped successfully")
