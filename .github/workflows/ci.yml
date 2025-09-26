@@ -595,12 +595,50 @@ jobs:
       working-directory: frontend
       run: npm run build
 
+    - name: Verify database connection
+      run: |
+        echo "🔍 Verifying database connection..."
+        PGPASSWORD=abc123 psql -h localhost -U sysmanage -d sysmanage -c "SELECT 1;" || {
+          echo "❌ Database connection failed!"
+          exit 1
+        }
+        echo "✅ Database connection successful"
+
     - name: Start backend server
       run: |
+        echo "🚀 Starting backend server..."
+
+        # Check if the backend directory and main.py exist
+        ls -la backend/
+        if [ ! -f "backend/main.py" ]; then
+          echo "❌ backend/main.py not found!"
+          exit 1
+        fi
+
+        # Show current working directory and config
+        echo "Current directory: $(pwd)"
+        echo "Config file exists: $(test -f /etc/sysmanage.yaml && echo 'YES' || echo 'NO')"
+
+        # Start backend with output to log file for debugging
         cd backend
-        python -m uvicorn main:app --host 0.0.0.0 --port 8080 &
-        echo $! > /tmp/backend.pid
-        sleep 10
+        echo "Starting uvicorn from directory: $(pwd)"
+        echo "PYTHONPATH will be: .."
+        PYTHONPATH=.. python -m uvicorn main:app --host 0.0.0.0 --port 8080 > /tmp/backend.log 2>&1 &
+        BACKEND_PID=$!
+        echo $BACKEND_PID > /tmp/backend.pid
+        echo "Backend started with PID: $BACKEND_PID"
+
+        # Give server time to start
+        sleep 15
+
+        # Check if process is still running
+        if ! kill -0 $BACKEND_PID 2>/dev/null; then
+          echo "❌ Backend process died! Log contents:"
+          cat /tmp/backend.log
+          exit 1
+        fi
+
+        echo "✅ Backend server started successfully"
       env:
         PYTHONPATH: .
 
@@ -614,11 +652,31 @@ jobs:
     - name: Wait for servers to be ready
       run: |
         echo "Waiting for backend health check..."
-        timeout 60 bash -c 'until curl -f http://localhost:8080/api/health; do echo "Waiting for backend..."; sleep 2; done'
+        if ! timeout 60 bash -c 'until curl -f http://localhost:8080/api/health; do echo "Waiting for backend..."; sleep 2; done'; then
+          echo "❌ Backend health check failed! Backend logs:"
+          cat /tmp/backend.log || echo "No backend log file found"
+          echo "Backend process status:"
+          if [ -f /tmp/backend.pid ]; then
+            PID=$(cat /tmp/backend.pid)
+            if kill -0 $PID 2>/dev/null; then
+              echo "Backend process $PID is still running"
+            else
+              echo "Backend process $PID is not running"
+            fi
+          fi
+          echo "Port 8080 status:"
+          netstat -tulpn | grep :8080 || echo "Nothing listening on port 8080"
+          exit 1
+        fi
         echo "✅ Backend is ready"
 
         echo "Waiting for frontend..."
-        timeout 60 bash -c 'until curl -f http://localhost:3000/; do echo "Waiting for frontend..."; sleep 2; done'
+        if ! timeout 60 bash -c 'until curl -f http://localhost:3000/; do echo "Waiting for frontend..."; sleep 2; done'; then
+          echo "❌ Frontend health check failed!"
+          echo "Port 3000 status:"
+          netstat -tulpn | grep :3000 || echo "Nothing listening on port 3000"
+          exit 1
+        fi
         echo "✅ Frontend is ready"
 
     - name: Run Playwright UI tests
