@@ -102,23 +102,33 @@ def get_make_command():
     return 'make'
 
 def get_original_user():
-    """Get the original user who invoked sudo, if running under sudo."""
+    """Get the original user who invoked sudo/doas, if running under elevated privileges."""
+    # Check for explicitly passed original user (for doas)
+    original_user = os.environ.get('ORIGINAL_USER')
+    if original_user:
+        return original_user
+
     # Check if running under sudo
     sudo_user = os.environ.get('SUDO_USER')
     if sudo_user:
         return sudo_user
 
-    # Fall back to current user if not under sudo
+    # Check if running under doas (OpenBSD/FreeBSD)
+    doas_user = os.environ.get('DOAS_USER')
+    if doas_user:
+        return doas_user
+
+    # Fall back to current user if not under sudo/doas
     import pwd
     return pwd.getpwuid(os.getuid()).pw_name
 
 def fix_file_ownership(file_path):
-    """Fix file ownership to the original user if running under sudo."""
+    """Fix file ownership to the original user if running under sudo/doas."""
     try:
         original_user = get_original_user()
-        sudo_user = os.environ.get('SUDO_USER')
+        elevated_user = os.environ.get('SUDO_USER') or os.environ.get('DOAS_USER') or os.environ.get('ORIGINAL_USER')
 
-        if sudo_user and original_user:
+        if elevated_user and original_user:
             import pwd
             import grp
 
@@ -814,6 +824,15 @@ ui = true
 
         if result.returncode != 0:
             print(f"  Error initializing vault: {result.stderr}")
+            # If vault is already initialized, fix ownership of existing files
+            if "already initialized" in result.stderr:
+                print("  Vault already initialized, fixing ownership of existing files...")
+                credentials_file = project_root / '.vault_credentials'
+                if credentials_file.exists():
+                    fix_file_ownership(credentials_file)
+                pid_file = project_root / '.openbao.pid'
+                if pid_file.exists():
+                    fix_file_ownership(pid_file)
             vault_process.terminate()
             return
 

@@ -1529,6 +1529,7 @@ async def handle_package_collection(db: Session, connection, message_data: dict)
                     package_version=package.get("version", ""),
                     package_description=package.get("description", ""),
                     last_updated=now,
+                    created_at=now,
                 )
                 batch_packages.append(available_package)
 
