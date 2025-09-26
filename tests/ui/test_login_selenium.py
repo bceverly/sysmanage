@@ -1,6 +1,16 @@
 """
 Selenium-based Login UI Tests for OpenBSD
 Fallback when Playwright is not available
+
+IMPORTANT: Keep this file in sync with test_login_cross_browser.py
+When adding/modifying tests in the Playwright version, make equivalent
+changes here to ensure feature parity across platforms.
+
+Sync checklist:
+- Test scenarios and assertions should match
+- User credentials and test data should be identical
+- Error handling patterns should be consistent
+- Test names and descriptions should align
 """
 
 import time
@@ -13,7 +23,8 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 def test_login_selenium(selenium_page, test_user, ui_config, start_server):
     """Test login functionality using Selenium"""
-    print("\n=== Testing login with Selenium ===")
+    browser_name = selenium_page.browser_name
+    print(f"\n=== Testing login with Selenium ({browser_name}) ===")
 
     try:
         # Navigate to login page
@@ -152,7 +163,7 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
         if not user_indicator_found:
             print(f"  - User indicator not found (may not be implemented yet)")
 
-        print(f"  ✓ Login successful with Selenium")
+        print(f"  ✓ Login successful with Selenium ({browser_name})")
         print(f"  ✓ Found {found_nav_items} navigation items")
         print(f"  ✓ Current URL: {current_url}")
 
@@ -160,7 +171,7 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
         # Take screenshot on failure
         screenshot_path = f"/tmp/claude/selenium_login_failure_{int(time.time())}.png"
         selenium_page.screenshot(screenshot_path)
-        print(f"  ✗ Selenium login test failed")
+        print(f"  ✗ Selenium login test failed ({browser_name})")
         print(f"  ✗ Screenshot saved: {screenshot_path}")
         print(f"  ✗ Current URL: {selenium_page.get_current_url()}")
         print(f"  ✗ Error: {str(e)}")
@@ -169,7 +180,8 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
 
 def test_invalid_login_selenium(selenium_page, ui_config, start_server):
     """Test invalid login handling using Selenium"""
-    print("\n=== Testing invalid login with Selenium ===")
+    browser_name = selenium_page.browser_name
+    print(f"\n=== Testing invalid login with Selenium ({browser_name}) ===")
 
     # Navigate to login page
     selenium_page.goto("/login")
@@ -237,7 +249,7 @@ def test_invalid_login_selenium(selenium_page, ui_config, start_server):
     if not error_found:
         print("  - No specific error message found (may not be implemented)")
 
-    print("  ✓ Invalid login correctly rejected (Selenium)")
+    print(f"  ✓ Invalid login correctly rejected (Selenium {browser_name})")
 
 
 if __name__ == "__main__":

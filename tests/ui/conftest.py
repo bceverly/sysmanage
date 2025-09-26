@@ -1,91 +1,272 @@
 """
-UI Test Configuration and Fixtures
-Provides test fixtures for Playwright-based UI testing with proper cleanup
+Selenium-based test configuration for OpenBSD
+Fallback when Playwright is not available
+
+This file provides the same fixtures as conftest.py but using Selenium instead of Playwright
+
+Cross-browser testing requirements:
+- Chrome/Chromium: Requires chromedriver (usually: doas pkg_add chromedriver)
+- Firefox: Requires geckodriver (usually: doas pkg_add firefox-geckodriver)
+
+If either browser/driver is missing, tests will be skipped for that browser.
 """
 
-import asyncio
 import os
-import signal
-import subprocess
 import time
-import uuid
-from typing import Generator, Optional
-
 import pytest
 import yaml
+import uuid
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from playwright.async_api import async_playwright, Browser, BrowserContext, Page
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 from backend.persistence.models.core import User
 
 
-def cleanup_leftover_test_users():
-    """Utility function to clean up any leftover test users"""
-    config = UITestConfig()
-    engine = create_engine(config.get_database_url())
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    session = SessionLocal()
+def load_sysmanage_config():
+    """Load SysManage configuration using the same logic as backend/config/config.py"""
+    # Check for system config first, then fall back to development config
+    if os.name == "nt":  # Windows
+        config_path = r"C:\ProgramData\SysManage\sysmanage.yaml"
+    else:  # Unix-like (Linux, macOS, BSD)
+        config_path = "/etc/sysmanage.yaml"
+
+    # Fallback to development config if system config doesn't exist
+    if not os.path.exists(config_path) and os.path.exists("sysmanage-dev.yaml"):
+        config_path = "sysmanage-dev.yaml"
 
     try:
-        result = session.execute(
-            text('DELETE FROM "user" WHERE userid LIKE :pattern'),
-            {"pattern": "%ui_test_user_%"},
-        )
-        session.commit()
-        count = result.rowcount
-        if count > 0:
-            print(f"Cleaned up {count} leftover test users")
-        return count
+        with open(config_path, "r", encoding="utf-8") as file:
+            config = yaml.safe_load(file)
+
+            # Apply defaults just like the main config
+            if "host" not in config["api"]:
+                config["api"]["host"] = "localhost"
+            if "port" not in config["api"]:
+                config["api"]["port"] = 8443
+            if "host" not in config["webui"]:
+                config["webui"]["host"] = "localhost"
+            if "port" not in config["webui"]:
+                config["webui"]["port"] = 8080
+
+            return config
     except Exception as e:
-        print(f"Warning: Failed to clean up leftover test users: {e}")
-        session.rollback()
-        return 0
-    finally:
-        session.close()
+        # Fall back to hardcoded defaults if config loading fails
+        print(f"Warning: Could not load config file: {e}")
+        return {
+            "api": {"host": "localhost", "port": 8080},
+            "webui": {"host": "localhost", "port": 3000},
+        }
 
 
-class UITestConfig:
-    """Configuration for UI tests"""
+def resolve_host_for_client(config_host):
+    """Resolve host for client connections, same logic as start.sh generate_urls function"""
+    if config_host == "0.0.0.0":
+        # When bound to 0.0.0.0, prefer localhost for client connections
+        # (could also use hostname like start.sh, but localhost is safer for tests)
+        return "localhost"
+    else:
+        # Use the configured host directly
+        return config_host
 
+
+class UIConfig:
     def __init__(self):
-        self.test_user_id = str(uuid.uuid4())
-        self.test_username = f"ui_test_user_{int(time.time())}@example.com"
-        self.test_password = "TestPassword123!"
-        self.server_process: Optional[subprocess.Popen] = None
-        self.base_url = "http://localhost:3000"
+        config = load_sysmanage_config()
 
-    def get_database_url(self) -> str:
-        """Get database URL - use production database for UI tests"""
-        # Use production database since the running backend connects to it
-        return "postgresql://sysmanage:abc123@localhost:5432/sysmanage"
+        # Build URLs from config
+        api_host = config["api"]["host"]
+        api_port = config["api"]["port"]
+        webui_host = config["webui"]["host"]
+        webui_port = config["webui"]["port"]
 
-    def get_salt(self) -> str:
-        """Get salt from production configuration"""
-        # Use production password salt from /etc/sysmanage.yaml
-        return "b3a5a4c28062b69a9e2757667f3023cf261a1befd6d3800b46b30dadcb833d3c"
+        # Debug output
+        print(
+            f"Debug: Loaded config - API: {api_host}:{api_port}, WebUI: {webui_host}:{webui_port}"
+        )
+
+        # Resolve hosts for client connections (handle 0.0.0.0 case)
+        resolved_api_host = resolve_host_for_client(api_host)
+        resolved_webui_host = resolve_host_for_client(webui_host)
+
+        self.base_url = f"http://{resolved_webui_host}:{webui_port}"
+        self.api_url = f"http://{resolved_api_host}:{api_port}"
+        self.timeout = 30
+
+        print(f"Debug: Final URLs - API: {self.api_url}, WebUI: {self.base_url}")
 
 
 @pytest.fixture(scope="session")
-def ui_config() -> Generator[UITestConfig, None, None]:
-    """Provide UI test configuration"""
-    config = UITestConfig()
-    yield config
+def ui_config():
+    """UI test configuration"""
+    return UIConfig()
+
+
+@pytest.fixture(scope="session", params=["chrome", "firefox"])
+def browser_driver(request):
+    """WebDriver instance for Selenium tests - supports Chrome and Firefox"""
+    browser_name = request.param
+
+    if browser_name == "chrome":
+        driver_gen = _create_chrome_driver()
+        driver = next(driver_gen)
+        yield driver
+        try:
+            next(driver_gen)  # Trigger cleanup
+        except StopIteration:
+            pass
+    elif browser_name == "firefox":
+        driver_gen = _create_firefox_driver()
+        driver = next(driver_gen)
+        yield driver
+        try:
+            next(driver_gen)  # Trigger cleanup
+        except StopIteration:
+            pass
+    else:
+        raise ValueError(f"Unsupported browser: {browser_name}")
+
+
+def _create_chrome_driver():
+    """Create Chrome WebDriver instance"""
+    options = ChromeOptions()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-background-timer-throttling")
+    options.add_argument("--disable-backgrounding-occluded-windows")
+    options.add_argument("--disable-renderer-backgrounding")
+
+    # Set Chrome binary location for OpenBSD
+    chrome_binary_paths = [
+        "/usr/local/bin/chrome",
+        "/usr/local/bin/chromium",
+        "/usr/bin/google-chrome",
+        "/usr/bin/chromium-browser",
+    ]
+
+    chrome_binary = None
+    for chrome_path in chrome_binary_paths:
+        if os.path.exists(chrome_path):
+            chrome_binary = chrome_path
+            options.binary_location = chrome_path
+            break
+
+    if not chrome_binary:
+        raise RuntimeError("Chrome/Chromium binary not found")
+
+    # Set ChromeDriver path for OpenBSD
+    chromedriver_paths = [
+        "/usr/local/bin/chromedriver",
+        "/usr/bin/chromedriver",
+        "/opt/chromedriver",
+    ]
+
+    chromedriver_path = None
+    for driver_path in chromedriver_paths:
+        if os.path.exists(driver_path):
+            chromedriver_path = driver_path
+            break
+
+    if not chromedriver_path:
+        raise RuntimeError("ChromeDriver not found")
+
+    # Create Chrome service with explicit driver path
+    service = ChromeService(executable_path=chromedriver_path)
+
+    try:
+        print(f"Using Chrome binary: {chrome_binary}")
+        print(f"Using ChromeDriver: {chromedriver_path}")
+        driver = webdriver.Chrome(service=service, options=options)
+        yield driver
+    finally:
+        if "driver" in locals():
+            driver.quit()
+
+
+def _create_firefox_driver():
+    """Create Firefox WebDriver instance"""
+    options = FirefoxOptions()
+    options.add_argument("--headless")
+    options.add_argument("--width=1920")
+    options.add_argument("--height=1080")
+
+    # Set Firefox binary location for OpenBSD
+    firefox_binary_paths = [
+        "/usr/local/bin/firefox",
+        "/usr/bin/firefox",
+        "/opt/firefox/firefox",
+    ]
+
+    firefox_binary = None
+    for firefox_path in firefox_binary_paths:
+        if os.path.exists(firefox_path):
+            firefox_binary = firefox_path
+            options.binary_location = firefox_path
+            break
+
+    if not firefox_binary:
+        raise RuntimeError("Firefox binary not found")
+
+    # Set GeckoDriver path for OpenBSD
+    geckodriver_paths = [
+        "/usr/local/bin/geckodriver",
+        "/usr/bin/geckodriver",
+        "/opt/geckodriver",
+    ]
+
+    geckodriver_path = None
+    for driver_path in geckodriver_paths:
+        if os.path.exists(driver_path):
+            geckodriver_path = driver_path
+            break
+
+    if not geckodriver_path:
+        raise RuntimeError("GeckoDriver not found")
+
+    # Create Firefox service with explicit driver path
+    service = FirefoxService(executable_path=geckodriver_path)
+
+    try:
+        print(f"Using Firefox binary: {firefox_binary}")
+        print(f"Using GeckoDriver: {geckodriver_path}")
+        driver = webdriver.Firefox(service=service, options=options)
+        yield driver
+    finally:
+        if "driver" in locals():
+            driver.quit()
+
+
+# Legacy Chrome-only fixture for backward compatibility
+@pytest.fixture(scope="session")
+def chrome_driver():
+    """Chrome WebDriver instance for Selenium tests (legacy)"""
+    return _create_chrome_driver()
 
 
 @pytest.fixture(scope="session")
-def start_server(ui_config: UITestConfig) -> Generator[bool, None, None]:
+def start_server(ui_config):
     """Ensure SysManage server is running for UI testing"""
+    import requests
+
     print("Checking if SysManage server is already running...")
 
     # First, check if server is already running
     server_running = False
     try:
-        import requests
-
-        response = requests.get("http://localhost:8080/api/health", timeout=5)
+        response = requests.get(f"{ui_config.api_url}/api/health", timeout=5)
         if response.status_code == 200:
             server_running = True
             print(f"✓ Server already running at {ui_config.base_url}")
@@ -119,13 +300,25 @@ def start_server(ui_config: UITestConfig) -> Generator[bool, None, None]:
 
 
 @pytest.fixture(scope="session")
-def database_session(ui_config: UITestConfig):
-    """Create database session for test user management - reuse existing test DB"""
+def database_session(ui_config):
+    """Create database session for test user management - use production database"""
     from backend.persistence.models.core import Base
 
-    engine = create_engine(ui_config.get_database_url())
+    config = load_sysmanage_config()
 
-    # Ensure all tables exist in the test database
+    # Build database URL from config (same as production)
+    db_config = config.get("database", {})
+    db_user = db_config.get("user", "sysmanage")
+    db_password = db_config.get("password", "")
+    db_host = db_config.get("host", "localhost")
+    db_port = db_config.get("port", 5432)
+    db_name = db_config.get("name", "sysmanage")
+
+    database_url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+
+    engine = create_engine(database_url)
+
+    # Ensure all tables exist in the database
     Base.metadata.create_all(bind=engine)
 
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -137,32 +330,42 @@ def database_session(ui_config: UITestConfig):
 
 
 @pytest.fixture(scope="function")
-def test_user(ui_config: UITestConfig, database_session) -> Generator[dict, None, None]:
-    """Create a test user in the database with proper Argon2 hashing"""
-    # Hash password using Argon2 (no additional salt needed)
+def test_user(ui_config, database_session):
+    """Create a test user in the production database with proper Argon2 hashing"""
+    # Hash password using Argon2
     ph = PasswordHasher()
-    hashed_password = ph.hash(ui_config.test_password)
+    test_password = "TestPassword123!"
+    test_username = "uitest@example.com"
+    test_user_id = str(uuid.uuid4())  # Generate proper UUID
 
-    # Create test user
+    hashed_password = ph.hash(test_password)
+
+    # Create test user data
     user_data = {
-        "id": ui_config.test_user_id,
-        "username": ui_config.test_username,
-        "password": ui_config.test_password,  # Plain password for login
+        "id": test_user_id,
+        "username": test_username,
+        "password": test_password,  # Plain password for login
         "hashed_password": hashed_password,
     }
 
     try:
-        # Insert user directly into database
+        # Insert user directly into production database
         database_session.execute(
             text(
                 """
                 INSERT INTO "user" (id, userid, hashed_password, active, is_locked, failed_login_attempts, is_admin, created_at, updated_at)
                 VALUES (:id, :userid, :hashed_password, :active, :is_locked, :failed_login_attempts, :is_admin, NOW(), NOW())
-            """
+                ON CONFLICT (userid) DO UPDATE SET
+                    hashed_password = EXCLUDED.hashed_password,
+                    active = EXCLUDED.active,
+                    is_locked = EXCLUDED.is_locked,
+                    failed_login_attempts = EXCLUDED.failed_login_attempts,
+                    updated_at = NOW()
+                """
             ),
             {
-                "id": ui_config.test_user_id,
-                "userid": ui_config.test_username,
+                "id": test_user_id,
+                "userid": test_username,
                 "hashed_password": hashed_password,
                 "active": True,
                 "is_locked": False,
@@ -171,89 +374,67 @@ def test_user(ui_config: UITestConfig, database_session) -> Generator[dict, None
             },
         )
         database_session.commit()
-        print(f"Created test user: {ui_config.test_username}")
+        print(f"Created test user: {test_username} with ID: {test_user_id}")
 
         yield user_data
 
     finally:
-        # Cleanup: Delete ONLY the test user we created
+        # Cleanup: Delete the test user we created
         try:
             result = database_session.execute(
                 text('DELETE FROM "user" WHERE userid = :userid'),
-                {"userid": ui_config.test_username},
+                {"userid": test_username},
             )
             database_session.commit()
             print(
-                f"Deleted test user: {ui_config.test_username} (affected rows: {result.rowcount})"
+                f"Deleted test user: {test_username} (affected rows: {result.rowcount})"
             )
         except Exception as e:
-            print(f"Warning: Failed to delete test user {ui_config.test_username}: {e}")
-            database_session.rollback()
+            print(f"Error cleaning up test user: {e}")
 
 
-@pytest.fixture(scope="function")
-async def playwright_instance():
-    """Provide Playwright instance with fallback handling"""
-    try:
-        async with async_playwright() as p:
-            yield p
-    except Exception as e:
-        pytest.skip(
-            f"Playwright not available: {e}. Install system dependencies with 'sudo playwright install-deps'"
-        )
+@pytest.fixture
+def selenium_page(browser_driver, ui_config):
+    """Selenium page wrapper with common functionality"""
 
+    class SeleniumPage:
+        def __init__(self, driver, config):
+            self.driver = driver
+            self.config = config
+            self.wait = WebDriverWait(driver, config.timeout)
+            self.browser_name = driver.capabilities.get("browserName", "unknown")
 
-@pytest.fixture(scope="function")
-async def browser_context(
-    playwright_instance, request
-) -> Generator[BrowserContext, None, None]:
-    """Create browser context for each test"""
-    # Get browser type from test marker or default to chromium
-    browser_name = getattr(request, "param", "chromium")
+        def goto(self, path):
+            url = f"{self.config.base_url}{path}"
+            self.driver.get(url)
 
-    # Launch browser in headless mode (works on servers without display)
-    launch_options = {
-        "headless": True,
-        "args": [
-            "--no-sandbox",
-            "--disable-dev-shm-usage",
-        ],  # Common headless server options
-    }
+        def find_element(self, by, value):
+            return self.wait.until(EC.presence_of_element_located((by, value)))
 
-    if browser_name == "chromium":
-        browser = await playwright_instance.chromium.launch(**launch_options)
-    elif browser_name == "firefox":
-        browser = await playwright_instance.firefox.launch(
-            headless=True
-        )  # Firefox doesn't need the extra args
-    elif browser_name == "webkit":
-        browser = await playwright_instance.webkit.launch(headless=True)
-    else:
-        raise ValueError(f"Unsupported browser: {browser_name}")
+        def find_elements(self, by, value):
+            return self.driver.find_elements(by, value)
 
-    context = await browser.new_context(
-        viewport={"width": 1280, "height": 720}, ignore_https_errors=True
-    )
+        def wait_for_element_visible(self, by, value, timeout=None):
+            if timeout:
+                wait = WebDriverWait(self.driver, timeout)
+            else:
+                wait = self.wait
+            return wait.until(EC.visibility_of_element_located((by, value)))
 
-    yield context
+        def wait_for_element_clickable(self, by, value, timeout=None):
+            if timeout:
+                wait = WebDriverWait(self.driver, timeout)
+            else:
+                wait = self.wait
+            return wait.until(EC.element_to_be_clickable((by, value)))
 
-    await context.close()
-    await browser.close()
+        def get_current_url(self):
+            return self.driver.current_url
 
+        def get_title(self):
+            return self.driver.title
 
-@pytest.fixture(scope="function")
-async def page(browser_context: BrowserContext) -> Generator[Page, None, None]:
-    """Create a new page for each test"""
-    page = await browser_context.new_page()
-    yield page
-    await page.close()
+        def screenshot(self, filename):
+            self.driver.save_screenshot(filename)
 
-
-# Browser type markers for parametrized tests
-def pytest_configure(config):
-    """Configure pytest markers"""
-    config.addinivalue_line("markers", "chromium: mark test to run on Chromium browser")
-    config.addinivalue_line("markers", "firefox: mark test to run on Firefox browser")
-    config.addinivalue_line(
-        "markers", "webkit: mark test to run on WebKit browser (Safari)"
-    )
+    return SeleniumPage(browser_driver, ui_config)

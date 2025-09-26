@@ -3,6 +3,12 @@ Selenium-based test configuration for OpenBSD
 Fallback when Playwright is not available
 
 This file provides the same fixtures as conftest.py but using Selenium instead of Playwright
+
+Cross-browser testing requirements:
+- Chrome/Chromium: Requires chromedriver (usually: doas pkg_add chromedriver)
+- Firefox: Requires geckodriver (usually: doas pkg_add firefox-geckodriver)
+
+If either browser/driver is missing, tests will be skipped for that browser.
 """
 
 import os
@@ -15,6 +21,8 @@ from argon2.exceptions import VerifyMismatchError
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -103,9 +111,33 @@ def ui_config():
     return UIConfig()
 
 
-@pytest.fixture(scope="session")
-def chrome_driver():
-    """Chrome WebDriver instance for Selenium tests"""
+@pytest.fixture(scope="session", params=["chrome", "firefox"])
+def browser_driver(request):
+    """WebDriver instance for Selenium tests - supports Chrome and Firefox"""
+    browser_name = request.param
+
+    if browser_name == "chrome":
+        driver_gen = _create_chrome_driver()
+        driver = next(driver_gen)
+        yield driver
+        try:
+            next(driver_gen)  # Trigger cleanup
+        except StopIteration:
+            pass
+    elif browser_name == "firefox":
+        driver_gen = _create_firefox_driver()
+        driver = next(driver_gen)
+        yield driver
+        try:
+            next(driver_gen)  # Trigger cleanup
+        except StopIteration:
+            pass
+    else:
+        raise ValueError(f"Unsupported browser: {browser_name}")
+
+
+def _create_chrome_driver():
+    """Create Chrome WebDriver instance"""
     options = ChromeOptions()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
@@ -162,6 +194,66 @@ def chrome_driver():
     finally:
         if "driver" in locals():
             driver.quit()
+
+
+def _create_firefox_driver():
+    """Create Firefox WebDriver instance"""
+    options = FirefoxOptions()
+    options.add_argument("--headless")
+    options.add_argument("--width=1920")
+    options.add_argument("--height=1080")
+
+    # Set Firefox binary location for OpenBSD
+    firefox_binary_paths = [
+        "/usr/local/bin/firefox",
+        "/usr/bin/firefox",
+        "/opt/firefox/firefox",
+    ]
+
+    firefox_binary = None
+    for firefox_path in firefox_binary_paths:
+        if os.path.exists(firefox_path):
+            firefox_binary = firefox_path
+            options.binary_location = firefox_path
+            break
+
+    if not firefox_binary:
+        raise RuntimeError("Firefox binary not found")
+
+    # Set GeckoDriver path for OpenBSD
+    geckodriver_paths = [
+        "/usr/local/bin/geckodriver",
+        "/usr/bin/geckodriver",
+        "/opt/geckodriver",
+    ]
+
+    geckodriver_path = None
+    for driver_path in geckodriver_paths:
+        if os.path.exists(driver_path):
+            geckodriver_path = driver_path
+            break
+
+    if not geckodriver_path:
+        raise RuntimeError("GeckoDriver not found")
+
+    # Create Firefox service with explicit driver path
+    service = FirefoxService(executable_path=geckodriver_path)
+
+    try:
+        print(f"Using Firefox binary: {firefox_binary}")
+        print(f"Using GeckoDriver: {geckodriver_path}")
+        driver = webdriver.Firefox(service=service, options=options)
+        yield driver
+    finally:
+        if "driver" in locals():
+            driver.quit()
+
+
+# Legacy Chrome-only fixture for backward compatibility
+@pytest.fixture(scope="session")
+def chrome_driver():
+    """Chrome WebDriver instance for Selenium tests (legacy)"""
+    return _create_chrome_driver()
 
 
 @pytest.fixture(scope="session")
@@ -302,7 +394,7 @@ def test_user(ui_config, database_session):
 
 
 @pytest.fixture
-def selenium_page(chrome_driver, ui_config):
+def selenium_page(browser_driver, ui_config):
     """Selenium page wrapper with common functionality"""
 
     class SeleniumPage:
@@ -310,6 +402,7 @@ def selenium_page(chrome_driver, ui_config):
             self.driver = driver
             self.config = config
             self.wait = WebDriverWait(driver, config.timeout)
+            self.browser_name = driver.capabilities.get("browserName", "unknown")
 
         def goto(self, path):
             url = f"{self.config.base_url}{path}"
@@ -344,4 +437,4 @@ def selenium_page(chrome_driver, ui_config):
         def screenshot(self, filename):
             self.driver.save_screenshot(filename)
 
-    return SeleniumPage(chrome_driver, ui_config)
+    return SeleniumPage(browser_driver, ui_config)

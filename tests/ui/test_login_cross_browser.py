@@ -1,6 +1,17 @@
 """
 Cross-Browser Login UI Tests
 Tests login functionality across Chrome, Firefox, and Safari (WebKit)
+
+IMPORTANT: Keep this file in sync with test_login_selenium.py
+The Selenium version is used as a fallback on OpenBSD where Playwright
+is not available. When adding/modifying tests here, make equivalent
+changes in the Selenium version to ensure feature parity.
+
+Sync checklist:
+- Test scenarios and assertions should match
+- User credentials and test data should be identical
+- Error handling patterns should be consistent
+- Test names and descriptions should align
 """
 
 import time

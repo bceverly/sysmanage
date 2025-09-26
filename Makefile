@@ -102,6 +102,26 @@ install-dev: $(VENV_ACTIVATE)
 		); \
 	else \
 		echo "Skipping Playwright installation on OpenBSD/FreeBSD - using Selenium with system browser"; \
+		echo "Installing Selenium WebDriver dependencies for cross-browser testing..."; \
+		if [ "$(shell uname -s)" = "OpenBSD" ]; then \
+			echo "Installing geckodriver for Firefox support..."; \
+			if command -v doas >/dev/null 2>&1; then \
+				doas pkg_add geckodriver || echo "Warning: Could not install geckodriver"; \
+			elif command -v sudo >/dev/null 2>&1; then \
+				sudo pkg_add geckodriver || echo "Warning: Could not install geckodriver"; \
+			else \
+				echo "Warning: No privilege escalation command found. Please install manually:"; \
+				echo "  doas pkg_add geckodriver"; \
+			fi; \
+		elif [ "$(shell uname -s)" = "FreeBSD" ]; then \
+			echo "Installing geckodriver for Firefox support..."; \
+			if command -v sudo >/dev/null 2>&1; then \
+				sudo pkg install -y geckodriver || echo "Warning: Could not install geckodriver"; \
+			else \
+				echo "Warning: No privilege escalation command found. Please install manually:"; \
+				echo "  sudo pkg install geckodriver"; \
+			fi; \
+		fi; \
 	fi
 	@echo "Installing TypeScript/React development dependencies..."
 	@cd frontend && npm install --include=optional
