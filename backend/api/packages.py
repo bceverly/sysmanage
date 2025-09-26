@@ -384,16 +384,29 @@ async def refresh_packages_for_os_version(
             )
         else:
             # For other OS types, use direct matching
-            hosts = (
-                db.query(Host)
-                .filter(
-                    Host.platform == os_name,
-                    Host.platform_version.like(f"{os_version}%"),
-                    Host.active.is_(True),
-                    Host.approval_status == "approved",
+            # Handle FreeBSD where platform_version includes "FreeBSD " prefix
+            if os_name == "FreeBSD":
+                hosts = (
+                    db.query(Host)
+                    .filter(
+                        Host.platform == os_name,
+                        Host.platform_version.contains(os_version),
+                        Host.active.is_(True),
+                        Host.approval_status == "approved",
+                    )
+                    .all()
                 )
-                .all()
-            )
+            else:
+                hosts = (
+                    db.query(Host)
+                    .filter(
+                        Host.platform == os_name,
+                        Host.platform_version.like(f"{os_version}%"),
+                        Host.active.is_(True),
+                        Host.approval_status == "approved",
+                    )
+                    .all()
+                )
 
         if not hosts:
             raise HTTPException(
