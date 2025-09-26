@@ -114,12 +114,12 @@ install-dev: $(VENV_ACTIVATE)
 				echo "  doas pkg_add geckodriver"; \
 			fi; \
 		elif [ "$(shell uname -s)" = "FreeBSD" ]; then \
-			echo "Installing geckodriver for Firefox support..."; \
+			echo "Installing Firefox and geckodriver for cross-browser testing..."; \
 			if command -v sudo >/dev/null 2>&1; then \
-				sudo pkg install -y geckodriver || echo "Warning: Could not install geckodriver"; \
+				sudo pkg install -y firefox geckodriver || echo "Warning: Could not install Firefox/geckodriver"; \
 			else \
 				echo "Warning: No privilege escalation command found. Please install manually:"; \
-				echo "  sudo pkg install geckodriver"; \
+				echo "  sudo pkg install firefox geckodriver"; \
 			fi; \
 		fi; \
 	fi
