@@ -101,6 +101,39 @@ def get_make_command():
     # For Linux, macOS, and other systems, use make
     return 'make'
 
+def get_original_user():
+    """Get the original user who invoked sudo, if running under sudo."""
+    # Check if running under sudo
+    sudo_user = os.environ.get('SUDO_USER')
+    if sudo_user:
+        return sudo_user
+
+    # Fall back to current user if not under sudo
+    import pwd
+    return pwd.getpwuid(os.getuid()).pw_name
+
+def fix_file_ownership(file_path):
+    """Fix file ownership to the original user if running under sudo."""
+    try:
+        original_user = get_original_user()
+        sudo_user = os.environ.get('SUDO_USER')
+
+        if sudo_user and original_user:
+            import pwd
+            import grp
+
+            # Get user and group info
+            user_info = pwd.getpwnam(original_user)
+            uid = user_info.pw_uid
+            gid = user_info.pw_gid
+
+            # Change ownership back to original user
+            os.chown(file_path, uid, gid)
+            print(f"  Fixed ownership of {file_path} to {original_user}")
+
+    except Exception as e:
+        print(f"  Warning: Could not fix ownership of {file_path}: {e}")
+
 def run_make_install_dev():
     """Run make install-dev to set up dependencies."""
     print("\n--- Installing Development Dependencies ---")
@@ -818,10 +851,16 @@ ui = true
         # Set restrictive permissions on credentials file
         os.chmod(credentials_file, 0o600)
 
+        # Fix ownership back to original user (if running under sudo)
+        fix_file_ownership(credentials_file)
+
         # Save PID file
         pid_file = project_root / '.openbao.pid'
         with open(pid_file, 'w') as f:
             f.write(str(vault_process.pid))
+
+        # Fix ownership of PID file too
+        fix_file_ownership(pid_file)
 
         print("  OpenBAO vault initialized successfully!")
         print(f"    Root token: {root_token}")
