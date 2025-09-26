@@ -807,6 +807,9 @@ ui = true
         vault_cmd, 'server', f'-config={vault_config_path}'
     ], stdout=open(log_file, 'w'), stderr=subprocess.STDOUT)
 
+    # Fix ownership of the log file after it's created
+    fix_file_ownership(log_file)
+
     # Wait for server to start
     time.sleep(3)
 
@@ -1092,6 +1095,22 @@ def main():
 
         # Create admin user with new salt
         create_admin_user(user_data, salt)
+
+        # Fix ownership of all created files (important for macOS/Linux when running under sudo)
+        print("\n--- Fixing file ownership ---")
+        files_to_fix = [
+            project_root / '.vault_credentials',
+            project_root / '.openbao.pid',
+            project_root / 'logs',
+            project_root / 'logs' / 'openbao.log',
+            project_root / 'openbao.hcl',
+            project_root / 'data',
+            project_root / 'data' / 'openbao'
+        ]
+
+        for file_path in files_to_fix:
+            if file_path.exists():
+                fix_file_ownership(file_path)
 
         print("\n" + "="*60)
         print("Installation completed successfully!")

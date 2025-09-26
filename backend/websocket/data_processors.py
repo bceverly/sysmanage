@@ -109,7 +109,7 @@ def process_software_packages(db: Session, host_id: str, packages_data: list):
             software_package = SoftwarePackage(
                 host_id=host_id,
                 package_name=package_data.get("package_name"),
-                package_version=package_data.get("version"),
+                package_version=package_data.get("version") or "unknown",
                 package_description=package_data.get("description"),
                 package_manager=package_data.get("package_manager"),
                 architecture=package_data.get("architecture"),

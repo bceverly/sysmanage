@@ -131,7 +131,7 @@ wait_for_service() {
         
         sleep 1
         attempt=$((attempt + 1))
-        echo -n "."
+        printf "."
         
         # Show debug info every 10 attempts
         if [ $((attempt % 10)) -eq 0 ]; then

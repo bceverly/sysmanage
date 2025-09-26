@@ -61,6 +61,64 @@ def detect_system_browser():
     print("  - On macOS: brew install --cask google-chrome")
     return False
 
+def install_playwright_browsers():
+    """Install Playwright browsers."""
+    import platform
+    system = platform.system().lower()
+
+    # Check if we're on OpenBSD or FreeBSD - skip Playwright
+    if system in ['openbsd', 'freebsd']:
+        print("Detected BSD system - Playwright not supported, using Selenium fallback")
+        return True
+
+    try:
+        print("Installing Playwright browsers...")
+
+        # Check if playwright is installed
+        import playwright
+        print(f"[OK] Playwright {playwright.__version__} found")
+
+        # Install all browsers for all platforms
+        browsers_to_install = ["chromium", "firefox"]
+
+        # Add webkit only on macOS
+        if system == "darwin":
+            browsers_to_install.append("webkit")
+            print("[INFO] macOS detected - including WebKit/Safari support")
+
+        for browser in browsers_to_install:
+            print(f"Installing {browser}...")
+            result = subprocess.run([
+                sys.executable, "-m", "playwright", "install", browser
+            ], capture_output=True, text=True)
+
+            if result.returncode == 0:
+                print(f"[OK] {browser} installed successfully")
+            else:
+                print(f"[WARN] Failed to install {browser}: {result.stderr}")
+                return False
+
+        # Install system dependencies
+        print("Installing Playwright system dependencies...")
+        result = subprocess.run([
+            sys.executable, "-m", "playwright", "install-deps"
+        ], capture_output=True, text=True)
+
+        if result.returncode == 0:
+            print("[OK] Playwright system dependencies installed")
+        else:
+            print(f"[WARN] Failed to install system dependencies: {result.stderr}")
+            # Don't fail here as this might work anyway
+
+        return True
+
+    except ImportError:
+        print("[INFO] Playwright not found, skipping browser installation")
+        return True
+    except Exception as e:
+        print(f"[WARN] Playwright browser installation failed: {e}")
+        return False
+
 def main():
     print("SysManage WebDriver Installation")
     print("=" * 40)
@@ -74,11 +132,17 @@ def main():
         sys.exit(1)
 
     # Install WebDriver
-    success = install_webdriver()
+    webdriver_success = install_webdriver()
 
-    if success:
+    # Install Playwright browsers
+    playwright_success = install_playwright_browsers()
+
+    if webdriver_success and playwright_success:
         print("\n[SUCCESS] WebDriver setup complete!")
         print("You can now use screenshot capabilities in SysManage")
+    elif webdriver_success:
+        print("\n[PARTIAL] WebDriver setup complete, but Playwright installation had issues")
+        print("Selenium-based features will work, but Playwright tests may not")
     else:
         print("\n[WARN]  WebDriver setup failed")
         print("Screenshot capabilities may not work properly")
