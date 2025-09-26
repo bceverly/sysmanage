@@ -247,6 +247,7 @@ async def test_invalid_login_firefox(page: Page, ui_config, start_server):
 
 # Only define WebKit test on macOS to avoid "skipped" status on other platforms
 if platform.system() == "Darwin":
+
     @pytest.mark.asyncio
     async def test_invalid_login_webkit(page: Page, ui_config, start_server):
         """Test invalid login handling on WebKit/Safari (macOS only)"""
