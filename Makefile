@@ -307,15 +307,17 @@ test-typescript:
 test-ui: $(VENV_ACTIVATE)
 	@if [ "$(shell uname -s)" != "OpenBSD" ] && [ "$(shell uname -s)" != "FreeBSD" ]; then \
 		echo "=== Running UI Integration Tests (Playwright) ==="; \
-		$(PYTHON) -m pytest tests/ui/test_login_cross_browser.py -v --tb=short; \
+		if [ "$(shell uname -s)" = "Darwin" ]; then \
+			echo "[INFO] macOS detected - testing Chrome, Firefox, and WebKit/Safari"; \
+		else \
+			echo "[INFO] Linux/Windows detected - testing Chrome and Firefox"; \
+		fi; \
+		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short; \
 		echo "[OK] Playwright UI integration tests completed"; \
 	else \
 		echo "=== Running UI Integration Tests (Selenium) ==="; \
 		echo "[INFO] Using Selenium fallback on OpenBSD/FreeBSD"; \
-		mv tests/ui/conftest.py tests/ui/conftest_playwright.py 2>/dev/null || true; \
-		cp tests/ui/conftest_selenium.py tests/ui/conftest.py; \
-		$(PYTHON) -m pytest tests/ui/test_login_selenium.py -v --tb=short; \
-		mv tests/ui/conftest_playwright.py tests/ui/conftest.py 2>/dev/null || true; \
+		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_selenium.py --confcutdir=tests/ui -p conftest_selenium -v --tb=short; \
 		echo "[OK] Selenium UI integration tests completed"; \
 	fi
 

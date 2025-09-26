@@ -1,31 +1,23 @@
 """
-Selenium-based test configuration for OpenBSD
-Fallback when Playwright is not available
-
-This file provides the same fixtures as conftest.py but using Selenium instead of Playwright
-
-Cross-browser testing requirements:
-- Chrome/Chromium: Requires chromedriver (usually: doas pkg_add chromedriver)
-- Firefox: Requires geckodriver (usually: doas pkg_add firefox-geckodriver)
-
-If either browser/driver is missing, tests will be skipped for that browser.
+UI Test Configuration and Fixtures for Playwright
+Provides test fixtures for Playwright-based UI testing with proper cleanup
+Supports Chrome, Firefox, and WebKit/Safari (macOS only)
 """
 
+import asyncio
 import os
+import signal
+import subprocess
 import time
+import uuid
+import platform
+from typing import Generator, Optional
+
 import pytest
 import yaml
-import uuid
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.chrome.options import Options as ChromeOptions
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from selenium.webdriver.firefox.options import Options as FirefoxOptions
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from playwright.async_api import async_playwright, Browser, BrowserContext, Page
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
@@ -72,7 +64,6 @@ def resolve_host_for_client(config_host):
     """Resolve host for client connections, same logic as start.sh generate_urls function"""
     if config_host == "0.0.0.0":
         # When bound to 0.0.0.0, prefer localhost for client connections
-        # (could also use hostname like start.sh, but localhost is safer for tests)
         return "localhost"
     else:
         # Use the configured host directly
@@ -109,151 +100,6 @@ class UIConfig:
 def ui_config():
     """UI test configuration"""
     return UIConfig()
-
-
-@pytest.fixture(scope="session", params=["chrome", "firefox"])
-def browser_driver(request):
-    """WebDriver instance for Selenium tests - supports Chrome and Firefox"""
-    browser_name = request.param
-
-    if browser_name == "chrome":
-        driver_gen = _create_chrome_driver()
-        driver = next(driver_gen)
-        yield driver
-        try:
-            next(driver_gen)  # Trigger cleanup
-        except StopIteration:
-            pass
-    elif browser_name == "firefox":
-        driver_gen = _create_firefox_driver()
-        driver = next(driver_gen)
-        yield driver
-        try:
-            next(driver_gen)  # Trigger cleanup
-        except StopIteration:
-            pass
-    else:
-        raise ValueError(f"Unsupported browser: {browser_name}")
-
-
-def _create_chrome_driver():
-    """Create Chrome WebDriver instance"""
-    options = ChromeOptions()
-    options.add_argument("--headless")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("--disable-extensions")
-    options.add_argument("--disable-background-timer-throttling")
-    options.add_argument("--disable-backgrounding-occluded-windows")
-    options.add_argument("--disable-renderer-backgrounding")
-
-    # Set Chrome binary location for OpenBSD
-    chrome_binary_paths = [
-        "/usr/local/bin/chrome",
-        "/usr/local/bin/chromium",
-        "/usr/bin/google-chrome",
-        "/usr/bin/chromium-browser",
-    ]
-
-    chrome_binary = None
-    for chrome_path in chrome_binary_paths:
-        if os.path.exists(chrome_path):
-            chrome_binary = chrome_path
-            options.binary_location = chrome_path
-            break
-
-    if not chrome_binary:
-        raise RuntimeError("Chrome/Chromium binary not found")
-
-    # Set ChromeDriver path for OpenBSD
-    chromedriver_paths = [
-        "/usr/local/bin/chromedriver",
-        "/usr/bin/chromedriver",
-        "/opt/chromedriver",
-    ]
-
-    chromedriver_path = None
-    for driver_path in chromedriver_paths:
-        if os.path.exists(driver_path):
-            chromedriver_path = driver_path
-            break
-
-    if not chromedriver_path:
-        raise RuntimeError("ChromeDriver not found")
-
-    # Create Chrome service with explicit driver path
-    service = ChromeService(executable_path=chromedriver_path)
-
-    try:
-        print(f"Using Chrome binary: {chrome_binary}")
-        print(f"Using ChromeDriver: {chromedriver_path}")
-        driver = webdriver.Chrome(service=service, options=options)
-        yield driver
-    finally:
-        if "driver" in locals():
-            driver.quit()
-
-
-def _create_firefox_driver():
-    """Create Firefox WebDriver instance"""
-    options = FirefoxOptions()
-    options.add_argument("--headless")
-    options.add_argument("--width=1920")
-    options.add_argument("--height=1080")
-
-    # Set Firefox binary location for OpenBSD
-    firefox_binary_paths = [
-        "/usr/local/bin/firefox",
-        "/usr/bin/firefox",
-        "/opt/firefox/firefox",
-    ]
-
-    firefox_binary = None
-    for firefox_path in firefox_binary_paths:
-        if os.path.exists(firefox_path):
-            firefox_binary = firefox_path
-            options.binary_location = firefox_path
-            break
-
-    if not firefox_binary:
-        raise RuntimeError("Firefox binary not found")
-
-    # Set GeckoDriver path for OpenBSD
-    geckodriver_paths = [
-        "/usr/local/bin/geckodriver",
-        "/usr/bin/geckodriver",
-        "/opt/geckodriver",
-    ]
-
-    geckodriver_path = None
-    for driver_path in geckodriver_paths:
-        if os.path.exists(driver_path):
-            geckodriver_path = driver_path
-            break
-
-    if not geckodriver_path:
-        raise RuntimeError("GeckoDriver not found")
-
-    # Create Firefox service with explicit driver path
-    service = FirefoxService(executable_path=geckodriver_path)
-
-    try:
-        print(f"Using Firefox binary: {firefox_binary}")
-        print(f"Using GeckoDriver: {geckodriver_path}")
-        driver = webdriver.Firefox(service=service, options=options)
-        yield driver
-    finally:
-        if "driver" in locals():
-            driver.quit()
-
-
-# Legacy Chrome-only fixture for backward compatibility
-@pytest.fixture(scope="session")
-def chrome_driver():
-    """Chrome WebDriver instance for Selenium tests (legacy)"""
-    return _create_chrome_driver()
 
 
 @pytest.fixture(scope="session")
@@ -335,7 +181,7 @@ def test_user(ui_config, database_session):
     # Hash password using Argon2
     ph = PasswordHasher()
     test_password = "TestPassword123!"
-    test_username = "uitest@example.com"
+    test_username = f"uitest_{int(time.time())}@example.com"
     test_user_id = str(uuid.uuid4())  # Generate proper UUID
 
     hashed_password = ph.hash(test_password)
@@ -393,48 +239,73 @@ def test_user(ui_config, database_session):
             print(f"Error cleaning up test user: {e}")
 
 
-@pytest.fixture
-def selenium_page(browser_driver, ui_config):
-    """Selenium page wrapper with common functionality"""
+@pytest.fixture(scope="function")
+async def playwright_instance():
+    """Provide Playwright instance with fallback handling"""
+    try:
+        async with async_playwright() as p:
+            yield p
+    except Exception as e:
+        pytest.skip(
+            f"Playwright not available: {e}. Install browsers with 'python -m playwright install'"
+        )
 
-    class SeleniumPage:
-        def __init__(self, driver, config):
-            self.driver = driver
-            self.config = config
-            self.wait = WebDriverWait(driver, config.timeout)
-            self.browser_name = driver.capabilities.get("browserName", "unknown")
 
-        def goto(self, path):
-            url = f"{self.config.base_url}{path}"
-            self.driver.get(url)
+@pytest.fixture(scope="function")
+async def browser_context(
+    playwright_instance, request
+) -> Generator[BrowserContext, None, None]:
+    """Create browser context for each test - supports chromium, firefox, and webkit (macOS only)"""
+    # Get browser type from test marker or default to chromium
+    browser_name = getattr(request, "param", "chromium")
 
-        def find_element(self, by, value):
-            return self.wait.until(EC.presence_of_element_located((by, value)))
+    # Skip webkit on non-macOS systems
+    if browser_name == "webkit" and platform.system() != "Darwin":
+        pytest.skip("WebKit/Safari tests only run on macOS")
 
-        def find_elements(self, by, value):
-            return self.driver.find_elements(by, value)
+    # Launch browser in headless mode (works on servers without display)
+    launch_options = {
+        "headless": True,
+        "args": [
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+        ],  # Common headless server options
+    }
 
-        def wait_for_element_visible(self, by, value, timeout=None):
-            if timeout:
-                wait = WebDriverWait(self.driver, timeout)
-            else:
-                wait = self.wait
-            return wait.until(EC.visibility_of_element_located((by, value)))
+    if browser_name == "chromium":
+        browser = await playwright_instance.chromium.launch(**launch_options)
+    elif browser_name == "firefox":
+        browser = await playwright_instance.firefox.launch(
+            headless=True
+        )  # Firefox doesn't need the extra args
+    elif browser_name == "webkit":
+        browser = await playwright_instance.webkit.launch(headless=True)
+    else:
+        raise ValueError(f"Unsupported browser: {browser_name}")
 
-        def wait_for_element_clickable(self, by, value, timeout=None):
-            if timeout:
-                wait = WebDriverWait(self.driver, timeout)
-            else:
-                wait = self.wait
-            return wait.until(EC.element_to_be_clickable((by, value)))
+    context = await browser.new_context(
+        viewport={"width": 1280, "height": 720}, ignore_https_errors=True
+    )
 
-        def get_current_url(self):
-            return self.driver.current_url
+    yield context
 
-        def get_title(self):
-            return self.driver.title
+    await context.close()
+    await browser.close()
 
-        def screenshot(self, filename):
-            self.driver.save_screenshot(filename)
 
-    return SeleniumPage(browser_driver, ui_config)
+@pytest.fixture(scope="function")
+async def page(browser_context: BrowserContext) -> Generator[Page, None, None]:
+    """Create a new page for each test"""
+    page = await browser_context.new_page()
+    yield page
+    await page.close()
+
+
+# Browser type markers for parametrized tests
+def pytest_configure(config):
+    """Configure pytest markers"""
+    config.addinivalue_line("markers", "chromium: mark test to run on Chromium browser")
+    config.addinivalue_line("markers", "firefox: mark test to run on Firefox browser")
+    config.addinivalue_line(
+        "markers", "webkit: mark test to run on WebKit browser (Safari) - macOS only"
+    )
