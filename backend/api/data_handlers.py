@@ -522,7 +522,7 @@ def _create_user_account_with_security_id(connection, account, now):
         uid=uid_value,  # Integer UID for Unix systems, None for Windows
         security_id=security_id_value,  # Windows SID string, None for Unix
         home_directory=account.get("home_directory"),
-        shell=shell_value,
+        shell=shell_value,  # nosec B604 - Database field assignment, not shell execution
         is_system_user=is_system_user,
         created_at=now,
         updated_at=now,
