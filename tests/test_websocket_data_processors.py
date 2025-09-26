@@ -579,9 +579,9 @@ class TestProcessSoftwarePackages:
 
         package = mock_db.add.call_args_list[0][0][0]
         assert package.package_name == "minimal_package"
-        assert package.package_version is None
+        assert package.package_version == "unknown"  # Default for non-nullable field
         assert package.package_description is None
-        assert package.package_manager is None
+        assert package.package_manager == "unknown"  # Default for non-nullable field
         assert package.is_system_package is False  # Default
 
         # Verify logging
