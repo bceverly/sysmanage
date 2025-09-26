@@ -547,9 +547,15 @@ jobs:
         npm cache clean --force || true
         npm install --legacy-peer-deps || npm ci --legacy-peer-deps
 
-    - name: Install Playwright browsers
+    - name: Install Playwright and browsers
       run: |
+        # First install playwright package if not already installed
+        pip install playwright
+
+        # Then install browsers
         python -m playwright install --with-deps chromium firefox
+
+        # Install additional system dependencies for UI testing
         sudo apt-get update
         sudo apt-get install -y libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libgtk-3-0
 
