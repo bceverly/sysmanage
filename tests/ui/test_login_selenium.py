@@ -1,0 +1,245 @@
+"""
+Selenium-based Login UI Tests for OpenBSD
+Fallback when Playwright is not available
+"""
+
+import time
+import pytest
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+
+
+def test_login_selenium(selenium_page, test_user, ui_config, start_server):
+    """Test login functionality using Selenium"""
+    print("\n=== Testing login with Selenium ===")
+
+    try:
+        # Navigate to login page
+        selenium_page.goto("/login")
+        time.sleep(2)  # Wait for page load
+
+        # Verify we're on the login page
+        title = selenium_page.get_title()
+        assert "SysManage" in title, f"Expected SysManage in title, got: {title}"
+
+        # Find and fill login form
+        # Try multiple selectors for username/email field
+        username_selectors = [
+            (By.CSS_SELECTOR, 'input[type="text"]'),
+            (By.CSS_SELECTOR, 'input[placeholder*="email" i]'),
+            (By.CSS_SELECTOR, 'input[placeholder*="username" i]'),
+            (By.CSS_SELECTOR, 'input[name="username"]'),
+            (By.CSS_SELECTOR, 'input[name="email"]'),
+        ]
+
+        username_input = None
+        for by, selector in username_selectors:
+            try:
+                username_input = selenium_page.wait_for_element_visible(
+                    by, selector, timeout=5
+                )
+                break
+            except TimeoutException:
+                continue
+
+        assert username_input is not None, "Could not find username input field"
+
+        # Find password field
+        password_input = selenium_page.wait_for_element_visible(
+            By.CSS_SELECTOR, 'input[type="password"]'
+        )
+
+        # Fill in credentials
+        username_input.clear()
+        username_input.send_keys(test_user["username"])
+        password_input.clear()
+        password_input.send_keys(test_user["password"])
+
+        # Find and click login button
+        login_button_selectors = [
+            (By.CSS_SELECTOR, 'button[type="submit"]'),
+            (By.XPATH, '//button[contains(text(), "LOGIN")]'),
+            (By.XPATH, '//button[contains(text(), "Login")]'),
+            (By.XPATH, '//button[contains(text(), "Sign In")]'),
+        ]
+
+        login_button = None
+        for by, selector in login_button_selectors:
+            try:
+                login_button = selenium_page.wait_for_element_clickable(
+                    by, selector, timeout=5
+                )
+                break
+            except TimeoutException:
+                continue
+
+        assert login_button is not None, "Could not find login button"
+        login_button.click()
+
+        # Wait for navigation
+        time.sleep(3)
+
+        # Verify successful login by checking for main application elements
+        current_url = selenium_page.get_current_url()
+        assert "/login" not in current_url, f"Still on login page: {current_url}"
+
+        # Look for navigation menu
+        nav_selectors = [
+            (By.CSS_SELECTOR, "nav"),
+            (By.CSS_SELECTOR, ".navbar"),
+            (By.CSS_SELECTOR, '[role="navigation"]'),
+        ]
+
+        nav_found = False
+        for by, selector in nav_selectors:
+            try:
+                nav_element = selenium_page.wait_for_element_visible(
+                    by, selector, timeout=10
+                )
+                nav_found = True
+                break
+            except TimeoutException:
+                continue
+
+        assert nav_found, "Could not find navigation menu after login"
+
+        # Check for common navigation links
+        expected_nav_items = ["Dashboard", "Hosts", "Reports", "Settings", "Security"]
+        found_nav_items = 0
+
+        for item in expected_nav_items:
+            nav_link_selectors = [
+                (By.XPATH, f'//a[contains(text(), "{item}")]'),
+                (By.XPATH, f'//button[contains(text(), "{item}")]'),
+                (By.XPATH, f'//*[@role="menuitem"][contains(text(), "{item}")]'),
+            ]
+
+            for by, selector in nav_link_selectors:
+                try:
+                    selenium_page.driver.find_element(by, selector)
+                    found_nav_items += 1
+                    print(f"  ✓ Found navigation item: {item}")
+                    break
+                except NoSuchElementException:
+                    continue
+
+        # Verify we found at least 2 navigation items
+        assert (
+            found_nav_items >= 2
+        ), f"Expected at least 2 navigation items, found {found_nav_items}"
+
+        # Look for user indicator
+        user_indicator_selectors = [
+            (By.XPATH, f'//text()[contains(., "{test_user["username"]}")]'),
+            (By.XPATH, f'//*[@title="{test_user["username"]}"]'),
+            (By.XPATH, '//button[contains(text(), "Logout")]'),
+            (By.XPATH, '//button[contains(text(), "Sign Out")]'),
+            (By.XPATH, '//a[contains(text(), "Profile")]'),
+        ]
+
+        user_indicator_found = False
+        for by, selector in user_indicator_selectors:
+            try:
+                selenium_page.driver.find_element(by, selector)
+                user_indicator_found = True
+                print(f"  ✓ Found user indicator")
+                break
+            except NoSuchElementException:
+                continue
+
+        if not user_indicator_found:
+            print(f"  - User indicator not found (may not be implemented yet)")
+
+        print(f"  ✓ Login successful with Selenium")
+        print(f"  ✓ Found {found_nav_items} navigation items")
+        print(f"  ✓ Current URL: {current_url}")
+
+    except Exception as e:
+        # Take screenshot on failure
+        screenshot_path = f"/tmp/claude/selenium_login_failure_{int(time.time())}.png"
+        selenium_page.screenshot(screenshot_path)
+        print(f"  ✗ Selenium login test failed")
+        print(f"  ✗ Screenshot saved: {screenshot_path}")
+        print(f"  ✗ Current URL: {selenium_page.get_current_url()}")
+        print(f"  ✗ Error: {str(e)}")
+        raise
+
+
+def test_invalid_login_selenium(selenium_page, ui_config, start_server):
+    """Test invalid login handling using Selenium"""
+    print("\n=== Testing invalid login with Selenium ===")
+
+    # Navigate to login page
+    selenium_page.goto("/login")
+    time.sleep(2)
+
+    # Find input fields
+    username_input = selenium_page.wait_for_element_visible(
+        By.CSS_SELECTOR, 'input[type="text"]'
+    )
+    password_input = selenium_page.wait_for_element_visible(
+        By.CSS_SELECTOR, 'input[type="password"]'
+    )
+
+    # Try invalid credentials
+    username_input.clear()
+    username_input.send_keys("invalid_user")
+    password_input.clear()
+    password_input.send_keys("invalid_password")
+
+    # Click login button
+    login_button = selenium_page.wait_for_element_clickable(
+        By.CSS_SELECTOR, 'button[type="submit"]'
+    )
+    login_button.click()
+
+    # Wait for response and handle alert if present
+    time.sleep(3)
+
+    # Handle alert dialog if present
+    try:
+        alert = selenium_page.driver.switch_to.alert
+        alert_text = alert.text
+        print(f"  ✓ Found expected alert: {alert_text}")
+        alert.accept()  # Click OK on the alert
+        time.sleep(1)  # Wait for alert to be dismissed
+    except Exception:
+        print("  - No alert found (may use different error display method)")
+
+    # Verify we're still on login page
+    current_url = selenium_page.get_current_url()
+    assert (
+        "/login" in current_url or current_url == f"{ui_config.base_url}/"
+    ), f"Expected to stay on login page, but went to: {current_url}"
+
+    # Look for error message
+    error_selectors = [
+        (By.XPATH, '//*[contains(text(), "Invalid credentials")]'),
+        (By.XPATH, '//*[contains(text(), "Login failed")]'),
+        (By.XPATH, '//*[contains(text(), "Invalid username or password")]'),
+        (By.CSS_SELECTOR, '[role="alert"]'),
+        (By.CSS_SELECTOR, ".error"),
+        (By.CSS_SELECTOR, ".alert-danger"),
+    ]
+
+    error_found = False
+    for by, selector in error_selectors:
+        try:
+            selenium_page.driver.find_element(by, selector)
+            error_found = True
+            print("  ✓ Error message displayed for invalid login")
+            break
+        except NoSuchElementException:
+            continue
+
+    if not error_found:
+        print("  - No specific error message found (may not be implemented)")
+
+    print("  ✓ Invalid login correctly rejected (Selenium)")
+
+
+if __name__ == "__main__":
+    # For debugging individual tests
+    pytest.main([__file__, "-v", "-s"])
