@@ -36,39 +36,39 @@ def check_c_tracer_available():
             # Check for CTracer status in debug output
             if 'ctracer:' in output:
                 if 'available' in output and 'unavailable' not in output:
-                    print("✅ Coverage C tracer is available and active")
+                    print("[OK] Coverage C tracer is available and active")
                     return True
                 elif 'unavailable' in output:
-                    print("⚠️  Coverage C tracer is unavailable - needs reinstallation")
+                    print("[WARN]  Coverage C tracer is unavailable - needs reinstallation")
                     return False
 
             # Fallback: try direct import
             try:
                 import coverage.tracer
-                print("✅ Coverage C tracer is available (verified by import)")
+                print("[OK] Coverage C tracer is available (verified by import)")
                 return True
             except ImportError:
-                print("⚠️  Coverage C tracer not available - using Python tracer (slower)")
+                print("[WARN]  Coverage C tracer not available - using Python tracer (slower)")
                 return False
         else:
-            print("⚠️  Could not check C tracer status via coverage debug")
+            print("[WARN]  Could not check C tracer status via coverage debug")
             return False
 
     except (subprocess.TimeoutExpired, FileNotFoundError, Exception) as e:
-        print(f"⚠️  Error checking C tracer status: {e}")
+        print(f"[WARN]  Error checking C tracer status: {e}")
         # Fallback to import test
         try:
             import coverage.tracer
-            print("✅ Coverage C tracer available (fallback check)")
+            print("[OK] Coverage C tracer available (fallback check)")
             return True
         except ImportError:
-            print("⚠️  Coverage C tracer not available (fallback check)")
+            print("[WARN]  Coverage C tracer not available (fallback check)")
             return False
 
 def install_coverage_with_c_extension():
     """Reinstall coverage with C extension on OpenBSD."""
     try:
-        print("🔧 Reinstalling coverage with C extension...")
+        print("[SETUP] Reinstalling coverage with C extension...")
 
         # Uninstall existing coverage
         subprocess.run([sys.executable, '-m', 'pip', 'uninstall', '-y', 'coverage'],
@@ -81,14 +81,14 @@ def install_coverage_with_c_extension():
         ], capture_output=True, text=True)
 
         if result.returncode == 0:
-            print("✅ Coverage reinstalled with C extension")
+            print("[OK] Coverage reinstalled with C extension")
             return True
         else:
-            print(f"❌ Failed to reinstall coverage: {result.stderr}")
+            print(f"[ERROR] Failed to reinstall coverage: {result.stderr}")
             return False
 
     except Exception as e:
-        print(f"❌ Error reinstalling coverage: {e}")
+        print(f"[ERROR] Error reinstalling coverage: {e}")
         return False
 
 def verify_c_tracer():
@@ -99,14 +99,14 @@ def verify_c_tracer():
         ], capture_output=True, text=True)
 
         if 'CTracer' in result.stdout:
-            print("✅ C tracer is active and working")
+            print("[OK] C tracer is active and working")
             return True
         else:
-            print("⚠️  C tracer not active, using Python tracer")
+            print("[WARN]  C tracer not active, using Python tracer")
             return False
 
     except Exception as e:
-        print(f"❌ Error checking tracer status: {e}")
+        print(f"[ERROR] Error checking tracer status: {e}")
         return False
 
 def main():
@@ -114,14 +114,14 @@ def main():
     print("=" * 40)
 
     system_name = platform.system()
-    print(f"🔍 Detected {system_name} system")
+    print(f"[INFO] Detected {system_name} system")
 
     # Check C tracer status first (applies to all platforms)
     if check_c_tracer_available():
-        print("✅ C tracer already working - no action needed")
+        print("[OK] C tracer already working - no action needed")
         return
 
-    print("🔧 C tracer not available - checking dependencies...")
+    print("[SETUP] C tracer not available - checking dependencies...")
 
     # OpenBSD-specific package checks
     if check_openbsd_system():
@@ -137,7 +137,7 @@ def main():
                 missing_packages.append(package)
 
         if missing_packages:
-            print("⚠️  Missing required packages for C extension compilation:")
+            print("[WARN]  Missing required packages for C extension compilation:")
             for pkg in missing_packages:
                 print(f"   - {pkg}")
             print()
@@ -147,13 +147,13 @@ def main():
             print("Note: C tracer will use Python fallback (slower but functional)")
             return
 
-        print("✅ Required compilation tools are available")
+        print("[OK] Required compilation tools are available")
     else:
         # Non-OpenBSD systems - assume dev tools are available or user can install them
         print("ℹ️  Non-OpenBSD system - assuming development tools are available")
 
     # Try to reinstall coverage with C extension (works on all platforms)
-    print("🔧 Attempting to reinstall coverage with C extension...")
+    print("[SETUP] Attempting to reinstall coverage with C extension...")
 
     if install_coverage_with_c_extension():
         # Verify it worked
@@ -161,10 +161,10 @@ def main():
             print("\n🎉 C tracer successfully enabled!")
             print("Coverage.py will now run at native speed")
         else:
-            print("\n⚠️  C tracer installation completed but not active")
+            print("\n[WARN]  C tracer installation completed but not active")
             print("Coverage will work but use slower Python implementation")
     else:
-        print("\n⚠️  Could not install C tracer - using Python fallback")
+        print("\n[WARN]  Could not install C tracer - using Python fallback")
         print("Coverage will work but run slower")
         if not check_openbsd_system():
             print("You may need to install development tools (gcc, python-dev, etc.)")
