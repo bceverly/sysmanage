@@ -300,7 +300,7 @@ jobs:
     - name: Run frontend tests with coverage
       working-directory: frontend
       run: |
-        make test-vite
+        npm run test:coverage
 
     - name: Debug coverage files
       working-directory: frontend
