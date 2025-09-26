@@ -2234,7 +2234,7 @@ const HostDetail = () => {
                                                                         <TableCell>{device.mount_point}</TableCell>
                                                                     </TableRow>
                                                                 )}
-                                                                {device.capacity_bytes && (
+                                                                {device.capacity_bytes != null && device.capacity_bytes > 0 && (
                                                                     <TableRow>
                                                                         <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
                                                                             {t('hostDetail.capacity', 'Capacity')}
@@ -2382,7 +2382,7 @@ const HostDetail = () => {
                                                                         <TableCell>{iface.mac_address}</TableCell>
                                                                     </TableRow>
                                                                 )}
-                                                                {iface.speed_mbps && (
+                                                                {iface.speed_mbps != null && iface.speed_mbps > 0 && (
                                                                     <TableRow>
                                                                         <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
                                                                             {t('hostDetail.speed', 'Speed')}
