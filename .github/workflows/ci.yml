@@ -770,3 +770,422 @@ jobs:
         fi
         pkill -f "uvicorn" || true
         pkill -f "serve" || true
+
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Allow writing to update README badge
+      pull-requests: write  # Allow creating pull requests
+    needs: [ui-tests]  # Only run after UI tests pass
+    if: success()
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: sysmanage
+          POSTGRES_USER: sysmanage
+          POSTGRES_PASSWORD: abc123
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        registry-url: 'https://registry.npmjs.org/'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Cache pip packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install frontend dependencies
+      working-directory: frontend
+      run: |
+        npm cache clean --force || true
+        npm install --legacy-peer-deps || npm ci --legacy-peer-deps
+
+    - name: Install Artillery for load testing
+      run: |
+        npm install -g artillery@latest
+
+    - name: Install Playwright and browsers
+      run: |
+        pip install playwright
+        python -m playwright install --with-deps chromium firefox
+
+    - name: Create test config
+      run: |
+        sudo mkdir -p /etc
+        sudo tee /etc/sysmanage.yaml > /dev/null <<EOF
+        api:
+          host: "0.0.0.0"
+          port: 8001
+          certFile: ""
+          chainFile: ""
+          keyFile: ""
+        database:
+          user: "sysmanage"
+          password: "abc123"
+          host: "localhost"
+          port: 5432
+          name: "sysmanage"
+        security:
+          password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+          admin_userid: "admin@sysmanage.org"
+          admin_password: "TEST_AdminPass123!"
+          jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+          jwt_algorithm: "HS256"
+          jwt_auth_timeout: 6000
+          jwt_refresh_timeout: 60000
+        webui:
+          host: "0.0.0.0"
+          port: 3001
+        vault:
+          enabled: false
+        EOF
+
+    - name: Run backend database migrations
+      run: |
+        python -m alembic upgrade head
+      env:
+        PYTHONPATH: .
+        DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+    - name: Build frontend
+      working-directory: frontend
+      run: npm run build
+
+    - name: Start backend server for performance testing
+      run: |
+        echo "🚀 Starting backend server on port 8001 for performance testing..."
+        cd backend
+        PYTHONPATH=.. python -m uvicorn main:app --host 0.0.0.0 --port 8001 > /tmp/backend-perf.log 2>&1 &
+        BACKEND_PID=$!
+        echo $BACKEND_PID > /tmp/backend-perf.pid
+        echo "Backend started with PID: $BACKEND_PID"
+
+        # Give server time to start
+        sleep 15
+
+        # Check if process is still running
+        if ! kill -0 $BACKEND_PID 2>/dev/null; then
+          echo "❌ Backend process died! Log contents:"
+          cat /tmp/backend-perf.log
+          exit 1
+        fi
+
+        echo "✅ Backend server started successfully for performance testing"
+      env:
+        PYTHONPATH: .
+
+    - name: Start frontend server for performance testing
+      working-directory: frontend
+      run: |
+        npx serve -s build -l 3001 &
+        echo $! > /tmp/frontend-perf.pid
+        sleep 5
+
+    - name: Wait for servers to be ready
+      run: |
+        echo "Waiting for backend health check..."
+        if ! timeout 60 bash -c 'until curl -f http://localhost:8001/api/health; do echo "Waiting for backend..."; sleep 2; done'; then
+          echo "❌ Backend health check failed!"
+          cat /tmp/backend-perf.log || echo "No backend log file found"
+          exit 1
+        fi
+        echo "✅ Backend is ready"
+
+        echo "Waiting for frontend..."
+        if ! timeout 60 bash -c 'until curl -f http://localhost:3001/; do echo "Waiting for frontend..."; sleep 2; done'; then
+          echo "❌ Frontend health check failed!"
+          exit 1
+        fi
+        echo "✅ Frontend is ready"
+
+    - name: Create Artillery configuration
+      run: |
+        cat > artillery.yml << EOF
+        config:
+          target: 'http://localhost:8001'
+          phases:
+            - duration: 60
+              arrivalRate: 10
+              name: 'Warm up'
+            - duration: 120
+              arrivalRate: 25
+              name: 'Sustained load'
+        scenarios:
+          - name: 'API Health Check Load Test'
+            weight: 40
+            flow:
+              - get:
+                  url: '/api/health'
+          - name: 'API Authentication Load Test'
+            weight: 30
+            flow:
+              - post:
+                  url: '/api/auth/login'
+                  json:
+                    username: 'admin@sysmanage.org'
+                    password: 'TEST_AdminPass123!'
+          - name: 'Static Asset Load Test'
+            weight: 30
+            flow:
+              - get:
+                  url: 'http://localhost:3001/'
+        EOF
+
+    - name: Run Artillery load tests
+      id: artillery-tests
+      run: |
+        echo "🎯 Running Artillery load tests..."
+
+        if artillery run artillery.yml --output artillery-report.json; then
+          echo "✅ Artillery load tests completed successfully"
+
+          # Extract key metrics from the report
+          if [ -f artillery-report.json ]; then
+            # Parse Artillery results
+            REQUESTS_TOTAL=$(python3 -c "
+            import json
+            with open('artillery-report.json', 'r') as f:
+                data = json.load(f)
+            total = data.get('aggregate', {}).get('counters', {}).get('http.requests', 0)
+            print(total)
+            " 2>/dev/null || echo "0")
+
+            RESPONSE_TIME_P95=$(python3 -c "
+            import json
+            with open('artillery-report.json', 'r') as f:
+                data = json.load(f)
+            p95 = data.get('aggregate', {}).get('summaries', {}).get('http.response_time', {}).get('p95', 0)
+            print(int(p95))
+            " 2>/dev/null || echo "0")
+
+            ERROR_RATE=$(python3 -c "
+            import json
+            with open('artillery-report.json', 'r') as f:
+                data = json.load(f)
+            errors = data.get('aggregate', {}).get('counters', {}).get('errors.ECONNREFUSED', 0)
+            errors += data.get('aggregate', {}).get('counters', {}).get('http.codes.500', 0)
+            total = data.get('aggregate', {}).get('counters', {}).get('http.requests', 1)
+            rate = round((errors / total) * 100, 1) if total > 0 else 0
+            print(rate)
+            " 2>/dev/null || echo "0")
+
+            echo "📊 Artillery Results:"
+            echo "   Total Requests: $REQUESTS_TOTAL"
+            echo "   95th Percentile Response Time: ${RESPONSE_TIME_P95}ms"
+            echo "   Error Rate: ${ERROR_RATE}%"
+
+            # Determine status and color
+            if [ "$ERROR_RATE" = "0" ] && [ "$RESPONSE_TIME_P95" -lt 1000 ]; then
+              echo "artillery_status=excellent" >> $GITHUB_OUTPUT
+              echo "artillery_color=brightgreen" >> $GITHUB_OUTPUT
+              echo "artillery_metric=${RESPONSE_TIME_P95}ms" >> $GITHUB_OUTPUT
+            elif [ "$ERROR_RATE" = "0" ] && [ "$RESPONSE_TIME_P95" -lt 2000 ]; then
+              echo "artillery_status=good" >> $GITHUB_OUTPUT
+              echo "artillery_color=green" >> $GITHUB_OUTPUT
+              echo "artillery_metric=${RESPONSE_TIME_P95}ms" >> $GITHUB_OUTPUT
+            elif [ "$ERROR_RATE" = "0" ] && [ "$RESPONSE_TIME_P95" -lt 5000 ]; then
+              echo "artillery_status=acceptable" >> $GITHUB_OUTPUT
+              echo "artillery_color=yellow" >> $GITHUB_OUTPUT
+              echo "artillery_metric=${RESPONSE_TIME_P95}ms" >> $GITHUB_OUTPUT
+            else
+              echo "artillery_status=poor" >> $GITHUB_OUTPUT
+              echo "artillery_color=red" >> $GITHUB_OUTPUT
+              echo "artillery_metric=${ERROR_RATE}%25%20errors" >> $GITHUB_OUTPUT
+            fi
+
+            # Generate HTML report
+            artillery report artillery-report.json --output artillery-report.html
+            echo "📋 Artillery HTML report generated: artillery-report.html"
+          else
+            echo "artillery_status=no--data" >> $GITHUB_OUTPUT
+            echo "artillery_color=lightgrey" >> $GITHUB_OUTPUT
+            echo "artillery_metric=unknown" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "❌ Artillery load tests failed"
+          echo "artillery_status=failed" >> $GITHUB_OUTPUT
+          echo "artillery_color=red" >> $GITHUB_OUTPUT
+          echo "artillery_metric=failed" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Run Playwright performance tests
+      id: playwright-perf-tests
+      run: |
+        echo "🎭 Running Playwright performance tests..."
+
+        # Create a basic Playwright performance test file if it doesn't exist
+        mkdir -p tests/ui
+        if [ ! -f tests/ui/test_performance_playwright.py ]; then
+          cat > tests/ui/test_performance_playwright.py << 'EOF'
+        import pytest
+        from playwright.async_api import Page, expect
+        import time
+
+        @pytest.mark.asyncio
+        async def test_page_load_performance(page: Page, ui_config, start_server):
+            """Test page load performance metrics"""
+            try:
+                start_time = time.time()
+                await page.goto(f"{ui_config.base_url}/", wait_until="networkidle")
+                load_time = (time.time() - start_time) * 1000
+
+                # Get performance metrics
+                metrics = await page.evaluate("""
+                () => {
+                    const navigation = performance.getEntriesByType('navigation')[0];
+                    const paintEntries = performance.getEntriesByType('paint');
+
+                    return {
+                        domContentLoaded: navigation ? navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart : 0,
+                        firstContentfulPaint: paintEntries.find(entry => entry.name === 'first-contentful-paint')?.startTime || 0,
+                        loadComplete: navigation ? navigation.loadEventEnd - navigation.loadEventStart : 0
+                    };
+                }
+                """)
+
+                print(f"Page Load Time: {load_time:.0f}ms")
+                print(f"DOM Content Loaded: {metrics['domContentLoaded']:.0f}ms")
+                print(f"First Contentful Paint: {metrics['firstContentfulPaint']:.0f}ms")
+
+                # Performance assertions
+                assert load_time < 10000, f"Page load took too long: {load_time}ms"
+                assert metrics['firstContentfulPaint'] < 5000, f"FCP too slow: {metrics['firstContentfulPaint']}ms"
+
+                return {
+                    'load_time': load_time,
+                    'fcp': metrics['firstContentfulPaint'],
+                    'dcl': metrics['domContentLoaded']
+                }
+
+            except Exception as e:
+                print(f"Performance test failed: {e}")
+                raise
+        EOF
+        fi
+
+        if PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short; then
+          echo "✅ Playwright performance tests completed successfully"
+          echo "playwright_status=passing" >> $GITHUB_OUTPUT
+          echo "playwright_color=brightgreen" >> $GITHUB_OUTPUT
+          echo "playwright_metric=optimized" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Playwright performance tests failed"
+          echo "playwright_status=failing" >> $GITHUB_OUTPUT
+          echo "playwright_color=red" >> $GITHUB_OUTPUT
+          echo "playwright_metric=issues" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Upload performance test artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-test-results-${{ github.run_number }}
+        path: |
+          artillery-report.json
+          artillery-report.html
+        retention-days: 7
+
+    - name: Save performance test status data
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        echo '${{ steps.artillery-tests.outputs.artillery_status }}' > artillery-status.txt
+        echo '${{ steps.artillery-tests.outputs.artillery_color }}' > artillery-color.txt
+        echo '${{ steps.artillery-tests.outputs.artillery_metric }}' > artillery-metric.txt
+        echo '${{ steps.playwright-perf-tests.outputs.playwright_status }}' > playwright-perf-status.txt
+        echo '${{ steps.playwright-perf-tests.outputs.playwright_color }}' > playwright-perf-color.txt
+        echo '${{ steps.playwright-perf-tests.outputs.playwright_metric }}' > playwright-perf-metric.txt
+
+    - name: Upload performance test status data
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-test-status-data
+        path: |
+          artillery-status.txt
+          artillery-color.txt
+          artillery-metric.txt
+          playwright-perf-status.txt
+          playwright-perf-color.txt
+          playwright-perf-metric.txt
+
+    - name: Checkout repository for performance badge update
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: actions/checkout@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Update performance badges
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        # Update Performance Tests badge
+        sed -i "s/performance%20tests-[^-]*-[a-z]*/performance%20tests-${{ steps.playwright-perf-tests.outputs.playwright_metric }}-${{ steps.playwright-perf-tests.outputs.playwright_color }}/g" README.md
+
+        # Update Artillery Load Tests badge
+        sed -i "s/artillery-[^-]*-[a-z]*/artillery-${{ steps.artillery-tests.outputs.artillery_metric }}-${{ steps.artillery-tests.outputs.artillery_color }}/g" README.md
+
+    - name: Create PR for performance badges
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "Update performance test badges [skip ci]"
+        title: "Update performance test badges"
+        body: |
+          🚀 **Performance Test Results Update**
+
+          ## Artillery Load Tests
+          - **Status**: ${{ steps.artillery-tests.outputs.artillery_status }}
+          - **Metric**: ${{ steps.artillery-tests.outputs.artillery_metric }}
+          - **Badge Color**: ${{ steps.artillery-tests.outputs.artillery_color }}
+
+          ## Playwright Performance Tests
+          - **Status**: ${{ steps.playwright-perf-tests.outputs.playwright_status }}
+          - **Metric**: ${{ steps.playwright-perf-tests.outputs.playwright_metric }}
+          - **Badge Color**: ${{ steps.playwright-perf-tests.outputs.playwright_color }}
+
+          Generated automatically by CI pipeline.
+        branch: update-performance-badges-${{ github.run_number }}
+        delete-branch: true
+
+    - name: Stop performance test servers
+      if: always()
+      run: |
+        echo "🛑 Stopping performance test servers..."
+        if [ -f /tmp/backend-perf.pid ]; then
+          kill $(cat /tmp/backend-perf.pid) || true
+        fi
+        if [ -f /tmp/frontend-perf.pid ]; then
+          kill $(cat /tmp/frontend-perf.pid) || true
+        fi
+        pkill -f "uvicorn.*8001" || true
+        pkill -f "serve.*3001" || true
