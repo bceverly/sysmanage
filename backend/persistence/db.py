@@ -144,5 +144,29 @@ def get_database_url():
     return PROD_DATABASE_URL
 
 
-# Export for alembic
-SQLALCHEMY_DATABASE_URL = get_database_url()
+# Export for alembic - avoid import-time config loading by checking environment first
+def _get_alembic_database_url():
+    """Get database URL for alembic, with fallback to environment variable."""
+    import os
+
+    # Check for environment variable first (for CI)
+    env_url = os.getenv("DATABASE_URL")
+    if env_url:
+        return env_url
+
+    # Otherwise use the normal config-based URL
+    try:
+        return get_database_url()
+    except Exception:
+        # Final fallback for CI environments
+        return "postgresql://sysmanage:abc123@localhost:5432/sysmanage"
+
+
+# For alembic compatibility, try to get URL immediately but with environment priority
+try:
+    import os
+
+    SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL") or get_database_url()
+except Exception:
+    # Fallback for CI environments where config file doesn't exist
+    SQLALCHEMY_DATABASE_URL = "postgresql://sysmanage:abc123@localhost:5432/sysmanage"

@@ -113,7 +113,10 @@ class TestSysManagePerformance:
             login_success = False
             # Look for error message or any indication of failure with shorter timeout
             try:
-                await page.wait_for_selector(".error-message, .alert-error, [role='alert'], .invalid-feedback", timeout=1000)
+                await page.wait_for_selector(
+                    ".error-message, .alert-error, [role='alert'], .invalid-feedback",
+                    timeout=1000,
+                )
                 error_time = time.time() - form_start
                 print(f"❌ Login failed (expected) in {error_time:.2f}s")
                 navigation_time = error_time
@@ -122,11 +125,17 @@ class TestSysManagePerformance:
                 error_time = time.time() - form_start
 
                 # Check if form is still present (indicating failure to navigate)
-                form_still_present = await page.locator('form, input[name="userid"]').count() > 0
+                form_still_present = (
+                    await page.locator('form, input[name="userid"]').count() > 0
+                )
                 if form_still_present:
-                    print(f"❌ Login failed (form still present, no error message) in {error_time:.2f}s")
+                    print(
+                        f"❌ Login failed (form still present, no error message) in {error_time:.2f}s"
+                    )
                 else:
-                    print(f"✅ Login appeared to succeed (form disappeared) in {error_time:.2f}s")
+                    print(
+                        f"✅ Login appeared to succeed (form disappeared) in {error_time:.2f}s"
+                    )
                 navigation_time = error_time
 
         total_flow_time = time.time() - start_time

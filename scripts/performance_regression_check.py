@@ -43,9 +43,9 @@ class PerformanceRegessionDetector:
         try:
             with open(self.performance_history_file, 'w') as f:
                 json.dump(history, f, indent=2)
-            print(f"💾 Performance history saved to {self.performance_history_file}")
+            print(f"[INFO] Performance history saved to {self.performance_history_file}")
         except Exception as e:
-            print(f"❌ Failed to save performance history: {e}")
+            print(f"[ERROR] Failed to save performance history: {e}")
 
     def calculate_baseline(self, metric_history):
         """Calculate baseline using rolling average of recent runs"""
@@ -97,7 +97,7 @@ class PerformanceRegessionDetector:
             with open(results_file, 'r') as f:
                 data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
-            print(f"❌ Could not load Playwright results: {e}")
+            print(f"[ERROR] Could not load Playwright results: {e}")
             return {}
 
         metrics = {}
@@ -128,7 +128,7 @@ class PerformanceRegessionDetector:
             with open(results_file, 'r') as f:
                 data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
-            print(f"❌ Could not load Artillery results: {e}")
+            print(f"[ERROR] Could not load Artillery results: {e}")
             return {}
 
         metrics = {}
@@ -169,7 +169,7 @@ class PerformanceRegessionDetector:
         regressions_found = []
         performance_summary = []
 
-        print("\n🔍 Performance Regression Analysis")
+        print("\n[INFO] Performance Regression Analysis")
         print("=" * 50)
 
         for metric_name, current_value in current_results.items():
@@ -240,7 +240,7 @@ def main():
     # Analyze Playwright results
     playwright_file = "performance-results.json"
     if os.path.exists(playwright_file):
-        print("📊 Analyzing Playwright performance results...")
+        print("[INFO] Analyzing Playwright performance results...")
         playwright_metrics = detector.analyze_playwright_results(playwright_file)
         all_metrics.update(playwright_metrics)
 
