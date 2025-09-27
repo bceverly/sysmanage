@@ -66,7 +66,14 @@ install-dev: $(VENV_ACTIVATE)
 	@echo "Installing Python development dependencies..."
 	@$(PIP) install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep
 	@echo "Installing requirements.txt (includes Selenium WebDriver)..."
-	@$(PIP) install -r requirements.txt
+	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ]; then \
+		echo "[INFO] Installing requirements without Playwright (unsupported on $(shell uname -s))"; \
+		grep -v "^playwright==" requirements.txt > /tmp/requirements-no-playwright.txt; \
+		$(PIP) install -r /tmp/requirements-no-playwright.txt; \
+		rm -f /tmp/requirements-no-playwright.txt; \
+	else \
+		$(PIP) install -r requirements.txt; \
+	fi
 	@echo "Checking for OpenBSD C tracer requirements..."
 	@$(PYTHON) scripts/check-openbsd-deps.py
 	@echo "Installing OpenBAO for secrets management..."
@@ -77,33 +84,41 @@ ifeq ($(OS),Windows_NT)
 	@echo "Installing Playwright browsers for Windows..."
 	@$(PYTHON) -m playwright install chromium firefox webkit 2>nul || echo "Playwright browser installation failed - continuing with Selenium fallback"
 else
-	@echo "Installing Playwright browsers for Unix-like system..."
-	@$(PYTHON) -m playwright install chromium firefox webkit 2>/dev/null || echo "Playwright browser installation failed - continuing with Selenium fallback"
-	@echo "Checking Playwright browser dependencies..."
-	@$(PYTHON) -c "from playwright.sync_api import sync_playwright; exec('with sync_playwright() as p: browser = p.chromium.launch(headless=True); browser.close(); print(\"✓ Playwright dependencies working\")')" 2>/dev/null || ( \
-		echo "Installing Playwright system dependencies..."; \
-		echo "This may prompt for sudo password to install system packages..."; \
-		if command -v sudo >/dev/null 2>&1; then \
-			sudo $(PYTHON) -m playwright install-deps 2>/dev/null || ( \
-				echo ""; \
-				echo "❌ Playwright automatic dependency installation failed."; \
-				echo "   Installing manually..."; \
-				echo ""; \
-				sudo apt-get update -qq && \
-				sudo apt-get install -y \
-					libicu76 libavif16 libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 \
-					libatspi2.0-0t64 libcairo2 libcups2t64 libdbus-1-3 libdrm2 libgbm1 \
-					libglib2.0-0t64 libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 \
-					libxcomposite1 libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2 \
-					libcairo-gobject2 libfontconfig1 libfreetype6 libgdk-pixbuf-2.0-0 \
-					libgtk-3-0t64 libpangocairo-1.0-0 libx11-xcb1 libxcb-shm0 libxcursor1 \
-					libxi6 libxrender1 fonts-liberation xvfb && \
-				echo "✓ Comprehensive dependency installation completed" \
-			); \
-		else \
-			echo "❌ sudo not available and Playwright dependencies needed manual installation"; \
-		fi \
-	)
+	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ]; then \
+		echo "[INFO] Skipping Playwright browser installation on $(shell uname -s) (using Selenium fallback)"; \
+	else \
+		echo "Installing Playwright browsers for Unix-like system..."; \
+		$(PYTHON) -m playwright install chromium firefox webkit 2>/dev/null || echo "Playwright browser installation failed - continuing with Selenium fallback"; \
+	fi
+	@if [ "$(shell uname -s)" != "OpenBSD" ] && [ "$(shell uname -s)" != "FreeBSD" ]; then \
+		echo "Checking Playwright browser dependencies..."; \
+		$(PYTHON) -c "from playwright.sync_api import sync_playwright; exec('with sync_playwright() as p: browser = p.chromium.launch(headless=True); browser.close(); print(\"✓ Playwright dependencies working\")')" 2>/dev/null || ( \
+			echo "Installing Playwright system dependencies..."; \
+			echo "This may prompt for sudo password to install system packages..."; \
+			if command -v sudo >/dev/null 2>&1; then \
+				sudo $(PYTHON) -m playwright install-deps 2>/dev/null || ( \
+					echo ""; \
+					echo "❌ Playwright automatic dependency installation failed."; \
+					echo "   Installing manually..."; \
+					echo ""; \
+					sudo apt-get update -qq && \
+					sudo apt-get install -y \
+						libicu76 libavif16 libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 \
+						libatspi2.0-0t64 libcairo2 libcups2t64 libdbus-1-3 libdrm2 libgbm1 \
+						libglib2.0-0t64 libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 \
+						libxcomposite1 libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2 \
+						libcairo-gobject2 libfontconfig1 libfreetype6 libgdk-pixbuf-2.0-0 \
+						libgtk-3-0t64 libpangocairo-1.0-0 libx11-xcb1 libxcb-shm0 libxcursor1 \
+						libxi6 libxrender1 fonts-liberation xvfb && \
+					echo "✓ Comprehensive dependency installation completed" \
+				); \
+			else \
+				echo "❌ sudo not available and Playwright dependencies needed manual installation"; \
+			fi \
+		); \
+	else \
+		echo "[INFO] Skipping Playwright dependency check on $(shell uname -s)"; \
+	fi
 endif
 	@echo "Installing TypeScript/React development dependencies..."
 	@cd frontend && npm install --include=optional
@@ -322,8 +337,7 @@ test-playwright: test-ui
 test-performance: $(VENV_ACTIVATE)
 	@echo "=== Running Performance Tests ==="
 	@if [ "$(shell uname -s)" = "OpenBSD" ]; then \
-		echo "[SKIP] Artillery not supported on OpenBSD - running Playwright performance only"; \
-		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short || echo "[WARNING] Playwright performance tests failed"; \
+		echo "[SKIP] Artillery and Playwright not supported on OpenBSD - performance tests skipped"; \
 	else \
 		echo "[INFO] Running Artillery load tests for backend API..."; \
 		command -v artillery >/dev/null 2>&1 || { \
