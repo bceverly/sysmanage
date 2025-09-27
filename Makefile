@@ -285,11 +285,22 @@ test-typescript:
 	@echo "[OK] TypeScript tests completed"
 
 # UI integration tests
-test-ui:
-	@echo "=== Running UI Integration Tests (Playwright) ==="
-	@echo "[INFO] Cross-platform UI testing with Playwright"
-	@$(PYTHON) -m pytest tests/ui/test_login_cross_browser.py -p tests.ui.conftest_playwright -v --tb=short
-	@echo "[OK] Playwright UI integration tests completed"
+test-ui: $(VENV_ACTIVATE)
+	@if [ "$(shell uname -s)" != "OpenBSD" ] && [ "$(shell uname -s)" != "FreeBSD" ]; then \
+		echo "=== Running UI Integration Tests (Playwright) ==="; \
+		if [ "$(shell uname -s)" = "Darwin" ]; then \
+			echo "[INFO] macOS detected - testing Chrome, Firefox, and WebKit/Safari"; \
+		else \
+			echo "[INFO] Linux/Windows detected - testing Chrome and Firefox"; \
+		fi; \
+		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short; \
+		echo "[OK] Playwright UI integration tests completed"; \
+	else \
+		echo "=== Running UI Integration Tests (Selenium) ==="; \
+		echo "[INFO] Using Selenium fallback on OpenBSD/FreeBSD"; \
+		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_selenium.py --confcutdir=tests/ui -p conftest_selenium -v --tb=short; \
+		echo "[OK] Selenium UI integration tests completed"; \
+	fi
 
 # Playwright tests only (alias for test-ui)
 test-playwright: test-ui
