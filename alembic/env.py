@@ -21,22 +21,23 @@ from backend.persistence.db import Base
 SQLALCHEMY_DATABASE_URL = os.getenv('DATABASE_URL')
 
 if SQLALCHEMY_DATABASE_URL:
-    print(f"Using DATABASE_URL from environment for alembic")
+    print(f"Using DATABASE_URL from environment for alembic: {SQLALCHEMY_DATABASE_URL}")
 else:
     # Try to import from config as fallback
     try:
-        from backend.persistence.db import SQLALCHEMY_DATABASE_URL as imported_url
-        SQLALCHEMY_DATABASE_URL = imported_url
-        print(f"Using database URL from config")
+        from backend.persistence.db import get_database_url
+        SQLALCHEMY_DATABASE_URL = get_database_url()
+        print(f"Using database URL from config: {SQLALCHEMY_DATABASE_URL}")
     except Exception as e:
-        print(f"Warning: Could not import SQLALCHEMY_DATABASE_URL: {e}")
+        print(f"Warning: Could not get database URL from config: {e}")
         # Final fallback for CI/testing environments
         SQLALCHEMY_DATABASE_URL = 'postgresql://sysmanage:abc123@localhost:5432/sysmanage'
-        print(f"Using hardcoded fallback DATABASE_URL")
+        print(f"Using hardcoded fallback DATABASE_URL: {SQLALCHEMY_DATABASE_URL}")
 
 # Validate URL format
 if not SQLALCHEMY_DATABASE_URL or not SQLALCHEMY_DATABASE_URL.startswith(('postgresql://', 'sqlite:///')):
-    print(f"Error: Invalid database URL format, using CI default")
+    print(f"Error: Invalid database URL format: {SQLALCHEMY_DATABASE_URL}")
+    print(f"Using CI default PostgreSQL URL")
     # Force a known good URL for CI
     SQLALCHEMY_DATABASE_URL = 'postgresql://sysmanage:abc123@localhost:5432/sysmanage'
 

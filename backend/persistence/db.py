@@ -35,10 +35,15 @@ def _init_production_database():
     db_port = the_config["database"]["port"]
     db_name = the_config["database"]["name"]
 
-    # Build the connection string
-    PROD_DATABASE_URL = (
-        f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-    )
+    # Build the connection string based on database type
+    if db_user == "sqlite" or not db_host:
+        # SQLite configuration
+        PROD_DATABASE_URL = f"sqlite:///{db_name}"
+    else:
+        # PostgreSQL configuration
+        PROD_DATABASE_URL = (
+            f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+        )
 
     # create the database connection
     PROD_ENGINE = create_engine(PROD_DATABASE_URL, connect_args={}, echo=False)
