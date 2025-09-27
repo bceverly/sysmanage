@@ -336,8 +336,8 @@ test-playwright: test-ui
 # Performance testing with Artillery and enhanced Playwright
 test-performance: $(VENV_ACTIVATE)
 	@echo "=== Running Performance Tests ==="
-	@if [ "$(shell uname -s)" = "OpenBSD" ]; then \
-		echo "[SKIP] Artillery and Playwright not supported on OpenBSD - performance tests skipped"; \
+	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ]; then \
+		echo "[SKIP] Artillery and Playwright not supported on $(shell uname -s) - performance tests skipped"; \
 	else \
 		echo "[INFO] Running Artillery load tests for backend API..."; \
 		command -v artillery >/dev/null 2>&1 || { \
