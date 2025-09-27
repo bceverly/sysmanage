@@ -149,18 +149,11 @@ def start_server(ui_config):
 def database_session(ui_config):
     """Create database session for test user management - use production database"""
     from backend.persistence.models.core import Base
+    from backend.persistence.db import get_database_url
 
-    config = load_sysmanage_config()
-
-    # Build database URL from config (same as production)
-    db_config = config.get("database", {})
-    db_user = db_config.get("user", "sysmanage")
-    db_password = db_config.get("password", "")
-    db_host = db_config.get("host", "localhost")
-    db_port = db_config.get("port", 5432)
-    db_name = db_config.get("name", "sysmanage")
-
-    database_url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    # Use the same database URL logic as the main backend
+    database_url = get_database_url()
+    print(f"UI tests using database URL: {database_url}")
 
     engine = create_engine(database_url)
 
