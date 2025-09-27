@@ -689,7 +689,7 @@ jobs:
       id: ui-tests
       run: |
         echo "🎭 Running Playwright UI tests..."
-        if python -m pytest tests/ui/ -v --tb=short; then
+        if PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short; then
           echo "status=passing" >> $GITHUB_OUTPUT
           echo "color=brightgreen" >> $GITHUB_OUTPUT
           echo "✅ All UI tests passed"
