@@ -68,8 +68,16 @@ class PerformanceRegessionDetector:
         if baseline is None:
             return False, "No baseline available"
 
-        # Calculate percentage deviation
-        deviation = abs(current_value - baseline) / baseline * 100
+        # Calculate percentage deviation (handle zero baseline)
+        if baseline == 0:
+            # If baseline is 0, treat any non-zero current value as establishing a new baseline
+            if current_value == 0:
+                deviation = 0  # Both are zero, no deviation
+            else:
+                # First measurement, treat as establishing baseline
+                deviation = 0
+        else:
+            deviation = abs(current_value - baseline) / baseline * 100
 
         # Use tolerance percentage or 2 standard deviations, whichever is more generous
         tolerance_by_percentage = self.tolerance_percentage

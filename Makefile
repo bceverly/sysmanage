@@ -285,7 +285,7 @@ endif
 # TypeScript/React tests
 test-typescript:
 	@echo "=== Running TypeScript/React Tests ==="
-	@cd frontend && npm test
+	@cd frontend && npm run test:coverage
 	@echo "[OK] TypeScript tests completed"
 
 # UI integration tests
@@ -314,8 +314,11 @@ test-performance: $(VENV_ACTIVATE)
 				exit 1; \
 			fi; \
 		}; \
-		echo "[INFO] Running Artillery load tests against http://localhost:8001..."; \
-		echo "[NOTE] Ensure the SysManage server is running on port 8001"; \
+		echo "[INFO] Generating Artillery config from sysmanage.yaml..."; \
+		$(PYTHON) scripts/generate_artillery_config.py; \
+		TARGET_URL=$$(grep 'target:' artillery.yml | sed 's/.*target: *//'); \
+		echo "[INFO] Running Artillery load tests against $$TARGET_URL..."; \
+		echo "[NOTE] Ensure the SysManage server is running on the configured port"; \
 		artillery run artillery.yml --output artillery-report.json || { \
 			echo "[WARNING] Artillery tests failed - continuing with Playwright performance tests"; \
 		}; \
