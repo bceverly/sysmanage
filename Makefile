@@ -72,57 +72,38 @@ install-dev: $(VENV_ACTIVATE)
 	@$(PYTHON) scripts/install-openbao.py
 	@echo "Setting up WebDriver for screenshots..."
 	@$(PYTHON) scripts/install-browsers.py
-	@if [ "$(shell uname -s)" != "OpenBSD" ] && [ "$(shell uname -s)" != "FreeBSD" ]; then \
-		echo "Installing Playwright browsers..."; \
-		$(PYTHON) -m playwright install chromium firefox webkit 2>/dev/null || echo "Playwright browser installation failed - continuing with Selenium fallback"; \
-		echo "Checking Playwright browser dependencies..."; \
-		$(PYTHON) -c "from playwright.sync_api import sync_playwright; exec('with sync_playwright() as p: browser = p.chromium.launch(headless=True); browser.close(); print(\"✓ Playwright dependencies working\")')" 2>/dev/null || ( \
-			echo "Installing Playwright system dependencies..."; \
-			echo "This may prompt for sudo password to install system packages..."; \
-			if command -v sudo >/dev/null 2>&1; then \
-				sudo $(PYTHON) -m playwright install-deps 2>/dev/null || ( \
-					echo ""; \
-					echo "❌ Playwright automatic dependency installation failed."; \
-					echo "   Installing manually..."; \
-					echo ""; \
-					sudo apt-get update -qq && \
-					sudo apt-get install -y \
-						libicu76 libavif16 libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 \
-						libatspi2.0-0t64 libcairo2 libcups2t64 libdbus-1-3 libdrm2 libgbm1 \
-						libglib2.0-0t64 libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 \
-						libxcomposite1 libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2 \
-						libcairo-gobject2 libfontconfig1 libfreetype6 libgdk-pixbuf-2.0-0 \
-						libgtk-3-0t64 libpangocairo-1.0-0 libx11-xcb1 libxcb-shm0 libxcursor1 \
-						libxi6 libxrender1 fonts-liberation xvfb && \
-					echo "✓ Comprehensive dependency installation completed" \
-				); \
-			else \
-				echo "❌ sudo not available and Playwright dependencies needed manual installation"; \
-			fi \
-		); \
-	else \
-		echo "Skipping Playwright installation on OpenBSD/FreeBSD - using Selenium with system browser"; \
-		echo "Installing Selenium WebDriver dependencies for cross-browser testing..."; \
-		if [ "$(shell uname -s)" = "OpenBSD" ]; then \
-			echo "Installing geckodriver for Firefox support..."; \
-			if command -v doas >/dev/null 2>&1; then \
-				doas pkg_add geckodriver || echo "Warning: Could not install geckodriver"; \
-			elif command -v sudo >/dev/null 2>&1; then \
-				sudo pkg_add geckodriver || echo "Warning: Could not install geckodriver"; \
-			else \
-				echo "Warning: No privilege escalation command found. Please install manually:"; \
-				echo "  doas pkg_add geckodriver"; \
-			fi; \
-		elif [ "$(shell uname -s)" = "FreeBSD" ]; then \
-			echo "Installing Firefox and geckodriver for cross-browser testing..."; \
-			if command -v sudo >/dev/null 2>&1; then \
-				sudo pkg install -y firefox geckodriver || echo "Warning: Could not install Firefox/geckodriver"; \
-			else \
-				echo "Warning: No privilege escalation command found. Please install manually:"; \
-				echo "  sudo pkg install firefox geckodriver"; \
-			fi; \
-		fi; \
-	fi
+ifeq ($(OS),Windows_NT)
+	@echo "Installing Playwright browsers for Windows..."
+	@$(PYTHON) -m playwright install chromium firefox webkit 2>nul || echo "Playwright browser installation failed - continuing with Selenium fallback"
+else
+	@echo "Installing Playwright browsers for Unix-like system..."
+	@$(PYTHON) -m playwright install chromium firefox webkit 2>/dev/null || echo "Playwright browser installation failed - continuing with Selenium fallback"
+	@echo "Checking Playwright browser dependencies..."
+	@$(PYTHON) -c "from playwright.sync_api import sync_playwright; exec('with sync_playwright() as p: browser = p.chromium.launch(headless=True); browser.close(); print(\"✓ Playwright dependencies working\")')" 2>/dev/null || ( \
+		echo "Installing Playwright system dependencies..."; \
+		echo "This may prompt for sudo password to install system packages..."; \
+		if command -v sudo >/dev/null 2>&1; then \
+			sudo $(PYTHON) -m playwright install-deps 2>/dev/null || ( \
+				echo ""; \
+				echo "❌ Playwright automatic dependency installation failed."; \
+				echo "   Installing manually..."; \
+				echo ""; \
+				sudo apt-get update -qq && \
+				sudo apt-get install -y \
+					libicu76 libavif16 libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 \
+					libatspi2.0-0t64 libcairo2 libcups2t64 libdbus-1-3 libdrm2 libgbm1 \
+					libglib2.0-0t64 libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 \
+					libxcomposite1 libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2 \
+					libcairo-gobject2 libfontconfig1 libfreetype6 libgdk-pixbuf-2.0-0 \
+					libgtk-3-0t64 libpangocairo-1.0-0 libx11-xcb1 libxcb-shm0 libxcursor1 \
+					libxi6 libxrender1 fonts-liberation xvfb && \
+				echo "✓ Comprehensive dependency installation completed" \
+			); \
+		else \
+			echo "❌ sudo not available and Playwright dependencies needed manual installation"; \
+		fi \
+	)
+endif
 	@echo "Installing TypeScript/React development dependencies..."
 	@cd frontend && npm install --include=optional
 	@echo "Ensuring esbuild optional dependencies are installed..."
@@ -304,22 +285,11 @@ test-typescript:
 	@echo "[OK] TypeScript tests completed"
 
 # UI integration tests
-test-ui: $(VENV_ACTIVATE)
-	@if [ "$(shell uname -s)" != "OpenBSD" ] && [ "$(shell uname -s)" != "FreeBSD" ]; then \
-		echo "=== Running UI Integration Tests (Playwright) ==="; \
-		if [ "$(shell uname -s)" = "Darwin" ]; then \
-			echo "[INFO] macOS detected - testing Chrome, Firefox, and WebKit/Safari"; \
-		else \
-			echo "[INFO] Linux/Windows detected - testing Chrome and Firefox"; \
-		fi; \
-		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short; \
-		echo "[OK] Playwright UI integration tests completed"; \
-	else \
-		echo "=== Running UI Integration Tests (Selenium) ==="; \
-		echo "[INFO] Using Selenium fallback on OpenBSD/FreeBSD"; \
-		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_selenium.py --confcutdir=tests/ui -p conftest_selenium -v --tb=short; \
-		echo "[OK] Selenium UI integration tests completed"; \
-	fi
+test-ui:
+	@echo "=== Running UI Integration Tests (Playwright) ==="
+	@echo "[INFO] Cross-platform UI testing with Playwright"
+	@$(PYTHON) -m pytest tests/ui/test_login_cross_browser.py -p tests.ui.conftest_playwright -v --tb=short
+	@echo "[OK] Playwright UI integration tests completed"
 
 # Playwright tests only (alias for test-ui)
 test-playwright: test-ui

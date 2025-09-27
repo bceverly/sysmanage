@@ -41,11 +41,20 @@ def install_webdriver():
 
 def detect_system_browser():
     """Detect available system browsers."""
+    import platform
+    system = platform.system().lower()
+
     # Check if chromium or chrome is available in system
     browsers = ['chromium', 'chromium-browser', 'google-chrome', 'chrome']
+    if system == 'windows':
+        # On Windows, use 'where' instead of 'which'
+        command = 'where'
+    else:
+        command = 'which'
+
     for browser in browsers:
         try:
-            result = subprocess.run(['which', browser], capture_output=True)
+            result = subprocess.run([command, browser], capture_output=True)
             if result.returncode == 0:
                 browser_path = result.stdout.decode().strip()
                 print(f"[OK] Found system browser: {browser_path}")
@@ -76,7 +85,11 @@ def install_playwright_browsers():
 
         # Check if playwright is installed
         import playwright
-        print(f"[OK] Playwright {playwright.__version__} found")
+        try:
+            version = getattr(playwright, '__version__', 'unknown')
+        except AttributeError:
+            version = 'unknown'
+        print(f"[OK] Playwright {version} found")
 
         # Install all browsers for all platforms
         browsers_to_install = ["chromium", "firefox"]
