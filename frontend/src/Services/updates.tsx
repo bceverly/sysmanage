@@ -55,15 +55,24 @@ export interface UpdateResultsResponse {
 }
 
 export interface OSUpgradeResponse {
+  id: string;
   host_id: string;
-  hostname: string;
+  host_fqdn: string;
+  host_platform: string;
   package_name: string;
   current_version: string;
   available_version: string;
   package_manager: string;
-  is_security_update: boolean;
+  update_type: string;
   requires_reboot: boolean;
-  update_size_bytes: number | null;
+  size_bytes: number | null;
+  discovered_at: string | null;
+}
+
+export interface OSUpgradesListResponse {
+  os_upgrades: OSUpgradeResponse[];
+  total_count: number;
+  hosts_with_upgrades: number;
 }
 
 export interface OSUpgradeSummary {
@@ -174,7 +183,7 @@ class UpdatesService {
   }
 
   // OS Upgrade Methods
-  async getOSUpgrades(): Promise<OSUpgradeResponse[]> {
+  async getOSUpgrades(): Promise<OSUpgradesListResponse> {
     try {
       const response = await axiosInstance.get('/api/updates/os-upgrades');
       return response.data;

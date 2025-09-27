@@ -76,6 +76,9 @@ def engine():
 
     yield test_engine
 
+    # Properly dispose of the engine to close all connections
+    test_engine.dispose()
+
     # Exit test mode after test
     from backend.persistence.db import exit_test_mode
 
@@ -129,8 +132,11 @@ def db_session(engine):
     try:
         yield session
     finally:
+        # Close session and clear connection pool
         session.rollback()
         session.close()
+        # Remove connection from the pool
+        session.get_bind().dispose()
 
 
 @pytest.fixture(scope="function")

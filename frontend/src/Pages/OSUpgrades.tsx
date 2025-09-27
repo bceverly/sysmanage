@@ -44,7 +44,10 @@ const OSUpgrades: React.FC = () => {
   const fetchOSUpgrades = useCallback(async () => {
     try {
       setIsLoading(true);
-      const upgrades = await updatesService.getOSUpgrades();
+      const response = await updatesService.getOSUpgrades();
+
+      // Extract the upgrades array from the response object
+      const upgrades = response.os_upgrades || [];
 
       // Apply package manager filter if present
       let filteredUpgrades = upgrades;
@@ -342,8 +345,9 @@ const OSUpgrades: React.FC = () => {
         ) : (
           <div className="updates__list">
             {osUpgrades.map(upgrade => {
-              const key = `${upgrade.host_id}-${upgrade.package_manager}`;
-              const isSelected = selectedUpgrades.has(key);
+              const key = upgrade.id; // Use the unique id from backend
+              const selectionKey = `${upgrade.host_id}-${upgrade.package_manager}`;
+              const isSelected = selectedUpgrades.has(selectionKey);
 
               return (
                 <div
@@ -370,7 +374,7 @@ const OSUpgrades: React.FC = () => {
                     </div>
 
                     <div className="updates__item-details">
-                      <span className="updates__item-host">{upgrade.hostname}</span>
+                      <span className="updates__item-host">{upgrade.host_fqdn}</span>
                       <span className="updates__item-version">
                         {upgrade.current_version} → {upgrade.available_version}
                       </span>

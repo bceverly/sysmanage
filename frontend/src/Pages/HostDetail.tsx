@@ -55,7 +55,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
 
-import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData } from '../Services/hosts';
+import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck } from '../Services/hosts';
 import { SysManageUser, doGetMe } from '../Services/users';
 import { SecretResponse } from '../Services/secrets';
 
@@ -1018,14 +1018,16 @@ const HostDetail = () => {
         try {
             setDiagnosticsLoading(true);
 
-            // Request both diagnostics and user access data collection
+            // Request diagnostics, user access data, software inventory, and package updates
             await Promise.all([
                 doRequestHostDiagnostics(hostId),
-                doRefreshUserAccessData(hostId)
+                doRefreshUserAccessData(hostId),
+                doRefreshSoftwareData(hostId),
+                doRefreshUpdatesCheck(hostId)
             ]);
 
             // Show success message
-            console.log('Diagnostics and user access data collection requested successfully');
+            console.log('Diagnostics, user access data, software inventory, and package updates requested successfully');
             
             // Refresh host data to get updated diagnostics request status
             const updatedHost = await doGetHostByID(hostId);

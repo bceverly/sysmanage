@@ -988,7 +988,7 @@ async def handle_software_update(db: Session, connection, message_data: dict):
                 software_package = SoftwarePackage(
                     host_id=connection.host_id,
                     package_name=package.get("package_name"),
-                    package_version=package.get("version"),
+                    package_version=package.get("version") or "unknown",
                     package_manager=package.get("package_manager", "unknown"),
                     package_description=package.get("description"),
                     architecture=package.get("architecture"),
@@ -1105,7 +1105,7 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
             package_update_record = PackageUpdate(
                 host_id=connection.host_id,
                 package_name=package_update.get("package_name"),
-                current_version=package_update.get("current_version"),
+                current_version=package_update.get("current_version") or "unknown",
                 available_version=new_version,  # Use validated version
                 package_manager=package_update.get("package_manager", "unknown"),
                 update_type=update_type,
