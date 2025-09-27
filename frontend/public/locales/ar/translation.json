@@ -967,5 +967,130 @@
     "unsealing": "جاري إلغاء الختم...",
     "sealError": "فشل في ختم OpenBAO",
     "unsealError": "فشل في إلغاء ختم OpenBAO"
+  },
+  "ui_testing": {
+    "title": "توثيق الاختبار للواجهة",
+    "overview": {
+      "title": "نظرة عامة على إطار العمل للاختبار",
+      "description": "إعداد شامل لاختبار الواجهة باستخدام أطر عمل حديثة متعددة المنصات",
+      "frameworks": "أطر عمل الاختبار",
+      "platforms": "الدعم متعدد المنصات",
+      "automation": "الأتمتة و CI/CD"
+    },
+    "playwright": {
+      "title": "اختبار Playwright",
+      "description": "إطار عمل حديث متعدد المنصات مع قدرات انتظار تلقائي موثوقة",
+      "features": {
+        "crossBrowser": "الاختبار متعدد المتصفحات",
+        "autoWait": "الانتظار التلقائي للعناصر",
+        "screenshots": "اختبار لقطات الشاشة",
+        "video": "تسجيل الفيديو",
+        "tracing": "تتبع الاختبار",
+        "parallel": "التنفيذ المتوازي"
+      },
+      "browsers": {
+        "chromium": "Chromium",
+        "firefox": "Firefox",
+        "webkit": "WebKit",
+        "safari": "Safari",
+        "edge": "Microsoft Edge"
+      },
+      "commands": {
+        "install": "تثبيت Playwright",
+        "test": "تشغيل الاختبارات",
+        "debug": "تصحيح الاختبارات",
+        "codegen": "توليد الكود",
+        "report": "تقرير الاختبار",
+        "trace": "عرض التتبع"
+      }
+    },
+    "selenium": {
+      "title": "اختبار Selenium",
+      "description": "أتمتة WebDriver المعيارية في الصناعة لدعم المتصفحات القديمة",
+      "features": {
+        "webdriver": "بروتوكول WebDriver",
+        "gridSupport": "دعم Selenium Grid",
+        "multiLanguage": "الدعم متعدد اللغات",
+        "crossPlatform": "الاختبار متعدد المنصات",
+        "remoteExecution": "التنفيذ عن بُعد",
+        "mobileTesting": "اختبار الجوال"
+      },
+      "drivers": {
+        "chrome": "ChromeDriver",
+        "firefox": "GeckoDriver",
+        "safari": "SafariDriver",
+        "edge": "EdgeDriver",
+        "ie": "IEDriver"
+      }
+    },
+    "testTypes": {
+      "title": "أنواع الاختبار",
+      "unit": "اختبارات الوحدة",
+      "integration": "اختبارات التكامل",
+      "e2e": "اختبارات شاملة",
+      "visual": "اختبارات الانحدار البصري",
+      "accessibility": "اختبارات إمكانية الوصول",
+      "performance": "اختبارات الأداء",
+      "api": "اختبارات API",
+      "mobile": "اختبارات الجوال"
+    },
+    "cicd": {
+      "title": "تكامل CI/CD",
+      "description": "سير عمل اختبار التكامل المستمر والنشر",
+      "platforms": {
+        "githubActions": "GitHub Actions",
+        "jenkins": "Jenkins",
+        "azure": "Azure DevOps",
+        "gitlab": "GitLab CI",
+        "circleci": "CircleCI",
+        "travis": "Travis CI"
+      },
+      "features": {
+        "parallelJobs": "تنفيذ المهام المتوازية",
+        "testReports": "توليد تقارير الاختبار",
+        "artifactStorage": "تخزين مصنوعات الاختبار",
+        "notificationIntegration": "تكامل الإشعارات",
+        "environmentManagement": "إدارة البيئة"
+      }
+    },
+    "configuration": {
+      "title": "تكوين الاختبار",
+      "configFiles": "ملفات التكوين",
+      "environment": "إعداد البيئة",
+      "testData": "إدارة بيانات الاختبار",
+      "pageObjects": "نمط كائنات الصفحة",
+      "utilities": "أدوات الاختبار",
+      "reporting": "تقارير الاختبار"
+    },
+    "bestPractices": {
+      "title": "أفضل ممارسات الاختبار",
+      "maintainability": "قابلية صيانة الاختبار",
+      "reliability": "موثوقية الاختبار",
+      "performance": "أداء الاختبار",
+      "debugging": "استراتيجيات التصحيح",
+      "documentation": "توثيق الاختبار",
+      "codeReview": "مراجعة كود الاختبار"
+    },
+    "tools": {
+      "title": "أدوات ومرافق الاختبار",
+      "testRunners": "مشغلات الاختبار",
+      "assertionLibraries": "مكتبات التأكيد",
+      "mockingFrameworks": "أطر عمل المحاكاة",
+      "dataGenerators": "مولدات بيانات الاختبار",
+      "visualTools": "أدوات الاختبار البصري",
+      "accessibilityTools": "أدوات اختبار إمكانية الوصول"
+    },
+    "makefile": {
+      "title": "أوامر Makefile",
+      "description": "أوامر الاختبار الشائعة المتاحة من خلال Makefile",
+      "commands": {
+        "test": "make test",
+        "testWatch": "make test-watch",
+        "testCoverage": "make test-coverage",
+        "testE2e": "make test-e2e",
+        "testVisual": "make test-visual",
+        "testAccessibility": "make test-a11y"
+      }
+    }
   }
 }

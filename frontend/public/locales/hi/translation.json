@@ -961,5 +961,130 @@
     "unsealing": "अनसील हो रहा है...",
     "sealError": "OpenBAO को सील करने में विफल",
     "unsealError": "OpenBAO को अनसील करने में विफल"
+  },
+  "ui_testing": {
+    "title": "UI परीक्षण दस्तावेज़",
+    "overview": {
+      "title": "परीक्षण फ्रेमवर्क अवलोकन",
+      "description": "आधुनिक क्रॉस-प्लेटफॉर्म परीक्षण फ्रेमवर्क का उपयोग करके व्यापक UI परीक्षण सेटअप",
+      "frameworks": "परीक्षण फ्रेमवर्क",
+      "platforms": "क्रॉस-प्लेटफॉर्म समर्थन",
+      "automation": "स्वचालन और CI/CD"
+    },
+    "playwright": {
+      "title": "Playwright परीक्षण",
+      "description": "विश्वसनीय ऑटो-वेट क्षमताओं के साथ आधुनिक क्रॉस-प्लेटफॉर्म परीक्षण फ्रेमवर्क",
+      "features": {
+        "crossBrowser": "क्रॉस-ब्राउज़र परीक्षण",
+        "autoWait": "तत्वों के लिए ऑटो-वेट",
+        "screenshots": "स्क्रीनशॉट परीक्षण",
+        "video": "वीडियो रिकॉर्डिंग",
+        "tracing": "परीक्षण ट्रेसिंग",
+        "parallel": "समानांतर निष्पादन"
+      },
+      "browsers": {
+        "chromium": "Chromium",
+        "firefox": "Firefox",
+        "webkit": "WebKit",
+        "safari": "Safari",
+        "edge": "Microsoft Edge"
+      },
+      "commands": {
+        "install": "Playwright इंस्टॉल करें",
+        "test": "परीक्षण चलाएं",
+        "debug": "परीक्षण डिबग करें",
+        "codegen": "कोड जनरेशन",
+        "report": "परीक्षण रिपोर्ट",
+        "trace": "ट्रेस देखें"
+      }
+    },
+    "selenium": {
+      "title": "Selenium परीक्षण",
+      "description": "लीगेसी ब्राउज़र समर्थन के लिए उद्योग-मानक WebDriver स्वचालन",
+      "features": {
+        "webdriver": "WebDriver प्रोटोकॉल",
+        "gridSupport": "Selenium Grid समर्थन",
+        "multiLanguage": "बहु-भाषा समर्थन",
+        "crossPlatform": "क्रॉस-प्लेटफॉर्म परीक्षण",
+        "remoteExecution": "रिमोट निष्पादन",
+        "mobileTesting": "मोबाइल परीक्षण"
+      },
+      "drivers": {
+        "chrome": "ChromeDriver",
+        "firefox": "GeckoDriver",
+        "safari": "SafariDriver",
+        "edge": "EdgeDriver",
+        "ie": "IEDriver"
+      }
+    },
+    "testTypes": {
+      "title": "परीक्षण प्रकार",
+      "unit": "यूनिट परीक्षण",
+      "integration": "एकीकरण परीक्षण",
+      "e2e": "एंड-टू-एंड परीक्षण",
+      "visual": "विज़ुअल रिग्रेशन परीक्षण",
+      "accessibility": "पहुंच परीक्षण",
+      "performance": "प्रदर्शन परीक्षण",
+      "api": "API परीक्षण",
+      "mobile": "मोबाइल परीक्षण"
+    },
+    "cicd": {
+      "title": "CI/CD एकीकरण",
+      "description": "निरंतर एकीकरण और परिनियोजन परीक्षण वर्कफ़्लो",
+      "platforms": {
+        "githubActions": "GitHub Actions",
+        "jenkins": "Jenkins",
+        "azure": "Azure DevOps",
+        "gitlab": "GitLab CI",
+        "circleci": "CircleCI",
+        "travis": "Travis CI"
+      },
+      "features": {
+        "parallelJobs": "समानांतर जॉब निष्पादन",
+        "testReports": "परीक्षण रिपोर्ट जनरेशन",
+        "artifactStorage": "परीक्षण आर्टिफैक्ट भंडारण",
+        "notificationIntegration": "अधिसूचना एकीकरण",
+        "environmentManagement": "पर्यावरण प्रबंधन"
+      }
+    },
+    "configuration": {
+      "title": "परीक्षण कॉन्फ़िगरेशन",
+      "configFiles": "कॉन्फ़िगरेशन फाइलें",
+      "environment": "पर्यावरण सेटअप",
+      "testData": "परीक्षण डेटा प्रबंधन",
+      "pageObjects": "पेज ऑब्जेक्ट पैटर्न",
+      "utilities": "परीक्षण उपयोगिताएं",
+      "reporting": "परीक्षण रिपोर्टिंग"
+    },
+    "bestPractices": {
+      "title": "परीक्षण सर्वोत्तम प्रथाएं",
+      "maintainability": "परीक्षण रखरखाव",
+      "reliability": "परीक्षण विश्वसनीयता",
+      "performance": "परीक्षण प्रदर्शन",
+      "debugging": "डिबगिंग रणनीतियां",
+      "documentation": "परीक्षण दस्तावेज़",
+      "codeReview": "परीक्षण कोड समीक्षा"
+    },
+    "tools": {
+      "title": "परीक्षण उपकरण और उपयोगिताएं",
+      "testRunners": "परीक्षण रनर्स",
+      "assertionLibraries": "असर्शन लाइब्रेरीज़",
+      "mockingFrameworks": "मॉकिंग फ्रेमवर्क",
+      "dataGenerators": "परीक्षण डेटा जेनरेटर",
+      "visualTools": "विज़ुअल परीक्षण उपकरण",
+      "accessibilityTools": "पहुंच परीक्षण उपकरण"
+    },
+    "makefile": {
+      "title": "Makefile कमांड",
+      "description": "Makefile के माध्यम से उपलब्ध सामान्य परीक्षण कमांड",
+      "commands": {
+        "test": "make test",
+        "testWatch": "make test-watch",
+        "testCoverage": "make test-coverage",
+        "testE2e": "make test-e2e",
+        "testVisual": "make test-visual",
+        "testAccessibility": "make test-a11y"
+      }
+    }
   }
 }

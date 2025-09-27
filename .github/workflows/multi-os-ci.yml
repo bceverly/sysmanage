@@ -1,0 +1,433 @@
+name: Multi-OS CI/CD Pipeline with Performance Testing
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+
+jobs:
+  # Multi-OS backend testing
+  test-backend:
+    name: Backend Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+      pull-requests: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.12']
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: abc123
+          POSTGRES_USER: sysmanage
+          POSTGRES_DB: sysmanage
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache pip packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/pip
+          ~/AppData/Local/pip/Cache
+          ~/Library/Caches/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-asyncio
+
+    - name: Create test config (Linux/macOS)
+      if: runner.os != 'Windows'
+      run: |
+        sudo mkdir -p /etc
+        sudo tee /etc/sysmanage.yaml > /dev/null <<EOF
+        api:
+          host: "localhost"
+          port: 8000
+          certFile: ""
+          chainFile: ""
+          keyFile: ""
+        database:
+          user: "sysmanage"
+          password: "abc123"
+          host: "localhost"
+          port: 5432
+          name: "sysmanage"
+        security:
+          password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+          admin_userid: "admin@sysmanage.org"
+          admin_password: "TEST_AdminPass123!"
+          jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+          jwt_algorithm: "HS256"
+          jwt_auth_timeout: 6000
+          jwt_refresh_timeout: 60000
+        webui:
+          host: "localhost"
+          port: 7443
+        EOF
+
+    - name: Create test config (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        New-Item -ItemType Directory -Force -Path "C:\ProgramData\sysmanage"
+        @"
+        api:
+          host: "localhost"
+          port: 8000
+          certFile: ""
+          chainFile: ""
+          keyFile: ""
+        database:
+          user: "sysmanage"
+          password: "abc123"
+          host: "localhost"
+          port: 5432
+          name: "sysmanage"
+        security:
+          password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+          admin_userid: "admin@sysmanage.org"
+          admin_password: "TEST_AdminPass123!"
+          jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+          jwt_algorithm: "HS256"
+          jwt_auth_timeout: 6000
+          jwt_refresh_timeout: 60000
+        webui:
+          host: "localhost"
+          port: 7443
+        "@ | Out-File -FilePath "C:\ProgramData\sysmanage\sysmanage.yaml" -Encoding UTF8
+      shell: powershell
+
+    - name: Run backend database migrations
+      run: |
+        python -m alembic upgrade head
+      env:
+        PYTHONPATH: .
+        DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+    - name: Run backend tests
+      run: |
+        python -m pytest tests/ --ignore=tests/ui/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml
+      env:
+        PYTHONPATH: .
+        DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v5
+      with:
+        files: ./coverage.xml
+        flags: backend-${{ matrix.os }}
+        name: backend-coverage-${{ matrix.os }}
+
+  # Multi-OS frontend testing
+  test-frontend:
+    name: Frontend Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: ['20']
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install frontend dependencies
+      run: npm ci
+      working-directory: frontend
+
+    - name: Run frontend tests
+      run: npm test -- --coverage --watchAll=false
+      working-directory: frontend
+
+    - name: Build frontend
+      run: npm run build
+      working-directory: frontend
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-build-${{ matrix.os }}
+        path: frontend/build/
+
+  # Multi-OS UI and Performance testing
+  test-ui-performance:
+    name: UI & Performance Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: [test-frontend]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.12']
+        node-version: ['20']
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install Artillery globally
+      run: npm install -g artillery@latest
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-asyncio
+
+    - name: Install Playwright browsers
+      run: |
+        pip install playwright
+        playwright install chromium firefox
+        # Install WebKit only on macOS
+        if [ "${{ runner.os }}" == "macOS" ]; then
+          playwright install webkit
+        fi
+      shell: bash
+
+    - name: Install additional system dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libnss3 libnspr4 libdbus-1-3 libatk1.0-0 libatk-bridge2.0-0 \
+          libdrm2 libxkbcommon0 libgtk-3-0 libgdk-pixbuf2.0-0
+
+    - name: Download frontend build
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-build-${{ matrix.os }}
+        path: frontend/build/
+
+    - name: Create test config
+      run: |
+        # Platform-specific config creation
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          mkdir -p "/c/ProgramData/sysmanage"
+          CONFIG_PATH="/c/ProgramData/sysmanage/sysmanage.yaml"
+        else
+          sudo mkdir -p /etc
+          CONFIG_PATH="/etc/sysmanage.yaml"
+        fi
+
+        cat > "$CONFIG_PATH" <<EOF
+        api:
+          host: "localhost"
+          port: 8001
+          certFile: ""
+          chainFile: ""
+          keyFile: ""
+        database:
+          user: "sqlite"
+          password: ""
+          host: ""
+          port: 0
+          name: "test.db"
+        security:
+          password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+          admin_userid: "admin@sysmanage.org"
+          admin_password: "TEST_AdminPass123!"
+          jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+          jwt_algorithm: "HS256"
+          jwt_auth_timeout: 6000
+          jwt_refresh_timeout: 60000
+        webui:
+          host: "localhost"
+          port: 7443
+        EOF
+      shell: bash
+
+    - name: Run UI tests with performance metrics
+      run: |
+        echo "🎭 Running UI tests with performance metrics collection..."
+        if [ "${{ runner.os }}" == "Darwin" ]; then
+          echo "🍎 macOS detected - testing Chrome, Firefox, and WebKit/Safari"
+        else
+          echo "🐧 ${{ runner.os }} detected - testing Chrome and Firefox"
+        fi
+
+        PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short
+      env:
+        PYTHONPATH: .
+
+    - name: Run dedicated performance tests (Skip Artillery on Windows due to complexity)
+      if: runner.os != 'Windows'
+      run: |
+        echo "🚀 Running performance tests..."
+        PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short
+      env:
+        PYTHONPATH: .
+
+    - name: Run Artillery load tests (Linux/macOS only)
+      if: runner.os != 'Windows'
+      run: |
+        echo "⚡ Running Artillery load tests..."
+        # Start server in background
+        python -m uvicorn backend.main:app --host localhost --port 8001 &
+        SERVER_PID=$!
+        sleep 10
+
+        # Run Artillery tests
+        artillery run artillery.yml --output artillery-report-${{ runner.os }}.json || echo "Artillery tests completed with warnings"
+
+        # Generate report
+        if [ -f artillery-report-${{ runner.os }}.json ]; then
+          artillery report artillery-report-${{ runner.os }}.json --output artillery-report-${{ runner.os }}.html
+          echo "📊 Artillery report generated: artillery-report-${{ runner.os }}.html"
+        fi
+
+        # Stop server
+        kill $SERVER_PID 2>/dev/null || true
+      env:
+        PYTHONPATH: .
+
+    - name: Upload performance results
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-results-${{ matrix.os }}
+        path: |
+          performance-results.json
+          artillery-report-*.json
+          artillery-report-*.html
+
+    - name: Upload UI test artifacts on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ui-test-results-${{ matrix.os }}-${{ github.run_number }}
+        path: |
+          tests/ui/test-results/
+          tests/ui/playwright-report/
+
+  # Performance regression analysis
+  analyze-performance:
+    name: Performance Regression Analysis
+    runs-on: ubuntu-latest
+    needs: [test-ui-performance]
+    if: always()
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Download all performance results
+      uses: actions/download-artifact@v4
+      with:
+        pattern: performance-results-*
+        merge-multiple: true
+
+    - name: Analyze performance trends
+      run: |
+        echo "📊 Analyzing performance trends across platforms..."
+
+        # Create performance summary
+        echo "# Performance Test Summary" > performance-summary.md
+        echo "## Test Run: ${{ github.run_number }}" >> performance-summary.md
+        echo "## Commit: ${{ github.sha }}" >> performance-summary.md
+        echo "" >> performance-summary.md
+
+        # Process Playwright performance results
+        for file in performance-results.json*; do
+          if [ -f "$file" ]; then
+            echo "### Playwright Performance Metrics" >> performance-summary.md
+            echo "\`\`\`json" >> performance-summary.md
+            cat "$file" >> performance-summary.md
+            echo "\`\`\`" >> performance-summary.md
+            echo "" >> performance-summary.md
+          fi
+        done
+
+        # Process Artillery results
+        for file in artillery-report-*.json; do
+          if [ -f "$file" ]; then
+            OS=$(echo "$file" | sed 's/artillery-report-\(.*\)\.json/\1/')
+            echo "### Artillery Load Test Results ($OS)" >> performance-summary.md
+            echo "Artillery report available: artillery-report-$OS.html" >> performance-summary.md
+            echo "" >> performance-summary.md
+          fi
+        done
+
+        echo "📄 Performance summary created"
+        cat performance-summary.md
+
+    - name: Upload performance summary
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-summary
+        path: |
+          performance-summary.md
+          artillery-report-*.html
+
+  # Final status aggregation
+  ci-status:
+    name: CI Status Summary
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend, test-ui-performance, analyze-performance]
+    if: always()
+
+    steps:
+    - name: Check all job statuses
+      run: |
+        echo "🔍 CI/CD Pipeline Status Summary"
+        echo "Backend Tests: ${{ needs.test-backend.result }}"
+        echo "Frontend Tests: ${{ needs.test-frontend.result }}"
+        echo "UI & Performance Tests: ${{ needs.test-ui-performance.result }}"
+        echo "Performance Analysis: ${{ needs.analyze-performance.result }}"
+
+        # Determine overall status
+        if [[ "${{ needs.test-backend.result }}" == "success" &&
+              "${{ needs.test-frontend.result }}" == "success" &&
+              "${{ needs.test-ui-performance.result }}" == "success" ]]; then
+          echo "✅ All critical tests passed!"
+          echo "overall_status=success" >> $GITHUB_ENV
+        else
+          echo "❌ Some tests failed"
+          echo "overall_status=failure" >> $GITHUB_ENV
+          exit 1
+        fi

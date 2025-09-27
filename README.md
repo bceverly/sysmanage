@@ -15,6 +15,8 @@
 [![Backend Test Coverage](https://img.shields.io/badge/backend%20test%20coverage-64%25-yellow.svg)]()
 [![Frontend Test Coverage](https://img.shields.io/badge/frontend%20test%20coverage-13%25-red.svg)]()
 [![UI Tests](https://img.shields.io/badge/ui%20tests-passing-brightgreen.svg)]()
+[![Performance Tests](https://img.shields.io/badge/performance%20tests-multi--OS-blue.svg)]()
+[![Artillery Load Tests](https://img.shields.io/badge/artillery-load%20testing-orange.svg)]()
 
 A modern, cross-platform system monitoring and management platform with real-time WebSocket communication, built with FastAPI and React.
 
@@ -57,7 +59,7 @@ SysManage is a comprehensive system management solution that allows you to monit
 ## Prerequisites
 
 - **Python**: 3.11 or 3.12 (Python 3.13 not yet supported)
-- **Node.js**: 20.x or higher
+- **Node.js**: 20.x or higher (22.13+ recommended for Artillery performance testing)
 - **PostgreSQL**: 14 or higher
 - **OS**: Linux, macOS, Windows, FreeBSD, or OpenBSD
 
@@ -235,13 +237,39 @@ This project uses a **dual conftest architecture** for optimal test performance 
 ### Running Tests
 
 ```bash
-# Run all tests (target: 99.8% pass rate)
+# Run all tests (backend + frontend + UI + performance)
 make test
 
 # Run specific test suites
+make test-python           # Backend tests only
+make test-typescript       # Frontend tests only
+make test-playwright        # UI tests only
+make test-performance       # Performance tests (Artillery + Playwright + regression analysis)
+
+# Individual test files
 python -m pytest tests/api/test_packages.py -v
 python -m pytest tests/api/ -q --tb=no
 ```
+
+#### 🚀 Performance Testing
+
+SysManage includes comprehensive performance testing with multi-OS support:
+
+- **Artillery Load Testing** - API response times, throughput, error rates
+- **Playwright Performance** - UI metrics, Core Web Vitals, cross-browser testing
+- **Regression Detection** - Statistical analysis with tolerance bands (±15%)
+- **Multi-Platform** - Linux, macOS, Windows (FreeBSD supported, OpenBSD partial)
+
+```bash
+# Run performance tests locally
+make test-performance
+
+# Performance requirements
+npm install -g artillery@latest  # For load testing
+playwright install               # For browser automation
+```
+
+**📊 For detailed performance testing documentation, see [PERFORMANCE_TESTING.md](PERFORMANCE_TESTING.md)**
 
 ### ⚠️ Adding New Database Models
 

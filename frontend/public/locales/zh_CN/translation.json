@@ -963,5 +963,130 @@
     "unsealing": "解封中...",
     "sealError": "封印 OpenBAO 失败",
     "unsealError": "解封 OpenBAO 失败"
+  },
+  "ui_testing": {
+    "title": "UI 测试文档",
+    "overview": {
+      "title": "测试框架概述",
+      "description": "使用现代跨平台测试框架的综合 UI 测试设置",
+      "frameworks": "测试框架",
+      "platforms": "跨平台支持",
+      "automation": "自动化与 CI/CD"
+    },
+    "playwright": {
+      "title": "Playwright 测试",
+      "description": "具有可靠自动等待功能的现代跨平台测试框架",
+      "features": {
+        "crossBrowser": "跨浏览器测试",
+        "autoWait": "元素自动等待",
+        "screenshots": "截图测试",
+        "video": "视频录制",
+        "tracing": "测试跟踪",
+        "parallel": "并行执行"
+      },
+      "browsers": {
+        "chromium": "Chromium",
+        "firefox": "Firefox",
+        "webkit": "WebKit",
+        "safari": "Safari",
+        "edge": "Microsoft Edge"
+      },
+      "commands": {
+        "install": "安装 Playwright",
+        "test": "运行测试",
+        "debug": "调试测试",
+        "codegen": "代码生成",
+        "report": "测试报告",
+        "trace": "查看跟踪"
+      }
+    },
+    "selenium": {
+      "title": "Selenium 测试",
+      "description": "用于传统浏览器支持的行业标准 WebDriver 自动化",
+      "features": {
+        "webdriver": "WebDriver 协议",
+        "gridSupport": "Selenium Grid 支持",
+        "multiLanguage": "多语言支持",
+        "crossPlatform": "跨平台测试",
+        "remoteExecution": "远程执行",
+        "mobileTesting": "移动测试"
+      },
+      "drivers": {
+        "chrome": "ChromeDriver",
+        "firefox": "GeckoDriver",
+        "safari": "SafariDriver",
+        "edge": "EdgeDriver",
+        "ie": "IEDriver"
+      }
+    },
+    "testTypes": {
+      "title": "测试类型",
+      "unit": "单元测试",
+      "integration": "集成测试",
+      "e2e": "端到端测试",
+      "visual": "视觉回归测试",
+      "accessibility": "无障碍测试",
+      "performance": "性能测试",
+      "api": "API 测试",
+      "mobile": "移动测试"
+    },
+    "cicd": {
+      "title": "CI/CD 集成",
+      "description": "持续集成和部署测试工作流程",
+      "platforms": {
+        "githubActions": "GitHub Actions",
+        "jenkins": "Jenkins",
+        "azure": "Azure DevOps",
+        "gitlab": "GitLab CI",
+        "circleci": "CircleCI",
+        "travis": "Travis CI"
+      },
+      "features": {
+        "parallelJobs": "并行作业执行",
+        "testReports": "测试报告生成",
+        "artifactStorage": "测试工件存储",
+        "notificationIntegration": "通知集成",
+        "environmentManagement": "环境管理"
+      }
+    },
+    "configuration": {
+      "title": "测试配置",
+      "configFiles": "配置文件",
+      "environment": "环境设置",
+      "testData": "测试数据管理",
+      "pageObjects": "页面对象模式",
+      "utilities": "测试工具",
+      "reporting": "测试报告"
+    },
+    "bestPractices": {
+      "title": "测试最佳实践",
+      "maintainability": "测试可维护性",
+      "reliability": "测试可靠性",
+      "performance": "测试性能",
+      "debugging": "调试策略",
+      "documentation": "测试文档",
+      "codeReview": "测试代码审查"
+    },
+    "tools": {
+      "title": "测试工具与实用程序",
+      "testRunners": "测试运行器",
+      "assertionLibraries": "断言库",
+      "mockingFrameworks": "模拟框架",
+      "dataGenerators": "测试数据生成器",
+      "visualTools": "视觉测试工具",
+      "accessibilityTools": "无障碍测试工具"
+    },
+    "makefile": {
+      "title": "Makefile 命令",
+      "description": "通过 Makefile 可用的常用测试命令",
+      "commands": {
+        "test": "make test",
+        "testWatch": "make test-watch",
+        "testCoverage": "make test-coverage",
+        "testE2e": "make test-e2e",
+        "testVisual": "make test-visual",
+        "testAccessibility": "make test-a11y"
+      }
+    }
   }
 }

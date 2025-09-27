@@ -965,5 +965,130 @@
     "unsealing": "シール解除中...",
     "sealError": "OpenBAOのシールに失敗しました",
     "unsealError": "OpenBAOのシール解除に失敗しました"
+  },
+  "ui_testing": {
+    "title": "UIテストドキュメント",
+    "overview": {
+      "title": "テストフレームワーク概要",
+      "description": "モダンなクロスプラットフォームテストフレームワークを使用した包括的なUIテストセットアップ",
+      "frameworks": "テストフレームワーク",
+      "platforms": "クロスプラットフォームサポート",
+      "automation": "自動化とCI/CD"
+    },
+    "playwright": {
+      "title": "Playwrightテスト",
+      "description": "信頼性の高い自動待機機能を備えたモダンなクロスプラットフォームテストフレームワーク",
+      "features": {
+        "crossBrowser": "クロスブラウザテスト",
+        "autoWait": "要素の自動待機",
+        "screenshots": "スクリーンショットテスト",
+        "video": "ビデオ録画",
+        "tracing": "テストトレース",
+        "parallel": "並列実行"
+      },
+      "browsers": {
+        "chromium": "Chromium",
+        "firefox": "Firefox",
+        "webkit": "WebKit",
+        "safari": "Safari",
+        "edge": "Microsoft Edge"
+      },
+      "commands": {
+        "install": "Playwrightをインストール",
+        "test": "テストを実行",
+        "debug": "テストをデバッグ",
+        "codegen": "コード生成",
+        "report": "テストレポート",
+        "trace": "トレースを表示"
+      }
+    },
+    "selenium": {
+      "title": "Seleniumテスト",
+      "description": "レガシーブラウザサポート用の業界標準WebDriver自動化",
+      "features": {
+        "webdriver": "WebDriverプロトコル",
+        "gridSupport": "Selenium Gridサポート",
+        "multiLanguage": "多言語サポート",
+        "crossPlatform": "クロスプラットフォームテスト",
+        "remoteExecution": "リモート実行",
+        "mobileTesting": "モバイルテスト"
+      },
+      "drivers": {
+        "chrome": "ChromeDriver",
+        "firefox": "GeckoDriver",
+        "safari": "SafariDriver",
+        "edge": "EdgeDriver",
+        "ie": "IEDriver"
+      }
+    },
+    "testTypes": {
+      "title": "テストタイプ",
+      "unit": "ユニットテスト",
+      "integration": "統合テスト",
+      "e2e": "エンドツーエンドテスト",
+      "visual": "ビジュアル回帰テスト",
+      "accessibility": "アクセシビリティテスト",
+      "performance": "パフォーマンステスト",
+      "api": "APIテスト",
+      "mobile": "モバイルテスト"
+    },
+    "cicd": {
+      "title": "CI/CD統合",
+      "description": "継続的統合とデプロイメントテストワークフロー",
+      "platforms": {
+        "githubActions": "GitHub Actions",
+        "jenkins": "Jenkins",
+        "azure": "Azure DevOps",
+        "gitlab": "GitLab CI",
+        "circleci": "CircleCI",
+        "travis": "Travis CI"
+      },
+      "features": {
+        "parallelJobs": "並列ジョブ実行",
+        "testReports": "テストレポート生成",
+        "artifactStorage": "テストアーティファクト保存",
+        "notificationIntegration": "通知統合",
+        "environmentManagement": "環境管理"
+      }
+    },
+    "configuration": {
+      "title": "テスト設定",
+      "configFiles": "設定ファイル",
+      "environment": "環境セットアップ",
+      "testData": "テストデータ管理",
+      "pageObjects": "ページオブジェクトパターン",
+      "utilities": "テストユーティリティ",
+      "reporting": "テストレポート"
+    },
+    "bestPractices": {
+      "title": "テストベストプラクティス",
+      "maintainability": "テスト保守性",
+      "reliability": "テスト信頼性",
+      "performance": "テストパフォーマンス",
+      "debugging": "デバッグ戦略",
+      "documentation": "テストドキュメント",
+      "codeReview": "テストコードレビュー"
+    },
+    "tools": {
+      "title": "テストツールとユーティリティ",
+      "testRunners": "テストランナー",
+      "assertionLibraries": "アサーションライブラリ",
+      "mockingFrameworks": "モックフレームワーク",
+      "dataGenerators": "テストデータジェネレーター",
+      "visualTools": "ビジュアルテストツール",
+      "accessibilityTools": "アクセシビリティテストツール"
+    },
+    "makefile": {
+      "title": "Makefileコマンド",
+      "description": "Makefileを通じて利用可能な一般的なテストコマンド",
+      "commands": {
+        "test": "make test",
+        "testWatch": "make test-watch",
+        "testCoverage": "make test-coverage",
+        "testE2e": "make test-e2e",
+        "testVisual": "make test-visual",
+        "testAccessibility": "make test-a11y"
+      }
+    }
   }
 }

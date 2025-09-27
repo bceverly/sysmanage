@@ -961,5 +961,130 @@
     "unsealing": "解封中...",
     "sealError": "封印 OpenBAO 失敗",
     "unsealError": "解封 OpenBAO 失敗"
+  },
+  "ui_testing": {
+    "title": "UI 測試文檔",
+    "overview": {
+      "title": "測試框架概述",
+      "description": "使用現代跨平台測試框架的綜合 UI 測試設置",
+      "frameworks": "測試框架",
+      "platforms": "跨平台支持",
+      "automation": "自動化與 CI/CD"
+    },
+    "playwright": {
+      "title": "Playwright 測試",
+      "description": "具有可靠自動等待功能的現代跨平台測試框架",
+      "features": {
+        "crossBrowser": "跨瀏覽器測試",
+        "autoWait": "元素自動等待",
+        "screenshots": "截圖測試",
+        "video": "視頻錄製",
+        "tracing": "測試跟蹤",
+        "parallel": "並行執行"
+      },
+      "browsers": {
+        "chromium": "Chromium",
+        "firefox": "Firefox",
+        "webkit": "WebKit",
+        "safari": "Safari",
+        "edge": "Microsoft Edge"
+      },
+      "commands": {
+        "install": "安裝 Playwright",
+        "test": "運行測試",
+        "debug": "調試測試",
+        "codegen": "代碼生成",
+        "report": "測試報告",
+        "trace": "查看跟蹤"
+      }
+    },
+    "selenium": {
+      "title": "Selenium 測試",
+      "description": "用於傳統瀏覽器支持的行業標準 WebDriver 自動化",
+      "features": {
+        "webdriver": "WebDriver 協議",
+        "gridSupport": "Selenium Grid 支持",
+        "multiLanguage": "多語言支持",
+        "crossPlatform": "跨平台測試",
+        "remoteExecution": "遠程執行",
+        "mobileTesting": "移動測試"
+      },
+      "drivers": {
+        "chrome": "ChromeDriver",
+        "firefox": "GeckoDriver",
+        "safari": "SafariDriver",
+        "edge": "EdgeDriver",
+        "ie": "IEDriver"
+      }
+    },
+    "testTypes": {
+      "title": "測試類型",
+      "unit": "單元測試",
+      "integration": "集成測試",
+      "e2e": "端到端測試",
+      "visual": "視覺回歸測試",
+      "accessibility": "無障礙測試",
+      "performance": "性能測試",
+      "api": "API 測試",
+      "mobile": "移動測試"
+    },
+    "cicd": {
+      "title": "CI/CD 集成",
+      "description": "持續集成和部署測試工作流程",
+      "platforms": {
+        "githubActions": "GitHub Actions",
+        "jenkins": "Jenkins",
+        "azure": "Azure DevOps",
+        "gitlab": "GitLab CI",
+        "circleci": "CircleCI",
+        "travis": "Travis CI"
+      },
+      "features": {
+        "parallelJobs": "並行作業執行",
+        "testReports": "測試報告生成",
+        "artifactStorage": "測試工件存儲",
+        "notificationIntegration": "通知集成",
+        "environmentManagement": "環境管理"
+      }
+    },
+    "configuration": {
+      "title": "測試配置",
+      "configFiles": "配置文件",
+      "environment": "環境設置",
+      "testData": "測試數據管理",
+      "pageObjects": "頁面對象模式",
+      "utilities": "測試工具",
+      "reporting": "測試報告"
+    },
+    "bestPractices": {
+      "title": "測試最佳實踐",
+      "maintainability": "測試可維護性",
+      "reliability": "測試可靠性",
+      "performance": "測試性能",
+      "debugging": "調試策略",
+      "documentation": "測試文檔",
+      "codeReview": "測試代碼審查"
+    },
+    "tools": {
+      "title": "測試工具與實用程序",
+      "testRunners": "測試運行器",
+      "assertionLibraries": "斷言庫",
+      "mockingFrameworks": "模擬框架",
+      "dataGenerators": "測試數據生成器",
+      "visualTools": "視覺測試工具",
+      "accessibilityTools": "無障礙測試工具"
+    },
+    "makefile": {
+      "title": "Makefile 命令",
+      "description": "通過 Makefile 可用的常用測試命令",
+      "commands": {
+        "test": "make test",
+        "testWatch": "make test-watch",
+        "testCoverage": "make test-coverage",
+        "testE2e": "make test-e2e",
+        "testVisual": "make test-visual",
+        "testAccessibility": "make test-a11y"
+      }
+    }
   }
 }

@@ -16,6 +16,7 @@ Sync checklist:
 
 import time
 import re
+import json
 import pytest
 from playwright.async_api import Page, expect
 import platform
@@ -24,6 +25,51 @@ import platform
 browsers = ["chromium", "firefox"]
 if platform.system() == "Darwin":
     browsers.append("webkit")
+
+
+async def collect_performance_metrics(page: Page, browser_name: str):
+    """Collect performance metrics from the page"""
+    try:
+        metrics = await page.evaluate(
+            """
+            () => {
+                const navigation = performance.getEntriesByType('navigation')[0];
+                const paintEntries = performance.getEntriesByType('paint');
+
+                return {
+                    // Page load metrics
+                    domContentLoaded: navigation ? navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart : 0,
+                    loadComplete: navigation ? navigation.loadEventEnd - navigation.loadEventStart : 0,
+                    firstByte: navigation ? navigation.responseStart - navigation.requestStart : 0,
+
+                    // Paint metrics
+                    firstPaint: paintEntries.find(entry => entry.name === 'first-paint')?.startTime || 0,
+                    firstContentfulPaint: paintEntries.find(entry => entry.name === 'first-contentful-paint')?.startTime || 0,
+
+                    // Resource metrics
+                    resourceCount: performance.getEntriesByType('resource').length,
+
+                    // Memory (if available)
+                    memoryUsed: performance.memory ? performance.memory.usedJSHeapSize : null
+                };
+            }
+        """
+        )
+
+        # Log metrics for this browser
+        print(f"📊 {browser_name} Performance Metrics:")
+        print(f"   DOM Content Loaded: {metrics['domContentLoaded']:.0f}ms")
+        print(f"   First Contentful Paint: {metrics['firstContentfulPaint']:.0f}ms")
+        print(f"   Resources loaded: {metrics['resourceCount']}")
+
+        if metrics["memoryUsed"]:
+            memory_mb = metrics["memoryUsed"] / (1024 * 1024)
+            print(f"   Memory usage: {memory_mb:.1f}MB")
+
+        return metrics
+    except Exception as e:
+        print(f"⚠️ Failed to collect performance metrics for {browser_name}: {e}")
+        return None
 
 
 @pytest.mark.parametrize("browser_context", browsers, indirect=True)
@@ -41,6 +87,9 @@ async def test_login_cross_browser(
 
         # Wait for page to load
         await page.wait_for_load_state("networkidle")
+
+        # Collect performance metrics for this browser
+        await collect_performance_metrics(page, browser_name)
 
         # Verify we're on the login page
         await expect(page).to_have_title(re.compile(".*SysManage.*"))

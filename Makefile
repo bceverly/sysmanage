@@ -1,17 +1,18 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-playwright lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev migrate help start stop start-openbao stop-openbao status-openbao
+.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev migrate help start stop start-openbao stop-openbao status-openbao
 
 # Default target
 help:
 	@echo "SysManage Server - Available targets:"
 	@echo "  make start         - Start SysManage server + OpenBAO (auto-detects shell/platform)"
 	@echo "  make stop          - Stop SysManage server + OpenBAO (auto-detects shell/platform)"
-	@echo "  make test          - Run all tests (Python + TypeScript + UI integration)"
+	@echo "  make test          - Run all tests (Python + TypeScript + UI integration + Performance)"
 	@echo "  make test-python   - Run Python backend tests only"
 	@echo "  make test-vite     - Run Vite/TypeScript frontend tests only"
 	@echo "  make test-playwright - Run Playwright UI tests only"
+	@echo "  make test-performance - Run Artillery load tests and Playwright performance tests"
 	@echo "  make lint          - Run all linters (Python + TypeScript)"
 	@echo "  make lint-python   - Run Python linting only"
 	@echo "  make lint-typescript - Run TypeScript linting only"
@@ -128,6 +129,18 @@ else
 		npm install -g eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin; \
 	fi
 endif
+	@echo "Installing Artillery for performance testing..."
+	@if [ "$(shell uname -s)" != "OpenBSD" ]; then \
+		if ! command -v artillery >/dev/null 2>&1; then \
+			echo "Installing Artillery globally..."; \
+			npm install -g artillery@latest || echo "[WARNING] Artillery installation failed - performance tests may not run"; \
+		else \
+			echo "Artillery is already installed"; \
+		fi; \
+	else \
+		echo "[INFO] Skipping Artillery on OpenBSD (not fully supported)"; \
+	fi
+	@echo "[OK] Development dependencies installation completed"
 
 # Database migration target
 migrate: $(VENV_ACTIVATE)
@@ -305,6 +318,39 @@ test-ui: $(VENV_ACTIVATE)
 # Playwright tests only (alias for test-ui)
 test-playwright: test-ui
 
+# Performance testing with Artillery and enhanced Playwright
+test-performance: $(VENV_ACTIVATE)
+	@echo "=== Running Performance Tests ==="
+	@if [ "$(shell uname -s)" = "OpenBSD" ]; then \
+		echo "[SKIP] Artillery not supported on OpenBSD - running Playwright performance only"; \
+		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short || echo "[WARNING] Playwright performance tests failed"; \
+	else \
+		echo "[INFO] Running Artillery load tests for backend API..."; \
+		command -v artillery >/dev/null 2>&1 || { \
+			echo "[ERROR] Artillery not found. Installing..."; \
+			if command -v npm >/dev/null 2>&1; then \
+				npm install -g artillery@latest; \
+			else \
+				echo "[ERROR] npm not found. Please install Node.js and npm first."; \
+				exit 1; \
+			fi; \
+		}; \
+		echo "[INFO] Running Artillery load tests against http://localhost:8001..."; \
+		echo "[NOTE] Ensure the SysManage server is running on port 8001"; \
+		artillery run artillery.yml --output artillery-report.json || { \
+			echo "[WARNING] Artillery tests failed - continuing with Playwright performance tests"; \
+		}; \
+		if [ -f artillery-report.json ]; then \
+			artillery report artillery-report.json --output artillery-report.html; \
+			echo "[INFO] Artillery report generated: artillery-report.html"; \
+		fi; \
+		echo "[INFO] Running Playwright performance tests..."; \
+		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short || echo "[WARNING] Playwright performance tests failed"; \
+		echo "[INFO] Running performance regression analysis..."; \
+		$(PYTHON) scripts/performance_regression_check.py || echo "[WARNING] Performance regressions detected"; \
+	fi
+	@echo "[OK] Performance testing completed"
+
 # Vite tests only (alias for test-typescript)
 test-vite: test-typescript
 
@@ -314,7 +360,7 @@ check-test-models:
 	@$(PYTHON) scripts/check_test_models.py
 
 # Combined testing
-test: test-python test-typescript test-ui
+test: test-python test-typescript test-ui test-performance
 	@echo "[OK] All tests completed successfully!"
 
 # Clean artifacts

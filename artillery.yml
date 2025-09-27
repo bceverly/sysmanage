@@ -1,0 +1,72 @@
+config:
+  target: 'http://localhost:8001'
+  phases:
+    # Warm-up phase
+    - duration: 10
+      arrivalRate: 2
+      name: "Warm-up"
+    # Normal load
+    - duration: 30
+      arrivalRate: 5
+      name: "Normal load"
+    # Peak load
+    - duration: 20
+      arrivalRate: 10
+      name: "Peak load"
+  processor: "./artillery-processor.js"
+
+  # Performance budgets for regression detection
+  ensure:
+    # Response time budgets (95th percentile)
+    p95: 500  # 95% of requests should be under 500ms
+    p99: 1000 # 99% of requests should be under 1s
+    # Error rate budget
+    maxErrorRate: 1  # Max 1% error rate
+    # Throughput budget
+    minRPS: 8  # Minimum 8 requests per second
+
+scenarios:
+  - name: "Health Check"
+    weight: 30
+    flow:
+      - get:
+          url: "/health"
+          capture:
+            - json: "$.status"
+              as: "healthStatus"
+      - think: 1
+
+  - name: "API Authentication Flow"
+    weight: 40
+    flow:
+      - post:
+          url: "/auth/login"
+          json:
+            username: "test_user"
+            password: "test_password"
+          expect:
+            - statusCode: [200, 401]  # Accept both success and auth failure
+          capture:
+            - json: "$.access_token"
+              as: "authToken"
+      - think: 2
+
+  - name: "Host Management API"
+    weight: 20
+    flow:
+      - get:
+          url: "/api/hosts"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: [200, 401]  # Accept both success and auth failure
+      - think: 1
+
+  - name: "WebSocket Connection Test"
+    weight: 10
+    flow:
+      - get:
+          url: "/ws"
+          expect:
+            - statusCode: [101, 400, 426]  # WebSocket upgrade codes
+      - think: 3

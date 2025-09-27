@@ -962,5 +962,130 @@
     "unsealing": "봉인 해제 중...",
     "sealError": "OpenBAO 봉인에 실패했습니다",
     "unsealError": "OpenBAO 봉인 해제에 실패했습니다"
+  },
+  "ui_testing": {
+    "title": "UI 테스트 문서",
+    "overview": {
+      "title": "테스트 프레임워크 개요",
+      "description": "현대적인 크로스 플랫폼 테스트 프레임워크를 사용한 포괄적인 UI 테스트 설정",
+      "frameworks": "테스트 프레임워크",
+      "platforms": "크로스 플랫폼 지원",
+      "automation": "자동화 및 CI/CD"
+    },
+    "playwright": {
+      "title": "Playwright 테스트",
+      "description": "신뢰할 수 있는 자동 대기 기능을 갖춘 현대적인 크로스 플랫폼 테스트 프레임워크",
+      "features": {
+        "crossBrowser": "크로스 브라우저 테스트",
+        "autoWait": "요소 자동 대기",
+        "screenshots": "스크린샷 테스트",
+        "video": "비디오 녹화",
+        "tracing": "테스트 추적",
+        "parallel": "병렬 실행"
+      },
+      "browsers": {
+        "chromium": "Chromium",
+        "firefox": "Firefox",
+        "webkit": "WebKit",
+        "safari": "Safari",
+        "edge": "Microsoft Edge"
+      },
+      "commands": {
+        "install": "Playwright 설치",
+        "test": "테스트 실행",
+        "debug": "테스트 디버그",
+        "codegen": "코드 생성",
+        "report": "테스트 보고서",
+        "trace": "추적 보기"
+      }
+    },
+    "selenium": {
+      "title": "Selenium 테스트",
+      "description": "레거시 브라우저 지원을 위한 업계 표준 WebDriver 자동화",
+      "features": {
+        "webdriver": "WebDriver 프로토콜",
+        "gridSupport": "Selenium Grid 지원",
+        "multiLanguage": "다국어 지원",
+        "crossPlatform": "크로스 플랫폼 테스트",
+        "remoteExecution": "원격 실행",
+        "mobileTesting": "모바일 테스트"
+      },
+      "drivers": {
+        "chrome": "ChromeDriver",
+        "firefox": "GeckoDriver",
+        "safari": "SafariDriver",
+        "edge": "EdgeDriver",
+        "ie": "IEDriver"
+      }
+    },
+    "testTypes": {
+      "title": "테스트 유형",
+      "unit": "단위 테스트",
+      "integration": "통합 테스트",
+      "e2e": "엔드투엔드 테스트",
+      "visual": "시각적 회귀 테스트",
+      "accessibility": "접근성 테스트",
+      "performance": "성능 테스트",
+      "api": "API 테스트",
+      "mobile": "모바일 테스트"
+    },
+    "cicd": {
+      "title": "CI/CD 통합",
+      "description": "지속적 통합 및 배포 테스트 워크플로우",
+      "platforms": {
+        "githubActions": "GitHub Actions",
+        "jenkins": "Jenkins",
+        "azure": "Azure DevOps",
+        "gitlab": "GitLab CI",
+        "circleci": "CircleCI",
+        "travis": "Travis CI"
+      },
+      "features": {
+        "parallelJobs": "병렬 작업 실행",
+        "testReports": "테스트 보고서 생성",
+        "artifactStorage": "테스트 아티팩트 저장",
+        "notificationIntegration": "알림 통합",
+        "environmentManagement": "환경 관리"
+      }
+    },
+    "configuration": {
+      "title": "테스트 구성",
+      "configFiles": "구성 파일",
+      "environment": "환경 설정",
+      "testData": "테스트 데이터 관리",
+      "pageObjects": "페이지 객체 패턴",
+      "utilities": "테스트 유틸리티",
+      "reporting": "테스트 보고"
+    },
+    "bestPractices": {
+      "title": "테스트 모범 사례",
+      "maintainability": "테스트 유지보수성",
+      "reliability": "테스트 신뢰성",
+      "performance": "테스트 성능",
+      "debugging": "디버깅 전략",
+      "documentation": "테스트 문서",
+      "codeReview": "테스트 코드 리뷰"
+    },
+    "tools": {
+      "title": "테스트 도구 및 유틸리티",
+      "testRunners": "테스트 러너",
+      "assertionLibraries": "어설션 라이브러리",
+      "mockingFrameworks": "모킹 프레임워크",
+      "dataGenerators": "테스트 데이터 생성기",
+      "visualTools": "시각적 테스트 도구",
+      "accessibilityTools": "접근성 테스트 도구"
+    },
+    "makefile": {
+      "title": "Makefile 명령",
+      "description": "Makefile을 통해 사용 가능한 일반적인 테스트 명령",
+      "commands": {
+        "test": "make test",
+        "testWatch": "make test-watch",
+        "testCoverage": "make test-coverage",
+        "testE2e": "make test-e2e",
+        "testVisual": "make test-visual",
+        "testAccessibility": "make test-a11y"
+      }
+    }
   }
 }

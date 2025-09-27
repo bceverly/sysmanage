@@ -1013,5 +1013,130 @@
     "unsealing": "Unsealing...",
     "sealError": "Failed to seal OpenBAO",
     "unsealError": "Failed to unseal OpenBAO"
+  },
+  "ui_testing": {
+    "title": "UI Testing Documentation",
+    "overview": {
+      "title": "Testing Framework Overview",
+      "description": "Comprehensive UI testing setup using modern cross-platform testing frameworks",
+      "frameworks": "Testing Frameworks",
+      "platforms": "Cross-Platform Support",
+      "automation": "Automation & CI/CD"
+    },
+    "playwright": {
+      "title": "Playwright Testing",
+      "description": "Modern cross-platform testing framework with reliable auto-wait capabilities",
+      "features": {
+        "crossBrowser": "Cross-Browser Testing",
+        "autoWait": "Auto-wait for Elements",
+        "screenshots": "Screenshot Testing",
+        "video": "Video Recording",
+        "tracing": "Test Tracing",
+        "parallel": "Parallel Execution"
+      },
+      "browsers": {
+        "chromium": "Chromium",
+        "firefox": "Firefox",
+        "webkit": "WebKit",
+        "safari": "Safari",
+        "edge": "Microsoft Edge"
+      },
+      "commands": {
+        "install": "Install Playwright",
+        "test": "Run Tests",
+        "debug": "Debug Tests",
+        "codegen": "Code Generation",
+        "report": "Test Report",
+        "trace": "View Trace"
+      }
+    },
+    "selenium": {
+      "title": "Selenium Testing",
+      "description": "Industry-standard WebDriver automation for legacy browser support",
+      "features": {
+        "webdriver": "WebDriver Protocol",
+        "gridSupport": "Selenium Grid Support",
+        "multiLanguage": "Multi-Language Support",
+        "crossPlatform": "Cross-Platform Testing",
+        "remoteExecution": "Remote Execution",
+        "mobileTesting": "Mobile Testing"
+      },
+      "drivers": {
+        "chrome": "ChromeDriver",
+        "firefox": "GeckoDriver",
+        "safari": "SafariDriver",
+        "edge": "EdgeDriver",
+        "ie": "IEDriver"
+      }
+    },
+    "testTypes": {
+      "title": "Test Types",
+      "unit": "Unit Tests",
+      "integration": "Integration Tests",
+      "e2e": "End-to-End Tests",
+      "visual": "Visual Regression Tests",
+      "accessibility": "Accessibility Tests",
+      "performance": "Performance Tests",
+      "api": "API Tests",
+      "mobile": "Mobile Tests"
+    },
+    "cicd": {
+      "title": "CI/CD Integration",
+      "description": "Continuous integration and deployment testing workflows",
+      "platforms": {
+        "githubActions": "GitHub Actions",
+        "jenkins": "Jenkins",
+        "azure": "Azure DevOps",
+        "gitlab": "GitLab CI",
+        "circleci": "CircleCI",
+        "travis": "Travis CI"
+      },
+      "features": {
+        "parallelJobs": "Parallel Job Execution",
+        "testReports": "Test Report Generation",
+        "artifactStorage": "Test Artifact Storage",
+        "notificationIntegration": "Notification Integration",
+        "environmentManagement": "Environment Management"
+      }
+    },
+    "configuration": {
+      "title": "Test Configuration",
+      "configFiles": "Configuration Files",
+      "environment": "Environment Setup",
+      "testData": "Test Data Management",
+      "pageObjects": "Page Object Pattern",
+      "utilities": "Test Utilities",
+      "reporting": "Test Reporting"
+    },
+    "bestPractices": {
+      "title": "Testing Best Practices",
+      "maintainability": "Test Maintainability",
+      "reliability": "Test Reliability",
+      "performance": "Test Performance",
+      "debugging": "Debugging Strategies",
+      "documentation": "Test Documentation",
+      "codeReview": "Test Code Review"
+    },
+    "tools": {
+      "title": "Testing Tools & Utilities",
+      "testRunners": "Test Runners",
+      "assertionLibraries": "Assertion Libraries",
+      "mockingFrameworks": "Mocking Frameworks",
+      "dataGenerators": "Test Data Generators",
+      "visualTools": "Visual Testing Tools",
+      "accessibilityTools": "Accessibility Testing Tools"
+    },
+    "makefile": {
+      "title": "Makefile Commands",
+      "description": "Common testing commands available through Makefile",
+      "commands": {
+        "test": "make test",
+        "testWatch": "make test-watch",
+        "testCoverage": "make test-coverage",
+        "testE2e": "make test-e2e",
+        "testVisual": "make test-visual",
+        "testAccessibility": "make test-a11y"
+      }
+    }
   }
 }

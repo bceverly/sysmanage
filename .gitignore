@@ -203,3 +203,11 @@ data/
 
 # Build directories
 .build/
+
+# Performance testing artifacts
+performance-history.json
+performance-results.json
+artillery-report.json
+artillery-report.html
+artillery-report-*.json
+artillery-report-*.html
