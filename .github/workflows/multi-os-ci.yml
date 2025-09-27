@@ -356,16 +356,10 @@ jobs:
 
     - name: Create test config
       run: |
-        # Platform-specific config creation
-        if [ "${{ runner.os }}" == "Windows" ]; then
-          mkdir -p "/c/ProgramData/sysmanage"
-          CONFIG_PATH="/c/ProgramData/sysmanage/sysmanage.yaml"
-        else
-          sudo mkdir -p /etc
-          CONFIG_PATH="/etc/sysmanage.yaml"
-        fi
+        echo "Creating test config for ${{ runner.os }}..."
 
-        cat > "$CONFIG_PATH" <<EOF
+        # Create config content first
+        cat > temp_config.yaml <<EOF
         api:
           host: "localhost"
           port: 8001
@@ -390,6 +384,22 @@ jobs:
           host: "localhost"
           port: 7443
         EOF
+
+        # Platform-specific config placement
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          echo "Setting up config for Windows..."
+          mkdir -p "/c/ProgramData/sysmanage"
+          cp temp_config.yaml "/c/ProgramData/sysmanage/sysmanage.yaml"
+        else
+          echo "Setting up config for Unix-like system (${{ runner.os }})..."
+          sudo mkdir -p /etc
+          sudo cp temp_config.yaml /etc/sysmanage.yaml
+        fi
+
+        # Cleanup
+        rm temp_config.yaml
+
+        echo "Config created successfully for ${{ runner.os }}"
       shell: bash
 
     - name: Run UI tests with performance metrics
@@ -402,6 +412,7 @@ jobs:
         fi
 
         PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short
+      shell: bash
       env:
         PYTHONPATH: .
 
@@ -410,6 +421,7 @@ jobs:
       run: |
         echo "🚀 Running performance tests..."
         PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short
+      shell: bash
       env:
         PYTHONPATH: .
 
@@ -433,6 +445,7 @@ jobs:
 
         # Stop server
         kill $SERVER_PID 2>/dev/null || true
+      shell: bash
       env:
         PYTHONPATH: .
 
@@ -503,6 +516,7 @@ jobs:
 
         echo "📄 Performance summary created"
         cat performance-summary.md
+      shell: bash
 
     - name: Upload performance summary
       uses: actions/upload-artifact@v4
@@ -539,3 +553,4 @@ jobs:
           echo "overall_status=failure" >> $GITHUB_ENV
           exit 1
         fi
+      shell: bash
