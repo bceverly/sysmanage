@@ -115,7 +115,7 @@ def start_server(ui_config):
         response = requests.get(f"{ui_config.api_url}/api/health", timeout=5)
         if response.status_code == 200:
             server_running = True
-            print(f"✓ Server already running at {ui_config.base_url}")
+            print(f"[OK] Server already running at {ui_config.base_url}")
     except Exception as e:
         print(f"Health check failed: {e}")
         # Also try just hitting the root endpoint
@@ -124,7 +124,7 @@ def start_server(ui_config):
             if response.status_code in [200, 404]:  # 404 might be OK if no root handler
                 server_running = True
                 print(
-                    f"✓ Server detected running at {ui_config.base_url} (via root endpoint)"
+                    f"[OK] Server detected running at {ui_config.base_url} (via root endpoint)"
                 )
         except:
             pass
@@ -142,7 +142,7 @@ def start_server(ui_config):
     yield True
 
     # Never stop the server - leave it running as requested
-    print("✓ UI tests completed - leaving server running")
+    print("[OK] UI tests completed - leaving server running")
 
 
 @pytest.fixture(scope="session")

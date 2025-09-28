@@ -57,7 +57,7 @@ async def collect_performance_metrics(page: Page, browser_name: str):
         )
 
         # Log metrics for this browser
-        print(f"📊 {browser_name} Performance Metrics:")
+        print(f"[INFO] {browser_name} Performance Metrics:")
         print(f"   DOM Content Loaded: {metrics['domContentLoaded']:.0f}ms")
         print(f"   First Contentful Paint: {metrics['firstContentfulPaint']:.0f}ms")
         print(f"   Resources loaded: {metrics['resourceCount']}")
@@ -68,7 +68,7 @@ async def collect_performance_metrics(page: Page, browser_name: str):
 
         return metrics
     except Exception as e:
-        print(f"⚠️ Failed to collect performance metrics for {browser_name}: {e}")
+        print(f"[WARNING] Failed to collect performance metrics for {browser_name}: {e}")
         return None
 
 
@@ -135,7 +135,7 @@ async def test_login_cross_browser(
             try:
                 await expect(nav_link).to_be_visible(timeout=5000)
                 found_nav_items += 1
-                print(f"  ✓ Found navigation item: {item}")
+                print(f"  [OK] Found navigation item: {item}")
             except:
                 print(f"  - Navigation item not found: {item}")
 
@@ -159,24 +159,24 @@ async def test_login_cross_browser(
 
         try:
             await expect(user_indicator).to_be_visible(timeout=10000)
-            print(f"  ✓ Found user indicator for {test_user['username']}")
+            print(f"  [OK] Found user indicator for {test_user['username']}")
         except:
             print(f"  - User indicator not found (may not be implemented yet)")
 
-        print(f"  ✓ Login successful on {browser_name}")
-        print(f"  ✓ Found {found_nav_items} navigation items")
-        print(f"  ✓ Current URL: {current_url}")
+        print(f"  [OK] Login successful on {browser_name}")
+        print(f"  [OK] Found {found_nav_items} navigation items")
+        print(f"  [OK] Current URL: {current_url}")
 
     except Exception as e:
         # Take screenshot on failure for debugging
         screenshot_path = (
-            f"/tmp/claude/login_failure_{browser_name}_{int(time.time())}.png"
+            f"tests/ui/test-results/login_failure_{browser_name}_{int(time.time())}.png"
         )
         await page.screenshot(path=screenshot_path)
-        print(f"  ✗ Login test failed on {browser_name}")
-        print(f"  ✗ Screenshot saved: {screenshot_path}")
-        print(f"  ✗ Current URL: {page.url}")
-        print(f"  ✗ Error: {str(e)}")
+        print(f"  [ERROR] Login test failed on {browser_name}")
+        print(f"  [ERROR] Screenshot saved: {screenshot_path}")
+        print(f"  [ERROR] Current URL: {page.url}")
+        print(f"  [ERROR] Error: {str(e)}")
         raise
 
 
@@ -226,7 +226,7 @@ async def test_invalid_login_chromium(page: Page, ui_config, start_server):
             error_element = page.locator(error_selector).first
             await expect(error_element).to_be_visible(timeout=2000)
             error_found = True
-            print("  ✓ Error message displayed for invalid login")
+            print("  [OK] Error message displayed for invalid login")
             break
         except:
             continue
@@ -234,7 +234,7 @@ async def test_invalid_login_chromium(page: Page, ui_config, start_server):
     if not error_found:
         print("  - No specific error message found (may not be implemented)")
 
-    print("  ✓ Invalid login correctly rejected (Chromium)")
+    print("  [OK] Invalid login correctly rejected (Chromium)")
 
 
 @pytest.mark.asyncio
@@ -283,7 +283,7 @@ async def test_invalid_login_firefox(page: Page, ui_config, start_server):
             error_element = page.locator(error_selector).first
             await expect(error_element).to_be_visible(timeout=2000)
             error_found = True
-            print("  ✓ Error message displayed for invalid login")
+            print("  [OK] Error message displayed for invalid login")
             break
         except:
             continue
@@ -291,7 +291,7 @@ async def test_invalid_login_firefox(page: Page, ui_config, start_server):
     if not error_found:
         print("  - No specific error message found (may not be implemented)")
 
-    print("  ✓ Invalid login correctly rejected (Firefox)")
+    print("  [OK] Invalid login correctly rejected (Firefox)")
 
 
 # Only define WebKit test on macOS to avoid "skipped" status on other platforms
@@ -343,7 +343,7 @@ if platform.system() == "Darwin":
                 error_element = page.locator(error_selector).first
                 await expect(error_element).to_be_visible(timeout=2000)
                 error_found = True
-                print("  ✓ Error message displayed for invalid login")
+                print("  [OK] Error message displayed for invalid login")
                 break
             except:
                 continue
@@ -351,7 +351,7 @@ if platform.system() == "Darwin":
         if not error_found:
             print("  - No specific error message found (may not be implemented)")
 
-        print("  ✓ Invalid login correctly rejected (WebKit/Safari)")
+        print("  [OK] Invalid login correctly rejected (WebKit/Safari)")
 
 
 if __name__ == "__main__":

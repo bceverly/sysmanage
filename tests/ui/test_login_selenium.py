@@ -131,7 +131,7 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
                 try:
                     selenium_page.driver.find_element(by, selector)
                     found_nav_items += 1
-                    print(f"  ✓ Found navigation item: {item}")
+                    print(f"  [OK] Found navigation item: {item}")
                     break
                 except NoSuchElementException:
                     continue
@@ -155,7 +155,7 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
             try:
                 selenium_page.driver.find_element(by, selector)
                 user_indicator_found = True
-                print(f"  ✓ Found user indicator")
+                print(f"  [OK] Found user indicator")
                 break
             except NoSuchElementException:
                 continue
@@ -163,18 +163,18 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
         if not user_indicator_found:
             print(f"  - User indicator not found (may not be implemented yet)")
 
-        print(f"  ✓ Login successful with Selenium ({browser_name})")
-        print(f"  ✓ Found {found_nav_items} navigation items")
-        print(f"  ✓ Current URL: {current_url}")
+        print(f"  [OK] Login successful with Selenium ({browser_name})")
+        print(f"  [OK] Found {found_nav_items} navigation items")
+        print(f"  [OK] Current URL: {current_url}")
 
     except Exception as e:
         # Take screenshot on failure
-        screenshot_path = f"/tmp/claude/selenium_login_failure_{int(time.time())}.png"
+        screenshot_path = f"tests/ui/test-results/selenium_login_failure_{int(time.time())}.png"
         selenium_page.screenshot(screenshot_path)
-        print(f"  ✗ Selenium login test failed ({browser_name})")
-        print(f"  ✗ Screenshot saved: {screenshot_path}")
-        print(f"  ✗ Current URL: {selenium_page.get_current_url()}")
-        print(f"  ✗ Error: {str(e)}")
+        print(f"  [ERROR] Selenium login test failed ({browser_name})")
+        print(f"  [ERROR] Screenshot saved: {screenshot_path}")
+        print(f"  [ERROR] Current URL: {selenium_page.get_current_url()}")
+        print(f"  [ERROR] Error: {str(e)}")
         raise
 
 
@@ -214,7 +214,7 @@ def test_invalid_login_selenium(selenium_page, ui_config, start_server):
     try:
         alert = selenium_page.driver.switch_to.alert
         alert_text = alert.text
-        print(f"  ✓ Found expected alert: {alert_text}")
+        print(f"  [OK] Found expected alert: {alert_text}")
         alert.accept()  # Click OK on the alert
         time.sleep(1)  # Wait for alert to be dismissed
     except Exception:
@@ -241,7 +241,7 @@ def test_invalid_login_selenium(selenium_page, ui_config, start_server):
         try:
             selenium_page.driver.find_element(by, selector)
             error_found = True
-            print("  ✓ Error message displayed for invalid login")
+            print("  [OK] Error message displayed for invalid login")
             break
         except NoSuchElementException:
             continue
@@ -249,7 +249,7 @@ def test_invalid_login_selenium(selenium_page, ui_config, start_server):
     if not error_found:
         print("  - No specific error message found (may not be implemented)")
 
-    print(f"  ✓ Invalid login correctly rejected (Selenium {browser_name})")
+    print(f"  [OK] Invalid login correctly rejected (Selenium {browser_name})")
 
 
 if __name__ == "__main__":

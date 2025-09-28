@@ -230,7 +230,7 @@ class TestSysManagePerformance:
 
             print("✅ Network performance within acceptable limits")
         else:
-            print("⚠️ No network requests captured")
+            print("[WARNING] No network requests captured")
 
     @pytest.mark.asyncio
     async def test_save_performance_results(self, page: Page, ui_config):
@@ -300,10 +300,10 @@ class TestSysManagePerformance:
                 json.dump(performance_data, f, indent=2)
             print(f"💾 Performance results saved to {results_file}")
         except Exception as e:
-            print(f"⚠️ Failed to save performance results: {e}")
+            print(f"[WARNING] Failed to save performance results: {e}")
 
         # Log key metrics for CI/CD
-        print("📊 Key Performance Metrics:")
+        print("[INFO] Key Performance Metrics:")
         print(f"   FCP: {performance_data['paint']['firstContentfulPaint']:.0f}ms")
         print(f"   DCL: {performance_data['navigation']['domContentLoaded']:.0f}ms")
         print(f"   Load: {performance_data['navigation']['loadComplete']:.0f}ms")

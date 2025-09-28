@@ -297,12 +297,12 @@ test-ui: $(VENV_ACTIVATE)
 		else \
 			echo "[INFO] Linux/Windows detected - testing Chrome and Firefox"; \
 		fi; \
-		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short; \
+		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short; \
 		echo "[OK] Playwright UI integration tests completed"; \
 	else \
 		echo "=== Running UI Integration Tests (Selenium) ==="; \
 		echo "[INFO] Using Selenium fallback on OpenBSD/FreeBSD"; \
-		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_selenium.py --confcutdir=tests/ui -p conftest_selenium -v --tb=short; \
+		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_selenium.py --confcutdir=tests/ui -p tests.ui.conftest_selenium -v --tb=short; \
 		echo "[OK] Selenium UI integration tests completed"; \
 	fi
 
