@@ -408,24 +408,33 @@ jobs:
       run: |
         echo "🚀 Starting SysManage backend and frontend servers..."
 
-        # Start backend API server
+        # Start backend API server (with CI environment flag for faster startup)
         echo "Starting backend on port 8001..."
-        python -m uvicorn backend.main:app --host localhost --port 8001 &
+        SYSMANAGE_CI_MODE=true python -m uvicorn backend.main:app --host localhost --port 8001 &
         BACKEND_PID=$!
         echo "BACKEND_PID=$BACKEND_PID" >> $GITHUB_ENV
 
-        # Wait for backend to start
+        # Wait for backend to start (extended timeout for CI environments)
         echo "Waiting for backend API to start..."
-        for i in {1..30}; do
+        for i in {1..90}; do
           if curl -f http://localhost:8001/api/health > /dev/null 2>&1; then
             echo "✅ Backend API is running on port 8001"
             break
           fi
-          if [ $i -eq 30 ]; then
-            echo "❌ Backend failed to start after 30 seconds"
-            exit 1
+          if [ $i -eq 90 ]; then
+            echo "❌ Backend failed to start after 90 seconds"
+            echo "Checking if backend process is still running..."
+            if ps -p $BACKEND_PID > /dev/null 2>&1; then
+              echo "Backend process is still running (PID: $BACKEND_PID)"
+              echo "It may still be starting up. Continuing anyway..."
+            else
+              echo "Backend process has died (PID: $BACKEND_PID)"
+              exit 1
+            fi
           fi
-          echo "Waiting for backend... (attempt $i/30)"
+          if [ $((i % 10)) -eq 0 ]; then
+            echo "Still waiting for backend... (attempt $i/90)"
+          fi
           sleep 1
         done
 

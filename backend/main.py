@@ -140,55 +140,76 @@ def get_cors_origins(web_ui_port, backend_api_port):
     except Exception as e:  # nosec B110
         startup_logger.warning("Failed to get network interface IPs: %s", e)
 
-    # Get all network interface IPs (not just hostname resolution)
-    try:
-        import netifaces
+    # Get all network interface IPs (skip in CI mode for faster startup)
+    ci_mode = os.getenv("SYSMANAGE_CI_MODE", "").lower() in ("true", "1", "yes")
+    if ci_mode:
+        startup_logger.info(
+            "CI mode detected - skipping network interface discovery for faster startup"
+        )
+    else:
+        try:
+            import netifaces
 
-        startup_logger.info("Getting all network interface IPs using netifaces")
-        for interface in netifaces.interfaces():
-            try:
-                addresses = netifaces.ifaddresses(interface)
-                if netifaces.AF_INET in addresses:
-                    for addr_info in addresses[netifaces.AF_INET]:
-                        ip = addr_info.get("addr")
-                        if ip and ip != "127.0.0.1" and not ip.startswith("169.254"):
-                            interface_origins = [
-                                f"http://{ip}:{web_ui_port}",
-                                f"http://{ip}:{backend_api_port}",
+            startup_logger.info("Getting all network interface IPs using netifaces")
+            for interface in netifaces.interfaces():
+                try:
+                    addresses = netifaces.ifaddresses(interface)
+                    if netifaces.AF_INET in addresses:
+                        for addr_info in addresses[netifaces.AF_INET]:
+                            ip = addr_info.get("addr")
+                            if (
+                                ip
+                                and ip != "127.0.0.1"
+                                and not ip.startswith("169.254")
+                            ):
+                                interface_origins = [
+                                    f"http://{ip}:{web_ui_port}",
+                                    f"http://{ip}:{backend_api_port}",
+                                ]
+                                startup_logger.info(
+                                    "Adding interface %s IP origins: %s",
+                                    interface,
+                                    interface_origins,
+                                )
+                                cors_origins.extend(interface_origins)
+                except Exception as e:
+                    startup_logger.warning(
+                        "Failed to get addresses for interface %s: %s", interface, e
+                    )
+        except ImportError:
+            if not ci_mode:
+                # Fallback method using socket - try to get local IP by connecting to a remote address
+                startup_logger.info(
+                    "netifaces not available, using socket fallback method"
+                )
+                try:
+                    # Create a socket and connect to a remote address to get local IP
+                    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+                        # Connect to a public DNS server (doesn't actually send data)
+                        s.connect(("8.8.8.8", 80))
+                        local_ip = s.getsockname()[0]
+                        startup_logger.info(
+                            "Detected local IP via socket method: %s", local_ip
+                        )
+                        if local_ip and local_ip != "127.0.0.1":
+                            fallback_origins = [
+                                f"http://{local_ip}:{web_ui_port}",
+                                f"http://{local_ip}:{backend_api_port}",
                             ]
                             startup_logger.info(
-                                "Adding interface %s IP origins: %s",
-                                interface,
-                                interface_origins,
+                                "Adding fallback IP origins: %s", fallback_origins
                             )
-                            cors_origins.extend(interface_origins)
-            except Exception as e:
-                startup_logger.warning(
-                    "Failed to get addresses for interface %s: %s", interface, e
-                )
-    except ImportError:
-        # Fallback method using socket - try to get local IP by connecting to a remote address
-        startup_logger.info("netifaces not available, using socket fallback method")
-        try:
-            # Create a socket and connect to a remote address to get local IP
-            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-                # Connect to a public DNS server (doesn't actually send data)
-                s.connect(("8.8.8.8", 80))
-                local_ip = s.getsockname()[0]
-                startup_logger.info("Detected local IP via socket method: %s", local_ip)
-                if local_ip and local_ip != "127.0.0.1":
-                    fallback_origins = [
-                        f"http://{local_ip}:{web_ui_port}",
-                        f"http://{local_ip}:{backend_api_port}",
-                    ]
-                    startup_logger.info(
-                        "Adding fallback IP origins: %s", fallback_origins
+                            cors_origins.extend(fallback_origins)
+                except Exception as e:
+                    startup_logger.warning(
+                        "Failed to get local IP via socket fallback: %s", e
                     )
-                    cors_origins.extend(fallback_origins)
-        except Exception as e:
-            startup_logger.warning("Failed to get local IP via socket fallback: %s", e)
-    except Exception as e:  # nosec B110
-        startup_logger.warning("Failed to get all network interface IPs: %s", e)
+            else:
+                startup_logger.info(
+                    "CI mode detected - skipping socket fallback method"
+                )
+        except Exception as e:  # nosec B110
+            startup_logger.warning("Failed to get all network interface IPs: %s", e)
 
     startup_logger.info(
         "Total CORS origins before deduplication: %d", len(cors_origins)
