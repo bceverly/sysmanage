@@ -152,7 +152,7 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: actions/checkout@v5
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.AUTO_MERGE_TOKEN }}
 
     - name: Update backend coverage badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -164,9 +164,10 @@ jobs:
 
     - name: Create PR for backend coverage badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      id: backend-pr
       uses: peter-evans/create-pull-request@v5
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.AUTO_MERGE_TOKEN }}
         commit-message: "Update backend test coverage badge to ${{ steps.coverage.outputs.percentage }}% [skip ci]"
         title: "Update backend coverage badge to ${{ steps.coverage.outputs.percentage }}%"
         body: |
@@ -178,6 +179,13 @@ jobs:
           Generated automatically by CI pipeline.
         branch: update-backend-coverage-badge-${{ github.run_number }}
         delete-branch: true
+
+    - name: Enable auto-merge for backend coverage PR
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.backend-pr.outputs.pull-request-number
+      run: |
+        gh pr merge ${{ steps.backend-pr.outputs.pull-request-number }} --auto --squash
+      env:
+        GITHUB_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
 
     - name: Upload backend coverage to Codecov
       uses: codecov/codecov-action@v5
@@ -357,7 +365,7 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: actions/checkout@v5
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.AUTO_MERGE_TOKEN }}
 
     - name: Update frontend coverage badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -369,9 +377,10 @@ jobs:
 
     - name: Create PR for frontend coverage badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      id: frontend-pr
       uses: peter-evans/create-pull-request@v5
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.AUTO_MERGE_TOKEN }}
         commit-message: "Update frontend test coverage badge to ${{ steps.frontend-coverage.outputs.percentage }}% [skip ci]"
         title: "Update frontend coverage badge to ${{ steps.frontend-coverage.outputs.percentage }}%"
         body: |
@@ -383,6 +392,13 @@ jobs:
           Generated automatically by CI pipeline.
         branch: update-frontend-coverage-badge-${{ github.run_number }}
         delete-branch: true
+
+    - name: Enable auto-merge for frontend coverage PR
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.frontend-pr.outputs.pull-request-number
+      run: |
+        gh pr merge ${{ steps.frontend-pr.outputs.pull-request-number }} --auto --squash
+      env:
+        GITHUB_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
 
     - name: Upload frontend coverage to Codecov
       uses: codecov/codecov-action@v5
@@ -731,7 +747,7 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: actions/checkout@v5
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.AUTO_MERGE_TOKEN }}
 
     - name: Update UI tests badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -743,9 +759,10 @@ jobs:
 
     - name: Create PR for UI tests badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      id: ui-tests-pr
       uses: peter-evans/create-pull-request@v5
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.AUTO_MERGE_TOKEN }}
         commit-message: "Update UI tests badge to ${{ steps.ui-tests.outputs.status }} [skip ci]"
         title: "Update UI tests badge to ${{ steps.ui-tests.outputs.status }}"
         body: |
@@ -757,6 +774,13 @@ jobs:
           Generated automatically by CI pipeline.
         branch: update-ui-tests-badge-${{ github.run_number }}
         delete-branch: true
+
+    - name: Enable auto-merge for UI tests badge PR
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.ui-tests-pr.outputs.pull-request-number
+      run: |
+        gh pr merge ${{ steps.ui-tests-pr.outputs.pull-request-number }} --auto --squash
+      env:
+        GITHUB_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
 
     - name: Stop servers
       if: always()
@@ -1142,7 +1166,7 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: actions/checkout@v5
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.AUTO_MERGE_TOKEN }}
 
     - name: Update performance badges
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -1155,9 +1179,10 @@ jobs:
 
     - name: Create PR for performance badges
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      id: performance-pr
       uses: peter-evans/create-pull-request@v5
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.AUTO_MERGE_TOKEN }}
         commit-message: "Update performance test badges [skip ci]"
         title: "Update performance test badges"
         body: |
@@ -1176,6 +1201,13 @@ jobs:
           Generated automatically by CI pipeline.
         branch: update-performance-badges-${{ github.run_number }}
         delete-branch: true
+
+    - name: Enable auto-merge for performance badges PR
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.performance-pr.outputs.pull-request-number
+      run: |
+        gh pr merge ${{ steps.performance-pr.outputs.pull-request-number }} --auto --squash
+      env:
+        GITHUB_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
 
     - name: Stop performance test servers
       if: always()
