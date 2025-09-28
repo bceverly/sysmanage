@@ -483,7 +483,6 @@ jobs:
       shell: bash
       env:
         PYTHONPATH: .
-        DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
 
     - name: Run dedicated performance tests (Skip Artillery on Windows due to complexity)
       if: runner.os != 'Windows'
@@ -493,7 +492,6 @@ jobs:
       shell: bash
       env:
         PYTHONPATH: .
-        DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
 
     - name: Stop SysManage servers after UI tests
       if: always()
