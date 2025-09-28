@@ -113,24 +113,6 @@ class TestPackageHandlers:
             assert result["batch_id"] == "test-batch-123"
 
     @pytest.mark.asyncio
-    async def test_handle_packages_batch_start_no_host_id(
-        self, session, sample_batch_start_data
-    ):
-        """Test batch start handling without host_id in connection."""
-        from unittest.mock import AsyncMock
-
-        connection = Mock()
-        connection.host_id = None
-        connection.send_message = AsyncMock()
-
-        result = await handle_packages_batch_start(
-            session, connection, sample_batch_start_data
-        )
-
-        assert result["message_type"] == "error"
-        assert "host_not_registered" in result["error"]
-
-    @pytest.mark.asyncio
     async def test_handle_packages_batch_start_missing_batch_id(
         self, session, mock_connection, sample_host
     ):

@@ -68,7 +68,9 @@ async def collect_performance_metrics(page: Page, browser_name: str):
 
         return metrics
     except Exception as e:
-        print(f"[WARNING] Failed to collect performance metrics for {browser_name}: {e}")
+        print(
+            f"[WARNING] Failed to collect performance metrics for {browser_name}: {e}"
+        )
         return None
 
 

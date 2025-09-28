@@ -169,7 +169,9 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
 
     except Exception as e:
         # Take screenshot on failure
-        screenshot_path = f"tests/ui/test-results/selenium_login_failure_{int(time.time())}.png"
+        screenshot_path = (
+            f"tests/ui/test-results/selenium_login_failure_{int(time.time())}.png"
+        )
         selenium_page.screenshot(screenshot_path)
         print(f"  [ERROR] Selenium login test failed ({browser_name})")
         print(f"  [ERROR] Screenshot saved: {screenshot_path}")
