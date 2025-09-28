@@ -447,7 +447,7 @@ jobs:
         # Start frontend web UI server
         echo "Starting frontend on port 7443..."
         cd frontend
-        FORCE_HTTP=true VITE_HOST=localhost VITE_PORT=7443 npm start -- --host localhost --port 7443 &
+        FORCE_HTTP=true VITE_HOST=localhost VITE_PORT=7443 VITE_BACKEND_PORT=8001 npm start -- --host localhost --port 7443 &
         FRONTEND_PID=$!
         echo "FRONTEND_PID=$FRONTEND_PID" >> $GITHUB_ENV
         cd ..

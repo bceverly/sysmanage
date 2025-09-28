@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 // Dynamically determine the backend URL based on current host
 const getBackendBaseURL = () => {
   const currentHost = window.location.hostname;
-  const backendPort = 8080; // This should match your config file
+  // Use environment variable if available, otherwise default to 8080
+  const backendPort = import.meta.env.VITE_BACKEND_PORT || 8080;
   return `http://${currentHost}:${backendPort}`;
 };
 
