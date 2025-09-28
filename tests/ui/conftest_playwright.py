@@ -151,8 +151,10 @@ def database_session(ui_config):
     from backend.persistence.models.core import Base
     from backend.persistence.db import get_database_url
 
-    # Use the same database URL logic as the main backend
-    database_url = get_database_url()
+    # Use the same database URL logic as the main backend, but force PostgreSQL in CI
+    import os
+
+    database_url = os.getenv("DATABASE_URL") or get_database_url()
     print(f"UI tests using database URL: {database_url}")
 
     engine = create_engine(database_url)
@@ -188,18 +190,23 @@ def test_user(ui_config, database_session):
     }
 
     try:
+        # Use database-agnostic timestamp handling
+        from datetime import datetime
+
+        current_time = datetime.utcnow()
+
         # Insert user directly into production database
         database_session.execute(
             text(
                 """
                 INSERT INTO "user" (id, userid, hashed_password, active, is_locked, failed_login_attempts, is_admin, created_at, updated_at)
-                VALUES (:id, :userid, :hashed_password, :active, :is_locked, :failed_login_attempts, :is_admin, NOW(), NOW())
+                VALUES (:id, :userid, :hashed_password, :active, :is_locked, :failed_login_attempts, :is_admin, :created_at, :updated_at)
                 ON CONFLICT (userid) DO UPDATE SET
                     hashed_password = EXCLUDED.hashed_password,
                     active = EXCLUDED.active,
                     is_locked = EXCLUDED.is_locked,
                     failed_login_attempts = EXCLUDED.failed_login_attempts,
-                    updated_at = NOW()
+                    updated_at = :updated_at
                 """
             ),
             {
@@ -210,6 +217,8 @@ def test_user(ui_config, database_session):
                 "is_locked": False,
                 "failed_login_attempts": 0,
                 "is_admin": False,
+                "created_at": current_time,
+                "updated_at": current_time,
             },
         )
         database_session.commit()

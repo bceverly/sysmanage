@@ -404,6 +404,63 @@ jobs:
         echo "Config created successfully for ${{ runner.os }}"
       shell: bash
 
+    - name: Start SysManage server for UI tests
+      run: |
+        echo "🚀 Starting SysManage backend and frontend servers..."
+
+        # Start backend API server
+        echo "Starting backend on port 8001..."
+        python -m uvicorn backend.main:app --host localhost --port 8001 &
+        BACKEND_PID=$!
+        echo "BACKEND_PID=$BACKEND_PID" >> $GITHUB_ENV
+
+        # Wait for backend to start
+        echo "Waiting for backend API to start..."
+        for i in {1..30}; do
+          if curl -f http://localhost:8001/api/health > /dev/null 2>&1; then
+            echo "✅ Backend API is running on port 8001"
+            break
+          fi
+          if [ $i -eq 30 ]; then
+            echo "❌ Backend failed to start after 30 seconds"
+            exit 1
+          fi
+          echo "Waiting for backend... (attempt $i/30)"
+          sleep 1
+        done
+
+        # Install frontend dependencies if needed
+        if [ ! -d "frontend/node_modules" ]; then
+          echo "Installing frontend dependencies..."
+          cd frontend && npm install && cd ..
+        fi
+
+        # Start frontend web UI server
+        echo "Starting frontend on port 7443..."
+        cd frontend
+        FORCE_HTTP=true VITE_HOST=localhost VITE_PORT=7443 npm start -- --host localhost --port 7443 &
+        FRONTEND_PID=$!
+        echo "FRONTEND_PID=$FRONTEND_PID" >> $GITHUB_ENV
+        cd ..
+
+        # Wait for frontend to start
+        echo "Waiting for frontend web UI to start..."
+        for i in {1..60}; do
+          if curl -f http://localhost:7443 > /dev/null 2>&1; then
+            echo "✅ Frontend UI is running on port 7443"
+            break
+          fi
+          if [ $i -eq 60 ]; then
+            echo "❌ Frontend failed to start after 60 seconds"
+            exit 1
+          fi
+          echo "Waiting for frontend... (attempt $i/60)"
+          sleep 2
+        done
+
+        echo "✅ Both backend (8001) and frontend (7443) are running"
+      shell: bash
+
     - name: Run UI tests with performance metrics
       run: |
         echo "🎭 Running UI tests with performance metrics collection..."
@@ -426,6 +483,33 @@ jobs:
       shell: bash
       env:
         PYTHONPATH: .
+
+    - name: Stop SysManage servers after UI tests
+      if: always()
+      run: |
+        echo "🛑 Stopping SysManage servers..."
+
+        # Stop backend server
+        if [ -n "$BACKEND_PID" ]; then
+          kill $BACKEND_PID || true
+          echo "Backend stopped (PID: $BACKEND_PID)"
+        else
+          echo "No backend PID found, attempting to kill by port..."
+          pkill -f "uvicorn.*--port 8001" || true
+        fi
+
+        # Stop frontend server
+        if [ -n "$FRONTEND_PID" ]; then
+          kill $FRONTEND_PID || true
+          echo "Frontend stopped (PID: $FRONTEND_PID)"
+        else
+          echo "No frontend PID found, attempting to kill by port..."
+          pkill -f "npm.*start.*--port 7443" || true
+          pkill -f "vite.*--port 7443" || true
+        fi
+
+        echo "✅ Server cleanup completed"
+      shell: bash
 
     - name: Run Artillery load tests (Linux/macOS only)
       if: runner.os != 'Windows'
