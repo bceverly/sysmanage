@@ -216,7 +216,7 @@ def test_user(ui_config, database_session):
                 "active": True,
                 "is_locked": False,
                 "failed_login_attempts": 0,
-                "is_admin": False,
+                "is_admin": True,
                 "created_at": current_time,
                 "updated_at": current_time,
             },
