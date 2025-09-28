@@ -286,7 +286,9 @@ async def browser_context(
         raise ValueError(f"Unsupported browser: {browser_name}")
 
     context = await browser.new_context(
-        viewport={"width": 1280, "height": 720}, ignore_https_errors=True
+        viewport={"width": 1280, "height": 720},
+        ignore_https_errors=True,
+        java_script_enabled=True,  # Explicitly enable JavaScript
     )
 
     yield context

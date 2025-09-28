@@ -116,8 +116,16 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
 
         assert nav_found, "Could not find navigation menu after login"
 
-        # Check for common navigation links
-        expected_nav_items = ["Dashboard", "Hosts", "Reports", "Settings", "Security"]
+        # Check for common navigation links (based on actual app structure from screenshots)
+        expected_nav_items = [
+            "Dashboard",
+            "Hosts",
+            "Users",
+            "Updates",
+            "Reports",
+            "Secrets",
+            "Scripts",
+        ]
         found_nav_items = 0
 
         for item in expected_nav_items:
