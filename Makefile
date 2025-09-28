@@ -289,30 +289,56 @@ test-typescript:
 	@echo "[OK] TypeScript tests completed"
 
 # UI integration tests
-test-ui:
-	@echo "=== Running UI Integration Tests (Playwright) ==="
-	@echo "[INFO] Cross-platform UI testing with Playwright"
-	@$(PYTHON) -m pytest tests/ui/test_login_cross_browser.py -p tests.ui.conftest_playwright -v --tb=short
-	@echo "[OK] Playwright UI integration tests completed"
+test-ui: $(VENV_ACTIVATE)
+	@if [ "$(shell uname -s)" != "OpenBSD" ] && [ "$(shell uname -s)" != "FreeBSD" ]; then \
+		echo "=== Running UI Integration Tests (Playwright) ==="; \
+		if [ "$(shell uname -s)" = "Darwin" ]; then \
+			echo "[INFO] macOS detected - testing Chrome, Firefox, and WebKit/Safari"; \
+		else \
+			echo "[INFO] Linux/Windows detected - testing Chrome and Firefox"; \
+		fi; \
+		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short; \
+		echo "[OK] Playwright UI integration tests completed"; \
+	else \
+		echo "=== Running UI Integration Tests (Selenium) ==="; \
+		echo "[INFO] Using Selenium fallback on OpenBSD/FreeBSD"; \
+		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_selenium.py --confcutdir=tests/ui -p conftest_selenium -v --tb=short; \
+		echo "[OK] Selenium UI integration tests completed"; \
+	fi
 
 # Playwright tests only (alias for test-ui)
 test-playwright: test-ui
 
 # Performance testing with Artillery and enhanced Playwright
-test-performance:
+test-performance: $(VENV_ACTIVATE)
 	@echo "=== Running Performance Tests ==="
-	@echo "[INFO] Running Artillery load tests for backend API..."
-	@npm install -g artillery@latest >nul 2>nul || echo "[WARNING] Artillery installation failed"
-	@echo "[INFO] Generating Artillery config from sysmanage.yaml..."
-	@$(PYTHON) scripts/generate_artillery_config.py
-	@echo "[INFO] Running Artillery load tests..."
-	@echo "[NOTE] Ensure the SysManage server is running on the configured port"
-	@artillery run artillery.yml --output artillery-report.json || echo "[WARNING] Artillery tests failed - continuing with Playwright performance tests"
-	@artillery report artillery-report.json --output artillery-report.html 2>nul && echo "[INFO] Artillery report generated: artillery-report.html" || echo "[INFO] No artillery report to generate"
-	@echo "[INFO] Running Playwright performance tests..."
-	@$(PYTHON) -m pytest tests/ui/test_performance_playwright.py -p tests.ui.conftest_playwright -v --tb=short || echo "[WARNING] Playwright performance tests failed"
-	@echo "[INFO] Running performance regression analysis..."
-	@$(PYTHON) scripts/performance_regression_check.py || echo "[WARNING] Performance regressions detected"
+	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ]; then \
+		echo "[SKIP] Artillery and Playwright not supported on $(shell uname -s) - performance tests skipped"; \
+	else \
+		echo "[INFO] Running Artillery load tests for backend API..."; \
+		command -v artillery >/dev/null 2>&1 || { \
+			echo "[ERROR] Artillery not found. Installing..."; \
+			if command -v npm >/dev/null 2>&1; then \
+				npm install -g artillery@latest; \
+			else \
+				echo "[ERROR] npm not found. Please install Node.js and npm first."; \
+				exit 1; \
+			fi; \
+		}; \
+		echo "[INFO] Running Artillery load tests against http://localhost:8001..."; \
+		echo "[NOTE] Ensure the SysManage server is running on port 8001"; \
+		artillery run artillery.yml --output artillery-report.json || { \
+			echo "[WARNING] Artillery tests failed - continuing with Playwright performance tests"; \
+		}; \
+		if [ -f artillery-report.json ]; then \
+			artillery report artillery-report.json --output artillery-report.html; \
+			echo "[INFO] Artillery report generated: artillery-report.html"; \
+		fi; \
+		echo "[INFO] Running Playwright performance tests..."; \
+		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short || echo "[WARNING] Playwright performance tests failed"; \
+		echo "[INFO] Running performance regression analysis..."; \
+		$(PYTHON) scripts/performance_regression_check.py || echo "[WARNING] Performance regressions detected"; \
+	fi
 	@echo "[OK] Performance testing completed"
 
 # Vite tests only (alias for test-typescript)
