@@ -211,3 +211,5 @@ artillery-report.json
 artillery-report.html
 artillery-report-*.json
 artillery-report-*.html
+
+tests/ui/test-results
