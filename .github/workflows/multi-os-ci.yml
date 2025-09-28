@@ -479,7 +479,7 @@ jobs:
           echo "🐧 ${{ runner.os }} detected - testing Chrome and Firefox"
         fi
 
-        PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short
+        PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short
       shell: bash
       env:
         PYTHONPATH: .
@@ -488,7 +488,7 @@ jobs:
       if: runner.os != 'Windows'
       run: |
         echo "🚀 Running performance tests..."
-        PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short
+        PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short
       shell: bash
       env:
         PYTHONPATH: .

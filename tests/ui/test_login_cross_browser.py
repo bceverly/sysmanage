@@ -68,7 +68,9 @@ async def collect_performance_metrics(page: Page, browser_name: str):
 
         return metrics
     except Exception as e:
-        print(f"[WARNING] Failed to collect performance metrics for {browser_name}: {e}")
+        print(
+            f"[WARNING] Failed to collect performance metrics for {browser_name}: {e}"
+        )
         return None
 
 
@@ -104,23 +106,103 @@ async def test_login_cross_browser(
         await expect(password_input).to_be_visible(timeout=10000)
 
         # Fill in credentials
+        print(f"  [DEBUG] Filling username: {test_user['username']}")
         await username_input.fill(test_user["username"])
+        print(f"  [DEBUG] Filling password: [hidden]")
         await password_input.fill(test_user["password"])
+
+        # Debug: Check if form fields are filled
+        username_value = await username_input.input_value()
+        password_value = await password_input.input_value()
+        print(f"  [DEBUG] Username field value: {username_value}")
+        print(f"  [DEBUG] Password field filled: {len(password_value) > 0}")
 
         # Find and click login button
         login_button = page.locator(
             'button[type="submit"], button:has-text("LOGIN"), button:has-text("Login"), button:has-text("Sign In")'
         ).first
         await expect(login_button).to_be_visible()
+
+        # Debug: Check button text
+        button_text = await login_button.text_content()
+        print(f"  [DEBUG] Login button text: '{button_text}'")
+
+        print(f"  [DEBUG] Clicking login button...")
         await login_button.click()
 
+        # Wait a moment and check URL
+        await page.wait_for_timeout(2000)
+        url_after_click = page.url
+        print(f"  [DEBUG] URL after login click: {url_after_click}")
+
         # Wait for navigation to main dashboard
+        print(f"  [DEBUG] Waiting for network idle...")
         await page.wait_for_load_state("networkidle")
+
+        final_url = page.url
+        print(f"  [DEBUG] Final URL after network idle: {final_url}")
+
+        # Give React app extra time to load and render navigation
+        print(f"  [DEBUG] Waiting additional 5 seconds for React app to fully load...")
+        await page.wait_for_timeout(5000)
+
+        # Debug: Check what's actually on the page
+        body_text = await page.locator("body").text_content()
+        print(f"  [DEBUG] Page body text length: {len(body_text)} characters")
+        if body_text:
+            # Clean the text to avoid Unicode issues in Windows console
+            clean_text = "".join(c for c in body_text[:200] if ord(c) < 128)
+            print(f"  [DEBUG] First 200 chars of body (ASCII only): {clean_text}")
+
+        # Check if we're on an error page or loading page
+        page_html = await page.content()
+        if "loading" in page_html.lower():
+            print(f"  [DEBUG] Page appears to be in loading state")
+        if "error" in page_html.lower():
+            print(f"  [DEBUG] Page appears to have an error")
+
+        # Capture full HTML content as artifact
+        import os
+        import time
+
+        os.makedirs("tests/ui/test-results", exist_ok=True)
+        html_filename = (
+            f"tests/ui/test-results/page_content_{browser_name}_{int(time.time())}.html"
+        )
+        with open(html_filename, "w", encoding="utf-8") as f:
+            f.write(page_html)
+        print(f"  [DEBUG] Full HTML content saved to: {html_filename}")
+        print(f"  [DEBUG] HTML content size: {len(page_html)} characters")
 
         # Verify successful login by checking for main application elements
         # Look for the main navigation menu
+        print(f"  [DEBUG] Looking for navigation menu...")
         nav_menu = page.locator('nav, .navbar, [role="navigation"]').first
-        await expect(nav_menu).to_be_visible(timeout=15000)
+
+        # Debug: Check if we can find any navigation at all
+        all_nav_elements = await page.locator(
+            'nav, .navbar, [role="navigation"]'
+        ).count()
+        print(f"  [DEBUG] Found {all_nav_elements} navigation elements")
+
+        if all_nav_elements > 0:
+            await expect(nav_menu).to_be_visible(timeout=15000)
+        else:
+            # If no nav found, let's check what's on the page
+            page_content = await page.content()
+            print(f"  [DEBUG] Page title: {await page.title()}")
+            # Look for any error messages
+            error_elements = await page.locator(
+                '[class*="error"], [class*="alert"], .error, .alert'
+            ).count()
+            print(f"  [DEBUG] Found {error_elements} potential error elements")
+            if error_elements > 0:
+                error_text = await page.locator(
+                    '[class*="error"], [class*="alert"], .error, .alert'
+                ).first.text_content()
+                print(f"  [DEBUG] Error message: {error_text}")
+
+            raise Exception(f"No navigation elements found on page after login attempt")
 
         # Check for common navigation links (adjust based on actual app structure)
         # These are typical links we'd expect in a system management application
@@ -169,10 +251,28 @@ async def test_login_cross_browser(
 
     except Exception as e:
         # Take screenshot on failure for debugging
+        import os
+        import time
+
+        os.makedirs("tests/ui/test-results", exist_ok=True)
+
+        timestamp = int(time.time())
         screenshot_path = (
-            f"tests/ui/test-results/login_failure_{browser_name}_{int(time.time())}.png"
+            f"tests/ui/test-results/login_failure_{browser_name}_{timestamp}.png"
         )
+        html_path = f"tests/ui/test-results/failure_page_content_{browser_name}_{timestamp}.html"
+
         await page.screenshot(path=screenshot_path)
+
+        # Capture HTML content on failure
+        try:
+            page_html = await page.content()
+            with open(html_path, "w", encoding="utf-8") as f:
+                f.write(page_html)
+            print(f"  [ERROR] Full HTML content saved to: {html_path}")
+        except Exception as html_error:
+            print(f"  [ERROR] Failed to capture HTML: {html_error}")
+
         print(f"  [ERROR] Login test failed on {browser_name}")
         print(f"  [ERROR] Screenshot saved: {screenshot_path}")
         print(f"  [ERROR] Current URL: {page.url}")
