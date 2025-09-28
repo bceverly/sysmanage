@@ -90,6 +90,17 @@ async def test_login_cross_browser(
         # Wait for page to load
         await page.wait_for_load_state("networkidle")
 
+        # Check for JavaScript errors
+        page.on(
+            "console",
+            lambda msg: (
+                print(f"  [DEBUG] Console {msg.type}: {msg.text}")
+                if msg.type in ["error", "warning"]
+                else None
+            ),
+        )
+        page.on("pageerror", lambda err: print(f"  [DEBUG] Page error: {err}"))
+
         # Collect performance metrics for this browser
         await collect_performance_metrics(page, browser_name)
 
@@ -127,8 +138,36 @@ async def test_login_cross_browser(
         button_text = await login_button.text_content()
         print(f"  [DEBUG] Login button text: '{button_text}'")
 
+        # Check if button is actually enabled and clickable
+        is_enabled = await login_button.is_enabled()
+        is_visible = await login_button.is_visible()
+        print(f"  [DEBUG] Button enabled: {is_enabled}, visible: {is_visible}")
+
+        # Monitor network requests
+        def handle_request(request):
+            if "login" in request.url or "auth" in request.url:
+                print(f"  [DEBUG] Login API request: {request.method} {request.url}")
+
+        def handle_response(response):
+            if "login" in response.url or "auth" in response.url:
+                print(
+                    f"  [DEBUG] Login API response: {response.status} from {response.url}"
+                )
+
+        page.on("request", handle_request)
+        page.on("response", handle_response)
+
         print(f"  [DEBUG] Clicking login button...")
-        await login_button.click()
+
+        # Click button and wait for potential navigation
+        try:
+            async with page.expect_navigation(timeout=5000):
+                await login_button.click()
+            print(f"  [DEBUG] Navigation occurred after login")
+        except:
+            # No navigation occurred, try clicking without expecting navigation
+            await login_button.click()
+            print(f"  [DEBUG] No navigation after login click, may be SPA routing")
 
         # Wait a moment and check URL
         await page.wait_for_timeout(2000)
@@ -143,8 +182,33 @@ async def test_login_cross_browser(
         print(f"  [DEBUG] Final URL after network idle: {final_url}")
 
         # Give React app extra time to load and render navigation
-        print(f"  [DEBUG] Waiting additional 5 seconds for React app to fully load...")
-        await page.wait_for_timeout(5000)
+        print(f"  [DEBUG] Waiting for React app to fully load...")
+
+        # Wait for the "You need to enable JavaScript" message to disappear or nav to appear
+        try:
+            # Either the noscript message disappears OR nav appears
+            noscript_element = page.locator(
+                'text="You need to enable JavaScript to run this app."'
+            )
+            nav_element = page.locator('nav, .navbar, [role="navigation"]').first
+
+            # Wait for either condition
+            try:
+                await expect(noscript_element).to_be_hidden(timeout=10000)
+                print(f"  [DEBUG] React app loaded (noscript message hidden)")
+            except:
+                # If noscript is still visible, check if nav is there anyway
+                if await nav_element.is_visible():
+                    print(f"  [DEBUG] Navigation visible despite noscript message")
+                else:
+                    print(
+                        f"  [WARNING] React app may not have fully loaded - noscript still visible, no nav"
+                    )
+        except Exception as e:
+            print(f"  [WARNING] Error checking React load state: {e}")
+
+        # Additional wait for navigation to render
+        await page.wait_for_timeout(3000)
 
         # Debug: Check what's actually on the page
         body_text = await page.locator("body").text_content()
@@ -204,9 +268,17 @@ async def test_login_cross_browser(
 
             raise Exception(f"No navigation elements found on page after login attempt")
 
-        # Check for common navigation links (adjust based on actual app structure)
-        # These are typical links we'd expect in a system management application
-        expected_nav_items = ["Dashboard", "Hosts", "Reports", "Settings", "Security"]
+        # Check for common navigation links (based on actual app structure from screenshots)
+        # These are the actual navigation items in the SysManage application
+        expected_nav_items = [
+            "Dashboard",
+            "Hosts",
+            "Users",
+            "Updates",
+            "Reports",
+            "Secrets",
+            "Scripts",
+        ]
 
         # Count how many expected nav items we can find
         found_nav_items = 0
