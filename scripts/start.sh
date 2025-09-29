@@ -16,8 +16,8 @@ mkdir -p logs
 
 # Function to get configuration value
 get_config_value() {
-    local key=$1
-    local config_file=""
+    key=$1
+    config_file=""
     
     # Use same priority as backend config loader: /etc/sysmanage.yaml first, then sysmanage-dev.yaml
     if [ -f "/etc/sysmanage.yaml" ]; then
@@ -46,11 +46,11 @@ except:
 
 # Function to generate user-friendly URLs
 generate_urls() {
-    local service_type=$1
-    local port=$2
+    service_type=$1
+    port=$2
     
     # Get host from config
-    local config_host=""
+    config_host=""
     if [ "$service_type" = "api" ]; then
         config_host=$(get_config_value "api.host")
     else
@@ -64,8 +64,8 @@ generate_urls() {
     # Generate URLs based on config host
     if [ "$config_host" = "0.0.0.0" ]; then
         # When bound to 0.0.0.0, prefer FQDN, fallback to hostname, then localhost
-        local fqdn=$(hostname -f 2>/dev/null)
-        local shortname=$(hostname 2>/dev/null)
+        fqdn=$(hostname -f 2>/dev/null)
+        shortname=$(hostname 2>/dev/null)
         
         # Check which one looks like a real FQDN (contains dots)
         if [ -n "$fqdn" ] && echo "$fqdn" | grep -q '\.' && [ "$fqdn" != "localhost" ]; then
@@ -92,7 +92,7 @@ generate_urls() {
 
 # Function to check if a port is in use
 check_port() {
-    local port=$1
+port=$1
     # Try multiple approaches for different systems
     if command -v lsof >/dev/null 2>&1; then
         lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1
@@ -106,10 +106,10 @@ check_port() {
 
 # Function to wait for service to be ready
 wait_for_service() {
-    local port=$1
-    local service_name=$2
-    local max_attempts=30
-    local attempt=0
+port=$1
+service_name=$2
+max_attempts=30
+attempt=0
     
     echo "Waiting for $service_name to start on port $port..."
     while [ $attempt -lt $max_attempts ]; do
@@ -151,10 +151,9 @@ wait_for_service() {
 
 # Function to check for running server processes
 check_existing_processes() {
-    local found_processes=false
+found_processes=false
     
     # Check for backend processes
-    local backend_pids
     if command -v pgrep >/dev/null 2>&1; then
         backend_pids=$(pgrep -f "backend.main" 2>/dev/null)
     else
@@ -164,7 +163,7 @@ check_existing_processes() {
         echo "⚠️  Found existing backend processes:"
         echo "$backend_pids" | while read pid; do
             if [ -n "$pid" ]; then
-                local cmd=$(ps -p "$pid" -o command= 2>/dev/null | cut -c 1-80)
+            cmd=$(ps -p "$pid" -o command= 2>/dev/null | cut -c 1-80)
                 echo "   PID $pid: $cmd"
             fi
         done
@@ -172,7 +171,6 @@ check_existing_processes() {
     fi
     
     # Check for frontend processes
-    local frontend_pids
     if command -v pgrep >/dev/null 2>&1; then
         frontend_pids=$(pgrep -f "react-scripts start" 2>/dev/null)
     else
@@ -182,7 +180,7 @@ check_existing_processes() {
         echo "⚠️  Found existing frontend processes:"
         echo "$frontend_pids" | while read pid; do
             if [ -n "$pid" ]; then
-                local cmd=$(ps -p "$pid" -o command= 2>/dev/null | cut -c 1-80)
+            cmd=$(ps -p "$pid" -o command= 2>/dev/null | cut -c 1-80)
                 echo "   PID $pid: $cmd"
             fi
         done
@@ -194,8 +192,7 @@ check_existing_processes() {
     if [ $? -ne 0 ] || [ -z "$BACKEND_PORT" ]; then
         BACKEND_PORT=8080
     fi
-    
-    local backend_port_pid
+
     if command -v lsof >/dev/null 2>&1; then
         backend_port_pid=$(lsof -ti:$BACKEND_PORT 2>/dev/null)
     else
@@ -210,8 +207,7 @@ check_existing_processes() {
     if [ $? -ne 0 ] || [ -z "$FRONTEND_PORT" ]; then
         FRONTEND_PORT=3000
     fi
-    
-    local frontend_port_pid
+
     if command -v lsof >/dev/null 2>&1; then
         frontend_port_pid=$(lsof -ti:$FRONTEND_PORT 2>/dev/null)
     else

@@ -79,7 +79,7 @@ async def login(login_data: UserLogin, request: Request, response: Response):
             response.set_cookie(
                 key="refresh_token",
                 value=refresh_token,
-                expires=datetime.now().replace(tzinfo=timezone.utc)
+                expires=datetime.now(timezone.utc)
                 + timedelta(seconds=jwt_refresh_timout),
                 path="/",
                 domain="sysmanage.org",
@@ -149,7 +149,7 @@ async def login(login_data: UserLogin, request: Request, response: Response):
                 response.set_cookie(
                     key="refresh_token",
                     value=refresh_token,
-                    expires=datetime.now().replace(tzinfo=timezone.utc)
+                    expires=datetime.now(timezone.utc)
                     + timedelta(seconds=jwt_refresh_timout),
                     path="/",
                     domain="sysmanage.org",
