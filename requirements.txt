@@ -53,7 +53,7 @@ starlette==0.48.0
 tomlkit==0.12.4
 typing_extensions>=4.12.2
 ujson==5.9.0
-uvicorn==0.29.0
+uvicorn==0.37.0
 watchfiles==1.1.0
 websocket==0.2.1
 websockets==15.0.1
