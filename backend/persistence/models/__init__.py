@@ -11,6 +11,7 @@ from .hardware import *
 from .operations import *
 from .secret import *
 from .host_certificate import *
+from .host_role import *
 from .software import *
 
 __all__ = [
@@ -51,4 +52,6 @@ __all__ = [
     "Secret",
     # Certificate models
     "HostCertificate",
+    # Role models
+    "HostRole",
 ]

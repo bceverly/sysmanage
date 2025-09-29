@@ -168,6 +168,9 @@ class Host(Base):
     certificates = relationship(
         "HostCertificate", back_populates="host", cascade="all, delete-orphan"
     )
+    roles = relationship(
+        "HostRole", back_populates="host", cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"<Host(id={self.id}, fqdn='{self.fqdn}', active={self.active})>"

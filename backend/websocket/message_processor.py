@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from backend.api.data_handlers import (
     handle_hardware_update,
     handle_host_certificates_update,
+    handle_host_role_data_update,
     handle_os_version_update,
     handle_package_updates_update,
     handle_reboot_status_update,
@@ -423,6 +424,11 @@ class MessageProcessor:
                 await handle_host_certificates_update(db, mock_connection, message_data)
                 success = True
 
+            elif message.message_type == MessageType.ROLE_DATA:
+                logger.info("Processing ROLE_DATA")
+                await handle_host_role_data_update(db, mock_connection, message_data)
+                success = True
+
             else:
                 logger.warning(
                     _("Unknown message type in queue: %s (expected: %s)"),
@@ -702,6 +708,18 @@ class MessageProcessor:
                 success = True
                 print(
                     "Successfully processed host certificates update",
+                    flush=True,
+                )
+
+            elif message.message_type == MessageType.ROLE_DATA:
+                print(
+                    "About to call handle_host_role_data_update",
+                    flush=True,
+                )
+                await handle_host_role_data_update(db, mock_connection, message_data)
+                success = True
+                print(
+                    "Successfully processed host role data update",
                     flush=True,
                 )
 

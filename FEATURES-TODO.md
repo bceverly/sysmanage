@@ -15,31 +15,24 @@ like to add:
     sends linearly with the number of
     registered agents.
 
-3.  SSH Keys - Manage SSH keys on the agents
-    so that they can be pushed out from a
-    central location.  Keys must be stored
-    in a secure vault - use the open source
-    version of the Hashicorp vault to store
-    them.
-
-4.  Firewall Rules - Manage firewall rules
+3.  Firewall Rules - Manage firewall rules
     on the agent machines.
 
-5.  Versioning of the API - We need to make
+4.  Versioning of the API - We need to make
     sure that older clients can talk to
     newer servers and degrade gracefully.
 
-6.  User Management - Ability to manage
+5.  User Management - Ability to manage
     add/edit/delete users and groups on
     the agent hosts.
 
-7.  We need a MFA mechanism using an
+6.  We need a MFA mechanism using an
     authenticator app on someone's
     mobile device as well as the ability
     to send a code via email to their
     registered email address.
 
-8.  Have the agent and the server log
+7.  Have the agent and the server log
     their messages to the operating
     system appropriate location but
     fall back to the local logs dir-
@@ -52,7 +45,7 @@ like to add:
     sysmanage-agent subdirectory in
     which the logs should be placed.
 
-9.  Add an automation tab between
+8.  Add an automation tab between
     updates and scripts in the main
     navbar.  on that tab, have an
     "Updates" subtab that allows you
@@ -87,7 +80,7 @@ like to add:
     string externalization /
     translation.
 
-10. Add OpenTelemetry support to
+9.  Add OpenTelemetry support to
     sysmanage and sysmanage-agent
     so that the performance can be
     monitoried in a large-scale
@@ -97,14 +90,14 @@ like to add:
     hosts and connect them to
     the grafana system.
 
-11. Add the ability to deploy an
+10. Add the ability to deploy an
     antivirus solution that is
     platform approriate to the
     hosts along with centralized
     configuration file management
     of it.
 
-12. For Ubuntu (and possibly other
+11. For Ubuntu (and possibly other
     Linux platforms?) we need to
     be able to push a request to
     add a PPA to a remote host

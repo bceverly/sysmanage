@@ -31,6 +31,7 @@ class MessageType(str, Enum):
     REBOOT_STATUS_UPDATE = "reboot_status_update"
     DIAGNOSTIC_COLLECTION_RESULT = "diagnostic_collection_result"
     HOST_CERTIFICATES_UPDATE = "host_certificates_update"
+    ROLE_DATA = "role_data"
 
     # Server -> Agent messages
     COMMAND = "command"
