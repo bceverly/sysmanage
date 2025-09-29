@@ -49,6 +49,9 @@ import AddIcon from '@mui/icons-material/Add';
 import HistoryIcon from '@mui/icons-material/History';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CertificateIcon from '@mui/icons-material/AdminPanelSettings';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import StopIcon from '@mui/icons-material/Stop';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField, List, ListItem, ListItemText, Divider, TableContainer, TableHead, InputAdornment } from '@mui/material';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
@@ -78,6 +81,18 @@ interface Certificate {
     common_name: string | null;
 }
 
+interface HostRole {
+    id: string;
+    role: string;
+    package_name: string;
+    package_version: string | null;
+    service_name: string | null;
+    service_status: string | null;
+    is_active: boolean;
+    detected_at: string;
+    updated_at: string;
+}
+
 const HostDetail = () => {
     const { hostId } = useParams<{ hostId: string }>();
     const [host, setHost] = useState<SysManageHost | null>(null);
@@ -94,6 +109,11 @@ const HostDetail = () => {
     const [currentTab, setCurrentTab] = useState<number>(0);
     const [diagnosticsLoading, setDiagnosticsLoading] = useState<boolean>(false);
     const [certificatesLoading, setCertificatesLoading] = useState<boolean>(false);
+    const [roles, setRoles] = useState<HostRole[]>([]);
+    const [rolesLoading, setRolesLoading] = useState<boolean>(false);
+    const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+    const [serviceControlLoading, setServiceControlLoading] = useState<boolean>(false);
+    const rolesRefreshInterval = useRef<ReturnType<typeof setInterval> | null>(null);
     const [certificateFilter, setCertificateFilter] = useState<'all' | 'ca' | 'server' | 'client'>('server');
     const [certificatePaginationModel, setCertificatePaginationModel] = useState({ page: 0, pageSize: 10 });
     const [certificateSearchTerm, setCertificateSearchTerm] = useState<string>('');
@@ -190,8 +210,9 @@ const HostDetail = () => {
     const getSoftwareInstallsTabIndex = () => 3;
     const getAccessTabIndex = () => 4;
     const getCertificatesTabIndex = () => 5;
-    const getUbuntuProTabIndex = () => ubuntuProInfo?.available ? 6 : -1;
-    const getDiagnosticsTabIndex = () => ubuntuProInfo?.available ? 7 : 6;
+    const getServerRolesTabIndex = () => 6;
+    const getUbuntuProTabIndex = () => ubuntuProInfo?.available ? 7 : -1;
+    const getDiagnosticsTabIndex = () => ubuntuProInfo?.available ? 8 : 7;
 
     // Certificate-related functions
     const fetchCertificates = useCallback(async () => {
@@ -239,6 +260,143 @@ const HostDetail = () => {
             setCertificatesLoading(false);
         }
     }, [hostId, fetchCertificates, t]);
+
+    // Role-related functions
+    const fetchRoles = useCallback(async (showLoading: boolean = true) => {
+        if (!hostId) return;
+        try {
+            if (showLoading) {
+                setRolesLoading(true);
+            }
+            const response = await axiosInstance.get(`/api/host/${hostId}/roles`);
+            if (response.status === 200) {
+                setRoles(response.data.roles || []);
+            }
+        } catch (error) {
+            console.error('Error fetching roles:', error);
+            // Don't fail the whole page load for role errors
+            setRoles([]);
+        } finally {
+            if (showLoading) {
+                setRolesLoading(false);
+            }
+        }
+    }, [hostId]);
+
+    const requestRolesCollection = useCallback(async () => {
+        if (!hostId) return;
+        try {
+            setRolesLoading(true);
+            const response = await axiosInstance.post(`/api/host/${hostId}/request-roles-collection`);
+            if (response.status === 200) {
+                setSnackbarMessage(t('hostDetail.roleCollectionRequested', 'Role collection requested'));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+                // Refetch roles after a short delay to allow collection to complete
+                setTimeout(() => {
+                    fetchRoles();
+                }, 3000);
+            }
+        } catch (error) {
+            console.error('Error requesting role collection:', error);
+            setSnackbarMessage(t('hostDetail.roleCollectionError', 'Error requesting role collection'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setRolesLoading(false);
+        }
+    }, [hostId, fetchRoles, t]);
+
+    // Service control handlers
+    const handleRoleSelection = (roleId: string, checked: boolean) => {
+        if (checked) {
+            setSelectedRoles(prev => [...prev, roleId]);
+        } else {
+            setSelectedRoles(prev => prev.filter(id => id !== roleId));
+        }
+    };
+
+    const handleSelectAllRoles = (checked: boolean) => {
+        if (checked) {
+            const selectableRoles = roles.filter(role => role.service_name && role.service_name.trim() !== '').map(role => role.id);
+            setSelectedRoles(selectableRoles);
+        } else {
+            setSelectedRoles([]);
+        }
+    };
+
+    const handleServiceControl = async (action: 'start' | 'stop' | 'restart') => {
+        if (!hostId || selectedRoles.length === 0) return;
+
+        try {
+            setServiceControlLoading(true);
+            const selectedRoleData = roles.filter(role => selectedRoles.includes(role.id));
+            const serviceNames = selectedRoleData.map(role => role.service_name).filter(name => name);
+
+            if (serviceNames.length === 0) {
+                setSnackbarMessage(t('hostDetail.noServicesSelected', 'No services selected for control'));
+                setSnackbarSeverity('warning');
+                setSnackbarOpen(true);
+                return;
+            }
+
+            const response = await axiosInstance.post(`/api/host/${hostId}/service-control`, {
+                action,
+                services: serviceNames
+            });
+
+            if (response.status === 200) {
+                setSnackbarMessage(t(`hostDetail.service${action.charAt(0).toUpperCase() + action.slice(1)}Success`, `Service ${action} requested successfully`));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+                setSelectedRoles([]);
+
+                // Refresh roles after a delay to get updated status
+                setTimeout(() => {
+                    fetchRoles();
+                }, 3000);
+            }
+        } catch (error) {
+            console.error(`Error ${action}ing services:`, error);
+            setSnackbarMessage(t(`hostDetail.service${action.charAt(0).toUpperCase() + action.slice(1)}Error`, `Error ${action}ing services`));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setServiceControlLoading(false);
+        }
+    };
+
+    // Auto-refresh functionality
+    useEffect(() => {
+        if (currentTab === getServerRolesTabIndex() && host && host.active) {
+            // Start auto-refresh every 30 seconds (without loading indicator)
+            const interval = setInterval(() => {
+                fetchRoles(false);
+            }, 30000);
+            rolesRefreshInterval.current = interval;
+
+            return () => {
+                if (interval) {
+                    clearInterval(interval);
+                }
+            };
+        } else {
+            // Clear interval when tab is not active or host is not active
+            if (rolesRefreshInterval.current) {
+                clearInterval(rolesRefreshInterval.current);
+                rolesRefreshInterval.current = null;
+            }
+        }
+    }, [currentTab, host?.active, host?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Cleanup interval on unmount
+    useEffect(() => {
+        return () => {
+            if (rolesRefreshInterval.current) {
+                clearInterval(rolesRefreshInterval.current);
+            }
+        };
+    }, []);
 
     useEffect(() => {
         if (!localStorage.getItem('bearer_token')) {
@@ -325,6 +483,13 @@ const HostDetail = () => {
                         // Certificates data is optional, don't fail the whole page load
                         console.log('Certificates data not available or failed to load:', error);
                     }
+                    // Fetch roles data
+                    try {
+                        await fetchRoles();
+                    } catch (error) {
+                        // Roles data is optional, don't fail the whole page load
+                        console.log('Roles data not available or failed to load:', error);
+                    }
                 } catch (hardwareErr) {
                     // Log but don't fail the whole request - hardware/software/diagnostics data is optional
                     console.warn('Failed to fetch hardware/software/diagnostics data:', hardwareErr);
@@ -340,7 +505,7 @@ const HostDetail = () => {
         };
 
         fetchHost();
-    }, [hostId, navigate, t, fetchCertificates]);
+    }, [hostId, navigate, t, fetchCertificates, fetchRoles]);
 
     // Tag-related functions
     const loadHostTags = useCallback(async () => {
@@ -1855,6 +2020,12 @@ const HostDetail = () => {
                         iconPosition="start"
                         sx={{ textTransform: 'none' }}
                     />
+                    <Tab
+                        icon={<AssignmentIcon />}
+                        label={t('hostDetail.serverRolesTab', 'Server Roles')}
+                        iconPosition="start"
+                        sx={{ textTransform: 'none' }}
+                    />
                     {ubuntuProInfo?.available && (
                         <Tab
                             icon={<VerifiedUserIcon />}
@@ -3078,6 +3249,187 @@ const HostDetail = () => {
                                             </TableBody>
                                         </Table>
                                     </TableContainer>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                </Grid>
+            )}
+
+            {/* Server Roles Tab */}
+            {currentTab === getServerRolesTabIndex() && (
+                <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                        <Card>
+                            <CardContent>
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                                    <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                        <AssignmentIcon sx={{ mr: 1 }} />
+                                        {t('hostDetail.serverRoles', 'Server Roles')} ({roles.length})
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                        <Button
+                                            variant="outlined"
+                                            onClick={requestRolesCollection}
+                                            disabled={rolesLoading || !host.active}
+                                            sx={{ minWidth: 120, height: '36.5px' }}
+                                        >
+                                            {rolesLoading ?
+                                                <CircularProgress size={20} /> :
+                                                t('hostDetail.collectRoles', 'Collect')
+                                            }
+                                        </Button>
+                                    </Box>
+                                </Box>
+                                {rolesLoading && (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                                        <CircularProgress />
+                                    </Box>
+                                )}
+                                {/* Server Roles Table */}
+                                {!rolesLoading && (
+                                    <TableContainer>
+                                        <Table>
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell padding="checkbox">
+                                                        <Checkbox
+                                                            indeterminate={selectedRoles.length > 0 && selectedRoles.length < roles.filter(role => role.service_name && role.service_name.trim() !== '').length}
+                                                            checked={roles.filter(role => role.service_name && role.service_name.trim() !== '').length > 0 && selectedRoles.length === roles.filter(role => role.service_name && role.service_name.trim() !== '').length}
+                                                            onChange={(e) => handleSelectAllRoles(e.target.checked)}
+                                                            disabled={!host.is_agent_privileged || roles.filter(role => role.service_name && role.service_name.trim() !== '').length === 0}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>{t('hostDetail.role', 'Role')}</TableCell>
+                                                    <TableCell>{t('hostDetail.package', 'Package')}</TableCell>
+                                                    <TableCell>{t('hostDetail.version', 'Version')}</TableCell>
+                                                    <TableCell>{t('hostDetail.service', 'Service')}</TableCell>
+                                                    <TableCell>{t('hostDetail.status', 'Status')}</TableCell>
+                                                    <TableCell>{t('hostDetail.detected', 'Detected')}</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {roles.length === 0 ? (
+                                                    <TableRow>
+                                                        <TableCell colSpan={7} align="center">
+                                                            <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'textSecondary', py: 2 }}>
+                                                                {t('hostDetail.noRolesDetected', 'No server roles detected')}
+                                                            </Typography>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ) : (
+                                                    roles.map((role) => (
+                                                        <TableRow key={role.id}>
+                                                            <TableCell padding="checkbox">
+                                                                <Checkbox
+                                                                    checked={selectedRoles.includes(role.id)}
+                                                                    onChange={(e) => handleRoleSelection(role.id, e.target.checked)}
+                                                                    disabled={!host.is_agent_privileged || !role.service_name || role.service_name.trim() === ''}
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                                                    {role.role}
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Typography variant="body2">
+                                                                    {role.package_name}
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Typography variant="body2">
+                                                                    {role.package_version || t('common.unknown', 'Unknown')}
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Typography variant="body2">
+                                                                    {role.service_name || t('common.none', 'None')}
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Chip
+                                                                    label={
+                                                                        role.service_status === 'running'
+                                                                            ? t('hostDetail.running', 'Running')
+                                                                            : role.service_status === 'stopped'
+                                                                            ? t('hostDetail.stopped', 'Stopped')
+                                                                            : role.service_status === 'installed'
+                                                                            ? t('hostDetail.installed', 'Installed')
+                                                                            : role.service_status || t('common.unknown', 'Unknown')
+                                                                    }
+                                                                    color={
+                                                                        role.service_status === 'running'
+                                                                            ? 'success'
+                                                                            : role.service_status === 'stopped'
+                                                                            ? 'error'
+                                                                            : role.service_status === 'installed'
+                                                                            ? 'info'
+                                                                            : 'default'
+                                                                    }
+                                                                    size="small"
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Typography variant="body2" sx={{ color: 'textSecondary' }}>
+                                                                    {new Date(role.detected_at).toLocaleDateString()}
+                                                                </Typography>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))
+                                                )}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                )}
+
+                                {/* Service Control Buttons */}
+                                {!rolesLoading && roles.length > 0 && roles.some(role => role.service_name && role.service_name.trim() !== '') && (
+                                    <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex', gap: 2, alignItems: 'center' }}>
+                                        <Typography variant="body2" sx={{ color: 'textSecondary', mr: 2 }}>
+                                            {t('hostDetail.serviceControlActions', 'Service Control Actions')}:
+                                        </Typography>
+                                        <Button
+                                            variant="contained"
+                                            color="success"
+                                            startIcon={<PlayArrowIcon />}
+                                            onClick={() => handleServiceControl('start')}
+                                            disabled={!host.is_agent_privileged || selectedRoles.length === 0 || serviceControlLoading}
+                                            sx={{ minWidth: 100 }}
+                                        >
+                                            {serviceControlLoading ? <CircularProgress size={20} /> : t('hostDetail.start', 'Start')}
+                                        </Button>
+                                        <Button
+                                            variant="contained"
+                                            color="error"
+                                            startIcon={<StopIcon />}
+                                            onClick={() => handleServiceControl('stop')}
+                                            disabled={!host.is_agent_privileged || selectedRoles.length === 0 || serviceControlLoading}
+                                            sx={{ minWidth: 100 }}
+                                        >
+                                            {serviceControlLoading ? <CircularProgress size={20} /> : t('hostDetail.stop', 'Stop')}
+                                        </Button>
+                                        <Button
+                                            variant="contained"
+                                            color="warning"
+                                            startIcon={<RestartAltIcon />}
+                                            onClick={() => handleServiceControl('restart')}
+                                            disabled={!host.is_agent_privileged || selectedRoles.length === 0 || serviceControlLoading}
+                                            sx={{ minWidth: 100 }}
+                                        >
+                                            {serviceControlLoading ? <CircularProgress size={20} /> : t('hostDetail.restart', 'Restart')}
+                                        </Button>
+                                        {!host.is_agent_privileged && (
+                                            <Typography variant="caption" sx={{ color: 'warning.main', ml: 2 }}>
+                                                {t('hostDetail.privilegedModeRequired', 'Privileged mode required for service control')}
+                                            </Typography>
+                                        )}
+                                        {selectedRoles.length > 0 && (
+                                            <Typography variant="caption" sx={{ color: 'primary.main', ml: 2 }}>
+                                                {t('hostDetail.selectedServices', `${selectedRoles.length} service(s) selected`)}
+                                            </Typography>
+                                        )}
+                                    </Box>
                                 )}
                             </CardContent>
                         </Card>

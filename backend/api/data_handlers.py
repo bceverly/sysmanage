@@ -17,6 +17,7 @@ from backend.persistence.models import (
     AvailablePackage,
     Host,
     HostCertificate,
+    HostRole,
     NetworkInterface,
     PackageUpdate,
     SoftwarePackage,
@@ -1700,4 +1701,106 @@ async def handle_host_certificates_update(db: Session, connection, message_data:
         return {
             "message_type": "error",
             "error": f"Failed to process certificates update: {str(e)}",
+        }
+
+
+async def handle_host_role_data_update(db: Session, connection, message_data: dict):
+    """Handle host role data update message from agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    try:
+        # Check for host_id in message data (agent-provided)
+        agent_host_id = message_data.get("host_id")
+        if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+            return {"message_type": "error", "error": "host_not_registered"}
+
+        # Find the host by hostname or other connection attributes
+        host = None
+        if hasattr(connection, "hostname") and connection.hostname:
+            host = db.query(Host).filter(Host.fqdn == connection.hostname).first()
+        if not host and agent_host_id:
+            host = db.query(Host).filter(Host.id == agent_host_id).first()
+
+        if not host:
+            debug_logger.warning(
+                "Could not identify host for role data update from connection %s",
+                getattr(connection, "hostname", "unknown"),
+            )
+            return {"message_type": "error", "error": "host_identification_failed"}
+
+        # Get role data from message
+        roles_data = message_data.get("roles", [])
+        collection_timestamp = message_data.get("collection_timestamp")
+
+        debug_logger.info(
+            "Processing %d server roles for host %s (%s)",
+            len(roles_data),
+            host.fqdn,
+            host.id,
+        )
+
+        # Clear existing roles for this host
+        db.query(HostRole).filter(HostRole.host_id == host.id).delete()
+
+        # Process and store new roles
+        roles_processed = 0
+        for role_data in roles_data:
+            try:
+                # Parse collection timestamp
+                detected_at = None
+                if collection_timestamp:
+                    detected_at = datetime.fromisoformat(
+                        collection_timestamp.replace("Z", "+00:00")
+                    )
+
+                # Create role record
+                role = HostRole(
+                    host_id=host.id,
+                    role=role_data.get("role", ""),
+                    package_name=role_data.get("package_name", ""),
+                    package_version=role_data.get("package_version"),
+                    service_name=role_data.get("service_name"),
+                    service_status=role_data.get("service_status"),
+                    is_active=role_data.get("is_active", False),
+                    detected_at=detected_at or datetime.now(timezone.utc),
+                )
+
+                db.add(role)
+                roles_processed += 1
+
+            except Exception as e:
+                debug_logger.warning(
+                    "Failed to process role %s for host %s: %s",
+                    role_data.get("role", "unknown"),
+                    host.fqdn,
+                    e,
+                )
+                continue
+
+        # Commit all changes
+        db.commit()
+
+        debug_logger.info(
+            "Successfully stored %d server roles for host %s",
+            roles_processed,
+            host.fqdn,
+        )
+
+        return {
+            "message_type": "role_data_update_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "status": "processed",
+            "roles_stored": roles_processed,
+        }
+
+    except Exception as e:
+        debug_logger.error(
+            "Error processing role data update from %s: %s",
+            getattr(connection, "hostname", "unknown"),
+            e,
+        )
+        db.rollback()
+        return {
+            "message_type": "error",
+            "error": f"Failed to process role data update: {str(e)}",
         }

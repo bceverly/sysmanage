@@ -199,7 +199,7 @@ class TestSysManagePerformance:
                 req["response_time"] for req in completed_requests
             ) / len(completed_requests)
             max_response_time = max(req["response_time"] for req in completed_requests)
-            total_size = sum(req["size"] for req in completed_requests)
+            total_size = sum(req.get("size", 0) for req in completed_requests)
 
             print(f"🌐 Total requests: {len(completed_requests)}")
             print(f"⚡ Average response time: {avg_response_time:.3f}s")
