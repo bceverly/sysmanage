@@ -33,7 +33,9 @@ help:
 	@echo "  make stop-openbao  - Stop OpenBAO development server only"
 	@echo "  make status-openbao - Check OpenBAO server status"
 	@echo ""
-	@echo "OpenBSD users: install-dev will check for C tracer dependencies (gcc, py3-cffi)"
+	@echo "BSD users: install-dev will check for C tracer dependencies"
+	@echo "  - OpenBSD: gcc, py3-cffi"
+	@echo "  - NetBSD: gcc13, py312-cffi"
 
 # Virtual environment activation
 VENV := .venv
@@ -66,9 +68,26 @@ install-dev:
 	@echo "Installing Python development dependencies..."
 	@$(PIP) install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep
 	@echo "Installing requirements.txt (includes Selenium WebDriver)..."
-	@$(PIP) install -r requirements.txt
-	@echo "Checking for OpenBSD C tracer requirements..."
-	@$(PYTHON) scripts/check-openbsd-deps.py
+	@if [ "$$(uname -s)" = "NetBSD" ] || [ "$$(uname -s)" = "OpenBSD" ] || [ "$$(uname -s)" = "FreeBSD" ]; then \
+		echo "[INFO] Installing packages except Playwright (not available on BSD systems)..."; \
+		grep -v "^playwright" requirements.txt | $(PIP) install -r /dev/stdin || true; \
+		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
+	else \
+		$(PIP) install -r requirements.txt; \
+	fi
+	@echo "Checking for BSD system C tracer requirements..."
+	@$(PYTHON) scripts/check-bsd-deps.py
+	@if [ "$$(uname -s)" = "NetBSD" ]; then \
+		echo "[INFO] NetBSD detected - rebuilding Pillow with correct library paths..."; \
+		export CFLAGS="-I/usr/pkg/include" && export LDFLAGS="-L/usr/pkg/lib -Wl,-R/usr/pkg/lib" && \
+		$(PIP) uninstall -y Pillow && $(PIP) install --no-binary=:all: Pillow; \
+		echo "[OK] Pillow rebuilt for NetBSD"; \
+		echo "[INFO] NetBSD detected - fixing websocket dependencies for Selenium compatibility..."; \
+		$(PIP) uninstall -y websocket 2>/dev/null || true; \
+		rm -rf $(VENV_DIR)/lib/python*/site-packages/websocket $(VENV_DIR)/lib/python*/site-packages/websocket-*.dist-info 2>/dev/null || true; \
+		$(PIP) install --force-reinstall websocket-client websockets; \
+		echo "[OK] websocket dependencies fixed for NetBSD Selenium support"; \
+	fi
 	@echo "Installing OpenBAO for secrets management..."
 	@$(PYTHON) scripts/install-openbao.py
 	@echo "Setting up WebDriver for screenshots..."
@@ -77,33 +96,37 @@ ifeq ($(OS),Windows_NT)
 	@echo "Installing Playwright browsers for Windows..."
 	@$(PYTHON) -m playwright install chromium firefox webkit 2>nul || echo "Playwright browser installation failed - continuing with Selenium fallback"
 else
-	@echo "Installing Playwright browsers for Unix-like system..."
-	@$(PYTHON) -m playwright install chromium firefox webkit 2>/dev/null || echo "Playwright browser installation failed - continuing with Selenium fallback"
-	@echo "Checking Playwright browser dependencies..."
-	@$(PYTHON) -c "from playwright.sync_api import sync_playwright; exec('with sync_playwright() as p: browser = p.chromium.launch(headless=True); browser.close(); print(\"✓ Playwright dependencies working\")')" 2>/dev/null || ( \
-		echo "Installing Playwright system dependencies..."; \
-		echo "This may prompt for sudo password to install system packages..."; \
-		if command -v sudo >/dev/null 2>&1; then \
-			sudo $(PYTHON) -m playwright install-deps 2>/dev/null || ( \
-				echo ""; \
-				echo "❌ Playwright automatic dependency installation failed."; \
-				echo "   Installing manually..."; \
-				echo ""; \
-				sudo apt-get update -qq && \
-				sudo apt-get install -y \
-					libicu76 libavif16 libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 \
-					libatspi2.0-0t64 libcairo2 libcups2t64 libdbus-1-3 libdrm2 libgbm1 \
-					libglib2.0-0t64 libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 \
-					libxcomposite1 libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2 \
-					libcairo-gobject2 libfontconfig1 libfreetype6 libgdk-pixbuf-2.0-0 \
-					libgtk-3-0t64 libpangocairo-1.0-0 libx11-xcb1 libxcb-shm0 libxcursor1 \
-					libxi6 libxrender1 fonts-liberation xvfb && \
-				echo "✓ Comprehensive dependency installation completed" \
-			); \
-		else \
-			echo "❌ sudo not available and Playwright dependencies needed manual installation"; \
-		fi \
-	)
+	@if [ "$$(uname -s)" != "OpenBSD" ] && [ "$$(uname -s)" != "FreeBSD" ] && [ "$$(uname -s)" != "NetBSD" ]; then \
+		echo "Installing Playwright browsers for Unix-like system..."; \
+		$(PYTHON) -m playwright install chromium firefox webkit 2>/dev/null || echo "Playwright browser installation failed - continuing with Selenium fallback"; \
+		echo "Checking Playwright browser dependencies..."; \
+		$(PYTHON) -c "from playwright.sync_api import sync_playwright; exec('with sync_playwright() as p: browser = p.chromium.launch(headless=True); browser.close(); print(\"✓ Playwright dependencies working\")')" 2>/dev/null || ( \
+			echo "Installing Playwright system dependencies..."; \
+			echo "This may prompt for sudo password to install system packages..."; \
+			if command -v sudo >/dev/null 2>&1; then \
+				sudo $(PYTHON) -m playwright install-deps 2>/dev/null || ( \
+					echo ""; \
+					echo "❌ Playwright automatic dependency installation failed."; \
+					echo "   Installing manually..."; \
+					echo ""; \
+					sudo apt-get update -qq && \
+					sudo apt-get install -y \
+						libicu76 libavif16 libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 \
+						libatspi2.0-0t64 libcairo2 libcups2t64 libdbus-1-3 libdrm2 libgbm1 \
+						libglib2.0-0t64 libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 \
+						libxcomposite1 libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2 \
+						libcairo-gobject2 libfontconfig1 libfreetype6 libgdk-pixbuf-2.0-0 \
+						libgtk-3-0t64 libpangocairo-1.0-0 libx11-xcb1 libxcb-shm0 libxcursor1 \
+						libxi6 libxrender1 fonts-liberation xvfb && \
+					echo "✓ Comprehensive dependency installation completed" \
+				); \
+			else \
+				echo "❌ sudo not available and Playwright dependencies needed manual installation"; \
+			fi \
+		); \
+	else \
+		echo "BSD system detected - skipping Playwright browser installation (using Selenium)"; \
+	fi
 endif
 	@echo "Installing TypeScript/React development dependencies..."
 	@cd frontend && npm install --include=optional
@@ -129,8 +152,12 @@ else
 		npm install -g eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin; \
 	fi
 endif
-	@echo "Installing Artillery for performance testing..."
-	@npm install -g artillery@latest || echo "[WARNING] Artillery installation failed - performance tests may not run"
+	@if [ "$$(uname -s)" != "OpenBSD" ] && [ "$$(uname -s)" != "FreeBSD" ] && [ "$$(uname -s)" != "NetBSD" ]; then \
+		echo "Installing Artillery for performance testing..."; \
+		npm install -g artillery@latest || echo "[WARNING] Artillery installation failed - performance tests may not run"; \
+	else \
+		echo "[SKIP] Artillery installation skipped on BSD systems - performance tests not supported"; \
+	fi
 	@echo "[OK] Development dependencies installation completed"
 
 # Database migration target
@@ -290,7 +317,7 @@ test-typescript:
 
 # UI integration tests
 test-ui: $(VENV_ACTIVATE)
-	@if [ "$(shell uname -s)" != "OpenBSD" ] && [ "$(shell uname -s)" != "FreeBSD" ]; then \
+	@if [ "$(shell uname -s)" != "OpenBSD" ] && [ "$(shell uname -s)" != "FreeBSD" ] && [ "$(shell uname -s)" != "NetBSD" ]; then \
 		echo "=== Running UI Integration Tests (Playwright) ==="; \
 		if [ "$(shell uname -s)" = "Darwin" ]; then \
 			echo "[INFO] macOS detected - testing Chrome, Firefox, and WebKit/Safari"; \
@@ -301,7 +328,7 @@ test-ui: $(VENV_ACTIVATE)
 		echo "[OK] Playwright UI integration tests completed"; \
 	else \
 		echo "=== Running UI Integration Tests (Selenium) ==="; \
-		echo "[INFO] Using Selenium fallback on OpenBSD/FreeBSD"; \
+		echo "[INFO] Using Selenium fallback on BSD systems (OpenBSD/FreeBSD/NetBSD)"; \
 		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_selenium.py --confcutdir=tests/ui -p tests.ui.conftest_selenium -v --tb=short; \
 		echo "[OK] Selenium UI integration tests completed"; \
 	fi
@@ -312,7 +339,7 @@ test-playwright: test-ui
 # Performance testing with Artillery and enhanced Playwright
 test-performance: $(VENV_ACTIVATE)
 	@echo "=== Running Performance Tests ==="
-	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ]; then \
+	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ] || [ "$(shell uname -s)" = "NetBSD" ]; then \
 		echo "[SKIP] Artillery and Playwright not supported on $(shell uname -s) - performance tests skipped"; \
 	else \
 		echo "[INFO] Running Artillery load tests for backend API..."; \

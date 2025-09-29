@@ -59,7 +59,7 @@ def check_elevated_privileges():
     """Check if the script is running with elevated privileges."""
     system = platform.system()
 
-    if system in ["Linux", "Darwin", "FreeBSD", "OpenBSD"]:
+    if system in ["Linux", "Darwin", "FreeBSD", "OpenBSD", "NetBSD"]:
         # Unix-like systems
         if os.geteuid() != 0:
             print("Error: This script must be run with elevated privileges.")
@@ -155,22 +155,38 @@ def run_make_install_dev():
 
     try:
         print(f"Running {make_cmd} install-dev...")
+        print("(This may take several minutes and may prompt for sudo password...)")
+
+        # Preserve user's PATH to ensure tools like 'bao' are found
+        env = os.environ.copy()
+        original_user = os.environ.get('SUDO_USER') or os.environ.get('DOAS_USER') or os.environ.get('ORIGINAL_USER')
+        if original_user:
+            # Get the user's home directory
+            import pwd
+            try:
+                user_info = pwd.getpwnam(original_user)
+                user_home = user_info.pw_dir
+
+                # Add ~/.local/bin to PATH if not already present
+                current_path = env.get('PATH', '')
+                local_bin = os.path.join(user_home, '.local', 'bin')
+                if local_bin not in current_path:
+                    env['PATH'] = f"{local_bin}:{current_path}"
+
+            except (KeyError, ImportError):
+                pass  # Fall back to default environment
+
         result = subprocess.run([make_cmd, 'install-dev'], cwd=project_root,
-                              capture_output=True, text=True, timeout=300)
+                              text=True, timeout=900, env=env)
 
         if result.returncode != 0:
-            print(f"Error running make install-dev:")
-            print(f"STDOUT: {result.stdout}")
-            print(f"STDERR: {result.stderr}")
+            print(f"Error: make install-dev failed with return code {result.returncode}")
             sys.exit(1)
 
         print("Dependencies installed successfully!")
-        if result.stdout:
-            print("Output:")
-            print(result.stdout)
 
     except subprocess.TimeoutExpired:
-        print("Error: make install-dev timed out after 5 minutes")
+        print("Error: make install-dev timed out after 15 minutes")
         sys.exit(1)
     except Exception as e:
         print(f"Error running make install-dev: {e}")

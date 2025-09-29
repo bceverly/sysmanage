@@ -111,9 +111,20 @@ def ui_config():
     return UIConfig()
 
 
-@pytest.fixture(scope="session", params=["chrome", "firefox"])
+def _get_browser_params():
+    """Get browser parameters based on platform"""
+    import platform
+
+    # On NetBSD, only test Chrome due to Firefox WebDriver compatibility issues
+    if platform.system() == "NetBSD":
+        return ["chrome"]
+    else:
+        return ["chrome", "firefox"]
+
+
+@pytest.fixture(scope="session", params=_get_browser_params())
 def browser_driver(request):
-    """WebDriver instance for Selenium tests - supports Chrome and Firefox"""
+    """WebDriver instance for Selenium tests - supports Chrome and Firefox (Chrome only on NetBSD)"""
     browser_name = request.param
 
     if browser_name == "chrome":
@@ -149,13 +160,25 @@ def _create_chrome_driver():
     options.add_argument("--disable-backgrounding-occluded-windows")
     options.add_argument("--disable-renderer-backgrounding")
 
-    # Set Chrome binary location for OpenBSD
-    chrome_binary_paths = [
-        "/usr/local/bin/chrome",
-        "/usr/local/bin/chromium",
-        "/usr/bin/google-chrome",
-        "/usr/bin/chromium-browser",
-    ]
+    # Set Chrome binary location based on platform
+    import platform
+
+    system = platform.system()
+
+    chrome_binary_paths = []
+    if system == "NetBSD":
+        chrome_binary_paths = [
+            "/usr/pkg/bin/chromium",  # NetBSD (pkgin)
+            "/usr/pkg/bin/chrome",  # NetBSD alternative
+        ]
+    else:
+        # OpenBSD, FreeBSD, Linux, etc.
+        chrome_binary_paths = [
+            "/usr/local/bin/chrome",  # OpenBSD/FreeBSD
+            "/usr/local/bin/chromium",  # OpenBSD/FreeBSD
+            "/usr/bin/google-chrome",  # Linux
+            "/usr/bin/chromium-browser",  # Linux
+        ]
 
     chrome_binary = None
     for chrome_path in chrome_binary_paths:
@@ -167,12 +190,19 @@ def _create_chrome_driver():
     if not chrome_binary:
         raise RuntimeError("Chrome/Chromium binary not found")
 
-    # Set ChromeDriver path for OpenBSD
-    chromedriver_paths = [
-        "/usr/local/bin/chromedriver",
-        "/usr/bin/chromedriver",
-        "/opt/chromedriver",
-    ]
+    # Set ChromeDriver path based on platform
+    chromedriver_paths = []
+    if system == "NetBSD":
+        chromedriver_paths = [
+            "/usr/pkg/bin/chromedriver",  # NetBSD (pkgin)
+        ]
+    else:
+        # OpenBSD, FreeBSD, Linux, etc.
+        chromedriver_paths = [
+            "/usr/local/bin/chromedriver",  # OpenBSD/FreeBSD
+            "/usr/bin/chromedriver",  # Linux
+            "/opt/chromedriver",  # Manual install
+        ]
 
     chromedriver_path = None
     for driver_path in chromedriver_paths:
@@ -203,12 +233,23 @@ def _create_firefox_driver():
     options.add_argument("--width=1920")
     options.add_argument("--height=1080")
 
-    # Set Firefox binary location for OpenBSD
-    firefox_binary_paths = [
-        "/usr/local/bin/firefox",
-        "/usr/bin/firefox",
-        "/opt/firefox/firefox",
-    ]
+    # Set Firefox binary location based on platform
+    import platform
+
+    system = platform.system()
+
+    firefox_binary_paths = []
+    if system == "NetBSD":
+        firefox_binary_paths = [
+            "/usr/pkg/bin/firefox",  # NetBSD (pkgin)
+        ]
+    else:
+        # OpenBSD, FreeBSD, Linux, etc.
+        firefox_binary_paths = [
+            "/usr/local/bin/firefox",  # OpenBSD/FreeBSD
+            "/usr/bin/firefox",  # Linux
+            "/opt/firefox/firefox",  # Manual install
+        ]
 
     firefox_binary = None
     for firefox_path in firefox_binary_paths:
@@ -220,12 +261,19 @@ def _create_firefox_driver():
     if not firefox_binary:
         raise RuntimeError("Firefox binary not found")
 
-    # Set GeckoDriver path for OpenBSD
-    geckodriver_paths = [
-        "/usr/local/bin/geckodriver",
-        "/usr/bin/geckodriver",
-        "/opt/geckodriver",
-    ]
+    # Set GeckoDriver path based on platform
+    geckodriver_paths = []
+    if system == "NetBSD":
+        geckodriver_paths = [
+            "/usr/pkg/bin/geckodriver",  # NetBSD (pkgin)
+        ]
+    else:
+        # OpenBSD, FreeBSD, Linux, etc.
+        geckodriver_paths = [
+            "/usr/local/bin/geckodriver",  # OpenBSD/FreeBSD
+            "/usr/bin/geckodriver",  # Linux
+            "/opt/geckodriver",  # Manual install
+        ]
 
     geckodriver_path = None
     for driver_path in geckodriver_paths:

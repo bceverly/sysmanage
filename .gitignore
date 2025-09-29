@@ -213,3 +213,4 @@ artillery-report-*.json
 artillery-report-*.html
 
 tests/ui/test-results
+*.core

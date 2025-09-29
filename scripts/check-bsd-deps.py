@@ -2,7 +2,7 @@
 """
 Coverage.py C tracer checker and installer.
 Detects if coverage.py C tracer is unavailable and attempts to fix it.
-Works on all platforms, with specific OpenBSD 7.7 support.
+Works on all platforms, with specific OpenBSD and NetBSD support.
 """
 
 import platform
@@ -14,8 +14,16 @@ def check_openbsd_system():
     """Check if we're running on OpenBSD."""
     return platform.system().lower() == 'openbsd'
 
+def check_netbsd_system():
+    """Check if we're running on NetBSD."""
+    return platform.system().lower() == 'netbsd'
+
+def check_bsd_system():
+    """Check if we're running on any BSD system (OpenBSD or NetBSD)."""
+    return check_openbsd_system() or check_netbsd_system()
+
 def check_pkg_installed(package_name):
-    """Check if an OpenBSD package is installed."""
+    """Check if a BSD package is installed (works on both OpenBSD and NetBSD)."""
     try:
         result = subprocess.run(['pkg_info', '-e', package_name],
                               capture_output=True, text=True)
@@ -123,13 +131,19 @@ def main():
 
     print("[SETUP] C tracer not available - checking dependencies...")
 
-    # OpenBSD-specific package checks
-    if check_openbsd_system():
+    # BSD-specific package checks (OpenBSD and NetBSD)
+    if check_bsd_system():
         # Check if development tools are available
-        required_packages = [
-            'gcc',  # C compiler
-            'py3-cffi',  # Python CFFI for C extensions
-        ]
+        if check_openbsd_system():
+            required_packages = [
+                'gcc',  # C compiler
+                'py3-cffi',  # Python CFFI for C extensions
+            ]
+        elif check_netbsd_system():
+            required_packages = [
+                'gcc13',  # C compiler (NetBSD typically uses versioned gcc packages)
+                'py312-cffi',  # Python CFFI for C extensions (Python 3.12)
+            ]
 
         missing_packages = []
         for package in required_packages:
@@ -142,15 +156,20 @@ def main():
                 print(f"   - {pkg}")
             print()
             print("To install missing packages:")
-            print(f"   doas pkg_add {' '.join(missing_packages)}")
+            if check_openbsd_system():
+                print(f"   doas pkg_add {' '.join(missing_packages)}")
+            elif check_netbsd_system():
+                print(f"   pkgin install {' '.join(missing_packages)}")
+                print("   # or using pkg_add:")
+                print(f"   pkg_add {' '.join(missing_packages)}")
             print()
             print("Note: C tracer will use Python fallback (slower but functional)")
             return
 
         print("[OK] Required compilation tools are available")
     else:
-        # Non-OpenBSD systems - assume dev tools are available or user can install them
-        print("ℹ️  Non-OpenBSD system - assuming development tools are available")
+        # Non-BSD systems - assume dev tools are available or user can install them
+        print("ℹ️  Non-BSD system - assuming development tools are available")
 
     # Try to reinstall coverage with C extension (works on all platforms)
     print("[SETUP] Attempting to reinstall coverage with C extension...")
@@ -166,7 +185,7 @@ def main():
     else:
         print("\n[WARN]  Could not install C tracer - using Python fallback")
         print("Coverage will work but run slower")
-        if not check_openbsd_system():
+        if not check_bsd_system():
             print("You may need to install development tools (gcc, python-dev, etc.)")
 
     print("\nNote: This only affects test coverage speed, not functionality")

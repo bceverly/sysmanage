@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Build OpenBAO from source on OpenBSD
+# Build OpenBAO from source on BSD systems (OpenBSD/NetBSD)
 # This script handles downloading, building, and installing OpenBAO
 #
 
@@ -11,13 +11,27 @@ PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 BUILD_DIR="$PROJECT_DIR/.build"
 INSTALL_DIR="$HOME/.local/bin"
 
-echo "OpenBAO Source Build Script for OpenBSD"
-echo "======================================="
+# Detect the operating system
+OS_NAME=$(uname -s | tr '[:upper:]' '[:lower:]')
+echo "OpenBAO Source Build Script for BSD Systems"
+echo "==========================================="
+echo "Detected OS: $OS_NAME"
 
 # Check if Go is installed
 if ! command -v go >/dev/null 2>&1; then
     echo "Error: Go is required to build OpenBAO"
-    echo "Install with: doas pkg_add go"
+    case "$OS_NAME" in
+        openbsd)
+            echo "Install with: doas pkg_add go"
+            ;;
+        netbsd)
+            echo "Install with: pkgin install go"
+            echo "Then create symlink: sudo ln -sf /usr/pkg/bin/go124 /usr/pkg/bin/go"
+            ;;
+        *)
+            echo "Install Go for your system"
+            ;;
+    esac
     exit 1
 fi
 
@@ -27,7 +41,17 @@ echo "Found Go version: $GO_VERSION"
 # Check if git is installed
 if ! command -v git >/dev/null 2>&1; then
     echo "Error: Git is required to download OpenBAO source"
-    echo "Install with: doas pkg_add git"
+    case "$OS_NAME" in
+        openbsd)
+            echo "Install with: doas pkg_add git"
+            ;;
+        netbsd)
+            echo "Install with: pkgin install git"
+            ;;
+        *)
+            echo "Install Git for your system"
+            ;;
+    esac
     exit 1
 fi
 
@@ -84,9 +108,9 @@ else
     echo "Warning: Patch script not found at $PATCH_SCRIPT"
 fi
 
-# Set up Go environment for OpenBSD
+# Set up Go environment for the detected OS
 export CGO_ENABLED=0
-export GOOS=openbsd
+export GOOS="$OS_NAME"
 export GOARCH=amd64
 
 # Build OpenBAO

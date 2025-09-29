@@ -17,8 +17,8 @@ def install_webdriver():
     import platform
     system = platform.system().lower()
 
-    # Check if we're on OpenBSD or FreeBSD - skip automatic driver download
-    if system in ['openbsd', 'freebsd']:
+    # Check if we're on BSD systems - skip automatic driver download
+    if system in ['openbsd', 'freebsd', 'netbsd']:
         print("Detected BSD system - using system browser directly...")
         return detect_system_browser()
 
@@ -66,6 +66,7 @@ def detect_system_browser():
     print("Please install a browser:")
     print("  - On OpenBSD: pkg_add chromium")
     print("  - On FreeBSD: pkg install chromium")
+    print("  - On NetBSD: pkgin install chromium")
     print("  - On Linux: apt-get install chromium-browser")
     print("  - On macOS: brew install --cask google-chrome")
     return False
@@ -161,6 +162,8 @@ def main():
         print("Screenshot capabilities may not work properly")
         print("You may need to install Chrome/Chromium manually:")
         print("  - On OpenBSD: pkg_add chromium")
+        print("  - On FreeBSD: pkg install chromium")
+        print("  - On NetBSD: pkgin install chromium")
         print("  - On Linux: apt-get install chromium-browser")
         print("  - On macOS: brew install --cask google-chrome")
         sys.exit(1)

@@ -1,227 +1,184 @@
 api:
-  host: "localhost"
+  host: localhost
   port: 8080
-  # Development - no SSL certificates for HTTP
-
 database:
-  user: "sysmanage"
-  # WARNING: Development credentials only - NEVER use in production
-  password: "DEV_Change_Me_ABC123!"
-  host: "localhost"
+  user: sysmanage
+  password: DEV_Change_Me_ABC123!
+  host: localhost
   port: 5432
-  name: "sysmanage"
-
+  name: sysmanage
 security:
-  password_salt: "fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
-  admin_userid: "admin@sysmanage.org"
-  # WARNING: Development credentials only - NEVER use in production
-  admin_password: "DEV_AdminPass123!"
-  # WARNING: Development secret only - NEVER use in production
-  # nosemgrep: generic.secrets.security.detected-generic-secret
-  jwt_secret: "SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
-  jwt_algorithm: "HS256"
+  password_salt: 4d287511d0a2b17c0f820feeb57ed976e87e38ab90385f5b41eadbeafe975542
+  admin_userid: admin@sysmanage.org
+  admin_password: DEV_AdminPass123!
+  jwt_secret: kVZVgGsFyBctZOYDrG6id-tQnbSi5k8Inli0uM7K9DnXpQXiOzIYgH3YQEYHdoWYOq7bRZrzTgmXD3MQAA-iJw
+  jwt_algorithm: HS256
   jwt_auth_timeout: 6000
   jwt_refresh_timeout: 60000
   password_policy:
-    # Minimum password length (default: 8)
     min_length: 8
-    
-    # Maximum password length (default: 128)
     max_length: 128
-    
-    # Require at least one uppercase letter (A-Z)
     require_uppercase: true
-    
-    # Require at least one lowercase letter (a-z)
     require_lowercase: true
-    
-    # Require at least one number (0-9)
     require_numbers: true
-    
-    # Require at least one special character
     require_special_chars: true
-    
-    # Define which special characters are allowed
-    special_chars: "!@#$%^&*()_+-=[]{}|;':\",./<>?"
-    
-    # Prevent users from including their username/email in password
+    special_chars: '!@#$%^&*()_+-=[]{}|;'':",./<>?'
     allow_username_in_password: false
-    
-    # Remember last N passwords to prevent reuse (0 = disabled)
     password_history_count: 3
-    
-    # Minimum number of different character types required (1-4)
     min_character_types: 3
-
 webui:
-  host: "localhost"
+  host: localhost
   port: 3000
-  # Development - no SSL certificates for HTTP
-
 logging:
-  # Log levels to include: DEBUG, INFO, WARNING, ERROR, CRITICAL
-  # Can combine multiple levels with pipe: "INFO|WARNING|ERROR|CRITICAL"
-  # Examples: "DEBUG" (debug only), "INFO|ERROR" (info and errors only), 
-  #          "WARNING|ERROR|CRITICAL" (warnings and above)
-  level: "INFO|WARNING|ERROR|CRITICAL"
-  
-  # Log to file (default is logs/* in service directory)
-  # file: "/var/log/sysmanage.log"
-  
-  # Log format - customize the log message appearance
-  format: "[%(asctime)s UTC] %(name)s - %(levelname)s - %(message)s"
-
+  level: INFO|WARNING|ERROR|CRITICAL
+  format: '[%(asctime)s UTC] %(name)s - %(levelname)s - %(message)s'
 message_queue:
-  # Message expiration timeout in minutes (default: 60)
-  # Messages older than this will be marked as expired and no longer processed
   expiration_timeout_minutes: 60
-  
-  # Cleanup interval in minutes (default: 30) 
-  # How often to check for and clean up expired messages
   cleanup_interval_minutes: 30
-
 vault:
-  # OpenBAO (HashiCorp Vault fork) configuration for secrets management
-  # Set enabled to false to disable vault functionality entirely
   enabled: true
-
-  # OpenBAO server connection details
-  url: "http://localhost:8200"
-
-  # Authentication token for connecting to OpenBAO
-  # WARNING: Development token only - NEVER use in production
-  # Generate with: bao auth -method=userpass username=dev
-  token: "dev-only-token-change-me"
-
-  # KV secrets engine mount path for storing SSH keys and other secrets
-  # Default mount path for KV v2 secrets engine
-  mount_path: "secret"
-
-  # Connection settings
-  timeout: 30  # Connection timeout in seconds
-  verify_ssl: false  # Set to true in production with proper certificates
-
-  # Development settings
-  dev_mode: true  # Enables development-specific features and logging
-
-  # Server configuration
+  url: http://localhost:8200
+  token: s.o8iy5NE06zGtZN4a9nNHYlK1
+  mount_path: secret
+  timeout: 30
+  verify_ssl: false
+  dev_mode: false
   server:
-    enabled: false  # Don't start OpenBAO server in dev mode (use external dev server)
-    config_file: "./openbao.hcl"  # Path to OpenBAO configuration file
-    data_path: "./data/openbao"  # Path to store vault data
-    unseal_keys: []  # Unseal keys (populated during initialization)
-    initialized: false  # Whether vault has been initialized
-
+    enabled: true
+    config_file: ./openbao.hcl
+    data_path: ./data/openbao
+    unseal_keys:
+    - w6aIlwzcDBzYIR6jRKxCdbJg0O/iRoCOlX5j3D3DXtQ=
+    initialized: true
 email:
-  # SMTP server configuration for sending emails (password resets, notifications, etc.)
-  # Set enabled to false to disable email functionality entirely
   enabled: false
-  
-  # SMTP server details
   smtp:
-    # SMTP server hostname
-    host: "smtp.gmail.com"
-    
-    # SMTP server port (common values: 587 for STARTTLS, 465 for SSL/TLS, 25 for unencrypted)
+    host: smtp.gmail.com
     port: 587
-    
-    # Use STARTTLS encryption (recommended for port 587)
     use_tls: true
-    
-    # Use SSL encryption (typically for port 465)
     use_ssl: false
-    
-    # Authentication credentials - UPDATE THESE FOR YOUR ENVIRONMENT
-    username: "your-email@gmail.com"
-    # WARNING: Replace with actual app password for production use
-    password: "your-app-password"  # For Gmail, generate an App Password
-    
-    # Connection timeout in seconds
+    username: your-email@gmail.com
+    password: your-app-password
     timeout: 30
-  
-  # Default email settings
-  from_address: "noreply@your-domain.com"
-  from_name: "SysManage System"
-  
-  # Email template settings
+  from_address: noreply@your-domain.com
+  from_name: SysManage System
   templates:
-    # Subject prefix for all emails
-    subject_prefix: "[SysManage]"
-
-    # Password reset email template
+    subject_prefix: '[SysManage]'
     password_reset:
-      subject: "Password Reset Request"
-      text_body: |
-        Hello,
+      subject: Password Reset Request
+      text_body: 'Hello,
+
 
         We received a request to reset your password for your SysManage account.
 
+
         To reset your password, please click the following link:
+
         {reset_url}
 
+
         This link will expire in 24 hours.
+
 
         If you did not request this password reset, please ignore this email.
 
+
         --
+
         SysManage System
 
-      html_body: |
-        <html>
+        '
+      html_body: '<html>
+
         <body>
+
         <p>Hello,</p>
+
 
         <p>We received a request to reset your password for your SysManage account.</p>
 
+
         <p>To reset your password, please click the following link:</p>
+
         <p><a href="{reset_url}">Reset Your Password</a></p>
 
+
         <p>This link will expire in 24 hours.</p>
+
 
         <p>If you did not request this password reset, please ignore this email.</p>
 
+
         <hr>
+
         <p><em>SysManage System</em></p>
+
         </body>
+
         </html>
 
-    # Initial account setup email template (for new users)
+        '
     initial_setup:
-      subject: "Welcome to SysManage - Set Your Password"
-      text_body: |
-        Hello,
+      subject: Welcome to SysManage - Set Your Password
+      text_body: 'Hello,
+
 
         A SysManage account has been created for you by your system administrator.
 
-        To complete your account setup and set your initial password, please click the following link:
+
+        To complete your account setup and set your initial password, please click
+        the following link:
+
         {setup_url}
+
 
         This link will expire in 24 hours.
 
-        If you did not expect this email or have questions, please contact your system administrator.
+
+        If you did not expect this email or have questions, please contact your system
+        administrator.
+
 
         Welcome to SysManage!
 
+
         --
+
         SysManage System
 
-      html_body: |
-        <html>
+        '
+      html_body: '<html>
+
         <body>
+
         <p>Hello,</p>
+
 
         <p>A SysManage account has been created for you by your system administrator.</p>
 
-        <p>To complete your account setup and set your initial password, please click the following link:</p>
+
+        <p>To complete your account setup and set your initial password, please click
+        the following link:</p>
+
         <p><a href="{setup_url}">Set Up Your Account</a></p>
+
 
         <p>This link will expire in 24 hours.</p>
 
-        <p>If you did not expect this email or have questions, please contact your system administrator.</p>
+
+        <p>If you did not expect this email or have questions, please contact your
+        system administrator.</p>
+
 
         <p><strong>Welcome to SysManage!</strong></p>
 
+
         <hr>
+
         <p><em>SysManage System</em></p>
+
         </body>
+
         </html>
+
+        '

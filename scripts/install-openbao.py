@@ -57,12 +57,15 @@ def detect_platform():
         return f'freebsd_{arch}'
     elif system == 'openbsd':
         return f'openbsd_{arch}'
+    elif system == 'netbsd':
+        return f'netbsd_{arch}'
     else:
         raise ValueError(f"Unsupported platform: {system}_{arch}")
 
 
 def check_openbao_installed():
     """Check if OpenBAO is already installed and accessible."""
+    # Check if 'bao' is in PATH
     try:
         result = subprocess.run(['bao', 'version'], capture_output=True, text=True)
         if result.returncode == 0:
@@ -70,6 +73,19 @@ def check_openbao_installed():
             return True
     except FileNotFoundError:
         pass
+
+    # Check if 'bao' is in ~/.local/bin (common install location)
+    home_dir = os.path.expanduser("~")
+    local_bao = os.path.join(home_dir, '.local', 'bin', 'bao')
+    if os.path.isfile(local_bao) and os.access(local_bao, os.X_OK):
+        try:
+            result = subprocess.run([local_bao, 'version'], capture_output=True, text=True)
+            if result.returncode == 0:
+                print(f"OpenBAO already installed in ~/.local/bin: {result.stdout.strip()}")
+                return True
+        except Exception:
+            pass
+
     return False
 
 
@@ -116,6 +132,121 @@ def install_via_package_manager():
             else:
                 print(f"pkg installation failed: {result.stderr}")
 
+        elif system == 'netbsd':
+            print("NetBSD detected - checking for existing installations...")
+
+            # Check if OpenBAO is already installed manually
+            if shutil.which('bao'):
+                print("OpenBAO (bao) found in PATH!")
+                return True
+
+            # Check if we have a previously built binary in the project
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            project_dir = os.path.dirname(script_dir)
+            built_binary = os.path.join(project_dir, '.build', 'openbao', 'bin', 'bao')
+
+            if os.path.exists(built_binary):
+                print(f"Found previously built OpenBAO binary: {built_binary}")
+                try:
+                    # Test if the binary works
+                    result = subprocess.run([built_binary, 'version'],
+                                          capture_output=True, text=True, timeout=5)
+                    if result.returncode == 0:
+                        print("Previous build is working! Installing to local bin...")
+                        # Install to user's local bin
+                        install_path = os.path.expanduser("~/.local/bin")
+                        os.makedirs(install_path, exist_ok=True)
+                        target_path = os.path.join(install_path, 'bao')
+                        shutil.copy2(built_binary, target_path)
+                        os.chmod(target_path, 0o755)
+                        print(f"OpenBAO installed to: {target_path}")
+                        print("Add ~/.local/bin to your PATH if not already done")
+                        return True
+                    else:
+                        print("Previous build exists but doesn't work properly")
+                        print("Will offer to rebuild...")
+                except Exception as e:
+                    print(f"Previous build exists but failed to test: {e}")
+                    print("Will offer to rebuild...")
+
+            # Check if vault is already installed
+            if shutil.which('vault'):
+                print("HashiCorp Vault found in PATH!")
+                print("Note: You can use 'vault' instead of 'bao' for development")
+                # Try to create symlink for compatibility if we have privileges
+                try:
+                    subprocess.run(['sudo', 'ln', '-sf', '/usr/pkg/bin/vault', '/usr/pkg/bin/bao'],
+                                 capture_output=True, text=True, check=False)
+                    print("Created 'bao' symlink to vault for compatibility")
+                except:
+                    pass
+                return True
+
+            # NetBSD doesn't have OpenBAO in packages - offer to build from source
+            print("OpenBAO is not available in NetBSD packages.")
+            print("Would you like to build OpenBAO from source? This requires Go and Git.")
+            print("(This will take 5-10 minutes depending on your system)")
+            print("")
+
+            # Check for required dependencies first
+            if not shutil.which('go'):
+                print("Go is required to build OpenBAO from source.")
+                print("")
+                print("Install Go with:")
+                print("  pkgin install go")
+                print("")
+                print("Then re-run: gmake install-dev")
+                print("")
+                print("Note: OpenBAO is optional - the system works without it (vault.enabled=false)")
+                return False
+
+            if not shutil.which('git'):
+                print("Git is required to download OpenBAO source.")
+                print("")
+                print("Install Git with:")
+                print("  pkgin install git")
+                print("")
+                print("Then re-run: gmake install-dev")
+                print("")
+                print("Note: OpenBAO is optional - the system works without it (vault.enabled=false)")
+                return False
+
+            if not shutil.which('gmake'):
+                print("GNU make is required to build OpenBAO from source.")
+                print("")
+                print("Install GNU make with:")
+                print("  pkgin install gmake")
+                print("")
+                print("Then re-run: gmake install-dev")
+                print("")
+                print("Note: OpenBAO is optional - the system works without it (vault.enabled=false)")
+                return False
+
+            try:
+                response = input("Build OpenBAO from source? [y/N]: ").strip().lower()
+                if response in ['y', 'yes']:
+                    print("Building OpenBAO from source...")
+
+                    # Run the build script
+                    build_script = os.path.join(os.path.dirname(__file__), 'build-openbao.sh')
+                    result = subprocess.run(['sh', build_script],
+                                          capture_output=False, text=True)
+
+                    if result.returncode == 0:
+                        print("OpenBAO built and installed successfully!")
+                        return True
+                    else:
+                        print("Build failed. You can try building manually or use vault.enabled=false")
+                        return False
+                else:
+                    print("Skipping OpenBAO build.")
+                    print("The development environment will work fine with vault.enabled=false")
+                    return False
+            except (KeyboardInterrupt, EOFError):
+                print("\nSkipping OpenBAO build.")
+                print("The development environment will work fine with vault.enabled=false")
+                return False
+
         elif system == 'openbsd':
             print("OpenBSD detected - checking for existing installations...")
 
@@ -123,6 +254,35 @@ def install_via_package_manager():
             if shutil.which('bao'):
                 print("OpenBAO (bao) found in PATH!")
                 return True
+
+            # Check if we have a previously built binary in the project
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            project_dir = os.path.dirname(script_dir)
+            built_binary = os.path.join(project_dir, '.build', 'openbao', 'bin', 'bao')
+
+            if os.path.exists(built_binary):
+                print(f"Found previously built OpenBAO binary: {built_binary}")
+                try:
+                    # Test if the binary works
+                    result = subprocess.run([built_binary, 'version'],
+                                          capture_output=True, text=True, timeout=5)
+                    if result.returncode == 0:
+                        print("Previous build is working! Installing to local bin...")
+                        # Install to user's local bin
+                        install_path = os.path.expanduser("~/.local/bin")
+                        os.makedirs(install_path, exist_ok=True)
+                        target_path = os.path.join(install_path, 'bao')
+                        shutil.copy2(built_binary, target_path)
+                        os.chmod(target_path, 0o755)
+                        print(f"OpenBAO installed to: {target_path}")
+                        print("Add ~/.local/bin to your PATH if not already done")
+                        return True
+                    else:
+                        print("Previous build exists but doesn't work properly")
+                        print("Will offer to rebuild...")
+                except Exception as e:
+                    print(f"Previous build exists but failed to test: {e}")
+                    print("Will offer to rebuild...")
 
             # Check if vault is already installed
             if shutil.which('vault'):
@@ -234,9 +394,9 @@ def install_from_binary():
         platform_str = detect_platform()
         print(f"Detected platform: {platform_str}")
 
-        # OpenBSD doesn't have precompiled binaries available
-        if platform_str.startswith('openbsd'):
-            print("OpenBSD precompiled binaries are not available from OpenBAO releases.")
+        # BSD systems don't have precompiled binaries available
+        if platform_str.startswith('openbsd') or platform_str.startswith('netbsd'):
+            print(f"{platform_str.split('_')[0].capitalize()} precompiled binaries are not available from OpenBAO releases.")
             print("Please install manually or use the package manager option.")
             return False
 
@@ -563,10 +723,10 @@ def main():
     if check_openbao_installed():
         return 0
 
-    # Special handling for OpenBSD
+    # Special handling for BSD systems
     system = platform.system().lower()
-    if system == 'openbsd':
-        print("OpenBSD detected - trying package installation...")
+    if system in ['openbsd', 'netbsd']:
+        print(f"{system.capitalize()} detected - trying package installation...")
 
         # Try package manager first (this will handle the build-from-source option)
         if install_via_package_manager():
