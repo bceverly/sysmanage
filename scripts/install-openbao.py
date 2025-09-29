@@ -74,17 +74,39 @@ def check_openbao_installed():
     except FileNotFoundError:
         pass
 
-    # Check if 'bao' is in ~/.local/bin (common install location)
-    home_dir = os.path.expanduser("~")
-    local_bao = os.path.join(home_dir, '.local', 'bin', 'bao')
-    if os.path.isfile(local_bao) and os.access(local_bao, os.X_OK):
-        try:
-            result = subprocess.run([local_bao, 'version'], capture_output=True, text=True)
-            if result.returncode == 0:
-                print(f"OpenBAO already installed in ~/.local/bin: {result.stdout.strip()}")
-                return True
-        except Exception:
-            pass
+    # Check common installation locations based on platform
+    system = platform.system().lower()
+    binary_name = 'bao.exe' if system == 'windows' else 'bao'
+
+    if system == 'windows':
+        # Windows-specific paths to check
+        potential_paths = [
+            os.path.join(os.path.expanduser("~"), "AppData", "Local", "bin", binary_name),
+            os.path.join(os.path.expanduser("~"), "bin", binary_name),
+            os.path.join("C:", "Program Files", "OpenBAO", binary_name),
+            os.path.join("C:", "Program Files (x86)", "OpenBAO", binary_name),
+        ]
+    else:
+        # Unix-like systems
+        potential_paths = [
+            os.path.join(os.path.expanduser("~"), '.local', 'bin', binary_name),
+            os.path.join('/usr', 'local', 'bin', binary_name),
+            os.path.join('/opt', 'openbao', 'bin', binary_name),
+        ]
+
+    for path in potential_paths:
+        if os.path.isfile(path) and os.access(path, os.X_OK):
+            try:
+                result = subprocess.run([path, 'version'], capture_output=True, text=True)
+                if result.returncode == 0:
+                    print(f"OpenBAO already installed at {path}: {result.stdout.strip()}")
+                    # Add to PATH hint if not already accessible
+                    if system == 'windows':
+                        parent_dir = os.path.dirname(path)
+                        print(f"Note: Add {parent_dir} to your PATH to use 'bao' command globally")
+                    return True
+            except Exception:
+                continue
 
     return False
 

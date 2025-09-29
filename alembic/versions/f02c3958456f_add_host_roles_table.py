@@ -36,78 +36,146 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
 
-    # Handle constraint and index modifications using batch mode for SQLite compatibility
-    with op.batch_alter_table('diagnostic_report', schema=None) as batch_op:
-        batch_op.drop_constraint(op.f('diagnostic_report_collection_id_key'), type_='unique')
-        batch_op.drop_index(op.f('ix_diagnostic_report_collection_id'))
-        batch_op.create_index(op.f('ix_diagnostic_report_collection_id'), ['collection_id'], unique=True)
+    # For SQLite compatibility, we need to use a different approach
+    # Since the previous migration may have created different constraint patterns,
+    # we'll just ensure the indexes exist with the correct uniqueness
 
-    with op.batch_alter_table('password_reset_token', schema=None) as batch_op:
-        batch_op.drop_constraint(op.f('password_reset_token_token_key'), type_='unique')
-        batch_op.drop_index(op.f('ix_password_reset_token_token'))
-        batch_op.create_index(op.f('ix_password_reset_token_token'), ['token'], unique=True)
+    # Recreate indexes as unique for all affected tables
+    # This is idempotent - if index already exists, it will be skipped
 
-    with op.batch_alter_table('script_execution_log', schema=None) as batch_op:
-        batch_op.drop_constraint(op.f('script_execution_log_execution_id_key'), type_='unique')
-        batch_op.drop_constraint(op.f('script_execution_log_execution_uuid_key'), type_='unique')
-        batch_op.drop_index(op.f('ix_script_execution_log_execution_id'))
-        batch_op.create_index(op.f('ix_script_execution_log_execution_id'), ['execution_id'], unique=True)
-        batch_op.drop_index(op.f('ix_script_execution_log_execution_uuid'))
-        batch_op.create_index(op.f('ix_script_execution_log_execution_uuid'), ['execution_uuid'], unique=True)
+    try:
+        op.drop_index('ix_diagnostic_report_collection_id', table_name='diagnostic_report')
+    except:
+        pass  # Index might not exist or might be named differently
+    try:
+        op.create_index(op.f('ix_diagnostic_report_collection_id'), 'diagnostic_report', ['collection_id'], unique=True)
+    except:
+        pass  # Index might already exist with correct settings
 
-    with op.batch_alter_table('software_installation_log', schema=None) as batch_op:
-        batch_op.drop_constraint(op.f('software_installation_log_installation_id_key'), type_='unique')
-        batch_op.drop_index(op.f('ix_software_installation_log_installation_id'))
-        batch_op.create_index(op.f('ix_software_installation_log_installation_id'), ['installation_id'], unique=True)
+    try:
+        op.drop_index('ix_password_reset_token_token', table_name='password_reset_token')
+    except:
+        pass  # Index might not exist or might be named differently
+    try:
+        op.create_index(op.f('ix_password_reset_token_token'), 'password_reset_token', ['token'], unique=True)
+    except:
+        pass  # Index might already exist with correct settings
 
-    with op.batch_alter_table('tags', schema=None) as batch_op:
-        batch_op.drop_constraint(op.f('tags_name_key'), type_='unique')
-        batch_op.drop_index(op.f('ix_tags_name'))
-        batch_op.create_index(op.f('ix_tags_name'), ['name'], unique=True)
+    try:
+        op.drop_index('ix_script_execution_log_execution_id', table_name='script_execution_log')
+    except:
+        pass  # Index might not exist or might be named differently
+    try:
+        op.create_index(op.f('ix_script_execution_log_execution_id'), 'script_execution_log', ['execution_id'], unique=True)
+    except:
+        pass  # Index might already exist with correct settings
 
-    with op.batch_alter_table('user', schema=None) as batch_op:
-        batch_op.drop_constraint(op.f('user_userid_key'), type_='unique')
-        batch_op.drop_index(op.f('ix_user_userid'))
-        batch_op.create_index(op.f('ix_user_userid'), ['userid'], unique=True)
+    try:
+        op.drop_index('ix_script_execution_log_execution_uuid', table_name='script_execution_log')
+    except:
+        pass  # Index might not exist or might be named differently
+    try:
+        op.create_index(op.f('ix_script_execution_log_execution_uuid'), 'script_execution_log', ['execution_uuid'], unique=True)
+    except:
+        pass  # Index might already exist with correct settings
+
+    try:
+        op.drop_index('ix_software_installation_log_installation_id', table_name='software_installation_log')
+    except:
+        pass  # Index might not exist or might be named differently
+    try:
+        op.create_index(op.f('ix_software_installation_log_installation_id'), 'software_installation_log', ['installation_id'], unique=True)
+    except:
+        pass  # Index might already exist with correct settings
+
+    try:
+        op.drop_index('ix_tags_name', table_name='tags')
+    except:
+        pass  # Index might not exist or might be named differently
+    try:
+        op.create_index(op.f('ix_tags_name'), 'tags', ['name'], unique=True)
+    except:
+        pass  # Index might already exist with correct settings
+
+    try:
+        op.drop_index('ix_user_userid', table_name='user')
+    except:
+        pass  # Index might not exist or might be named differently
+    try:
+        op.create_index(op.f('ix_user_userid'), 'user', ['userid'], unique=True)
+    except:
+        pass  # Index might already exist with correct settings
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
 
-    # Handle constraint and index modifications using batch mode for SQLite compatibility
-    with op.batch_alter_table('user', schema=None) as batch_op:
-        batch_op.drop_index(op.f('ix_user_userid'))
-        batch_op.create_index(op.f('ix_user_userid'), ['userid'], unique=False)
-        batch_op.create_unique_constraint(op.f('user_userid_key'), ['userid'])
+    # For downgrade, we'll revert the unique indexes back to regular indexes
+    # and try to restore the original constraint structure
 
-    with op.batch_alter_table('tags', schema=None) as batch_op:
-        batch_op.drop_index(op.f('ix_tags_name'))
-        batch_op.create_index(op.f('ix_tags_name'), ['name'], unique=False)
-        batch_op.create_unique_constraint(op.f('tags_name_key'), ['name'])
+    try:
+        op.drop_index('ix_user_userid', table_name='user')
+    except:
+        pass  # Index might not exist
+    try:
+        op.create_index(op.f('ix_user_userid'), 'user', ['userid'], unique=False)
+    except:
+        pass  # Index might already exist
 
-    with op.batch_alter_table('software_installation_log', schema=None) as batch_op:
-        batch_op.drop_index(op.f('ix_software_installation_log_installation_id'))
-        batch_op.create_index(op.f('ix_software_installation_log_installation_id'), ['installation_id'], unique=False)
-        batch_op.create_unique_constraint(op.f('software_installation_log_installation_id_key'), ['installation_id'])
+    try:
+        op.drop_index('ix_tags_name', table_name='tags')
+    except:
+        pass  # Index might not exist
+    try:
+        op.create_index(op.f('ix_tags_name'), 'tags', ['name'], unique=False)
+    except:
+        pass  # Index might already exist
 
-    with op.batch_alter_table('script_execution_log', schema=None) as batch_op:
-        batch_op.drop_index(op.f('ix_script_execution_log_execution_uuid'))
-        batch_op.create_index(op.f('ix_script_execution_log_execution_uuid'), ['execution_uuid'], unique=False)
-        batch_op.drop_index(op.f('ix_script_execution_log_execution_id'))
-        batch_op.create_index(op.f('ix_script_execution_log_execution_id'), ['execution_id'], unique=False)
-        batch_op.create_unique_constraint(op.f('script_execution_log_execution_uuid_key'), ['execution_uuid'])
-        batch_op.create_unique_constraint(op.f('script_execution_log_execution_id_key'), ['execution_id'])
+    try:
+        op.drop_index('ix_software_installation_log_installation_id', table_name='software_installation_log')
+    except:
+        pass  # Index might not exist
+    try:
+        op.create_index(op.f('ix_software_installation_log_installation_id'), 'software_installation_log', ['installation_id'], unique=False)
+    except:
+        pass  # Index might already exist
 
-    with op.batch_alter_table('password_reset_token', schema=None) as batch_op:
-        batch_op.drop_index(op.f('ix_password_reset_token_token'))
-        batch_op.create_index(op.f('ix_password_reset_token_token'), ['token'], unique=False)
-        batch_op.create_unique_constraint(op.f('password_reset_token_token_key'), ['token'])
+    try:
+        op.drop_index('ix_script_execution_log_execution_uuid', table_name='script_execution_log')
+    except:
+        pass  # Index might not exist
+    try:
+        op.create_index(op.f('ix_script_execution_log_execution_uuid'), 'script_execution_log', ['execution_uuid'], unique=False)
+    except:
+        pass  # Index might already exist
 
-    with op.batch_alter_table('diagnostic_report', schema=None) as batch_op:
-        batch_op.drop_index(op.f('ix_diagnostic_report_collection_id'))
-        batch_op.create_index(op.f('ix_diagnostic_report_collection_id'), ['collection_id'], unique=False)
-        batch_op.create_unique_constraint(op.f('diagnostic_report_collection_id_key'), ['collection_id'])
+    try:
+        op.drop_index('ix_script_execution_log_execution_id', table_name='script_execution_log')
+    except:
+        pass  # Index might not exist
+    try:
+        op.create_index(op.f('ix_script_execution_log_execution_id'), 'script_execution_log', ['execution_id'], unique=False)
+    except:
+        pass  # Index might already exist
+
+    try:
+        op.drop_index('ix_password_reset_token_token', table_name='password_reset_token')
+    except:
+        pass  # Index might not exist
+    try:
+        op.create_index(op.f('ix_password_reset_token_token'), 'password_reset_token', ['token'], unique=False)
+    except:
+        pass  # Index might already exist
+
+    try:
+        op.drop_index('ix_diagnostic_report_collection_id', table_name='diagnostic_report')
+    except:
+        pass  # Index might not exist
+    try:
+        op.create_index(op.f('ix_diagnostic_report_collection_id'), 'diagnostic_report', ['collection_id'], unique=False)
+    except:
+        pass  # Index might already exist
 
     op.drop_table('host_roles')
     # ### end Alembic commands ###

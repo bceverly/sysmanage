@@ -68,6 +68,9 @@ install-dev:
 	@echo "Installing Python development dependencies..."
 	@$(PIP) install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep
 	@echo "Installing requirements.txt (includes Selenium WebDriver)..."
+ifeq ($(OS),Windows_NT)
+	@$(PIP) install -r requirements.txt
+else
 	@if [ "$$(uname -s)" = "NetBSD" ] || [ "$$(uname -s)" = "OpenBSD" ] || [ "$$(uname -s)" = "FreeBSD" ]; then \
 		echo "[INFO] Installing packages except Playwright (not available on BSD systems)..."; \
 		grep -v "^playwright" requirements.txt | $(PIP) install -r /dev/stdin || true; \
@@ -75,8 +78,12 @@ install-dev:
 	else \
 		$(PIP) install -r requirements.txt; \
 	fi
+endif
 	@echo "Checking for BSD system C tracer requirements..."
 	@$(PYTHON) scripts/check-bsd-deps.py
+ifeq ($(OS),Windows_NT)
+	@echo "[INFO] Windows detected - skipping BSD-specific package builds"
+else
 	@if [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD detected - rebuilding Pillow with correct library paths..."; \
 		export CFLAGS="-I/usr/pkg/include" && export LDFLAGS="-L/usr/pkg/lib -Wl,-R/usr/pkg/lib" && \
@@ -88,6 +95,7 @@ install-dev:
 		$(PIP) install --force-reinstall websocket-client websockets; \
 		echo "[OK] websocket dependencies fixed for NetBSD Selenium support"; \
 	fi
+endif
 	@echo "Installing OpenBAO for secrets management..."
 	@$(PYTHON) scripts/install-openbao.py
 	@echo "Setting up WebDriver for screenshots..."
@@ -152,12 +160,17 @@ else
 		npm install -g eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin; \
 	fi
 endif
+ifeq ($(OS),Windows_NT)
+	@echo "Installing Artillery for performance testing..."
+	@npm install -g artillery@latest || echo "[WARNING] Artillery installation failed - performance tests may not run"
+else
 	@if [ "$$(uname -s)" != "OpenBSD" ] && [ "$$(uname -s)" != "FreeBSD" ] && [ "$$(uname -s)" != "NetBSD" ]; then \
 		echo "Installing Artillery for performance testing..."; \
 		npm install -g artillery@latest || echo "[WARNING] Artillery installation failed - performance tests may not run"; \
 	else \
 		echo "[SKIP] Artillery installation skipped on BSD systems - performance tests not supported"; \
 	fi
+endif
 	@echo "[OK] Development dependencies installation completed"
 
 # Database migration target
@@ -317,12 +330,18 @@ test-typescript:
 
 # UI integration tests
 test-ui: $(VENV_ACTIVATE)
+ifeq ($(OS),Windows_NT)
+	@echo "=== Running UI Integration Tests (Playwright) ==="
+	@echo "[INFO] Windows detected - testing Chrome and Firefox"
+	@cmd /c "set PYTHONPATH=tests/ui;%PYTHONPATH% && $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short"
+	@echo "[OK] Playwright UI integration tests completed"
+else
 	@if [ "$(shell uname -s)" != "OpenBSD" ] && [ "$(shell uname -s)" != "FreeBSD" ] && [ "$(shell uname -s)" != "NetBSD" ]; then \
 		echo "=== Running UI Integration Tests (Playwright) ==="; \
 		if [ "$(shell uname -s)" = "Darwin" ]; then \
 			echo "[INFO] macOS detected - testing Chrome, Firefox, and WebKit/Safari"; \
 		else \
-			echo "[INFO] Linux/Windows detected - testing Chrome and Firefox"; \
+			echo "[INFO] Linux detected - testing Chrome and Firefox"; \
 		fi; \
 		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short; \
 		echo "[OK] Playwright UI integration tests completed"; \
@@ -332,6 +351,7 @@ test-ui: $(VENV_ACTIVATE)
 		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_selenium.py --confcutdir=tests/ui -p tests.ui.conftest_selenium -v --tb=short; \
 		echo "[OK] Selenium UI integration tests completed"; \
 	fi
+endif
 
 # Playwright tests only (alias for test-ui)
 test-playwright: test-ui
@@ -339,6 +359,24 @@ test-playwright: test-ui
 # Performance testing with Artillery and enhanced Playwright
 test-performance: $(VENV_ACTIVATE)
 	@echo "=== Running Performance Tests ==="
+ifeq ($(OS),Windows_NT)
+	@echo "[INFO] Running Artillery load tests for backend API..."
+	@where artillery >nul 2>nul || ( \
+		echo "[ERROR] Artillery not found. Installing..." && \
+		npm install -g artillery@latest \
+	)
+	@echo "[INFO] Running Artillery load tests against http://localhost:8001..."
+	@echo "[NOTE] Ensure the SysManage server is running on port 8001"
+	@artillery run artillery.yml --output artillery-report.json || echo "[WARNING] Artillery tests failed - continuing with Playwright performance tests"
+	@if exist artillery-report.json ( \
+		artillery report artillery-report.json --output artillery-report.html && \
+		echo "[INFO] Artillery report generated: artillery-report.html" \
+	)
+	@echo "[INFO] Running Playwright performance tests..."
+	@cmd /c "set PYTHONPATH=tests/ui;%PYTHONPATH% && $(PYTHON) -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short" || echo "[WARNING] Playwright performance tests failed"
+	@echo "[INFO] Running performance regression analysis..."
+	@$(PYTHON) scripts/performance_regression_check.py || echo "[WARNING] Performance regressions detected"
+else
 	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ] || [ "$(shell uname -s)" = "NetBSD" ]; then \
 		echo "[SKIP] Artillery and Playwright not supported on $(shell uname -s) - performance tests skipped"; \
 	else \
@@ -366,6 +404,7 @@ test-performance: $(VENV_ACTIVATE)
 		echo "[INFO] Running performance regression analysis..."; \
 		$(PYTHON) scripts/performance_regression_check.py || echo "[WARNING] Performance regressions detected"; \
 	fi
+endif
 	@echo "[OK] Performance testing completed"
 
 # Vite tests only (alias for test-typescript)
