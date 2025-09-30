@@ -381,11 +381,10 @@ def start_openbao() -> Dict[str, Any]:
             "status": get_openbao_status(),
         }
     except Exception as e:
+        logger.error("Exception occurred while starting OpenBAO", exc_info=True)
         return {
             "success": False,
-            "message": _(
-                "openbao.start_error", "Error starting OpenBAO: {error}"
-            ).format(error=str(e)),
+            "message": _("openbao.start_error", "An error occurred while starting OpenBAO"),
             "status": get_openbao_status(),
         }
 
