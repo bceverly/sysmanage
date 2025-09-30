@@ -442,9 +442,9 @@ jobs:
                 )
                 session.add(admin_user)
                 session.commit()
-                print('✅ Test admin user created')
+                print('Test admin user created')
             else:
-                print('ℹ️ Admin user already exists')
+                print('Admin user already exists')
         "
       env:
         PYTHONPATH: .
