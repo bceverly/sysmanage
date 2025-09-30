@@ -375,14 +375,24 @@ def main():
     if not check_system_requirements():
         sys.exit(1)
 
-    # Check for elevated privileges
-    if platform.system() != 'Windows' and os.geteuid() != 0:
-        print("❌ This script requires elevated privileges.")
-        print("Please run: sudo python3 scripts/install-telemetry.py")
-        sys.exit(1)
+    # Check for elevated privileges only if needed
+    if platform.system() != 'Windows':
+        # Check if we can write to common installation directories
+        test_dirs = ['/usr/local/bin', '/etc']
+        needs_sudo = False
+        for test_dir in test_dirs:
+            if os.path.exists(test_dir) and not os.access(test_dir, os.W_OK):
+                needs_sudo = True
+                break
+
+        if needs_sudo and os.geteuid() != 0:
+            print("❌ This script requires elevated privileges to install to system directories.")
+            print("Please run: sudo python3 scripts/install-telemetry.py")
+            print("Or ensure /usr/local/bin and /etc are writable by your user.")
+            sys.exit(1)
 
     success_count = 0
-    total_steps = 5
+    total_steps = 4
 
     # Install components
     if create_config_directories():
@@ -399,7 +409,6 @@ def main():
 
     # Final success check
     if success_count == total_steps:
-        success_count += 1
         print("\n🎉 Telemetry stack installation completed successfully!")
         print("\nNext steps:")
         print("  1. Configure OpenTelemetry Collector (/etc/otelcol-contrib/config.yaml)")
