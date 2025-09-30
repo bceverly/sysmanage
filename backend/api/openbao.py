@@ -706,7 +706,7 @@ async def start_server():
     except HTTPException:
         raise
     except Exception:  # pylint: disable=broad-except
-        logger.error("Error starting OpenBAO", exc_info=True)
+        # Don't log exception details to avoid information disclosure
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
@@ -731,7 +731,7 @@ async def stop_server():
     except HTTPException:
         raise
     except Exception:  # pylint: disable=broad-except
-        logger.error("Error stopping OpenBAO", exc_info=True)
+        # Don't log exception details to avoid information disclosure
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
@@ -775,7 +775,7 @@ async def seal_vault():
     except HTTPException:
         raise
     except Exception:  # pylint: disable=broad-except
-        logger.error("Error sealing OpenBAO", exc_info=True)
+        # Don't log exception details to avoid information disclosure
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
@@ -798,7 +798,7 @@ async def unseal_vault():
     except HTTPException:
         raise
     except Exception:  # pylint: disable=broad-except
-        logger.error("Error unsealing OpenBAO", exc_info=True)
+        # Don't log exception details to avoid information disclosure
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
