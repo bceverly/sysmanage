@@ -404,36 +404,54 @@ jobs:
         echo "Config created successfully for ${{ runner.os }}"
       shell: bash
 
+    - name: Run database migrations for UI tests
+      run: |
+        echo "🗄️ Running database migrations..."
+        python -m alembic upgrade head
+      env:
+        PYTHONPATH: .
+        DATABASE_URL: sqlite:///test.db
+
     - name: Start SysManage server for UI tests
       run: |
         echo "🚀 Starting SysManage backend and frontend servers..."
 
         # Start backend API server (with CI environment flag for faster startup)
         echo "Starting backend on port 8001..."
-        SYSMANAGE_CI_MODE=true python -m uvicorn backend.main:app --host localhost --port 8001 &
+        SYSMANAGE_CI_MODE=true python -m uvicorn backend.main:app --host 0.0.0.0 --port 8001 &
         BACKEND_PID=$!
         echo "BACKEND_PID=$BACKEND_PID" >> $GITHUB_ENV
 
         # Wait for backend to start (extended timeout for CI environments)
         echo "Waiting for backend API to start..."
-        for i in {1..90}; do
+        for i in {1..120}; do
           if curl -f http://localhost:8001/api/health > /dev/null 2>&1; then
-            echo "✅ Backend API is running on port 8001"
-            break
+            echo "✅ Backend API health check passed on port 8001"
+            # Also test the login endpoint specifically
+            if curl -f -X POST http://localhost:8001/login -H "Content-Type: application/json" -d '{"username":"test","password":"test"}' > /dev/null 2>&1; then
+              echo "✅ Backend login endpoint is accessible"
+              break
+            else
+              echo "⚠️ Health check passed but login endpoint not ready yet..."
+            fi
           fi
-          if [ $i -eq 90 ]; then
-            echo "❌ Backend failed to start after 90 seconds"
-            echo "Checking if backend process is still running..."
+          if [ $i -eq 120 ]; then
+            echo "❌ Backend failed to start after 120 seconds"
+            echo "Checking backend process status..."
             if ps -p $BACKEND_PID > /dev/null 2>&1; then
               echo "Backend process is still running (PID: $BACKEND_PID)"
-              echo "It may still be starting up. Continuing anyway..."
+              echo "Checking what's listening on port 8001..."
+              netstat -tlnp 2>/dev/null | grep :8001 || echo "No process listening on port 8001"
+              echo "Trying to connect directly..."
+              curl -v http://localhost:8001/api/health || echo "Direct connection failed"
+              exit 1
             else
               echo "Backend process has died (PID: $BACKEND_PID)"
               exit 1
             fi
           fi
-          if [ $((i % 10)) -eq 0 ]; then
-            echo "Still waiting for backend... (attempt $i/90)"
+          if [ $((i % 15)) -eq 0 ]; then
+            echo "Still waiting for backend... (attempt $i/120)"
           fi
           sleep 1
         done
@@ -468,7 +486,13 @@ jobs:
         done
 
         echo "✅ Both backend (8001) and frontend (7443) are running"
+        echo "🔍 Final connectivity check..."
+        curl -f http://localhost:8001/api/health && echo "Backend health OK"
+        curl -f http://localhost:7443 && echo "Frontend OK"
       shell: bash
+      env:
+        PYTHONPATH: .
+        DATABASE_URL: sqlite:///test.db
 
     - name: Run UI tests with performance metrics
       run: |
