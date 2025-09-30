@@ -319,14 +319,14 @@ def start_openbao() -> Dict[str, Any]:
                         )
 
                 except Exception as e:
-
+                    logger.exception("Failed to run PowerShell script for OpenBAO start")
                     class Result:
-                        def __init__(self, error):
+                        def __init__(self):
                             self.returncode = 1
                             self.stdout = ""
-                            self.stderr = str(error)
+                            self.stderr = _("openbao.start_error", "Internal error occurred while starting OpenBAO")
 
-                    result = Result(e)
+                    result = Result()
             else:
                 # CMD script fallback - avoid shell=True for security
                 result = subprocess.run(  # nosec B607 B603
