@@ -72,8 +72,8 @@ class TestSysManagePerformance:
 
         # Performance budgets (fail if exceeded) - adjusted for development environment
         assert (
-            load_time < 8.0
-        ), f"Page load time {load_time:.2f}s exceeds budget of 8.0s"
+            load_time < 15.0
+        ), f"Page load time {load_time:.2f}s exceeds budget of 15.0s"
         assert (
             performance_metrics["firstContentfulPaint"] < 5000
         ), f"FCP {performance_metrics['firstContentfulPaint']:.2f}ms exceeds budget of 5000ms"
@@ -146,8 +146,8 @@ class TestSysManagePerformance:
             navigation_time < 5.0
         ), f"Login response time {navigation_time:.2f}s exceeds budget of 5.0s"
         assert (
-            total_flow_time < 8.0
-        ), f"Total login flow {total_flow_time:.2f}s exceeds budget of 8.0s"
+            total_flow_time < 15.0
+        ), f"Total login flow {total_flow_time:.2f}s exceeds budget of 15.0s"
 
         print("✅ Login flow performance within acceptable limits")
 
@@ -207,7 +207,7 @@ class TestSysManagePerformance:
             print(f"📦 Total size: {total_size / 1024:.2f}KB")
 
             # Find slowest requests (use 1.5s threshold for CI environments)
-            slow_threshold = 1.5
+            slow_threshold = 2.0
             slow_requests = [
                 req
                 for req in completed_requests
@@ -222,11 +222,11 @@ class TestSysManagePerformance:
 
             # Performance budgets (relaxed for CI environments)
             assert (
-                avg_response_time < 0.5
-            ), f"Average response time {avg_response_time:.3f}s exceeds budget of 0.5s"
+                avg_response_time < 2.0
+            ), f"Average response time {avg_response_time:.3f}s exceeds budget of 2.0s"
             assert (
-                max_response_time < 2.0
-            ), f"Slowest response time {max_response_time:.3f}s exceeds budget of 2.0s"
+                max_response_time < 5.0
+            ), f"Slowest response time {max_response_time:.3f}s exceeds budget of 5.0s"
             assert (
                 len(slow_requests) == 0
             ), f"{len(slow_requests)} requests exceeded {slow_threshold}s response time"

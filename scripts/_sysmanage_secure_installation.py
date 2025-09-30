@@ -193,6 +193,38 @@ def run_make_install_dev():
         print(f"Error running make install-dev: {e}")
         sys.exit(1)
 
+def generate_secure_db_password(length=32):
+    """Generate a secure random password for the database."""
+    # Use alphanumeric characters (avoid special chars for DB compatibility)
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
+
+def update_postgres_user_password(username, password):
+    """Update the PostgreSQL user's password using psql."""
+    try:
+        # Use sudo -u postgres to run psql as the postgres user
+        sql_command = f"ALTER USER {username} PASSWORD '{password}';"
+        result = subprocess.run(
+            ['sudo', '-u', 'postgres', 'psql', '-c', sql_command],
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+
+        if result.returncode == 0:
+            print(f"  PostgreSQL password updated for user '{username}'")
+            return True
+        else:
+            print(f"  Failed to update PostgreSQL password: {result.stderr}")
+            return False
+
+    except subprocess.TimeoutExpired:
+        print("  Error: PostgreSQL password update timed out")
+        return False
+    except Exception as e:
+        print(f"  Error updating PostgreSQL password: {e}")
+        return False
+
 def get_database_config():
     """Prompt for database configuration."""
     print("\n--- Database Configuration ---")
@@ -299,6 +331,14 @@ def check_database_connectivity():
         if user_field in db_config:
             required_fields.append(user_field)
 
+        # Check if password is a placeholder that needs to be changed
+        password_is_placeholder = False
+        if 'password' in db_config:
+            placeholder_passwords = ['CHANGE_ME_PLEASE!', 'changeme', 'password', 'GENERATE_NEW_PASSWORD']
+            if db_config['password'] in placeholder_passwords:
+                password_is_placeholder = True
+                print("  Detected placeholder database password - will generate secure password")
+
         if not all(key in db_config for key in required_fields):
             print("  Database configuration is incomplete or missing.")
             print(f"  Found fields: {list(db_config.keys())}")
@@ -313,11 +353,38 @@ def check_database_connectivity():
                 'username': db_config.get('user', db_config.get('username')),
                 'password': db_config['password']
             }
-            if test_database_connection(normalized_config):
+
+            # If password is a placeholder or connection fails, generate new password
+            connection_failed = not test_database_connection(normalized_config)
+
+            if password_is_placeholder or connection_failed:
+                if connection_failed:
+                    print("  Database connection failed with existing configuration.")
+
+                print("  Generating secure database password...")
+                new_password = generate_secure_db_password()
+
+                print(f"  Updating PostgreSQL password for user '{normalized_config['username']}'...")
+                if update_postgres_user_password(normalized_config['username'], new_password):
+                    # Update the config with new password
+                    normalized_config['password'] = new_password
+
+                    # Test connection with new password
+                    print("  Testing database connection with new password...")
+                    if test_database_connection(normalized_config):
+                        print("  Database connection successful with new password!")
+                        # Update the YAML file
+                        update_database_config(config_path, normalized_config)
+                        return
+                    else:
+                        print("  Error: Connection failed even after updating password.")
+                        print("  You may need to manually configure the database.")
+                else:
+                    print("  Error: Failed to update PostgreSQL password.")
+                    print("  Please ensure PostgreSQL is running and you have sudo access.")
+            else:
                 print("  Database connection successful!")
                 return
-            else:
-                print("  Database connection failed with existing configuration.")
 
         # Offer to configure database
         print("\nDatabase configuration is needed.")
@@ -1098,17 +1165,30 @@ def main():
         # Get user input
         user_data = get_user_input()
 
-        # Install development dependencies first
-        run_make_install_dev()
-
-        # Check database connectivity
+        # Check and fix database password BEFORE running install-dev
+        # (install-dev runs migrations which need a working database connection)
         check_database_connectivity()
+
+        # IMPORTANT: Reload config module to pick up the new database password
+        # The config module caches the config at import time, so we need to reload it
+        import importlib
+        import backend.config.config
+        importlib.reload(backend.config.config)
+        from backend.config.config import get_config
+        from backend.persistence.db import get_engine
+
+        # Install development dependencies (includes migrations)
+        run_make_install_dev()
 
         # Generate new security keys
         salt, jwt_secret = generate_security_keys()
 
         # Update configuration file with new keys
         update_config_file(salt, jwt_secret)
+
+        # Reload config AGAIN after updating security keys
+        importlib.reload(backend.config.config)
+        from backend.config.config import get_config
 
         # Load current configuration (after potential database config updates)
         config = get_config()
