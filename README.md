@@ -15,7 +15,7 @@
 [![Backend Test Coverage](https://img.shields.io/badge/backend%20test%20coverage-64%25-yellow.svg)]()
 [![Frontend Test Coverage](https://img.shields.io/badge/frontend%20test%20coverage-12%25-red.svg)]()
 [![UI Tests](https://img.shields.io/badge/ui%20tests-passing-brightgreen.svg)]()
-[![Performance Tests](https://img.shields.io/badge/performance%20tests-optimized-brightgreen.svg)]()
+[![Performance Tests](https://img.shields.io/badge/performance%20tests-issues-red.svg)]()
 [![Artillery Load Tests](https://img.shields.io/badge/artillery-0ms-brightgreen.svg)]()
 
 A modern, cross-platform system monitoring and management platform with real-time WebSocket communication, built with FastAPI and React.
