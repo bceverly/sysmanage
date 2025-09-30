@@ -673,11 +673,10 @@ def unseal_openbao() -> Dict[str, Any]:
             "status": get_openbao_status(),
         }
     except Exception as e:
+        logger.exception("Exception occurred while unsealing OpenBAO")
         return {
             "success": False,
-            "message": _(
-                "openbao.unseal_error", "Error unsealing OpenBAO: {error}"
-            ).format(error=str(e)),
+            "message": _("openbao.unseal_error", "Error unsealing OpenBAO"),
             "status": get_openbao_status(),
         }
 
