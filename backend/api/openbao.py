@@ -319,14 +319,14 @@ def start_openbao() -> Dict[str, Any]:
                         )
 
                 except Exception as e:
-
+                    logger.exception("Failed to run PowerShell script for OpenBAO start")
                     class Result:
-                        def __init__(self, error):
+                        def __init__(self):
                             self.returncode = 1
                             self.stdout = ""
-                            self.stderr = str(error)
+                            self.stderr = _("openbao.start_error", "Internal error occurred while starting OpenBAO")
 
-                    result = Result(e)
+                    result = Result()
             else:
                 # CMD script fallback - avoid shell=True for security
                 result = subprocess.run(  # nosec B607 B603
@@ -561,7 +561,7 @@ def seal_openbao() -> Dict[str, Any]:
             return {
                 "success": False,
                 "message": _("openbao.seal_failed", "Failed to seal OpenBAO"),
-                "error": result.stderr or result.stdout,
+                # "error": result.stderr or result.stdout,  # Commented out to avoid exposing details
                 "status": get_openbao_status(),
             }
 
@@ -572,13 +572,13 @@ def seal_openbao() -> Dict[str, Any]:
             "status": get_openbao_status(),
         }
     except Exception as e:
+        logger.exception("Exception occurred while sealing OpenBAO")  # Log full traceback for server-side debugging
         return {
             "success": False,
-            "message": _("openbao.seal_error", "Error sealing OpenBAO: {error}").format(
-                error=str(e)
-            ),
+            "message": _("openbao.seal_error", "Error sealing OpenBAO"),
             "status": get_openbao_status(),
         }
+
 
 
 def unseal_openbao() -> Dict[str, Any]:
