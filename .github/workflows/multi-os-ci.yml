@@ -465,7 +465,7 @@ jobs:
           if curl -f http://localhost:8001/api/health > /dev/null 2>&1; then
             echo "✅ Backend API health check passed on port 8001"
             # Also test the login endpoint specifically
-            if curl -f -X POST http://localhost:8001/login -H "Content-Type: application/json" -d '{"username":"admin","password":"admin"}' > /dev/null 2>&1; then
+            if curl -f -X POST http://localhost:8001/login -H "Content-Type: application/json" -d '{"userid":"admin","password":"admin"}' > /dev/null 2>&1; then
               echo "✅ Backend login endpoint is accessible"
               break
             else
