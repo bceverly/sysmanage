@@ -428,16 +428,15 @@ jobs:
 
         with SessionLocal() as session:
             # Check if admin user already exists
-            existing_user = session.query(User).filter(User.username == 'admin').first()
+            existing_user = session.query(User).filter(User.userid == 'admin').first()
             if not existing_user:
                 # Create admin user with password 'admin'
                 from backend.auth.auth_handler import hash_password
                 admin_user = User(
-                    username='admin',
-                    password=hash_password('admin'),
-                    email='admin@test.com',
-                    role='admin',
-                    approval_status='approved'
+                    userid='admin',
+                    hashed_password=hash_password('admin'),
+                    active=True,
+                    is_admin=True
                 )
                 session.add(admin_user)
                 session.commit()

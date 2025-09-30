@@ -698,11 +698,12 @@ async def start_server():
     try:
         result = start_openbao()
         # Sanitize potentially sensitive information from response
-        if not result.get("success", True) and "error" in result:
-            # Remove detailed error messages that might contain sensitive info
-            result = result.copy()
-            result["error"] = _("openbao.start_failed", "Failed to start OpenBAO")
-        return result
+        sanitized_result = {"success": result.get("success", False)}
+        if not sanitized_result["success"]:
+            sanitized_result["error"] = _(
+                "openbao.start_failed", "Failed to start OpenBAO"
+            )
+        return sanitized_result
     except HTTPException:
         raise
     except Exception:  # pylint: disable=broad-except
@@ -723,11 +724,12 @@ async def stop_server():
     try:
         result = stop_openbao()
         # Sanitize potentially sensitive information from response
-        if not result.get("success", True) and "error" in result:
-            # Remove detailed error messages that might contain sensitive info
-            result = result.copy()
-            result["error"] = _("openbao.stop_failed", "Failed to stop OpenBAO")
-        return result
+        sanitized_result = {"success": result.get("success", False)}
+        if not sanitized_result["success"]:
+            sanitized_result["error"] = _(
+                "openbao.stop_failed", "Failed to stop OpenBAO"
+            )
+        return sanitized_result
     except HTTPException:
         raise
     except Exception:  # pylint: disable=broad-except
@@ -768,10 +770,13 @@ async def seal_vault():
     """
     try:
         result = seal_openbao()
-        if not result.get("success", True) and "error" in result:
-            result = result.copy()
-            result["error"] = _("openbao.seal_failed", "Failed to seal OpenBAO")
-        return result
+        # Sanitize potentially sensitive information from response
+        sanitized_result = {"success": result.get("success", False)}
+        if not sanitized_result["success"]:
+            sanitized_result["error"] = _(
+                "openbao.seal_failed", "Failed to seal OpenBAO"
+            )
+        return sanitized_result
     except HTTPException:
         raise
     except Exception:  # pylint: disable=broad-except
@@ -791,10 +796,13 @@ async def unseal_vault():
     """
     try:
         result = unseal_openbao()
-        if not result.get("success", True) and "error" in result:
-            result = result.copy()
-            result["error"] = _("openbao.unseal_failed", "Failed to unseal OpenBAO")
-        return result
+        # Sanitize potentially sensitive information from response
+        sanitized_result = {"success": result.get("success", False)}
+        if not sanitized_result["success"]:
+            sanitized_result["error"] = _(
+                "openbao.unseal_failed", "Failed to unseal OpenBAO"
+            )
+        return sanitized_result
     except HTTPException:
         raise
     except Exception:  # pylint: disable=broad-except
