@@ -87,8 +87,11 @@ async def test_login_cross_browser(
         # Navigate to login page
         await page.goto(f"{ui_config.base_url}/login")
 
-        # Wait for page to load
-        await page.wait_for_load_state("networkidle")
+        # Wait for page to load - use domcontentloaded which is more reliable than networkidle
+        await page.wait_for_load_state("domcontentloaded")
+
+        # Give a moment for React to initialize
+        await page.wait_for_timeout(2000)
 
         # Check for JavaScript errors
         page.on(
@@ -175,11 +178,23 @@ async def test_login_cross_browser(
         print(f"  [DEBUG] URL after login click: {url_after_click}")
 
         # Wait for navigation to main dashboard
-        print(f"  [DEBUG] Waiting for network idle...")
-        await page.wait_for_load_state("networkidle")
+        print(f"  [DEBUG] Waiting for page to load...")
+        try:
+            # Try networkidle first, but with a shorter timeout
+            await page.wait_for_load_state("networkidle", timeout=10000)
+            print(f"  [DEBUG] Network idle achieved")
+        except:
+            # If networkidle fails (especially on Firefox), fall back to domcontentloaded
+            print(
+                f"  [DEBUG] Network idle timeout, falling back to domcontentloaded..."
+            )
+            await page.wait_for_load_state("domcontentloaded")
+            # Give extra time for React to render
+            await page.wait_for_timeout(5000)
+            print(f"  [DEBUG] Using fallback load detection")
 
         final_url = page.url
-        print(f"  [DEBUG] Final URL after network idle: {final_url}")
+        print(f"  [DEBUG] Final URL after load: {final_url}")
 
         # Give React app extra time to load and render navigation
         print(f"  [DEBUG] Waiting for React app to fully load...")
@@ -359,7 +374,8 @@ async def test_invalid_login_chromium(page: Page, ui_config, start_server):
 
     # Navigate to login page
     await page.goto(f"{ui_config.base_url}/login")
-    await page.wait_for_load_state("networkidle")
+    await page.wait_for_load_state("domcontentloaded")
+    await page.wait_for_timeout(2000)  # Give React time to initialize
 
     # Try invalid credentials
     username_input = page.locator('input[type="text"]').first
@@ -416,7 +432,8 @@ async def test_invalid_login_firefox(page: Page, ui_config, start_server):
 
     # Navigate to login page
     await page.goto(f"{ui_config.base_url}/login")
-    await page.wait_for_load_state("networkidle")
+    await page.wait_for_load_state("domcontentloaded")
+    await page.wait_for_timeout(2000)  # Give React time to initialize
 
     # Try invalid credentials
     username_input = page.locator('input[type="text"]').first
@@ -476,7 +493,8 @@ if platform.system() == "Darwin":
 
         # Navigate to login page
         await page.goto(f"{ui_config.base_url}/login")
-        await page.wait_for_load_state("networkidle")
+        await page.wait_for_load_state("domcontentloaded")
+        await page.wait_for_timeout(2000)  # Give React time to initialize
 
         # Try invalid credentials
         username_input = page.locator('input[type="text"]').first

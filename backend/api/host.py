@@ -154,7 +154,11 @@ async def get_host(host_id: str):
             "fqdn": host.fqdn,
             "ipv4": host.ipv4,
             "ipv6": host.ipv6,
-            "last_access": host.last_access.isoformat() if host.last_access else None,
+            "last_access": (
+                host.last_access.replace(tzinfo=timezone.utc).isoformat()
+                if host.last_access
+                else None
+            ),
             "status": host.status,
             "approval_status": host.approval_status,
             "platform": host.platform,
@@ -225,7 +229,11 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
             "fqdn": host.fqdn,
             "ipv4": host.ipv4,
             "ipv6": host.ipv6,
-            "last_access": host.last_access.isoformat() if host.last_access else None,
+            "last_access": (
+                host.last_access.replace(tzinfo=timezone.utc).isoformat()
+                if host.last_access
+                else None
+            ),
             "status": host.status,
             "approval_status": host.approval_status,
             "platform": host.platform,
@@ -298,7 +306,9 @@ async def get_all_hosts():
                 "ipv4": host.ipv4,
                 "ipv6": host.ipv6,
                 "last_access": (
-                    host.last_access.isoformat() if host.last_access else None
+                    host.last_access.replace(tzinfo=timezone.utc).isoformat()
+                    if host.last_access
+                    else None
                 ),
                 "status": host.status,
                 "approval_status": host.approval_status,

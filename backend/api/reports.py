@@ -803,19 +803,19 @@ async def generate_report(
         if report_type == "registered-hosts":
             generator = HostsReportGenerator(db)
             pdf_buffer = generator.generate_hosts_report()
-            filename = (
-                f"registered_hosts_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-            )
+            filename = f"registered_hosts_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.pdf"
 
         elif report_type == "hosts-with-tags":
             generator = HostsReportGenerator(db)
             pdf_buffer = generator.generate_hosts_with_tags_report()
-            filename = f"hosts_with_tags_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+            filename = f"hosts_with_tags_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.pdf"
 
         elif report_type == "users-list":
             generator = UsersReportGenerator(db)
             pdf_buffer = generator.generate_users_list_report()
-            filename = f"users_list_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+            filename = (
+                f"users_list_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.pdf"
+            )
 
         else:
             raise HTTPException(

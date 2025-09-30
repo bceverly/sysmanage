@@ -13,8 +13,8 @@ cd "$PROJECT_ROOT"
 
 # Function to get configuration value
 get_config_value() {
-    local key=$1
-    local config_file=""
+key=$1
+config_file=""
     
     # Use same priority as backend config loader: /etc/sysmanage.yaml first, then sysmanage-dev.yaml
     if [ -f "/etc/sysmanage.yaml" ]; then
@@ -43,11 +43,11 @@ except:
 
 # Function to kill process by PID file
 kill_by_pidfile() {
-    local pidfile=$1
-    local service_name=$2
+pidfile=$1
+service_name=$2
     
     if [ -f "$pidfile" ]; then
-        local pid=$(cat "$pidfile")
+    pid=$(cat "$pidfile")
         if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
             echo "Stopping $service_name (PID: $pid)..."
             kill "$pid"
@@ -64,25 +64,25 @@ kill_by_pidfile() {
 
 # Function to kill processes by name pattern
 kill_by_pattern() {
-    local pattern=$1
-    local service_name=$2
+pattern=$1
+service_name=$2
     
-    local pids=$(pgrep -f "$pattern" 2>/dev/null)
+pids=$(pgrep -f "$pattern" 2>/dev/null)
     if [ -n "$pids" ]; then
-        local pid_count=$(echo "$pids" | wc -l)
+    pid_count=$(echo "$pids" | wc -l)
         echo "Found $pid_count $service_name process(es), stopping them..."
         echo "$pids" | while read pid; do
             if [ -n "$pid" ]; then
-                local cmd=$(ps -p "$pid" -o command= 2>/dev/null | head -c 60)
+            cmd=$(ps -p "$pid" -o command= 2>/dev/null | head -c 60)
                 echo "  Stopping PID $pid: $cmd"
             fi
         done
         echo "$pids" | xargs kill 2>/dev/null
         sleep 2
         # Force kill if still running
-        local remaining_pids=$(pgrep -f "$pattern" 2>/dev/null)
+    remaining_pids=$(pgrep -f "$pattern" 2>/dev/null)
         if [ -n "$remaining_pids" ]; then
-            local remaining_count=$(echo "$remaining_pids" | wc -l)
+        remaining_count=$(echo "$remaining_pids" | wc -l)
             echo "⚠️  $remaining_count $service_name process(es) still running, force stopping..."
             echo "$remaining_pids" | xargs kill -9 2>/dev/null
         fi

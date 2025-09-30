@@ -2,7 +2,7 @@
 Host role model for tracking server roles based on installed packages and services.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import Column, String, DateTime, Boolean, ForeignKey, Integer
@@ -29,8 +29,12 @@ class HostRole(Base):
     service_name = Column(String(255))  # Name of the associated service
     service_status = Column(String(20))  # "running", "stopped", "unknown"
     is_active = Column(Boolean, default=True)  # Whether the service is currently active
-    detected_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    detected_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
 
     # Relationship to host
     host = relationship("Host", back_populates="roles")
