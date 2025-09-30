@@ -54,7 +54,8 @@ async def configure_prometheus_datasource(
             session.query(models.Secret)
             .filter(
                 models.Secret.name == "Grafana API Key",
-                models.Secret.secret_type == "API Key",
+                models.Secret.secret_type
+                == "API Key",  # nosec B105 - type label not password
                 models.Secret.vault_token == settings.api_key_vault_token,
             )
             .first()
@@ -342,9 +343,9 @@ async def update_grafana_integration_settings(
 
                 # Store API key in vault (trimmed to remove any leading/trailing whitespace)
                 vault_result = vault_service.store_secret(
-                    secret_name="Grafana API Key",
+                    secret_name="Grafana API Key",  # nosec B106 - name not password
                     secret_data=request.api_key.strip(),
-                    secret_type="API Key",
+                    secret_type="API Key",  # nosec B106 - type label not password
                     secret_subtype="grafana",
                 )
 
@@ -352,8 +353,8 @@ async def update_grafana_integration_settings(
 
                 # Create database entry for the secret (will show up in secrets screen)
                 secret_entry = models.Secret(
-                    name="Grafana API Key",
-                    secret_type="API Key",
+                    name="Grafana API Key",  # nosec B106 - name not password
+                    secret_type="API Key",  # nosec B106 - type label not password
                     secret_subtype="grafana",
                     vault_token=vault_token,
                     vault_path=vault_result["vault_path"],
@@ -366,7 +367,8 @@ async def update_grafana_integration_settings(
                     session.query(models.Secret)
                     .filter(
                         models.Secret.name == "Grafana API Key",
-                        models.Secret.secret_type == "API Key",
+                        models.Secret.secret_type
+                        == "API Key",  # nosec B105 - type label not password
                     )
                     .first()
                 )
@@ -462,7 +464,8 @@ async def check_grafana_health():
                         session.query(models.Secret)
                         .filter(
                             models.Secret.name == "Grafana API Key",
-                            models.Secret.secret_type == "API Key",
+                            models.Secret.secret_type
+                            == "API Key",  # nosec B105 - type label not password
                             models.Secret.vault_token == settings.api_key_vault_token,
                         )
                         .first()

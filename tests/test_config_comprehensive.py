@@ -237,6 +237,8 @@ security:
                 return False
             elif path == "sysmanage-dev.yaml":
                 return True
+            elif path == "sysmanage-dev.yaml.example":
+                return True
             return False
 
         mock_exists.side_effect = mock_exists_side_effect
@@ -247,6 +249,7 @@ security:
 
         importlib.reload(config_module)
 
+        # Should prefer sysmanage-dev.yaml over .example
         assert config_module.CONFIG_PATH == "sysmanage-dev.yaml"
 
     @patch("backend.config.config.yaml.safe_load")
