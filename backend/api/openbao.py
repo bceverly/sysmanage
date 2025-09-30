@@ -705,8 +705,8 @@ async def start_server():
         return result
     except HTTPException:
         raise
-    except Exception as e:  # pylint: disable=broad-except
-        logger.error("Error starting OpenBAO: %s", str(e), exc_info=True)
+    except Exception:  # pylint: disable=broad-except
+        logger.error("Error starting OpenBAO", exc_info=True)
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
@@ -730,8 +730,8 @@ async def stop_server():
         return result
     except HTTPException:
         raise
-    except Exception as e:  # pylint: disable=broad-except
-        logger.error("Error stopping OpenBAO: %s", str(e), exc_info=True)
+    except Exception:  # pylint: disable=broad-except
+        logger.error("Error stopping OpenBAO", exc_info=True)
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
@@ -774,8 +774,8 @@ async def seal_vault():
         return result
     except HTTPException:
         raise
-    except Exception as e:  # pylint: disable=broad-except
-        logger.error("Error sealing OpenBAO: %s", str(e), exc_info=True)
+    except Exception:  # pylint: disable=broad-except
+        logger.error("Error sealing OpenBAO", exc_info=True)
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
@@ -797,8 +797,8 @@ async def unseal_vault():
         return result
     except HTTPException:
         raise
-    except Exception as e:  # pylint: disable=broad-except
-        logger.error("Error unsealing OpenBAO: %s", str(e), exc_info=True)
+    except Exception:  # pylint: disable=broad-except
+        logger.error("Error unsealing OpenBAO", exc_info=True)
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(

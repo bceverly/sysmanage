@@ -12,6 +12,15 @@ sysmanage-dev.yaml
 scripts/start.sh
 scripts/start.ps1
 
-# Frontend files with safe console logging
+# Frontend files with safe console logging and type-safe template literals
 frontend/vite.config.ts
 frontend/src/Services/connectionMonitor.ts
+frontend/src/Pages/HostDetail.tsx
+
+# Installation scripts with intentional chmod for downloaded binaries
+scripts/install-openbao.py
+scripts/install-telemetry.py
+
+# Backend files with safe logging (no actual credentials logged, only metadata)
+backend/api/grafana_integration.py
+backend/api/reports.py

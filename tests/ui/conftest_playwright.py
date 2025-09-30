@@ -259,11 +259,7 @@ def database_session(ui_config):
     import os
 
     database_url = os.getenv("DATABASE_URL") or get_database_url()
-    # Redact password from database URL for logging
-    import re
-
-    safe_url = re.sub(r":([^:@]+)@", ":***@", database_url)
-    print(f"UI tests using database URL: {safe_url}")
+    # Don't log database URL to avoid exposing credentials in CI logs
 
     engine = create_engine(database_url)
 

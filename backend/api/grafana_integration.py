@@ -68,10 +68,7 @@ async def configure_prometheus_datasource(
         secret_data = vault_service.retrieve_secret(
             secret.vault_path, settings.api_key_vault_token
         )
-        logger.debug(
-            "Retrieved secret_data keys: %s",
-            list(secret_data.keys()) if secret_data else None,
-        )
+        # Don't log secret data structure to avoid potential information disclosure
 
         # Try different possible paths for the API key
         api_key = None
