@@ -412,6 +412,43 @@ jobs:
         PYTHONPATH: .
         DATABASE_URL: sqlite:///test.db
 
+    - name: Create test user for UI tests
+      run: |
+        echo "👤 Creating test user..."
+        python -c "
+        from backend.persistence import db
+        from backend.persistence.models import User
+        from sqlalchemy.orm import sessionmaker
+        import os
+
+        os.environ['DATABASE_URL'] = 'sqlite:///test.db'
+
+        engine = db.get_engine()
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+        with SessionLocal() as session:
+            # Check if admin user already exists
+            existing_user = session.query(User).filter(User.username == 'admin').first()
+            if not existing_user:
+                # Create admin user with password 'admin'
+                from backend.auth.auth_handler import hash_password
+                admin_user = User(
+                    username='admin',
+                    password=hash_password('admin'),
+                    email='admin@test.com',
+                    role='admin',
+                    approval_status='approved'
+                )
+                session.add(admin_user)
+                session.commit()
+                print('✅ Test admin user created')
+            else:
+                print('ℹ️ Admin user already exists')
+        "
+      env:
+        PYTHONPATH: .
+        DATABASE_URL: sqlite:///test.db
+
     - name: Start SysManage server for UI tests
       run: |
         echo "🚀 Starting SysManage backend and frontend servers..."
@@ -428,7 +465,7 @@ jobs:
           if curl -f http://localhost:8001/api/health > /dev/null 2>&1; then
             echo "✅ Backend API health check passed on port 8001"
             # Also test the login endpoint specifically
-            if curl -f -X POST http://localhost:8001/login -H "Content-Type: application/json" -d '{"username":"test","password":"test"}' > /dev/null 2>&1; then
+            if curl -f -X POST http://localhost:8001/login -H "Content-Type: application/json" -d '{"username":"admin","password":"admin"}' > /dev/null 2>&1; then
               echo "✅ Backend login endpoint is accessible"
               break
             else
