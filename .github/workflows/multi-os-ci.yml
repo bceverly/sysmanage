@@ -419,22 +419,23 @@ jobs:
         from backend.persistence import db
         from backend.persistence.models import User
         from sqlalchemy.orm import sessionmaker
+        from argon2 import PasswordHasher
         import os
 
         os.environ['DATABASE_URL'] = 'sqlite:///test.db'
 
         engine = db.get_engine()
         SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        hasher = PasswordHasher()
 
         with SessionLocal() as session:
             # Check if admin user already exists
             existing_user = session.query(User).filter(User.userid == 'admin').first()
             if not existing_user:
                 # Create admin user with password 'admin'
-                from backend.auth.auth_handler import hash_password
                 admin_user = User(
                     userid='admin',
-                    hashed_password=hash_password('admin'),
+                    hashed_password=hasher.hash('admin'),
                     active=True,
                     is_admin=True
                 )
