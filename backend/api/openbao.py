@@ -319,12 +319,18 @@ def start_openbao() -> Dict[str, Any]:
                         )
 
                 except Exception as e:
-                    logger.exception("Failed to run PowerShell script for OpenBAO start")
+                    logger.exception(
+                        "Failed to run PowerShell script for OpenBAO start"
+                    )
+
                     class Result:
                         def __init__(self):
                             self.returncode = 1
                             self.stdout = ""
-                            self.stderr = _("openbao.start_error", "Internal error occurred while starting OpenBAO")
+                            self.stderr = _(
+                                "openbao.start_error",
+                                "Internal error occurred while starting OpenBAO",
+                            )
 
                     result = Result()
             else:
@@ -493,7 +499,9 @@ def stop_openbao() -> Dict[str, Any]:
         logger.error("Exception occurred while stopping OpenBAO:\n%s", e, exc_info=True)
         return {
             "success": False,
-            "message": _("openbao.generic_error", "An error occurred while stopping OpenBAO"),
+            "message": _(
+                "openbao.generic_error", "An error occurred while stopping OpenBAO"
+            ),
             "status": get_openbao_status(),
         }
 
@@ -572,13 +580,14 @@ def seal_openbao() -> Dict[str, Any]:
             "status": get_openbao_status(),
         }
     except Exception as e:
-        logger.exception("Exception occurred while sealing OpenBAO")  # Log full traceback for server-side debugging
+        logger.exception(
+            "Exception occurred while sealing OpenBAO"
+        )  # Log full traceback for server-side debugging
         return {
             "success": False,
             "message": _("openbao.seal_error", "Error sealing OpenBAO"),
             "status": get_openbao_status(),
         }
-
 
 
 def unseal_openbao() -> Dict[str, Any]:
