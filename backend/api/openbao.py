@@ -2,12 +2,14 @@
 This module contains the API implementation for OpenBAO (Vault) management in the system.
 """
 
-import subprocess  # nosec B404 - Required for OpenBAO process management
-import os
 import json
+import os
 import platform
-from typing import Dict, Any, Optional
-from fastapi import APIRouter, HTTPException, Depends
+import subprocess  # nosec B404 - Required for OpenBAO process management
+from typing import Any, Dict, Optional
+
+from fastapi import APIRouter, Depends, HTTPException
+
 from backend.auth.auth_bearer import JWTBearer
 from backend.config import config
 from backend.i18n import _
@@ -242,8 +244,8 @@ def start_openbao() -> Dict[str, Any]:
             if start_script.endswith(".ps1"):
                 # Use scheduled task approach to completely isolate from Python process
                 try:
-                    import uuid
                     import time
+                    import uuid
 
                     # Generate unique task name
                     task_name = f"SysManage_OpenBao_Start_{uuid.uuid4().hex[:8]}"

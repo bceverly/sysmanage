@@ -88,7 +88,7 @@ async def get_ubuntu_pro_settings(
 
         if not settings:
             # Create default settings if they don't exist
-            now = datetime.now(timezone.utc)
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
             settings = models.UbuntuProSettings(
                 auto_attach_enabled=False,
                 created_at=now,
@@ -120,7 +120,7 @@ async def update_ubuntu_pro_settings(
 
         if not settings:
             # Create new settings record
-            now = datetime.now(timezone.utc)
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
             settings = models.UbuntuProSettings(
                 master_key=settings_update.master_key,
                 organization_name=settings_update.organization_name,
@@ -142,7 +142,7 @@ async def update_ubuntu_pro_settings(
             if settings_update.auto_attach_enabled is not None:
                 settings.auto_attach_enabled = settings_update.auto_attach_enabled
 
-            settings.updated_at = datetime.now(timezone.utc)
+            settings.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
         db.commit()
         db.refresh(settings)
@@ -176,7 +176,7 @@ async def clear_master_key(
 
         if settings:
             settings.master_key = None
-            settings.updated_at = datetime.now(timezone.utc)
+            settings.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
             db.commit()
 
             logger.info("Ubuntu Pro master key cleared")

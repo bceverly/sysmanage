@@ -36,6 +36,12 @@ vi.mock('../../Services/updates', () => ({
   }
 }));
 
+// Mock MUI X-Charts Gauge component to avoid ESM resolution issues
+vi.mock('@mui/x-charts/Gauge', () => ({
+  Gauge: vi.fn(() => null),
+  gaugeClasses: {}
+}));
+
 const HomeWithRouter = () => (
   <BrowserRouter future={{
     v7_startTransition: true,

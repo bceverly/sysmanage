@@ -4,6 +4,7 @@ This module handles endpoints related to monitoring aspects of hosts.
 """
 
 import logging
+from datetime import timezone
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -69,16 +70,24 @@ async def get_host_certificates(host_id: str):
                     "subject": cert.subject,
                     "issuer": cert.issuer,
                     "not_before": (
-                        cert.not_before.isoformat() if cert.not_before else None
+                        cert.not_before.replace(tzinfo=timezone.utc).isoformat()
+                        if cert.not_before
+                        else None
                     ),
-                    "not_after": cert.not_after.isoformat() if cert.not_after else None,
+                    "not_after": (
+                        cert.not_after.replace(tzinfo=timezone.utc).isoformat()
+                        if cert.not_after
+                        else None
+                    ),
                     "serial_number": cert.serial_number,
                     "fingerprint_sha256": cert.fingerprint_sha256,
                     "is_ca": cert.is_ca,
                     "key_usage": cert.key_usage,
                     "file_path": cert.file_path,
                     "collected_at": (
-                        cert.collected_at.isoformat() if cert.collected_at else None
+                        cert.collected_at.replace(tzinfo=timezone.utc).isoformat()
+                        if cert.collected_at
+                        else None
                     ),
                     "is_expired": cert.is_expired,
                     "days_until_expiry": cert.days_until_expiry,
@@ -191,10 +200,14 @@ async def get_host_roles(host_id: str):
                     "service_status": role.service_status,
                     "is_active": role.is_active,
                     "detected_at": (
-                        role.detected_at.isoformat() if role.detected_at else None
+                        role.detected_at.replace(tzinfo=timezone.utc).isoformat()
+                        if role.detected_at
+                        else None
                     ),
                     "updated_at": (
-                        role.updated_at.isoformat() if role.updated_at else None
+                        role.updated_at.replace(tzinfo=timezone.utc).isoformat()
+                        if role.updated_at
+                        else None
                     ),
                 }
             )

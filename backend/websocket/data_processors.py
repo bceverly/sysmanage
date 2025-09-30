@@ -29,8 +29,8 @@ def process_user_accounts(db: Session, host_id: str, users_data: list):
                 home_directory=user_data.get("home_directory"),
                 shell=user_data.get("shell"),  # nosec B604
                 is_system_user=user_data.get("is_system_user", False),
-                created_at=datetime.now(timezone.utc),
-                updated_at=datetime.now(timezone.utc),
+                created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+                updated_at=datetime.now(timezone.utc).replace(tzinfo=None),
             )
             db.add(user_account)
 
@@ -44,8 +44,8 @@ def process_user_groups(db: Session, host_id: str, groups_data: list):
                 group_name=group_data.get("group_name"),
                 gid=group_data.get("gid"),
                 is_system_group=group_data.get("is_system_group", False),
-                created_at=datetime.now(timezone.utc),
-                updated_at=datetime.now(timezone.utc),
+                created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+                updated_at=datetime.now(timezone.utc).replace(tzinfo=None),
             )
             db.add(user_group)
 
@@ -70,7 +70,7 @@ def process_user_group_memberships(
                 for group_name in groups_list:
                     if group_name in group_id_map:
                         group_id = group_id_map[group_name]
-                        current_time = datetime.now(timezone.utc)
+                        current_time = datetime.now(timezone.utc).replace(tzinfo=None)
                         membership = UserGroupMembership(
                             host_id=host_id,
                             user_account_id=user_account_id,
@@ -120,8 +120,8 @@ def process_software_packages(db: Session, host_id: str, packages_data: list):
                 license=package_data.get("license_type"),
                 install_path=package_data.get("installation_path"),
                 is_system_package=package_data.get("is_system_package", False),
-                created_at=datetime.now(timezone.utc),
-                updated_at=datetime.now(timezone.utc),
+                created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+                updated_at=datetime.now(timezone.utc).replace(tzinfo=None),
             )
             db.add(software_package)
             package_count += 1

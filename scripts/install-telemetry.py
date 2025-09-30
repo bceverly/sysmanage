@@ -6,15 +6,16 @@ Automatically detects platform and installs components accordingly.
 
 import os
 import platform
+import shutil
 import subprocess
 import sys
-import urllib.parse
-import requests
-import zipfile
-import tempfile
-import shutil
 import tarfile
+import tempfile
+import urllib.parse
+import zipfile
 from pathlib import Path
+
+import requests
 
 
 def safe_extract_tar(tar, path):

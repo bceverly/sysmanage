@@ -10,6 +10,7 @@ import subprocess
 import sys
 import warnings
 
+
 def check_openbsd_system():
     """Check if we're running on OpenBSD."""
     return platform.system().lower() == 'openbsd'

@@ -36,8 +36,8 @@ class UserAccount(Base):
     home_directory = Column(String(500), nullable=True)
     shell = Column(String(255), nullable=True)
     is_system_user = Column(Boolean, nullable=False, default=False)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
     # Relationship back to Host
     host = relationship("Host", back_populates="user_accounts")
@@ -56,8 +56,8 @@ class UserGroup(Base):
     gid = Column(Integer, nullable=True)  # Linux/macOS group ID
     security_id = Column(String(255), nullable=True)  # Windows SID
     is_system_group = Column(Boolean, nullable=False, default=False)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
     # Relationship back to Host
     host = relationship("Host", back_populates="user_groups")
@@ -79,8 +79,8 @@ class UserGroupMembership(Base):
     user_group_id = Column(
         GUID(), ForeignKey("user_groups.id", ondelete="CASCADE"), nullable=False
     )
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
     # Relationships
     host = relationship("Host")
@@ -104,16 +104,16 @@ class UpdateExecutionLog(Base):
     execution_status = Column(
         String(20), nullable=False
     )  # pending, running, success, failed
-    started_at = Column(DateTime(timezone=True), nullable=True)
-    completed_at = Column(DateTime(timezone=True), nullable=True)
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
     output_log = Column(Text, nullable=True)
     error_log = Column(Text, nullable=True)
     executed_by = Column(String(255), nullable=True)  # User who initiated the update
     execution_method = Column(String(50), nullable=True)  # manual, automatic, scheduled
     requires_reboot = Column(Boolean, nullable=False, default=False)
     reboot_requested = Column(Boolean, nullable=False, default=False)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
     # Relationship back to Host
     host = relationship("Host")
@@ -142,21 +142,17 @@ class MessageQueue(Base):
     priority = Column(String(10), nullable=False, index=True)
     retry_count = Column(Integer, nullable=False, default=0)
     max_retries = Column(Integer, nullable=False, default=3)
-    created_at = Column(DateTime(timezone=True), nullable=False, index=True)
-    scheduled_at = Column(
-        DateTime(timezone=True), nullable=True, index=True
-    )  # For delayed messages
-    started_at = Column(DateTime(timezone=True), nullable=True)
-    completed_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime, nullable=False, index=True)
+    scheduled_at = Column(DateTime, nullable=True, index=True)  # For delayed messages
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
     error_message = Column(Text, nullable=True)
-    last_error_at = Column(DateTime(timezone=True), nullable=True)
+    last_error_at = Column(DateTime, nullable=True)
     correlation_id = Column(
         String(36), nullable=True, index=True
     )  # For request-response correlation
     reply_to = Column(String(36), nullable=True)  # Response queue name
-    expired_at = Column(
-        DateTime(timezone=True), nullable=True, index=True
-    )  # Message expiration
+    expired_at = Column(DateTime, nullable=True, index=True)  # Message expiration
 
     def __repr__(self):
         return f"<MessageQueue(id={self.id}, message_id='{self.message_id}', direction='{self.direction}', type='{self.message_type}', status='{self.status}', host_id={self.host_id}, priority={self.priority})>"
@@ -189,13 +185,13 @@ class QueueMetrics(Base):
         String(100), nullable=False
     )  # Flexible storage for different metric types
     aggregation_period = Column(String(20), nullable=False)  # minute, hour, day
-    period_start = Column(DateTime(timezone=True), nullable=False, index=True)
-    period_end = Column(DateTime(timezone=True), nullable=False)
+    period_start = Column(DateTime, nullable=False, index=True)
+    period_end = Column(DateTime, nullable=False)
     sample_count = Column(
         Integer, nullable=True
     )  # Number of samples in this aggregation
     additional_data = Column(Text, nullable=True)  # JSON for additional metric metadata
-    created_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
 
     def __repr__(self):
         return f"<QueueMetrics(id={self.id}, queue='{self.queue_name}', type='{self.metric_type}', value='{self.metric_value}', period='{self.aggregation_period}')>"
@@ -217,8 +213,8 @@ class SavedScript(Base):
     run_as_user = Column(String(100), nullable=True)
     is_active = Column(Boolean, nullable=False, default=True, index=True)
     created_by = Column(String(255), nullable=False)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
     def __repr__(self):
         return f"<SavedScript(id={self.id}, name='{self.name}', shell='{self.shell_type}', active={self.is_active})>"
@@ -247,14 +243,14 @@ class ScriptExecutionLog(Base):
         String(20), nullable=False, default="pending"
     )  # pending, running, completed, failed, timeout
     requested_by = Column(String(255), nullable=False)
-    started_at = Column(DateTime(timezone=True), nullable=True)
-    completed_at = Column(DateTime(timezone=True), nullable=True)
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
     exit_code = Column(Integer, nullable=True)
     stdout_output = Column(Text, nullable=True)
     stderr_output = Column(Text, nullable=True)
     error_message = Column(Text, nullable=True)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
     execution_uuid = Column(String(36), nullable=True, unique=True, index=True)
 
     # Relationships
@@ -279,9 +275,9 @@ class DiagnosticReport(Base):
     collection_status = Column(
         String(20), nullable=False, default="pending"
     )  # pending, collecting, completed, failed
-    requested_at = Column(DateTime(timezone=True), nullable=False)
-    started_at = Column(DateTime(timezone=True), nullable=True)
-    completed_at = Column(DateTime(timezone=True), nullable=True)
+    requested_at = Column(DateTime, nullable=False)
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
     collection_size_bytes = Column(BigInteger, nullable=True)
     files_collected = Column(Integer, nullable=True)
     error_message = Column(Text, nullable=True)
@@ -296,8 +292,8 @@ class DiagnosticReport(Base):
     environment_variables = Column(Text, nullable=True)
     agent_logs = Column(Text, nullable=True)
 
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
     # Relationship
     host = relationship("Host")
@@ -316,8 +312,8 @@ class Tag(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     name = Column(String(100), unique=True, nullable=False, index=True)
     description = Column(Text, nullable=True)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
     # Relationship
     hosts = relationship(
@@ -339,7 +335,7 @@ class HostTag(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     tag_id = Column(GUID(), ForeignKey("tags.id", ondelete="CASCADE"), nullable=False)
-    created_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
 
     def __repr__(self):
         return f"<HostTag(id={self.id}, host_id={self.host_id}, tag_id={self.tag_id})>"
@@ -355,9 +351,9 @@ class PasswordResetToken(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     user_id = Column(GUID(), ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     token = Column(String(255), unique=True, nullable=False, index=True)
-    expires_at = Column(DateTime(timezone=True), nullable=False)
-    used_at = Column(DateTime(timezone=True), nullable=True)
-    created_at = Column(DateTime(timezone=True), nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    used_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False)
 
     # Relationship
     user = relationship("User")
@@ -385,9 +381,9 @@ class UbuntuProInfo(Base):
     account_name = Column(String(255), nullable=True)
     contract_name = Column(String(255), nullable=True)
     tech_support_level = Column(String(100), nullable=True)
-    expires = Column(DateTime(timezone=True), nullable=True)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    expires = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
     # Relationship
     host = relationship("Host")
@@ -415,8 +411,8 @@ class UbuntuProService(Base):
     service_name = Column(String(100), nullable=False)
     entitled = Column(String(20), nullable=True)  # "yes", "no", etc.
     status = Column(String(20), nullable=True)  # "enabled", "disabled", etc.
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
     # Relationship
     ubuntu_pro_info = relationship("UbuntuProInfo", back_populates="services")
@@ -436,8 +432,8 @@ class UbuntuProSettings(Base):
     organization_name = Column(String(255), nullable=True)
     master_key = Column(String(255), nullable=True)  # Encrypted Ubuntu Pro key
     auto_attach_enabled = Column(Boolean, nullable=False, default=False)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
     def __repr__(self):
         return f"<UbuntuProSettings(id={self.id}, organization='{self.organization_name}', auto_attach={self.auto_attach_enabled})>"

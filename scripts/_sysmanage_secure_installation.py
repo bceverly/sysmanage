@@ -10,18 +10,18 @@ This is the internal Python script. Users should run:
 The wrapper script handles privilege elevation and virtual environment setup.
 """
 
-import os
-import sys
-import platform
 import getpass
+import os
+import platform
+import re
 import secrets
 import string
-import re
 import subprocess
+import sys
 import time
-from pathlib import Path
-from datetime import datetime, timezone
 import uuid
+from datetime import datetime, timezone
+from pathlib import Path
 
 # Add the project root to the path so we can import backend modules
 project_root = Path(__file__).parent.parent
@@ -35,8 +35,9 @@ if venv_path.exists():
         sys.path.insert(0, str(site_packages))
 
 try:
-    from argon2 import PasswordHasher
     import yaml
+    from argon2 import PasswordHasher
+
     from alembic import command
     from alembic.config import Config
 except ImportError as e:
@@ -47,7 +48,7 @@ except ImportError as e:
 
 # Import backend modules for config loading
 try:
-    from backend.config.config import get_config, CONFIG_PATH
+    from backend.config.config import CONFIG_PATH, get_config
     from backend.persistence import models
     from backend.persistence.db import SessionLocal, get_engine
 except ImportError as e:
@@ -129,8 +130,8 @@ def fix_file_ownership(file_path):
         elevated_user = os.environ.get('SUDO_USER') or os.environ.get('DOAS_USER') or os.environ.get('ORIGINAL_USER')
 
         if elevated_user and original_user:
-            import pwd
             import grp
+            import pwd
 
             # Get user and group info
             user_info = pwd.getpwnam(original_user)

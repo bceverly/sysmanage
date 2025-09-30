@@ -122,7 +122,7 @@ async def update_profile(
             user.last_name = profile_data.last_name
 
         # Update last access
-        user.last_access = datetime.now(timezone.utc)
+        user.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
 
         session.commit()
         session.refresh(user)
@@ -187,7 +187,7 @@ async def change_password(
 
         # Update password and last access time
         user.hashed_password = new_password_hash
-        user.last_access = datetime.now(timezone.utc)
+        user.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
 
         session.commit()
 
@@ -314,8 +314,8 @@ async def upload_profile_image(
         # Update user's profile image
         user.profile_image = processed_image_bytes
         user.profile_image_type = image_format
-        user.profile_image_uploaded_at = datetime.now(timezone.utc)
-        user.last_access = datetime.now(timezone.utc)
+        user.profile_image_uploaded_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        user.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
 
         session.commit()
 
@@ -395,7 +395,7 @@ async def delete_profile_image(current_user: str = Depends(get_current_user)):
         user.profile_image = None
         user.profile_image_type = None
         user.profile_image_uploaded_at = None
-        user.last_access = datetime.now(timezone.utc)
+        user.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
 
         session.commit()
 

@@ -36,7 +36,7 @@ class StorageDevice(Base):
     used_size_bytes = Column(BigInteger, nullable=True)
     available_size_bytes = Column(BigInteger, nullable=True)
     device_details = Column(Text, nullable=True)  # JSON for additional device info
-    last_updated = Column(DateTime(timezone=True), nullable=False)
+    last_updated = Column(DateTime, nullable=False)
 
     # Relationship
     host = relationship("Host")
@@ -68,7 +68,7 @@ class NetworkInterface(Base):
     interface_details = Column(
         Text, nullable=True
     )  # JSON for additional interface info
-    last_updated = Column(DateTime(timezone=True), nullable=False)
+    last_updated = Column(DateTime, nullable=False)
 
     # Relationship
     host = relationship("Host")

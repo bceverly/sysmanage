@@ -15,7 +15,7 @@ from backend.api.host_utils import validate_host_approval_status
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import db, models
-from backend.services.vault_service import VaultService, VaultError
+from backend.services.vault_service import VaultError, VaultService
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

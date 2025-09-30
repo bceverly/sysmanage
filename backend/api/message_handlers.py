@@ -234,7 +234,8 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                     not hasattr(connection, "is_mock_connection")
                     or not connection.is_mock_connection
                 ):
-                    host.last_access = datetime.now(timezone.utc)
+                    # Store as naive UTC datetime (timezone stripped but value is UTC)
+                    host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
 
                 # Update privileged status if provided in heartbeat
                 is_privileged = message_data.get("is_privileged")
@@ -283,7 +284,9 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                         not hasattr(connection, "is_mock_connection")
                         or not connection.is_mock_connection
                     ):
-                        last_access_value = datetime.now(timezone.utc)
+                        last_access_value = datetime.now(timezone.utc).replace(
+                            tzinfo=None
+                        )
 
                     host = Host(
                         fqdn=connection.hostname,
@@ -544,7 +547,7 @@ async def handle_installation_status(db: Session, connection, message_data: dict
             }
 
         # Update the installation log with the new status
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
 
         installation_log_entry.status = status
         installation_log_entry.updated_at = now

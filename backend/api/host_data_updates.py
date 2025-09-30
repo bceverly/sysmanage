@@ -112,8 +112,8 @@ async def update_host_hardware(host_id: str, hardware_data: dict):
         if "hardware_details" in hardware_data:
             host.hardware_details = hardware_data["hardware_details"]
 
-        host.hardware_updated_at = datetime.now(timezone.utc)
-        host.last_access = datetime.now(timezone.utc)
+        host.hardware_updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
 
         session.commit()
         session.refresh(host)

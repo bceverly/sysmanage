@@ -717,7 +717,7 @@ async def handle_installation_completion(
             )
 
         # Update the request with completion data
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
         installation_request.completed_at = now
         installation_request.status = "completed" if request.success else "failed"
         installation_request.result_log = request.result_log

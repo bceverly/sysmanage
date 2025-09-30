@@ -72,8 +72,9 @@ class TestProcessUserAccounts:
             assert first_call.home_directory == "/home/alice"
             assert first_call.shell == "/bin/bash"
             assert first_call.is_system_user is False
-            assert first_call.created_at == mock_now
-            assert first_call.updated_at == mock_now
+            # Database stores naive UTC datetimes
+            assert first_call.created_at == mock_now.replace(tzinfo=None)
+            assert first_call.updated_at == mock_now.replace(tzinfo=None)
 
     def test_process_user_accounts_with_errors(self):
         """Test processing user accounts with error entries."""
@@ -189,8 +190,9 @@ class TestProcessUserGroups:
             assert first_call.group_name == "admin"
             assert first_call.gid == 1000
             assert first_call.is_system_group is False
-            assert first_call.created_at == mock_now
-            assert first_call.updated_at == mock_now
+            # Database stores naive UTC datetimes
+            assert first_call.created_at == mock_now.replace(tzinfo=None)
+            assert first_call.updated_at == mock_now.replace(tzinfo=None)
 
     def test_process_user_groups_with_errors(self):
         """Test processing user groups with error entries."""
@@ -303,8 +305,9 @@ class TestProcessUserGroupMemberships:
             assert first_call.host_id == 789
             assert first_call.user_account_id == 1  # alice
             assert first_call.user_group_id == 10  # admin
-            assert first_call.created_at == mock_now
-            assert first_call.updated_at == mock_now
+            # Database stores naive UTC datetimes
+            assert first_call.created_at == mock_now.replace(tzinfo=None)
+            assert first_call.updated_at == mock_now.replace(tzinfo=None)
 
     @patch("backend.websocket.data_processors.debug_logger")
     def test_process_user_group_memberships_with_errors(self, mock_logger):
@@ -520,8 +523,9 @@ class TestProcessSoftwarePackages:
             assert first_call.license == "GPL"
             assert first_call.install_path == "/usr/bin/vim"
             assert first_call.is_system_package is True
-            assert first_call.created_at == mock_now
-            assert first_call.updated_at == mock_now
+            # Database stores naive UTC datetimes
+            assert first_call.created_at == mock_now.replace(tzinfo=None)
+            assert first_call.updated_at == mock_now.replace(tzinfo=None)
 
     @patch("backend.websocket.data_processors.debug_logger")
     def test_process_software_packages_with_errors(self, mock_logger):

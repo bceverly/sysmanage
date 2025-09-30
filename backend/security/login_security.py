@@ -190,7 +190,7 @@ class LoginSecurityValidator:
 
         if user.failed_login_attempts >= max_attempts and not user.is_locked:
             user.is_locked = True
-            user.locked_at = datetime.now(timezone.utc)
+            user.locked_at = datetime.now(timezone.utc).replace(tzinfo=None)
             db_session.commit()
             logger.warning(
                 "User account '%s' locked after %s failed attempts",
@@ -228,7 +228,7 @@ class LoginSecurityValidator:
         if not user.is_locked:
             user.is_locked = True
             user.failed_login_attempts = 0
-            user.locked_at = datetime.now(timezone.utc)
+            user.locked_at = datetime.now(timezone.utc).replace(tzinfo=None)
             db_session.commit()
             logger.info("User account '%s' manually locked", user.userid)
 

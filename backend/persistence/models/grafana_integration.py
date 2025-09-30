@@ -5,7 +5,7 @@ Grafana integration settings model for managing Grafana server connections.
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Column, String, DateTime, Boolean, Integer, ForeignKey
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from backend.persistence.db import Base

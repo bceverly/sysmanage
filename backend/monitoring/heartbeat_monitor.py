@@ -27,7 +27,7 @@ async def check_host_heartbeats():
 
     try:
         timeout_minutes = get_heartbeat_timeout_minutes()
-        timeout_threshold = datetime.now(timezone.utc) - timedelta(
+        timeout_threshold = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
             minutes=timeout_minutes
         )
 

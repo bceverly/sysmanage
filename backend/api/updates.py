@@ -104,7 +104,7 @@ async def report_updates(
             if not host:
                 raise HTTPException(status_code=404, detail=_("Host not found"))
 
-            now = datetime.now(timezone.utc)
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
 
             # Clear existing updates for this host
             session.query(models.PackageUpdate).filter(
@@ -479,7 +479,9 @@ async def execute_os_upgrades(
                     # Mark updates as in progress (status column removed)
                     for update in available_upgrades:
                         # update.status = "updating"  # status column removed
-                        update.updated_at = datetime.now(timezone.utc)
+                        update.updated_at = datetime.now(timezone.utc).replace(
+                            tzinfo=None
+                        )
 
                     session.commit()
 
@@ -778,7 +780,7 @@ async def execute_updates(
                 for update in updates:
                     # Update status to updating
                     update.status = "updating"
-                    update.updated_at = datetime.now(timezone.utc)
+                    update.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
                     # Create execution log
                     execution_log = models.UpdateExecutionLog(

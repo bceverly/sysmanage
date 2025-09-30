@@ -5,11 +5,11 @@ Analyzes performance test results and detects regressions with tolerance bands
 """
 
 import json
-import sys
 import os
+import statistics
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-import statistics
 
 
 class PerformanceRegessionDetector:

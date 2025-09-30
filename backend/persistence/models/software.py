@@ -84,10 +84,10 @@ class SoftwarePackage(Base):
     category = Column(String(100), nullable=True)
     license = Column(String(255), nullable=True)
     install_path = Column(String(500), nullable=True)
-    install_date = Column(DateTime(timezone=True), nullable=True)
+    install_date = Column(DateTime, nullable=True)
     is_system_package = Column(Boolean, nullable=False, default=False)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
     # Relationship back to Host
     host = relationship("Host", back_populates="software_packages")
@@ -114,9 +114,9 @@ class PackageUpdate(Base):
     description = Column(Text, nullable=True)
     size_bytes = Column(BigInteger, nullable=True)
     requires_reboot = Column(Boolean, nullable=False, default=False)
-    discovered_at = Column(DateTime(timezone=True), nullable=False)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    discovered_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
     # Relationship back to Host
     host = relationship("Host", back_populates="package_updates")
@@ -175,10 +175,10 @@ class SoftwareInstallationLog(Base):
     )  # pending, queued, installing, completed, failed, cancelled
 
     # Timestamps
-    requested_at = Column(DateTime(timezone=True), nullable=False, index=True)
-    queued_at = Column(DateTime(timezone=True), nullable=True)
-    started_at = Column(DateTime(timezone=True), nullable=True)
-    completed_at = Column(DateTime(timezone=True), nullable=True)
+    requested_at = Column(DateTime, nullable=False, index=True)
+    queued_at = Column(DateTime, nullable=True)
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
 
     # Installation results
     installed_version = Column(String(100), nullable=True)
@@ -187,8 +187,8 @@ class SoftwareInstallationLog(Base):
     installation_log = Column(Text, nullable=True)  # Command output/logs
 
     # Metadata
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
     # Relationships
     host = relationship("Host", back_populates="software_installation_logs")
@@ -215,8 +215,8 @@ class InstallationRequest(Base):
     requested_by = Column(
         String(100), nullable=False
     )  # User who requested installation
-    requested_at = Column(DateTime(timezone=True), nullable=False, index=True)
-    completed_at = Column(DateTime(timezone=True), nullable=True)
+    requested_at = Column(DateTime, nullable=False, index=True)
+    completed_at = Column(DateTime, nullable=True)
 
     # Status tracking
     status = Column(
@@ -232,8 +232,8 @@ class InstallationRequest(Base):
     result_log = Column(Text, nullable=True)  # Captured output from agent
 
     # Timestamps
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
     # Relationships
     host = relationship("Host")

@@ -6,7 +6,9 @@ Uses the same config loading logic as the backend to ensure consistency
 
 import os
 import sys
+
 import yaml
+
 
 def load_sysmanage_config():
     """Load SysManage configuration using the same logic as backend/config/config.py"""

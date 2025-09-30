@@ -4,13 +4,12 @@ This module houses the API routes for the host object in SysManage.
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from cryptography import x509
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
-from typing import List
 
 # Import the new router modules
 from backend.api import (
@@ -418,7 +417,9 @@ async def register_host(registration_data: HostRegistration):
                 existing_host.active = registration_data.active
                 existing_host.ipv4 = registration_data.ipv4
                 existing_host.ipv6 = registration_data.ipv6
-                existing_host.last_access = datetime.now(timezone.utc)
+                existing_host.last_access = datetime.now(timezone.utc).replace(
+                    tzinfo=None
+                )
 
                 # NOTE: Script execution capability should not be overwritten during re-registration
                 # This prevents agents from overwriting server-configured script execution settings
@@ -527,7 +528,7 @@ async def approve_host(host_id: str):  # pylint: disable=duplicate-code
 
         # Store certificate information in host record
         host.client_certificate = cert_pem.decode("utf-8")
-        host.certificate_issued_at = datetime.now(timezone.utc)
+        host.certificate_issued_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
         # Extract serial number for tracking
 
@@ -536,7 +537,7 @@ async def approve_host(host_id: str):  # pylint: disable=duplicate-code
 
         # Update approval status
         host.approval_status = "approved"
-        host.last_access = datetime.now(timezone.utc)
+        host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
         session.commit()
 
         # Send host approval notification to the agent via WebSocket
@@ -605,7 +606,7 @@ async def reject_host(host_id: str):  # pylint: disable=duplicate-code
 
         # Update approval status
         host.approval_status = "rejected"
-        host.last_access = datetime.now(timezone.utc)
+        host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
         session.commit()
 
         ret_host = models.Host(

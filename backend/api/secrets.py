@@ -2,24 +2,25 @@
 API endpoints for secrets management.
 """
 
-import uuid
 import logging
-from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, HTTPException, Depends, status
+import uuid
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
-from backend.persistence.db import get_db
-from backend.persistence.models.secret import Secret
-from backend.persistence.models import Host
-from backend.services.vault_service import VaultService, VaultError
-from backend.websocket.queue_manager import (
-    server_queue_manager,
-    QueueDirection,
-    Priority,
-)
 from backend.i18n import _
+from backend.persistence.db import get_db
+from backend.persistence.models import Host
+from backend.persistence.models.secret import Secret
+from backend.services.vault_service import VaultError, VaultService
+from backend.websocket.queue_manager import (
+    Priority,
+    QueueDirection,
+    server_queue_manager,
+)
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -698,7 +699,7 @@ async def deploy_ssh_keys(
         # Create message data for agent
         from datetime import datetime, timezone
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
 
         message_data = {
             "command_type": "deploy_ssh_keys",
@@ -848,7 +849,7 @@ async def deploy_certificates(
         # Create message data for agent
         from datetime import datetime, timezone
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
 
         message_data = {
             "command_type": "deploy_certificates",

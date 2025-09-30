@@ -108,7 +108,7 @@ class Host(Base):
     approval_status = Column(String(20), nullable=False, server_default="pending")
     client_certificate = Column(Text, nullable=True)
     certificate_serial = Column(String(64), nullable=True)
-    certificate_issued_at = Column(DateTime(timezone=True), nullable=True)
+    certificate_issued_at = Column(DateTime, nullable=True)
 
     # OS Version fields
     platform = Column(String(50), nullable=True)
@@ -117,7 +117,7 @@ class Host(Base):
     machine_architecture = Column(String(50), nullable=True)
     processor = Column(String(100), nullable=True)
     os_details = Column(Text, nullable=True)
-    os_version_updated_at = Column(DateTime(timezone=True), nullable=True)
+    os_version_updated_at = Column(DateTime, nullable=True)
 
     # Hardware inventory fields
     cpu_vendor = Column(String(100), nullable=True)
@@ -129,21 +129,21 @@ class Host(Base):
     storage_details = Column(Text, nullable=True)
     network_details = Column(Text, nullable=True)
     hardware_details = Column(Text, nullable=True)
-    hardware_updated_at = Column(DateTime(timezone=True), nullable=True)
+    hardware_updated_at = Column(DateTime, nullable=True)
 
     # Software inventory fields
-    software_updated_at = Column(DateTime(timezone=True), nullable=True)
+    software_updated_at = Column(DateTime, nullable=True)
 
     # User access data timestamp
-    user_access_updated_at = Column(DateTime(timezone=True), nullable=True)
+    user_access_updated_at = Column(DateTime, nullable=True)
 
     # Diagnostics request tracking
-    diagnostics_requested_at = Column(DateTime(timezone=True), nullable=True)
+    diagnostics_requested_at = Column(DateTime, nullable=True)
     diagnostics_request_status = Column(String(50), nullable=True)
 
     # Update management fields
     reboot_required = Column(Boolean, nullable=False, default=False)
-    reboot_required_updated_at = Column(DateTime(timezone=True), nullable=True)
+    reboot_required_updated_at = Column(DateTime, nullable=True)
 
     # Agent privilege status
     is_agent_privileged = Column(Boolean, nullable=True, default=False)
@@ -190,26 +190,26 @@ class User(Base):
     active = Column(Boolean, unique=False, index=False)
     userid = Column(String, unique=True, index=True)
     hashed_password = Column(String)
-    last_access = Column(DateTime(timezone=True), nullable=True)
+    last_access = Column(DateTime, nullable=True)
     is_locked = Column(Boolean, nullable=False, default=False)
     failed_login_attempts = Column(Integer, nullable=False, default=0)
-    locked_at = Column(DateTime(timezone=True), nullable=True)
+    locked_at = Column(DateTime, nullable=True)
     first_name = Column(String(100), nullable=True)
     last_name = Column(String(100), nullable=True)
     profile_image = Column(LargeBinary, nullable=True)
     profile_image_type = Column(String(10), nullable=True)
-    profile_image_uploaded_at = Column(DateTime(timezone=True), nullable=True)
+    profile_image_uploaded_at = Column(DateTime, nullable=True)
     is_admin = Column(Boolean, nullable=False, default=False)
-    last_login_at = Column(DateTime(timezone=True), nullable=True)
+    last_login_at = Column(DateTime, nullable=True)
     created_at = Column(
-        DateTime(timezone=True),
+        DateTime,
         nullable=False,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
     updated_at = Column(
-        DateTime(timezone=True),
+        DateTime,
         nullable=False,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
 
     def __repr__(self):

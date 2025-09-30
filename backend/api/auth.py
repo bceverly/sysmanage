@@ -132,7 +132,7 @@ async def login(login_data: UserLogin, request: Request, response: Response):
                 login_security.reset_failed_login_attempts(user, session)
 
                 # Update the last access datetime
-                user.last_access = datetime.now(timezone.utc)
+                user.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
                 session.commit()
 
                 # Add the refresh token to an http-only cookie

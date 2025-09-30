@@ -26,8 +26,8 @@ class AgentConnection:
         self.ipv4 = None
         self.ipv6 = None
         self.platform = None
-        self.connected_at = datetime.now(timezone.utc)
-        self.last_seen = datetime.now(timezone.utc)
+        self.connected_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        self.last_seen = datetime.now(timezone.utc).replace(tzinfo=None)
         self.pending_commands = []
 
     async def send_message(self, message: dict):
@@ -99,7 +99,7 @@ class AgentConnection:
             self.ipv6 = ipv6
         if platform:
             self.platform = platform
-        self.last_seen = datetime.now(timezone.utc)
+        self.last_seen = datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class ConnectionManager:

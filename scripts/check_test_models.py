@@ -9,6 +9,7 @@ import re
 import sys
 from pathlib import Path
 
+
 def extract_models_from_main_conftest():
     """Extract model names from main conftest via Alembic imports."""
     models = set()

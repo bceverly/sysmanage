@@ -136,7 +136,9 @@ def get_host_storage_devices(host_id: str) -> List[Dict[str, Any]]:
                     "used_bytes": device.used_size_bytes,
                     "available_bytes": device.available_size_bytes,
                     "last_updated": (
-                        device.last_updated.isoformat() if device.last_updated else None
+                        device.last_updated.replace(tzinfo=timezone.utc).isoformat()
+                        if device.last_updated
+                        else None
                     ),
                     # Legacy fields for backward compatibility
                     "size_gb": (
@@ -199,7 +201,7 @@ def get_host_network_interfaces(host_id: str) -> List[Dict[str, Any]]:
                 "is_up": interface.is_up,
                 "speed_mbps": interface.speed_mbps,
                 "last_updated": (
-                    interface.last_updated.isoformat()
+                    interface.last_updated.replace(tzinfo=timezone.utc).isoformat()
                     if interface.last_updated
                     else None
                 ),
@@ -238,7 +240,11 @@ def get_host_user_accounts(host_id: str) -> List[Dict[str, Any]]:
                 "group_id": user.group_id,
                 "is_system_user": user.is_system_user,
                 "is_active": user.is_active,
-                "last_login": user.last_login.isoformat() if user.last_login else None,
+                "last_login": (
+                    user.last_login.replace(tzinfo=timezone.utc).isoformat()
+                    if user.last_login
+                    else None
+                ),
             }
             for user in users
         ]
@@ -473,7 +479,7 @@ async def update_or_create_host(
         )
         host.ipv4 = ipv4
         host.ipv6 = ipv6
-        host.last_access = datetime.now(timezone.utc)
+        host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
         host.active = True
         host.status = "up"
         # Update script execution status from agent

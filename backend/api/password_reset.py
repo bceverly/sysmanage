@@ -55,7 +55,7 @@ def create_password_reset_token(user_id: str, session) -> str:
     token = generate_reset_token()
 
     # Set expiration (24 hours from now)
-    expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
+    expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 
     # Create token record
     reset_token = models.PasswordResetToken(
@@ -362,7 +362,7 @@ async def reset_password(request_data: ResetPasswordRequest) -> PasswordResetRes
         user.hashed_password = hashed_password
 
         # Mark token as used
-        reset_token.used_at = datetime.now(timezone.utc)
+        reset_token.used_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
         session.commit()
 

@@ -533,7 +533,7 @@ async def install_packages(
                 detail=_("No packages specified for installation"),
             )
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
 
         # Generate a single UUID for this entire installation request
         request_id = str(uuid.uuid4())
@@ -651,7 +651,7 @@ async def uninstall_packages(
                 detail=_("No packages specified for uninstallation"),
             )
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
 
         # Generate a single UUID for this entire uninstallation request
         request_id = str(uuid.uuid4())
@@ -870,7 +870,7 @@ async def handle_installation_completion(
             )
 
         # Update the request with completion data
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
         installation_request.completed_at = now
         installation_request.status = "completed" if request.success else "failed"
         installation_request.result_log = request.result_log

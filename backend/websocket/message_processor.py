@@ -138,7 +138,9 @@ class MessageProcessor:
             from backend.persistence.models import Host, MessageQueue
 
             # Define stuck message threshold (messages older than 30 seconds)
-            stuck_threshold = datetime.now(timezone.utc) - timedelta(seconds=30)
+            stuck_threshold = datetime.now(timezone.utc).replace(
+                tzinfo=None
+            ) - timedelta(seconds=30)
 
             # First, reset stuck IN_PROGRESS messages back to PENDING
             stuck_messages = (

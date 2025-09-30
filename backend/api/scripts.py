@@ -276,7 +276,7 @@ async def create_saved_script(
                 )
 
             # Create new script
-            now = datetime.now(timezone.utc)
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
             script = models.SavedScript(
                 name=script_data.name,
                 description=script_data.description,
@@ -404,7 +404,7 @@ async def update_saved_script(
             for field, value in update_data.items():
                 setattr(script, field, value)
 
-            script.updated_at = datetime.now(timezone.utc)
+            script.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
             db_session.commit()
             db_session.refresh(script)
@@ -540,7 +540,7 @@ async def execute_script(
                     execution_request.run_as_user = saved_script.run_as_user
 
             # Create execution log entry
-            now = datetime.now(timezone.utc)
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
             execution_log = models.ScriptExecutionLog(
                 host_id=execution_request.host_id,
                 saved_script_id=execution_request.saved_script_id,
@@ -603,7 +603,9 @@ async def execute_script(
                 execution_log.error_message = _(
                     "Failed to queue script execution: {}"
                 ).format(str(e))
-                execution_log.updated_at = datetime.now(timezone.utc)
+                execution_log.updated_at = datetime.now(timezone.utc).replace(
+                    tzinfo=None
+                )
                 db_session.commit()
 
                 logger.error("Failed to queue script execution: %s", e)

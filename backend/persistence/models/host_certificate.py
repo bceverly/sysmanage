@@ -4,7 +4,8 @@ Database model for host SSL certificates.
 
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Text, DateTime, Boolean, ForeignKey, text
+
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Text, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -30,11 +31,9 @@ class HostCertificate(Base):
     )  # Human-readable name extracted from certificate
     subject = Column(Text, nullable=True)  # Certificate subject (CN, O, OU, etc.)
     issuer = Column(Text, nullable=True)  # Certificate issuer information
-    not_before = Column(
-        DateTime(timezone=True), nullable=True
-    )  # Certificate valid from date
+    not_before = Column(DateTime, nullable=True)  # Certificate valid from date
     not_after = Column(
-        DateTime(timezone=True), nullable=True, index=True
+        DateTime, nullable=True, index=True
     )  # Certificate expiration date
     serial_number = Column(String(100), nullable=True)  # Certificate serial number
     fingerprint_sha256 = Column(
@@ -47,18 +46,18 @@ class HostCertificate(Base):
 
     # Audit and tracking fields
     collected_at = Column(
-        DateTime(timezone=True),
+        DateTime,
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
         index=True,
     )  # When this certificate data was collected from the host
     created_at = Column(
-        DateTime(timezone=True),
+        DateTime,
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
     updated_at = Column(
-        DateTime(timezone=True),
+        DateTime,
         server_default=text("CURRENT_TIMESTAMP"),
         onupdate=text("CURRENT_TIMESTAMP"),
         nullable=False,

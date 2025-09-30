@@ -159,9 +159,9 @@ class ServerMessageQueueManager:
 
                 # Second check: Same script content within 10 seconds (prevent rapid duplicate requests)
                 if script_content:
-                    recent_threshold = datetime.now(timezone.utc) - timedelta(
-                        seconds=10
-                    )
+                    recent_threshold = datetime.now(timezone.utc).replace(
+                        tzinfo=None
+                    ) - timedelta(seconds=10)
 
                     similar_command = (
                         db.query(MessageQueue)
@@ -204,7 +204,7 @@ class ServerMessageQueueManager:
                 scheduled_at=scheduled_at,
                 correlation_id=correlation_id,
                 reply_to=reply_to,
-                created_at=datetime.now(timezone.utc),
+                created_at=datetime.now(timezone.utc).replace(tzinfo=None),
             )
 
             db.add(queue_item)
@@ -337,7 +337,7 @@ class ServerMessageQueueManager:
         if hasattr(direction, "value"):
             direction = direction.value
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
 
         session_provided = db is not None
         if not session_provided:
@@ -404,7 +404,7 @@ class ServerMessageQueueManager:
         if hasattr(direction, "value"):
             direction = direction.value
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
 
         session_provided = db is not None
         if not session_provided:
@@ -456,7 +456,7 @@ class ServerMessageQueueManager:
                 return False
 
             message.status = QueueStatus.IN_PROGRESS
-            message.started_at = datetime.now(timezone.utc)
+            message.started_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
             if not session_provided:
                 db.commit()
@@ -499,7 +499,7 @@ class ServerMessageQueueManager:
                 return False
 
             message.status = QueueStatus.COMPLETED
-            message.completed_at = datetime.now(timezone.utc)
+            message.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
             if not session_provided:
                 db.commit()
@@ -550,7 +550,7 @@ class ServerMessageQueueManager:
                 return False
 
             message.retry_count += 1
-            message.last_error_at = datetime.now(timezone.utc)
+            message.last_error_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
             if error_message:
                 message.error_message = error_message
@@ -562,9 +562,9 @@ class ServerMessageQueueManager:
                 backoff_seconds = min(
                     60 * (2 ** (message.retry_count - 1)), 3600
                 )  # Max 1 hour
-                message.scheduled_at = datetime.now(timezone.utc) + timedelta(
-                    seconds=backoff_seconds
-                )
+                message.scheduled_at = datetime.now(timezone.utc).replace(
+                    tzinfo=None
+                ) + timedelta(seconds=backoff_seconds)
                 message.started_at = None  # Reset processing timestamp
 
                 logger.debug(
@@ -579,7 +579,7 @@ class ServerMessageQueueManager:
             else:
                 # Max retries reached or retry disabled
                 message.status = QueueStatus.FAILED
-                message.completed_at = datetime.now(timezone.utc)
+                message.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
                 logger.warning(
                     _("Message %s permanently failed after %d attempts: %s"),
@@ -685,7 +685,9 @@ class ServerMessageQueueManager:
         Returns:
             int: Number of messages deleted
         """
-        cutoff_date = datetime.now(timezone.utc) - timedelta(days=older_than_days)
+        cutoff_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
+            days=older_than_days
+        )
 
         session_provided = db is not None
         if not session_provided:
@@ -818,7 +820,7 @@ class ServerMessageQueueManager:
             timeout_minutes = config.get("message_queue", {}).get(
                 "expiration_timeout_minutes", 60
             )
-            cutoff_time = datetime.now(timezone.utc) - timedelta(
+            cutoff_time = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
                 minutes=timeout_minutes
             )
 
@@ -841,7 +843,7 @@ class ServerMessageQueueManager:
                 messages_to_expire.update(
                     {
                         "status": QueueStatus.EXPIRED,
-                        "expired_at": datetime.now(timezone.utc),
+                        "expired_at": datetime.now(timezone.utc).replace(tzinfo=None),
                         "error_message": f"Message expired after {timeout_minutes} minutes",
                     },
                     synchronize_session=False,

@@ -102,7 +102,7 @@ async def collect_diagnostics(host_id: str, request: DiagnosticRequest = None):
         # Update host diagnostics request status
         from sqlalchemy import update
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
         stmt = (
             update(models.Host)
             .where(models.Host.id == host_id)
@@ -143,14 +143,16 @@ async def collect_diagnostics(host_id: str, request: DiagnosticRequest = None):
             # Update status to failed if we can't send the message
             diagnostic_report.status = "failed"
             diagnostic_report.error_message = "Agent is not connected"
-            diagnostic_report.updated_at = datetime.now(timezone.utc)
+            diagnostic_report.updated_at = datetime.now(timezone.utc).replace(
+                tzinfo=None
+            )
             session.commit()
             raise HTTPException(status_code=503, detail=_("Agent is not connected"))
 
         # Update status to collecting
         diagnostic_report.status = "collecting"
-        diagnostic_report.started_at = datetime.now(timezone.utc)
-        diagnostic_report.updated_at = datetime.now(timezone.utc)
+        diagnostic_report.started_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        diagnostic_report.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
         session.commit()
 
         return {
@@ -225,12 +227,18 @@ async def get_host_diagnostics(
                     "collection_id": diag.collection_id,
                     "status": diag.status,
                     "requested_by": diag.requested_by,
-                    "requested_at": diag.requested_at.isoformat(),
+                    "requested_at": diag.requested_at.replace(
+                        tzinfo=timezone.utc
+                    ).isoformat(),
                     "started_at": (
-                        diag.started_at.isoformat() if diag.started_at else None
+                        diag.started_at.replace(tzinfo=timezone.utc).isoformat()
+                        if diag.started_at
+                        else None
                     ),
                     "completed_at": (
-                        diag.completed_at.isoformat() if diag.completed_at else None
+                        diag.completed_at.replace(tzinfo=timezone.utc).isoformat()
+                        if diag.completed_at
+                        else None
                     ),
                     "collection_size_bytes": diag.collection_size_bytes,
                     "files_collected": diag.files_collected,
@@ -287,12 +295,18 @@ async def get_diagnostic_report(diagnostic_id: str):
             "collection_id": diagnostic.collection_id,
             "status": diagnostic.status,
             "requested_by": diagnostic.requested_by,
-            "requested_at": diagnostic.requested_at.isoformat(),
+            "requested_at": diagnostic.requested_at.replace(
+                tzinfo=timezone.utc
+            ).isoformat(),
             "started_at": (
-                diagnostic.started_at.isoformat() if diagnostic.started_at else None
+                diagnostic.started_at.replace(tzinfo=timezone.utc).isoformat()
+                if diagnostic.started_at
+                else None
             ),
             "completed_at": (
-                diagnostic.completed_at.isoformat() if diagnostic.completed_at else None
+                diagnostic.completed_at.replace(tzinfo=timezone.utc).isoformat()
+                if diagnostic.completed_at
+                else None
             ),
             "collection_size_bytes": diagnostic.collection_size_bytes,
             "files_collected": diagnostic.files_collected,
@@ -347,12 +361,18 @@ async def get_diagnostic_status(diagnostic_id: str):
             "id": str(diagnostic.id),
             "collection_id": diagnostic.collection_id,
             "status": diagnostic.status,
-            "requested_at": diagnostic.requested_at.isoformat(),
+            "requested_at": diagnostic.requested_at.replace(
+                tzinfo=timezone.utc
+            ).isoformat(),
             "started_at": (
-                diagnostic.started_at.isoformat() if diagnostic.started_at else None
+                diagnostic.started_at.replace(tzinfo=timezone.utc).isoformat()
+                if diagnostic.started_at
+                else None
             ),
             "completed_at": (
-                diagnostic.completed_at.isoformat() if diagnostic.completed_at else None
+                diagnostic.completed_at.replace(tzinfo=timezone.utc).isoformat()
+                if diagnostic.completed_at
+                else None
             ),
             "error_message": diagnostic.error_message,
         }
@@ -450,8 +470,8 @@ async def process_diagnostic_result(result_data: dict):
         diagnostic.status = (
             "completed" if result_data.get("success", False) else "failed"
         )
-        diagnostic.completed_at = datetime.now(timezone.utc)
-        diagnostic.updated_at = datetime.now(timezone.utc)
+        diagnostic.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        diagnostic.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
         if result_data.get("error"):
             diagnostic.error_message = result_data["error"]

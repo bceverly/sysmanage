@@ -5,7 +5,7 @@ Host role model for tracking server roles based on installed packages and servic
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import Column, String, DateTime, Boolean, ForeignKey, Integer
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from backend.persistence.db import Base

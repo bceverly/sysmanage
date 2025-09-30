@@ -262,7 +262,7 @@ async def add_user(new_user: User, request: Request):
             first_name=new_user.first_name,
             last_name=new_user.last_name,
             hashed_password=hashed_value,
-            last_access=datetime.now(timezone.utc),
+            last_access=datetime.now(timezone.utc).replace(tzinfo=None),
         )
         session.add(user)
         session.commit()
@@ -457,7 +457,7 @@ async def upload_user_profile_image(user_id: str, file: UploadFile = File(...)):
         # Update user's profile image
         user.profile_image = processed_image_bytes
         user.profile_image_type = image_format
-        user.profile_image_uploaded_at = datetime.now(timezone.utc)
+        user.profile_image_uploaded_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
         session.commit()
 

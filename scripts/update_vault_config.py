@@ -13,7 +13,9 @@ Example usage:
 """
 import os
 import sys
+
 import yaml
+
 
 def main():
     config_path = "/etc/sysmanage.yaml"

@@ -80,7 +80,7 @@ async def handle_packages_batch_start(db: Session, connection, message_data: dic
             "os_version": os_version,
             "package_managers": package_managers,
             "total_packages": 0,
-            "started_at": datetime.now(timezone.utc),
+            "started_at": datetime.now(timezone.utc).replace(tzinfo=None),
         }
 
         return {
@@ -145,7 +145,7 @@ async def handle_packages_batch(db: Session, connection, message_data: dict):
             )
 
             # Insert packages from this batch
-            now = datetime.now(timezone.utc)
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
             for package in packages:
                 package_name = package.get("name", "").strip()
                 package_version = package.get("version", "").strip()

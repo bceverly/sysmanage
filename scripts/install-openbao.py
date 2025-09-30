@@ -6,14 +6,15 @@ Automatically detects platform and installs OpenBAO accordingly.
 
 import os
 import platform
+import shutil
 import subprocess
 import sys
-import urllib.parse
-import requests
-import zipfile
 import tempfile
-import shutil
+import urllib.parse
+import zipfile
 from pathlib import Path
+
+import requests
 
 
 def safe_extract(tar, path):

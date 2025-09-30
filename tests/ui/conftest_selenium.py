@@ -331,20 +331,124 @@ def start_server(ui_config):
         except:
             pass
 
+    server_process = None
     if not server_running:
         print("❌ Server not detected running on expected port.")
-        print(f"   Expected: {ui_config.base_url}")
-        print(
-            "   Please ensure the server is running with 'make start' before running UI tests."
-        )
-        pytest.skip(
-            f"Server not running at {ui_config.base_url} - start with 'make start' before running UI tests"
-        )
+        print(f"   Starting server at {ui_config.base_url}")
+
+        # Start the server using run.sh
+        try:
+            # Change to project root directory
+            project_root = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), "../..")
+            )
+            print(f"   Project root: {project_root}")
+
+            # Start server in background using scripts/start.sh
+            run_script = os.path.join(project_root, "scripts", "start.sh")
+            if not os.path.exists(run_script):
+                raise FileNotFoundError(f"start.sh not found at {run_script}")
+
+            server_process = subprocess.Popen(
+                [run_script],
+                cwd=project_root,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                preexec_fn=os.setsid if os.name != "nt" else None,
+            )
+
+            print(f"   Server process started (PID: {server_process.pid})")
+            print("   Waiting for server to be ready...")
+
+            # Wait up to 60 seconds for server to be ready
+            max_wait = 60
+            wait_interval = 2
+            elapsed = 0
+
+            while elapsed < max_wait:
+                time.sleep(wait_interval)
+                elapsed += wait_interval
+
+                try:
+                    response = requests.get(
+                        f"{ui_config.api_url}/api/health", timeout=5
+                    )
+                    if response.status_code == 200:
+                        print(f"   [OK] Server ready after {elapsed} seconds")
+                        server_running = True
+                        break
+                except:
+                    # Try root endpoint as fallback
+                    try:
+                        response = requests.get(f"{ui_config.base_url}/", timeout=5)
+                        if response.status_code in [200, 404]:
+                            print(
+                                f"   [OK] Server ready after {elapsed} seconds (via root endpoint)"
+                            )
+                            server_running = True
+                            break
+                    except:
+                        pass
+
+                print(f"   Waiting... ({elapsed}/{max_wait}s)")
+
+            if not server_running:
+                # Clean up failed server process
+                if server_process:
+                    (
+                        os.killpg(os.getpgid(server_process.pid), signal.SIGTERM)
+                        if os.name != "nt"
+                        else server_process.terminate()
+                    )
+                raise Exception(f"Server failed to start within {max_wait} seconds")
+
+        except Exception as e:
+            print(f"   [ERROR] Failed to start server: {e}")
+            if server_process:
+                try:
+                    (
+                        os.killpg(os.getpgid(server_process.pid), signal.SIGTERM)
+                        if os.name != "nt"
+                        else server_process.terminate()
+                    )
+                except:
+                    pass
+            raise
 
     yield True
 
-    # Never stop the server - leave it running as requested
-    print("[OK] UI tests completed - leaving server running")
+    # Clean up: stop the server if we started it
+    if server_process:
+        print("[INFO] Stopping server that was started for UI tests")
+        try:
+            # Use scripts/stop.sh to cleanly stop the server
+            # Redirect all output including shell job control messages
+            project_root = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), "../..")
+            )
+            stop_script = os.path.join(project_root, "scripts", "stop.sh")
+            if os.path.exists(stop_script):
+                # Run stop script in a subshell to completely suppress output
+                result = subprocess.run(
+                    ["sh", "-c", f"'{stop_script}' >/dev/null 2>&1"],
+                    cwd=project_root,
+                    timeout=10,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                print("[OK] Server stopped successfully using stop.sh")
+            else:
+                # Fallback to signal-based termination
+                if os.name != "nt":
+                    os.killpg(os.getpgid(server_process.pid), signal.SIGTERM)
+                else:
+                    server_process.terminate()
+                server_process.wait(timeout=10)
+                print("[OK] Server stopped successfully")
+        except Exception as e:
+            print(f"[WARNING] Error stopping server: {e}")
+    else:
+        print("[OK] UI tests completed - leaving pre-existing server running")
 
 
 @pytest.fixture(scope="session")

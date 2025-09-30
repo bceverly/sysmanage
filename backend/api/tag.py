@@ -190,7 +190,7 @@ async def update_tag(
         if tag_data.description is not None:
             tag.description = tag_data.description
 
-        tag.updated_at = datetime.now(timezone.utc)
+        tag.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
         db.commit()
         db.refresh(tag)

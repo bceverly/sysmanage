@@ -4,9 +4,9 @@ Post-install script to install WebDriver for browser automation.
 Run this after: pip install -r requirements.txt
 """
 
+import os
 import subprocess
 import sys
-import os
 import warnings
 
 # Suppress urllib3 LibreSSL warning on OpenBSD

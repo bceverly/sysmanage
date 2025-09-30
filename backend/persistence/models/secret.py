@@ -4,7 +4,8 @@ Database model for secrets management.
 
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Text, DateTime, text, func
+
+from sqlalchemy import Column, DateTime, String, Text, func, text
 from sqlalchemy.dialects.postgresql import UUID
 
 from backend.persistence.db import Base
@@ -35,13 +36,13 @@ class Secret(Base):
 
     # Audit fields
     created_at = Column(
-        DateTime(timezone=True),
+        DateTime,
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
         index=True,
     )
     updated_at = Column(
-        DateTime(timezone=True),
+        DateTime,
         server_default=text("CURRENT_TIMESTAMP"),
         onupdate=text("CURRENT_TIMESTAMP"),
         nullable=False,

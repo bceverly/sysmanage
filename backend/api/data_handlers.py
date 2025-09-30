@@ -132,7 +132,9 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
                     host.os_details = os_info["os_details"]
 
                 # Set timestamp
-                host.os_version_updated_at = datetime.now(timezone.utc)
+                host.os_version_updated_at = datetime.now(timezone.utc).replace(
+                    tzinfo=None
+                )
 
                 # Process Ubuntu Pro information if present
                 await handle_ubuntu_pro_update(db, connection, message_data, host)
@@ -306,7 +308,9 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
 
         # Update hardware information if we have any data
         if hardware_updates:
-            hardware_updates["hardware_updated_at"] = datetime.now(timezone.utc)
+            hardware_updates["hardware_updated_at"] = datetime.now(
+                timezone.utc
+            ).replace(tzinfo=None)
 
             stmt = (
                 update(Host)
@@ -334,7 +338,7 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
 
             # Add new interfaces
             for interface in network_interfaces:
-                now = datetime.now(timezone.utc)
+                now = datetime.now(timezone.utc).replace(tzinfo=None)
                 # Extract IPv4 and IPv6 addresses from agent's ip_addresses list
                 ip_addresses = interface.get("ip_addresses", [])
                 ipv4_address = None
@@ -370,7 +374,7 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
 
             # Add new storage devices
             for device in storage_devices:
-                now = datetime.now(timezone.utc)
+                now = datetime.now(timezone.utc).replace(tzinfo=None)
 
                 # Determine if device is physical based on device type
                 device_type = device.get("device_type", "unknown")
@@ -603,7 +607,7 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
             )
 
             # Add new user accounts with security_id support
-            now = datetime.now(timezone.utc)
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
             for account in user_accounts:
                 user_account = _create_user_account_with_security_id(
                     connection, account, now
@@ -622,7 +626,7 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
             db.execute(delete(UserGroup).where(UserGroup.host_id == connection.host_id))
 
             # Add new user groups with security_id support
-            now = datetime.now(timezone.utc)
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
             for group in user_groups:
                 user_group = _create_user_group_with_security_id(connection, group, now)
                 db.add(user_group)
@@ -683,7 +687,7 @@ async def handle_user_access_update_legacy(db: Session, connection, message_data
 
             # Add new user accounts
             for account in user_accounts:
-                now = datetime.now(timezone.utc)
+                now = datetime.now(timezone.utc).replace(tzinfo=None)
 
                 # Determine if this is a system user based on UID and username
                 uid = account.get("uid", 0)
@@ -870,7 +874,7 @@ async def handle_user_access_update_legacy(db: Session, connection, message_data
 
             # Add new user groups
             for group in user_groups:
-                now = datetime.now(timezone.utc)
+                now = datetime.now(timezone.utc).replace(tzinfo=None)
 
                 # Handle gid field - store integers for Unix, for Windows store a hash of the SID
                 gid_value = None
@@ -985,7 +989,7 @@ async def handle_software_update(db: Session, connection, message_data: dict):
 
             # Add new software packages
             for package in software_packages:
-                now = datetime.now(timezone.utc)
+                now = datetime.now(timezone.utc).replace(tzinfo=None)
                 software_package = SoftwarePackage(
                     host_id=connection.host_id,
                     package_name=package.get("package_name"),
@@ -1064,7 +1068,7 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
             )
 
         for package_update in available_updates:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
             # Debug: log all keys in this package update
             debug_logger.info(
                 "Package update keys for %s: %s",
@@ -1259,8 +1263,8 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
             execution_log.shell_used = message_data.get("shell_used")
             execution_log.error_message = message_data.get("error")
             execution_log.timed_out = message_data.get("timeout", False)
-            execution_log.completed_at = datetime.now(timezone.utc)
-            execution_log.updated_at = datetime.now(timezone.utc)
+            execution_log.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+            execution_log.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
             # Set started_at if not already set
             if not execution_log.started_at:
@@ -1350,7 +1354,9 @@ async def handle_reboot_status_update(db: Session, connection, message_data: dic
 
         # Update the reboot status
         host.reboot_required = reboot_required
-        host.reboot_required_updated_at = datetime.now(timezone.utc)
+        host.reboot_required_updated_at = datetime.now(timezone.utc).replace(
+            tzinfo=None
+        )
 
         db.commit()
 
@@ -1393,7 +1399,7 @@ async def handle_ubuntu_pro_update(
         # Clear existing Ubuntu Pro data for this host
         db.execute(delete(UbuntuProInfo).where(UbuntuProInfo.host_id == host.id))
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
 
         # Parse expires field if present
         expires_at = None
@@ -1513,7 +1519,7 @@ async def handle_package_collection(db: Session, connection, message_data: dict)
 
         # Process each package manager's packages
         total_inserted = 0
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
 
         for package_manager, package_list in packages.items():
             debug_logger.info(

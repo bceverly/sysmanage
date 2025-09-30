@@ -12,8 +12,9 @@ Usage:
 
 import os
 import sys
-import yaml
+
 import sqlalchemy as sa
+import yaml
 from sqlalchemy import create_engine, text
 
 # Add the project root to Python path so we can import sysmanage modules if needed
