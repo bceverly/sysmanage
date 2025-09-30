@@ -547,9 +547,9 @@ start-telemetry:
 	@echo "Starting telemetry services..."
 ifeq ($(OS),Windows_NT)
 	@echo "Starting OpenTelemetry Collector..."
-	@powershell -Command "Start-Process -FilePath 'otelcol-contrib' -ArgumentList '--config=config/otel-collector-config.yml' -NoNewWindow -PassThru | Out-File -FilePath 'logs/otel-collector.pid' -Encoding ASCII"
+	@powershell -Command "if (Test-Path '$(USERPROFILE)\AppData\Local\bin\otelcol-contrib.exe') { Start-Process -FilePath '$(USERPROFILE)\AppData\Local\bin\otelcol-contrib.exe' -ArgumentList '--config=config/otel-collector-config.yml' -NoNewWindow -PassThru | Out-File -FilePath 'logs/otel-collector.pid' -Encoding ASCII } else { Write-Host '[WARNING] otelcol-contrib.exe not found. Run make install-dev first.' }"
 	@echo "Starting Prometheus..."
-	@powershell -Command "Start-Process -FilePath 'prometheus' -ArgumentList '--config.file=config/prometheus.yml','--web.listen-address=:9091','--storage.tsdb.path=/var/lib/prometheus' -NoNewWindow -PassThru | Out-File -FilePath 'logs/prometheus.pid' -Encoding ASCII"
+	@powershell -Command "if (Test-Path '$(USERPROFILE)\AppData\Local\bin\prometheus.exe') { Start-Process -FilePath '$(USERPROFILE)\AppData\Local\bin\prometheus.exe' -ArgumentList '--config.file=config/prometheus.yml','--web.listen-address=:9091','--storage.tsdb.path=data/prometheus' -NoNewWindow -PassThru | Out-File -FilePath 'logs/prometheus.pid' -Encoding ASCII } else { Write-Host '[WARNING] prometheus.exe not found. Run make install-dev first.' }"
 else
 	@echo "Starting OpenTelemetry Collector..."
 	@if command -v otelcol-contrib >/dev/null 2>&1; then \
