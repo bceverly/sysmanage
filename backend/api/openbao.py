@@ -490,11 +490,10 @@ def stop_openbao() -> Dict[str, Any]:
             "status": get_openbao_status(),
         }
     except Exception as e:
+        logger.error("Exception occurred while stopping OpenBAO:\n%s", e, exc_info=True)
         return {
             "success": False,
-            "message": _(
-                "openbao.stop_error", "Error stopping OpenBAO: {error}"
-            ).format(error=str(e)),
+            "message": _("openbao.generic_error", "An error occurred while stopping OpenBAO"),
             "status": get_openbao_status(),
         }
 
@@ -673,11 +672,10 @@ def unseal_openbao() -> Dict[str, Any]:
             "status": get_openbao_status(),
         }
     except Exception as e:
+        logger.exception("Exception occurred while unsealing OpenBAO")
         return {
             "success": False,
-            "message": _(
-                "openbao.unseal_error", "Error unsealing OpenBAO: {error}"
-            ).format(error=str(e)),
+            "message": _("openbao.unseal_error", "Error unsealing OpenBAO"),
             "status": get_openbao_status(),
         }
 
