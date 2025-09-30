@@ -38,7 +38,7 @@ message_queue:
 vault:
   enabled: true
   url: http://localhost:8200
-  token: s.o8iy5NE06zGtZN4a9nNHYlK1
+  token: INSERT_YOUR_VAULT_TOKEN_HERE
   mount_path: secret
   timeout: 30
   verify_ssl: false

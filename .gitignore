@@ -214,3 +214,4 @@ artillery-report-*.html
 
 tests/ui/test-results
 *.core
+sysmanage-dev.yaml
