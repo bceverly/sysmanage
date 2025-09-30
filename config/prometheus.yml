@@ -1,0 +1,52 @@
+# Prometheus configuration for SysManage monitoring
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'sysmanage-monitor'
+    environment: 'development'
+
+# Alertmanager configuration (optional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - localhost:9093
+
+# Load rules once and periodically evaluate them
+# rule_files:
+#   - "alerts/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # SysManage backend application metrics
+  - job_name: 'sysmanage-backend'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'sysmanage'
+          component: 'backend'
+
+  # OpenTelemetry Collector metrics
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['localhost:8888']
+        labels:
+          service: 'otel-collector'
+          component: 'collector'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9091']
+        labels:
+          service: 'prometheus'
+          component: 'monitoring'
+
+  # Node exporter for system metrics (optional, install separately)
+  # - job_name: 'node'
+  #   static_configs:
+  #     - targets: ['localhost:9100']
+  #       labels:
+  #         service: 'node-exporter'
+  #         component: 'system'

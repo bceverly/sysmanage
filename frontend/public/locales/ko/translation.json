@@ -365,7 +365,14 @@
     "noDescription": "설명 없음",
     "close": "닫기",
     "id": "ID",
-    "confirmAction": "작업 확인"
+    "confirmAction": "작업 확인",
+    "active": "활성",
+    "inactive": "비활성",
+    "enabled": "활성화됨",
+    "disabled": "비활성화됨",
+    "running": "실행 중",
+    "stopped": "중지됨",
+    "refresh": "새로고침"
   },
   "serverDown": {
     "title": "연결이 중단됨",
@@ -1112,6 +1119,50 @@
         "testVisual": "make test-visual",
         "testAccessibility": "make test-a11y"
       }
+    }
+  },
+  "grafana": {
+    "title": "Grafana 통합",
+    "status": {
+      "label": "상태",
+      "disabled": "비활성화됨",
+      "checking": "확인 중...",
+      "unknown": "알 수 없음",
+      "healthy": "정상",
+      "unhealthy": "비정상"
+    },
+    "enabled": {
+      "label": "Grafana 통합 활성화"
+    },
+    "useManagedServer": {
+      "label": "관리 서버 사용"
+    },
+    "selectServer": {
+      "label": "Grafana 서버 선택"
+    },
+    "noServers": "Grafana 서버를 찾을 수 없습니다",
+    "serverUrl": {
+      "label": "URL"
+    },
+    "manualUrl": {
+      "label": "Grafana URL",
+      "help": "Grafana 인스턴스의 전체 URL을 입력하세요"
+    },
+    "apiKey": {
+      "label": "API 키 (선택사항)",
+      "help": "향상된 기능 및 버전 감지를 위한 편집자 역할 권한이 있는 선택적 API 키"
+    },
+    "healthError": {
+      "label": "상태 확인 오류"
+    },
+    "checkHealth": "상태 확인"
+  },
+  "telemetry": {
+    "instrumentation": {
+      "fastapi": "FastAPI",
+      "sqlalchemy": "SQLAlchemy",
+      "requests": "요청",
+      "logging": "로깅"
     }
   }
 }

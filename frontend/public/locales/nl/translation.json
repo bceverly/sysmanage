@@ -352,7 +352,14 @@
     "noDescription": "Geen beschrijving",
     "close": "Sluiten",
     "id": "ID",
-    "confirmAction": "Actie bevestigen"
+    "confirmAction": "Actie bevestigen",
+    "active": "Actief",
+    "inactive": "Inactief",
+    "enabled": "Ingeschakeld",
+    "disabled": "Uitgeschakeld",
+    "running": "Actief",
+    "stopped": "Gestopt",
+    "refresh": "Vernieuwen"
   },
   "serverDown": {
     "title": "Verbinding Onderbroken",
@@ -976,5 +983,49 @@
     "unsealing": "Ontzegelen...",
     "sealError": "Verzegelen van OpenBAO mislukt",
     "unsealError": "Ontzegelen van OpenBAO mislukt"
+  },
+  "grafana": {
+    "title": "Grafana Integratie",
+    "status": {
+      "label": "Status",
+      "disabled": "Uitgeschakeld",
+      "checking": "Controleren...",
+      "unknown": "Onbekend",
+      "healthy": "Gezond",
+      "unhealthy": "Ongezond"
+    },
+    "enabled": {
+      "label": "Grafana integratie inschakelen"
+    },
+    "useManagedServer": {
+      "label": "Beheerde server gebruiken"
+    },
+    "selectServer": {
+      "label": "Grafana server selecteren"
+    },
+    "noServers": "Geen Grafana servers gevonden",
+    "serverUrl": {
+      "label": "URL"
+    },
+    "manualUrl": {
+      "label": "Grafana URL",
+      "help": "Voer de volledige URL naar uw Grafana instantie in"
+    },
+    "apiKey": {
+      "label": "API Sleutel (Optioneel)",
+      "help": "Optionele API sleutel met Editor rol machtigingen voor verbeterde functies en versiedetectie"
+    },
+    "healthError": {
+      "label": "Gezondheidscontrole fout"
+    },
+    "checkHealth": "Gezondheid controleren"
+  },
+  "telemetry": {
+    "instrumentation": {
+      "fastapi": "FastAPI",
+      "sqlalchemy": "SQLAlchemy",
+      "requests": "Verzoeken",
+      "logging": "Logboekregistratie"
+    }
   }
 }

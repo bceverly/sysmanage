@@ -102,3 +102,16 @@ like to add:
     be able to push a request to
     add a PPA to a remote host
     from a UI on the server.
+
+12. Add the ability to issue and
+    manage SysManage API keys with
+    View/Edit/Admin roles.  They
+    should be stored in the vault
+    and have an expiration date
+    after which they are invalid.
+    They key should be able to be
+    used to get a JWT token for
+    the API so there should be
+    an endpoint that is not /api/
+    prefixed to get the token
+    issued / renewed.

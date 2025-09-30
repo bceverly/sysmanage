@@ -350,7 +350,14 @@
     "noDescription": "Без описания",
     "close": "Закрыть",
     "id": "ID",
-    "confirmAction": "Подтвердить действие"
+    "confirmAction": "Подтвердить действие",
+    "active": "Активный",
+    "inactive": "Неактивный",
+    "enabled": "Включено",
+    "disabled": "Отключено",
+    "running": "Работает",
+    "stopped": "Остановлено",
+    "refresh": "Обновить"
   },
   "serverDown": {
     "title": "Соединение прервано",
@@ -974,5 +981,49 @@
     "unsealing": "Распечатывание...",
     "sealError": "Не удалось запечатать OpenBAO",
     "unsealError": "Не удалось распечатать OpenBAO"
+  },
+  "grafana": {
+    "title": "Интеграция Grafana",
+    "status": {
+      "label": "Статус",
+      "disabled": "Отключено",
+      "checking": "Проверка...",
+      "unknown": "Неизвестно",
+      "healthy": "Работает",
+      "unhealthy": "Не работает"
+    },
+    "enabled": {
+      "label": "Включить интеграцию Grafana"
+    },
+    "useManagedServer": {
+      "label": "Использовать управляемый сервер"
+    },
+    "selectServer": {
+      "label": "Выбрать сервер Grafana"
+    },
+    "noServers": "Серверы Grafana не найдены",
+    "serverUrl": {
+      "label": "URL"
+    },
+    "manualUrl": {
+      "label": "URL Grafana",
+      "help": "Введите полный URL к вашему экземпляру Grafana"
+    },
+    "apiKey": {
+      "label": "API ключ (Необязательно)",
+      "help": "Необязательный API ключ с правами роли Редактор для расширенных функций и определения версии"
+    },
+    "healthError": {
+      "label": "Ошибка проверки состояния"
+    },
+    "checkHealth": "Проверить состояние"
+  },
+  "telemetry": {
+    "instrumentation": {
+      "fastapi": "FastAPI",
+      "sqlalchemy": "SQLAlchemy",
+      "requests": "Запросы",
+      "logging": "Журналирование"
+    }
   }
 }

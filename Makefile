@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev migrate help start stop start-openbao stop-openbao status-openbao
+.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry
 
 # Default target
 help:
@@ -32,6 +32,11 @@ help:
 	@echo "  make start-openbao - Start OpenBAO development server only"
 	@echo "  make stop-openbao  - Stop OpenBAO development server only"
 	@echo "  make status-openbao - Check OpenBAO server status"
+	@echo ""
+	@echo "Telemetry/Observability targets:"
+	@echo "  make status-telemetry  - Check telemetry services status"
+	@echo "  Note: Telemetry services are automatically started/stopped with 'make start/stop'"
+	@echo "  Note: Telemetry stack is automatically installed with 'make install-dev'"
 	@echo ""
 	@echo "BSD users: install-dev will check for C tracer dependencies"
 	@echo "  - OpenBSD: gcc, py3-cffi"
@@ -90,6 +95,12 @@ install-dev:
 	fi
 	@echo "Installing OpenBAO for secrets management..."
 	@$(PYTHON) scripts/install-openbao.py
+	@echo "Installing telemetry stack (OpenTelemetry + Prometheus)..."
+ifeq ($(OS),Windows_NT)
+	@$(PYTHON) scripts/install-telemetry.py
+else
+	@sudo $(PYTHON) scripts/install-telemetry.py || echo "[WARNING] Telemetry installation failed - continuing without telemetry"
+endif
 	@echo "Setting up WebDriver for screenshots..."
 	@$(PYTHON) scripts/install-browsers.py
 ifeq ($(OS),Windows_NT)
@@ -409,6 +420,9 @@ else
 	@./scripts/start-openbao.sh
 endif
 	@echo ""
+	@echo "Starting telemetry services..."
+	@$(MAKE) start-telemetry
+	@echo ""
 	@echo "Starting SysManage server..."
 ifeq ($(OS),Windows_NT)
 	@powershell -ExecutionPolicy Bypass -File scripts/start.ps1 || scripts\start.cmd
@@ -448,6 +462,9 @@ else
 	fi
 endif
 	@echo ""
+	@echo "Stopping telemetry services..."
+	@$(MAKE) stop-telemetry
+	@echo ""
 	@echo "Stopping OpenBAO development server..."
 ifeq ($(OS),Windows_NT)
 	@powershell -ExecutionPolicy Bypass -File scripts/stop-openbao.ps1 || scripts\stop-openbao.cmd
@@ -485,3 +502,90 @@ run-dev: start
 
 stop-dev: stop
 	@echo "Legacy stop-dev target - use 'make stop' instead"
+
+# Telemetry management targets (installation happens in install-dev)
+start-telemetry:
+	@echo "Starting telemetry services..."
+ifeq ($(OS),Windows_NT)
+	@echo "Starting OpenTelemetry Collector..."
+	@powershell -Command "Start-Process -FilePath 'otelcol-contrib' -ArgumentList '--config=config/otel-collector-config.yml' -NoNewWindow -PassThru | Out-File -FilePath 'logs/otel-collector.pid' -Encoding ASCII"
+	@echo "Starting Prometheus..."
+	@powershell -Command "Start-Process -FilePath 'prometheus' -ArgumentList '--config.file=config/prometheus.yml','--web.listen-address=:9091','--storage.tsdb.path=/var/lib/prometheus' -NoNewWindow -PassThru | Out-File -FilePath 'logs/prometheus.pid' -Encoding ASCII"
+else
+	@echo "Starting OpenTelemetry Collector..."
+	@if command -v otelcol-contrib >/dev/null 2>&1; then \
+		nohup otelcol-contrib --config=config/otel-collector-config.yml > logs/otel-collector.log 2>&1 & echo $$! > logs/otel-collector.pid; \
+		echo "OpenTelemetry Collector started (PID: $$(cat logs/otel-collector.pid))"; \
+	else \
+		echo "[WARNING] otelcol-contrib not found. Run 'make install-telemetry' first."; \
+	fi
+	@echo "Starting Prometheus..."
+	@if command -v prometheus >/dev/null 2>&1; then \
+		mkdir -p data/prometheus; \
+		nohup prometheus --config.file=config/prometheus.yml --web.listen-address=:9091 --storage.tsdb.path=./data/prometheus --storage.tsdb.retention.time=15d --storage.tsdb.retention.size=10GB > logs/prometheus.log 2>&1 & echo $$! > logs/prometheus.pid; \
+		echo "Prometheus started (PID: $$(cat logs/prometheus.pid))"; \
+	else \
+		echo "[WARNING] prometheus not found. Run 'make install-telemetry' first."; \
+	fi
+endif
+	@echo ""
+	@echo "[OK] Telemetry services started successfully"
+	@echo "  - OpenTelemetry Collector: http://localhost:4317 (gRPC), http://localhost:4318 (HTTP)"
+	@echo "  - OpenTelemetry Collector UI: http://localhost:55679"
+	@echo "  - Prometheus: http://localhost:9091"
+	@echo "  - Prometheus metrics scraper: http://localhost:9090 (from SysManage backend)"
+	@echo ""
+	@echo "Note: OpenTelemetry is enabled by default. To disable, set OTEL_ENABLED=false"
+
+stop-telemetry:
+	@echo "Stopping telemetry services..."
+ifeq ($(OS),Windows_NT)
+	@if exist logs\otel-collector.pid (powershell -Command "Stop-Process -Id (Get-Content logs\otel-collector.pid) -Force -ErrorAction SilentlyContinue" && del logs\otel-collector.pid)
+	@if exist logs\prometheus.pid (powershell -Command "Stop-Process -Id (Get-Content logs\prometheus.pid) -Force -ErrorAction SilentlyContinue" && del logs\prometheus.pid)
+else
+	@if [ -f logs/otel-collector.pid ]; then \
+		kill $$(cat logs/otel-collector.pid) 2>/dev/null || true; \
+		rm -f logs/otel-collector.pid; \
+		echo "OpenTelemetry Collector stopped"; \
+	fi
+	@if [ -f logs/prometheus.pid ]; then \
+		kill $$(cat logs/prometheus.pid) 2>/dev/null || true; \
+		rm -f logs/prometheus.pid; \
+		echo "Prometheus stopped"; \
+	fi
+endif
+	@echo "[OK] Telemetry services stopped"
+
+status-telemetry:
+	@echo "=== Telemetry Services Status ==="
+ifeq ($(OS),Windows_NT)
+	@if exist logs\otel-collector.pid (powershell -Command "Get-Process -Id (Get-Content logs\otel-collector.pid) -ErrorAction SilentlyContinue" && echo "OpenTelemetry Collector: RUNNING") else (echo "OpenTelemetry Collector: STOPPED")
+	@if exist logs\prometheus.pid (powershell -Command "Get-Process -Id (Get-Content logs\prometheus.pid) -ErrorAction SilentlyContinue" && echo "Prometheus: RUNNING") else (echo "Prometheus: STOPPED")
+else
+	@if [ -f logs/otel-collector.pid ]; then \
+		if ps -p $$(cat logs/otel-collector.pid) > /dev/null 2>&1; then \
+			echo "OpenTelemetry Collector: RUNNING (PID: $$(cat logs/otel-collector.pid))"; \
+		else \
+			echo "OpenTelemetry Collector: STOPPED (stale PID file)"; \
+			rm -f logs/otel-collector.pid; \
+		fi; \
+	else \
+		echo "OpenTelemetry Collector: STOPPED"; \
+	fi
+	@if [ -f logs/prometheus.pid ]; then \
+		if ps -p $$(cat logs/prometheus.pid) > /dev/null 2>&1; then \
+			echo "Prometheus: RUNNING (PID: $$(cat logs/prometheus.pid))"; \
+		else \
+			echo "Prometheus: STOPPED (stale PID file)"; \
+			rm -f logs/prometheus.pid; \
+		fi; \
+	else \
+		echo "Prometheus: STOPPED"; \
+	fi
+endif
+	@echo ""
+	@echo "Service URLs:"
+	@echo "  - OpenTelemetry Collector gRPC: http://localhost:4317"
+	@echo "  - OpenTelemetry Collector HTTP: http://localhost:4318"
+	@echo "  - OpenTelemetry Collector UI: http://localhost:55679"
+	@echo "  - Prometheus: http://localhost:9091"

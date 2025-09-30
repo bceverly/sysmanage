@@ -146,7 +146,14 @@
     "noDescription": "無描述",
     "close": "關閉",
     "id": "ID",
-    "confirmAction": "確認操作"
+    "confirmAction": "確認操作",
+    "active": "活躍",
+    "inactive": "不活躍",
+    "enabled": "已啟用",
+    "disabled": "已禁用",
+    "running": "執行中",
+    "stopped": "已停止",
+    "refresh": "重新整理"
   },
   "hostDetail": {
     "invalidId": "無效的主機 ID",
@@ -1098,6 +1105,50 @@
         "testVisual": "make test-visual",
         "testAccessibility": "make test-a11y"
       }
+    }
+  },
+  "grafana": {
+    "title": "Grafana 整合",
+    "status": {
+      "label": "狀態",
+      "disabled": "已停用",
+      "checking": "檢查中...",
+      "unknown": "未知",
+      "healthy": "健康",
+      "unhealthy": "不健康"
+    },
+    "enabled": {
+      "label": "啟用 Grafana 整合"
+    },
+    "useManagedServer": {
+      "label": "使用託管伺服器"
+    },
+    "selectServer": {
+      "label": "選擇 Grafana 伺服器"
+    },
+    "noServers": "找不到 Grafana 伺服器",
+    "serverUrl": {
+      "label": "URL"
+    },
+    "manualUrl": {
+      "label": "Grafana URL",
+      "help": "輸入您的 Grafana 實例的完整 URL"
+    },
+    "apiKey": {
+      "label": "API 金鑰（選用）",
+      "help": "具有編輯者角色權限的選用 API 金鑰，用於增強功能和版本檢測"
+    },
+    "healthError": {
+      "label": "健康檢查錯誤"
+    },
+    "checkHealth": "檢查健康狀態"
+  },
+  "telemetry": {
+    "instrumentation": {
+      "fastapi": "FastAPI",
+      "sqlalchemy": "SQLAlchemy",
+      "requests": "請求",
+      "logging": "日誌記錄"
     }
   }
 }

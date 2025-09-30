@@ -171,6 +171,9 @@ class Host(Base):
     roles = relationship(
         "HostRole", back_populates="host", cascade="all, delete-orphan"
     )
+    grafana_integration = relationship(
+        "GrafanaIntegrationSettings", back_populates="host", uselist=False
+    )
 
     def __repr__(self):
         return f"<Host(id={self.id}, fqdn='{self.fqdn}', active={self.active})>"

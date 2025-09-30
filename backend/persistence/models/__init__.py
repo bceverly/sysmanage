@@ -12,6 +12,7 @@ from .operations import *
 from .secret import *
 from .host_certificate import *
 from .host_role import *
+from .grafana_integration import *
 from .software import *
 
 __all__ = [
@@ -54,4 +55,6 @@ __all__ = [
     "HostCertificate",
     # Role models
     "HostRole",
+    # Grafana integration models
+    "GrafanaIntegrationSettings",
 ]

@@ -147,7 +147,14 @@
     "noDescription": "Aucune description",
     "close": "Fermer",
     "id": "ID",
-    "confirmAction": "Confirmer l'action"
+    "confirmAction": "Confirmer l'action",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "enabled": "Activé",
+    "disabled": "Désactivé",
+    "running": "En cours d'exécution",
+    "stopped": "Arrêté",
+    "refresh": "Actualiser"
   },
   "hostDetail": {
     "invalidId": "ID d'hôte invalide",
@@ -989,5 +996,49 @@
     "unsealing": "Descellement en cours...",
     "sealError": "Échec du scellement d'OpenBAO",
     "unsealError": "Échec du descellement d'OpenBAO"
+  },
+  "grafana": {
+    "title": "Intégration Grafana",
+    "status": {
+      "label": "Statut",
+      "disabled": "Désactivé",
+      "checking": "Vérification en cours...",
+      "unknown": "Inconnu",
+      "healthy": "Sain",
+      "unhealthy": "Malsain"
+    },
+    "enabled": {
+      "label": "Activer l'intégration Grafana"
+    },
+    "useManagedServer": {
+      "label": "Utiliser le serveur géré"
+    },
+    "selectServer": {
+      "label": "Sélectionner le serveur Grafana"
+    },
+    "noServers": "Aucun serveur Grafana trouvé",
+    "serverUrl": {
+      "label": "URL"
+    },
+    "manualUrl": {
+      "label": "URL Grafana",
+      "help": "Entrez l'URL complète de votre instance Grafana"
+    },
+    "apiKey": {
+      "label": "Clé API (Facultative)",
+      "help": "Clé API facultative avec permissions de rôle Éditeur pour les fonctionnalités améliorées et la détection de version"
+    },
+    "healthError": {
+      "label": "Erreur de vérification de santé"
+    },
+    "checkHealth": "Vérifier la santé"
+  },
+  "telemetry": {
+    "instrumentation": {
+      "fastapi": "FastAPI",
+      "sqlalchemy": "SQLAlchemy",
+      "requests": "Requêtes",
+      "logging": "Journalisation"
+    }
   }
 }

@@ -504,7 +504,8 @@ def get_user_input():
     print("  4. Drop and recreate all database tables")
     print("  5. Run database migrations")
     print("  6. Initialize OpenBAO vault (if available)")
-    print("  7. Create an initial admin user")
+    print("  7. Install telemetry stack (optional)")
+    print("  8. Create an initial admin user")
     print("\nWARNING: This will DELETE all existing data!")
 
     confirm = input("\nDo you want to continue? (yes/no): ").strip().lower()
@@ -771,6 +772,44 @@ def find_vault_binary():
             pass
 
     return None
+
+def install_telemetry_stack():
+    """Install OpenTelemetry and Prometheus for performance monitoring."""
+    print("\n--- Installing Telemetry Stack ---")
+
+    telemetry_script = project_root / 'scripts' / 'install-telemetry.py'
+    if not telemetry_script.exists():
+        print("  Telemetry installation script not found, skipping telemetry setup")
+        return False
+
+    print("  This will install OpenTelemetry Collector and Prometheus for monitoring SysManage performance.")
+    install_telemetry = input("  Install telemetry stack? (y/n): ").strip().lower()
+
+    if install_telemetry != 'y' and install_telemetry != 'yes':
+        print("  Skipping telemetry stack installation")
+        return False
+
+    try:
+        print("  Running telemetry installation script...")
+        # Run the telemetry installation script with elevated privileges
+        result = subprocess.run([
+            sys.executable, str(telemetry_script)
+        ], timeout=300, capture_output=False)
+
+        if result.returncode == 0:
+            print("  ✅ Telemetry stack installed successfully!")
+            return True
+        else:
+            print("  ❌ Telemetry stack installation failed")
+            return False
+
+    except subprocess.TimeoutExpired:
+        print("  ❌ Telemetry installation timed out")
+        return False
+    except Exception as e:
+        print(f"  ❌ Error installing telemetry stack: {e}")
+        return False
+
 
 def initialize_vault():
     """Initialize OpenBAO vault with production configuration."""
@@ -1102,6 +1141,9 @@ def main():
             unseal_key, root_token = vault_result
             if config_path:
                 update_config_with_vault(config_path, unseal_key, root_token)
+
+        # Install telemetry stack (optional)
+        telemetry_installed = install_telemetry_stack()
 
         # Reload configuration to ensure we're using the updated salt
         config = get_config()

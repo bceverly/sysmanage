@@ -170,6 +170,13 @@ class VaultService:
                 subpath = secret_subtype
             else:
                 subpath = "github"  # Default fallback
+        elif secret_type == "API Key":  # nosec B105
+            # API Keys: api/grafana, api/github, api/salesforce
+            base_path = "api"
+            if secret_subtype in ["grafana", "github", "salesforce"]:
+                subpath = secret_subtype
+            else:
+                subpath = "default"  # Default fallback
         else:
             # Fallback for unknown types
             base_path = secret_type

@@ -155,7 +155,14 @@
     "less": "less",
     "noDescription": "No description",
     "close": "Close",
-    "confirmAction": "Confirm Action"
+    "confirmAction": "Confirm Action",
+    "active": "Active",
+    "inactive": "Inactive",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "running": "Running",
+    "stopped": "Stopped",
+    "refresh": "Refresh"
   },
   "hostDetail": {
     "invalidId": "Invalid host ID",
@@ -346,7 +353,6 @@
     "roleCollectionError": "Error requesting role collection",
     "noRolesDetected": "No server roles detected",
     "role": "Role",
-    "package": "Package",
     "serviceControlActions": "Service Control Actions",
     "start": "Start",
     "stop": "Stop",
@@ -1022,8 +1028,7 @@
     "packageUninstallError": "Error queueing package uninstallation",
     "added": "Added",
     "softwareInstallationHistory": "Software Installation History",
-    "softwareInstallsComingSoon": "Software installation tracking coming soon. This feature will show the history and status of package installations requested through the software manager.",
-    "version": "Version"
+    "softwareInstallsComingSoon": "Software installation tracking coming soon. This feature will show the history and status of package installations requested through the software manager."
   },
   "openbao": {
     "devModeChip": "Dev",
@@ -1163,6 +1168,79 @@
         "testVisual": "make test-visual",
         "testAccessibility": "make test-a11y"
       }
+    }
+  },
+  "grafana": {
+    "title": "Grafana Integration",
+    "status": {
+      "label": "Status",
+      "disabled": "Disabled",
+      "checking": "Checking...",
+      "unknown": "Unknown",
+      "healthy": "Healthy",
+      "unhealthy": "Unhealthy"
+    },
+    "enabled": {
+      "label": "Enable Grafana Integration"
+    },
+    "useManagedServer": {
+      "label": "Use Managed Server"
+    },
+    "selectServer": {
+      "label": "Select Grafana Server"
+    },
+    "noServers": "No Grafana servers found",
+    "serverUrl": {
+      "label": "URL"
+    },
+    "manualUrl": {
+      "label": "Grafana URL",
+      "help": "Enter the full URL to your Grafana instance"
+    },
+    "apiKey": {
+      "label": "API Key (Optional)",
+      "help": "Optional API key with Editor role permissions for enhanced features and version detection"
+    },
+    "healthError": {
+      "label": "Health Check Error"
+    },
+    "checkHealth": "Check Health"
+  },
+  "telemetry": {
+    "opentelemetry": {
+      "title": "OpenTelemetry Status",
+      "status": "Status",
+      "configuration": "Configuration",
+      "collectorUrl": "Collector URL",
+      "prometheusPort": "Prometheus Port",
+      "instrumentation": "Instrumentation",
+      "statistics": "Statistics",
+      "metricsCount": "Metrics",
+      "tracesCount": "Traces",
+      "enableHint": "OpenTelemetry is enabled by default. To disable, set OTEL_ENABLED=false environment variable and restart the server.",
+      "disabledMessage": "OpenTelemetry instrumentation is currently disabled. Remove OTEL_ENABLED=false or set OTEL_ENABLED=true to enable distributed tracing and metrics collection."
+    },
+    "prometheus": {
+      "title": "Prometheus Status",
+      "status": "Status",
+      "information": "Information",
+      "version": "Version",
+      "url": "URL",
+      "scrapeInterval": "Scrape Interval",
+      "retentionTime": "Retention Time",
+      "statistics": "Statistics",
+      "targets": "Targets",
+      "metricsCount": "Metrics",
+      "storageSize": "Storage Size",
+      "lastScrape": "Last Scrape",
+      "manageHint": "Prometheus is managed by the telemetry stack. Use \"make start-telemetry\" to start or \"make stop-telemetry\" to stop.",
+      "notRunningMessage": "Prometheus is not running. Start the telemetry stack with \"make start-telemetry\" or \"make start\"."
+    },
+    "instrumentation": {
+      "fastapi": "FastAPI",
+      "sqlalchemy": "SQLAlchemy",
+      "requests": "Requests",
+      "logging": "Logging"
     }
   }
 }

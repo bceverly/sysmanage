@@ -147,7 +147,14 @@
     "noDescription": "Keine Beschreibung",
     "close": "Schließen",
     "id": "ID",
-    "confirmAction": "Aktion bestätigen"
+    "confirmAction": "Aktion bestätigen",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "enabled": "Aktiviert",
+    "disabled": "Deaktiviert",
+    "running": "Läuft",
+    "stopped": "Gestoppt",
+    "refresh": "Aktualisieren"
   },
   "hostDetail": {
     "invalidId": "Ungültige Host-ID",
@@ -991,5 +998,49 @@
     "unsealing": "Entsiegelung läuft...",
     "sealError": "Fehler beim Versiegeln von OpenBAO",
     "unsealError": "Fehler beim Entsiegeln von OpenBAO"
+  },
+  "grafana": {
+    "title": "Grafana-Integration",
+    "status": {
+      "label": "Status",
+      "disabled": "Deaktiviert",
+      "checking": "Prüfung läuft...",
+      "unknown": "Unbekannt",
+      "healthy": "Gesund",
+      "unhealthy": "Ungesund"
+    },
+    "enabled": {
+      "label": "Grafana-Integration aktivieren"
+    },
+    "useManagedServer": {
+      "label": "Verwalteten Server verwenden"
+    },
+    "selectServer": {
+      "label": "Grafana-Server auswählen"
+    },
+    "noServers": "Keine Grafana-Server gefunden",
+    "serverUrl": {
+      "label": "URL"
+    },
+    "manualUrl": {
+      "label": "Grafana-URL",
+      "help": "Geben Sie die vollständige URL zu Ihrer Grafana-Instanz ein"
+    },
+    "apiKey": {
+      "label": "API-Schlüssel (Optional)",
+      "help": "Optionaler API-Schlüssel mit Editor-Rollen-Berechtigungen für erweiterte Funktionen und Versionserkennung"
+    },
+    "healthError": {
+      "label": "Gesundheitscheck-Fehler"
+    },
+    "checkHealth": "Gesundheit prüfen"
+  },
+  "telemetry": {
+    "instrumentation": {
+      "fastapi": "FastAPI",
+      "sqlalchemy": "SQLAlchemy",
+      "requests": "Anfragen",
+      "logging": "Protokollierung"
+    }
   }
 }

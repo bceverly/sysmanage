@@ -147,7 +147,14 @@
     "noDescription": "Sem descrição",
     "close": "Fechar",
     "id": "ID",
-    "confirmAction": "Confirmar ação"
+    "confirmAction": "Confirmar ação",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "enabled": "Ativado",
+    "disabled": "Desativado",
+    "running": "Em execução",
+    "stopped": "Parado",
+    "refresh": "Atualizar"
   },
   "hostDetail": {
     "invalidId": "ID do host inválido",
@@ -991,5 +998,49 @@
     "unsealing": "Desselando...",
     "sealError": "Falha ao selar o OpenBAO",
     "unsealError": "Falha ao desselar o OpenBAO"
+  },
+  "grafana": {
+    "title": "Integração Grafana",
+    "status": {
+      "label": "Status",
+      "disabled": "Desabilitado",
+      "checking": "Verificando...",
+      "unknown": "Desconhecido",
+      "healthy": "Saudável",
+      "unhealthy": "Não saudável"
+    },
+    "enabled": {
+      "label": "Habilitar integração Grafana"
+    },
+    "useManagedServer": {
+      "label": "Usar servidor gerenciado"
+    },
+    "selectServer": {
+      "label": "Selecionar servidor Grafana"
+    },
+    "noServers": "Nenhum servidor Grafana encontrado",
+    "serverUrl": {
+      "label": "URL"
+    },
+    "manualUrl": {
+      "label": "URL do Grafana",
+      "help": "Digite a URL completa para sua instância Grafana"
+    },
+    "apiKey": {
+      "label": "Chave API (Opcional)",
+      "help": "Chave API opcional com permissões de função Editor para recursos aprimorados e detecção de versão"
+    },
+    "healthError": {
+      "label": "Erro de verificação de saúde"
+    },
+    "checkHealth": "Verificar saúde"
+  },
+  "telemetry": {
+    "instrumentation": {
+      "fastapi": "FastAPI",
+      "sqlalchemy": "SQLAlchemy",
+      "requests": "Solicitações",
+      "logging": "Registro"
+    }
   }
 }

@@ -26,6 +26,7 @@ from backend.api import (
     diagnostics,
     email,
     fleet,
+    grafana_integration,
     host,
     openbao,
     packages,
@@ -37,6 +38,7 @@ from backend.api import (
     secrets,
     security,
     tag,
+    telemetry,
     ubuntu_pro_settings,
     updates,
     user,
@@ -45,6 +47,7 @@ from backend.config import config
 from backend.discovery.discovery_service import discovery_beacon
 from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
 from backend.security.certificate_manager import certificate_manager
+from backend.telemetry.otel_config import setup_telemetry
 from backend.utils.logging_formatter import UTCTimestampFormatter
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.message_processor import message_processor
@@ -434,6 +437,23 @@ startup_logger.info(
     getattr(app, "version", "Not set"),
 )
 
+# Set up OpenTelemetry instrumentation
+startup_logger.info("=== SETTING UP OPENTELEMETRY ===")
+try:
+    otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317")
+    prometheus_port = int(os.getenv("OTEL_PROMETHEUS_PORT", "9090"))
+    setup_telemetry(
+        app,
+        service_name="sysmanage",
+        service_version="1.0.0",
+        otlp_endpoint=otlp_endpoint,
+        prometheus_port=prometheus_port,
+    )
+    startup_logger.info("OpenTelemetry setup completed")
+except Exception as e:
+    startup_logger.warning(f"OpenTelemetry setup failed (non-fatal): {e}")
+startup_logger.info("=== OPENTELEMETRY SETUP COMPLETE ===")
+
 # Set up the CORS configuration - dynamically discover hostnames
 startup_logger.info("=== SETTING UP CORS CONFIGURATION ===")
 webui_port = app_config["webui"]["port"]
@@ -741,6 +761,17 @@ app.include_router(
     secrets.router, prefix="/api", tags=["secrets"]
 )  # /api/secrets/* (with auth)
 startup_logger.info("Secrets router added")
+startup_logger.info("Adding Grafana integration router with /api prefix")
+app.include_router(
+    grafana_integration.router, prefix="/api/grafana", tags=["grafana"]
+)  # /api/grafana/* (with auth)
+startup_logger.info("Grafana integration router added")
+
+startup_logger.info("Adding Telemetry router with /api prefix")
+app.include_router(
+    telemetry.router, prefix="/api/telemetry", tags=["telemetry"]
+)  # /api/telemetry/* (with auth)
+startup_logger.info("Telemetry router added")
 
 startup_logger.info("=== ALL ROUTES REGISTERED ===")
 

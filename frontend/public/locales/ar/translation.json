@@ -146,7 +146,14 @@
     "less": "أقل",
     "noDescription": "لا يوجد وصف",
     "close": "إغلاق",
-    "confirmAction": "تأكيد الإجراء"
+    "confirmAction": "تأكيد الإجراء",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "enabled": "ممكّن",
+    "disabled": "معطل",
+    "running": "قيد التشغيل",
+    "stopped": "متوقف",
+    "refresh": "تحديث"
   },
   "hostDetail": {
     "invalidId": "معرف مضيف غير صالح",
@@ -1117,6 +1124,50 @@
         "testVisual": "make test-visual",
         "testAccessibility": "make test-a11y"
       }
+    }
+  },
+  "grafana": {
+    "title": "تكامل Grafana",
+    "status": {
+      "label": "الحالة",
+      "disabled": "معطل",
+      "checking": "فحص جاري...",
+      "unknown": "غير معروف",
+      "healthy": "سليم",
+      "unhealthy": "غير سليم"
+    },
+    "enabled": {
+      "label": "تفعيل تكامل Grafana"
+    },
+    "useManagedServer": {
+      "label": "استخدام الخادم المُدار"
+    },
+    "selectServer": {
+      "label": "اختر خادم Grafana"
+    },
+    "noServers": "لم يتم العثور على خوادم Grafana",
+    "serverUrl": {
+      "label": "الرابط"
+    },
+    "manualUrl": {
+      "label": "رابط Grafana",
+      "help": "أدخل الرابط الكامل لمثيل Grafana الخاص بك"
+    },
+    "apiKey": {
+      "label": "مفتاح API (اختياري)",
+      "help": "مفتاح API اختياري مع أذونات دور المحرر للميزات المحسنة وكشف الإصدار"
+    },
+    "healthError": {
+      "label": "خطأ فحص الصحة"
+    },
+    "checkHealth": "فحص الصحة"
+  },
+  "telemetry": {
+    "instrumentation": {
+      "fastapi": "FastAPI",
+      "sqlalchemy": "SQLAlchemy",
+      "requests": "الطلبات",
+      "logging": "التسجيل"
     }
   }
 }
