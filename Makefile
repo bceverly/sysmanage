@@ -330,7 +330,7 @@ else
 	@find /tmp -name "*sysmanage*.db" -type f -delete 2>/dev/null || true
 	@find /tmp -name "tmp*.db" -type f -delete 2>/dev/null || true
 endif
-	@$(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html
+	@OTEL_ENABLED=false $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html
 	@echo "[OK] Python tests completed"
 
 # TypeScript/React tests
@@ -344,7 +344,7 @@ test-ui: $(VENV_ACTIVATE)
 ifeq ($(OS),Windows_NT)
 	@echo "=== Running UI Integration Tests (Playwright) ==="
 	@echo "[INFO] Windows detected - testing Chrome and Firefox"
-	@cmd /c "set PYTHONPATH=tests/ui;%PYTHONPATH% && $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short"
+	@cmd /c "set OTEL_ENABLED=false && set PYTHONPATH=tests/ui;%PYTHONPATH% && $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short"
 	@echo "[OK] Playwright UI integration tests completed"
 else
 	@if [ "$(shell uname -s)" != "OpenBSD" ] && [ "$(shell uname -s)" != "FreeBSD" ] && [ "$(shell uname -s)" != "NetBSD" ]; then \
@@ -354,12 +354,12 @@ else
 		else \
 			echo "[INFO] Linux detected - testing Chrome and Firefox"; \
 		fi; \
-		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short; \
+		OTEL_ENABLED=false PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short; \
 		echo "[OK] Playwright UI integration tests completed"; \
 	else \
 		echo "=== Running UI Integration Tests (Selenium) ==="; \
 		echo "[INFO] Using Selenium fallback on BSD systems (OpenBSD/FreeBSD/NetBSD)"; \
-		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_selenium.py --confcutdir=tests/ui -p tests.ui.conftest_selenium -v --tb=short; \
+		OTEL_ENABLED=false PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_selenium.py --confcutdir=tests/ui -p tests.ui.conftest_selenium -v --tb=short; \
 		echo "[OK] Selenium UI integration tests completed"; \
 	fi
 endif
@@ -384,7 +384,7 @@ ifeq ($(OS),Windows_NT)
 		echo "[INFO] Artillery report generated: artillery-report.html" \
 	)
 	@echo "[INFO] Running Playwright performance tests..."
-	@cmd /c "set PYTHONPATH=tests/ui;%PYTHONPATH% && $(PYTHON) -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short" || echo "[WARNING] Playwright performance tests failed"
+	@cmd /c "set OTEL_ENABLED=false && set PYTHONPATH=tests/ui;%PYTHONPATH% && $(PYTHON) -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short" || echo "[WARNING] Playwright performance tests failed"
 	@echo "[INFO] Running performance regression analysis..."
 	@$(PYTHON) scripts/performance_regression_check.py || echo "[WARNING] Performance regressions detected"
 else
@@ -411,7 +411,7 @@ else
 			echo "[INFO] Artillery report generated: artillery-report.html"; \
 		fi; \
 		echo "[INFO] Running Playwright performance tests..."; \
-		PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short || echo "[WARNING] Playwright performance tests failed"; \
+		OTEL_ENABLED=false PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short || echo "[WARNING] Playwright performance tests failed"; \
 		echo "[INFO] Running performance regression analysis..."; \
 		$(PYTHON) scripts/performance_regression_check.py || echo "[WARNING] Performance regressions detected"; \
 	fi
