@@ -214,6 +214,8 @@ jobs:
     needs: [test-backend, test-frontend]
     # Only require UI tests if they were requested AND they didn't fail
     if: always() && (needs.test-backend.result == 'success' && needs.test-frontend.result == 'success')
+    permissions:
+      contents: read
 
     steps:
     - uses: actions/checkout@v5

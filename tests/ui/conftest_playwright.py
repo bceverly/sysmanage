@@ -259,7 +259,11 @@ def database_session(ui_config):
     import os
 
     database_url = os.getenv("DATABASE_URL") or get_database_url()
-    print(f"UI tests using database URL: {database_url}")
+    # Redact password from database URL for logging
+    import re
+
+    safe_url = re.sub(r":([^:@]+)@", ":***@", database_url)
+    print(f"UI tests using database URL: {safe_url}")
 
     engine = create_engine(database_url)
 

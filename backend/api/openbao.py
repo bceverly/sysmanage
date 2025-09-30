@@ -3,6 +3,7 @@ This module contains the API implementation for OpenBAO (Vault) management in th
 """
 
 import json
+import logging
 import os
 import platform
 import subprocess  # nosec B404 - Required for OpenBAO process management
@@ -15,6 +16,7 @@ from backend.config import config
 from backend.i18n import _
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 def get_openbao_status() -> Dict[str, Any]:
@@ -704,6 +706,7 @@ async def start_server():
     except HTTPException:
         raise
     except Exception as e:  # pylint: disable=broad-except
+        logger.error("Error starting OpenBAO: %s", str(e), exc_info=True)
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
@@ -728,6 +731,7 @@ async def stop_server():
     except HTTPException:
         raise
     except Exception as e:  # pylint: disable=broad-except
+        logger.error("Error stopping OpenBAO: %s", str(e), exc_info=True)
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
@@ -771,6 +775,7 @@ async def seal_vault():
     except HTTPException:
         raise
     except Exception as e:  # pylint: disable=broad-except
+        logger.error("Error sealing OpenBAO: %s", str(e), exc_info=True)
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
@@ -793,6 +798,7 @@ async def unseal_vault():
     except HTTPException:
         raise
     except Exception as e:  # pylint: disable=broad-except
+        logger.error("Error unsealing OpenBAO: %s", str(e), exc_info=True)
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(

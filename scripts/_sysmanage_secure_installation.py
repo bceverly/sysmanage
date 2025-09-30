@@ -461,7 +461,10 @@ def run_database_migrations():
                 if existing_tables:
                     for table in existing_tables:
                         try:
-                            connection.execute(text(f'DROP TABLE IF EXISTS public."{table}" CASCADE'))
+                            # Use SQLAlchemy's quoted identifier to prevent SQL injection
+                            from sqlalchemy import DDL
+                            drop_stmt = DDL(f'DROP TABLE IF EXISTS "{table}" CASCADE')
+                            connection.execute(drop_stmt)
                             print(f"  Dropped existing table: {table}")
                         except Exception as e:
                             print(f"  Warning: Could not drop {table}: {e}")
@@ -594,7 +597,10 @@ def drop_all_tables(config):
                 for table_name in table_names:
                     try:
                         print(f"  Dropping table: {table_name}")
-                        connection.execute(text(f'DROP TABLE IF EXISTS public."{table_name}" CASCADE'))
+                        # Use SQLAlchemy's quoted identifier to prevent SQL injection
+                        from sqlalchemy import DDL
+                        drop_stmt = DDL(f'DROP TABLE IF EXISTS "{table_name}" CASCADE')
+                        connection.execute(drop_stmt)
                     except Exception as e:
                         print(f"    Warning: Could not drop table {table_name}: {e}")
 

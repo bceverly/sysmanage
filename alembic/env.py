@@ -27,16 +27,22 @@ else:
     try:
         from backend.persistence.db import get_database_url
         SQLALCHEMY_DATABASE_URL = get_database_url()
-        print(f"Using database URL from config: {SQLALCHEMY_DATABASE_URL}")
+        # Redact password from database URL for logging
+        import re
+        safe_url = re.sub(r':([^:@]+)@', ':***@', SQLALCHEMY_DATABASE_URL)
+        print(f"Using database URL from config: {safe_url}")
     except Exception as e:
         print(f"Warning: Could not get database URL from config: {e}")
         # Final fallback for CI/testing environments
         SQLALCHEMY_DATABASE_URL = 'postgresql://sysmanage:abc123@localhost:5432/sysmanage'
-        print(f"Using hardcoded fallback DATABASE_URL: {SQLALCHEMY_DATABASE_URL}")
+        print(f"Using hardcoded fallback DATABASE_URL: postgresql://sysmanage:***@localhost:5432/sysmanage")
 
 # Validate URL format
 if not SQLALCHEMY_DATABASE_URL or not SQLALCHEMY_DATABASE_URL.startswith(('postgresql://', 'sqlite:///')):
-    print(f"Error: Invalid database URL format: {SQLALCHEMY_DATABASE_URL}")
+    # Redact password for error logging
+    import re
+    safe_url = re.sub(r':([^:@]+)@', ':***@', SQLALCHEMY_DATABASE_URL) if SQLALCHEMY_DATABASE_URL else 'None'
+    print(f"Error: Invalid database URL format: {safe_url}")
     print(f"Using CI default PostgreSQL URL")
     # Force a known good URL for CI
     SQLALCHEMY_DATABASE_URL = 'postgresql://sysmanage:abc123@localhost:5432/sysmanage'

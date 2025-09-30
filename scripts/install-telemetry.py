@@ -174,8 +174,8 @@ def install_prometheus():
 
             # Make executable on Unix-like systems
             if platform_name != 'windows':
-                os.chmod(os.path.join(install_dir, prometheus_binary), 0o755)
-                os.chmod(os.path.join(install_dir, promtool_binary), 0o755)
+                os.chmod(os.path.join(install_dir, prometheus_binary), 0o755)  # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
+                os.chmod(os.path.join(install_dir, promtool_binary), 0o755)  # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
             else:
                 # Provide PATH hint for Windows users
                 print(f"💡 Add {install_dir} to your PATH to use 'prometheus' command globally")
@@ -283,7 +283,7 @@ def install_otel_collector():
                     os.path.join(temp_dir, 'otelcol-contrib'),
                     '/usr/local/bin/otelcol-contrib'
                 )
-                os.chmod('/usr/local/bin/otelcol-contrib', 0o755)
+                os.chmod('/usr/local/bin/otelcol-contrib', 0o755)  # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
 
         elif platform_name == 'windows':
             # Windows - use tar.gz format like other platforms

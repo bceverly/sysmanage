@@ -68,7 +68,7 @@ async def configure_prometheus_datasource(
         secret_data = vault_service.retrieve_secret(
             secret.vault_path, settings.api_key_vault_token
         )
-        logger.info(
+        logger.debug(
             "Retrieved secret_data keys: %s",
             list(secret_data.keys()) if secret_data else None,
         )
@@ -87,14 +87,12 @@ async def configure_prometheus_datasource(
             # Trim whitespace from retrieved key
             if api_key:
                 api_key = api_key.strip()
-                logger.info(
-                    "API key found: True, length=%s, first 5=%s, last 5=%s",
+                logger.debug(
+                    "API key found: True, length=%s",
                     len(api_key),
-                    api_key[:5],
-                    api_key[-5:],
                 )
             else:
-                logger.info("API key found: False")
+                logger.debug("API key found: False")
 
         if not api_key:
             logger.warning(
