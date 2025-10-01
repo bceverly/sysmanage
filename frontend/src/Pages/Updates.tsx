@@ -692,14 +692,19 @@ const Updates: React.FC = () => {
             onChange={(e) => handleFilterChange('package_manager', e.target.value)}
           >
             <option value="">{t('updates.filters.allManagers', 'All Package Managers')}</option>
-            <option value="apt">APT</option>
+            <option value="apt">APT (Debian/Ubuntu)</option>
+            <option value="dnf">DNF (Fedora/RHEL/CentOS 8+)</option>
+            <option value="yum">YUM (RHEL/CentOS 7)</option>
+            <option value="zypper">Zypper (openSUSE/SUSE)</option>
+            <option value="pacman">Pacman (Arch Linux)</option>
+            <option value="pkg">PKG (FreeBSD)</option>
+            <option value="pkgin">pkgin (NetBSD)</option>
             <option value="snap">Snap</option>
             <option value="flatpak">Flatpak</option>
             <option value="fwupd">fwupd</option>
-            <option value="homebrew">Homebrew</option>
-            <option value="winget">Winget</option>
-            <option value="chocolatey">Chocolatey</option>
-            <option value="pkg">PKG</option>
+            <option value="homebrew">Homebrew (macOS)</option>
+            <option value="winget">Winget (Windows)</option>
+            <option value="chocolatey">Chocolatey (Windows)</option>
           </select>
         </div>
 
