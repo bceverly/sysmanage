@@ -54,7 +54,8 @@ async def configure_prometheus_datasource(
             session.query(models.Secret)
             .filter(
                 models.Secret.name == "Grafana API Key",
-                models.Secret.secret_type == "API Key",
+                models.Secret.secret_type
+                == "API Key",  # nosec B105 - type label not password
                 models.Secret.vault_token == settings.api_key_vault_token,
             )
             .first()
@@ -67,10 +68,7 @@ async def configure_prometheus_datasource(
         secret_data = vault_service.retrieve_secret(
             secret.vault_path, settings.api_key_vault_token
         )
-        logger.info(
-            "Retrieved secret_data keys: %s",
-            list(secret_data.keys()) if secret_data else None,
-        )
+        # Don't log secret data structure to avoid potential information disclosure
 
         # Try different possible paths for the API key
         api_key = None
@@ -86,14 +84,12 @@ async def configure_prometheus_datasource(
             # Trim whitespace from retrieved key
             if api_key:
                 api_key = api_key.strip()
-                logger.info(
-                    "API key found: True, length=%s, first 5=%s, last 5=%s",
+                logger.debug(
+                    "API key found: True, length=%s",
                     len(api_key),
-                    api_key[:5],
-                    api_key[-5:],
                 )
             else:
-                logger.info("API key found: False")
+                logger.debug("API key found: False")
 
         if not api_key:
             logger.warning(
@@ -342,9 +338,9 @@ async def update_grafana_integration_settings(
 
                 # Store API key in vault (trimmed to remove any leading/trailing whitespace)
                 vault_result = vault_service.store_secret(
-                    secret_name="Grafana API Key",
+                    secret_name="Grafana API Key",  # nosec B106 - name not password
                     secret_data=request.api_key.strip(),
-                    secret_type="API Key",
+                    secret_type="API Key",  # nosec B106 - type label not password
                     secret_subtype="grafana",
                 )
 
@@ -352,8 +348,8 @@ async def update_grafana_integration_settings(
 
                 # Create database entry for the secret (will show up in secrets screen)
                 secret_entry = models.Secret(
-                    name="Grafana API Key",
-                    secret_type="API Key",
+                    name="Grafana API Key",  # nosec B106 - name not password
+                    secret_type="API Key",  # nosec B106 - type label not password
                     secret_subtype="grafana",
                     vault_token=vault_token,
                     vault_path=vault_result["vault_path"],
@@ -366,7 +362,8 @@ async def update_grafana_integration_settings(
                     session.query(models.Secret)
                     .filter(
                         models.Secret.name == "Grafana API Key",
-                        models.Secret.secret_type == "API Key",
+                        models.Secret.secret_type
+                        == "API Key",  # nosec B105 - type label not password
                     )
                     .first()
                 )
@@ -462,7 +459,8 @@ async def check_grafana_health():
                         session.query(models.Secret)
                         .filter(
                             models.Secret.name == "Grafana API Key",
-                            models.Secret.secret_type == "API Key",
+                            models.Secret.secret_type
+                            == "API Key",  # nosec B105 - type label not password
                             models.Secret.vault_token == settings.api_key_vault_token,
                         )
                         .first()

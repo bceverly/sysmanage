@@ -68,6 +68,18 @@ def get_cors_origins(web_ui_port, backend_api_port):
     startup_logger.info(
         "Web UI port: %s, Backend API port: %s", web_ui_port, backend_api_port
     )
+
+    # Check if running in CI mode - skip slow hostname resolution
+    ci_mode = os.getenv("SYSMANAGE_CI_MODE", "").lower() == "true"
+    if ci_mode:
+        startup_logger.info("CI mode detected - using minimal CORS origins")
+        return [
+            f"http://localhost:{web_ui_port}",
+            f"http://localhost:{backend_api_port}",
+            f"http://127.0.0.1:{web_ui_port}",
+            f"http://127.0.0.1:{backend_api_port}",
+        ]
+
     cors_origins = []
 
     # Always add localhost for development

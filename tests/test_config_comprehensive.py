@@ -228,8 +228,14 @@ security:
             expected_path = "/etc/sysmanage.yaml"
             assert config_module.CONFIG_PATH == expected_path
 
+    @patch(
+        "backend.config.config.open",
+        new_callable=mock_open,
+        read_data="api:\n  host: localhost\n  port: 8443\nwebui:\n  host: localhost\n  port: 8080\nsecurity:\n  max_failed_logins: 5\n",
+    )
+    @patch("backend.config.config.yaml.safe_load")
     @patch("backend.config.config.os.path.exists")
-    def test_config_fallback_to_dev_config(self, mock_exists):
+    def test_config_fallback_to_dev_config(self, mock_exists, mock_yaml, mock_file):
         """Test fallback to development config when system config doesn't exist."""
 
         def mock_exists_side_effect(path):
@@ -237,9 +243,18 @@ security:
                 return False
             elif path == "sysmanage-dev.yaml":
                 return True
+            elif path == "sysmanage-dev.yaml.example":
+                return True
             return False
 
         mock_exists.side_effect = mock_exists_side_effect
+
+        # Mock yaml.safe_load to return a valid config
+        mock_yaml.return_value = {
+            "api": {"host": "localhost", "port": 8443},
+            "webui": {"host": "localhost", "port": 8080},
+            "security": {"max_failed_logins": 5},
+        }
 
         import importlib
 
@@ -247,6 +262,7 @@ security:
 
         importlib.reload(config_module)
 
+        # Should prefer sysmanage-dev.yaml over .example
         assert config_module.CONFIG_PATH == "sysmanage-dev.yaml"
 
     @patch("backend.config.config.yaml.safe_load")

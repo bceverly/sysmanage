@@ -145,9 +145,43 @@ def fix_file_ownership(file_path):
     except Exception as e:
         print(f"  Warning: Could not fix ownership of {file_path}: {e}")
 
+def setup_netbsd_gcc14_libstdcpp():
+    """Create libstdc++.so.9 symlink for NetBSD GCC 14 compatibility."""
+    if platform.system() != "NetBSD":
+        return
+
+    print("\n--- Setting up NetBSD GCC 14 libstdc++ compatibility ---")
+
+    gcc14_lib = Path("/usr/pkg/gcc14/lib")
+    if not gcc14_lib.exists():
+        print("  GCC 14 not found at /usr/pkg/gcc14, skipping symlink setup")
+        return
+
+    symlink_path = gcc14_lib / "libstdc++.so.9"
+    target = "libstdc++.so.7.33"
+
+    if symlink_path.exists() or symlink_path.is_symlink():
+        print(f"  libstdc++.so.9 symlink already exists")
+        return
+
+    try:
+        print(f"  Creating symlink: {symlink_path} -> {target}")
+        symlink_path.symlink_to(target)
+        print("  ✅ Symlink created successfully")
+    except PermissionError:
+        print("  ❌ Permission denied. Please run manually:")
+        print(f"     sudo ln -s {target} {symlink_path}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"  ⚠️ Warning: Could not create symlink: {e}")
+
 def run_make_install_dev():
     """Run make install-dev to set up dependencies."""
     print("\n--- Installing Development Dependencies ---")
+
+    # Set up NetBSD GCC 14 libstdc++ symlink first (requires root)
+    setup_netbsd_gcc14_libstdcpp()
+
     make_cmd = get_make_command()
     print(f"This will run '{make_cmd} install-dev' to install Python dependencies,")
     print("set up the virtual environment, and install OpenBAO if needed.")
@@ -192,6 +226,38 @@ def run_make_install_dev():
     except Exception as e:
         print(f"Error running make install-dev: {e}")
         sys.exit(1)
+
+def generate_secure_db_password(length=32):
+    """Generate a secure random password for the database."""
+    # Use alphanumeric characters (avoid special chars for DB compatibility)
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
+
+def update_postgres_user_password(username, password):
+    """Update the PostgreSQL user's password using psql."""
+    try:
+        # Use sudo -u postgres to run psql as the postgres user
+        sql_command = f"ALTER USER {username} PASSWORD '{password}';"
+        result = subprocess.run(
+            ['sudo', '-u', 'postgres', 'psql', '-c', sql_command],
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+
+        if result.returncode == 0:
+            print("  PostgreSQL password updated successfully.")
+            return True
+        else:
+            print(f"  Failed to update PostgreSQL password: {result.stderr}")
+            return False
+
+    except subprocess.TimeoutExpired:
+        print("  Error: PostgreSQL password update timed out")
+        return False
+    except Exception as e:
+        print(f"  Error updating PostgreSQL password: {e}")
+        return False
 
 def get_database_config():
     """Prompt for database configuration."""
@@ -299,6 +365,14 @@ def check_database_connectivity():
         if user_field in db_config:
             required_fields.append(user_field)
 
+        # Check if password is a placeholder that needs to be changed
+        password_is_placeholder = False
+        if 'password' in db_config:
+            placeholder_passwords = ['CHANGE_ME_PLEASE!', 'changeme', 'password', 'GENERATE_NEW_PASSWORD']
+            if db_config['password'] in placeholder_passwords:
+                password_is_placeholder = True
+                print("  Detected placeholder database password - will generate secure password")
+
         if not all(key in db_config for key in required_fields):
             print("  Database configuration is incomplete or missing.")
             print(f"  Found fields: {list(db_config.keys())}")
@@ -313,11 +387,38 @@ def check_database_connectivity():
                 'username': db_config.get('user', db_config.get('username')),
                 'password': db_config['password']
             }
-            if test_database_connection(normalized_config):
+
+            # If password is a placeholder or connection fails, generate new password
+            connection_failed = not test_database_connection(normalized_config)
+
+            if password_is_placeholder or connection_failed:
+                if connection_failed:
+                    print("  Database connection failed with existing configuration.")
+
+                print("  Generating secure database password...")
+                new_password = generate_secure_db_password()
+
+                print("  Updating PostgreSQL password for database user...")
+                if update_postgres_user_password(normalized_config['username'], new_password):
+                    # Update the config with new password
+                    normalized_config['password'] = new_password
+
+                    # Test connection with new password
+                    print("  Testing database connection with new password...")
+                    if test_database_connection(normalized_config):
+                        print("  Database connection successful with new password!")
+                        # Update the YAML file
+                        update_database_config(config_path, normalized_config)
+                        return
+                    else:
+                        print("  Error: Connection failed even after updating password.")
+                        print("  You may need to manually configure the database.")
+                else:
+                    print("  Error: Failed to update PostgreSQL password.")
+                    print("  Please ensure PostgreSQL is running and you have sudo access.")
+            else:
                 print("  Database connection successful!")
                 return
-            else:
-                print("  Database connection failed with existing configuration.")
 
         # Offer to configure database
         print("\nDatabase configuration is needed.")
@@ -461,7 +562,10 @@ def run_database_migrations():
                 if existing_tables:
                     for table in existing_tables:
                         try:
-                            connection.execute(text(f'DROP TABLE IF EXISTS public."{table}" CASCADE'))
+                            # Use SQLAlchemy's quoted identifier to prevent SQL injection
+                            from sqlalchemy import DDL
+                            drop_stmt = DDL(f'DROP TABLE IF EXISTS "{table}" CASCADE')
+                            connection.execute(drop_stmt)
                             print(f"  Dropped existing table: {table}")
                         except Exception as e:
                             print(f"  Warning: Could not drop {table}: {e}")
@@ -469,7 +573,7 @@ def run_database_migrations():
             # Use the comprehensive migration specifically
             print("  Running comprehensive database migration from scratch...")
             # Use python -m alembic to ensure we use the virtual environment's alembic
-            result = subprocess.run([sys.executable, '-m', 'alembic', 'upgrade', '6dd4ca89b6b8'], cwd=project_root,
+            result = subprocess.run([sys.executable, '-m', 'alembic', 'upgrade', 'head'], cwd=project_root,
                                   capture_output=True, text=True, timeout=120, env=env)
             if result.returncode == 0:
                 print("  Comprehensive migration completed successfully!")
@@ -594,7 +698,10 @@ def drop_all_tables(config):
                 for table_name in table_names:
                     try:
                         print(f"  Dropping table: {table_name}")
-                        connection.execute(text(f'DROP TABLE IF EXISTS public."{table_name}" CASCADE'))
+                        # Use SQLAlchemy's quoted identifier to prevent SQL injection
+                        from sqlalchemy import DDL
+                        drop_stmt = DDL(f'DROP TABLE IF EXISTS "{table_name}" CASCADE')
+                        connection.execute(drop_stmt)
                     except Exception as e:
                         print(f"    Warning: Could not drop table {table_name}: {e}")
 
@@ -693,6 +800,14 @@ def update_config_file(salt, jwt_secret):
         config['security']['password_salt'] = salt
         config['security']['jwt_secret'] = jwt_secret
 
+        # Remove deprecated admin credentials (admin user is now created via the installation script)
+        if 'admin_userid' in config['security']:
+            del config['security']['admin_userid']
+            print("  Removed deprecated admin_userid from config")
+        if 'admin_password' in config['security']:
+            del config['security']['admin_password']
+            print("  Removed deprecated admin_password from config")
+
         # Try to write directly first
         try:
             with open(config_path, 'w') as f:
@@ -759,16 +874,31 @@ def update_config_file(salt, jwt_secret):
 
 def find_vault_binary():
     """Find OpenBAO or Vault binary."""
-    # Check for bao first
-    if os.path.exists(os.path.expanduser("~/.local/bin/bao")):
-        return os.path.expanduser("~/.local/bin/bao")
+    # Get the original user's home directory (before sudo)
+    original_user = get_original_user()
+
+    # Check for bao in original user's home directory first
+    try:
+        import pwd
+        user_info = pwd.getpwnam(original_user)
+        user_home = user_info.pw_dir
+        bao_path = os.path.join(user_home, '.local', 'bin', 'bao')
+        if os.path.exists(bao_path):
+            return bao_path
+    except Exception as e:
+        print(f"  Debug: Could not check user home for bao: {e}")
 
     # Check system PATH
     for cmd in ['bao', 'vault']:
         try:
             result = subprocess.run(['which', cmd], capture_output=True, text=True)
             if result.returncode == 0:
-                return cmd
+                binary_path = result.stdout.strip()
+                if binary_path:
+                    # Expand ~ if present (which sometimes returns unexpanded paths)
+                    expanded_path = os.path.expanduser(binary_path)
+                    if os.path.exists(expanded_path):
+                        return expanded_path
         except:
             pass
 
@@ -859,39 +989,71 @@ ui = true
     # Fix ownership of logs directory (if running under sudo)
     fix_file_ownership(log_file.parent)
 
+    # Use absolute path for config file
+    vault_config_abs_path = str(vault_config_path.absolute())
+
     vault_process = subprocess.Popen([
-        vault_cmd, 'server', f'-config={vault_config_path}'
-    ], stdout=open(log_file, 'w'), stderr=subprocess.STDOUT)
+        vault_cmd, 'server', f'-config={vault_config_abs_path}'
+    ], stdout=open(log_file, 'w'), stderr=subprocess.STDOUT, cwd=str(project_root))
 
     # Fix ownership of the log file after it's created
     fix_file_ownership(log_file)
 
     # Wait for server to start
-    time.sleep(3)
+    time.sleep(5)
 
     # Set vault address
     env = os.environ.copy()
     env['BAO_ADDR'] = 'http://127.0.0.1:8200'
 
+    # Verify the vault server is actually running and responding
+    print("  Verifying vault server is running...")
+    try:
+        status_result = subprocess.run([
+            vault_cmd, 'status'
+        ], env=env, capture_output=True, text=True, timeout=10)
+        print(f"  Vault status check: {status_result.returncode}")
+        if "storage type" in status_result.stdout.lower():
+            print(f"  Vault is using correct storage configuration")
+    except Exception as e:
+        print(f"  Warning: Could not verify vault status: {e}")
+
     try:
         # Initialize vault
         print("  Initializing vault...")
+        print(f"  DEBUG: Running command: {vault_cmd} operator init -key-shares=1 -key-threshold=1 -format=json")
+        print(f"  DEBUG: BAO_ADDR={env.get('BAO_ADDR')}")
         result = subprocess.run([
             vault_cmd, 'operator', 'init',
             '-key-shares=1', '-key-threshold=1', '-format=json'
         ], env=env, capture_output=True, text=True, timeout=30)
 
+        print(f"  DEBUG: Init result return code: {result.returncode}")
+        print(f"  DEBUG: Init result stdout: {result.stdout[:200] if result.stdout else 'None'}")
+        print(f"  DEBUG: Init result stderr: {result.stderr[:200] if result.stderr else 'None'}")
+
         if result.returncode != 0:
-            print(f"  Error initializing vault: {result.stderr}")
-            # If vault is already initialized, fix ownership of existing files
-            if "already initialized" in result.stderr:
-                print("  Vault already initialized, fixing ownership of existing files...")
+            print(f"  Error initializing vault (return code {result.returncode})")
+            print(f"  STDERR: {result.stderr}")
+            print(f"  STDOUT: {result.stdout}")
+            # If vault is already initialized, check if credentials exist
+            if "already initialized" in result.stderr.lower():
+                print("  Vault already initialized")
                 credentials_file = project_root / '.vault_credentials'
                 if credentials_file.exists():
+                    print("  Vault credentials file exists, fixing ownership...")
                     fix_file_ownership(credentials_file)
-                pid_file = project_root / '.openbao.pid'
-                if pid_file.exists():
-                    fix_file_ownership(pid_file)
+                    pid_file = project_root / '.openbao.pid'
+                    if pid_file.exists():
+                        fix_file_ownership(pid_file)
+                else:
+                    print("  ERROR: Vault is initialized but credentials file is missing!")
+                    print("  This means the vault was previously initialized but the credentials were not saved.")
+                    print("  You need to either:")
+                    print("    1. Delete the vault data directory and re-run: rm -rf data/openbao")
+                    print("    2. Or manually unseal the vault if you have the credentials")
+            else:
+                print(f"  Vault initialization failed for another reason")
             vault_process.terminate()
             return
 
@@ -1092,17 +1254,34 @@ def main():
         # Get user input
         user_data = get_user_input()
 
-        # Install development dependencies first
-        run_make_install_dev()
-
-        # Check database connectivity
+        # Check and fix database password BEFORE running install-dev
+        # (install-dev runs migrations which need a working database connection)
         check_database_connectivity()
+
+        # IMPORTANT: Reload config module to pick up the new database password
+        # The config module caches the config at import time, so we need to reload it
+        import importlib
+        import backend.config.config
+        import backend.persistence.db
+        importlib.reload(backend.config.config)
+        importlib.reload(backend.persistence.db)
+        from backend.config.config import get_config
+        from backend.persistence.db import get_engine
+
+        # Install development dependencies (includes migrations)
+        run_make_install_dev()
 
         # Generate new security keys
         salt, jwt_secret = generate_security_keys()
 
         # Update configuration file with new keys
         update_config_file(salt, jwt_secret)
+
+        # Reload config AGAIN after updating security keys
+        importlib.reload(backend.config.config)
+        importlib.reload(backend.persistence.db)
+        from backend.config.config import get_config
+        from backend.persistence.db import get_engine
 
         # Load current configuration (after potential database config updates)
         config = get_config()

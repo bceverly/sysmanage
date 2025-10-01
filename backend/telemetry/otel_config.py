@@ -150,7 +150,8 @@ def setup_metrics(
 
         # Start Prometheus HTTP server if not already started
         if not _prometheus_server_started:
-            start_http_server(port=prometheus_port, addr="0.0.0.0")
+            # Bind to 0.0.0.0 to allow external monitoring - intentional for metrics
+            start_http_server(port=prometheus_port, addr="0.0.0.0")  # nosec B104
             _prometheus_server_started = True
             logger.info("Prometheus metrics server started on port %s", prometheus_port)
     except Exception as e:  # pylint: disable=broad-except

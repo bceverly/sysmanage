@@ -3,6 +3,7 @@ This module contains the API implementation for OpenBAO (Vault) management in th
 """
 
 import json
+import logging
 import os
 import platform
 import subprocess  # nosec B404 - Required for OpenBAO process management
@@ -15,6 +16,7 @@ from backend.config import config
 from backend.i18n import _
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 def get_openbao_status() -> Dict[str, Any]:
@@ -317,14 +319,20 @@ def start_openbao() -> Dict[str, Any]:
                         )
 
                 except Exception as e:
+                    logger.exception(
+                        "Failed to run PowerShell script for OpenBAO start"
+                    )
 
                     class Result:
-                        def __init__(self, error):
+                        def __init__(self):
                             self.returncode = 1
                             self.stdout = ""
-                            self.stderr = str(error)
+                            self.stderr = _(
+                                "openbao.start_error",
+                                "Internal error occurred while starting OpenBAO",
+                            )
 
-                    result = Result(e)
+                    result = Result()
             else:
                 # CMD script fallback - avoid shell=True for security
                 result = subprocess.run(  # nosec B607 B603
@@ -373,11 +381,12 @@ def start_openbao() -> Dict[str, Any]:
             "status": get_openbao_status(),
         }
     except Exception as e:
+        logger.error("Exception occurred while starting OpenBAO", exc_info=True)
         return {
             "success": False,
             "message": _(
-                "openbao.start_error", "Error starting OpenBAO: {error}"
-            ).format(error=str(e)),
+                "openbao.start_error", "An error occurred while starting OpenBAO"
+            ),
             "status": get_openbao_status(),
         }
 
@@ -488,11 +497,12 @@ def stop_openbao() -> Dict[str, Any]:
             "status": get_openbao_status(),
         }
     except Exception as e:
+        logger.error("Exception occurred while stopping OpenBAO:\n%s", e, exc_info=True)
         return {
             "success": False,
             "message": _(
-                "openbao.stop_error", "Error stopping OpenBAO: {error}"
-            ).format(error=str(e)),
+                "openbao.generic_error", "An error occurred while stopping OpenBAO"
+            ),
             "status": get_openbao_status(),
         }
 
@@ -560,7 +570,7 @@ def seal_openbao() -> Dict[str, Any]:
             return {
                 "success": False,
                 "message": _("openbao.seal_failed", "Failed to seal OpenBAO"),
-                "error": result.stderr or result.stdout,
+                # "error": result.stderr or result.stdout,  # Commented out to avoid exposing details
                 "status": get_openbao_status(),
             }
 
@@ -571,11 +581,12 @@ def seal_openbao() -> Dict[str, Any]:
             "status": get_openbao_status(),
         }
     except Exception as e:
+        logger.exception(
+            "Exception occurred while sealing OpenBAO"
+        )  # Log full traceback for server-side debugging
         return {
             "success": False,
-            "message": _("openbao.seal_error", "Error sealing OpenBAO: {error}").format(
-                error=str(e)
-            ),
+            "message": _("openbao.seal_error", "Error sealing OpenBAO"),
             "status": get_openbao_status(),
         }
 
@@ -671,11 +682,10 @@ def unseal_openbao() -> Dict[str, Any]:
             "status": get_openbao_status(),
         }
     except Exception as e:
+        logger.exception("Exception occurred while unsealing OpenBAO")
         return {
             "success": False,
-            "message": _(
-                "openbao.unseal_error", "Error unsealing OpenBAO: {error}"
-            ).format(error=str(e)),
+            "message": _("openbao.unseal_error", "Error unsealing OpenBAO"),
             "status": get_openbao_status(),
         }
 
@@ -696,14 +706,16 @@ async def start_server():
     try:
         result = start_openbao()
         # Sanitize potentially sensitive information from response
-        if not result.get("success", True) and "error" in result:
-            # Remove detailed error messages that might contain sensitive info
-            result = result.copy()
-            result["error"] = _("openbao.start_failed", "Failed to start OpenBAO")
-        return result
+        sanitized_result = {"success": result.get("success", False)}
+        if not sanitized_result["success"]:
+            sanitized_result["error"] = _(
+                "openbao.start_failed", "Failed to start OpenBAO"
+            )
+        return sanitized_result
     except HTTPException:
         raise
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
+        # Don't log exception details to avoid information disclosure
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
@@ -720,14 +732,16 @@ async def stop_server():
     try:
         result = stop_openbao()
         # Sanitize potentially sensitive information from response
-        if not result.get("success", True) and "error" in result:
-            # Remove detailed error messages that might contain sensitive info
-            result = result.copy()
-            result["error"] = _("openbao.stop_failed", "Failed to stop OpenBAO")
-        return result
+        sanitized_result = {"success": result.get("success", False)}
+        if not sanitized_result["success"]:
+            sanitized_result["error"] = _(
+                "openbao.stop_failed", "Failed to stop OpenBAO"
+            )
+        return sanitized_result
     except HTTPException:
         raise
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
+        # Don't log exception details to avoid information disclosure
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
@@ -764,13 +778,17 @@ async def seal_vault():
     """
     try:
         result = seal_openbao()
-        if not result.get("success", True) and "error" in result:
-            result = result.copy()
-            result["error"] = _("openbao.seal_failed", "Failed to seal OpenBAO")
-        return result
+        # Sanitize potentially sensitive information from response
+        sanitized_result = {"success": result.get("success", False)}
+        if not sanitized_result["success"]:
+            sanitized_result["error"] = _(
+                "openbao.seal_failed", "Failed to seal OpenBAO"
+            )
+        return sanitized_result
     except HTTPException:
         raise
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
+        # Don't log exception details to avoid information disclosure
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
@@ -786,13 +804,17 @@ async def unseal_vault():
     """
     try:
         result = unseal_openbao()
-        if not result.get("success", True) and "error" in result:
-            result = result.copy()
-            result["error"] = _("openbao.unseal_failed", "Failed to unseal OpenBAO")
-        return result
+        # Sanitize potentially sensitive information from response
+        sanitized_result = {"success": result.get("success", False)}
+        if not sanitized_result["success"]:
+            sanitized_result["error"] = _(
+                "openbao.unseal_failed", "Failed to unseal OpenBAO"
+            )
+        return sanitized_result
     except HTTPException:
         raise
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
+        # Don't log exception details to avoid information disclosure
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(

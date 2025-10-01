@@ -52,12 +52,11 @@ const Hosts = () => {
             width: 280,  // Increased width for status and update chips
             renderCell: (params) => {
                 const row = params.row;
-                // Server returns timezone-aware timestamps  
+                // Server returns timezone-aware timestamps
                 const rawLastAccess = row.last_access;
-                const utcLastAccess = typeof rawLastAccess === 'string' && 
-                    !rawLastAccess.endsWith('Z') && 
-                    !rawLastAccess.includes('+') && 
-                    !rawLastAccess.includes('-')
+                const utcLastAccess = typeof rawLastAccess === 'string' &&
+                    !rawLastAccess.endsWith('Z') &&
+                    !/[+-]\d{2}:\d{2}$/.test(rawLastAccess)
                     ? rawLastAccess + 'Z'
                     : rawLastAccess;
                 
@@ -179,10 +178,9 @@ const Hosts = () => {
                 // Server returns timezone-aware timestamps
                 const rawValue = params.value;
                 // Don't modify if it already has timezone info (+ or - offset) or Z
-                const utcTimestamp = typeof rawValue === 'string' && 
-                    !rawValue.endsWith('Z') && 
-                    !rawValue.includes('+') && 
-                    !rawValue.includes('-')
+                const utcTimestamp = typeof rawValue === 'string' &&
+                    !rawValue.endsWith('Z') &&
+                    !/[+-]\d{2}:\d{2}$/.test(rawValue)
                     ? rawValue + 'Z'  // Add UTC marker only if no timezone info
                     : rawValue;
                 
