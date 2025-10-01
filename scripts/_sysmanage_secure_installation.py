@@ -364,7 +364,7 @@ def check_database_connectivity():
                 print("  Generating secure database password...")
                 new_password = generate_secure_db_password()
 
-                print(f"  Updating PostgreSQL password for user '{normalized_config['username']}'...")
+                print("  Updating PostgreSQL password for database user...")
                 if update_postgres_user_password(normalized_config['username'], new_password):
                     # Update the config with new password
                     normalized_config['password'] = new_password
