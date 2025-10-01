@@ -330,7 +330,11 @@ else
 	@find /tmp -name "*sysmanage*.db" -type f -delete 2>/dev/null || true
 	@find /tmp -name "tmp*.db" -type f -delete 2>/dev/null || true
 endif
+ifeq ($(OS),Windows_NT)
+	@set OTEL_ENABLED=false && $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html
+else
 	@OTEL_ENABLED=false $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html
+endif
 	@echo "[OK] Python tests completed"
 
 # TypeScript/React tests
