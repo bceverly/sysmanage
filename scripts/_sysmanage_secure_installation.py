@@ -212,7 +212,7 @@ def update_postgres_user_password(username, password):
         )
 
         if result.returncode == 0:
-            print(f"  PostgreSQL password updated for user '{username}'")
+            print("  PostgreSQL password updated successfully.")
             return True
         else:
             print(f"  Failed to update PostgreSQL password: {result.stderr}")
