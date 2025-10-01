@@ -832,16 +832,31 @@ def update_config_file(salt, jwt_secret):
 
 def find_vault_binary():
     """Find OpenBAO or Vault binary."""
-    # Check for bao first
-    if os.path.exists(os.path.expanduser("~/.local/bin/bao")):
-        return os.path.expanduser("~/.local/bin/bao")
+    # Get the original user's home directory (before sudo)
+    original_user = get_original_user()
+
+    # Check for bao in original user's home directory first
+    try:
+        import pwd
+        user_info = pwd.getpwnam(original_user)
+        user_home = user_info.pw_dir
+        bao_path = os.path.join(user_home, '.local', 'bin', 'bao')
+        if os.path.exists(bao_path):
+            return bao_path
+    except Exception as e:
+        print(f"  Debug: Could not check user home for bao: {e}")
 
     # Check system PATH
     for cmd in ['bao', 'vault']:
         try:
             result = subprocess.run(['which', cmd], capture_output=True, text=True)
             if result.returncode == 0:
-                return cmd
+                binary_path = result.stdout.strip()
+                if binary_path:
+                    # Expand ~ if present (which sometimes returns unexpanded paths)
+                    expanded_path = os.path.expanduser(binary_path)
+                    if os.path.exists(expanded_path):
+                        return expanded_path
         except:
             pass
 
@@ -932,39 +947,71 @@ ui = true
     # Fix ownership of logs directory (if running under sudo)
     fix_file_ownership(log_file.parent)
 
+    # Use absolute path for config file
+    vault_config_abs_path = str(vault_config_path.absolute())
+
     vault_process = subprocess.Popen([
-        vault_cmd, 'server', f'-config={vault_config_path}'
-    ], stdout=open(log_file, 'w'), stderr=subprocess.STDOUT)
+        vault_cmd, 'server', f'-config={vault_config_abs_path}'
+    ], stdout=open(log_file, 'w'), stderr=subprocess.STDOUT, cwd=str(project_root))
 
     # Fix ownership of the log file after it's created
     fix_file_ownership(log_file)
 
     # Wait for server to start
-    time.sleep(3)
+    time.sleep(5)
 
     # Set vault address
     env = os.environ.copy()
     env['BAO_ADDR'] = 'http://127.0.0.1:8200'
 
+    # Verify the vault server is actually running and responding
+    print("  Verifying vault server is running...")
+    try:
+        status_result = subprocess.run([
+            vault_cmd, 'status'
+        ], env=env, capture_output=True, text=True, timeout=10)
+        print(f"  Vault status check: {status_result.returncode}")
+        if "storage type" in status_result.stdout.lower():
+            print(f"  Vault is using correct storage configuration")
+    except Exception as e:
+        print(f"  Warning: Could not verify vault status: {e}")
+
     try:
         # Initialize vault
         print("  Initializing vault...")
+        print(f"  DEBUG: Running command: {vault_cmd} operator init -key-shares=1 -key-threshold=1 -format=json")
+        print(f"  DEBUG: BAO_ADDR={env.get('BAO_ADDR')}")
         result = subprocess.run([
             vault_cmd, 'operator', 'init',
             '-key-shares=1', '-key-threshold=1', '-format=json'
         ], env=env, capture_output=True, text=True, timeout=30)
 
+        print(f"  DEBUG: Init result return code: {result.returncode}")
+        print(f"  DEBUG: Init result stdout: {result.stdout[:200] if result.stdout else 'None'}")
+        print(f"  DEBUG: Init result stderr: {result.stderr[:200] if result.stderr else 'None'}")
+
         if result.returncode != 0:
-            print(f"  Error initializing vault: {result.stderr}")
-            # If vault is already initialized, fix ownership of existing files
-            if "already initialized" in result.stderr:
-                print("  Vault already initialized, fixing ownership of existing files...")
+            print(f"  Error initializing vault (return code {result.returncode})")
+            print(f"  STDERR: {result.stderr}")
+            print(f"  STDOUT: {result.stdout}")
+            # If vault is already initialized, check if credentials exist
+            if "already initialized" in result.stderr.lower():
+                print("  Vault already initialized")
                 credentials_file = project_root / '.vault_credentials'
                 if credentials_file.exists():
+                    print("  Vault credentials file exists, fixing ownership...")
                     fix_file_ownership(credentials_file)
-                pid_file = project_root / '.openbao.pid'
-                if pid_file.exists():
-                    fix_file_ownership(pid_file)
+                    pid_file = project_root / '.openbao.pid'
+                    if pid_file.exists():
+                        fix_file_ownership(pid_file)
+                else:
+                    print("  ERROR: Vault is initialized but credentials file is missing!")
+                    print("  This means the vault was previously initialized but the credentials were not saved.")
+                    print("  You need to either:")
+                    print("    1. Delete the vault data directory and re-run: rm -rf data/openbao")
+                    print("    2. Or manually unseal the vault if you have the credentials")
+            else:
+                print(f"  Vault initialization failed for another reason")
             vault_process.terminate()
             return
 
