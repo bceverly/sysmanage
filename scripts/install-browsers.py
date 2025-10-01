@@ -142,7 +142,8 @@ def main():
         import selenium
         print(f"[OK] Selenium {selenium.__version__} found")
     except ImportError:
-        print("[ERROR] Selenium not installed. Run: pip install -r requirements.txt")
+        print("[ERROR] Selenium not installed. This should not happen - requirements.txt should have been installed first.")
+        print("       Try manually: pip install selenium")
         sys.exit(1)
 
     # Install WebDriver

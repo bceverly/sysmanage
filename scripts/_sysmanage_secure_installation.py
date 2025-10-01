@@ -145,9 +145,43 @@ def fix_file_ownership(file_path):
     except Exception as e:
         print(f"  Warning: Could not fix ownership of {file_path}: {e}")
 
+def setup_netbsd_gcc14_libstdcpp():
+    """Create libstdc++.so.9 symlink for NetBSD GCC 14 compatibility."""
+    if platform.system() != "NetBSD":
+        return
+
+    print("\n--- Setting up NetBSD GCC 14 libstdc++ compatibility ---")
+
+    gcc14_lib = Path("/usr/pkg/gcc14/lib")
+    if not gcc14_lib.exists():
+        print("  GCC 14 not found at /usr/pkg/gcc14, skipping symlink setup")
+        return
+
+    symlink_path = gcc14_lib / "libstdc++.so.9"
+    target = "libstdc++.so.7.33"
+
+    if symlink_path.exists() or symlink_path.is_symlink():
+        print(f"  libstdc++.so.9 symlink already exists")
+        return
+
+    try:
+        print(f"  Creating symlink: {symlink_path} -> {target}")
+        symlink_path.symlink_to(target)
+        print("  ✅ Symlink created successfully")
+    except PermissionError:
+        print("  ❌ Permission denied. Please run manually:")
+        print(f"     sudo ln -s {target} {symlink_path}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"  ⚠️ Warning: Could not create symlink: {e}")
+
 def run_make_install_dev():
     """Run make install-dev to set up dependencies."""
     print("\n--- Installing Development Dependencies ---")
+
+    # Set up NetBSD GCC 14 libstdc++ symlink first (requires root)
+    setup_netbsd_gcc14_libstdcpp()
+
     make_cmd = get_make_command()
     print(f"This will run '{make_cmd} install-dev' to install Python dependencies,")
     print("set up the virtual environment, and install OpenBAO if needed.")
