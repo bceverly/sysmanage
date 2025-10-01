@@ -259,7 +259,7 @@ def database_session(ui_config):
     import os
 
     database_url = os.getenv("DATABASE_URL") or get_database_url()
-    print(f"UI tests using database URL: {database_url}")
+    # Don't log database URL to avoid exposing credentials in CI logs
 
     engine = create_engine(database_url)
 

@@ -37,7 +37,7 @@ jobs:
     - uses: actions/checkout@v5
 
     - name: Set up Python 3.12
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.12'
 
@@ -123,7 +123,7 @@ jobs:
     - uses: actions/checkout@v5
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -271,7 +271,7 @@ jobs:
     - uses: actions/checkout@v5
 
     - name: Set up Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
@@ -312,12 +312,12 @@ jobs:
     - uses: actions/checkout@v5
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Set up Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
@@ -351,7 +351,7 @@ jobs:
           libdrm2 libxkbcommon0 libgtk-3-0 libgdk-pixbuf2.0-0
 
     - name: Download frontend build
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: frontend-build-${{ matrix.os }}
         path: frontend/build/
@@ -404,36 +404,92 @@ jobs:
         echo "Config created successfully for ${{ runner.os }}"
       shell: bash
 
+    - name: Run database migrations for UI tests
+      run: |
+        echo "🗄️ Running database migrations..."
+        python -m alembic upgrade head
+      env:
+        PYTHONPATH: .
+        DATABASE_URL: sqlite:///test.db
+
+    - name: Create test user for UI tests
+      run: |
+        echo "👤 Creating test user..."
+        python -c "
+        from backend.persistence import db
+        from backend.persistence.models import User
+        from sqlalchemy.orm import sessionmaker
+        from argon2 import PasswordHasher
+        import os
+
+        os.environ['DATABASE_URL'] = 'sqlite:///test.db'
+
+        engine = db.get_engine()
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        hasher = PasswordHasher()
+
+        with SessionLocal() as session:
+            # Check if admin user already exists
+            existing_user = session.query(User).filter(User.userid == 'admin@test.com').first()
+            if not existing_user:
+                # Create admin user with password 'admin'
+                # userid must be email format for Pydantic EmailStr validation
+                admin_user = User(
+                    userid='admin@test.com',
+                    hashed_password=hasher.hash('admin'),
+                    active=True,
+                    is_admin=True
+                )
+                session.add(admin_user)
+                session.commit()
+                print('Test admin user created')
+            else:
+                print('Admin user already exists')
+        "
+      env:
+        PYTHONPATH: .
+        DATABASE_URL: sqlite:///test.db
+
     - name: Start SysManage server for UI tests
       run: |
         echo "🚀 Starting SysManage backend and frontend servers..."
 
         # Start backend API server (with CI environment flag for faster startup)
         echo "Starting backend on port 8001..."
-        SYSMANAGE_CI_MODE=true python -m uvicorn backend.main:app --host localhost --port 8001 &
+        SYSMANAGE_CI_MODE=true python -m uvicorn backend.main:app --host 0.0.0.0 --port 8001 &
         BACKEND_PID=$!
         echo "BACKEND_PID=$BACKEND_PID" >> $GITHUB_ENV
 
         # Wait for backend to start (extended timeout for CI environments)
         echo "Waiting for backend API to start..."
-        for i in {1..90}; do
+        for i in {1..120}; do
           if curl -f http://localhost:8001/api/health > /dev/null 2>&1; then
-            echo "✅ Backend API is running on port 8001"
-            break
+            echo "✅ Backend API health check passed on port 8001"
+            # Also test the login endpoint specifically
+            if curl -f -X POST http://localhost:8001/login -H "Content-Type: application/json" -d '{"userid":"admin@test.com","password":"admin"}' > /dev/null 2>&1; then
+              echo "✅ Backend login endpoint is accessible"
+              break
+            else
+              echo "⚠️ Health check passed but login endpoint not ready yet..."
+            fi
           fi
-          if [ $i -eq 90 ]; then
-            echo "❌ Backend failed to start after 90 seconds"
-            echo "Checking if backend process is still running..."
+          if [ $i -eq 120 ]; then
+            echo "❌ Backend failed to start after 120 seconds"
+            echo "Checking backend process status..."
             if ps -p $BACKEND_PID > /dev/null 2>&1; then
               echo "Backend process is still running (PID: $BACKEND_PID)"
-              echo "It may still be starting up. Continuing anyway..."
+              echo "Checking what's listening on port 8001..."
+              netstat -tlnp 2>/dev/null | grep :8001 || echo "No process listening on port 8001"
+              echo "Trying to connect directly..."
+              curl -v http://localhost:8001/api/health || echo "Direct connection failed"
+              exit 1
             else
               echo "Backend process has died (PID: $BACKEND_PID)"
               exit 1
             fi
           fi
-          if [ $((i % 10)) -eq 0 ]; then
-            echo "Still waiting for backend... (attempt $i/90)"
+          if [ $((i % 15)) -eq 0 ]; then
+            echo "Still waiting for backend... (attempt $i/120)"
           fi
           sleep 1
         done
@@ -468,7 +524,13 @@ jobs:
         done
 
         echo "✅ Both backend (8001) and frontend (7443) are running"
+        echo "🔍 Final connectivity check..."
+        curl -f http://localhost:8001/api/health && echo "Backend health OK"
+        curl -f http://localhost:7443 && echo "Frontend OK"
       shell: bash
+      env:
+        PYTHONPATH: .
+        DATABASE_URL: sqlite:///test.db
 
     - name: Run UI tests with performance metrics
       run: |
@@ -574,7 +636,7 @@ jobs:
     - uses: actions/checkout@v5
 
     - name: Download all performance results
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         pattern: performance-results-*
         merge-multiple: true

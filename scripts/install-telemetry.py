@@ -156,7 +156,8 @@ def install_prometheus():
 
             # Install to appropriate location based on platform
             if platform_name == 'windows':
-                install_dir = r"C:\Program Files\SysManage\bin"
+                # Use user-writable directory on Windows
+                install_dir = os.path.expanduser(r"~\AppData\Local\bin")
                 os.makedirs(install_dir, exist_ok=True)
             elif platform_name == 'freebsd':
                 # BSD systems use /usr/pkg/bin or /usr/local/bin
@@ -190,8 +191,11 @@ def install_prometheus():
 
             # Make executable on Unix-like systems
             if platform_name != 'windows':
-                os.chmod(os.path.join(install_dir, prometheus_binary), 0o755)
-                os.chmod(os.path.join(install_dir, promtool_binary), 0o755)
+                os.chmod(os.path.join(install_dir, prometheus_binary), 0o755)  # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
+                os.chmod(os.path.join(install_dir, promtool_binary), 0o755)  # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
+            else:
+                # Provide PATH hint for Windows users
+                print(f"💡 Add {install_dir} to your PATH to use 'prometheus' command globally")
 
         print("✅ Prometheus installed successfully")
         return True
@@ -513,7 +517,7 @@ def install_otel_collector():
 
     try:
         platform_name, arch = detect_platform()
-        version = "0.91.0"  # Latest stable version
+        version = "0.136.0"  # Latest stable version
 
         if platform_name == 'linux':
             # Use .deb package for Ubuntu/Debian
@@ -605,7 +609,7 @@ def install_otel_collector():
                             os.path.join(temp_dir, 'otelcol-contrib'),
                             os.path.join(install_dir, 'otelcol-contrib')
                         )
-                        os.chmod(os.path.join(install_dir, 'otelcol-contrib'), 0o755)
+                        os.chmod(os.path.join(install_dir, 'otelcol-contrib'), 0o755)  # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
                     except PermissionError:
                         print(f"⚠️  Need elevated privileges to install to {install_dir}")
                         print("   OTEL Collector binary downloaded but not installed")
@@ -619,6 +623,40 @@ def install_otel_collector():
                     return build_otel_collector_from_source(version, platform_name, arch)
                 else:
                     raise
+
+        elif platform_name == 'windows':
+            # Windows - use tar.gz format like other platforms
+            filename = f"otelcol-contrib_{version}_{platform_name}_{arch}.tar.gz"
+            url = f"https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v{version}/{filename}"
+
+            print(f"Downloading OpenTelemetry Collector {version} for {platform_name}-{arch}...")
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, filename)
+
+                # Download
+                response = requests.get(url, stream=True, timeout=300)
+                response.raise_for_status()
+
+                with open(archive_path, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+
+                # Extract tar.gz
+                with tarfile.open(archive_path, 'r:gz') as tar:
+                    safe_extract_tar(tar, temp_dir)
+
+                # Install to user's local bin directory
+                install_dir = os.path.expanduser(r"~\AppData\Local\bin")
+                os.makedirs(install_dir, exist_ok=True)
+
+                shutil.copy2(
+                    os.path.join(temp_dir, 'otelcol-contrib.exe'),
+                    os.path.join(install_dir, 'otelcol-contrib.exe')
+                )
+
+                # Provide PATH hint for Windows users
+                print(f"💡 Add {install_dir} to your PATH to use 'otelcol-contrib' command globally")
 
         else:
             print(f"❌ Unsupported platform for OTEL Collector: {platform_name}")
@@ -636,24 +674,44 @@ def create_config_directories():
     """Create necessary configuration directories."""
     print("\n📁 Creating configuration directories...")
 
-    config_dirs = [
-        '/etc/otelcol-contrib',
-        '/etc/prometheus',
-        '/var/lib/prometheus',
-        '/var/log/prometheus'
-    ]
+    system = platform.system().lower()
+
+    if system == 'windows':
+        # Windows-specific directories
+        config_dirs = [
+            os.path.expanduser(r'~\AppData\Local\otelcol-contrib'),
+            os.path.expanduser(r'~\AppData\Local\prometheus'),
+            os.path.expanduser(r'~\AppData\Local\prometheus\data'),
+            os.path.expanduser(r'~\AppData\Local\prometheus\logs')
+        ]
+    else:
+        # Unix-like systems
+        config_dirs = [
+            '/etc/otelcol-contrib',
+            '/etc/prometheus',
+            '/var/lib/prometheus',
+            '/var/log/prometheus'
+        ]
 
     for config_dir in config_dirs:
         try:
-            os.makedirs(config_dir, exist_ok=True, mode=0o755)
-            print(f"✅ Created directory: {config_dir}")
+            if system == 'windows':
+                os.makedirs(config_dir, exist_ok=True)
+                print(f"✅ Created directory: {config_dir}")
+            else:
+                os.makedirs(config_dir, exist_ok=True, mode=0o755)
+                print(f"✅ Created directory: {config_dir}")
         except PermissionError:
-            try:
-                subprocess.run(['sudo', 'mkdir', '-p', config_dir], check=True)
-                subprocess.run(['sudo', 'chmod', '755', config_dir], check=True)
-                print(f"✅ Created directory (with sudo): {config_dir}")
-            except subprocess.CalledProcessError as e:
-                print(f"❌ Failed to create directory {config_dir}: {e}")
+            if system != 'windows':
+                try:
+                    subprocess.run(['sudo', 'mkdir', '-p', config_dir], check=True)
+                    subprocess.run(['sudo', 'chmod', '755', config_dir], check=True)
+                    print(f"✅ Created directory (with sudo): {config_dir}")
+                except subprocess.CalledProcessError as e:
+                    print(f"❌ Failed to create directory {config_dir}: {e}")
+                    return False
+            else:
+                print(f"❌ Failed to create directory {config_dir}: Permission denied")
                 return False
 
     return True

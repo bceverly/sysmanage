@@ -181,7 +181,7 @@ def install_via_package_manager():
                         os.makedirs(install_path, exist_ok=True)
                         target_path = os.path.join(install_path, 'bao')
                         shutil.copy2(built_binary, target_path)
-                        os.chmod(target_path, 0o755)
+                        os.chmod(target_path, 0o755)  # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
                         print(f"OpenBAO installed to: {target_path}")
                         print("Add ~/.local/bin to your PATH if not already done")
                         return True
@@ -296,7 +296,7 @@ def install_via_package_manager():
                         os.makedirs(install_path, exist_ok=True)
                         target_path = os.path.join(install_path, 'bao')
                         shutil.copy2(built_binary, target_path)
-                        os.chmod(target_path, 0o755)
+                        os.chmod(target_path, 0o755)  # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
                         print(f"OpenBAO installed to: {target_path}")
                         print("Add ~/.local/bin to your PATH if not already done")
                         return True

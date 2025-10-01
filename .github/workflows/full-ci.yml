@@ -35,7 +35,7 @@ jobs:
     - uses: actions/checkout@v5
 
     - name: Set up Python 3.12
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.12'
 
@@ -93,7 +93,7 @@ jobs:
     - uses: actions/checkout@v5
 
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: '20'
         cache: 'npm'
@@ -134,12 +134,12 @@ jobs:
     - uses: actions/checkout@v5
 
     - name: Set up Python 3.12
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.12'
 
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: '20'
         cache: 'npm'
@@ -214,12 +214,14 @@ jobs:
     needs: [test-backend, test-frontend]
     # Only require UI tests if they were requested AND they didn't fail
     if: always() && (needs.test-backend.result == 'success' && needs.test-frontend.result == 'success')
+    permissions:
+      contents: read
 
     steps:
     - uses: actions/checkout@v5
 
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: '20'
         cache: 'npm'

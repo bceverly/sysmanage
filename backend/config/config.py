@@ -17,8 +17,12 @@ else:  # Unix-like (Linux, macOS, BSD)
     CONFIG_PATH = "/etc/sysmanage.yaml"
 
 # Fallback to development config if system config doesn't exist
-if not os.path.exists(CONFIG_PATH) and os.path.exists("sysmanage-dev.yaml"):
-    CONFIG_PATH = "sysmanage-dev.yaml"
+# Check for sysmanage-dev.yaml first (user's local config), then .example
+if not os.path.exists(CONFIG_PATH):
+    if os.path.exists("sysmanage-dev.yaml"):
+        CONFIG_PATH = "sysmanage-dev.yaml"
+    elif os.path.exists("sysmanage-dev.yaml.example"):
+        CONFIG_PATH = "sysmanage-dev.yaml.example"
     # Using development configuration as fallback
 
 try:
