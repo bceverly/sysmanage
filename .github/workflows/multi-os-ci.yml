@@ -37,7 +37,7 @@ jobs:
     - uses: actions/checkout@v5
 
     - name: Set up Python 3.12
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.12'
 
@@ -123,7 +123,7 @@ jobs:
     - uses: actions/checkout@v5
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -271,7 +271,7 @@ jobs:
     - uses: actions/checkout@v5
 
     - name: Set up Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
@@ -312,12 +312,12 @@ jobs:
     - uses: actions/checkout@v5
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Set up Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
@@ -351,7 +351,7 @@ jobs:
           libdrm2 libxkbcommon0 libgtk-3-0 libgdk-pixbuf2.0-0
 
     - name: Download frontend build
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: frontend-build-${{ matrix.os }}
         path: frontend/build/
@@ -636,7 +636,7 @@ jobs:
     - uses: actions/checkout@v5
 
     - name: Download all performance results
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         pattern: performance-results-*
         merge-multiple: true
