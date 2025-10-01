@@ -539,7 +539,7 @@ def run_database_migrations():
             # Use the comprehensive migration specifically
             print("  Running comprehensive database migration from scratch...")
             # Use python -m alembic to ensure we use the virtual environment's alembic
-            result = subprocess.run([sys.executable, '-m', 'alembic', 'upgrade', '6dd4ca89b6b8'], cwd=project_root,
+            result = subprocess.run([sys.executable, '-m', 'alembic', 'upgrade', 'head'], cwd=project_root,
                                   capture_output=True, text=True, timeout=120, env=env)
             if result.returncode == 0:
                 print("  Comprehensive migration completed successfully!")
@@ -765,6 +765,14 @@ def update_config_file(salt, jwt_secret):
 
         config['security']['password_salt'] = salt
         config['security']['jwt_secret'] = jwt_secret
+
+        # Remove deprecated admin credentials (admin user is now created via the installation script)
+        if 'admin_userid' in config['security']:
+            del config['security']['admin_userid']
+            print("  Removed deprecated admin_userid from config")
+        if 'admin_password' in config['security']:
+            del config['security']['admin_password']
+            print("  Removed deprecated admin_password from config")
 
         # Try to write directly first
         try:
@@ -1220,7 +1228,9 @@ def main():
         # The config module caches the config at import time, so we need to reload it
         import importlib
         import backend.config.config
+        import backend.persistence.db
         importlib.reload(backend.config.config)
+        importlib.reload(backend.persistence.db)
         from backend.config.config import get_config
         from backend.persistence.db import get_engine
 
@@ -1235,7 +1245,9 @@ def main():
 
         # Reload config AGAIN after updating security keys
         importlib.reload(backend.config.config)
+        importlib.reload(backend.persistence.db)
         from backend.config.config import get_config
+        from backend.persistence.db import get_engine
 
         # Load current configuration (after potential database config updates)
         config = get_config()
