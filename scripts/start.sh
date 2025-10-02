@@ -243,18 +243,49 @@ if check_existing_processes; then
         FRONTEND_PORT=3000
     fi
     
-    # Check if ports are still in use
+    # Check if ports are still in use (with retry for TIME_WAIT sockets)
     backend_still_running=false
     frontend_still_running=false
-    
-    if check_port $BACKEND_PORT; then
-        backend_still_running=true
-    fi
-    
-    if check_port $FRONTEND_PORT; then
-        frontend_still_running=true
-    fi
-    
+    max_wait=5
+    attempt=0
+
+    while [ $attempt -lt $max_wait ]; do
+        backend_still_running=false
+        frontend_still_running=false
+
+        # Check backend port with fstat (actual process check)
+        if command -v fstat >/dev/null 2>&1; then
+            backend_pid=$(fstat 2>/dev/null | awk "\$9 ~ /:$BACKEND_PORT\$/ {print \$3}" | head -1)
+            if [ -n "$backend_pid" ]; then
+                backend_still_running=true
+            fi
+        elif check_port $BACKEND_PORT; then
+            backend_still_running=true
+        fi
+
+        # Check frontend port with fstat (actual process check)
+        if command -v fstat >/dev/null 2>&1; then
+            frontend_pid=$(fstat 2>/dev/null | awk "\$9 ~ /:$FRONTEND_PORT\$/ {print \$3}" | head -1)
+            if [ -n "$frontend_pid" ]; then
+                frontend_still_running=true
+            fi
+        elif check_port $FRONTEND_PORT; then
+            frontend_still_running=true
+        fi
+
+        # If nothing found, we're good
+        if [ "$backend_still_running" = false ] && [ "$frontend_still_running" = false ]; then
+            break
+        fi
+
+        # Wait and retry
+        attempt=$((attempt + 1))
+        if [ $attempt -lt $max_wait ]; then
+            echo "   Waiting for ports to be released (TIME_WAIT)... ($attempt/$max_wait)"
+            sleep 1
+        fi
+    done
+
     if [ "$backend_still_running" = true ] || [ "$frontend_still_running" = true ]; then
         echo "❌ ERROR: Failed to stop existing processes. Please manually stop them before continuing."
         if [ "$backend_still_running" = true ]; then
@@ -287,7 +318,7 @@ if [ -f "backend/main.py" ]; then
         echo "WARNING: Could not read api.port from /etc/sysmanage.yaml or sysmanage-dev.yaml, using default 8080"
         BACKEND_PORT=8080
     fi
-    
+
     # Start the backend using the main.py configuration
     nohup python -m backend.main > logs/backend.log 2>&1 &
     BACKEND_PID=$!

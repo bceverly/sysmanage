@@ -56,32 +56,70 @@ else
     VENV_ACTIVATE := $(VENV)/bin/activate
 endif
 
-# Check if virtual environment exists
+# Create or repair virtual environment
 $(VENV_ACTIVATE):
-	@echo "Virtual environment not found. Please create one with:"
-	@echo "  python3 -m venv .venv"
+	@echo "Creating/repairing virtual environment..."
 ifeq ($(OS),Windows_NT)
-	@echo "  .venv\Scripts\activate"
+	@if exist $(VENV) rmdir /s /q $(VENV) 2>nul || echo.
+	@python -m venv $(VENV)
+	@$(PYTHON) -m pip install --upgrade pip
 else
-	@echo "  source .venv/bin/activate"
+	@rm -rf $(VENV) 2>/dev/null || true
+	@if command -v python3 >/dev/null 2>&1; then \
+		python3 -m venv $(VENV); \
+	elif command -v python3.12 >/dev/null 2>&1; then \
+		python3.12 -m venv $(VENV); \
+	elif command -v python3.11 >/dev/null 2>&1; then \
+		python3.11 -m venv $(VENV); \
+	else \
+		echo "Error: No Python 3 found"; exit 1; \
+	fi
+	@$(PYTHON) -m pip install --upgrade pip
 endif
-	@echo "  pip install -r requirements.txt"
-	@exit 1
+
+setup-venv: $(VENV_ACTIVATE)
 
 # Install development dependencies
-install-dev:
+install-dev: setup-venv
 	@echo "Installing Python development dependencies..."
-	@$(PIP) install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep
+ifeq ($(OS),Windows_NT)
+	@$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep
+else
+	@if [ "$$(uname -s)" = "NetBSD" ]; then \
+		echo "[INFO] NetBSD detected - configuring for grpcio build..."; \
+		export TMPDIR=/var/tmp && \
+		export CFLAGS="-I/usr/pkg/include" && \
+		export CXXFLAGS="-std=c++17 -I/usr/pkg/include -fpermissive" && \
+		export LDFLAGS="-L/usr/pkg/lib -Wl,-R/usr/pkg/lib" && \
+		export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 && \
+		export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 && \
+		export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
+		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
+	else \
+		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
+	fi
+endif
 	@echo "Installing requirements.txt (includes Selenium WebDriver)..."
 ifeq ($(OS),Windows_NT)
-	@$(PIP) install -r requirements.txt
+	@$(PYTHON) -m pip install -r requirements.txt
 else
-	@if [ "$$(uname -s)" = "NetBSD" ] || [ "$$(uname -s)" = "OpenBSD" ] || [ "$$(uname -s)" = "FreeBSD" ]; then \
+	@if [ "$$(uname -s)" = "NetBSD" ]; then \
+		echo "[INFO] NetBSD - using /var/tmp and excluding Playwright..."; \
+		export TMPDIR=/var/tmp && \
+		export CFLAGS="-I/usr/pkg/include" && \
+		export CXXFLAGS="-std=c++17 -I/usr/pkg/include -fpermissive" && \
+		export LDFLAGS="-L/usr/pkg/lib -Wl,-R/usr/pkg/lib" && \
+		export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 && \
+		export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 && \
+		export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
+		grep -v "^playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || true; \
+		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
+	elif [ "$$(uname -s)" = "OpenBSD" ] || [ "$$(uname -s)" = "FreeBSD" ]; then \
 		echo "[INFO] Installing packages except Playwright (not available on BSD systems)..."; \
-		grep -v "^playwright" requirements.txt | $(PIP) install -r /dev/stdin || true; \
+		grep -v "^playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || true; \
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
 	else \
-		$(PIP) install -r requirements.txt; \
+		$(PYTHON) -m pip install -r requirements.txt; \
 	fi
 endif
 	@echo "Checking for BSD system C tracer requirements..."
@@ -91,22 +129,67 @@ ifeq ($(OS),Windows_NT)
 else
 	@if [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD detected - rebuilding Pillow with correct library paths..."; \
-		export CFLAGS="-I/usr/pkg/include" && export LDFLAGS="-L/usr/pkg/lib -Wl,-R/usr/pkg/lib" && \
-		$(PIP) uninstall -y Pillow && $(PIP) install --no-binary=:all: Pillow; \
+		export TMPDIR=/var/tmp && \
+		export CFLAGS="-I/usr/pkg/include" && \
+		export CXXFLAGS="-std=c++17 -I/usr/pkg/include -fpermissive" && \
+		export LDFLAGS="-L/usr/pkg/lib -Wl,-R/usr/pkg/lib" && \
+		export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 && \
+		export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 && \
+		export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
+		$(PYTHON) -m pip uninstall -y Pillow && $(PYTHON) -m pip install --no-binary=:all: Pillow; \
 		echo "[OK] Pillow rebuilt for NetBSD"; \
+		echo "[INFO] NetBSD detected - rebuilding grpcio with GCC 14 for C++ compatibility..."; \
+		$(PYTHON) -m pip cache remove grpcio 2>/dev/null || true; \
+		$(PYTHON) -m pip uninstall -y grpcio && \
+		CC=/usr/pkg/gcc14/bin/gcc \
+		CXX=/usr/pkg/gcc14/bin/g++ \
+		CFLAGS="-I/usr/pkg/include -fpermissive -Wno-error" \
+		CXXFLAGS="-I/usr/pkg/include -fpermissive -Wno-error" \
+		LDFLAGS="-L/usr/pkg/gcc14/lib -Wl,-R/usr/pkg/gcc14/lib -lstdc++" \
+		LDSHARED="/usr/pkg/gcc14/bin/g++ -pthread -shared -L/usr/pkg/gcc14/lib -Wl,-R/usr/pkg/gcc14/lib" \
+		$(PYTHON) -m pip install --no-binary=:all: grpcio; \
+		echo "[OK] grpcio rebuilt for NetBSD with GCC 14"; \
+		echo "[INFO] Setting up GCC 14 library path in venv activate script..."; \
+		if [ ! -f "$(VENV)/bin/activate.backup" ]; then \
+			cp "$(VENV)/bin/activate" "$(VENV)/bin/activate.backup"; \
+		fi; \
+		grep -q "LD_LIBRARY_PATH.*gcc14" "$(VENV)/bin/activate" || \
+		echo 'export LD_LIBRARY_PATH="/usr/pkg/gcc14/lib:$${LD_LIBRARY_PATH}"' >> "$(VENV)/bin/activate"; \
+		echo "[OK] GCC 14 library path configured in venv"; \
 		echo "[INFO] NetBSD detected - fixing websocket dependencies for Selenium compatibility..."; \
-		$(PIP) uninstall -y websocket 2>/dev/null || true; \
+		$(PYTHON) -m pip uninstall -y websocket 2>/dev/null || true; \
 		rm -rf $(VENV_DIR)/lib/python*/site-packages/websocket $(VENV_DIR)/lib/python*/site-packages/websocket-*.dist-info 2>/dev/null || true; \
-		$(PIP) install --force-reinstall websocket-client websockets; \
+		$(PYTHON) -m pip install --force-reinstall websocket-client websockets; \
 		echo "[OK] websocket dependencies fixed for NetBSD Selenium support"; \
 	fi
 endif
 	@echo "Installing OpenBAO for secrets management..."
 	@$(PYTHON) scripts/install-openbao.py
-	@echo "Installing telemetry stack (OpenTelemetry + Prometheus)..."
 ifeq ($(OS),Windows_NT)
+	@echo "Installing telemetry stack (OpenTelemetry + Prometheus)..."
 	@$(PYTHON) scripts/install-telemetry.py || echo "[WARNING] Telemetry installation failed - continuing without telemetry"
 else
+	@if [ "$$(uname -s)" = "NetBSD" ]; then \
+		echo "[INFO] NetBSD detected - building Prometheus from source..."; \
+		if [ ! -f "$$HOME/.local/bin/prometheus" ]; then \
+			mkdir -p /tmp/prometheus-build && \
+			cd /tmp/prometheus-build && \
+			rm -rf prometheus && \
+			git clone --depth 1 --branch v3.1.0 https://github.com/prometheus/prometheus.git && \
+			cd prometheus && \
+			echo "[INFO] Building Prometheus (this may take several minutes)..." && \
+			go build ./cmd/prometheus && \
+			go build ./cmd/promtool && \
+			mkdir -p $$HOME/.local/bin && \
+			cp prometheus promtool $$HOME/.local/bin/ && \
+			chmod +x $$HOME/.local/bin/prometheus $$HOME/.local/bin/promtool && \
+			cd /tmp && rm -rf /tmp/prometheus-build && \
+			echo "[OK] Prometheus built and installed to ~/.local/bin"; \
+		else \
+			echo "[OK] Prometheus already installed"; \
+		fi; \
+	fi
+	@echo "Installing telemetry stack (OpenTelemetry + Prometheus)..."
 	@sudo $(PYTHON) scripts/install-telemetry.py || echo "[WARNING] Telemetry installation failed - continuing without telemetry"
 endif
 	@echo "Setting up WebDriver for screenshots..."
@@ -183,16 +266,13 @@ else
 	fi
 endif
 	@echo "[OK] Development dependencies installation completed"
+	@echo "Development environment setup complete!"
 
 # Database migration target
 migrate:
 	@echo "Running database migrations..."
 	@$(PYTHON) -m alembic upgrade head
 	@echo "[OK] Database migrations completed"
-
-# Setup target that ensures everything is ready
-setup: install-dev
-	@echo "Development environment setup complete!"
 
 # Clean trailing whitespace from Python files (cross-platform)
 clean-whitespace: $(VENV_ACTIVATE)
@@ -571,12 +651,18 @@ else
 		echo "[WARNING] otelcol-contrib not found. Run 'make install-telemetry' first."; \
 	fi
 	@echo "Starting Prometheus..."
-	@if command -v prometheus >/dev/null 2>&1; then \
+	@PROMETHEUS_BIN=""; \
+	if [ -f "$$HOME/.local/bin/prometheus" ]; then \
+		PROMETHEUS_BIN="$$HOME/.local/bin/prometheus"; \
+	elif command -v prometheus >/dev/null 2>&1; then \
+		PROMETHEUS_BIN="prometheus"; \
+	fi; \
+	if [ -n "$$PROMETHEUS_BIN" ]; then \
 		mkdir -p data/prometheus; \
-		nohup prometheus --config.file=config/prometheus.yml --web.listen-address=:9091 --storage.tsdb.path=./data/prometheus --storage.tsdb.retention.time=15d --storage.tsdb.retention.size=10GB > logs/prometheus.log 2>&1 & echo $$! > logs/prometheus.pid; \
+		nohup $$PROMETHEUS_BIN --config.file=config/prometheus.yml --web.listen-address=:9091 --storage.tsdb.path=./data/prometheus --storage.tsdb.retention.time=15d --storage.tsdb.retention.size=10GB > logs/prometheus.log 2>&1 & echo $$! > logs/prometheus.pid; \
 		echo "Prometheus started (PID: $$(cat logs/prometheus.pid))"; \
 	else \
-		echo "[WARNING] prometheus not found. Run 'make install-telemetry' first."; \
+		echo "[WARNING] prometheus not found. Run 'make install-dev' first."; \
 	fi
 endif
 	@echo ""

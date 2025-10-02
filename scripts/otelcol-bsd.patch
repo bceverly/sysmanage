@@ -1,0 +1,112 @@
+diff --git a/Makefile b/Makefile
+index 1234567..abcdefg 100644
+--- a/Makefile
++++ b/Makefile
+@@ -17,7 +17,7 @@ GROUP ?= all
+ FOR_GROUP_TARGET=for-$(GROUP)-target
+
+ FIND_MOD_ARGS=-type f -name "go.mod"
+-TO_MOD_DIR=dirname {} \; | sort | grep -E '^./'
++TO_MOD_DIR=-exec dirname {} \; | sort | grep -E '^./'
+ EX_COMPONENTS=-not -path "./receiver/*" -not -path "./processor/*" -not -path "./exporter/*" -not -path "./extension/*" -not -path "./connector/*"
+ EX_INTERNAL=-not -path "./internal/*"
+ EX_PKG=-not -path "./pkg/*"
+@@ -26,30 +26,30 @@ EX_CMD=-not -path "./cmd/*"
+ # This includes a final slash
+ ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+
+-RECEIVER_MODS_0 := $(shell find ./receiver/[a-f]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
+-RECEIVER_MODS_1 := $(shell find ./receiver/[g-o]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
+-RECEIVER_MODS_2 := $(shell find ./receiver/[p]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) ) # Prometheus is special and gets its own section.
+-RECEIVER_MODS_3 := $(shell find ./receiver/[q-z]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++RECEIVER_MODS_0 := $(shell gfind ./receiver/[a-f]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++RECEIVER_MODS_1 := $(shell gfind ./receiver/[g-o]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++RECEIVER_MODS_2 := $(shell gfind ./receiver/[p]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++RECEIVER_MODS_3 := $(shell gfind ./receiver/[q-z]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
+ RECEIVER_MODS := $(RECEIVER_MODS_0) $(RECEIVER_MODS_1) $(RECEIVER_MODS_2) $(RECEIVER_MODS_3)
+-PROCESSOR_MODS_0 := $(shell find ./processor/[a-o]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
+-PROCESSOR_MODS_1 := $(shell find ./processor/[p-z]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++PROCESSOR_MODS_0 := $(shell gfind ./processor/[a-o]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++PROCESSOR_MODS_1 := $(shell gfind ./processor/[p-z]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
+ PROCESSOR_MODS := $(PROCESSOR_MODS_0) $(PROCESSOR_MODS_1)
+-EXPORTER_MODS_0 := $(shell find ./exporter/[a-c]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
+-EXPORTER_MODS_1 := $(shell find ./exporter/[d-i]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
+-EXPORTER_MODS_2 := $(shell find ./exporter/[k-o]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
+-EXPORTER_MODS_3 := $(shell find ./exporter/[p-z]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++EXPORTER_MODS_0 := $(shell gfind ./exporter/[a-c]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++EXPORTER_MODS_1 := $(shell gfind ./exporter/[d-i]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++EXPORTER_MODS_2 := $(shell gfind ./exporter/[k-o]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++EXPORTER_MODS_3 := $(shell gfind ./exporter/[p-z]* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
+ EXPORTER_MODS := $(EXPORTER_MODS_0) $(EXPORTER_MODS_1) $(EXPORTER_MODS_2) $(EXPORTER_MODS_3)
+-EXTENSION_MODS := $(shell find ./extension/* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
+-CONNECTOR_MODS := $(shell find ./connector/* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
+-INTERNAL_MODS := $(shell find ./internal/* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
+-PKG_MODS := $(shell find ./pkg/* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
+-CMD_MODS_0 := $(shell find ./cmd/[a-z]* $(FIND_MOD_ARGS) -not -path "./cmd/otel*col/*" -exec $(TO_MOD_DIR) )
++EXTENSION_MODS := $(shell gfind ./extension/* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++CONNECTOR_MODS := $(shell gfind ./connector/* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++INTERNAL_MODS := $(shell gfind ./internal/* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++PKG_MODS := $(shell gfind ./pkg/* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++CMD_MODS_0 := $(shell gfind ./cmd/[a-z]* $(FIND_MOD_ARGS) -not -path "./cmd/otel*col/*" -exec $(TO_MOD_DIR) )
+ CMD_MODS := $(CMD_MODS_0)
+-OTHER_MODS := $(shell find . $(EX_COMPONENTS) $(EX_INTERNAL) $(EX_PKG) $(EX_CMD) $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
++OTHER_MODS := $(shell gfind . $(EX_COMPONENTS) $(EX_INTERNAL) $(EX_PKG) $(EX_CMD) $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR) )
+ ALL_MODS := $(RECEIVER_MODS) $(PROCESSOR_MODS) $(EXPORTER_MODS) $(EXTENSION_MODS) $(CONNECTOR_MODS) $(INTERNAL_MODS) $(PKG_MODS) $(CMD_MODS) $(OTHER_MODS)
+
+ CGO_MODS := ./receiver/hostmetricsreceiver
+
+-FIND_INTEGRATION_TEST_MODS={ find . -type f -name "*integration_test.go" & find . -type f -name "*e2e_test.go" -not -path "./testbed/*"; }
+-INTEGRATION_MODS := $(shell $(FIND_INTEGRATION_TEST_MODS) | xargs $(TO_MOD_DIR) | uniq)
++FIND_INTEGRATION_TEST_MODS={ gfind . -type f -name "*integration_test.go" & gfind . -type f -name "*e2e_test.go" -not -path "./testbed/*"; }
++INTEGRATION_MODS := $(shell $(FIND_INTEGRATION_TEST_MODS) | gxargs $(TO_MOD_DIR) | uniq)
+
+ # Excluded from ALL_MODS
+-GENERATED_MODS := $(shell find ./cmd/otel*col/* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR))
++GENERATED_MODS := $(shell gfind ./cmd/otel*col/* $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR))
+diff --git a/Makefile.Common b/Makefile.Common
+index 1234567..abcdefg 100644
+--- a/Makefile.Common
++++ b/Makefile.Common
+@@ -158,7 +158,7 @@ endif
+ # Note: if the `| uniq` is added prior to sed, we could incorrectly have the last test name contain a pipe in it.
+ INTEGRATION_TEST_FILES := $(shell echo '$(INTEGRATION_TEST_MODS)' | tr ' ' '\n' | sed '/^[[:space:]]*$$/d' | uniq | awk '{printf " %s/integration_test_files.txt", $$0}')
+ # Matches test names as printed by `go test -v`.
+-INTEGRATION_TESTS := $(if $(INTEGRATION_TEST_FILES), $(shell cat $(INTEGRATION_TEST_FILES) | sed -n "s/func \(Test[A-Za-z0-9_]*\).*/\1/p" | xargs | sed "s/ /|/g"))
++INTEGRATION_TESTS := $(if $(INTEGRATION_TEST_FILES), $(shell cat $(INTEGRATION_TEST_FILES) | sed -n "s/func \(Test[A-Za-z0-9_]*\).*/\1/p" | gxargs | sed "s/ /|/g"))
+
+ # Append root module to all modules
+ GOMODULES = $(ALL_MODULES) $(PWD)
+@@ -194,7 +194,8 @@ endif
+ 	$(GOTEST) $(GOTEST_OPT) -benchtime=1x -bench=. -run=notests --tags=$(GO_BUILD_TAGS) $(ALL_MODULES)
+
+ .PHONY: gotest-benchmark-compare
+-	$(GOTESTSUM) $(GOTESTSUM_OPT) --packages="$$(find . -name 'go.mod' -not -path '*/third_party/*' -not -path '*/local/*' -type f | xargs dirname | sort | uniq | xargs -L 1 bash -c 'cd $$0 && go list -f "{{ .Dir }}"' | xargs echo)" -- -bench=. -run=notests --tags=$(GO_BUILD_TAGS)
++gotest-benchmark-compare:
++	$(GOTESTSUM) $(GOTESTSUM_OPT) --packages="$$(gfind . -name 'go.mod' -not -path '*/third_party/*' -not -path '*/local/*' -type f | gxargs dirname | sort | uniq | gxargs -L 1 bash -c 'cd $$0 && go list -f "{{ .Dir }}"' | gxargs echo)" -- -bench=. -run=notests --tags=$(GO_BUILD_TAGS)
+
+ # Long-running e2e tests
+ .PHONY: gotest-e2e
+@@ -301,11 +302,11 @@ check-changes:
+ 		cd $(ROOT); \
+ 		git diff --name-only $${COMMIT_SHA} | grep -v ".*_test.go$$" | grep "\.go$$" > /tmp/changed_files.txt || true; \
+ 		CHANGED_GOLANG_SOURCES=$$(cat /tmp/changed_files.txt); \
+-		DEPENDENT_PKGS=$$(echo $${CHANGED_GOLANG_SOURCES} | xargs sed -n 's|^package .* // import "\(.*\)"$$|\1|p' | uniq); \
++		DEPENDENT_PKGS=$$(echo $${CHANGED_GOLANG_SOURCES} | gxargs sed -n 's|^package .* // import "\(.*\)"$$|\1|p' | uniq); \
+ 		echo "Changed Packages: $${DEPENDENT_PKGS}"; \
+ 		if [ -n "$${DEPENDENT_PKGS}" ]; then \
+ 			DEPENDENT_PKG_DIRS=""; \
+ 			for pkg in $${DEPENDENT_PKGS}; do \
+-			DEPENDENT_PKG_DIRS=$$(echo $${DEPENDENT_PKGS} | tr ' ' '\n' | xargs -I {} grep --include=go.mod -rl {} | xargs -r dirname | uniq); \
++			DEPENDENT_PKG_DIRS=$$(echo $${DEPENDENT_PKGS} | tr ' ' '\n' | gxargs -I {} grep --include=go.mod -rl {} | gxargs -r dirname | uniq); \
+ 			done; \
+ 			echo "Affected Packages: $${DEPENDENT_PKG_DIRS}"; \
+ 		fi; \
+@@ -325,7 +326,7 @@ check-changes:
+ 		CHANGED_GOLANG_TESTS=$$(git diff --no-commit-id --name-only -r $(COMMIT_SHA) | grep "_test.go$$" | sort); \
+ 		if [ -n "$${CHANGED_GOLANG_TESTS}" ]; then \
+ 			echo "Changed tests: $${CHANGED_GOLANG_TESTS}"; \
+-		AFFECTED_TEST_DIRS=$$(echo $${CHANGED_GOLANG_TESTS} | tr ' ' '\n' | xargs dirname | uniq); \
++		AFFECTED_TEST_DIRS=$$(echo $${CHANGED_GOLANG_TESTS} | tr ' ' '\n' | gxargs dirname | uniq); \
+ 			echo "Affected test dirs: $${AFFECTED_TEST_DIRS}"; \
+ 		fi; \
+ 		echo "⚠️ Ensure all changed code is unit-tested! ⚠️";
