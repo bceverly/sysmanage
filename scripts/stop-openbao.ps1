@@ -28,7 +28,19 @@ if (-not (Test-Path $PidFile)) {
 # Read PID
 try {
     $OpenBaoPid = Get-Content $PidFile -ErrorAction Stop
-    $OpenBaoPid = [int]$OpenBaoPid.Trim()
+    $OpenBaoPid = $OpenBaoPid.Trim()
+
+    # Check if it's the "STARTED" marker from VBScript launch
+    if ($OpenBaoPid -eq "STARTED") {
+        Write-Host "Stopping OpenBAO (started via VBScript wrapper)..." -ForegroundColor Cyan
+        # Kill by process name since we don't have PID
+        Get-Process -Name "bao","vault" -ErrorAction SilentlyContinue | Stop-Process -Force
+        Remove-Item $PidFile -ErrorAction SilentlyContinue
+        Write-Host "OpenBAO stopped" -ForegroundColor Green
+        exit 0
+    }
+
+    $OpenBaoPid = [int]$OpenBaoPid
 } catch {
     Write-Host "Error reading PID file: $($_.Exception.Message)" -ForegroundColor Red
     Remove-Item $PidFile -ErrorAction SilentlyContinue

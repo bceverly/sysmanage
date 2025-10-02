@@ -52,15 +52,8 @@ const Hosts = () => {
             width: 280,  // Increased width for status and update chips
             renderCell: (params) => {
                 const row = params.row;
-                // Server returns timezone-aware timestamps
-                const rawLastAccess = row.last_access;
-                const utcLastAccess = typeof rawLastAccess === 'string' &&
-                    !rawLastAccess.endsWith('Z') &&
-                    !/[+-]\d{2}:\d{2}$/.test(rawLastAccess)
-                    ? rawLastAccess + 'Z'
-                    : rawLastAccess;
-                
-                const lastAccess = new Date(utcLastAccess);
+                // Server sends naive UTC timestamps as ISO strings with Z suffix
+                const lastAccess = new Date(row.last_access);
                 const now = new Date();
                 const diffMinutes = Math.floor((now.getTime() - lastAccess.getTime()) / 60000);
                 
@@ -175,19 +168,10 @@ const Hosts = () => {
             headerName: t('hosts.lastCheckin'), 
             width: 200,
             renderCell: (params) => {
-                // Server returns timezone-aware timestamps
-                const rawValue = params.value;
-                // Don't modify if it already has timezone info (+ or - offset) or Z
-                const utcTimestamp = typeof rawValue === 'string' &&
-                    !rawValue.endsWith('Z') &&
-                    !/[+-]\d{2}:\d{2}$/.test(rawValue)
-                    ? rawValue + 'Z'  // Add UTC marker only if no timezone info
-                    : rawValue;
-                
-                const date = new Date(utcTimestamp);
+                // Server sends naive UTC timestamps as ISO strings with Z suffix
+                const date = new Date(params.value);
                 const now = new Date();
-                
-                
+
                 // Check if date is valid
                 if (isNaN(date.getTime())) {
                     return <span style={{ color: '#f44336' }}>{t('hosts.invalidDate', 'Invalid date')}</span>;

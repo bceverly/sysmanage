@@ -77,12 +77,26 @@ echo Continuing without OpenBAO/Vault...
 exit /b 0
 
 :start_server
-echo Starting OpenBAO development server...
+echo Starting OpenBAO server...
 echo Log file: %LOG_FILE%
 echo PID file: %PID_FILE%
 
+REM Check if production config exists
+set "VAULT_CONFIG=%PROJECT_DIR%\openbao.hcl"
+set "VAULT_CREDS=%PROJECT_DIR%\.vault_credentials"
+
+if exist "%VAULT_CONFIG%" if exist "%VAULT_CREDS%" (
+    echo Starting OpenBAO in production mode with persistent storage...
+    set "BAO_ARGS=server -config=%VAULT_CONFIG%"
+    set "PRODUCTION_MODE=1"
+) else (
+    echo Production config not found, starting in development mode...
+    set "BAO_ARGS=server -dev -dev-root-token-id=dev-only-token-change-me -dev-listen-address=127.0.0.1:8200 -log-level=info"
+    set "PRODUCTION_MODE=0"
+)
+
 REM Start OpenBAO using PowerShell with proper hidden background execution and capture PID
-for /f %%i in ('powershell -WindowStyle Hidden -Command "& { $processInfo = New-Object System.Diagnostics.ProcessStartInfo; $processInfo.FileName = '%BAO_CMD%'; $processInfo.Arguments = 'server -dev -dev-root-token-id=dev-only-token-change-me -dev-listen-address=127.0.0.1:8200 -log-level=info'; $processInfo.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden; $processInfo.CreateNoWindow = $true; $processInfo.UseShellExecute = $false; $processInfo.RedirectStandardOutput = $true; $processInfo.RedirectStandardError = $true; $process = New-Object System.Diagnostics.Process; $process.StartInfo = $processInfo; $process.Start(); Start-Sleep 1; if (-not $process.HasExited) { $process.Id } }"') do set "NEW_PID=%%i"
+for /f %%i in ('powershell -WindowStyle Hidden -Command "& { $processInfo = New-Object System.Diagnostics.ProcessStartInfo; $processInfo.FileName = '%BAO_CMD%'; $processInfo.Arguments = '%BAO_ARGS%'; $processInfo.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden; $processInfo.CreateNoWindow = $true; $processInfo.UseShellExecute = $false; $processInfo.RedirectStandardOutput = $true; $processInfo.RedirectStandardError = $true; $process = New-Object System.Diagnostics.Process; $process.StartInfo = $processInfo; $process.Start(); Start-Sleep 1; if (-not $process.HasExited) { $process.Id } }"') do set "NEW_PID=%%i"
 
 if defined NEW_PID (
     echo !NEW_PID! > "%PID_FILE%"
@@ -93,7 +107,34 @@ if defined NEW_PID (
 )
 
 echo Server URL: http://127.0.0.1:8200
-echo Root token: dev-only-token-change-me
+
+REM Display appropriate token message based on mode
+if "%PRODUCTION_MODE%"=="1" (
+    REM Wait for server to be ready
+    timeout /t 3 /nobreak >nul
+
+    REM Set environment for unsealing
+    set "BAO_ADDR=http://127.0.0.1:8200"
+
+    REM Read credentials and unseal if needed
+    if exist "%VAULT_CREDS%" (
+        for /f "tokens=2 delims==" %%a in ('findstr "^UNSEAL_KEY=" "%VAULT_CREDS%"') do set "UNSEAL_KEY=%%a"
+        for /f "tokens=2 delims==" %%a in ('findstr "^ROOT_TOKEN=" "%VAULT_CREDS%"') do set "ROOT_TOKEN=%%a"
+
+        REM Check if vault needs unsealing
+        "%BAO_CMD%" status 2>&1 | findstr /C:"Sealed" | findstr /C:"true" >nul
+        if !errorlevel! equ 0 (
+            echo Unsealing vault...
+            "%BAO_CMD%" operator unseal !UNSEAL_KEY! >nul
+        )
+
+        echo Root token: !ROOT_TOKEN! (production mode)
+    ) else (
+        echo Root token: [check .vault_credentials file] (production mode)
+    )
+) else (
+    echo Root token: dev-only-token-change-me (development mode)
+)
 echo.
 echo To stop OpenBAO: make stop-openbao
 echo To check status: make status-openbao

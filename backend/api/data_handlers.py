@@ -1146,7 +1146,7 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
             stmt = (
                 update(Host)
                 .where(Host.id == connection.host_id)
-                .values(last_access=text("NOW()"))
+                .values(last_access=datetime.now(timezone.utc).replace(tzinfo=None))
             )
             db.execute(stmt)
 

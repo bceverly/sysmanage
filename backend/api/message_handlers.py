@@ -172,7 +172,9 @@ async def handle_system_info(db: Session, connection, message_data: dict):
                 not hasattr(connection, "is_mock_connection")
                 or not connection.is_mock_connection
             ):
-                update_values["last_access"] = text("NOW()")
+                update_values["last_access"] = datetime.now(timezone.utc).replace(
+                    tzinfo=None
+                )
 
             stmt = update(Host).where(Host.id == host.id).values(**update_values)
             db.execute(stmt)

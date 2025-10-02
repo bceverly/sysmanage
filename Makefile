@@ -105,7 +105,7 @@ endif
 	@$(PYTHON) scripts/install-openbao.py
 	@echo "Installing telemetry stack (OpenTelemetry + Prometheus)..."
 ifeq ($(OS),Windows_NT)
-	@$(PYTHON) scripts/install-telemetry.py
+	@$(PYTHON) scripts/install-telemetry.py || echo "[WARNING] Telemetry installation failed - continuing without telemetry"
 else
 	@sudo $(PYTHON) scripts/install-telemetry.py || echo "[WARNING] Telemetry installation failed - continuing without telemetry"
 endif
@@ -456,9 +456,16 @@ endif
 
 # Server management targets with shell detection
 start:
+	@echo "Stopping any existing processes..."
+ifeq ($(OS),Windows_NT)
+	@powershell -ExecutionPolicy Bypass -File scripts/stop.ps1 2>nul || echo "No processes to stop"
+else
+	@./scripts/stop.sh 2>/dev/null || echo "No processes to stop"
+endif
+	@echo ""
 	@echo "Starting OpenBAO development server..."
 ifeq ($(OS),Windows_NT)
-	@powershell -ExecutionPolicy Bypass -File scripts/start-openbao.ps1 || scripts\start-openbao.cmd
+	@powershell -ExecutionPolicy Bypass -File scripts/start-openbao-nohup.ps1
 else
 	@./scripts/start-openbao.sh
 endif
@@ -468,7 +475,7 @@ endif
 	@echo ""
 	@echo "Starting SysManage server..."
 ifeq ($(OS),Windows_NT)
-	@powershell -ExecutionPolicy Bypass -File scripts/start.ps1 || scripts\start.cmd
+	@powershell -ExecutionPolicy Bypass -File scripts/start-nohup.ps1
 else
 	@if [ -n "$$ZSH_VERSION" ]; then \
 		echo "Detected zsh shell, using start.sh"; \
@@ -551,9 +558,10 @@ start-telemetry:
 	@echo "Starting telemetry services..."
 ifeq ($(OS),Windows_NT)
 	@echo "Starting OpenTelemetry Collector..."
-	@powershell -Command "if (Test-Path '$(USERPROFILE)\AppData\Local\bin\otelcol-contrib.exe') { Start-Process -FilePath '$(USERPROFILE)\AppData\Local\bin\otelcol-contrib.exe' -ArgumentList '--config=config/otel-collector-config.yml' -NoNewWindow -PassThru | Out-File -FilePath 'logs/otel-collector.pid' -Encoding ASCII } else { Write-Host '[WARNING] otelcol-contrib.exe not found. Run make install-dev first.' }"
+	-@powershell -Command "if (Test-Path '$(USERPROFILE)\AppData\Local\bin\otelcol-contrib.exe') { Start-Process -FilePath '$(USERPROFILE)\AppData\Local\bin\otelcol-contrib.exe' -ArgumentList '--config=config/otel-collector-config.yml' -WindowStyle Minimized -PassThru | ForEach-Object { $$_.Id | Out-File -FilePath 'logs/otel-collector.pid' -Encoding ASCII } } else { Write-Host '[WARNING] otelcol-contrib.exe not found. Run make install-dev first.' }; exit 0"
 	@echo "Starting Prometheus..."
-	@powershell -Command "if (Test-Path '$(USERPROFILE)\AppData\Local\bin\prometheus.exe') { Start-Process -FilePath '$(USERPROFILE)\AppData\Local\bin\prometheus.exe' -ArgumentList '--config.file=config/prometheus.yml','--web.listen-address=:9091','--storage.tsdb.path=data/prometheus' -NoNewWindow -PassThru | Out-File -FilePath 'logs/prometheus.pid' -Encoding ASCII } else { Write-Host '[WARNING] prometheus.exe not found. Run make install-dev first.' }"
+	-@powershell -Command "if (-not (Test-Path 'data/prometheus')) { New-Item -ItemType Directory -Path 'data/prometheus' -Force | Out-Null }; Remove-Item 'data/prometheus/queries.active' -ErrorAction SilentlyContinue; exit 0"
+	-@powershell -Command "if (Test-Path '$(USERPROFILE)\AppData\Local\bin\prometheus.exe') { Start-Process -FilePath '$(USERPROFILE)\AppData\Local\bin\prometheus.exe' -ArgumentList '--config.file=config/prometheus.yml','--web.listen-address=:9091','--storage.tsdb.path=data/prometheus' -WindowStyle Minimized -PassThru | ForEach-Object { $$_.Id | Out-File -FilePath 'logs/prometheus.pid' -Encoding ASCII } } else { Write-Host '[WARNING] prometheus.exe not found. Run make install-dev first.' }; exit 0"
 else
 	@echo "Starting OpenTelemetry Collector..."
 	@if command -v otelcol-contrib >/dev/null 2>&1; then \
@@ -583,8 +591,10 @@ endif
 stop-telemetry:
 	@echo "Stopping telemetry services..."
 ifeq ($(OS),Windows_NT)
-	@if exist logs\otel-collector.pid (powershell -Command "Stop-Process -Id (Get-Content logs\otel-collector.pid) -Force -ErrorAction SilentlyContinue" && del logs\otel-collector.pid)
-	@if exist logs\prometheus.pid (powershell -Command "Stop-Process -Id (Get-Content logs\prometheus.pid) -Force -ErrorAction SilentlyContinue" && del logs\prometheus.pid)
+	@powershell -Command "Get-Process otelcol-contrib -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue" 2>nul || exit 0
+	@if exist logs\otel-collector.pid del logs\otel-collector.pid 2>nul
+	@powershell -Command "Get-Process prometheus -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue" 2>nul || exit 0
+	@if exist logs\prometheus.pid del logs\prometheus.pid 2>nul
 else
 	@if [ -f logs/otel-collector.pid ]; then \
 		kill $$(cat logs/otel-collector.pid) 2>/dev/null || true; \

@@ -31,7 +31,13 @@ def safe_extract_tar(tar, path):
             if is_within_directory(path, os.path.join(path, member.name)):
                 yield member
 
-    tar.extractall(path, members=safe_members(tar))
+    # Use filter='data' to suppress Python 3.14 deprecation warning
+    # This is safe because we're already filtering members manually
+    try:
+        tar.extractall(path, members=safe_members(tar), filter='data')
+    except TypeError:
+        # Older Python versions don't support filter parameter
+        tar.extractall(path, members=safe_members(tar))
 
 
 def safe_extract_zip(zip_file, path):
@@ -106,6 +112,16 @@ def install_prometheus():
     if shutil.which('prometheus'):
         print("✅ Prometheus is already installed")
         return True
+
+    # On Windows, also check if binary exists in install directory (might be running)
+    platform_name, _ = detect_platform()
+    if platform_name == 'windows':
+        install_dir = os.path.expanduser(r"~\AppData\Local\bin")
+        prometheus_binary = os.path.join(install_dir, "prometheus.exe")
+        if os.path.exists(prometheus_binary):
+            print("✅ Prometheus is already installed (found in local bin)")
+            print(f"💡 Add {install_dir} to your PATH if not already present")
+            return True
 
     try:
         platform_name, arch = detect_platform()
