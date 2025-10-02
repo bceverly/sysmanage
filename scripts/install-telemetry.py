@@ -107,6 +107,38 @@ def check_system_requirements():
     return True
 
 
+def stop_service(service_name):
+    """Stop a systemd service if it's running."""
+    try:
+        # Check if service exists and is running
+        result = subprocess.run(
+            ['systemctl', 'is-active', service_name],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+
+        if result.stdout.strip() == 'active':
+            print(f"⏸️  Stopping {service_name} service...")
+            subprocess.run(['systemctl', 'stop', service_name], check=True)
+            return True
+        return False
+    except Exception as e:
+        print(f"⚠️  Could not stop {service_name}: {e}")
+        return False
+
+
+def start_service(service_name):
+    """Start a systemd service."""
+    try:
+        print(f"▶️  Starting {service_name} service...")
+        subprocess.run(['systemctl', 'start', service_name], check=True)
+        return True
+    except Exception as e:
+        print(f"⚠️  Could not start {service_name}: {e}")
+        return False
+
+
 def install_prometheus():
     """Install Prometheus if not already installed."""
     print("\n🔧 Installing Prometheus...")
@@ -188,6 +220,11 @@ def install_prometheus():
             prometheus_binary = "prometheus.exe" if platform_name == 'windows' else "prometheus"
             promtool_binary = "promtool.exe" if platform_name == 'windows' else "promtool"
 
+            # Stop prometheus service if running (to avoid "Text file busy" error)
+            prometheus_was_running = False
+            if platform_name == 'linux' and os.path.exists('/etc/systemd/system'):
+                prometheus_was_running = stop_service('prometheus')
+
             # Copy binaries (may require sudo on Unix)
             try:
                 shutil.copy2(
@@ -212,6 +249,10 @@ def install_prometheus():
             else:
                 # Provide PATH hint for Windows users
                 print(f"💡 Add {install_dir} to your PATH to use 'prometheus' command globally")
+
+            # Restart prometheus service if it was running
+            if prometheus_was_running:
+                start_service('prometheus')
 
         print("✅ Prometheus installed successfully")
         return True
@@ -583,12 +624,21 @@ def install_otel_collector():
                     with tarfile.open(archive_path, 'r:gz') as tar:
                         safe_extract_tar(tar, temp_dir)
 
+                    # Stop otelcol-contrib service if running (to avoid "Text file busy" error)
+                    otelcol_was_running = False
+                    if os.path.exists('/etc/systemd/system'):
+                        otelcol_was_running = stop_service('otelcol-contrib')
+
                     # Install to /usr/local/bin
                     shutil.copy2(
                         os.path.join(temp_dir, 'otelcol-contrib'),
                         '/usr/local/bin/otelcol-contrib'
                     )
                     os.chmod('/usr/local/bin/otelcol-contrib', 0o755)
+
+                    # Restart service if it was running
+                    if otelcol_was_running:
+                        start_service('otelcol-contrib')
 
         elif platform_name in ['darwin', 'freebsd']:
             # macOS and BSD systems - try binary first, build from source as fallback
