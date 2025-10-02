@@ -543,7 +543,7 @@ async def approve_host(host_id: str):  # pylint: disable=duplicate-code
         # Send host approval notification to the agent via WebSocket
         try:
             approval_message = create_host_approved_message(
-                host_id=host.id,
+                host_id=str(host.id),
                 host_token=host.host_token,
                 approval_status="approved",
                 certificate=host.client_certificate,
