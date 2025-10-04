@@ -327,8 +327,16 @@ def check_gnu_tools():
                     text=True,
                     timeout=120
                 )
+            elif system == 'freebsd':
+                # FreeBSD uses pkg and sudo
+                result = subprocess.run(
+                    ['sudo', 'pkg', 'install', '-y', package],
+                    capture_output=True,
+                    text=True,
+                    timeout=120
+                )
             else:
-                # Default to pkgin for other BSD systems
+                # Default to pkgin for other BSD systems (NetBSD)
                 result = subprocess.run(
                     ['sudo', 'pkgin', '-y', 'install', package],
                     capture_output=True,
@@ -342,6 +350,8 @@ def check_gnu_tools():
                 print(f"   ❌ Failed to install {package}: {result.stderr}")
                 if system == 'openbsd':
                     print(f"   Please install manually: doas pkg_add {package}")
+                elif system == 'freebsd':
+                    print(f"   Please install manually: sudo pkg install {package}")
                 else:
                     print(f"   Please install manually: sudo pkgin install {package}")
                 return False
@@ -355,278 +365,6 @@ def check_gnu_tools():
             print(f"   Please install manually: sudo pkgin install {' '.join(missing)}")
         return False
 
-
-def build_otel_collector_from_source(version, platform_name, arch):
-    """Build OpenTelemetry Collector from source using Go."""
-    print("🔨 Building OpenTelemetry Collector from source (this may take several minutes)...")
-
-    # Check if Go is installed
-    if not shutil.which('go'):
-        print("❌ Go compiler not found. Install Go to build from source.")
-        print("   On NetBSD: sudo pkgin install go")
-        return False
-
-    # Check for GNU tools on BSD systems
-    if not check_gnu_tools():
-        return False
-
-    try:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Clone the opentelemetry-collector-contrib repository
-            print(f"📥 Downloading source code (tag v{version})...")
-            result = subprocess.run(
-                ['git', 'clone', '--depth', '1', '--branch', f'v{version}',
-                 'https://github.com/open-telemetry/opentelemetry-collector-contrib.git',
-                 os.path.join(temp_dir, 'otelcol-contrib')],
-                capture_output=True,
-                text=True,
-                timeout=300
-            )
-
-            if result.returncode != 0:
-                print(f"❌ Failed to clone repository: {result.stderr}")
-                return False
-
-            build_dir = os.path.join(temp_dir, 'otelcol-contrib')
-
-            # Apply BSD compatibility fixes using Python (more reliable than sed)
-            print("🔧 Applying BSD compatibility fixes...")
-            makefile = os.path.join(build_dir, 'Makefile')
-            makefile_common = os.path.join(build_dir, 'Makefile.Common')
-
-            try:
-                # Fix Makefile
-                with open(makefile, 'r') as f:
-                    content = f.read()
-
-                # Replace BSD commands with GNU versions
-                content = content.replace('$(shell find ', '$(shell gfind ')
-                content = content.replace('| xargs ', '| gxargs ')
-                content = content.replace('{ find ', '{ gfind ')
-                content = content.replace('dirname ', 'gdirname ')
-
-                with open(makefile, 'w') as f:
-                    f.write(content)
-
-                # Fix Makefile.Common
-                with open(makefile_common, 'r') as f:
-                    content = f.read()
-
-                content = content.replace('| xargs ', '| gxargs ')
-                content = content.replace('| xargs\n', '| gxargs\n')
-                content = content.replace('$$(find ', '$$(gfind ')
-                content = content.replace('dirname ', 'gdirname ')
-
-                with open(makefile_common, 'w') as f:
-                    f.write(content)
-
-                print("   ✓ BSD compatibility fixes applied")
-            except Exception as e:
-                print(f"   ⚠️  Fixes failed: {e}")
-                return False
-
-            # For BSD systems, create /bin/bash symlink if needed
-            print("🔧 Preparing build environment for BSD...")
-            symlink_created = False
-            system = platform.system().lower()
-
-            # Check for bash in platform-specific locations
-            bash_locations = []
-            elevation_cmd = 'sudo'
-
-            if system == 'netbsd':
-                bash_locations = ['/usr/pkg/bin/bash']
-                elevation_cmd = 'sudo'
-            elif system == 'openbsd':
-                bash_locations = ['/usr/local/bin/bash']
-                elevation_cmd = 'doas'
-            elif system == 'freebsd':
-                bash_locations = ['/usr/local/bin/bash']
-                elevation_cmd = 'sudo'
-
-            bash_path = None
-            for bash_loc in bash_locations:
-                if os.path.exists(bash_loc):
-                    bash_path = bash_loc
-                    break
-
-            if not os.path.exists('/bin/bash') and bash_path:
-                print(f"   Creating temporary /bin/bash symlink (requires {elevation_cmd})...")
-                try:
-                    result = subprocess.run([elevation_cmd, 'ln', '-sf', bash_path, '/bin/bash'],
-                                          capture_output=True, text=True)
-                    if result.returncode == 0:
-                        symlink_created = True
-                        print("   ✓ Symlink created")
-                    else:
-                        print(f"   ⚠️  Failed to create symlink: {result.stderr}")
-                        print("   Build will likely fail - you may need to manually run:")
-                        print(f"   {elevation_cmd} ln -sf {bash_path} /bin/bash")
-                        return False
-                except Exception as e:
-                    print(f"   ⚠️  Could not create symlink: {e}")
-                    return False
-
-            # Create a minimal builder config for NetBSD with only essential components
-            print("🔧 Creating minimal NetBSD-compatible build configuration...")
-            builder_config = os.path.join(build_dir, 'cmd', 'otelcontribcol', 'builder-config.yaml')
-
-            # Minimal config with just OTLP receivers/exporters and basic processors
-            minimal_config = """# Minimal OpenTelemetry Collector configuration for NetBSD
-dist:
-  module: github.com/open-telemetry/opentelemetry-collector-contrib/cmd/otelcontribcol
-  name: otelcontribcol
-  description: Minimal OpenTelemetry Collector for NetBSD
-  version: 0.91.0
-  output_path: _build
-
-extensions:
-  - gomod: go.opentelemetry.io/collector/extension/zpagesextension v0.91.0
-
-exporters:
-  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v0.91.0
-  - gomod: go.opentelemetry.io/collector/exporter/otlpexporter v0.91.0
-  - gomod: go.opentelemetry.io/collector/exporter/otlphttpexporter v0.91.0
-  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter v0.91.0
-
-processors:
-  - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.91.0
-  - gomod: go.opentelemetry.io/collector/processor/memorylimiterprocessor v0.91.0
-  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.91.0
-  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourceprocessor v0.91.0
-
-receivers:
-  - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v0.91.0
-  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver v0.91.0
-
-connectors:
-  - gomod: go.opentelemetry.io/collector/connector/forwardconnector v0.91.0
-"""
-
-            with open(builder_config, 'w') as f:
-                f.write(minimal_config)
-            print("   ✓ Created minimal build configuration (OTLP + Prometheus only)")
-
-            # Set Go build cache to /var/tmp to avoid /tmp space issues on NetBSD
-            go_cache_dir = '/var/tmp/go-build'
-            go_tmp_dir = '/var/tmp/go-tmp'
-            os.makedirs(go_cache_dir, exist_ok=True)
-            os.makedirs(go_tmp_dir, exist_ok=True)
-
-            build_env = os.environ.copy()
-            build_env['GOCACHE'] = go_cache_dir
-            build_env['GOTMPDIR'] = go_tmp_dir
-
-            # Remove NetBSD-incompatible components from components.go
-            print("🔧 Removing NetBSD-incompatible components...")
-            components_file = os.path.join(build_dir, 'cmd', 'otelcontribcol', 'components.go')
-
-            if os.path.exists(components_file):
-                with open(components_file, 'r') as f:
-                    content = f.read()
-
-                # Remove DataDog components and filestats receiver
-                incompatible_imports = [
-                    'datadogconnector "github.com/open-telemetry/opentelemetry-collector-contrib/connector/datadogconnector"',
-                    'datadogexporter "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter"',
-                    'datadogprocessor "github.com/open-telemetry/opentelemetry-collector-contrib/processor/datadogprocessor"',
-                    'datadogreceiver "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/datadogreceiver"',
-                    'filestatsreceiver "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filestatsreceiver"',
-                ]
-
-                for imp in incompatible_imports:
-                    content = content.replace(imp + '\n', '')
-                    content = content.replace('\t' + imp + '\n', '')
-
-                # Remove factory registrations
-                incompatible_factories = [
-                    'datadogconnector.NewFactory(),',
-                    'datadogexporter.NewFactory(),',
-                    'datadogprocessor.NewFactory(),',
-                    'datadogreceiver.NewFactory(),',
-                    'filestatsreceiver.NewFactory(),',
-                ]
-
-                for factory in incompatible_factories:
-                    content = content.replace('\n\t\t' + factory, '')
-                    content = content.replace('\t\t' + factory + '\n', '')
-
-                with open(components_file, 'w') as f:
-                    f.write(content)
-
-                print("   ✓ Components file updated")
-            else:
-                print(f"   ⚠️  Components file not found at {components_file}")
-
-            binary_path = None
-
-            # Try traditional Makefile build
-            if True:
-                # Build the collector
-                print("🔧 Compiling OpenTelemetry Collector (this will take 5-10 minutes)...")
-                print("   (Showing build output - this may take a while)...")
-
-                result = subprocess.run(
-                    ['gmake', 'otelcontribcol'],
-                    cwd=build_dir,
-                    env=build_env,
-                    timeout=1800  # 30 minute timeout (increased)
-                )
-
-                if result.returncode != 0:
-                    print(f"❌ Build failed with compilation errors")
-                    print(f"   This may be due to platform-specific code issues in version {version}")
-                    print(f"   The Python OpenTelemetry packages are installed and working.")
-                    print(f"   The OpenTelemetry Collector is optional - you can:")
-                    print(f"   1. Use Prometheus alone for metrics")
-                    print(f"   2. Try a different OTEL Collector version")
-                    print(f"   3. Use a pre-built binary from a different source")
-                    return False
-
-                # Find the built binary - check bin directory for any otel binary
-                bin_dir = os.path.join(build_dir, 'bin')
-
-                if os.path.exists(bin_dir):
-                    binaries = [f for f in os.listdir(bin_dir) if 'otel' in f.lower() and os.path.isfile(os.path.join(bin_dir, f))]
-                    if binaries:
-                        binary_path = os.path.join(bin_dir, binaries[0])
-                        print(f"   ✓ Found binary: {binaries[0]}")
-                    else:
-                        binary_path = None
-                else:
-                    binary_path = None
-
-            if not binary_path or not os.path.exists(binary_path):
-                print(f"❌ Built binary not found in {os.path.join(build_dir, 'bin')}")
-                # List what's in the bin directory for debugging
-                bin_dir = os.path.join(build_dir, 'bin')
-                if os.path.exists(bin_dir):
-                    print(f"   Contents of bin directory: {os.listdir(bin_dir)}")
-                return False
-
-            # Install to appropriate directory
-            if platform_name == 'freebsd' and os.path.exists('/usr/pkg/bin'):
-                install_dir = '/usr/pkg/bin'
-            else:
-                install_dir = '/usr/local/bin'
-
-            try:
-                shutil.copy2(binary_path, os.path.join(install_dir, 'otelcol-contrib'))
-                os.chmod(os.path.join(install_dir, 'otelcol-contrib'), 0o755)
-                print(f"✅ OpenTelemetry Collector built and installed to {install_dir}")
-                return True
-            except PermissionError:
-                print(f"⚠️  Need elevated privileges to install to {install_dir}")
-                print(f"   Built binary is at: {binary_path}")
-                print(f"   Run: sudo cp {binary_path} {install_dir}/")
-                return False
-
-    except subprocess.TimeoutExpired:
-        print("❌ Build timed out after 15 minutes")
-        return False
-    except Exception as e:
-        print(f"❌ Failed to build from source: {e}")
-        return False
 
 
 def build_otel_collector_from_source(version, platform_name, arch):
@@ -659,7 +397,7 @@ def build_otel_collector_from_source(version, platform_name, arch):
                 return False
 
             # Handle platform-specific modifications
-            if platform_name in ['netbsd', 'openbsd']:
+            if platform_name in ['netbsd', 'openbsd', 'freebsd']:
 
                 # Apply platform-specific modifications using sed
                 if platform_name == 'openbsd':
@@ -717,6 +455,26 @@ def build_otel_collector_from_source(version, platform_name, arch):
                                              cwd=build_dir, check=False)
 
                     print("   ✓ OpenBSD modifications applied successfully")
+
+                elif platform_name == 'freebsd':
+                    print("🔧 Applying FreeBSD-specific modifications...")
+                    # FreeBSD has better GNU tool compatibility, so minimal changes needed
+                    # Just replace any bash references with sh for better compatibility
+                    sed_commands = [
+                        ['sed', '-i', 's|/bin/bash|/bin/sh|g', 'Makefile'],
+                        ['sed', '-i', 's|/bin/bash|/bin/sh|g', 'Makefile.Common'],
+                        ['sed', '-i', 's|bash -c|/bin/sh -c|g', 'Makefile'],
+                        ['sed', '-i', 's|bash -c|/bin/sh -c|g', 'Makefile.Common'],
+                    ]
+
+                    for cmd in sed_commands:
+                        file_path = os.path.join(build_dir, cmd[-1])
+                        if os.path.exists(file_path):
+                            full_cmd = cmd[:-1] + [file_path]
+                            result = subprocess.run(full_cmd, cwd=build_dir)
+                            print(f"   Applied: {' '.join(cmd)} to {cmd[-1]}")
+
+                    print("   ✓ FreeBSD modifications applied successfully")
 
                 # Create minimal builder config for BSD systems
                 print("🔧 Creating minimal BSD-compatible build configuration...")
@@ -1287,6 +1045,36 @@ def install_python_packages():
 
         # Install packages
         cmd = [str(pip_path), 'install'] + packages
+
+        # Fix pip cache permissions if running with elevated privileges (Linux/macOS only)
+        if platform.system() in ['Linux', 'Darwin'] and os.geteuid() == 0:
+            # Get the original user
+            original_user = os.environ.get('SUDO_USER') or os.environ.get('DOAS_USER') or os.environ.get('ORIGINAL_USER')
+            if original_user:
+                try:
+                    import pwd
+                    user_info = pwd.getpwnam(original_user)
+                    user_home = user_info.pw_dir
+                    uid = user_info.pw_uid
+                    gid = user_info.pw_gid
+
+                    # Fix pip cache directory ownership before running pip
+                    pip_cache_dir = os.path.join(user_home, 'Library', 'Caches', 'pip') if platform.system() == 'Darwin' else os.path.join(user_home, '.cache', 'pip')
+
+                    if os.path.exists(pip_cache_dir):
+                        print(f"  Fixing pip cache permissions...")
+                        for root, dirs, files in os.walk(pip_cache_dir):
+                            try:
+                                os.chown(root, uid, gid)
+                                for d in dirs:
+                                    os.chown(os.path.join(root, d), uid, gid)
+                                for f in files:
+                                    os.chown(os.path.join(root, f), uid, gid)
+                            except Exception:
+                                pass
+                except Exception:
+                    pass  # Don't fail if we can't fix permissions
+
         subprocess.run(cmd, check=True)
 
         print("✅ Python OpenTelemetry packages installed successfully")
