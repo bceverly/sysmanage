@@ -58,23 +58,62 @@ class MockHostTag:
         self.created_at = datetime.now(timezone.utc)
 
 
+class MockRoleCache:
+    """Mock role cache that allows all roles."""
+
+    def has_role(self, role):
+        return True
+
+    def has_any_role(self, roles):
+        return True
+
+    def has_all_roles(self, roles):
+        return True
+
+
+class MockUser:
+    """Mock user object for RBAC checks."""
+
+    def __init__(self, userid="test@example.com"):
+        self.userid = userid
+        self.active = True
+        self._role_cache = None
+
+    def load_role_cache(self, session):
+        """Mock method to load role cache."""
+        self._role_cache = MockRoleCache()
+
+    def has_role(self, role):
+        """Mock method that returns True for all roles (testing purposes)."""
+        if self._role_cache is None:
+            return False
+        return self._role_cache.has_role(role)
+
+
 class MockDB:
     """Mock database session."""
 
     def __init__(self, tags=None, host_tags=None, execute_results=None):
         self.tags = tags or []
         self.host_tags = host_tags or []
+        # Always include a default current user for RBAC checks
+        self.current_user = MockUser()
         self.execute_results = execute_results or []
         self.committed = False
         self.rolled_back = False
         self.added_objects = []
         self.deleted_objects = []
         self.execute_call_count = 0
+        self.query_count = 0
 
     def query(self, model):
-        if model.__name__ == "Tag":
+        self.query_count += 1
+        # First query is typically for User (RBAC check)
+        if hasattr(model, "__name__") and model.__name__ == "User":
+            return MockQuery([self.current_user])
+        elif hasattr(model, "__name__") and model.__name__ == "Tag":
             return MockQuery(self.tags)
-        elif model.__name__ == "HostTag":
+        elif hasattr(model, "__name__") and model.__name__ == "HostTag":
             return MockQuery(self.host_tags)
         return MockQuery([])
 
@@ -235,10 +274,30 @@ class TestCreateTag:
     """Test create_tag function."""
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_create_tag_success(self, mock_get_user):
+    async def test_create_tag_success(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test successful tag creation."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
+
         mock_db = MockDB([])  # No existing tags
 
         # Mock the added tag to have an ID after commit
@@ -257,10 +316,30 @@ class TestCreateTag:
         assert len(mock_db.added_objects) == 1
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_create_tag_duplicate_name(self, mock_get_user):
+    async def test_create_tag_duplicate_name(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test creating tag with duplicate name."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
+
         existing_tag = MockTag(1, "existing-tag")
         mock_db = MockDB([existing_tag])
 
@@ -272,10 +351,30 @@ class TestCreateTag:
         assert exc_info.value.status_code == 400
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_create_tag_integrity_error(self, mock_get_user):
+    async def test_create_tag_integrity_error(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test creating tag with integrity error."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
+
         mock_db = MockDB([])
         mock_db.commit = Mock(side_effect=IntegrityError("", "", ""))
 
@@ -288,10 +387,30 @@ class TestCreateTag:
         assert mock_db.rolled_back is True
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_create_tag_general_error(self, mock_get_user):
+    async def test_create_tag_general_error(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test creating tag with general error."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
+
         mock_db = MockDB([])
         mock_db.commit = Mock(side_effect=Exception("Database error"))
 
@@ -308,10 +427,30 @@ class TestUpdateTag:
     """Test update_tag function."""
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_update_tag_success(self, mock_get_user):
+    async def test_update_tag_success(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test successful tag update."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
+
         existing_tag = MockTag(1, "old-name", "Old description")
 
         # Mock to return the tag on first query, and no duplicates on name check
@@ -337,10 +476,30 @@ class TestUpdateTag:
         assert mock_db.committed is True
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_update_tag_not_found(self, mock_get_user):
+    async def test_update_tag_not_found(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test updating non-existent tag."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
+
         mock_db = MockDB([])  # No tags
 
         tag_data = TagUpdate(name="new-name")
@@ -351,10 +510,30 @@ class TestUpdateTag:
         assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_update_tag_duplicate_name(self, mock_get_user):
+    async def test_update_tag_duplicate_name(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test updating tag to duplicate name."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
+
         tag1 = MockTag(1, "tag1")
         tag2 = MockTag(2, "tag2")
 
@@ -379,10 +558,30 @@ class TestUpdateTag:
         assert exc_info.value.status_code == 400
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_update_tag_partial_update(self, mock_get_user):
+    async def test_update_tag_partial_update(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test partial tag update."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
+
         existing_tag = MockTag(1, "existing-tag", "Old description")
         mock_db = MockDB([existing_tag])
 
@@ -399,10 +598,30 @@ class TestUpdateTag:
         assert result.description == "New description only"
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_update_tag_host_count_error(self, mock_get_user):
+    async def test_update_tag_host_count_error(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test updating tag when host count fails."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
+
         existing_tag = MockTag(1, "existing-tag")
         existing_tag.hosts = Mock()
         existing_tag.hosts.count.side_effect = Exception("Database error")
@@ -430,10 +649,30 @@ class TestDeleteTag:
     """Test delete_tag function."""
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_delete_tag_success(self, mock_get_user):
+    async def test_delete_tag_success(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test successful tag deletion."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
+
         existing_tag = MockTag(1, "test-tag")
         mock_db = MockDB([existing_tag])
 
@@ -443,10 +682,30 @@ class TestDeleteTag:
         assert mock_db.execute_call_count == 2  # Two SQL deletes
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_delete_tag_not_found(self, mock_get_user):
+    async def test_delete_tag_not_found(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test deleting non-existent tag."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
+
         mock_db = MockDB([])
 
         with pytest.raises(HTTPException) as exc_info:
@@ -455,10 +714,30 @@ class TestDeleteTag:
         assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_delete_tag_database_error(self, mock_get_user):
+    async def test_delete_tag_database_error(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test deleting tag with database error."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
+
         existing_tag = MockTag(1, "test-tag")
         mock_db = MockDB([existing_tag])
         mock_db.execute = Mock(side_effect=Exception("Database error"))
@@ -542,10 +821,29 @@ class TestAddTagToHost:
     """Test add_tag_to_host function."""
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_add_tag_to_host_success(self, mock_get_user):
+    async def test_add_tag_to_host_success(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test successfully adding tag to host."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
 
         host_result = MockResultRow(id="550e8400-e29b-41d4-a716-446655440011")
         tag_result = MockResultRow(id="550e8400-e29b-41d4-a716-446655440001")
@@ -570,10 +868,29 @@ class TestAddTagToHost:
         assert len(mock_db.added_objects) == 1
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_add_tag_to_host_host_not_found(self, mock_get_user):
+    async def test_add_tag_to_host_host_not_found(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test adding tag to non-existent host."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
 
         mock_db = MockDB(
             execute_results=[MockExecuteResult(first_result=None)]  # Host doesn't exist
@@ -590,10 +907,29 @@ class TestAddTagToHost:
         assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_add_tag_to_host_tag_not_found(self, mock_get_user):
+    async def test_add_tag_to_host_tag_not_found(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test adding non-existent tag to host."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
 
         host_result = MockResultRow(id="550e8400-e29b-41d4-a716-446655440011")
 
@@ -615,10 +951,29 @@ class TestAddTagToHost:
         assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_add_tag_to_host_already_associated(self, mock_get_user):
+    async def test_add_tag_to_host_already_associated(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test adding tag to host when already associated."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
 
         host_result = MockResultRow(id="550e8400-e29b-41d4-a716-446655440011")
         tag_result = MockResultRow(id="550e8400-e29b-41d4-a716-446655440001")
@@ -649,10 +1004,30 @@ class TestRemoveTagFromHost:
     """Test remove_tag_from_host function."""
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_remove_tag_from_host_success(self, mock_get_user):
+    async def test_remove_tag_from_host_success(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test successfully removing tag from host."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
+
         existing_association = MockHostTag(1, 1)
         mock_db = MockDB(host_tags=[existing_association])
 
@@ -667,10 +1042,30 @@ class TestRemoveTagFromHost:
         assert len(mock_db.deleted_objects) == 1
 
     @pytest.mark.asyncio
+    @patch("backend.api.tag.db_module.get_engine")
+    @patch("backend.api.tag.sessionmaker")
     @patch("backend.api.tag.get_current_user")
-    async def test_remove_tag_from_host_not_associated(self, mock_get_user):
+    async def test_remove_tag_from_host_not_associated(
+        self, mock_get_user, mock_sessionmaker, mock_get_engine
+    ):
         """Test removing tag from host when not associated."""
         mock_get_user.return_value = "test@example.com"
+
+        # Create a mock RBAC session
+        mock_user = MockUser()
+        mock_rbac_session = MockDB()
+        mock_rbac_session.current_user = mock_user
+
+        # Create a context manager that returns the RBAC session
+        def create_rbac_context():
+            context_mgr = Mock()
+            context_mgr.__enter__ = Mock(return_value=mock_rbac_session)
+            context_mgr.__exit__ = Mock(return_value=None)
+            return context_mgr
+
+        mock_sessionmaker.return_value = create_rbac_context
+        mock_get_engine.return_value = Mock()
+
         mock_db = MockDB(host_tags=[])  # No associations
 
         with pytest.raises(HTTPException) as exc_info:

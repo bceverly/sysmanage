@@ -5,11 +5,15 @@ Queue Management API endpoints for managing message queues.
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.auth.auth_bearer import get_current_user
+from backend.i18n import _
+from backend.persistence import db
 from backend.persistence.db import get_db
 from backend.persistence.models import MessageQueue
+from backend.persistence import models
+from backend.security.roles import SecurityRoles
 from backend.websocket.queue_manager import server_queue_manager
 
 router = APIRouter()
@@ -72,12 +76,31 @@ async def get_failed_messages(
 @router.delete("/failed")
 async def delete_failed_messages(
     message_ids: List[str],
-    db: Session = Depends(get_db),
+    db_session: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
     """
     Delete selected failed messages from the queue.
     """
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_session.get_bind()
+    )
+    with session_local() as session:
+        # Check if user has permission to delete queue messages
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+        if auth_user._role_cache is None:
+            auth_user.load_role_cache(session)
+        if not auth_user.has_role(SecurityRoles.DELETE_QUEUE_MESSAGE):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: DELETE_QUEUE_MESSAGE role required"),
+            )
     try:
         if not message_ids:
             raise HTTPException(
@@ -87,7 +110,7 @@ async def delete_failed_messages(
 
         # Delete the specified messages
         deleted_count = (
-            db.query(MessageQueue)
+            db_session.query(MessageQueue)
             .filter(
                 MessageQueue.message_id.in_(message_ids),
                 MessageQueue.expired_at.is_not(
@@ -97,14 +120,14 @@ async def delete_failed_messages(
             .delete(synchronize_session=False)
         )
 
-        db.commit()
+        db_session.commit()
 
         return {
             "deleted_count": deleted_count,
             "message": f"Successfully deleted {deleted_count} expired messages",
         }
     except Exception as e:
-        db.rollback()
+        db_session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete failed messages: {str(e)}",

@@ -61,17 +61,6 @@ class TestUserMe:
 
     def test_get_user_me_success(self, client, session, auth_headers):
         """Test getting current user info."""
-        # Create a test user
-        user = models.User(
-            userid="admin@sysmanage.org",  # Use admin user like in other tests
-            hashed_password="hashed_password",
-            active=True,
-            first_name="Admin",
-            last_name="User",
-        )
-        session.add(user)
-        session.commit()
-
         response = client.get("/api/user/me", headers=auth_headers)
 
         assert response.status_code == 200
@@ -191,7 +180,7 @@ class TestUsersList:
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
-        assert len(data) == 3
+        assert len(data) == 4
 
         # Verify user data - use exact matching for security
         userids = [user["userid"] for user in data]
@@ -214,7 +203,7 @@ class TestUsersList:
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
-        assert len(data) == 0
+        assert len(data) == 1
 
     def test_get_users_unauthorized(self, client):
         """Test getting users without authentication."""

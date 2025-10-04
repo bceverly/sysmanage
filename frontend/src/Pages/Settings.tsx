@@ -43,6 +43,7 @@ import OpenTelemetryStatusCard from '../Components/OpenTelemetryStatusCard';
 import PrometheusStatusCard from '../Components/PrometheusStatusCard';
 import UbuntuProSettings from '../Components/UbuntuProSettings';
 import axiosInstance from '../Services/api';
+import { hasPermission, SecurityRoles } from '../Services/permissions';
 
 interface Tag {
   id: string;
@@ -146,9 +147,28 @@ const Settings: React.FC = () => {
   const [packageRefreshInterval, setPackageRefreshInterval] = useState<number | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
+  // Permission states
+  const [canDeleteQueueMessage, setCanDeleteQueueMessage] = useState<boolean>(false);
+
+  // Permission state
+  const [canEditTags, setCanEditTags] = useState<boolean>(false);
+
   const { pageSize, pageSizeOptions } = useTablePageSize({
     reservedHeight: 350,
   });
+
+  // Check permissions
+  useEffect(() => {
+    const checkPermission = async () => {
+      const [editTags, deleteQueueMessage] = await Promise.all([
+        hasPermission(SecurityRoles.EDIT_TAGS),
+        hasPermission(SecurityRoles.DELETE_QUEUE_MESSAGE)
+      ]);
+      setCanEditTags(editTags);
+      setCanDeleteQueueMessage(deleteQueueMessage);
+    };
+    checkPermission();
+  }, []);
 
   // Search columns configuration
   const searchColumns = [
@@ -592,21 +612,25 @@ const Settings: React.FC = () => {
 
       {/* Action Buttons */}
       <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setAddDialogOpen(true)}
-        >
-          {t('tags.addTag', 'Add Tag')}
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<DeleteIcon />}
-          onClick={handleDeleteTags}
-          disabled={selectedTags.length === 0}
-        >
-          {t('common.delete', 'Delete')} ({selectedTags.length})
-        </Button>
+        {canEditTags && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setAddDialogOpen(true)}
+          >
+            {t('tags.addTag', 'Add Tag')}
+          </Button>
+        )}
+        {canEditTags && (
+          <Button
+            variant="outlined"
+            startIcon={<DeleteIcon />}
+            onClick={handleDeleteTags}
+            disabled={selectedTags.length === 0}
+          >
+            {t('common.delete', 'Delete')} ({selectedTags.length})
+          </Button>
+        )}
       </Stack>
     </Box>
   );
@@ -642,14 +666,16 @@ const Settings: React.FC = () => {
 
       {/* Action Buttons */}
       <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-        <Button
-          variant="outlined"
-          startIcon={<DeleteIcon />}
-          onClick={handleDeleteMessages}
-          disabled={selectedMessages.length === 0}
-        >
-          {t('common.delete', 'Delete')} ({selectedMessages.length})
-        </Button>
+        {canDeleteQueueMessage && (
+          <Button
+            variant="outlined"
+            startIcon={<DeleteIcon />}
+            onClick={handleDeleteMessages}
+            disabled={selectedMessages.length === 0}
+          >
+            {t('common.delete', 'Delete')} ({selectedMessages.length})
+          </Button>
+        )}
       </Stack>
     </Box>
   );

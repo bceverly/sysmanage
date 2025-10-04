@@ -16,7 +16,11 @@ import {
     DialogTitle,
     DialogContent,
     DialogContentText,
-    DialogActions
+    DialogActions,
+    Checkbox,
+    FormControlLabel,
+    FormGroup,
+    Divider
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonIcon from '@mui/icons-material/Person';
@@ -24,9 +28,19 @@ import SecurityIcon from '@mui/icons-material/Security';
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import LockResetIcon from '@mui/icons-material/LockReset';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import EditIcon from '@mui/icons-material/Edit';
+import IconButton from '@mui/material/IconButton';
 import { useTranslation } from 'react-i18next';
 
-import { SysManageUser, doGetUsers } from '../Services/users';
+import { SysManageUser, doGetUsers, doLockUser, doUnlockUser } from '../Services/users';
+import {
+    SecurityRoleGroup,
+    doGetAllRoleGroups,
+    doGetUserRoles,
+    doUpdateUserRoles
+} from '../Services/securityRoles';
+import { hasPermission, SecurityRoles } from '../Services/permissions';
 import axiosInstance from '../Services/api';
 
 interface AxiosError {
@@ -46,8 +60,39 @@ const UserDetail = () => {
     const [resetSuccess, setResetSuccess] = useState<string | null>(null);
     const [resetError, setResetError] = useState<string | null>(null);
     const [confirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
+
+    // Security roles state
+    const [roleGroups, setRoleGroups] = useState<SecurityRoleGroup[]>([]);
+    const [selectedRoles, setSelectedRoles] = useState<number[]>([]);
+    const [originalRoles, setOriginalRoles] = useState<number[]>([]);
+    const [rolesLoading, setRolesLoading] = useState<boolean>(false);
+    const [rolesSaving, setRolesSaving] = useState<boolean>(false);
+    const [rolesSuccess, setRolesSuccess] = useState<string | null>(null);
+    const [rolesError, setRolesError] = useState<string | null>(null);
+    const [rolesEditMode, setRolesEditMode] = useState<boolean>(false);
+
+    // Permission states
+    const [canLockUser, setCanLockUser] = useState<boolean>(false);
+    const [canUnlockUser, setCanUnlockUser] = useState<boolean>(false);
+    const [canResetUserPassword, setCanResetUserPassword] = useState<boolean>(false);
+
     const navigate = useNavigate();
     const { t } = useTranslation();
+
+    // Check permissions
+    useEffect(() => {
+        const checkPermissions = async () => {
+            const [lockUser, unlockUser, resetUserPassword] = await Promise.all([
+                hasPermission(SecurityRoles.LOCK_USER),
+                hasPermission(SecurityRoles.UNLOCK_USER),
+                hasPermission(SecurityRoles.RESET_USER_PASSWORD)
+            ]);
+            setCanLockUser(lockUser);
+            setCanUnlockUser(unlockUser);
+            setCanResetUserPassword(resetUserPassword);
+        };
+        checkPermissions();
+    }, []);
 
     useEffect(() => {
         if (!localStorage.getItem('bearer_token')) {
@@ -84,6 +129,31 @@ const UserDetail = () => {
 
         fetchUser();
     }, [userId, navigate, t]);
+
+    // Fetch security roles and user's current roles
+    useEffect(() => {
+        if (!userId) return;
+
+        const fetchSecurityRoles = async () => {
+            try {
+                setRolesLoading(true);
+                const [groups, userRoles] = await Promise.all([
+                    doGetAllRoleGroups(),
+                    doGetUserRoles(userId)
+                ]);
+                setRoleGroups(groups);
+                setSelectedRoles(userRoles.role_ids);
+                setOriginalRoles(userRoles.role_ids);
+            } catch (err) {
+                console.error('Error fetching security roles:', err);
+                setRolesError(t('userDetail.rolesLoadError', 'Failed to load security roles'));
+            } finally {
+                setRolesLoading(false);
+            }
+        };
+
+        fetchSecurityRoles();
+    }, [userId, t]);
 
     const formatDate = (dateString: string | null | undefined) => {
         if (!dateString) return t('common.notAvailable', 'N/A');
@@ -129,6 +199,83 @@ const UserDetail = () => {
         setConfirmDialogOpen(false);
     };
 
+    const handleRoleToggle = (roleId: number) => {
+        setSelectedRoles(prev =>
+            prev.includes(roleId)
+                ? prev.filter(id => id !== roleId)
+                : [...prev, roleId]
+        );
+    };
+
+    const handleCheckAll = () => {
+        const allRoleIds = roleGroups.flatMap(group => group.roles.map(role => role.id));
+        setSelectedRoles(allRoleIds);
+    };
+
+    const handleClearAll = () => {
+        setSelectedRoles([]);
+    };
+
+    const handleSaveRoles = async () => {
+        if (!userId) return;
+
+        try {
+            setRolesSaving(true);
+            setRolesError(null);
+            setRolesSuccess(null);
+
+            await doUpdateUserRoles(userId, selectedRoles);
+
+            setOriginalRoles(selectedRoles);
+            setRolesSuccess(t('userDetail.rolesSaveSuccess', 'Security roles updated successfully'));
+            setRolesEditMode(false);
+        } catch (err) {
+            console.error('Error saving roles:', err);
+            setRolesError(t('userDetail.rolesSaveError', 'Failed to update security roles'));
+        } finally {
+            setRolesSaving(false);
+        }
+    };
+
+    const handleCancelRoles = () => {
+        setSelectedRoles(originalRoles);
+        setRolesError(null);
+        setRolesSuccess(null);
+        setRolesEditMode(false);
+    };
+
+    const handleLockUser = async () => {
+        if (!userId) return;
+        try {
+            await doLockUser(userId);
+            // Refresh user data
+            const users = await doGetUsers();
+            const updatedUser = users.find((u: SysManageUser) => u.id.toString() === userId);
+            if (updatedUser) {
+                setUser(updatedUser);
+            }
+        } catch (err) {
+            console.error('Error locking user:', err);
+        }
+    };
+
+    const handleUnlockUser = async () => {
+        if (!userId) return;
+        try {
+            await doUnlockUser(userId);
+            // Refresh user data
+            const users = await doGetUsers();
+            const updatedUser = users.find((u: SysManageUser) => u.id.toString() === userId);
+            if (updatedUser) {
+                setUser(updatedUser);
+            }
+        } catch (err) {
+            console.error('Error unlocking user:', err);
+        }
+    };
+
+    const hasUnsavedChanges = JSON.stringify(selectedRoles.sort()) !== JSON.stringify(originalRoles.sort());
+
     if (loading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -172,18 +319,20 @@ const UserDetail = () => {
                     {user.userid}
                 </Typography>
 
-                <Button
-                    variant="outlined"
-                    color="warning"
-                    startIcon={<LockResetIcon />}
-                    onClick={handlePasswordResetClick}
-                    disabled={resettingPassword}
-                >
-                    {resettingPassword
-                        ? t('userDetail.resettingPassword', 'Sending Reset Email...')
-                        : t('userDetail.resetPassword', 'Reset Password')
-                    }
-                </Button>
+                {canResetUserPassword && (
+                    <Button
+                        variant="outlined"
+                        color="warning"
+                        startIcon={<LockResetIcon />}
+                        onClick={handlePasswordResetClick}
+                        disabled={resettingPassword}
+                    >
+                        {resettingPassword
+                            ? t('userDetail.resettingPassword', 'Sending Reset Email...')
+                            : t('userDetail.resetPassword', 'Reset Password')
+                        }
+                    </Button>
+                )}
             </Box>
 
             <Grid container spacing={3}>
@@ -196,45 +345,55 @@ const UserDetail = () => {
                                 {t('userDetail.basicInfo', 'Basic Information')}
                             </Typography>
                             <Grid container spacing={2}>
-                                <Grid item xs={12}>
-                                    <Typography variant="body2" color="textSecondary">
-                                        {t('userDetail.userId', 'User ID')}
-                                    </Typography>
-                                    <Typography variant="body1">{user.id.toString()}</Typography>
+                                {/* Left Column */}
+                                <Grid item xs={12} sm={6}>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('userDetail.userId', 'User ID')}
+                                            </Typography>
+                                            <Typography variant="body1">{user.id.toString()}</Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('userDetail.active', 'Active')}
+                                            </Typography>
+                                            <Chip
+                                                label={user.active ? t('common.yes') : t('common.no')}
+                                                color={user.active ? 'success' : 'default'}
+                                                size="small"
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('userDetail.lastAccess', 'Last Access')}
+                                            </Typography>
+                                            <Typography variant="body1">{formatDate(user.last_access)}</Typography>
+                                        </Grid>
+                                    </Grid>
                                 </Grid>
-                                <Grid item xs={12}>
-                                    <Typography variant="body2" color="textSecondary">
-                                        {t('users.email', 'Email')}
-                                    </Typography>
-                                    <Typography variant="body1">{user.userid}</Typography>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Typography variant="body2" color="textSecondary">
-                                        {t('userDetail.firstName', 'First Name')}
-                                    </Typography>
-                                    <Typography variant="body1">{user.first_name || t('common.notAvailable', 'N/A')}</Typography>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Typography variant="body2" color="textSecondary">
-                                        {t('userDetail.lastName', 'Last Name')}
-                                    </Typography>
-                                    <Typography variant="body1">{user.last_name || t('common.notAvailable', 'N/A')}</Typography>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Typography variant="body2" color="textSecondary">
-                                        {t('userDetail.active', 'Active')}
-                                    </Typography>
-                                    <Chip 
-                                        label={user.active ? t('common.yes') : t('common.no')}
-                                        color={user.active ? 'success' : 'default'}
-                                        size="small"
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Typography variant="body2" color="textSecondary">
-                                        {t('userDetail.lastAccess', 'Last Access')}
-                                    </Typography>
-                                    <Typography variant="body1">{formatDate(user.last_access)}</Typography>
+                                {/* Right Column */}
+                                <Grid item xs={12} sm={6}>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('users.email', 'Email')}
+                                            </Typography>
+                                            <Typography variant="body1">{user.userid}</Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('userDetail.firstName', 'First Name')}
+                                            </Typography>
+                                            <Typography variant="body1">{user.first_name || t('common.notAvailable', 'N/A')}</Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('userDetail.lastName', 'Last Name')}
+                                            </Typography>
+                                            <Typography variant="body1">{user.last_name || t('common.notAvailable', 'N/A')}</Typography>
+                                        </Grid>
+                                    </Grid>
                                 </Grid>
                             </Grid>
                         </CardContent>
@@ -245,10 +404,37 @@ const UserDetail = () => {
                 <Grid item xs={12} md={6}>
                     <Card>
                         <CardContent>
-                            <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
-                                <SecurityIcon sx={{ mr: 1 }} />
-                                {t('userDetail.securityInfo', 'Security Information')}
-                            </Typography>
+                            <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <SecurityIcon sx={{ mr: 1 }} />
+                                    {t('userDetail.securityInfo', 'Security Information')}
+                                </Typography>
+                                <Box>
+                                    {user.is_locked ? (
+                                        canUnlockUser && (
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                startIcon={<LockOpenIcon />}
+                                                onClick={handleUnlockUser}
+                                            >
+                                                {t('userDetail.unlockUser', 'Unlock User')}
+                                            </Button>
+                                        )
+                                    ) : (
+                                        canLockUser && (
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                startIcon={<LockIcon />}
+                                                onClick={handleLockUser}
+                                            >
+                                                {t('userDetail.lockUser', 'Lock User')}
+                                            </Button>
+                                        )
+                                    )}
+                                </Box>
+                            </Box>
                             <Grid container spacing={2}>
                                 <Grid item xs={12}>
                                     <Typography variant="body2" color="textSecondary">
@@ -285,6 +471,117 @@ const UserDetail = () => {
                                     </Typography>
                                 </Grid>
                             </Grid>
+                        </CardContent>
+                    </Card>
+                </Grid>
+
+                {/* Security Roles */}
+                <Grid item xs={12}>
+                    <Card>
+                        <CardContent>
+                            <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <AdminPanelSettingsIcon sx={{ mr: 1 }} />
+                                        {t('userDetail.securityRoles', 'Security Roles')}
+                                    </Typography>
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => setRolesEditMode(!rolesEditMode)}
+                                        disabled={rolesSaving || rolesLoading}
+                                        sx={{ ml: 2 }}
+                                        color={rolesEditMode ? 'primary' : 'default'}
+                                    >
+                                        <EditIcon fontSize="small" />
+                                    </IconButton>
+                                </Box>
+                                {rolesEditMode && (
+                                    <Box>
+                                        <Button
+                                            size="small"
+                                            onClick={handleCheckAll}
+                                            disabled={rolesSaving || rolesLoading}
+                                            sx={{ mr: 1 }}
+                                        >
+                                            {t('userDetail.checkAll', 'Check All')}
+                                        </Button>
+                                        <Button
+                                            size="small"
+                                            onClick={handleClearAll}
+                                            disabled={rolesSaving || rolesLoading}
+                                        >
+                                            {t('userDetail.clearAll', 'Clear All')}
+                                        </Button>
+                                    </Box>
+                                )}
+                            </Box>
+
+                            {rolesLoading ? (
+                                <Box display="flex" justifyContent="center" py={3}>
+                                    <CircularProgress />
+                                </Box>
+                            ) : rolesError ? (
+                                <Alert severity="error" sx={{ mb: 2 }}>
+                                    {rolesError}
+                                </Alert>
+                            ) : (
+                                <>
+                                    {roleGroups.map((group, index) => (
+                                        <Box key={group.id}>
+                                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, textDecoration: 'underline' }}>
+                                                {group.name}
+                                            </Typography>
+                                            <FormGroup>
+                                                <Grid container spacing={1}>
+                                                    {group.roles.map((role) => (
+                                                        <Grid item xs={12} sm={6} md={4} key={role.id}>
+                                                            <FormControlLabel
+                                                                control={
+                                                                    <Checkbox
+                                                                        checked={selectedRoles.includes(role.id)}
+                                                                        onChange={() => handleRoleToggle(role.id)}
+                                                                        disabled={!rolesEditMode || rolesSaving}
+                                                                    />
+                                                                }
+                                                                label={role.name}
+                                                            />
+                                                        </Grid>
+                                                    ))}
+                                                </Grid>
+                                            </FormGroup>
+                                            {index < roleGroups.length - 1 && (
+                                                <Divider sx={{ my: 3 }} />
+                                            )}
+                                        </Box>
+                                    ))}
+
+                                    {rolesSuccess && (
+                                        <Alert severity="success" sx={{ mb: 2 }}>
+                                            {rolesSuccess}
+                                        </Alert>
+                                    )}
+
+                                    {rolesEditMode && (
+                                        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={handleSaveRoles}
+                                                disabled={!hasUnsavedChanges || rolesSaving}
+                                            >
+                                                {rolesSaving ? t('common.saving', 'Saving...') : t('common.save', 'Save')}
+                                            </Button>
+                                            <Button
+                                                variant="outlined"
+                                                onClick={handleCancelRoles}
+                                                disabled={!hasUnsavedChanges || rolesSaving}
+                                            >
+                                                {t('common.cancel', 'Cancel')}
+                                            </Button>
+                                        </Box>
+                                    )}
+                                </>
+                            )}
                         </CardContent>
                     </Card>
                 </Grid>

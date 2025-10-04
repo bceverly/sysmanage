@@ -12,9 +12,10 @@ from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
 from backend.api.host_utils import validate_host_approval_status
-from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.security.roles import SecurityRoles
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
 
@@ -270,7 +271,11 @@ async def request_roles_collection(host_id: str):
 
 
 @router.post("/host/{host_id}/service-control", dependencies=[Depends(JWTBearer())])
-async def control_services(host_id: str, request: ServiceControlRequest):
+async def control_services(
+    host_id: str,
+    request: ServiceControlRequest,
+    current_user: str = Depends(get_current_user),
+):
     """
     Control services on a host (start, stop, restart).
     This sends a command via WebSocket to the agent to control the specified services.
@@ -299,6 +304,38 @@ async def control_services(host_id: str, request: ServiceControlRequest):
     )
 
     with session_local() as session:
+        # Check if user has permission for the requested action
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        if user._role_cache is None:
+            user.load_role_cache(session)
+
+        # Check specific role based on action
+        if request.action == "start":
+            if not user.has_role(SecurityRoles.START_HOST_SERVICE):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: START_HOST_SERVICE role required"),
+                )
+        elif request.action == "stop":
+            if not user.has_role(SecurityRoles.STOP_HOST_SERVICE):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: STOP_HOST_SERVICE role required"),
+                )
+        elif request.action == "restart":
+            if not user.has_role(SecurityRoles.RESTART_HOST_SERVICE):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: RESTART_HOST_SERVICE role required"),
+                )
+
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 

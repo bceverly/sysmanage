@@ -5,9 +5,10 @@ Host system operations endpoints (reboot, shutdown, software refresh).
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import sessionmaker
 
-from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.security.roles import SecurityRoles
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
 
@@ -45,7 +46,7 @@ async def refresh_host_software(host_id: str):
 
 
 @router.post("/host/reboot/{host_id}", dependencies=[Depends(JWTBearer())])
-async def reboot_host(host_id: str):
+async def reboot_host(host_id: str, current_user: str = Depends(get_current_user)):
     """
     Request a system reboot for a specific host.
     """
@@ -55,6 +56,26 @@ async def reboot_host(host_id: str):
     )
 
     with session_local() as session:
+        # Check if user has permission to reboot hosts
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        # Load role cache if not already loaded
+        if user._role_cache is None:
+            user.load_role_cache(session)
+
+        # Check for REBOOT_HOST role
+        if not user.has_role(SecurityRoles.REBOOT_HOST):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: REBOOT_HOST role required"),
+            )
+
         # Find the host first to ensure it exists
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
@@ -75,7 +96,7 @@ async def reboot_host(host_id: str):
 
 
 @router.post("/host/shutdown/{host_id}", dependencies=[Depends(JWTBearer())])
-async def shutdown_host(host_id: str):
+async def shutdown_host(host_id: str, current_user: str = Depends(get_current_user)):
     """
     Request a system shutdown for a specific host.
     """
@@ -85,6 +106,26 @@ async def shutdown_host(host_id: str):
     )
 
     with session_local() as session:
+        # Check if user has permission to shutdown hosts
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        # Load role cache if not already loaded
+        if user._role_cache is None:
+            user.load_role_cache(session)
+
+        # Check for SHUTDOWN_HOST role
+        if not user.has_role(SecurityRoles.SHUTDOWN_HOST):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: SHUTDOWN_HOST role required"),
+            )
+
         # Find the host first to ensure it exists
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:

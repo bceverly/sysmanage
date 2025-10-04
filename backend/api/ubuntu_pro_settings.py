@@ -9,12 +9,13 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, validator
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
-from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
-from backend.persistence import models
+from backend.persistence import db, models
 from backend.persistence.db import get_db
+from backend.security.roles import SecurityRoles
 
 logger = logging.getLogger(__name__)
 
@@ -110,13 +111,36 @@ async def get_ubuntu_pro_settings(
 @router.put("/", response_model=UbuntuProSettingsResponse)
 async def update_ubuntu_pro_settings(
     settings_update: UbuntuProSettingsUpdate,
-    db: Session = Depends(get_db),
+    db_session: Session = Depends(get_db),
     dependencies=Depends(JWTBearer()),
+    current_user=Depends(get_current_user),
 ):
     """Update Ubuntu Pro settings."""
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_session.get_bind()
+    )
+    with session_local() as session:
+        # Check if user has permission to change Ubuntu Pro master key
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+        if auth_user._role_cache is None:
+            auth_user.load_role_cache(session)
+        if not auth_user.has_role(SecurityRoles.CHANGE_UBUNTU_PRO_MASTER_KEY):
+            raise HTTPException(
+                status_code=403,
+                detail=_(
+                    "Permission denied: CHANGE_UBUNTU_PRO_MASTER_KEY role required"
+                ),
+            )
+
     try:
         # Get or create the singleton settings record
-        settings = db.query(models.UbuntuProSettings).first()
+        settings = db_session.query(models.UbuntuProSettings).first()
 
         if not settings:
             # Create new settings record
@@ -128,7 +152,7 @@ async def update_ubuntu_pro_settings(
                 created_at=now,
                 updated_at=now,
             )
-            db.add(settings)
+            db_session.add(settings)
         else:
             # Update existing settings
             # Note: master_key can be None (to clear it), so we check if it was provided in the request
@@ -144,8 +168,8 @@ async def update_ubuntu_pro_settings(
 
             settings.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
-        db.commit()
-        db.refresh(settings)
+        db_session.commit()
+        db_session.refresh(settings)
 
         logger.info(
             "Ubuntu Pro settings updated: organization=%s, has_master_key=%s, auto_attach=%s",

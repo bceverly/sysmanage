@@ -10,11 +10,12 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import distinct
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.sql.functions import count
 
-from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
+from backend.persistence import db as db_module, models
 from backend.persistence.db import get_db
 from backend.persistence.models import (
     AvailablePackage,
@@ -22,6 +23,7 @@ from backend.persistence.models import (
     InstallationPackage,
     InstallationRequest,
 )
+from backend.security.roles import SecurityRoles
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
@@ -501,6 +503,7 @@ async def install_packages(
     host_id: str,
     request: PackageInstallRequest,
     db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
 ):
     """
     Queue package installation for a specific host using UUID-based grouping.
@@ -509,6 +512,28 @@ async def install_packages(
     The agent will receive this UUID and return it when reporting completion.
     """
     try:
+        # Check if user has permission to add packages
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local() as session:
+            user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if user._role_cache is None:
+                user.load_role_cache(session)
+
+            if not user.has_role(SecurityRoles.ADD_PACKAGE):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: ADD_PACKAGE role required"),
+                )
+
         # Validate host exists and is active
         host = (
             db.query(Host)

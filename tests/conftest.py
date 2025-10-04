@@ -147,24 +147,186 @@ def mock_config():
 
 
 @pytest.fixture(scope="function")
-def client(db_session, mock_config):
+def session(db_session):
+    """Alias for db_session to match test expectations."""
+    return db_session
+
+
+@pytest.fixture(scope="function")
+def client(engine, db_session, mock_config):
     """Create a test client with test database and mocked config."""
+    from backend.auth.auth_bearer import get_current_user
+    from backend.persistence.models import (
+        User,
+        SecurityRole,
+        SecurityRoleGroup,
+        UserSecurityRole,
+    )
+    from argon2 import PasswordHasher
+    from backend.security.roles import SecurityRoles
+    from uuid import UUID
+    import hashlib
+
+    # Create security role groups and roles in test database
+    groups = [
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000001"),
+            "name": "Host Management",
+            "description": "Roles for managing hosts",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000002"),
+            "name": "Package Management",
+            "description": "Roles for managing packages",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000003"),
+            "name": "Secrets Management",
+            "description": "Roles for managing secrets",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000004"),
+            "name": "User Management",
+            "description": "Roles for managing users",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000005"),
+            "name": "Script Management",
+            "description": "Roles for managing scripts",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000006"),
+            "name": "Report Management",
+            "description": "Roles for managing reports",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000007"),
+            "name": "Integration Management",
+            "description": "Roles for managing integrations",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000008"),
+            "name": "Ubuntu Pro Management",
+            "description": "Roles for Ubuntu Pro",
+        },
+    ]
+
+    for group_data in groups:
+        group = SecurityRoleGroup(**group_data)
+        db_session.merge(group)
+
+    role_to_group = {
+        SecurityRoles.APPROVE_HOST_REGISTRATION: UUID(
+            "00000000-0000-0000-0000-000000000001"
+        ),
+        SecurityRoles.DELETE_HOST: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.VIEW_HOST_DETAILS: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.REBOOT_HOST: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.SHUTDOWN_HOST: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.EDIT_TAGS: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.STOP_HOST_SERVICE: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.START_HOST_SERVICE: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.RESTART_HOST_SERVICE: UUID(
+            "00000000-0000-0000-0000-000000000001"
+        ),
+        SecurityRoles.ADD_PACKAGE: UUID("00000000-0000-0000-0000-000000000002"),
+        SecurityRoles.APPLY_SOFTWARE_UPDATE: UUID(
+            "00000000-0000-0000-0000-000000000002"
+        ),
+        SecurityRoles.APPLY_HOST_OS_UPGRADE: UUID(
+            "00000000-0000-0000-0000-000000000002"
+        ),
+        SecurityRoles.DEPLOY_SSH_KEY: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.DEPLOY_CERTIFICATE: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.ADD_SECRET: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.DELETE_SECRET: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.EDIT_SECRET: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.STOP_VAULT: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.START_VAULT: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.ADD_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.EDIT_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.LOCK_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.UNLOCK_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.DELETE_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.RESET_USER_PASSWORD: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.ADD_SCRIPT: UUID("00000000-0000-0000-0000-000000000005"),
+        SecurityRoles.EDIT_SCRIPT: UUID("00000000-0000-0000-0000-000000000005"),
+        SecurityRoles.DELETE_SCRIPT: UUID("00000000-0000-0000-0000-000000000005"),
+        SecurityRoles.RUN_SCRIPT: UUID("00000000-0000-0000-0000-000000000005"),
+        SecurityRoles.DELETE_SCRIPT_EXECUTION: UUID(
+            "00000000-0000-0000-0000-000000000005"
+        ),
+        SecurityRoles.VIEW_REPORT: UUID("00000000-0000-0000-0000-000000000006"),
+        SecurityRoles.GENERATE_PDF_REPORT: UUID("00000000-0000-0000-0000-000000000006"),
+        SecurityRoles.DELETE_QUEUE_MESSAGE: UUID(
+            "00000000-0000-0000-0000-000000000007"
+        ),
+        SecurityRoles.ENABLE_GRAFANA_INTEGRATION: UUID(
+            "00000000-0000-0000-0000-000000000007"
+        ),
+        SecurityRoles.ATTACH_UBUNTU_PRO: UUID("00000000-0000-0000-0000-000000000008"),
+        SecurityRoles.DETACH_UBUNTU_PRO: UUID("00000000-0000-0000-0000-000000000008"),
+        SecurityRoles.CHANGE_UBUNTU_PRO_MASTER_KEY: UUID(
+            "00000000-0000-0000-0000-000000000008"
+        ),
+    }
+
+    for role_enum, group_id in role_to_group.items():
+        role_id = UUID(hashlib.md5(role_enum.value.encode()).hexdigest())
+        role = SecurityRole(
+            id=role_id,
+            name=role_enum.value,
+            description=f"Permission to {role_enum.value.lower()}",
+            group_id=group_id,
+        )
+        db_session.merge(role)
+
+    db_session.commit()
+
+    # Create test user with all roles
+    password_hasher = PasswordHasher()
+    hashed_password = password_hasher.hash("testpassword")
+
+    test_user = User(
+        userid="test_user@example.com",
+        hashed_password=hashed_password,
+        first_name="Test",
+        last_name="User",
+        active=True,
+        is_admin=False,
+    )
+    db_session.add(test_user)
+    db_session.commit()
+    db_session.refresh(test_user)
+
+    # Assign all roles to test user
+    all_roles = db_session.query(SecurityRole).all()
+    for role in all_roles:
+        user_role = UserSecurityRole(
+            user_id=test_user.id,
+            role_id=role.id,
+            granted_by=test_user.id,
+        )
+        db_session.add(user_role)
+
+    db_session.commit()
+    test_user.load_role_cache(db_session)
 
     def override_get_db():
         try:
-            # Ensure the same session and engine are used throughout the test
             yield db_session
         finally:
             pass
+
+    def override_get_current_user():
+        return "test_user@example.com"
 
     # Mock the FastAPI app lifespan to prevent service startup during tests
     from contextlib import asynccontextmanager
 
     @asynccontextmanager
     async def mock_lifespan(app):
-        # Mock startup - do nothing
         yield
-        # Mock shutdown - do nothing
 
     # Replace the lifespan manager
     original_lifespan = app.router.lifespan_context
@@ -172,8 +334,8 @@ def client(db_session, mock_config):
 
     try:
         app.dependency_overrides[get_db] = override_get_db
+        app.dependency_overrides[get_current_user] = override_get_current_user
 
-        # Patch JWTBearer to always succeed for authenticated endpoints
         with patch("backend.auth.auth_bearer.JWTBearer.__call__") as mock_jwt:
 
             async def mock_jwt_call(*args, **kwargs):
@@ -186,7 +348,6 @@ def client(db_session, mock_config):
 
         app.dependency_overrides.clear()
     finally:
-        # Restore original lifespan
         app.router.lifespan_context = original_lifespan
 
 
@@ -194,6 +355,166 @@ def client(db_session, mock_config):
 def authenticated_client(db_session, mock_config):
     """Create a test client with test database and mocked JWT auth."""
     from unittest.mock import patch
+    from backend.persistence.models import (
+        User,
+        SecurityRole,
+        SecurityRoleGroup,
+        UserSecurityRole,
+    )
+    from argon2 import PasswordHasher
+    from backend.security.roles import SecurityRoles
+    from uuid import UUID
+    import hashlib
+
+    # Create security role groups and roles in test database
+    groups = [
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000001"),
+            "name": "Host Management",
+            "description": "Roles for managing hosts",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000002"),
+            "name": "Package Management",
+            "description": "Roles for managing packages",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000003"),
+            "name": "Secrets Management",
+            "description": "Roles for managing secrets",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000004"),
+            "name": "User Management",
+            "description": "Roles for managing users",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000005"),
+            "name": "Script Management",
+            "description": "Roles for managing scripts",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000006"),
+            "name": "Report Management",
+            "description": "Roles for managing reports",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000007"),
+            "name": "Integration Management",
+            "description": "Roles for managing integrations",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000008"),
+            "name": "Ubuntu Pro Management",
+            "description": "Roles for Ubuntu Pro",
+        },
+    ]
+
+    for group_data in groups:
+        group = SecurityRoleGroup(**group_data)
+        db_session.merge(group)
+
+    role_to_group = {
+        SecurityRoles.APPROVE_HOST_REGISTRATION: UUID(
+            "00000000-0000-0000-0000-000000000001"
+        ),
+        SecurityRoles.DELETE_HOST: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.VIEW_HOST_DETAILS: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.REBOOT_HOST: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.SHUTDOWN_HOST: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.EDIT_TAGS: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.STOP_HOST_SERVICE: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.START_HOST_SERVICE: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.RESTART_HOST_SERVICE: UUID(
+            "00000000-0000-0000-0000-000000000001"
+        ),
+        SecurityRoles.ADD_PACKAGE: UUID("00000000-0000-0000-0000-000000000002"),
+        SecurityRoles.APPLY_SOFTWARE_UPDATE: UUID(
+            "00000000-0000-0000-0000-000000000002"
+        ),
+        SecurityRoles.APPLY_HOST_OS_UPGRADE: UUID(
+            "00000000-0000-0000-0000-000000000002"
+        ),
+        SecurityRoles.DEPLOY_SSH_KEY: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.DEPLOY_CERTIFICATE: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.ADD_SECRET: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.DELETE_SECRET: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.EDIT_SECRET: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.STOP_VAULT: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.START_VAULT: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.ADD_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.EDIT_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.LOCK_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.UNLOCK_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.DELETE_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.RESET_USER_PASSWORD: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.ADD_SCRIPT: UUID("00000000-0000-0000-0000-000000000005"),
+        SecurityRoles.EDIT_SCRIPT: UUID("00000000-0000-0000-0000-000000000005"),
+        SecurityRoles.DELETE_SCRIPT: UUID("00000000-0000-0000-0000-000000000005"),
+        SecurityRoles.RUN_SCRIPT: UUID("00000000-0000-0000-0000-000000000005"),
+        SecurityRoles.DELETE_SCRIPT_EXECUTION: UUID(
+            "00000000-0000-0000-0000-000000000005"
+        ),
+        SecurityRoles.VIEW_REPORT: UUID("00000000-0000-0000-0000-000000000006"),
+        SecurityRoles.GENERATE_PDF_REPORT: UUID("00000000-0000-0000-0000-000000000006"),
+        SecurityRoles.DELETE_QUEUE_MESSAGE: UUID(
+            "00000000-0000-0000-0000-000000000007"
+        ),
+        SecurityRoles.ENABLE_GRAFANA_INTEGRATION: UUID(
+            "00000000-0000-0000-0000-000000000007"
+        ),
+        SecurityRoles.ATTACH_UBUNTU_PRO: UUID("00000000-0000-0000-0000-000000000008"),
+        SecurityRoles.DETACH_UBUNTU_PRO: UUID("00000000-0000-0000-0000-000000000008"),
+        SecurityRoles.CHANGE_UBUNTU_PRO_MASTER_KEY: UUID(
+            "00000000-0000-0000-0000-000000000008"
+        ),
+    }
+
+    for role_enum, group_id in role_to_group.items():
+        role_id = UUID(hashlib.md5(role_enum.value.encode()).hexdigest())
+        role = SecurityRole(
+            id=role_id,
+            name=role_enum.value,
+            description=f"Permission to {role_enum.value.lower()}",
+            group_id=group_id,
+        )
+        db_session.merge(role)
+
+    db_session.commit()
+
+    # Create test user with all roles if it doesn't exist
+    test_user = (
+        db_session.query(User).filter(User.userid == "test_user@example.com").first()
+    )
+
+    if not test_user:
+        password_hasher = PasswordHasher()
+        test_user = User(
+            userid="test_user@example.com",
+            hashed_password=password_hasher.hash("testpassword"),
+            first_name="Test",
+            last_name="User",
+            active=True,
+            is_admin=False,
+        )
+        db_session.add(test_user)
+        db_session.commit()
+        db_session.refresh(test_user)
+
+        # Assign all roles to test user
+        all_roles = db_session.query(SecurityRole).all()
+        for role in all_roles:
+            user_role = UserSecurityRole(
+                user_id=test_user.id,
+                role_id=role.id,
+                granted_by=test_user.id,
+            )
+            db_session.add(user_role)
+
+        db_session.commit()
+
+    # Load role cache for quick permission checking
+    test_user.load_role_cache(db_session)
 
     def override_get_db():
         try:
@@ -258,9 +579,195 @@ def session(db_session):
 
 
 @pytest.fixture
-def auth_headers():
+def security_roles_populated(db_session):
+    """Populate security roles and groups in test database."""
+    from backend.persistence.models import SecurityRole, SecurityRoleGroup
+    from uuid import UUID
+
+    # Create role groups (matching migration 54fcacb0e742)
+    groups = [
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000001"),
+            "name": "Host Management",
+            "description": "Roles for managing hosts",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000002"),
+            "name": "Package Management",
+            "description": "Roles for managing packages",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000003"),
+            "name": "Secrets Management",
+            "description": "Roles for managing secrets",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000004"),
+            "name": "User Management",
+            "description": "Roles for managing users",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000005"),
+            "name": "Script Management",
+            "description": "Roles for managing scripts",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000006"),
+            "name": "Report Management",
+            "description": "Roles for managing reports",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000007"),
+            "name": "Integration Management",
+            "description": "Roles for managing integrations",
+        },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000008"),
+            "name": "Ubuntu Pro Management",
+            "description": "Roles for Ubuntu Pro",
+        },
+    ]
+
+    for group_data in groups:
+        group = SecurityRoleGroup(**group_data)
+        db_session.merge(group)
+
+    # Create all security roles from the SecurityRoles enum
+    from backend.security.roles import SecurityRoles
+
+    role_to_group = {
+        SecurityRoles.APPROVE_HOST_REGISTRATION: UUID(
+            "00000000-0000-0000-0000-000000000001"
+        ),
+        SecurityRoles.DELETE_HOST: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.VIEW_HOST_DETAILS: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.REBOOT_HOST: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.SHUTDOWN_HOST: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.EDIT_TAGS: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.STOP_HOST_SERVICE: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.START_HOST_SERVICE: UUID("00000000-0000-0000-0000-000000000001"),
+        SecurityRoles.RESTART_HOST_SERVICE: UUID(
+            "00000000-0000-0000-0000-000000000001"
+        ),
+        SecurityRoles.ADD_PACKAGE: UUID("00000000-0000-0000-0000-000000000002"),
+        SecurityRoles.APPLY_SOFTWARE_UPDATE: UUID(
+            "00000000-0000-0000-0000-000000000002"
+        ),
+        SecurityRoles.APPLY_HOST_OS_UPGRADE: UUID(
+            "00000000-0000-0000-0000-000000000002"
+        ),
+        SecurityRoles.DEPLOY_SSH_KEY: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.DEPLOY_CERTIFICATE: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.ADD_SECRET: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.DELETE_SECRET: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.EDIT_SECRET: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.STOP_VAULT: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.START_VAULT: UUID("00000000-0000-0000-0000-000000000003"),
+        SecurityRoles.ADD_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.EDIT_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.LOCK_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.UNLOCK_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.DELETE_USER: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.RESET_USER_PASSWORD: UUID("00000000-0000-0000-0000-000000000004"),
+        SecurityRoles.ADD_SCRIPT: UUID("00000000-0000-0000-0000-000000000005"),
+        SecurityRoles.EDIT_SCRIPT: UUID("00000000-0000-0000-0000-000000000005"),
+        SecurityRoles.DELETE_SCRIPT: UUID("00000000-0000-0000-0000-000000000005"),
+        SecurityRoles.RUN_SCRIPT: UUID("00000000-0000-0000-0000-000000000005"),
+        SecurityRoles.DELETE_SCRIPT_EXECUTION: UUID(
+            "00000000-0000-0000-0000-000000000005"
+        ),
+        SecurityRoles.VIEW_REPORT: UUID("00000000-0000-0000-0000-000000000006"),
+        SecurityRoles.GENERATE_PDF_REPORT: UUID("00000000-0000-0000-0000-000000000006"),
+        SecurityRoles.DELETE_QUEUE_MESSAGE: UUID(
+            "00000000-0000-0000-0000-000000000007"
+        ),
+        SecurityRoles.ENABLE_GRAFANA_INTEGRATION: UUID(
+            "00000000-0000-0000-0000-000000000007"
+        ),
+        SecurityRoles.ATTACH_UBUNTU_PRO: UUID("00000000-0000-0000-0000-000000000008"),
+        SecurityRoles.DETACH_UBUNTU_PRO: UUID("00000000-0000-0000-0000-000000000008"),
+        SecurityRoles.CHANGE_UBUNTU_PRO_MASTER_KEY: UUID(
+            "00000000-0000-0000-0000-000000000008"
+        ),
+    }
+
+    import hashlib
+
+    for role_enum, group_id in role_to_group.items():
+        # Generate deterministic UUID based on role name
+        role_id = UUID(hashlib.md5(role_enum.value.encode()).hexdigest())
+        role = SecurityRole(
+            id=role_id,
+            name=role_enum.value,
+            description=f"Permission to {role_enum.value.lower()}",
+            group_id=group_id,
+        )
+        db_session.merge(role)
+
+    db_session.commit()
+    return True
+
+
+@pytest.fixture
+def test_user_with_all_roles(db_session, security_roles_populated):
+    """Create a test user with all security roles for testing."""
+    from backend.persistence.models import User, SecurityRole, UserSecurityRole
+    from argon2 import PasswordHasher
+
+    # Create test user
+    password_hasher = PasswordHasher()
+    hashed_password = password_hasher.hash("testpassword")
+
+    test_user = User(
+        userid="test_user@example.com",
+        hashed_password=hashed_password,
+        first_name="Test",
+        last_name="User",
+        active=True,
+        is_admin=False,
+    )
+    db_session.add(test_user)
+    db_session.commit()
+    db_session.refresh(test_user)
+
+    # Get all security roles and assign them to the test user
+    all_roles = db_session.query(SecurityRole).all()
+    for role in all_roles:
+        user_role = UserSecurityRole(
+            user_id=test_user.id,
+            role_id=role.id,
+            granted_by=test_user.id,
+        )
+        db_session.add(user_role)
+
+    db_session.commit()
+
+    # Initialize role cache
+    test_user.load_role_cache(db_session)
+
+    return test_user
+
+
+@pytest.fixture
+def auth_headers(client, mock_config):
     """Provide authentication headers for test requests."""
-    return {"Authorization": "Bearer test-token"}
+    # The test user is already created in the client fixture
+    # Create a valid JWT token for the test user
+    import time
+    import jwt
+
+    payload = {
+        "user_id": "test_user@example.com",
+        "expires": time.time() + int(mock_config["security"]["jwt_auth_timeout"]),
+    }
+
+    token = jwt.encode(
+        payload,
+        mock_config["security"]["jwt_secret"],
+        algorithm=mock_config["security"]["jwt_algorithm"],
+    )
+
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.fixture

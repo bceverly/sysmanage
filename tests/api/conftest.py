@@ -17,6 +17,7 @@ SQLite Compatibility Rules:
 See README.md and TESTING.md for detailed guidelines.
 """
 
+import hashlib
 import os
 import tempfile
 import uuid
@@ -176,6 +177,133 @@ def test_db():
             DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
         )
         updated_at = Column(
+            DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+        )
+
+        # Runtime role cache (not stored in database)
+        _role_cache = None
+
+        def load_role_cache(self, db_session):
+            """
+            Load security roles into cache for quick permission checking.
+
+            This should be called after user authentication to populate the role cache.
+
+            Args:
+                db_session: SQLAlchemy database session
+            """
+            from backend.security.roles import load_user_roles
+
+            self._role_cache = load_user_roles(db_session, self.id)
+
+        def has_role(self, role):
+            """
+            Check if user has a specific security role.
+
+            Args:
+                role: SecurityRoles enum value
+
+            Returns:
+                True if user has the role, False otherwise
+
+            Note:
+                load_role_cache() must be called first, otherwise this returns False.
+            """
+            if self._role_cache is None:
+                return False
+
+            return self._role_cache.has_role(role)
+
+        def has_any_role(self, roles):
+            """
+            Check if user has any of the specified roles.
+
+            Args:
+                roles: List of SecurityRoles enum values
+
+            Returns:
+                True if user has at least one of the roles, False otherwise
+
+            Note:
+                load_role_cache() must be called first, otherwise this returns False.
+            """
+            if self._role_cache is None:
+                return False
+
+            return self._role_cache.has_any_role(roles)
+
+        def has_all_roles(self, roles):
+            """
+            Check if user has all of the specified roles.
+
+            Args:
+                roles: List of SecurityRoles enum values
+
+            Returns:
+                True if user has all of the roles, False otherwise
+
+            Note:
+                load_role_cache() must be called first, otherwise this returns False.
+            """
+            if self._role_cache is None:
+                return False
+
+            return self._role_cache.has_all_roles(roles)
+
+        def get_roles(self):
+            """
+            Get all security roles the user has.
+
+            Returns:
+                Set of SecurityRoles enum values, or empty set if cache not loaded
+
+            Note:
+                load_role_cache() must be called first to get accurate results.
+            """
+            if self._role_cache is None:
+                return set()
+
+            return self._role_cache.get_roles()
+
+    # Create test version of SecurityRoleGroup model for SQLite compatibility
+    class SecurityRoleGroup(TestBase):
+        __tablename__ = "security_role_groups"
+        id = Column(GUID(), primary_key=True)
+        name = Column(String(100), nullable=False, unique=True)
+        description = Column(String(500), nullable=True)
+        created_at = Column(
+            DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+        )
+
+    # Create test version of SecurityRole model for SQLite compatibility
+    class SecurityRole(TestBase):
+        __tablename__ = "security_roles"
+        id = Column(GUID(), primary_key=True)
+        name = Column(String(200), nullable=False, unique=True)
+        description = Column(String(500), nullable=True)
+        group_id = Column(
+            GUID(),
+            ForeignKey("security_role_groups.id", ondelete="CASCADE"),
+            nullable=False,
+        )
+        created_at = Column(
+            DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+        )
+
+    # Create test version of UserSecurityRole model for SQLite compatibility
+    class UserSecurityRole(TestBase):
+        __tablename__ = "user_security_roles"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        user_id = Column(
+            GUID(), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+        )
+        role_id = Column(
+            GUID(), ForeignKey("security_roles.id", ondelete="CASCADE"), nullable=False
+        )
+        granted_by = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+        granted_at = Column(
             DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
         )
 
@@ -435,10 +563,316 @@ def test_db():
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)
 
+    # Populate security role groups and roles for testing
+    # Create a session to populate initial data
+    SessionLocal = sessionmaker(autocommit=False, autoflush=True, bind=test_engine)
+    session = SessionLocal()
+    try:
+        # Create security role groups with fixed UUIDs
+        role_groups = [
+            SecurityRoleGroup(
+                id=uuid.UUID("00000000-0000-0000-0000-000000000001"),
+                name="Host",
+                description="Permissions related to host management",
+            ),
+            SecurityRoleGroup(
+                id=uuid.UUID("00000000-0000-0000-0000-000000000002"),
+                name="Package",
+                description="Permissions related to package management",
+            ),
+            SecurityRoleGroup(
+                id=uuid.UUID("00000000-0000-0000-0000-000000000003"),
+                name="Secrets",
+                description="Permissions related to secret management",
+            ),
+            SecurityRoleGroup(
+                id=uuid.UUID("00000000-0000-0000-0000-000000000004"),
+                name="User",
+                description="Permissions related to user management",
+            ),
+            SecurityRoleGroup(
+                id=uuid.UUID("00000000-0000-0000-0000-000000000005"),
+                name="Scripts",
+                description="Permissions related to script management",
+            ),
+            SecurityRoleGroup(
+                id=uuid.UUID("00000000-0000-0000-0000-000000000006"),
+                name="Reports",
+                description="Permissions related to report generation",
+            ),
+            SecurityRoleGroup(
+                id=uuid.UUID("00000000-0000-0000-0000-000000000007"),
+                name="Integrations",
+                description="Permissions related to system integrations",
+            ),
+            SecurityRoleGroup(
+                id=uuid.UUID("00000000-0000-0000-0000-000000000008"),
+                name="Ubuntu Pro",
+                description="Permissions related to Ubuntu Pro management",
+            ),
+        ]
+        for group in role_groups:
+            session.add(group)
+        session.commit()
+
+        # Create security roles - using the exact same UUIDs as the migration
+        roles_data = [
+            # Host group
+            (
+                "10000000-0000-0000-0000-000000000001",
+                "Approve Host Registration",
+                "Approve new host registrations",
+                "00000000-0000-0000-0000-000000000001",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000002",
+                "Delete Host",
+                "Delete hosts from the system",
+                "00000000-0000-0000-0000-000000000001",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000003",
+                "View Host Details",
+                "View detailed host information",
+                "00000000-0000-0000-0000-000000000001",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000004",
+                "Reboot Host",
+                "Reboot hosts",
+                "00000000-0000-0000-0000-000000000001",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000005",
+                "Shutdown Host",
+                "Shutdown hosts",
+                "00000000-0000-0000-0000-000000000001",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000006",
+                "Edit Tags",
+                "Edit host tags",
+                "00000000-0000-0000-0000-000000000001",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000010",
+                "Stop Host Service",
+                "Stop services on hosts",
+                "00000000-0000-0000-0000-000000000001",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000011",
+                "Start Host Service",
+                "Start services on hosts",
+                "00000000-0000-0000-0000-000000000001",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000012",
+                "Restart Host Service",
+                "Restart services on hosts",
+                "00000000-0000-0000-0000-000000000001",
+            ),
+            # Package group
+            (
+                "10000000-0000-0000-0000-000000000007",
+                "Add Package",
+                "Add packages to hosts",
+                "00000000-0000-0000-0000-000000000002",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000020",
+                "Apply Software Update",
+                "Apply software updates to hosts",
+                "00000000-0000-0000-0000-000000000002",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000021",
+                "Apply Host OS Upgrade",
+                "Apply OS upgrades to hosts",
+                "00000000-0000-0000-0000-000000000002",
+            ),
+            # Secrets group
+            (
+                "10000000-0000-0000-0000-000000000008",
+                "Deploy SSH Key",
+                "Deploy SSH keys to hosts",
+                "00000000-0000-0000-0000-000000000003",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000009",
+                "Deploy Certificate",
+                "Deploy certificates to hosts",
+                "00000000-0000-0000-0000-000000000003",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000022",
+                "Add Secret",
+                "Add secrets to the vault",
+                "00000000-0000-0000-0000-000000000003",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000023",
+                "Delete Secret",
+                "Delete secrets from the vault",
+                "00000000-0000-0000-0000-000000000003",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000024",
+                "Edit Secret",
+                "Edit existing secrets",
+                "00000000-0000-0000-0000-000000000003",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000032",
+                "Stop Vault",
+                "Stop the vault service",
+                "00000000-0000-0000-0000-000000000003",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000033",
+                "Start Vault",
+                "Start the vault service",
+                "00000000-0000-0000-0000-000000000003",
+            ),
+            # User group
+            (
+                "10000000-0000-0000-0000-000000000015",
+                "Add User",
+                "Add new users to the system",
+                "00000000-0000-0000-0000-000000000004",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000016",
+                "Edit User",
+                "Edit existing users",
+                "00000000-0000-0000-0000-000000000004",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000017",
+                "Lock User",
+                "Lock user accounts",
+                "00000000-0000-0000-0000-000000000004",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000018",
+                "Unlock User",
+                "Unlock user accounts",
+                "00000000-0000-0000-0000-000000000004",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000019",
+                "Delete User",
+                "Delete users from the system",
+                "00000000-0000-0000-0000-000000000004",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000036",
+                "Reset User Password",
+                "Reset user passwords",
+                "00000000-0000-0000-0000-000000000004",
+            ),
+            # Scripts group
+            (
+                "10000000-0000-0000-0000-000000000025",
+                "Add Script",
+                "Add new scripts",
+                "00000000-0000-0000-0000-000000000005",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000037",
+                "Edit Script",
+                "Edit existing scripts",
+                "00000000-0000-0000-0000-000000000005",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000026",
+                "Delete Script",
+                "Delete scripts",
+                "00000000-0000-0000-0000-000000000005",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000027",
+                "Run Script",
+                "Execute scripts on hosts",
+                "00000000-0000-0000-0000-000000000005",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000028",
+                "Delete Script Execution",
+                "Delete script execution history",
+                "00000000-0000-0000-0000-000000000005",
+            ),
+            # Reports group
+            (
+                "10000000-0000-0000-0000-000000000029",
+                "View Report",
+                "View system reports",
+                "00000000-0000-0000-0000-000000000006",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000030",
+                "Generate PDF Report",
+                "Generate PDF reports",
+                "00000000-0000-0000-0000-000000000006",
+            ),
+            # Integrations group
+            (
+                "10000000-0000-0000-0000-000000000031",
+                "Delete Queue Message",
+                "Delete messages from the queue",
+                "00000000-0000-0000-0000-000000000007",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000034",
+                "Enable Grafana Integration",
+                "Enable and configure Grafana integration",
+                "00000000-0000-0000-0000-000000000007",
+            ),
+            # Ubuntu Pro group
+            (
+                "10000000-0000-0000-0000-000000000013",
+                "Attach Ubuntu Pro",
+                "Attach Ubuntu Pro to hosts",
+                "00000000-0000-0000-0000-000000000008",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000014",
+                "Detach Ubuntu Pro",
+                "Detach Ubuntu Pro from hosts",
+                "00000000-0000-0000-0000-000000000008",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000035",
+                "Change Ubuntu Pro Master Key",
+                "Change the Ubuntu Pro master key",
+                "00000000-0000-0000-0000-000000000008",
+            ),
+        ]
+
+        for role_id, name, description, group_id in roles_data:
+            role = SecurityRole(
+                id=uuid.UUID(role_id),
+                name=name,
+                description=description,
+                group_id=uuid.UUID(group_id),
+            )
+            session.add(role)
+        session.commit()
+
+        # Note: We don't create an admin user here because some tests create their own
+        # admin@sysmanage.org user. Tests that need an admin user with roles should
+        # use the create_admin_user fixture or create their own user.
+
+    finally:
+        session.close()
+
     # Monkey patch models to use test models during testing
     # ⚠️  ADD NEW MODEL MONKEY PATCHES HERE: Store original and patch models!
     original_host = models.Host
     original_user = models.User
+    original_security_role_group = models.SecurityRoleGroup
+    original_security_role = models.SecurityRole
+    original_user_security_role = models.UserSecurityRole
     original_tag = models.Tag
     original_host_tag = models.HostTag
     original_password_reset_token = models.PasswordResetToken
@@ -451,6 +885,9 @@ def test_db():
     original_software_installation_log = models.SoftwareInstallationLog
     models.Host = Host
     models.User = User
+    models.SecurityRoleGroup = SecurityRoleGroup
+    models.SecurityRole = SecurityRole
+    models.UserSecurityRole = UserSecurityRole
     models.Tag = Tag
     models.HostTag = HostTag
     models.PasswordResetToken = PasswordResetToken
@@ -493,6 +930,9 @@ def test_db():
     # ⚠️  ADD NEW MODEL CLEANUP HERE: Restore original model classes!
     models.Host = original_host
     models.User = original_user
+    models.SecurityRoleGroup = original_security_role_group
+    models.SecurityRole = original_security_role
+    models.UserSecurityRole = original_user_security_role
     models.Tag = original_tag
     models.HostTag = original_host_tag
     models.PasswordResetToken = original_password_reset_token
@@ -619,9 +1059,26 @@ def admin_token(mock_config):
 
 
 @pytest.fixture
-def auth_headers(admin_token):
-    """Create authorization headers with admin token."""
-    return {"Authorization": f"Bearer {admin_token}"}
+def auth_headers(admin_token, create_admin_user_with_roles):
+    """
+    Create authorization headers with admin token.
+
+    This fixture automatically creates an admin user with all security roles
+    to ensure the JWT token is valid and the user has all necessary permissions.
+    """
+    from backend.auth.auth_bearer import get_current_user
+
+    # Override get_current_user to return the admin user ID
+    def override_get_current_user():
+        return "admin@sysmanage.org"
+
+    app.dependency_overrides[get_current_user] = override_get_current_user
+
+    yield {"Authorization": f"Bearer {admin_token}"}
+
+    # Clean up the override
+    if get_current_user in app.dependency_overrides:
+        del app.dependency_overrides[get_current_user]
 
 
 @pytest.fixture(autouse=True)
@@ -676,20 +1133,110 @@ def mock_login_security():
 
 
 @pytest.fixture
-def mock_current_user():
+def mock_current_user(session):
     """Mock the current user dependency for authenticated tests."""
     from backend.auth.auth_bearer import get_current_user
 
-    mock_user = Mock()
-    mock_user.id = 1
-    mock_user.userid = "test@example.com"
-    mock_user.active = True
+    # Return a string userid instead of a Mock object to avoid database binding issues
+    test_userid = "test@example.com"
+
+    # Create test user with all roles if it doesn't exist
+    existing_user = (
+        session.query(models.User).filter(models.User.userid == test_userid).first()
+    )
+
+    if not existing_user:
+        # Create test user
+        password_hasher = PasswordHasher()
+        test_user = models.User(
+            userid=test_userid,
+            hashed_password=password_hasher.hash("testpassword"),
+            first_name="Test",
+            last_name="User",
+            active=True,
+            is_admin=False,
+        )
+        session.add(test_user)
+        session.commit()
+        session.refresh(test_user)
+
+        # Assign all roles to test user
+        all_roles = session.query(models.SecurityRole).all()
+        for role in all_roles:
+            user_role = models.UserSecurityRole(
+                user_id=test_user.id,
+                role_id=role.id,
+                granted_by=test_user.id,
+            )
+            session.add(user_role)
+        session.commit()
+
+        # Load role cache for quick permission checking
+        test_user.load_role_cache(session)
+    else:
+        # Load role cache if user already exists
+        existing_user.load_role_cache(session)
 
     def override_get_current_user():
-        return mock_user
+        return test_userid
 
     app.dependency_overrides[get_current_user] = override_get_current_user
-    yield mock_user
+    yield test_userid
     # Clean up the override
     if get_current_user in app.dependency_overrides:
         del app.dependency_overrides[get_current_user]
+
+
+@pytest.fixture
+def create_admin_user_with_roles(session):
+    """
+    Create an admin user with all security roles.
+
+    This fixture should be used by tests that require a fully-privileged admin user
+    for testing RBAC-protected endpoints. The user created has the email
+    'admin@sysmanage.org' and all 35 security roles assigned.
+
+    Returns:
+        User: The created admin user object with role cache loaded
+    """
+    # Check if admin user already exists (some tests create it themselves)
+    existing_admin = (
+        session.query(models.User)
+        .filter(models.User.userid == "admin@sysmanage.org")
+        .first()
+    )
+
+    if existing_admin:
+        # Load role cache and return existing user
+        existing_admin.load_role_cache(session)
+        return existing_admin
+
+    # Create admin user
+    password_hasher = PasswordHasher()
+    admin_user = models.User(
+        userid="admin@sysmanage.org",
+        hashed_password=password_hasher.hash("admin_pass"),
+        first_name="Admin",
+        last_name="User",
+        active=True,
+        is_admin=True,
+    )
+    session.add(admin_user)
+    session.commit()
+    session.refresh(admin_user)
+
+    # Get all security roles and assign them to admin
+    all_roles = session.query(models.SecurityRole).all()
+    for role in all_roles:
+        user_role = models.UserSecurityRole(
+            user_id=admin_user.id,
+            role_id=role.id,
+            granted_by=admin_user.id,
+        )
+        session.add(user_role)
+    session.commit()
+
+    # Load role cache for quick permission checking
+    admin_user.load_role_cache(session)
+
+    return admin_user

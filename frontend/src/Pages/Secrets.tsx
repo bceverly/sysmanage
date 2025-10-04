@@ -31,6 +31,7 @@ import {
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import { secretsService, SecretResponse, SecretWithContent, SecretType } from '../Services/secrets';
+import { hasPermission, SecurityRoles } from '../Services/permissions';
 import './css/Secrets.css';
 
 const Secrets: React.FC = () => {
@@ -64,6 +65,11 @@ const Secrets: React.FC = () => {
   // Table pagination
   const { pageSize, pageSizeOptions } = useTablePageSize();
 
+  // Permission states
+  const [canAddSecret, setCanAddSecret] = useState<boolean>(false);
+  const [canDeleteSecret, setCanDeleteSecret] = useState<boolean>(false);
+  const [canEditSecret, setCanEditSecret] = useState<boolean>(false);
+
   // UI state
   const [notification, setNotification] = useState<{
     open: boolean;
@@ -78,6 +84,21 @@ const Secrets: React.FC = () => {
   const handleCloseNotification = () => {
     setNotification({ ...notification, open: false });
   };
+
+  // Check permissions
+  useEffect(() => {
+    const checkPermissions = async () => {
+      const [addSecret, deleteSecret, editSecret] = await Promise.all([
+        hasPermission(SecurityRoles.ADD_SECRET),
+        hasPermission(SecurityRoles.DELETE_SECRET),
+        hasPermission(SecurityRoles.EDIT_SECRET)
+      ]);
+      setCanAddSecret(addSecret);
+      setCanDeleteSecret(deleteSecret);
+      setCanEditSecret(editSecret);
+    };
+    checkPermissions();
+  }, []);
 
   // Load data
   const loadSecrets = useCallback(async () => {
@@ -417,14 +438,16 @@ const Secrets: React.FC = () => {
           >
             <IoEye />
           </IconButton>
-          <IconButton
-            size="small"
-            onClick={() => handleEditSecret(params.row.id)}
-            title={t('secrets.editSecret', 'Edit Secret')}
-            sx={{ color: 'primary.main' }}
-          >
-            <IoPencil />
-          </IconButton>
+          {canEditSecret && (
+            <IconButton
+              size="small"
+              onClick={() => handleEditSecret(params.row.id)}
+              title={t('secrets.editSecret', 'Edit Secret')}
+              sx={{ color: 'primary.main' }}
+            >
+              <IoPencil />
+            </IconButton>
+          )}
         </Box>
       ),
     },
@@ -478,22 +501,26 @@ const Secrets: React.FC = () => {
 
           <Box component="section">&nbsp;</Box>
           <Stack direction="row" spacing={2}>
-            <Button
-              variant="outlined"
-              startIcon={<IoAdd />}
-              onClick={handleAddSecret}
-            >
-              {t('secrets.addSecret', 'Add Secret')}
-            </Button>
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<IoTrash />}
-              onClick={handleDeleteSelected}
-              disabled={selectedSecrets.length === 0}
-            >
-              {t('secrets.deleteSelected', 'Delete Selected')}
-            </Button>
+            {canAddSecret && (
+              <Button
+                variant="outlined"
+                startIcon={<IoAdd />}
+                onClick={handleAddSecret}
+              >
+                {t('secrets.addSecret', 'Add Secret')}
+              </Button>
+            )}
+            {canDeleteSecret && (
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<IoTrash />}
+                onClick={handleDeleteSelected}
+                disabled={selectedSecrets.length === 0}
+              >
+                {t('secrets.deleteSelected', 'Delete Selected')}
+              </Button>
+            )}
           </Stack>
         </CardContent>
       </Card>

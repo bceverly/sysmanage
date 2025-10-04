@@ -13,13 +13,14 @@ import {
   IoPlay,
   IoSearch
 } from 'react-icons/io5';
-import { 
-  updatesService, 
-  UpdateStatsSummary, 
-  PackageUpdate, 
+import {
+  updatesService,
+  UpdateStatsSummary,
+  PackageUpdate,
   UpdatesResponse,
-  HostUpdatesResponse 
+  HostUpdatesResponse
 } from '../Services/updates';
+import { hasPermission, SecurityRoles } from '../Services/permissions';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
 import './css/Updates.css';
 
@@ -78,6 +79,9 @@ const Updates: React.FC = () => {
     host_id: searchParams.get('host') || ''
   });
 
+  // Permission state
+  const [canApplySoftwareUpdate, setCanApplySoftwareUpdate] = useState<boolean>(false);
+
   // Auto-refresh state (disabled)
   // const [refreshCountdown, setRefreshCountdown] = useState(30);
   // const [hasActiveUpdates, setHasActiveUpdates] = useState(false);
@@ -85,8 +89,17 @@ const Updates: React.FC = () => {
   // const countdownTimerRef = useRef<number | null>(null);
 
   const ITEMS_PER_PAGE = 50;
-  // const STANDARD_REFRESH_INTERVAL = 30000; // 30 seconds 
+  // const STANDARD_REFRESH_INTERVAL = 30000; // 30 seconds
   // const ACTIVE_UPDATES_REFRESH_INTERVAL = 15000; // 15 seconds when updates are running
+
+  // Check permissions
+  useEffect(() => {
+    const checkPermission = async () => {
+      const applySoftwareUpdate = await hasPermission(SecurityRoles.APPLY_SOFTWARE_UPDATE);
+      setCanApplySoftwareUpdate(applySoftwareUpdate);
+    };
+    checkPermission();
+  }, []);
 
   const fetchUpdatesSummary = useCallback(async () => {
     try {
@@ -728,17 +741,21 @@ const Updates: React.FC = () => {
         <div className="updates__actions">
           <div className="updates__selection">
             <label className="updates__select-all">
-              {selectedUpdates.size === updates.length ? (
-                <IoCheckbox onClick={handleSelectAll} />
+              {canApplySoftwareUpdate ? (
+                selectedUpdates.size === updates.length ? (
+                  <IoCheckbox onClick={handleSelectAll} />
+                ) : (
+                  <IoSquareOutline onClick={handleSelectAll} />
+                )
               ) : (
-                <IoSquareOutline onClick={handleSelectAll} />
+                <IoSquareOutline style={{ opacity: 0.3, cursor: 'not-allowed' }} />
               )}
               {t('updates.selectAll', 'Select All')} ({selectedUpdates.size}/{updates.length})
             </label>
           </div>
-          
-          {selectedUpdates.size > 0 && (
-            <button 
+
+          {selectedUpdates.size > 0 && canApplySoftwareUpdate && (
+            <button
               className="updates__execute"
               onClick={executeSelectedUpdates}
             >
@@ -784,15 +801,19 @@ const Updates: React.FC = () => {
               const isSelected = selectedUpdates.has(key);
               
               return (
-                <div 
-                  key={key} 
+                <div
+                  key={key}
                   className={`updates__item ${isSelected ? 'selected' : ''} ${update.is_security_update ? 'security' : ''}`}
                 >
                   <div className="updates__item-select">
-                    {isSelected ? (
-                      <IoCheckbox onClick={() => handleSelectUpdate(update)} />
+                    {canApplySoftwareUpdate ? (
+                      isSelected ? (
+                        <IoCheckbox onClick={() => handleSelectUpdate(update)} />
+                      ) : (
+                        <IoSquareOutline onClick={() => handleSelectUpdate(update)} />
+                      )
                     ) : (
-                      <IoSquareOutline onClick={() => handleSelectUpdate(update)} />
+                      <IoSquareOutline style={{ opacity: 0.3, cursor: 'not-allowed' }} />
                     )}
                   </div>
                   

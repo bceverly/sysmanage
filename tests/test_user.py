@@ -47,18 +47,42 @@ class MockUser:
         self.profile_image = None
         self.profile_image_type = None
         self.profile_image_uploaded_at = None
+        self._role_cache = None
+
+    def load_role_cache(self, session):
+        """Mock method to load role cache."""
+        self._role_cache = set()
+
+    def has_role(self, role):
+        """Mock method that returns True for all roles (testing purposes)."""
+        return True
 
 
 class MockSession:
     """Mock database session."""
 
-    def __init__(self, users=None):
+    def __init__(self, users=None, skip_rbac_user=False):
+        # Store the provided users list for other operations
         self.users = users or []
         self.committed = False
         self.added_objects = []
+        self.query_count = 0
+        self.skip_rbac_user = skip_rbac_user
+        # Always create a default current user for RBAC checks unless skipped
+        if not skip_rbac_user:
+            self.current_user = MockUser(userid="test@example.com")
+        else:
+            self.current_user = None
 
     def query(self, model):
-        return MockQuery(self.users)
+        # Increment query counter to track which query this is
+        self.query_count += 1
+        # First query is typically for current_user (RBAC check)
+        # Subsequent queries are for the actual operation
+        if self.query_count == 1 and not self.skip_rbac_user:
+            return MockQuery([self.current_user])
+        else:
+            return MockQuery(self.users)
 
     def add(self, obj):
         self.added_objects.append(obj)
@@ -67,6 +91,7 @@ class MockSession:
         self.committed = True
 
     def __enter__(self):
+        self.query_count = 0  # Reset counter when entering context
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -189,15 +214,15 @@ class TestGetLoggedInUser:
         mock_config.get_config.return_value = {
             "security": {"admin_userid": "admin@example.com"}
         }
-        mock_decode_jwt.return_value = {"user_id": "user@example.com"}
-        mock_user = MockUser(userid="user@example.com")
+        mock_decode_jwt.return_value = {"user_id": "test@example.com"}
+        mock_user = MockUser(userid="test@example.com")
         mock_session = MockSession([mock_user])
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         request = MockRequest({"Authorization": "Bearer token123"})
         result = await get_logged_in_user(request)
 
-        assert result.userid == "user@example.com"
+        assert result.userid == "test@example.com"
         assert result.id == 1
 
     @pytest.mark.asyncio
@@ -213,7 +238,7 @@ class TestGetLoggedInUser:
             "security": {"admin_userid": "admin@example.com"}
         }
         mock_decode_jwt.return_value = {"user_id": "nonexistent@example.com"}
-        mock_session = MockSession([])
+        mock_session = MockSession([], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         request = MockRequest({"Authorization": "Bearer token123"})
@@ -235,7 +260,7 @@ class TestGetLoggedInUser:
         mock_config.get_config.return_value = {
             "security": {"admin_userid": "admin@example.com"}
         }
-        mock_session = MockSession([])
+        mock_session = MockSession([], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         request = MockRequest({})
@@ -257,7 +282,7 @@ class TestGetLoggedInUser:
         mock_config.get_config.return_value = {
             "security": {"admin_userid": "admin@example.com"}
         }
-        mock_session = MockSession([])
+        mock_session = MockSession([], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         request = MockRequest({"Authorization": "InvalidToken"})
@@ -280,7 +305,7 @@ class TestGetLoggedInUser:
             "security": {"admin_userid": "admin@example.com"}
         }
         mock_decode_jwt.return_value = None
-        mock_session = MockSession([])
+        mock_session = MockSession([], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         request = MockRequest({"Authorization": "Bearer invalidtoken"})
@@ -303,7 +328,7 @@ class TestGetLoggedInUser:
             "security": {"admin_userid": "admin@example.com"}
         }
         mock_decode_jwt.return_value = {"other_field": "value"}
-        mock_session = MockSession([])
+        mock_session = MockSession([], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         request = MockRequest({"Authorization": "Bearer token123"})
@@ -336,7 +361,7 @@ class TestGetUser:
     @patch("backend.api.user.db")
     async def test_get_user_not_found(self, mock_db, mock_sessionmaker):
         """Test retrieval of non-existent user."""
-        mock_session = MockSession([])
+        mock_session = MockSession([], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
@@ -366,7 +391,7 @@ class TestGetUserByUserid:
     @patch("backend.api.user.db")
     async def test_get_user_by_userid_not_found(self, mock_db, mock_sessionmaker):
         """Test retrieval of non-existent user by userid."""
-        mock_session = MockSession([])
+        mock_session = MockSession([], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         with pytest.raises(HTTPException) as exc_info:
@@ -387,7 +412,7 @@ class TestGetAllUsers:
             MockUser(1, "user1@example.com"),
             MockUser(2, "user2@example.com"),
         ]
-        mock_session = MockSession(mock_users)
+        mock_session = MockSession(mock_users, skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         result = await get_all_users()
@@ -401,7 +426,7 @@ class TestGetAllUsers:
     @patch("backend.api.user.db")
     async def test_get_all_users_empty(self, mock_db, mock_sessionmaker):
         """Test retrieval when no users exist."""
-        mock_session = MockSession([])
+        mock_session = MockSession([], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         result = await get_all_users()
@@ -626,7 +651,7 @@ class TestUploadUserProfileImage:
     ):
         """Test upload for non-existent user."""
         mock_validate.return_value = (b"processed_image", "jpeg")
-        mock_session = MockSession([])
+        mock_session = MockSession([], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         mock_file = Mock()
@@ -653,7 +678,7 @@ class TestGetUserProfileImage:
         mock_user.profile_image = b"image_data"
         mock_user.profile_image_type = "jpg"
         mock_user.profile_image_uploaded_at = datetime.now(timezone.utc)
-        mock_session = MockSession([mock_user])
+        mock_session = MockSession([mock_user], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         result = await get_user_profile_image(1)
@@ -670,7 +695,7 @@ class TestGetUserProfileImage:
         mock_user.profile_image = b"image_data"
         mock_user.profile_image_type = "png"
         mock_user.profile_image_uploaded_at = None
-        mock_session = MockSession([mock_user])
+        mock_session = MockSession([mock_user], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         result = await get_user_profile_image(1)
@@ -721,7 +746,7 @@ class TestDeleteUserProfileImage:
         mock_user.profile_image = b"image_data"
         mock_user.profile_image_type = "jpeg"
         mock_user.profile_image_uploaded_at = datetime.now(timezone.utc)
-        mock_session = MockSession([mock_user])
+        mock_session = MockSession([mock_user], skip_rbac_user=True)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
         result = await delete_user_profile_image(1)

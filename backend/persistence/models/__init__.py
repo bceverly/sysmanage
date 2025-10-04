@@ -57,4 +57,8 @@ __all__ = [
     "HostRole",
     # Grafana integration models
     "GrafanaIntegrationSettings",
+    # Security role models
+    "SecurityRoleGroup",
+    "SecurityRole",
+    "UserSecurityRole",
 ]

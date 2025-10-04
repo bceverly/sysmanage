@@ -11,9 +11,10 @@ from pydantic import BaseModel, validator
 from sqlalchemy import and_, desc
 from sqlalchemy.orm import sessionmaker
 
-from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.security.roles import SecurityRoles
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
 
@@ -360,13 +361,35 @@ async def get_os_upgrades_summary(dependencies=Depends(JWTBearer())):
 
 @router.post("/execute-os-upgrades")
 async def execute_os_upgrades(
-    request: UpdateExecutionRequest, dependencies=Depends(JWTBearer())
+    request: UpdateExecutionRequest,
+    dependencies=Depends(JWTBearer()),
+    current_user: str = Depends(get_current_user),
 ):
     """
     Execute OS version upgrades on specified hosts.
     This is a specialized version of execute_updates that adds extra safety checks for OS upgrades.
     """
     try:
+        # Check if user has permission to apply host OS upgrades
+        session_factory = sessionmaker(bind=db.get_engine())
+        with session_factory() as session:
+            user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if user._role_cache is None:
+                user.load_role_cache(session)
+
+            if not user.has_role(SecurityRoles.APPLY_HOST_OS_UPGRADE):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: APPLY_HOST_OS_UPGRADE role required"),
+                )
+
         logger.info(
             "Received OS upgrade execution request: host_ids=%s, package_managers=%s",
             request.host_ids,
@@ -711,17 +734,38 @@ async def get_all_updates(  # pylint: disable=too-many-positional-arguments
 
 @router.post("/execute")
 async def execute_updates(
-    request: UpdateExecutionRequest, dependencies=Depends(JWTBearer())
+    request: UpdateExecutionRequest,
+    dependencies=Depends(JWTBearer()),
+    current_user: str = Depends(get_current_user),
 ):
     """Execute package updates on specified hosts."""
     try:
+        # Check if user has permission to apply software updates
+        session_factory = sessionmaker(bind=db.get_engine())
+        with session_factory() as session:
+            user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if user._role_cache is None:
+                user.load_role_cache(session)
+
+            if not user.has_role(SecurityRoles.APPLY_SOFTWARE_UPDATE):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: APPLY_SOFTWARE_UPDATE role required"),
+                )
+
         logger.info(
             "Received update execution request: host_ids=%s, package_names=%s, package_managers=%s",
             request.host_ids,
             request.package_names,
             request.package_managers,
         )
-        session_factory = sessionmaker(bind=db.get_engine())
         with session_factory() as session:
             results = []
 

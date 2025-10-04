@@ -19,6 +19,7 @@ import { useTablePageSize } from '../hooks/useTablePageSize';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
 import SearchBox from '../Components/SearchBox';
 import axiosInstance from '../Services/api';
+import { hasPermission, SecurityRoles } from '../Services/permissions';
 
 const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
@@ -29,6 +30,11 @@ const Hosts = () => {
     const [searchColumn, setSearchColumn] = useState<string>('fqdn');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [allTags, setAllTags] = useState<Array<{id: string, name: string}>>([]);
+    const [canApproveHosts, setCanApproveHosts] = useState<boolean>(false);
+    const [canDeleteHost, setCanDeleteHost] = useState<boolean>(false);
+    const [canViewHostDetails, setCanViewHostDetails] = useState<boolean>(false);
+    const [canRebootHost, setCanRebootHost] = useState<boolean>(false);
+    const [canShutdownHost, setCanShutdownHost] = useState<boolean>(false);
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { triggerRefresh } = useNotificationRefresh();
@@ -212,14 +218,16 @@ const Hosts = () => {
             sortable: false,
             filterable: false,
             renderCell: (params) => (
-                <IconButton
-                    color="primary"
-                    size="small"
-                    onClick={() => navigate(`/hosts/${params.row.id}`)}
-                    title={t('common.view')}
-                >
-                    <VisibilityIcon />
-                </IconButton>
+                canViewHostDetails ? (
+                    <IconButton
+                        color="primary"
+                        size="small"
+                        onClick={() => navigate(`/hosts/${params.row.id}`)}
+                        title={t('common.view')}
+                    >
+                        <VisibilityIcon />
+                    </IconButton>
+                ) : null
             )
         }
     ];
@@ -411,16 +419,36 @@ const Hosts = () => {
         if (!localStorage.getItem('bearer_token')) {
             navigate("/login");
         }
-        
+
         // Initial load
         refreshHosts();
-        
+
         // Set up periodic refresh every 30 seconds
         const intervalId = window.setInterval(() => refreshHosts(), 30000);
-        
+
         // Cleanup interval on unmount
         return () => window.clearInterval(intervalId);
     }, [navigate]);
+
+    // Check permissions
+    useEffect(() => {
+        const checkPermissions = async () => {
+            const [approve, deleteHost, viewDetails, reboot, shutdown] = await Promise.all([
+                hasPermission(SecurityRoles.APPROVE_HOST_REGISTRATION),
+                hasPermission(SecurityRoles.DELETE_HOST),
+                hasPermission(SecurityRoles.VIEW_HOST_DETAILS),
+                hasPermission(SecurityRoles.REBOOT_HOST),
+                hasPermission(SecurityRoles.SHUTDOWN_HOST)
+            ]);
+            setCanApproveHosts(approve);
+            setCanDeleteHost(deleteHost);
+            setCanViewHostDetails(viewDetails);
+            setCanRebootHost(reboot);
+            setCanShutdownHost(shutdown);
+        };
+        checkPermissions();
+    }, []);
+
     const formatLastRefresh = () => {
         if (!lastRefresh) return t('hosts.never', 'never');
         const now = new Date();
@@ -590,15 +618,17 @@ const Hosts = () => {
             </div>
             <Box component="section">&nbsp;</Box>
             <Stack direction="row" spacing={2}>
-                <Button 
-                    variant="outlined" 
-                    startIcon={<CheckIcon />} 
-                    disabled={!hasPendingSelection}
-                    onClick={handleApprove}
-                    color="success"
-                >
-                    {t('hosts.approveSelected', { defaultValue: 'Approve Selected' })}
-                </Button>
+                {canApproveHosts && (
+                    <Button
+                        variant="outlined"
+                        startIcon={<CheckIcon />}
+                        disabled={!hasPendingSelection}
+                        onClick={handleApprove}
+                        color="success"
+                    >
+                        {t('hosts.approveSelected', { defaultValue: 'Approve Selected' })}
+                    </Button>
+                )}
                 <Button 
                     variant="outlined" 
                     startIcon={<SyncIcon />} 
@@ -617,27 +647,33 @@ const Hosts = () => {
                 >
                     {t('hosts.getDiagnostics', 'Get Diagnostics')}
                 </Button>
-                <Button 
-                    variant="outlined" 
-                    startIcon={<RestartAltIcon />} 
-                    disabled={!hasActivePrivilegedSelection}
-                    onClick={handleRebootSelected}
-                    color="warning"
-                >
-                    {t('hosts.rebootSelected', 'Reboot Selected')}
-                </Button>
-                <Button 
-                    variant="outlined" 
-                    startIcon={<PowerSettingsNewIcon />} 
-                    disabled={!hasActivePrivilegedSelection}
-                    onClick={handleShutdownSelected}
-                    color="error"
-                >
-                    {t('hosts.shutdownSelected', 'Shutdown Selected')}
-                </Button>
-                <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
-                    {t('common.delete')} {t('common.selected', { defaultValue: 'Selected' })}
-                </Button>
+                {canRebootHost && (
+                    <Button
+                        variant="outlined"
+                        startIcon={<RestartAltIcon />}
+                        disabled={!hasActivePrivilegedSelection}
+                        onClick={handleRebootSelected}
+                        color="warning"
+                    >
+                        {t('hosts.rebootSelected', 'Reboot Selected')}
+                    </Button>
+                )}
+                {canShutdownHost && (
+                    <Button
+                        variant="outlined"
+                        startIcon={<PowerSettingsNewIcon />}
+                        disabled={!hasActivePrivilegedSelection}
+                        onClick={handleShutdownSelected}
+                        color="error"
+                    >
+                        {t('hosts.shutdownSelected', 'Shutdown Selected')}
+                    </Button>
+                )}
+                {canDeleteHost && (
+                    <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
+                        {t('common.delete')} {t('common.selected', { defaultValue: 'Selected' })}
+                    </Button>
+                )}
             </Stack>
         </div>
     );
