@@ -4,6 +4,7 @@ OpenTelemetry configuration and setup for SysManage.
 
 import logging
 import os
+import platform
 from typing import Optional
 
 from opentelemetry import metrics, trace
@@ -23,6 +24,14 @@ from prometheus_client import start_http_server
 
 logger = logging.getLogger(__name__)
 
+# Check if OpenTelemetry packages are available
+try:
+    import opentelemetry
+
+    TELEMETRY_AVAILABLE = True
+except ImportError:
+    TELEMETRY_AVAILABLE = False
+
 # Global state for telemetry
 _telemetry_enabled = False
 _prometheus_server_started = False
@@ -30,9 +39,13 @@ _prometheus_server_started = False
 
 def is_telemetry_enabled() -> bool:
     """
-    Check if telemetry is enabled based on environment variable.
-    Default is True (enabled) unless explicitly disabled.
+    Check if telemetry is enabled based on environment variable and platform compatibility.
+    Default is True (enabled) unless explicitly disabled or on incompatible platforms.
     """
+    # Disable telemetry if OpenTelemetry packages are not available
+    if not TELEMETRY_AVAILABLE:
+        return False
+
     return os.getenv("OTEL_ENABLED", "true").lower() in ("true", "1", "yes")
 
 

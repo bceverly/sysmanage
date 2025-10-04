@@ -55,6 +55,26 @@ PYTHON_BIN=$(find_python)
 
 # Check if we're already running with elevated privileges
 if check_privileges; then
+    # Fix data directory ownership on OpenBSD (if running as root)
+    if [ "$OS_TYPE" = "OpenBSD" ] && [ -d "$PROJECT_ROOT/data" ]; then
+        # Get the actual user (not root) from environment or filesystem
+        if [ -n "$ORIGINAL_USER" ]; then
+            ACTUAL_USER="$ORIGINAL_USER"
+        elif [ -n "$SUDO_USER" ]; then
+            ACTUAL_USER="$SUDO_USER"
+        else
+            # Fallback: check who owns the project root
+            ACTUAL_USER=$(stat -f "%Su" "$PROJECT_ROOT")
+        fi
+
+        # Fix ownership if data directory is owned by root
+        DATA_OWNER=$(stat -f "%Su" "$PROJECT_ROOT/data")
+        if [ "$DATA_OWNER" = "root" ] && [ "$ACTUAL_USER" != "root" ]; then
+            echo "Fixing data directory ownership for OpenBSD..."
+            chown -R "$ACTUAL_USER:$ACTUAL_USER" "$PROJECT_ROOT/data"
+        fi
+    fi
+
     # We already have privileges, just run the script
     exec "$PYTHON_BIN" "$PYTHON_SCRIPT" "$@"
 else

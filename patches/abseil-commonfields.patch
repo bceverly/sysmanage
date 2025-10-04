@@ -1,0 +1,12 @@
+--- a/third_party/abseil-cpp/absl/container/internal/raw_hash_set.cc
++++ b/third_party/abseil-cpp/absl/container/internal/raw_hash_set.cc
+@@ -338,7 +338,7 @@ void ClearBackingArray(CommonFields& c, const PolicyFunctions& policy,
+     // infoz.
+     c.infoz().RecordClearedReservation();
+     c.infoz().RecordStorageChanged(0, soo_enabled ? SooCapacity() : 0);
+     (*policy.dealloc)(c, policy);
+-    c = soo_enabled ? CommonFields{soo_tag_t{}} : CommonFields{};
++    c = soo_enabled ? CommonFields{soo_tag_t{}} : CommonFields();
+   }
+ }
+
