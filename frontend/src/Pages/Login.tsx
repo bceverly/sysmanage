@@ -17,6 +17,7 @@ import api from "../Services/api"
 import LanguageSelector from "../Components/LanguageSelector"
 import ForgotPasswordDialog from "../Components/ForgotPasswordDialog"
 import { saveRememberedEmail, getRememberedEmail, clearRememberedEmail } from "../utils/cookieUtils"
+import { clearPermissionsCache } from "../Services/permissions"
 
 const Login = () => {
     const [input, setInput] = useState({
@@ -46,6 +47,9 @@ const Login = () => {
         })
         .then((response: { data: { Authorization: string; }; }) => {
           if (response.data.Authorization) {
+            // Clear permissions cache before setting new credentials
+            clearPermissionsCache();
+
             localStorage.setItem("userid", input.userid);
             localStorage.setItem("bearer_token", response.data.Authorization);
 

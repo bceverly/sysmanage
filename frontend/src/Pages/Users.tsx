@@ -25,6 +25,7 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Avatar from '@mui/material/Avatar';
 import SearchBox from '../Components/SearchBox';
+import { hasPermission, SecurityRoles } from '../Services/permissions';
 
 const Users = () => {
     const [tableData, setTableData] = useState<SysManageUser[]>([]);
@@ -42,8 +43,16 @@ const Users = () => {
     const [editImageLoading, setEditImageLoading] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [searchColumn, setSearchColumn] = useState<string>('userid');
+
+    // Permission states
+    const [canLockUser, setCanLockUser] = useState<boolean>(false);
+    const [canUnlockUser, setCanUnlockUser] = useState<boolean>(false);
+    const [canAddUser, setCanAddUser] = useState<boolean>(false);
+    const [canEditUser, setCanEditUser] = useState<boolean>(false);
+    const [canDeleteUser, setCanDeleteUser] = useState<boolean>(false);
+
     const { t } = useTranslation();
-    
+
     // Dynamic table page sizing based on window height
     const { pageSize, pageSizeOptions } = useTablePageSize({
         reservedHeight: 350, // Account for navbar, title, buttons, margins, and action buttons below table
@@ -211,6 +220,25 @@ const Users = () => {
         }
     }, [tableData, searchTerm, searchColumn, performSearch]);
 
+    // Check permissions
+    useEffect(() => {
+        const checkPermissions = async () => {
+            const [lockUser, unlockUser, addUser, editUser, deleteUser] = await Promise.all([
+                hasPermission(SecurityRoles.LOCK_USER),
+                hasPermission(SecurityRoles.UNLOCK_USER),
+                hasPermission(SecurityRoles.ADD_USER),
+                hasPermission(SecurityRoles.EDIT_USER),
+                hasPermission(SecurityRoles.DELETE_USER)
+            ]);
+            setCanLockUser(lockUser);
+            setCanUnlockUser(unlockUser);
+            setCanAddUser(addUser);
+            setCanEditUser(editUser);
+            setCanDeleteUser(deleteUser);
+        };
+        checkPermissions();
+    }, []);
+
     const handleClickOpen = () => {
         setAddDialogOpen(true);
     };
@@ -362,31 +390,41 @@ const Users = () => {
             </div>
             <Box component="section">&nbsp;</Box>
             <Stack direction="row" spacing={2}>
-                <Button variant="outlined" startIcon={<AddIcon />} disabled={selection.length > 0} onClick={handleClickOpen}>
-                    {t('common.add')}
-                </Button>
-                <Button variant="outlined" startIcon={<EditIcon />} disabled={selection.length !== 1} onClick={handleEditClickOpen}>
-                    {t('common.edit')}
-                </Button>
-                <Button
-                    variant="outlined"
-                    startIcon={<LockIcon />}
-                    disabled={selection.length === 0 || !getSelectedUsersUnlockStatus()}
-                    onClick={handleLock}
-                >
-                    {t('users.lockSelected')}
-                </Button>
-                <Button
-                    variant="outlined"
-                    startIcon={<LockOpenIcon />}
-                    disabled={selection.length === 0 || !getSelectedUsersLockStatus()}
-                    onClick={handleUnlock}
-                >
-                    {t('users.unlockSelected')}
-                </Button>
-                <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
-                    {t('common.delete')} {t('common.selected')}
-                </Button>
+                {canAddUser && (
+                    <Button variant="outlined" startIcon={<AddIcon />} disabled={selection.length > 0} onClick={handleClickOpen}>
+                        {t('common.add')}
+                    </Button>
+                )}
+                {canEditUser && (
+                    <Button variant="outlined" startIcon={<EditIcon />} disabled={selection.length !== 1} onClick={handleEditClickOpen}>
+                        {t('common.edit')}
+                    </Button>
+                )}
+                {canLockUser && (
+                    <Button
+                        variant="outlined"
+                        startIcon={<LockIcon />}
+                        disabled={selection.length === 0 || !getSelectedUsersUnlockStatus()}
+                        onClick={handleLock}
+                    >
+                        {t('users.lockSelected')}
+                    </Button>
+                )}
+                {canUnlockUser && (
+                    <Button
+                        variant="outlined"
+                        startIcon={<LockOpenIcon />}
+                        disabled={selection.length === 0 || !getSelectedUsersLockStatus()}
+                        onClick={handleUnlock}
+                    >
+                        {t('users.unlockSelected')}
+                    </Button>
+                )}
+                {canDeleteUser && (
+                    <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
+                        {t('common.delete')} {t('common.selected')}
+                    </Button>
+                )}
             </Stack>
             <Dialog
                 open={addDialogOpen}

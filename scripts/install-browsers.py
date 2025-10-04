@@ -112,17 +112,24 @@ def install_playwright_browsers():
                 print(f"[WARN] Failed to install {browser}: {result.stderr}")
                 return False
 
-        # Install system dependencies
-        print("Installing Playwright system dependencies...")
-        result = subprocess.run([
-            sys.executable, "-m", "playwright", "install-deps"
-        ], capture_output=True, text=True)
+        # Install system dependencies (only on Debian/Ubuntu systems)
+        # Playwright's install-deps only supports apt-get based systems
+        if os.path.exists('/etc/debian_version'):
+            print("Installing Playwright system dependencies...")
+            result = subprocess.run([
+                sys.executable, "-m", "playwright", "install-deps"
+            ], capture_output=True, text=True)
 
-        if result.returncode == 0:
-            print("[OK] Playwright system dependencies installed")
+            if result.returncode == 0:
+                print("[OK] Playwright system dependencies installed")
+            else:
+                print(f"[WARN] Failed to install system dependencies: {result.stderr}")
+                # Don't fail here as this might work anyway
         else:
-            print(f"[WARN] Failed to install system dependencies: {result.stderr}")
-            # Don't fail here as this might work anyway
+            print("[INFO] Non-Debian system detected - skipping Playwright system dependencies")
+            print("       Playwright will use system libraries if available")
+            print("       On openSUSE, install: zypper install libgbm1 libnss3 libatk-1_0-0 libatk-bridge-2_0-0")
+            print("       On Fedora/RHEL, install: dnf install mesa-libgbm nss atk at-spi2-atk")
 
         return True
 

@@ -7,12 +7,15 @@ from datetime import datetime, timezone
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Response
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
+from backend.persistence import db
 from backend.persistence.db import get_db
 from backend.persistence.models import Host, User
+from backend.persistence import models
+from backend.security.roles import SecurityRoles
 
 # PDF generation imports
 try:
@@ -743,6 +746,24 @@ async def view_report_html(
     """
     Generate and return HTML version of a report
     """
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_bind())
+    with session_local() as session:
+        # Check if user has permission to view reports
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+        if auth_user._role_cache is None:
+            auth_user.load_role_cache(session)
+        if not auth_user.has_role(SecurityRoles.VIEW_REPORT):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: VIEW_REPORT role required"),
+            )
+
     try:
         hosts = None
         users = None
@@ -791,6 +812,24 @@ async def generate_report(
     """
     Generate and download a PDF report
     """
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_bind())
+    with session_local() as session:
+        # Check if user has permission to generate PDF reports
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+        if auth_user._role_cache is None:
+            auth_user.load_role_cache(session)
+        if not auth_user.has_role(SecurityRoles.GENERATE_PDF_REPORT):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: GENERATE_PDF_REPORT role required"),
+            )
+
     if not REPORTLAB_AVAILABLE:
         raise HTTPException(
             status_code=500,

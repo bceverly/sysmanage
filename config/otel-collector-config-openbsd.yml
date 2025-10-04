@@ -1,0 +1,57 @@
+# OpenTelemetry Collector configuration for OpenBSD
+# Minimal configuration using only built-in components
+
+receivers:
+  # OTLP receiver for traces, metrics, and logs
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # Batch processor to batch telemetry data
+  batch:
+    timeout: 10s
+    send_batch_size: 1024
+
+exporters:
+  # Debug exporter for logging (replaces 'logging' exporter)
+  debug:
+    verbosity: detailed
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+  # OTLP exporter (for sending to other collectors or backends)
+  otlp:
+    endpoint: localhost:4317
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    # Traces pipeline
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+
+    # Metrics pipeline
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+
+    # Logs pipeline
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      # Disable internal metrics to avoid port 8888 conflict
+      level: none

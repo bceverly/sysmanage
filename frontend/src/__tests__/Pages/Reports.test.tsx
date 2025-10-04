@@ -97,12 +97,34 @@ const ReportsWithRouter = () => (
 describe('Reports Page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Mock the permissions API endpoint
+    mockApi.get.mockImplementation((url: string) => {
+      if (url === '/api/user/permissions') {
+        return Promise.resolve({
+          data: {
+            is_admin: false,
+            permissions: {
+              'View Report': true,
+              'Generate PDF Report': true,
+            },
+          },
+        });
+      }
+      return Promise.reject(new Error(`Unhandled API call: ${url}`));
+    });
   });
 
   test('renders without crashing', async () => {
     await act(async () => {
       render(<ReportsWithRouter />);
     });
+
+    // Wait for permissions to load
+    await waitFor(() => {
+      expect(mockApi.get).toHaveBeenCalledWith('/api/user/permissions');
+    });
+
     expect(screen.getByText('Reports')).toBeInTheDocument();
   });
 

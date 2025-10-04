@@ -13,12 +13,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 
 from backend.api.profile import validate_and_process_image
-from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.auth.auth_handler import decode_jwt
 from backend.config import config
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.login_security import login_security
+from backend.security.roles import SecurityRoles
 
 # Import will be added at runtime to avoid circular imports
 
@@ -46,7 +47,7 @@ class User(BaseModel):
 
 
 @router.delete("/user/{user_id}", dependencies=[Depends(JWTBearer())])
-async def delete_user(user_id: str):
+async def delete_user(user_id: str, current_user: str = Depends(get_current_user)):
     """
     This function deletes a single user given an id
     """
@@ -57,6 +58,24 @@ async def delete_user(user_id: str):
     )
 
     with session_local() as session:
+        # Check if user has permission to delete users
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        if auth_user._role_cache is None:
+            auth_user.load_role_cache(session)
+
+        if not auth_user.has_role(SecurityRoles.DELETE_USER):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: DELETE_USER role required"),
+            )
+
         # See if we were passed a valid id
         users = session.query(models.User).filter(models.User.id == user_id).all()
 
@@ -69,6 +88,38 @@ async def delete_user(user_id: str):
         session.commit()
 
     return {"result": True}
+
+
+@router.get("/user/permissions", dependencies=[Depends(JWTBearer())])
+async def get_user_permissions(current_user: str = Depends(get_current_user)):
+    """
+    Get the current user's security role permissions.
+    Returns a dictionary of role names to boolean values.
+    """
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the user
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        # Load role cache
+        user.load_role_cache(session)
+
+        # Build permissions dictionary for all known roles
+        permissions = {}
+        for role in SecurityRoles:
+            permissions[role.value] = user.has_role(role)
+
+        return {"is_admin": user.is_admin, "permissions": permissions}
 
 
 @router.get("/user/me", dependencies=[Depends(JWTBearer())])
@@ -225,7 +276,9 @@ async def get_all_users():
 
 
 @router.post("/user", dependencies=[Depends(JWTBearer())])
-async def add_user(new_user: User, request: Request):
+async def add_user(
+    new_user: User, request: Request, current_user: str = Depends(get_current_user)
+):
     """
     This function adds a new user to the system.
     """
@@ -236,6 +289,23 @@ async def add_user(new_user: User, request: Request):
 
     # Add the data to the database
     with session_local() as session:
+        # Check if user has permission to add users
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        if auth_user._role_cache is None:
+            auth_user.load_role_cache(session)
+
+        if not auth_user.has_role(SecurityRoles.ADD_USER):
+            raise HTTPException(
+                status_code=403, detail=_("Permission denied: ADD_USER role required")
+            )
+
         # See if the caller is trying to add a user that already exists
         check_duplicate = (
             session.query(models.User)
@@ -291,7 +361,9 @@ async def add_user(new_user: User, request: Request):
 
 
 @router.put("/user/{user_id}", dependencies=[Depends(JWTBearer())])
-async def update_user(user_id: str, user_data: User):
+async def update_user(
+    user_id: str, user_data: User, current_user: str = Depends(get_current_user)
+):
     """
     This function updates an existing user by id
     """
@@ -303,6 +375,23 @@ async def update_user(user_id: str, user_data: User):
 
     # Update the user
     with session_local() as session:
+        # Check if user has permission to edit users
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        if auth_user._role_cache is None:
+            auth_user.load_role_cache(session)
+
+        if not auth_user.has_role(SecurityRoles.EDIT_USER):
+            raise HTTPException(
+                status_code=403, detail=_("Permission denied: EDIT_USER role required")
+            )
+
         # See if we were passed a valid id
         users = session.query(models.User).filter(models.User.id == user_id).all()
 
@@ -349,7 +438,7 @@ async def update_user(user_id: str, user_data: User):
 
 
 @router.post("/user/{user_id}/unlock", dependencies=[Depends(JWTBearer())])
-async def unlock_user(user_id: str):
+async def unlock_user(user_id: str, current_user: str = Depends(get_current_user)):
     """
     This function unlocks a user account manually
     """
@@ -359,6 +448,24 @@ async def unlock_user(user_id: str):
     )
 
     with session_local() as session:
+        # Check if user has permission to unlock users
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        if auth_user._role_cache is None:
+            auth_user.load_role_cache(session)
+
+        if not auth_user.has_role(SecurityRoles.UNLOCK_USER):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: UNLOCK_USER role required"),
+            )
+
         # See if we were passed a valid id
         user = session.query(models.User).filter(models.User.id == user_id).first()
 
@@ -382,7 +489,7 @@ async def unlock_user(user_id: str):
 
 
 @router.post("/user/{user_id}/lock", dependencies=[Depends(JWTBearer())])
-async def lock_user(user_id: str):
+async def lock_user(user_id: str, current_user: str = Depends(get_current_user)):
     """
     This function locks a user account manually
     """
@@ -392,6 +499,23 @@ async def lock_user(user_id: str):
     )
 
     with session_local() as session:
+        # Check if user has permission to lock users
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        if auth_user._role_cache is None:
+            auth_user.load_role_cache(session)
+
+        if not auth_user.has_role(SecurityRoles.LOCK_USER):
+            raise HTTPException(
+                status_code=403, detail=_("Permission denied: LOCK_USER role required")
+            )
+
         # See if we were passed a valid id
         user = session.query(models.User).filter(models.User.id == user_id).first()
 

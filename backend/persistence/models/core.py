@@ -11,6 +11,7 @@ from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
+    ForeignKey,
     Integer,
     LargeBinary,
     String,
@@ -212,5 +213,190 @@ class User(Base):
         default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
 
+    # Relationships
+    security_roles = relationship(
+        "SecurityRole",
+        secondary="user_security_roles",
+        primaryjoin="User.id == UserSecurityRole.user_id",
+        secondaryjoin="SecurityRole.id == UserSecurityRole.role_id",
+        back_populates="users",
+    )
+
+    # Runtime role cache (not stored in database)
+    _role_cache = None
+
+    def load_role_cache(self, db_session):
+        """
+        Load security roles into cache for quick permission checking.
+
+        This should be called after user authentication to populate the role cache.
+
+        Args:
+            db_session: SQLAlchemy database session
+        """
+        from backend.security.roles import load_user_roles
+
+        self._role_cache = load_user_roles(db_session, self.id)
+
+    def has_role(self, role):
+        """
+        Check if user has a specific security role.
+
+        Args:
+            role: SecurityRoles enum value
+
+        Returns:
+            True if user has the role, False otherwise
+
+        Note:
+            load_role_cache() must be called first, otherwise this returns False.
+        """
+        if self._role_cache is None:
+            return False
+
+        return self._role_cache.has_role(role)
+
+    def has_any_role(self, roles):
+        """
+        Check if user has any of the specified roles.
+
+        Args:
+            roles: List of SecurityRoles enum values
+
+        Returns:
+            True if user has at least one of the roles, False otherwise
+
+        Note:
+            load_role_cache() must be called first, otherwise this returns False.
+        """
+        if self._role_cache is None:
+            return False
+
+        return self._role_cache.has_any_role(roles)
+
+    def has_all_roles(self, roles):
+        """
+        Check if user has all of the specified roles.
+
+        Args:
+            roles: List of SecurityRoles enum values
+
+        Returns:
+            True if user has all of the roles, False otherwise
+
+        Note:
+            load_role_cache() must be called first, otherwise this returns False.
+        """
+        if self._role_cache is None:
+            return False
+
+        return self._role_cache.has_all_roles(roles)
+
+    def get_roles(self):
+        """
+        Get all security roles the user has.
+
+        Returns:
+            Set of SecurityRoles enum values, or empty set if cache not loaded
+
+        Note:
+            load_role_cache() must be called first to get accurate results.
+        """
+        if self._role_cache is None:
+            return set()
+
+        return self._role_cache.get_roles()
+
     def __repr__(self):
         return f"<User(id={self.id}, userid='{self.userid}', active={self.active}, is_admin={self.is_admin})>"
+
+
+class SecurityRoleGroup(Base):
+    """
+    Security role groups for organizing permissions.
+    """
+
+    __tablename__ = "security_role_groups"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String(100), unique=True, nullable=False, index=True)
+    description = Column(Text, nullable=True)
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+
+    # Relationships
+    roles = relationship(
+        "SecurityRole", back_populates="group", cascade="all, delete-orphan"
+    )
+
+    def __repr__(self):
+        return f"<SecurityRoleGroup(id={self.id}, name='{self.name}')>"
+
+
+class SecurityRole(Base):
+    """
+    Security roles for fine-grained permission control.
+    """
+
+    __tablename__ = "security_roles"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String(100), unique=True, nullable=False, index=True)
+    description = Column(Text, nullable=True)
+    group_id = Column(
+        GUID(),
+        ForeignKey("security_role_groups.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+
+    # Relationships
+    group = relationship("SecurityRoleGroup", back_populates="roles")
+    users = relationship(
+        "User",
+        secondary="user_security_roles",
+        primaryjoin="SecurityRole.id == UserSecurityRole.role_id",
+        secondaryjoin="User.id == UserSecurityRole.user_id",
+        back_populates="security_roles",
+    )
+
+    def __repr__(self):
+        return f"<SecurityRole(id={self.id}, name='{self.name}', group_id={self.group_id})>"
+
+
+class UserSecurityRole(Base):
+    """
+    Mapping table for users to security roles.
+    """
+
+    __tablename__ = "user_security_roles"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    user_id = Column(
+        GUID(), ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    role_id = Column(
+        GUID(),
+        ForeignKey("security_roles.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    granted_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    granted_by = Column(
+        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
+
+    def __repr__(self):
+        return f"<UserSecurityRole(user_id={self.user_id}, role_id={self.role_id})>"

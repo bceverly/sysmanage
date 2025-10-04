@@ -39,7 +39,7 @@ help:
 	@echo "  Note: Telemetry stack is automatically installed with 'make install-dev'"
 	@echo ""
 	@echo "BSD users: install-dev will check for C tracer dependencies"
-	@echo "  - OpenBSD: gcc, py3-cffi"
+	@echo "  - OpenBSD: gcc-11.2.0p15, findutils (builds cffi, grpcio from source)"
 	@echo "  - NetBSD: gcc13, py312-cffi"
 
 # Virtual environment activation
@@ -112,11 +112,17 @@ else
 		export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 && \
 		export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 && \
 		export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
-		grep -v "^playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || true; \
+		grep -v "playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || true; \
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
-	elif [ "$$(uname -s)" = "OpenBSD" ] || [ "$$(uname -s)" = "FreeBSD" ]; then \
+	elif [ "$$(uname -s)" = "FreeBSD" ]; then \
 		echo "[INFO] Installing packages except Playwright (not available on BSD systems)..."; \
-		grep -v "^playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || true; \
+		grep -v "playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || true; \
+		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
+	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
+		echo "[INFO] OpenBSD - patching and building grpcio with bundled abseil..."; \
+		$(MAKE) build-grpcio-openbsd || { echo "[ERROR] grpcio build failed - see ~/tmp/grpcio-build.log"; exit 1; }; \
+		echo "[INFO] Now installing remaining dependencies..."; \
+		grep -v "playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || { echo "[ERROR] Failed to install requirements"; exit 1; }; \
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
 	else \
 		$(PYTHON) -m pip install -r requirements.txt; \
@@ -188,9 +194,36 @@ else
 		else \
 			echo "[OK] Prometheus already installed"; \
 		fi; \
+	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
+		echo "[INFO] OpenBSD detected - building Prometheus from source..."; \
+		if [ ! -f "$$HOME/.local/bin/prometheus" ]; then \
+			mkdir -p $$HOME/tmp/prometheus-build && \
+			export GOCACHE=$$HOME/tmp/go-cache && \
+			export GOMODCACHE=$$HOME/tmp/go-mod-cache && \
+			export GOTMPDIR=$$HOME/tmp/go-tmp && \
+			mkdir -p $$HOME/tmp/go-cache $$HOME/tmp/go-mod-cache $$HOME/tmp/go-tmp && \
+			cd $$HOME/tmp/prometheus-build && \
+			rm -rf prometheus && \
+			git clone --depth 1 --branch v3.1.0 https://github.com/prometheus/prometheus.git && \
+			cd prometheus && \
+			echo "[INFO] Building Prometheus (this may take several minutes)..." && \
+			go build ./cmd/prometheus && \
+			go build ./cmd/promtool && \
+			mkdir -p $$HOME/.local/bin && \
+			cp prometheus promtool $$HOME/.local/bin/ && \
+			chmod +x $$HOME/.local/bin/prometheus $$HOME/.local/bin/promtool && \
+			cd $$HOME && rm -rf $$HOME/tmp/prometheus-build && \
+			echo "[OK] Prometheus built and installed to ~/.local/bin"; \
+		else \
+			echo "[OK] Prometheus already installed"; \
+		fi; \
 	fi
 	@echo "Installing telemetry stack (OpenTelemetry + Prometheus)..."
-	@sudo $(PYTHON) scripts/install-telemetry.py || echo "[WARNING] Telemetry installation failed - continuing without telemetry"
+	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
+		doas $(PYTHON) scripts/install-telemetry.py || echo "[WARNING] Telemetry installation failed - continuing without telemetry"; \
+	else \
+		sudo $(PYTHON) scripts/install-telemetry.py || echo "[WARNING] Telemetry installation failed - continuing without telemetry"; \
+	fi
 endif
 	@echo "Setting up WebDriver for screenshots..."
 	@$(PYTHON) scripts/install-browsers.py
@@ -231,13 +264,46 @@ else
 	fi
 endif
 	@echo "Installing TypeScript/React development dependencies..."
+ifeq ($(OS),Windows_NT)
 	@cd frontend && npm install --include=optional
+else
+	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
+		mkdir -p $$HOME/.npm-cache && \
+		cd frontend && npm install --include=optional --cache=$$HOME/.npm-cache; \
+	else \
+		cd frontend && npm install --include=optional; \
+	fi
+endif
 	@echo "Ensuring esbuild optional dependencies are installed..."
+ifeq ($(OS),Windows_NT)
 	@cd frontend && npm uninstall esbuild && npm install esbuild
+else
+	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
+		cd frontend && npm uninstall esbuild && npm install esbuild --cache=$$HOME/.npm-cache; \
+	else \
+		cd frontend && npm uninstall esbuild && npm install esbuild; \
+	fi
+endif
 	@echo "Installing ESLint security plugins..."
+ifeq ($(OS),Windows_NT)
 	@cd frontend && npm install eslint-plugin-security eslint-plugin-no-unsanitized
+else
+	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
+		cd frontend && npm install eslint-plugin-security eslint-plugin-no-unsanitized --cache=$$HOME/.npm-cache; \
+	else \
+		cd frontend && npm install eslint-plugin-security eslint-plugin-no-unsanitized; \
+	fi
+endif
 	@echo "Setting up MSW (Mock Service Worker) for API mocking..."
+ifeq ($(OS),Windows_NT)
 	@cd frontend && npm install --save-dev msw
+else
+	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
+		cd frontend && npm install --save-dev msw --cache=$$HOME/.npm-cache; \
+	else \
+		cd frontend && npm install --save-dev msw; \
+	fi
+endif
 	@echo "Initializing MSW browser setup (for optional development use)..."
 	@cd frontend && npx msw init public/ --save
 	@echo "Running database migrations to ensure tables exist..."
@@ -645,10 +711,15 @@ ifeq ($(OS),Windows_NT)
 else
 	@echo "Starting OpenTelemetry Collector..."
 	@if command -v otelcol-contrib >/dev/null 2>&1; then \
-		nohup otelcol-contrib --config=config/otel-collector-config.yml > logs/otel-collector.log 2>&1 & echo $$! > logs/otel-collector.pid; \
+		OTEL_CONFIG="config/otel-collector-config.yml"; \
+		if [ "$$(uname -s)" = "OpenBSD" ] && [ -f "config/otel-collector-config-openbsd.yml" ]; then \
+			OTEL_CONFIG="config/otel-collector-config-openbsd.yml"; \
+			echo "Using OpenBSD-specific OTel config"; \
+		fi; \
+		nohup otelcol-contrib --config=$$OTEL_CONFIG > logs/otel-collector.log 2>&1 & echo $$! > logs/otel-collector.pid; \
 		echo "OpenTelemetry Collector started (PID: $$(cat logs/otel-collector.pid))"; \
 	else \
-		echo "[WARNING] otelcol-contrib not found. Run 'make install-telemetry' first."; \
+		echo "[WARNING] otelcol-contrib not found. Run 'make install-dev' first."; \
 	fi
 	@echo "Starting Prometheus..."
 	@PROMETHEUS_BIN=""; \
@@ -658,7 +729,13 @@ else
 		PROMETHEUS_BIN="prometheus"; \
 	fi; \
 	if [ -n "$$PROMETHEUS_BIN" ]; then \
-		mkdir -p data/prometheus; \
+		if [ ! -d "data/prometheus" ]; then \
+			if [ "$$(uname -s)" = "OpenBSD" ]; then \
+				sudo mkdir -p data/prometheus && sudo chown -R $(USER):$(USER) data/prometheus; \
+			else \
+				mkdir -p data/prometheus; \
+			fi; \
+		fi; \
 		nohup $$PROMETHEUS_BIN --config.file=config/prometheus.yml --web.listen-address=:9091 --storage.tsdb.path=./data/prometheus --storage.tsdb.retention.time=15d --storage.tsdb.retention.size=10GB > logs/prometheus.log 2>&1 & echo $$! > logs/prometheus.pid; \
 		echo "Prometheus started (PID: $$(cat logs/prometheus.pid))"; \
 	else \
@@ -728,3 +805,44 @@ endif
 	@echo "  - OpenTelemetry Collector HTTP: http://localhost:4318"
 	@echo "  - OpenTelemetry Collector UI: http://localhost:55679"
 	@echo "  - Prometheus: http://localhost:9091"
+
+# OpenBSD grpcio build target
+build-grpcio-openbsd: $(VENV_ACTIVATE)
+	@echo "=== Building grpcio for OpenBSD ==="
+	@echo "[INFO] Uninstalling any existing grpcio..."
+	@$(PYTHON) -m pip uninstall -y grpcio 2>/dev/null || true
+	@mkdir -p $$HOME/tmp
+	@export TMPDIR=$$HOME/tmp && \
+	PYTHON_PATH=$$(cd $(CURDIR) && pwd)/$(PYTHON) && \
+	echo "[INFO] Downloading grpcio source for patching..." && \
+	$$PYTHON_PATH -m pip download --no-binary=grpcio --no-deps grpcio==1.71.0 -d $$HOME/tmp/ && \
+	cd $$HOME/tmp && tar -xzf grpcio-1.71.0.tar.gz && \
+	echo "[INFO] Applying OpenBSD patches from ports..." && \
+	cd $$HOME/tmp/grpcio-1.71.0 && \
+	PATCH_DIR=$$(cd $(CURDIR) && pwd)/patches/openbsd-grpc && \
+	ABSEIL_PATCH=$$(cd $(CURDIR) && pwd)/patches/abseil-commonfields.patch && \
+	ARES_PATCH=$$(cd $(CURDIR) && pwd)/patches/grpcio-ares-openbsd.patch && \
+	patch -p0 < $$PATCH_DIR/patch-src_core_util_posix_directory_reader_cc && \
+	patch -p1 < $$ABSEIL_PATCH && \
+	patch -p1 < $$ARES_PATCH && \
+	echo "[INFO] Configuring build to use bundled abseil (not system abseil)..." && \
+	export CFLAGS="-isystem /usr/local/include" && \
+	export CXXFLAGS="-std=c++17 -fpermissive -Wno-error -isystem /usr/local/include" && \
+	export LDFLAGS="-L/usr/local/lib -Wl,-R/usr/local/lib" && \
+	export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 && \
+	export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 && \
+	export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
+	export GRPC_PYTHON_BUILD_WITH_BORING_SSL_ASM="" && \
+	export GRPC_PYTHON_DISABLE_LIBC_COMPATIBILITY=1 && \
+	export GRPC_PYTHON_BUILD_EXT_COMPILER_JOBS=1 && \
+	echo "[INFO] Building patched grpcio from source (this may take 5-10 minutes)..." && \
+	$$PYTHON_PATH -m pip install --no-cache-dir --no-binary=:all: -v . 2>&1 | tee $$HOME/tmp/grpcio-build.log; \
+	BUILD_RESULT=$$?; \
+	if [ $$BUILD_RESULT -ne 0 ]; then \
+		echo "[ERROR] grpcio build failed with exit code $$BUILD_RESULT"; \
+		echo "[ERROR] Check log at $$HOME/tmp/grpcio-build.log"; \
+		cd $(CURDIR) && rm -rf $$HOME/tmp/grpcio-1.71.0; \
+		exit 1; \
+	fi && \
+	rm -rf $$HOME/tmp/grpcio-1.71.0* && \
+	echo "[OK] grpcio 1.71.0 build completed successfully with OpenBSD patches"

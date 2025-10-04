@@ -19,10 +19,11 @@ from backend.api import (
     host_ubuntu_pro,
 )
 from backend.api.host_utils import validate_host_approval_status
-from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.certificate_manager import certificate_manager
+from backend.security.roles import SecurityRoles
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import (
     create_command_message,
@@ -89,7 +90,7 @@ class Host(BaseModel):
 
 
 @auth_router.delete("/host/{host_id}", dependencies=[Depends(JWTBearer())])
-async def delete_host(host_id: str):
+async def delete_host(host_id: str, current_user: str = Depends(get_current_user)):
     """
     This function deletes a single host given an id
     """
@@ -100,6 +101,26 @@ async def delete_host(host_id: str):
     )
 
     with session_local() as session:
+        # Check if user has permission to delete hosts
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        # Load role cache if not already loaded
+        if user._role_cache is None:
+            user.load_role_cache(session)
+
+        # Check for DELETE_HOST role
+        if not user.has_role(SecurityRoles.DELETE_HOST):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: DELETE_HOST role required"),
+            )
+
         # See if we were passed a valid id
         hosts = session.query(models.Host).filter(models.Host.id == host_id).all()
 
@@ -115,7 +136,7 @@ async def delete_host(host_id: str):
 
 
 @auth_router.get("/host/{host_id}", dependencies=[Depends(JWTBearer())])
-async def get_host(host_id: str):
+async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
     """
     This function retrieves a single host by its id
     """
@@ -125,6 +146,26 @@ async def get_host(host_id: str):
     )
 
     with session_local() as session:
+        # Check if user has permission to view host details
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        # Load role cache if not already loaded
+        if user._role_cache is None:
+            user.load_role_cache(session)
+
+        # Check for VIEW_HOST_DETAILS role
+        if not user.has_role(SecurityRoles.VIEW_HOST_DETAILS):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: VIEW_HOST_DETAILS role required"),
+            )
+
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
             raise HTTPException(status_code=404, detail=_("Host not found"))
@@ -500,7 +541,9 @@ async def update_host(host_id: str, host_data: Host):
 
 
 @auth_router.put("/host/{host_id}/approve", dependencies=[Depends(JWTBearer())])
-async def approve_host(host_id: str):  # pylint: disable=duplicate-code
+async def approve_host(
+    host_id: str, current_user: str = Depends(get_current_user)
+):  # pylint: disable=duplicate-code
     """
     Approve a pending host registration
     """
@@ -510,6 +553,25 @@ async def approve_host(host_id: str):  # pylint: disable=duplicate-code
     )
 
     with session_local() as session:
+        # Check if user has permission to approve hosts
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        # Load role cache if not already loaded
+        if user._role_cache is None:
+            user.load_role_cache(session)
+
+        # Check for APPROVE_HOST_REGISTRATION role
+        if not user.has_role(SecurityRoles.APPROVE_HOST_REGISTRATION):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: APPROVE_HOST_REGISTRATION role required"),
+            )
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
@@ -543,7 +605,7 @@ async def approve_host(host_id: str):  # pylint: disable=duplicate-code
         # Send host approval notification to the agent via WebSocket
         try:
             approval_message = create_host_approved_message(
-                host_id=host.id,
+                host_id=str(host.id),
                 host_token=host.host_token,
                 approval_status="approved",
                 certificate=host.client_certificate,

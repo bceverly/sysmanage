@@ -16,6 +16,7 @@ from sqlalchemy.orm import sessionmaker
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.security.roles import SecurityRoles
 from backend.websocket.queue_manager import (
     Priority,
     QueueDirection,
@@ -263,6 +264,24 @@ async def create_saved_script(
     session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
+            # Check if user has permission to add scripts
+            auth_user = (
+                db_session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not auth_user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if auth_user._role_cache is None:
+                auth_user.load_role_cache(db_session)
+
+            if not auth_user.has_role(SecurityRoles.ADD_SCRIPT):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: ADD_SCRIPT role required"),
+                )
+
             # Check for duplicate name
             existing = (
                 db_session.query(models.SavedScript)
@@ -371,6 +390,24 @@ async def update_saved_script(
     session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
+            # Check if user has permission to edit scripts
+            auth_user = (
+                db_session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not auth_user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if auth_user._role_cache is None:
+                auth_user.load_role_cache(db_session)
+
+            if not auth_user.has_role(SecurityRoles.EDIT_SCRIPT):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: EDIT_SCRIPT role required"),
+                )
+
             script = (
                 db_session.query(models.SavedScript)
                 .filter(models.SavedScript.id == script_id)
@@ -442,6 +479,24 @@ async def delete_saved_script(
     session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
+            # Check if user has permission to delete scripts
+            auth_user = (
+                db_session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not auth_user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if auth_user._role_cache is None:
+                auth_user.load_role_cache(db_session)
+
+            if not auth_user.has_role(SecurityRoles.DELETE_SCRIPT):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: DELETE_SCRIPT role required"),
+                )
+
             script = (
                 db_session.query(models.SavedScript)
                 .filter(models.SavedScript.id == script_id)
@@ -493,6 +548,24 @@ async def execute_script(
     session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
+            # Check if user has permission to run scripts
+            auth_user = (
+                db_session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not auth_user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if auth_user._role_cache is None:
+                auth_user.load_role_cache(db_session)
+
+            if not auth_user.has_role(SecurityRoles.RUN_SCRIPT):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: RUN_SCRIPT role required"),
+                )
+
             # Verify host exists and is active
             host = (
                 db_session.query(models.Host)
@@ -726,6 +799,26 @@ async def delete_script_execution(
     session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
+            # Check if user has permission to delete script executions
+            auth_user = (
+                db_session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not auth_user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if auth_user._role_cache is None:
+                auth_user.load_role_cache(db_session)
+
+            if not auth_user.has_role(SecurityRoles.DELETE_SCRIPT_EXECUTION):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_(
+                        "Permission denied: DELETE_SCRIPT_EXECUTION role required"
+                    ),
+                )
+
             execution = (
                 db_session.query(models.ScriptExecutionLog)
                 .filter(models.ScriptExecutionLog.execution_id == execution_id)
@@ -763,6 +856,26 @@ async def delete_script_executions_bulk(
     session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
+            # Check if user has permission to delete script executions
+            auth_user = (
+                db_session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not auth_user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if auth_user._role_cache is None:
+                auth_user.load_role_cache(db_session)
+
+            if not auth_user.has_role(SecurityRoles.DELETE_SCRIPT_EXECUTION):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_(
+                        "Permission denied: DELETE_SCRIPT_EXECUTION role required"
+                    ),
+                )
+
             deleted_count = (
                 db_session.query(models.ScriptExecutionLog)
                 .filter(models.ScriptExecutionLog.execution_id.in_(execution_ids))

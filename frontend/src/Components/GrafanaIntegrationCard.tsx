@@ -31,6 +31,7 @@ import {
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
+import { hasPermission, SecurityRoles } from '../Services/permissions';
 
 interface GrafanaServer {
   id: string;
@@ -76,6 +77,7 @@ const GrafanaIntegrationCard: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [checkingHealth, setCheckingHealth] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [canEnableGrafanaIntegration, setCanEnableGrafanaIntegration] = useState<boolean>(false);
 
   // Load initial data
   const loadData = useCallback(async () => {
@@ -149,6 +151,15 @@ const GrafanaIntegrationCard: React.FC = () => {
       setSaving(false);
     }
   }, [settings, checkHealth]);
+
+  // Check permissions
+  useEffect(() => {
+    const checkPermission = async () => {
+      const enableGrafana = await hasPermission(SecurityRoles.ENABLE_GRAFANA_INTEGRATION);
+      setCanEnableGrafanaIntegration(enableGrafana);
+    };
+    checkPermission();
+  }, []);
 
   // Load data on mount
   useEffect(() => {
@@ -286,6 +297,7 @@ const GrafanaIntegrationCard: React.FC = () => {
                 <Switch
                   checked={settings.enabled}
                   onChange={handleEnabledChange}
+                  disabled={!canEnableGrafanaIntegration}
                 />
               }
               label={t('grafana.enabled.label', 'Enable Grafana Integration')}
@@ -401,14 +413,16 @@ const GrafanaIntegrationCard: React.FC = () => {
               >
                 {t('grafana.checkHealth', 'Check Health')}
               </Button>
-              <Button
-                onClick={saveSettings}
-                disabled={saving}
-                startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />}
-                variant="contained"
-              >
-                {t('common.save', 'Save')}
-              </Button>
+              {canEnableGrafanaIntegration && (
+                <Button
+                  onClick={saveSettings}
+                  disabled={saving}
+                  startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />}
+                  variant="contained"
+                >
+                  {t('common.save', 'Save')}
+                </Button>
+              )}
             </Box>
           </Grid>
         </Grid>

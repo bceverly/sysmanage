@@ -1355,7 +1355,7 @@ def fix_existing_vault_config(config_path):
         print(f"  Error updating vault configuration: {e}")
 
 def create_admin_user(user_data, salt):
-    """Create the initial admin user in the database."""
+    """Create the initial admin user in the database with all security roles."""
     print("\n--- Creating admin user ---")
 
     try:
@@ -1382,9 +1382,30 @@ def create_admin_user(user_data, salt):
             )
 
             db.add(admin_user)
-            db.commit()
+            db.flush()  # Flush to get the admin_user.id
 
             print("  Admin user created successfully.")
+
+            # Get all security roles
+            all_roles = db.query(models.SecurityRole).all()
+            if all_roles:
+                print(f"  Assigning all {len(all_roles)} security roles to admin user...")
+
+                # Create UserSecurityRole entries for each role
+                for role in all_roles:
+                    user_role = models.UserSecurityRole(
+                        user_id=admin_user.id,
+                        role_id=role.id,
+                        granted_by=admin_user.id,  # Self-granted
+                        granted_at=datetime.now(timezone.utc)
+                    )
+                    db.add(user_role)
+
+                print(f"  All security roles assigned to admin user.")
+            else:
+                print("  Warning: No security roles found in database.")
+
+            db.commit()
 
         finally:
             db.close()

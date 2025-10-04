@@ -4,11 +4,13 @@ Ubuntu Pro management endpoints for hosts.
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.orm import sessionmaker
 
 from backend.api.host_utils import get_host_by_id
-from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
-from backend.persistence import db
+from backend.persistence import db, models
+from backend.security.roles import SecurityRoles
 from backend.websocket.queue_manager import (
     Priority,
     QueueDirection,
@@ -39,19 +41,37 @@ class UbuntuProServiceRequest(BaseModel):
 
 
 @router.post("/host/{host_id}/ubuntu-pro/attach", dependencies=[Depends(JWTBearer())])
-async def attach_ubuntu_pro(host_id: str, request: UbuntuProAttachRequest):
+async def attach_ubuntu_pro(
+    host_id: str,
+    request: UbuntuProAttachRequest,
+    current_user=Depends(get_current_user),
+):
     """
     Attach Ubuntu Pro subscription to a host using the provided token.
     """
-    token = request.token.strip()
-    if not token:
-        raise HTTPException(status_code=400, detail=_("Ubuntu Pro token is required"))
-
-    from sqlalchemy.orm import sessionmaker
-
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
+    with session_local() as session:
+        # Check if user has permission to attach Ubuntu Pro
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+        if auth_user._role_cache is None:
+            auth_user.load_role_cache(session)
+        if not auth_user.has_role(SecurityRoles.ATTACH_UBUNTU_PRO):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: ATTACH_UBUNTU_PRO role required"),
+            )
+
+    token = request.token.strip()
+    if not token:
+        raise HTTPException(status_code=400, detail=_("Ubuntu Pro token is required"))
 
     with session_local() as db_session:
         try:
@@ -94,15 +114,30 @@ async def attach_ubuntu_pro(host_id: str, request: UbuntuProAttachRequest):
 
 
 @router.post("/host/{host_id}/ubuntu-pro/detach", dependencies=[Depends(JWTBearer())])
-async def detach_ubuntu_pro(host_id: str):
+async def detach_ubuntu_pro(host_id: str, current_user=Depends(get_current_user)):
     """
     Detach Ubuntu Pro subscription from a host.
     """
-    from sqlalchemy.orm import sessionmaker
-
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
+
+    with session_local() as session:
+        # Check if user has permission to detach Ubuntu Pro
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+        if auth_user._role_cache is None:
+            auth_user.load_role_cache(session)
+        if not auth_user.has_role(SecurityRoles.DETACH_UBUNTU_PRO):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: DETACH_UBUNTU_PRO role required"),
+            )
 
     with session_local() as db_session:
         try:

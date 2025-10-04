@@ -2,19 +2,23 @@
 API endpoints for secrets management.
 """
 
+# pylint: disable=too-many-lines
+
 import logging
 import uuid
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
+from backend.persistence import db as db_module, models
 from backend.persistence.db import get_db
 from backend.persistence.models import Host
 from backend.persistence.models.secret import Secret
+from backend.security.roles import SecurityRoles
 from backend.services.vault_service import VaultError, VaultService
 from backend.websocket.queue_manager import (
     Priority,
@@ -307,6 +311,28 @@ async def create_secret(
 ):
     """Create a new secret."""
     try:
+        # Check if user has permission to add secrets
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local() as session:
+            user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if user._role_cache is None:
+                user.load_role_cache(session)
+
+            if not user.has_role(SecurityRoles.ADD_SECRET):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: ADD_SECRET role required"),
+                )
+
         # Check if secret name already exists
         existing = db.query(Secret).filter(Secret.name == secret_data.name).first()
         if existing:
@@ -374,6 +400,28 @@ async def update_secret(
 ):
     """Update an existing secret."""
     try:
+        # Check if user has permission to edit secrets
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local() as session:
+            user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if user._role_cache is None:
+                user.load_role_cache(session)
+
+            if not user.has_role(SecurityRoles.EDIT_SECRET):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: EDIT_SECRET role required"),
+                )
+
         secret = db.query(Secret).filter(Secret.id == uuid.UUID(secret_id)).first()
         if not secret:
             raise HTTPException(
@@ -461,6 +509,28 @@ async def delete_secret(
 ):
     """Delete a secret."""
     try:
+        # Check if user has permission to delete secrets
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local() as session:
+            user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if user._role_cache is None:
+                user.load_role_cache(session)
+
+            if not user.has_role(SecurityRoles.DELETE_SECRET):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: DELETE_SECRET role required"),
+                )
+
         secret = db.query(Secret).filter(Secret.id == uuid.UUID(secret_id)).first()
         if not secret:
             raise HTTPException(
@@ -512,6 +582,28 @@ async def delete_multiple_secrets(
     current_user: dict = Depends(get_current_user),
 ):
     """Delete multiple secrets."""
+    # Check if user has permission to delete secrets
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
+    with session_local() as session:
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        if user._role_cache is None:
+            user.load_role_cache(session)
+
+        if not user.has_role(SecurityRoles.DELETE_SECRET):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: DELETE_SECRET role required"),
+            )
+
     if not secret_ids:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -615,6 +707,28 @@ async def deploy_ssh_keys(
 ):
     """Deploy SSH keys to a user on a target host via agent."""
     try:
+        # Check if user has permission to deploy SSH keys
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local() as session:
+            user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if user._role_cache is None:
+                user.load_role_cache(session)
+
+            if not user.has_role(SecurityRoles.DEPLOY_SSH_KEY):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: DEPLOY_SSH_KEY role required"),
+                )
+
         # Validate host exists and is active
         host = (
             db.query(Host).filter(Host.id == uuid.UUID(deploy_request.host_id)).first()
@@ -762,6 +876,28 @@ async def deploy_certificates(
 ):
     """Deploy SSL certificates to a target host via agent."""
     try:
+        # Check if user has permission to deploy certificates
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local() as session:
+            user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if user._role_cache is None:
+                user.load_role_cache(session)
+
+            if not user.has_role(SecurityRoles.DEPLOY_CERTIFICATE):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: DEPLOY_CERTIFICATE role required"),
+                )
+
         # Validate host exists and is active
         host = (
             db.query(Host).filter(Host.id == uuid.UUID(deploy_request.host_id)).first()

@@ -12,10 +12,11 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import sessionmaker
 
-from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.config import config
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.security.roles import SecurityRoles
 from backend.services.email_service import email_service
 
 router = APIRouter()  # Public routes (no authentication)
@@ -398,7 +399,7 @@ async def validate_reset_token(token: str) -> PasswordResetResponse:
     "/admin/reset-user-password/{user_id}", dependencies=[Depends(JWTBearer())]
 )
 async def admin_reset_user_password(
-    user_id: str, request: Request
+    user_id: str, request: Request, current_user: str = Depends(get_current_user)
 ) -> PasswordResetResponse:
     """
     Admin endpoint to trigger password reset for a specific user.
@@ -409,6 +410,24 @@ async def admin_reset_user_password(
     )
 
     with session_local() as session:
+        # Check if user has permission to reset user passwords
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        if auth_user._role_cache is None:
+            auth_user.load_role_cache(session)
+
+        if not auth_user.has_role(SecurityRoles.RESET_USER_PASSWORD):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: RESET_USER_PASSWORD role required"),
+            )
+
         # Get the user
         user = session.query(models.User).get(user_id)
         if not user:

@@ -12,9 +12,10 @@ from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
 from backend.api.host_utils import validate_host_approval_status
-from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.security.roles import SecurityRoles
 from backend.services.vault_service import VaultError, VaultService
 
 router = APIRouter()
@@ -284,7 +285,9 @@ async def get_grafana_integration_settings():
 
 @router.post("/settings", dependencies=[Depends(JWTBearer())])
 async def update_grafana_integration_settings(
-    request: GrafanaIntegrationRequest, req: Request
+    request: GrafanaIntegrationRequest,
+    req: Request,
+    current_user=Depends(get_current_user),
 ):
     """
     Update Grafana integration settings.
@@ -294,6 +297,21 @@ async def update_grafana_integration_settings(
     )
 
     with session_local() as session:
+        # Check if user has permission to enable Grafana integration
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+        if auth_user._role_cache is None:
+            auth_user.load_role_cache(session)
+        if not auth_user.has_role(SecurityRoles.ENABLE_GRAFANA_INTEGRATION):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: ENABLE_GRAFANA_INTEGRATION role required"),
+            )
         # Validate host if using managed server
         if request.use_managed_server and request.host_id:
             host = (

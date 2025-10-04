@@ -37,6 +37,7 @@ from backend.api import (
     scripts,
     secrets,
     security,
+    security_roles,
     tag,
     telemetry,
     ubuntu_pro_settings,
@@ -784,6 +785,10 @@ app.include_router(
     telemetry.router, prefix="/api/telemetry", tags=["telemetry"]
 )  # /api/telemetry/* (with auth)
 startup_logger.info("Telemetry router added")
+
+startup_logger.info("Adding Security Roles router")
+app.include_router(security_roles.router)  # /api/security-roles/* (with auth)
+startup_logger.info("Security Roles router added")
 
 startup_logger.info("=== ALL ROUTES REGISTERED ===")
 

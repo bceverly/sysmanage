@@ -9,12 +9,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy import and_, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
+from backend.persistence import db as db_module, models
 from backend.persistence.db import get_db
 from backend.persistence.models import HostTag, Tag
+from backend.security.roles import SecurityRoles
 
 router = APIRouter()
 
@@ -117,6 +119,28 @@ async def create_tag(
 ):
     """Create a new tag"""
     try:
+        # Check if user has permission to edit tags
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local() as session:
+            user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if user._role_cache is None:
+                user.load_role_cache(session)
+
+            if not user.has_role(SecurityRoles.EDIT_TAGS):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: EDIT_TAGS role required"),
+                )
+
         # Check if tag with same name already exists
         existing_tag = db.query(Tag).filter(Tag.name == tag_data.name).first()
         if existing_tag:
@@ -170,6 +194,28 @@ async def update_tag(
 ):
     """Update an existing tag"""
     try:
+        # Check if user has permission to edit tags
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local() as session:
+            user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if user._role_cache is None:
+                user.load_role_cache(session)
+
+            if not user.has_role(SecurityRoles.EDIT_TAGS):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: EDIT_TAGS role required"),
+                )
+
         # Find the tag
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
         if not tag:
@@ -227,6 +273,28 @@ async def delete_tag(
 ):
     """Delete a tag"""
     try:
+        # Check if user has permission to edit tags
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local() as session:
+            user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if user._role_cache is None:
+                user.load_role_cache(session)
+
+            if not user.has_role(SecurityRoles.EDIT_TAGS):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: EDIT_TAGS role required"),
+                )
+
         # Find the tag
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
         if not tag:
@@ -329,6 +397,28 @@ async def add_tag_to_host(
 ):
     """Add a tag to a host"""
     try:
+        # Check if user has permission to edit tags
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local() as session:
+            user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if user._role_cache is None:
+                user.load_role_cache(session)
+
+            if not user.has_role(SecurityRoles.EDIT_TAGS):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: EDIT_TAGS role required"),
+                )
+
         from sqlalchemy import text
 
         # Verify host exists using raw SQL to avoid ORM issues
@@ -389,6 +479,28 @@ async def remove_tag_from_host(
 ):
     """Remove a tag from a host"""
     try:
+        # Check if user has permission to edit tags
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local() as session:
+            user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if user._role_cache is None:
+                user.load_role_cache(session)
+
+            if not user.has_role(SecurityRoles.EDIT_TAGS):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: EDIT_TAGS role required"),
+                )
+
         # Find the association
         host_tag = (
             db.query(HostTag)

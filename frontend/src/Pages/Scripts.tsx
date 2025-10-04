@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { 
-  IoCode, 
-  IoPlay, 
-  IoAdd, 
+import {
+  IoCode,
+  IoPlay,
+  IoAdd,
   IoSave,
   IoDocumentText,
   IoEye,
   IoTrash,
   IoTime,
-  IoRefresh
+  IoRefresh,
+  IoPencil
 } from 'react-icons/io5';
 import Editor from '@monaco-editor/react';
 import {
@@ -37,15 +38,16 @@ import {
   Stack
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
-import { 
-  scriptsService, 
-  Script, 
-  Host, 
+import {
+  scriptsService,
+  Script,
+  Host,
   ScriptExecution,
-  ExecuteScriptRequest 
+  ExecuteScriptRequest
 } from '../Services/scripts';
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import SearchBox from '../Components/SearchBox';
+import { hasPermission, SecurityRoles } from '../Services/permissions';
 import './css/Scripts.css';
 
 interface TabPanelProps {
@@ -122,6 +124,13 @@ const Scripts: React.FC = () => {
     message: string;
     severity: 'success' | 'error' | 'info' | 'warning';
   }>({ open: false, message: '', severity: 'info' });
+
+  // Permission states
+  const [canAddScript, setCanAddScript] = useState<boolean>(false);
+  const [canEditScript, setCanEditScript] = useState<boolean>(false);
+  const [canDeleteScript, setCanDeleteScript] = useState<boolean>(false);
+  const [canRunScript, setCanRunScript] = useState<boolean>(false);
+  const [canDeleteScriptExecution, setCanDeleteScriptExecution] = useState<boolean>(false);
 
   const allShells = [
     { value: 'bash', label: t('scripts.shells.bash'), platforms: ['linux', 'darwin', 'freebsd', 'openbsd', 'netbsd'] },
@@ -279,6 +288,25 @@ const Scripts: React.FC = () => {
     loadScripts();
     loadExecutions();
   }, [loadScripts, loadExecutions]);
+
+  // Check permissions
+  useEffect(() => {
+    const checkPermissions = async () => {
+      const [addScript, editScript, deleteScript, runScript, deleteExecution] = await Promise.all([
+        hasPermission(SecurityRoles.ADD_SCRIPT),
+        hasPermission(SecurityRoles.EDIT_SCRIPT),
+        hasPermission(SecurityRoles.DELETE_SCRIPT),
+        hasPermission(SecurityRoles.RUN_SCRIPT),
+        hasPermission(SecurityRoles.DELETE_SCRIPT_EXECUTION)
+      ]);
+      setCanAddScript(addScript);
+      setCanEditScript(editScript);
+      setCanDeleteScript(deleteScript);
+      setCanRunScript(runScript);
+      setCanDeleteScriptExecution(deleteExecution);
+    };
+    checkPermissions();
+  }, []);
 
   // Load hosts only when Execute Script tab is accessed
   useEffect(() => {
@@ -755,14 +783,26 @@ const Scripts: React.FC = () => {
       filterable: false,
       disableColumnMenu: true,
       renderCell: (params) => (
-        <IconButton
-          size="small"
-          onClick={() => handleViewScript(params.row as Script)}
-          title={t('scripts.viewScript')}
-          sx={{ color: 'primary.main' }}
-        >
-          <IoEye />
-        </IconButton>
+        <>
+          {canEditScript && (
+            <IconButton
+              size="small"
+              onClick={() => handleEditFromLibrary(params.row as Script)}
+              title={t('scripts.edit')}
+              sx={{ color: 'primary.main' }}
+            >
+              <IoPencil />
+            </IconButton>
+          )}
+          <IconButton
+            size="small"
+            onClick={() => handleViewScript(params.row as Script)}
+            title={t('scripts.viewScript')}
+            sx={{ color: 'primary.main' }}
+          >
+            <IoEye />
+          </IconButton>
+        </>
       ),
     },
   ];
@@ -1072,23 +1112,27 @@ const Scripts: React.FC = () => {
         </div>
         <Box component="section">&nbsp;</Box>
         <Stack direction="row" spacing={2}>
-          <Button
-            variant="outlined"
-            startIcon={<IoAdd />}
-            onClick={handleAddNewScript}
-            disabled={selectedScripts.length > 0}
-          >
-            {t('scripts.addScript')}
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<IoTrash />}
-            onClick={handleDeleteSelected}
-            disabled={selectedScripts.length === 0}
-          >
-            {t('scripts.deleteSelected')}
-          </Button>
+          {canAddScript && (
+            <Button
+              variant="outlined"
+              startIcon={<IoAdd />}
+              onClick={handleAddNewScript}
+              disabled={selectedScripts.length > 0}
+            >
+              {t('scripts.addScript')}
+            </Button>
+          )}
+          {canDeleteScript && (
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<IoTrash />}
+              onClick={handleDeleteSelected}
+              disabled={selectedScripts.length === 0}
+            >
+              {t('scripts.deleteSelected')}
+            </Button>
+          )}
         </Stack>
       </TabPanel>
 
@@ -1202,18 +1246,20 @@ const Scripts: React.FC = () => {
                   </Box>
                 )}
 
-                <Button
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  size="large"
-                  startIcon={<IoPlay />}
-                  onClick={handleExecuteScript}
-                  disabled={loading || !savedScriptId || !selectedHost || isExecuting}
-                  sx={{ mt: 3, py: 1.5 }}
-                >
-                  {isExecuting ? t('scripts.executing') : t('scripts.executeNow')}
-                </Button>
+                {canRunScript && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    size="large"
+                    startIcon={<IoPlay />}
+                    onClick={handleExecuteScript}
+                    disabled={loading || !savedScriptId || !selectedHost || isExecuting}
+                    sx={{ mt: 3, py: 1.5 }}
+                  >
+                    {isExecuting ? t('scripts.executing') : t('scripts.executeNow')}
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </Grid>
@@ -1392,15 +1438,17 @@ const Scripts: React.FC = () => {
           />
         </div>
         <Box component="section">&nbsp;</Box>
-        <Button
-          variant="outlined"
-          color="error"
-          startIcon={<IoTrash />}
-          onClick={handleDeleteSelectedExecutions}
-          disabled={selectedExecutions.length === 0}
-        >
-          {t('scripts.deleteSelectedExecutions')}
-        </Button>
+        {canDeleteScriptExecution && (
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<IoTrash />}
+            onClick={handleDeleteSelectedExecutions}
+            disabled={selectedExecutions.length === 0}
+          >
+            {t('scripts.deleteSelectedExecutions')}
+          </Button>
+        )}
       </TabPanel>
 
       {/* Script Viewing Dialog */}
@@ -1460,25 +1508,29 @@ const Scripts: React.FC = () => {
               </Box>
             </DialogContent>
             <DialogActions>
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<IoTrash />}
-                onClick={() => {
-                  if (viewingScript.id) {
-                    handleDeleteScript(viewingScript.id);
-                    handleCloseScriptView();
-                  }
-                }}
-              >
-                {t('scripts.delete')}
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => handleEditFromLibrary(viewingScript)}
-              >
-                {t('scripts.edit')}
-              </Button>
+              {canDeleteScript && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<IoTrash />}
+                  onClick={() => {
+                    if (viewingScript.id) {
+                      handleDeleteScript(viewingScript.id);
+                      handleCloseScriptView();
+                    }
+                  }}
+                >
+                  {t('scripts.delete')}
+                </Button>
+              )}
+              {canEditScript && (
+                <Button
+                  variant="contained"
+                  onClick={() => handleEditFromLibrary(viewingScript)}
+                >
+                  {t('scripts.edit')}
+                </Button>
+              )}
               <Button onClick={handleCloseScriptView}>
                 {t('common.close')}
               </Button>

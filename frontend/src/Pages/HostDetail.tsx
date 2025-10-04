@@ -57,6 +57,7 @@ import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
+import { hasPermission, SecurityRoles } from '../Services/permissions';
 
 import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck } from '../Services/hosts';
 import { SysManageUser, doGetMe } from '../Services/users';
@@ -178,6 +179,17 @@ const HostDetail = () => {
     const [availableTags, setAvailableTags] = useState<Array<{id: string, name: string, description: string | null}>>([]);
     const [selectedTagToAdd, setSelectedTagToAdd] = useState<string>('');
     const [diagnosticDetailLoading, setDiagnosticDetailLoading] = useState<boolean>(false);
+
+    // Permission states
+    const [canEditTags, setCanEditTags] = useState<boolean>(false);
+    const [canStopService, setCanStopService] = useState<boolean>(false);
+    const [canStartService, setCanStartService] = useState<boolean>(false);
+    const [canRestartService, setCanRestartService] = useState<boolean>(false);
+    const [canAddPackage, setCanAddPackage] = useState<boolean>(false);
+    const [canDeploySshKey, setCanDeploySshKey] = useState<boolean>(false);
+    const [canDeployCertificate, setCanDeployCertificate] = useState<boolean>(false);
+    const [canAttachUbuntuPro, setCanAttachUbuntuPro] = useState<boolean>(false);
+    const [canDetachUbuntuPro, setCanDetachUbuntuPro] = useState<boolean>(false);
 
     // Installation history state
     interface InstallationHistoryItem {
@@ -398,6 +410,33 @@ const HostDetail = () => {
                 clearInterval(rolesRefreshInterval.current);
             }
         };
+    }, []);
+
+    // Check permissions
+    useEffect(() => {
+        const checkPermissions = async () => {
+            const [editTags, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro] = await Promise.all([
+                hasPermission(SecurityRoles.EDIT_TAGS),
+                hasPermission(SecurityRoles.STOP_HOST_SERVICE),
+                hasPermission(SecurityRoles.START_HOST_SERVICE),
+                hasPermission(SecurityRoles.RESTART_HOST_SERVICE),
+                hasPermission(SecurityRoles.ADD_PACKAGE),
+                hasPermission(SecurityRoles.DEPLOY_SSH_KEY),
+                hasPermission(SecurityRoles.DEPLOY_CERTIFICATE),
+                hasPermission(SecurityRoles.ATTACH_UBUNTU_PRO),
+                hasPermission(SecurityRoles.DETACH_UBUNTU_PRO)
+            ]);
+            setCanEditTags(editTags);
+            setCanStopService(stopService);
+            setCanStartService(startService);
+            setCanRestartService(restartService);
+            setCanAddPackage(addPackage);
+            setCanDeploySshKey(deploySshKey);
+            setCanDeployCertificate(deployCertificate);
+            setCanAttachUbuntuPro(attachUbuntuPro);
+            setCanDetachUbuntuPro(detachUbuntuPro);
+        };
+        checkPermissions();
     }, []);
 
     useEffect(() => {
@@ -2249,8 +2288,8 @@ const HostDetail = () => {
                                     <Chip
                                         key={tag.id}
                                         label={tag.name}
-                                        onDelete={() => handleRemoveTag(tag.id)}
-                                        deleteIcon={<DeleteIcon />}
+                                        onDelete={canEditTags ? () => handleRemoveTag(tag.id) : undefined}
+                                        deleteIcon={canEditTags ? <DeleteIcon /> : undefined}
                                         variant="outlined"
                                     />
                                 ))}
@@ -2260,30 +2299,32 @@ const HostDetail = () => {
                                     </Typography>
                                 )}
                             </Box>
-                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                <FormControl size="small" sx={{ minWidth: 200 }}>
-                                    <InputLabel>{t('hostDetail.addTag', 'Add Tag')}</InputLabel>
-                                    <Select
-                                        value={selectedTagToAdd}
-                                        onChange={(e) => setSelectedTagToAdd(e.target.value)}
-                                        label={t('hostDetail.addTag', 'Add Tag')}
+                            {canEditTags && (
+                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                    <FormControl size="small" sx={{ minWidth: 200 }}>
+                                        <InputLabel>{t('hostDetail.addTag', 'Add Tag')}</InputLabel>
+                                        <Select
+                                            value={selectedTagToAdd}
+                                            onChange={(e) => setSelectedTagToAdd(e.target.value)}
+                                            label={t('hostDetail.addTag', 'Add Tag')}
+                                        >
+                                            {availableTags.map(tag => (
+                                                <MenuItem key={tag.id} value={tag.id}>
+                                                    {tag.name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                    <Button
+                                        variant="contained"
+                                        onClick={handleAddTag}
+                                        disabled={!selectedTagToAdd}
+                                        size="small"
                                     >
-                                        {availableTags.map(tag => (
-                                            <MenuItem key={tag.id} value={tag.id}>
-                                                {tag.name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                                <Button
-                                    variant="contained"
-                                    onClick={handleAddTag}
-                                    disabled={!selectedTagToAdd}
-                                    size="small"
-                                >
-                                    {t('common.add', 'Add')}
-                                </Button>
-                            </Box>
+                                        {t('common.add', 'Add')}
+                                    </Button>
+                                </Box>
+                            )}
                         </CardContent>
                     </Card>
                 </Grid>
@@ -2623,19 +2664,21 @@ const HostDetail = () => {
                                         </Typography>
                                     </Box>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                        <Button
-                                            variant="contained"
-                                            startIcon={<AddIcon />}
-                                            sx={{
-                                                backgroundColor: 'primary.main',
-                                                '&:hover': { backgroundColor: 'primary.dark' },
-                                                height: '40px', // Match ToggleButtonGroup height for small size
-                                                minHeight: '40px'
-                                            }}
-                                            onClick={() => setPackageInstallDialogOpen(true)}
-                                        >
-                                            {t('hostDetail.addPackage', 'Add Package')}
-                                        </Button>
+                                        {canAddPackage && (
+                                            <Button
+                                                variant="contained"
+                                                startIcon={<AddIcon />}
+                                                sx={{
+                                                    backgroundColor: 'primary.main',
+                                                    '&:hover': { backgroundColor: 'primary.dark' },
+                                                    height: '40px', // Match ToggleButtonGroup height for small size
+                                                    minHeight: '40px'
+                                                }}
+                                                onClick={() => setPackageInstallDialogOpen(true)}
+                                            >
+                                                {t('hostDetail.addPackage', 'Add Package')}
+                                            </Button>
+                                        )}
                                         <ToggleButtonGroup
                                             value={packageManagerFilter}
                                             exclusive
@@ -2792,16 +2835,18 @@ const HostDetail = () => {
                                                             <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
                                                                 {user.username}
                                                             </Typography>
-                                                            <Button
-                                                                size="small"
-                                                                variant="outlined"
-                                                                color="primary"
-                                                                onClick={() => handleAddSSHKey(user)}
-                                                                disabled={!host?.active || !host?.is_agent_privileged}
-                                                                sx={{ minWidth: 'auto', fontSize: '0.7rem', py: 0.25, px: 1 }}
-                                                            >
-                                                                {t('hostDetail.addSSHKey', 'Add SSH Key')}
-                                                            </Button>
+                                                            {canDeploySshKey && (
+                                                                <Button
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                    color="primary"
+                                                                    onClick={() => handleAddSSHKey(user)}
+                                                                    disabled={!host?.active || !host?.is_agent_privileged}
+                                                                    sx={{ minWidth: 'auto', fontSize: '0.7rem', py: 0.25, px: 1 }}
+                                                                >
+                                                                    {t('hostDetail.addSSHKey', 'Add SSH Key')}
+                                                                </Button>
+                                                            )}
                                                         </Box>
                                                         <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
                                                             {host?.platform?.toLowerCase().includes('windows') ? 'SID' : 'UID'}: {host?.platform?.toLowerCase().includes('windows') ? (user.security_id || t('common.notAvailable')) : (user.uid !== undefined ? user.uid : t('common.notAvailable'))}
@@ -3080,18 +3125,20 @@ const HostDetail = () => {
                                                 {t('common.all', 'All')}
                                             </ToggleButton>
                                         </ToggleButtonGroup>
-                                        <Button
-                                            variant="outlined"
-                                            startIcon={<AddIcon />}
-                                            onClick={() => {
-                                                setAddCertificateDialogOpen(true);
-                                                loadAvailableCertificates();
-                                            }}
-                                            disabled={!host.active || !host.is_agent_privileged}
-                                            sx={{ minWidth: 100, height: '36.5px' }}
-                                        >
-                                            {t('hostDetail.addCertificate', 'Add')}
-                                        </Button>
+                                        {canDeployCertificate && (
+                                            <Button
+                                                variant="outlined"
+                                                startIcon={<AddIcon />}
+                                                onClick={() => {
+                                                    setAddCertificateDialogOpen(true);
+                                                    loadAvailableCertificates();
+                                                }}
+                                                disabled={!host.active || !host.is_agent_privileged}
+                                                sx={{ minWidth: 100, height: '36.5px' }}
+                                            >
+                                                {t('hostDetail.addCertificate', 'Add')}
+                                            </Button>
+                                        )}
                                         <Button
                                             variant="outlined"
                                             startIcon={<RefreshIcon />}
@@ -3386,41 +3433,47 @@ const HostDetail = () => {
                                 )}
 
                                 {/* Service Control Buttons */}
-                                {!rolesLoading && roles.length > 0 && roles.some(role => role.service_name && role.service_name.trim() !== '') && (
+                                {!rolesLoading && roles.length > 0 && roles.some(role => role.service_name && role.service_name.trim() !== '') && (canStartService || canStopService || canRestartService) && (
                                     <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex', gap: 2, alignItems: 'center' }}>
                                         <Typography variant="body2" sx={{ color: 'textSecondary', mr: 2 }}>
                                             {t('hostDetail.serviceControlActions', 'Service Control Actions')}:
                                         </Typography>
-                                        <Button
-                                            variant="contained"
-                                            color="success"
-                                            startIcon={<PlayArrowIcon />}
-                                            onClick={() => handleServiceControl('start')}
-                                            disabled={!host.is_agent_privileged || selectedRoles.length === 0 || serviceControlLoading}
-                                            sx={{ minWidth: 100 }}
-                                        >
-                                            {serviceControlLoading ? <CircularProgress size={20} /> : t('hostDetail.start', 'Start')}
-                                        </Button>
-                                        <Button
-                                            variant="contained"
-                                            color="error"
-                                            startIcon={<StopIcon />}
-                                            onClick={() => handleServiceControl('stop')}
-                                            disabled={!host.is_agent_privileged || selectedRoles.length === 0 || serviceControlLoading}
-                                            sx={{ minWidth: 100 }}
-                                        >
-                                            {serviceControlLoading ? <CircularProgress size={20} /> : t('hostDetail.stop', 'Stop')}
-                                        </Button>
-                                        <Button
-                                            variant="contained"
-                                            color="warning"
-                                            startIcon={<RestartAltIcon />}
-                                            onClick={() => handleServiceControl('restart')}
-                                            disabled={!host.is_agent_privileged || selectedRoles.length === 0 || serviceControlLoading}
-                                            sx={{ minWidth: 100 }}
-                                        >
-                                            {serviceControlLoading ? <CircularProgress size={20} /> : t('hostDetail.restart', 'Restart')}
-                                        </Button>
+                                        {canStartService && (
+                                            <Button
+                                                variant="contained"
+                                                color="success"
+                                                startIcon={<PlayArrowIcon />}
+                                                onClick={() => handleServiceControl('start')}
+                                                disabled={!host.is_agent_privileged || selectedRoles.length === 0 || serviceControlLoading}
+                                                sx={{ minWidth: 100 }}
+                                            >
+                                                {serviceControlLoading ? <CircularProgress size={20} /> : t('hostDetail.start', 'Start')}
+                                            </Button>
+                                        )}
+                                        {canStopService && (
+                                            <Button
+                                                variant="contained"
+                                                color="error"
+                                                startIcon={<StopIcon />}
+                                                onClick={() => handleServiceControl('stop')}
+                                                disabled={!host.is_agent_privileged || selectedRoles.length === 0 || serviceControlLoading}
+                                                sx={{ minWidth: 100 }}
+                                            >
+                                                {serviceControlLoading ? <CircularProgress size={20} /> : t('hostDetail.stop', 'Stop')}
+                                            </Button>
+                                        )}
+                                        {canRestartService && (
+                                            <Button
+                                                variant="contained"
+                                                color="warning"
+                                                startIcon={<RestartAltIcon />}
+                                                onClick={() => handleServiceControl('restart')}
+                                                disabled={!host.is_agent_privileged || selectedRoles.length === 0 || serviceControlLoading}
+                                                sx={{ minWidth: 100 }}
+                                            >
+                                                {serviceControlLoading ? <CircularProgress size={20} /> : t('hostDetail.restart', 'Restart')}
+                                            </Button>
+                                        )}
                                         {!host.is_agent_privileged && (
                                             <Typography variant="caption" sx={{ color: 'warning.main', ml: 2 }}>
                                                 {t('hostDetail.privilegedModeRequired', 'Privileged mode required for service control')}
@@ -3473,25 +3526,29 @@ const HostDetail = () => {
                                             {!ubuntuProAttaching && !ubuntuProDetaching && (
                                                 <>
                                                     {ubuntuProInfo.attached ? (
-                                                        <Button
-                                                            variant="outlined"
-                                                            color="warning"
-                                                            size="small"
-                                                            onClick={handleUbuntuProDetach}
-                                                            startIcon={<DeleteIcon />}
-                                                        >
-                                                            {t('hostDetail.ubuntuProDetach', 'Detach')}
-                                                        </Button>
+                                                        canDetachUbuntuPro && (
+                                                            <Button
+                                                                variant="outlined"
+                                                                color="warning"
+                                                                size="small"
+                                                                onClick={handleUbuntuProDetach}
+                                                                startIcon={<DeleteIcon />}
+                                                            >
+                                                                {t('hostDetail.ubuntuProDetach', 'Detach')}
+                                                            </Button>
+                                                        )
                                                     ) : (
-                                                        <Button
-                                                            variant="outlined"
-                                                            color="primary"
-                                                            size="small"
-                                                            onClick={handleUbuntuProAttach}
-                                                            startIcon={<VerifiedUserIcon />}
-                                                        >
-                                                            {t('hostDetail.ubuntuProAttach', 'Attach')}
-                                                        </Button>
+                                                        canAttachUbuntuPro && (
+                                                            <Button
+                                                                variant="outlined"
+                                                                color="primary"
+                                                                size="small"
+                                                                onClick={handleUbuntuProAttach}
+                                                                startIcon={<VerifiedUserIcon />}
+                                                            >
+                                                                {t('hostDetail.ubuntuProAttach', 'Attach')}
+                                                            </Button>
+                                                        )
                                                     )}
                                                 </>
                                             )}

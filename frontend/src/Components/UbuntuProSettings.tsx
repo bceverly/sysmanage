@@ -25,6 +25,7 @@ import {
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
+import { hasPermission, SecurityRoles } from '../Services/permissions';
 
 interface MasterKeyStatus {
   has_master_key: boolean;
@@ -50,6 +51,9 @@ const UbuntuProSettings: React.FC = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+
+  // Permission state
+  const [canChangeUbuntuProMasterKey, setCanChangeUbuntuProMasterKey] = useState<boolean>(false);
 
   // Helper functions
   const showSnackbar = useCallback((message: string, severity: 'success' | 'error') => {
@@ -80,6 +84,15 @@ const UbuntuProSettings: React.FC = () => {
     } catch (error) {
       console.error('Error loading master key status:', error);
     }
+  }, []);
+
+  // Check permissions
+  useEffect(() => {
+    const checkPermission = async () => {
+      const changeMasterKey = await hasPermission(SecurityRoles.CHANGE_UBUNTU_PRO_MASTER_KEY);
+      setCanChangeUbuntuProMasterKey(changeMasterKey);
+    };
+    checkPermission();
   }, []);
 
   // Load settings on component mount
@@ -243,16 +256,18 @@ const UbuntuProSettings: React.FC = () => {
 
             {/* Action buttons */}
             <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-              <Button
-                variant="contained"
-                startIcon={saving ? <CircularProgress size={20} /> : <SaveIcon />}
-                onClick={saveSettings}
-                disabled={!isFormValid() || saving}
-              >
-                {t('common.save', 'Save')}
-              </Button>
+              {canChangeUbuntuProMasterKey && (
+                <Button
+                  variant="contained"
+                  startIcon={saving ? <CircularProgress size={20} /> : <SaveIcon />}
+                  onClick={saveSettings}
+                  disabled={!isFormValid() || saving}
+                >
+                  {t('common.save', 'Save')}
+                </Button>
+              )}
 
-              {keyStatus?.has_master_key && (
+              {canChangeUbuntuProMasterKey && keyStatus?.has_master_key && (
                 <Button
                   variant="outlined"
                   color="error"

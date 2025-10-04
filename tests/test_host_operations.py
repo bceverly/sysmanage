@@ -25,15 +25,46 @@ class MockHost:
         self.approval_status = "approved"
         self.status = "up"
         self.active = True
+        self._role_cache = None
+
+    def load_role_cache(self, session):
+        """Mock method to load role cache."""
+        self._role_cache = set()
+
+    def has_role(self, role):
+        """Mock method that returns True for all roles (testing purposes)."""
+        return True
+
+
+class MockUser:
+    """Mock user object."""
+
+    def __init__(self, user_id=1, userid="test@example.com"):
+        self.id = user_id
+        self.userid = userid
+        self.active = True
+        self._role_cache = None
+
+    def load_role_cache(self, session):
+        """Mock method to load role cache."""
+        self._role_cache = set()
+
+    def has_role(self, role):
+        """Mock method that returns True for all roles (testing purposes)."""
+        return True
 
 
 class MockSession:
     """Mock database session."""
 
-    def __init__(self, hosts=None):
+    def __init__(self, hosts=None, users=None):
         self.hosts = hosts or []
+        self.users = users or [MockUser()]  # Default user for RBAC checks
 
     def query(self, model):
+        # Return different mock queries based on model type
+        if hasattr(model, "__name__") and "User" in model.__name__:
+            return MockQuery(self.users)
         return MockQuery(self.hosts)
 
     def __enter__(self):

@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import api from '../Services/api';
+import { hasPermission, SecurityRoles } from '../Services/permissions';
 
 import {
   Box,
@@ -65,6 +66,23 @@ const Reports: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchField, setSearchField] = useState<'name' | 'description'>('name');
+
+  // Permission states
+  const [canViewReport, setCanViewReport] = useState<boolean>(false);
+  const [canGeneratePdfReport, setCanGeneratePdfReport] = useState<boolean>(false);
+
+  // Check permissions
+  useEffect(() => {
+    const checkPermissions = async () => {
+      const [viewReport, generatePdf] = await Promise.all([
+        hasPermission(SecurityRoles.VIEW_REPORT),
+        hasPermission(SecurityRoles.GENERATE_PDF_REPORT)
+      ]);
+      setCanViewReport(viewReport);
+      setCanGeneratePdfReport(generatePdf);
+    };
+    checkPermissions();
+  }, []);
 
   const filteredReports = useMemo(() => {
     // Get the backend base URL for screenshots
@@ -213,24 +231,28 @@ const Reports: React.FC = () => {
           </Box>
         </CardContent>
         <Box sx={{ p: 2, pt: 0, display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<ViewIcon />}
-            fullWidth
-            size="small"
-            onClick={() => handleViewReport(report.id)}
-          >
-            {t('reports.viewReport', 'View Report')}
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<DownloadIcon />}
-            fullWidth
-            size="small"
-            onClick={() => handleGenerateReport(report.id)}
-          >
-            {t('reports.generatePdf', 'Generate PDF')}
-          </Button>
+          {canViewReport && (
+            <Button
+              variant="outlined"
+              startIcon={<ViewIcon />}
+              fullWidth
+              size="small"
+              onClick={() => handleViewReport(report.id)}
+            >
+              {t('reports.viewReport', 'View Report')}
+            </Button>
+          )}
+          {canGeneratePdfReport && (
+            <Button
+              variant="contained"
+              startIcon={<DownloadIcon />}
+              fullWidth
+              size="small"
+              onClick={() => handleGenerateReport(report.id)}
+            >
+              {t('reports.generatePdf', 'Generate PDF')}
+            </Button>
+          )}
         </Box>
       </Card>
     </Grid>
