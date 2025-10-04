@@ -92,7 +92,7 @@ async def handle_update_apply_result(db: Session, connection, message_data: dict
                     )
                     .values(
                         status="completed",
-                        applied_date=text("NOW()"),
+                        applied_date=datetime.now(timezone.utc).replace(tzinfo=None),
                         new_version=new_version,
                     )
                 )
@@ -122,7 +122,7 @@ async def handle_update_apply_result(db: Session, connection, message_data: dict
                     .values(
                         status="failed",
                         error_message=error,
-                        applied_date=text("NOW()"),
+                        applied_date=datetime.now(timezone.utc).replace(tzinfo=None),
                     )
                 )
                 result = db.execute(stmt)

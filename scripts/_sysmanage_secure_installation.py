@@ -15,6 +15,7 @@ import os
 import platform
 import re
 import secrets
+import shutil
 import string
 import subprocess
 import sys
@@ -119,12 +120,19 @@ def get_original_user():
     if doas_user:
         return doas_user
 
-    # Fall back to current user if not under sudo/doas
-    import pwd
-    return pwd.getpwuid(os.getuid()).pw_name
+    # Fall back to current user
+    if platform.system() == "Windows":
+        return os.environ.get('USERNAME', 'user')
+    else:
+        import pwd
+        return pwd.getpwuid(os.getuid()).pw_name
 
 def fix_file_ownership(file_path):
     """Fix file ownership to the original user if running under sudo/doas."""
+    # Windows doesn't need ownership fixing (no sudo/doas concept)
+    if platform.system() == "Windows":
+        return
+
     try:
         original_user = get_original_user()
         elevated_user = os.environ.get('SUDO_USER') or os.environ.get('DOAS_USER') or os.environ.get('ORIGINAL_USER')
@@ -874,33 +882,55 @@ def update_config_file(salt, jwt_secret):
 
 def find_vault_binary():
     """Find OpenBAO or Vault binary."""
-    # Get the original user's home directory (before sudo)
-    original_user = get_original_user()
+    system = platform.system()
 
-    # Check for bao in original user's home directory first
-    try:
-        import pwd
-        user_info = pwd.getpwnam(original_user)
-        user_home = user_info.pw_dir
-        bao_path = os.path.join(user_home, '.local', 'bin', 'bao')
-        if os.path.exists(bao_path):
-            return bao_path
-    except Exception as e:
-        print(f"  Debug: Could not check user home for bao: {e}")
+    if system == "Windows":
+        # Windows-specific search
+        # Check for bao/vault in PATH first
+        for cmd in ['bao.exe', 'bao', 'vault.exe', 'vault']:
+            binary_path = shutil.which(cmd)
+            if binary_path and os.path.exists(binary_path):
+                return binary_path
 
-    # Check system PATH
-    for cmd in ['bao', 'vault']:
+        # Check common Windows locations
+        common_paths = [
+            os.path.expanduser(r'~\AppData\Local\bin\bao.exe'),
+            r'C:\Program Files\OpenBAO\bao.exe',
+            r'C:\Program Files (x86)\OpenBAO\bao.exe',
+        ]
+        for path in common_paths:
+            if os.path.exists(path):
+                return path
+
+    else:
+        # Unix-like systems (Linux, BSD, macOS)
+        # Get the original user's home directory (before sudo)
+        original_user = get_original_user()
+
+        # Check for bao in original user's home directory first
         try:
-            result = subprocess.run(['which', cmd], capture_output=True, text=True)
-            if result.returncode == 0:
-                binary_path = result.stdout.strip()
-                if binary_path:
-                    # Expand ~ if present (which sometimes returns unexpanded paths)
-                    expanded_path = os.path.expanduser(binary_path)
-                    if os.path.exists(expanded_path):
-                        return expanded_path
-        except:
-            pass
+            import pwd
+            user_info = pwd.getpwnam(original_user)
+            user_home = user_info.pw_dir
+            bao_path = os.path.join(user_home, '.local', 'bin', 'bao')
+            if os.path.exists(bao_path):
+                return bao_path
+        except Exception as e:
+            print(f"  Debug: Could not check user home for bao: {e}")
+
+        # Check system PATH
+        for cmd in ['bao', 'vault']:
+            try:
+                result = subprocess.run(['which', cmd], capture_output=True, text=True)
+                if result.returncode == 0:
+                    binary_path = result.stdout.strip()
+                    if binary_path:
+                        # Expand ~ if present (which sometimes returns unexpanded paths)
+                        expanded_path = os.path.expanduser(binary_path)
+                        if os.path.exists(expanded_path):
+                            return expanded_path
+            except:
+                pass
 
     return None
 
@@ -954,6 +984,14 @@ def initialize_vault():
 
     print(f"  Using vault binary: {vault_cmd}")
 
+    # Clean up any stale vault data from previous failed attempts
+    data_dir = project_root / 'data' / 'openbao'
+    if data_dir.exists() and any(data_dir.iterdir()):
+        print("  Cleaning up stale vault data from previous installation...")
+        import shutil
+        shutil.rmtree(data_dir, ignore_errors=True)
+        data_dir.mkdir(parents=True, exist_ok=True)
+
     # Create production configuration
     vault_config_path = project_root / 'openbao.hcl'
     vault_config = '''storage "file" {
@@ -992,15 +1030,29 @@ ui = true
     # Use absolute path for config file
     vault_config_abs_path = str(vault_config_path.absolute())
 
-    vault_process = subprocess.Popen([
-        vault_cmd, 'server', f'-config={vault_config_abs_path}'
-    ], stdout=open(log_file, 'w'), stderr=subprocess.STDOUT, cwd=str(project_root))
+    # Start vault server with platform-specific handling
+    if platform.system() == "Windows":
+        # On Windows, use CREATE_NEW_PROCESS_GROUP to properly detach
+        vault_process = subprocess.Popen([
+            vault_cmd, 'server', f'-config={vault_config_abs_path}'
+        ],
+        stdout=open(log_file, 'w'),
+        stderr=subprocess.STDOUT,
+        cwd=str(project_root),
+        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+    else:
+        vault_process = subprocess.Popen([
+            vault_cmd, 'server', f'-config={vault_config_abs_path}'
+        ], stdout=open(log_file, 'w'), stderr=subprocess.STDOUT, cwd=str(project_root))
 
     # Fix ownership of the log file after it's created
     fix_file_ownership(log_file)
 
-    # Wait for server to start
-    time.sleep(5)
+    # Wait for server to start (longer on Windows)
+    if platform.system() == "Windows":
+        time.sleep(8)
+    else:
+        time.sleep(5)
 
     # Set vault address
     env = os.environ.copy()

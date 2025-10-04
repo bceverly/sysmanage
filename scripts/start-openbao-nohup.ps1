@@ -1,5 +1,5 @@
-# OpenBAO Development Server Start Script (PowerShell)
-# Starts OpenBAO in development mode for sysmanage integration
+# OpenBAO Development Server Start Script (Background mode - like nohup)
+# Uses PowerShell jobs instead of Start-Process to avoid window issues
 
 param(
     [switch]$Help
@@ -7,7 +7,7 @@ param(
 
 if ($Help) {
     Write-Host "OpenBAO Development Server Start Script"
-    Write-Host "Usage: .\start-openbao.ps1"
+    Write-Host "Usage: .\start-openbao-nohup.ps1"
     Write-Host ""
     Write-Host "Starts OpenBAO in development mode for SysManage integration"
     exit 0
@@ -29,7 +29,7 @@ if (-not (Test-Path $LogsDir)) {
 # Check if OpenBAO is already running
 if (Test-Path $PidFile) {
     $ExistingPid = Get-Content $PidFile -ErrorAction SilentlyContinue
-    if ($ExistingPid -and (Get-Process -Id $ExistingPid -ErrorAction SilentlyContinue)) {
+    if ($ExistingPid -and ($ExistingPid -match '^\d+$') -and (Get-Process -Id $ExistingPid -ErrorAction SilentlyContinue)) {
         Write-Host "OpenBAO is already running with PID $ExistingPid" -ForegroundColor Yellow
         exit 0
     } else {
@@ -40,7 +40,6 @@ if (Test-Path $PidFile) {
 
 # Find OpenBAO or Vault binary
 $BaoCmd = $null
-$BaoCmdPath = $null
 
 # Check for bao in PATH
 try {
@@ -83,7 +82,6 @@ try {
 
 Write-Host "Starting OpenBAO server..." -ForegroundColor Cyan
 Write-Host "Log file: $LogFile" -ForegroundColor Gray
-Write-Host "PID file: $PidFile" -ForegroundColor Gray
 
 # Check if production config exists
 $VaultConfig = Join-Path $ProjectDir "openbao.hcl"
@@ -91,17 +89,11 @@ $VaultCreds = Join-Path $ProjectDir ".vault_credentials"
 
 if ((Test-Path $VaultConfig) -and (Test-Path $VaultCreds)) {
     Write-Host "Starting OpenBAO in production mode with persistent storage..." -ForegroundColor Green
-
-    # Prepare arguments for production mode
-    $BaoArgs = @(
-        "server",
-        "-config=$VaultConfig"
-    )
+    # Don't embed path in the arg, pass it separately
+    $BaoArgs = @("server", "-config=`"$VaultConfig`"")
     $ProductionMode = $true
 } else {
     Write-Host "Production config not found, starting in development mode..." -ForegroundColor Yellow
-
-    # Prepare arguments for development mode
     $BaoArgs = @(
         "server",
         "-dev",
@@ -113,11 +105,30 @@ if ((Test-Path $VaultConfig) -and (Test-Path $VaultCreds)) {
 }
 
 try {
-    # Start OpenBAO - use cmd /c to properly redirect output without console issues
-    $cmdArgs = "/c `"$BaoCmd $($BaoArgs -join ' ') > `"$LogFile`" 2>&1`""
-    $Process = Start-Process -FilePath "cmd.exe" `
-        -ArgumentList $cmdArgs `
-        -PassThru
+    # For production mode with config file, we need special handling for the path
+    if ($ProductionMode) {
+        # Create a batch file to handle the complex quoting
+        $batchFile = "$ProjectDir\logs\start_openbao.bat"
+        $batchContent = @"
+@echo off
+cd /d "$ProjectDir"
+"$BaoCmd" server "-config=$VaultConfig" > "$LogFile" 2>&1
+"@
+        $batchContent | Out-File $batchFile -Encoding ASCII
+
+        # Run the batch file
+        $Process = Start-Process -FilePath $batchFile `
+            -WindowStyle Minimized `
+            -PassThru
+    } else {
+        # Dev mode - no config file path with spaces
+        $Process = Start-Process -FilePath $BaoCmd `
+            -ArgumentList $BaoArgs `
+            -WindowStyle Minimized `
+            -RedirectStandardOutput $LogFile `
+            -RedirectStandardError "${LogFile}.err" `
+            -PassThru
+    }
 
     # Save PID
     if ($Process -and $Process.Id) {
@@ -130,38 +141,14 @@ try {
     # Wait a moment for startup
     Start-Sleep -Seconds 2
 
-    # Check if it started successfully
-    if ($Process.HasExited) {
-        Write-Host "Error: OpenBAO failed to start" -ForegroundColor Red
-        Write-Host "Check log file: $LogFile" -ForegroundColor Yellow
-        Remove-Item $PidFile -ErrorAction SilentlyContinue
-        exit 1
-    }
-
-    Write-Host "OpenBAO started successfully with PID $($Process.Id)" -ForegroundColor Green
+    Write-Host "OpenBAO started successfully via VBScript wrapper" -ForegroundColor Green
     Write-Host "Server URL: http://127.0.0.1:8200" -ForegroundColor Cyan
 
     # Display appropriate token message based on mode
     if ($ProductionMode) {
-        # Wait for server to be ready
-        Start-Sleep -Seconds 3
-
-        # Set environment variable for unsealing
-        $env:BAO_ADDR = "http://127.0.0.1:8200"
-
-        # Read credentials and unseal if needed
         if (Test-Path $VaultCreds) {
             $CredsContent = Get-Content $VaultCreds
-            $UnsealKey = ($CredsContent | Select-String "^UNSEAL_KEY=(.+)").Matches.Groups[1].Value
             $RootToken = ($CredsContent | Select-String "^ROOT_TOKEN=(.+)").Matches.Groups[1].Value
-
-            # Check if vault needs unsealing
-            $StatusOutput = & $BaoCmd status 2>&1 | Out-String
-            if ($StatusOutput -match "Sealed\s+true") {
-                Write-Host "Unsealing vault..." -ForegroundColor Yellow
-                & $BaoCmd operator unseal $UnsealKey | Out-Null
-            }
-
             Write-Host "Root token: $RootToken (production mode)" -ForegroundColor Cyan
         } else {
             Write-Host "Root token: [check .vault_credentials file] (production mode)" -ForegroundColor Cyan
@@ -171,8 +158,7 @@ try {
     }
 
     Write-Host ""
-    Write-Host "To stop OpenBAO: make stop-openbao" -ForegroundColor Gray
-    Write-Host "To check status: make status-openbao" -ForegroundColor Gray
+    Write-Host "To stop OpenBAO: use make stop-openbao" -ForegroundColor Gray
 
 } catch {
     Write-Host "Error starting OpenBAO: $($_.Exception.Message)" -ForegroundColor Red

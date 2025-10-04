@@ -74,13 +74,13 @@ webdriver-manager>=4.0.0
 requests>=2.32.0  # For UI test health checks
 urllib3>=2.5.0  # Security fix for CVE-2024-37891 (SSRF vulnerability)
 
-# OpenTelemetry for observability (using compatible versions with semgrep)
+# OpenTelemetry for observability (updated to latest versions to fix pkg_resources deprecation)
 opentelemetry-api>=1.25.0,<2.0.0
 opentelemetry-sdk>=1.25.0,<2.0.0
-opentelemetry-instrumentation>=0.46b0,<1.0.0
-opentelemetry-instrumentation-fastapi>=0.46b0,<1.0.0
-opentelemetry-instrumentation-sqlalchemy>=0.46b0,<1.0.0
-opentelemetry-instrumentation-requests>=0.46b0,<1.0.0
-opentelemetry-instrumentation-logging>=0.46b0,<1.0.0
+opentelemetry-instrumentation>=0.58b0,<1.0.0
+opentelemetry-instrumentation-fastapi>=0.58b0,<1.0.0
+opentelemetry-instrumentation-sqlalchemy>=0.58b0,<1.0.0
+opentelemetry-instrumentation-requests>=0.58b0,<1.0.0
+opentelemetry-instrumentation-logging>=0.58b0,<1.0.0
 opentelemetry-exporter-otlp>=1.25.0,<2.0.0
-opentelemetry-exporter-prometheus>=0.46b0,<1.0.0
+opentelemetry-exporter-prometheus>=0.58b0,<1.0.0

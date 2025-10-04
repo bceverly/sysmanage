@@ -131,17 +131,19 @@ async def handle_system_info(db: Session, connection, message_data: dict):
         # Check approval status
         debug_logger.info("Host %s approval status: %s", hostname, host.approval_status)
 
-        # Set connection details if approved
+        # Always set hostname on connection so we can send approval messages
+        connection.hostname = hostname
+
+        # Update connection manager mapping for sending messages to this host
+        from backend.websocket.connection_manager import connection_manager
+
+        connection_manager.register_agent(
+            connection.agent_id, hostname, ipv4, ipv6, platform
+        )
+
+        # Set host_id only if approved
         if host.approval_status == "approved":
             connection.host_id = host.id
-            connection.hostname = hostname
-
-            # Update connection manager mapping for sending messages to this host
-            from backend.websocket.connection_manager import connection_manager
-
-            connection_manager.register_agent(
-                connection.agent_id, hostname, ipv4, ipv6, platform
-            )
 
             # Update host online status
             # Only update last_access for actual heartbeat/checkin messages, not queued data
@@ -172,7 +174,9 @@ async def handle_system_info(db: Session, connection, message_data: dict):
                 not hasattr(connection, "is_mock_connection")
                 or not connection.is_mock_connection
             ):
-                update_values["last_access"] = text("NOW()")
+                update_values["last_access"] = datetime.now(timezone.utc).replace(
+                    tzinfo=None
+                )
 
             stmt = update(Host).where(Host.id == host.id).values(**update_values)
             db.execute(stmt)
@@ -224,7 +228,12 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
     if hasattr(connection, "host_id") and connection.host_id:
         try:
             # Get the host object for tests compatibility and also update it
+            import logging
+
+            logger = logging.getLogger("backend.message_handlers.heartbeat")
+            logger.info("Heartbeat: Looking up host with ID: %s", connection.host_id)
             host = db.query(Host).filter(Host.id == connection.host_id).first()
+            logger.info("Heartbeat: Found host: %s", host.fqdn if host else "NOT FOUND")
             if host:
                 # Update host object attributes for test compatibility
                 host.status = "up"
@@ -258,6 +267,11 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
 
                 # Commit changes
                 db.commit()
+                logger.info(
+                    "Heartbeat: Updated last_access for %s to %s",
+                    host.fqdn,
+                    host.last_access,
+                )
                 result_rowcount = 1
             else:
                 # Host not found - create a new host entry if we have the connection info

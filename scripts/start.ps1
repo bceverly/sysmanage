@@ -209,8 +209,8 @@ $pythonExe -m backend.main >> "$ProjectRoot\logs\backend.log" 2>&1
     $backendBatchFile = "logs\start_backend.bat"
     $backendBatchContent | Out-File $backendBatchFile -Encoding ascii
 
-    # Start backend process in background
-    $backendProcess = Start-Process -FilePath "cmd.exe" -ArgumentList "/c", $backendBatchFile -WindowStyle Hidden -PassThru -WorkingDirectory $ProjectRoot
+    # Start backend process in new window
+    $backendProcess = Start-Process -FilePath "cmd.exe" -ArgumentList "/c", $backendBatchFile -PassThru -WorkingDirectory $ProjectRoot
 
     # Store process ID for later cleanup
     if ($backendProcess) {
@@ -258,16 +258,12 @@ if ((Test-Path "frontend") -and (Test-Path "frontend\package.json")) {
         New-Item -ItemType File -Path $nullInputFile -Force | Out-Null
     }
 
-    # Start npm as background process with output redirection using PowerShell
-    # Use npm.cmd on Windows instead of npm, with proper detachment from terminal
+    # Start npm as background process in new window
+    # Use npm.cmd on Windows
     try {
         $frontendProcess = Start-Process -FilePath "npm.cmd" -ArgumentList "start" `
             -WorkingDirectory "$ProjectRoot\frontend" `
-            -WindowStyle Hidden `
-            -PassThru `
-            -RedirectStandardOutput "$ProjectRoot\logs\frontend.log" `
-            -RedirectStandardError "$ProjectRoot\logs\frontend_error.log" `
-            -RedirectStandardInput $nullInputFile
+            -PassThru
 
         Pop-Location
 
