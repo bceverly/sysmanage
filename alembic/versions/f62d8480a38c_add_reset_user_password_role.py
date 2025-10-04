@@ -19,15 +19,25 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # Detect database type
+    bind = op.get_bind()
+    is_sqlite = bind.dialect.name == 'sqlite'
+    uuid_cast = '' if is_sqlite else '::uuid'
+
     # Add the Reset User Password role to the User group
-    op.execute("""
+    op.execute(f"""
         INSERT INTO security_roles (id, name, description, group_id) VALUES
-        ('10000000-0000-0000-0000-000000000036'::uuid, 'Reset User Password', 'Reset user passwords', '00000000-0000-0000-0000-000000000004'::uuid)
+        ('10000000-0000-0000-0000-000000000036'{uuid_cast}, 'Reset User Password', 'Reset user passwords', '00000000-0000-0000-0000-000000000004'{uuid_cast})
     """)
 
 
 def downgrade() -> None:
+    # Detect database type
+    bind = op.get_bind()
+    is_sqlite = bind.dialect.name == 'sqlite'
+    uuid_cast = '' if is_sqlite else '::uuid'
+
     # Remove the Reset User Password role
-    op.execute("""
-        DELETE FROM security_roles WHERE id = '10000000-0000-0000-0000-000000000036'::uuid
+    op.execute(f"""
+        DELETE FROM security_roles WHERE id = '10000000-0000-0000-0000-000000000036'{uuid_cast}
     """)
