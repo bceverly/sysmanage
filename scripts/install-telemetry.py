@@ -1045,6 +1045,36 @@ def install_python_packages():
 
         # Install packages
         cmd = [str(pip_path), 'install'] + packages
+
+        # Fix pip cache permissions if running with elevated privileges (Linux/macOS only)
+        if platform.system() in ['Linux', 'Darwin'] and os.geteuid() == 0:
+            # Get the original user
+            original_user = os.environ.get('SUDO_USER') or os.environ.get('DOAS_USER') or os.environ.get('ORIGINAL_USER')
+            if original_user:
+                try:
+                    import pwd
+                    user_info = pwd.getpwnam(original_user)
+                    user_home = user_info.pw_dir
+                    uid = user_info.pw_uid
+                    gid = user_info.pw_gid
+
+                    # Fix pip cache directory ownership before running pip
+                    pip_cache_dir = os.path.join(user_home, 'Library', 'Caches', 'pip') if platform.system() == 'Darwin' else os.path.join(user_home, '.cache', 'pip')
+
+                    if os.path.exists(pip_cache_dir):
+                        print(f"  Fixing pip cache permissions...")
+                        for root, dirs, files in os.walk(pip_cache_dir):
+                            try:
+                                os.chown(root, uid, gid)
+                                for d in dirs:
+                                    os.chown(os.path.join(root, d), uid, gid)
+                                for f in files:
+                                    os.chown(os.path.join(root, f), uid, gid)
+                            except Exception:
+                                pass
+                except Exception:
+                    pass  # Don't fail if we can't fix permissions
+
         subprocess.run(cmd, check=True)
 
         print("✅ Python OpenTelemetry packages installed successfully")
