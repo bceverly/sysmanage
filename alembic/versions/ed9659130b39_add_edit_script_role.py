@@ -19,15 +19,25 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # Detect database type
+    bind = op.get_bind()
+    is_sqlite = bind.dialect.name == 'sqlite'
+    uuid_cast = '' if is_sqlite else '::uuid'
+
     # Add the Edit Script role to the Scripts group
-    op.execute("""
+    op.execute(f"""
         INSERT INTO security_roles (id, name, description, group_id) VALUES
-        ('10000000-0000-0000-0000-000000000037'::uuid, 'Edit Script', 'Edit existing scripts', '00000000-0000-0000-0000-000000000005'::uuid)
+        ('10000000-0000-0000-0000-000000000037'{uuid_cast}, 'Edit Script', 'Edit existing scripts', '00000000-0000-0000-0000-000000000005'{uuid_cast})
     """)
 
 
 def downgrade() -> None:
+    # Detect database type
+    bind = op.get_bind()
+    is_sqlite = bind.dialect.name == 'sqlite'
+    uuid_cast = '' if is_sqlite else '::uuid'
+
     # Remove the Edit Script role
-    op.execute("""
-        DELETE FROM security_roles WHERE id = '10000000-0000-0000-0000-000000000037'::uuid
+    op.execute(f"""
+        DELETE FROM security_roles WHERE id = '10000000-0000-0000-0000-000000000037'{uuid_cast}
     """)

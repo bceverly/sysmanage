@@ -20,22 +20,34 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create grafana_integration_settings table
-    op.create_table(
-        'grafana_integration_settings',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('enabled', sa.Boolean(), default=False, nullable=False),
-        sa.Column('host_id', GUID(), nullable=True),  # References host.id when using managed server
-        sa.Column('manual_url', sa.String(255), nullable=True),  # Manual URL when not using managed server
-        sa.Column('use_managed_server', sa.Boolean(), default=True, nullable=False),  # True for dropdown, False for manual
-        sa.Column('api_key', sa.String(255), nullable=True),  # Optional Grafana API key for enhanced features
-        sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.func.now()),
-        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.func.now(), onupdate=sa.func.now()),
-        sa.PrimaryKeyConstraint('id'),
-        sa.ForeignKeyConstraint(['host_id'], ['host.id'], ondelete='SET NULL'),
-    )
+    # Check if grafana_integration_settings table already exists before creating it
+    connection = op.get_bind()
+    inspector = sa.inspect(connection)
+    tables = inspector.get_table_names()
+
+    if 'grafana_integration_settings' not in tables:
+        # Create grafana_integration_settings table
+        op.create_table(
+            'grafana_integration_settings',
+            sa.Column('id', sa.Integer(), nullable=False),
+            sa.Column('enabled', sa.Boolean(), default=False, nullable=False),
+            sa.Column('host_id', GUID(), nullable=True),  # References host.id when using managed server
+            sa.Column('manual_url', sa.String(255), nullable=True),  # Manual URL when not using managed server
+            sa.Column('use_managed_server', sa.Boolean(), default=True, nullable=False),  # True for dropdown, False for manual
+            sa.Column('api_key', sa.String(255), nullable=True),  # Optional Grafana API key for enhanced features
+            sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.func.now()),
+            sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.func.now(), onupdate=sa.func.now()),
+            sa.PrimaryKeyConstraint('id'),
+            sa.ForeignKeyConstraint(['host_id'], ['host.id'], ondelete='SET NULL'),
+        )
 
 
 def downgrade() -> None:
-    # Drop grafana_integration_settings table
-    op.drop_table('grafana_integration_settings')
+    # Check if grafana_integration_settings table exists before dropping it
+    connection = op.get_bind()
+    inspector = sa.inspect(connection)
+    tables = inspector.get_table_names()
+
+    if 'grafana_integration_settings' in tables:
+        # Drop grafana_integration_settings table
+        op.drop_table('grafana_integration_settings')

@@ -147,8 +147,27 @@ def fix_file_ownership(file_path):
             gid = user_info.pw_gid
 
             # Change ownership back to original user
-            os.chown(file_path, uid, gid)
-            print(f"  Fixed ownership of {file_path} to {original_user}")
+            # If it's a directory, recursively fix all contents
+            if os.path.isdir(file_path):
+                print(f"  Fixing ownership of {file_path} and contents to {original_user}")
+                for root, dirs, files in os.walk(file_path):
+                    try:
+                        os.chown(root, uid, gid)
+                    except Exception:
+                        pass
+                    for d in dirs:
+                        try:
+                            os.chown(os.path.join(root, d), uid, gid)
+                        except Exception:
+                            pass
+                    for f in files:
+                        try:
+                            os.chown(os.path.join(root, f), uid, gid)
+                        except Exception:
+                            pass
+            else:
+                os.chown(file_path, uid, gid)
+                print(f"  Fixed ownership of {file_path} to {original_user}")
 
     except Exception as e:
         print(f"  Warning: Could not fix ownership of {file_path}: {e}")
@@ -183,9 +202,83 @@ def setup_netbsd_gcc14_libstdcpp():
     except Exception as e:
         print(f"  ⚠️ Warning: Could not create symlink: {e}")
 
+def fix_pip_cache_permissions():
+    """Fix pip cache directory permissions on Linux/macOS."""
+    system = platform.system()
+
+    # Only needed on Unix-like systems
+    if system not in ["Linux", "Darwin"]:
+        return
+
+    # Only needed when running as root
+    try:
+        if os.geteuid() != 0:
+            return
+    except AttributeError:
+        # geteuid not available on this platform
+        return
+
+    try:
+        # Get the original user's home directory
+        original_user = get_original_user()
+        if not original_user:
+            return
+
+        import pwd
+        user_info = pwd.getpwnam(original_user)
+        user_home = user_info.pw_dir
+        uid = user_info.pw_uid
+        gid = user_info.pw_gid
+
+        # Fix pip cache directory ownership
+        if system == "Darwin":
+            cache_base = os.path.join(user_home, 'Library', 'Caches')
+            pip_cache_dir = os.path.join(cache_base, 'pip')
+        else:
+            cache_base = os.path.join(user_home, '.cache')
+            pip_cache_dir = os.path.join(cache_base, 'pip')
+
+        # Ensure parent directories exist and have correct ownership
+        for parent_dir in [cache_base, pip_cache_dir]:
+            if not os.path.exists(parent_dir):
+                print(f"  Creating {parent_dir} with correct ownership...")
+                os.makedirs(parent_dir, exist_ok=True)
+                os.chown(parent_dir, uid, gid)
+
+        if os.path.exists(pip_cache_dir):
+            print(f"  Fixing pip cache permissions at {pip_cache_dir}...")
+            # Recursively fix ownership
+            for root, dirs, files in os.walk(pip_cache_dir):
+                try:
+                    os.chown(root, uid, gid)
+                except Exception:
+                    pass
+                for d in dirs:
+                    try:
+                        os.chown(os.path.join(root, d), uid, gid)
+                    except Exception:
+                        pass
+                for f in files:
+                    try:
+                        os.chown(os.path.join(root, f), uid, gid)
+                    except Exception:
+                        pass
+            print("  Pip cache permissions fixed")
+        else:
+            # Create the directory with correct ownership so pip won't complain
+            print(f"  Creating pip cache directory with correct ownership...")
+            os.makedirs(pip_cache_dir, exist_ok=True)
+            os.chown(pip_cache_dir, uid, gid)
+    except Exception as e:
+        # Don't fail the installation if this doesn't work
+        print(f"  Note: Could not fix pip cache permissions: {e}")
+
 def run_make_install_dev():
     """Run make install-dev to set up dependencies."""
     print("\n--- Installing Development Dependencies ---")
+
+    # Fix pip cache permissions first (Linux/macOS only)
+    fix_pip_cache_permissions()
 
     # Set up NetBSD GCC 14 libstdc++ symlink first (requires root)
     setup_netbsd_gcc14_libstdcpp()
@@ -227,6 +320,10 @@ def run_make_install_dev():
             sys.exit(1)
 
         print("Dependencies installed successfully!")
+
+        # Fix pip cache permissions again after install-dev (in case pip recreated the cache)
+        fix_pip_cache_permissions()
+
     except Exception as e:
         print(f"Error running make install-dev: {e}")
         sys.exit(1)
