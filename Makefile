@@ -222,7 +222,7 @@ else
 	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
 		doas $(PYTHON) scripts/install-telemetry.py || echo "[WARNING] Telemetry installation failed - continuing without telemetry"; \
 	else \
-		sudo $(PYTHON) scripts/install-telemetry.py || echo "[WARNING] Telemetry installation failed - continuing without telemetry"; \
+		sudo -H $(PYTHON) scripts/install-telemetry.py || echo "[WARNING] Telemetry installation failed - continuing without telemetry"; \
 	fi
 endif
 	@echo "Setting up WebDriver for screenshots..."
@@ -239,13 +239,13 @@ else
 			echo "Installing Playwright system dependencies..."; \
 			echo "This may prompt for sudo password to install system packages..."; \
 			if command -v sudo >/dev/null 2>&1; then \
-				sudo $(PYTHON) -m playwright install-deps 2>/dev/null || ( \
+				sudo -H $(PYTHON) -m playwright install-deps 2>/dev/null || ( \
 					echo ""; \
 					echo "❌ Playwright automatic dependency installation failed."; \
 					echo "   Installing manually..."; \
 					echo ""; \
-					sudo apt-get update -qq && \
-					sudo apt-get install -y \
+					sudo -H apt-get update -qq && \
+					sudo -H apt-get install -y \
 						libicu76 libavif16 libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 \
 						libatspi2.0-0t64 libcairo2 libcups2t64 libdbus-1-3 libdrm2 libgbm1 \
 						libglib2.0-0t64 libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 \
@@ -715,6 +715,9 @@ else
 		if [ "$$(uname -s)" = "OpenBSD" ] && [ -f "config/otel-collector-config-openbsd.yml" ]; then \
 			OTEL_CONFIG="config/otel-collector-config-openbsd.yml"; \
 			echo "Using OpenBSD-specific OTel config"; \
+		elif [ "$$(uname -s)" = "NetBSD" ] && [ -f "config/otel-collector-config-netbsd.yml" ]; then \
+			OTEL_CONFIG="config/otel-collector-config-netbsd.yml"; \
+			echo "Using NetBSD-specific OTel config"; \
 		fi; \
 		nohup otelcol-contrib --config=$$OTEL_CONFIG > logs/otel-collector.log 2>&1 & echo $$! > logs/otel-collector.pid; \
 		echo "OpenTelemetry Collector started (PID: $$(cat logs/otel-collector.pid))"; \
@@ -731,7 +734,7 @@ else
 	if [ -n "$$PROMETHEUS_BIN" ]; then \
 		if [ ! -d "data/prometheus" ]; then \
 			if [ "$$(uname -s)" = "OpenBSD" ]; then \
-				sudo mkdir -p data/prometheus && sudo chown -R $(USER):$(USER) data/prometheus; \
+				doas mkdir -p data/prometheus && doas chown -R $(USER):$(USER) data/prometheus; \
 			else \
 				mkdir -p data/prometheus; \
 			fi; \

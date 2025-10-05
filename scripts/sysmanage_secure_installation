@@ -90,8 +90,8 @@ else
                     echo "Running with sudo (you may be prompted for your password)..."
                 fi
 
-                # Use -E to preserve environment variables (especially for virtual env paths)
-                if sudo -E "$PYTHON_BIN" "$PYTHON_SCRIPT" "$@"; then
+                # Use -H to set HOME properly, -E to preserve environment variables
+                if sudo -H -E "$PYTHON_BIN" "$PYTHON_SCRIPT" "$@"; then
                     exit 0
                 else
                     echo "Error: Failed to run with elevated privileges." >&2
@@ -104,11 +104,11 @@ else
             fi
             ;;
 
-        FreeBSD|OpenBSD|NetBSD)
-            # BSDs might use doas instead of sudo
+        OpenBSD)
+            # OpenBSD prefers doas over sudo
             if command -v doas >/dev/null 2>&1; then
                 echo "Running with doas..."
-                # Note: doas doesn't support -E flag, so we explicitly pass environment
+                # Note: doas doesn't support -E or -H flags, so we explicitly pass environment
                 # Pass the current user as an environment variable since doas doesn't preserve DOAS_USER
                 if doas env ORIGINAL_USER="$(id -un)" "$PYTHON_BIN" "$PYTHON_SCRIPT" "$@"; then
                     exit 0
@@ -123,12 +123,44 @@ else
                     echo "Running with sudo (you may be prompted for your password)..."
                 fi
 
-                # Use -E to preserve environment variables (especially for virtual env paths)
-                if sudo -E "$PYTHON_BIN" "$PYTHON_SCRIPT" "$@"; then
+                # Use -H to set HOME properly, -E to preserve environment variables
+                if sudo -H -E "$PYTHON_BIN" "$PYTHON_SCRIPT" "$@"; then
                     exit 0
                 else
                     echo "Error: Failed to run with elevated privileges using sudo." >&2
                     echo "Please ensure you have sudo access or run as root." >&2
+                    exit 1
+                fi
+            else
+                echo "Error: Neither sudo nor doas is available. Please run as root." >&2
+                exit 1
+            fi
+            ;;
+
+        FreeBSD|NetBSD)
+            # Other BSDs typically use sudo
+            if command -v sudo >/dev/null 2>&1; then
+                # Test if user can actually use sudo
+                if ! sudo -n true 2>/dev/null; then
+                    echo "Running with sudo (you may be prompted for your password)..."
+                fi
+
+                # Use -H to set HOME properly, -E to preserve environment variables
+                if sudo -H -E "$PYTHON_BIN" "$PYTHON_SCRIPT" "$@"; then
+                    exit 0
+                else
+                    echo "Error: Failed to run with elevated privileges using sudo." >&2
+                    echo "Please ensure you have sudo access or run as root." >&2
+                    exit 1
+                fi
+            elif command -v doas >/dev/null 2>&1; then
+                echo "Running with doas..."
+                # Note: doas doesn't support -E or -H flags, so we explicitly pass environment
+                if doas env ORIGINAL_USER="$(id -un)" "$PYTHON_BIN" "$PYTHON_SCRIPT" "$@"; then
+                    exit 0
+                else
+                    echo "Error: Failed to run with elevated privileges using doas." >&2
+                    echo "Please ensure you have doas access or run as root." >&2
                     exit 1
                 fi
             else

@@ -220,17 +220,13 @@ def run_make_install_dev():
                 pass  # Fall back to default environment
 
         result = subprocess.run([make_cmd, 'install-dev'], cwd=project_root,
-                              text=True, timeout=900, env=env)
+                              text=True, env=env)
 
         if result.returncode != 0:
             print(f"Error: make install-dev failed with return code {result.returncode}")
             sys.exit(1)
 
         print("Dependencies installed successfully!")
-
-    except subprocess.TimeoutExpired:
-        print("Error: make install-dev timed out after 15 minutes")
-        sys.exit(1)
     except Exception as e:
         print(f"Error running make install-dev: {e}")
         sys.exit(1)
@@ -247,10 +243,9 @@ def update_postgres_user_password(username, password):
         # Use sudo -u postgres to run psql as the postgres user
         sql_command = f"ALTER USER {username} PASSWORD '{password}';"
         result = subprocess.run(
-            ['sudo', '-u', 'postgres', 'psql', '-c', sql_command],
+            ['sudo', '-H', '-u', 'postgres', 'psql', '-c', sql_command],
             capture_output=True,
-            text=True,
-            timeout=30
+            text=True
         )
 
         if result.returncode == 0:
@@ -259,10 +254,6 @@ def update_postgres_user_password(username, password):
         else:
             print(f"  Failed to update PostgreSQL password: {result.stderr}")
             return False
-
-    except subprocess.TimeoutExpired:
-        print("  Error: PostgreSQL password update timed out")
-        return False
     except Exception as e:
         print(f"  Error updating PostgreSQL password: {e}")
         return False
@@ -544,7 +535,7 @@ def run_database_migrations():
         if strategy == "stamp":
             print("Synchronizing alembic tracking with existing database...")
             result = subprocess.run([sys.executable, '-m', 'alembic', 'stamp', 'head'], cwd=project_root,
-                                  capture_output=True, text=True, timeout=60, env=env)
+                                  capture_output=True, text=True, env=env)
             if result.returncode == 0:
                 print("  Database tracking synchronized successfully!")
             else:
@@ -555,7 +546,7 @@ def run_database_migrations():
             print("Running incremental database migrations...")
             make_cmd = get_make_command()
             result = subprocess.run([make_cmd, 'migrate'], cwd=project_root,
-                                  capture_output=True, text=True, timeout=120, env=env)
+                                  capture_output=True, text=True, env=env)
             if result.returncode == 0:
                 print("  Incremental migrations completed successfully!")
             else:
@@ -582,7 +573,7 @@ def run_database_migrations():
             print("  Running comprehensive database migration from scratch...")
             # Use python -m alembic to ensure we use the virtual environment's alembic
             result = subprocess.run([sys.executable, '-m', 'alembic', 'upgrade', 'head'], cwd=project_root,
-                                  capture_output=True, text=True, timeout=120, env=env)
+                                  capture_output=True, text=True, env=env)
             if result.returncode == 0:
                 print("  Comprehensive migration completed successfully!")
             else:
@@ -596,10 +587,6 @@ def run_database_migrations():
             for line in result.stdout.split('\n'):
                 if line.strip():
                     print(f"  {line}")
-
-    except subprocess.TimeoutExpired:
-        print("Error: Database migrations timed out after 2 minutes")
-        sys.exit(1)
     except Exception as e:
         print(f"Error running database migrations: {e}")
         sys.exit(1)

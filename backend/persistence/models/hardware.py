@@ -58,10 +58,12 @@ class NetworkInterface(Base):
         String(50), nullable=True
     )  # e.g., "ethernet", "wifi", "loopback"
     mac_address = Column(String(17), nullable=True)
-    ipv4_address = Column(String(15), nullable=True)
-    ipv6_address = Column(String(39), nullable=True)
-    netmask = Column(String(15), nullable=True)
-    broadcast = Column(String(15), nullable=True)
+    ipv4_address = Column(
+        String(45), nullable=True
+    )  # Support IPv6-mapped IPv4 addresses
+    ipv6_address = Column(String(45), nullable=True)  # Support full IPv6 with zone IDs
+    netmask = Column(String(45), nullable=True)  # Support IPv6 netmasks
+    broadcast = Column(String(45), nullable=True)  # Support IPv6 broadcast addresses
     mtu = Column(Integer, nullable=True)
     speed_mbps = Column(Integer, nullable=True)
     is_up = Column(Boolean, nullable=True)
