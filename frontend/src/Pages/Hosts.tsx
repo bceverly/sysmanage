@@ -169,9 +169,9 @@ const Hosts = () => {
                 );
             }
         },
-        { 
-            field: 'last_access', 
-            headerName: t('hosts.lastCheckin'), 
+        {
+            field: 'last_access',
+            headerName: t('hosts.lastCheckin'),
             width: 200,
             renderCell: (params) => {
                 // Server sends naive UTC timestamps as ISO strings with Z suffix
@@ -182,13 +182,13 @@ const Hosts = () => {
                 if (isNaN(date.getTime())) {
                     return <span style={{ color: '#f44336' }}>{t('hosts.invalidDate', 'Invalid date')}</span>;
                 }
-                
+
                 const diffSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-                
+
                 // Handle negative differences (clock skew)
                 const absDiff = Math.abs(diffSeconds);
                 let timeText = '';
-                
+
                 if (absDiff < 60) {
                     timeText = diffSeconds < 0 ? t('hosts.justNow', 'Just now') : t('hosts.secondsAgo', '{{seconds}}s ago', { seconds: absDiff });
                 } else if (absDiff < 3600) {
@@ -198,7 +198,7 @@ const Hosts = () => {
                 } else {
                     timeText = t('hosts.daysAgo', '{{days}}d ago', { days: Math.floor(absDiff / 86400) });
                 }
-                
+
                 return (
                     <div title={date.toLocaleString()}>
                         <div style={{ fontSize: '0.85em', color: absDiff < 120 ? '#4caf50' : absDiff < 300 ? '#ff9800' : '#f44336' }}>
@@ -208,6 +208,38 @@ const Hosts = () => {
                             {date.toLocaleTimeString()}
                         </div>
                     </div>
+                );
+            }
+        },
+        {
+            field: 'tags',
+            headerName: t('hosts.tags', 'Tags'),
+            width: 200,
+            sortable: false,
+            renderCell: (params) => {
+                const tags = params.row.tags || [];
+                if (tags.length === 0) {
+                    return null;
+                }
+                return (
+                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                        {tags.map((tag: { id: string; name: string }) => (
+                            <Chip
+                                key={tag.id}
+                                label={tag.name}
+                                size="small"
+                                variant="filled"
+                                sx={{
+                                    fontSize: '0.75rem',
+                                    backgroundColor: '#1976d2',
+                                    color: '#ffffff',
+                                    '&:hover': {
+                                        backgroundColor: '#1565c0'
+                                    }
+                                }}
+                            />
+                        ))}
+                    </Box>
                 );
             }
         },
