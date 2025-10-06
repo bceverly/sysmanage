@@ -88,12 +88,16 @@ else
 	@if [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD detected - configuring for grpcio build..."; \
 		export TMPDIR=/var/tmp && \
-		export CFLAGS="-I/usr/pkg/include" && \
-		export CXXFLAGS="-std=c++17 -I/usr/pkg/include -fpermissive" && \
-		export LDFLAGS="-L/usr/pkg/lib -Wl,-R/usr/pkg/lib" && \
+		export CC=/usr/pkg/gcc14/bin/gcc && \
+		export CXX=/usr/pkg/gcc14/bin/g++ && \
+		export CFLAGS="-I/usr/pkg/include -fpermissive -Wno-error" && \
+		export CXXFLAGS="-I/usr/pkg/include -fpermissive -Wno-error" && \
+		export LDFLAGS="-L/usr/pkg/gcc14/lib -Wl,-rpath,/usr/pkg/gcc14/lib -lstdc++" && \
+		export LDSHARED="/usr/pkg/gcc14/bin/g++ -pthread -shared -L/usr/pkg/gcc14/lib -Wl,-rpath,/usr/pkg/gcc14/lib" && \
 		export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 && \
 		export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 && \
 		export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
+		export GRPC_PYTHON_BUILD_EXT_COMPILER_JOBS=1 && \
 		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
 	else \
 		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \

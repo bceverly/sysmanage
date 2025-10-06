@@ -90,8 +90,8 @@ ${BUILD_DIR}/${GRPCIO_DIR}/.built: ${BUILD_DIR}/${GRPCIO_DIR}/.patched
 		    CXX=${GCC14_PREFIX}/bin/g++ \
 		    CFLAGS="-I${PKG_PREFIX}/include -fpermissive -Wno-error" \
 		    CXXFLAGS="-I${PKG_PREFIX}/include -fpermissive -Wno-error" \
-		    LDFLAGS="-L${GCC14_PREFIX}/lib -Wl,-R${GCC14_PREFIX}/lib -lstdc++" \
-		    LDSHARED="${GCC14_PREFIX}/bin/g++ -pthread -shared -L${GCC14_PREFIX}/lib -Wl,-R${GCC14_PREFIX}/lib" \
+		    LDFLAGS="-L${GCC14_PREFIX}/lib -Wl,-rpath,${GCC14_PREFIX}/lib -lstdc++" \
+		    LDSHARED="${GCC14_PREFIX}/bin/g++ -pthread -shared -L${GCC14_PREFIX}/lib -Wl,-rpath,${GCC14_PREFIX}/lib" \
 		    GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 \
 		    GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 \
 		    GRPC_PYTHON_BUILD_SYSTEM_CARES=1 \
