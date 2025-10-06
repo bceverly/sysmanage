@@ -483,7 +483,7 @@ const Hosts = () => {
                         eligible.add(host.id);
                     }
                 } catch (error) {
-                    console.error(`Failed to check OpenTelemetry eligibility for host ${host.id}:`, error);
+                    console.error('Failed to check OpenTelemetry eligibility for host:', error);
                 }
             });
 
