@@ -215,3 +215,11 @@ artillery-report-*.html
 tests/ui/test-results
 *.core
 sysmanage-dev.yaml
+
+# BSD contrib build artifacts
+contrib/openbsd/opentelemetry/build/
+contrib/openbsd/opentelemetry/downloads/
+contrib/netbsd/opentelemetry/build/
+contrib/netbsd/opentelemetry/downloads/
+contrib/freebsd/opentelemetry/build/
+contrib/freebsd/opentelemetry/downloads/

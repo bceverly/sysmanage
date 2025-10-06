@@ -1,0 +1,14 @@
+--- a/src/core/lib/event_engine/ares_resolver.cc
++++ b/src/core/lib/event_engine/ares_resolver.cc
+@@ -368,7 +368,7 @@
+   grpc_core::MutexLock lock(&mutex_);
+   callback_map_.emplace(++id_, std::move(callback));
+   auto* resolver_arg = new QueryArg(this, id_, host);
+-  ares_query(channel_, std::string(host).c_str(), ns_c_in, ns_t_srv,
++  ares_query(channel_, std::string(host).c_str(), C_IN, T_SRV,
+              &AresResolver::OnSRVQueryDoneLocked, resolver_arg);
+   CheckSocketsLocked();
+   MaybeStartTimerLocked();
+@@ -406,1 +406,1 @@
+-  ares_search(channel_, std::string(host).c_str(), ns_c_in, ns_t_txt,
++  ares_search(channel_, std::string(host).c_str(), C_IN, T_TXT,

@@ -1,0 +1,23 @@
+# Build artifacts
+build/
+dist/
+downloads/
+
+# Go build cache
+~/tmp/go-cache/
+~/tmp/go-tmp/
+
+# Python builds
+*.egg-info/
+*.pyc
+__pycache__/
+
+# Editor files
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
