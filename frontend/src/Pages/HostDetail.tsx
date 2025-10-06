@@ -62,6 +62,7 @@ import { hasPermission, SecurityRoles } from '../Services/permissions';
 import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck } from '../Services/hosts';
 import { SysManageUser, doGetMe } from '../Services/users';
 import { SecretResponse } from '../Services/secrets';
+import { doCheckOpenTelemetryEligibility, doDeployOpenTelemetry, doGetOpenTelemetryStatus, doStartOpenTelemetry, doStopOpenTelemetry, doRestartOpenTelemetry, doConnectOpenTelemetryToGrafana, doDisconnectOpenTelemetryFromGrafana, doRemoveOpenTelemetry } from '../Services/opentelemetry';
 
 // Certificate interface
 interface Certificate {
@@ -114,7 +115,10 @@ const HostDetail = () => {
     const [rolesLoading, setRolesLoading] = useState<boolean>(false);
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [serviceControlLoading, setServiceControlLoading] = useState<boolean>(false);
+    const [openTelemetryStatus, setOpenTelemetryStatus] = useState<{deployed: boolean, service_status: string, grafana_url: string | null, grafana_configured: boolean} | null>(null);
+    const [openTelemetryLoading, setOpenTelemetryLoading] = useState<boolean>(false);
     const rolesRefreshInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+    const openTelemetryRefreshInterval = useRef<ReturnType<typeof setInterval> | null>(null);
     const [certificateFilter, setCertificateFilter] = useState<'all' | 'ca' | 'server' | 'client'>('server');
     const [certificatePaginationModel, setCertificatePaginationModel] = useState({ page: 0, pageSize: 10 });
     const [certificateSearchTerm, setCertificateSearchTerm] = useState<string>('');
@@ -190,6 +194,11 @@ const HostDetail = () => {
     const [canDeployCertificate, setCanDeployCertificate] = useState<boolean>(false);
     const [canAttachUbuntuPro, setCanAttachUbuntuPro] = useState<boolean>(false);
     const [canDetachUbuntuPro, setCanDetachUbuntuPro] = useState<boolean>(false);
+
+    // OpenTelemetry deployment states
+    const [canDeployOpenTelemetry, setCanDeployOpenTelemetry] = useState<boolean>(false);  // User has permission to see button
+    const [openTelemetryEligible, setOpenTelemetryEligible] = useState<boolean>(false);  // Deployment is actually allowed
+    const [openTelemetryDeploying, setOpenTelemetryDeploying] = useState<boolean>(false);
 
     // Installation history state
     interface InstallationHistoryItem {
@@ -319,6 +328,19 @@ const HostDetail = () => {
         }
     }, [hostId, fetchRoles, t]);
 
+    const fetchOpenTelemetryStatus = useCallback(async () => {
+        if (!hostId) return;
+        try {
+            setOpenTelemetryLoading(true);
+            const status = await doGetOpenTelemetryStatus(hostId);
+            setOpenTelemetryStatus(status);
+        } catch (err) {
+            console.error('Error fetching OpenTelemetry status:', err);
+        } finally {
+            setOpenTelemetryLoading(false);
+        }
+    }, [hostId]);
+
     // Service control handlers
     const handleRoleSelection = (roleId: string, checked: boolean) => {
         if (checked) {
@@ -380,6 +402,127 @@ const HostDetail = () => {
         }
     };
 
+    // OpenTelemetry service control handlers
+    const handleOpenTelemetryStart = async () => {
+        if (!hostId) return;
+        try {
+            setOpenTelemetryLoading(true);
+            await doStartOpenTelemetry(hostId);
+            setSnackbarMessage(t('hostDetail.opentelemetryStartSuccess', 'OpenTelemetry service started successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            // Refresh status after a delay
+            setTimeout(() => fetchOpenTelemetryStatus(), 2000);
+        } catch (error) {
+            console.error('Error starting OpenTelemetry:', error);
+            setSnackbarMessage(t('hostDetail.opentelemetryOperationFailed', 'OpenTelemetry operation failed'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setOpenTelemetryLoading(false);
+        }
+    };
+
+    const handleOpenTelemetryStop = async () => {
+        if (!hostId) return;
+        try {
+            setOpenTelemetryLoading(true);
+            await doStopOpenTelemetry(hostId);
+            setSnackbarMessage(t('hostDetail.opentelemetryStopSuccess', 'OpenTelemetry service stopped successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            // Refresh status after a delay
+            setTimeout(() => fetchOpenTelemetryStatus(), 2000);
+        } catch (error) {
+            console.error('Error stopping OpenTelemetry:', error);
+            setSnackbarMessage(t('hostDetail.opentelemetryOperationFailed', 'OpenTelemetry operation failed'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setOpenTelemetryLoading(false);
+        }
+    };
+
+    const handleOpenTelemetryRestart = async () => {
+        if (!hostId) return;
+        try {
+            setOpenTelemetryLoading(true);
+            await doRestartOpenTelemetry(hostId);
+            setSnackbarMessage(t('hostDetail.opentelemetryRestartSuccess', 'OpenTelemetry service restarted successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            // Refresh status after a delay
+            setTimeout(() => fetchOpenTelemetryStatus(), 2000);
+        } catch (error) {
+            console.error('Error restarting OpenTelemetry:', error);
+            setSnackbarMessage(t('hostDetail.opentelemetryOperationFailed', 'OpenTelemetry operation failed'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setOpenTelemetryLoading(false);
+        }
+    };
+
+    const handleOpenTelemetryConnect = async () => {
+        if (!hostId) return;
+        try {
+            setOpenTelemetryLoading(true);
+            await doConnectOpenTelemetryToGrafana(hostId);
+            setSnackbarMessage(t('hostDetail.opentelemetryConnectSuccess', 'OpenTelemetry connected to Grafana successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            // Refresh status after a delay
+            setTimeout(() => fetchOpenTelemetryStatus(), 2000);
+        } catch (error) {
+            console.error('Error connecting OpenTelemetry to Grafana:', error);
+            setSnackbarMessage(t('hostDetail.opentelemetryOperationFailed', 'OpenTelemetry operation failed'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setOpenTelemetryLoading(false);
+        }
+    };
+
+    const handleOpenTelemetryDisconnect = async () => {
+        if (!hostId) return;
+        try {
+            setOpenTelemetryLoading(true);
+            await doDisconnectOpenTelemetryFromGrafana(hostId);
+            setSnackbarMessage(t('hostDetail.opentelemetryDisconnectSuccess', 'OpenTelemetry disconnected from Grafana successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            // Refresh status after a delay
+            setTimeout(() => fetchOpenTelemetryStatus(), 2000);
+        } catch (error) {
+            console.error('Error disconnecting OpenTelemetry from Grafana:', error);
+            setSnackbarMessage(t('hostDetail.opentelemetryOperationFailed', 'OpenTelemetry operation failed'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setOpenTelemetryLoading(false);
+        }
+    };
+
+    const handleRemoveOpenTelemetry = async () => {
+        if (!hostId) return;
+        try {
+            setOpenTelemetryLoading(true);
+            await doRemoveOpenTelemetry(hostId);
+            setSnackbarMessage(t('hostDetail.opentelemetryRemoveSuccess', 'OpenTelemetry removal queued successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            // Refresh status after a delay
+            setTimeout(() => fetchOpenTelemetryStatus(), 2000);
+        } catch (error) {
+            console.error('Error removing OpenTelemetry:', error);
+            setSnackbarMessage(t('hostDetail.opentelemetryOperationFailed', 'OpenTelemetry operation failed'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setOpenTelemetryLoading(false);
+        }
+    };
+
     // Auto-refresh functionality
     useEffect(() => {
         if (currentTab === getServerRolesTabIndex() && host && host.active) {
@@ -408,6 +551,46 @@ const HostDetail = () => {
         return () => {
             if (rolesRefreshInterval.current) {
                 clearInterval(rolesRefreshInterval.current);
+            }
+        };
+    }, []);
+
+    // Fetch OpenTelemetry status when Info tab is active
+    useEffect(() => {
+        if (currentTab === 0 && host && host.active) {
+            fetchOpenTelemetryStatus();
+        }
+    }, [currentTab, host?.active, host, fetchOpenTelemetryStatus]);
+
+    // Auto-refresh OpenTelemetry status every 30 seconds when on Info tab
+    useEffect(() => {
+        if (currentTab === 0 && host && host.active) {
+            // Start auto-refresh every 30 seconds
+            const interval = setInterval(() => {
+                fetchOpenTelemetryStatus();
+            }, 30000);
+            openTelemetryRefreshInterval.current = interval;
+
+            return () => {
+                if (interval) {
+                    clearInterval(interval);
+                }
+            };
+        } else {
+            // Clear interval when tab is not active or host is not active
+            if (openTelemetryRefreshInterval.current) {
+                clearInterval(openTelemetryRefreshInterval.current);
+                openTelemetryRefreshInterval.current = null;
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentTab, host?.active, host?.id, fetchOpenTelemetryStatus]);
+
+    // Cleanup OpenTelemetry interval on unmount
+    useEffect(() => {
+        return () => {
+            if (openTelemetryRefreshInterval.current) {
+                clearInterval(openTelemetryRefreshInterval.current);
             }
         };
     }, []);
@@ -547,6 +730,25 @@ const HostDetail = () => {
 
         fetchHost();
     }, [hostId, navigate, t, fetchCertificates, fetchRoles]);
+
+    // Check OpenTelemetry eligibility when host is loaded
+    useEffect(() => {
+        const checkOpenTelemetryEligibility = async () => {
+            if (!hostId || !host) return;
+
+            try {
+                const eligibility = await doCheckOpenTelemetryEligibility(hostId);
+                setCanDeployOpenTelemetry(eligibility.has_permission || false);  // Show button if user has RBAC permission
+                setOpenTelemetryEligible(eligibility.eligible || false);  // Enable button only if eligible to deploy
+            } catch (error) {
+                console.log('Failed to check OpenTelemetry eligibility:', error);
+                setCanDeployOpenTelemetry(false);
+                setOpenTelemetryEligible(false);
+            }
+        };
+
+        checkOpenTelemetryEligibility();
+    }, [hostId, host]);
 
     // Tag-related functions
     const loadHostTags = useCallback(async () => {
@@ -1218,9 +1420,46 @@ const HostDetail = () => {
     // Check if diagnostics are currently being processed based on persistent state
     const isDiagnosticsProcessing = host?.diagnostics_request_status === 'pending';
 
+    const handleDeployOpenTelemetry = async () => {
+        if (!hostId) return;
+
+        try {
+            setOpenTelemetryDeploying(true);
+
+            const result = await doDeployOpenTelemetry(hostId);
+
+            // Show success message
+            setSnackbarMessage(result.message || t('hostDetail.opentelemetryDeploySuccess', 'OpenTelemetry deployment queued successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+
+            // Refresh software data after a delay to show the deployment
+            setTimeout(async () => {
+                try {
+                    const softwareData = await doGetHostSoftware(hostId);
+                    setSoftwarePackages(softwareData);
+
+                    // Re-check eligibility
+                    const eligibility = await doCheckOpenTelemetryEligibility(hostId);
+                    setCanDeployOpenTelemetry(eligibility.has_permission || false);
+                    setOpenTelemetryEligible(eligibility.eligible || false);
+                } catch (error) {
+                    console.error('Error refreshing software data:', error);
+                }
+            }, 5000);
+        } catch (error) {
+            console.error('Error deploying OpenTelemetry:', error);
+            setSnackbarMessage(String(error) || t('hostDetail.opentelemetryDeployFailed', 'Failed to deploy OpenTelemetry'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setOpenTelemetryDeploying(false);
+        }
+    };
+
     const handleRequestDiagnostics = async () => {
         if (!hostId) return;
-        
+
         try {
             setDiagnosticsLoading(true);
 
@@ -1444,7 +1683,10 @@ const HostDetail = () => {
         }
     };
 
-    const handleCloseSnackbar = () => {
+    const handleCloseSnackbar = (_event?: React.SyntheticEvent, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
         setSnackbarOpen(false);
     };
 
@@ -2275,9 +2517,149 @@ const HostDetail = () => {
                     </Card>
                 </Grid>
 
+                {/* OpenTelemetry Status */}
+                <Grid item xs={12} md={6}>
+                    <Card sx={{ height: '100%' }}>
+                        <CardContent>
+                            <Typography variant="subtitle1" sx={{ mb: 2, display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                <MedicalServicesIcon sx={{ mr: 1 }} />
+                                {t('hostDetail.opentelemetryStatus', 'OpenTelemetry Status')}
+                            </Typography>
+                            {openTelemetryLoading ? (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                                    <CircularProgress size={24} />
+                                </Box>
+                            ) : openTelemetryStatus ? (
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12}>
+                                        <Typography variant="body2" color="textSecondary">
+                                            {t('hostDetail.opentelemetryDeployed', 'Deployed')}
+                                        </Typography>
+                                        <Typography variant="body1">
+                                            {openTelemetryStatus.deployed ? t('common.yes', 'Yes') : t('common.no', 'No')}
+                                        </Typography>
+                                    </Grid>
+                                    {!openTelemetryStatus.deployed && hasPermission(SecurityRoles.DEPLOY_OPENTELEMETRY) && host?.is_agent_privileged && (
+                                        <Grid item xs={12}>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                size="small"
+                                                onClick={handleDeployOpenTelemetry}
+                                                disabled={openTelemetryDeploying || openTelemetryLoading}
+                                            >
+                                                {openTelemetryDeploying ? t('hostDetail.deploying', 'Deploying...') : t('hostDetail.deployOpenTelemetry', 'Deploy OpenTelemetry')}
+                                            </Button>
+                                        </Grid>
+                                    )}
+                                    {openTelemetryStatus.deployed && (
+                                        <>
+                                            <Grid item xs={12}>
+                                                <Typography variant="body2" color="textSecondary">
+                                                    {t('hostDetail.opentelemetryServiceStatus', 'Service Status')}
+                                                </Typography>
+                                                <Chip
+                                                    label={
+                                                        openTelemetryStatus.service_status === 'running'
+                                                            ? t('hostDetail.opentelemetryServiceRunning', 'Running')
+                                                            : openTelemetryStatus.service_status === 'stopped'
+                                                            ? t('hostDetail.opentelemetryServiceStopped', 'Stopped')
+                                                            : t('hostDetail.opentelemetryServiceUnknown', 'Unknown')
+                                                    }
+                                                    color={
+                                                        openTelemetryStatus.service_status === 'running'
+                                                            ? 'success'
+                                                            : openTelemetryStatus.service_status === 'stopped'
+                                                            ? 'error'
+                                                            : 'default'
+                                                    }
+                                                    size="small"
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <Typography variant="body2" color="textSecondary">
+                                                    {t('hostDetail.opentelemetryGrafanaServer', 'Grafana Server')}
+                                                </Typography>
+                                                <Typography variant="body1">
+                                                    {openTelemetryStatus.grafana_url || t('hostDetail.opentelemetryNotConnected', 'Not Connected')}
+                                                </Typography>
+                                            </Grid>
+                                            {host.is_agent_privileged && (
+                                                <Grid item xs={12}>
+                                                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                                                        <Button
+                                                            variant="outlined"
+                                                            size="small"
+                                                            startIcon={<PlayArrowIcon />}
+                                                            onClick={handleOpenTelemetryStart}
+                                                            disabled={openTelemetryLoading}
+                                                        >
+                                                            {t('hostDetail.opentelemetryStart', 'Start')}
+                                                        </Button>
+                                                        <Button
+                                                            variant="outlined"
+                                                            size="small"
+                                                            startIcon={<StopIcon />}
+                                                            onClick={handleOpenTelemetryStop}
+                                                            disabled={openTelemetryLoading}
+                                                        >
+                                                            {t('hostDetail.opentelemetryStop', 'Stop')}
+                                                        </Button>
+                                                        <Button
+                                                            variant="outlined"
+                                                            size="small"
+                                                            startIcon={<RestartAltIcon />}
+                                                            onClick={handleOpenTelemetryRestart}
+                                                            disabled={openTelemetryLoading}
+                                                        >
+                                                            {t('hostDetail.opentelemetryRestart', 'Restart')}
+                                                        </Button>
+                                                        {openTelemetryStatus.grafana_configured && !openTelemetryStatus.grafana_url && (
+                                                            <Button
+                                                                variant="outlined"
+                                                                size="small"
+                                                                onClick={handleOpenTelemetryConnect}
+                                                                disabled={openTelemetryLoading}
+                                                            >
+                                                                {t('hostDetail.opentelemetryConnect', 'Connect to Grafana')}
+                                                            </Button>
+                                                        )}
+                                                        <Button
+                                                            variant="outlined"
+                                                            size="small"
+                                                            onClick={handleRemoveOpenTelemetry}
+                                                            disabled={openTelemetryLoading}
+                                                        >
+                                                            {t('hostDetail.opentelemetryRemove', 'Remove OpenTelemetry')}
+                                                        </Button>
+                                                        {openTelemetryStatus.grafana_url && (
+                                                            <Button
+                                                                variant="outlined"
+                                                                size="small"
+                                                                onClick={handleOpenTelemetryDisconnect}
+                                                                disabled={openTelemetryLoading}
+                                                            >
+                                                                {t('hostDetail.opentelemetryDisconnect', 'Disconnect from Grafana')}
+                                                            </Button>
+                                                        )}
+                                                    </Box>
+                                                </Grid>
+                                            )}
+                                        </>
+                                    )}
+                                </Grid>
+                            ) : (
+                                <Typography variant="body2" color="textSecondary">
+                                    {t('common.notAvailable', 'Not Available')}
+                                </Typography>
+                            )}
+                        </CardContent>
+                    </Card>
+                </Grid>
+
                 {/* Tags */}
                 <Grid item xs={12} md={6}>
-                    <Card>
+                    <Card sx={{ height: '100%' }}>
                         <CardContent>
                             <Typography variant="subtitle1" sx={{ mb: 2, display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
                                 <LocalOfferIcon sx={{ mr: 1 }} />
@@ -2677,6 +3059,22 @@ const HostDetail = () => {
                                                 onClick={() => setPackageInstallDialogOpen(true)}
                                             >
                                                 {t('hostDetail.addPackage', 'Add Package')}
+                                            </Button>
+                                        )}
+                                        {canDeployOpenTelemetry && (
+                                            <Button
+                                                variant="contained"
+                                                startIcon={openTelemetryDeploying ? <CircularProgress size={20} color="inherit" /> : <SystemUpdateAltIcon />}
+                                                disabled={!openTelemetryEligible || openTelemetryDeploying}
+                                                sx={{
+                                                    backgroundColor: 'success.main',
+                                                    '&:hover': { backgroundColor: 'success.dark' },
+                                                    height: '40px', // Match ToggleButtonGroup height for small size
+                                                    minHeight: '40px'
+                                                }}
+                                                onClick={handleDeployOpenTelemetry}
+                                            >
+                                                {t('hostDetail.deployOpenTelemetry', 'Deploy OpenTelemetry')}
                                             </Button>
                                         )}
                                         <ToggleButtonGroup
