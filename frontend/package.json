@@ -11,7 +11,7 @@
     "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^6.1.0",
     "@mui/material": "^6.1.0",
-    "@mui/system": "^6.1.0",
+    "@mui/system": "^7.3.3",
     "@mui/x-charts": "^8.12.0",
     "@mui/x-data-grid": "^7.5.1",
     "@testing-library/dom": "^10.4.1",
