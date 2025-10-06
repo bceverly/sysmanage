@@ -73,6 +73,10 @@ class SecurityRoles(str, Enum):
     # Integration Management Roles
     DELETE_QUEUE_MESSAGE = "Delete Queue Message"
     ENABLE_GRAFANA_INTEGRATION = "Enable Grafana Integration"
+    DEPLOY_OPENTELEMETRY = "Deploy OpenTelemetry"
+    START_OPENTELEMETRY_SERVICE = "Start OpenTelemetry Service"
+    STOP_OPENTELEMETRY_SERVICE = "Stop OpenTelemetry Service"
+    RESTART_OPENTELEMETRY_SERVICE = "Restart OpenTelemetry Service"
 
     # Ubuntu Pro Management Roles
     ATTACH_UBUNTU_PRO = "Attach Ubuntu Pro"

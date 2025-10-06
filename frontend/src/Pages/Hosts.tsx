@@ -11,10 +11,12 @@ import SyncIcon from '@mui/icons-material/Sync';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
 import { Chip, Typography, IconButton, Autocomplete, TextField } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost, doRequestHostDiagnostics } from '../Services/hosts'
+import { doCheckOpenTelemetryEligibility, doDeployOpenTelemetry } from '../Services/opentelemetry'
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
 import SearchBox from '../Components/SearchBox';
@@ -35,6 +37,7 @@ const Hosts = () => {
     const [canViewHostDetails, setCanViewHostDetails] = useState<boolean>(false);
     const [canRebootHost, setCanRebootHost] = useState<boolean>(false);
     const [canShutdownHost, setCanShutdownHost] = useState<boolean>(false);
+    const [eligibleForOpenTelemetry, setEligibleForOpenTelemetry] = useState<Set<string>>(new Set());
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { triggerRefresh } = useNotificationRefresh();
@@ -437,6 +440,60 @@ const Hosts = () => {
         }
     }
 
+    const handleDeployOpenTelemetry = async () => {
+        try {
+            if (selection.length === 0) return;
+
+            // Deploy to all eligible selected hosts
+            const eligibleHosts = selection.filter(hostId => eligibleForOpenTelemetry.has(String(hostId)));
+
+            if (eligibleHosts.length === 0) {
+                alert(t('hosts.noEligibleHostsForOpenTelemetry', 'No eligible hosts selected for OpenTelemetry deployment'));
+                return;
+            }
+
+            const deploymentPromises = eligibleHosts.map(hostId => doDeployOpenTelemetry(String(hostId)));
+            await Promise.all(deploymentPromises);
+
+            // Show success message
+            alert(t('hosts.opentelemetryDeploySuccess', `OpenTelemetry deployment queued for ${eligibleHosts.length} host(s)`));
+
+            // Refresh hosts and eligibility
+            await refreshHosts();
+            await checkOpenTelemetryEligibility();
+
+            // Clear selection
+            setSelection([]);
+        } catch (error) {
+            console.error('Error deploying OpenTelemetry:', error);
+            alert(t('hosts.opentelemetryDeployFailed', 'Failed to deploy OpenTelemetry. Please try again.'));
+            setSelection([]);
+        }
+    }
+
+    const checkOpenTelemetryEligibility = useCallback(async () => {
+        try {
+            const eligible = new Set<string>();
+
+            // Check eligibility for all hosts
+            const eligibilityPromises = tableData.map(async (host) => {
+                try {
+                    const result = await doCheckOpenTelemetryEligibility(host.id);
+                    if (result.eligible) {
+                        eligible.add(host.id);
+                    }
+                } catch (error) {
+                    console.error(`Failed to check OpenTelemetry eligibility for host ${host.id}:`, error);
+                }
+            });
+
+            await Promise.all(eligibilityPromises);
+            setEligibleForOpenTelemetry(eligible);
+        } catch (error) {
+            console.error('Error checking OpenTelemetry eligibility:', error);
+        }
+    }, [tableData]);
+
     const refreshHosts = async () => {
         try {
             const response = await doGetHosts();
@@ -446,6 +503,13 @@ const Hosts = () => {
             console.error('Error refreshing hosts:', error);
         }
     };
+
+    // Check eligibility when table data changes
+    useEffect(() => {
+        if (tableData.length > 0) {
+            checkOpenTelemetryEligibility();
+        }
+    }, [tableData, checkOpenTelemetryEligibility]);
 
     useEffect(() => {
         if (!localStorage.getItem('bearer_token')) {
@@ -670,14 +734,23 @@ const Hosts = () => {
                 >
                     {t('hosts.refreshAllData', 'Refresh All Data')}
                 </Button>
-                <Button 
-                    variant="outlined" 
-                    startIcon={<MedicalServicesIcon />} 
+                <Button
+                    variant="outlined"
+                    startIcon={<MedicalServicesIcon />}
                     disabled={selection.length !== 1}
                     onClick={handleGetDiagnostics}
                     color="secondary"
                 >
                     {t('hosts.getDiagnostics', 'Get Diagnostics')}
+                </Button>
+                <Button
+                    variant="outlined"
+                    startIcon={<SystemUpdateAltIcon />}
+                    disabled={selection.length === 0 || !selection.some(hostId => eligibleForOpenTelemetry.has(String(hostId)))}
+                    onClick={handleDeployOpenTelemetry}
+                    color="success"
+                >
+                    {t('hosts.deployOpenTelemetry', 'Deploy OpenTelemetry')}
                 </Button>
                 {canRebootHost && (
                     <Button

@@ -394,6 +394,8 @@ async def handle_command_result(connection, message_data: dict):
 
     # Check if this is a package collection result
     result_data = message_data.get("result", {})
+    if result_data is None:
+        result_data = {}
     debug_logger.info("PACKAGE_DEBUG: message_data keys: %s", list(message_data.keys()))
     debug_logger.info(
         "PACKAGE_DEBUG: result_data type: %s, keys: %s",

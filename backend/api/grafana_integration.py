@@ -460,7 +460,14 @@ async def check_grafana_health():
                 status_code=400, detail=_("Grafana integration is not enabled")
             )
 
-        grafana_url = settings.grafana_url
+        try:
+            grafana_url = settings.grafana_url
+        except Exception as e:
+            logger.error("Error accessing grafana_url property: %s", e)
+            raise HTTPException(
+                status_code=500, detail=_("Error retrieving Grafana URL: %s") % str(e)
+            ) from e
+
         if not grafana_url:
             raise HTTPException(
                 status_code=400, detail=_("Grafana URL is not configured")
@@ -498,6 +505,7 @@ async def check_grafana_health():
                     logger.warning("Unexpected error retrieving API key: %s", e)
 
             # Try to get Grafana health endpoint
+            logger.info("Checking Grafana health at URL: %s/api/health", grafana_url)
             async with httpx.AsyncClient(timeout=10.0) as client:
                 # Try health API first
                 health_response = await client.get(f"{grafana_url}/api/health")
@@ -534,12 +542,21 @@ async def check_grafana_health():
                         error=f"HTTP {health_response.status_code}: {health_response.text}",
                     )
 
-        except httpx.TimeoutException:
+        except (
+            httpx.ReadTimeout,
+            httpx.ConnectTimeout,
+            httpx.WriteTimeout,
+            httpx.PoolTimeout,
+        ) as e:
+            logger.error("Grafana health check timeout for %s: %s", grafana_url, e)
             return GrafanaHealthStatus(
                 healthy=False,
                 error=_("Connection timeout - Grafana server may be unreachable"),
             )
-        except httpx.ConnectError:
+        except httpx.ConnectError as e:
+            logger.error(
+                "Grafana health check connection failed for %s: %s", grafana_url, e
+            )
             return GrafanaHealthStatus(
                 healthy=False,
                 error=_(

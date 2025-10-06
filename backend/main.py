@@ -29,6 +29,7 @@ from backend.api import (
     grafana_integration,
     host,
     openbao,
+    opentelemetry,
     packages,
     password_reset,
     profile,
@@ -785,6 +786,12 @@ app.include_router(
     telemetry.router, prefix="/api/telemetry", tags=["telemetry"]
 )  # /api/telemetry/* (with auth)
 startup_logger.info("Telemetry router added")
+
+startup_logger.info("Adding OpenTelemetry router with /api prefix")
+app.include_router(
+    opentelemetry.router, prefix="/api/opentelemetry", tags=["opentelemetry"]
+)  # /api/opentelemetry/* (with auth)
+startup_logger.info("OpenTelemetry router added")
 
 startup_logger.info("Adding Security Roles router")
 app.include_router(security_roles.router)  # /api/security-roles/* (with auth)

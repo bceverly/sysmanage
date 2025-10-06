@@ -118,13 +118,14 @@ const Updates: React.FC = () => {
         undefined,
         undefined,
         undefined,
+        undefined,
         1000,
         0
       );
-      
+
       // Extract unique hosts from updates
       const hostMap = new Map<number, { hostname: string; count: number }>();
-      response.updates.forEach(update => {
+      (response.updates || []).forEach(update => {
         const existing = hostMap.get(update.host_id);
         if (existing) {
           existing.count++;

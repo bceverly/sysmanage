@@ -80,30 +80,20 @@ like to add:
     string externalization /
     translation.
 
-9.  Add OpenTelemetry support to
-    sysmanage and sysmanage-agent
-    so that the performance can be
-    monitoried in a large-scale
-    production environment.  Also,
-    add the ability to deploy
-    open telemetry to the remote
-    hosts and connect them to
-    the grafana system.
-
-10. Add the ability to deploy an
+9. Add the ability to deploy an
     antivirus solution that is
     platform approriate to the
     hosts along with centralized
     configuration file management
     of it.
 
-11. For Ubuntu (and possibly other
+10. For Ubuntu (and possibly other
     Linux platforms?) we need to
     be able to push a request to
     add a PPA to a remote host
     from a UI on the server.
 
-12. Add the ability to issue and
+11. Add the ability to issue and
     manage SysManage API keys with
     View/Edit/Admin roles.  They
     should be stored in the vault
@@ -115,3 +105,14 @@ like to add:
     an endpoint that is not /api/
     prefixed to get the token
     issued / renewed.
+
+12. A cool AI integration would be
+    to have the system pull back
+    a diagnostics report from a 
+    remote agent and do a health
+    check on what it sees and
+    make recommendations about
+    best practices config changes
+    for that remote host along
+    with the opportunity to have
+    sysmanage fix the issues.
