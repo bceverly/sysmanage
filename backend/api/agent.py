@@ -247,6 +247,7 @@ async def _handle_message_by_type(message, connection, db):
         MessageType.REBOOT_STATUS_UPDATE,
         MessageType.HOST_CERTIFICATES_UPDATE,
         MessageType.ROLE_DATA,
+        MessageType.THIRD_PARTY_REPOSITORY_UPDATE,
     ]:
         # Process inventory message using helper function
         logger.info("Received inventory message type: %s", message.message_type)

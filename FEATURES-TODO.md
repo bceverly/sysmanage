@@ -87,13 +87,7 @@ like to add:
     configuration file management
     of it.
 
-10. For Ubuntu (and possibly other
-    Linux platforms?) we need to
-    be able to push a request to
-    add a PPA to a remote host
-    from a UI on the server.
-
-11. Add the ability to issue and
+10. Add the ability to issue and
     manage SysManage API keys with
     View/Edit/Admin roles.  They
     should be stored in the vault
@@ -106,9 +100,9 @@ like to add:
     prefixed to get the token
     issued / renewed.
 
-12. A cool AI integration would be
+11. A cool AI integration would be
     to have the system pull back
-    a diagnostics report from a 
+    a diagnostics report from a
     remote agent and do a health
     check on what it sees and
     make recommendations about

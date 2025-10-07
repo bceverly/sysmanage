@@ -18,6 +18,7 @@ from backend.api.data_handlers import (
     handle_reboot_status_update,
     handle_script_execution_result,
     handle_software_update,
+    handle_third_party_repository_update,
     handle_user_access_update,
 )
 from backend.api.package_handlers import (
@@ -725,6 +726,20 @@ class MessageProcessor:
                     flush=True,
                 )
 
+            elif message.message_type == MessageType.THIRD_PARTY_REPOSITORY_UPDATE:
+                print(
+                    "About to call handle_third_party_repository_update",
+                    flush=True,
+                )
+                await handle_third_party_repository_update(
+                    db, mock_connection, message_data
+                )
+                success = True
+                print(
+                    "Successfully processed third-party repository update",
+                    flush=True,
+                )
+
             else:
                 print(
                     f"Unknown message type: {message.message_type}",
@@ -891,16 +906,11 @@ class MessageProcessor:
     ) -> bool:
         """Send a command message to an agent."""
         from backend.websocket.connection_manager import connection_manager
-        from backend.websocket.messages import create_command_message
 
         try:
-            # Create the command message
-            # Check if this is a script execution command
-            if "execution_id" in command_data:
-                message = create_command_message("execute_script", command_data)
-            else:
-                # Other types of commands
-                message = create_command_message("generic_command", command_data)
+            # The command_data is already a properly formatted message from create_command_message
+            # called in the API endpoints, so we can send it directly without wrapping again
+            message = command_data
 
             # Send via connection manager
             logger.info(

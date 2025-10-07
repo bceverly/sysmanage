@@ -41,6 +41,7 @@ from backend.api import (
     security_roles,
     tag,
     telemetry,
+    third_party_repos,
     ubuntu_pro_settings,
     updates,
     user,
@@ -796,6 +797,12 @@ startup_logger.info("OpenTelemetry router added")
 startup_logger.info("Adding Security Roles router")
 app.include_router(security_roles.router)  # /api/security-roles/* (with auth)
 startup_logger.info("Security Roles router added")
+
+startup_logger.info("Adding Third-Party Repositories router with /api prefix")
+app.include_router(
+    third_party_repos.router, prefix="/api", tags=["third-party-repos"]
+)  # /api/hosts/{host_id}/third-party-repos/* (with auth)
+startup_logger.info("Third-Party Repositories router added")
 
 startup_logger.info("=== ALL ROUTES REGISTERED ===")
 

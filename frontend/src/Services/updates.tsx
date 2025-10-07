@@ -7,6 +7,7 @@ export interface UpdateStatsSummary {
   security_updates: number;
   system_updates: number;
   application_updates: number;
+  os_upgrades: number;
 }
 
 export interface PackageUpdate {

@@ -280,3 +280,32 @@ class InstallationPackage(Base):
             f"<InstallationPackage(id={self.id}, package_name='{self.package_name}', "
             f"installation_request_id='{self.installation_request_id}')>"
         )
+
+
+class ThirdPartyRepository(Base):
+    """
+    This class holds the object mapping for the third_party_repository table.
+    Tracks third-party repositories (PPAs, COPRs, OBS, etc.) configured on each host.
+    """
+
+    __tablename__ = "third_party_repository"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(
+        GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    name = Column(String(255), nullable=False)  # Repository name
+    type = Column(String(50), nullable=False)  # ppa, copr, obs, zypper, etc.
+    url = Column(String(500), nullable=True)  # Repository URL
+    enabled = Column(Boolean, nullable=False, default=True)  # Whether repo is enabled
+    file_path = Column(String(500), nullable=True)  # Path to repo config file
+    last_updated = Column(DateTime, nullable=False)  # When this record was last updated
+
+    # Relationship back to Host
+    host = relationship("Host", back_populates="third_party_repositories")
+
+    def __repr__(self):
+        return (
+            f"<ThirdPartyRepository(id={self.id}, name='{self.name}', "
+            f"type='{self.type}', enabled={self.enabled}, host_id={self.host_id})>"
+        )

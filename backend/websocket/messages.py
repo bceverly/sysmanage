@@ -32,6 +32,7 @@ class MessageType(str, Enum):
     DIAGNOSTIC_COLLECTION_RESULT = "diagnostic_collection_result"
     HOST_CERTIFICATES_UPDATE = "host_certificates_update"
     ROLE_DATA = "role_data"
+    THIRD_PARTY_REPOSITORY_UPDATE = "third_party_repository_update"
 
     # Server -> Agent messages
     COMMAND = "command"

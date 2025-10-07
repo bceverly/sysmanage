@@ -52,6 +52,7 @@ import CertificateIcon from '@mui/icons-material/AdminPanelSettings';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
+import SourceIcon from '@mui/icons-material/Source';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField, List, ListItem, ListItemText, Divider, TableContainer, TableHead, InputAdornment } from '@mui/material';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
@@ -63,6 +64,7 @@ import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as 
 import { SysManageUser, doGetMe } from '../Services/users';
 import { SecretResponse } from '../Services/secrets';
 import { doCheckOpenTelemetryEligibility, doDeployOpenTelemetry, doGetOpenTelemetryStatus, doStartOpenTelemetry, doStopOpenTelemetry, doRestartOpenTelemetry, doConnectOpenTelemetryToGrafana, doDisconnectOpenTelemetryFromGrafana, doRemoveOpenTelemetry } from '../Services/opentelemetry';
+import ThirdPartyRepositories from './ThirdPartyRepositories';
 
 // Certificate interface
 interface Certificate {
@@ -227,13 +229,33 @@ const HostDetail = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
 
+    // Check if OS supports third-party repositories
+    const supportsThirdPartyRepos = () => {
+        if (!host?.platform_release && !host?.platform) return false;
+        const osName = host.platform_release || host.platform || '';
+        return osName.includes('Ubuntu') ||
+               osName.includes('Debian') ||
+               osName.includes('Fedora') ||
+               osName.includes('RHEL') ||
+               osName.includes('CentOS') ||
+               osName.includes('SUSE') ||
+               osName.includes('openSUSE');
+    };
+
     // Helper functions to calculate dynamic tab indices
     const getSoftwareInstallsTabIndex = () => 3;
-    const getAccessTabIndex = () => 4;
-    const getCertificatesTabIndex = () => 5;
-    const getServerRolesTabIndex = () => 6;
-    const getUbuntuProTabIndex = () => ubuntuProInfo?.available ? 7 : -1;
-    const getDiagnosticsTabIndex = () => ubuntuProInfo?.available ? 8 : 7;
+    const getThirdPartyReposTabIndex = () => supportsThirdPartyRepos() ? 4 : -1;
+    const getAccessTabIndex = () => supportsThirdPartyRepos() ? 5 : 4;
+    const getCertificatesTabIndex = () => supportsThirdPartyRepos() ? 6 : 5;
+    const getServerRolesTabIndex = () => supportsThirdPartyRepos() ? 7 : 6;
+    const getUbuntuProTabIndex = () => {
+        if (!ubuntuProInfo?.available) return -1;
+        return supportsThirdPartyRepos() ? 8 : 7;
+    };
+    const getDiagnosticsTabIndex = () => {
+        const baseIndex = supportsThirdPartyRepos() ? 8 : 7;
+        return ubuntuProInfo?.available ? baseIndex + 1 : baseIndex;
+    };
 
     // Certificate-related functions
     const fetchCertificates = useCallback(async () => {
@@ -2291,6 +2313,14 @@ const HostDetail = () => {
                         iconPosition="start"
                         sx={{ textTransform: 'none' }}
                     />
+                    {supportsThirdPartyRepos() && (
+                        <Tab
+                            icon={<SourceIcon />}
+                            label={t('hostDetail.thirdPartyReposTab', 'Third-Party Repositories')}
+                            iconPosition="start"
+                            sx={{ textTransform: 'none' }}
+                        />
+                    )}
                     <Tab
                         icon={<SecurityIcon />}
                         label={t('hostDetail.accessTab', 'Access')}
@@ -3178,6 +3208,15 @@ const HostDetail = () => {
                         </Card>
                     </Grid>
                 </Grid>
+            )}
+
+            {/* Third-Party Repositories Tab */}
+            {currentTab === getThirdPartyReposTabIndex() && host && (
+                <ThirdPartyRepositories
+                    hostId={hostId || ''}
+                    privilegedMode={host.is_agent_privileged || false}
+                    osName={host.platform_release || host.platform || ''}
+                />
             )}
 
             {/* Access Tab */}

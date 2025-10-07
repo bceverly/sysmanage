@@ -68,6 +68,10 @@ export const SecurityRoles = {
     ADD_PACKAGE: 'Add Package',
     APPLY_SOFTWARE_UPDATE: 'Apply Software Update',
     APPLY_HOST_OS_UPGRADE: 'Apply Host OS Upgrade',
+    ADD_THIRD_PARTY_REPOSITORY: 'Add Third-Party Repository',
+    DELETE_THIRD_PARTY_REPOSITORY: 'Delete Third-Party Repository',
+    ENABLE_THIRD_PARTY_REPOSITORY: 'Enable Third-Party Repository',
+    DISABLE_THIRD_PARTY_REPOSITORY: 'Disable Third-Party Repository',
 
     // Secrets Management
     DEPLOY_SSH_KEY: 'Deploy SSH Key',

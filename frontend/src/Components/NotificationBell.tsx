@@ -13,6 +13,7 @@ const NotificationBell: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const isMountedRef = useRef(true);
+  const dropdownRef = useRef<React.ElementRef<'div'>>(null);
   const { registerRefresh, unregisterRefresh } = useNotificationRefresh();
 
   const fetchUpdateStats = useCallback(async () => {
@@ -49,22 +50,22 @@ const NotificationBell: React.FC = () => {
 
   useEffect(() => {
     isMountedRef.current = true;
-    
+
     // Don't set up polling if user is not authenticated
     if (!localStorage.getItem('bearer_token')) {
       return () => {
         isMountedRef.current = false;
       };
     }
-    
+
     fetchUpdateStats();
-    
+
     // Register the refresh function for external triggers
     registerRefresh(fetchUpdateStats);
-    
+
     // Start with frequent polling (every 10 seconds) for the first 2 minutes to catch initial data
     let interval = window.setInterval(fetchUpdateStats, 10 * 1000);
-    
+
     // After 2 minutes, switch to less frequent polling (every 30 seconds)
     const slowDownTimeout = window.setTimeout(() => {
       if (isMountedRef.current) {
@@ -72,7 +73,7 @@ const NotificationBell: React.FC = () => {
         interval = window.setInterval(fetchUpdateStats, 30 * 1000);
       }
     }, 2 * 60 * 1000);
-    
+
     return () => {
       isMountedRef.current = false;
       unregisterRefresh();
@@ -80,6 +81,24 @@ const NotificationBell: React.FC = () => {
       window.clearTimeout(slowDownTimeout);
     };
   }, [fetchUpdateStats, registerRefresh, unregisterRefresh]);
+
+  // Handle clicking outside to close dropdown
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleClickOutside = (event: any) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
 
   const handleBellClick = () => {
     setShowDropdown(!showDropdown);
@@ -104,7 +123,7 @@ const NotificationBell: React.FC = () => {
   }
 
   return (
-    <div className="notification-bell">
+    <div className="notification-bell" ref={dropdownRef}>
       <button
         className={`notification-bell__button ${hasUpdates ? 'has-notifications' : ''}`}
         onClick={handleBellClick}
@@ -116,7 +135,7 @@ const NotificationBell: React.FC = () => {
         ) : (
           <IoNotificationsOutline className="notification-bell__icon" />
         )}
-        
+
         {hasUpdates && (
           <span className={`notification-bell__badge ${hasSecurityUpdates ? 'security' : ''}`}>
             {updateStats.total_updates > 99 ? '99+' : updateStats.total_updates}
@@ -125,14 +144,9 @@ const NotificationBell: React.FC = () => {
       </button>
 
       {showDropdown && (
-        <>
-          <div 
-            className="notification-bell__overlay" 
-            onClick={() => setShowDropdown(false)}
-          />
-          <div className="notification-bell__dropdown">
+        <div className="notification-bell__dropdown">
             <div className="notification-bell__header">
-              <h3>{t('notifications.title', 'Available Updates')}</h3>
+              <h3>{t('notifications.title', 'Available Updates/Upgrades')}</h3>
             </div>
             
             <div className="notification-bell__content">
@@ -183,7 +197,18 @@ const NotificationBell: React.FC = () => {
                       </span>
                     </div>
                   )}
-                  
+
+                  {updateStats.os_upgrades > 0 && (
+                    <div className="notification-bell__stat">
+                      <span className="notification-bell__stat-number">
+                        {updateStats.os_upgrades}
+                      </span>
+                      <span className="notification-bell__stat-label">
+                        {t('notifications.osUpgrades', 'OS Upgrades')}
+                      </span>
+                    </div>
+                  )}
+
                   <div className="notification-bell__hosts">
                     <span className="notification-bell__hosts-text">
                       {t('notifications.hostsAffected', 
@@ -221,8 +246,7 @@ const NotificationBell: React.FC = () => {
                 </button>
               </div>
             )}
-          </div>
-        </>
+        </div>
       )}
     </div>
   );

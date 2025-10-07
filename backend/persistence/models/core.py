@@ -164,6 +164,9 @@ class Host(Base):
         "SoftwareInstallationLog", back_populates="host"
     )
     software_packages = relationship("SoftwarePackage", back_populates="host")
+    third_party_repositories = relationship(
+        "ThirdPartyRepository", back_populates="host"
+    )
     user_accounts = relationship("UserAccount", back_populates="host")
     user_groups = relationship("UserGroup", back_populates="host")
     certificates = relationship(

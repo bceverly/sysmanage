@@ -22,6 +22,7 @@ from backend.persistence.models import (
     PackageUpdate,
     SoftwarePackage,
     StorageDevice,
+    ThirdPartyRepository,
     UbuntuProInfo,
     UbuntuProService,
     UserAccount,
@@ -1809,4 +1810,86 @@ async def handle_host_role_data_update(db: Session, connection, message_data: di
         return {
             "message_type": "error",
             "error": f"Failed to process role data update: {str(e)}",
+        }
+
+
+async def handle_third_party_repository_update(
+    db: Session, connection, message_data: dict
+):
+    """Handle third-party repository update message from agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
+
+    if not hasattr(connection, "host_id") or not connection.host_id:
+        return {"message_type": "error", "error": _("Host not registered")}
+
+    try:
+        # Handle third-party repositories
+        repositories = message_data.get("repositories", [])
+
+        debug_logger.info(
+            "Processing third-party repository update from %s with %d repositories",
+            getattr(connection, "hostname", "unknown"),
+            len(repositories),
+        )
+
+        # Delete existing repositories for this host
+        db.execute(
+            delete(ThirdPartyRepository).where(
+                ThirdPartyRepository.host_id == connection.host_id
+            )
+        )
+
+        # Add new repositories
+        repos_added = 0
+        for repo in repositories:
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
+            repository = ThirdPartyRepository(
+                host_id=connection.host_id,
+                name=repo.get("name", ""),
+                type=repo.get("type", "unknown"),
+                url=repo.get("url"),
+                enabled=repo.get("enabled", True),
+                file_path=repo.get("file_path"),
+                last_updated=now,
+            )
+            db.add(repository)
+            repos_added += 1
+
+        # Update host timestamp
+        host = db.query(Host).filter(Host.id == connection.host_id).first()
+        if host:
+            # We don't have a specific timestamp field for third-party repos yet,
+            # but we can use last_access or add one in the future
+            pass
+
+        db.commit()
+
+        debug_logger.info(
+            "Successfully stored %d third-party repositories for host %s",
+            repos_added,
+            getattr(connection, "hostname", "unknown"),
+        )
+
+        return {
+            "message_type": "third_party_repository_update_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "status": "processed",
+            "repositories_stored": repos_added,
+        }
+
+    except Exception as e:
+        debug_logger.error(
+            "Error processing third-party repository update from %s: %s",
+            getattr(connection, "hostname", "unknown"),
+            e,
+        )
+        db.rollback()
+        return {
+            "message_type": "error",
+            "error": f"Failed to process third-party repository update: {str(e)}",
         }

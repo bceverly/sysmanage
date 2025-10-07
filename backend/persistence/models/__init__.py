@@ -31,6 +31,7 @@ __all__ = [
     "SoftwareInstallationLog",
     "InstallationRequest",
     "InstallationPackage",
+    "ThirdPartyRepository",
     # User management models
     "UserAccount",
     "UserGroup",

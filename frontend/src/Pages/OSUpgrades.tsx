@@ -303,6 +303,7 @@ const OSUpgrades: React.FC = () => {
             <option value="windows-upgrade">{t('osUpgrades.filters.windows', 'Windows')}</option>
             <option value="openbsd-upgrade">{t('osUpgrades.filters.openbsd', 'OpenBSD')}</option>
             <option value="freebsd-upgrade">{t('osUpgrades.filters.freebsd', 'FreeBSD')}</option>
+            <option value="netbsd-upgrade">{t('osUpgrades.filters.netbsd', 'NetBSD')}</option>
           </select>
         </div>
       </div>

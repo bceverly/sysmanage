@@ -1,16 +1,12 @@
-"""
-This module houses the API routes for package update management in SysManage.
-"""
+"""API routes for package update management."""
 
 import logging
 from datetime import datetime, timezone
 from typing import List, Optional
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, validator
 from sqlalchemy import and_, desc
 from sqlalchemy.orm import sessionmaker
-
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -19,7 +15,6 @@ from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
 
 logger = logging.getLogger(__name__)
-
 router = APIRouter()
 
 
@@ -75,7 +70,6 @@ class UpdateExecutionRequest(BaseModel):
     def validate_package_managers(
         cls, package_managers
     ):  # pylint: disable=no-self-argument
-        # Convert empty array to None
         if package_managers == []:
             return None
         return package_managers
@@ -112,10 +106,8 @@ async def report_updates(
                 models.PackageUpdate.host_id == host_id
             ).delete()
 
-            # Store new updates
             for update_info in updates_report.available_updates:
-                # Map old agent fields to new schema
-                update_type = "package"  # default
+                update_type = "package"
                 if update_info.is_security_update:
                     update_type = "security"
                 elif update_info.is_system_update:
@@ -128,8 +120,8 @@ async def report_updates(
                     available_version=update_info.available_version,
                     package_manager=update_info.package_manager,
                     update_type=update_type,
-                    priority=None,  # Not provided by agent
-                    description=None,  # Not provided by agent
+                    priority=None,
+                    description=None,
                     size_bytes=update_info.update_size_bytes,
                     requires_reboot=update_info.requires_reboot,
                     discovered_at=now,
@@ -190,6 +182,17 @@ async def get_update_summary(dependencies=Depends(JWTBearer())):
                 .count()
             )
 
+            # Count OS upgrades (based on package_manager)
+            os_upgrades = (
+                session.query(models.PackageUpdate)
+                .filter(
+                    models.PackageUpdate.package_manager.in_(
+                        OS_UPGRADE_PACKAGE_MANAGERS
+                    )
+                )
+                .count()
+            )
+
             # Try to get update results from the update handlers module's cache
             update_results = {}
             try:
@@ -211,6 +214,7 @@ async def get_update_summary(dependencies=Depends(JWTBearer())):
                 "security_updates": security_updates,
                 "system_updates": system_updates,
                 "application_updates": application_updates,
+                "os_upgrades": os_upgrades,
                 "results": update_results,
             }
 
@@ -220,17 +224,16 @@ async def get_update_summary(dependencies=Depends(JWTBearer())):
         ) from e
 
 
-# OS Version Upgrade specific endpoints
-
 OS_UPGRADE_PACKAGE_MANAGERS = [
     "ubuntu-release",
     "fedora-release",
     "opensuse-release",
     "macos-upgrade",
-    "macOS Update",  # Agent sends this for macOS system updates
+    "macOS Update",
     "windows-upgrade",
     "openbsd-upgrade",
     "freebsd-upgrade",
+    "netbsd-upgrade",
 ]
 
 
@@ -345,13 +348,22 @@ async def get_os_upgrades_summary(dependencies=Depends(JWTBearer())):
                 del data["host_ids"]  # Remove set, not JSON serializable
                 summary.append(data)
 
+            # Count total hosts
+            total_hosts = (
+                session.query(models.Host).filter(models.Host.active.is_(True)).count()
+            )
+
             return {
                 "os_upgrades_summary": summary,
-                "total_upgrades": len(all_upgrades),
-                "total_hosts_with_upgrades": len(
+                "total_os_upgrades": len(all_upgrades),
+                "hosts_with_os_upgrades": len(
                     set(update.host_id for update in all_upgrades)
                 ),
-                "os_types_with_upgrades": list(summary_by_os.keys()),
+                "total_hosts": total_hosts,
+                "os_upgrades_by_type": {
+                    os_type: len(data["upgrades"])
+                    for os_type, data in summary_by_os.items()
+                },
             }
 
     except Exception as e:
@@ -954,7 +966,7 @@ async def get_execution_log(
 
 @router.get("/results", response_model=UpdateStatsSummary)
 async def get_update_results(dependencies=Depends(JWTBearer())):
-    """Get recent update application results from agents."""
+    """Get update results."""
     try:
         logger.info("SUCCESS: get_update_results called successfully")
         return UpdateStatsSummary(
@@ -974,17 +986,14 @@ async def get_update_results(dependencies=Depends(JWTBearer())):
 
 @router.get("/update-status")
 async def get_update_status(dependencies=Depends(JWTBearer())):
-    """Get recent update application results from agents."""
+    """Get update status."""
     try:
-        # Try to get the update results cache from the global scope
         import backend.api.agent as agent_module
 
         if hasattr(agent_module, "handle_update_apply_result"):
             handler = getattr(agent_module, "handle_update_apply_result")
             if hasattr(handler, "update_results_cache"):
-                results = handler.update_results_cache.copy()
-                return {"results": results}
-
+                return {"results": handler.update_results_cache.copy()}
         return {"results": {}}
     except Exception as e:
         logger.error("Error fetching update status: %s", e)
