@@ -110,3 +110,11 @@ like to add:
     for that remote host along
     with the opportunity to have
     sysmanage fix the issues.
+
+12. We should have a settings
+    screen that allows the user
+    to specify default third-
+    party repositories that
+    should be auto-applied to
+    every host that is approved
+    on registration.

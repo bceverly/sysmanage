@@ -232,14 +232,29 @@ const HostDetail = () => {
     // Check if OS supports third-party repositories
     const supportsThirdPartyRepos = () => {
         if (!host?.platform_release && !host?.platform) return false;
-        const osName = host.platform_release || host.platform || '';
-        return osName.includes('Ubuntu') ||
-               osName.includes('Debian') ||
-               osName.includes('Fedora') ||
-               osName.includes('RHEL') ||
-               osName.includes('CentOS') ||
-               osName.includes('SUSE') ||
-               osName.includes('openSUSE');
+        const platform = host.platform || '';
+        const platformRelease = host.platform_release || '';
+        // OpenBSD explicitly does not support third-party repositories by design
+        if (platform.includes('OpenBSD') || platformRelease.includes('OpenBSD')) return false;
+        return platform.includes('Ubuntu') ||
+               platform.includes('Debian') ||
+               platform.includes('Fedora') ||
+               platform.includes('RHEL') ||
+               platform.includes('CentOS') ||
+               platform.includes('SUSE') ||
+               platform.includes('openSUSE') ||
+               platform.includes('macOS') ||
+               platform.includes('Darwin') ||
+               platform.includes('FreeBSD') ||
+               platform.includes('NetBSD') ||
+               platform.includes('Windows') ||
+               platformRelease.includes('Ubuntu') ||
+               platformRelease.includes('Debian') ||
+               platformRelease.includes('Fedora') ||
+               platformRelease.includes('RHEL') ||
+               platformRelease.includes('CentOS') ||
+               platformRelease.includes('SUSE') ||
+               platformRelease.includes('openSUSE');
     };
 
     // Helper functions to calculate dynamic tab indices
@@ -3215,7 +3230,7 @@ const HostDetail = () => {
                 <ThirdPartyRepositories
                     hostId={hostId || ''}
                     privilegedMode={host.is_agent_privileged || false}
-                    osName={host.platform_release || host.platform || ''}
+                    osName={host.platform || host.platform_release || ''}
                 />
             )}
 

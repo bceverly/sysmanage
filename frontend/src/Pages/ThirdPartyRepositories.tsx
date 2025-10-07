@@ -64,6 +64,23 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
     const [obsDistroVersion, setObsDistroVersion] = useState<string>('');
     const [obsRepoName, setObsRepoName] = useState<string>('');
 
+    // macOS Homebrew
+    const [tapUser, setTapUser] = useState<string>('');
+    const [tapRepo, setTapRepo] = useState<string>('');
+
+    // FreeBSD pkg
+    const [pkgRepoName, setPkgRepoName] = useState<string>('');
+    const [pkgRepoUrl, setPkgRepoUrl] = useState<string>('');
+
+    // NetBSD pkgsrc
+    const [pkgsrcName, setPkgsrcName] = useState<string>('');
+    const [pkgsrcUrl, setPkgsrcUrl] = useState<string>('');
+
+    // Windows
+    const [windowsRepoType, setWindowsRepoType] = useState<string>('chocolatey');
+    const [windowsRepoName, setWindowsRepoName] = useState<string>('');
+    const [windowsRepoUrl, setWindowsRepoUrl] = useState<string>('');
+
     // Computed repository string
     const [constructedRepo, setConstructedRepo] = useState<string>('');
 
@@ -132,8 +149,32 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
             } else {
                 setConstructedRepo('');
             }
+        } else if (osName.includes('macOS') || osName.includes('Darwin')) {
+            if (tapUser && tapRepo) {
+                setConstructedRepo(`${tapUser}/${tapRepo}`);
+            } else {
+                setConstructedRepo('');
+            }
+        } else if (osName.includes('FreeBSD')) {
+            if (pkgRepoName && pkgRepoUrl) {
+                setConstructedRepo(pkgRepoName);
+            } else {
+                setConstructedRepo('');
+            }
+        } else if (osName.includes('NetBSD')) {
+            if (pkgsrcName && pkgsrcUrl) {
+                setConstructedRepo(pkgsrcName);
+            } else {
+                setConstructedRepo('');
+            }
+        } else if (osName.includes('Windows')) {
+            if (windowsRepoName && windowsRepoUrl) {
+                setConstructedRepo(windowsRepoName);
+            } else {
+                setConstructedRepo('');
+            }
         }
-    }, [ppaOwner, ppaName, coprOwner, coprProject, obsUrl, obsProjectPath, obsDistroVersion, obsRepoName, osName]);
+    }, [ppaOwner, ppaName, coprOwner, coprProject, obsUrl, obsProjectPath, obsDistroVersion, obsRepoName, tapUser, tapRepo, pkgRepoName, pkgRepoUrl, pkgsrcName, pkgsrcUrl, windowsRepoName, windowsRepoUrl, osName]);
 
     useEffect(() => {
         loadRepositories();
@@ -154,13 +195,20 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
         setError(null);
 
         try {
-            const payload: { repository: string; url?: string } = {
+            const payload: { repository: string; url?: string; type?: string } = {
                 repository: constructedRepo,
             };
 
-            // For SUSE, we might need the full URL
+            // For SUSE, FreeBSD, NetBSD, and Windows, we need the full URL
             if (osName.includes('SUSE') || osName.includes('openSUSE')) {
                 payload.url = constructedRepo;
+            } else if (osName.includes('FreeBSD')) {
+                payload.url = pkgRepoUrl;
+            } else if (osName.includes('NetBSD')) {
+                payload.url = pkgsrcUrl;
+            } else if (osName.includes('Windows')) {
+                payload.url = windowsRepoUrl;
+                payload.type = windowsRepoType;
             }
 
             await axiosInstance.post(`/api/hosts/${hostId}/third-party-repos`, payload);
@@ -176,6 +224,15 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
             setObsProjectPath('');
             setObsDistroVersion('');
             setObsRepoName('');
+            setTapUser('');
+            setTapRepo('');
+            setPkgRepoName('');
+            setPkgRepoUrl('');
+            setPkgsrcName('');
+            setPkgsrcUrl('');
+            setWindowsRepoType('chocolatey');
+            setWindowsRepoName('');
+            setWindowsRepoUrl('');
             setConstructedRepo('');
 
             // Wait a moment for the agent to process and then refresh
@@ -568,6 +625,176 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                                         </Typography>
                                         <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500, wordBreak: 'break-all' }}>
                                             {constructedRepo}
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </>
+                        )}
+
+                        {/* macOS Homebrew Tap Fields */}
+                        {(osName.includes('macOS') || osName.includes('Darwin')) && (
+                            <>
+                                <TextField
+                                    autoFocus
+                                    fullWidth
+                                    label={t('thirdPartyRepos.tapUser', 'Tap User/Org')}
+                                    value={tapUser}
+                                    onChange={(e) => setTapUser(e.target.value)}
+                                    sx={{ mb: 2 }}
+                                    helperText={t('thirdPartyRepos.tapUserHelp', 'e.g., homebrew')}
+                                />
+                                <TextField
+                                    fullWidth
+                                    label={t('thirdPartyRepos.tapRepo', 'Tap Repository')}
+                                    value={tapRepo}
+                                    onChange={(e) => setTapRepo(e.target.value)}
+                                    sx={{ mb: 2 }}
+                                    helperText={t('thirdPartyRepos.tapRepoHelp', 'e.g., cask-versions')}
+                                />
+                                {constructedRepo && (
+                                    <Box sx={{ mb: 2, p: 2, bgcolor: 'action.hover', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                            {t('thirdPartyRepos.tapIdentifier', 'Tap Identifier')}:
+                                        </Typography>
+                                        <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500 }}>
+                                            {constructedRepo}
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </>
+                        )}
+
+                        {/* FreeBSD pkg Repository Fields */}
+                        {osName.includes('FreeBSD') && (
+                            <>
+                                <TextField
+                                    autoFocus
+                                    fullWidth
+                                    label={t('thirdPartyRepos.pkgRepoName', 'Repository Name')}
+                                    value={pkgRepoName}
+                                    onChange={(e) => setPkgRepoName(e.target.value)}
+                                    sx={{ mb: 2 }}
+                                    helperText={t('thirdPartyRepos.pkgRepoNameHelp', 'e.g., my-custom-repo')}
+                                />
+                                <TextField
+                                    fullWidth
+                                    label={t('thirdPartyRepos.pkgRepoUrl', 'Repository URL')}
+                                    value={pkgRepoUrl}
+                                    onChange={(e) => setPkgRepoUrl(e.target.value)}
+                                    sx={{ mb: 2 }}
+                                    helperText={t('thirdPartyRepos.pkgRepoUrlHelp', 'e.g., http://example.com/packages')}
+                                />
+                                {constructedRepo && (
+                                    <Box sx={{ mb: 2, p: 2, bgcolor: 'action.hover', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                            {t('thirdPartyRepos.pkgRepoIdentifier', 'Repository Name')}:
+                                        </Typography>
+                                        <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500 }}>
+                                            {constructedRepo}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, mb: 0.5 }}>
+                                            URL:
+                                        </Typography>
+                                        <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500, wordBreak: 'break-all' }}>
+                                            {pkgRepoUrl}
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </>
+                        )}
+
+                        {/* NetBSD pkgsrc Repository Fields */}
+                        {osName.includes('NetBSD') && (
+                            <>
+                                <TextField
+                                    autoFocus
+                                    fullWidth
+                                    label={t('thirdPartyRepos.pkgsrcName', 'Repository Name')}
+                                    value={pkgsrcName}
+                                    onChange={(e) => setPkgsrcName(e.target.value)}
+                                    sx={{ mb: 2 }}
+                                    helperText={t('thirdPartyRepos.pkgsrcNameHelp', 'e.g., wip or custom-packages')}
+                                />
+                                <TextField
+                                    fullWidth
+                                    label={t('thirdPartyRepos.pkgsrcUrl', 'Git Repository URL')}
+                                    value={pkgsrcUrl}
+                                    onChange={(e) => setPkgsrcUrl(e.target.value)}
+                                    sx={{ mb: 2 }}
+                                    helperText={t('thirdPartyRepos.pkgsrcUrlHelp', 'e.g., https://github.com/NetBSD/pkgsrc-wip')}
+                                />
+                                {constructedRepo && (
+                                    <Box sx={{ mb: 2, p: 2, bgcolor: 'action.hover', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                            {t('thirdPartyRepos.pkgsrcIdentifier', 'Repository Name')}:
+                                        </Typography>
+                                        <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500 }}>
+                                            {constructedRepo}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, mb: 0.5 }}>
+                                            URL:
+                                        </Typography>
+                                        <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500, wordBreak: 'break-all' }}>
+                                            {pkgsrcUrl}
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </>
+                        )}
+
+                        {/* Windows Repository Fields */}
+                        {osName.includes('Windows') && (
+                            <>
+                                <TextField
+                                    select
+                                    fullWidth
+                                    label={t('thirdPartyRepos.windowsType', 'Repository Type')}
+                                    value={windowsRepoType}
+                                    onChange={(e) => setWindowsRepoType(e.target.value)}
+                                    sx={{ mb: 2 }}
+                                    helperText={t('thirdPartyRepos.windowsTypeHelp', 'Choose Chocolatey or winget')}
+                                    SelectProps={{
+                                        native: true,
+                                    }}
+                                >
+                                    <option value="chocolatey">Chocolatey</option>
+                                    <option value="winget">winget</option>
+                                </TextField>
+                                <TextField
+                                    fullWidth
+                                    label={t('thirdPartyRepos.windowsName', 'Repository Name')}
+                                    value={windowsRepoName}
+                                    onChange={(e) => setWindowsRepoName(e.target.value)}
+                                    sx={{ mb: 2 }}
+                                    helperText={t('thirdPartyRepos.windowsNameHelp', 'e.g., mycompany-repo')}
+                                />
+                                <TextField
+                                    fullWidth
+                                    label={t('thirdPartyRepos.windowsUrl', 'Repository URL')}
+                                    value={windowsRepoUrl}
+                                    onChange={(e) => setWindowsRepoUrl(e.target.value)}
+                                    sx={{ mb: 2 }}
+                                    helperText={t('thirdPartyRepos.windowsUrlHelp', 'e.g., https://mycompany.com/chocolatey')}
+                                />
+                                {constructedRepo && (
+                                    <Box sx={{ mb: 2, p: 2, bgcolor: 'action.hover', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                            {t('thirdPartyRepos.windowsIdentifier', 'Repository Name')}:
+                                        </Typography>
+                                        <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500 }}>
+                                            {constructedRepo}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, mb: 0.5 }}>
+                                            Type:
+                                        </Typography>
+                                        <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500 }}>
+                                            {windowsRepoType}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, mb: 0.5 }}>
+                                            URL:
+                                        </Typography>
+                                        <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500, wordBreak: 'break-all' }}>
+                                            {windowsRepoUrl}
                                         </Typography>
                                     </Box>
                                 )}
