@@ -126,8 +126,63 @@ const Settings: React.FC = () => {
   const [viewHostsDialogOpen, setViewHostsDialogOpen] = useState(false);
   const [viewingTag, setViewingTag] = useState<TagWithHosts | null>(null);
   
+  // Tab names for URL hash
+  const tabNames = ['tags', 'queues', 'integrations', 'ubuntu-pro', 'available-packages'];
+
+  // Initialize tab from URL hash
+  const getInitialTab = () => {
+    const hash = window.location.hash.slice(1); // Remove # prefix
+    const tabIndex = tabNames.indexOf(hash);
+    return tabIndex >= 0 ? tabIndex : 0;
+  };
+
   // Tab state
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(getInitialTab);
+
+  // Handle tab change and update URL hash
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+    window.location.hash = tabNames[newValue];
+
+    // Load queue messages when switching to queue tab
+    if (newValue === 1) {
+      loadQueueMessages();
+    }
+    // Load package data when switching to Available Packages tab
+    if (newValue === 4) {
+      loadPackageSummary();
+      // Start 30-second auto-refresh timer for package cards
+      if (packageRefreshInterval) {
+        window.clearInterval(packageRefreshInterval);
+      }
+      const interval = window.setInterval(() => {
+        loadPackageSummary();
+      }, 30000);
+      setPackageRefreshInterval(interval);
+    } else {
+      // Clear interval when leaving Available Packages tab
+      if (packageRefreshInterval) {
+        window.clearInterval(packageRefreshInterval);
+        setPackageRefreshInterval(null);
+      }
+    }
+  };
+
+  // Listen for hash changes (browser back/forward)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      const tabIndex = tabNames.indexOf(hash);
+      if (tabIndex >= 0) {
+        setActiveTab(tabIndex);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+    // tabNames is a constant array, safe to omit from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   // Queue management state
   const [queueMessages, setQueueMessages] = useState<QueueMessage[]>([]);
@@ -146,6 +201,7 @@ const Settings: React.FC = () => {
   const [packageTotalCount, setPackageTotalCount] = useState(0);
   const [packageRefreshInterval, setPackageRefreshInterval] = useState<number | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [packageSummaryLoading, setPackageSummaryLoading] = useState(false);
 
   // Permission states
   const [canDeleteQueueMessage, setCanDeleteQueueMessage] = useState<boolean>(false);
@@ -304,33 +360,6 @@ const Settings: React.FC = () => {
     setEditDialogOpen(true);
   };
 
-  // Tab change handler
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
-    // Load queue messages when switching to queue tab
-    if (newValue === 1) {
-      loadQueueMessages();
-    }
-    // Load package data when switching to Available Packages tab
-    if (newValue === 4) {
-      loadPackageSummary();
-      // Start 30-second auto-refresh timer for package cards
-      if (packageRefreshInterval) {
-        window.clearInterval(packageRefreshInterval);
-      }
-      const interval = window.setInterval(() => {
-        loadPackageSummary();
-      }, 30000);
-      setPackageRefreshInterval(interval);
-    } else {
-      // Clear interval when switching away from Available Packages tab
-      if (packageRefreshInterval) {
-        window.clearInterval(packageRefreshInterval);
-        setPackageRefreshInterval(null);
-      }
-    }
-  };
-
   // Load queue messages from API
   const loadQueueMessages = useCallback(async () => {
     setQueueLoading(true);
@@ -373,11 +402,14 @@ const Settings: React.FC = () => {
 
   // Package management functions
   const loadPackageSummary = useCallback(async () => {
+    setPackageSummaryLoading(true);
     try {
       const response = await axiosInstance.get('/api/packages/summary');
       setPackageSummary(response.data);
     } catch (error) {
       console.error('Error fetching package summary:', error);
+    } finally {
+      setPackageSummaryLoading(false);
     }
   }, []);
 
@@ -502,6 +534,13 @@ const Settings: React.FC = () => {
       console.error('Error refreshing all packages:', error);
     }
   }, [packageSummary, loadPackageSummary]);
+
+  // Load package summary on mount if we're on the Available Packages tab
+  useEffect(() => {
+    if (activeTab === 4) {
+      loadPackageSummary();
+    }
+  }, [activeTab, loadPackageSummary]);
 
   // DataGrid columns
   const columns: GridColDef[] = [
@@ -922,9 +961,16 @@ const Settings: React.FC = () => {
       )}
 
       {/* Initial State */}
-      {!packageSearchTerm && packageSummary.length === 0 && (
+      {!packageSearchTerm && packageSummary.length === 0 && !packageSummaryLoading && (
         <Alert severity="info" sx={{ mt: 2 }}>
           {t('availablePackages.noData', 'No package data available. Packages will be collected from your managed hosts automatically.')}
+        </Alert>
+      )}
+
+      {/* Loading State */}
+      {packageSummaryLoading && packageSummary.length === 0 && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          {t('availablePackages.loading', 'Loading package data...')}
         </Alert>
       )}
     </Box>

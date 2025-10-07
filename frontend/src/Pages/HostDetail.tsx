@@ -60,7 +60,7 @@ import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 
-import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck } from '../Services/hosts';
+import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck } from '../Services/hosts';
 import { SysManageUser, doGetMe } from '../Services/users';
 import { SecretResponse } from '../Services/secrets';
 import { doCheckOpenTelemetryEligibility, doDeployOpenTelemetry, doGetOpenTelemetryStatus, doStartOpenTelemetry, doStopOpenTelemetry, doRestartOpenTelemetry, doConnectOpenTelemetryToGrafana, doDisconnectOpenTelemetryFromGrafana, doRemoveOpenTelemetry } from '../Services/opentelemetry';
@@ -110,7 +110,55 @@ const HostDetail = () => {
     const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticReport[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [currentTab, setCurrentTab] = useState<number>(0);
+
+    // Check if OS supports third-party repositories
+    const supportsThirdPartyRepos = useCallback(() => {
+        if (!host?.platform_release && !host?.platform) return false;
+        const platform = host.platform || '';
+        const platformRelease = host.platform_release || '';
+        // OpenBSD explicitly does not support third-party repositories by design
+        if (platform.includes('OpenBSD') || platformRelease.includes('OpenBSD')) return false;
+        return platform.includes('Ubuntu') ||
+               platform.includes('Debian') ||
+               platform.includes('Fedora') ||
+               platform.includes('RHEL') ||
+               platform.includes('CentOS') ||
+               platform.includes('SUSE') ||
+               platform.includes('openSUSE') ||
+               platform.includes('macOS') ||
+               platform.includes('Darwin') ||
+               platform.includes('FreeBSD') ||
+               platform.includes('NetBSD') ||
+               platform.includes('Windows') ||
+               platformRelease.includes('Ubuntu') ||
+               platformRelease.includes('Debian') ||
+               platformRelease.includes('Fedora') ||
+               platformRelease.includes('RHEL') ||
+               platformRelease.includes('CentOS') ||
+               platformRelease.includes('SUSE') ||
+               platformRelease.includes('openSUSE');
+    }, [host]);
+
+    // Tab names for URL hash (static tabs only - dynamic tabs handled separately)
+    const getTabNames = useCallback(() => {
+        const tabs = ['info', 'hardware', 'software', 'software-changes'];
+        if (supportsThirdPartyRepos()) tabs.push('third-party-repos');
+        tabs.push('access', 'certificates', 'server-roles');
+        if (ubuntuProInfo?.available) tabs.push('ubuntu-pro');
+        tabs.push('diagnostics');
+        return tabs;
+    }, [ubuntuProInfo, supportsThirdPartyRepos]);
+
+    // Initialize tab from URL hash
+    const getInitialTab = useCallback(() => {
+        const hash = window.location.hash.slice(1);
+        if (!hash) return 0;
+        const tabs = getTabNames();
+        const tabIndex = tabs.indexOf(hash);
+        return tabIndex >= 0 ? tabIndex : 0;
+    }, [getTabNames]);
+
+    const [currentTab, setCurrentTab] = useState<number>(getInitialTab);
     const [diagnosticsLoading, setDiagnosticsLoading] = useState<boolean>(false);
     const [certificatesLoading, setCertificatesLoading] = useState<boolean>(false);
     const [roles, setRoles] = useState<HostRole[]>([]);
@@ -224,38 +272,13 @@ const HostDetail = () => {
     const [uninstallConfirmOpen, setUninstallConfirmOpen] = useState<boolean>(false);
     const [packageToUninstall, setPackageToUninstall] = useState<SoftwarePackage | null>(null);
 
+    // Request packages confirmation state
+    const [requestPackagesConfirmOpen, setRequestPackagesConfirmOpen] = useState<boolean>(false);
+
     // Current user state
     const [currentUser, setCurrentUser] = useState<SysManageUser | null>(null);
     const navigate = useNavigate();
     const { t } = useTranslation();
-
-    // Check if OS supports third-party repositories
-    const supportsThirdPartyRepos = () => {
-        if (!host?.platform_release && !host?.platform) return false;
-        const platform = host.platform || '';
-        const platformRelease = host.platform_release || '';
-        // OpenBSD explicitly does not support third-party repositories by design
-        if (platform.includes('OpenBSD') || platformRelease.includes('OpenBSD')) return false;
-        return platform.includes('Ubuntu') ||
-               platform.includes('Debian') ||
-               platform.includes('Fedora') ||
-               platform.includes('RHEL') ||
-               platform.includes('CentOS') ||
-               platform.includes('SUSE') ||
-               platform.includes('openSUSE') ||
-               platform.includes('macOS') ||
-               platform.includes('Darwin') ||
-               platform.includes('FreeBSD') ||
-               platform.includes('NetBSD') ||
-               platform.includes('Windows') ||
-               platformRelease.includes('Ubuntu') ||
-               platformRelease.includes('Debian') ||
-               platformRelease.includes('Fedora') ||
-               platformRelease.includes('RHEL') ||
-               platformRelease.includes('CentOS') ||
-               platformRelease.includes('SUSE') ||
-               platformRelease.includes('openSUSE');
-    };
 
     // Helper functions to calculate dynamic tab indices
     const getSoftwareInstallsTabIndex = () => 3;
@@ -898,6 +921,33 @@ const HostDetail = () => {
             }
         };
     }, [hostId, ubuntuProInfo?.available, servicesMessage]);
+
+    // Listen for hash changes (browser back/forward)
+    useEffect(() => {
+        const handleHashChange = () => {
+            const hash = window.location.hash.slice(1);
+            if (!hash) return;
+            const tabs = getTabNames();
+            const tabIndex = tabs.indexOf(hash);
+            if (tabIndex >= 0) {
+                setCurrentTab(tabIndex);
+            }
+        };
+
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, [getTabNames]);
+
+    // Recalculate current tab when host or ubuntuProInfo changes (handles dynamic tabs)
+    useEffect(() => {
+        const hash = window.location.hash.slice(1);
+        if (!hash) return;
+        const tabs = getTabNames();
+        const tabIndex = tabs.indexOf(hash);
+        if (tabIndex >= 0 && tabIndex !== currentTab) {
+            setCurrentTab(tabIndex);
+        }
+    }, [host, ubuntuProInfo, getTabNames, currentTab]);
 
     const formatDate = (dateString: string | undefined) => {
         if (!dateString) return t('common.notAvailable', 'N/A');
@@ -1598,9 +1648,28 @@ const HostDetail = () => {
         }
     };
 
+    const handleRequestPackages = () => {
+        setRequestPackagesConfirmOpen(true);
+    };
+
+    const handleRequestPackagesConfirm = async () => {
+        if (!host || !host.id) return;
+        setRequestPackagesConfirmOpen(false);
+
+        try {
+            await doRequestPackages(host.id);
+            setSnackbarMessage(t('hosts.packagesRequested', 'Package collection requested successfully'));
+            setSnackbarOpen(true);
+        } catch (error) {
+            console.error('Failed to request package collection:', error);
+            setSnackbarMessage(t('hosts.packagesRequestFailed', 'Failed to request package collection'));
+            setSnackbarOpen(true);
+        }
+    };
+
     const handleShutdownConfirm = async () => {
         if (!host || !host.id) return;
-        
+
         try {
             await doShutdownHost(host.id);
             setSnackbarMessage(t('hosts.shutdownRequested', 'Shutdown requested successfully'));
@@ -1756,6 +1825,8 @@ const HostDetail = () => {
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setCurrentTab(newValue);
+        const tabs = getTabNames();
+        window.location.hash = tabs[newValue];
     };
 
     // Ubuntu Pro handlers
@@ -2279,6 +2350,15 @@ const HostDetail = () => {
                         disabled={!host.active || (host.security_updates_count || 0) + (host.system_updates_count || 0) === 0}
                     >
                         {t('hosts.updates', 'Updates')}
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        startIcon={<AppsIcon />}
+                        onClick={handleRequestPackages}
+                        disabled={!host.active}
+                    >
+                        {t('hosts.requestPackages', 'Request Avail. Packages')}
                     </Button>
                     <Button
                         variant="outlined"
@@ -4957,6 +5037,35 @@ const HostDetail = () => {
                         variant="contained"
                     >
                         {t('common.delete', 'Delete')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Request Packages Confirmation Dialog */}
+            <Dialog
+                open={requestPackagesConfirmOpen}
+                onClose={() => setRequestPackagesConfirmOpen(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>
+                    {t('hostDetail.confirmRequestPackages', 'Request Available Packages')}
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        {t('hostDetail.confirmRequestPackagesMessage', 'This will trigger package collection on the host, which can be resource-intensive and may take several minutes to complete. Do you want to proceed?')}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setRequestPackagesConfirmOpen(false)}>
+                        {t('common.no', 'No')}
+                    </Button>
+                    <Button
+                        onClick={handleRequestPackagesConfirm}
+                        color="primary"
+                        variant="contained"
+                    >
+                        {t('common.yes', 'Yes')}
                     </Button>
                 </DialogActions>
             </Dialog>

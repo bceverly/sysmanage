@@ -26,6 +26,16 @@ vi.mock('../../Services/api', () => ({
   },
 }));
 
+// Mock permissions - we'll let it use the real API call
+vi.mock('../../Services/permissions', async () => {
+  const actual = await vi.importActual('../../Services/permissions');
+  return {
+    ...actual,
+    // Don't override hasPermission - let it use the real implementation
+    // which will call the mocked API
+  };
+});
+
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -81,6 +91,7 @@ vi.mock('react-router-dom', async () => {
 
 // Import the mocked api
 import api from '../../Services/api';
+import { clearPermissionsCache } from '../../Services/permissions';
 
 // Type the mock properly
 const mockApi = vi.mocked(api);
@@ -97,8 +108,10 @@ const ReportsWithRouter = () => (
 describe('Reports Page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    clearPermissionsCache(); // Clear cache to ensure API is called
+    window.location.hash = ''; // Reset URL hash to default (hosts tab)
 
-    // Mock the permissions API endpoint
+    // Mock the permissions API endpoint - set default implementation
     mockApi.get.mockImplementation((url: string) => {
       if (url === '/api/user/permissions') {
         return Promise.resolve({
@@ -111,8 +124,21 @@ describe('Reports Page', () => {
           },
         });
       }
+      if (url.includes('/api/reports/generate/')) {
+        // Default mock for report generation
+        return Promise.resolve({
+          data: new Blob(['mock pdf content'], { type: 'application/pdf' }),
+          headers: {
+            'content-disposition': 'attachment; filename="report.pdf"',
+          },
+        });
+      }
       return Promise.reject(new Error(`Unhandled API call: ${url}`));
     });
+  });
+
+  afterEach(() => {
+    clearPermissionsCache(); // Clean up after each test
   });
 
   test('renders without crashing', async () => {
@@ -197,15 +223,38 @@ describe('Reports Page', () => {
       originalConsoleError(...args);
     };
 
-    mockApi.get.mockResolvedValueOnce({
-      data: new Blob(['mock-pdf'], { type: 'application/pdf' }),
-      headers: {
-        'content-disposition': 'attachment; filename="hosts_report.pdf"'
+    // Reset and set up mock implementation for this test
+    mockApi.get.mockReset();
+    let callCount = 0;
+    mockApi.get.mockImplementation((url: string) => {
+      callCount++;
+      if (url === '/api/user/permissions' || callCount === 1) {
+        return Promise.resolve({
+          data: {
+            is_admin: false,
+            permissions: {
+              'View Report': true,
+              'Generate PDF Report': true,
+            },
+          },
+        });
       }
+      // Second call - PDF generation
+      return Promise.resolve({
+        data: new Blob(['mock-pdf'], { type: 'application/pdf' }),
+        headers: {
+          'content-disposition': 'attachment; filename="hosts_report.pdf"'
+        }
+      });
     });
 
     await act(async () => {
       render(<ReportsWithRouter />);
+    });
+
+    // Wait for permissions to load and buttons to appear
+    await waitFor(() => {
+      expect(screen.getAllByText('Generate PDF').length).toBeGreaterThan(0);
     });
 
     const generateButtons = screen.getAllByText('Generate PDF');
@@ -228,12 +277,35 @@ describe('Reports Page', () => {
   });
 
   test('views HTML report when View Report button is clicked', async () => {
-    mockApi.get.mockResolvedValueOnce({
-      data: '<html><body>Mock HTML Report</body></html>',
+    // Reset and set up mock implementation for this test
+    mockApi.get.mockReset();
+    let callCount = 0;
+    mockApi.get.mockImplementation((url: string) => {
+      callCount++;
+      if (url === '/api/user/permissions' || callCount === 1) {
+        return Promise.resolve({
+          data: {
+            is_admin: false,
+            permissions: {
+              'View Report': true,
+              'Generate PDF Report': true,
+            },
+          },
+        });
+      }
+      // Second call - HTML report
+      return Promise.resolve({
+        data: '<html><body>Mock HTML Report</body></html>',
+      });
     });
 
     await act(async () => {
       render(<ReportsWithRouter />);
+    });
+
+    // Wait for permissions to load and buttons to appear
+    await waitFor(() => {
+      expect(screen.getAllByText('View Report').length).toBeGreaterThan(0);
     });
 
     const viewButtons = screen.getAllByText('View Report');
@@ -248,13 +320,36 @@ describe('Reports Page', () => {
   });
 
   test('handles PDF generation error gracefully', async () => {
-    mockApi.get.mockRejectedValueOnce(new Error('Network error'));
+    // Reset and set up mock implementation for this test
+    mockApi.get.mockReset();
+    let callCount = 0;
+    mockApi.get.mockImplementation((url: string) => {
+      callCount++;
+      if (url === '/api/user/permissions' || callCount === 1) {
+        return Promise.resolve({
+          data: {
+            is_admin: false,
+            permissions: {
+              'View Report': true,
+              'Generate PDF Report': true,
+            },
+          },
+        });
+      }
+      // Second call - error for PDF generation
+      return Promise.reject(new Error('Network error'));
+    });
 
     // Mock console.error to suppress error output in tests
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await act(async () => {
       render(<ReportsWithRouter />);
+    });
+
+    // Wait for permissions to load and buttons to appear
+    await waitFor(() => {
+      expect(screen.getAllByText('Generate PDF').length).toBeGreaterThan(0);
     });
 
     const generateButtons = screen.getAllByText('Generate PDF');
@@ -360,13 +455,27 @@ describe('Reports Page', () => {
 
     const mockBlob = new Blob(['mock-pdf'], { type: 'application/pdf' });
 
-    // Reset and setup fresh mock
+    // Reset and setup fresh mock - need to handle permissions call first
     mockApi.get.mockReset();
-    mockApi.get.mockResolvedValue({
-      data: mockBlob,
-      headers: {
-        'content-disposition': 'attachment; filename="hosts_report.pdf"'
+    mockApi.get.mockImplementation((url: string) => {
+      if (url === '/api/user/permissions') {
+        return Promise.resolve({
+          data: {
+            is_admin: false,
+            permissions: {
+              'View Report': true,
+              'Generate PDF Report': true,
+            },
+          },
+        });
       }
+      // Default to blob response for report generation
+      return Promise.resolve({
+        data: mockBlob,
+        headers: {
+          'content-disposition': 'attachment; filename="hosts_report.pdf"'
+        }
+      });
     });
 
     await act(async () => {
@@ -397,12 +506,35 @@ describe('Reports Page', () => {
   });
 
   test('navigation to report viewer includes correct report ID', async () => {
-    mockApi.get.mockResolvedValueOnce({
-      data: '<html><body>Mock HTML Report</body></html>',
+    // Reset and set up mock implementation for this test
+    mockApi.get.mockReset();
+    let callCount = 0;
+    mockApi.get.mockImplementation((url: string) => {
+      callCount++;
+      if (url === '/api/user/permissions' || callCount === 1) {
+        return Promise.resolve({
+          data: {
+            is_admin: false,
+            permissions: {
+              'View Report': true,
+              'Generate PDF Report': true,
+            },
+          },
+        });
+      }
+      // Second call - HTML report
+      return Promise.resolve({
+        data: '<html><body>Mock HTML Report</body></html>',
+      });
     });
 
     await act(async () => {
       render(<ReportsWithRouter />);
+    });
+
+    // Wait for permissions to load and buttons to render
+    await waitFor(() => {
+      expect(screen.getAllByText('View Report').length).toBeGreaterThan(1);
     });
 
     const viewButtons = screen.getAllByText('View Report');

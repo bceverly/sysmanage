@@ -63,7 +63,41 @@ interface ReportCard {
 const Reports: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [tabValue, setTabValue] = useState(0);
+
+  // Tab names for URL hash
+  const tabNames = ['hosts', 'users'];
+
+  // Initialize tab from URL hash
+  const getInitialTab = () => {
+    const hash = window.location.hash.slice(1);
+    const tabIndex = tabNames.indexOf(hash);
+    return tabIndex >= 0 ? tabIndex : 0;
+  };
+
+  const [tabValue, setTabValue] = useState(getInitialTab);
+
+  // Handle tab change and update URL hash
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+    setSearchTerm(''); // Clear search when switching tabs
+    window.location.hash = tabNames[newValue];
+  };
+
+  // Listen for hash changes (browser back/forward)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      const tabIndex = tabNames.indexOf(hash);
+      if (tabIndex >= 0) {
+        setTabValue(tabIndex);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+    // tabNames is a constant array, safe to omit from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchField, setSearchField] = useState<'name' | 'description'>('name');
 
@@ -131,11 +165,6 @@ const Reports: React.FC = () => {
         return searchValue.toLowerCase().includes(searchTerm.toLowerCase());
       });
   }, [tabValue, searchTerm, searchField]);
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-    setSearchTerm(''); // Clear search when switching tabs
-  };
 
   const handleViewReport = (reportId: string) => {
     navigate(`/reports/${reportId}`);

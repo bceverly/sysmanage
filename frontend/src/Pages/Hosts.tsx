@@ -225,7 +225,14 @@ const Hosts = () => {
                     return null;
                 }
                 return (
-                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                    <Box sx={{
+                        display: 'flex',
+                        gap: 0.5,
+                        flexWrap: 'wrap',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '100%'
+                    }}>
                         {tags.map((tag: { id: string; name: string }) => (
                             <Chip
                                 key={tag.id}

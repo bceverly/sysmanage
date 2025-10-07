@@ -13,6 +13,7 @@ from sqlalchemy import distinct
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.sql.functions import count
 
+from backend.api.package_host_selector import find_hosts_for_os, select_best_host
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db as db_module, models
@@ -370,45 +371,8 @@ async def refresh_packages_for_os_version(
     it to collect and transmit updated package information.
     """
     try:
-        # Find an active host with this OS/version combination
-        # Handle the mapping between UI OS names and database platform info
-        if os_name == "Ubuntu":
-            # For Ubuntu hosts, platform is stored as "Linux" and we need to check platform_version for Ubuntu
-            hosts = (
-                db.query(Host)
-                .filter(
-                    Host.platform == "Linux",
-                    Host.platform_version.contains("Ubuntu"),
-                    Host.active.is_(True),
-                    Host.approval_status == "approved",
-                )
-                .all()
-            )
-        else:
-            # For other OS types, use direct matching
-            # Handle FreeBSD where platform_version includes "FreeBSD " prefix
-            if os_name == "FreeBSD":
-                hosts = (
-                    db.query(Host)
-                    .filter(
-                        Host.platform == os_name,
-                        Host.platform_version.contains(os_version),
-                        Host.active.is_(True),
-                        Host.approval_status == "approved",
-                    )
-                    .all()
-                )
-            else:
-                hosts = (
-                    db.query(Host)
-                    .filter(
-                        Host.platform == os_name,
-                        Host.platform_version.like(f"{os_version}%"),
-                        Host.active.is_(True),
-                        Host.approval_status == "approved",
-                    )
-                    .all()
-                )
+        # Find hosts matching the OS and version
+        hosts = find_hosts_for_os(db, os_name, os_version)
 
         if not hosts:
             raise HTTPException(
@@ -416,55 +380,8 @@ async def refresh_packages_for_os_version(
                 detail=_("No active hosts found for %s %s") % (os_name, os_version),
             )
 
-        # Select host with bias towards those with more package managers
-        import json
-        import random
-
-        # Score hosts based on number of package managers they have
-        def score_host(host):
-            """Score a host based on the number of package managers available."""
-            base_score = 1  # Every host gets a base score
-
-            # Parse enabled shells to count package managers
-            if host.enabled_shells:
-                try:
-                    enabled_shells = json.loads(host.enabled_shells)
-                    # Count optional package managers (homebrew, chocolatey, etc.)
-                    optional_managers = 0
-                    for shell_name in enabled_shells:
-                        shell_lower = shell_name.lower()
-                        if any(
-                            mgr in shell_lower
-                            for mgr in [
-                                "brew",
-                                "homebrew",
-                                "choco",
-                                "chocolatey",
-                                "winget",
-                                "scoop",
-                            ]
-                        ):
-                            optional_managers += 1
-
-                    # Boost score for hosts with optional package managers
-                    base_score += (
-                        optional_managers * 3
-                    )  # 3x weight for optional managers
-                except (json.JSONDecodeError, TypeError):
-                    pass  # Fall back to base score if shell data is invalid
-
-            return base_score
-
-        # Calculate scores for all hosts
-        host_scores = [(host, score_host(host)) for host in hosts]
-
-        # Create weighted selection - hosts with higher scores are more likely to be chosen
-        weights = [score for _, score in host_scores]
-        selected_host = random.choices(  # nosec B311 - random.choices is appropriate for non-cryptographic host selection/load balancing
-            [host for host, _ in host_scores], weights=weights, k=1
-        )[
-            0
-        ]
+        # Select best host with bias towards those with more package managers
+        selected_host = select_best_host(hosts)
 
         # Create command message to collect packages
         command_message = create_command_message(

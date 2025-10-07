@@ -602,16 +602,33 @@ async def _process_inventory_message(message, connection, db):
 
 async def _handle_packages_batch_message(message, connection, db):
     """Handle packages batch messages by enqueueing them for ordered processing."""
-    hostname = getattr(connection, "hostname", "unknown")
-    logger.info("Enqueueing %s message for host: %s", message.message_type, hostname)
-
     # Get host information for validation
     from backend.persistence.models import Host
 
-    host = db.query(Host).filter(Host.fqdn == hostname).first()
+    # Try to get host from message data first (host_id), then from connection
+    host = None
+    host_id = message.data.get("host_id")
+    if host_id:
+        host = db.query(Host).filter(Host.id == host_id).first()
+        logger.info(
+            "Enqueueing %s message for host_id: %s", message.message_type, host_id
+        )
+
     if not host:
-        logger.error("Host %s not found for batch message", hostname)
-        error_msg = ErrorMessage("host_not_found", f"Host {hostname} not found")
+        # Fall back to hostname from connection
+        hostname = getattr(connection, "hostname", "unknown")
+        logger.info(
+            "Enqueueing %s message for host: %s", message.message_type, hostname
+        )
+        host = db.query(Host).filter(Host.fqdn == hostname).first()
+
+    if not host:
+        logger.error(
+            "Host not found for batch message (host_id=%s, hostname=%s)",
+            host_id,
+            getattr(connection, "hostname", "unknown"),
+        )
+        error_msg = ErrorMessage("host_not_found", "Host not found")
         await connection.send_message(error_msg.to_dict())
         return
 
@@ -631,7 +648,7 @@ async def _handle_packages_batch_message(message, connection, db):
         logger.info(
             "Enqueued %s from host %s (queue_id: %s)",
             message.message_type,
-            hostname,
+            host.fqdn,
             queue_message_id,
         )
 
