@@ -110,7 +110,26 @@ const HostDetail = () => {
     const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticReport[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [currentTab, setCurrentTab] = useState<number>(0);
+    // Tab names for URL hash (static tabs only - dynamic tabs handled separately)
+    const getTabNames = useCallback(() => {
+        const tabs = ['info', 'hardware', 'software', 'software-changes'];
+        if (supportsThirdPartyRepos()) tabs.push('third-party-repos');
+        tabs.push('access', 'certificates', 'server-roles');
+        if (ubuntuProInfo?.available) tabs.push('ubuntu-pro');
+        tabs.push('diagnostics');
+        return tabs;
+    }, [ubuntuProInfo, supportsThirdPartyRepos]);
+
+    // Initialize tab from URL hash
+    const getInitialTab = useCallback(() => {
+        const hash = window.location.hash.slice(1);
+        if (!hash) return 0;
+        const tabs = getTabNames();
+        const tabIndex = tabs.indexOf(hash);
+        return tabIndex >= 0 ? tabIndex : 0;
+    }, [getTabNames]);
+
+    const [currentTab, setCurrentTab] = useState<number>(getInitialTab);
     const [diagnosticsLoading, setDiagnosticsLoading] = useState<boolean>(false);
     const [certificatesLoading, setCertificatesLoading] = useState<boolean>(false);
     const [roles, setRoles] = useState<HostRole[]>([]);
@@ -230,7 +249,7 @@ const HostDetail = () => {
     const { t } = useTranslation();
 
     // Check if OS supports third-party repositories
-    const supportsThirdPartyRepos = () => {
+    const supportsThirdPartyRepos = useCallback(() => {
         if (!host?.platform_release && !host?.platform) return false;
         const osName = host.platform_release || host.platform || '';
         return osName.includes('Ubuntu') ||
@@ -240,7 +259,7 @@ const HostDetail = () => {
                osName.includes('CentOS') ||
                osName.includes('SUSE') ||
                osName.includes('openSUSE');
-    };
+    }, [host]);
 
     // Helper functions to calculate dynamic tab indices
     const getSoftwareInstallsTabIndex = () => 3;
@@ -883,6 +902,22 @@ const HostDetail = () => {
             }
         };
     }, [hostId, ubuntuProInfo?.available, servicesMessage]);
+
+    // Listen for hash changes (browser back/forward)
+    useEffect(() => {
+        const handleHashChange = () => {
+            const hash = window.location.hash.slice(1);
+            if (!hash) return;
+            const tabs = getTabNames();
+            const tabIndex = tabs.indexOf(hash);
+            if (tabIndex >= 0) {
+                setCurrentTab(tabIndex);
+            }
+        };
+
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, [getTabNames]);
 
     const formatDate = (dateString: string | undefined) => {
         if (!dateString) return t('common.notAvailable', 'N/A');
@@ -1741,6 +1776,8 @@ const HostDetail = () => {
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setCurrentTab(newValue);
+        const tabs = getTabNames();
+        window.location.hash = tabs[newValue];
     };
 
     // Ubuntu Pro handlers

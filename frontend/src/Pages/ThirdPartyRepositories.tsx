@@ -127,8 +127,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
         } else if (osName.includes('SUSE') || osName.includes('openSUSE')) {
             if (obsUrl && obsProjectPath && obsDistroVersion && obsRepoName) {
                 const cleanUrl = obsUrl.endsWith('/') ? obsUrl : obsUrl + '/';
-                const cleanProject = obsProjectPath.replace(/:/g, ':');
-                setConstructedRepo(`${cleanUrl}${cleanProject}/${obsDistroVersion}/${obsRepoName}`);
+                setConstructedRepo(`${cleanUrl}${obsProjectPath}/${obsDistroVersion}/${obsRepoName}`);
             } else {
                 setConstructedRepo('');
             }
