@@ -171,10 +171,12 @@ def select_best_host(hosts: List[Host]) -> Optional[Host]:
     total_score = sum(score for _, score in host_scores)
     if total_score == 0:
         # If all scores are 0, just pick randomly
-        return random.choice(hosts)
+        return random.choice(hosts)  # nosec B311 # Non-security use: host selection
 
     # Normalize scores to probabilities and select
-    rand_value = random.uniform(0, total_score)
+    rand_value = random.uniform(
+        0, total_score
+    )  # nosec B311 # Non-security use: host selection
     cumulative = 0
     for host, score in host_scores:
         cumulative += score
