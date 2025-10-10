@@ -1240,5 +1240,37 @@
     "enableError": "启用仓库失败",
     "disableSuccess": "成功禁用仓库。软件包列表将很快更新。",
     "disableError": "禁用仓库失败"
+  },
+  "security": {
+    "antivirus": "防病毒软件",
+    "antivirusError": "加载防病毒软件状态失败",
+    "noAntivirusDetected": "未检测到防病毒软件",
+    "software": "软件",
+    "version": "版本",
+    "installPath": "安装路径",
+    "status": "状态",
+    "enabled": "已启用",
+    "disabled": "已禁用",
+    "unknown": "未知",
+    "lastUpdated": "最后更新",
+    "alreadyDeployed": "防病毒软件已部署",
+    "alreadyEnabled": "防病毒软件已启用",
+    "alreadyDisabled": "防病毒软件已禁用",
+    "notDeployed": "未部署防病毒软件",
+    "enableAntivirus": "启用防病毒软件",
+    "disableAntivirus": "禁用防病毒软件",
+    "removeAntivirus": "删除防病毒软件",
+    "antivirusEnableSuccess": "防病毒软件启用已成功开始",
+    "antivirusEnableFailed": "启用防病毒软件失败",
+    "antivirusDisableSuccess": "防病毒软件禁用已成功开始",
+    "antivirusDisableFailed": "禁用防病毒软件失败",
+    "antivirusRemoveSuccess": "防病毒软件删除已成功开始",
+    "antivirusRemoveFailed": "删除防病毒软件失败"
+  },
+  "dataGrid": {
+    "columnVisibility": "列可见性",
+    "showAll": "全部显示",
+    "hideAll": "全部隐藏",
+    "reset": "重置"
   }
 }

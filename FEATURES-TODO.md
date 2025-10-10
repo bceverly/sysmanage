@@ -80,14 +80,7 @@ like to add:
     string externalization /
     translation.
 
-9. Add the ability to deploy an
-    antivirus solution that is
-    platform approriate to the
-    hosts along with centralized
-    configuration file management
-    of it.
-
-10. Add the ability to issue and
+9. Add the ability to issue and
     manage SysManage API keys with
     View/Edit/Admin roles.  They
     should be stored in the vault
@@ -100,7 +93,7 @@ like to add:
     prefixed to get the token
     issued / renewed.
 
-11. A cool AI integration would be
+10. A cool AI integration would be
     to have the system pull back
     a diagnostics report from a
     remote agent and do a health
@@ -111,10 +104,15 @@ like to add:
     with the opportunity to have
     sysmanage fix the issues.
 
-12. We should have a settings
+11. We should have a settings
     screen that allows the user
     to specify default third-
     party repositories that
     should be auto-applied to
     every host that is approved
     on registration.
+
+12. Add a new chart to the dash-
+    board to show the number of
+    hosts that have antivirus
+    deployed and enabled on them.

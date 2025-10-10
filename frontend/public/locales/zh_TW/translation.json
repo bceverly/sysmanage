@@ -1225,5 +1225,37 @@
     "enableError": "啟用儲存庫失敗",
     "disableSuccess": "成功停用儲存庫。套件清單將很快更新。",
     "disableError": "停用儲存庫失敗"
+  },
+  "security": {
+    "antivirus": "防毒軟體",
+    "antivirusError": "載入防毒軟體狀態失敗",
+    "noAntivirusDetected": "未偵測到防毒軟體",
+    "software": "軟體",
+    "version": "版本",
+    "installPath": "安裝路徑",
+    "status": "狀態",
+    "enabled": "已啟用",
+    "disabled": "已停用",
+    "unknown": "未知",
+    "lastUpdated": "最後更新",
+    "alreadyDeployed": "防毒軟體已部署",
+    "alreadyEnabled": "防毒軟體已啟用",
+    "alreadyDisabled": "防毒軟體已停用",
+    "notDeployed": "未部署防毒軟體",
+    "enableAntivirus": "啟用防毒軟體",
+    "disableAntivirus": "停用防毒軟體",
+    "removeAntivirus": "移除防毒軟體",
+    "antivirusEnableSuccess": "防毒軟體啟用已成功開始",
+    "antivirusEnableFailed": "啟用防毒軟體失敗",
+    "antivirusDisableSuccess": "防毒軟體停用已成功開始",
+    "antivirusDisableFailed": "停用防毒軟體失敗",
+    "antivirusRemoveSuccess": "防毒軟體移除已成功開始",
+    "antivirusRemoveFailed": "移除防毒軟體失敗"
+  },
+  "dataGrid": {
+    "columnVisibility": "欄位可見性",
+    "showAll": "全部顯示",
+    "hideAll": "全部隱藏",
+    "reset": "重設"
   }
 }

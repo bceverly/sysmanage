@@ -88,7 +88,11 @@
     "osUpgradeAvailable": "OS-Upgrade für diesen Host verfügbar",
     "securityAndSystemUpdates": "{{security}} Sicherheits-, {{system}} System-Updates",
     "securityUpdatesOnly": "{{count}} Sicherheitsupdates",
-    "systemUpdatesOnly": "{{count}} Systemupdates"
+    "systemUpdatesOnly": "{{count}} Systemupdates",
+    "deployAntivirus": "Antivirus bereitstellen",
+    "noEligibleHostsForAntivirus": "Keine geeigneten Hosts ausgewählt. Hosts müssen aktiv und im privilegierten Modus sein, um Antivirus bereitzustellen.",
+    "antivirusDeploySuccess": "Antivirus-Bereitstellung für {{count}} Host(s) in die Warteschlange gestellt",
+    "antivirusDeployFailed": "Fehler beim Bereitstellen von Antivirus. Bitte versuchen Sie es erneut."
   },
   "users": {
     "title": "Benutzerverwaltung",
@@ -373,7 +377,10 @@
     "opentelemetryConnectSuccess": "OpenTelemetry erfolgreich mit Grafana verbunden",
     "opentelemetryDisconnectSuccess": "OpenTelemetry erfolgreich von Grafana getrennt",
     "opentelemetryRemoveSuccess": "OpenTelemetry-Entfernung erfolgreich in Warteschlange gestellt",
-    "opentelemetryOperationFailed": "OpenTelemetry-Operation fehlgeschlagen"
+    "opentelemetryOperationFailed": "OpenTelemetry-Operation fehlgeschlagen",
+    "deployAntivirus": "Antivirus bereitstellen",
+    "antivirusDeploySuccess": "Antivirus-Bereitstellung erfolgreich gestartet",
+    "antivirusDeployFailed": "Fehler beim Bereitstellen von Antivirus"
   },
   "userDetail": {
     "invalidId": "Ungültige Benutzer-ID",
@@ -1117,5 +1124,51 @@
     "enableError": "Fehler beim Aktivieren der Repositories",
     "disableSuccess": "Repositories erfolgreich deaktiviert. Die Paketliste wird in Kürze aktualisiert.",
     "disableError": "Fehler beim Deaktivieren der Repositories"
+  },
+  "antivirus": {
+    "title": "Antivirus",
+    "description": "Standard-Antivirus-Software für jedes Betriebssystem konfigurieren",
+    "none": "Keine",
+    "save": "Speichern",
+    "saveSuccess": "Antivirus-Standardeinstellungen erfolgreich gespeichert",
+    "permissionWarning": "Sie haben keine Berechtigung, Antivirus-Standardeinstellungen zu ändern. Wenden Sie sich an Ihren Administrator, um die Rolle MANAGE_ANTIVIRUS_DEFAULTS zu erhalten.",
+    "errors": {
+      "loadFailed": "Fehler beim Laden der Antivirus-Standardeinstellungen",
+      "saveFailed": "Fehler beim Speichern der Antivirus-Standardeinstellungen",
+      "permissionDenied": "Sie haben keine Berechtigung, Antivirus-Standardeinstellungen zu verwalten"
+    },
+    "selectProgram": "Antivirus-Programm auswählen"
+  },
+  "security": {
+    "antivirus": "Antivirus",
+    "antivirusError": "Fehler beim Laden des Antivirus-Status",
+    "noAntivirusDetected": "Keine Antivirus-Software erkannt",
+    "software": "Software",
+    "version": "Version",
+    "installPath": "Installationspfad",
+    "status": "Status",
+    "enabled": "Aktiviert",
+    "disabled": "Deaktiviert",
+    "unknown": "Unbekannt",
+    "lastUpdated": "Zuletzt Aktualisiert",
+    "alreadyDeployed": "Antivirus bereits bereitgestellt",
+    "alreadyEnabled": "Antivirus bereits aktiviert",
+    "alreadyDisabled": "Antivirus bereits deaktiviert",
+    "notDeployed": "Kein Antivirus bereitgestellt",
+    "enableAntivirus": "Antivirus aktivieren",
+    "disableAntivirus": "Antivirus deaktivieren",
+    "removeAntivirus": "Antivirus entfernen",
+    "antivirusEnableSuccess": "Antivirus-Aktivierung erfolgreich initiiert",
+    "antivirusEnableFailed": "Fehler beim Aktivieren von Antivirus",
+    "antivirusDisableSuccess": "Antivirus-Deaktivierung erfolgreich initiiert",
+    "antivirusDisableFailed": "Fehler beim Deaktivieren von Antivirus",
+    "antivirusRemoveSuccess": "Antivirus-Entfernung erfolgreich initiiert",
+    "antivirusRemoveFailed": "Fehler beim Entfernen von Antivirus"
+  },
+  "dataGrid": {
+    "columnVisibility": "Spaltensichtbarkeit",
+    "showAll": "Alle anzeigen",
+    "hideAll": "Alle ausblenden",
+    "reset": "Zurücksetzen"
   }
 }

@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
 import { useTablePageSize } from '../hooks/useTablePageSize';
+import { useColumnVisibility } from '../Hooks/useColumnVisibility';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -25,12 +26,14 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Avatar from '@mui/material/Avatar';
 import SearchBox from '../Components/SearchBox';
+import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 
 const Users = () => {
     const [tableData, setTableData] = useState<SysManageUser[]>([]);
     const [filteredData, setFilteredData] = useState<SysManageUser[]>([]);
     const [selection, setSelection] = useState<GridRowSelectionModel>([]);
+    const [loading, setLoading] = useState<boolean>(true);
     const [addDialogOpen, setAddDialogOpen] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [dupeError, setDupeError] = useState<boolean>(false);
@@ -59,6 +62,14 @@ const Users = () => {
         minRows: 5,
         maxRows: 50,
     });
+
+    // Column visibility preferences
+    const {
+        hiddenColumns,
+        setHiddenColumns,
+        resetPreferences,
+        getColumnVisibilityModel,
+    } = useColumnVisibility('users-grid');
 
     const navigate = useNavigate();
 
@@ -335,10 +346,18 @@ const Users = () => {
         if (!localStorage.getItem('bearer_token')) {
             navigate("/login");
         }
-        doGetUsers().then((response: SysManageUser[]) => {
-            setTableData(response);
-            return Promise.resolve(response);
-        });
+        const loadUsers = async () => {
+            try {
+                setLoading(true);
+                const response = await doGetUsers();
+                setTableData(response);
+            } catch (error) {
+                console.error('Error loading users:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadUsers();
     }, [navigate]);
 
     return (
@@ -352,11 +371,24 @@ const Users = () => {
                 columns={searchColumns}
                 placeholder={t('search.searchUsers', 'Search users')}
             />
-            
+
+            {/* Column Visibility Button */}
+            <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                <ColumnVisibilityButton
+                    columns={columns
+                        .filter(col => col.field !== 'actions')
+                        .map(col => ({ field: col.field, headerName: col.headerName || col.field }))}
+                    hiddenColumns={hiddenColumns}
+                    onColumnsChange={setHiddenColumns}
+                    onReset={resetPreferences}
+                />
+            </Box>
+
             <div  style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px` }}>
                 <DataGrid
                     rows={filteredData}
                     columns={columns}
+                    loading={loading}
                     initialState={{
                         pagination: {
                             paginationModel: { page: 0, pageSize: pageSize },
@@ -364,11 +396,10 @@ const Users = () => {
                         sorting: {
                             sortModel: [{ field: 'userid', sort: 'asc'}],
                         },
-                        columns: {
-                            columnVisibilityModel: {
-                                id: false,
-                            },
-                        },
+                    }}
+                    columnVisibilityModel={{
+                        id: false,
+                        ...getColumnVisibilityModel(),
                     }}
                     autosizeOptions = {{
                         columns: ['userid'],

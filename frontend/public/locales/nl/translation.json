@@ -1102,5 +1102,37 @@
     "enableError": "Repositories inschakelen mislukt",
     "disableSuccess": "Repositories succesvol uitgeschakeld. Pakketlijst wordt binnenkort bijgewerkt.",
     "disableError": "Repositories uitschakelen mislukt"
+  },
+  "security": {
+    "antivirus": "Antivirus",
+    "antivirusError": "Laden van antivirusstatus mislukt",
+    "noAntivirusDetected": "Geen antivirussoftware gedetecteerd",
+    "software": "Software",
+    "version": "Versie",
+    "installPath": "Installatiepad",
+    "status": "Status",
+    "enabled": "Ingeschakeld",
+    "disabled": "Uitgeschakeld",
+    "unknown": "Onbekend",
+    "lastUpdated": "Laatst Bijgewerkt",
+    "alreadyDeployed": "Antivirus is al geïmplementeerd",
+    "alreadyEnabled": "Antivirus is al ingeschakeld",
+    "alreadyDisabled": "Antivirus is al uitgeschakeld",
+    "notDeployed": "Geen antivirus geïmplementeerd",
+    "enableAntivirus": "Antivirus inschakelen",
+    "disableAntivirus": "Antivirus uitschakelen",
+    "removeAntivirus": "Antivirus verwijderen",
+    "antivirusEnableSuccess": "Antivirus inschakelen succesvol gestart",
+    "antivirusEnableFailed": "Antivirus inschakelen mislukt",
+    "antivirusDisableSuccess": "Antivirus uitschakelen succesvol gestart",
+    "antivirusDisableFailed": "Antivirus uitschakelen mislukt",
+    "antivirusRemoveSuccess": "Antivirus verwijderen succesvol gestart",
+    "antivirusRemoveFailed": "Antivirus verwijderen mislukt"
+  },
+  "dataGrid": {
+    "columnVisibility": "Kolomzichtbaarheid",
+    "showAll": "Alles tonen",
+    "hideAll": "Alles verbergen",
+    "reset": "Herstellen"
   }
 }

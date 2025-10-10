@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from backend.i18n import _
 from backend.persistence.models import (
+    AntivirusStatus,
     AvailablePackage,
     Host,
     HostCertificate,
@@ -1892,4 +1893,74 @@ async def handle_third_party_repository_update(
         return {
             "message_type": "error",
             "error": f"Failed to process third-party repository update: {str(e)}",
+        }
+
+
+async def handle_antivirus_status_update(db: Session, connection, message_data: dict):
+    """Handle antivirus status update message from agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
+
+    if not hasattr(connection, "host_id") or not connection.host_id:
+        return {"message_type": "error", "error": _("Host not registered")}
+
+    try:
+        # Extract antivirus status information
+        software_name = message_data.get("software_name")
+        install_path = message_data.get("install_path")
+        version = message_data.get("version")
+        enabled = message_data.get("enabled")
+
+        debug_logger.info(
+            "Processing antivirus status update from %s: software=%s, enabled=%s",
+            getattr(connection, "hostname", "unknown"),
+            software_name,
+            enabled,
+        )
+
+        # Delete existing antivirus status for this host (if any)
+        db.execute(
+            delete(AntivirusStatus).where(AntivirusStatus.host_id == connection.host_id)
+        )
+
+        # Add new antivirus status (only if software is detected)
+        if software_name:
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
+            antivirus_status = AntivirusStatus(
+                host_id=connection.host_id,
+                software_name=software_name,
+                install_path=install_path,
+                version=version,
+                enabled=enabled,
+                last_updated=now,
+            )
+            db.add(antivirus_status)
+
+        db.commit()
+
+        debug_logger.info(
+            "Successfully stored antivirus status for host %s",
+            getattr(connection, "hostname", "unknown"),
+        )
+
+        return {
+            "message_type": "antivirus_status_update_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "status": "processed",
+        }
+
+    except Exception as e:
+        debug_logger.error(
+            "Error processing antivirus status update from %s: %s",
+            getattr(connection, "hostname", "unknown"),
+            e,
+        )
+        db.rollback()
+        return {
+            "message_type": "error",
+            "error": f"Failed to process antivirus status update: {str(e)}",
         }

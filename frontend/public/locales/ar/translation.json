@@ -88,7 +88,11 @@
     "osUpgradeAvailable": "ترقية نظام التشغيل متاحة لهذا المضيف",
     "securityAndSystemUpdates": "{{security}} أمنية، {{system}} تحديثات نظام",
     "securityUpdatesOnly": "{{count}} تحديثات أمنية",
-    "systemUpdatesOnly": "{{count}} تحديثات نظام"
+    "systemUpdatesOnly": "{{count}} تحديثات نظام",
+    "deployAntivirus": "نشر برنامج مكافحة الفيروسات",
+    "noEligibleHostsForAntivirus": "لم يتم تحديد أي مضيفات مؤهلة. يجب أن تكون المضيفات نشطة وفي الوضع المميز لنشر برنامج مكافحة الفيروسات.",
+    "antivirusDeploySuccess": "تم وضع نشر برنامج مكافحة الفيروسات في قائمة الانتظار لـ {{count}} من المضيفات",
+    "antivirusDeployFailed": "فشل نشر برنامج مكافحة الفيروسات. يرجى المحاولة مرة أخرى."
   },
   "users": {
     "title": "إدارة المستخدمين",
@@ -371,7 +375,10 @@
     "opentelemetryConnectSuccess": "تم توصيل OpenTelemetry بـ Grafana بنجاح",
     "opentelemetryDisconnectSuccess": "تم قطع اتصال OpenTelemetry من Grafana بنجاح",
     "opentelemetryRemoveSuccess": "تم وضع إزالة OpenTelemetry في قائمة الانتظار بنجاح",
-    "opentelemetryOperationFailed": "فشلت عملية OpenTelemetry"
+    "opentelemetryOperationFailed": "فشلت عملية OpenTelemetry",
+    "deployAntivirus": "نشر برنامج مكافحة الفيروسات",
+    "antivirusDeploySuccess": "تم بدء نشر برنامج مكافحة الفيروسات بنجاح",
+    "antivirusDeployFailed": "فشل نشر برنامج مكافحة الفيروسات"
   },
   "userDetail": {
     "invalidId": "معرف مستخدم غير صالح",
@@ -1244,5 +1251,51 @@
     "enableError": "فشل تمكين المستودعات",
     "disableSuccess": "تم تعطيل المستودعات بنجاح. سيتم تحديث قائمة الحزم قريباً.",
     "disableError": "فشل تعطيل المستودعات"
+  },
+  "antivirus": {
+    "title": "برنامج مكافحة الفيروسات",
+    "description": "تكوين برنامج مكافحة الفيروسات الافتراضي لكل نظام تشغيل",
+    "none": "لا شيء",
+    "save": "حفظ",
+    "saveSuccess": "تم حفظ إعدادات برنامج مكافحة الفيروسات الافتراضية بنجاح",
+    "permissionWarning": "ليس لديك إذن لتعديل إعدادات برنامج مكافحة الفيروسات الافتراضية. اتصل بالمسؤول للحصول على دور MANAGE_ANTIVIRUS_DEFAULTS.",
+    "errors": {
+      "loadFailed": "فشل تحميل إعدادات برنامج مكافحة الفيروسات الافتراضية",
+      "saveFailed": "فشل حفظ إعدادات برنامج مكافحة الفيروسات الافتراضية",
+      "permissionDenied": "ليس لديك إذن لإدارة إعدادات برنامج مكافحة الفيروسات الافتراضية"
+    },
+    "selectProgram": "اختر برنامج مكافحة الفيروسات"
+  },
+  "security": {
+    "antivirus": "مكافحة الفيروسات",
+    "antivirusError": "فشل تحميل حالة مكافحة الفيروسات",
+    "noAntivirusDetected": "لم يتم الكشف عن برنامج مكافحة الفيروسات",
+    "software": "البرنامج",
+    "version": "الإصدار",
+    "installPath": "مسار التثبيت",
+    "status": "الحالة",
+    "enabled": "مفعّل",
+    "disabled": "معطل",
+    "unknown": "غير معروف",
+    "lastUpdated": "آخر تحديث",
+    "alreadyDeployed": "تم نشر برنامج مكافحة الفيروسات بالفعل",
+    "alreadyEnabled": "برنامج مكافحة الفيروسات مفعّل بالفعل",
+    "alreadyDisabled": "برنامج مكافحة الفيروسات معطل بالفعل",
+    "notDeployed": "لم يتم نشر برنامج مكافحة الفيروسات",
+    "enableAntivirus": "تفعيل برنامج مكافحة الفيروسات",
+    "disableAntivirus": "تعطيل برنامج مكافحة الفيروسات",
+    "removeAntivirus": "إزالة برنامج مكافحة الفيروسات",
+    "antivirusEnableSuccess": "تم بدء تفعيل برنامج مكافحة الفيروسات بنجاح",
+    "antivirusEnableFailed": "فشل تفعيل برنامج مكافحة الفيروسات",
+    "antivirusDisableSuccess": "تم بدء تعطيل برنامج مكافحة الفيروسات بنجاح",
+    "antivirusDisableFailed": "فشل تعطيل برنامج مكافحة الفيروسات",
+    "antivirusRemoveSuccess": "تم بدء إزالة برنامج مكافحة الفيروسات بنجاح",
+    "antivirusRemoveFailed": "فشلت إزالة برنامج مكافحة الفيروسات"
+  },
+  "dataGrid": {
+    "columnVisibility": "رؤية الأعمدة",
+    "showAll": "إظهار الكل",
+    "hideAll": "إخفاء الكل",
+    "reset": "إعادة تعيين"
   }
 }

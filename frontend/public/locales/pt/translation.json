@@ -1117,5 +1117,37 @@
     "enableError": "Falha ao ativar repositórios",
     "disableSuccess": "Repositórios desativados com sucesso. A lista de pacotes será atualizada em breve.",
     "disableError": "Falha ao desativar repositórios"
+  },
+  "security": {
+    "antivirus": "Antivírus",
+    "antivirusError": "Falha ao carregar o status do antivírus",
+    "noAntivirusDetected": "Nenhum software antivírus detectado",
+    "software": "Software",
+    "version": "Versão",
+    "installPath": "Caminho de Instalação",
+    "status": "Status",
+    "enabled": "Ativado",
+    "disabled": "Desativado",
+    "unknown": "Desconhecido",
+    "lastUpdated": "Última Atualização",
+    "alreadyDeployed": "Antivírus já implantado",
+    "alreadyEnabled": "Antivírus já ativado",
+    "alreadyDisabled": "Antivírus já desativado",
+    "notDeployed": "Nenhum antivírus implantado",
+    "enableAntivirus": "Ativar Antivírus",
+    "disableAntivirus": "Desativar Antivírus",
+    "removeAntivirus": "Remover Antivírus",
+    "antivirusEnableSuccess": "Ativação de antivírus iniciada com sucesso",
+    "antivirusEnableFailed": "Falha ao ativar antivírus",
+    "antivirusDisableSuccess": "Desativação de antivírus iniciada com sucesso",
+    "antivirusDisableFailed": "Falha ao desativar antivírus",
+    "antivirusRemoveSuccess": "Remoção de antivírus iniciada com sucesso",
+    "antivirusRemoveFailed": "Falha ao remover antivírus"
+  },
+  "dataGrid": {
+    "columnVisibility": "Visibilidade das colunas",
+    "showAll": "Mostrar tudo",
+    "hideAll": "Ocultar tudo",
+    "reset": "Redefinir"
   }
 }

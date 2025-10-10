@@ -88,7 +88,11 @@
     "osUpgradeAvailable": "Mise à jour OS disponible pour cet hôte",
     "securityAndSystemUpdates": "{{security}} sécurité, {{system}} mises à jour système",
     "securityUpdatesOnly": "{{count}} mises à jour de sécurité",
-    "systemUpdatesOnly": "{{count}} mises à jour système"
+    "systemUpdatesOnly": "{{count}} mises à jour système",
+    "deployAntivirus": "Déployer l'antivirus",
+    "noEligibleHostsForAntivirus": "Aucun hôte éligible sélectionné. Les hôtes doivent être actifs et en mode privilégié pour le déploiement d'antivirus.",
+    "antivirusDeploySuccess": "Déploiement d'antivirus mis en file d'attente pour {{count}} hôte(s)",
+    "antivirusDeployFailed": "Échec du déploiement de l'antivirus. Veuillez réessayer."
   },
   "users": {
     "title": "Gestion des utilisateurs",
@@ -373,7 +377,10 @@
     "opentelemetryConnectSuccess": "OpenTelemetry connecté à Grafana avec succès",
     "opentelemetryDisconnectSuccess": "OpenTelemetry déconnecté de Grafana avec succès",
     "opentelemetryRemoveSuccess": "Suppression d'OpenTelemetry mise en file d'attente avec succès",
-    "opentelemetryOperationFailed": "Échec de l'opération OpenTelemetry"
+    "opentelemetryOperationFailed": "Échec de l'opération OpenTelemetry",
+    "deployAntivirus": "Déployer l'antivirus",
+    "antivirusDeploySuccess": "Déploiement d'antivirus initié avec succès",
+    "antivirusDeployFailed": "Échec du déploiement de l'antivirus"
   },
   "userDetail": {
     "invalidId": "ID utilisateur invalide",
@@ -1115,5 +1122,51 @@
     "enableError": "Échec de l'activation des dépôts",
     "disableSuccess": "Dépôts désactivés avec succès. La liste des paquets sera mise à jour sous peu.",
     "disableError": "Échec de la désactivation des dépôts"
+  },
+  "antivirus": {
+    "title": "Antivirus",
+    "description": "Configurer le logiciel antivirus par défaut pour chaque système d'exploitation",
+    "none": "Aucun",
+    "save": "Enregistrer",
+    "saveSuccess": "Paramètres antivirus par défaut enregistrés avec succès",
+    "permissionWarning": "Vous n'avez pas la permission de modifier les paramètres antivirus par défaut. Contactez votre administrateur pour obtenir le rôle MANAGE_ANTIVIRUS_DEFAULTS.",
+    "errors": {
+      "loadFailed": "Échec du chargement des paramètres antivirus par défaut",
+      "saveFailed": "Échec de l'enregistrement des paramètres antivirus par défaut",
+      "permissionDenied": "Vous n'avez pas la permission de gérer les paramètres antivirus par défaut"
+    },
+    "selectProgram": "Sélectionner un programme antivirus"
+  },
+  "security": {
+    "antivirus": "Antivirus",
+    "antivirusError": "Échec du chargement du statut antivirus",
+    "noAntivirusDetected": "Aucun logiciel antivirus détecté",
+    "software": "Logiciel",
+    "version": "Version",
+    "installPath": "Chemin d'Installation",
+    "status": "Statut",
+    "enabled": "Activé",
+    "disabled": "Désactivé",
+    "unknown": "Inconnu",
+    "lastUpdated": "Dernière Mise à Jour",
+    "alreadyDeployed": "Antivirus déjà déployé",
+    "alreadyEnabled": "Antivirus déjà activé",
+    "alreadyDisabled": "Antivirus déjà désactivé",
+    "notDeployed": "Aucun antivirus déployé",
+    "enableAntivirus": "Activer l'Antivirus",
+    "disableAntivirus": "Désactiver l'Antivirus",
+    "removeAntivirus": "Supprimer l'Antivirus",
+    "antivirusEnableSuccess": "Activation de l'antivirus initiée avec succès",
+    "antivirusEnableFailed": "Échec de l'activation de l'antivirus",
+    "antivirusDisableSuccess": "Désactivation de l'antivirus initiée avec succès",
+    "antivirusDisableFailed": "Échec de la désactivation de l'antivirus",
+    "antivirusRemoveSuccess": "Suppression de l'antivirus initiée avec succès",
+    "antivirusRemoveFailed": "Échec de la suppression de l'antivirus"
+  },
+  "dataGrid": {
+    "columnVisibility": "Visibilité des colonnes",
+    "showAll": "Tout afficher",
+    "hideAll": "Tout masquer",
+    "reset": "Réinitialiser"
   }
 }

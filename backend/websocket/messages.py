@@ -33,6 +33,7 @@ class MessageType(str, Enum):
     HOST_CERTIFICATES_UPDATE = "host_certificates_update"
     ROLE_DATA = "role_data"
     THIRD_PARTY_REPOSITORY_UPDATE = "third_party_repository_update"
+    ANTIVIRUS_STATUS_UPDATE = "antivirus_status_update"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -58,6 +59,10 @@ class CommandType(str, Enum):
     CHECK_REBOOT_STATUS = "check_reboot_status"
     COLLECT_DIAGNOSTICS = "collect_diagnostics"
     COLLECT_CERTIFICATES = "collect_certificates"
+    DEPLOY_ANTIVIRUS = "deploy_antivirus"
+    ENABLE_ANTIVIRUS = "enable_antivirus"
+    DISABLE_ANTIVIRUS = "disable_antivirus"
+    REMOVE_ANTIVIRUS = "remove_antivirus"
 
 
 class Message:

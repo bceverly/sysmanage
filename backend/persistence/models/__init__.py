@@ -32,6 +32,8 @@ __all__ = [
     "InstallationRequest",
     "InstallationPackage",
     "ThirdPartyRepository",
+    "AntivirusDefault",
+    "AntivirusStatus",
     # User management models
     "UserAccount",
     "UserGroup",
@@ -62,4 +64,6 @@ __all__ = [
     "SecurityRoleGroup",
     "SecurityRole",
     "UserSecurityRole",
+    # User preference models
+    "UserDataGridColumnPreference",
 ]

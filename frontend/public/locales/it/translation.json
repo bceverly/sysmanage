@@ -1117,5 +1117,37 @@
     "enableError": "Errore nell'abilitazione dei repository",
     "disableSuccess": "Repository disabilitati con successo. L'elenco dei pacchetti verrà aggiornato a breve.",
     "disableError": "Errore nella disabilitazione dei repository"
+  },
+  "security": {
+    "antivirus": "Antivirus",
+    "antivirusError": "Impossibile caricare lo stato dell'antivirus",
+    "noAntivirusDetected": "Nessun software antivirus rilevato",
+    "software": "Software",
+    "version": "Versione",
+    "installPath": "Percorso di Installazione",
+    "status": "Stato",
+    "enabled": "Abilitato",
+    "disabled": "Disabilitato",
+    "unknown": "Sconosciuto",
+    "lastUpdated": "Ultimo Aggiornamento",
+    "alreadyDeployed": "Antivirus già distribuito",
+    "alreadyEnabled": "Antivirus già abilitato",
+    "alreadyDisabled": "Antivirus già disabilitato",
+    "notDeployed": "Nessun antivirus distribuito",
+    "enableAntivirus": "Abilita Antivirus",
+    "disableAntivirus": "Disabilita Antivirus",
+    "removeAntivirus": "Rimuovi Antivirus",
+    "antivirusEnableSuccess": "Abilitazione antivirus avviata con successo",
+    "antivirusEnableFailed": "Errore nell'abilitazione dell'antivirus",
+    "antivirusDisableSuccess": "Disabilitazione antivirus avviata con successo",
+    "antivirusDisableFailed": "Errore nella disabilitazione dell'antivirus",
+    "antivirusRemoveSuccess": "Rimozione antivirus avviata con successo",
+    "antivirusRemoveFailed": "Errore nella rimozione dell'antivirus"
+  },
+  "dataGrid": {
+    "columnVisibility": "Visibilità colonne",
+    "showAll": "Mostra tutto",
+    "hideAll": "Nascondi tutto",
+    "reset": "Ripristina"
   }
 }

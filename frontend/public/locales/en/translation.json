@@ -101,7 +101,11 @@
     "securityUpdatesOnly": "{{count}} security updates",
     "systemUpdatesOnly": "{{count}} system updates",
     "filterByTags": "Filter by Tags",
-    "selectTags": "Select tags"
+    "selectTags": "Select tags",
+    "deployAntivirus": "Deploy Antivirus",
+    "noEligibleHostsForAntivirus": "No eligible hosts selected. Hosts must be active and in privileged mode for antivirus deployment.",
+    "antivirusDeploySuccess": "Antivirus deployment queued for {{count}} host(s)",
+    "antivirusDeployFailed": "Failed to deploy antivirus. Please try again."
   },
   "users": {
     "title": "User Management",
@@ -348,6 +352,7 @@
     "installationDeleteError": "Failed to delete installation record",
     "viewInstallationLog": "View Installation Log",
     "version": "Version",
+    "securityTab": "Security",
     "certificatesTab": "Certificates",
     "certificates": "SSL Certificates",
     "collectCertificates": "Collect",
@@ -408,7 +413,10 @@
     "location": "Location",
     "serialNumber": "Serial Number",
     "expired": "Expired",
-    "daysUntilExpiry": "{{days}} days"
+    "daysUntilExpiry": "{{days}} days",
+    "deployAntivirus": "Deploy Antivirus",
+    "antivirusDeploySuccess": "Antivirus deployment initiated successfully",
+    "antivirusDeployFailed": "Failed to deploy antivirus"
   },
   "userDetail": {
     "resetPassword": "Reset Password",
@@ -1326,5 +1334,51 @@
     "enableError": "Failed to enable repositories",
     "disableSuccess": "Repositories disabled successfully. Package list will be updated shortly.",
     "disableError": "Failed to disable repositories"
+  },
+  "antivirus": {
+    "title": "Antivirus",
+    "description": "Configure default antivirus software for each operating system",
+    "none": "None",
+    "save": "Save",
+    "saveSuccess": "Antivirus defaults saved successfully",
+    "permissionWarning": "You do not have permission to modify antivirus defaults. Contact your administrator to gain the MANAGE_ANTIVIRUS_DEFAULTS role.",
+    "errors": {
+      "loadFailed": "Failed to load antivirus defaults",
+      "saveFailed": "Failed to save antivirus defaults",
+      "permissionDenied": "You do not have permission to manage antivirus defaults"
+    },
+    "selectProgram": "Select Antivirus Program"
+  },
+  "security": {
+    "antivirus": "Antivirus",
+    "antivirusError": "Failed to load antivirus status",
+    "noAntivirusDetected": "No antivirus software detected",
+    "software": "Software",
+    "version": "Version",
+    "installPath": "Installation Path",
+    "status": "Status",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "unknown": "Unknown",
+    "lastUpdated": "Last Updated",
+    "alreadyDeployed": "Antivirus already deployed",
+    "alreadyEnabled": "Antivirus already enabled",
+    "alreadyDisabled": "Antivirus already disabled",
+    "notDeployed": "No antivirus deployed",
+    "enableAntivirus": "Enable Antivirus",
+    "disableAntivirus": "Disable Antivirus",
+    "removeAntivirus": "Remove Antivirus",
+    "antivirusEnableSuccess": "Antivirus enable initiated successfully",
+    "antivirusEnableFailed": "Failed to enable antivirus",
+    "antivirusDisableSuccess": "Antivirus disable initiated successfully",
+    "antivirusDisableFailed": "Failed to disable antivirus",
+    "antivirusRemoveSuccess": "Antivirus removal initiated successfully",
+    "antivirusRemoveFailed": "Failed to remove antivirus"
+  },
+  "dataGrid": {
+    "columnVisibility": "Column Visibility",
+    "showAll": "Show All",
+    "hideAll": "Hide All",
+    "reset": "Reset"
   }
 }

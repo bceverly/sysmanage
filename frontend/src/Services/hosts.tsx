@@ -377,13 +377,14 @@ const doRefreshUpdatesCheck = async (id: string) => {
 };
 
 const doRefreshAllHostData = async (id: string) => {
-    // Request OS, hardware updates, and updates check
+    // Request OS, hardware updates, updates check, and system info (includes antivirus status)
     const promises = [
         doRefreshHostData(id),
         doRefreshHardwareData(id),
-        doRefreshUpdatesCheck(id)
+        doRefreshUpdatesCheck(id),
+        doRequestSystemInfo(id)
     ];
-    
+
     await Promise.all(promises);
     return { result: true } as SuccessResponse;
 };
@@ -456,6 +457,22 @@ const doRefreshUserAccessData = async (id: string) => {
     let result = {} as SuccessResponse;
 
     await api.post<SuccessResponse>("/api/host/" + id + "/request-user-access-update")
+    .then((response) => {
+        // No error - process response
+        result = response.data;
+        return Promise.resolve(response);
+    })
+    .catch((error) => {
+        processError(error);
+        return Promise.reject(error);
+    });
+    return result;
+};
+
+const doRequestSystemInfo = async (id: string) => {
+    let result = {} as SuccessResponse;
+
+    await api.post<SuccessResponse>("/api/host/" + id + "/request-system-info")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -692,4 +709,4 @@ type UbuntuProInfo = {
 }
 
 export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, UbuntuProService };
-export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService };
+export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doRequestSystemInfo, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService };

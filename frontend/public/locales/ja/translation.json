@@ -1242,5 +1242,37 @@
     "enableError": "リポジトリの有効化に失敗しました",
     "disableSuccess": "リポジトリが正常に無効化されました。パッケージリストはまもなく更新されます。",
     "disableError": "リポジトリの無効化に失敗しました"
+  },
+  "security": {
+    "antivirus": "アンチウイルス",
+    "antivirusError": "アンチウイルスステータスの読み込みに失敗しました",
+    "noAntivirusDetected": "アンチウイルスソフトウェアが検出されませんでした",
+    "software": "ソフトウェア",
+    "version": "バージョン",
+    "installPath": "インストールパス",
+    "status": "ステータス",
+    "enabled": "有効",
+    "disabled": "無効",
+    "unknown": "不明",
+    "lastUpdated": "最終更新",
+    "alreadyDeployed": "アンチウイルスは既にデプロイされています",
+    "alreadyEnabled": "アンチウイルスは既に有効です",
+    "alreadyDisabled": "アンチウイルスは既に無効です",
+    "notDeployed": "アンチウイルスがデプロイされていません",
+    "enableAntivirus": "アンチウイルスを有効にする",
+    "disableAntivirus": "アンチウイルスを無効にする",
+    "removeAntivirus": "アンチウイルスを削除",
+    "antivirusEnableSuccess": "アンチウイルスの有効化を正常に開始しました",
+    "antivirusEnableFailed": "アンチウイルスの有効化に失敗しました",
+    "antivirusDisableSuccess": "アンチウイルスの無効化を正常に開始しました",
+    "antivirusDisableFailed": "アンチウイルスの無効化に失敗しました",
+    "antivirusRemoveSuccess": "アンチウイルスの削除を正常に開始しました",
+    "antivirusRemoveFailed": "アンチウイルスの削除に失敗しました"
+  },
+  "dataGrid": {
+    "columnVisibility": "列の表示",
+    "showAll": "すべて表示",
+    "hideAll": "すべて非表示",
+    "reset": "リセット"
   }
 }

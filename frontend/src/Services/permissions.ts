@@ -108,5 +108,12 @@ export const SecurityRoles = {
     // Ubuntu Pro Management
     ATTACH_UBUNTU_PRO: 'Attach Ubuntu Pro',
     DETACH_UBUNTU_PRO: 'Detach Ubuntu Pro',
-    CHANGE_UBUNTU_PRO_MASTER_KEY: 'Change Ubuntu Pro Master Key'
+    CHANGE_UBUNTU_PRO_MASTER_KEY: 'Change Ubuntu Pro Master Key',
+
+    // Antivirus Management
+    MANAGE_ANTIVIRUS_DEFAULTS: 'Manage Antivirus Defaults',
+    DEPLOY_ANTIVIRUS: 'Deploy Antivirus',
+    ENABLE_ANTIVIRUS: 'Enable Antivirus',
+    DISABLE_ANTIVIRUS: 'Disable Antivirus',
+    REMOVE_ANTIVIRUS: 'Remove Antivirus'
 } as const;

@@ -1100,5 +1100,37 @@
     "enableError": "Не удалось включить репозитории",
     "disableSuccess": "Репозитории успешно отключены. Список пакетов скоро будет обновлен.",
     "disableError": "Не удалось отключить репозитории"
+  },
+  "security": {
+    "antivirus": "Антивирус",
+    "antivirusError": "Не удалось загрузить статус антивируса",
+    "noAntivirusDetected": "Антивирусное программное обеспечение не обнаружено",
+    "software": "Программное обеспечение",
+    "version": "Версия",
+    "installPath": "Путь установки",
+    "status": "Статус",
+    "enabled": "Включено",
+    "disabled": "Отключено",
+    "unknown": "Неизвестно",
+    "lastUpdated": "Последнее обновление",
+    "alreadyDeployed": "Антивирус уже развёрнут",
+    "alreadyEnabled": "Антивирус уже включён",
+    "alreadyDisabled": "Антивирус уже отключён",
+    "notDeployed": "Антивирус не развёрнут",
+    "enableAntivirus": "Включить антивирус",
+    "disableAntivirus": "Отключить антивирус",
+    "removeAntivirus": "Удалить антивирус",
+    "antivirusEnableSuccess": "Включение антивируса успешно начато",
+    "antivirusEnableFailed": "Не удалось включить антивирус",
+    "antivirusDisableSuccess": "Отключение антивируса успешно начато",
+    "antivirusDisableFailed": "Не удалось отключить антивирус",
+    "antivirusRemoveSuccess": "Удаление антивируса успешно начато",
+    "antivirusRemoveFailed": "Не удалось удалить антивирус"
+  },
+  "dataGrid": {
+    "columnVisibility": "Видимость столбцов",
+    "showAll": "Показать все",
+    "hideAll": "Скрыть все",
+    "reset": "Сбросить"
   }
 }

@@ -12,14 +12,17 @@ import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
-import { Chip, Typography, IconButton, Autocomplete, TextField } from '@mui/material';
+import SecurityIcon from '@mui/icons-material/Security';
+import { Chip, IconButton, Autocomplete, TextField } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost, doRequestHostDiagnostics } from '../Services/hosts'
 import { doCheckOpenTelemetryEligibility, doDeployOpenTelemetry } from '../Services/opentelemetry'
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
+import { useColumnVisibility } from '../Hooks/useColumnVisibility';
 import SearchBox from '../Components/SearchBox';
+import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 
@@ -27,7 +30,7 @@ const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
     const [filteredData, setFilteredData] = useState<SysManageHost[]>([]);
     const [selection, setSelection] = useState<GridRowSelectionModel>([]);
-    const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [searchColumn, setSearchColumn] = useState<string>('fqdn');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -37,17 +40,26 @@ const Hosts = () => {
     const [canViewHostDetails, setCanViewHostDetails] = useState<boolean>(false);
     const [canRebootHost, setCanRebootHost] = useState<boolean>(false);
     const [canShutdownHost, setCanShutdownHost] = useState<boolean>(false);
+    const [canDeployAntivirus, setCanDeployAntivirus] = useState<boolean>(false);
     const [eligibleForOpenTelemetry, setEligibleForOpenTelemetry] = useState<Set<string>>(new Set());
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { triggerRefresh } = useNotificationRefresh();
-    
+
     // Dynamic table page sizing based on window height
     const { pageSize, pageSizeOptions } = useTablePageSize({
         reservedHeight: 350, // Account for navbar, title, buttons, margins, and action buttons below table
         minRows: 5,
         maxRows: 50,
     });
+
+    // Column visibility preferences
+    const {
+        hiddenColumns,
+        setHiddenColumns,
+        resetPreferences,
+        getColumnVisibilityModel,
+    } = useColumnVisibility('hosts-grid');
 
     const columns: GridColDef[] = [
         { field: 'id', headerName: t('common.id', 'ID'), width: 70 },
@@ -405,20 +417,16 @@ const Hosts = () => {
 
     const handleRefreshData = async () => {
         try {
-            // Request comprehensive data refresh (OS + hardware) for selected hosts
+            // Request comprehensive data refresh for selected hosts
             const refreshPromises = selection.map(id => {
                 return doRefreshAllHostData(id.toString());
             });
-            
+
             await Promise.all(refreshPromises);
-            
+
             // Clear selection after successful requests
             setSelection([]);
-            
-            // Optional: Show success message or refresh data after a delay
-            console.log(`Comprehensive data refresh requested for ${selection.length} hosts`);
-        } catch (error) {
-            console.error('Error requesting comprehensive data refresh:', error);
+        } catch {
             // Still clear selection even if there was an error
             setSelection([]);
         }
@@ -478,21 +486,71 @@ const Hosts = () => {
         }
     }
 
+    const handleDeployAntivirus = async () => {
+        try {
+            if (selection.length === 0) return;
+
+            // Deploy to all selected hosts that are active and in privileged mode
+            const eligibleHosts = selection.filter(hostId => {
+                const host = tableData.find(h => h.id === hostId);
+                return host && host.active && host.privileged_mode;
+            });
+
+            if (eligibleHosts.length === 0) {
+                alert(t('hosts.noEligibleHostsForAntivirus', 'No eligible hosts selected. Hosts must be active and in privileged mode for antivirus deployment.'));
+                return;
+            }
+
+            // Call backend API to deploy antivirus
+            const response = await axiosInstance.post('/api/deploy', {
+                host_ids: eligibleHosts.map(id => String(id))
+            });
+
+            // Check for errors
+            if (response.data.failed_hosts && response.data.failed_hosts.length > 0) {
+                const failedHostsList = response.data.failed_hosts
+                    .map((fh: {hostname: string, reason: string}) => `${fh.hostname}: ${fh.reason}`)
+                    .join('\n');
+
+                if (response.data.success_count > 0) {
+                    alert(t('hosts.antivirusDeployPartialSuccess', `Antivirus deployment initiated for ${response.data.success_count} host(s).\n\nFailed hosts:\n${failedHostsList}`));
+                } else {
+                    alert(t('hosts.antivirusDeployAllFailed', `Antivirus deployment failed for all hosts:\n\n${failedHostsList}`));
+                }
+            } else {
+                // Show success message
+                alert(t('hosts.antivirusDeploySuccess', `Antivirus deployment initiated for ${response.data.success_count} host(s)`));
+            }
+
+            // Refresh hosts
+            await refreshHosts();
+
+            // Clear selection
+            setSelection([]);
+        } catch (error) {
+            console.error('Error deploying antivirus:', error);
+            alert(t('hosts.antivirusDeployFailed', 'Failed to deploy antivirus. Please try again.'));
+            setSelection([]);
+        }
+    }
+
     const checkOpenTelemetryEligibility = useCallback(async () => {
         try {
             const eligible = new Set<string>();
 
-            // Check eligibility for all hosts
-            const eligibilityPromises = tableData.map(async (host) => {
-                try {
-                    const result = await doCheckOpenTelemetryEligibility(host.id);
-                    if (result.eligible) {
-                        eligible.add(host.id);
+            // Check eligibility only for active hosts
+            const eligibilityPromises = tableData
+                .filter(host => host.active)  // Only check active hosts
+                .map(async (host) => {
+                    try {
+                        const result = await doCheckOpenTelemetryEligibility(host.id);
+                        if (result.eligible) {
+                            eligible.add(host.id);
+                        }
+                    } catch (error) {
+                        console.error('Failed to check OpenTelemetry eligibility for host:', error);
                     }
-                } catch (error) {
-                    console.error('Failed to check OpenTelemetry eligibility for host:', error);
-                }
-            });
+                });
 
             await Promise.all(eligibilityPromises);
             setEligibleForOpenTelemetry(eligible);
@@ -503,11 +561,13 @@ const Hosts = () => {
 
     const refreshHosts = async () => {
         try {
+            setLoading(true);
             const response = await doGetHosts();
             setTableData(response);
-            setLastRefresh(new Date());
         } catch (error) {
             console.error('Error refreshing hosts:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -536,32 +596,24 @@ const Hosts = () => {
     // Check permissions
     useEffect(() => {
         const checkPermissions = async () => {
-            const [approve, deleteHost, viewDetails, reboot, shutdown] = await Promise.all([
+            const [approve, deleteHost, viewDetails, reboot, shutdown, deployAntivirus] = await Promise.all([
                 hasPermission(SecurityRoles.APPROVE_HOST_REGISTRATION),
                 hasPermission(SecurityRoles.DELETE_HOST),
                 hasPermission(SecurityRoles.VIEW_HOST_DETAILS),
                 hasPermission(SecurityRoles.REBOOT_HOST),
-                hasPermission(SecurityRoles.SHUTDOWN_HOST)
+                hasPermission(SecurityRoles.SHUTDOWN_HOST),
+                hasPermission(SecurityRoles.DEPLOY_ANTIVIRUS)
             ]);
             setCanApproveHosts(approve);
             setCanDeleteHost(deleteHost);
             setCanViewHostDetails(viewDetails);
             setCanRebootHost(reboot);
             setCanShutdownHost(shutdown);
+            setCanDeployAntivirus(deployAntivirus);
         };
         checkPermissions();
     }, []);
 
-    const formatLastRefresh = () => {
-        if (!lastRefresh) return t('hosts.never', 'never');
-        const now = new Date();
-        const diffSeconds = Math.floor((now.getTime() - lastRefresh.getTime()) / 1000);
-        
-        if (diffSeconds < 10) return t('hosts.justNow', 'just now');
-        if (diffSeconds < 60) return t('hosts.secondsAgo', '{{seconds}}s ago', { seconds: diffSeconds });
-        if (diffSeconds < 3600) return t('hosts.minutesAgo', '{{minutes}}m ago', { minutes: Math.floor(diffSeconds / 60) });
-        return lastRefresh.toLocaleTimeString();
-    };
 
     // Check if any selected hosts need approval
     const hasPendingSelection = filteredData.some(host =>
@@ -672,20 +724,23 @@ const Hosts = () => {
                 />
             </Box>
             
-            {/* Subtle Refresh Status */}
-            <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Typography variant="caption" color="textSecondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                    {t('hosts.updated', 'Updated')} {formatLastRefresh()} <span style={{ marginLeft: '4px', color: '#4caf50', fontSize: '8px' }}>●</span>
-                </Typography>
-                <Typography variant="caption" color="textSecondary">
-                    {t('hosts.autoRefresh', 'Auto-refresh')}: 30s
-                </Typography>
+            {/* Column Visibility Button */}
+            <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                <ColumnVisibilityButton
+                    columns={columns
+                        .filter(col => col.field !== 'actions')
+                        .map(col => ({ field: col.field, headerName: col.headerName || col.field }))}
+                    hiddenColumns={hiddenColumns}
+                    onColumnsChange={setHiddenColumns}
+                    onReset={resetPreferences}
+                />
             </Box>
             
             <div  style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px` }}>
                 <DataGrid
                     rows={filteredData}
                     columns={columns}
+                    loading={loading}
                     initialState={{
                         pagination: {
                             paginationModel: { page: 0, pageSize: pageSize },
@@ -693,11 +748,10 @@ const Hosts = () => {
                         sorting: {
                             sortModel: [{ field: 'fqdn', sort: 'asc'}],
                         },
-                        columns: {
-                            columnVisibilityModel: {
-                                id: false,
-                            },
-                        },
+                    }}
+                    columnVisibilityModel={{
+                        id: false,
+                        ...getColumnVisibilityModel(),
                     }}
                     pageSizeOptions={pageSizeOptions}
                     checkboxSelection
@@ -759,6 +813,17 @@ const Hosts = () => {
                 >
                     {t('hosts.deployOpenTelemetry', 'Deploy OpenTelemetry')}
                 </Button>
+                {canDeployAntivirus && (
+                    <Button
+                        variant="outlined"
+                        startIcon={<SecurityIcon />}
+                        disabled={selection.length === 0}
+                        onClick={handleDeployAntivirus}
+                        color="success"
+                    >
+                        {t('hosts.deployAntivirus', 'Deploy Antivirus')}
+                    </Button>
+                )}
                 {canRebootHost && (
                     <Button
                         variant="outlined"

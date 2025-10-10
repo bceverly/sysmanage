@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import AntivirusStatusCard from '../Components/AntivirusStatusCard';
 import { 
     Box, 
     Card, 
@@ -53,14 +54,17 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import SourceIcon from '@mui/icons-material/Source';
+import ShieldIcon from '@mui/icons-material/Shield';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField, List, ListItem, ListItemText, Divider, TableContainer, TableHead, InputAdornment } from '@mui/material';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
+import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 
-import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck } from '../Services/hosts';
+import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck, doRequestSystemInfo } from '../Services/hosts';
 import { SysManageUser, doGetMe } from '../Services/users';
 import { SecretResponse } from '../Services/secrets';
 import { doCheckOpenTelemetryEligibility, doDeployOpenTelemetry, doGetOpenTelemetryStatus, doStartOpenTelemetry, doStopOpenTelemetry, doRestartOpenTelemetry, doConnectOpenTelemetryToGrafana, doDisconnectOpenTelemetryFromGrafana, doRemoveOpenTelemetry } from '../Services/opentelemetry';
@@ -110,6 +114,7 @@ const HostDetail = () => {
     const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticReport[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [hasAntivirusOsDefault, setHasAntivirusOsDefault] = useState<boolean>(false);
 
     // Check if OS supports third-party repositories
     const supportsThirdPartyRepos = useCallback(() => {
@@ -244,6 +249,11 @@ const HostDetail = () => {
     const [canDeployCertificate, setCanDeployCertificate] = useState<boolean>(false);
     const [canAttachUbuntuPro, setCanAttachUbuntuPro] = useState<boolean>(false);
     const [canDetachUbuntuPro, setCanDetachUbuntuPro] = useState<boolean>(false);
+    const [canDeployAntivirus, setCanDeployAntivirus] = useState<boolean>(false);
+    const [canEnableAntivirus, setCanEnableAntivirus] = useState<boolean>(false);
+    const [canDisableAntivirus, setCanDisableAntivirus] = useState<boolean>(false);
+    const [canRemoveAntivirus, setCanRemoveAntivirus] = useState<boolean>(false);
+    const [antivirusRefreshTrigger, setAntivirusRefreshTrigger] = useState<number>(0);
 
     // OpenTelemetry deployment states
     const [canDeployOpenTelemetry, setCanDeployOpenTelemetry] = useState<boolean>(false);  // User has permission to see button
@@ -280,18 +290,27 @@ const HostDetail = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
 
+    // Column visibility preferences for Certificates grid
+    const {
+        hiddenColumns: hiddenCertificatesColumns,
+        setHiddenColumns: setHiddenCertificatesColumns,
+        resetPreferences: resetCertificatesPreferences,
+        getColumnVisibilityModel: getCertificatesColumnVisibilityModel,
+    } = useColumnVisibility('hostdetail-certificates-grid');
+
     // Helper functions to calculate dynamic tab indices
     const getSoftwareInstallsTabIndex = () => 3;
     const getThirdPartyReposTabIndex = () => supportsThirdPartyRepos() ? 4 : -1;
     const getAccessTabIndex = () => supportsThirdPartyRepos() ? 5 : 4;
-    const getCertificatesTabIndex = () => supportsThirdPartyRepos() ? 6 : 5;
-    const getServerRolesTabIndex = () => supportsThirdPartyRepos() ? 7 : 6;
+    const getSecurityTabIndex = () => supportsThirdPartyRepos() ? 6 : 5;
+    const getCertificatesTabIndex = () => supportsThirdPartyRepos() ? 7 : 6;
+    const getServerRolesTabIndex = () => supportsThirdPartyRepos() ? 8 : 7;
     const getUbuntuProTabIndex = () => {
         if (!ubuntuProInfo?.available) return -1;
-        return supportsThirdPartyRepos() ? 8 : 7;
+        return supportsThirdPartyRepos() ? 9 : 8;
     };
     const getDiagnosticsTabIndex = () => {
-        const baseIndex = supportsThirdPartyRepos() ? 8 : 7;
+        const baseIndex = supportsThirdPartyRepos() ? 9 : 8;
         return ubuntuProInfo?.available ? baseIndex + 1 : baseIndex;
     };
 
@@ -658,7 +677,7 @@ const HostDetail = () => {
     // Check permissions
     useEffect(() => {
         const checkPermissions = async () => {
-            const [editTags, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro] = await Promise.all([
+            const [editTags, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro, deployAntivirus, enableAntivirus, disableAntivirus, removeAntivirus] = await Promise.all([
                 hasPermission(SecurityRoles.EDIT_TAGS),
                 hasPermission(SecurityRoles.STOP_HOST_SERVICE),
                 hasPermission(SecurityRoles.START_HOST_SERVICE),
@@ -667,7 +686,11 @@ const HostDetail = () => {
                 hasPermission(SecurityRoles.DEPLOY_SSH_KEY),
                 hasPermission(SecurityRoles.DEPLOY_CERTIFICATE),
                 hasPermission(SecurityRoles.ATTACH_UBUNTU_PRO),
-                hasPermission(SecurityRoles.DETACH_UBUNTU_PRO)
+                hasPermission(SecurityRoles.DETACH_UBUNTU_PRO),
+                hasPermission(SecurityRoles.DEPLOY_ANTIVIRUS),
+                hasPermission(SecurityRoles.ENABLE_ANTIVIRUS),
+                hasPermission(SecurityRoles.DISABLE_ANTIVIRUS),
+                hasPermission(SecurityRoles.REMOVE_ANTIVIRUS)
             ]);
             setCanEditTags(editTags);
             setCanStopService(stopService);
@@ -678,6 +701,10 @@ const HostDetail = () => {
             setCanDeployCertificate(deployCertificate);
             setCanAttachUbuntuPro(attachUbuntuPro);
             setCanDetachUbuntuPro(detachUbuntuPro);
+            setCanDeployAntivirus(deployAntivirus);
+            setCanEnableAntivirus(enableAntivirus);
+            setCanDisableAntivirus(disableAntivirus);
+            setCanRemoveAntivirus(removeAntivirus);
         };
         checkPermissions();
     }, []);
@@ -699,7 +726,42 @@ const HostDetail = () => {
                 setLoading(true);
                 const hostData = await doGetHostByID(hostId);
                 setHost(hostData);
-                
+
+                // Check if there's an antivirus default for this host's OS
+                try {
+                    // For macOS, use platform directly since platform_release contains version codenames
+                    // For other OSes, try platform_release first, but fall back to platform if it's just a version number
+                    let osName = '';
+
+                    if (hostData.platform === 'macOS') {
+                        osName = 'macOS';
+                    } else {
+                        osName = hostData.platform_release || '';
+
+                        // If platform_release doesn't start with a letter (e.g., "7.7"), use platform instead
+                        if (!osName || !/^[A-Za-z]/.test(osName)) {
+                            osName = hostData.platform || '';
+                        }
+
+                        // Extract OS name without version (e.g., "Ubuntu 25.04" -> "Ubuntu")
+                        // Match common patterns: "Ubuntu X.Y", "FreeBSD X.Y-RELEASE", "NetBSD X.Y", etc.
+                        const match = osName.match(/^([A-Za-z]+)/);
+                        if (match) {
+                            osName = match[1];
+                        }
+                    }
+
+                    if (osName) {
+                        const response = await axiosInstance.get(`/api/antivirus-defaults/${osName}`);
+                        setHasAntivirusOsDefault(response.data && response.data.antivirus_package !== null);
+                    } else {
+                        setHasAntivirusOsDefault(false);
+                    }
+                } catch {
+                    // If 404 or any error, assume no default is configured
+                    setHasAntivirusOsDefault(false);
+                }
+
                 // Fetch normalized storage, network, user access, software, and diagnostics data
                 try {
                     const [storageData, networkData, usersData, groupsData, softwareData, diagnosticsData, currentUserData] = await Promise.all([
@@ -795,6 +857,13 @@ const HostDetail = () => {
     useEffect(() => {
         const checkOpenTelemetryEligibility = async () => {
             if (!hostId || !host) return;
+
+            // Don't check eligibility if host is not active (down)
+            if (!host.active) {
+                setCanDeployOpenTelemetry(false);
+                setOpenTelemetryEligible(false);
+                return;
+            }
 
             try {
                 const eligibility = await doCheckOpenTelemetryEligibility(hostId);
@@ -1550,16 +1619,17 @@ const HostDetail = () => {
         try {
             setDiagnosticsLoading(true);
 
-            // Request diagnostics, user access data, software inventory, and package updates
+            // Request diagnostics, system info, user access data, software inventory, and package updates
             await Promise.all([
                 doRequestHostDiagnostics(hostId),
+                doRequestSystemInfo(hostId),
                 doRefreshUserAccessData(hostId),
                 doRefreshSoftwareData(hostId),
                 doRefreshUpdatesCheck(hostId)
             ]);
 
             // Show success message
-            console.log('Diagnostics, user access data, software inventory, and package updates requested successfully');
+            console.log('Diagnostics, system info, user access data, software inventory, and package updates requested successfully');
             
             // Refresh host data to get updated diagnostics request status
             const updatedHost = await doGetHostByID(hostId);
@@ -1663,6 +1733,88 @@ const HostDetail = () => {
         } catch (error) {
             console.error('Failed to request package collection:', error);
             setSnackbarMessage(t('hosts.packagesRequestFailed', 'Failed to request package collection'));
+            setSnackbarOpen(true);
+        }
+    };
+
+    const handleDeployAntivirus = async () => {
+        if (!host || !host.id) return;
+
+        try {
+            // Call backend API to deploy antivirus to this specific host
+            const response = await axiosInstance.post('/api/deploy', {
+                host_ids: [host.id]
+            });
+
+            if (response.data.failed_hosts && response.data.failed_hosts.length > 0) {
+                const failedHost = response.data.failed_hosts[0];
+                setSnackbarMessage(t('hostDetail.antivirusDeployFailed', 'Failed to deploy antivirus: {reason}', { reason: failedHost.reason }));
+                setSnackbarSeverity('error');
+            } else {
+                setSnackbarMessage(t('hostDetail.antivirusDeploySuccess', 'Antivirus deployment initiated successfully'));
+                setSnackbarSeverity('success');
+                // Trigger refresh after a short delay to allow agent to update
+                setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 5000);
+            }
+            setSnackbarOpen(true);
+        } catch (error) {
+            console.error('Failed to deploy antivirus:', error);
+            setSnackbarMessage(t('hostDetail.antivirusDeployFailed', 'Failed to deploy antivirus'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        }
+    };
+
+    const handleEnableAntivirus = async () => {
+        if (!host || !host.id) return;
+
+        try {
+            await axiosInstance.post(`/api/hosts/${host.id}/antivirus/enable`);
+            setSnackbarMessage(t('security.antivirusEnableSuccess', 'Antivirus enable initiated successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            // Trigger refresh after a short delay
+            setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 3000);
+        } catch (error) {
+            console.error('Failed to enable antivirus:', error);
+            setSnackbarMessage(t('security.antivirusEnableFailed', 'Failed to enable antivirus'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        }
+    };
+
+    const handleDisableAntivirus = async () => {
+        if (!host || !host.id) return;
+
+        try {
+            await axiosInstance.post(`/api/hosts/${host.id}/antivirus/disable`);
+            setSnackbarMessage(t('security.antivirusDisableSuccess', 'Antivirus disable initiated successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            // Trigger refresh after a short delay
+            setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 3000);
+        } catch (error) {
+            console.error('Failed to disable antivirus:', error);
+            setSnackbarMessage(t('security.antivirusDisableFailed', 'Failed to disable antivirus'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        }
+    };
+
+    const handleRemoveAntivirus = async () => {
+        if (!host || !host.id) return;
+
+        try {
+            await axiosInstance.post(`/api/hosts/${host.id}/antivirus/remove`);
+            setSnackbarMessage(t('security.antivirusRemoveSuccess', 'Antivirus removal initiated successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            // Trigger refresh after a short delay
+            setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 5000);
+        } catch (error) {
+            console.error('Failed to remove antivirus:', error);
+            setSnackbarMessage(t('security.antivirusRemoveFailed', 'Failed to remove antivirus'));
+            setSnackbarSeverity('error');
             setSnackbarOpen(true);
         }
     };
@@ -2419,6 +2571,12 @@ const HostDetail = () => {
                     <Tab
                         icon={<SecurityIcon />}
                         label={t('hostDetail.accessTab', 'Access')}
+                        iconPosition="start"
+                        sx={{ textTransform: 'none' }}
+                    />
+                    <Tab
+                        icon={<ShieldIcon />}
+                        label={t('hostDetail.securityTab', 'Security')}
                         iconPosition="start"
                         sx={{ textTransform: 'none' }}
                     />
@@ -3603,6 +3761,29 @@ const HostDetail = () => {
                 </Grid>
             )}
 
+            {/* Security Tab */}
+            {currentTab === getSecurityTabIndex() && hostId && (
+                <Grid container spacing={3}>
+                    <Grid item xs={12} md={6}>
+                        <AntivirusStatusCard
+                            hostId={hostId}
+                            onDeployAntivirus={handleDeployAntivirus}
+                            onEnableAntivirus={handleEnableAntivirus}
+                            onDisableAntivirus={handleDisableAntivirus}
+                            onRemoveAntivirus={handleRemoveAntivirus}
+                            canDeployAntivirus={canDeployAntivirus}
+                            canEnableAntivirus={canEnableAntivirus}
+                            canDisableAntivirus={canDisableAntivirus}
+                            canRemoveAntivirus={canRemoveAntivirus}
+                            isHostActive={host?.active || false}
+                            isAgentPrivileged={host?.is_agent_privileged || false}
+                            hasOsDefault={hasAntivirusOsDefault}
+                            refreshTrigger={antivirusRefreshTrigger}
+                        />
+                    </Grid>
+                </Grid>
+            )}
+
             {/* Certificates Tab */}
             {currentTab === getCertificatesTabIndex() && (
                 <Grid container spacing={3}>
@@ -3695,51 +3876,63 @@ const HostDetail = () => {
 
                                 {/* Certificate DataGrid */}
                                 {!certificatesLoading && (
-                                    <DataGrid
-                                        rows={certificates.filter(cert => {
-                                            // Apply search filter first
-                                            if (certificateSearchTerm) {
-                                                const searchLower = certificateSearchTerm.toLowerCase();
-                                                const nameMatch = cert.certificate_name?.toLowerCase().includes(searchLower);
-                                                const subjectMatch = cert.subject?.toLowerCase().includes(searchLower);
-                                                const issuerMatch = cert.issuer?.toLowerCase().includes(searchLower);
-                                                if (!nameMatch && !subjectMatch && !issuerMatch) {
-                                                    return false;
+                                    <>
+                                        <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                            <ColumnVisibilityButton
+                                                columns={certificateColumns.map(col => ({ field: col.field, headerName: col.headerName || col.field }))}
+                                                hiddenColumns={hiddenCertificatesColumns}
+                                                onColumnsChange={setHiddenCertificatesColumns}
+                                                onReset={resetCertificatesPreferences}
+                                            />
+                                        </Box>
+                                        <DataGrid
+                                            rows={certificates.filter(cert => {
+                                                // Apply search filter first
+                                                if (certificateSearchTerm) {
+                                                    const searchLower = certificateSearchTerm.toLowerCase();
+                                                    const nameMatch = cert.certificate_name?.toLowerCase().includes(searchLower);
+                                                    const subjectMatch = cert.subject?.toLowerCase().includes(searchLower);
+                                                    const issuerMatch = cert.issuer?.toLowerCase().includes(searchLower);
+                                                    if (!nameMatch && !subjectMatch && !issuerMatch) {
+                                                        return false;
+                                                    }
                                                 }
-                                            }
 
-                                            // Apply type filter
-                                            if (certificateFilter === 'all') return true;
-                                            if (certificateFilter === 'ca') {
-                                                return cert.is_ca || cert.key_usage === 'CA';
-                                            }
-                                            if (certificateFilter === 'server') {
-                                                return cert.key_usage === 'Server';
-                                            }
-                                            if (certificateFilter === 'client') {
-                                                return cert.key_usage === 'Client';
-                                            }
-                                            return true;
-                                        })}
-                                        columns={certificateColumns}
-                                        initialState={{
-                                            sorting: {
-                                                sortModel: [{ field: 'days_until_expiry', sort: 'asc' }],
-                                            },
-                                        }}
-                                        paginationModel={certificatePaginationModel}
-                                        onPaginationModelChange={setCertificatePaginationModel}
-                                        pageSizeOptions={[5, 10, 25]}
-                                        disableRowSelectionOnClick
-                                        autoHeight
-                                        sx={{
-                                            '& .MuiDataGrid-row': {
-                                                '&:hover': {
-                                                    backgroundColor: 'action.hover',
+                                                // Apply type filter
+                                                if (certificateFilter === 'all') return true;
+                                                if (certificateFilter === 'ca') {
+                                                    return cert.is_ca || cert.key_usage === 'CA';
+                                                }
+                                                if (certificateFilter === 'server') {
+                                                    return cert.key_usage === 'Server';
+                                                }
+                                                if (certificateFilter === 'client') {
+                                                    return cert.key_usage === 'Client';
+                                                }
+                                                return true;
+                                            })}
+                                            columns={certificateColumns}
+                                            loading={certificatesLoading}
+                                            initialState={{
+                                                sorting: {
+                                                    sortModel: [{ field: 'days_until_expiry', sort: 'asc' }],
                                                 },
-                                            },
-                                        }}
-                                    />
+                                            }}
+                                            columnVisibilityModel={getCertificatesColumnVisibilityModel()}
+                                            paginationModel={certificatePaginationModel}
+                                            onPaginationModelChange={setCertificatePaginationModel}
+                                            pageSizeOptions={[5, 10, 25]}
+                                            disableRowSelectionOnClick
+                                            autoHeight
+                                            sx={{
+                                                '& .MuiDataGrid-row': {
+                                                    '&:hover': {
+                                                        backgroundColor: 'action.hover',
+                                                    },
+                                                },
+                                            }}
+                                        />
+                                    </>
                                 )}
                             </CardContent>
                         </Card>

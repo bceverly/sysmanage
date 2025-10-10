@@ -30,6 +30,8 @@ import {
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { useTablePageSize } from '../hooks/useTablePageSize';
+import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import { secretsService, SecretResponse, SecretWithContent, SecretType } from '../Services/secrets';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import './css/Secrets.css';
@@ -38,7 +40,7 @@ const Secrets: React.FC = () => {
   const { t } = useTranslation();
   const [secrets, setSecrets] = useState<SecretResponse[]>([]);
   const [secretTypes, setSecretTypes] = useState<SecretType[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Secret form state
   const [showAddSecretDialog, setShowAddSecretDialog] = useState(false);
@@ -64,6 +66,14 @@ const Secrets: React.FC = () => {
 
   // Table pagination
   const { pageSize, pageSizeOptions } = useTablePageSize();
+
+  // Column visibility preferences
+  const {
+    hiddenColumns,
+    setHiddenColumns,
+    resetPreferences,
+    getColumnVisibilityModel,
+  } = useColumnVisibility('secrets-grid');
 
   // Permission states
   const [canAddSecret, setCanAddSecret] = useState<boolean>(false);
@@ -468,6 +478,18 @@ const Secrets: React.FC = () => {
             </Typography>
           </Box>
 
+          {/* Column Visibility Button */}
+          <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+            <ColumnVisibilityButton
+              columns={columns
+                .filter(col => col.field !== 'actions')
+                .map(col => ({ field: col.field, headerName: col.headerName || col.field }))}
+              hiddenColumns={hiddenColumns}
+              onColumnsChange={setHiddenColumns}
+              onReset={resetPreferences}
+            />
+          </Box>
+
           <div style={{ height: 400, width: '100%' }}>
             <DataGrid
               rows={secrets}
@@ -477,6 +499,10 @@ const Secrets: React.FC = () => {
                 pagination: {
                   paginationModel: { pageSize: pageSize, page: 0 },
                 },
+              }}
+              columnVisibilityModel={{
+                id: false,
+                ...getColumnVisibilityModel(),
               }}
               pageSizeOptions={pageSizeOptions}
               checkboxSelection

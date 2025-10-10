@@ -309,3 +309,53 @@ class ThirdPartyRepository(Base):
             f"<ThirdPartyRepository(id={self.id}, name='{self.name}', "
             f"type='{self.type}', enabled={self.enabled}, host_id={self.host_id})>"
         )
+
+
+class AntivirusDefault(Base):
+    """
+    This class holds the object mapping for the antivirus_default table.
+    Stores the default antivirus software for each operating system.
+    """
+
+    __tablename__ = "antivirus_default"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    os_name = Column(
+        String(100), nullable=False, unique=True, index=True
+    )  # Ubuntu, Fedora, Windows, etc.
+    antivirus_package = Column(
+        String(255), nullable=False
+    )  # Package name (e.g., clamav, sophos-av)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
+
+    def __repr__(self):
+        return f"<AntivirusDefault(id={self.id}, os_name='{self.os_name}', antivirus_package='{self.antivirus_package}')>"
+
+
+class AntivirusStatus(Base):
+    """
+    This class holds the object mapping for the antivirus_status table.
+    Stores the current antivirus software status for each host.
+    """
+
+    __tablename__ = "antivirus_status"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(
+        GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    software_name = Column(String(255), nullable=True)  # Name of antivirus software
+    install_path = Column(String(512), nullable=True)  # Installation path
+    version = Column(String(100), nullable=True)  # Version number
+    enabled = Column(Boolean, nullable=True)  # Whether antivirus is enabled
+    last_updated = Column(DateTime, nullable=False)  # UTC datetime, stored as naive
+
+    # Relationship back to Host
+    host = relationship("Host", back_populates="antivirus_status")
+
+    def __repr__(self):
+        return (
+            f"<AntivirusStatus(id={self.id}, host_id={self.host_id}, "
+            f"software_name='{self.software_name}', enabled={self.enabled})>"
+        )

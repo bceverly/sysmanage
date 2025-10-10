@@ -19,6 +19,8 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { useTranslation } from 'react-i18next';
+import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 
@@ -44,7 +46,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
 }) => {
     const { t } = useTranslation();
     const [repositories, setRepositories] = useState<ThirdPartyRepository[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [selectedRows, setSelectedRows] = useState<GridRowSelectionModel>([]);
@@ -83,6 +85,14 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
 
     // Computed repository string
     const [constructedRepo, setConstructedRepo] = useState<string>('');
+
+    // Column visibility preferences for Third-Party Repositories grid
+    const {
+        hiddenColumns,
+        setHiddenColumns,
+        resetPreferences,
+        getColumnVisibilityModel,
+    } = useColumnVisibility('thirdpartyrepos-grid');
 
     // Load permissions
     useEffect(() => {
@@ -438,26 +448,38 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                     <CircularProgress />
                 </Box>
             ) : (
-                <DataGrid
-                    rows={repositories}
-                    columns={columns}
-                    checkboxSelection={canDelete || canEnable || canDisable}
-                    disableRowSelectionOnClick
-                    onRowSelectionModelChange={(newSelection) => {
-                        setSelectedRows(newSelection);
-                    }}
-                    rowSelectionModel={selectedRows}
-                    autoHeight
-                    pageSizeOptions={[10, 25, 50, 100]}
-                    initialState={{
-                        pagination: { paginationModel: { pageSize: 25 } },
-                    }}
-                    sx={{
-                        '& .MuiDataGrid-cell': {
-                            borderBottom: '1px solid rgba(224, 224, 224, 1)',
-                        },
-                    }}
-                />
+                <>
+                    <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                        <ColumnVisibilityButton
+                            columns={columns.map(col => ({ field: col.field, headerName: col.headerName || col.field }))}
+                            hiddenColumns={hiddenColumns}
+                            onColumnsChange={setHiddenColumns}
+                            onReset={resetPreferences}
+                        />
+                    </Box>
+                    <DataGrid
+                        rows={repositories}
+                        columns={columns}
+                        loading={loading}
+                        checkboxSelection={canDelete || canEnable || canDisable}
+                        disableRowSelectionOnClick
+                        onRowSelectionModelChange={(newSelection) => {
+                            setSelectedRows(newSelection);
+                        }}
+                        rowSelectionModel={selectedRows}
+                        autoHeight
+                        pageSizeOptions={[10, 25, 50, 100]}
+                        initialState={{
+                            pagination: { paginationModel: { pageSize: 25 } },
+                        }}
+                        columnVisibilityModel={getColumnVisibilityModel()}
+                        sx={{
+                            '& .MuiDataGrid-cell': {
+                                borderBottom: '1px solid rgba(224, 224, 224, 1)',
+                            },
+                        }}
+                    />
+                </>
             )}
 
             {/* Action buttons at bottom */}

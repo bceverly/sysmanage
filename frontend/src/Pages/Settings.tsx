@@ -35,13 +35,16 @@ import {
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useTablePageSize } from '../hooks/useTablePageSize';
+import { useColumnVisibility } from '../Hooks/useColumnVisibility';
 import SearchBox from '../Components/SearchBox';
+import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import EmailConfigCard from '../Components/EmailConfigCard';
 import OpenBAOStatusCard from '../Components/OpenBAOStatusCard';
 import GrafanaIntegrationCard from '../Components/GrafanaIntegrationCard';
 import OpenTelemetryStatusCard from '../Components/OpenTelemetryStatusCard';
 import PrometheusStatusCard from '../Components/PrometheusStatusCard';
 import UbuntuProSettings from '../Components/UbuntuProSettings';
+import AntivirusDefaultsSettings from '../Components/AntivirusDefaultsSettings';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 
@@ -110,7 +113,7 @@ const Settings: React.FC = () => {
   const { t } = useTranslation();
   const [tags, setTags] = useState<Tag[]>([]);
   const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [tagsLoading, setTagsLoading] = useState<boolean>(true);
   const [selectedTags, setSelectedTags] = useState<GridRowSelectionModel>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchColumn, setSearchColumn] = useState<string>('name');
@@ -127,7 +130,7 @@ const Settings: React.FC = () => {
   const [viewingTag, setViewingTag] = useState<TagWithHosts | null>(null);
   
   // Tab names for URL hash
-  const tabNames = ['tags', 'queues', 'integrations', 'ubuntu-pro', 'available-packages'];
+  const tabNames = ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages'];
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -148,8 +151,9 @@ const Settings: React.FC = () => {
     if (newValue === 1) {
       loadQueueMessages();
     }
+    // Note: Available Packages tab is now at index 5 (was 4)
     // Load package data when switching to Available Packages tab
-    if (newValue === 4) {
+    if (newValue === 5) {
       loadPackageSummary();
       // Start 30-second auto-refresh timer for package cards
       if (packageRefreshInterval) {
@@ -187,7 +191,7 @@ const Settings: React.FC = () => {
   // Queue management state
   const [queueMessages, setQueueMessages] = useState<QueueMessage[]>([]);
   const [selectedMessages, setSelectedMessages] = useState<GridRowSelectionModel>([]);
-  const [queueLoading, setQueueLoading] = useState(false);
+  const [queueLoading, setQueueLoading] = useState<boolean>(true);
   const [messageDetailOpen, setMessageDetailOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<QueueMessage | null>(null);
 
@@ -213,6 +217,22 @@ const Settings: React.FC = () => {
     reservedHeight: 350,
   });
 
+  // Column visibility preferences for Tags grid
+  const {
+    hiddenColumns: hiddenTagsColumns,
+    setHiddenColumns: setHiddenTagsColumns,
+    resetPreferences: resetTagsPreferences,
+    getColumnVisibilityModel: getTagsColumnVisibilityModel,
+  } = useColumnVisibility('settings-tags-grid');
+
+  // Column visibility preferences for Queue Management grid
+  const {
+    hiddenColumns: hiddenQueueColumns,
+    setHiddenColumns: setHiddenQueueColumns,
+    resetPreferences: resetQueuePreferences,
+    getColumnVisibilityModel: getQueueColumnVisibilityModel,
+  } = useColumnVisibility('settings-queue-grid');
+
   // Check permissions
   useEffect(() => {
     const checkPermission = async () => {
@@ -234,14 +254,14 @@ const Settings: React.FC = () => {
 
   // Load tags from API
   const loadTags = useCallback(async () => {
-    setLoading(true);
+    setTagsLoading(true);
     try {
       const response = await axiosInstance.get('/api/tags');
       setTags(response.data);
     } catch (error) {
       console.error('Error fetching tags:', error);
     } finally {
-      setLoading(false);
+      setTagsLoading(false);
     }
   }, []);
 
@@ -537,7 +557,7 @@ const Settings: React.FC = () => {
 
   // Load package summary on mount if we're on the Available Packages tab
   useEffect(() => {
-    if (activeTab === 4) {
+    if (activeTab === 5) {
       loadPackageSummary();
     }
   }, [activeTab, loadPackageSummary]);
@@ -631,15 +651,28 @@ const Settings: React.FC = () => {
         placeholder={t('search.searchTags', 'Search tags')}
       />
 
+      {/* Column Visibility Button */}
+      <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+        <ColumnVisibilityButton
+          columns={columns
+            .filter(col => col.field !== 'actions')
+            .map(col => ({ field: col.field, headerName: col.headerName || col.field }))}
+          hiddenColumns={hiddenTagsColumns}
+          onColumnsChange={setHiddenTagsColumns}
+          onReset={resetTagsPreferences}
+        />
+      </Box>
+
       {/* Data Grid */}
       <div style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px` }}>
         <DataGrid
           rows={filteredTags}
           columns={columns}
-          loading={loading}
+          loading={tagsLoading}
           checkboxSelection
           onRowSelectionModelChange={setSelectedTags}
           rowSelectionModel={selectedTags}
+          columnVisibilityModel={getTagsColumnVisibilityModel()}
           initialState={{
             pagination: {
               paginationModel: { page: 0, pageSize: pageSize },
@@ -685,6 +718,18 @@ const Settings: React.FC = () => {
         {t('queues.description', 'View and manage expired/failed messages from the message queue.')}
       </Typography>
 
+      {/* Column Visibility Button */}
+      <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+        <ColumnVisibilityButton
+          columns={queueColumns
+            .filter(col => col.field !== 'actions')
+            .map(col => ({ field: col.field, headerName: col.headerName || col.field }))}
+          hiddenColumns={hiddenQueueColumns}
+          onColumnsChange={setHiddenQueueColumns}
+          onReset={resetQueuePreferences}
+        />
+      </Box>
+
       {/* Data Grid */}
       <div style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px` }}>
         <DataGrid
@@ -694,6 +739,7 @@ const Settings: React.FC = () => {
           checkboxSelection
           onRowSelectionModelChange={setSelectedMessages}
           rowSelectionModel={selectedMessages}
+          columnVisibilityModel={getQueueColumnVisibilityModel()}
           initialState={{
             pagination: {
               paginationModel: { page: 0, pageSize: pageSize },
@@ -989,6 +1035,7 @@ const Settings: React.FC = () => {
           <Tab label={t('queues.title', 'Queues')} />
           <Tab label={t('integrations.title', 'Integrations')} />
           <Tab label={t('ubuntuPro.title', 'Ubuntu Pro')} />
+          <Tab label={t('antivirus.title', 'Antivirus')} />
           <Tab label={t('availablePackages.title', 'Available Packages')} />
         </Tabs>
       </Box>
@@ -999,7 +1046,8 @@ const Settings: React.FC = () => {
         {activeTab === 1 && renderQueuesTab()}
         {activeTab === 2 && renderIntegrationsTab()}
         {activeTab === 3 && renderUbuntuProTab()}
-        {activeTab === 4 && renderAvailablePackagesTab()}
+        {activeTab === 4 && <AntivirusDefaultsSettings />}
+        {activeTab === 5 && renderAvailablePackagesTab()}
       </Box>
 
       {/* Add Tag Dialog */}

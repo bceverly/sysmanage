@@ -88,7 +88,11 @@
     "osUpgradeAvailable": "Actualización de SO disponible para este host",
     "securityAndSystemUpdates": "{{security}} seguridad, {{system}} actualizaciones del sistema",
     "securityUpdatesOnly": "{{count}} actualizaciones de seguridad",
-    "systemUpdatesOnly": "{{count}} actualizaciones del sistema"
+    "systemUpdatesOnly": "{{count}} actualizaciones del sistema",
+    "deployAntivirus": "Implementar antivirus",
+    "noEligibleHostsForAntivirus": "No se han seleccionado hosts elegibles. Los hosts deben estar activos y en modo privilegiado para la implementación de antivirus.",
+    "antivirusDeploySuccess": "Implementación de antivirus en cola para {{count}} host(s)",
+    "antivirusDeployFailed": "Error al implementar antivirus. Por favor, inténtelo de nuevo."
   },
   "users": {
     "title": "Gestión de Usuarios",
@@ -373,7 +377,10 @@
     "opentelemetryConnectSuccess": "OpenTelemetry conectado a Grafana correctamente",
     "opentelemetryDisconnectSuccess": "OpenTelemetry desconectado de Grafana correctamente",
     "opentelemetryRemoveSuccess": "Eliminación de OpenTelemetry en cola correctamente",
-    "opentelemetryOperationFailed": "Operación de OpenTelemetry falló"
+    "opentelemetryOperationFailed": "Operación de OpenTelemetry falló",
+    "deployAntivirus": "Implementar antivirus",
+    "antivirusDeploySuccess": "Implementación de antivirus iniciada exitosamente",
+    "antivirusDeployFailed": "Error al implementar antivirus"
   },
   "userDetail": {
     "invalidId": "ID de usuario inválido",
@@ -1117,5 +1124,51 @@
     "enableError": "Error al habilitar repositorios",
     "disableSuccess": "Repositorios deshabilitados exitosamente. La lista de paquetes se actualizará pronto.",
     "disableError": "Error al deshabilitar repositorios"
+  },
+  "antivirus": {
+    "title": "Antivirus",
+    "description": "Configurar software antivirus predeterminado para cada sistema operativo",
+    "none": "Ninguno",
+    "save": "Guardar",
+    "saveSuccess": "Configuraciones predeterminadas de antivirus guardadas exitosamente",
+    "permissionWarning": "No tiene permiso para modificar las configuraciones predeterminadas de antivirus. Contacte a su administrador para obtener el rol MANAGE_ANTIVIRUS_DEFAULTS.",
+    "errors": {
+      "loadFailed": "Error al cargar las configuraciones predeterminadas de antivirus",
+      "saveFailed": "Error al guardar las configuraciones predeterminadas de antivirus",
+      "permissionDenied": "No tiene permiso para administrar las configuraciones predeterminadas de antivirus"
+    },
+    "selectProgram": "Seleccionar programa antivirus"
+  },
+  "security": {
+    "antivirus": "Antivirus",
+    "antivirusError": "Error al cargar el estado del antivirus",
+    "noAntivirusDetected": "No se detectó software antivirus",
+    "software": "Software",
+    "version": "Versión",
+    "installPath": "Ruta de Instalación",
+    "status": "Estado",
+    "enabled": "Habilitado",
+    "disabled": "Deshabilitado",
+    "unknown": "Desconocido",
+    "lastUpdated": "Última Actualización",
+    "alreadyDeployed": "Antivirus ya implementado",
+    "alreadyEnabled": "Antivirus ya habilitado",
+    "alreadyDisabled": "Antivirus ya deshabilitado",
+    "notDeployed": "No hay antivirus implementado",
+    "enableAntivirus": "Habilitar Antivirus",
+    "disableAntivirus": "Deshabilitar Antivirus",
+    "removeAntivirus": "Eliminar Antivirus",
+    "antivirusEnableSuccess": "Habilitación de antivirus iniciada exitosamente",
+    "antivirusEnableFailed": "Error al habilitar antivirus",
+    "antivirusDisableSuccess": "Deshabilitación de antivirus iniciada exitosamente",
+    "antivirusDisableFailed": "Error al deshabilitar antivirus",
+    "antivirusRemoveSuccess": "Eliminación de antivirus iniciada exitosamente",
+    "antivirusRemoveFailed": "Error al eliminar antivirus"
+  },
+  "dataGrid": {
+    "columnVisibility": "Visibilidad de columnas",
+    "showAll": "Mostrar todo",
+    "hideAll": "Ocultar todo",
+    "reset": "Restablecer"
   }
 }

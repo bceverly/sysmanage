@@ -290,6 +290,41 @@ async def request_user_access_update(host_id: str):
         return {"result": True, "message": _("User access update requested")}
 
 
+@router.post("/host/{host_id}/request-system-info", dependencies=[Depends(JWTBearer())])
+async def request_system_info(host_id: str):
+    """
+    Request an agent to send updated system information.
+    This sends a GET_SYSTEM_INFO command via WebSocket to the agent requesting fresh system data
+    including hardware, network, storage, users, groups, software, Ubuntu Pro info, and antivirus status.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Find the host
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+
+        if not host:
+            raise HTTPException(status_code=404, detail=_("Host not found"))
+
+        validate_host_approval_status(host)
+
+        # Create command message for system info request
+        command_message = create_command_message(
+            command_type="get_system_info", parameters={}
+        )
+
+        # Send command to agent via WebSocket
+        success = await connection_manager.send_to_host(host_id, command_message)
+
+        if not success:
+            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+
+        return {"result": True, "message": _("System info update requested")}
+
+
 @router.get("/host/{host_id}/software", dependencies=[Depends(JWTBearer())])
 async def get_host_software(host_id: str):
     """

@@ -20,6 +20,8 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.api import (
     agent,
+    antivirus_defaults,
+    antivirus_status,
     auth,
     certificates,
     config_management,
@@ -45,6 +47,7 @@ from backend.api import (
     ubuntu_pro_settings,
     updates,
     user,
+    user_preferences,
 )
 from backend.config import config
 from backend.discovery.discovery_service import discovery_beacon
@@ -709,6 +712,12 @@ startup_logger.info("Adding profile router with /api prefix")
 app.include_router(profile.router, prefix="/api", tags=["profile"])
 startup_logger.info("Profile router added")
 
+startup_logger.info("Adding user preferences router with /api/user-preferences prefix")
+app.include_router(
+    user_preferences.router, prefix="/api/user-preferences", tags=["user-preferences"]
+)
+startup_logger.info("User preferences router added")
+
 startup_logger.info("Adding updates router with /api/updates prefix")
 app.include_router(updates.router, prefix="/api/updates", tags=["updates"])
 startup_logger.info("Updates router added")
@@ -734,6 +743,18 @@ app.include_router(
     ubuntu_pro_settings.router, prefix="/api/ubuntu-pro", tags=["ubuntu-pro"]
 )
 startup_logger.info("Ubuntu Pro settings router added")
+
+startup_logger.info(
+    "Adding antivirus defaults router with /api/antivirus-defaults prefix"
+)
+app.include_router(
+    antivirus_defaults.router, prefix="/api/antivirus-defaults", tags=["antivirus"]
+)
+startup_logger.info("Antivirus defaults router added")
+
+startup_logger.info("Adding antivirus status router with /api prefix")
+app.include_router(antivirus_status.router, prefix="/api", tags=["antivirus"])
+startup_logger.info("Antivirus status router added")
 
 startup_logger.info("Adding certificates auth router with /api prefix")
 app.include_router(

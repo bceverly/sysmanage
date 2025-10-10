@@ -1238,5 +1238,37 @@
     "enableError": "रिपॉजिटरी सक्षम करने में विफल",
     "disableSuccess": "रिपॉजिटरी सफलतापूर्वक अक्षम की गईं। पैकेज सूची शीघ्र अपडेट होगी।",
     "disableError": "रिपॉजिटरी अक्षम करने में विफल"
+  },
+  "security": {
+    "antivirus": "एंटीवायरस",
+    "antivirusError": "एंटीवायरस स्थिति लोड करने में विफल",
+    "noAntivirusDetected": "कोई एंटीवायरस सॉफ़्टवेयर का पता नहीं चला",
+    "software": "सॉफ़्टवेयर",
+    "version": "संस्करण",
+    "installPath": "इंस्टॉलेशन पथ",
+    "status": "स्थिति",
+    "enabled": "सक्षम",
+    "disabled": "अक्षम",
+    "unknown": "अज्ञात",
+    "lastUpdated": "अंतिम अपडेट",
+    "alreadyDeployed": "एंटीवायरस पहले से तैनात है",
+    "alreadyEnabled": "एंटीवायरस पहले से सक्षम है",
+    "alreadyDisabled": "एंटीवायरस पहले से अक्षम है",
+    "notDeployed": "कोई एंटीवायरस तैनात नहीं है",
+    "enableAntivirus": "एंटीवायरस सक्षम करें",
+    "disableAntivirus": "एंटीवायरस अक्षम करें",
+    "removeAntivirus": "एंटीवायरस हटाएं",
+    "antivirusEnableSuccess": "एंटीवायरस सक्षम करना सफलतापूर्वक शुरू किया गया",
+    "antivirusEnableFailed": "एंटीवायरस सक्षम करने में विफल",
+    "antivirusDisableSuccess": "एंटीवायरस अक्षम करना सफलतापूर्वक शुरू किया गया",
+    "antivirusDisableFailed": "एंटीवायरस अक्षम करने में विफल",
+    "antivirusRemoveSuccess": "एंटीवायरस हटाना सफलतापूर्वक शुरू किया गया",
+    "antivirusRemoveFailed": "एंटीवायरस हटाने में विफल"
+  },
+  "dataGrid": {
+    "columnVisibility": "कॉलम दृश्यता",
+    "showAll": "सभी दिखाएं",
+    "hideAll": "सभी छुपाएं",
+    "reset": "रीसेट करें"
   }
 }

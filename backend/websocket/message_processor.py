@@ -10,6 +10,7 @@ from typing import Any, Dict
 from sqlalchemy.orm import Session
 
 from backend.api.data_handlers import (
+    handle_antivirus_status_update,
     handle_hardware_update,
     handle_host_certificates_update,
     handle_host_role_data_update,
@@ -737,6 +738,18 @@ class MessageProcessor:
                 success = True
                 print(
                     "Successfully processed third-party repository update",
+                    flush=True,
+                )
+
+            elif message.message_type == MessageType.ANTIVIRUS_STATUS_UPDATE:
+                print(
+                    "About to call handle_antivirus_status_update",
+                    flush=True,
+                )
+                await handle_antivirus_status_update(db, mock_connection, message_data)
+                success = True
+                print(
+                    "Successfully processed antivirus status update",
                     flush=True,
                 )
 

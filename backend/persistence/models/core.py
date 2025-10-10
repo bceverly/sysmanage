@@ -17,7 +17,7 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import TypeDecorator
 
@@ -166,6 +166,9 @@ class Host(Base):
     software_packages = relationship("SoftwarePackage", back_populates="host")
     third_party_repositories = relationship(
         "ThirdPartyRepository", back_populates="host"
+    )
+    antivirus_status = relationship(
+        "AntivirusStatus", back_populates="host", uselist=False
     )
     user_accounts = relationship("UserAccount", back_populates="host")
     user_groups = relationship("UserGroup", back_populates="host")
@@ -403,3 +406,37 @@ class UserSecurityRole(Base):
 
     def __repr__(self):
         return f"<UserSecurityRole(user_id={self.user_id}, role_id={self.role_id})>"
+
+
+class UserDataGridColumnPreference(Base):
+    """
+    User preferences for DataGrid column visibility.
+    Stores which columns a user has hidden for each grid.
+    """
+
+    __tablename__ = "user_datagrid_column_preferences"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    user_id = Column(
+        GUID(), ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    grid_identifier = Column(
+        String(255), nullable=False, index=True
+    )  # e.g., "hosts-grid", "users-grid"
+    hidden_columns = Column(
+        JSON, nullable=False
+    )  # JSON array of hidden column field names
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        onupdate=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+
+    def __repr__(self):
+        return f"<UserDataGridColumnPreference(user_id={self.user_id}, grid_identifier='{self.grid_identifier}')>"

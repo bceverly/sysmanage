@@ -46,7 +46,9 @@ import {
   ExecuteScriptRequest
 } from '../Services/scripts';
 import { useTablePageSize } from '../hooks/useTablePageSize';
+import { useColumnVisibility } from '../Hooks/useColumnVisibility';
 import SearchBox from '../Components/SearchBox';
+import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import './css/Scripts.css';
 
@@ -81,7 +83,7 @@ const Scripts: React.FC = () => {
   const [filteredScripts, setFilteredScripts] = useState<Script[]>([]);
   const [hosts, setHosts] = useState<Host[]>([]);
   const [executions, setExecutions] = useState<ScriptExecution[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [executionsLoading, setExecutionsLoading] = useState(false);
   
   // Script editor state
@@ -117,7 +119,15 @@ const Scripts: React.FC = () => {
 
   // Table pagination
   const { pageSize, pageSizeOptions } = useTablePageSize();
-  
+
+  // Column visibility preferences
+  const {
+    hiddenColumns,
+    setHiddenColumns,
+    resetPreferences,
+    getColumnVisibilityModel,
+  } = useColumnVisibility('scripts-grid');
+
   // UI state
   const [notification, setNotification] = useState<{
     open: boolean;
@@ -228,10 +238,13 @@ const Scripts: React.FC = () => {
   // Load data
   const loadScripts = useCallback(async () => {
     try {
+      setLoading(true);
       const data = await scriptsService.getSavedScripts();
       setScripts(data);
     } catch {
       showNotification(t('scripts.loadError'), 'error');
+    } finally {
+      setLoading(false);
     }
   }, [t]);
 
@@ -1081,14 +1094,30 @@ const Scripts: React.FC = () => {
           placeholder={t('search.searchScripts', 'Search scripts')}
         />
 
+        {/* Column Visibility Button */}
+        <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+          <ColumnVisibilityButton
+            columns={columns
+              .filter(col => col.field !== 'actions')
+              .map(col => ({ field: col.field, headerName: col.headerName || col.field }))}
+            hiddenColumns={hiddenColumns}
+            onColumnsChange={setHiddenColumns}
+            onReset={resetPreferences}
+          />
+        </Box>
+
         <div style={{ height: 400 }}>
           <DataGrid
             rows={filteredScripts}
             columns={columns}
+            loading={loading}
             initialState={{
               pagination: {
                 paginationModel: { pageSize: pageSize, page: 0 },
               },
+            }}
+            columnVisibilityModel={{
+              ...getColumnVisibilityModel(),
             }}
             pageSizeOptions={pageSizeOptions}
             checkboxSelection
