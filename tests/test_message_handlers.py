@@ -363,7 +363,7 @@ class TestHandleCommandResult:
         assert "timestamp" in result
 
     @pytest.mark.asyncio
-    @patch("backend.api.data_handlers.handle_script_execution_result")
+    @patch("backend.api.handlers.handle_script_execution_result")
     @patch("backend.persistence.db.get_db")
     async def test_command_result_script_execution(
         self, mock_get_db, mock_script_handler

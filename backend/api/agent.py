@@ -19,7 +19,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 # pylint: disable=unused-import
-from backend.api.data_handlers import handle_os_version_update
+from backend.api.handlers import handle_os_version_update
 from backend.api.message_handlers import (
     handle_command_result,
     handle_config_acknowledgment,

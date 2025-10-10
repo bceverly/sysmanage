@@ -7,10 +7,12 @@ import pytest
 from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime, timezone
 
-from backend.api.data_handlers import (
+from backend.api.handlers import (
     is_new_os_version_combination,
     handle_os_version_update,
     handle_reboot_status_update,
+)
+from backend.api.handlers.user_access_handlers import (
     _create_user_account_with_security_id,
     _create_user_group_with_security_id,
 )
@@ -89,9 +91,9 @@ class TestBasicDataHandlers:
         with patch(
             "backend.utils.host_validation.validate_host_id"
         ) as mock_validate, patch(
-            "backend.api.data_handlers.is_new_os_version_combination"
+            "backend.api.handlers.is_new_os_version_combination"
         ) as mock_is_new, patch(
-            "backend.api.data_handlers.handle_ubuntu_pro_update"
+            "backend.api.handlers.handle_ubuntu_pro_update"
         ) as mock_ubuntu_pro:
 
             mock_validate.return_value = True

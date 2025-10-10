@@ -26,15 +26,21 @@ class TestReportsBasicFunctionality:
 
     def test_html_generation_functions_exist(self):
         """Test that HTML generation functions exist."""
-        from backend.api.reports import generate_hosts_html, generate_users_html
+        from backend.api.reports.html_generators import (
+            generate_hosts_html,
+            generate_users_html,
+        )
 
         assert callable(generate_hosts_html)
         assert callable(generate_users_html)
 
-    @patch("backend.api.reports._")
+    @patch("backend.api.reports.html_generators._")
     def test_basic_html_generation(self, mock_gettext):
         """Test basic HTML generation with minimal mocking."""
-        from backend.api.reports import generate_hosts_html, generate_users_html
+        from backend.api.reports.html_generators import (
+            generate_hosts_html,
+            generate_users_html,
+        )
 
         # Mock the translation function to return input
         mock_gettext.side_effect = lambda x: x
@@ -95,10 +101,11 @@ class TestReportsBasicFunctionality:
         response = authenticated_client.get("/api/reports/generate/invalid")
         assert response.status_code == 404
 
-    @patch("backend.api.reports.REPORTLAB_AVAILABLE", False)
+    @patch("backend.api.reports.endpoints.REPORTLAB_AVAILABLE", False)
+    @patch("backend.api.reports.pdf_generators.REPORTLAB_AVAILABLE", False)
     def test_pdf_without_reportlab(self, authenticated_client):
         """Test PDF generation without ReportLab."""
-        response = authenticated_client.get("/api/reports/generate/hosts")
+        response = authenticated_client.get("/api/reports/generate/registered-hosts")
         assert response.status_code == 500
         assert "PDF generation is not available" in response.json()["detail"]
 

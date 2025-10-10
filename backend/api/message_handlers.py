@@ -380,7 +380,7 @@ async def handle_command_result(connection, message_data: dict):
     if "execution_id" in message_data:
         debug_logger.info("Detected script execution result, routing to script handler")
         # Import here to avoid circular imports
-        from backend.api.data_handlers import handle_script_execution_result
+        from backend.api.handlers import handle_script_execution_result
         from backend.persistence.db import get_db
 
         # Get database session and route to script handler
@@ -412,7 +412,7 @@ async def handle_command_result(connection, message_data: dict):
             "Detected package collection result, routing to package handler"
         )
         # Import here to avoid circular imports
-        from backend.api.data_handlers import handle_package_collection
+        from backend.api.handlers import handle_package_collection
         from backend.persistence.db import get_db
 
         # For new message format, merge result data into message_data for backwards compatibility

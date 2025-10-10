@@ -26,7 +26,7 @@ class TestServerMessageQueueManager(unittest.TestCase):
         """Test queue manager initialization."""
         assert self.queue_manager is not None
 
-    @patch("backend.websocket.queue_manager.get_db")
+    @patch("backend.websocket.queue_operations.get_db")
     def test_enqueue_message_success(self, mock_get_db):
         """Test successful message enqueueing."""
         mock_db = Mock()
@@ -44,7 +44,7 @@ class TestServerMessageQueueManager(unittest.TestCase):
         mock_db.add.assert_called_once()
         mock_db.commit.assert_called_once()
 
-    @patch("backend.websocket.queue_manager.get_db")
+    @patch("backend.websocket.queue_operations.get_db")
     def test_mark_completed_success(self, mock_get_db):
         """Test marking message as completed."""
         mock_db = Mock()
@@ -62,7 +62,7 @@ class TestServerMessageQueueManager(unittest.TestCase):
         assert mock_message.status == QueueStatus.COMPLETED
         mock_db.commit.assert_called_once()
 
-    @patch("backend.websocket.queue_manager.get_db")
+    @patch("backend.websocket.queue_operations.get_db")
     def test_mark_failed_success(self, mock_get_db):
         """Test marking message as failed."""
         mock_db = Mock()
@@ -82,7 +82,7 @@ class TestServerMessageQueueManager(unittest.TestCase):
         assert mock_message.status == QueueStatus.FAILED
         mock_db.commit.assert_called_once()
 
-    @patch("backend.websocket.queue_manager.get_db")
+    @patch("backend.websocket.queue_operations.get_db")
     def test_mark_failed_with_retry(self, mock_get_db):
         """Test marking failed message for retry."""
         mock_db = Mock()
@@ -104,7 +104,7 @@ class TestServerMessageQueueManager(unittest.TestCase):
         assert mock_message.status == QueueStatus.PENDING
         mock_db.commit.assert_called_once()
 
-    @patch("backend.websocket.queue_manager.get_db")
+    @patch("backend.websocket.queue_stats.get_db")
     def test_get_queue_stats(self, mock_get_db):
         """Test getting queue statistics."""
         mock_db = Mock()

@@ -49,7 +49,7 @@ class TestServerMessageQueueManager:
         manager = ServerMessageQueueManager()
         assert manager is not None
 
-    @patch("backend.websocket.queue_manager.get_db")
+    @patch("backend.websocket.queue_operations.get_db")
     def test_enqueue_message_basic(self, mock_get_db):
         """Test basic message enqueuing."""
         mock_db = Mock()
@@ -69,7 +69,7 @@ class TestServerMessageQueueManager:
         mock_db.add.assert_called_once()
         mock_db.commit.assert_called_once()
 
-    @patch("backend.websocket.queue_manager.get_db")
+    @patch("backend.websocket.queue_operations.get_db")
     def test_enqueue_message_no_host_id(self, mock_get_db):
         """Test message enqueuing without host ID (broadcast)."""
         mock_db = Mock()
@@ -86,7 +86,7 @@ class TestServerMessageQueueManager:
         assert isinstance(message_id, str)
         mock_db.add.assert_called_once()
 
-    @patch("backend.websocket.queue_manager.get_db")
+    @patch("backend.websocket.queue_operations.get_db")
     def test_enqueue_message_invalid_host(self, mock_get_db):
         """Test message enqueuing with invalid host ID."""
         mock_db = Mock()
@@ -160,7 +160,7 @@ class TestQueueManagerIntegration:
         manager = ServerMessageQueueManager()
 
         # Test with enum values
-        with patch("backend.websocket.queue_manager.get_db") as mock_get_db:
+        with patch("backend.websocket.queue_operations.get_db") as mock_get_db:
             mock_db = Mock()
             mock_get_db.return_value = iter([mock_db])
             mock_db.query.return_value.filter.return_value.first.return_value = (

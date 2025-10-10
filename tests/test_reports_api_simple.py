@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from backend.api.reports import generate_hosts_html, generate_users_html
+from backend.api.reports.html_generators import generate_hosts_html, generate_users_html
 
 
 class TestHostsHTMLGeneration:
@@ -88,7 +88,7 @@ class TestUsersHTMLGeneration:
 class TestReportsInternationalization:
     """Test cases for Reports i18n functionality."""
 
-    @patch("backend.api.reports._")
+    @patch("backend.api.reports.html_generators._")
     def test_html_generation_uses_i18n(self, mock_gettext):
         """Test that HTML generation uses internationalization."""
         mock_gettext.side_effect = lambda x: f"TRANSLATED_{x}"
@@ -222,10 +222,11 @@ class TestReportsAPIEndpointsSimple:
         finally:
             app.router.lifespan_context = original_lifespan
 
-    @patch("backend.api.reports.REPORTLAB_AVAILABLE", False)
+    @patch("backend.api.reports.endpoints.REPORTLAB_AVAILABLE", False)
+    @patch("backend.api.reports.pdf_generators.REPORTLAB_AVAILABLE", False)
     def test_generate_pdf_without_reportlab(self, authenticated_client):
         """Test PDF generation when ReportLab is not available."""
-        response = authenticated_client.get("/api/reports/generate/hosts")
+        response = authenticated_client.get("/api/reports/generate/registered-hosts")
 
         assert response.status_code == 500
         assert "PDF generation is not available" in response.json()["detail"]
@@ -241,7 +242,7 @@ class TestReportsAPIEndpointsSimple:
 class TestReportsErrorHandling:
     """Test cases for Reports error handling."""
 
-    @patch("backend.api.reports.REPORTLAB_AVAILABLE", True)
+    @patch("backend.api.reports.pdf_generators.REPORTLAB_AVAILABLE", True)
     def test_database_error_handling(self, authenticated_client, session):
         """Test handling of database errors."""
         # Mock the session to raise an exception
