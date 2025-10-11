@@ -2,10 +2,18 @@
 HTML report generation functions
 """
 
+import html
 import json
 from datetime import datetime, timezone
 
 from backend.i18n import _
+
+
+def _escape(value) -> str:
+    """Escape HTML characters to prevent XSS attacks"""
+    if value is None:
+        return ""
+    return html.escape(str(value))
 
 
 def generate_hosts_html(hosts, report_type: str, report_title: str) -> str:
@@ -17,7 +25,7 @@ def generate_hosts_html(hosts, report_type: str, report_title: str) -> str:
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{report_title}</title>
+        <title>{_escape(report_title)}</title>
         <style>
             body {{
                 font-family: Arial, sans-serif;
@@ -74,12 +82,12 @@ def generate_hosts_html(hosts, report_type: str, report_title: str) -> str:
     </head>
     <body>
         <div class="header">
-            <h1>{report_title}</h1>
+            <h1>{_escape(report_title)}</h1>
         </div>
 
         <div class="metadata">
-            <p><strong>{_('Generated')}:</strong> {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
-            <p><strong>{_('Total Hosts')}:</strong> {len(hosts)}</p>
+            <p><strong>{_escape(_('Generated'))}:</strong> {_escape(datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC'))}</p>
+            <p><strong>{_escape(_('Total Hosts'))}:</strong> {_escape(len(hosts))}</p>
         </div>
     """
 
@@ -144,14 +152,14 @@ def generate_hosts_html(hosts, report_type: str, report_title: str) -> str:
 
                 html_content += f"""
                     <tr>
-                        <td>{hostname}</td>
-                        <td>{host.fqdn or _('N/A')}</td>
-                        <td>{ipv4}</td>
-                        <td>{ipv6}</td>
-                        <td>{os_name}</td>
-                        <td>{os_version}</td>
-                        <td>{host.status or _('unknown')}</td>
-                        <td>{last_seen}</td>
+                        <td>{_escape(hostname)}</td>
+                        <td>{_escape(host.fqdn or _('N/A'))}</td>
+                        <td>{_escape(ipv4)}</td>
+                        <td>{_escape(ipv6)}</td>
+                        <td>{_escape(os_name)}</td>
+                        <td>{_escape(os_version)}</td>
+                        <td>{_escape(host.status or _('unknown'))}</td>
+                        <td>{_escape(last_seen)}</td>
                     </tr>
                 """
         else:  # hosts-with-tags
@@ -186,11 +194,11 @@ def generate_hosts_html(hosts, report_type: str, report_title: str) -> str:
 
                 html_content += f"""
                     <tr>
-                        <td>{hostname}</td>
-                        <td>{host.fqdn or _('N/A')}</td>
-                        <td>{host.status or _('unknown')}</td>
-                        <td>{tags_str}</td>
-                        <td>{last_seen}</td>
+                        <td>{_escape(hostname)}</td>
+                        <td>{_escape(host.fqdn or _('N/A'))}</td>
+                        <td>{_escape(host.status or _('unknown'))}</td>
+                        <td>{_escape(tags_str)}</td>
+                        <td>{_escape(last_seen)}</td>
                     </tr>
                 """
 
@@ -216,7 +224,7 @@ def generate_users_html(users, report_title: str) -> str:
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{report_title}</title>
+        <title>{_escape(report_title)}</title>
         <style>
             body {{
                 font-family: Arial, sans-serif;
@@ -273,12 +281,12 @@ def generate_users_html(users, report_title: str) -> str:
     </head>
     <body>
         <div class="header">
-            <h1>{report_title}</h1>
+            <h1>{_escape(report_title)}</h1>
         </div>
 
         <div class="metadata">
-            <p><strong>{_('Generated')}:</strong> {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
-            <p><strong>{_('Total Users')}:</strong> {len(users)}</p>
+            <p><strong>{_escape(_('Generated'))}:</strong> {_escape(datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC'))}</p>
+            <p><strong>{_escape(_('Total Users'))}:</strong> {_escape(len(users))}</p>
         </div>
     """
 
@@ -326,12 +334,12 @@ def generate_users_html(users, report_title: str) -> str:
 
             html_content += f"""
                 <tr>
-                    <td>{user.userid or _('N/A')}</td>
-                    <td>{user.first_name or _('N/A')}</td>
-                    <td>{user.last_name or _('N/A')}</td>
-                    <td>{status}</td>
-                    <td>{last_access}</td>
-                    <td>{security_status}</td>
+                    <td>{_escape(user.userid or _('N/A'))}</td>
+                    <td>{_escape(user.first_name or _('N/A'))}</td>
+                    <td>{_escape(user.last_name or _('N/A'))}</td>
+                    <td>{_escape(status)}</td>
+                    <td>{_escape(last_access)}</td>
+                    <td>{_escape(security_status)}</td>
                 </tr>
             """
 

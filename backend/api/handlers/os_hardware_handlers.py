@@ -19,10 +19,15 @@ from backend.persistence.models import (
     UbuntuProInfo,
     UbuntuProService,
 )
+from backend.websocket.queue_operations import QueueOperations
+from backend.websocket.queue_enums import QueueDirection
 
 # Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")
 debug_logger.setLevel(logging.DEBUG)
+
+# Initialize queue operations
+queue_ops = QueueOperations()
 
 
 async def is_new_os_version_combination(
@@ -165,10 +170,7 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
                             os_version,
                         )
 
-                        # Import necessary modules for sending command
-                        from backend.websocket.connection_manager import (
-                            connection_manager,
-                        )
+                        # Import necessary module for creating command message
                         from backend.websocket.messages import create_command_message
 
                         # Create command message to collect packages
@@ -176,26 +178,24 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
                             command_type="collect_available_packages", parameters={}
                         )
 
-                        # Send command to this host
+                        # Enqueue command to this host
                         try:
-                            success = await connection_manager.send_to_host(
-                                host.id, command_message
+                            queue_ops.enqueue_message(
+                                message_type="command",
+                                message_data=command_message,
+                                direction=QueueDirection.OUTBOUND,
+                                host_id=host.id,
+                                db=db,
                             )
-                            if success:
-                                debug_logger.info(
-                                    "Automatic package collection command sent to host %s (%s %s)",
-                                    host.fqdn,
-                                    os_name,
-                                    os_version,
-                                )
-                            else:
-                                debug_logger.warning(
-                                    "Failed to send automatic package collection command to host %s - host may not be connected",
-                                    host.fqdn,
-                                )
+                            debug_logger.info(
+                                "Automatic package collection command queued for host %s (%s %s)",
+                                host.fqdn,
+                                os_name,
+                                os_version,
+                            )
                         except Exception as e:
                             debug_logger.error(
-                                "Error sending automatic package collection command to host %s: %s",
+                                "Error queueing automatic package collection command for host %s: %s",
                                 host.fqdn,
                                 str(e),
                             )

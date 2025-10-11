@@ -7,13 +7,19 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
+from backend.persistence import models
+from backend.persistence.db import get_db
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import CommandMessage, CommandType, MessageType
+from backend.websocket.queue_enums import QueueDirection
+from backend.websocket.queue_operations import QueueOperations
 
 router = APIRouter()
+queue_ops = QueueOperations()
 
 
 # Pydantic models for API requests
@@ -87,25 +93,31 @@ async def get_agent(hostname: str, _dependencies=Depends(JWTBearer())):
 
 @router.post("/fleet/agent/{hostname}/command")
 async def send_command_to_agent(
-    hostname: str, command: CommandRequest, _dependencies=Depends(JWTBearer())
+    hostname: str,
+    command: CommandRequest,
+    db: Session = Depends(get_db),
+    _dependencies=Depends(JWTBearer()),
 ):
     """Send a command to a specific agent by hostname."""
-    # Check if agent is connected
-    if not connection_manager.get_agent_by_hostname(hostname):
-        raise HTTPException(
-            status_code=404, detail=_("Agent %s is not connected") % hostname
-        )
+    # Look up host by hostname
+    host = db.query(models.Host).filter(models.Host.fqdn == hostname).first()
+    if not host:
+        raise HTTPException(status_code=404, detail=_("Host not found"))
 
     # Create and send command
     cmd_message = CommandMessage(
         command.command_type, command.parameters, command.timeout
     )
-    success = await connection_manager.send_to_hostname(hostname, cmd_message.to_dict())
 
-    if not success:
-        raise HTTPException(
-            status_code=500, detail=_("Failed to send command to %s") % hostname
-        )
+    queue_ops.enqueue_message(
+        message_type="command",
+        message_data=cmd_message.to_dict(),
+        direction=QueueDirection.OUTBOUND,
+        host_id=str(host.id),
+        db=db,
+    )
+    # Commit the session to persist the queued message
+    db.commit()
 
     return {
         "status": "sent",
@@ -118,13 +130,16 @@ async def send_command_to_agent(
 
 @router.post("/fleet/agent/{hostname}/shell")
 async def execute_shell_command(
-    hostname: str, shell_request: ShellCommandRequest, dependencies=Depends(JWTBearer())
+    hostname: str,
+    shell_request: ShellCommandRequest,
+    db: Session = Depends(get_db),
+    dependencies=Depends(JWTBearer()),
 ):
     """Execute a shell command on a specific agent."""
-    if not connection_manager.get_agent_by_hostname(hostname):
-        raise HTTPException(
-            status_code=404, detail=_("Agent %s is not connected") % hostname
-        )
+    # Look up host by hostname
+    host = db.query(models.Host).filter(models.Host.fqdn == hostname).first()
+    if not host:
+        raise HTTPException(status_code=404, detail=_("Host not found"))
 
     parameters = {
         "command": shell_request.command,
@@ -134,12 +149,16 @@ async def execute_shell_command(
     cmd_message = CommandMessage(
         CommandType.EXECUTE_SHELL, parameters, shell_request.timeout
     )
-    success = await connection_manager.send_to_hostname(hostname, cmd_message.to_dict())
 
-    if not success:
-        raise HTTPException(
-            status_code=500, detail=_("Failed to send shell command to %s") % hostname
-        )
+    queue_ops.enqueue_message(
+        message_type="command",
+        message_data=cmd_message.to_dict(),
+        direction=QueueDirection.OUTBOUND,
+        host_id=str(host.id),
+        db=db,
+    )
+    # Commit the session to persist the queued message
+    db.commit()
 
     return {
         "status": "sent",
@@ -151,13 +170,16 @@ async def execute_shell_command(
 
 @router.post("/fleet/agent/{hostname}/install-package")
 async def install_package(
-    hostname: str, package_request: PackageRequest, dependencies=Depends(JWTBearer())
+    hostname: str,
+    package_request: PackageRequest,
+    db: Session = Depends(get_db),
+    dependencies=Depends(JWTBearer()),
 ):
     """Install a package on a specific agent."""
-    if not connection_manager.get_agent_by_hostname(hostname):
-        raise HTTPException(
-            status_code=404, detail=_("Agent %s is not connected") % hostname
-        )
+    # Look up host by hostname
+    host = db.query(models.Host).filter(models.Host.fqdn == hostname).first()
+    if not host:
+        raise HTTPException(status_code=404, detail=_("Host not found"))
 
     parameters = {
         "package_name": package_request.package_name,
@@ -167,12 +189,16 @@ async def install_package(
     cmd_message = CommandMessage(
         CommandType.INSTALL_PACKAGE, parameters, package_request.timeout
     )
-    success = await connection_manager.send_to_hostname(hostname, cmd_message.to_dict())
 
-    if not success:
-        raise HTTPException(
-            status_code=500, detail=_("Failed to send install command to %s") % hostname
-        )
+    queue_ops.enqueue_message(
+        message_type="command",
+        message_data=cmd_message.to_dict(),
+        direction=QueueDirection.OUTBOUND,
+        host_id=str(host.id),
+        db=db,
+    )
+    # Commit the session to persist the queued message
+    db.commit()
 
     return {
         "status": "sent",
@@ -186,25 +212,32 @@ async def install_package(
 
 @router.post("/fleet/agent/{hostname}/restart-service")
 async def restart_service(
-    hostname: str, service_request: ServiceRequest, dependencies=Depends(JWTBearer())
+    hostname: str,
+    service_request: ServiceRequest,
+    db: Session = Depends(get_db),
+    dependencies=Depends(JWTBearer()),
 ):
     """Restart a service on a specific agent."""
-    if not connection_manager.get_agent_by_hostname(hostname):
-        raise HTTPException(
-            status_code=404, detail=_("Agent %s is not connected") % hostname
-        )
+    # Look up host by hostname
+    host = db.query(models.Host).filter(models.Host.fqdn == hostname).first()
+    if not host:
+        raise HTTPException(status_code=404, detail=_("Host not found"))
 
     parameters = {"service_name": service_request.service_name}
 
     cmd_message = CommandMessage(
         CommandType.RESTART_SERVICE, parameters, service_request.timeout
     )
-    success = await connection_manager.send_to_hostname(hostname, cmd_message.to_dict())
 
-    if not success:
-        raise HTTPException(
-            status_code=500, detail=_("Failed to send restart command to %s") % hostname
-        )
+    queue_ops.enqueue_message(
+        message_type="command",
+        message_data=cmd_message.to_dict(),
+        direction=QueueDirection.OUTBOUND,
+        host_id=str(host.id),
+        db=db,
+    )
+    # Commit the session to persist the queued message
+    db.commit()
 
     return {
         "status": "sent",
@@ -217,22 +250,28 @@ async def restart_service(
 
 
 @router.post("/fleet/agent/{hostname}/update-system")
-async def update_system(hostname: str, dependencies=Depends(JWTBearer())):
+async def update_system(
+    hostname: str, db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
+):
     """Trigger system updates on a specific agent."""
-    if not connection_manager.get_agent_by_hostname(hostname):
-        raise HTTPException(
-            status_code=404, detail=_("Agent %s is not connected") % hostname
-        )
+    # Look up host by hostname
+    host = db.query(models.Host).filter(models.Host.fqdn == hostname).first()
+    if not host:
+        raise HTTPException(status_code=404, detail=_("Host not found"))
 
     cmd_message = CommandMessage(
         CommandType.UPDATE_SYSTEM, {}, 1800
     )  # 30 minute timeout
-    success = await connection_manager.send_to_hostname(hostname, cmd_message.to_dict())
 
-    if not success:
-        raise HTTPException(
-            status_code=500, detail=_("Failed to send update command to %s") % hostname
-        )
+    queue_ops.enqueue_message(
+        message_type="command",
+        message_data=cmd_message.to_dict(),
+        direction=QueueDirection.OUTBOUND,
+        host_id=str(host.id),
+        db=db,
+    )
+    # Commit the session to persist the queued message
+    db.commit()
 
     return {
         "status": "sent",
@@ -244,22 +283,28 @@ async def update_system(hostname: str, dependencies=Depends(JWTBearer())):
 
 
 @router.post("/fleet/agent/{hostname}/reboot")
-async def reboot_system(hostname: str, dependencies=Depends(JWTBearer())):
+async def reboot_system(
+    hostname: str, db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
+):
     """Reboot a specific agent system."""
-    if not connection_manager.get_agent_by_hostname(hostname):
-        raise HTTPException(
-            status_code=404, detail=_("Agent %s is not connected") % hostname
-        )
+    # Look up host by hostname
+    host = db.query(models.Host).filter(models.Host.fqdn == hostname).first()
+    if not host:
+        raise HTTPException(status_code=404, detail=_("Host not found"))
 
     cmd_message = CommandMessage(
         CommandType.REBOOT_SYSTEM, {}, 60
     )  # Short timeout before reboot
-    success = await connection_manager.send_to_hostname(hostname, cmd_message.to_dict())
 
-    if not success:
-        raise HTTPException(
-            status_code=500, detail=_("Failed to send reboot command to %s") % hostname
-        )
+    queue_ops.enqueue_message(
+        message_type="command",
+        message_data=cmd_message.to_dict(),
+        direction=QueueDirection.OUTBOUND,
+        host_id=str(host.id),
+        db=db,
+    )
+    # Commit the session to persist the queued message
+    db.commit()
 
     return {
         "status": "sent",

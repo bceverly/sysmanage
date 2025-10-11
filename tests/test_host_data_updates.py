@@ -405,16 +405,16 @@ class TestRequestHardwareUpdate:
     @patch("backend.api.host_data_updates.db")
     @patch("backend.api.host_data_updates.validate_host_approval_status")
     @patch("backend.api.host_data_updates.create_command_message")
-    @patch("backend.api.host_data_updates.connection_manager")
+    @patch("backend.api.host_data_updates.queue_ops")
     async def test_request_hardware_update_success(
-        self, mock_conn_mgr, mock_create_msg, mock_validate, mock_db, mock_sessionmaker
+        self, mock_queue_ops, mock_create_msg, mock_validate, mock_db, mock_sessionmaker
     ):
         """Test successful hardware update request."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
         mock_create_msg.return_value = {"command": "update_hardware"}
-        mock_conn_mgr.send_to_host = AsyncMock(return_value=True)
+        mock_queue_ops.enqueue_message = Mock(return_value="test-message-id-123")
 
         result = await request_hardware_update(1)
 
@@ -424,9 +424,7 @@ class TestRequestHardwareUpdate:
         mock_create_msg.assert_called_once_with(
             command_type="update_hardware", parameters={}
         )
-        mock_conn_mgr.send_to_host.assert_called_once_with(
-            1, {"command": "update_hardware"}
-        )
+        mock_queue_ops.enqueue_message.assert_called_once()
 
     @pytest.mark.asyncio
     @patch("backend.api.host_data_updates.sessionmaker")
@@ -443,27 +441,6 @@ class TestRequestHardwareUpdate:
 
         assert exc_info.value.status_code == 404
 
-    @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
-    @patch("backend.api.host_data_updates.validate_host_approval_status")
-    @patch("backend.api.host_data_updates.create_command_message")
-    @patch("backend.api.host_data_updates.connection_manager")
-    async def test_request_hardware_update_agent_not_connected(
-        self, mock_conn_mgr, mock_create_msg, mock_validate, mock_db, mock_sessionmaker
-    ):
-        """Test hardware update request when agent is not connected."""
-        mock_host = MockHost()
-        mock_session = MockSession([mock_host])
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
-        mock_create_msg.return_value = {"command": "update_hardware"}
-        mock_conn_mgr.send_to_host = AsyncMock(return_value=False)
-
-        with pytest.raises(HTTPException) as exc_info:
-            await request_hardware_update(1)
-
-        assert exc_info.value.status_code == 503
-
 
 class TestRequestHardwareUpdateBulk:
     """Test request_hardware_update_bulk function."""
@@ -472,57 +449,22 @@ class TestRequestHardwareUpdateBulk:
     @patch("backend.api.host_data_updates.sessionmaker")
     @patch("backend.api.host_data_updates.db")
     @patch("backend.api.host_data_updates.create_command_message")
-    @patch("backend.api.host_data_updates.connection_manager")
+    @patch("backend.api.host_data_updates.queue_ops")
     async def test_request_hardware_update_bulk_success(
-        self, mock_conn_mgr, mock_create_msg, mock_db, mock_sessionmaker
+        self, mock_queue_ops, mock_create_msg, mock_db, mock_sessionmaker
     ):
         """Test successful bulk hardware update request."""
         mock_hosts = [MockHost(1), MockHost(2)]
         mock_session = MockSession(mock_hosts)
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
         mock_create_msg.return_value = {"command": "update_hardware"}
-        mock_conn_mgr.send_to_host = AsyncMock(return_value=True)
+        mock_queue_ops.enqueue_message = Mock(return_value="test-message-id-123")
 
         result = await request_hardware_update_bulk([1, 2])
 
         assert len(result["results"]) == 2
         assert all(r["success"] for r in result["results"])
-        assert mock_conn_mgr.send_to_host.call_count == 2
-
-    @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
-    @patch("backend.api.host_data_updates.create_command_message")
-    @patch("backend.api.host_data_updates.connection_manager")
-    async def test_request_hardware_update_bulk_agent_not_connected(
-        self, mock_conn_mgr, mock_create_msg, mock_db, mock_sessionmaker
-    ):
-        """Test bulk hardware update request when some agents are not connected."""
-        mock_hosts = [MockHost(1, "approved"), MockHost(2, "approved")]
-        mock_session = MockSession(mock_hosts)
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
-        mock_create_msg.return_value = {"command": "update_hardware"}
-
-        # First succeeds, second fails connection
-        def mock_send_to_host(host_id, message):
-            return host_id == 1
-
-        mock_conn_mgr.send_to_host = AsyncMock(side_effect=mock_send_to_host)
-
-        result = await request_hardware_update_bulk([1, 2])
-
-        results = result["results"]
-        assert len(results) == 2
-
-        # First should succeed
-        assert results[0]["success"] is True
-        assert results[0]["host_id"] == 1
-        assert "Hardware update requested" in results[0]["message"]
-
-        # Second should fail (agent not connected)
-        assert results[1]["success"] is False
-        assert results[1]["host_id"] == 2
-        assert results[1]["error"] == "Agent is not connected"
+        assert mock_queue_ops.enqueue_message.call_count == 2
 
     @pytest.mark.asyncio
     @patch("backend.api.host_data_updates.sessionmaker")
@@ -602,16 +544,16 @@ class TestRequestUserAccessUpdate:
     @patch("backend.api.host_data_updates.db")
     @patch("backend.api.host_data_updates.validate_host_approval_status")
     @patch("backend.api.host_data_updates.create_command_message")
-    @patch("backend.api.host_data_updates.connection_manager")
+    @patch("backend.api.host_data_updates.queue_ops")
     async def test_request_user_access_update_success(
-        self, mock_conn_mgr, mock_create_msg, mock_validate, mock_db, mock_sessionmaker
+        self, mock_queue_ops, mock_create_msg, mock_validate, mock_db, mock_sessionmaker
     ):
         """Test successful user access update request."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
         mock_create_msg.return_value = {"command": "update_user_access"}
-        mock_conn_mgr.send_to_host = AsyncMock(return_value=True)
+        mock_queue_ops.enqueue_message = Mock(return_value="test-message-id-123")
 
         result = await request_user_access_update(1)
 
@@ -621,9 +563,7 @@ class TestRequestUserAccessUpdate:
         mock_create_msg.assert_called_once_with(
             command_type="update_user_access", parameters={}
         )
-        mock_conn_mgr.send_to_host.assert_called_once_with(
-            1, {"command": "update_user_access"}
-        )
+        mock_queue_ops.enqueue_message.assert_called_once()
 
     @pytest.mark.asyncio
     @patch("backend.api.host_data_updates.sessionmaker")
@@ -639,27 +579,6 @@ class TestRequestUserAccessUpdate:
             await request_user_access_update(999)
 
         assert exc_info.value.status_code == 404
-
-    @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
-    @patch("backend.api.host_data_updates.validate_host_approval_status")
-    @patch("backend.api.host_data_updates.create_command_message")
-    @patch("backend.api.host_data_updates.connection_manager")
-    async def test_request_user_access_update_agent_not_connected(
-        self, mock_conn_mgr, mock_create_msg, mock_validate, mock_db, mock_sessionmaker
-    ):
-        """Test user access update request when agent not connected."""
-        mock_host = MockHost()
-        mock_session = MockSession([mock_host])
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
-        mock_create_msg.return_value = {"command": "update_user_access"}
-        mock_conn_mgr.send_to_host = AsyncMock(return_value=False)
-
-        with pytest.raises(HTTPException) as exc_info:
-            await request_user_access_update(1)
-
-        assert exc_info.value.status_code == 503
 
 
 class TestGetHostSoftware:

@@ -19,10 +19,13 @@ from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import CommandType, Message, MessageType
+from backend.websocket.queue_operations import QueueOperations
+from backend.websocket.queue_enums import QueueDirection
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+queue_ops = QueueOperations()
 
 
 class AntivirusStatusResponse(BaseModel):
@@ -235,19 +238,13 @@ async def deploy_antivirus(
                 )
 
                 # Send command to agent via WebSocket/queue
-                success = await connection_manager.send_to_host(
-                    str(host_id), command_message.to_dict()
+                queue_ops.enqueue_message(
+                    message_type="command",
+                    message_data=command_message.to_dict(),
+                    direction=QueueDirection.OUTBOUND,
+                    host_id=str(host_id),
+                    db=session,
                 )
-
-                if not success:
-                    failed_hosts.append(
-                        {
-                            "host_id": host_id_str,
-                            "hostname": host.fqdn,
-                            "reason": _("Agent is not connected"),
-                        }
-                    )
-                    continue
 
                 success_count += 1
                 logger.info(
@@ -262,6 +259,10 @@ async def deploy_antivirus(
             failed_hosts.append(
                 {"host_id": host_id_str, "hostname": "Unknown", "reason": str(e)}
             )
+
+    # Commit the session to persist all queued messages
+    with session_local() as session:
+        session.commit()
 
     # Generate response message
     if success_count == len(deploy_request.host_ids):
@@ -319,9 +320,15 @@ async def enable_antivirus(
         },
     )
 
-    success = await connection_manager.send_to_host(host.id, message.to_dict())
-    if not success:
-        raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+    queue_ops.enqueue_message(
+        message_type="command",
+        message_data=message.to_dict(),
+        direction=QueueDirection.OUTBOUND,
+        host_id=str(host.id),
+        db=db,
+    )
+    # Commit the session to persist the queued message
+    db.commit()
 
     logger.info("Antivirus enable command sent to host %s", host.fqdn)
     return {"message": _("Antivirus enable command sent successfully")}
@@ -367,9 +374,15 @@ async def disable_antivirus(
         },
     )
 
-    success = await connection_manager.send_to_host(host.id, message.to_dict())
-    if not success:
-        raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+    queue_ops.enqueue_message(
+        message_type="command",
+        message_data=message.to_dict(),
+        direction=QueueDirection.OUTBOUND,
+        host_id=str(host.id),
+        db=db,
+    )
+    # Commit the session to persist the queued message
+    db.commit()
 
     logger.info("Antivirus disable command sent to host %s", host.fqdn)
     return {"message": _("Antivirus disable command sent successfully")}
@@ -425,9 +438,15 @@ async def remove_antivirus(
             },
         )
 
-        success = await connection_manager.send_to_host(host.id, message.to_dict())
-        if not success:
-            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=message.to_dict(),
+            direction=QueueDirection.OUTBOUND,
+            host_id=str(host.id),
+            db=db,
+        )
+        # Commit the session to persist the queued message
+        db.commit()
 
         logger.info("Antivirus remove command sent to host %s", host.fqdn)
         return {"message": _("Antivirus remove command sent successfully")}
@@ -437,4 +456,82 @@ async def remove_antivirus(
         logger.exception("Unexpected error in remove_antivirus: %s", e)
         raise HTTPException(
             status_code=500, detail=f"Internal server error: {str(e)}"
+        ) from e
+
+
+class AntivirusCoverageResponse(BaseModel):
+    """Response model for antivirus coverage statistics."""
+
+    total_hosts: int
+    hosts_with_antivirus: int
+    hosts_without_antivirus: int
+    coverage_percentage: float
+
+
+@router.get(
+    "/antivirus-coverage",
+    response_model=AntivirusCoverageResponse,
+    dependencies=[Depends(JWTBearer())],
+)
+async def get_antivirus_coverage(db: Session = Depends(get_db)):
+    """Get antivirus coverage statistics across all registered hosts."""
+    try:
+        # Get all registered hosts
+        all_hosts = db.query(models.Host).all()
+        total_hosts = len(all_hosts)
+
+        if total_hosts == 0:
+            return AntivirusCoverageResponse(
+                total_hosts=0,
+                hosts_with_antivirus=0,
+                hosts_without_antivirus=0,
+                coverage_percentage=0.0,
+            )
+
+        # Count hosts with antivirus (either open-source OR commercial)
+        hosts_with_antivirus = 0
+
+        for host in all_hosts:
+            has_opensource = False
+            has_commercial = False
+
+            # Check for open-source antivirus
+            opensource_status = (
+                db.query(models.AntivirusStatus)
+                .filter(models.AntivirusStatus.host_id == host.id)
+                .first()
+            )
+            if opensource_status and opensource_status.enabled:
+                has_opensource = True
+
+            # Check for commercial antivirus
+            commercial_status = (
+                db.query(models.CommercialAntivirusStatus)
+                .filter(models.CommercialAntivirusStatus.host_id == host.id)
+                .first()
+            )
+            if commercial_status and commercial_status.antivirus_enabled:
+                has_commercial = True
+
+            # Host has antivirus if either is installed and enabled
+            if has_opensource or has_commercial:
+                hosts_with_antivirus += 1
+
+        hosts_without_antivirus = total_hosts - hosts_with_antivirus
+        coverage_percentage = (
+            (hosts_with_antivirus / total_hosts * 100) if total_hosts > 0 else 0.0
+        )
+
+        return AntivirusCoverageResponse(
+            total_hosts=total_hosts,
+            hosts_with_antivirus=hosts_with_antivirus,
+            hosts_without_antivirus=hosts_without_antivirus,
+            coverage_percentage=round(coverage_percentage, 2),
+        )
+
+    except Exception as e:
+        logger.error("Error getting antivirus coverage statistics: %s", e)
+        raise HTTPException(
+            status_code=500,
+            detail=_("Failed to retrieve antivirus coverage: %s") % str(e),
         ) from e

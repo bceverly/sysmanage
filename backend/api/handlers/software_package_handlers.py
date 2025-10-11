@@ -13,6 +13,7 @@ from backend.i18n import _
 from backend.persistence.models import (
     AntivirusStatus,
     AvailablePackage,
+    CommercialAntivirusStatus,
     Host,
     PackageUpdate,
     SoftwarePackage,
@@ -494,4 +495,123 @@ async def handle_antivirus_status_update(db: Session, connection, message_data: 
         return {
             "message_type": "error",
             "error": f"Failed to process antivirus status update: {str(e)}",
+        }
+
+
+async def handle_commercial_antivirus_status_update(
+    db: Session, connection, message_data: dict
+):
+    """Handle commercial antivirus status update message from agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
+
+    if not hasattr(connection, "host_id") or not connection.host_id:
+        return {"message_type": "error", "error": _("Host not registered")}
+
+    try:
+        # Extract commercial antivirus status information
+        product_name = message_data.get("product_name")
+        product_version = message_data.get("product_version")
+        service_enabled = message_data.get("service_enabled")
+        antispyware_enabled = message_data.get("antispyware_enabled")
+        antivirus_enabled = message_data.get("antivirus_enabled")
+        realtime_protection_enabled = message_data.get("realtime_protection_enabled")
+        full_scan_age = message_data.get("full_scan_age")
+        quick_scan_age = message_data.get("quick_scan_age")
+        full_scan_end_time = message_data.get("full_scan_end_time")
+        quick_scan_end_time = message_data.get("quick_scan_end_time")
+        signature_last_updated = message_data.get("signature_last_updated")
+        signature_version = message_data.get("signature_version")
+        tamper_protection_enabled = message_data.get("tamper_protection_enabled")
+
+        debug_logger.info(
+            "Processing commercial antivirus status update from %s: product=%s, enabled=%s",
+            getattr(connection, "hostname", "unknown"),
+            product_name,
+            antivirus_enabled,
+        )
+
+        # Parse datetime strings if provided
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+        if full_scan_end_time:
+            try:
+                full_scan_end_time = datetime.fromisoformat(full_scan_end_time).replace(
+                    tzinfo=None
+                )
+            except (ValueError, AttributeError):
+                full_scan_end_time = None
+
+        if quick_scan_end_time:
+            try:
+                quick_scan_end_time = datetime.fromisoformat(
+                    quick_scan_end_time
+                ).replace(tzinfo=None)
+            except (ValueError, AttributeError):
+                quick_scan_end_time = None
+
+        if signature_last_updated:
+            try:
+                signature_last_updated = datetime.fromisoformat(
+                    signature_last_updated
+                ).replace(tzinfo=None)
+            except (ValueError, AttributeError):
+                signature_last_updated = None
+
+        # Delete existing commercial antivirus status for this host (if any)
+        db.execute(
+            delete(CommercialAntivirusStatus).where(
+                CommercialAntivirusStatus.host_id == connection.host_id
+            )
+        )
+
+        # Add new commercial antivirus status (only if product is detected)
+        if product_name:
+            commercial_antivirus_status = CommercialAntivirusStatus(
+                host_id=connection.host_id,
+                product_name=product_name,
+                product_version=product_version,
+                service_enabled=service_enabled,
+                antispyware_enabled=antispyware_enabled,
+                antivirus_enabled=antivirus_enabled,
+                realtime_protection_enabled=realtime_protection_enabled,
+                full_scan_age=full_scan_age,
+                quick_scan_age=quick_scan_age,
+                full_scan_end_time=full_scan_end_time,
+                quick_scan_end_time=quick_scan_end_time,
+                signature_last_updated=signature_last_updated,
+                signature_version=signature_version,
+                tamper_protection_enabled=tamper_protection_enabled,
+                created_at=now,
+                last_updated=now,
+            )
+            db.add(commercial_antivirus_status)
+
+        db.commit()
+
+        debug_logger.info(
+            "Successfully stored commercial antivirus status for host %s",
+            getattr(connection, "hostname", "unknown"),
+        )
+
+        return {
+            "message_type": "commercial_antivirus_status_update_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "status": "processed",
+        }
+
+    except Exception as e:
+        debug_logger.error(
+            "Error processing commercial antivirus status update from %s: %s",
+            getattr(connection, "hostname", "unknown"),
+            e,
+        )
+        db.rollback()
+        return {
+            "message_type": "error",
+            "error": f"Failed to process commercial antivirus status update: {str(e)}",
         }

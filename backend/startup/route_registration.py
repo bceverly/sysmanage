@@ -13,6 +13,7 @@ from backend.api import (
     antivirus_status,
     auth,
     certificates,
+    commercial_antivirus_status,
     config_management,
     diagnostics,
     email,
@@ -155,6 +156,12 @@ def register_routes(app: FastAPI):
     logger.info("Adding antivirus status router with /api prefix")
     app.include_router(antivirus_status.router, prefix="/api", tags=["antivirus"])
     logger.info("Antivirus status router added")
+
+    logger.info("Adding commercial antivirus status router with /api prefix")
+    app.include_router(
+        commercial_antivirus_status.router, prefix="/api", tags=["commercial-antivirus"]
+    )
+    logger.info("Commercial antivirus status router added")
 
     logger.info("Adding certificates auth router with /api prefix")
     app.include_router(

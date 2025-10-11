@@ -152,16 +152,24 @@ class TestGetAgent:
 class TestSendCommand:
     """Test cases for POST /fleet/agent/{hostname}/command endpoint."""
 
-    @patch("backend.api.fleet.connection_manager")
-    def test_send_command_success(self, mock_connection_manager, client, auth_headers):
+    @patch("backend.api.fleet.queue_ops")
+    def test_send_command_success(self, mock_queue_ops, client, auth_headers, session):
         """Test successfully sending command to agent."""
-        # Mock agent exists
-        mock_connection_manager.get_agent_by_hostname.return_value = {
-            "hostname": "test.example.com"
-        }
+        from backend.persistence.models import Host
+        import uuid
 
-        # Mock successful command send
-        mock_connection_manager.send_to_hostname = AsyncMock(return_value=True)
+        # Create host in database
+        host = Host(
+            id=uuid.uuid4(),
+            fqdn="test.example.com",
+            active=True,
+            platform="Linux",
+        )
+        session.add(host)
+        session.commit()
+
+        # Mock queue operations
+        mock_queue_ops.enqueue_message = Mock()
 
         command_data = {
             "command_type": "get_system_info",
@@ -185,13 +193,11 @@ class TestSendCommand:
             == "Command CommandType.GET_SYSTEM_INFO sent to test.example.com"
         )
 
-    @patch("backend.api.fleet.connection_manager")
-    def test_send_command_agent_not_connected(
-        self, mock_connection_manager, client, auth_headers
-    ):
-        """Test sending command to disconnected agent."""
-        mock_connection_manager.get_agent_by_hostname.return_value = None
+        # Verify enqueue_message was called
+        mock_queue_ops.enqueue_message.assert_called_once()
 
+    def test_send_command_host_not_found(self, client, auth_headers):
+        """Test sending command to non-existent host."""
         command_data = {
             "command_type": "get_system_info",
             "parameters": {},
@@ -206,36 +212,7 @@ class TestSendCommand:
 
         assert response.status_code == 404
         data = response.json()
-        assert "is not connected" in data["detail"]
-
-    @patch("backend.api.fleet.connection_manager")
-    def test_send_command_send_failed(
-        self, mock_connection_manager, client, auth_headers
-    ):
-        """Test command send failure."""
-        # Mock agent exists
-        mock_connection_manager.get_agent_by_hostname.return_value = {
-            "hostname": "test.example.com"
-        }
-
-        # Mock failed command send
-        mock_connection_manager.send_to_hostname = AsyncMock(return_value=False)
-
-        command_data = {
-            "command_type": "get_system_info",
-            "parameters": {},
-            "timeout": 300,
-        }
-
-        response = client.post(
-            "/api/fleet/agent/test.example.com/command",
-            json=command_data,
-            headers=auth_headers,
-        )
-
-        assert response.status_code == 500
-        data = response.json()
-        assert "Failed to send command" in data["detail"]
+        assert "Host not found" in data["detail"]
 
     def test_send_command_invalid_type(self, client, auth_headers):
         """Test sending command with invalid command type."""
@@ -280,16 +257,26 @@ class TestSendCommand:
 class TestShellCommand:
     """Test cases for POST /fleet/agent/{hostname}/shell endpoint."""
 
-    @patch("backend.api.fleet.connection_manager")
+    @patch("backend.api.fleet.queue_ops")
     def test_send_shell_command_success(
-        self, mock_connection_manager, client, auth_headers
+        self, mock_queue_ops, client, auth_headers, session
     ):
         """Test successfully sending shell command to agent."""
-        # Mock agent exists
-        mock_connection_manager.get_agent_by_hostname.return_value = {
-            "hostname": "test.example.com"
-        }
-        mock_connection_manager.send_to_hostname = AsyncMock(return_value=True)
+        from backend.persistence.models import Host
+        import uuid
+
+        # Create host in database
+        host = Host(
+            id=uuid.uuid4(),
+            fqdn="test.example.com",
+            active=True,
+            platform="Linux",
+        )
+        session.add(host)
+        session.commit()
+
+        # Mock queue operations
+        mock_queue_ops.enqueue_message = Mock()
 
         shell_data = {"command": "ls -la", "timeout": 60, "working_directory": "/tmp"}
 
@@ -306,13 +293,11 @@ class TestShellCommand:
         # Use exact matching for security - check specific message format
         assert data["message"] == "Shell command sent to test.example.com"
 
-    @patch("backend.api.fleet.connection_manager")
-    def test_send_shell_command_agent_not_found(
-        self, mock_connection_manager, client, auth_headers
-    ):
-        """Test sending shell command to non-existent agent."""
-        mock_connection_manager.get_agent_by_hostname.return_value = None
+        # Verify enqueue_message was called
+        mock_queue_ops.enqueue_message.assert_called_once()
 
+    def test_send_shell_command_host_not_found(self, client, auth_headers):
+        """Test sending shell command to non-existent host."""
         shell_data = {"command": "ls -la", "timeout": 60}
 
         response = client.post(
@@ -323,7 +308,7 @@ class TestShellCommand:
 
         assert response.status_code == 404
         data = response.json()
-        assert "is not connected" in data["detail"]
+        assert "Host not found" in data["detail"]
 
     def test_send_shell_command_missing_command(self, client, auth_headers):
         """Test sending shell command without command field."""
@@ -347,15 +332,26 @@ class TestShellCommand:
 class TestPackageManagement:
     """Test cases for package management endpoints."""
 
-    @patch("backend.api.fleet.connection_manager")
+    @patch("backend.api.fleet.queue_ops")
     def test_install_package_success(
-        self, mock_connection_manager, client, auth_headers
+        self, mock_queue_ops, client, auth_headers, session
     ):
         """Test successfully sending package install command."""
-        mock_connection_manager.get_agent_by_hostname.return_value = {
-            "hostname": "test.example.com"
-        }
-        mock_connection_manager.send_to_hostname = AsyncMock(return_value=True)
+        from backend.persistence.models import Host
+        import uuid
+
+        # Create host in database
+        host = Host(
+            id=uuid.uuid4(),
+            fqdn="test.example.com",
+            active=True,
+            platform="Linux",
+        )
+        session.add(host)
+        session.commit()
+
+        # Mock queue operations
+        mock_queue_ops.enqueue_message = Mock()
 
         package_data = {"package_name": "nginx", "version": "1.18.0", "timeout": 600}
 
@@ -374,6 +370,9 @@ class TestPackageManagement:
             data["message"] == "Package installation command sent to test.example.com"
         )
 
+        # Verify enqueue_message was called
+        mock_queue_ops.enqueue_message.assert_called_once()
+
     def test_install_package_missing_name(self, client, auth_headers):
         """Test installing package without package name."""
         response = client.post(
@@ -387,15 +386,26 @@ class TestPackageManagement:
 class TestServiceManagement:
     """Test cases for service management endpoints."""
 
-    @patch("backend.api.fleet.connection_manager")
+    @patch("backend.api.fleet.queue_ops")
     def test_restart_service_success(
-        self, mock_connection_manager, client, auth_headers
+        self, mock_queue_ops, client, auth_headers, session
     ):
         """Test successfully sending service restart command."""
-        mock_connection_manager.get_agent_by_hostname.return_value = {
-            "hostname": "test.example.com"
-        }
-        mock_connection_manager.send_to_hostname = AsyncMock(return_value=True)
+        from backend.persistence.models import Host
+        import uuid
+
+        # Create host in database
+        host = Host(
+            id=uuid.uuid4(),
+            fqdn="test.example.com",
+            active=True,
+            platform="Linux",
+        )
+        session.add(host)
+        session.commit()
+
+        # Mock queue operations
+        mock_queue_ops.enqueue_message = Mock()
 
         service_data = {"service_name": "apache2", "timeout": 120}
 
@@ -411,6 +421,9 @@ class TestServiceManagement:
         # Use exact matching for security - check specific message format
         assert data["message"] == "Service restart command sent to test.example.com"
 
+        # Verify enqueue_message was called
+        mock_queue_ops.enqueue_message.assert_called_once()
+
     def test_restart_service_missing_name(self, client, auth_headers):
         """Test restarting service without service name."""
         response = client.post(
@@ -424,13 +437,24 @@ class TestServiceManagement:
 class TestSystemCommands:
     """Test cases for system-level commands."""
 
-    @patch("backend.api.fleet.connection_manager")
-    def test_update_system_success(self, mock_connection_manager, client, auth_headers):
+    @patch("backend.api.fleet.queue_ops")
+    def test_update_system_success(self, mock_queue_ops, client, auth_headers, session):
         """Test successfully sending system update command."""
-        mock_connection_manager.get_agent_by_hostname.return_value = {
-            "hostname": "test.example.com"
-        }
-        mock_connection_manager.send_to_hostname = AsyncMock(return_value=True)
+        from backend.persistence.models import Host
+        import uuid
+
+        # Create host in database
+        host = Host(
+            id=uuid.uuid4(),
+            fqdn="test.example.com",
+            active=True,
+            platform="Linux",
+        )
+        session.add(host)
+        session.commit()
+
+        # Mock queue operations
+        mock_queue_ops.enqueue_message = Mock()
 
         response = client.post(
             "/api/fleet/agent/test.example.com/update-system",
@@ -444,13 +468,27 @@ class TestSystemCommands:
         # Use exact matching for security - check specific message format
         assert data["message"] == "System update command sent to test.example.com"
 
-    @patch("backend.api.fleet.connection_manager")
-    def test_reboot_system_success(self, mock_connection_manager, client, auth_headers):
+        # Verify enqueue_message was called
+        mock_queue_ops.enqueue_message.assert_called_once()
+
+    @patch("backend.api.fleet.queue_ops")
+    def test_reboot_system_success(self, mock_queue_ops, client, auth_headers, session):
         """Test successfully sending system reboot command."""
-        mock_connection_manager.get_agent_by_hostname.return_value = {
-            "hostname": "test.example.com"
-        }
-        mock_connection_manager.send_to_hostname = AsyncMock(return_value=True)
+        from backend.persistence.models import Host
+        import uuid
+
+        # Create host in database
+        host = Host(
+            id=uuid.uuid4(),
+            fqdn="test.example.com",
+            active=True,
+            platform="Linux",
+        )
+        session.add(host)
+        session.commit()
+
+        # Mock queue operations
+        mock_queue_ops.enqueue_message = Mock()
 
         response = client.post(
             "/api/fleet/agent/test.example.com/reboot", json={}, headers=auth_headers
@@ -461,6 +499,9 @@ class TestSystemCommands:
         assert data["status"] == "sent"
         # Use exact matching for security - check specific message format
         assert data["message"] == "Reboot command sent to test.example.com"
+
+        # Verify enqueue_message was called
+        mock_queue_ops.enqueue_message.assert_called_once()
 
 
 class TestBroadcastCommand:

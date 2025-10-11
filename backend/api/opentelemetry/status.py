@@ -12,7 +12,7 @@ from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
 
-from .models import OpenTelemetryStatusResponse
+from .models import OpenTelemetryStatusResponse, OpenTelemetryCoverageResponse
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -108,4 +108,79 @@ async def get_opentelemetry_status(
         raise HTTPException(
             status_code=500,
             detail=_("Failed to get OpenTelemetry status: %s") % str(e),
+        ) from e
+
+
+@router.get(
+    "/opentelemetry-coverage",
+    response_model=OpenTelemetryCoverageResponse,
+    dependencies=[Depends(JWTBearer())],
+)
+async def get_opentelemetry_coverage(db: Session = Depends(get_db)):
+    """
+    Get OpenTelemetry coverage statistics across all registered hosts.
+
+    Returns:
+        OpenTelemetryCoverageResponse with coverage statistics
+    """
+    try:
+        # Get all registered hosts
+        all_hosts = db.query(models.Host).all()
+        total_hosts = len(all_hosts)
+
+        if total_hosts == 0:
+            return OpenTelemetryCoverageResponse(
+                total_hosts=0,
+                hosts_with_opentelemetry=0,
+                hosts_without_opentelemetry=0,
+                coverage_percentage=0.0,
+            )
+
+        # Count hosts with OpenTelemetry deployed AND running
+        hosts_with_opentelemetry = 0
+
+        for host in all_hosts:
+            # Check if OpenTelemetry is installed
+            opentelemetry_installed = (
+                db.query(models.SoftwarePackage)
+                .filter(
+                    models.SoftwarePackage.host_id == host.id,
+                    models.SoftwarePackage.package_name.ilike("%otel%")
+                    | models.SoftwarePackage.package_name.ilike("%opentelemetry%"),
+                )
+                .first()
+            ) is not None
+
+            if opentelemetry_installed:
+                # Check if service is running
+                otel_role = (
+                    db.query(models.HostRole)
+                    .filter(
+                        models.HostRole.host_id == host.id,
+                        models.HostRole.package_name.ilike("%otelcol%"),
+                    )
+                    .first()
+                )
+
+                # Count as deployed if installed and running
+                if otel_role and otel_role.service_status == "running":
+                    hosts_with_opentelemetry += 1
+
+        hosts_without_opentelemetry = total_hosts - hosts_with_opentelemetry
+        coverage_percentage = (
+            (hosts_with_opentelemetry / total_hosts * 100) if total_hosts > 0 else 0.0
+        )
+
+        return OpenTelemetryCoverageResponse(
+            total_hosts=total_hosts,
+            hosts_with_opentelemetry=hosts_with_opentelemetry,
+            hosts_without_opentelemetry=hosts_without_opentelemetry,
+            coverage_percentage=round(coverage_percentage, 2),
+        )
+
+    except Exception as e:
+        logger.error("Error getting OpenTelemetry coverage statistics: %s", e)
+        raise HTTPException(
+            status_code=500,
+            detail=_("Failed to retrieve OpenTelemetry coverage: %s") % str(e),
         ) from e

@@ -25,7 +25,6 @@ from backend.persistence.models import (
     InstallationRequest,
 )
 from backend.security.roles import SecurityRoles
-from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
     Priority,
@@ -388,16 +387,15 @@ async def refresh_packages_for_os_version(
             command_type="collect_available_packages", parameters={}
         )
 
-        # Send command to the selected host
-        success = await connection_manager.send_to_host(
-            selected_host.id, command_message
+        # Queue the command to the selected host
+        server_queue_manager.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=selected_host.id,
+            priority=Priority.NORMAL,
+            db=db,
         )
-
-        if not success:
-            raise HTTPException(
-                status_code=503,
-                detail=_("Host %s is not currently connected") % selected_host.fqdn,
-            )
 
         return {
             "success": True,

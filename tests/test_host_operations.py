@@ -60,12 +60,17 @@ class MockSession:
     def __init__(self, hosts=None, users=None):
         self.hosts = hosts or []
         self.users = users or [MockUser()]  # Default user for RBAC checks
+        self.committed = False
 
     def query(self, model):
         # Return different mock queries based on model type
         if hasattr(model, "__name__") and "User" in model.__name__:
             return MockQuery(self.users)
         return MockQuery(self.hosts)
+
+    def commit(self):
+        """Mock commit method."""
+        self.committed = True
 
     def __enter__(self):
         return self
@@ -104,16 +109,18 @@ class TestRefreshHostSoftware:
     @patch("backend.api.host_operations.sessionmaker")
     @patch("backend.api.host_operations.db")
     @patch("backend.api.host_operations.create_command_message")
-    @patch("backend.api.host_operations.connection_manager")
+    @patch("backend.api.host_operations.queue_ops")
     async def test_refresh_host_software_success(
-        self, mock_conn_mgr, mock_create_msg, mock_db, mock_sessionmaker
+        self, mock_queue_ops, mock_create_msg, mock_db, mock_sessionmaker
     ):
         """Test successful software refresh request."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
         mock_create_msg.return_value = {"command": "update_software_inventory"}
-        mock_conn_mgr.send_to_host = AsyncMock(return_value=True)
+        mock_queue_ops.enqueue_message = Mock(
+            return_value="550e8400-e29b-41d4-a716-446655440000"
+        )
 
         result = await refresh_host_software(1)
 
@@ -122,9 +129,7 @@ class TestRefreshHostSoftware:
         mock_create_msg.assert_called_once_with(
             command_type="update_software_inventory", parameters={}
         )
-        mock_conn_mgr.send_to_host.assert_called_once_with(
-            1, {"command": "update_software_inventory"}
-        )
+        mock_queue_ops.enqueue_message.assert_called_once()
 
     @pytest.mark.asyncio
     @patch("backend.api.host_operations.sessionmaker")
@@ -142,27 +147,6 @@ class TestRefreshHostSoftware:
         assert exc_info.value.status_code == 404
         assert "Host not found" in str(exc_info.value.detail)
 
-    @pytest.mark.asyncio
-    @patch("backend.api.host_operations.sessionmaker")
-    @patch("backend.api.host_operations.db")
-    @patch("backend.api.host_operations.create_command_message")
-    @patch("backend.api.host_operations.connection_manager")
-    async def test_refresh_host_software_agent_not_connected(
-        self, mock_conn_mgr, mock_create_msg, mock_db, mock_sessionmaker
-    ):
-        """Test software refresh when agent is not connected."""
-        mock_host = MockHost()
-        mock_session = MockSession([mock_host])
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
-        mock_create_msg.return_value = {"command": "update_software_inventory"}
-        mock_conn_mgr.send_to_host = AsyncMock(return_value=False)
-
-        with pytest.raises(HTTPException) as exc_info:
-            await refresh_host_software(1)
-
-        assert exc_info.value.status_code == 503
-        assert "Agent is not connected" in str(exc_info.value.detail)
-
 
 class TestRebootHost:
     """Test reboot_host function."""
@@ -171,16 +155,18 @@ class TestRebootHost:
     @patch("backend.api.host_operations.sessionmaker")
     @patch("backend.api.host_operations.db")
     @patch("backend.api.host_operations.create_command_message")
-    @patch("backend.api.host_operations.connection_manager")
+    @patch("backend.api.host_operations.queue_ops")
     async def test_reboot_host_success(
-        self, mock_conn_mgr, mock_create_msg, mock_db, mock_sessionmaker
+        self, mock_queue_ops, mock_create_msg, mock_db, mock_sessionmaker
     ):
         """Test successful reboot request."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
         mock_create_msg.return_value = {"command": "reboot_system"}
-        mock_conn_mgr.send_to_host = AsyncMock(return_value=True)
+        mock_queue_ops.enqueue_message = Mock(
+            return_value="550e8400-e29b-41d4-a716-446655440000"
+        )
 
         result = await reboot_host(1)
 
@@ -189,9 +175,7 @@ class TestRebootHost:
         mock_create_msg.assert_called_once_with(
             command_type="reboot_system", parameters={}
         )
-        mock_conn_mgr.send_to_host.assert_called_once_with(
-            1, {"command": "reboot_system"}
-        )
+        mock_queue_ops.enqueue_message.assert_called_once()
 
     @pytest.mark.asyncio
     @patch("backend.api.host_operations.sessionmaker")
@@ -207,27 +191,6 @@ class TestRebootHost:
         assert exc_info.value.status_code == 404
         assert "Host not found" in str(exc_info.value.detail)
 
-    @pytest.mark.asyncio
-    @patch("backend.api.host_operations.sessionmaker")
-    @patch("backend.api.host_operations.db")
-    @patch("backend.api.host_operations.create_command_message")
-    @patch("backend.api.host_operations.connection_manager")
-    async def test_reboot_host_agent_not_connected(
-        self, mock_conn_mgr, mock_create_msg, mock_db, mock_sessionmaker
-    ):
-        """Test reboot when agent is not connected."""
-        mock_host = MockHost()
-        mock_session = MockSession([mock_host])
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
-        mock_create_msg.return_value = {"command": "reboot_system"}
-        mock_conn_mgr.send_to_host = AsyncMock(return_value=False)
-
-        with pytest.raises(HTTPException) as exc_info:
-            await reboot_host(1)
-
-        assert exc_info.value.status_code == 503
-        assert "Agent is not connected" in str(exc_info.value.detail)
-
 
 class TestShutdownHost:
     """Test shutdown_host function."""
@@ -236,16 +199,18 @@ class TestShutdownHost:
     @patch("backend.api.host_operations.sessionmaker")
     @patch("backend.api.host_operations.db")
     @patch("backend.api.host_operations.create_command_message")
-    @patch("backend.api.host_operations.connection_manager")
+    @patch("backend.api.host_operations.queue_ops")
     async def test_shutdown_host_success(
-        self, mock_conn_mgr, mock_create_msg, mock_db, mock_sessionmaker
+        self, mock_queue_ops, mock_create_msg, mock_db, mock_sessionmaker
     ):
         """Test successful shutdown request."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
         mock_create_msg.return_value = {"command": "shutdown_system"}
-        mock_conn_mgr.send_to_host = AsyncMock(return_value=True)
+        mock_queue_ops.enqueue_message = Mock(
+            return_value="550e8400-e29b-41d4-a716-446655440000"
+        )
 
         result = await shutdown_host(1)
 
@@ -254,9 +219,7 @@ class TestShutdownHost:
         mock_create_msg.assert_called_once_with(
             command_type="shutdown_system", parameters={}
         )
-        mock_conn_mgr.send_to_host.assert_called_once_with(
-            1, {"command": "shutdown_system"}
-        )
+        mock_queue_ops.enqueue_message.assert_called_once()
 
     @pytest.mark.asyncio
     @patch("backend.api.host_operations.sessionmaker")
@@ -272,27 +235,6 @@ class TestShutdownHost:
         assert exc_info.value.status_code == 404
         assert "Host not found" in str(exc_info.value.detail)
 
-    @pytest.mark.asyncio
-    @patch("backend.api.host_operations.sessionmaker")
-    @patch("backend.api.host_operations.db")
-    @patch("backend.api.host_operations.create_command_message")
-    @patch("backend.api.host_operations.connection_manager")
-    async def test_shutdown_host_agent_not_connected(
-        self, mock_conn_mgr, mock_create_msg, mock_db, mock_sessionmaker
-    ):
-        """Test shutdown when agent is not connected."""
-        mock_host = MockHost()
-        mock_session = MockSession([mock_host])
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
-        mock_create_msg.return_value = {"command": "shutdown_system"}
-        mock_conn_mgr.send_to_host = AsyncMock(return_value=False)
-
-        with pytest.raises(HTTPException) as exc_info:
-            await shutdown_host(1)
-
-        assert exc_info.value.status_code == 503
-        assert "Agent is not connected" in str(exc_info.value.detail)
-
 
 class TestHostOperationsIntegration:
     """Integration tests for host operations module."""
@@ -301,15 +243,17 @@ class TestHostOperationsIntegration:
     @patch("backend.api.host_operations.sessionmaker")
     @patch("backend.api.host_operations.db")
     @patch("backend.api.host_operations.create_command_message")
-    @patch("backend.api.host_operations.connection_manager")
+    @patch("backend.api.host_operations.queue_ops")
     async def test_all_operations_same_host(
-        self, mock_conn_mgr, mock_create_msg, mock_db, mock_sessionmaker
+        self, mock_queue_ops, mock_create_msg, mock_db, mock_sessionmaker
     ):
         """Test that all operations work for the same host."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
-        mock_conn_mgr.send_to_host = AsyncMock(return_value=True)
+        mock_queue_ops.enqueue_message = Mock(
+            return_value="550e8400-e29b-41d4-a716-446655440000"
+        )
 
         # Test software refresh
         mock_create_msg.return_value = {"command": "update_software_inventory"}
@@ -326,8 +270,8 @@ class TestHostOperationsIntegration:
         result3 = await shutdown_host(1)
         assert result3["result"] is True
 
-        # Verify all commands were sent
-        assert mock_conn_mgr.send_to_host.call_count == 3
+        # Verify all commands were enqueued
+        assert mock_queue_ops.enqueue_message.call_count == 3
 
     @pytest.mark.asyncio
     @patch("backend.api.host_operations.sessionmaker")
@@ -349,36 +293,6 @@ class TestHostOperationsIntegration:
         with pytest.raises(HTTPException) as exc_info3:
             await shutdown_host(999)
         assert exc_info3.value.status_code == 404
-
-    @pytest.mark.asyncio
-    @patch("backend.api.host_operations.sessionmaker")
-    @patch("backend.api.host_operations.db")
-    @patch("backend.api.host_operations.create_command_message")
-    @patch("backend.api.host_operations.connection_manager")
-    async def test_all_operations_agent_disconnected(
-        self, mock_conn_mgr, mock_create_msg, mock_db, mock_sessionmaker
-    ):
-        """Test that all operations fail consistently when agent is disconnected."""
-        mock_host = MockHost()
-        mock_session = MockSession([mock_host])
-        mock_sessionmaker.return_value = MockSessionLocal(mock_session)
-        mock_create_msg.return_value = {"command": "test"}
-        mock_conn_mgr.send_to_host = AsyncMock(
-            return_value=False
-        )  # Agent not connected
-
-        # All operations should fail with 503
-        with pytest.raises(HTTPException) as exc_info1:
-            await refresh_host_software(1)
-        assert exc_info1.value.status_code == 503
-
-        with pytest.raises(HTTPException) as exc_info2:
-            await reboot_host(1)
-        assert exc_info2.value.status_code == 503
-
-        with pytest.raises(HTTPException) as exc_info3:
-            await shutdown_host(1)
-        assert exc_info3.value.status_code == 503
 
     def test_command_message_parameters(self):
         """Test that command messages are created with correct parameters."""
@@ -413,8 +327,7 @@ class TestHostOperationsIntegration:
     def test_error_message_consistency(self):
         """Test that error messages are consistent across operations."""
         # This tests the pattern of error handling
-        expected_errors = {404: "Host not found", 503: "Agent is not connected"}
+        expected_errors = {404: "Host not found"}
 
         # This ensures we maintain consistent error messaging
         assert 404 in expected_errors
-        assert 503 in expected_errors

@@ -24,17 +24,19 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.certificate_manager import certificate_manager
 from backend.security.roles import SecurityRoles
-from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import (
     create_command_message,
     create_host_approved_message,
 )
+from backend.websocket.queue_enums import QueueDirection
+from backend.websocket.queue_operations import QueueOperations
 
 # Split into separate routers for different authentication requirements
 public_router = APIRouter()  # Unauthenticated endpoints (no /api prefix)
 auth_router = APIRouter()  # Authenticated endpoints (with /api prefix)
 
 logger = logging.getLogger(__name__)
+queue_ops = QueueOperations()
 
 # Backward compatibility - this allows existing imports to still work
 router = public_router  # Default to public router for backward compatibility
@@ -611,22 +613,24 @@ async def approve_host(
                 certificate=host.client_certificate,
             )
 
-            # Try to send the message to the agent if it's connected
-            success = await connection_manager.send_to_host(host.id, approval_message)
-            if success:
-                print(
-                    f"DEBUG: Successfully sent host approval notification to host {host.id} ({host.fqdn})",
-                    flush=True,
-                )
-            else:
-                print(
-                    f"DEBUG: Host {host.id} ({host.fqdn}) not currently connected, approval message not sent",
-                    flush=True,
-                )
-        except Exception as e:
-            # Don't fail the approval process if we can't send the notification
+            # Enqueue the message to be sent to the agent
+            queue_ops.enqueue_message(
+                message_type="host_approved",
+                message_data=approval_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=str(host.id),
+                db=session,
+            )
+            # Commit the session to persist the queued message
+            session.commit()
             print(
-                f"DEBUG: Error sending host approval notification to {host.id} ({host.fqdn}): {e}",
+                f"DEBUG: Enqueued host approval notification for host {host.id} ({host.fqdn})",
+                flush=True,
+            )
+        except Exception as e:
+            # Don't fail the approval process if we can't enqueue the notification
+            print(
+                f"DEBUG: Error enqueuing host approval notification to {host.id} ({host.fqdn}): {e}",
                 flush=True,
             )
 
@@ -712,11 +716,16 @@ async def request_os_version_update(host_id: str):
             command_type="update_os_version", parameters={}
         )
 
-        # Send command to agent via WebSocket
-        success = await connection_manager.send_to_host(host_id, command_message)
-
-        if not success:
-            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+        # Enqueue command to agent via message queue
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+        # Commit the session to persist the queued message
+        session.commit()
 
         return {"result": True, "message": _("OS version update requested")}
 
@@ -748,11 +757,16 @@ async def request_updates_check(host_id: str):
             command_type="check_updates", parameters={}
         )
 
-        # Send command to agent via WebSocket
-        success = await connection_manager.send_to_host(host_id, command_message)
-
-        if not success:
-            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+        # Enqueue command to agent via message queue
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+        # Commit the session to persist the queued message
+        session.commit()
 
         return {"result": True, "message": _("Updates check requested")}
 

@@ -78,8 +78,15 @@ class TestOSVersionAPI:
 
         # Use the MockSession pattern from test_host_operations.py
         class MockSession:
+            def __init__(self):
+                self.committed = False
+
             def query(self, model):
                 return MockQuery([mock_host])  # Return the mock host
+
+            def commit(self):
+                """Mock commit method."""
+                self.committed = True
 
             def __enter__(self):
                 return self
@@ -108,7 +115,7 @@ class TestOSVersionAPI:
         mock_host.approval_status = "approved"
         mock_session = MockSession()
 
-        with patch("backend.api.host.connection_manager") as mock_conn_mgr, patch(
+        with patch("backend.api.host.queue_ops") as mock_queue_ops, patch(
             "backend.api.host.create_command_message"
         ) as mock_create_msg, patch(
             "backend.api.host.sessionmaker"
@@ -118,7 +125,7 @@ class TestOSVersionAPI:
             "backend.api.host.validate_host_approval_status"
         ) as mock_validate:
 
-            mock_conn_mgr.send_to_host = AsyncMock(return_value=True)
+            mock_queue_ops.enqueue_message.return_value = "test-message-id-123"
             mock_create_msg.return_value = {"command": "update_os_version"}
             # Mock the validation to pass for approved host
             mock_validate.return_value = None
@@ -130,9 +137,7 @@ class TestOSVersionAPI:
 
             assert result["result"] is True
             assert "OS version update requested" in result["message"]
-            mock_conn_mgr.send_to_host.assert_called_once_with(
-                1, {"command": "update_os_version"}
-            )
+            mock_queue_ops.enqueue_message.assert_called_once()
             # Validation should be called once
             mock_validate.assert_called_once()
 
@@ -142,8 +147,15 @@ class TestOSVersionAPI:
 
         # Use the MockSession pattern from test_host_operations.py
         class MockSession:
+            def __init__(self):
+                self.committed = False
+
             def query(self, model):
                 return MockQuery([])  # Empty list = no hosts found
+
+            def commit(self):
+                """Mock commit method."""
+                self.committed = True
 
             def __enter__(self):
                 return self
@@ -174,10 +186,10 @@ class TestOSVersionAPI:
         ), patch(
             "backend.api.host.validate_host_approval_status"
         ) as mock_validate, patch(
-            "backend.api.host.connection_manager"
-        ) as mock_conn_mgr:
-            # Mock connection manager to avoid the 503 error
-            mock_conn_mgr.send_to_host = AsyncMock(return_value=False)
+            "backend.api.host.queue_ops"
+        ) as mock_queue_ops:
+            # Mock queue operations
+            mock_queue_ops.enqueue_message.return_value = "test-message-id-123"
             mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
             from fastapi import HTTPException
@@ -191,8 +203,8 @@ class TestOSVersionAPI:
             assert "Host not found" in str(exc_info.value.detail)
             # Validation should not be called if host is not found
             mock_validate.assert_not_called()
-            # Connection manager should not be called if host is not found
-            mock_conn_mgr.send_to_host.assert_not_called()
+            # Queue operations should not be called if host is not found
+            mock_queue_ops.enqueue_message.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_request_os_version_host_not_approved(self, mock_db, mock_host):

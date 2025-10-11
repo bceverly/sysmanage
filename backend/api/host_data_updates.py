@@ -19,10 +19,12 @@ from backend.api.host_utils import (
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import db, models
-from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
+from backend.websocket.queue_operations import QueueOperations
+from backend.websocket.queue_enums import QueueDirection
 
 router = APIRouter()
+queue_ops = QueueOperations()
 
 
 @router.post("/host/{host_id}/update-hardware", dependencies=[Depends(JWTBearer())])
@@ -167,11 +169,17 @@ async def request_hardware_update(host_id: str):
             command_type="update_hardware", parameters={}
         )
 
-        # Send command to agent via WebSocket
-        success = await connection_manager.send_to_host(host_id, command_message)
+        # Enqueue command message for outbound processing
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
 
-        if not success:
-            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+        # Commit the session to persist the queued message
+        session.commit()
 
         return {"result": True, "message": _("Hardware update requested")}
 
@@ -215,25 +223,25 @@ async def request_hardware_update_bulk(host_ids: list[str]):
                 command_type="update_hardware", parameters={}
             )
 
-            # Send command to agent via WebSocket
-            success = await connection_manager.send_to_host(host_id, command_message)
+            # Enqueue command message for outbound processing
+            queue_ops.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                db=session,
+            )
 
-            if success:
-                results.append(
-                    {
-                        "host_id": host_id,
-                        "success": True,
-                        "message": "Hardware update requested",
-                    }
-                )
-            else:
-                results.append(
-                    {
-                        "host_id": host_id,
-                        "success": False,
-                        "error": "Agent is not connected",
-                    }
-                )
+            results.append(
+                {
+                    "host_id": host_id,
+                    "success": True,
+                    "message": "Hardware update requested",
+                }
+            )
+
+        # Commit the session to persist all queued messages
+        session.commit()
 
     return {"results": results}
 
@@ -281,11 +289,17 @@ async def request_user_access_update(host_id: str):
             command_type="update_user_access", parameters={}
         )
 
-        # Send command to agent via WebSocket
-        success = await connection_manager.send_to_host(host_id, command_message)
+        # Enqueue command message for outbound processing
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
 
-        if not success:
-            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+        # Commit the session to persist the queued message
+        session.commit()
 
         return {"result": True, "message": _("User access update requested")}
 
@@ -316,11 +330,17 @@ async def request_system_info(host_id: str):
             command_type="get_system_info", parameters={}
         )
 
-        # Send command to agent via WebSocket
-        success = await connection_manager.send_to_host(host_id, command_message)
+        # Enqueue command message for outbound processing
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
 
-        if not success:
-            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+        # Commit the session to persist the queued message
+        session.commit()
 
         return {"result": True, "message": _("System info update requested")}
 

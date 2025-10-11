@@ -15,10 +15,12 @@ from backend.api.host_utils import validate_host_approval_status
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import db, models
-from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import CommandType, create_command_message
+from backend.websocket.queue_operations import QueueOperations
+from backend.websocket.queue_enums import QueueDirection
 
 router = APIRouter()
+queue_ops = QueueOperations()
 
 
 class DiagnosticRequest(BaseModel):
@@ -136,18 +138,14 @@ async def collect_diagnostics(host_id: str, request: DiagnosticRequest = None):
             command_type=CommandType.COLLECT_DIAGNOSTICS, parameters=parameters
         )
 
-        # Send command to agent via WebSocket
-        success = await connection_manager.send_to_host(host_id, command_message)
-
-        if not success:
-            # Update status to failed if we can't send the message
-            diagnostic_report.status = "failed"
-            diagnostic_report.error_message = "Agent is not connected"
-            diagnostic_report.updated_at = datetime.now(timezone.utc).replace(
-                tzinfo=None
-            )
-            session.commit()
-            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+        # Enqueue command to agent via message queue
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
 
         # Update status to collecting
         diagnostic_report.status = "collecting"

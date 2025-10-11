@@ -4,10 +4,13 @@ import Stack from '@mui/material/Stack';
 import { Gauge, gaugeClasses } from '@mui/x-charts/Gauge';
 import Box from '@mui/material/Box';
 import { useTranslation } from 'react-i18next';
-import { Typography, Grid, Skeleton, CircularProgress } from "@mui/material";
+import { Typography, Grid, Skeleton, CircularProgress, IconButton } from "@mui/material";
+import { Settings as SettingsIcon } from '@mui/icons-material';
 
 import { doGetHosts } from '../Services/hosts'
 import { updatesService } from '../Services/updates';
+import axiosInstance from '../Services/api';
+import DashboardSettingsDialog from '../Components/DashboardSettingsDialog';
 
 const Dashboard = () => {
     const [hostsTotal, setHostsTotal] = useState<number>(0);
@@ -19,7 +22,20 @@ const Dashboard = () => {
     const [securityColor, setSecurityColor] = useState<string>('#52b202'); // Default green
     const [rebootRequired, setRebootRequired] = useState<number>(0);
     const [rebootColor, setRebootColor] = useState<string>('#52b202'); // Default green
+    const [antivirusCoverage, setAntivirusCoverage] = useState<number>(0);
+    const [antivirusColor, setAntivirusColor] = useState<string>('#52b202'); // Default green
+    const [otelCoverage, setOtelCoverage] = useState<number>(0);
+    const [otelColor, setOtelColor] = useState<string>('#52b202'); // Default green
     const [loading, setLoading] = useState<boolean>(true);
+    const [settingsOpen, setSettingsOpen] = useState(false);
+    const [cardVisibility, setCardVisibility] = useState<Record<string, boolean>>({
+        hosts: true,
+        updates: true,
+        security: true,
+        reboot: true,
+        antivirus: true,
+        opentelemetry: true,
+    });
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -30,10 +46,12 @@ const Dashboard = () => {
         }
 
         try {
-            // Fetch both hosts and updates data in parallel
-            const [hostsResponse, updatesResponse] = await Promise.allSettled([
+            // Fetch hosts, updates, antivirus coverage, and OpenTelemetry coverage data in parallel
+            const [hostsResponse, updatesResponse, antivirusResponse, otelResponse] = await Promise.allSettled([
                 doGetHosts(),
-                updatesService.getUpdatesSummary()
+                updatesService.getUpdatesSummary(),
+                axiosInstance.get('/api/antivirus-coverage'),
+                axiosInstance.get('/api/opentelemetry/opentelemetry-coverage')
             ]);
 
             // Process hosts data
@@ -78,6 +96,44 @@ const Dashboard = () => {
                 console.error('Failed to fetch updates summary:', updatesResponse.reason);
                 // Keep defaults (0) on error
             }
+
+            // Process antivirus coverage data
+            if (antivirusResponse.status === 'fulfilled') {
+                const coverage = antivirusResponse.value.data;
+                const coveragePercentage = coverage.coverage_percentage;
+                setAntivirusCoverage(Math.round(coveragePercentage));
+
+                // Set color based on coverage: green >= 80%, yellow >= 50%, red < 50%
+                if (coveragePercentage >= 80) {
+                    setAntivirusColor('#52b202');
+                } else if (coveragePercentage >= 50) {
+                    setAntivirusColor('#ff9800');
+                } else {
+                    setAntivirusColor('#ff1744');
+                }
+            } else {
+                console.error('Failed to fetch antivirus coverage:', antivirusResponse.reason);
+                // Keep defaults (0) on error
+            }
+
+            // Process OpenTelemetry coverage data
+            if (otelResponse.status === 'fulfilled') {
+                const coverage = otelResponse.value.data;
+                const coveragePercentage = coverage.coverage_percentage;
+                setOtelCoverage(Math.round(coveragePercentage));
+
+                // Set color based on coverage: green >= 80%, yellow >= 50%, red < 50%
+                if (coveragePercentage >= 80) {
+                    setOtelColor('#52b202');
+                } else if (coveragePercentage >= 50) {
+                    setOtelColor('#ff9800');
+                } else {
+                    setOtelColor('#ff1744');
+                }
+            } else {
+                console.error('Failed to fetch OpenTelemetry coverage:', otelResponse.reason);
+                // Keep defaults (0) on error
+            }
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
         } finally {
@@ -87,11 +143,41 @@ const Dashboard = () => {
         }
     };
 
+    const loadCardPreferences = async () => {
+        try {
+            const response = await axiosInstance.get('/api/user-preferences/dashboard-cards');
+            const prefs = response.data.preferences || [];
+            const visibilityMap: Record<string, boolean> = {
+                hosts: true,
+                updates: true,
+                security: true,
+                reboot: true,
+                antivirus: true,
+                opentelemetry: true,
+            };
+
+            // Apply saved preferences
+            if (Array.isArray(prefs)) {
+                prefs.forEach((pref: { card_identifier: string; visible: boolean }) => {
+                    visibilityMap[pref.card_identifier] = pref.visible;
+                });
+            }
+
+            setCardVisibility(visibilityMap);
+        } catch (error) {
+            console.error('Error loading card preferences:', error);
+            // Keep defaults on error
+        }
+    };
+
     useEffect(() => {
         if (!localStorage.getItem('bearer_token')) {
             navigate("/login");
             return;
         }
+
+        // Load card preferences
+        loadCardPreferences();
 
         // Initial data fetch
         fetchData(true);
@@ -123,6 +209,24 @@ const Dashboard = () => {
     const handleRebootClick = () => {
         // Navigate to hosts page to show hosts requiring reboot
         navigate('/hosts');
+    };
+
+    const handleAntivirusClick = () => {
+        // Navigate to hosts page
+        navigate('/hosts');
+    };
+
+    const handleOtelClick = () => {
+        // Navigate to hosts page
+        navigate('/hosts');
+    };
+
+    const handleSaveSettings = (cards: { identifier: string; visible: boolean }[]) => {
+        const visibilityMap: Record<string, boolean> = {};
+        cards.forEach((card) => {
+            visibilityMap[card.identifier] = card.visible;
+        });
+        setCardVisibility(visibilityMap);
     };
 
     const DashboardCard = ({ title, value, maxValue, color, onClick, loading }: {
@@ -179,48 +283,98 @@ const Dashboard = () => {
     );
 
     return (
-        <Grid container spacing={3} sx={{ mt: 2 }}>
-            <Grid item>
-                <DashboardCard
-                    title={t('dashboard.hosts')}
-                    value={hostsTotal}
-                    maxValue={hostsTotal || 1} // Prevent division by zero
-                    color={hostStatusColor}
-                    onClick={handleHostsClick}
-                    loading={loading}
-                />
+        <Box>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                <IconButton
+                    onClick={() => setSettingsOpen(true)}
+                    color="primary"
+                    aria-label={t('dashboard.settings.title', 'Dashboard Settings')}
+                >
+                    <SettingsIcon />
+                </IconButton>
+            </Box>
+
+            <Grid container spacing={3}>
+                {cardVisibility.hosts && (
+                    <Grid item>
+                        <DashboardCard
+                            title={t('dashboard.hosts')}
+                            value={hostsTotal}
+                            maxValue={hostsTotal || 1}
+                            color={hostStatusColor}
+                            onClick={handleHostsClick}
+                            loading={loading}
+                        />
+                    </Grid>
+                )}
+                {cardVisibility.updates && (
+                    <Grid item>
+                        <DashboardCard
+                            title={t('dashboard.updates')}
+                            value={hostsWithUpdates}
+                            maxValue={hostsTotal || 1}
+                            color={updatesColor}
+                            onClick={handleUpdatesClick}
+                            loading={loading}
+                        />
+                    </Grid>
+                )}
+                {cardVisibility.security && (
+                    <Grid item>
+                        <DashboardCard
+                            title={t('dashboard.security')}
+                            value={securityUpdates}
+                            maxValue={updatesTotal || 1}
+                            color={securityColor}
+                            onClick={handleSecurityClick}
+                            loading={loading}
+                        />
+                    </Grid>
+                )}
+                {cardVisibility.reboot && (
+                    <Grid item>
+                        <DashboardCard
+                            title={t('dashboard.rebootRequired')}
+                            value={rebootRequired}
+                            maxValue={hostsTotal || 1}
+                            color={rebootColor}
+                            onClick={handleRebootClick}
+                            loading={loading}
+                        />
+                    </Grid>
+                )}
+                {cardVisibility.antivirus && (
+                    <Grid item>
+                        <DashboardCard
+                            title={t('dashboard.antivirusCoverage')}
+                            value={antivirusCoverage}
+                            maxValue={100}
+                            color={antivirusColor}
+                            onClick={handleAntivirusClick}
+                            loading={loading}
+                        />
+                    </Grid>
+                )}
+                {cardVisibility.opentelemetry && (
+                    <Grid item>
+                        <DashboardCard
+                            title={t('dashboard.openTelemetryCoverage')}
+                            value={otelCoverage}
+                            maxValue={100}
+                            color={otelColor}
+                            onClick={handleOtelClick}
+                            loading={loading}
+                        />
+                    </Grid>
+                )}
             </Grid>
-            <Grid item>
-                <DashboardCard
-                    title={t('dashboard.updates')}
-                    value={hostsWithUpdates}
-                    maxValue={hostsTotal || 1}
-                    color={updatesColor}
-                    onClick={handleUpdatesClick}
-                    loading={loading}
-                />
-            </Grid>
-            <Grid item>
-                <DashboardCard
-                    title={t('dashboard.security')}
-                    value={securityUpdates}
-                    maxValue={updatesTotal || 1}
-                    color={securityColor}
-                    onClick={handleSecurityClick}
-                    loading={loading}
-                />
-            </Grid>
-            <Grid item>
-                <DashboardCard
-                    title={t('dashboard.rebootRequired')}
-                    value={rebootRequired}
-                    maxValue={hostsTotal || 1}
-                    color={rebootColor}
-                    onClick={handleRebootClick}
-                    loading={loading}
-                />
-            </Grid>
-        </Grid>
+
+            <DashboardSettingsDialog
+                open={settingsOpen}
+                onClose={() => setSettingsOpen(false)}
+                onSave={handleSaveSettings}
+            />
+        </Box>
     );
 }
  

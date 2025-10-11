@@ -16,10 +16,13 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
+from backend.websocket.queue_operations import QueueOperations
+from backend.websocket.queue_enums import QueueDirection
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+queue_ops = QueueOperations()
 
 
 class UbuntuProSettingsResponse(BaseModel):
@@ -279,7 +282,6 @@ async def enroll_hosts_in_ubuntu_pro(
 ):
     """Enroll specified hosts in Ubuntu Pro using master key or custom key."""
     try:
-        from backend.websocket.connection_manager import connection_manager
         from backend.websocket.messages import create_command_message
 
         # Validate request: if not using master key, custom key must be provided
@@ -338,7 +340,13 @@ async def enroll_hosts_in_ubuntu_pro(
                     },
                 )
 
-                await connection_manager.send_to_host(host.id, command_message)
+                queue_ops.enqueue_message(
+                    message_type="command",
+                    message_data=command_message,
+                    direction=QueueDirection.OUTBOUND,
+                    host_id=host.id,
+                    db=db,
+                )
 
                 results.append(
                     {
@@ -358,6 +366,9 @@ async def enroll_hosts_in_ubuntu_pro(
                         "error": _("Failed to send enrollment command: %s") % str(e),
                     }
                 )
+
+        # Commit the session to persist all queued messages
+        db.commit()
 
         return {"results": results}
 

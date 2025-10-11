@@ -84,13 +84,13 @@ class TestHardwareEndpoints:
         assert response.status_code == 404
         assert "Host not found" in response.json()["detail"]
 
-    @patch("backend.websocket.connection_manager.connection_manager.send_to_host")
+    @patch("backend.api.host_data_updates.queue_ops.enqueue_message")
     def test_request_hardware_update_success(
-        self, mock_send, client: TestClient, auth_headers
+        self, mock_enqueue, client: TestClient, auth_headers
     ):
         """Test requesting hardware update from agent."""
-        # Mock successful WebSocket send
-        mock_send.return_value = True
+        # Mock successful message enqueue
+        mock_enqueue.return_value = "test-message-id-123"
 
         # Create and approve a test host
         host_data = {
@@ -113,19 +113,19 @@ class TestHardwareEndpoints:
         assert response.json()["result"] is True
         assert "requested" in response.json()["message"]
 
-        # Verify WebSocket send was called
-        mock_send.assert_called_once()
-        args, kwargs = mock_send.call_args
-        assert args[0] == host_id  # host_id
-        assert args[1]["data"]["command_type"] == "update_hardware"
+        # Verify enqueue_message was called
+        mock_enqueue.assert_called_once()
+        call_args = mock_enqueue.call_args
+        assert call_args.kwargs["host_id"] == host_id
+        assert call_args.kwargs["message_type"] == "command"
 
-    @patch("backend.websocket.connection_manager.connection_manager.send_to_host")
+    @patch("backend.api.host_data_updates.queue_ops.enqueue_message")
     def test_request_hardware_update_bulk_success(
-        self, mock_send, client: TestClient, auth_headers
+        self, mock_enqueue, client: TestClient, auth_headers
     ):
         """Test bulk hardware update request."""
-        # Mock successful WebSocket send
-        mock_send.return_value = True
+        # Mock successful message enqueue
+        mock_enqueue.return_value = "test-message-id-123"
 
         # Create two test hosts
         host_ids = []
@@ -154,33 +154,5 @@ class TestHardwareEndpoints:
             assert result["success"] is True
             assert "requested" in result["message"]
 
-        # Verify WebSocket send was called twice
-        assert mock_send.call_count == 2
-
-    @patch("backend.websocket.connection_manager.connection_manager.send_to_host")
-    def test_request_hardware_update_agent_offline(
-        self, mock_send, client: TestClient, auth_headers
-    ):
-        """Test hardware update request when agent is offline."""
-        # Mock failed WebSocket send (agent offline)
-        mock_send.return_value = False
-
-        # Create a test host
-        host_data = {
-            "active": True,
-            "fqdn": "test-offline.example.com",
-            "ipv4": "192.168.1.102",
-            "ipv6": "::1",
-        }
-
-        response = client.post("/api/host", json=host_data, headers=auth_headers)
-        assert response.status_code == 200
-        host_id = response.json()["id"]
-
-        # Request hardware update
-        response = client.post(
-            f"/api/host/{host_id}/request-hardware-update", headers=auth_headers
-        )
-
-        assert response.status_code == 503
-        assert "not connected" in response.json()["detail"]
+        # Verify enqueue_message was called twice
+        assert mock_enqueue.call_count == 2

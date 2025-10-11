@@ -10,12 +10,14 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
-from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
+from backend.websocket.queue_operations import QueueOperations
+from backend.websocket.queue_enums import QueueDirection
 from .models import UpdateExecutionRequest
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+queue_ops = QueueOperations()
 
 
 @router.post("/execute")
@@ -139,7 +141,15 @@ async def execute_updates(
                         },
                     )
 
-                    await connection_manager.send_to_host(host.id, command_message)
+                    queue_ops.enqueue_message(
+                        message_type="command",
+                        message_data=command_message,
+                        direction=QueueDirection.OUTBOUND,
+                        host_id=host.id,
+                        db=session,
+                    )
+                    # Commit the session to persist the queued message
+                    session.commit()
 
                     results.append(
                         {

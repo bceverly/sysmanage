@@ -34,6 +34,7 @@ class MessageType(str, Enum):
     ROLE_DATA = "role_data"
     THIRD_PARTY_REPOSITORY_UPDATE = "third_party_repository_update"
     ANTIVIRUS_STATUS_UPDATE = "antivirus_status_update"
+    COMMERCIAL_ANTIVIRUS_STATUS_UPDATE = "commercial_antivirus_status_update"
 
     # Server -> Agent messages
     COMMAND = "command"

@@ -34,6 +34,7 @@ __all__ = [
     "ThirdPartyRepository",
     "AntivirusDefault",
     "AntivirusStatus",
+    "CommercialAntivirusStatus",
     # User management models
     "UserAccount",
     "UserGroup",
@@ -66,4 +67,5 @@ __all__ = [
     "UserSecurityRole",
     # User preference models
     "UserDataGridColumnPreference",
+    "UserDashboardCardPreference",
 ]

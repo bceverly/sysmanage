@@ -9,10 +9,12 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
-from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
+from backend.websocket.queue_operations import QueueOperations
+from backend.websocket.queue_enums import QueueDirection
 
 router = APIRouter()
+queue_ops = QueueOperations()
 
 
 @router.post("/host/refresh/software/{host_id}", dependencies=[Depends(JWTBearer())])
@@ -36,11 +38,16 @@ async def refresh_host_software(host_id: str):
             command_type="update_software_inventory", parameters={}
         )
 
-        # Send command to agent via WebSocket
-        success = await connection_manager.send_to_host(host_id, command_message)
-
-        if not success:
-            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+        # Send command to agent via message queue
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+        # Commit the session to persist the queued message
+        session.commit()
 
         return {"result": True, "message": _("Software inventory update requested")}
 
@@ -86,11 +93,16 @@ async def reboot_host(host_id: str, current_user: str = Depends(get_current_user
             command_type="reboot_system", parameters={}
         )
 
-        # Send command to agent via WebSocket
-        success = await connection_manager.send_to_host(host_id, command_message)
-
-        if not success:
-            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+        # Send command to agent via message queue
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+        # Commit the session to persist the queued message
+        session.commit()
 
         return {"result": True, "message": _("System reboot requested")}
 
@@ -136,11 +148,16 @@ async def shutdown_host(host_id: str, current_user: str = Depends(get_current_us
             command_type="shutdown_system", parameters={}
         )
 
-        # Send command to agent via WebSocket
-        success = await connection_manager.send_to_host(host_id, command_message)
-
-        if not success:
-            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+        # Send command to agent via message queue
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+        # Commit the session to persist the queued message
+        session.commit()
 
         return {"result": True, "message": _("System shutdown requested")}
 
@@ -175,10 +192,15 @@ async def request_packages(host_id: str, current_user: str = Depends(get_current
             command_type="collect_available_packages", parameters={}
         )
 
-        # Send command to agent via WebSocket
-        success = await connection_manager.send_to_host(host_id, command_message)
-
-        if not success:
-            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+        # Send command to agent via message queue
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+        # Commit the session to persist the queued message
+        session.commit()
 
         return {"result": True, "message": _("Package collection requested")}

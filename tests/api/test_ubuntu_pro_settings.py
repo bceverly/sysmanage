@@ -407,13 +407,15 @@ class TestUbuntuProEnrollment:
         session.refresh(host1)
         session.refresh(host2)
 
-        # Mock WebSocket connection manager
+        # Mock queue operations
         with patch(
-            "backend.websocket.connection_manager.connection_manager.send_to_host"
-        ) as mock_send, patch(
+            "backend.api.ubuntu_pro_settings.queue_ops.enqueue_message"
+        ) as mock_enqueue, patch(
             "backend.websocket.messages.create_command_message"
         ) as mock_create_cmd:
-            mock_send.return_value = None  # Simulate successful send
+            mock_enqueue.return_value = (
+                "550e8400-e29b-41d4-a716-446655440000"  # Return a message_id
+            )
             mock_create_cmd.return_value = {"command": "ubuntu_pro_attach", "data": {}}
 
             # Test enrollment
@@ -437,8 +439,8 @@ class TestUbuntuProEnrollment:
                 assert "Ubuntu Pro enrollment initiated" in result["message"]
                 assert result["hostname"] in ["test1.example.com", "test2.example.com"]
 
-            # Verify WebSocket calls were made
-            assert mock_send.call_count == 2
+            # Verify enqueue_message was called for both hosts
+            assert mock_enqueue.call_count == 2
 
     def test_enroll_with_custom_key_success(self, client, session, auth_headers):
         """Test successful enrollment using custom key."""
@@ -448,13 +450,15 @@ class TestUbuntuProEnrollment:
         session.commit()
         session.refresh(host)
 
-        # Mock WebSocket connection manager
+        # Mock queue operations
         with patch(
-            "backend.websocket.connection_manager.connection_manager.send_to_host"
-        ) as mock_send, patch(
+            "backend.api.ubuntu_pro_settings.queue_ops.enqueue_message"
+        ) as mock_enqueue, patch(
             "backend.websocket.messages.create_command_message"
         ) as mock_create_cmd:
-            mock_send.return_value = None
+            mock_enqueue.return_value = (
+                "550e8400-e29b-41d4-a716-446655440000"  # Return a message_id
+            )
             mock_create_cmd.return_value = {"command": "ubuntu_pro_attach", "data": {}}
 
             # Test enrollment with custom key
@@ -471,7 +475,7 @@ class TestUbuntuProEnrollment:
             assert response.status_code == 200
             data = response.json()
             assert data["results"][0]["success"] is True
-            mock_send.assert_called_once()
+            mock_enqueue.assert_called_once()
 
     def test_enroll_no_master_key_configured(self, client, session, auth_headers):
         """Test enrollment failure when no master key is configured."""
@@ -555,7 +559,7 @@ class TestUbuntuProEnrollment:
         assert "Host not found or inactive" in data["results"][0]["error"]
 
     def test_enroll_websocket_error(self, client, session, auth_headers):
-        """Test enrollment when WebSocket connection fails."""
+        """Test enrollment when message queueing fails."""
         # Create Ubuntu Pro settings and host
         now = datetime.now(timezone.utc)
         settings = models.UbuntuProSettings(
@@ -571,13 +575,13 @@ class TestUbuntuProEnrollment:
         session.commit()
         session.refresh(host)
 
-        # Mock WebSocket connection failure
+        # Mock queue operation failure
         with patch(
-            "backend.websocket.connection_manager.connection_manager.send_to_host"
-        ) as mock_send, patch(
+            "backend.api.ubuntu_pro_settings.queue_ops.enqueue_message"
+        ) as mock_enqueue, patch(
             "backend.websocket.messages.create_command_message"
         ) as mock_create_cmd:
-            mock_send.side_effect = ConnectionError("Connection failed")
+            mock_enqueue.side_effect = RuntimeError("Queue operation failed")
             mock_create_cmd.return_value = {"command": "ubuntu_pro_attach", "data": {}}
 
             # Test enrollment

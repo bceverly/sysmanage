@@ -2,6 +2,7 @@
 Report API endpoints
 """
 
+import html
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Response
@@ -175,6 +176,9 @@ async def get_report_screenshot(report_id: str):
     """
     # In a real implementation, you might store actual screenshots
     # For now, return a placeholder SVG
+    # Escape report_id to prevent XSS attacks
+    escaped_report_title = html.escape(report_id.replace("-", " ").title())
+    escaped_report_label = html.escape(_("Report"))
     placeholder_svg = f"""
     <svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
         <rect width="300" height="200" fill="#374151"/>
@@ -185,7 +189,7 @@ async def get_report_screenshot(report_id: str):
         <rect x="30" y="110" width="220" height="15" fill="#6B7280"/>
         <rect x="30" y="130" width="160" height="15" fill="#6B7280"/>
         <text x="150" y="170" text-anchor="middle" fill="#9CA3AF" font-family="Arial" font-size="12">
-            {report_id.replace('-', ' ').title()} {_('Report')}
+            {escaped_report_title} {escaped_report_label}
         </text>
     </svg>
     """

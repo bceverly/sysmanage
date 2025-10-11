@@ -170,6 +170,9 @@ class Host(Base):
     antivirus_status = relationship(
         "AntivirusStatus", back_populates="host", uselist=False
     )
+    commercial_antivirus_status = relationship(
+        "CommercialAntivirusStatus", back_populates="host", uselist=False
+    )
     user_accounts = relationship("UserAccount", back_populates="host")
     user_groups = relationship("UserGroup", back_populates="host")
     certificates = relationship(
@@ -226,6 +229,11 @@ class User(Base):
         primaryjoin="User.id == UserSecurityRole.user_id",
         secondaryjoin="SecurityRole.id == UserSecurityRole.role_id",
         back_populates="users",
+    )
+    dashboard_card_preferences = relationship(
+        "UserDashboardCardPreference",
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
 
     # Runtime role cache (not stored in database)
@@ -440,3 +448,36 @@ class UserDataGridColumnPreference(Base):
 
     def __repr__(self):
         return f"<UserDataGridColumnPreference(user_id={self.user_id}, grid_identifier='{self.grid_identifier}')>"
+
+
+class UserDashboardCardPreference(Base):
+    """
+    Store user preferences for which dashboard cards are visible.
+    Each user can customize which cards appear on their dashboard.
+    """
+
+    __tablename__ = "user_dashboard_card_preference"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID(), ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    card_identifier = Column(
+        String(100), nullable=False
+    )  # e.g., "hosts", "updates", "security", "reboot", "antivirus", "opentelemetry"
+    visible = Column(Boolean, nullable=False, default=True)
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        onupdate=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+
+    # Relationship to user
+    user = relationship("User", back_populates="dashboard_card_preferences")
+
+    def __repr__(self):
+        return f"<UserDashboardCardPreference(user_id={self.user_id}, card='{self.card_identifier}', visible={self.visible})>"

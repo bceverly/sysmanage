@@ -112,7 +112,18 @@ like to add:
     every host that is approved
     on registration.
 
-12. Add a new chart to the dash-
-    board to show the number of
-    hosts that have antivirus
-    deployed and enabled on them.
+12. We need an audit table in the
+    database that records every
+    action the user takes in terms
+    of changing anything in the
+    sysmanage database or sending
+    messages to a remote agent
+    that will result in a change
+    being made on the remote
+    host.  Also should have an
+    audit report added to the
+    reports tab.
+
+13. Add the ability to hook up a
+    remote host to Graylog for
+    log aggregation.

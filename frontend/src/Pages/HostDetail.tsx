@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import AntivirusStatusCard from '../Components/AntivirusStatusCard';
+import CommercialAntivirusStatusCard from '../Components/CommercialAntivirusStatusCard';
 import { 
     Box, 
     Card, 
@@ -148,7 +149,7 @@ const HostDetail = () => {
     const getTabNames = useCallback(() => {
         const tabs = ['info', 'hardware', 'software', 'software-changes'];
         if (supportsThirdPartyRepos()) tabs.push('third-party-repos');
-        tabs.push('access', 'certificates', 'server-roles');
+        tabs.push('access', 'security', 'certificates', 'server-roles');
         if (ubuntuProInfo?.available) tabs.push('ubuntu-pro');
         tabs.push('diagnostics');
         return tabs;
@@ -3778,6 +3779,12 @@ const HostDetail = () => {
                             isHostActive={host?.active || false}
                             isAgentPrivileged={host?.is_agent_privileged || false}
                             hasOsDefault={hasAntivirusOsDefault}
+                            refreshTrigger={antivirusRefreshTrigger}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <CommercialAntivirusStatusCard
+                            hostId={hostId}
                             refreshTrigger={antivirusRefreshTrigger}
                         />
                     </Grid>

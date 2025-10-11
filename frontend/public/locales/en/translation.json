@@ -28,8 +28,16 @@
     "updates": "Updates",
     "security": "Security",
     "rebootRequired": "Reboot Needed",
+    "antivirusCoverage": "Antivirus",
+    "openTelemetryCoverage": "OpenTelemetry",
     "totalUsers": "Total Users",
-    "systemHealth": "System Health"
+    "systemHealth": "System Health",
+    "settings": {
+      "title": "Dashboard Settings",
+      "description": "Select which cards to display on your dashboard",
+      "checkAll": "Check All",
+      "checkNone": "Check None"
+    }
   },
   "hosts": {
     "title": "Host Management",
@@ -878,7 +886,16 @@
     "step3CreateUser": "Create a new admin user via the Users page in this interface",
     "step4LoginNewUser": "Log out and log in with your new admin account",
     "step5RemoveCredentials": "Remove admin_userid and admin_password from your YAML configuration file",
-    "step6RestartServer": "Restart the server with ./run.sh"
+    "step6RestartServer": "Restart the server with ./run.sh",
+    "antivirusCoverage": {
+      "title": "Antivirus Coverage",
+      "coverage": "Coverage",
+      "totalHosts": "Total Hosts",
+      "protected": "Protected",
+      "unprotected": "Unprotected",
+      "warningMessage": "{{count}} host(s) do not have antivirus protection enabled.",
+      "successMessage": "All hosts have antivirus protection enabled."
+    }
   },
   "search": {
     "search": "Search",
@@ -1351,8 +1368,12 @@
   },
   "security": {
     "antivirus": "Antivirus",
+    "antivirusOpenSource": "Antivirus - Open Source",
+    "commercialAntivirus": "Antivirus - Commercial",
     "antivirusError": "Failed to load antivirus status",
+    "commercialAntivirusError": "Failed to load commercial antivirus status",
     "noAntivirusDetected": "No antivirus software detected",
+    "noCommercialAntivirusDetected": "No commercial antivirus detected",
     "software": "Software",
     "version": "Version",
     "installPath": "Installation Path",
@@ -1361,6 +1382,23 @@
     "disabled": "Disabled",
     "unknown": "Unknown",
     "lastUpdated": "Last Updated",
+    "protected": "Protected",
+    "notProtected": "Not Protected",
+    "protectionStatus": "Protection Status",
+    "coreService": "Core Service",
+    "antivirusProtection": "Antivirus",
+    "antispyware": "Antispyware",
+    "realtimeProtection": "Real-time Protection",
+    "tamperProtection": "Tamper Protection",
+    "scanInformation": "Scan Information",
+    "lastFullScan": "Last Full Scan",
+    "lastQuickScan": "Last Quick Scan",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "{{days}} days ago",
+    "never": "Never",
+    "signatureInformation": "Signature Information",
+    "statusLastUpdated": "Status last updated",
     "alreadyDeployed": "Antivirus already deployed",
     "alreadyEnabled": "Antivirus already enabled",
     "alreadyDisabled": "Antivirus already disabled",

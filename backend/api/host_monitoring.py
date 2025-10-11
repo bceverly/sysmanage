@@ -16,10 +16,12 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
-from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
+from backend.websocket.queue_operations import QueueOperations
+from backend.websocket.queue_enums import QueueDirection
 
 router = APIRouter()
+queue_ops = QueueOperations()
 logger = logging.getLogger(__name__)
 
 
@@ -143,16 +145,16 @@ async def request_certificates_collection(host_id: str):
             "CERTIFICATE COLLECTION: Created command message: %s", command_message
         )
 
-        # Send command to agent via WebSocket
-        success = await connection_manager.send_to_host(host_id, command_message)
-
-        logger.info("CERTIFICATE COLLECTION: WebSocket send result: %s", success)
-
-        if not success:
-            logger.warning(
-                "CERTIFICATE COLLECTION: Agent not connected for host: %s", host_id
-            )
-            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+        # Send command to agent via message queue
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+        # Commit the session to persist the queued message
+        session.commit()
 
         logger.info(
             "CERTIFICATE COLLECTION: Successfully requested certificate collection for host: %s",
@@ -253,14 +255,16 @@ async def request_roles_collection(host_id: str):
 
         logger.info("ROLE COLLECTION: Created command message: %s", command_message)
 
-        # Send command to agent via WebSocket
-        success = await connection_manager.send_to_host(host_id, command_message)
-
-        logger.info("ROLE COLLECTION: WebSocket send result: %s", success)
-
-        if not success:
-            logger.error("ROLE COLLECTION: Failed to send command to host %s", host_id)
-            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+        # Send command to agent via message queue
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+        # Commit the session to persist the queued message
+        session.commit()
 
         logger.info(
             "ROLE COLLECTION: Successfully requested role collection for host: %s",
@@ -359,14 +363,16 @@ async def control_services(
 
         logger.info("SERVICE CONTROL: Created command message: %s", command_message)
 
-        # Send command to agent via WebSocket
-        success = await connection_manager.send_to_host(host_id, command_message)
-
-        logger.info("SERVICE CONTROL: WebSocket send result: %s", success)
-
-        if not success:
-            logger.error("SERVICE CONTROL: Failed to send command to host %s", host_id)
-            raise HTTPException(status_code=503, detail=_("Agent is not connected"))
+        # Send command to agent via message queue
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+        # Commit the session to persist the queued message
+        session.commit()
 
         logger.info(
             "SERVICE CONTROL: Successfully requested %s for services %s on host: %s",

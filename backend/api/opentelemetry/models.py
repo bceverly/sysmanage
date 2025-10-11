@@ -32,3 +32,12 @@ class OpenTelemetryStatusResponse(BaseModel):
     service_status: str  # "running", "stopped", "unknown"
     grafana_url: Optional[str] = None
     grafana_configured: bool
+
+
+class OpenTelemetryCoverageResponse(BaseModel):
+    """Response model for OpenTelemetry coverage statistics."""
+
+    total_hosts: int
+    hosts_with_opentelemetry: int
+    hosts_without_opentelemetry: int
+    coverage_percentage: float

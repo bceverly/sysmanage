@@ -114,6 +114,38 @@ export const handlers = [
       return HttpResponse.json(null);
     }
 
+    // Dashboard card preferences
+    if (path === '/api/user-preferences/dashboard-cards') {
+      return HttpResponse.json({
+        preferences: [
+          { card_identifier: 'hosts', visible: true },
+          { card_identifier: 'updates', visible: true },
+          { card_identifier: 'security', visible: true },
+          { card_identifier: 'reboot', visible: true },
+          { card_identifier: 'antivirus', visible: true },
+          { card_identifier: 'opentelemetry', visible: true }
+        ]
+      });
+    }
+
+    // Antivirus coverage
+    if (path === '/api/antivirus-coverage') {
+      return HttpResponse.json({
+        total_hosts: 0,
+        hosts_with_antivirus: 0,
+        coverage_percentage: 0
+      });
+    }
+
+    // OpenTelemetry coverage
+    if (path === '/api/opentelemetry/opentelemetry-coverage') {
+      return HttpResponse.json({
+        total_hosts: 0,
+        hosts_with_opentelemetry: 0,
+        coverage_percentage: 0
+      });
+    }
+
     // Default: return empty array for API endpoints
     console.log(`MSW: Unhandled API endpoint ${path}, returning empty array`);
     return HttpResponse.json([]);
@@ -136,6 +168,14 @@ export const handlers = [
       success: true,
       message: 'Package uninstallation has been queued',
       uninstallation_id: `uuid-${Math.random().toString(36).substr(2, 9)}`
+    });
+  }),
+
+  // Handle PUT requests for dashboard preferences
+  http.put('http://localhost:8080/api/user-preferences/dashboard-cards', async ({ request }) => {
+    const body = await request.json() as { preferences: Array<{ card_identifier: string; visible: boolean }> };
+    return HttpResponse.json({
+      preferences: body.preferences
     });
   }),
 

@@ -3,8 +3,18 @@ Software management models for SysManage - packages, updates, and installations.
 """
 
 import uuid
+from datetime import datetime, timezone
 
-from sqlalchemy import BigInteger, Boolean, Column, DateTime, ForeignKey, String, Text
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import TypeDecorator
 
@@ -358,4 +368,76 @@ class AntivirusStatus(Base):
         return (
             f"<AntivirusStatus(id={self.id}, host_id={self.host_id}, "
             f"software_name='{self.software_name}', enabled={self.enabled})>"
+        )
+
+
+class CommercialAntivirusStatus(Base):
+    """
+    This class holds the object mapping for the commercial_antivirus_status table.
+    Stores commercial antivirus software status for hosts (e.g., Microsoft Defender, McAfee, Symantec).
+    """
+
+    __tablename__ = "commercial_antivirus_status"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(
+        GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+
+    # Product identification
+    product_name = Column(
+        String(255), nullable=True
+    )  # Name of commercial AV (e.g., "Microsoft Defender")
+    product_version = Column(String(100), nullable=True)  # Version of the AV software
+
+    # Core service status flags
+    service_enabled = Column(Boolean, nullable=True)  # Core AV service enabled
+    antispyware_enabled = Column(
+        Boolean, nullable=True
+    )  # Antispyware protection enabled
+    antivirus_enabled = Column(Boolean, nullable=True)  # Antivirus protection enabled
+    realtime_protection_enabled = Column(
+        Boolean, nullable=True
+    )  # Real-time protection enabled
+
+    # Scan age (in days since last scan)
+    # Using BigInteger to handle Windows Defender's 4294967295 (2^32-1) for "never scanned"
+    full_scan_age = Column(BigInteger, nullable=True)  # Days since last full scan
+    quick_scan_age = Column(BigInteger, nullable=True)  # Days since last quick scan
+
+    # Scan end times (naive UTC datetime)
+    full_scan_end_time = Column(
+        DateTime, nullable=True
+    )  # Last full scan completion time
+    quick_scan_end_time = Column(
+        DateTime, nullable=True
+    )  # Last quick scan completion time
+
+    # Signature/definition information - last updated (naive UTC datetime)
+    signature_last_updated = Column(
+        DateTime, nullable=True
+    )  # When signatures were last updated
+    signature_version = Column(String(100), nullable=True)  # Current signature version
+
+    # Additional status
+    tamper_protection_enabled = Column(
+        Boolean, nullable=True
+    )  # Tamper protection status
+
+    # Timestamps
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    last_updated = Column(DateTime, nullable=False)  # UTC datetime, stored as naive
+
+    # Relationship back to Host
+    host = relationship("Host", back_populates="commercial_antivirus_status")
+
+    def __repr__(self):
+        return (
+            f"<CommercialAntivirusStatus(id={self.id}, host_id={self.host_id}, "
+            f"product_name='{self.product_name}', "
+            f"antivirus_enabled={self.antivirus_enabled})>"
         )
