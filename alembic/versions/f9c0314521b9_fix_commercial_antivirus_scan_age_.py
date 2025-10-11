@@ -21,35 +21,35 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # Change full_scan_age and quick_scan_age from INTEGER to BIGINT
     # This fixes overflow with Windows Defender's 4294967295 (2^32-1) for "never scanned"
-    op.alter_column(
-        'commercial_antivirus_status',
-        'full_scan_age',
-        existing_type=sa.Integer(),
-        type_=sa.BigInteger(),
-        existing_nullable=True
-    )
-    op.alter_column(
-        'commercial_antivirus_status',
-        'quick_scan_age',
-        existing_type=sa.Integer(),
-        type_=sa.BigInteger(),
-        existing_nullable=True
-    )
+    # Use batch mode for SQLite compatibility
+    with op.batch_alter_table('commercial_antivirus_status', schema=None) as batch_op:
+        batch_op.alter_column(
+            'full_scan_age',
+            existing_type=sa.Integer(),
+            type_=sa.BigInteger(),
+            existing_nullable=True
+        )
+        batch_op.alter_column(
+            'quick_scan_age',
+            existing_type=sa.Integer(),
+            type_=sa.BigInteger(),
+            existing_nullable=True
+        )
 
 
 def downgrade() -> None:
     # Revert back to INTEGER (may lose data if values exceed INTEGER range)
-    op.alter_column(
-        'commercial_antivirus_status',
-        'quick_scan_age',
-        existing_type=sa.BigInteger(),
-        type_=sa.Integer(),
-        existing_nullable=True
-    )
-    op.alter_column(
-        'commercial_antivirus_status',
-        'full_scan_age',
-        existing_type=sa.BigInteger(),
-        type_=sa.Integer(),
-        existing_nullable=True
-    )
+    # Use batch mode for SQLite compatibility
+    with op.batch_alter_table('commercial_antivirus_status', schema=None) as batch_op:
+        batch_op.alter_column(
+            'quick_scan_age',
+            existing_type=sa.BigInteger(),
+            type_=sa.Integer(),
+            existing_nullable=True
+        )
+        batch_op.alter_column(
+            'full_scan_age',
+            existing_type=sa.BigInteger(),
+            type_=sa.Integer(),
+            existing_nullable=True
+        )

@@ -19,25 +19,30 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create antivirus_default table
-    op.create_table(
-        'antivirus_default',
-        sa.Column('id', sa.dialects.postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('os_name', sa.String(length=100), nullable=False),
-        sa.Column('antivirus_package', sa.String(length=255), nullable=False),
-        sa.Column('created_at', sa.DateTime(), nullable=False),
-        sa.Column('updated_at', sa.DateTime(), nullable=False),
-        sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('os_name')
-    )
+    # Check if table already exists
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
 
-    # Create index on os_name for faster lookups
-    op.create_index(
-        op.f('ix_antivirus_default_os_name'),
-        'antivirus_default',
-        ['os_name'],
-        unique=True
-    )
+    if 'antivirus_default' not in inspector.get_table_names():
+        # Create antivirus_default table
+        op.create_table(
+            'antivirus_default',
+            sa.Column('id', sa.dialects.postgresql.UUID(as_uuid=True), nullable=False),
+            sa.Column('os_name', sa.String(length=100), nullable=False),
+            sa.Column('antivirus_package', sa.String(length=255), nullable=False),
+            sa.Column('created_at', sa.DateTime(), nullable=False),
+            sa.Column('updated_at', sa.DateTime(), nullable=False),
+            sa.PrimaryKeyConstraint('id'),
+            sa.UniqueConstraint('os_name')
+        )
+
+        # Create index on os_name for faster lookups
+        op.create_index(
+            op.f('ix_antivirus_default_os_name'),
+            'antivirus_default',
+            ['os_name'],
+            unique=True
+        )
 
 
 def downgrade() -> None:

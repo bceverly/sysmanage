@@ -19,23 +19,28 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.create_table(
-        'user_datagrid_column_preferences',
-        sa.Column('id', sa.UUID(), nullable=False),
-        sa.Column('user_id', sa.UUID(), nullable=False),
-        sa.Column('grid_identifier', sa.String(length=255), nullable=False),
-        sa.Column('hidden_columns', sa.JSON(), nullable=False),
-        sa.Column('created_at', sa.DateTime(), nullable=False),
-        sa.Column('updated_at', sa.DateTime(), nullable=False),
-        sa.PrimaryKeyConstraint('id'),
-        sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
-    )
-    op.create_index(
-        op.f('ix_user_datagrid_column_preferences_user_id_grid'),
-        'user_datagrid_column_preferences',
-        ['user_id', 'grid_identifier'],
-        unique=True
-    )
+    # Check if table already exists
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+
+    if 'user_datagrid_column_preferences' not in inspector.get_table_names():
+        op.create_table(
+            'user_datagrid_column_preferences',
+            sa.Column('id', sa.UUID(), nullable=False),
+            sa.Column('user_id', sa.UUID(), nullable=False),
+            sa.Column('grid_identifier', sa.String(length=255), nullable=False),
+            sa.Column('hidden_columns', sa.JSON(), nullable=False),
+            sa.Column('created_at', sa.DateTime(), nullable=False),
+            sa.Column('updated_at', sa.DateTime(), nullable=False),
+            sa.PrimaryKeyConstraint('id'),
+            sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
+        )
+        op.create_index(
+            op.f('ix_user_datagrid_column_preferences_user_id_grid'),
+            'user_datagrid_column_preferences',
+            ['user_id', 'grid_identifier'],
+            unique=True
+        )
 
 
 def downgrade() -> None:
