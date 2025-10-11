@@ -371,19 +371,29 @@ async def browser_context(
 
     # Launch browser in headless mode (works on servers without display)
     # Add memory optimization flags to reduce OOM risk
+    # Platform-specific arguments
+    browser_args = [
+        "--disable-gpu",
+        "--disable-software-rasterizer",
+        "--disable-extensions",
+        "--disable-background-networking",
+        "--disable-sync",
+        "--metrics-recording-only",
+        "--no-first-run",
+    ]
+
+    # Add Linux-specific arguments only on non-Windows systems
+    if platform.system() != "Windows":
+        browser_args.extend(
+            [
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+            ]
+        )
+
     launch_options = {
         "headless": True,
-        "args": [
-            "--no-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-gpu",
-            "--disable-software-rasterizer",
-            "--disable-extensions",
-            "--disable-background-networking",
-            "--disable-sync",
-            "--metrics-recording-only",
-            "--no-first-run",
-        ],
+        "args": browser_args,
     }
 
     if browser_name == "chromium":
