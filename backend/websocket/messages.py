@@ -35,6 +35,7 @@ class MessageType(str, Enum):
     THIRD_PARTY_REPOSITORY_UPDATE = "third_party_repository_update"
     ANTIVIRUS_STATUS_UPDATE = "antivirus_status_update"
     COMMERCIAL_ANTIVIRUS_STATUS_UPDATE = "commercial_antivirus_status_update"
+    FIREWALL_STATUS_UPDATE = "firewall_status_update"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -64,6 +65,10 @@ class CommandType(str, Enum):
     ENABLE_ANTIVIRUS = "enable_antivirus"
     DISABLE_ANTIVIRUS = "disable_antivirus"
     REMOVE_ANTIVIRUS = "remove_antivirus"
+    DEPLOY_FIREWALL = "deploy_firewall"
+    ENABLE_FIREWALL = "enable_firewall"
+    DISABLE_FIREWALL = "disable_firewall"
+    RESTART_FIREWALL = "restart_firewall"
 
 
 class Message:

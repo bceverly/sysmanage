@@ -441,3 +441,49 @@ class CommercialAntivirusStatus(Base):
             f"product_name='{self.product_name}', "
             f"antivirus_enabled={self.antivirus_enabled})>"
         )
+
+
+class FirewallStatus(Base):
+    """
+    This class holds the object mapping for the firewall_status table.
+    Stores the current firewall status and rules for each host.
+    """
+
+    __tablename__ = "firewall_status"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(
+        GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    firewall_name = Column(
+        String(255), nullable=True
+    )  # Name of firewall software (pf, ufw, Windows Firewall, etc.)
+    enabled = Column(
+        Boolean, nullable=False, default=False
+    )  # Whether firewall is enabled
+    tcp_open_ports = Column(
+        Text, nullable=True
+    )  # JSON array of open TCP ports/ranges (legacy)
+    udp_open_ports = Column(
+        Text, nullable=True
+    )  # JSON array of open UDP ports/ranges (legacy)
+    ipv4_ports = Column(
+        Text, nullable=True
+    )  # JSON array of IPv4 ports with protocol tags: [{"port": "22", "protocols": ["tcp"]}]
+    ipv6_ports = Column(
+        Text, nullable=True
+    )  # JSON array of IPv6 ports with protocol tags: [{"port": "22", "protocols": ["tcp"]}]
+    last_updated = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )  # UTC datetime, stored as naive
+
+    # Relationship back to Host
+    host = relationship("Host", back_populates="firewall_status")
+
+    def __repr__(self):
+        return (
+            f"<FirewallStatus(id={self.id}, host_id={self.host_id}, "
+            f"firewall_name='{self.firewall_name}', enabled={self.enabled})>"
+        )

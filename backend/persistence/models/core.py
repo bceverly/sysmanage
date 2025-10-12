@@ -173,6 +173,9 @@ class Host(Base):
     commercial_antivirus_status = relationship(
         "CommercialAntivirusStatus", back_populates="host", uselist=False
     )
+    firewall_status = relationship(
+        "FirewallStatus", back_populates="host", uselist=False
+    )
     user_accounts = relationship("UserAccount", back_populates="host")
     user_groups = relationship("UserGroup", back_populates="host")
     certificates = relationship(

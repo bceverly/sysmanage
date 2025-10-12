@@ -2,6 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import AntivirusStatusCard from '../Components/AntivirusStatusCard';
 import CommercialAntivirusStatusCard from '../Components/CommercialAntivirusStatusCard';
+import FirewallStatusCard from '../Components/FirewallStatusCard';
 import { 
     Box, 
     Card, 
@@ -1755,7 +1756,7 @@ const HostDetail = () => {
                 setSnackbarMessage(t('hostDetail.antivirusDeploySuccess', 'Antivirus deployment initiated successfully'));
                 setSnackbarSeverity('success');
                 // Trigger refresh after a short delay to allow agent to update
-                setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 5000);
+                setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 10000);
             }
             setSnackbarOpen(true);
         } catch (error) {
@@ -1775,7 +1776,7 @@ const HostDetail = () => {
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
             // Trigger refresh after a short delay
-            setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 3000);
+            setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 10000);
         } catch (error) {
             console.error('Failed to enable antivirus:', error);
             setSnackbarMessage(t('security.antivirusEnableFailed', 'Failed to enable antivirus'));
@@ -1793,7 +1794,7 @@ const HostDetail = () => {
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
             // Trigger refresh after a short delay
-            setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 3000);
+            setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 10000);
         } catch (error) {
             console.error('Failed to disable antivirus:', error);
             setSnackbarMessage(t('security.antivirusDisableFailed', 'Failed to disable antivirus'));
@@ -1811,7 +1812,7 @@ const HostDetail = () => {
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
             // Trigger refresh after a short delay
-            setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 5000);
+            setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 10000);
         } catch (error) {
             console.error('Failed to remove antivirus:', error);
             setSnackbarMessage(t('security.antivirusRemoveFailed', 'Failed to remove antivirus'));
@@ -3765,7 +3766,7 @@ const HostDetail = () => {
             {/* Security Tab */}
             {currentTab === getSecurityTabIndex() && hostId && (
                 <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
                         <AntivirusStatusCard
                             hostId={hostId}
                             onDeployAntivirus={handleDeployAntivirus}
@@ -3780,10 +3781,18 @@ const HostDetail = () => {
                             isAgentPrivileged={host?.is_agent_privileged || false}
                             hasOsDefault={hasAntivirusOsDefault}
                             refreshTrigger={antivirusRefreshTrigger}
+                            sx={{ height: '100%', width: '100%' }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
+                        <CommercialAntivirusStatusCard
+                            hostId={hostId}
+                            refreshTrigger={antivirusRefreshTrigger}
+                            sx={{ height: '100%', width: '100%' }}
                         />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                        <CommercialAntivirusStatusCard
+                        <FirewallStatusCard
                             hostId={hostId}
                             refreshTrigger={antivirusRefreshTrigger}
                         />

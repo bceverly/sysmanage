@@ -17,7 +17,6 @@ from backend.i18n import _
 from backend.persistence import db as persistence_db, models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
-from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import CommandType, Message, MessageType
 from backend.websocket.queue_operations import QueueOperations
 from backend.websocket.queue_enums import QueueDirection
@@ -46,8 +45,16 @@ class AntivirusStatusResponse(BaseModel):
             return str(value)
         return value
 
+    @validator("last_updated", pre=True)
+    def add_utc_timezone(cls, value):  # pylint: disable=no-self-argument
+        """Add UTC timezone to naive datetime."""
+        if isinstance(value, datetime) and value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value
+
     class Config:
         from_attributes = True
+        json_encoders = {datetime: lambda v: v.isoformat() if v else None}
 
 
 @router.get(
@@ -148,23 +155,24 @@ async def deploy_antivirus(
     success_count = 0
     failed_hosts = []
 
-    for host_id_str in deploy_request.host_ids:
-        try:
-            # Convert host_id to UUID
+    # Use a single session for all operations to ensure proper commit
+    with session_local() as session:
+        for host_id_str in deploy_request.host_ids:
             try:
-                host_id = uuid.UUID(host_id_str)
-            except ValueError:
-                failed_hosts.append(
-                    {
-                        "host_id": host_id_str,
-                        "hostname": "Unknown",
-                        "reason": _("Invalid host ID format"),
-                    }
-                )
-                continue
+                # Convert host_id to UUID
+                try:
+                    host_id = uuid.UUID(host_id_str)
+                except ValueError:
+                    failed_hosts.append(
+                        {
+                            "host_id": host_id_str,
+                            "hostname": "Unknown",
+                            "reason": _("Invalid host ID format"),
+                        }
+                    )
+                    continue
 
-            # Get host details
-            with session_local() as session:
+                # Get host details
                 host = (
                     session.query(models.Host).filter(models.Host.id == host_id).first()
                 )
@@ -254,14 +262,13 @@ async def deploy_antivirus(
                     antivirus_default.antivirus_package,
                 )
 
-        except Exception as e:
-            logger.error("Error deploying antivirus to host %s: %s", host_id_str, e)
-            failed_hosts.append(
-                {"host_id": host_id_str, "hostname": "Unknown", "reason": str(e)}
-            )
+            except Exception as e:
+                logger.error("Error deploying antivirus to host %s: %s", host_id_str, e)
+                failed_hosts.append(
+                    {"host_id": host_id_str, "hostname": "Unknown", "reason": str(e)}
+                )
 
-    # Commit the session to persist all queued messages
-    with session_local() as session:
+        # Commit the session to persist all queued messages
         session.commit()
 
     # Generate response message
@@ -306,11 +313,7 @@ async def enable_antivirus(
     if not host:
         raise HTTPException(status_code=404, detail=_("Host not found"))
 
-    # Check if agent is connected
-    if host.fqdn not in connection_manager.hostname_to_agent:
-        raise HTTPException(status_code=400, detail=_("Host agent is not connected"))
-
-    # Send enable command to agent
+    # Queue enable command for agent (will be delivered when agent is available)
     message = Message(
         message_type=MessageType.COMMAND,
         data={
@@ -360,11 +363,7 @@ async def disable_antivirus(
     if not host:
         raise HTTPException(status_code=404, detail=_("Host not found"))
 
-    # Check if agent is connected
-    if host.fqdn not in connection_manager.hostname_to_agent:
-        raise HTTPException(status_code=400, detail=_("Host agent is not connected"))
-
-    # Send disable command to agent
+    # Queue disable command for agent (will be delivered when agent is available)
     message = Message(
         message_type=MessageType.COMMAND,
         data={
@@ -421,14 +420,7 @@ async def remove_antivirus(
             logger.error("Host not found: %s", host_id)
             raise HTTPException(status_code=404, detail=_("Host not found"))
 
-        # Check if agent is connected
-        if host.fqdn not in connection_manager.hostname_to_agent:
-            logger.error("Agent not connected for host: %s", host.fqdn)
-            raise HTTPException(
-                status_code=400, detail=_("Host agent is not connected")
-            )
-
-        # Send remove command to agent
+        # Queue remove command for agent (will be delivered when agent is available)
         message = Message(
             message_type=MessageType.COMMAND,
             data={

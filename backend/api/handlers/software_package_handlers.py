@@ -14,6 +14,7 @@ from backend.persistence.models import (
     AntivirusStatus,
     AvailablePackage,
     CommercialAntivirusStatus,
+    FirewallStatus,
     Host,
     PackageUpdate,
     SoftwarePackage,
@@ -614,4 +615,93 @@ async def handle_commercial_antivirus_status_update(
         return {
             "message_type": "error",
             "error": f"Failed to process commercial antivirus status update: {str(e)}",
+        }
+
+
+async def handle_firewall_status_update(db: Session, connection, message_data: dict):
+    """Handle firewall status update message from agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
+
+    if not hasattr(connection, "host_id") or not connection.host_id:
+        return {"message_type": "error", "error": _("Host not registered")}
+
+    try:
+        # Extract firewall status information
+        firewall_name = message_data.get("firewall_name")
+        enabled = message_data.get("enabled", False)
+        tcp_open_ports = message_data.get(
+            "tcp_open_ports"
+        )  # JSON string or list (legacy)
+        udp_open_ports = message_data.get(
+            "udp_open_ports"
+        )  # JSON string or list (legacy)
+        ipv4_ports = message_data.get("ipv4_ports")  # JSON string or list
+        ipv6_ports = message_data.get("ipv6_ports")  # JSON string or list
+
+        debug_logger.info(
+            "Processing firewall status update from %s: firewall=%s, enabled=%s",
+            getattr(connection, "hostname", "unknown"),
+            firewall_name,
+            enabled,
+        )
+
+        # Delete existing firewall status for this host (if any)
+        db.execute(
+            delete(FirewallStatus).where(FirewallStatus.host_id == connection.host_id)
+        )
+
+        # Add new firewall status
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+        # Convert lists to JSON strings if needed
+        import json
+
+        if isinstance(tcp_open_ports, list):
+            tcp_open_ports = json.dumps(tcp_open_ports)
+        if isinstance(udp_open_ports, list):
+            udp_open_ports = json.dumps(udp_open_ports)
+        if isinstance(ipv4_ports, list):
+            ipv4_ports = json.dumps(ipv4_ports)
+        if isinstance(ipv6_ports, list):
+            ipv6_ports = json.dumps(ipv6_ports)
+
+        firewall_status = FirewallStatus(
+            host_id=connection.host_id,
+            firewall_name=firewall_name,
+            enabled=enabled,
+            tcp_open_ports=tcp_open_ports,
+            udp_open_ports=udp_open_ports,
+            ipv4_ports=ipv4_ports,
+            ipv6_ports=ipv6_ports,
+            last_updated=now,
+        )
+        db.add(firewall_status)
+        db.commit()
+
+        debug_logger.info(
+            "Successfully stored firewall status for host %s",
+            getattr(connection, "hostname", "unknown"),
+        )
+
+        return {
+            "message_type": "firewall_status_update_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "status": "processed",
+        }
+
+    except Exception as e:
+        debug_logger.error(
+            "Error processing firewall status update from %s: %s",
+            getattr(connection, "hostname", "unknown"),
+            e,
+        )
+        db.rollback()
+        return {
+            "message_type": "error",
+            "error": f"Failed to process firewall status update: {str(e)}",
         }

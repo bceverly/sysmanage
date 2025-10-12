@@ -15,24 +15,21 @@ like to add:
     sends linearly with the number of
     registered agents.
 
-3.  Firewall Rules - Manage firewall rules
-    on the agent machines.
-
-4.  Versioning of the API - We need to make
+3.  Versioning of the API - We need to make
     sure that older clients can talk to
     newer servers and degrade gracefully.
 
-5.  User Management - Ability to manage
+4.  User Management - Ability to manage
     add/edit/delete users and groups on
     the agent hosts.
 
-6.  We need a MFA mechanism using an
+5.  We need a MFA mechanism using an
     authenticator app on someone's
     mobile device as well as the ability
     to send a code via email to their
     registered email address.
 
-7.  Have the agent and the server log
+6.  Have the agent and the server log
     their messages to the operating
     system appropriate location but
     fall back to the local logs dir-
@@ -45,7 +42,7 @@ like to add:
     sysmanage-agent subdirectory in
     which the logs should be placed.
 
-8.  Add an automation tab between
+7.  Add an automation tab between
     updates and scripts in the main
     navbar.  on that tab, have an
     "Updates" subtab that allows you
@@ -80,7 +77,7 @@ like to add:
     string externalization /
     translation.
 
-9. Add the ability to issue and
+8. Add the ability to issue and
     manage SysManage API keys with
     View/Edit/Admin roles.  They
     should be stored in the vault
@@ -93,7 +90,7 @@ like to add:
     prefixed to get the token
     issued / renewed.
 
-10. A cool AI integration would be
+9. A cool AI integration would be
     to have the system pull back
     a diagnostics report from a
     remote agent and do a health
@@ -104,7 +101,7 @@ like to add:
     with the opportunity to have
     sysmanage fix the issues.
 
-11. We should have a settings
+10. We should have a settings
     screen that allows the user
     to specify default third-
     party repositories that
@@ -112,7 +109,7 @@ like to add:
     every host that is approved
     on registration.
 
-12. We need an audit table in the
+11. We need an audit table in the
     database that records every
     action the user takes in terms
     of changing anything in the
@@ -124,6 +121,33 @@ like to add:
     audit report added to the
     reports tab.
 
-13. Add the ability to hook up a
+12. Add the ability to hook up a
     remote host to Graylog for
     log aggregation.
+
+13. Based on server roles that
+    we detect, recommend firewall
+    configuration for that host.
+
+14. Have a "Firewall Configuration"
+    page on settings that allow
+    the user to create a set of
+    named configurations that
+    explicitly enable or disable
+    inbound or outbound ports
+    generically for any firewall
+    and save it under a name.
+    The user can then turn around
+    and use that named config
+    to deploy rulesets to a
+    remote host.  The UI for the
+    deployment should allow the
+    user to deploy one OR MORE
+    of these so that the admin
+    can create things like an
+    ssh allowed config, a data-
+    base config and a web
+    server config and then stack
+    all three of these and 
+    associate them with a
+    particular host.

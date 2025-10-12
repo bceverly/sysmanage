@@ -35,6 +35,7 @@ __all__ = [
     "AntivirusDefault",
     "AntivirusStatus",
     "CommercialAntivirusStatus",
+    "FirewallStatus",
     # User management models
     "UserAccount",
     "UserGroup",

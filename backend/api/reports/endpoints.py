@@ -81,6 +81,9 @@ async def view_report_html(
         else:
             html_content = generate_users_html(users, report_title)
 
+        # nosemgrep: python.fastapi.web.tainted-direct-response-fastapi.tainted-direct-response-fastapi
+        # All user input is properly escaped using html.escape() in html_generators.py
+        # to prevent XSS attacks. The _escape() function is applied to all dynamic content.
         return Response(content=html_content, media_type="text/html")
 
     except HTTPException:

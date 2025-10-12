@@ -16,6 +16,7 @@ from backend.persistence.models import (
     UserSecurityRole,
 )
 from backend.auth.auth_bearer import get_current_user
+from backend.security.roles import SecurityRoles, check_user_has_role
 
 router = APIRouter(prefix="/api/security-roles", tags=["security-roles"])
 
@@ -68,7 +69,21 @@ async def get_all_role_groups(
 ):
     """
     Get all security role groups with their roles.
+    Requires VIEW_USER_SECURITY_ROLES permission.
     """
+    # Check if current user has permission to view user security roles
+    current_user_obj = db.query(User).filter(User.userid == current_user).first()
+    if not current_user_obj:
+        raise HTTPException(status_code=401, detail="Current user not found")
+
+    if not check_user_has_role(
+        db, current_user_obj.id, SecurityRoles.VIEW_USER_SECURITY_ROLES
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to view user security roles",
+        )
+
     groups = db.query(SecurityRoleGroup).order_by(SecurityRoleGroup.id).all()
 
     result = []
@@ -111,7 +126,21 @@ async def get_user_roles(
 ):
     """
     Get all security roles for a specific user.
+    Requires VIEW_USER_SECURITY_ROLES permission.
     """
+    # Check if current user has permission to view user security roles
+    current_user_obj = db.query(User).filter(User.userid == current_user).first()
+    if not current_user_obj:
+        raise HTTPException(status_code=401, detail="Current user not found")
+
+    if not check_user_has_role(
+        db, current_user_obj.id, SecurityRoles.VIEW_USER_SECURITY_ROLES
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to view user security roles",
+        )
+
     # Verify user exists
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -138,17 +167,27 @@ async def update_user_roles(
 ):
     """
     Update security roles for a specific user.
+    Requires EDIT_USER_SECURITY_ROLES permission.
     """
-    # Verify user exists
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
     # Get current user's UUID from their userid (email)
     current_user_obj = db.query(User).filter(User.userid == current_user).first()
     if not current_user_obj:
         raise HTTPException(status_code=401, detail="Current user not found")
     current_user_uuid = current_user_obj.id
+
+    # Check if current user has permission to edit user security roles
+    if not check_user_has_role(
+        db, current_user_uuid, SecurityRoles.EDIT_USER_SECURITY_ROLES
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to edit user security roles",
+        )
+
+    # Verify user exists
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
     # Convert string UUIDs to UUID objects and verify all role IDs exist
     role_uuids = []

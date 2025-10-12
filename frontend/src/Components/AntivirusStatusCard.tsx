@@ -32,6 +32,7 @@ interface AntivirusStatusCardProps {
   isAgentPrivileged?: boolean;
   hasOsDefault?: boolean;
   refreshTrigger?: number;
+  sx?: object;
 }
 
 const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
@@ -48,6 +49,7 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
   isAgentPrivileged = false,
   hasOsDefault = false,
   refreshTrigger = 0,
+  sx = {},
 }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
@@ -97,7 +99,7 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
 
   if (loading) {
     return (
-      <Card>
+      <Card sx={sx}>
         <CardContent>
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="150px">
             <CircularProgress />
@@ -109,7 +111,7 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
 
   if (error) {
     return (
-      <Card>
+      <Card sx={sx}>
         <CardContent>
           <Alert severity="error">{error}</Alert>
         </CardContent>
@@ -123,7 +125,7 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
   };
 
   return (
-    <Card>
+    <Card sx={sx}>
       <CardContent>
         <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem', mb: 2 }}>
           <ShieldIcon sx={{ mr: 1 }} />

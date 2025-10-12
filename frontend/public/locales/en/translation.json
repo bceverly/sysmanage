@@ -1411,7 +1411,16 @@
     "antivirusDisableSuccess": "Antivirus disable initiated successfully",
     "antivirusDisableFailed": "Failed to disable antivirus",
     "antivirusRemoveSuccess": "Antivirus removal initiated successfully",
-    "antivirusRemoveFailed": "Failed to remove antivirus"
+    "antivirusRemoveFailed": "Failed to remove antivirus",
+    "firewall": "Firewall",
+    "firewallSoftware": "Firewall Software",
+    "firewallError": "Failed to load firewall status",
+    "noFirewallDetected": "No firewall detected",
+    "tcpOpenPorts": "TCP Open Ports",
+    "udpOpenPorts": "UDP Open Ports",
+    "ipv4OpenPorts": "IPv4 Open Ports",
+    "ipv6OpenPorts": "IPv6 Open Ports",
+    "noOpenPorts": "No open ports detected"
   },
   "dataGrid": {
     "columnVisibility": "Column Visibility",

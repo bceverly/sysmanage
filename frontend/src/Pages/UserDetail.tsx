@@ -75,6 +75,8 @@ const UserDetail = () => {
     const [canLockUser, setCanLockUser] = useState<boolean>(false);
     const [canUnlockUser, setCanUnlockUser] = useState<boolean>(false);
     const [canResetUserPassword, setCanResetUserPassword] = useState<boolean>(false);
+    const [canViewUserSecurityRoles, setCanViewUserSecurityRoles] = useState<boolean>(false);
+    const [canEditUserSecurityRoles, setCanEditUserSecurityRoles] = useState<boolean>(false);
 
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -82,14 +84,18 @@ const UserDetail = () => {
     // Check permissions
     useEffect(() => {
         const checkPermissions = async () => {
-            const [lockUser, unlockUser, resetUserPassword] = await Promise.all([
+            const [lockUser, unlockUser, resetUserPassword, viewRoles, editRoles] = await Promise.all([
                 hasPermission(SecurityRoles.LOCK_USER),
                 hasPermission(SecurityRoles.UNLOCK_USER),
-                hasPermission(SecurityRoles.RESET_USER_PASSWORD)
+                hasPermission(SecurityRoles.RESET_USER_PASSWORD),
+                hasPermission(SecurityRoles.VIEW_USER_SECURITY_ROLES),
+                hasPermission(SecurityRoles.EDIT_USER_SECURITY_ROLES)
             ]);
             setCanLockUser(lockUser);
             setCanUnlockUser(unlockUser);
             setCanResetUserPassword(resetUserPassword);
+            setCanViewUserSecurityRoles(viewRoles);
+            setCanEditUserSecurityRoles(editRoles);
         };
         checkPermissions();
     }, []);
@@ -130,9 +136,9 @@ const UserDetail = () => {
         fetchUser();
     }, [userId, navigate, t]);
 
-    // Fetch security roles and user's current roles
+    // Fetch security roles and user's current roles - only if user has view permission
     useEffect(() => {
-        if (!userId) return;
+        if (!userId || !canViewUserSecurityRoles) return;
 
         const fetchSecurityRoles = async () => {
             try {
@@ -141,7 +147,16 @@ const UserDetail = () => {
                     doGetAllRoleGroups(),
                     doGetUserRoles(userId)
                 ]);
-                setRoleGroups(groups);
+
+                // Sort groups alphabetically by name
+                const sortedGroups = [...groups].sort((a, b) => a.name.localeCompare(b.name));
+
+                // Sort roles within each group alphabetically by name
+                sortedGroups.forEach(group => {
+                    group.roles.sort((a, b) => a.name.localeCompare(b.name));
+                });
+
+                setRoleGroups(sortedGroups);
                 setSelectedRoles(userRoles.role_ids);
                 setOriginalRoles(userRoles.role_ids);
             } catch (err) {
@@ -153,7 +168,7 @@ const UserDetail = () => {
         };
 
         fetchSecurityRoles();
-    }, [userId, t]);
+    }, [userId, canViewUserSecurityRoles, t]);
 
     const formatDate = (dateString: string | null | undefined) => {
         if (!dateString) return t('common.notAvailable', 'N/A');
@@ -475,7 +490,8 @@ const UserDetail = () => {
                     </Card>
                 </Grid>
 
-                {/* Security Roles */}
+                {/* Security Roles - Only show if user has VIEW permission */}
+                {canViewUserSecurityRoles && (
                 <Grid item xs={12}>
                     <Card>
                         <CardContent>
@@ -485,6 +501,7 @@ const UserDetail = () => {
                                         <AdminPanelSettingsIcon sx={{ mr: 1 }} />
                                         {t('userDetail.securityRoles', 'Security Roles')}
                                     </Typography>
+                                    {canEditUserSecurityRoles && (
                                     <IconButton
                                         size="small"
                                         onClick={() => setRolesEditMode(!rolesEditMode)}
@@ -494,6 +511,7 @@ const UserDetail = () => {
                                     >
                                         <EditIcon fontSize="small" />
                                     </IconButton>
+                                    )}
                                 </Box>
                                 {rolesEditMode && (
                                     <Box>
@@ -561,7 +579,7 @@ const UserDetail = () => {
                                         </Alert>
                                     )}
 
-                                    {rolesEditMode && (
+                                    {rolesEditMode && canEditUserSecurityRoles && (
                                         <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
                                             <Button
                                                 variant="contained"
@@ -585,6 +603,7 @@ const UserDetail = () => {
                         </CardContent>
                     </Card>
                 </Grid>
+                )}
             </Grid>
 
             {/* Success Snackbar */}

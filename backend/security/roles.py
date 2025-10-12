@@ -25,74 +25,101 @@ class SecurityRoles(str, Enum):
     """
 
     # Host Management Roles
+    # - General Host Operations (alphabetical)
     APPROVE_HOST_REGISTRATION = "Approve Host Registration"
     DELETE_HOST = "Delete Host"
+    EDIT_TAGS = "Edit Tags"
     VIEW_HOST_DETAILS = "View Host Details"
+    # - Host Power Operations (alphabetical)
     REBOOT_HOST = "Reboot Host"
     SHUTDOWN_HOST = "Shutdown Host"
-    EDIT_TAGS = "Edit Tags"
-    STOP_HOST_SERVICE = "Stop Host Service"
-    START_HOST_SERVICE = "Start Host Service"
+    # - Host Service Operations (alphabetical)
     RESTART_HOST_SERVICE = "Restart Host Service"
+    START_HOST_SERVICE = "Start Host Service"
+    STOP_HOST_SERVICE = "Stop Host Service"
+
+    # Integration Management Roles
+    # - Queue Operations (alphabetical)
+    DELETE_QUEUE_MESSAGE = "Delete Queue Message"
+    # - Grafana Operations (alphabetical)
+    ENABLE_GRAFANA_INTEGRATION = "Enable Grafana Integration"
+    # - OpenTelemetry Operations (alphabetical)
+    DEPLOY_OPENTELEMETRY = "Deploy OpenTelemetry"
+    RESTART_OPENTELEMETRY_SERVICE = "Restart OpenTelemetry Service"
+    START_OPENTELEMETRY_SERVICE = "Start OpenTelemetry Service"
+    STOP_OPENTELEMETRY_SERVICE = "Stop OpenTelemetry Service"
 
     # Package Management Roles
+    # - Package Operations (alphabetical)
     ADD_PACKAGE = "Add Package"
-    APPLY_SOFTWARE_UPDATE = "Apply Software Update"
     APPLY_HOST_OS_UPGRADE = "Apply Host OS Upgrade"
+    APPLY_SOFTWARE_UPDATE = "Apply Software Update"
+    # - Third-Party Repository Operations (alphabetical)
     ADD_THIRD_PARTY_REPOSITORY = "Add Third-Party Repository"
     DELETE_THIRD_PARTY_REPOSITORY = "Delete Third-Party Repository"
-    ENABLE_THIRD_PARTY_REPOSITORY = "Enable Third-Party Repository"
     DISABLE_THIRD_PARTY_REPOSITORY = "Disable Third-Party Repository"
+    ENABLE_THIRD_PARTY_REPOSITORY = "Enable Third-Party Repository"
+
+    # Report Management Roles
+    GENERATE_PDF_REPORT = "Generate PDF Report"
+    VIEW_REPORT = "View Report"
+
+    # Script Management Roles
+    # - Script CRUD Operations (alphabetical)
+    ADD_SCRIPT = "Add Script"
+    DELETE_SCRIPT = "Delete Script"
+    EDIT_SCRIPT = "Edit Script"
+    # - Script Execution Operations (alphabetical)
+    DELETE_SCRIPT_EXECUTION = "Delete Script Execution"
+    RUN_SCRIPT = "Run Script"
 
     # Secrets Management Roles
-    DEPLOY_SSH_KEY = "Deploy SSH Key"
-    DEPLOY_CERTIFICATE = "Deploy Certificate"
+    # - Secret Operations (alphabetical)
     ADD_SECRET = "Add Secret"  # nosec B105 - RBAC role name, not a password
     DELETE_SECRET = "Delete Secret"  # nosec B105 - RBAC role name, not a password
     EDIT_SECRET = "Edit Secret"  # nosec B105 - RBAC role name, not a password
-    STOP_VAULT = "Stop Vault"
+    # - Certificate Deployment (alphabetical)
+    DEPLOY_CERTIFICATE = "Deploy Certificate"
+    # - SSH Key Deployment (alphabetical)
+    DEPLOY_SSH_KEY = "Deploy SSH Key"
+    # - Vault Operations (alphabetical)
     START_VAULT = "Start Vault"
+    STOP_VAULT = "Stop Vault"
 
-    # User Management Roles
-    ADD_USER = "Add User"
-    EDIT_USER = "Edit User"
-    LOCK_USER = "Lock User"
-    UNLOCK_USER = "Unlock User"
-    DELETE_USER = "Delete User"
-    RESET_USER_PASSWORD = (
-        "Reset User Password"  # nosec B105 - RBAC role name, not a password
-    )
-
-    # Script Management Roles
-    ADD_SCRIPT = "Add Script"
-    EDIT_SCRIPT = "Edit Script"
-    DELETE_SCRIPT = "Delete Script"
-    RUN_SCRIPT = "Run Script"
-    DELETE_SCRIPT_EXECUTION = "Delete Script Execution"
-
-    # Report Management Roles
-    VIEW_REPORT = "View Report"
-    GENERATE_PDF_REPORT = "Generate PDF Report"
-
-    # Integration Management Roles
-    DELETE_QUEUE_MESSAGE = "Delete Queue Message"
-    ENABLE_GRAFANA_INTEGRATION = "Enable Grafana Integration"
-    DEPLOY_OPENTELEMETRY = "Deploy OpenTelemetry"
-    START_OPENTELEMETRY_SERVICE = "Start OpenTelemetry Service"
-    STOP_OPENTELEMETRY_SERVICE = "Stop OpenTelemetry Service"
-    RESTART_OPENTELEMETRY_SERVICE = "Restart OpenTelemetry Service"
+    # Security Management Roles
+    # - Antivirus Operations (alphabetical)
+    DEPLOY_ANTIVIRUS = "Deploy Antivirus"
+    DISABLE_ANTIVIRUS = "Disable Antivirus"
+    ENABLE_ANTIVIRUS = "Enable Antivirus"
+    MANAGE_ANTIVIRUS_DEFAULTS = "Manage Antivirus Defaults"
+    REMOVE_ANTIVIRUS = "Remove Antivirus"
+    # - Firewall Operations (alphabetical)
+    DEPLOY_FIREWALL = "Deploy Firewall"
+    DISABLE_FIREWALL = "Disable Firewall"
+    EDIT_FIREWALL_PORTS = "Edit Firewall Ports"
+    ENABLE_FIREWALL = "Enable Firewall"
+    REMOVE_FIREWALL = "Remove Firewall"
+    RESTART_FIREWALL = "Restart Firewall"
+    # - User Security Role Management (alphabetical)
+    EDIT_USER_SECURITY_ROLES = "Edit User Security Roles"
+    VIEW_USER_SECURITY_ROLES = "View User Security Roles"
 
     # Ubuntu Pro Management Roles
     ATTACH_UBUNTU_PRO = "Attach Ubuntu Pro"
-    DETACH_UBUNTU_PRO = "Detach Ubuntu Pro"
     CHANGE_UBUNTU_PRO_MASTER_KEY = "Change Ubuntu Pro Master Key"
+    DETACH_UBUNTU_PRO = "Detach Ubuntu Pro"
 
-    # Antivirus Management Roles
-    MANAGE_ANTIVIRUS_DEFAULTS = "Manage Antivirus Defaults"
-    DEPLOY_ANTIVIRUS = "Deploy Antivirus"
-    ENABLE_ANTIVIRUS = "Enable Antivirus"
-    DISABLE_ANTIVIRUS = "Disable Antivirus"
-    REMOVE_ANTIVIRUS = "Remove Antivirus"
+    # User Management Roles
+    # - User CRUD Operations (alphabetical)
+    ADD_USER = "Add User"
+    DELETE_USER = "Delete User"
+    EDIT_USER = "Edit User"
+    # - User Security Operations (alphabetical)
+    LOCK_USER = "Lock User"
+    RESET_USER_PASSWORD = (
+        "Reset User Password"  # nosec B105 - RBAC role name, not a password
+    )
+    UNLOCK_USER = "Unlock User"
 
 
 class UserRoleCache:

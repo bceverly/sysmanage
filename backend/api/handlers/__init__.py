@@ -30,6 +30,7 @@ from backend.api.handlers.user_access_handlers import (
 from backend.api.handlers.software_package_handlers import (
     handle_antivirus_status_update,
     handle_commercial_antivirus_status_update,
+    handle_firewall_status_update,
     handle_package_collection,
     handle_package_updates_update,
     handle_software_update,
@@ -61,6 +62,7 @@ __all__ = [
     "handle_third_party_repository_update",
     "handle_antivirus_status_update",
     "handle_commercial_antivirus_status_update",
+    "handle_firewall_status_update",
     # Infrastructure handlers
     "handle_script_execution_result",
     "handle_reboot_status_update",

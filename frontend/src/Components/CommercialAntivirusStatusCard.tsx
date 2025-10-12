@@ -19,11 +19,13 @@ import { CommercialAntivirusStatus, getCommercialAntivirusStatus } from '../Serv
 interface CommercialAntivirusStatusCardProps {
   hostId: string;
   refreshTrigger?: number;
+  sx?: object;
 }
 
 const CommercialAntivirusStatusCard: React.FC<CommercialAntivirusStatusCardProps> = ({
   hostId,
   refreshTrigger = 0,
+  sx = {},
 }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
@@ -118,7 +120,7 @@ const CommercialAntivirusStatusCard: React.FC<CommercialAntivirusStatusCardProps
 
   if (loading) {
     return (
-      <Card>
+      <Card sx={sx}>
         <CardContent>
           <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem', mb: 2 }}>
             <SecurityIcon sx={{ mr: 1 }} />
@@ -134,7 +136,7 @@ const CommercialAntivirusStatusCard: React.FC<CommercialAntivirusStatusCardProps
 
   if (error) {
     return (
-      <Card>
+      <Card sx={sx}>
         <CardContent>
           <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem', mb: 2 }}>
             <SecurityIcon sx={{ mr: 1 }} />
@@ -147,7 +149,7 @@ const CommercialAntivirusStatusCard: React.FC<CommercialAntivirusStatusCardProps
   }
 
   return (
-    <Card>
+    <Card sx={sx}>
       <CardContent>
         <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem', mb: 2 }}>
           <SecurityIcon sx={{ mr: 1 }} />

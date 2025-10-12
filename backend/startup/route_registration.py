@@ -17,6 +17,7 @@ from backend.api import (
     config_management,
     diagnostics,
     email,
+    firewall_status,
     fleet,
     grafana_integration,
     host,
@@ -162,6 +163,10 @@ def register_routes(app: FastAPI):
         commercial_antivirus_status.router, prefix="/api", tags=["commercial-antivirus"]
     )
     logger.info("Commercial antivirus status router added")
+
+    logger.info("Adding firewall status router with /api prefix")
+    app.include_router(firewall_status.router, prefix="/api", tags=["firewall"])
+    logger.info("Firewall status router added")
 
     logger.info("Adding certificates auth router with /api prefix")
     app.include_router(

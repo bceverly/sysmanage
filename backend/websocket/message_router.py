@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from backend.api.handlers import (
     handle_antivirus_status_update,
     handle_commercial_antivirus_status_update,
+    handle_firewall_status_update,
     handle_hardware_update,
     handle_host_certificates_update,
     handle_host_role_data_update,
@@ -146,6 +147,12 @@ async def route_inbound_message(
             print(
                 "Successfully processed commercial antivirus status update", flush=True
             )
+
+        elif message_type == MessageType.FIREWALL_STATUS_UPDATE:
+            print("About to call handle_firewall_status_update", flush=True)
+            await handle_firewall_status_update(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed firewall status update", flush=True)
 
         else:
             print(f"Unknown message type: {message_type}", flush=True)
