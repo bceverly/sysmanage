@@ -22,20 +22,23 @@ def upgrade() -> None:
     """
     Add two new firewall security roles: Deploy Firewall and Remove Firewall.
     """
+    import uuid
+
     # Get the Security group ID
     security_group_id = '00000000-0000-0000-0000-000000000009'
 
-    # Add the 2 new firewall roles
+    # Add the 2 new firewall roles with explicit UUIDs
     firewall_roles = [
         ('Deploy Firewall', 'Deploy and configure firewall on a host'),
         ('Remove Firewall', 'Remove firewall from a host'),
     ]
 
     for role_name, role_desc in firewall_roles:
+        role_id = str(uuid.uuid4())
         op.execute(
             f"""
-            INSERT INTO security_roles (name, description, group_id)
-            VALUES ('{role_name}', '{role_desc}', '{security_group_id}')
+            INSERT INTO security_roles (id, name, description, group_id)
+            VALUES ('{role_id}', '{role_name}', '{role_desc}', '{security_group_id}')
             """
         )
 

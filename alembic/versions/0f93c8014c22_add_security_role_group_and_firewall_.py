@@ -23,6 +23,8 @@ def upgrade() -> None:
     Add Security role group and firewall management roles.
     Move antivirus roles from Package group to Security group.
     """
+    import uuid
+
     # Create the Security role group with a fixed UUID
     security_group_id = '00000000-0000-0000-0000-000000000009'
     op.execute(
@@ -33,7 +35,7 @@ def upgrade() -> None:
         """
     )
 
-    # Add the 4 new firewall roles to the Security group
+    # Add the 4 new firewall roles to the Security group with explicit UUIDs
     firewall_roles = [
         ('Enable Firewall', 'Enable firewall on a host'),
         ('Disable Firewall', 'Disable firewall on a host'),
@@ -42,10 +44,11 @@ def upgrade() -> None:
     ]
 
     for role_name, role_desc in firewall_roles:
+        role_id = str(uuid.uuid4())
         op.execute(
             f"""
-            INSERT INTO security_roles (name, description, group_id)
-            VALUES ('{role_name}', '{role_desc}', '{security_group_id}')
+            INSERT INTO security_roles (id, name, description, group_id)
+            VALUES ('{role_id}', '{role_name}', '{role_desc}', '{security_group_id}')
             """
         )
 
