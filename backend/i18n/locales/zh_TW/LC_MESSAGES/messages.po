@@ -656,3 +656,54 @@ msgstr "找不到主機"
 
 
 
+
+msgid "Host Firewall Status"
+msgstr "主機防火牆狀態"
+
+msgid "Open-Source Antivirus Status"
+msgstr "開源防毒軟體狀態"
+
+msgid "Commercial Antivirus Status"
+msgstr "商業防毒軟體狀態"
+
+msgid "No hosts with firewall status found."
+msgstr "未找到有防火牆狀態的主機。"
+
+msgid "Firewall Software"
+msgstr "防火牆軟體"
+
+msgid "No hosts with open-source antivirus found."
+msgstr "未找到有開源防毒軟體的主機。"
+
+msgid "Antivirus Software"
+msgstr "防毒軟體"
+
+msgid "Install Path"
+msgstr "安裝路徑"
+
+msgid "No hosts with commercial antivirus found."
+msgstr "未找到有商業防毒軟體的主機。"
+
+msgid "Product Name"
+msgstr "產品名稱"
+
+msgid "Product Version"
+msgstr "產品版本"
+
+msgid "Signature Version"
+msgstr "簽名版本"
+
+msgid "Real-Time Protection"
+msgstr "即時保護"
+
+msgid "Service Status"
+msgstr "服務狀態"
+
+msgid "Last Updated"
+msgstr "最後更新"
+
+msgid "User Security Roles (RBAC)"
+msgstr "使用者安全角色 (RBAC)"
+
+msgid "No security roles assigned"
+msgstr "未分配安全角色"

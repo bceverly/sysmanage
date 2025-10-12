@@ -153,6 +153,38 @@ const Reports: React.FC = () => {
         category: 'users',
         screenshot: `${baseURL}/api/reports/screenshots/users-list.png`,
         tags: ['users', 'accounts', 'permissions']
+      },
+      {
+        id: 'user-rbac',
+        name: 'User Security Roles (RBAC)',
+        description: 'Complete view of all users with their assigned security roles organized by role groups. Shows the granular permission structure for role-based access control across the system.',
+        category: 'users',
+        screenshot: `${baseURL}/api/reports/screenshots/user-rbac.png`,
+        tags: ['users', 'security', 'rbac', 'permissions', 'roles']
+      },
+      {
+        id: 'firewall-status',
+        name: 'Host Firewall Status',
+        description: 'Detailed firewall status for all managed hosts including firewall software, enabled/disabled status, open IPv4 and IPv6 ports, and operating system information.',
+        category: 'hosts',
+        screenshot: `${baseURL}/api/reports/screenshots/firewall-status.png`,
+        tags: ['hosts', 'security', 'firewall', 'network']
+      },
+      {
+        id: 'antivirus-opensource',
+        name: 'Open-Source Antivirus Status',
+        description: 'Status of open-source antivirus software across all hosts showing software name, version, installation path, and enabled/disabled status.',
+        category: 'hosts',
+        screenshot: `${baseURL}/api/reports/screenshots/antivirus-opensource.png`,
+        tags: ['hosts', 'security', 'antivirus', 'opensource']
+      },
+      {
+        id: 'antivirus-commercial',
+        name: 'Commercial Antivirus Status',
+        description: 'Commercial antivirus protection status including product name, version, signature version, real-time protection status, and service status across all managed hosts.',
+        category: 'hosts',
+        screenshot: `${baseURL}/api/reports/screenshots/antivirus-commercial.png`,
+        tags: ['hosts', 'security', 'antivirus', 'commercial']
       }
     ];
 

@@ -649,3 +649,54 @@ msgstr "المضيف غير موجود"
 
 
 
+
+msgid "Host Firewall Status"
+msgstr "حالة جدار الحماية للمضيف"
+
+msgid "Open-Source Antivirus Status"
+msgstr "حالة مكافحة الفيروسات مفتوحة المصدر"
+
+msgid "Commercial Antivirus Status"
+msgstr "حالة مكافحة الفيروسات التجارية"
+
+msgid "No hosts with firewall status found."
+msgstr "لم يتم العثور على مضيفين بحالة جدار الحماية."
+
+msgid "Firewall Software"
+msgstr "برنامج جدار الحماية"
+
+msgid "No hosts with open-source antivirus found."
+msgstr "لم يتم العثور على مضيفين بمكافح فيروسات مفتوح المصدر."
+
+msgid "Antivirus Software"
+msgstr "برنامج مكافحة الفيروسات"
+
+msgid "Install Path"
+msgstr "مسار التثبيت"
+
+msgid "No hosts with commercial antivirus found."
+msgstr "لم يتم العثور على مضيفين بمكافح فيروسات تجاري."
+
+msgid "Product Name"
+msgstr "اسم المنتج"
+
+msgid "Product Version"
+msgstr "إصدار المنتج"
+
+msgid "Signature Version"
+msgstr "إصدار التوقيع"
+
+msgid "Real-Time Protection"
+msgstr "الحماية في الوقت الفعلي"
+
+msgid "Service Status"
+msgstr "حالة الخدمة"
+
+msgid "Last Updated"
+msgstr "آخر تحديث"
+
+msgid "User Security Roles (RBAC)"
+msgstr "أدوار أمان المستخدم (RBAC)"
+
+msgid "No security roles assigned"
+msgstr "لم يتم تعيين أدوار أمان"

@@ -657,3 +657,54 @@ msgstr "Host non trovato"
 
 
 
+
+msgid "Host Firewall Status"
+msgstr "Stato Firewall Host"
+
+msgid "Open-Source Antivirus Status"
+msgstr "Stato Antivirus Open Source"
+
+msgid "Commercial Antivirus Status"
+msgstr "Stato Antivirus Commerciale"
+
+msgid "No hosts with firewall status found."
+msgstr "Nessun host con stato firewall trovato."
+
+msgid "Firewall Software"
+msgstr "Software Firewall"
+
+msgid "No hosts with open-source antivirus found."
+msgstr "Nessun host con antivirus open source trovato."
+
+msgid "Antivirus Software"
+msgstr "Software Antivirus"
+
+msgid "Install Path"
+msgstr "Percorso di Installazione"
+
+msgid "No hosts with commercial antivirus found."
+msgstr "Nessun host con antivirus commerciale trovato."
+
+msgid "Product Name"
+msgstr "Nome Prodotto"
+
+msgid "Product Version"
+msgstr "Versione Prodotto"
+
+msgid "Signature Version"
+msgstr "Versione Firma"
+
+msgid "Real-Time Protection"
+msgstr "Protezione in Tempo Reale"
+
+msgid "Service Status"
+msgstr "Stato del Servizio"
+
+msgid "Last Updated"
+msgstr "Ultimo aggiornamento"
+
+msgid "User Security Roles (RBAC)"
+msgstr "Ruoli di Sicurezza Utente (RBAC)"
+
+msgid "No security roles assigned"
+msgstr "Nessun ruolo di sicurezza assegnato"

@@ -194,7 +194,8 @@ describe('ReportViewer Page', () => {
       fireEvent.click(backButton);
     });
 
-    expect(mockNavigate).toHaveBeenCalledWith('/reports');
+    // Should navigate to hosts tab since reportId 'hosts' is a host report
+    expect(mockNavigate).toHaveBeenCalledWith('/reports#hosts');
   });
 
   test('displays Generate PDF button', async () => {

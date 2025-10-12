@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from backend.api.reports.html_generators import generate_hosts_html, generate_users_html
+from backend.api.reports.html import generate_hosts_html, generate_users_html
 
 
 class TestHostsHTMLGeneration:
@@ -88,10 +88,12 @@ class TestUsersHTMLGeneration:
 class TestReportsInternationalization:
     """Test cases for Reports i18n functionality."""
 
-    @patch("backend.api.reports.html_generators._")
-    def test_html_generation_uses_i18n(self, mock_gettext):
+    @patch("backend.api.reports.html.hosts._")
+    @patch("backend.api.reports.html.users._")
+    def test_html_generation_uses_i18n(self, mock_gettext_users, mock_gettext_hosts):
         """Test that HTML generation uses internationalization."""
-        mock_gettext.side_effect = lambda x: f"TRANSLATED_{x}"
+        mock_gettext_hosts.side_effect = lambda x: f"TRANSLATED_{x}"
+        mock_gettext_users.side_effect = lambda x: f"TRANSLATED_{x}"
 
         hosts = [
             Mock(
@@ -110,7 +112,7 @@ class TestReportsInternationalization:
         html = generate_hosts_html(hosts, "hosts", "Test Report")
 
         # Verify that translation function was called
-        mock_gettext.assert_called()
+        assert mock_gettext_hosts.called or mock_gettext_users.called
 
         # Check that translated strings appear in HTML
         assert "TRANSLATED_" in html
@@ -180,8 +182,9 @@ class TestReportsAPIEndpointsSimple:
         """Test viewing report with invalid report type."""
         response = authenticated_client.get("/api/reports/view/invalid_type")
 
-        assert response.status_code == 400
-        assert "Invalid report type" in response.json()["detail"]
+        assert response.status_code == 422
+        # FastAPI returns validation error list, not simple string
+        assert "detail" in response.json()
 
     def test_screenshots_endpoint(self, authenticated_client):
         """Test screenshots endpoint returns placeholder."""
@@ -223,7 +226,7 @@ class TestReportsAPIEndpointsSimple:
             app.router.lifespan_context = original_lifespan
 
     @patch("backend.api.reports.endpoints.REPORTLAB_AVAILABLE", False)
-    @patch("backend.api.reports.pdf_generators.REPORTLAB_AVAILABLE", False)
+    @patch("backend.api.reports.pdf.REPORTLAB_AVAILABLE", False)
     def test_generate_pdf_without_reportlab(self, authenticated_client):
         """Test PDF generation when ReportLab is not available."""
         response = authenticated_client.get("/api/reports/generate/registered-hosts")
@@ -235,14 +238,15 @@ class TestReportsAPIEndpointsSimple:
         """Test PDF generation with invalid report type."""
         response = authenticated_client.get("/api/reports/generate/invalid_type")
 
-        assert response.status_code == 404
-        assert "not found" in response.json()["detail"]
+        assert response.status_code == 422
+        # FastAPI returns validation error list, not simple string
+        assert "detail" in response.json()
 
 
 class TestReportsErrorHandling:
     """Test cases for Reports error handling."""
 
-    @patch("backend.api.reports.pdf_generators.REPORTLAB_AVAILABLE", True)
+    @patch("backend.api.reports.pdf.REPORTLAB_AVAILABLE", True)
     def test_database_error_handling(self, authenticated_client, session):
         """Test handling of database errors."""
         # Mock the session to raise an exception

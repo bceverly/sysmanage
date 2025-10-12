@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from fastapi import HTTPException
 
-from backend.api.reports.html_generators import generate_hosts_html, generate_users_html
+from backend.api.reports.html import generate_hosts_html, generate_users_html
 
 
 class TestHostsHTMLGeneration:
@@ -165,7 +165,7 @@ class TestReportsAPIEndpoints:
         self.mock_db = Mock()
         self.mock_current_user = "test_user"
 
-    @patch("backend.api.reports.pdf_generators.REPORTLAB_AVAILABLE", True)
+    @patch("backend.api.reports.pdf.REPORTLAB_AVAILABLE", True)
     def test_view_hosts_report_success(self, authenticated_client, session):
         """Test viewing hosts report with authentication."""
         # Create a real host object in the database
@@ -188,7 +188,7 @@ class TestReportsAPIEndpoints:
 
         assert html_module.escape("test.example.com") in response.text
 
-    @patch("backend.api.reports.pdf_generators.REPORTLAB_AVAILABLE", True)
+    @patch("backend.api.reports.pdf.REPORTLAB_AVAILABLE", True)
     def test_view_users_report_success(self, authenticated_client, session):
         """Test viewing users report with authentication."""
         # Create a real user object in the database
@@ -224,11 +224,12 @@ class TestReportsAPIEndpoints:
         """Test viewing report with invalid report type."""
         response = authenticated_client.get("/api/reports/view/invalid_type")
 
-        assert response.status_code == 400
-        assert "Invalid report type" in response.json()["detail"]
+        assert response.status_code == 422
+        # FastAPI returns validation error list, not simple string
+        assert "detail" in response.json()
 
     @patch("backend.api.reports.endpoints.REPORTLAB_AVAILABLE", False)
-    @patch("backend.api.reports.pdf_generators.REPORTLAB_AVAILABLE", False)
+    @patch("backend.api.reports.pdf.REPORTLAB_AVAILABLE", False)
     def test_generate_pdf_without_reportlab(self, authenticated_client):
         """Test PDF generation when ReportLab is not available."""
         response = authenticated_client.get("/api/reports/generate/registered-hosts")
@@ -236,12 +237,12 @@ class TestReportsAPIEndpoints:
         assert response.status_code == 500
         assert "PDF generation is not available" in response.json()["detail"]
 
-    @patch("backend.api.reports.pdf_generators.REPORTLAB_AVAILABLE", True)
+    @patch("backend.api.reports.pdf.REPORTLAB_AVAILABLE", True)
     def test_generate_pdf_hosts_success(self, authenticated_client, session):
         """Test successful PDF generation for hosts."""
         import io
 
-        from backend.api.reports.pdf_generators import HostsReportGenerator
+        from backend.api.reports.pdf import HostsReportGenerator
 
         # Create real host data in database
         from backend.persistence.models import Host
@@ -275,8 +276,9 @@ class TestReportsAPIEndpoints:
         """Test PDF generation with invalid report type."""
         response = authenticated_client.get("/api/reports/generate/invalid_type")
 
-        assert response.status_code == 404
-        assert "not found" in response.json()["detail"]
+        assert response.status_code == 422
+        # FastAPI returns validation error list, not simple string
+        assert "detail" in response.json()
 
     def test_screenshots_endpoint(self, authenticated_client):
         """Test screenshots endpoint returns placeholder."""
@@ -321,11 +323,11 @@ class TestReportsAPIEndpoints:
 class TestReportsPDFGeneration:
     """Test cases for PDF generation functionality."""
 
-    @patch("backend.api.reports.pdf_generators.REPORTLAB_AVAILABLE", True)
-    @patch("backend.api.reports.pdf_generators.getSampleStyleSheet")
+    @patch("backend.api.reports.pdf.REPORTLAB_AVAILABLE", True)
+    @patch("backend.api.reports.pdf.base.getSampleStyleSheet")
     def test_hosts_report_generator_creation(self, mock_styles, session):
         """Test creation of HostsReportGenerator."""
-        from backend.api.reports.pdf_generators import HostsReportGenerator
+        from backend.api.reports.pdf import HostsReportGenerator
 
         mock_styles.return_value = {
             "Title": Mock(),
@@ -338,11 +340,11 @@ class TestReportsPDFGeneration:
         assert generator.db == session
         assert generator.styles is not None
 
-    @patch("backend.api.reports.pdf_generators.REPORTLAB_AVAILABLE", True)
-    @patch("backend.api.reports.pdf_generators.getSampleStyleSheet")
+    @patch("backend.api.reports.pdf.REPORTLAB_AVAILABLE", True)
+    @patch("backend.api.reports.pdf.base.getSampleStyleSheet")
     def test_users_report_generator_creation(self, mock_styles, session):
         """Test creation of UsersReportGenerator."""
-        from backend.api.reports.pdf_generators import UsersReportGenerator
+        from backend.api.reports.pdf import UsersReportGenerator
 
         mock_styles.return_value = {
             "Title": Mock(),
@@ -359,10 +361,12 @@ class TestReportsPDFGeneration:
 class TestReportsInternationalization:
     """Test cases for Reports i18n functionality."""
 
-    @patch("backend.api.reports.html_generators._")
-    def test_html_generation_uses_i18n(self, mock_gettext):
+    @patch("backend.api.reports.html.hosts._")
+    @patch("backend.api.reports.html.users._")
+    def test_html_generation_uses_i18n(self, mock_gettext_users, mock_gettext_hosts):
         """Test that HTML generation uses internationalization."""
-        mock_gettext.side_effect = lambda x: f"TRANSLATED_{x}"
+        mock_gettext_hosts.side_effect = lambda x: f"TRANSLATED_{x}"
+        mock_gettext_users.side_effect = lambda x: f"TRANSLATED_{x}"
 
         hosts = [
             Mock(
@@ -381,15 +385,17 @@ class TestReportsInternationalization:
         html = generate_hosts_html(hosts, "hosts", "Test Report")
 
         # Verify that translation function was called
-        mock_gettext.assert_called()
+        assert mock_gettext_hosts.called or mock_gettext_users.called
 
         # Check that translated strings appear in HTML
         assert "TRANSLATED_" in html
 
-    @patch("backend.api.reports.html_generators._")
-    def test_users_html_uses_i18n(self, mock_gettext):
+    @patch("backend.api.reports.html.hosts._")
+    @patch("backend.api.reports.html.users._")
+    def test_users_html_uses_i18n(self, mock_gettext_users, mock_gettext_hosts):
         """Test that users HTML generation uses internationalization."""
-        mock_gettext.side_effect = lambda x: f"TRANSLATED_{x}"
+        mock_gettext_hosts.side_effect = lambda x: f"TRANSLATED_{x}"
+        mock_gettext_users.side_effect = lambda x: f"TRANSLATED_{x}"
 
         users = [
             Mock(
@@ -407,7 +413,7 @@ class TestReportsInternationalization:
         html = generate_users_html(users, "Test Report")
 
         # Verify that translation function was called
-        mock_gettext.assert_called()
+        assert mock_gettext_hosts.called or mock_gettext_users.called
 
         # Check that translated strings appear in HTML
         assert "TRANSLATED_" in html
@@ -416,7 +422,7 @@ class TestReportsInternationalization:
 class TestReportsErrorHandling:
     """Test cases for Reports error handling."""
 
-    @patch("backend.api.reports.pdf_generators.REPORTLAB_AVAILABLE", True)
+    @patch("backend.api.reports.pdf.REPORTLAB_AVAILABLE", True)
     def test_database_error_handling(self, authenticated_client, session):
         """Test handling of database errors."""
         # Mock the session to raise an exception
@@ -426,8 +432,8 @@ class TestReportsErrorHandling:
             assert response.status_code == 500
             assert "Internal server error" in response.json()["detail"]
 
-    @patch("backend.api.reports.pdf_generators.REPORTLAB_AVAILABLE", True)
-    @patch("backend.api.reports.pdf_generators.SimpleDocTemplate")
+    @patch("backend.api.reports.pdf.REPORTLAB_AVAILABLE", True)
+    @patch("backend.api.reports.pdf.base.SimpleDocTemplate")
     def test_pdf_generation_error_handling(
         self, mock_doc, authenticated_client, session
     ):

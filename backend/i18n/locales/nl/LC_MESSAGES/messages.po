@@ -656,3 +656,54 @@ msgstr "Host niet gevonden"
 
 
 
+
+msgid "Host Firewall Status"
+msgstr "Host Firewall Status"
+
+msgid "Open-Source Antivirus Status"
+msgstr "Open-Source Antivirus Status"
+
+msgid "Commercial Antivirus Status"
+msgstr "Commerciële Antivirus Status"
+
+msgid "No hosts with firewall status found."
+msgstr "Geen hosts met firewall-status gevonden."
+
+msgid "Firewall Software"
+msgstr "Firewall Software"
+
+msgid "No hosts with open-source antivirus found."
+msgstr "Geen hosts met open-source antivirus gevonden."
+
+msgid "Antivirus Software"
+msgstr "Antivirus Software"
+
+msgid "Install Path"
+msgstr "Installatiepad"
+
+msgid "No hosts with commercial antivirus found."
+msgstr "Geen hosts met commerciële antivirus gevonden."
+
+msgid "Product Name"
+msgstr "Productnaam"
+
+msgid "Product Version"
+msgstr "Productversie"
+
+msgid "Signature Version"
+msgstr "Handtekeningversie"
+
+msgid "Real-Time Protection"
+msgstr "Realtime Bescherming"
+
+msgid "Service Status"
+msgstr "Servicestatus"
+
+msgid "Last Updated"
+msgstr "Laatst bijgewerkt"
+
+msgid "User Security Roles (RBAC)"
+msgstr "Gebruikersbeveiligingsrollen (RBAC)"
+
+msgid "No security roles assigned"
+msgstr "Geen beveiligingsrollen toegewezen"

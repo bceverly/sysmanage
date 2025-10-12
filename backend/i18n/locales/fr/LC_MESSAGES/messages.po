@@ -651,3 +651,54 @@ msgstr "Hôte introuvable"
 
 
 
+
+msgid "Host Firewall Status"
+msgstr "État du Pare-feu de l'Hôte"
+
+msgid "Open-Source Antivirus Status"
+msgstr "État de l'Antivirus Open Source"
+
+msgid "Commercial Antivirus Status"
+msgstr "État de l'Antivirus Commercial"
+
+msgid "No hosts with firewall status found."
+msgstr "Aucun hôte avec état de pare-feu trouvé."
+
+msgid "Firewall Software"
+msgstr "Logiciel Pare-feu"
+
+msgid "No hosts with open-source antivirus found."
+msgstr "Aucun hôte avec antivirus open source trouvé."
+
+msgid "Antivirus Software"
+msgstr "Logiciel Antivirus"
+
+msgid "Install Path"
+msgstr "Chemin d'Installation"
+
+msgid "No hosts with commercial antivirus found."
+msgstr "Aucun hôte avec antivirus commercial trouvé."
+
+msgid "Product Name"
+msgstr "Nom du Produit"
+
+msgid "Product Version"
+msgstr "Version du Produit"
+
+msgid "Signature Version"
+msgstr "Version de Signature"
+
+msgid "Real-Time Protection"
+msgstr "Protection en Temps Réel"
+
+msgid "Service Status"
+msgstr "État du Service"
+
+msgid "Last Updated"
+msgstr "Dernière mise à jour"
+
+msgid "User Security Roles (RBAC)"
+msgstr "Rôles de Sécurité Utilisateur (RBAC)"
+
+msgid "No security roles assigned"
+msgstr "Aucun rôle de sécurité attribué"

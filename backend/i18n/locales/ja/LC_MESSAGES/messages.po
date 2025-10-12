@@ -660,3 +660,54 @@ msgstr "ホストが見つかりません"
 
 
 
+
+msgid "Host Firewall Status"
+msgstr "ホストファイアウォールステータス"
+
+msgid "Open-Source Antivirus Status"
+msgstr "オープンソースアンチウイルスステータス"
+
+msgid "Commercial Antivirus Status"
+msgstr "商用アンチウイルスステータス"
+
+msgid "No hosts with firewall status found."
+msgstr "ファイアウォールステータスを持つホストが見つかりません。"
+
+msgid "Firewall Software"
+msgstr "ファイアウォールソフトウェア"
+
+msgid "No hosts with open-source antivirus found."
+msgstr "オープンソースアンチウイルスを持つホストが見つかりません。"
+
+msgid "Antivirus Software"
+msgstr "アンチウイルスソフトウェア"
+
+msgid "Install Path"
+msgstr "インストールパス"
+
+msgid "No hosts with commercial antivirus found."
+msgstr "商用アンチウイルスを持つホストが見つかりません。"
+
+msgid "Product Name"
+msgstr "製品名"
+
+msgid "Product Version"
+msgstr "製品バージョン"
+
+msgid "Signature Version"
+msgstr "シグネチャバージョン"
+
+msgid "Real-Time Protection"
+msgstr "リアルタイム保護"
+
+msgid "Service Status"
+msgstr "サービスステータス"
+
+msgid "Last Updated"
+msgstr "最終更新"
+
+msgid "User Security Roles (RBAC)"
+msgstr "ユーザーセキュリティロール (RBAC)"
+
+msgid "No security roles assigned"
+msgstr "セキュリティロールが割り当てられていません"

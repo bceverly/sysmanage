@@ -4,12 +4,21 @@ Report API endpoints
 
 import html
 from datetime import datetime, timezone
+from enum import Enum
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session, sessionmaker
 
-from backend.api.reports.html_generators import generate_hosts_html, generate_users_html
-from backend.api.reports.pdf_generators import (
+from backend.api.reports.html import (
+    generate_antivirus_commercial_html,
+    generate_antivirus_opensource_html,
+    generate_firewall_status_html,
+    generate_hosts_html,
+    generate_user_rbac_html,
+    generate_users_html,
+)
+from backend.api.reports.pdf import (
     REPORTLAB_AVAILABLE,
     HostsReportGenerator,
     UsersReportGenerator,
@@ -24,9 +33,22 @@ from backend.security.roles import SecurityRoles
 router = APIRouter(prefix="/api/reports", tags=["reports"])
 
 
-@router.get("/view/{report_type}")
+# Define allowed report types to prevent injection
+class ReportType(str, Enum):
+    """Valid report types"""
+
+    REGISTERED_HOSTS = "registered-hosts"
+    HOSTS_WITH_TAGS = "hosts-with-tags"
+    USERS_LIST = "users-list"
+    FIREWALL_STATUS = "firewall-status"
+    ANTIVIRUS_OPENSOURCE = "antivirus-opensource"
+    ANTIVIRUS_COMMERCIAL = "antivirus-commercial"
+    USER_RBAC = "user-rbac"
+
+
+@router.get("/view/{report_type}", response_class=HTMLResponse)
 async def view_report_html(
-    report_type: str,
+    report_type: ReportType,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -54,37 +76,56 @@ async def view_report_html(
     try:
         hosts = None
         users = None
+        report_title = ""
 
-        if report_type == "registered-hosts":
+        # report_type is validated by FastAPI Enum, so only valid values are allowed
+        if report_type == ReportType.REGISTERED_HOSTS:
             hosts = db.query(Host).order_by(Host.fqdn).all()
             report_title = _("Registered Hosts")
 
-        elif report_type == "hosts-with-tags":
+        elif report_type == ReportType.HOSTS_WITH_TAGS:
             hosts = db.query(Host).order_by(Host.fqdn).all()
             report_title = _("Hosts with Tags")
 
-        elif report_type == "users-list":
+        elif report_type == ReportType.USERS_LIST:
             users = db.query(User).order_by(User.userid).all()
             report_title = _("SysManage Users")
 
-        else:
-            raise HTTPException(
-                status_code=400,
-                detail=_("Invalid report type: {report_type}").format(
-                    report_type=report_type
-                ),
-            )
+        elif report_type == ReportType.FIREWALL_STATUS:
+            hosts = db.query(Host).order_by(Host.fqdn).all()
+            report_title = _("Host Firewall Status")
+
+        elif report_type == ReportType.ANTIVIRUS_OPENSOURCE:
+            hosts = db.query(Host).order_by(Host.fqdn).all()
+            report_title = _("Open-Source Antivirus Status")
+
+        elif report_type == ReportType.ANTIVIRUS_COMMERCIAL:
+            hosts = db.query(Host).order_by(Host.fqdn).all()
+            report_title = _("Commercial Antivirus Status")
+
+        elif report_type == ReportType.USER_RBAC:
+            users = db.query(User).order_by(User.userid).all()
+            report_title = _("User Security Roles (RBAC)")
 
         # Generate HTML content based on report type
-        if report_type in ["registered-hosts", "hosts-with-tags"]:
-            html_content = generate_hosts_html(hosts, report_type, report_title)
-        else:
-            html_content = generate_users_html(users, report_title)
-
-        # nosemgrep: python.fastapi.web.tainted-direct-response-fastapi.tainted-direct-response-fastapi
         # All user input is properly escaped using html.escape() in html_generators.py
-        # to prevent XSS attacks. The _escape() function is applied to all dynamic content.
-        return Response(content=html_content, media_type="text/html")
+        # The _escape() function is applied to all dynamic content to prevent XSS.
+        if report_type in [ReportType.REGISTERED_HOSTS, ReportType.HOSTS_WITH_TAGS]:
+            html_content = generate_hosts_html(hosts, report_type.value, report_title)
+        elif report_type == ReportType.USERS_LIST:
+            html_content = generate_users_html(users, report_title)
+        elif report_type == ReportType.FIREWALL_STATUS:
+            html_content = generate_firewall_status_html(hosts, report_title)
+        elif report_type == ReportType.ANTIVIRUS_OPENSOURCE:
+            html_content = generate_antivirus_opensource_html(hosts, report_title)
+        elif report_type == ReportType.ANTIVIRUS_COMMERCIAL:
+            html_content = generate_antivirus_commercial_html(hosts, report_title)
+        else:  # USER_RBAC
+            html_content = generate_user_rbac_html(db, users, report_title)
+
+        # Use HTMLResponse which is the proper FastAPI way to return HTML
+        # Input validation via Enum + HTML escaping in generators = XSS protection
+        return HTMLResponse(content=html_content)
 
     except HTTPException:
         # Re-raise HTTP exceptions (like 400 errors) without modification
@@ -95,7 +136,7 @@ async def view_report_html(
 
 @router.get("/generate/{report_type}")
 async def generate_report(
-    report_type: str,
+    report_type: ReportType,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -129,29 +170,44 @@ async def generate_report(
         )
 
     try:
-        if report_type == "registered-hosts":
+        # report_type is validated by FastAPI Enum, so only valid values are allowed
+        if report_type == ReportType.REGISTERED_HOSTS:
             generator = HostsReportGenerator(db)
             pdf_buffer = generator.generate_hosts_report()
             filename = f"registered_hosts_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.pdf"
 
-        elif report_type == "hosts-with-tags":
+        elif report_type == ReportType.HOSTS_WITH_TAGS:
             generator = HostsReportGenerator(db)
             pdf_buffer = generator.generate_hosts_with_tags_report()
             filename = f"hosts_with_tags_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.pdf"
 
-        elif report_type == "users-list":
+        elif report_type == ReportType.USERS_LIST:
             generator = UsersReportGenerator(db)
             pdf_buffer = generator.generate_users_list_report()
             filename = (
                 f"users_list_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.pdf"
             )
 
-        else:
-            raise HTTPException(
-                status_code=404,
-                detail=_("Report type '{report_type}' not found").format(
-                    report_type=report_type
-                ),
+        elif report_type == ReportType.FIREWALL_STATUS:
+            generator = HostsReportGenerator(db)
+            pdf_buffer = generator.generate_firewall_status_report()
+            filename = f"firewall_status_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.pdf"
+
+        elif report_type == ReportType.ANTIVIRUS_OPENSOURCE:
+            generator = HostsReportGenerator(db)
+            pdf_buffer = generator.generate_antivirus_opensource_report()
+            filename = f"antivirus_opensource_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.pdf"
+
+        elif report_type == ReportType.ANTIVIRUS_COMMERCIAL:
+            generator = HostsReportGenerator(db)
+            pdf_buffer = generator.generate_antivirus_commercial_report()
+            filename = f"antivirus_commercial_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.pdf"
+
+        else:  # ReportType.USER_RBAC
+            generator = UsersReportGenerator(db)
+            pdf_buffer = generator.generate_user_rbac_report()
+            filename = (
+                f"user_rbac_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.pdf"
             )
 
         # Return the PDF as response

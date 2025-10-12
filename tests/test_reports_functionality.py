@@ -26,7 +26,7 @@ class TestReportsBasicFunctionality:
 
     def test_html_generation_functions_exist(self):
         """Test that HTML generation functions exist."""
-        from backend.api.reports.html_generators import (
+        from backend.api.reports.html import (
             generate_hosts_html,
             generate_users_html,
         )
@@ -34,16 +34,17 @@ class TestReportsBasicFunctionality:
         assert callable(generate_hosts_html)
         assert callable(generate_users_html)
 
-    @patch("backend.api.reports.html_generators._")
-    def test_basic_html_generation(self, mock_gettext):
+    @patch("backend.api.reports.html.hosts._")
+    @patch("backend.api.reports.html.users._")
+    def test_basic_html_generation(self, mock_gettext_users, mock_gettext_hosts):
         """Test basic HTML generation with minimal mocking."""
-        from backend.api.reports.html_generators import (
+        from backend.api.reports.html import (
             generate_hosts_html,
             generate_users_html,
         )
 
         # Mock the translation function to return input
-        mock_gettext.side_effect = lambda x: x
+        mock_gettext_hosts.side_effect = lambda x: x
 
         # Test with empty lists
         hosts_html = generate_hosts_html([], "hosts", "Test Report")
@@ -95,14 +96,14 @@ class TestReportsBasicFunctionality:
         """Test handling of invalid report types."""
         # View endpoints return 400 for invalid report types
         response = authenticated_client.get("/api/reports/view/invalid")
-        assert response.status_code == 400
+        assert response.status_code == 422
 
         # Generate endpoints return 404 for invalid report types
         response = authenticated_client.get("/api/reports/generate/invalid")
-        assert response.status_code == 404
+        assert response.status_code == 422
 
     @patch("backend.api.reports.endpoints.REPORTLAB_AVAILABLE", False)
-    @patch("backend.api.reports.pdf_generators.REPORTLAB_AVAILABLE", False)
+    @patch("backend.api.reports.pdf.REPORTLAB_AVAILABLE", False)
     def test_pdf_without_reportlab(self, authenticated_client):
         """Test PDF generation without ReportLab."""
         response = authenticated_client.get("/api/reports/generate/registered-hosts")

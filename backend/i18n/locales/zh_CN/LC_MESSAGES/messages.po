@@ -656,3 +656,54 @@ msgstr "找不到主机"
 
 
 
+
+msgid "Host Firewall Status"
+msgstr "主机防火墙状态"
+
+msgid "Open-Source Antivirus Status"
+msgstr "开源杀毒软件状态"
+
+msgid "Commercial Antivirus Status"
+msgstr "商业杀毒软件状态"
+
+msgid "No hosts with firewall status found."
+msgstr "未找到有防火墙状态的主机。"
+
+msgid "Firewall Software"
+msgstr "防火墙软件"
+
+msgid "No hosts with open-source antivirus found."
+msgstr "未找到有开源杀毒软件的主机。"
+
+msgid "Antivirus Software"
+msgstr "杀毒软件"
+
+msgid "Install Path"
+msgstr "安装路径"
+
+msgid "No hosts with commercial antivirus found."
+msgstr "未找到有商业杀毒软件的主机。"
+
+msgid "Product Name"
+msgstr "产品名称"
+
+msgid "Product Version"
+msgstr "产品版本"
+
+msgid "Signature Version"
+msgstr "签名版本"
+
+msgid "Real-Time Protection"
+msgstr "实时保护"
+
+msgid "Service Status"
+msgstr "服务状态"
+
+msgid "Last Updated"
+msgstr "最后更新"
+
+msgid "User Security Roles (RBAC)"
+msgstr "用户安全角色 (RBAC)"
+
+msgid "No security roles assigned"
+msgstr "未分配安全角色"

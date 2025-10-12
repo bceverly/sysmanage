@@ -656,3 +656,54 @@ msgstr "होस्ट नहीं मिला"
 
 
 
+
+msgid "Host Firewall Status"
+msgstr "होस्ट फ़ायरवॉल स्थिति"
+
+msgid "Open-Source Antivirus Status"
+msgstr "ओपन-सोर्स एंटीवायरस स्थिति"
+
+msgid "Commercial Antivirus Status"
+msgstr "वाणिज्यिक एंटीवायरस स्थिति"
+
+msgid "No hosts with firewall status found."
+msgstr "फ़ायरवॉल स्थिति वाले कोई होस्ट नहीं मिले।"
+
+msgid "Firewall Software"
+msgstr "फ़ायरवॉल सॉफ्टवेयर"
+
+msgid "No hosts with open-source antivirus found."
+msgstr "ओपन-सोर्स एंटीवायरस वाले कोई होस्ट नहीं मिले।"
+
+msgid "Antivirus Software"
+msgstr "एंटीवायरस सॉफ्टवेयर"
+
+msgid "Install Path"
+msgstr "इंस्टॉल पथ"
+
+msgid "No hosts with commercial antivirus found."
+msgstr "वाणिज्यिक एंटीवायरस वाले कोई होस्ट नहीं मिले।"
+
+msgid "Product Name"
+msgstr "उत्पाद का नाम"
+
+msgid "Product Version"
+msgstr "उत्पाद संस्करण"
+
+msgid "Signature Version"
+msgstr "हस्ताक्षर संस्करण"
+
+msgid "Real-Time Protection"
+msgstr "रीयल-टाइम सुरक्षा"
+
+msgid "Service Status"
+msgstr "सेवा स्थिति"
+
+msgid "Last Updated"
+msgstr "अंतिम अद्यतन"
+
+msgid "User Security Roles (RBAC)"
+msgstr "उपयोगकर्ता सुरक्षा भूमिकाएँ (RBAC)"
+
+msgid "No security roles assigned"
+msgstr "कोई सुरक्षा भूमिका नहीं सौंपी गई"

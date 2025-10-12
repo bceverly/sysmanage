@@ -660,3 +660,54 @@ msgstr "Хост не найден"
 
 
 
+
+msgid "Host Firewall Status"
+msgstr "Состояние брандмауэра хоста"
+
+msgid "Open-Source Antivirus Status"
+msgstr "Состояние антивируса с открытым исходным кодом"
+
+msgid "Commercial Antivirus Status"
+msgstr "Состояние коммерческого антивируса"
+
+msgid "No hosts with firewall status found."
+msgstr "Хосты с состоянием брандмауэра не найдены."
+
+msgid "Firewall Software"
+msgstr "Программное обеспечение брандмауэра"
+
+msgid "No hosts with open-source antivirus found."
+msgstr "Хосты с антивирусом с открытым исходным кодом не найдены."
+
+msgid "Antivirus Software"
+msgstr "Антивирусное программное обеспечение"
+
+msgid "Install Path"
+msgstr "Путь установки"
+
+msgid "No hosts with commercial antivirus found."
+msgstr "Хосты с коммерческим антивирусом не найдены."
+
+msgid "Product Name"
+msgstr "Название продукта"
+
+msgid "Product Version"
+msgstr "Версия продукта"
+
+msgid "Signature Version"
+msgstr "Версия подписи"
+
+msgid "Real-Time Protection"
+msgstr "Защита в реальном времени"
+
+msgid "Service Status"
+msgstr "Состояние службы"
+
+msgid "Last Updated"
+msgstr "Последнее обновление"
+
+msgid "User Security Roles (RBAC)"
+msgstr "Роли безопасности пользователя (RBAC)"
+
+msgid "No security roles assigned"
+msgstr "Роли безопасности не назначены"
