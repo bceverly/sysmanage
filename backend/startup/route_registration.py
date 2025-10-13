@@ -11,6 +11,7 @@ from backend.api import (
     agent,
     antivirus_defaults,
     antivirus_status,
+    audit_log,
     auth,
     certificates,
     commercial_antivirus_status,
@@ -237,6 +238,10 @@ def register_routes(app: FastAPI):
         third_party_repos.router, prefix="/api", tags=["third-party-repos"]
     )  # /api/hosts/{host_id}/third-party-repos/* (with auth)
     logger.info("Third-Party Repositories router added")
+
+    logger.info("Adding Audit Log router")
+    app.include_router(audit_log.router)  # /api/audit-log/* (with auth)
+    logger.info("Audit Log router added")
 
     logger.info("=== ALL ROUTES REGISTERED ===")
 

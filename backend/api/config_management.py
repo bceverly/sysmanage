@@ -8,9 +8,11 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.config.config_push import config_push_manager
 from backend.i18n import _
+from backend.persistence import db, models
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 router = APIRouter()
 
@@ -65,49 +67,115 @@ class ServerConfigRequest(BaseModel):
 
 
 @router.post("/config/push", dependencies=[Depends(JWTBearer())])
-async def push_configuration(request: ConfigUpdateRequest):
+async def push_configuration(
+    request: ConfigUpdateRequest, current_user=Depends(get_current_user)
+):
     """
     Push configuration update to agents.
     """
     try:
-        if request.push_to_all:
-            results = await config_push_manager.push_config_to_all_agents(
-                request.config_data
-            )
-            return {
-                "message": _("Configuration pushed to all agents"),
-                "results": results,
-                "total_agents": len(results),
-                "successful": sum(1 for success in results.values() if success),
-            }
+        # Get user for audit logging
+        from sqlalchemy.orm import sessionmaker
 
-        if request.target_hostname:
-            success = await config_push_manager.push_config_to_agent(
-                request.target_hostname, request.config_data
-            )
-            if success:
-                return {
-                    "message": _("Configuration pushed successfully"),
-                    "target": request.target_hostname,
-                }
-            raise HTTPException(
-                status_code=404, detail=_("Agent not found or unreachable")
-            )
-
-        if request.target_platform:
-            successful_sends = await config_push_manager.push_config_by_platform(
-                request.target_platform, request.config_data
-            )
-            return {
-                "message": _("Configuration pushed to platform agents"),
-                "platform": request.target_platform,
-                "successful_sends": successful_sends,
-            }
-
-        raise HTTPException(
-            status_code=400,
-            detail=_("Must specify target_hostname, target_platform, or push_to_all"),
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db.get_engine()
         )
+        with session_local() as session:
+            auth_user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+
+            if request.push_to_all:
+                results = await config_push_manager.push_config_to_all_agents(
+                    request.config_data
+                )
+
+                # Log audit entry for config push to all agents
+                if auth_user:
+                    AuditService.log_update(
+                        db=session,
+                        entity_type=EntityType.SETTING,
+                        entity_name="Agent Configuration (All Agents)",
+                        user_id=auth_user.id,
+                        username=current_user,
+                        details={
+                            "target": "all_agents",
+                            "config_data": request.config_data,
+                            "total_agents": len(results),
+                            "successful": sum(
+                                1 for success in results.values() if success
+                            ),
+                        },
+                    )
+
+                return {
+                    "message": _("Configuration pushed to all agents"),
+                    "results": results,
+                    "total_agents": len(results),
+                    "successful": sum(1 for success in results.values() if success),
+                }
+
+            if request.target_hostname:
+                success = await config_push_manager.push_config_to_agent(
+                    request.target_hostname, request.config_data
+                )
+                if success:
+                    # Log audit entry for config push to specific agent
+                    if auth_user:
+                        AuditService.log_update(
+                            db=session,
+                            entity_type=EntityType.SETTING,
+                            entity_name=f"Agent Configuration ({request.target_hostname})",
+                            user_id=auth_user.id,
+                            username=current_user,
+                            details={
+                                "target": request.target_hostname,
+                                "config_data": request.config_data,
+                            },
+                        )
+
+                    return {
+                        "message": _("Configuration pushed successfully"),
+                        "target": request.target_hostname,
+                    }
+                raise HTTPException(
+                    status_code=404, detail=_("Agent not found or unreachable")
+                )
+
+            if request.target_platform:
+                successful_sends = await config_push_manager.push_config_by_platform(
+                    request.target_platform, request.config_data
+                )
+
+                # Log audit entry for config push by platform
+                if auth_user:
+                    AuditService.log_update(
+                        db=session,
+                        entity_type=EntityType.SETTING,
+                        entity_name=f"Agent Configuration ({request.target_platform} Platform)",
+                        user_id=auth_user.id,
+                        username=current_user,
+                        details={
+                            "target": request.target_platform,
+                            "config_data": request.config_data,
+                            "successful_sends": successful_sends,
+                        },
+                    )
+
+                return {
+                    "message": _("Configuration pushed to platform agents"),
+                    "platform": request.target_platform,
+                    "successful_sends": successful_sends,
+                }
+
+            raise HTTPException(
+                status_code=400,
+                detail=_(
+                    "Must specify target_hostname, target_platform, or push_to_all"
+                ),
+            )
 
     except Exception as e:
         raise HTTPException(

@@ -27,6 +27,7 @@ async def check_host_heartbeats():
 
     try:
         timeout_minutes = get_heartbeat_timeout_minutes()
+        # Use naive UTC time to match how last_access is stored (as naive UTC)
         timeout_threshold = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
             minutes=timeout_minutes
         )

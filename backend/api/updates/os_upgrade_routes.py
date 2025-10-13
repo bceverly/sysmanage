@@ -10,6 +10,7 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
 from .constants import OS_UPGRADE_PACKAGE_MANAGERS
@@ -307,6 +308,36 @@ async def execute_os_upgrades(
                         host_id,
                         host.fqdn,
                         len(available_upgrades),
+                    )
+
+                    # Audit log the OS upgrade execution
+                    AuditService.log(
+                        db=session,
+                        action_type=ActionType.UPDATE,
+                        entity_type=EntityType.HOST,
+                        description=_(
+                            "Initiated OS upgrade on host %s with %d upgrade(s)"
+                        )
+                        % (host.fqdn, len(available_upgrades)),
+                        result=Result.SUCCESS,
+                        user_id=user.id,
+                        username=current_user,
+                        entity_id=host_id,
+                        entity_name=host.fqdn,
+                        details={
+                            "upgrades_count": len(available_upgrades),
+                            "package_managers": (
+                                request.package_managers
+                                if request.package_managers
+                                else [u.package_manager for u in available_upgrades]
+                            ),
+                            "package_names": (
+                                request.package_names
+                                if request.package_names
+                                else [u.package_name for u in available_upgrades]
+                            ),
+                            "requires_reboot": True,
+                        },
                     )
 
                     results.append(

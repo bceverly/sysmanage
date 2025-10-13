@@ -13,6 +13,7 @@ from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.queue_manager import (
     Priority,
     QueueDirection,
@@ -144,7 +145,21 @@ async def deploy_opentelemetry(
             db=db,
         )
 
-        # Commit the message to the database
+        # Audit log the OpenTelemetry deployment request
+        AuditService.log(
+            db=db,
+            user_id=auth_user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            description=f"Requested OpenTelemetry deployment for host {host.fqdn}",
+            result=Result.SUCCESS,
+            details={"grafana_url": grafana_url},
+        )
+
+        # Commit the message and audit log to the database
         db.commit()
 
         logger.info(
@@ -244,6 +259,19 @@ async def remove_opentelemetry(
             host_id=host_id,
             priority=Priority.NORMAL,
             db=db,
+        )
+
+        # Audit log the OpenTelemetry removal request
+        AuditService.log(
+            db=db,
+            user_id=auth_user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            description=f"Requested OpenTelemetry removal for host {host.fqdn}",
+            result=Result.SUCCESS,
         )
 
         db.commit()

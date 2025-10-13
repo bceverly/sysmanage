@@ -161,7 +161,26 @@ async def process_pending_messages(db: Session) -> None:
         # Deserialize message data to extract hostname
         try:
             message_data = server_queue_manager.deserialize_message_data(message)
+
+            # Check if this is a SYSTEM_INFO message (registration) - these don't require host lookup
+            from backend.websocket.messages import MessageType
+
+            if message.message_type == MessageType.SYSTEM_INFO:
+                logger.info(
+                    _("Processing SYSTEM_INFO registration message %s"),
+                    message.message_id,
+                )
+                # SYSTEM_INFO messages are processed without host validation
+                # The handler will create/update the host record
+                await process_system_info_message(message, db)
+                continue
+
             hostname = message_data.get("hostname")
+
+            # Try connection info if no hostname in message data
+            if not hostname:
+                connection_info = message_data.get("_connection_info", {})
+                hostname = connection_info.get("hostname")
 
             if not hostname:
                 logger.warning(
@@ -322,6 +341,57 @@ async def process_validated_message(message, host, db: Session) -> None:
             str(e),
         )
         # Mark message as failed and remove from queue
+        server_queue_manager.mark_failed(
+            message.message_id, error_message=str(e), db=db
+        )
+
+
+async def process_system_info_message(message, db: Session) -> None:
+    """
+    Process a SYSTEM_INFO registration message.
+    This is special because the host may not exist yet.
+    """
+    try:
+        logger.info("Processing SYSTEM_INFO message %s", message.message_id)
+
+        # Mark message as being processed
+        if not server_queue_manager.mark_processing(message.message_id, db=db):
+            logger.warning(
+                _("Could not mark SYSTEM_INFO message %s as processing"),
+                message.message_id,
+            )
+            return
+
+        # Deserialize message data
+        message_data = server_queue_manager.deserialize_message_data(message)
+
+        # Extract connection info
+        connection_info = message_data.get("_connection_info", {})
+
+        # Create a mock connection with the stored connection info
+        mock_connection = MockConnection(None)  # No host_id yet
+        mock_connection.agent_id = connection_info.get("agent_id")
+        mock_connection.hostname = connection_info.get("hostname")
+        mock_connection.ipv4 = connection_info.get("ipv4")
+        mock_connection.ipv6 = connection_info.get("ipv6")
+        mock_connection.platform = connection_info.get("platform")
+
+        # Call the system_info handler
+        from backend.api.message_handlers import handle_system_info
+
+        response = await handle_system_info(db, mock_connection, message_data)
+
+        # Mark as completed
+        server_queue_manager.mark_completed(message.message_id, db=db)
+        logger.info("Successfully processed SYSTEM_INFO message %s", message.message_id)
+
+    except Exception as e:
+        logger.error(
+            _("Error processing SYSTEM_INFO message %s: %s"),
+            message.message_id,
+            str(e),
+            exc_info=True,
+        )
         server_queue_manager.mark_failed(
             message.message_id, error_message=str(e), db=db
         )

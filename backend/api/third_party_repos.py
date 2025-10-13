@@ -15,6 +15,7 @@ from backend.persistence import db as db_module, models
 from backend.persistence.db import get_db
 from backend.persistence.models import Host
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
     Priority,
@@ -273,6 +274,32 @@ async def add_third_party_repository(
         # Commit the session to persist the queued message
         db.commit()
 
+        # Get user for audit logging
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local() as session:
+            auth_user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if auth_user:
+                # Log audit entry for repository addition
+                AuditService.log_create(
+                    db=session,
+                    entity_type=EntityType.REPOSITORY,
+                    entity_name=request.repository,
+                    user_id=auth_user.id,
+                    username=current_user,
+                    details={
+                        "host_id": host_id,
+                        "host_name": host.fqdn,
+                        "repository": request.repository,
+                        "url": request.url,
+                    },
+                )
+
         return AddRepositoryResponse(
             success=True,
             message=_("Repository add request queued successfully"),
@@ -381,6 +408,32 @@ async def delete_third_party_repositories(
 
         # Commit the session to persist the queued message
         db.commit()
+
+        # Get user for audit logging
+        session_local_audit = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local_audit() as session:
+            auth_user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if auth_user:
+                # Log audit entry for repository deletion
+                for repo in request.repositories:
+                    AuditService.log_delete(
+                        db=session,
+                        entity_type=EntityType.REPOSITORY,
+                        entity_name=repo.get("name", "Unknown"),
+                        user_id=auth_user.id,
+                        username=current_user,
+                        details={
+                            "host_id": host_id,
+                            "host_name": host.fqdn,
+                            "repository": repo,
+                        },
+                    )
 
         return DeleteRepositoriesResponse(
             success=True,
@@ -491,6 +544,33 @@ async def enable_third_party_repositories(
         # Commit the session to persist the queued message
         db.commit()
 
+        # Get user for audit logging
+        session_local_audit = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local_audit() as session:
+            auth_user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if auth_user:
+                # Log audit entry for repository enable
+                for repo in request.repositories:
+                    AuditService.log_update(
+                        db=session,
+                        entity_type=EntityType.REPOSITORY,
+                        entity_name=repo.get("name", "Unknown"),
+                        user_id=auth_user.id,
+                        username=current_user,
+                        details={
+                            "host_id": host_id,
+                            "host_name": host.fqdn,
+                            "repository": repo,
+                            "action": "enable",
+                        },
+                    )
+
         return EnableDisableRepositoriesResponse(
             success=True,
             message=_("Repository enable request queued successfully"),
@@ -599,6 +679,33 @@ async def disable_third_party_repositories(
 
         # Commit the session to persist the queued message
         db.commit()
+
+        # Get user for audit logging
+        session_local_audit = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local_audit() as session:
+            auth_user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if auth_user:
+                # Log audit entry for repository disable
+                for repo in request.repositories:
+                    AuditService.log_update(
+                        db=session,
+                        entity_type=EntityType.REPOSITORY,
+                        entity_name=repo.get("name", "Unknown"),
+                        user_id=auth_user.id,
+                        username=current_user,
+                        details={
+                            "host_id": host_id,
+                            "host_name": host.fqdn,
+                            "repository": repo,
+                            "action": "disable",
+                        },
+                    )
 
         return EnableDisableRepositoriesResponse(
             success=True,

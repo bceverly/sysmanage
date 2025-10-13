@@ -17,6 +17,7 @@ from backend.i18n import _
 from backend.persistence import db as persistence_db, models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import CommandType, Message, MessageType
 from backend.websocket.queue_operations import QueueOperations
 from backend.websocket.queue_enums import QueueDirection
@@ -254,6 +255,20 @@ async def deploy_antivirus(
                     db=session,
                 )
 
+                # Audit log the antivirus deployment
+                AuditService.log(
+                    db=session,
+                    user_id=user.id,
+                    username=current_user,
+                    action_type=ActionType.EXECUTE,
+                    entity_type=EntityType.HOST,
+                    entity_id=str(host_id),
+                    entity_name=host.fqdn,
+                    description=f"Requested antivirus deployment for host {host.fqdn}",
+                    result=Result.SUCCESS,
+                    details={"antivirus_package": antivirus_default.antivirus_package},
+                )
+
                 success_count += 1
                 logger.info(
                     "Antivirus deployment initiated for host %s (%s) with package %s",
@@ -330,7 +345,21 @@ async def enable_antivirus(
         host_id=str(host.id),
         db=db,
     )
-    # Commit the session to persist the queued message
+
+    # Audit log the antivirus enable command
+    AuditService.log(
+        db=db,
+        user_id=user.id,
+        username=current_user,
+        action_type=ActionType.EXECUTE,
+        entity_type=EntityType.HOST,
+        entity_id=str(host.id),
+        entity_name=host.fqdn,
+        description=f"Requested antivirus enable for host {host.fqdn}",
+        result=Result.SUCCESS,
+    )
+
+    # Commit the session to persist the queued message and audit log
     db.commit()
 
     logger.info("Antivirus enable command sent to host %s", host.fqdn)
@@ -380,7 +409,21 @@ async def disable_antivirus(
         host_id=str(host.id),
         db=db,
     )
-    # Commit the session to persist the queued message
+
+    # Audit log the antivirus disable command
+    AuditService.log(
+        db=db,
+        user_id=user.id,
+        username=current_user,
+        action_type=ActionType.EXECUTE,
+        entity_type=EntityType.HOST,
+        entity_id=str(host.id),
+        entity_name=host.fqdn,
+        description=f"Requested antivirus disable for host {host.fqdn}",
+        result=Result.SUCCESS,
+    )
+
+    # Commit the session to persist the queued message and audit log
     db.commit()
 
     logger.info("Antivirus disable command sent to host %s", host.fqdn)
@@ -437,7 +480,21 @@ async def remove_antivirus(
             host_id=str(host.id),
             db=db,
         )
-        # Commit the session to persist the queued message
+
+        # Audit log the antivirus remove command
+        AuditService.log(
+            db=db,
+            user_id=user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host.id),
+            entity_name=host.fqdn,
+            description=f"Requested antivirus removal for host {host.fqdn}",
+            result=Result.SUCCESS,
+        )
+
+        # Commit the session to persist the queued message and audit log
         db.commit()
 
         logger.info("Antivirus remove command sent to host %s", host.fqdn)

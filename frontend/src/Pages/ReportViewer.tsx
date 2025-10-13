@@ -86,12 +86,17 @@ const ReportViewer: React.FC = () => {
 
   const handleGoBack = () => {
     // Determine the category based on reportId
-    const userReports = ['users-list', 'user-rbac'];
+    const userReports = ['users-list'];
+    const securityReports = ['user-rbac', 'audit-log'];
+
     const isUserReport = reportId && userReports.includes(reportId);
+    const isSecurityReport = reportId && securityReports.includes(reportId);
 
     // Navigate to the appropriate tab
     if (isUserReport) {
       navigate('/reports#users');
+    } else if (isSecurityReport) {
+      navigate('/reports#security');
     } else {
       navigate('/reports#hosts');
     }

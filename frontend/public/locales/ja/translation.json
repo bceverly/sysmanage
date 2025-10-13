@@ -964,7 +964,8 @@
     "subtitle": "ホスト、ユーザー、システム分析の包括的なレポートを生成",
     "tabs": {
       "hosts": "ホスト",
-      "users": "ユーザー"
+      "users": "ユーザー",
+      "security": "セキュリティ"
     },
     "search": {
       "label": "レポートを検索",
@@ -984,7 +985,19 @@
     "reportNotFound": "レポートが見つかりません",
     "registeredHostsDescription": "ホスト名、IPアドレス、OSバージョン、ステータスを含む基本情報とオペレーティングシステムの詳細を表示する、登録されたすべてのホストの完全なリスト。",
     "hostsWithTagsDescription": "簡単な分類とフィルタリングのために割り当てられたタグと一緒に登録されたすべてのホストを表示します。環境、目的、部門ごとにホストを整理するのに便利です。",
-    "sysmanageUsersDescription": "プロファイル、役割、権限、アカウントステータスを表示する、すべてのSysManageユーザーの包括的なリスト。ユーザー作成日と最後のログイン時間を含みます。"
+    "sysmanageUsersDescription": "プロファイル、役割、権限、アカウントステータスを表示する、すべてのSysManageユーザーの包括的なリスト。ユーザー作成日と最後のログイン時間を含みます。",
+    "auditLogDescription": "すべてのシステム活動、ユーザーアクション、および変更の完全な監査証跡。誰が何をいつ行ったか、そしてその結果を表示します。",
+    "timestamp": "タイムスタンプ",
+    "user": "ユーザー",
+    "action": "アクション",
+    "entityType": "エンティティタイプ",
+    "entityName": "エンティティ名",
+    "result": "結果",
+    "description": "説明",
+    "totalEntries": "合計エントリ",
+    "noAuditEntries": "監査ログエントリが見つかりません。",
+    "system": "システム",
+    "auditLog": "監査ログ"
   },
   "osUpgrades": {
     "title": "オペレーティングシステムアップグレード",

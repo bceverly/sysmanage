@@ -20,6 +20,7 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.login_security import login_security
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 # Import will be added at runtime to avoid circular imports
 
@@ -83,9 +84,21 @@ async def delete_user(user_id: str, current_user: str = Depends(get_current_user
         if len(users) != 1:
             raise HTTPException(status_code=404, detail=_("User not found"))
 
+        deleted_user = users[0]
+
         # Delete the record
         session.query(models.User).filter(models.User.id == user_id).delete()
         session.commit()
+
+        # Audit log user deletion
+        AuditService.log_delete(
+            db=session,
+            user_id=auth_user.id,
+            username=current_user,
+            entity_type=EntityType.USER,
+            entity_id=user_id,
+            entity_name=deleted_user.userid,
+        )
 
     return {"result": True}
 
@@ -337,6 +350,21 @@ async def add_user(
         session.add(user)
         session.commit()
 
+        # Audit log user creation
+        AuditService.log_create(
+            db=session,
+            user_id=auth_user.id,
+            username=current_user,
+            entity_type=EntityType.USER,
+            entity_id=str(user.id),
+            entity_name=str(new_user.userid),
+            details={
+                "active": new_user.active,
+                "first_name": new_user.first_name,
+                "last_name": new_user.last_name,
+            },
+        )
+
         # Import here to avoid circular imports
         from backend.api.password_reset import (
             create_password_reset_token,
@@ -415,6 +443,21 @@ async def update_user(
                 }
             )
             session.commit()
+
+            # Audit log user update
+            AuditService.log_update(
+                db=session,
+                user_id=auth_user.id,
+                username=current_user,
+                entity_type=EntityType.USER,
+                entity_id=user_id,
+                entity_name=str(user_data.userid),
+                details={
+                    "active": user_data.active,
+                    "first_name": user_data.first_name,
+                    "last_name": user_data.last_name,
+                },
+            )
         except IntegrityError as exc:
             session.rollback()
             raise HTTPException(

@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from backend.i18n import _
 from backend.persistence.models import Host, SoftwareInstallationLog
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 # Logger for debugging
 debug_logger = logging.getLogger("debug_logger")
@@ -62,6 +63,19 @@ async def validate_host_authentication(
         if host:
             return True, host
 
+        # Log authentication failure
+        AuditService.log(
+            db=db,
+            action_type=ActionType.AGENT_MESSAGE,
+            entity_type=EntityType.AGENT,
+            entity_id=None,
+            entity_name="unknown",
+            description=_("Agent authentication failed: invalid host token"),
+            result=Result.FAILURE,
+            details={"host_token_prefix": host_token[:16] + "..."},
+            error_message="Host with token is not registered",
+        )
+
         error_message = {
             "message_type": "error",
             "error_type": "host_not_registered",
@@ -76,6 +90,19 @@ async def validate_host_authentication(
         host = db.query(Host).filter(Host.id == host_id).first()
         if host:
             return True, host
+
+        # Log authentication failure
+        AuditService.log(
+            db=db,
+            action_type=ActionType.AGENT_MESSAGE,
+            entity_type=EntityType.AGENT,
+            entity_id=str(host_id),
+            entity_name="unknown",
+            description=_("Agent authentication failed: invalid host ID"),
+            result=Result.FAILURE,
+            details={"host_id": str(host_id)},
+            error_message="Host with ID is not registered",
+        )
 
         error_message = {
             "message_type": "error",
@@ -182,6 +209,24 @@ async def handle_system_info(db: Session, connection, message_data: dict):
             db.execute(stmt)
             db.commit()
             db.flush()  # Ensure changes are visible immediately
+
+            # Log successful agent registration/connection
+            AuditService.log(
+                db=db,
+                action_type=ActionType.AGENT_MESSAGE,
+                entity_type=EntityType.HOST,
+                entity_id=str(host.id),
+                entity_name=hostname,
+                description=_("Agent registered and connected successfully"),
+                result=Result.SUCCESS,
+                details={
+                    "platform": platform,
+                    "ipv4": ipv4,
+                    "ipv6": ipv6,
+                    "is_privileged": is_privileged,
+                    "approval_status": "approved",
+                },
+            )
 
             return {
                 "message_type": "registration_success",
@@ -590,6 +635,32 @@ async def handle_installation_status(db: Session, connection, message_data: dict
             status,
             installation_id,
         )
+
+        # Log significant package installation status changes (not "installing" state)
+        if status in ["completed", "failed"]:
+            hostname = getattr(connection, "hostname", "unknown")
+            host_id_value = getattr(connection, "host_id", None)
+
+            AuditService.log(
+                db=db,
+                action_type=ActionType.AGENT_MESSAGE,
+                entity_type=EntityType.PACKAGE,
+                entity_id=str(installation_id),
+                entity_name=package_name or "unknown",
+                description=_(
+                    "Package installation {status} on agent {hostname}"
+                ).format(status=status, hostname=hostname),
+                result=Result.SUCCESS if status == "completed" else Result.FAILURE,
+                details={
+                    "installation_id": str(installation_id),
+                    "package_name": package_name,
+                    "status": status,
+                    "installed_version": installed_version,
+                    "host_id": str(host_id_value) if host_id_value else None,
+                    "hostname": hostname,
+                },
+                error_message=error_message if status == "failed" else None,
+            )
 
         return {
             "message_type": "package_installation_status_ack",

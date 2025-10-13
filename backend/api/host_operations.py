@@ -18,7 +18,9 @@ queue_ops = QueueOperations()
 
 
 @router.post("/host/refresh/software/{host_id}", dependencies=[Depends(JWTBearer())])
-async def refresh_host_software(host_id: str):
+async def refresh_host_software(
+    host_id: str, current_user: str = Depends(get_current_user)
+):
     """
     Request software inventory refresh for a specific host.
     """
@@ -28,6 +30,15 @@ async def refresh_host_software(host_id: str):
     )
 
     with session_local() as session:
+        # Get user for audit logging
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
         # Find the host first to ensure it exists
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
@@ -46,7 +57,28 @@ async def refresh_host_software(host_id: str):
             host_id=host_id,
             db=session,
         )
-        # Commit the session to persist the queued message
+
+        # Audit log the software refresh request
+        from backend.services.audit_service import (
+            ActionType,
+            AuditService,
+            EntityType,
+            Result,
+        )
+
+        AuditService.log(
+            db=session,
+            user_id=user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            description=f"Requested software inventory refresh for host {host.fqdn}",
+            result=Result.SUCCESS,
+        )
+
+        # Commit the session to persist the queued message and audit log
         session.commit()
 
         return {"result": True, "message": _("Software inventory update requested")}
@@ -101,7 +133,28 @@ async def reboot_host(host_id: str, current_user: str = Depends(get_current_user
             host_id=host_id,
             db=session,
         )
-        # Commit the session to persist the queued message
+
+        # Audit log the reboot request
+        from backend.services.audit_service import (
+            ActionType,
+            AuditService,
+            EntityType,
+            Result,
+        )
+
+        AuditService.log(
+            db=session,
+            user_id=user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            description=f"Requested system reboot for host {host.fqdn}",
+            result=Result.SUCCESS,
+        )
+
+        # Commit the session to persist the queued message and audit log
         session.commit()
 
         return {"result": True, "message": _("System reboot requested")}
@@ -156,7 +209,28 @@ async def shutdown_host(host_id: str, current_user: str = Depends(get_current_us
             host_id=host_id,
             db=session,
         )
-        # Commit the session to persist the queued message
+
+        # Audit log the shutdown request
+        from backend.services.audit_service import (
+            ActionType,
+            AuditService,
+            EntityType,
+            Result,
+        )
+
+        AuditService.log(
+            db=session,
+            user_id=user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            description=f"Requested system shutdown for host {host.fqdn}",
+            result=Result.SUCCESS,
+        )
+
+        # Commit the session to persist the queued message and audit log
         session.commit()
 
         return {"result": True, "message": _("System shutdown requested")}
@@ -200,7 +274,28 @@ async def request_packages(host_id: str, current_user: str = Depends(get_current
             host_id=host_id,
             db=session,
         )
-        # Commit the session to persist the queued message
+
+        # Audit log the package collection request
+        from backend.services.audit_service import (
+            ActionType,
+            AuditService,
+            EntityType,
+            Result,
+        )
+
+        AuditService.log(
+            db=session,
+            user_id=user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            description=f"Requested package collection for host {host.fqdn}",
+            result=Result.SUCCESS,
+        )
+
+        # Commit the session to persist the queued message and audit log
         session.commit()
 
         return {"result": True, "message": _("Package collection requested")}

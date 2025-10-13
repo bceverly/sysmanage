@@ -16,6 +16,7 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 logger = logging.getLogger(__name__)
 
@@ -201,6 +202,21 @@ async def update_antivirus_defaults(
             len(updated_defaults),
         )
 
+        # Log audit entry for each updated default
+        for default in updated_defaults:
+            AuditService.log_update(
+                db=db_session,
+                entity_type=EntityType.SETTING,
+                entity_name=f"Antivirus Default for {default.os_name}",
+                user_id=auth_user.id,
+                username=current_user,
+                entity_id=str(default.id),
+                details={
+                    "os_name": default.os_name,
+                    "antivirus_package": default.antivirus_package,
+                },
+            )
+
         return updated_defaults
 
     except ValueError as e:
@@ -240,6 +256,17 @@ async def delete_antivirus_default(
             )
 
     try:
+        # Get user for audit logging
+        session_local_audit = sessionmaker(
+            autocommit=False, autoflush=False, bind=db.get_bind()
+        )
+        with session_local_audit() as session:
+            auth_user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+
         default = (
             db.query(models.AntivirusDefault)
             .filter(models.AntivirusDefault.os_name == os_name)
@@ -247,10 +274,24 @@ async def delete_antivirus_default(
         )
 
         if default:
+            default_id = str(default.id)
+            default_os_name = default.os_name
             db.delete(default)
             db.commit()
 
             logger.info("Antivirus default deleted for OS: %s", os_name)
+
+            # Log audit entry for deletion
+            AuditService.log_delete(
+                db=db,
+                entity_type=EntityType.SETTING,
+                entity_name=f"Antivirus Default for {default_os_name}",
+                user_id=auth_user.id,
+                username=current_user,
+                entity_id=default_id,
+                details={"os_name": default_os_name},
+            )
+
             return {"message": _("Antivirus default deleted successfully")}
 
         return {"message": _("No antivirus default found for this OS")}

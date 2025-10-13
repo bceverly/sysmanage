@@ -947,7 +947,8 @@
     "subtitle": "為主機、使用者和系統分析生成全面的報告",
     "tabs": {
       "hosts": "主機",
-      "users": "使用者"
+      "users": "使用者",
+      "security": "安全"
     },
     "search": {
       "label": "搜尋報告",
@@ -967,7 +968,19 @@
     "reportNotFound": "找不到報告",
     "registeredHostsDescription": "所有已註冊主機的完整清單，顯示基本訊息和作業系統詳情，包括主機名稱、IP位址、作業系統版本和狀態。",
     "hostsWithTagsDescription": "顯示所有已註冊主機及其指定的標籤，以便進行分類和篩選。有助於按環境、用途或部門組織主機。",
-    "sysmanageUsersDescription": "所有SysManage使用者的全面清單，顯示他們的資料、角色、權限和帳戶狀態。包括使用者建立日期和上次登入時間。"
+    "sysmanageUsersDescription": "所有SysManage使用者的全面清單，顯示他們的資料、角色、權限和帳戶狀態。包括使用者建立日期和上次登入時間。",
+    "auditLogDescription": "所有系統活動、使用者操作和更改的完整稽核追蹤。顯示誰做了什麼、何時做的以及結果。",
+    "timestamp": "時間戳記",
+    "user": "使用者",
+    "action": "操作",
+    "entityType": "實體類型",
+    "entityName": "實體名稱",
+    "result": "結果",
+    "description": "描述",
+    "totalEntries": "總條目",
+    "noAuditEntries": "未找到稽核日誌條目。",
+    "system": "系統",
+    "auditLog": "稽核日誌"
   },
   "osUpgrades": {
     "title": "作業系統升級",

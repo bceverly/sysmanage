@@ -161,6 +161,25 @@ async def create_tag(
         db.commit()
         db.refresh(new_tag)
 
+        # Audit log tag creation
+        from backend.services.audit_service import (
+            ActionType,
+            AuditService,
+            EntityType,
+            Result,
+        )
+
+        with session_local() as audit_session:
+            AuditService.log_create(
+                db=audit_session,
+                user_id=user.id,
+                username=current_user,
+                entity_type=EntityType.TAG,
+                entity_id=str(new_tag.id),
+                entity_name=new_tag.name,
+                details={"description": new_tag.description},
+            )
+
         return TagResponse(
             id=str(new_tag.id),
             name=new_tag.name,
@@ -241,6 +260,25 @@ async def update_tag(
         db.commit()
         db.refresh(tag)
 
+        # Audit log tag update
+        from backend.services.audit_service import (
+            ActionType,
+            AuditService,
+            EntityType,
+            Result,
+        )
+
+        with session_local() as audit_session:
+            AuditService.log_update(
+                db=audit_session,
+                user_id=user.id,
+                username=current_user,
+                entity_type=EntityType.TAG,
+                entity_id=tag_id,
+                entity_name=tag.name,
+                details={"description": tag.description},
+            )
+
         # Get host count safely
         try:
             host_count = tag.hosts.count() if hasattr(tag, "hosts") and tag.hosts else 0
@@ -310,9 +348,30 @@ async def delete_tag(
             text("DELETE FROM host_tags WHERE tag_id = :tag_id"), {"tag_id": tag_id}
         )
 
+        # Store tag name for audit log before deletion
+        tag_name = tag.name
+
         # Now delete the tag
         db.execute(text("DELETE FROM tags WHERE id = :tag_id"), {"tag_id": tag_id})
         db.commit()
+
+        # Audit log tag deletion
+        from backend.services.audit_service import (
+            ActionType,
+            AuditService,
+            EntityType,
+            Result,
+        )
+
+        with session_local() as audit_session:
+            AuditService.log_delete(
+                db=audit_session,
+                user_id=user.id,
+                username=current_user,
+                entity_type=EntityType.TAG,
+                entity_id=tag_id,
+                entity_name=tag_name,
+            )
     except HTTPException:
         raise
     except Exception as e:
@@ -452,12 +511,42 @@ async def add_tag_to_host(
                 detail=_("Tag already associated with this host"),
             )
 
+        # Get tag and host names for audit log
+        tag_name = db.execute(
+            text("SELECT name FROM tags WHERE id = :tag_id"), {"tag_id": tag_id}
+        ).scalar()
+        host_fqdn = db.execute(
+            text("SELECT fqdn FROM host WHERE id = :host_id"), {"host_id": host_id}
+        ).scalar()
+
         # Create association
         host_tag = HostTag(
             host_id=host_id, tag_id=tag_id, created_at=datetime.now(timezone.utc)
         )
         db.add(host_tag)
         db.commit()
+
+        # Audit log tag addition to host
+        from backend.services.audit_service import (
+            ActionType,
+            AuditService,
+            EntityType,
+            Result,
+        )
+
+        with session_local() as audit_session:
+            AuditService.log(
+                db=audit_session,
+                user_id=user.id,
+                username=current_user,
+                action_type=ActionType.UPDATE,
+                entity_type=EntityType.TAG,
+                entity_id=tag_id,
+                entity_name=tag_name,
+                description=f"Added tag '{tag_name}' to host {host_fqdn}",
+                result=Result.SUCCESS,
+                details={"host_id": host_id, "host_fqdn": host_fqdn},
+            )
 
         return {"message": _("Tag added to host successfully")}
     except HTTPException:
@@ -514,8 +603,40 @@ async def remove_tag_from_host(
                 detail=_("Tag not associated with this host"),
             )
 
+        # Get tag and host names for audit log
+        from sqlalchemy import text
+
+        tag_name = db.execute(
+            text("SELECT name FROM tags WHERE id = :tag_id"), {"tag_id": tag_id}
+        ).scalar()
+        host_fqdn = db.execute(
+            text("SELECT fqdn FROM host WHERE id = :host_id"), {"host_id": host_id}
+        ).scalar()
+
         db.delete(host_tag)
         db.commit()
+
+        # Audit log tag removal from host
+        from backend.services.audit_service import (
+            ActionType,
+            AuditService,
+            EntityType,
+            Result,
+        )
+
+        with session_local() as audit_session:
+            AuditService.log(
+                db=audit_session,
+                user_id=user.id,
+                username=current_user,
+                action_type=ActionType.UPDATE,
+                entity_type=EntityType.TAG,
+                entity_id=tag_id,
+                entity_name=tag_name,
+                description=f"Removed tag '{tag_name}' from host {host_fqdn}",
+                result=Result.SUCCESS,
+                details={"host_id": host_id, "host_fqdn": host_fqdn},
+            )
     except HTTPException:
         raise
     except Exception as e:

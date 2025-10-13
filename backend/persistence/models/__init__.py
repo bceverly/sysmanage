@@ -69,4 +69,6 @@ __all__ = [
     # User preference models
     "UserDataGridColumnPreference",
     "UserDashboardCardPreference",
+    # Audit models
+    "AuditLog",
 ]

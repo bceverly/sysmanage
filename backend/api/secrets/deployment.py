@@ -15,6 +15,7 @@ from backend.persistence.db import get_db
 from backend.persistence.models import Host
 from backend.persistence.models.secret import Secret
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.services.vault_service import VaultError, VaultService
 from backend.websocket.queue_manager import (
     Priority,
@@ -147,6 +148,27 @@ async def deploy_ssh_keys(
         except Exception as e:
             logger.error("Failed to enqueue SSH deployment message: %s", str(e))
             raise
+
+        # Log the deployment action
+        secret_names = [s.name for s in ssh_keys]
+        AuditService.log(
+            db=db,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.SECRET,
+            description=f"Deployed {len(ssh_key_data)} SSH key(s) to user {deploy_request.username} on host {host.name}",
+            user_id=current_user.get("id"),
+            username=current_user.get("username"),
+            entity_id=str(host.id),
+            entity_name=host.name,
+            details={
+                "operation": "deploy_ssh_keys",
+                "target_host": host.name,
+                "target_username": deploy_request.username,
+                "key_count": len(ssh_key_data),
+                "secret_names": secret_names,
+                "message_id": message_id,
+            },
+        )
 
         return {
             "message": _(
@@ -288,6 +310,26 @@ async def deploy_certificates(
         except Exception as e:
             logger.error("Failed to enqueue certificate deployment message: %s", str(e))
             raise
+
+        # Log the deployment action
+        certificate_names = [c.name for c in certificates]
+        AuditService.log(
+            db=db,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.CERTIFICATE,
+            description=f"Deployed {len(certificate_data)} SSL certificate(s) to host {host.name}",
+            user_id=current_user.get("id"),
+            username=current_user.get("username"),
+            entity_id=str(host.id),
+            entity_name=host.name,
+            details={
+                "operation": "deploy_certificates",
+                "target_host": host.name,
+                "certificate_count": len(certificate_data),
+                "certificate_names": certificate_names,
+                "message_id": message_id,
+            },
+        )
 
         return {
             "message": _(

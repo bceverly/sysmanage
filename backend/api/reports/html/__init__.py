@@ -11,6 +11,7 @@ from backend.api.reports.html.hosts import (
 from backend.api.reports.html.users import (
     generate_users_html,
     generate_user_rbac_html,
+    generate_audit_log_html,
 )
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "generate_antivirus_commercial_html",
     "generate_users_html",
     "generate_user_rbac_html",
+    "generate_audit_log_html",
 ]

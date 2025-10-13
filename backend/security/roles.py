@@ -121,6 +121,10 @@ class SecurityRoles(str, Enum):
     )
     UNLOCK_USER = "Unlock User"
 
+    # Audit Log Management Roles
+    VIEW_AUDIT_LOG = "View Audit Log"
+    EXPORT_AUDIT_LOG = "Export Audit Log"
+
 
 class UserRoleCache:
     """

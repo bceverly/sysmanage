@@ -16,6 +16,7 @@ from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import CommandType, Message, MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
@@ -151,7 +152,21 @@ async def enable_firewall(
         host_id=str(host.id),
         db=db,
     )
-    # Commit the session to persist the queued message
+
+    # Audit log the firewall enable command
+    AuditService.log(
+        db=db,
+        user_id=user.id,
+        username=current_user,
+        action_type=ActionType.EXECUTE,
+        entity_type=EntityType.HOST,
+        entity_id=str(host.id),
+        entity_name=host.fqdn,
+        description=f"Requested firewall enable for host {host.fqdn}",
+        result=Result.SUCCESS,
+    )
+
+    # Commit the session to persist the queued message and audit log
     db.commit()
 
     logger.info("Firewall enable command sent to host %s", host.fqdn)
@@ -201,6 +216,20 @@ async def disable_firewall(
         host_id=str(host.id),
         db=db,
     )
+
+    # Audit log the firewall disable command
+    AuditService.log(
+        db=db,
+        user_id=user.id,
+        username=current_user,
+        action_type=ActionType.EXECUTE,
+        entity_type=EntityType.HOST,
+        entity_id=str(host.id),
+        entity_name=host.fqdn,
+        description=f"Requested firewall disable for host {host.fqdn}",
+        result=Result.SUCCESS,
+    )
+
     db.commit()
 
     logger.info("Firewall disable command sent to host %s", host.fqdn)
@@ -250,6 +279,20 @@ async def restart_firewall(
         host_id=str(host.id),
         db=db,
     )
+
+    # Audit log the firewall restart command
+    AuditService.log(
+        db=db,
+        user_id=user.id,
+        username=current_user,
+        action_type=ActionType.EXECUTE,
+        entity_type=EntityType.HOST,
+        entity_id=str(host.id),
+        entity_name=host.fqdn,
+        description=f"Requested firewall restart for host {host.fqdn}",
+        result=Result.SUCCESS,
+    )
+
     db.commit()
 
     logger.info("Firewall restart command sent to host %s", host.fqdn)
@@ -299,6 +342,20 @@ async def deploy_firewall(
         host_id=str(host.id),
         db=db,
     )
+
+    # Audit log the firewall deployment command
+    AuditService.log(
+        db=db,
+        user_id=user.id,
+        username=current_user,
+        action_type=ActionType.EXECUTE,
+        entity_type=EntityType.HOST,
+        entity_id=str(host.id),
+        entity_name=host.fqdn,
+        description=f"Requested firewall deployment for host {host.fqdn}",
+        result=Result.SUCCESS,
+    )
+
     db.commit()
 
     logger.info("Firewall deploy command sent to host %s", host.fqdn)

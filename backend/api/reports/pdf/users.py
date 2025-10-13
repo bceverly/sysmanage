@@ -272,3 +272,109 @@ class UsersReportGenerator(ReportGenerator):
                 content.append(Spacer(1, 15))
 
         return self.create_pdf_buffer(_("User Security Roles (RBAC)"), content)
+
+    def generate_audit_log_report(self) -> io.BytesIO:
+        """Generate Audit Log report"""
+        from backend.persistence.models import AuditLog
+
+        audit_entries = (
+            self.db.query(AuditLog).order_by(AuditLog.timestamp.desc()).all()
+        )
+
+        content = []
+
+        # Title
+        title_style = ParagraphStyle(
+            "CustomTitle",
+            parent=self.styles["Heading1"],
+            fontSize=18,
+            spaceAfter=30,
+            alignment=1,
+        )
+        content.append(Paragraph(_("Audit Log"), title_style))
+        content.append(Spacer(1, 20))
+
+        # Report metadata
+        metadata_style = self.styles["Normal"]
+        content.append(
+            Paragraph(
+                f"{_('Generated')}: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}",
+                metadata_style,
+            )
+        )
+        content.append(
+            Paragraph(f"{_('Total Entries')}: {len(audit_entries)}", metadata_style)
+        )
+        content.append(Spacer(1, 20))
+
+        if not audit_entries:
+            content.append(
+                Paragraph(
+                    _("No audit log entries found."),
+                    self.styles["Normal"],
+                )
+            )
+        else:
+            # Create table data
+            table_data = [
+                [
+                    _("Timestamp"),
+                    _("User"),
+                    _("Action"),
+                    _("Entity Type"),
+                    _("Entity Name"),
+                    _("Result"),
+                    _("Description"),
+                ]
+            ]
+
+            for entry in audit_entries:
+                # Format timestamp
+                timestamp_str = (
+                    entry.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                    if entry.timestamp
+                    else _("N/A")
+                )
+
+                # Get username or system
+                username = entry.username if entry.username else _("System")
+
+                table_data.append(
+                    [
+                        timestamp_str,
+                        username,
+                        entry.action_type or _("N/A"),
+                        entry.entity_type or _("N/A"),
+                        entry.entity_name or _("N/A"),
+                        entry.result or _("N/A"),
+                        entry.description or _("N/A"),
+                    ]
+                )
+
+            # Create table with smaller column widths to fit all columns
+            table = Table(
+                table_data,
+                colWidths=[75, 60, 55, 65, 75, 50, 120],
+                repeatRows=1,
+            )
+            table.setStyle(
+                TableStyle(
+                    [
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+                        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                        ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                        ("FONTSIZE", (0, 0), (-1, 0), 8),
+                        ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+                        ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+                        ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+                        ("FONTSIZE", (0, 1), (-1, -1), 7),
+                        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ]
+                )
+            )
+
+            content.append(table)
+
+        return self.create_pdf_buffer(_("Audit Log"), content)

@@ -192,12 +192,16 @@ if __name__ == "__main__":
     port = app_config["api"]["port"]
     ws_ping_interval = 60.0  # pylint: disable=invalid-name
     ws_ping_timeout = 60.0  # pylint: disable=invalid-name
+    ws_max_size = 100 * 1024 * 1024  # 100MB max message size for software inventory
 
     startup_logger.info("=== UVICORN CONFIGURATION ===")
     startup_logger.info("Host: %s", host)
     startup_logger.info("Port: %s", port)
     startup_logger.info("WebSocket ping interval: %s seconds", ws_ping_interval)
     startup_logger.info("WebSocket ping timeout: %s seconds", ws_ping_timeout)
+    startup_logger.info(
+        "WebSocket max message size: %s MB", ws_max_size / (1024 * 1024)
+    )
     startup_logger.info("SSL enabled: %s", bool(ssl_config))
     startup_logger.info("Log level: INFO")
 
@@ -226,6 +230,7 @@ if __name__ == "__main__":
             port=port,
             ws_ping_interval=ws_ping_interval,  # Increased from default 20s to match agent config
             ws_ping_timeout=ws_ping_timeout,  # Increased to handle large message transmissions
+            ws_max_size=ws_max_size,  # Increased from default 16MB to handle large software inventories
             log_config=log_config,
             **ssl_config,
         )

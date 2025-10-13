@@ -16,6 +16,7 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.services.vault_service import VaultError, VaultService
 
 router = APIRouter()
@@ -425,6 +426,23 @@ async def update_grafana_integration_settings(
             except Exception as e:  # pylint: disable=broad-except
                 logger.warning("Failed to configure Prometheus data source: %s", e)
                 # Don't fail the settings update if data source config fails
+
+        # Log audit entry for Grafana integration settings update
+        AuditService.log_update(
+            db=session,
+            entity_type=EntityType.SETTING,
+            entity_name="Grafana Integration Settings",
+            user_id=auth_user.id,
+            username=current_user,
+            entity_id=str(settings.id),
+            details={
+                "enabled": settings.enabled,
+                "use_managed_server": settings.use_managed_server,
+                "host_id": str(settings.host_id) if settings.host_id else None,
+                "manual_url": settings.manual_url,
+                "has_api_key": bool(settings.api_key_vault_token),
+            },
+        )
 
         return {
             "result": True,
