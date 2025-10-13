@@ -12,9 +12,10 @@ from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
 from backend.api.host_utils import validate_host_approval_status
-from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import CommandType, create_command_message
 from backend.websocket.queue_operations import QueueOperations
 from backend.websocket.queue_enums import QueueDirection
@@ -55,7 +56,11 @@ class DiagnosticResponse(BaseModel):
 
 
 @router.post("/host/{host_id}/collect-diagnostics", dependencies=[Depends(JWTBearer())])
-async def collect_diagnostics(host_id: str, request: DiagnosticRequest = None):
+async def collect_diagnostics(
+    host_id: str,
+    request: DiagnosticRequest = None,
+    current_user: str = Depends(get_current_user),
+):
     """
     Request diagnostic collection from an agent.
     This sends a command via WebSocket to the agent requesting diagnostic data.
@@ -78,6 +83,15 @@ async def collect_diagnostics(host_id: str, request: DiagnosticRequest = None):
     )
 
     with session_local() as session:
+        # Get user for audit logging
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
@@ -151,6 +165,24 @@ async def collect_diagnostics(host_id: str, request: DiagnosticRequest = None):
         diagnostic_report.status = "collecting"
         diagnostic_report.started_at = datetime.now(timezone.utc).replace(tzinfo=None)
         diagnostic_report.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+        # Audit log the diagnostics collection request
+        AuditService.log(
+            db=session,
+            user_id=user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            description=f"Requested diagnostic collection for host {host.fqdn}",
+            result=Result.SUCCESS,
+            details={
+                "collection_id": collection_id,
+                "collection_types": parameters["collection_types"],
+            },
+        )
+
         session.commit()
 
         return {

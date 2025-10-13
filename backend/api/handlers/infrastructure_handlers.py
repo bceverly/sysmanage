@@ -14,6 +14,7 @@ from backend.persistence.models import (
     HostCertificate,
     HostRole,
 )
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 # Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")
@@ -153,6 +154,33 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
             "Successfully stored script execution result for host %s (execution_id: %s)",
             host.fqdn,
             execution_id,
+        )
+
+        # Log script execution result
+        script_status = "completed" if message_data.get("success", False) else "failed"
+        AuditService.log(
+            db=db,
+            action_type=ActionType.AGENT_MESSAGE,
+            entity_type=EntityType.SCRIPT,
+            entity_id=str(execution_log.id),
+            entity_name=message_data.get("script_name", "Unknown"),
+            description=_("Script execution {status} on agent {hostname}").format(
+                status=script_status, hostname=host.fqdn
+            ),
+            result=(
+                Result.SUCCESS if message_data.get("success", False) else Result.FAILURE
+            ),
+            details={
+                "execution_id": execution_id,
+                "script_name": message_data.get("script_name"),
+                "exit_code": message_data.get("exit_code"),
+                "execution_time": message_data.get("execution_time"),
+                "shell_used": message_data.get("shell_used"),
+                "host_id": str(host.id),
+                "hostname": host.fqdn,
+                "timed_out": message_data.get("timeout", False),
+            },
+            error_message=message_data.get("error"),
         )
 
         return {

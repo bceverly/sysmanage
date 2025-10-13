@@ -969,7 +969,8 @@
     "subtitle": "Générez des rapports complets pour les hôtes, les utilisateurs et les analyses système",
     "tabs": {
       "hosts": "Hôtes",
-      "users": "Utilisateurs"
+      "users": "Utilisateurs",
+      "security": "Sécurité"
     },
     "search": {
       "label": "Rechercher des rapports",
@@ -989,7 +990,19 @@
     "reportNotFound": "Rapport non trouvé",
     "registeredHostsDescription": "Liste complète de tous les hôtes enregistrés montrant les informations de base et les détails du système d'exploitation incluant le nom d'hôte, les adresses IP, la version de l'OS et le statut.",
     "hostsWithTagsDescription": "Affiche tous les hôtes enregistrés avec leurs étiquettes assignées pour une catégorisation et un filtrage faciles. Utile pour organiser les hôtes par environnement, objectif ou département.",
-    "sysmanageUsersDescription": "Liste complète de tous les utilisateurs SysManage montrant leurs profils, rôles, permissions et statut de compte. Inclut les dates de création d'utilisateur et les heures de dernière connexion."
+    "sysmanageUsersDescription": "Liste complète de tous les utilisateurs SysManage montrant leurs profils, rôles, permissions et statut de compte. Inclut les dates de création d'utilisateur et les heures de dernière connexion.",
+    "auditLogDescription": "Journal d'audit complet de toutes les activités du système, actions des utilisateurs et modifications. Montre qui a fait quoi, quand et le résultat.",
+    "timestamp": "Horodatage",
+    "user": "Utilisateur",
+    "action": "Action",
+    "entityType": "Type d'entité",
+    "entityName": "Nom de l'entité",
+    "result": "Résultat",
+    "description": "Description",
+    "totalEntries": "Nombre total",
+    "noAuditEntries": "Aucune entrée de journal d'audit trouvée.",
+    "system": "Système",
+    "auditLog": "Journal d'audit"
   },
   "osUpgrades": {
     "title": "Mises à jour du système d'exploitation",

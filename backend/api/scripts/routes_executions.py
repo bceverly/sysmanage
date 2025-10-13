@@ -15,6 +15,7 @@ from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.queue_manager import (
     Priority,
     QueueDirection,
@@ -163,6 +164,35 @@ async def execute_script(
                     queue_message_id,
                     host.id,
                     host.fqdn,
+                )
+
+                # Log the script execution to audit log
+                AuditService.log(
+                    db=db_session,
+                    action_type=ActionType.EXECUTE,
+                    entity_type=EntityType.SCRIPT,
+                    entity_id=str(execution_log.id),
+                    entity_name=script_name or "ad-hoc script",
+                    user_id=auth_user.id,
+                    username=current_user,
+                    description=_(
+                        "Executed script '{script_name}' on host '{host_fqdn}'"
+                    ).format(
+                        script_name=script_name or "ad-hoc script", host_fqdn=host.fqdn
+                    ),
+                    details={
+                        "execution_id": execution_id,
+                        "host_id": str(host.id),
+                        "host_fqdn": host.fqdn,
+                        "saved_script_id": (
+                            str(execution_request.saved_script_id)
+                            if execution_request.saved_script_id
+                            else None
+                        ),
+                        "shell_type": shell_type,
+                        "run_as_user": execution_request.run_as_user,
+                    },
+                    result=Result.SUCCESS,
                 )
             except Exception as e:
                 # Update execution log to failed
@@ -324,8 +354,25 @@ async def delete_script_execution(
                     status_code=404, detail=_("Script execution not found")
                 )
 
+            script_name = execution.script_name
+            execution_log_id = str(execution.id)
+
             db_session.delete(execution)
             db_session.commit()
+
+            # Log the deletion to audit log
+            AuditService.log_delete(
+                db=db_session,
+                entity_type=EntityType.SCRIPT,
+                entity_id=execution_log_id,
+                entity_name=f"execution of '{script_name}'",
+                user_id=auth_user.id,
+                username=current_user,
+                details={
+                    "execution_id": execution_id,
+                    "script_name": script_name,
+                },
+            )
 
             logger.info(
                 "Deleted script execution %s by user %s", execution_id, current_user
@@ -370,13 +417,35 @@ async def delete_script_executions_bulk(
                     ),
                 )
 
-            deleted_count = (
+            # Get execution info before deleting for audit log
+            executions_to_delete = (
                 db_session.query(models.ScriptExecutionLog)
                 .filter(models.ScriptExecutionLog.execution_id.in_(execution_ids))
-                .delete(synchronize_session=False)
+                .all()
             )
 
+            deleted_count = len(executions_to_delete)
+
+            # Delete the executions
+            db_session.query(models.ScriptExecutionLog).filter(
+                models.ScriptExecutionLog.execution_id.in_(execution_ids)
+            ).delete(synchronize_session=False)
+
             db_session.commit()
+
+            # Log the bulk deletion to audit log
+            AuditService.log_delete(
+                db=db_session,
+                entity_type=EntityType.SCRIPT,
+                entity_name=f"{deleted_count} script execution(s)",
+                user_id=auth_user.id,
+                username=current_user,
+                details={
+                    "execution_ids": execution_ids,
+                    "deleted_count": deleted_count,
+                    "script_names": [e.script_name for e in executions_to_delete],
+                },
+            )
 
             logger.info(
                 "Bulk deleted %d script executions by user %s",

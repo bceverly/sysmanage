@@ -961,7 +961,8 @@
     "subtitle": "호스트, 사용자 및 시스템 분석을 위한 종합적인 보고서 생성",
     "tabs": {
       "hosts": "호스트",
-      "users": "사용자"
+      "users": "사용자",
+      "security": "보안"
     },
     "search": {
       "label": "보고서 검색",
@@ -981,7 +982,19 @@
     "reportNotFound": "보고서를 찾을 수 없습니다",
     "registeredHostsDescription": "호스트명, IP 주소, OS 버전 및 상태를 포함한 기본 정보와 운영 체제 세부 사항을 보여주는 모든 등록된 호스트의 전체 목록입니다.",
     "hostsWithTagsDescription": "쉽게 분류하고 필터링할 수 있도록 할당된 태그와 함께 모든 등록된 호스트를 보여줍니다. 환경, 목적 또는 부서별로 호스트를 정리하는 데 유용합니다.",
-    "sysmanageUsersDescription": "프로필, 역할, 권한 및 계정 상태를 보여주는 모든 SysManage 사용자의 종합적인 목록입니다. 사용자 생성 날짜와 마지막 로그인 시간을 포함합니다."
+    "sysmanageUsersDescription": "프로필, 역할, 권한 및 계정 상태를 보여주는 모든 SysManage 사용자의 종합적인 목록입니다. 사용자 생성 날짜와 마지막 로그인 시간을 포함합니다.",
+    "auditLogDescription": "모든 시스템 활동, 사용자 작업 및 변경 사항의 완전한 감사 추적. 누가 무엇을 언제 했는지와 결과를 보여줍니다.",
+    "timestamp": "타임스탬프",
+    "user": "사용자",
+    "action": "작업",
+    "entityType": "엔티티 유형",
+    "entityName": "엔티티 이름",
+    "result": "결과",
+    "description": "설명",
+    "totalEntries": "총 항목",
+    "noAuditEntries": "감사 로그 항목을 찾을 수 없습니다.",
+    "system": "시스템",
+    "auditLog": "감사 로그"
   },
   "osUpgrades": {
     "title": "운영 체제 업그레이드",

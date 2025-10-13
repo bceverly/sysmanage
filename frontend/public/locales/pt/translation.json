@@ -964,7 +964,8 @@
     "subtitle": "Gere relatórios abrangentes para hosts, usuários e análises de sistema",
     "tabs": {
       "hosts": "Hosts",
-      "users": "Usuários"
+      "users": "Usuários",
+      "security": "Segurança"
     },
     "search": {
       "label": "Pesquisar relatórios",
@@ -984,7 +985,19 @@
     "reportNotFound": "Relatório não encontrado",
     "registeredHostsDescription": "Lista completa de todos os hosts registrados mostrando informações básicas e detalhes do sistema operacional incluindo nome do host, endereços IP, versão do SO e status.",
     "hostsWithTagsDescription": "Mostra todos os hosts registrados junto com suas tags atribuídas para fácil categorização e filtragem. Útil para organizar hosts por ambiente, propósito ou departamento.",
-    "sysmanageUsersDescription": "Lista abrangente de todos os usuários SysManage mostrando seus perfis, funções, permissões e status da conta. Inclui datas de criação de usuário e horários de último login."
+    "sysmanageUsersDescription": "Lista abrangente de todos os usuários SysManage mostrando seus perfis, funções, permissões e status da conta. Inclui datas de criação de usuário e horários de último login.",
+    "auditLogDescription": "Trilha de auditoria completa de todas as atividades do sistema, ações do usuário e alterações. Mostra quem fez o quê, quando fez e o resultado.",
+    "timestamp": "Carimbo de data/hora",
+    "user": "Usuário",
+    "action": "Ação",
+    "entityType": "Tipo de entidade",
+    "entityName": "Nome da entidade",
+    "result": "Resultado",
+    "description": "Descrição",
+    "totalEntries": "Total de entradas",
+    "noAuditEntries": "Nenhuma entrada de log de auditoria encontrada.",
+    "system": "Sistema",
+    "auditLog": "Registro de auditoria"
   },
   "osUpgrades": {
     "title": "Atualizações do Sistema Operacional",

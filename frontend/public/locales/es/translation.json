@@ -971,7 +971,8 @@
     "subtitle": "Genere informes integrales para hosts, usuarios y análisis del sistema",
     "tabs": {
       "hosts": "Hosts",
-      "users": "Usuarios"
+      "users": "Usuarios",
+      "security": "Seguridad"
     },
     "search": {
       "label": "Buscar informes",
@@ -991,7 +992,19 @@
     "reportNotFound": "Informe no encontrado",
     "registeredHostsDescription": "Lista completa de todos los hosts registrados que muestra información básica y detalles del sistema operativo incluyendo nombre del host, direcciones IP, versión del SO y estado.",
     "hostsWithTagsDescription": "Muestra todos los hosts registrados junto con sus etiquetas asignadas para facilitar la categorización y el filtrado. Útil para organizar hosts por entorno, propósito o departamento.",
-    "sysmanageUsersDescription": "Lista integral de todos los usuarios de SysManage que muestra sus perfiles, roles, permisos y estado de cuenta. Incluye fechas de creación de usuarios y tiempos de último inicio de sesión."
+    "sysmanageUsersDescription": "Lista integral de todos los usuarios de SysManage que muestra sus perfiles, roles, permisos y estado de cuenta. Incluye fechas de creación de usuarios y tiempos de último inicio de sesión.",
+    "auditLogDescription": "Registro de auditoría completo de todas las actividades del sistema, acciones de usuario y cambios. Muestra quién hizo qué, cuándo lo hizo y el resultado.",
+    "timestamp": "Marca de tiempo",
+    "user": "Usuario",
+    "action": "Acción",
+    "entityType": "Tipo de entidad",
+    "entityName": "Nombre de entidad",
+    "result": "Resultado",
+    "description": "Descripción",
+    "totalEntries": "Total de entradas",
+    "noAuditEntries": "No se encontraron entradas de registro de auditoría.",
+    "system": "Sistema",
+    "auditLog": "Registro de auditoría"
   },
   "osUpgrades": {
     "title": "Actualizaciones del Sistema Operativo",

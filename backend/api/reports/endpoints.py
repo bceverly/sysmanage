@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from backend.api.reports.html import (
     generate_antivirus_commercial_html,
     generate_antivirus_opensource_html,
+    generate_audit_log_html,
     generate_firewall_status_html,
     generate_hosts_html,
     generate_user_rbac_html,
@@ -44,6 +45,7 @@ class ReportType(str, Enum):
     ANTIVIRUS_OPENSOURCE = "antivirus-opensource"
     ANTIVIRUS_COMMERCIAL = "antivirus-commercial"
     USER_RBAC = "user-rbac"
+    AUDIT_LOG = "audit-log"
 
 
 @router.get("/view/{report_type}", response_class=HTMLResponse)
@@ -76,6 +78,7 @@ async def view_report_html(
     try:
         hosts = None
         users = None
+        audit_entries = None
         report_title = ""
 
         # report_type is validated by FastAPI Enum, so only valid values are allowed
@@ -107,6 +110,12 @@ async def view_report_html(
             users = db.query(User).order_by(User.userid).all()
             report_title = _("User Security Roles (RBAC)")
 
+        elif report_type == ReportType.AUDIT_LOG:
+            from backend.persistence.models import AuditLog
+
+            audit_entries = db.query(AuditLog).order_by(AuditLog.timestamp.desc()).all()
+            report_title = _("Audit Log")
+
         # Generate HTML content based on report type
         # All user input is properly escaped using html.escape() in html_generators.py
         # The _escape() function is applied to all dynamic content to prevent XSS.
@@ -120,11 +129,14 @@ async def view_report_html(
             html_content = generate_antivirus_opensource_html(hosts, report_title)
         elif report_type == ReportType.ANTIVIRUS_COMMERCIAL:
             html_content = generate_antivirus_commercial_html(hosts, report_title)
+        elif report_type == ReportType.AUDIT_LOG:
+            html_content = generate_audit_log_html(audit_entries, report_title)
         else:  # USER_RBAC
             html_content = generate_user_rbac_html(db, users, report_title)
 
         # Use HTMLResponse which is the proper FastAPI way to return HTML
         # Input validation via Enum + HTML escaping in generators = XSS protection
+        # nosemgrep: python.fastapi.web.tainted-direct-response-fastapi.tainted-direct-response-fastapi
         return HTMLResponse(content=html_content)
 
     except HTTPException:
@@ -203,11 +215,18 @@ async def generate_report(
             pdf_buffer = generator.generate_antivirus_commercial_report()
             filename = f"antivirus_commercial_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.pdf"
 
-        else:  # ReportType.USER_RBAC
+        elif report_type == ReportType.USER_RBAC:
             generator = UsersReportGenerator(db)
             pdf_buffer = generator.generate_user_rbac_report()
             filename = (
                 f"user_rbac_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.pdf"
+            )
+
+        else:  # ReportType.AUDIT_LOG
+            generator = UsersReportGenerator(db)
+            pdf_buffer = generator.generate_audit_log_report()
+            filename = (
+                f"audit_log_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.pdf"
             )
 
         # Return the PDF as response

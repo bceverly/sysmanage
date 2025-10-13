@@ -17,6 +17,7 @@ from backend.persistence.models import (
 )
 from backend.auth.auth_bearer import get_current_user
 from backend.security.roles import SecurityRoles, check_user_has_role
+from backend.services.audit_service import ActionType, AuditService, EntityType
 
 router = APIRouter(prefix="/api/security-roles", tags=["security-roles"])
 
@@ -219,5 +220,22 @@ async def update_user_roles(
         db.add(user_role)
 
     db.commit()
+
+    # Audit log role assignment
+    role_names = [
+        db.query(SecurityRole).filter(SecurityRole.id == role_uuid).first().name
+        for role_uuid in role_uuids
+    ]
+    AuditService.log(
+        db=db,
+        user_id=current_user_uuid,
+        username=current_user,
+        action_type=ActionType.UPDATE,
+        entity_type=EntityType.USER_ROLE,
+        entity_id=str(user_id),
+        entity_name=user.userid,
+        description=f"Security roles updated for user {user.userid} by {current_user}",
+        details={"roles": role_names, "role_ids": [str(r) for r in role_uuids]},
+    )
 
     return UserRolesResponse(user_id=user_id, role_ids=request.role_ids)

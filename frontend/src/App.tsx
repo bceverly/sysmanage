@@ -31,6 +31,7 @@ import Secrets from './Pages/Secrets';
 import Scripts from './Pages/Scripts';
 import Reports from './Pages/Reports';
 import ReportViewer from './Pages/ReportViewer';
+import AuditLogViewer from './Pages/AuditLogViewer';
 import Profile from './Pages/Profile';
 import Settings from './Pages/Settings';
 import Logout from './Pages/Logout';
@@ -107,6 +108,7 @@ function App() {
                     <Route path="/secrets" element={<Secrets />} />
                     <Route path="/scripts" element={<Scripts />} />
                     <Route path="/reports" element={<Reports />} />
+                    <Route path="/reports/audit-log" element={<AuditLogViewer />} />
                     <Route path="/reports/:reportId" element={<ReportViewer />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/settings" element={<Settings />} />

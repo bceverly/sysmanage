@@ -12,10 +12,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from sqlalchemy.orm import sessionmaker
 
-from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.certificate_manager import certificate_manager
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 # Split into separate routers for different authentication requirements
 public_router = APIRouter()  # Unauthenticated endpoints (no /api prefix)
@@ -116,7 +117,9 @@ async def get_client_certificate(host_id: str):  # pylint: disable=duplicate-cod
 
 
 @auth_router.post("/certificates/revoke/{host_id}", dependencies=[Depends(JWTBearer())])
-async def revoke_client_certificate(host_id: str):  # pylint: disable=duplicate-code
+async def revoke_client_certificate(
+    host_id: str, current_user: str = Depends(get_current_user)
+):  # pylint: disable=duplicate-code
     """
     Revoke client certificate for a host.
     This effectively blocks the host from connecting until re-approved.
@@ -139,6 +142,15 @@ async def revoke_client_certificate(host_id: str):  # pylint: disable=duplicate-
     )
 
     with session_local() as session:
+        # Get user for audit logging
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
@@ -150,6 +162,19 @@ async def revoke_client_certificate(host_id: str):  # pylint: disable=duplicate-
         host.certificate_serial = None
         host.certificate_issued_at = None
         host.approval_status = "revoked"
+
+        # Audit log the certificate revocation
+        AuditService.log(
+            db=session,
+            user_id=user.id,
+            username=current_user,
+            action_type=ActionType.DELETE,
+            entity_type=EntityType.CERTIFICATE,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            description=f"Revoked certificate for host {host.fqdn}",
+            result=Result.SUCCESS,
+        )
 
         session.commit()
 

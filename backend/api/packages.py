@@ -18,6 +18,7 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db as db_module, models
 from backend.persistence.db import get_db
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.persistence.models import (
     AvailablePackage,
     Host,
@@ -537,6 +538,25 @@ async def install_packages(
         # Final commit for status updates
         db.commit()
 
+        # Audit log the package installation request
+        AuditService.log(
+            db=db,
+            action_type=ActionType.UPDATE,
+            entity_type=EntityType.PACKAGE,
+            description=_("Queued installation of %d packages on host %s")
+            % (len(request.package_names), host.fqdn),
+            result=Result.SUCCESS,
+            user_id=user.id,
+            username=current_user,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            details={
+                "request_id": request_id,
+                "packages": request.package_names,
+                "requested_by": request.requested_by,
+            },
+        )
+
         return PackageInstallResponse(
             success=True,
             message=_("Successfully queued %d packages for installation")
@@ -559,6 +579,7 @@ async def uninstall_packages(
     host_id: str,
     request: PackageUninstallRequest,
     db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
 ):
     """
     Queue package uninstallation for a specific host using UUID-based grouping.
@@ -567,6 +588,28 @@ async def uninstall_packages(
     The agent will receive this UUID and return it when reporting completion.
     """
     try:
+        # Check if user has permission to remove packages
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local() as session:
+            user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            if not user:
+                raise HTTPException(status_code=401, detail=_("User not found"))
+
+            if user._role_cache is None:
+                user.load_role_cache(session)
+
+            if not user.has_role(SecurityRoles.REMOVE_PACKAGE):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: REMOVE_PACKAGE role required"),
+                )
+
         # Validate host exists and is active
         host = (
             db.query(Host)
@@ -654,6 +697,25 @@ async def uninstall_packages(
 
         # Final commit for status updates
         db.commit()
+
+        # Audit log the package uninstallation request
+        AuditService.log(
+            db=db,
+            action_type=ActionType.UPDATE,
+            entity_type=EntityType.PACKAGE,
+            description=_("Queued uninstallation of %d packages on host %s")
+            % (len(request.package_names), host.fqdn),
+            result=Result.SUCCESS,
+            user_id=user.id,
+            username=current_user,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            details={
+                "request_id": request_id,
+                "packages": request.package_names,
+                "requested_by": request.requested_by,
+            },
+        )
 
         return PackageUninstallResponse(
             success=True,

@@ -35,6 +35,7 @@ from backend.i18n import _
 from backend.persistence.db import get_db
 from backend.persistence.models import InstallationPackage, InstallationRequest
 from backend.security.communication_security import websocket_security
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import ErrorMessage, MessageType, create_message
@@ -98,6 +99,9 @@ async def agent_connect(websocket: WebSocket):
     logger.info("Auth token present", extra={"token_present": bool(auth_token)})
     connection_id = None
 
+    # Get database session for audit logging
+    db = next(get_db())
+
     if auth_token:
         logger.info("Validating auth token...")
         is_valid, connection_id, error_msg = (
@@ -111,6 +115,22 @@ async def agent_connect(websocket: WebSocket):
                 "WEBSOCKET_PROTOCOL_ERROR: Authentication failed",
                 extra={"client_host": client_host},
             )
+
+            # Log authentication failure
+            AuditService.log(
+                db=db,
+                action_type=ActionType.AGENT_MESSAGE,
+                entity_type=EntityType.AGENT,
+                entity_id=None,
+                entity_name="unknown",
+                description=_("Agent WebSocket authentication failed"),
+                result=Result.FAILURE,
+                details={"client_host": client_host},
+                error_message=error_msg,
+                ip_address=client_host,
+            )
+
+            db.close()
             await websocket.close(
                 code=4001, reason=_("Authentication failed: %s") % error_msg
             )
@@ -120,6 +140,22 @@ async def agent_connect(websocket: WebSocket):
             "WEBSOCKET_PROTOCOL_ERROR: No auth token provided",
             extra={"client_host": client_host},
         )
+
+        # Log missing token
+        AuditService.log(
+            db=db,
+            action_type=ActionType.AGENT_MESSAGE,
+            entity_type=EntityType.AGENT,
+            entity_id=None,
+            entity_name="unknown",
+            description=_("Agent WebSocket connection attempted without token"),
+            result=Result.FAILURE,
+            details={"client_host": client_host},
+            error_message="No authentication token provided",
+            ip_address=client_host,
+        )
+
+        db.close()
         await websocket.close(code=4000, reason=_("Authentication token required"))
         return
 
@@ -130,7 +166,7 @@ async def agent_connect(websocket: WebSocket):
         "WebSocket connection established, connection ID: %s", connection.agent_id
     )
     logger.info("Connection object created, waiting for messages...")
-    db = next(get_db())
+    # db session already opened above for audit logging, continue using it
 
     try:
         while True:
@@ -196,7 +232,13 @@ async def _process_websocket_message(data, connection, db, connection_id):
             message_size,
         )
 
-        await _handle_message_by_type(message, connection, db)
+        # Handle time-sensitive messages immediately (heartbeats, system_info)
+        # These should not be queued as they need immediate processing
+        if message.message_type in [MessageType.HEARTBEAT, MessageType.SYSTEM_INFO]:
+            await _handle_message_by_type(message, connection, db)
+        else:
+            # Queue all other messages for background processing
+            await _enqueue_inbound_message(message, connection, db)
 
     except json.JSONDecodeError:
         # Invalid JSON - send error
@@ -211,6 +253,48 @@ async def _process_websocket_message(data, connection, db, connection_id):
             await connection.send_message(error_msg.to_dict())
         except Exception as send_exc:
             logger.error("Failed to send error message: %s", send_exc)
+
+
+async def _enqueue_inbound_message(message, connection, db):
+    """
+    Enqueue an inbound message for background processing.
+    WebSocket thread should ONLY queue messages, not process them.
+    """
+    from backend.websocket.queue_operations import QueueOperations
+    from backend.websocket.queue_enums import QueueDirection, Priority
+
+    queue_ops = QueueOperations()
+
+    # Store connection information in the message data for later use
+    message_data = message.data.copy() if message.data else {}
+    message_data["_connection_info"] = {
+        "agent_id": connection.agent_id,
+        "hostname": connection.hostname,
+        "ipv4": connection.ipv4,
+        "ipv6": connection.ipv6,
+        "platform": connection.platform,
+    }
+
+    # Enqueue for background processing
+    queue_ops.enqueue_message(
+        message_type=message.message_type,
+        message_data=message_data,
+        direction=QueueDirection.INBOUND,
+        host_id=None,  # Will be determined during processing
+        priority=(
+            Priority.HIGH
+            if message.message_type == MessageType.SYSTEM_INFO
+            else Priority.NORMAL
+        ),
+        message_id=message.message_id,
+        db=db,
+    )
+
+    logger.info(
+        "Enqueued %s message from connection %s for background processing",
+        message.message_type,
+        connection.agent_id,
+    )
 
 
 async def _handle_message_by_type(message, connection, db):
@@ -375,17 +459,80 @@ async def _validate_and_get_host(message_data, connection, db):
     )
     hostname = message_data.get("hostname")
     host_id = message_data.get("host_id")
+
+    # Fall back to connection hostname if message doesn't include it
+    if not hostname and not host_id and connection and connection.hostname:
+        hostname = connection.hostname
+        logger.debug(
+            "Using connection hostname for validation: %s",
+            hostname,
+        )
+
+    # If still no hostname/host_id, try to look up by IP address
+    if not hostname and not host_id and connection:
+        from backend.persistence.models import Host
+
+        host_by_ip = None
+        if connection.ipv4:
+            logger.debug("Attempting host lookup by IPv4: %s", connection.ipv4)
+            host_by_ip = db.query(Host).filter(Host.ipv4 == connection.ipv4).first()
+
+        if not host_by_ip and connection.ipv6:
+            logger.debug("Attempting host lookup by IPv6: %s", connection.ipv6)
+            host_by_ip = db.query(Host).filter(Host.ipv6 == connection.ipv6).first()
+
+        if host_by_ip:
+            hostname = host_by_ip.fqdn
+            logger.debug(
+                "Found host by IP address: %s",
+                hostname,
+            )
+
     logger.debug(
         "Extracted hostname=%s, host_id=%s for validation",
         hostname,
         host_id,
     )
 
-    if not hostname:
-        logger.error("Message missing hostname - cannot validate host")
+    # Must have either hostname or host_id
+    if not hostname and not host_id:
+        logger.error("Message missing both hostname and host_id - cannot validate host")
+
+        # Gather connection info for audit log
+        connection_info = {}
+        if connection:
+            if connection.hostname:
+                connection_info["connection_hostname"] = connection.hostname
+            if connection.ipv4:
+                connection_info["connection_ipv4"] = connection.ipv4
+            if connection.ipv6:
+                connection_info["connection_ipv6"] = connection.ipv6
+            if connection.platform:
+                connection_info["connection_platform"] = connection.platform
+            if connection.agent_id:
+                connection_info["agent_id"] = connection.agent_id
+
+        # Log validation failure
+        AuditService.log(
+            db=db,
+            action_type=ActionType.AGENT_MESSAGE,
+            entity_type=EntityType.AGENT,
+            entity_id=None,
+            entity_name="unknown",
+            description=_(
+                "Agent message validation failed: missing hostname and host_id"
+            ),
+            result=Result.FAILURE,
+            details={
+                "message_data_keys": list(message_data.keys()) if message_data else [],
+                **connection_info,
+            },
+            error_message="Message missing both hostname and host_id",
+        )
+
         error_msg = ErrorMessage(
-            "missing_hostname",
-            _("Message must include hostname for host validation"),
+            "missing_host_info",
+            _("Message must include hostname or host_id for host validation"),
         )
         return None, error_msg
 
@@ -413,28 +560,29 @@ async def _validate_and_get_host(message_data, connection, db):
             )
             return None, error_msg
 
-        # Verify that the host_id matches the hostname (case-insensitive)
+        # Verify that the host_id matches the hostname (case-insensitive) if hostname is provided
         # Allow both short hostname and FQDN to match
-        hostname_lower = hostname.lower()
-        fqdn_lower = host.fqdn.lower()
-        short_name = fqdn_lower.split(".")[0]  # Extract short name from FQDN
+        if hostname:
+            hostname_lower = hostname.lower()
+            fqdn_lower = host.fqdn.lower()
+            short_name = fqdn_lower.split(".")[0]  # Extract short name from FQDN
 
-        if hostname_lower not in {fqdn_lower, short_name}:
-            logger.warning(
-                "Host ID %s hostname mismatch (expected: %s or %s, got: %s) - sending error",
-                host_id,
-                host.fqdn,
-                short_name,
-                hostname,
-            )
-            error_msg = ErrorMessage(
-                "host_not_registered",
-                _("Host ID and hostname mismatch - please re-register"),
-            )
-            return None, error_msg
+            if hostname_lower not in {fqdn_lower, short_name}:
+                logger.warning(
+                    "Host ID %s hostname mismatch (expected: %s or %s, got: %s) - sending error",
+                    host_id,
+                    host.fqdn,
+                    short_name,
+                    hostname,
+                )
+                error_msg = ErrorMessage(
+                    "host_not_registered",
+                    _("Host ID and hostname mismatch - please re-register"),
+                )
+                return None, error_msg
 
         logger.info(
-            "Host ID validation successful for host %s (ID: %s)", hostname, host_id
+            "Host ID validation successful for host %s (ID: %s)", host.fqdn, host_id
         )
     else:
         # No host_id provided, fall back to hostname lookup (case-insensitive)
@@ -444,9 +592,29 @@ async def _validate_and_get_host(message_data, connection, db):
         host = db.query(Host).filter(func.lower(Host.fqdn) == hostname.lower()).first()
 
     if not host:
+        host_name = hostname or f"host_id:{host_id}"
         logger.warning(
-            "Host %s not registered - sending registration required error", hostname
+            "Host %s not registered - sending registration required error", host_name
         )
+
+        # Log host not registered
+        AuditService.log(
+            db=db,
+            action_type=ActionType.AGENT_MESSAGE,
+            entity_type=EntityType.AGENT,
+            entity_id=None,
+            entity_name=host_name,
+            description=_("Agent message from unregistered host: {hostname}").format(
+                hostname=host_name
+            ),
+            result=Result.FAILURE,
+            details={
+                "hostname": hostname,
+                "host_id": str(host_id) if host_id else None,
+            },
+            error_message="Host not registered",
+        )
+
         error_msg = ErrorMessage(
             "host_not_registered",
             _("Host must register before sending inventory data"),
@@ -456,9 +624,25 @@ async def _validate_and_get_host(message_data, connection, db):
     if host.approval_status != "approved":
         logger.warning(
             "Host %s not approved (status: %s) - sending approval required error",
-            hostname,
+            host.fqdn,
             host.approval_status,
         )
+
+        # Log unapproved host attempt
+        AuditService.log(
+            db=db,
+            action_type=ActionType.AGENT_MESSAGE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host.id),
+            entity_name=hostname,
+            description=_("Agent message from unapproved host: {hostname}").format(
+                hostname=hostname
+            ),
+            result=Result.FAILURE,
+            details={"hostname": hostname, "approval_status": host.approval_status},
+            error_message="Host not approved",
+        )
+
         error_msg = ErrorMessage(
             "host_not_approved", _("Host registration pending approval")
         )

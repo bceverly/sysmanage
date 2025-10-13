@@ -146,5 +146,9 @@ export const SecurityRoles = {
     // - User Security Operations (alphabetical)
     LOCK_USER: 'Lock User',
     RESET_USER_PASSWORD: 'Reset User Password',
-    UNLOCK_USER: 'Unlock User'
+    UNLOCK_USER: 'Unlock User',
+
+    // Audit Log Management
+    VIEW_AUDIT_LOG: 'View Audit Log',
+    EXPORT_AUDIT_LOG: 'Export Audit Log'
 } as const;

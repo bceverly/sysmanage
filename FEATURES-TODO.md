@@ -109,27 +109,15 @@ like to add:
     every host that is approved
     on registration.
 
-11. We need an audit table in the
-    database that records every
-    action the user takes in terms
-    of changing anything in the
-    sysmanage database or sending
-    messages to a remote agent
-    that will result in a change
-    being made on the remote
-    host.  Also should have an
-    audit report added to the
-    reports tab.
-
-12. Add the ability to hook up a
+11. Add the ability to hook up a
     remote host to Graylog for
     log aggregation.
 
-13. Based on server roles that
+12. Based on server roles that
     we detect, recommend firewall
     configuration for that host.
 
-14. Have a "Firewall Configuration"
+13. Have a "Firewall Configuration"
     page on settings that allow
     the user to create a set of
     named configurations that

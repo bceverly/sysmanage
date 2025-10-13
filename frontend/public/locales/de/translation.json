@@ -971,7 +971,8 @@
     "subtitle": "Erstellen Sie umfassende Berichte für Hosts, Benutzer und Systemanalysen",
     "tabs": {
       "hosts": "Hosts",
-      "users": "Benutzer"
+      "users": "Benutzer",
+      "security": "Sicherheit"
     },
     "search": {
       "label": "Berichte durchsuchen",
@@ -991,7 +992,19 @@
     "reportNotFound": "Bericht nicht gefunden",
     "registeredHostsDescription": "Vollständige Auflistung aller registrierten Hosts mit grundlegenden Informationen und Betriebssystemdetails einschließlich Hostname, IP-Adressen, OS-Version und Status.",
     "hostsWithTagsDescription": "Zeigt alle registrierten Hosts zusammen mit ihren zugewiesenen Tags zur einfachen Kategorisierung und Filterung. Nützlich für die Organisation von Hosts nach Umgebung, Zweck oder Abteilung.",
-    "sysmanageUsersDescription": "Umfassende Liste aller SysManage-Benutzer mit ihren Profilen, Rollen, Berechtigungen und Kontostatus. Enthält Benutzererstellungsdaten und letzte Anmeldezeiten."
+    "sysmanageUsersDescription": "Umfassende Liste aller SysManage-Benutzer mit ihren Profilen, Rollen, Berechtigungen und Kontostatus. Enthält Benutzererstellungsdaten und letzte Anmeldezeiten.",
+    "auditLogDescription": "Vollständiger Prüfpfad aller Systemaktivitäten, Benutzeraktionen und Änderungen. Zeigt, wer was wann getan hat und das Ergebnis.",
+    "timestamp": "Zeitstempel",
+    "user": "Benutzer",
+    "action": "Aktion",
+    "entityType": "Entitätstyp",
+    "entityName": "Entitätsname",
+    "result": "Ergebnis",
+    "description": "Beschreibung",
+    "totalEntries": "Gesamteinträge",
+    "noAuditEntries": "Keine Audit-Log-Einträge gefunden.",
+    "system": "System",
+    "auditLog": "Audit-Protokoll"
   },
   "osUpgrades": {
     "title": "Betriebssystem-Upgrades",

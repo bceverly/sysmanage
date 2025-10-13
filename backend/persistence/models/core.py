@@ -484,3 +484,45 @@ class UserDashboardCardPreference(Base):
 
     def __repr__(self):
         return f"<UserDashboardCardPreference(user_id={self.user_id}, card='{self.card_identifier}', visible={self.visible})>"
+
+
+class AuditLog(Base):
+    """
+    Audit log model for tracking all user actions and system changes.
+    Records database modifications and agent messages for compliance and troubleshooting.
+    """
+
+    __tablename__ = "audit_log"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    timestamp = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        index=True,
+    )
+    user_id = Column(GUID(), nullable=True, index=True)  # Nullable for system actions
+    username = Column(String(255), nullable=True)  # Denormalized for historical record
+    action_type = Column(
+        String(50), nullable=False, index=True
+    )  # 'CREATE', 'UPDATE', 'DELETE', 'AGENT_MESSAGE'
+    entity_type = Column(
+        String(100), nullable=False, index=True
+    )  # 'host', 'user', 'package', 'script'
+    entity_id = Column(String(255), nullable=True)  # ID of the affected entity
+    entity_name = Column(String(255), nullable=True)  # Denormalized name for display
+    description = Column(Text, nullable=False)  # Human-readable description
+    details = Column(JSON, nullable=True)  # Additional structured data
+    ip_address = Column(String(45), nullable=True)  # IPv4 or IPv6
+    user_agent = Column(String(500), nullable=True)  # Browser/client info
+    result = Column(String(20), nullable=False)  # 'SUCCESS', 'FAILURE', 'PENDING'
+    error_message = Column(Text, nullable=True)  # Error details if failed
+    category = Column(
+        String(50), nullable=True, index=True
+    )  # 'Security', 'Packages', 'Hosts', etc.
+    entry_type = Column(
+        String(50), nullable=True, index=True
+    )  # 'Edit', 'Delete', 'Request Update', etc.
+
+    def __repr__(self):
+        return f"<AuditLog(id={self.id}, user='{self.username}', action='{self.action_type}', entity='{self.entity_type}')>"

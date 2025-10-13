@@ -949,7 +949,8 @@
     "subtitle": "Genereer uitgebreide rapporten voor hosts, gebruikers en systeemanalyses",
     "tabs": {
       "hosts": "Hosts",
-      "users": "Gebruikers"
+      "users": "Gebruikers",
+      "security": "Beveiliging"
     },
     "search": {
       "label": "Zoek rapporten",
@@ -969,7 +970,19 @@
     "reportNotFound": "Rapport niet gevonden",
     "registeredHostsDescription": "Volledige lijst van alle geregistreerde hosts met basisinformatie en besturingssysteemdetails inclusief hostnaam, IP-adressen, OS-versie en status.",
     "hostsWithTagsDescription": "Toont alle geregistreerde hosts samen met hun toegewezen tags voor eenvoudige categorisering en filtering. Handig voor het organiseren van hosts per omgeving, doel of afdeling.",
-    "sysmanageUsersDescription": "Uitgebreide lijst van alle SysManage-gebruikers met hun profielen, rollen, machtigingen en accountstatus. Bevat gebruikersaanmaakdatums en laatste inlogtijden."
+    "sysmanageUsersDescription": "Uitgebreide lijst van alle SysManage-gebruikers met hun profielen, rollen, machtigingen en accountstatus. Bevat gebruikersaanmaakdatums en laatste inlogtijden.",
+    "auditLogDescription": "Volledig auditspoor van alle systeemactiviteiten, gebruikersacties en wijzigingen. Toont wie wat deed, wanneer ze het deden en het resultaat.",
+    "timestamp": "Tijdstempel",
+    "user": "Gebruiker",
+    "action": "Actie",
+    "entityType": "Entiteitstype",
+    "entityName": "Entiteitsnaam",
+    "result": "Resultaat",
+    "description": "Beschrijving",
+    "totalEntries": "Totaal aantal vermeldingen",
+    "noAuditEntries": "Geen auditlogvermeldingen gevonden.",
+    "system": "Systeem",
+    "auditLog": "Auditlog"
   },
   "osUpgrades": {
     "title": "Besturingssysteem-upgrades",

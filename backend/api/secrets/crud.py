@@ -14,6 +14,7 @@ from backend.i18n import _
 from backend.persistence.db import get_db
 from backend.persistence.models.secret import Secret
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.services.vault_service import VaultError, VaultService
 
 from .models import (
@@ -187,6 +188,21 @@ async def create_secret(
         db.commit()
         db.refresh(secret)
 
+        # Log the creation
+        AuditService.log_create(
+            db=db,
+            entity_type=EntityType.SECRET,
+            entity_name=secret.name,
+            user_id=current_user.get("id"),
+            username=current_user.get("username"),
+            entity_id=str(secret.id),
+            details={
+                "secret_type": secret.secret_type,
+                "secret_subtype": secret.secret_subtype,
+                "filename": secret.filename,
+            },
+        )
+
         return SecretResponse(**secret.to_dict())
 
     except HTTPException:
@@ -277,6 +293,27 @@ async def update_secret(
         db.commit()
         db.refresh(secret)
 
+        # Log the update
+        update_details = {}
+        if secret_data.name:
+            update_details["updated_name"] = secret_data.name
+        if secret_data.filename is not None:
+            update_details["updated_filename"] = secret_data.filename
+        if secret_data.secret_subtype is not None:
+            update_details["updated_subtype"] = secret_data.secret_subtype
+        if secret_data.content:
+            update_details["content_updated"] = True
+
+        AuditService.log_update(
+            db=db,
+            entity_type=EntityType.SECRET,
+            entity_name=secret.name,
+            user_id=current_user.get("id"),
+            username=current_user.get("username"),
+            entity_id=str(secret.id),
+            details=update_details,
+        )
+
         return SecretResponse(**secret.to_dict())
 
     except ValueError as exc:
@@ -328,9 +365,23 @@ async def delete_secret(
                 ).format(error=str(e)),
             ) from e
 
+        # Log the deletion before removing from database
+        secret_name = secret.name
+        secret_id = str(secret.id)
+
         # Delete from database
         db.delete(secret)
         db.commit()
+
+        # Log the deletion
+        AuditService.log_delete(
+            db=db,
+            entity_type=EntityType.SECRET,
+            entity_name=secret_name,
+            user_id=current_user.get("id"),
+            username=current_user.get("username"),
+            entity_id=secret_id,
+        )
 
         return {"message": _("secrets.deleted", "Secret deleted successfully")}
 
@@ -396,11 +447,25 @@ async def delete_multiple_secrets(
             except VaultError as e:
                 vault_errors.append(f"{secret.name}: {str(e)}")
 
+        # Store secret info for audit logging before deletion
+        secret_info = [(str(s.id), s.name) for s in secrets]
+
         # Delete from database
         for secret in secrets:
             db.delete(secret)
 
         db.commit()
+
+        # Log each deletion
+        for secret_id, secret_name in secret_info:
+            AuditService.log_delete(
+                db=db,
+                entity_type=EntityType.SECRET,
+                entity_name=secret_name,
+                user_id=current_user.get("id"),
+                username=current_user.get("username"),
+                entity_id=secret_id,
+            )
 
         result = {
             "message": _("secrets.deleted_multiple", "Secrets deleted successfully")

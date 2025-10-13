@@ -964,7 +964,8 @@
     "subtitle": "Genera report completi per host, utenti e analisi di sistema",
     "tabs": {
       "hosts": "Host",
-      "users": "Utenti"
+      "users": "Utenti",
+      "security": "Sicurezza"
     },
     "search": {
       "label": "Cerca report",
@@ -984,7 +985,19 @@
     "reportNotFound": "Report non trovato",
     "registeredHostsDescription": "Elenco completo di tutti gli host registrati che mostra informazioni di base e dettagli del sistema operativo inclusi hostname, indirizzi IP, versione OS e stato.",
     "hostsWithTagsDescription": "Mostra tutti gli host registrati insieme ai loro tag assegnati per una facile categorizzazione e filtraggio. Utile per organizzare gli host per ambiente, scopo o dipartimento.",
-    "sysmanageUsersDescription": "Elenco completo di tutti gli utenti SysManage che mostra i loro profili, ruoli, permessi e stato dell'account. Include date di creazione utente e orari di ultimo accesso."
+    "sysmanageUsersDescription": "Elenco completo di tutti gli utenti SysManage che mostra i loro profili, ruoli, permessi e stato dell'account. Include date di creazione utente e orari di ultimo accesso.",
+    "auditLogDescription": "Registro completo di tutte le attività del sistema, azioni degli utenti e modifiche. Mostra chi ha fatto cosa, quando e il risultato.",
+    "timestamp": "Timestamp",
+    "user": "Utente",
+    "action": "Azione",
+    "entityType": "Tipo di entità",
+    "entityName": "Nome dell'entità",
+    "result": "Risultato",
+    "description": "Descrizione",
+    "totalEntries": "Totale voci",
+    "noAuditEntries": "Nessuna voce di registro di controllo trovata.",
+    "system": "Sistema",
+    "auditLog": "Registro di controllo"
   },
   "osUpgrades": {
     "title": "Aggiornamenti del Sistema Operativo",

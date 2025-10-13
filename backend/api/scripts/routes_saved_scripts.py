@@ -14,6 +14,7 @@ from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 from .models import SavedScriptCreate, SavedScriptResponse, SavedScriptUpdate
 
@@ -129,6 +130,22 @@ async def create_saved_script(
             db_session.add(script)
             db_session.commit()
             db_session.refresh(script)
+
+            # Log the creation to audit log
+            AuditService.log_create(
+                db=db_session,
+                entity_type=EntityType.SCRIPT,
+                entity_id=str(script.id),
+                entity_name=script.name,
+                user_id=auth_user.id,
+                username=current_user,
+                details={
+                    "description": script.description,
+                    "shell_type": script.shell_type,
+                    "platform": script.platform,
+                    "run_as_user": script.run_as_user,
+                },
+            )
 
             logger.info(
                 "Created saved script '%s' by user %s", script.name, current_user
@@ -263,6 +280,24 @@ async def update_saved_script(
             db_session.commit()
             db_session.refresh(script)
 
+            # Log the update to audit log
+            AuditService.log_update(
+                db=db_session,
+                entity_type=EntityType.SCRIPT,
+                entity_id=str(script.id),
+                entity_name=script.name,
+                user_id=auth_user.id,
+                username=current_user,
+                details={
+                    "updated_fields": list(update_data.keys()),
+                    "description": script.description,
+                    "shell_type": script.shell_type,
+                    "platform": script.platform,
+                    "run_as_user": script.run_as_user,
+                    "is_active": script.is_active,
+                },
+            )
+
             logger.info("Updated saved script %d by user %s", script_id, current_user)
             return SavedScriptResponse(
                 id=str(script.id),
@@ -341,8 +376,25 @@ async def delete_saved_script(
                     detail=_("Cannot delete script with active executions"),
                 )
 
+            script_name = script.name
+
             db_session.delete(script)
             db_session.commit()
+
+            # Log the deletion to audit log
+            AuditService.log_delete(
+                db=db_session,
+                entity_type=EntityType.SCRIPT,
+                entity_id=str(script_id),
+                entity_name=script_name,
+                user_id=auth_user.id,
+                username=current_user,
+                details={
+                    "description": script.description,
+                    "shell_type": script.shell_type,
+                    "platform": script.platform,
+                },
+            )
 
             logger.info("Deleted saved script %d by user %s", script_id, current_user)
             return {"message": _("Script deleted successfully")}

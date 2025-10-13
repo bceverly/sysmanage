@@ -16,6 +16,7 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.queue_operations import QueueOperations
 from backend.websocket.queue_enums import QueueDirection
 
@@ -181,6 +182,21 @@ async def update_ubuntu_pro_settings(
             settings.auto_attach_enabled,
         )
 
+        # Log audit entry for settings update
+        AuditService.log_update(
+            db=db_session,
+            entity_type=EntityType.SETTING,
+            entity_name="Ubuntu Pro Settings",
+            user_id=auth_user.id,
+            username=current_user,
+            entity_id=str(settings.id),
+            details={
+                "organization_name": settings.organization_name,
+                "has_master_key": settings.master_key is not None,
+                "auto_attach_enabled": settings.auto_attach_enabled,
+            },
+        )
+
         return settings
 
     except ValueError as e:
@@ -195,9 +211,22 @@ async def update_ubuntu_pro_settings(
 
 @router.delete("/master-key")
 async def clear_master_key(
-    db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
+    db: Session = Depends(get_db),
+    dependencies=Depends(JWTBearer()),
+    current_user=Depends(get_current_user),
 ):
     """Clear the stored Ubuntu Pro master key."""
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_bind())
+    with session_local() as session:
+        # Get user for audit logging
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
     try:
         settings = db.query(models.UbuntuProSettings).first()
 
@@ -207,6 +236,17 @@ async def clear_master_key(
             db.commit()
 
             logger.info("Ubuntu Pro master key cleared")
+
+            # Log audit entry for master key deletion
+            AuditService.log_delete(
+                db=db,
+                entity_type=EntityType.SETTING,
+                entity_name="Ubuntu Pro Master Key",
+                user_id=auth_user.id,
+                username=current_user,
+                entity_id=str(settings.id),
+            )
+
             return {"message": _("Master key cleared successfully")}
 
         return {"message": _("No settings found to clear")}

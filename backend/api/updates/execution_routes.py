@@ -10,6 +10,7 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_operations import QueueOperations
 from backend.websocket.queue_enums import QueueDirection
@@ -150,6 +151,28 @@ async def execute_updates(
                     )
                     # Commit the session to persist the queued message
                     session.commit()
+
+                    # Audit log the update execution - one message per package per host
+                    for update in updates:
+                        AuditService.log(
+                            db=session,
+                            action_type=ActionType.UPDATE,
+                            entity_type=EntityType.PACKAGE,
+                            description=f"Initiated update of package {update.package_name} from {update.current_version} to {update.available_version} on host {host.fqdn}",
+                            result=Result.SUCCESS,
+                            user_id=user.id,
+                            username=current_user,
+                            entity_id=host_id,
+                            entity_name=f"{host.fqdn}/{update.package_name}",
+                            details={
+                                "host_id": host_id,
+                                "host_fqdn": host.fqdn,
+                                "package_name": update.package_name,
+                                "package_manager": update.package_manager,
+                                "from_version": update.current_version,
+                                "to_version": update.available_version,
+                            },
+                        )
 
                     results.append(
                         {

@@ -314,3 +314,158 @@ def generate_user_rbac_html(db, users, report_title: str) -> str:
     """
 
     return html_content
+
+
+def generate_audit_log_html(audit_entries, report_title: str) -> str:
+    """Generate HTML content for audit log report"""
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{_escape(report_title)}</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                background-color: #f5f5f5;
+            }}
+            .header {{
+                background-color: #1976d2;
+                color: white;
+                padding: 20px;
+                text-align: center;
+                margin-bottom: 20px;
+                border-radius: 8px;
+            }}
+            .metadata {{
+                background-color: white;
+                padding: 15px;
+                margin-bottom: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }}
+            table {{
+                width: 100%;
+                background-color: white;
+                border-collapse: collapse;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }}
+            th {{
+                background-color: #666;
+                color: white;
+                padding: 12px;
+                text-align: left;
+                font-weight: bold;
+            }}
+            td {{
+                padding: 12px;
+                border-bottom: 1px solid #ddd;
+            }}
+            tr:nth-child(even) {{
+                background-color: #f9f9f9;
+            }}
+            tr:hover {{
+                background-color: #f5f5f5;
+            }}
+            .no-data {{
+                text-align: center;
+                padding: 40px;
+                color: #666;
+                font-style: italic;
+            }}
+            .result-success {{
+                color: #4caf50;
+                font-weight: bold;
+            }}
+            .result-failure {{
+                color: #f44336;
+                font-weight: bold;
+            }}
+            .result-pending {{
+                color: #ff9800;
+                font-weight: bold;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>{_escape(report_title)}</h1>
+        </div>
+
+        <div class="metadata">
+            <p><strong>{_escape(_('Generated'))}:</strong> {_escape(datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC'))}</p>
+            <p><strong>{_escape(_('Total Entries'))}:</strong> {_escape(len(audit_entries))}</p>
+        </div>
+    """
+
+    if not audit_entries:
+        html_content += f"""
+        <div class="no-data">
+            <p>{_('No audit log entries found.')}</p>
+        </div>
+        """
+    else:
+        html_content += f"""
+        <table>
+            <thead>
+                <tr>
+                    <th>{_('Timestamp')}</th>
+                    <th>{_('User')}</th>
+                    <th>{_('Action')}</th>
+                    <th>{_('Entity Type')}</th>
+                    <th>{_('Entity Name')}</th>
+                    <th>{_('Result')}</th>
+                    <th>{_('Description')}</th>
+                </tr>
+            </thead>
+            <tbody>
+        """
+
+        for entry in audit_entries:
+            # Format timestamp
+            timestamp_str = (
+                entry.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                if entry.timestamp
+                else _("N/A")
+            )
+
+            # Get username or system
+            username = entry.username if entry.username else _("System")
+
+            # Get result class for styling
+            result_class = ""
+            if entry.result == "SUCCESS":
+                result_class = "result-success"
+            elif entry.result == "FAILURE":
+                result_class = "result-failure"
+            elif entry.result == "PENDING":
+                result_class = "result-pending"
+
+            html_content += f"""
+                <tr>
+                    <td>{_escape(timestamp_str)}</td>
+                    <td>{_escape(username)}</td>
+                    <td>{_escape(entry.action_type or _('N/A'))}</td>
+                    <td>{_escape(entry.entity_type or _('N/A'))}</td>
+                    <td>{_escape(entry.entity_name or _('N/A'))}</td>
+                    <td class="{result_class}">{_escape(entry.result or _('N/A'))}</td>
+                    <td>{_escape(entry.description or _('N/A'))}</td>
+                </tr>
+            """
+
+        html_content += """
+            </tbody>
+        </table>
+        """
+
+    html_content += """
+    </body>
+    </html>
+    """
+
+    return html_content

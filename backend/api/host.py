@@ -24,6 +24,7 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.certificate_manager import certificate_manager
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import (
     create_command_message,
     create_host_approved_message,
@@ -130,9 +131,21 @@ async def delete_host(host_id: str, current_user: str = Depends(get_current_user
         if len(hosts) != 1:
             raise HTTPException(status_code=404, detail=_("Host not found"))
 
+        deleted_host = hosts[0]
+
         # Delete the record
         session.query(models.Host).filter(models.Host.id == host_id).delete()
         session.commit()
+
+        # Audit log host deletion
+        AuditService.log_delete(
+            db=session,
+            user_id=user.id,
+            username=current_user,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=deleted_host.fqdn,
+        )
 
     return {"result": True}
 
@@ -391,7 +404,7 @@ async def get_all_hosts():
 
 
 @auth_router.post("/host", dependencies=[Depends(JWTBearer())])
-async def add_host(new_host: Host):
+async def add_host(new_host: Host, current_user: str = Depends(get_current_user)):
     """
     This function adds a new host to the system.
     """
@@ -402,6 +415,14 @@ async def add_host(new_host: Host):
 
     # Add the data to the database
     with session_local() as session:
+        # Get the user object for audit logging
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
         # See if we are trying to add a duplicate host
         check_duplicate = (
             session.query(models.Host).filter(models.Host.fqdn == new_host.fqdn).all()
@@ -421,6 +442,21 @@ async def add_host(new_host: Host):
         session.add(host)
         session.commit()
         session.refresh(host)
+
+        # Audit log host creation
+        AuditService.log_create(
+            db=session,
+            user_id=user.id,
+            username=current_user,
+            entity_type=EntityType.HOST,
+            entity_id=str(host.id),
+            entity_name=host.fqdn,
+            details={
+                "active": new_host.active,
+                "ipv4": new_host.ipv4,
+                "ipv6": new_host.ipv6,
+            },
+        )
 
         return host
 
@@ -503,7 +539,9 @@ async def register_host(registration_data: HostRegistration):
 
 
 @auth_router.put("/host/{host_id}", dependencies=[Depends(JWTBearer())])
-async def update_host(host_id: str, host_data: Host):
+async def update_host(
+    host_id: str, host_data: Host, current_user: str = Depends(get_current_user)
+):
     """
     This function updates an existing host by id
     """
@@ -515,6 +553,14 @@ async def update_host(host_id: str, host_data: Host):
 
     # Update the user
     with session_local() as session:
+        # Get the user object for audit logging
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
         # See if we were passed a valid id
         hosts = session.query(models.Host).filter(models.Host.id == host_id).all()
 
@@ -537,6 +583,21 @@ async def update_host(host_id: str, host_data: Host):
         # Get updated host data after commit
         updated_host = (
             session.query(models.Host).filter(models.Host.id == host_id).first()
+        )
+
+        # Audit log host update
+        AuditService.log_update(
+            db=session,
+            user_id=user.id,
+            username=current_user,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host_data.fqdn,
+            details={
+                "active": host_data.active,
+                "ipv4": host_data.ipv4,
+                "ipv6": host_data.ipv6,
+            },
         )
 
     return updated_host
@@ -604,6 +665,16 @@ async def approve_host(
         host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
         session.commit()
 
+        # Audit log host approval
+        AuditService.log_update(
+            db=session,
+            user_id=user.id,
+            username=current_user,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+        )
+
         # Send host approval notification to the agent via WebSocket
         try:
             approval_message = create_host_approved_message(
@@ -649,7 +720,9 @@ async def approve_host(
 
 
 @auth_router.put("/host/{host_id}/reject", dependencies=[Depends(JWTBearer())])
-async def reject_host(host_id: str):  # pylint: disable=duplicate-code
+async def reject_host(
+    host_id: str, current_user: str = Depends(get_current_user)
+):  # pylint: disable=duplicate-code
     """
     Reject a pending host registration
     """
@@ -659,6 +732,14 @@ async def reject_host(host_id: str):  # pylint: disable=duplicate-code
     )
 
     with session_local() as session:
+        # Get the user object for audit logging
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
@@ -674,6 +755,16 @@ async def reject_host(host_id: str):  # pylint: disable=duplicate-code
         host.approval_status = "rejected"
         host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
         session.commit()
+
+        # Audit log host rejection
+        AuditService.log_update(
+            db=session,
+            user_id=user.id,
+            username=current_user,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+        )
 
         ret_host = models.Host(
             id=host.id,

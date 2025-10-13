@@ -16,6 +16,7 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 logger = logging.getLogger(__name__)
 
@@ -161,6 +162,20 @@ async def update_column_preferences(
             preference_request.grid_identifier,
         )
 
+        # Log audit entry for column preference update
+        AuditService.log_update(
+            db=db,
+            entity_type=EntityType.SETTING,
+            entity_name=f"DataGrid Column Preferences ({preference_request.grid_identifier})",
+            user_id=user.id,
+            username=current_user,
+            entity_id=str(preference.id),
+            details={
+                "grid_identifier": preference_request.grid_identifier,
+                "hidden_columns": preference_request.hidden_columns,
+            },
+        )
+
         return DataGridColumnPreferenceResponse(
             id=str(preference.id),
             user_id=str(preference.user_id),
@@ -206,13 +221,27 @@ async def delete_column_preferences(
         )
 
         if preference:
+            preference_id = str(preference.id)
             db.delete(preference)
             db.commit()
+
             logger.info(
                 "Column preferences deleted for user %s, grid %s",
                 current_user,
                 grid_identifier,
             )
+
+            # Log audit entry for column preference deletion
+            AuditService.log_delete(
+                db=db,
+                entity_type=EntityType.SETTING,
+                entity_name=f"DataGrid Column Preferences ({grid_identifier})",
+                user_id=user.id,
+                username=current_user,
+                entity_id=preference_id,
+                details={"grid_identifier": grid_identifier},
+            )
+
             return {"message": _("Column preferences reset to defaults")}
 
         return {"message": _("No preferences found to delete")}
@@ -335,6 +364,21 @@ async def update_dashboard_card_preferences(
         db.commit()
 
         logger.info("Dashboard card preferences updated for user %s", current_user)
+
+        # Log audit entry for dashboard card preferences update
+        AuditService.log_update(
+            db=db,
+            entity_type=EntityType.SETTING,
+            entity_name="Dashboard Card Preferences",
+            user_id=user.id,
+            username=current_user,
+            details={
+                "preferences": [
+                    {"card_identifier": pref.card_identifier, "visible": pref.visible}
+                    for pref in preference_request.preferences
+                ]
+            },
+        )
 
         # Return updated preferences
         all_prefs = (

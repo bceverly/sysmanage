@@ -55,7 +55,7 @@ interface ReportCard {
   id: string;
   name: string;
   description: string;
-  category: 'hosts' | 'users';
+  category: 'hosts' | 'users' | 'security';
   screenshot: string;
   tags: string[];
 }
@@ -65,7 +65,7 @@ const Reports: React.FC = () => {
   const navigate = useNavigate();
 
   // Tab names for URL hash
-  const tabNames = ['hosts', 'users'];
+  const tabNames = ['hosts', 'users', 'security'];
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -104,16 +104,19 @@ const Reports: React.FC = () => {
   // Permission states
   const [canViewReport, setCanViewReport] = useState<boolean>(false);
   const [canGeneratePdfReport, setCanGeneratePdfReport] = useState<boolean>(false);
+  const [canViewAuditLog, setCanViewAuditLog] = useState<boolean>(false);
 
   // Check permissions
   useEffect(() => {
     const checkPermissions = async () => {
-      const [viewReport, generatePdf] = await Promise.all([
+      const [viewReport, generatePdf, viewAuditLog] = await Promise.all([
         hasPermission(SecurityRoles.VIEW_REPORT),
-        hasPermission(SecurityRoles.GENERATE_PDF_REPORT)
+        hasPermission(SecurityRoles.GENERATE_PDF_REPORT),
+        hasPermission(SecurityRoles.VIEW_AUDIT_LOG)
       ]);
       setCanViewReport(viewReport);
       setCanGeneratePdfReport(generatePdf);
+      setCanViewAuditLog(viewAuditLog);
     };
     checkPermissions();
   }, []);
@@ -158,7 +161,7 @@ const Reports: React.FC = () => {
         id: 'user-rbac',
         name: 'User Security Roles (RBAC)',
         description: 'Complete view of all users with their assigned security roles organized by role groups. Shows the granular permission structure for role-based access control across the system.',
-        category: 'users',
+        category: 'security',
         screenshot: `${baseURL}/api/reports/screenshots/user-rbac.png`,
         tags: ['users', 'security', 'rbac', 'permissions', 'roles']
       },
@@ -185,21 +188,41 @@ const Reports: React.FC = () => {
         category: 'hosts',
         screenshot: `${baseURL}/api/reports/screenshots/antivirus-commercial.png`,
         tags: ['hosts', 'security', 'antivirus', 'commercial']
+      },
+      {
+        id: 'audit-log',
+        name: 'Audit Log',
+        description: 'Complete audit trail of all user actions and system changes for compliance and security monitoring. Tracks database modifications, agent messages, and administrative operations.',
+        category: 'security',
+        screenshot: `${baseURL}/api/reports/screenshots/audit-log.png`,
+        tags: ['users', 'security', 'audit', 'compliance', 'tracking']
       }
     ];
 
-    const categoryFilter = tabValue === 0 ? 'hosts' : 'users';
+    const categoryFilter = tabValue === 0 ? 'hosts' : tabValue === 1 ? 'users' : 'security';
     return availableReports
       .filter(report => report.category === categoryFilter)
+      .filter(report => {
+        // Filter out audit-log if user doesn't have VIEW_AUDIT_LOG permission
+        if (report.id === 'audit-log' && !canViewAuditLog) {
+          return false;
+        }
+        return true;
+      })
       .filter(report => {
         if (!searchTerm.trim()) return true;
         const searchValue = searchField === 'name' ? report.name : report.description;
         return searchValue.toLowerCase().includes(searchTerm.toLowerCase());
       });
-  }, [tabValue, searchTerm, searchField]);
+  }, [tabValue, searchTerm, searchField, canViewAuditLog]);
 
   const handleViewReport = (reportId: string) => {
-    navigate(`/reports/${reportId}`);
+    // Audit log has its own dedicated viewer component
+    if (reportId === 'audit-log') {
+      navigate('/reports/audit-log');
+    } else {
+      navigate(`/reports/${reportId}`);
+    }
   };
 
   const handleGenerateReport = async (reportId: string) => {
@@ -336,6 +359,7 @@ const Reports: React.FC = () => {
           <Tabs value={tabValue} onChange={handleTabChange} aria-label="reports tabs">
             <Tab label={t('reports.tabs.hosts', 'Hosts')} />
             <Tab label={t('reports.tabs.users', 'Users')} />
+            <Tab label={t('reports.tabs.security', 'Security')} />
           </Tabs>
         </Box>
 
@@ -385,6 +409,51 @@ const Reports: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
+          <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
+            <TextField
+              label={t('reports.search.label', 'Search reports')}
+              variant="outlined"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              size="small"
+              sx={{ minWidth: 300 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <InputLabel>{t('reports.search.searchBy', 'Search by')}</InputLabel>
+              <Select
+                value={searchField}
+                label={t('reports.search.searchBy', 'Search by')}
+                onChange={(e) => setSearchField(e.target.value as 'name' | 'description')}
+              >
+                <MenuItem value="name">{t('reports.search.name', 'Name')}</MenuItem>
+                <MenuItem value="description">{t('reports.search.description', 'Description')}</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+
+          <Grid container spacing={3}>
+            {filteredReports.map((report) => (
+              <ReportCard key={report.id} report={report} />
+            ))}
+          </Grid>
+
+          {filteredReports.length === 0 && (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography variant="h6" color="text.secondary">
+                {t('reports.noResults', 'No reports found matching your search')}
+              </Typography>
+            </Box>
+          )}
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={2}>
           <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
             <TextField
               label={t('reports.search.label', 'Search reports')}
