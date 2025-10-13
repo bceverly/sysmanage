@@ -199,7 +199,9 @@ if __name__ == "__main__":
     startup_logger.info("Port: %s", port)
     startup_logger.info("WebSocket ping interval: %s seconds", ws_ping_interval)
     startup_logger.info("WebSocket ping timeout: %s seconds", ws_ping_timeout)
-    startup_logger.info("WebSocket max message size: %s MB", ws_max_size / (1024 * 1024))
+    startup_logger.info(
+        "WebSocket max message size: %s MB", ws_max_size / (1024 * 1024)
+    )
     startup_logger.info("SSL enabled: %s", bool(ssl_config))
     startup_logger.info("Log level: INFO")
 
