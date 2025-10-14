@@ -5,6 +5,50 @@ import path from 'path'
 import os from 'os'
 import yaml from 'yaml'
 
+// Plugin to transform MUI icon barrel imports to individual imports
+// This prevents loading thousands of icon files and exhausting file descriptors
+function muiIconsPlugin() {
+  return {
+    name: 'mui-icons-transform',
+    transform(code: string, id: string) {
+      // Only process .tsx and .ts files
+      if (!id.endsWith('.tsx') && !id.endsWith('.ts')) return null
+
+      // Match: import { IconName, AnotherIcon } from '@mui/icons-material'
+      // Transform to: import IconName from '@mui/icons-material/IconName'; import AnotherIcon from '@mui/icons-material/AnotherIcon'
+      const muiIconsRegex = /import\s+\{([^}]+)\}\s+from\s+['"]@mui\/icons-material['"]/g
+
+      let transformed = code
+      let match
+
+      while ((match = muiIconsRegex.exec(code)) !== null) {
+        const imports = match[1]
+        const iconNames = imports.split(',').map(name => {
+          // Handle "Icon as AliasIcon" syntax
+          const parts = name.trim().split(/\s+as\s+/)
+          return {
+            original: parts[0].trim(),
+            alias: parts[1]?.trim() || parts[0].trim()
+          }
+        })
+
+        // Generate individual imports
+        const individualImports = iconNames
+          .map(({ original, alias }) =>
+            alias === original
+              ? `import ${original} from '@mui/icons-material/${original}'`
+              : `import ${alias} from '@mui/icons-material/${original}'`
+          )
+          .join('\n')
+
+        transformed = transformed.replace(match[0], individualImports)
+      }
+
+      return transformed !== code ? { code: transformed, map: null } : null
+    }
+  }
+}
+
 // Function to load configuration from hierarchy (same as backend)
 function loadConfig(): any {
   const configPaths = [
@@ -90,7 +134,7 @@ const clientHost = finalHost === '0.0.0.0' ? 'localhost' : finalHost;
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), muiIconsPlugin()],
   // Development-specific settings
   define: {
     // Suppress some common development warnings
@@ -132,8 +176,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
     css: true,
-    // Reduce file descriptor usage on macOS/Windows by using threads instead of forks
-    // Threads share the same process, reducing file descriptor usage
+    // Reduce file descriptor usage by using threads with limited concurrency
     pool: 'threads',
     poolOptions: {
       threads: {
