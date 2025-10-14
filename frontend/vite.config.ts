@@ -176,6 +176,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
     css: true,
+    // Increase timeout for Windows CI environments
+    testTimeout: 10000,
     // Reduce file descriptor usage by using threads with limited concurrency
     pool: 'threads',
     poolOptions: {
