@@ -133,11 +133,15 @@ export default defineConfig({
     setupFiles: './src/setupTests.ts',
     css: true,
     deps: {
-      inline: [
-        '@mui/x-data-grid',
-        '@mui/x-data-grid-pro',
-        '@mui/x-data-grid-premium'
-      ]
+      optimizer: {
+        web: {
+          include: [
+            '@mui/x-data-grid',
+            '@mui/x-data-grid-pro',
+            '@mui/x-data-grid-premium'
+          ]
+        }
+      }
     },
     coverage: {
       provider: 'v8',

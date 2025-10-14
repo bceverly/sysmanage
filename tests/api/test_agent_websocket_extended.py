@@ -77,10 +77,19 @@ class TestWebSocketConnect:
         return websocket
 
     @pytest.mark.asyncio
-    async def test_agent_connect_no_auth_token(self, mock_websocket):
+    @patch("backend.api.agent.AuditService.log")
+    @patch("backend.api.agent.get_db")
+    async def test_agent_connect_no_auth_token(
+        self, mock_get_db, mock_audit_log, mock_websocket
+    ):
         """Test WebSocket connection with no auth token."""
         # Remove token from query params
         mock_websocket.query_params = {}
+
+        # Mock database session
+        mock_db = Mock()
+        mock_db.close = Mock()
+        mock_get_db.return_value = iter([mock_db])
 
         await agent_connect(mock_websocket)
 
@@ -89,23 +98,38 @@ class TestWebSocketConnect:
             code=4000, reason="Authentication token required"
         )
 
+        # Verify audit log was called
+        assert mock_audit_log.called
+
     @pytest.mark.asyncio
-    async def test_agent_connect_invalid_token(self, mock_websocket):
+    @patch("backend.api.agent.AuditService.log")
+    @patch("backend.api.agent.get_db")
+    @patch("backend.api.agent.websocket_security")
+    async def test_agent_connect_invalid_token(
+        self, mock_security, mock_get_db, mock_audit_log, mock_websocket
+    ):
         """Test WebSocket connection with invalid token."""
-        with patch("backend.api.agent.websocket_security") as mock_security:
-            # Mock invalid token
-            mock_security.validate_connection_token.return_value = (
-                False,
-                None,
-                "Invalid token",
-            )
+        # Mock invalid token
+        mock_security.validate_connection_token.return_value = (
+            False,
+            None,
+            "Invalid token",
+        )
 
-            await agent_connect(mock_websocket)
+        # Mock database session
+        mock_db = Mock()
+        mock_db.close = Mock()
+        mock_get_db.return_value = iter([mock_db])
 
-            # Should close with auth error
-            mock_websocket.close.assert_called_once_with(
-                code=4001, reason="Authentication failed: Invalid token"
-            )
+        await agent_connect(mock_websocket)
+
+        # Should close with auth error
+        mock_websocket.close.assert_called_once_with(
+            code=4001, reason="Authentication failed: Invalid token"
+        )
+
+        # Verify audit log was called
+        assert mock_audit_log.called
 
 
 class TestHostValidationExtended:
