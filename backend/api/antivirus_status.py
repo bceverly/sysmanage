@@ -14,13 +14,14 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
-from backend.persistence import db as persistence_db, models
+from backend.persistence import db as persistence_db
+from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import CommandType, Message, MessageType
-from backend.websocket.queue_operations import QueueOperations
 from backend.websocket.queue_enums import QueueDirection
+from backend.websocket.queue_operations import QueueOperations
 
 logger = logging.getLogger(__name__)
 

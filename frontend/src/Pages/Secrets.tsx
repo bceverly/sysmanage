@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   IoKey,
@@ -66,6 +66,23 @@ const Secrets: React.FC = () => {
 
   // Table pagination
   const { pageSize, pageSizeOptions } = useTablePageSize();
+
+  // Controlled pagination state
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
+
+  // Update pagination when pageSize from hook changes
+  useEffect(() => {
+    setPaginationModel(prev => ({ ...prev, pageSize }));
+  }, [pageSize]);
+
+  // Ensure current page size is always in options to avoid MUI warning
+  const safePageSizeOptions = useMemo(() => {
+    const currentPageSize = paginationModel.pageSize;
+    if (!pageSizeOptions.includes(currentPageSize)) {
+      return [...pageSizeOptions, currentPageSize].sort((a, b) => a - b);
+    }
+    return pageSizeOptions;
+  }, [pageSizeOptions, paginationModel.pageSize]);
 
   // Column visibility preferences
   const {
@@ -213,7 +230,30 @@ const Secrets: React.FC = () => {
       const secretData = await secretsService.getSecret(secretId);
       setSecretName(secretData.name);
       setSecretFilename(secretData.filename || '');
-      setSelectedSecretType(secretData.secret_type);
+
+      // Normalize secret_type - map old label values to internal values
+      let normalizedSecretType = secretData.secret_type;
+      const typeMapping: Record<string, string> = {
+        'API Key': 'api_keys',
+        'API Keys': 'api_keys',
+        'Database Credentials': 'database_credentials',
+        'SSH Key': 'ssh_key',
+        'SSL Certificate': 'ssl_certificate'
+      };
+
+      // If the value is a label (has spaces or capitals), map it to the internal value
+      if (typeMapping[secretData.secret_type]) {
+        normalizedSecretType = typeMapping[secretData.secret_type];
+      }
+
+      // Validate that the normalized type is one of the valid values
+      const validTypes = ['api_keys', 'database_credentials', 'ssh_key', 'ssl_certificate'];
+      if (!validTypes.includes(normalizedSecretType)) {
+        console.warn(`Invalid secret type: ${secretData.secret_type}, defaulting to api_keys`);
+        normalizedSecretType = 'api_keys';
+      }
+
+      setSelectedSecretType(normalizedSecretType);
       setKeyVisibility(secretData.secret_subtype || 'private');
       setSecretContent(''); // Don't pre-fill content for security
       setIsEditMode(true);
@@ -464,14 +504,20 @@ const Secrets: React.FC = () => {
   ];
 
   return (
-    <Box className="secrets-container" sx={{ p: 3 }}>
+    <Box className="secrets-container" sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      height: 'calc(100vh - 120px)',
+      gap: 2,
+      p: 2
+    }}>
       <Typography variant="h4" component="h1" gutterBottom>
         <IoKey style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
         {t('secrets.title', 'Secrets')}
       </Typography>
 
-      <Card>
-        <CardContent>
+      <Card sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+        <CardContent sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h6">
               {t('secrets.savedSecrets', 'Saved Secrets')}
@@ -490,21 +536,18 @@ const Secrets: React.FC = () => {
             />
           </Box>
 
-          <div style={{ height: 400, width: '100%' }}>
+          <Box sx={{ flexGrow: 1, minHeight: 0 }}>
             <DataGrid
               rows={secrets}
               columns={columns}
               loading={loading}
-              initialState={{
-                pagination: {
-                  paginationModel: { pageSize: pageSize, page: 0 },
-                },
-              }}
+              paginationModel={paginationModel}
+              onPaginationModelChange={setPaginationModel}
               columnVisibilityModel={{
                 id: false,
                 ...getColumnVisibilityModel(),
               }}
-              pageSizeOptions={pageSizeOptions}
+              pageSizeOptions={safePageSizeOptions}
               checkboxSelection
               rowSelectionModel={selectedSecrets}
               onRowSelectionModelChange={setSelectedSecrets}
@@ -523,7 +566,7 @@ const Secrets: React.FC = () => {
                     : `${count.toLocaleString()} ${t('common.rowSelected', 'row selected')}`,
               }}
             />
-          </div>
+          </Box>
 
           <Box component="section">&nbsp;</Box>
           <Stack direction="row" spacing={2}>

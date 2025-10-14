@@ -2,6 +2,7 @@
 This module contains the API implementation for the user object in the system.
 """
 
+import asyncio
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
@@ -85,6 +86,8 @@ async def delete_user(user_id: str, current_user: str = Depends(get_current_user
             raise HTTPException(status_code=404, detail=_("User not found"))
 
         deleted_user = users[0]
+        # Extract values before deletion to avoid ObjectDeletedError
+        deleted_userid = deleted_user.userid
 
         # Delete the record
         session.query(models.User).filter(models.User.id == user_id).delete()
@@ -97,7 +100,7 @@ async def delete_user(user_id: str, current_user: str = Depends(get_current_user
             username=current_user,
             entity_type=EntityType.USER,
             entity_id=user_id,
-            entity_name=deleted_user.userid,
+            entity_name=deleted_userid,
         )
 
     return {"result": True}
@@ -256,12 +259,11 @@ async def get_user_by_userid(userid: str):
         return ret_user
 
 
-@router.get("/users", dependencies=[Depends(JWTBearer())])
-async def get_all_users():
+def _get_all_users_sync():
     """
-    This function retrieves all users in the system
+    Synchronous helper function to retrieve all users.
+    This runs in a thread pool to avoid blocking the event loop.
     """
-
     # Get the SQLAlchemy session
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -286,6 +288,17 @@ async def get_all_users():
             ret_users.append(the_user)
 
         return ret_users
+
+
+@router.get("/users", dependencies=[Depends(JWTBearer())])
+async def get_all_users():
+    """
+    This function retrieves all users in the system.
+    Runs the database query in a thread pool to avoid blocking the event loop.
+    """
+    # Run the synchronous database operation in a thread pool
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _get_all_users_sync)
 
 
 @router.post("/user", dependencies=[Depends(JWTBearer())])

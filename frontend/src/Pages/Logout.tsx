@@ -10,20 +10,20 @@ const Logout = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        const performLogout = async () => {
-            try {
-                // Call logout endpoint for audit logging
-                await axiosInstance.post('/api/auth/logout');
-            } catch (error) {
-                // Ignore errors - proceed with logout anyway
-                console.error('Logout endpoint error:', error);
-            } finally {
-                // Clear local storage and navigate to login
-                localStorage.removeItem("userid");
-                localStorage.removeItem("bearer_token");
-                clearPermissionsCache();
-                navigate("/login");
-            }
+        const performLogout = () => {
+            // Clear local storage and navigate to login immediately
+            // Don't wait for the audit log API call
+            localStorage.removeItem("userid");
+            localStorage.removeItem("bearer_token");
+            clearPermissionsCache();
+            navigate("/login");
+
+            // Call logout endpoint for audit logging in background (fire and forget)
+            // This doesn't block the user experience
+            axiosInstance.post('/logout').catch((error) => {
+                // Silently ignore errors - user is already logged out client-side
+                console.debug('Logout audit log failed (non-critical):', error);
+            });
         };
 
         performLogout();

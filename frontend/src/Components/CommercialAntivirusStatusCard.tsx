@@ -198,7 +198,7 @@ const CommercialAntivirusStatusCard: React.FC<CommercialAntivirusStatusCardProps
 
             {/* Protection Status */}
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 1 }}>
                   {t('security.protectionStatus', 'Protection Status')}
                 </Typography>
@@ -224,7 +224,7 @@ const CommercialAntivirusStatusCard: React.FC<CommercialAntivirusStatusCardProps
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 1 }}>
                   {t('security.scanInformation', 'Scan Information')}
                 </Typography>

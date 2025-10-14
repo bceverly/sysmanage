@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -47,10 +47,27 @@ const Hosts = () => {
 
     // Dynamic table page sizing based on window height
     const { pageSize, pageSizeOptions } = useTablePageSize({
-        reservedHeight: 350, // Account for navbar, title, buttons, margins, and action buttons below table
+        reservedHeight: 250, // Reduced to account for navbar + search box + buttons at bottom
         minRows: 5,
-        maxRows: 50,
+        maxRows: 100,
     });
+
+    // Controlled pagination state for v7
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
+
+    // Update pagination when pageSize from hook changes
+    useEffect(() => {
+        setPaginationModel(prev => ({ ...prev, pageSize }));
+    }, [pageSize]);
+
+    // Ensure current page size is always in options to avoid MUI warning
+    const safePageSizeOptions = useMemo(() => {
+        const currentPageSize = paginationModel.pageSize;
+        if (!pageSizeOptions.includes(currentPageSize)) {
+            return [...pageSizeOptions, currentPageSize].sort((a, b) => a - b);
+        }
+        return pageSizeOptions;
+    }, [pageSizeOptions, paginationModel.pageSize]);
 
     // Column visibility preferences
     const {
@@ -60,7 +77,8 @@ const Hosts = () => {
         getColumnVisibilityModel,
     } = useColumnVisibility('hosts-grid');
 
-    const columns: GridColDef[] = [
+    // Memoize columns to prevent recreation on every render
+    const columns: GridColDef[] = useMemo(() => [
         { field: 'id', headerName: t('common.id', 'ID'), width: 70 },
         { field: 'fqdn', headerName: t('hosts.fqdn'), width: 200 },
         { field: 'platform', headerName: t('hosts.platform'), width: 120 },
@@ -283,7 +301,7 @@ const Hosts = () => {
                 ) : null
             )
         }
-    ];
+    ], [t, navigate, canViewHostDetails]);
 
     // Search columns configuration (excluding irrelevant columns)
     const searchColumns = [
@@ -408,11 +426,12 @@ const Hosts = () => {
         }
     }
 
-    // Helper function to check if any selected hosts can be rebooted/shutdown
-    const hasActivePrivilegedSelection = selection.some(id => {
-        const host = filteredData.find(h => h.id.toString() === id.toString());
-        return host && host.active && host.is_agent_privileged;
-    });
+    // Helper function to check if any selected hosts can be rebooted/shutdown - memoized
+    const hasActivePrivilegedSelection = useMemo(() =>
+        selection.some(id => {
+            const host = filteredData.find(h => h.id.toString() === id.toString());
+            return host && host.active && host.is_agent_privileged;
+        }), [selection, filteredData]);
 
     const handleRefreshData = async () => {
         try {
@@ -531,6 +550,7 @@ const Hosts = () => {
             setTableData(response);
         } catch (error) {
             console.error('Error refreshing hosts:', error);
+            // Don't show error to user for background refresh failures
         } finally {
             setLoading(false);
         }
@@ -544,8 +564,11 @@ const Hosts = () => {
         // Initial load
         refreshHosts();
 
-        // Set up periodic refresh every 30 seconds
-        const intervalId = window.setInterval(() => refreshHosts(), 30000);
+        // Set up periodic refresh every 60 seconds (increased from 30 to reduce load)
+        const intervalId = window.setInterval(() => {
+            // Refresh hosts periodically
+            refreshHosts();
+        }, 60000);
 
         // Cleanup interval on unmount
         return () => window.clearInterval(intervalId);
@@ -573,10 +596,11 @@ const Hosts = () => {
     }, []);
 
 
-    // Check if any selected hosts need approval
-    const hasPendingSelection = filteredData.some(host =>
-        selection.includes(host.id.toString()) && host.approval_status === 'pending'
-    );
+    // Check if any selected hosts need approval - memoized
+    const hasPendingSelection = useMemo(() =>
+        filteredData.some(host =>
+            selection.includes(host.id.toString()) && host.approval_status === 'pending'
+        ), [filteredData, selection]);
 
 
     // Load all tags for filtering
@@ -633,19 +657,31 @@ const Hosts = () => {
         loadAllTags();
     }, [loadAllTags]);
 
+    // Memoize column visibility model
+    const columnVisibilityModel = useMemo(() => ({
+        id: false,
+        ...getColumnVisibilityModel(),
+    }), [getColumnVisibilityModel]);
+
     return (
-        <div>
+        <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: 'calc(100vh - 120px)', // Full viewport height minus navbar and padding
+            gap: 2,
+            p: 2
+        }}>
             {/* Search and Filter Controls */}
-            <Box sx={{ 
-                mb: 2, 
-                p: 2, 
-                bgcolor: 'background.paper', 
-                borderRadius: 1, 
+            <Box sx={{
+                p: 2,
+                bgcolor: 'background.paper',
+                borderRadius: 1,
                 boxShadow: 1,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 3,
-                flexWrap: 'wrap'
+                flexWrap: 'wrap',
+                flexShrink: 0
             }}>
                 {/* Search Box inline */}
                 <SearchBox
@@ -657,10 +693,10 @@ const Hosts = () => {
                     placeholder={t('search.searchHosts', 'Search hosts')}
                     inline={true}
                 />
-                
+
                 {/* Spacer for significant horizontal separation */}
                 <Box sx={{ flexGrow: 1, minWidth: 50 }} />
-                
+
                 {/* Tag Filter */}
                 <Autocomplete
                     multiple
@@ -681,9 +717,9 @@ const Hosts = () => {
                     sx={{ minWidth: 300, flexGrow: 1 }}
                 />
             </Box>
-            
+
             {/* Column Visibility Button */}
-            <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+            <Box sx={{ mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
                 <ColumnVisibilityButton
                     columns={columns
                         .filter(col => col.field !== 'actions')
@@ -693,25 +729,22 @@ const Hosts = () => {
                     onReset={resetPreferences}
                 />
             </Box>
-            
-            <div  style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px` }}>
+
+            {/* DataGrid - flexGrow to fill available space */}
+            <Box sx={{ flexGrow: 1, minHeight: 0 }}>
                 <DataGrid
                     rows={filteredData}
                     columns={columns}
                     loading={loading}
+                    paginationModel={paginationModel}
+                    onPaginationModelChange={setPaginationModel}
                     initialState={{
-                        pagination: {
-                            paginationModel: { page: 0, pageSize: pageSize },
-                        },
                         sorting: {
                             sortModel: [{ field: 'fqdn', sort: 'asc'}],
                         },
                     }}
-                    columnVisibilityModel={{
-                        id: false,
-                        ...getColumnVisibilityModel(),
-                    }}
-                    pageSizeOptions={pageSizeOptions}
+                    columnVisibilityModel={columnVisibilityModel}
+                    pageSizeOptions={safePageSizeOptions}
                     checkboxSelection
                     rowSelectionModel={selection}
                     onRowSelectionModelChange={setSelection}
@@ -723,16 +756,16 @@ const Hosts = () => {
                         },
                         noRowsLabel: t('hosts.noRows'),
                         noResultsOverlayLabel: t('hosts.noResults'),
-                        // Additional DataGrid locale text
-                        footerRowSelected: (count: number) => 
-                            count !== 1 
+                        footerRowSelected: (count: number) =>
+                            count !== 1
                                 ? `${count.toLocaleString()} ${t('common.rowsSelected')}`
                                 : `${count.toLocaleString()} ${t('common.rowSelected')}`,
                     }}
                 />
-            </div>
-            <Box component="section">&nbsp;</Box>
-            <Stack direction="row" spacing={2}>
+            </Box>
+
+            {/* Action Buttons - flexShrink: 0 to stay at bottom */}
+            <Stack direction="row" spacing={2} sx={{ flexShrink: 0, pb: 2 }}>
                 {canApproveHosts && (
                     <Button
                         variant="outlined"
@@ -810,7 +843,7 @@ const Hosts = () => {
                     </Button>
                 )}
             </Stack>
-        </div>
+        </Box>
     );
 }
  

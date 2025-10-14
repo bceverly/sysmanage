@@ -12,6 +12,7 @@ import Link from "@mui/material/Link";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import api from "../Services/api"
 import LanguageSelector from "../Components/LanguageSelector"
@@ -26,6 +27,7 @@ const Login = () => {
     });
     const [rememberMe, setRememberMe] = useState(false);
     const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -41,6 +43,7 @@ const Login = () => {
     const handleSubmitEvent = (e: { preventDefault: () => void; }) => {
       e.preventDefault();
       if (input.userid !== "" && input.password !== "") {
+        setIsLoggingIn(true);
         api.post("/login", {
           userid: input.userid,
           password: input.password
@@ -65,11 +68,11 @@ const Login = () => {
           window.location.reload();
           return response.data;
         })
-        .catch((_error) => {
+        .catch(() => {
           // Error situation - clear out storage
           localStorage.removeItem("userid");
           localStorage.removeItem("bearer_token");
-          alert(t('login.error'));
+          setIsLoggingIn(false);
         });
       }
     };
@@ -157,8 +160,10 @@ const Login = () => {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            disabled={isLoggingIn}
+            startIcon={isLoggingIn ? <CircularProgress size={20} color="inherit" /> : undefined}
           >
-            {t('login.submit')}
+            {isLoggingIn ? t('login.loggingIn', 'Logging in...') : t('login.submit')}
           </Button>
           <Box sx={{ textAlign: 'center', mt: 2 }}>
             <Link

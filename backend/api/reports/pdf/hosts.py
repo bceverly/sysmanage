@@ -10,9 +10,9 @@ from reportlab.lib import colors
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph, Spacer, Table, TableStyle
 
+from backend.api.reports.pdf.base import ReportGenerator
 from backend.i18n import _
 from backend.persistence.models import Host
-from backend.api.reports.pdf.base import ReportGenerator
 
 
 class HostsReportGenerator(ReportGenerator):

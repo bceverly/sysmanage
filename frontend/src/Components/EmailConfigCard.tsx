@@ -179,7 +179,7 @@ const EmailConfigCard: React.FC = () => {
         <CardContent>
           {config && (
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   SMTP Server
                 </Typography>
@@ -187,8 +187,8 @@ const EmailConfigCard: React.FC = () => {
                   {config.smtp_host}:{config.smtp_port}
                 </Typography>
               </Grid>
-              
-              <Grid item xs={12} sm={6}>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   From Address
                 </Typography>
@@ -196,8 +196,8 @@ const EmailConfigCard: React.FC = () => {
                   {config.from_name} &lt;{config.from_address}&gt;
                 </Typography>
               </Grid>
-              
-              <Grid item xs={12} sm={6}>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   Subject Prefix
                 </Typography>
@@ -205,8 +205,8 @@ const EmailConfigCard: React.FC = () => {
                   {config.subject_prefix || 'None'}
                 </Typography>
               </Grid>
-              
-              <Grid item xs={12} sm={6}>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   Status
                 </Typography>
@@ -215,8 +215,8 @@ const EmailConfigCard: React.FC = () => {
                   {config.enabled && !config.configured && ' (Not Configured)'}
                 </Typography>
               </Grid>
-              
-              <Grid item xs={12}>
+
+              <Grid size={{ xs: 12 }}>
                 <Box mt={2}>
                   <Button
                     variant="outlined"

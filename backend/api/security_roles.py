@@ -4,10 +4,12 @@ API endpoints for managing security roles and user permissions.
 
 from typing import List
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from backend.auth.auth_bearer import get_current_user
 from backend.persistence.db import get_db
 from backend.persistence.models import (
     SecurityRole,
@@ -15,7 +17,6 @@ from backend.persistence.models import (
     User,
     UserSecurityRole,
 )
-from backend.auth.auth_bearer import get_current_user
 from backend.security.roles import SecurityRoles, check_user_has_role
 from backend.services.audit_service import ActionType, AuditService, EntityType
 

@@ -2,6 +2,7 @@
 API routes for saved script management (CRUD operations).
 """
 
+import asyncio
 import logging
 from datetime import datetime, timezone
 from typing import List, Optional
@@ -23,13 +24,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/", response_model=List[SavedScriptResponse])
-async def get_saved_scripts(
-    current_user=Depends(get_current_user),
-    platform: Optional[str] = Query(None, description="Filter by platform"),
-    active_only: bool = Query(True, description="Show only active scripts"),
-):
-    """Get all saved scripts."""
+def _get_scripts_sync(
+    platform: Optional[str], active_only: bool
+) -> List[SavedScriptResponse]:
+    """
+    Synchronous helper function to retrieve saved scripts.
+    This runs in a thread pool to avoid blocking the event loop.
+    """
     session_factory = sessionmaker(bind=db.get_engine())
     try:
         with session_factory() as db_session:
@@ -71,6 +72,21 @@ async def get_saved_scripts(
         raise HTTPException(
             status_code=500, detail=_("Failed to fetch saved scripts")
         ) from e
+
+
+@router.get("/", response_model=List[SavedScriptResponse])
+async def get_saved_scripts(
+    current_user=Depends(get_current_user),
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    active_only: bool = Query(True, description="Show only active scripts"),
+):
+    """
+    Get all saved scripts.
+    Runs the database query in a thread pool to avoid blocking the event loop.
+    """
+    # Run the synchronous database operation in a thread pool
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _get_scripts_sync, platform, active_only)
 
 
 @router.post("/", response_model=SavedScriptResponse)

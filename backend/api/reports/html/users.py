@@ -5,8 +5,8 @@ HTML report generators for user-related reports
 import json
 from datetime import datetime, timezone
 
-from backend.i18n import _
 from backend.api.reports.html.common import escape as _escape
+from backend.i18n import _
 
 
 def generate_users_html(users, report_title: str) -> str:

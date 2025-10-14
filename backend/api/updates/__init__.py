@@ -5,12 +5,8 @@ that can be imported and included in the main application.
 """
 
 from fastapi import APIRouter
-from . import (
-    report_routes,
-    query_routes,
-    execution_routes,
-    os_upgrade_routes,
-)
+
+from . import execution_routes, os_upgrade_routes, query_routes, report_routes
 
 # Create main router that combines all sub-routers
 router = APIRouter()

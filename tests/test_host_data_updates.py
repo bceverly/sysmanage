@@ -594,7 +594,7 @@ class TestGetHostSoftware:
         result = await get_host_software(1)
 
         assert result == expected_result
-        mock_get_software.assert_called_once_with(1)
+        mock_get_software.assert_called_once_with(1, 1, 100, None)
 
 
 class TestGetHostUbuntuPro:

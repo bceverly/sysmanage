@@ -12,7 +12,7 @@ from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
 
-from .models import OpenTelemetryStatusResponse, OpenTelemetryCoverageResponse
+from .models import OpenTelemetryCoverageResponse, OpenTelemetryStatusResponse
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

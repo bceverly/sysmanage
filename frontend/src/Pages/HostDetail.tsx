@@ -57,16 +57,17 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import SourceIcon from '@mui/icons-material/Source';
 import ShieldIcon from '@mui/icons-material/Shield';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField, List, ListItem, ListItemText, Divider, TableContainer, TableHead, InputAdornment } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField, List, ListItem, ListItemText, Divider, TableContainer, TableHead, InputAdornment, Pagination } from '@mui/material';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
 import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import { useTablePageSize } from '../hooks/useTablePageSize';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 
-import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck, doRequestSystemInfo } from '../Services/hosts';
+import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck, doRequestSystemInfo } from '../Services/hosts';
 import { SysManageUser, doGetMe } from '../Services/users';
 import { SecretResponse } from '../Services/secrets';
 import { doCheckOpenTelemetryEligibility, doDeployOpenTelemetry, doGetOpenTelemetryStatus, doStartOpenTelemetry, doStopOpenTelemetry, doRestartOpenTelemetry, doConnectOpenTelemetryToGrafana, doDisconnectOpenTelemetryFromGrafana, doRemoveOpenTelemetry } from '../Services/opentelemetry';
@@ -111,6 +112,16 @@ const HostDetail = () => {
     const [userAccounts, setUserAccounts] = useState<UserAccount[]>([]);
     const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
     const [softwarePackages, setSoftwarePackages] = useState<SoftwarePackage[]>([]);
+    const [loadingSoftware, setLoadingSoftware] = useState<boolean>(false);
+    const [softwarePagination, setSoftwarePagination] = useState<PaginationInfo>({
+        page: 1,
+        page_size: 100,
+        total_items: 0,
+        total_pages: 0,
+        has_next: false,
+        has_prev: false
+    });
+    const [softwareSearchTerm, setSoftwareSearchTerm] = useState<string>('');
     const [certificates, setCertificates] = useState<Certificate[]>([]);
     const [ubuntuProInfo, setUbuntuProInfo] = useState<UbuntuProInfo | null>(null);
     const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticReport[]>([]);
@@ -183,7 +194,6 @@ const HostDetail = () => {
     const [networkFilter, setNetworkFilter] = useState<'all' | 'active' | 'inactive'>('active');
     const [userFilter, setUserFilter] = useState<'all' | 'system' | 'regular'>('all');
     const [groupFilter, setGroupFilter] = useState<'all' | 'system' | 'regular'>('regular');
-    const [packageManagerFilter, setPackageManagerFilter] = useState<string>('all');
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [dialogContent, setDialogContent] = useState<string>('');
     const [dialogTitle, setDialogTitle] = useState<string>('');
@@ -290,7 +300,7 @@ const HostDetail = () => {
     // Current user state
     const [currentUser, setCurrentUser] = useState<SysManageUser | null>(null);
     const navigate = useNavigate();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     // Column visibility preferences for Certificates grid
     const {
@@ -299,6 +309,27 @@ const HostDetail = () => {
         resetPreferences: resetCertificatesPreferences,
         getColumnVisibilityModel: getCertificatesColumnVisibilityModel,
     } = useColumnVisibility('hostdetail-certificates-grid');
+
+    // Dynamic table page sizing based on window height
+    const { pageSize, pageSizeOptions } = useTablePageSize({
+        reservedHeight: 300,
+        minRows: 5,
+        maxRows: 100,
+    });
+
+    // Update pagination when pageSize from hook changes
+    useEffect(() => {
+        setCertificatePaginationModel(prev => ({ ...prev, pageSize }));
+    }, [pageSize]);
+
+    // Ensure current page size is always in options to avoid MUI warning
+    const safePageSizeOptions = useMemo(() => {
+        const currentPageSize = certificatePaginationModel.pageSize;
+        if (!pageSizeOptions.includes(currentPageSize)) {
+            return [...pageSizeOptions, currentPageSize].sort((a, b) => a - b);
+        }
+        return pageSizeOptions;
+    }, [pageSizeOptions, certificatePaginationModel.pageSize]);
 
     // Helper functions to calculate dynamic tab indices
     const getSoftwareInstallsTabIndex = () => 3;
@@ -764,18 +795,18 @@ const HostDetail = () => {
                     setHasAntivirusOsDefault(false);
                 }
 
-                // Fetch normalized storage, network, user access, software, and diagnostics data
+                // Fetch normalized storage, network, user access, and diagnostics data
+                // Note: Software packages are loaded lazily when the Software tab is opened (not here)
                 try {
-                    const [storageData, networkData, usersData, groupsData, softwareData, diagnosticsData, currentUserData] = await Promise.all([
+                    const [storageData, networkData, usersData, groupsData, diagnosticsData, currentUserData] = await Promise.all([
                         doGetHostStorage(hostId),
                         doGetHostNetwork(hostId),
                         doGetHostUsers(hostId),
                         doGetHostGroups(hostId),
-                        doGetHostSoftware(hostId),
                         doGetHostDiagnostics(hostId),
                         doGetMe()
                     ]);
-                    
+
                     // If normalized data is empty, try to parse JSON fallback data
                     if (storageData.length === 0 && hostData.storage_details) {
                         try {
@@ -787,7 +818,7 @@ const HostDetail = () => {
                     } else {
                         setStorageDevices(storageData);
                     }
-                    
+
                     if (networkData.length === 0 && hostData.network_details) {
                         try {
                             const legacyNetworkData = JSON.parse(hostData.network_details);
@@ -798,13 +829,12 @@ const HostDetail = () => {
                     } else {
                         setNetworkInterfaces(networkData);
                     }
-                    
+
                     // Set user access data
                     setUserAccounts(usersData);
                     setUserGroups(groupsData);
-                    
-                    // Set software data
-                    setSoftwarePackages(softwareData);
+
+                    // Software data will be loaded lazily when Software tab is opened
 
                     // Set diagnostics data
                     setDiagnosticsData(diagnosticsData);
@@ -940,6 +970,30 @@ const HostDetail = () => {
     useEffect(() => {
         loadAvailableTags();
     }, [hostTags, loadAvailableTags]);
+
+    // Load software packages lazily when Software tab is selected (tab 2) or pagination changes
+    useEffect(() => {
+        const loadSoftwarePackages = async () => {
+            if (currentTab === 2 && hostId) {
+                try {
+                    setLoadingSoftware(true);
+                    const response = await doGetHostSoftware(
+                        hostId,
+                        softwarePagination.page,
+                        softwarePagination.page_size,
+                        softwareSearchTerm || undefined
+                    );
+                    setSoftwarePackages(response.items);
+                    setSoftwarePagination(response.pagination);
+                } catch (error) {
+                    console.error('Failed to load software packages:', error);
+                } finally {
+                    setLoadingSoftware(false);
+                }
+            }
+        };
+        loadSoftwarePackages();
+    }, [currentTab, hostId, softwarePagination.page, softwarePagination.page_size, softwareSearchTerm]);
 
     // Load installation history when Software Changes tab is selected
     useEffect(() => {
@@ -1496,27 +1550,6 @@ const HostDetail = () => {
                 });
         }
     }, [networkInterfaces, networkFilter]);
-
-    // Get unique package managers from software packages (memoized)
-    const packageManagers = useMemo(() => {
-        const managers = new Set<string>();
-        softwarePackages.forEach(pkg => {
-            if (pkg.package_manager) {
-                managers.add(pkg.package_manager);
-            }
-        });
-        return Array.from(managers).sort();
-    }, [softwarePackages]);
-
-    // Filter software packages based on package manager selection (memoized)
-    const filteredSoftwarePackages = useMemo(() => {
-        if (packageManagerFilter === 'all') {
-            return softwarePackages.sort((a, b) => (a.package_name || '').localeCompare(b.package_name || ''));
-        }
-        return softwarePackages
-            .filter(pkg => pkg.package_manager === packageManagerFilter)
-            .sort((a, b) => (a.package_name || '').localeCompare(b.package_name || ''));
-    }, [softwarePackages, packageManagerFilter]);
 
     // Package search function (defined before useEffect to avoid hoisting issues)
     const performPackageSearch = useCallback(async (query: string) => {
@@ -2481,16 +2514,22 @@ const HostDetail = () => {
     ];
 
     return (
-        <Box>
-            <Button 
-                startIcon={<ArrowBackIcon />} 
+        <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: 'calc(100vh - 120px)',
+            gap: 2,
+            p: 2
+        }}>
+            <Button
+                startIcon={<ArrowBackIcon />}
                 onClick={() => navigate('/hosts')}
-                sx={{ mb: 2 }}
+                sx={{ flexShrink: 0, alignSelf: 'flex-start' }}
             >
                 {t('common.back')}
             </Button>
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
                 <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center' }}>
                     <ComputerIcon sx={{ mr: 2, fontSize: '2rem' }} />
                     {host.fqdn}
@@ -2536,7 +2575,7 @@ const HostDetail = () => {
             </Box>
 
             {/* Tabs */}
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
                 <Tabs value={currentTab} onChange={handleTabChange} aria-label="host detail tabs">
                     <Tab 
                         icon={<InfoIcon />} 
@@ -2611,11 +2650,12 @@ const HostDetail = () => {
                 </Tabs>
             </Box>
 
-            {/* Tab Content */}
+            {/* Tab Content - flexGrow to fill available space */}
+            <Box sx={{ flexGrow: 1, overflow: 'auto', minHeight: 0 }}>
             {currentTab === 0 && (
                 <Grid container spacing={3}>
                 {/* Basic Information */}
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Card sx={{ height: '100%' }}>
                         <CardContent>
                             <Typography variant="subtitle1" sx={{ mb: 2, display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
@@ -2623,35 +2663,35 @@ const HostDetail = () => {
                                 {t('hostDetail.basicInfo', 'Basic Information')}
                             </Typography>
                             <Grid container spacing={2}>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hosts.fqdn', 'FQDN')}
                                     </Typography>
                                     <Typography variant="body1">{host.fqdn}</Typography>
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hosts.ipv4', 'IPv4')}
                                     </Typography>
                                     <Typography variant="body1">{host.ipv4 || t('common.notAvailable')}</Typography>
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hosts.ipv6', 'IPv6')}
                                     </Typography>
                                     <Typography variant="body1">{host.ipv6 || t('common.notAvailable')}</Typography>
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hosts.status', 'Status')}
                                     </Typography>
-                                    <Chip 
+                                    <Chip
                                         label={getDisplayStatus(host) === 'up' ? t('hosts.up') : t('hosts.down')}
                                         color={getStatusColor(getDisplayStatus(host))}
                                         size="small"
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hostDetail.approvalStatus', 'Approval Status')}
                                     </Typography>
@@ -2661,13 +2701,13 @@ const HostDetail = () => {
                                         size="small"
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hosts.lastCheckin', 'Last Check-in')}
                                     </Typography>
                                     <Typography variant="body1">{formatDate(host.last_access)}</Typography>
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hosts.scriptsEnabled', 'Scripts Enabled')}
                                     </Typography>
@@ -2676,7 +2716,7 @@ const HostDetail = () => {
                                             Unknown
                                         </Typography>
                                     ) : (
-                                        <Chip 
+                                        <Chip
                                             label={host.script_execution_enabled ? t('common.yes') : t('common.no')}
                                             color={host.script_execution_enabled ? 'success' : 'error'}
                                             size="small"
@@ -2685,7 +2725,7 @@ const HostDetail = () => {
                                         />
                                     )}
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hosts.privileged', 'Privileged')}
                                     </Typography>
@@ -2694,7 +2734,7 @@ const HostDetail = () => {
                                             Unknown
                                         </Typography>
                                     ) : (
-                                        <Chip 
+                                        <Chip
                                             label={host.is_agent_privileged ? t('common.yes') : t('common.no')}
                                             color={host.is_agent_privileged ? 'success' : 'error'}
                                             size="small"
@@ -2703,17 +2743,17 @@ const HostDetail = () => {
                                         />
                                     )}
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hostDetail.active', 'Active')}
                                     </Typography>
-                                    <Chip 
+                                    <Chip
                                         label={host.active ? t('common.yes') : t('common.no')}
                                         color={host.active ? 'success' : 'default'}
                                         size="small"
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hosts.shellsAllowed', 'Shells Allowed')}
                                     </Typography>
@@ -2740,7 +2780,7 @@ const HostDetail = () => {
                 </Grid>
 
                 {/* Operating System Information */}
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Card sx={{ height: '100%' }}>
                         <CardContent>
                             <Typography variant="subtitle1" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2, fontWeight: 'bold', fontSize: '1.1rem' }}>
@@ -2751,19 +2791,19 @@ const HostDetail = () => {
                                 </Typography>
                             </Typography>
                             <Grid container spacing={2}>
-                                <Grid item xs={12}>
+                                <Grid size={{ xs: 12 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hostDetail.platform', 'Platform')}
                                     </Typography>
                                     <Typography variant="body1">{host.platform || t('common.notAvailable')}</Typography>
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={{ xs: 12 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hostDetail.platformRelease', 'Platform Release')}
                                     </Typography>
                                     <Typography variant="body1">{host.platform_release || t('common.notAvailable')}</Typography>
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={{ xs: 12 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hostDetail.kernel', 'Kernel')}
                                     </Typography>
@@ -2771,20 +2811,20 @@ const HostDetail = () => {
                                         {host.platform_version || t('common.notAvailable')}
                                     </Typography>
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hostDetail.architecture', 'Architecture')}
                                     </Typography>
                                     <Typography variant="body1">{host.machine_architecture || t('common.notAvailable')}</Typography>
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hostDetail.processor', 'Processor')}
                                     </Typography>
                                     <Typography variant="body1">{host.processor || t('common.notAvailable')}</Typography>
                                 </Grid>
                                 {host.os_details && (
-                                    <Grid item xs={12}>
+                                    <Grid size={{ xs: 12 }}>
                                         <Typography variant="body2" color="textSecondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                             {t('hostDetail.osDetails', 'Additional Details')}
                                             <IconButton 
@@ -2803,7 +2843,7 @@ const HostDetail = () => {
                 </Grid>
 
                 {/* OpenTelemetry Status */}
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Card sx={{ height: '100%' }}>
                         <CardContent>
                             <Typography variant="subtitle1" sx={{ mb: 2, display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
@@ -2816,7 +2856,7 @@ const HostDetail = () => {
                                 </Box>
                             ) : openTelemetryStatus ? (
                                 <Grid container spacing={2}>
-                                    <Grid item xs={12}>
+                                    <Grid size={{ xs: 12 }}>
                                         <Typography variant="body2" color="textSecondary">
                                             {t('hostDetail.opentelemetryDeployed', 'Deployed')}
                                         </Typography>
@@ -2825,7 +2865,7 @@ const HostDetail = () => {
                                         </Typography>
                                     </Grid>
                                     {!openTelemetryStatus.deployed && hasPermission(SecurityRoles.DEPLOY_OPENTELEMETRY) && host?.is_agent_privileged && (
-                                        <Grid item xs={12}>
+                                        <Grid size={{ xs: 12 }}>
                                             <Button
                                                 variant="contained"
                                                 color="primary"
@@ -2839,7 +2879,7 @@ const HostDetail = () => {
                                     )}
                                     {openTelemetryStatus.deployed && (
                                         <>
-                                            <Grid item xs={12}>
+                                            <Grid size={{ xs: 12 }}>
                                                 <Typography variant="body2" color="textSecondary">
                                                     {t('hostDetail.opentelemetryServiceStatus', 'Service Status')}
                                                 </Typography>
@@ -2861,7 +2901,7 @@ const HostDetail = () => {
                                                     size="small"
                                                 />
                                             </Grid>
-                                            <Grid item xs={12}>
+                                            <Grid size={{ xs: 12 }}>
                                                 <Typography variant="body2" color="textSecondary">
                                                     {t('hostDetail.opentelemetryGrafanaServer', 'Grafana Server')}
                                                 </Typography>
@@ -2870,7 +2910,7 @@ const HostDetail = () => {
                                                 </Typography>
                                             </Grid>
                                             {host.is_agent_privileged && (
-                                                <Grid item xs={12}>
+                                                <Grid size={{ xs: 12 }}>
                                                     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                                                         <Button
                                                             variant="outlined"
@@ -2943,7 +2983,7 @@ const HostDetail = () => {
                 </Grid>
 
                 {/* Tags */}
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Card sx={{ height: '100%' }}>
                         <CardContent>
                             <Typography variant="subtitle1" sx={{ mb: 2, display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
@@ -3002,7 +3042,7 @@ const HostDetail = () => {
             {currentTab === 1 && (
                 <Grid container spacing={3}>
                 {/* Hardware Information */}
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                     <Card>
                         <CardContent>
                             <Typography variant="subtitle1" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2, fontWeight: 'bold', fontSize: '1.1rem' }}>
@@ -3014,36 +3054,36 @@ const HostDetail = () => {
                             </Typography>
                             <Grid container spacing={3}>
                                 {/* CPU Information */}
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{ xs: 12, md: 6 }}>
                                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
                                         {t('hostDetail.cpuInfo', 'CPU')}
                                     </Typography>
                                     <Grid container spacing={2}>
-                                        <Grid item xs={12}>
+                                        <Grid size={{ xs: 12 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('hostDetail.cpuVendor', 'CPU Vendor')}
                                             </Typography>
                                             <Typography variant="body1">{host.cpu_vendor || t('common.notAvailable')}</Typography>
                                         </Grid>
-                                        <Grid item xs={12}>
+                                        <Grid size={{ xs: 12 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('hostDetail.cpuModel', 'CPU Model')}
                                             </Typography>
                                             <Typography variant="body1">{host.cpu_model || t('common.notAvailable')}</Typography>
                                         </Grid>
-                                        <Grid item xs={6}>
+                                        <Grid size={{ xs: 6 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('hostDetail.cpuCores', 'Cores')}
                                             </Typography>
                                             <Typography variant="body1">{host.cpu_cores || t('common.notAvailable')}</Typography>
                                         </Grid>
-                                        <Grid item xs={6}>
+                                        <Grid size={{ xs: 6 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('hostDetail.cpuThreads', 'Threads')}
                                             </Typography>
                                             <Typography variant="body1">{host.cpu_threads || t('common.notAvailable')}</Typography>
                                         </Grid>
-                                        <Grid item xs={12}>
+                                        <Grid size={{ xs: 12 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('hostDetail.cpuFrequency', 'Frequency')}
                                             </Typography>
@@ -3053,12 +3093,12 @@ const HostDetail = () => {
                                 </Grid>
 
                                 {/* Memory Information */}
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{ xs: 12, md: 6 }}>
                                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
                                         {t('hostDetail.memoryInfo', 'Memory')}
                                     </Typography>
                                     <Grid container spacing={2}>
-                                        <Grid item xs={12}>
+                                        <Grid size={{ xs: 12 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('hostDetail.totalMemory', 'Total Memory')}
                                             </Typography>
@@ -3070,7 +3110,7 @@ const HostDetail = () => {
 
                                 {/* Storage Details */}
                                 {storageDevices.length > 0 && (
-                                    <Grid item xs={12}>
+                                    <Grid size={{ xs: 12 }}>
                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                                             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
                                                 <StorageIcon sx={{ mr: 1 }} />
@@ -3101,12 +3141,12 @@ const HostDetail = () => {
                                         {filteredStorageDevices.map((device: StorageDeviceType, index: number) => (
                                             <Box key={device.id || index} sx={{ mb: 3, p: 2, pb: 3, backgroundColor: 'grey.900', borderRadius: 1, minHeight: '140px', display: 'flex', flexDirection: 'column' }}>
                                                 <Grid container spacing={2} alignItems="flex-start">
-                                                    <Grid item xs={12} md={3}>
+                                                    <Grid size={{ xs: 12, md: 3 }}>
                                                         <Typography variant="body1" sx={{ fontWeight: 'medium', mb: 1 }}>
                                                             {device.name || device.device_path || device.mount_point || `Device ${index + 1}`}
                                                         </Typography>
                                                     </Grid>
-                                                    <Grid item xs={12} md={8}>
+                                                    <Grid size={{ xs: 12, md: 8 }}>
                                                         <Table size="small">
                                                             <TableBody>
                                                                 {device.mount_point && (
@@ -3166,9 +3206,9 @@ const HostDetail = () => {
                                                             </TableBody>
                                                         </Table>
                                                     </Grid>
-                                                    <Grid item xs={12} md={1}>
-                                                        <IconButton 
-                                                            size="small" 
+                                                    <Grid size={{ xs: 12, md: 1 }}>
+                                                        <IconButton
+                                                            size="small"
                                                             onClick={() => handleShowDialog(t('hostDetail.storageDeviceDetails', 'Storage Device Details'), JSON.stringify(device, null, 2))}
                                                             sx={{ color: 'textSecondary' }}
                                                         >
@@ -3183,7 +3223,7 @@ const HostDetail = () => {
 
                                 {/* Network Details */}
                                 {networkInterfaces.length > 0 && (
-                                    <Grid item xs={12}>
+                                    <Grid size={{ xs: 12 }}>
                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                                             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
                                                 <NetworkCheckIcon sx={{ mr: 1 }} />
@@ -3214,7 +3254,7 @@ const HostDetail = () => {
                                         {filteredNetworkInterfaces.map((iface: NetworkInterfaceType, index: number) => (
                                             <Box key={iface.id || index} sx={{ mb: 3, p: 2, pb: 3, backgroundColor: 'grey.900', borderRadius: 1, minHeight: '140px', display: 'flex', flexDirection: 'column' }}>
                                                 <Grid container spacing={2} alignItems="flex-start">
-                                                    <Grid item xs={12} md={3}>
+                                                    <Grid size={{ xs: 12, md: 3 }}>
                                                         <Typography variant="body1" sx={{ fontWeight: 'medium', mb: 1 }}>
                                                             {iface.name || `Interface ${index + 1}`}
                                                         </Typography>
@@ -3222,7 +3262,7 @@ const HostDetail = () => {
                                                             <Chip label={t('hostDetail.active', 'Active')} size="small" color="success" sx={{ mt: 1 }} />
                                                         )}
                                                     </Grid>
-                                                    <Grid item xs={12} md={8}>
+                                                    <Grid size={{ xs: 12, md: 8 }}>
                                                         <Table size="small">
                                                             <TableBody>
                                                                 {iface.interface_type && (
@@ -3276,9 +3316,9 @@ const HostDetail = () => {
                                                             </TableBody>
                                                         </Table>
                                                     </Grid>
-                                                    <Grid item xs={12} md={1}>
-                                                        <IconButton 
-                                                            size="small" 
+                                                    <Grid size={{ xs: 12, md: 1 }}>
+                                                        <IconButton
+                                                            size="small"
                                                             onClick={() => handleShowDialog(t('hostDetail.networkInterfaceDetails', 'Network Interface Details'), JSON.stringify(iface, null, 2))}
                                                             sx={{ color: 'textSecondary' }}
                                                         >
@@ -3293,11 +3333,11 @@ const HostDetail = () => {
 
                                 {/* Additional Hardware Details */}
                                 {host.hardware_details && (
-                                    <Grid item xs={12}>
+                                    <Grid size={{ xs: 12 }}>
                                         <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
                                             {t('hostDetail.additionalHardware', 'Additional Hardware Details')}
-                                            <IconButton 
-                                                size="small" 
+                                            <IconButton
+                                                size="small"
                                                 onClick={() => handleShowDialog('Additional Hardware Details', host.hardware_details || '')}
                                                 sx={{ color: 'textSecondary' }}
                                             >
@@ -3317,14 +3357,14 @@ const HostDetail = () => {
             {/* Software Tab */}
             {currentTab === 2 && (
                 <Grid container spacing={3}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Card>
                             <CardContent>
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                         <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
                                             <AppsIcon sx={{ mr: 1 }} />
-                                            {t('hostDetail.softwarePackages', 'Software Packages')} ({filteredSoftwarePackages.length})
+                                            {t('hostDetail.softwarePackages', 'Software Packages')} ({softwarePagination.total_items})
                                         </Typography>
                                         <Typography variant="caption" color="textSecondary">
                                             {t('hosts.updated', 'Updated')}: {formatTimestamp(host.software_updated_at)}
@@ -3362,35 +3402,51 @@ const HostDetail = () => {
                                                 {t('hostDetail.deployOpenTelemetry', 'Deploy OpenTelemetry')}
                                             </Button>
                                         )}
-                                        <ToggleButtonGroup
-                                            value={packageManagerFilter}
-                                            exclusive
-                                            onChange={(_, newFilter) => {
-                                                if (newFilter !== null) {
-                                                    setPackageManagerFilter(newFilter);
-                                                }
-                                            }}
-                                            size="small"
-                                        >
-                                            <ToggleButton value="all" aria-label="all packages">
-                                                {t('common.all', 'All')}
-                                            </ToggleButton>
-                                            {packageManagers.map((manager) => (
-                                                <ToggleButton key={manager} value={manager} aria-label={`${manager} packages`}>
-                                                    {manager}
-                                                </ToggleButton>
-                                            ))}
-                                        </ToggleButtonGroup>
                                     </Box>
                                 </Box>
-                                {filteredSoftwarePackages.length === 0 ? (
+                                <Box sx={{ mb: 2 }}>
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        placeholder={t('hostDetail.searchSoftware', 'Search by package name or description...')}
+                                        value={softwareSearchTerm}
+                                        onChange={(e) => {
+                                            setSoftwareSearchTerm(e.target.value);
+                                            setSoftwarePagination(prev => ({ ...prev, page: 1 })); // Reset to page 1 on search
+                                        }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <SearchIcon />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        size="small"
+                                    />
+                                </Box>
+                                {loadingSoftware ? (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+                                        <CircularProgress />
+                                        <Typography variant="body2" color="textSecondary" sx={{ ml: 2 }}>
+                                            {t('hostDetail.loadingSoftware', 'Loading software packages...')}
+                                        </Typography>
+                                    </Box>
+                                ) : softwarePackages.length === 0 ? (
                                     <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 2 }}>
                                         {t('hostDetail.noSoftwareFound', 'No software packages found')}
                                     </Typography>
                                 ) : (
-                                    <Grid container spacing={2}>
-                                        {filteredSoftwarePackages.map((pkg: SoftwarePackage, index: number) => (
-                                            <Grid item xs={12} sm={6} md={4} key={pkg.id || index}>
+                                    <>
+                                        <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                                            {t('hostDetail.showingPackages', 'Showing {{start}}-{{end}} of {{total}} packages', {
+                                                start: ((softwarePagination.page - 1) * softwarePagination.page_size + 1).toLocaleString(i18n.language),
+                                                end: Math.min(softwarePagination.page * softwarePagination.page_size, softwarePagination.total_items).toLocaleString(i18n.language),
+                                                total: softwarePagination.total_items.toLocaleString(i18n.language)
+                                            })}
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            {softwarePackages.map((pkg: SoftwarePackage, index: number) => (
+                                            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={pkg.id || index}>
                                                 <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
                                                     <CardContent sx={{ p: 2 }}>
                                                         <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1, wordBreak: 'break-word' }}>
@@ -3458,6 +3514,20 @@ const HostDetail = () => {
                                             </Grid>
                                         ))}
                                     </Grid>
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                                        <Pagination
+                                            count={softwarePagination.total_pages}
+                                            page={softwarePagination.page}
+                                            onChange={(_, page) => {
+                                                setSoftwarePagination(prev => ({ ...prev, page }));
+                                            }}
+                                            color="primary"
+                                            size="large"
+                                            showFirstButton
+                                            showLastButton
+                                        />
+                                    </Box>
+                                </>
                                 )}
                             </CardContent>
                         </Card>
@@ -3478,7 +3548,7 @@ const HostDetail = () => {
             {currentTab === getAccessTabIndex() && (
                 <Grid container spacing={3}>
                     {/* User Accounts */}
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Card>
                             <CardContent>
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -3520,7 +3590,7 @@ const HostDetail = () => {
                                 ) : (
                                     <Grid container spacing={2}>
                                         {filteredUsers.map((user: UserAccount, index: number) => (
-                                            <Grid item xs={12} sm={6} md={4} key={user.id || index}>
+                                            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={user.id || index}>
                                                 <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
                                                     <CardContent sx={{ p: 2 }}>
                                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
@@ -3632,7 +3702,7 @@ const HostDetail = () => {
                     </Grid>
 
                     {/* User Groups */}
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Card>
                             <CardContent>
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -3674,7 +3744,7 @@ const HostDetail = () => {
                                 ) : (
                                     <Grid container spacing={2}>
                                         {filteredGroups.map((group: UserGroup, index: number) => (
-                                            <Grid item xs={12} sm={6} md={4} key={group.id || index}>
+                                            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={group.id || index}>
                                                 <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
                                                     <CardContent sx={{ p: 2 }}>
                                                         <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
@@ -3766,7 +3836,7 @@ const HostDetail = () => {
             {/* Security Tab */}
             {currentTab === getSecurityTabIndex() && hostId && (
                 <Grid container spacing={3}>
-                    <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
+                    <Grid size={{ xs: 12, md: 6 }} sx={{ display: 'flex' }}>
                         <AntivirusStatusCard
                             hostId={hostId}
                             onDeployAntivirus={handleDeployAntivirus}
@@ -3784,14 +3854,14 @@ const HostDetail = () => {
                             sx={{ height: '100%', width: '100%' }}
                         />
                     </Grid>
-                    <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
+                    <Grid size={{ xs: 12, md: 6 }} sx={{ display: 'flex' }}>
                         <CommercialAntivirusStatusCard
                             hostId={hostId}
                             refreshTrigger={antivirusRefreshTrigger}
                             sx={{ height: '100%', width: '100%' }}
                         />
                     </Grid>
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                         <FirewallStatusCard
                             hostId={hostId}
                             refreshTrigger={antivirusRefreshTrigger}
@@ -3803,7 +3873,7 @@ const HostDetail = () => {
             {/* Certificates Tab */}
             {currentTab === getCertificatesTabIndex() && (
                 <Grid container spacing={3}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Card>
                             <CardContent>
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -3937,7 +4007,7 @@ const HostDetail = () => {
                                             columnVisibilityModel={getCertificatesColumnVisibilityModel()}
                                             paginationModel={certificatePaginationModel}
                                             onPaginationModelChange={setCertificatePaginationModel}
-                                            pageSizeOptions={[5, 10, 25]}
+                                            pageSizeOptions={safePageSizeOptions}
                                             disableRowSelectionOnClick
                                             autoHeight
                                             sx={{
@@ -3959,7 +4029,7 @@ const HostDetail = () => {
             {/* Software Changes Tab */}
             {currentTab === getSoftwareInstallsTabIndex() && (
                 <Grid container spacing={3}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Card>
                             <CardContent>
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -4049,7 +4119,7 @@ const HostDetail = () => {
             {/* Server Roles Tab */}
             {currentTab === getServerRolesTabIndex() && (
                 <Grid container spacing={3}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Card>
                             <CardContent>
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -4236,7 +4306,7 @@ const HostDetail = () => {
             {/* Ubuntu Pro Tab */}
             {currentTab === getUbuntuProTabIndex() && ubuntuProInfo?.available && (
                 <Grid container spacing={3}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Card>
                             <CardContent>
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -4298,7 +4368,7 @@ const HostDetail = () => {
                                 </Box>
 
                                 <Grid container spacing={2} sx={{ mt: 1 }}>
-                                    <Grid item xs={12} md={6}>
+                                    <Grid size={{ xs: 12, md: 6 }}>
                                         <Card variant="outlined" sx={{ mb: 2 }}>
                                             <CardContent>
                                                 <Typography variant="h6" gutterBottom>
@@ -4364,7 +4434,7 @@ const HostDetail = () => {
                                         </Card>
                                     </Grid>
 
-                                    <Grid item xs={12} md={6}>
+                                    <Grid size={{ xs: 12, md: 6 }}>
                                         <Card variant="outlined">
                                             <CardContent>
                                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
@@ -4421,7 +4491,7 @@ const HostDetail = () => {
                                                                 return statusOrder[a.status as keyof typeof statusOrder] - statusOrder[b.status as keyof typeof statusOrder];
                                                             })
                                                             .map((service, index) => (
-                                                            <Grid item xs={12} key={index}>
+                                                            <Grid size={{ xs: 12 }} key={index}>
                                                                 <Card variant="outlined" sx={{ p: 1 }}>
                                                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                                         <Box sx={{ flex: 1 }}>
@@ -4484,7 +4554,7 @@ const HostDetail = () => {
             {/* Diagnostics Tab */}
             {currentTab === getDiagnosticsTabIndex() && (
                 <Grid container spacing={3}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Card>
                             <CardContent>
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -4499,11 +4569,11 @@ const HostDetail = () => {
                                             </Typography>
                                         )}
                                         {isDiagnosticsProcessing && (
-                                            <Chip 
+                                            <Chip
                                                 label={t('hostDetail.processingDiagnostics', 'Processing...')}
                                                 color="warning"
                                                 size="small"
-                                                sx={{ 
+                                                sx={{
                                                     animation: 'pulse 1.5s ease-in-out infinite',
                                                     '@keyframes pulse': {
                                                         '0%': { opacity: 1 },
@@ -4526,13 +4596,13 @@ const HostDetail = () => {
                                         disabled={diagnosticsLoading}
                                         color="primary"
                                     >
-                                        {diagnosticsLoading 
-                                            ? t('hostDetail.requestingDiagnostics', 'Requesting...') 
+                                        {diagnosticsLoading
+                                            ? t('hostDetail.requestingDiagnostics', 'Requesting...')
                                             : t('hostDetail.requestHostData', 'Request Host Data')
                                         }
                                     </Button>
                                 </Box>
-                                
+
                                 {diagnosticsData.length === 0 ? (
                                     <Box sx={{ textAlign: 'center', py: 4 }}>
                                         <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
@@ -4545,7 +4615,7 @@ const HostDetail = () => {
                                 ) : (
                                     <Grid container spacing={2}>
                                         {diagnosticsData.map((diagnostic: DiagnosticReport, index: number) => (
-                                            <Grid item xs={12} key={diagnostic.id || index}>
+                                            <Grid size={{ xs: 12 }} key={diagnostic.id || index}>
                                                 <Card 
                                                     sx={{ 
                                                         backgroundColor: 'grey.900',
@@ -4662,6 +4732,7 @@ const HostDetail = () => {
                     </Grid>
                 </Grid>
             )}
+            </Box>
 
             {/* Dialog for Additional Details */}
             <Dialog
@@ -4800,7 +4871,7 @@ const HostDetail = () => {
                             <Card sx={{ mb: 3, backgroundColor: 'grey.800' }}>
                                 <CardContent>
                                     <Grid container spacing={2}>
-                                        <Grid item xs={12} sm={6}>
+                                        <Grid size={{ xs: 12, sm: 6 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('hostDetail.collectionId', 'Collection ID')}
                                             </Typography>
@@ -4808,17 +4879,17 @@ const HostDetail = () => {
                                                 {selectedDiagnostic.collection_id}
                                             </Typography>
                                         </Grid>
-                                        <Grid item xs={12} sm={6}>
+                                        <Grid size={{ xs: 12, sm: 6 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('hostDetail.collectionStatus', 'Status')}
                                             </Typography>
-                                            <Chip 
-                                                label={selectedDiagnostic.status} 
-                                                color={selectedDiagnostic.status === 'completed' ? 'success' : 'warning'} 
-                                                size="small" 
+                                            <Chip
+                                                label={selectedDiagnostic.status}
+                                                color={selectedDiagnostic.status === 'completed' ? 'success' : 'warning'}
+                                                size="small"
                                             />
                                         </Grid>
-                                        <Grid item xs={12} sm={6}>
+                                        <Grid size={{ xs: 12, sm: 6 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('hostDetail.requestedAt', 'Requested At')}
                                             </Typography>
@@ -4826,7 +4897,7 @@ const HostDetail = () => {
                                                 {formatDate(selectedDiagnostic.requested_at)}
                                             </Typography>
                                         </Grid>
-                                        <Grid item xs={12} sm={6}>
+                                        <Grid size={{ xs: 12, sm: 6 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('hostDetail.completedAt', 'Completed At')}
                                             </Typography>
@@ -5119,7 +5190,7 @@ const HostDetail = () => {
                     {selectedInstallationLog && (
                         <Box>
                             <Grid container spacing={2} sx={{ mb: 3 }}>
-                                <Grid item xs={6}>
+                                <Grid size={{ xs: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hostDetail.status', 'Status')}:
                                     </Typography>
@@ -5130,7 +5201,7 @@ const HostDetail = () => {
                                         sx={{ mt: 0.5 }}
                                     />
                                 </Grid>
-                                <Grid item xs={6}>
+                                <Grid size={{ xs: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hostDetail.requestedBy', 'Requested By')}:
                                     </Typography>
@@ -5138,7 +5209,7 @@ const HostDetail = () => {
                                         {selectedInstallationLog.requested_by}
                                     </Typography>
                                 </Grid>
-                                <Grid item xs={6}>
+                                <Grid size={{ xs: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hostDetail.requestedAt', 'Requested At')}:
                                     </Typography>
@@ -5146,7 +5217,7 @@ const HostDetail = () => {
                                         {formatDateTime(selectedInstallationLog.requested_at)}
                                     </Typography>
                                 </Grid>
-                                <Grid item xs={6}>
+                                <Grid size={{ xs: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('hostDetail.completedAt', 'Completed At')}:
                                     </Typography>
@@ -5158,7 +5229,7 @@ const HostDetail = () => {
                                     </Typography>
                                 </Grid>
                                 {selectedInstallationLog.installed_version && (
-                                    <Grid item xs={6}>
+                                    <Grid size={{ xs: 6 }}>
                                         <Typography variant="body2" color="textSecondary">
                                             {t('hostDetail.installedVersion', 'Installed Version')}:
                                         </Typography>

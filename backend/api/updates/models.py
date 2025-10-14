@@ -1,6 +1,7 @@
 """Pydantic models for package update management."""
 
 from typing import List, Optional
+
 from pydantic import BaseModel, validator
 
 

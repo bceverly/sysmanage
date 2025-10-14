@@ -3,9 +3,11 @@
 import logging
 from datetime import datetime, timezone
 from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_
 from sqlalchemy.orm import sessionmaker
+
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -13,6 +15,7 @@ from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
+
 from .constants import OS_UPGRADE_PACKAGE_MANAGERS
 from .models import UpdateExecutionRequest
 

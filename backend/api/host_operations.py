@@ -10,8 +10,8 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
 from backend.websocket.messages import create_command_message
-from backend.websocket.queue_operations import QueueOperations
 from backend.websocket.queue_enums import QueueDirection
+from backend.websocket.queue_operations import QueueOperations
 
 router = APIRouter()
 queue_ops = QueueOperations()

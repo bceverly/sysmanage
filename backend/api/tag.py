@@ -2,6 +2,7 @@
 Tag management API endpoints
 """
 
+import asyncio
 from datetime import datetime, timezone
 from typing import List, Optional
 
@@ -13,7 +14,8 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
-from backend.persistence import db as db_module, models
+from backend.persistence import db as db_module
+from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.persistence.models import HostTag, Tag
 from backend.security.roles import SecurityRoles
@@ -70,45 +72,62 @@ class HostTagRequest(BaseModel):
     tag_id: str
 
 
+def _get_tags_sync():
+    """
+    Synchronous helper function to retrieve all tags.
+    This runs in a thread pool to avoid blocking the event loop.
+    """
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
+
+    with session_local() as session:
+        try:
+            # Query all tags with host count
+            stmt = select(Tag).order_by(Tag.name)
+            result = session.execute(stmt)
+            tags = result.scalars().all()
+
+            # Add host count to each tag
+            tag_responses = []
+            for tag in tags:
+                try:
+                    # Try to get host count, fallback to 0 if there's an issue
+                    host_count = (
+                        tag.hosts.count() if hasattr(tag, "hosts") and tag.hosts else 0
+                    )
+                except Exception:
+                    # If relationship fails, default to 0
+                    host_count = 0
+
+                tag_dict = {
+                    "id": str(tag.id),
+                    "name": tag.name,
+                    "description": tag.description,
+                    "created_at": tag.created_at,
+                    "updated_at": tag.updated_at,
+                    "host_count": host_count,
+                }
+                tag_responses.append(tag_dict)
+
+            return tag_responses
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=_("Failed to fetch tags: %(error)s") % {"error": str(e)},
+            ) from e
+
+
 @router.get("/tags", response_model=List[TagResponse])
-async def get_tags(
-    db: Session = Depends(get_db), current_user: str = Depends(get_current_user)
-):
-    """Get all tags"""
-    try:
-        # Query all tags with host count
-        stmt = select(Tag).order_by(Tag.name)
-        result = db.execute(stmt)
-        tags = result.scalars().all()
-
-        # Add host count to each tag
-        tag_responses = []
-        for tag in tags:
-            try:
-                # Try to get host count, fallback to 0 if there's an issue
-                host_count = (
-                    tag.hosts.count() if hasattr(tag, "hosts") and tag.hosts else 0
-                )
-            except Exception:
-                # If relationship fails, default to 0
-                host_count = 0
-
-            tag_dict = {
-                "id": str(tag.id),
-                "name": tag.name,
-                "description": tag.description,
-                "created_at": tag.created_at,
-                "updated_at": tag.updated_at,
-                "host_count": host_count,
-            }
-            tag_responses.append(TagResponse(**tag_dict))
-
-        return tag_responses
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=_("Failed to fetch tags: %(error)s") % {"error": str(e)},
-        ) from e
+async def get_tags(current_user: str = Depends(get_current_user)):
+    """
+    Get all tags.
+    Runs the database query in a thread pool to avoid blocking the event loop.
+    """
+    # Run the synchronous database operation in a thread pool
+    loop = asyncio.get_event_loop()
+    tag_dicts = await loop.run_in_executor(None, _get_tags_sync)
+    return [TagResponse(**tag_dict) for tag_dict in tag_dicts]
 
 
 @router.post("/tags", response_model=TagResponse, status_code=status.HTTP_201_CREATED)
@@ -382,69 +401,87 @@ async def delete_tag(
         ) from e
 
 
+def _get_tag_hosts_sync(tag_id: str):
+    """
+    Synchronous helper function to retrieve hosts for a tag.
+    This runs in a thread pool to avoid blocking the event loop.
+    """
+    from sqlalchemy import text
+
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
+
+    with session_local() as session:
+        try:
+            # Find the tag using raw SQL
+            tag_result = session.execute(
+                text(
+                    "SELECT id, name, description, created_at, updated_at FROM tags WHERE id = :tag_id"
+                ),
+                {"tag_id": tag_id},
+            ).first()
+            if not tag_result:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail=_("Tag not found")
+                )
+
+            # Get associated hosts using raw SQL to avoid ORM issues
+            host_results = session.execute(
+                text(
+                    """
+                SELECT h.id, h.fqdn, h.ipv4, h.ipv6, h.active, h.status
+                FROM host h
+                JOIN host_tags ht ON h.id = ht.host_id
+                WHERE ht.tag_id = :tag_id
+            """
+                ),
+                {"tag_id": tag_id},
+            ).fetchall()
+
+            host_list = []
+            for host_row in host_results:
+                host_list.append(
+                    {
+                        "id": str(host_row.id),
+                        "fqdn": host_row.fqdn,
+                        "ipv4": host_row.ipv4,
+                        "ipv6": host_row.ipv6,
+                        "active": host_row.active,
+                        "status": host_row.status,
+                    }
+                )
+
+            return {
+                "id": str(tag_result.id),
+                "name": tag_result.name,
+                "description": tag_result.description,
+                "created_at": tag_result.created_at,
+                "updated_at": tag_result.updated_at,
+                "hosts": host_list,
+            }
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=_("Failed to fetch tag hosts: %(error)s") % {"error": str(e)},
+            ) from e
+
+
 @router.get("/tags/{tag_id}/hosts", response_model=TagWithHostsResponse)
 async def get_tag_hosts(
     tag_id: str,
-    db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
-    """Get all hosts associated with a specific tag"""
-    try:
-        from sqlalchemy import text
-
-        # Find the tag using raw SQL
-        tag_result = db.execute(
-            text(
-                "SELECT id, name, description, created_at, updated_at FROM tags WHERE id = :tag_id"
-            ),
-            {"tag_id": tag_id},
-        ).first()
-        if not tag_result:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=_("Tag not found")
-            )
-
-        # Get associated hosts using raw SQL to avoid ORM issues
-        host_results = db.execute(
-            text(
-                """
-            SELECT h.id, h.fqdn, h.ipv4, h.ipv6, h.active, h.status
-            FROM host h
-            JOIN host_tags ht ON h.id = ht.host_id
-            WHERE ht.tag_id = :tag_id
-        """
-            ),
-            {"tag_id": tag_id},
-        ).fetchall()
-
-        host_list = []
-        for host_row in host_results:
-            host_list.append(
-                {
-                    "id": str(host_row.id),
-                    "fqdn": host_row.fqdn,
-                    "ipv4": host_row.ipv4,
-                    "ipv6": host_row.ipv6,
-                    "active": host_row.active,
-                    "status": host_row.status,
-                }
-            )
-
-        return TagWithHostsResponse(
-            id=str(tag_result.id),
-            name=tag_result.name,
-            description=tag_result.description,
-            created_at=tag_result.created_at,
-            updated_at=tag_result.updated_at,
-            hosts=host_list,
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=_("Failed to fetch tag hosts: %(error)s") % {"error": str(e)},
-        ) from e
+    """
+    Get all hosts associated with a specific tag.
+    Runs the database query in a thread pool to avoid blocking the event loop.
+    """
+    # Run the synchronous database operation in a thread pool
+    loop = asyncio.get_event_loop()
+    tag_with_hosts = await loop.run_in_executor(None, _get_tag_hosts_sync, tag_id)
+    return TagWithHostsResponse(**tag_with_hosts)
 
 
 @router.post("/hosts/{host_id}/tags/{tag_id}", status_code=status.HTTP_201_CREATED)

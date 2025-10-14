@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
     Box,
     Button,
@@ -23,6 +23,7 @@ import { useColumnVisibility } from '../Hooks/useColumnVisibility';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import { useTablePageSize } from '../hooks/useTablePageSize';
 
 interface ThirdPartyRepository {
     id: string;
@@ -93,6 +94,30 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
         resetPreferences,
         getColumnVisibilityModel,
     } = useColumnVisibility('thirdpartyrepos-grid');
+
+    // Dynamic table page sizing based on window height
+    const { pageSize, pageSizeOptions } = useTablePageSize({
+        reservedHeight: 350, // Account for dialog content padding and buttons
+        minRows: 5,
+        maxRows: 100,
+    });
+
+    // Controlled pagination state for v7
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 25 });
+
+    // Update pagination when pageSize from hook changes
+    useEffect(() => {
+        setPaginationModel(prev => ({ ...prev, pageSize }));
+    }, [pageSize]);
+
+    // Ensure current page size is always in options to avoid MUI warning
+    const safePageSizeOptions = useMemo(() => {
+        const currentPageSize = paginationModel.pageSize;
+        if (!pageSizeOptions.includes(currentPageSize)) {
+            return [...pageSizeOptions, currentPageSize].sort((a, b) => a - b);
+        }
+        return pageSizeOptions;
+    }, [pageSizeOptions, paginationModel.pageSize]);
 
     // Load permissions
     useEffect(() => {
@@ -418,8 +443,15 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
     }
 
     return (
-        <Box sx={{ p: 3 }}>
-            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: 'calc(100vh - 120px)', // Full viewport height minus navbar and padding
+            gap: 2,
+            p: 2
+        }}>
+            {/* Header Row */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
                 <Typography variant="h6">{t('thirdPartyRepos.title')}</Typography>
                 <Button
                     variant="outlined"
@@ -431,25 +463,28 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                 </Button>
             </Box>
 
+            {/* Error and Success Alerts */}
             {error && (
-                <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+                <Alert severity="error" sx={{ flexShrink: 0 }} onClose={() => setError(null)}>
                     {error}
                 </Alert>
             )}
 
             {success && (
-                <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
+                <Alert severity="success" sx={{ flexShrink: 0 }} onClose={() => setSuccess(null)}>
                     {success}
                 </Alert>
             )}
 
+            {/* Loading Spinner or DataGrid */}
             {loading && repositories.length === 0 ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3, flexShrink: 0 }}>
                     <CircularProgress />
                 </Box>
             ) : (
                 <>
-                    <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                    {/* Column Visibility Button */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
                         <ColumnVisibilityButton
                             columns={columns.map(col => ({ field: col.field, headerName: col.headerName || col.field }))}
                             hiddenColumns={hiddenColumns}
@@ -457,33 +492,35 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                             onReset={resetPreferences}
                         />
                     </Box>
-                    <DataGrid
-                        rows={repositories}
-                        columns={columns}
-                        loading={loading}
-                        checkboxSelection={canDelete || canEnable || canDisable}
-                        disableRowSelectionOnClick
-                        onRowSelectionModelChange={(newSelection) => {
-                            setSelectedRows(newSelection);
-                        }}
-                        rowSelectionModel={selectedRows}
-                        autoHeight
-                        pageSizeOptions={[10, 25, 50, 100]}
-                        initialState={{
-                            pagination: { paginationModel: { pageSize: 25 } },
-                        }}
-                        columnVisibilityModel={getColumnVisibilityModel()}
-                        sx={{
-                            '& .MuiDataGrid-cell': {
-                                borderBottom: '1px solid rgba(224, 224, 224, 1)',
-                            },
-                        }}
-                    />
+
+                    {/* DataGrid - flexGrow to fill available space */}
+                    <Box sx={{ flexGrow: 1, minHeight: 0 }}>
+                        <DataGrid
+                            rows={repositories}
+                            columns={columns}
+                            loading={loading}
+                            checkboxSelection={canDelete || canEnable || canDisable}
+                            disableRowSelectionOnClick
+                            onRowSelectionModelChange={(newSelection) => {
+                                setSelectedRows(newSelection);
+                            }}
+                            rowSelectionModel={selectedRows}
+                            paginationModel={paginationModel}
+                            onPaginationModelChange={setPaginationModel}
+                            pageSizeOptions={safePageSizeOptions}
+                            columnVisibilityModel={getColumnVisibilityModel()}
+                            sx={{
+                                '& .MuiDataGrid-cell': {
+                                    borderBottom: '1px solid rgba(224, 224, 224, 1)',
+                                },
+                            }}
+                        />
+                    </Box>
                 </>
             )}
 
             {/* Action buttons at bottom */}
-            <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2, flexShrink: 0 }}>
                 <Button
                     variant="contained"
                     startIcon={<AddIcon />}

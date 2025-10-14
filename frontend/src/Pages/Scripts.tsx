@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   IoCode,
@@ -119,6 +119,23 @@ const Scripts: React.FC = () => {
 
   // Table pagination
   const { pageSize, pageSizeOptions } = useTablePageSize();
+
+  // Controlled pagination state for v7
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
+
+  // Update pagination when pageSize from hook changes
+  useEffect(() => {
+    setPaginationModel(prev => ({ ...prev, pageSize }));
+  }, [pageSize]);
+
+  // Ensure current page size is always in options to avoid MUI warning
+  const safePageSizeOptions = useMemo(() => {
+    const currentPageSize = paginationModel.pageSize;
+    if (!pageSizeOptions.includes(currentPageSize)) {
+      return [...pageSizeOptions, currentPageSize].sort((a, b) => a - b);
+    }
+    return pageSizeOptions;
+  }, [pageSizeOptions, paginationModel.pageSize]);
 
   // Column visibility preferences
   const {
@@ -1078,98 +1095,105 @@ const Scripts: React.FC = () => {
 
       {/* Script Library Tab */}
       <TabPanel value={tabValue} index={0}>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6">
-            {t('scripts.scriptLibrary')}
-          </Typography>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: 'calc(100vh - 250px)',
+          gap: 2,
+          p: 2
+        }}>
+          <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+            <Typography variant="h6">
+              {t('scripts.scriptLibrary')}
+            </Typography>
+          </Box>
+
+          {/* Search Box */}
+          <Box sx={{ flexShrink: 0 }}>
+            <SearchBox
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              searchColumn={searchColumn}
+              setSearchColumn={setSearchColumn}
+              columns={searchColumns}
+              placeholder={t('search.searchScripts', 'Search scripts')}
+            />
+          </Box>
+
+          {/* Column Visibility Button */}
+          <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
+            <ColumnVisibilityButton
+              columns={columns
+                .filter(col => col.field !== 'actions')
+                .map(col => ({ field: col.field, headerName: col.headerName || col.field }))}
+              hiddenColumns={hiddenColumns}
+              onColumnsChange={setHiddenColumns}
+              onReset={resetPreferences}
+            />
+          </Box>
+
+          <Box sx={{ flexGrow: 1, minHeight: 0 }}>
+            <DataGrid
+              rows={filteredScripts}
+              columns={columns}
+              loading={loading}
+              paginationModel={paginationModel}
+              onPaginationModelChange={setPaginationModel}
+              columnVisibilityModel={{
+                ...getColumnVisibilityModel(),
+              }}
+              pageSizeOptions={safePageSizeOptions}
+              checkboxSelection
+              rowSelectionModel={selectedScripts}
+              onRowSelectionModelChange={setSelectedScripts}
+              disableRowSelectionOnClick
+              localeText={{
+                MuiTablePagination: {
+                  labelRowsPerPage: t('common.rowsPerPage'),
+                  labelDisplayedRows: ({ from, to, count }: { from: number, to, count: number }) =>
+                    `${from}–${to} ${t('common.of')} ${count !== -1 ? count : `${t('common.of')} ${to}`}`,
+                },
+                noRowsLabel: t('scripts.noScripts'),
+                noResultsOverlayLabel: t('scripts.noScripts'),
+                footerRowSelected: (count: number) =>
+                  count !== 1
+                    ? `${count.toLocaleString()} ${t('common.rowsSelected')}`
+                    : `${count.toLocaleString()} ${t('common.rowSelected')}`,
+              }}
+            />
+          </Box>
+
+          <Stack direction="row" spacing={2} sx={{ flexShrink: 0 }}>
+            {canAddScript && (
+              <Button
+                variant="outlined"
+                startIcon={<IoAdd />}
+                onClick={handleAddNewScript}
+                disabled={selectedScripts.length > 0}
+              >
+                {t('scripts.addScript')}
+              </Button>
+            )}
+            {canDeleteScript && (
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<IoTrash />}
+                onClick={handleDeleteSelected}
+                disabled={selectedScripts.length === 0}
+              >
+                {t('scripts.deleteSelected')}
+              </Button>
+            )}
+          </Stack>
         </Box>
-
-        {/* Search Box */}
-        <SearchBox
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          searchColumn={searchColumn}
-          setSearchColumn={setSearchColumn}
-          columns={searchColumns}
-          placeholder={t('search.searchScripts', 'Search scripts')}
-        />
-
-        {/* Column Visibility Button */}
-        <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-          <ColumnVisibilityButton
-            columns={columns
-              .filter(col => col.field !== 'actions')
-              .map(col => ({ field: col.field, headerName: col.headerName || col.field }))}
-            hiddenColumns={hiddenColumns}
-            onColumnsChange={setHiddenColumns}
-            onReset={resetPreferences}
-          />
-        </Box>
-
-        <div style={{ height: 400 }}>
-          <DataGrid
-            rows={filteredScripts}
-            columns={columns}
-            loading={loading}
-            initialState={{
-              pagination: {
-                paginationModel: { pageSize: pageSize, page: 0 },
-              },
-            }}
-            columnVisibilityModel={{
-              ...getColumnVisibilityModel(),
-            }}
-            pageSizeOptions={pageSizeOptions}
-            checkboxSelection
-            rowSelectionModel={selectedScripts}
-            onRowSelectionModelChange={setSelectedScripts}
-            disableRowSelectionOnClick
-            localeText={{
-              MuiTablePagination: {
-                labelRowsPerPage: t('common.rowsPerPage'),
-                labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) =>
-                  `${from}–${to} ${t('common.of')} ${count !== -1 ? count : `${t('common.of')} ${to}`}`,
-              },
-              noRowsLabel: t('scripts.noScripts'),
-              noResultsOverlayLabel: t('scripts.noScripts'),
-              footerRowSelected: (count: number) => 
-                count !== 1 
-                  ? `${count.toLocaleString()} ${t('common.rowsSelected')}`
-                  : `${count.toLocaleString()} ${t('common.rowSelected')}`,
-            }}
-          />
-        </div>
-        <Box component="section">&nbsp;</Box>
-        <Stack direction="row" spacing={2}>
-          {canAddScript && (
-            <Button
-              variant="outlined"
-              startIcon={<IoAdd />}
-              onClick={handleAddNewScript}
-              disabled={selectedScripts.length > 0}
-            >
-              {t('scripts.addScript')}
-            </Button>
-          )}
-          {canDeleteScript && (
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<IoTrash />}
-              onClick={handleDeleteSelected}
-              disabled={selectedScripts.length === 0}
-            >
-              {t('scripts.deleteSelected')}
-            </Button>
-          )}
-        </Stack>
       </TabPanel>
 
       {/* Execute Script Tab */}
       <TabPanel value={tabValue} index={1}>
         <Grid container spacing={3}>
           {/* Left Card - Execute Script */}
-          <Grid item xs={12} md={5}>
+          <Grid size={{ xs: 12, md: 5 }}>
             <Card>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -1294,7 +1318,7 @@ const Scripts: React.FC = () => {
           </Grid>
 
           {/* Right Card - Execution Output */}
-          <Grid item xs={12} md={7}>
+          <Grid size={{ xs: 12, md: 7 }}>
             <Card sx={{ height: '100%', minHeight: 500 }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -1437,47 +1461,58 @@ const Scripts: React.FC = () => {
 
       {/* Script Executions Tab */}
       <TabPanel value={tabValue} index={2}>
-        <div style={{ height: 400 }}>
-          <DataGrid
-            rows={executions}
-            columns={executionColumns}
-            loading={executionsLoading}
-            pageSizeOptions={pageSizeOptions}
-            initialState={{
-              pagination: { paginationModel: { pageSize: pageSize } },
-              sorting: { sortModel: [{ field: 'started_at', sort: 'desc' }] },
-            }}
-            checkboxSelection={true}
-            rowSelectionModel={selectedExecutions}
-            onRowSelectionModelChange={setSelectedExecutions}
-            disableRowSelectionOnClick
-            localeText={{
-              MuiTablePagination: {
-                labelRowsPerPage: t('common.rowsPerPage'),
-                labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) =>
-                  `${from}–${to} ${t('common.of')} ${count !== -1 ? count : `${t('common.of')} ${to}`}`,
-              },
-              noRowsLabel: t('scripts.noExecutions'),
-              noResultsOverlayLabel: t('scripts.noExecutions'),
-              footerRowSelected: (count: number) => 
-                count !== 1 
-                  ? `${count.toLocaleString()} ${t('common.rowsSelected')}`
-                  : `${count.toLocaleString()} ${t('common.rowSelected')}`,
-            }}
-          />
-        </div>
-        <Box component="section">&nbsp;</Box>
-        {canDeleteScriptExecution && (
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<IoTrash />}
-            onClick={handleDeleteSelectedExecutions}
-            disabled={selectedExecutions.length === 0}
-          >
-            {t('scripts.deleteSelectedExecutions')}
-          </Button>
-        )}
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: 'calc(100vh - 250px)',
+          gap: 2,
+          p: 2
+        }}>
+          <Box sx={{ flexGrow: 1, minHeight: 0 }}>
+            <DataGrid
+              rows={executions}
+              columns={executionColumns}
+              loading={executionsLoading}
+              paginationModel={paginationModel}
+              onPaginationModelChange={setPaginationModel}
+              pageSizeOptions={safePageSizeOptions}
+              initialState={{
+                sorting: { sortModel: [{ field: 'started_at', sort: 'desc' }] },
+              }}
+              checkboxSelection={true}
+              rowSelectionModel={selectedExecutions}
+              onRowSelectionModelChange={setSelectedExecutions}
+              disableRowSelectionOnClick
+              localeText={{
+                MuiTablePagination: {
+                  labelRowsPerPage: t('common.rowsPerPage'),
+                  labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) =>
+                    `${from}–${to} ${t('common.of')} ${count !== -1 ? count : `${t('common.of')} ${to}`}`,
+                },
+                noRowsLabel: t('scripts.noExecutions'),
+                noResultsOverlayLabel: t('scripts.noExecutions'),
+                footerRowSelected: (count: number) =>
+                  count !== 1
+                    ? `${count.toLocaleString()} ${t('common.rowsSelected')}`
+                    : `${count.toLocaleString()} ${t('common.rowSelected')}`,
+              }}
+            />
+          </Box>
+
+          {canDeleteScriptExecution && (
+            <Box sx={{ flexShrink: 0 }}>
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<IoTrash />}
+                onClick={handleDeleteSelectedExecutions}
+                disabled={selectedExecutions.length === 0}
+              >
+                {t('scripts.deleteSelectedExecutions')}
+              </Button>
+            </Box>
+          )}
+        </Box>
       </TabPanel>
 
       {/* Script Viewing Dialog */}
@@ -1585,52 +1620,52 @@ const Scripts: React.FC = () => {
             <DialogContent>
               <Box sx={{ mb: 3 }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" gutterBottom>
                       <strong>{t('scripts.scriptName')}:</strong> {viewingExecution.script_name}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" gutterBottom>
                       <strong>{t('scripts.hostFqdn')}:</strong> {viewingExecution.host_fqdn}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Typography variant="body2">
                         <strong>{t('common.status')}:</strong>
                       </Typography>
-                      <Chip 
-                        label={t(`scripts.status.${viewingExecution.status}`)} 
+                      <Chip
+                        label={t(`scripts.status.${viewingExecution.status}`)}
                         color={getStatusColor(viewingExecution.status) as 'success' | 'error' | 'warning' | 'info' | 'default'}
                         size="small"
                       />
                     </Box>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" gutterBottom>
                       <strong>{t('scripts.executionId')}:</strong> {viewingExecution.id}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" gutterBottom>
                       <strong>{t('scripts.startedAt')}:</strong> {formatTimestamp(viewingExecution.started_at)}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" gutterBottom>
                       <strong>{t('scripts.completedAt')}:</strong> {viewingExecution.completed_at ? formatTimestamp(viewingExecution.completed_at) : '-'}
                     </Typography>
                   </Grid>
                   {viewingExecution.exit_code !== undefined && (
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                       <Typography variant="body2" gutterBottom>
                         <strong>{t('scripts.exitCode')}:</strong> {viewingExecution.exit_code}
                       </Typography>
                     </Grid>
                   )}
                   {viewingExecution.execution_time && (
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                       <Typography variant="body2" gutterBottom>
                         <strong>{t('scripts.executionTime')}:</strong> {viewingExecution.execution_time}s
                       </Typography>
@@ -1733,7 +1768,7 @@ const Scripts: React.FC = () => {
             />
             
             <Grid container spacing={2} sx={{ mt: 1 }}>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth variant="outlined">
                   <InputLabel id="shell-type-label">
                     {t('scripts.shellType')}
@@ -1752,7 +1787,7 @@ const Scripts: React.FC = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth variant="outlined">
                   <InputLabel id="platform-label">
                     {t('scripts.platform')}

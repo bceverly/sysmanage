@@ -11,13 +11,7 @@ This module provides functionality for:
 
 from fastapi import APIRouter
 
-from . import (
-    deployment,
-    eligibility,
-    grafana_connection,
-    service_control,
-    status,
-)
+from . import deployment, eligibility, grafana_connection, service_control, status
 
 # Create a single router that includes all sub-routers
 router = APIRouter()

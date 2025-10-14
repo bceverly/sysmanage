@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
 import { useTablePageSize } from '../hooks/useTablePageSize';
@@ -58,10 +58,27 @@ const Users = () => {
 
     // Dynamic table page sizing based on window height
     const { pageSize, pageSizeOptions } = useTablePageSize({
-        reservedHeight: 350, // Account for navbar, title, buttons, margins, and action buttons below table
+        reservedHeight: 250, // Reduced to account for navbar + search box + buttons at bottom
         minRows: 5,
-        maxRows: 50,
+        maxRows: 100,
     });
+
+    // Controlled pagination state for v7
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
+
+    // Update pagination when pageSize from hook changes
+    useEffect(() => {
+        setPaginationModel(prev => ({ ...prev, pageSize }));
+    }, [pageSize]);
+
+    // Ensure current page size is always in options to avoid MUI warning
+    const safePageSizeOptions = useMemo(() => {
+        const currentPageSize = paginationModel.pageSize;
+        if (!pageSizeOptions.includes(currentPageSize)) {
+            return [...pageSizeOptions, currentPageSize].sort((a, b) => a - b);
+        }
+        return pageSizeOptions;
+    }, [pageSizeOptions, paginationModel.pageSize]);
 
     // Column visibility preferences
     const {
@@ -360,20 +377,34 @@ const Users = () => {
         loadUsers();
     }, [navigate]);
 
+    // Memoize column visibility model
+    const columnVisibilityModel = useMemo(() => ({
+        id: false,
+        ...getColumnVisibilityModel(),
+    }), [getColumnVisibilityModel]);
+
     return (
-        <div>
+        <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: 'calc(100vh - 120px)', // Full viewport height minus navbar and padding
+            gap: 2,
+            p: 2
+        }}>
             {/* Search Box */}
-            <SearchBox
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                searchColumn={searchColumn}
-                setSearchColumn={setSearchColumn}
-                columns={searchColumns}
-                placeholder={t('search.searchUsers', 'Search users')}
-            />
+            <Box sx={{ flexShrink: 0 }}>
+                <SearchBox
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    searchColumn={searchColumn}
+                    setSearchColumn={setSearchColumn}
+                    columns={searchColumns}
+                    placeholder={t('search.searchUsers', 'Search users')}
+                />
+            </Box>
 
             {/* Column Visibility Button */}
-            <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+            <Box sx={{ mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
                 <ColumnVisibilityButton
                     columns={columns
                         .filter(col => col.field !== 'actions')
@@ -384,29 +415,26 @@ const Users = () => {
                 />
             </Box>
 
-            <div  style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px` }}>
+            {/* DataGrid - flexGrow to fill available space */}
+            <Box sx={{ flexGrow: 1, minHeight: 0 }}>
                 <DataGrid
                     rows={filteredData}
                     columns={columns}
                     loading={loading}
+                    paginationModel={paginationModel}
+                    onPaginationModelChange={setPaginationModel}
                     initialState={{
-                        pagination: {
-                            paginationModel: { page: 0, pageSize: pageSize },
-                        },
                         sorting: {
                             sortModel: [{ field: 'userid', sort: 'asc'}],
                         },
                     }}
-                    columnVisibilityModel={{
-                        id: false,
-                        ...getColumnVisibilityModel(),
-                    }}
+                    columnVisibilityModel={columnVisibilityModel}
                     autosizeOptions = {{
                         columns: ['userid'],
                         includeOutliers: true,
                         includeHeaders: true,
                     }}
-                    pageSizeOptions={pageSizeOptions}
+                    pageSizeOptions={safePageSizeOptions}
                     checkboxSelection
                     rowSelectionModel={selection}
                     onRowSelectionModelChange={setSelection}
@@ -416,11 +444,18 @@ const Users = () => {
                             labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) =>
                                 `${from}–${to} ${t('common.of')} ${count !== -1 ? count : `${t('common.of')} ${to}`}`,
                         },
+                        noRowsLabel: t('users.noRows'),
+                        noResultsOverlayLabel: t('users.noResults'),
+                        footerRowSelected: (count: number) =>
+                            count !== 1
+                                ? `${count.toLocaleString()} ${t('common.rowsSelected')}`
+                                : `${count.toLocaleString()} ${t('common.rowSelected')}`,
                     }}
                 />
-            </div>
-            <Box component="section">&nbsp;</Box>
-            <Stack direction="row" spacing={2}>
+            </Box>
+
+            {/* Action Buttons - flexShrink: 0 to stay at bottom */}
+            <Stack direction="row" spacing={2} sx={{ flexShrink: 0, pb: 2 }}>
                 {canAddUser && (
                     <Button variant="outlined" startIcon={<AddIcon />} disabled={selection.length > 0} onClick={handleClickOpen}>
                         {t('common.add')}
@@ -457,6 +492,8 @@ const Users = () => {
                     </Button>
                 )}
             </Stack>
+
+            {/* Dialogs */}
             <Dialog
                 open={addDialogOpen}
                 onClose={handleClose}
@@ -706,7 +743,7 @@ const Users = () => {
                     <Button type="submit">{t('common.save')}</Button>
                 </DialogActions>
             </Dialog>
-        </div>
+        </Box>
     );
 }
  

@@ -256,7 +256,7 @@ const Reports: React.FC = () => {
   };
 
   const ReportCard: React.FC<{ report: ReportCard }> = ({ report }) => (
-    <Grid item xs={12} sm={6} md={4} lg={3}>
+    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
       <Card
         sx={{
           height: '100%',

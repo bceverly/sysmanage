@@ -360,7 +360,7 @@ const OpenBAOStatusCard: React.FC = () => {
       <CardContent>
         {status && config && (
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 {t('openbao.serverUrl', 'Server URL')}
               </Typography>
@@ -369,7 +369,7 @@ const OpenBAOStatusCard: React.FC = () => {
               </Typography>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 {t('openbao.processId', 'Process ID')}
               </Typography>
@@ -378,7 +378,7 @@ const OpenBAOStatusCard: React.FC = () => {
               </Typography>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 {t('openbao.mountPath', 'Mount Path')}
               </Typography>
@@ -400,7 +400,7 @@ const OpenBAOStatusCard: React.FC = () => {
                       </Typography>
                       <Grid container spacing={1}>
                         {Object.entries(status.health).map(([key, value]) => (
-                          <Grid item xs={12} key={key}>
+                          <Grid size={{ xs: 12 }} key={key}>
                             <Typography variant="caption" color="text.secondary">
                               {key}:
                             </Typography>
@@ -416,7 +416,7 @@ const OpenBAOStatusCard: React.FC = () => {
               )}
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 {t('openbao.operationalMode', 'Operational Mode')}
               </Typography>
@@ -449,7 +449,7 @@ const OpenBAOStatusCard: React.FC = () => {
 
             {/* Operation Result */}
             {operationResult && (
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Alert severity={operationResult.success ? 'success' : 'error'} sx={{ mt: 1 }}>
                   {operationResult.message}
                 </Alert>
@@ -457,7 +457,7 @@ const OpenBAOStatusCard: React.FC = () => {
             )}
 
             {/* Action Buttons */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               {actionButtons}
 
               {!config.enabled && (
@@ -468,7 +468,7 @@ const OpenBAOStatusCard: React.FC = () => {
             </Grid>
 
             {/* Recent Logs */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Collapse in={showLogs}>
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="body2" color="text.secondary" gutterBottom>

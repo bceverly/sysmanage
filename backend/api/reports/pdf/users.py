@@ -9,9 +9,9 @@ from reportlab.lib import colors
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph, Spacer, Table, TableStyle
 
-from backend.i18n import _
-from backend.persistence.models import User, SecurityRole, SecurityRoleGroup
 from backend.api.reports.pdf.base import ReportGenerator
+from backend.i18n import _
+from backend.persistence.models import SecurityRole, SecurityRoleGroup, User
 
 
 class UsersReportGenerator(ReportGenerator):

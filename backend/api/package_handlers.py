@@ -53,6 +53,21 @@ async def handle_packages_batch_start(db: Session, connection, message_data: dic
         )
         package_managers = message_data.get("package_managers", [])
 
+        # Validate that the host is reporting packages for its own OS
+        if host.platform and host.platform_release:
+            if os_name != host.platform or os_version != host.platform_release:
+                error_msg = _(
+                    "Host %s (%s %s) attempted to report packages for %s %s"
+                ) % (
+                    host.fqdn,
+                    host.platform,
+                    host.platform_release,
+                    os_name,
+                    os_version,
+                )
+                debug_logger.error(error_msg)
+                return {"message_type": "error", "error": error_msg}
+
         debug_logger.info(
             "Starting available packages batch %s for host %s (%s %s) with managers: %s",
             batch_id,

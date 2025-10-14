@@ -390,8 +390,10 @@ def get_host_user_groups(host_id: str) -> List[Dict[str, Any]]:
         return groups
 
 
-def get_host_software_packages(host_id: str) -> List[Dict[str, Any]]:
-    """Get software packages for a host."""
+def get_host_software_packages(
+    host_id: str, page: int = 1, page_size: int = 100, search: Optional[str] = None
+) -> Dict[str, Any]:
+    """Get paginated software packages for a host."""
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -402,40 +404,71 @@ def get_host_software_packages(host_id: str) -> List[Dict[str, Any]]:
         if not host:
             raise HTTPException(status_code=404, detail=_("Host not found"))
 
-        # Get software packages
+        # Build base query
+        query = session.query(models.SoftwarePackage).filter(
+            models.SoftwarePackage.host_id == host_id
+        )
+
+        # Apply search filter if provided
+        if search:
+            search_pattern = f"%{search}%"
+            query = query.filter(
+                models.SoftwarePackage.package_name.ilike(search_pattern)
+                | models.SoftwarePackage.package_description.ilike(search_pattern)
+            )
+
+        # Get total count
+        total_count = query.count()
+
+        # Apply ordering and pagination
         packages = (
-            session.query(models.SoftwarePackage)
-            .filter(models.SoftwarePackage.host_id == host_id)
-            .order_by(models.SoftwarePackage.package_name)
+            query.order_by(models.SoftwarePackage.package_name)
+            .limit(page_size)
+            .offset((page - 1) * page_size)
             .all()
         )
 
-        return [
-            {
-                "id": str(package.id),
-                "package_name": package.package_name,
-                "version": package.package_version,
-                "description": package.package_description,
-                "package_manager": package.package_manager,
-                "architecture": package.architecture,
-                "size_bytes": package.size_bytes,
-                "vendor": package.vendor,
-                "category": package.category,
-                "license": package.license,
-                "install_path": package.install_path,
-                "install_date": (
-                    package.install_date.isoformat() if package.install_date else None
-                ),
-                "is_system_package": package.is_system_package,
-                "created_at": (
-                    package.created_at.isoformat() if package.created_at else None
-                ),
-                "updated_at": (
-                    package.updated_at.isoformat() if package.updated_at else None
-                ),
-            }
-            for package in packages
-        ]
+        # Calculate pagination metadata
+        total_pages = (total_count + page_size - 1) // page_size
+
+        return {
+            "items": [
+                {
+                    "id": str(package.id),
+                    "package_name": package.package_name,
+                    "version": package.package_version,
+                    "description": package.package_description,
+                    "package_manager": package.package_manager,
+                    "architecture": package.architecture,
+                    "size_bytes": package.size_bytes,
+                    "vendor": package.vendor,
+                    "category": package.category,
+                    "license": package.license,
+                    "install_path": package.install_path,
+                    "install_date": (
+                        package.install_date.isoformat()
+                        if package.install_date
+                        else None
+                    ),
+                    "is_system_package": package.is_system_package,
+                    "created_at": (
+                        package.created_at.isoformat() if package.created_at else None
+                    ),
+                    "updated_at": (
+                        package.updated_at.isoformat() if package.updated_at else None
+                    ),
+                }
+                for package in packages
+            ],
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_items": total_count,
+                "total_pages": total_pages,
+                "has_next": page < total_pages,
+                "has_prev": page > 1,
+            },
+        }
 
 
 def update_host_timestamp(host_id: str, field_name: str) -> None:

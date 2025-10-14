@@ -64,47 +64,48 @@ export const useTablePageSize = (options: UseTablePageSizeOptions = {}) => {
       
       // Create page size options as multiples of the optimal size
       const generateMultipleOptions = (baseSize: number): number[] => {
-        const options: number[] = [];
-        
-        // Always include the base calculated size
-        options.push(baseSize);
-        
+        const options: Set<number> = new Set();
+
+        // Always include the base calculated size FIRST
+        options.add(baseSize);
+
         // Add half size if it's >= minRows
         const halfSize = Math.floor(baseSize / 2);
         if (halfSize >= minRows) {
-          options.push(halfSize);
+          options.add(halfSize);
         }
-        
+
         // Add multiples (2x, 3x, etc.) up to maxRows
         for (let multiplier = 2; multiplier <= 4; multiplier++) {
           const multipleSize = baseSize * multiplier;
           if (multipleSize <= maxRows) {
-            options.push(multipleSize);
+            options.add(multipleSize);
           } else {
             break;
           }
         }
-        
+
         // Always ensure we have at least 5 as minimum
-        if (!options.includes(5) && minRows <= 5) {
-          options.push(5);
+        if (minRows <= 5) {
+          options.add(5);
         }
-        
+
         // Add common page size options if not included
         [10, 25, 50].forEach((size: number) => {
-          if (!options.includes(size) && size <= maxRows) {
-            options.push(size);
+          if (size <= maxRows) {
+            options.add(size);
           }
         });
-        
-        // Sort and remove duplicates
-        return Array.from(new Set<number>(options)).sort((a: number, b: number) => a - b);
+
+        // Sort and return as array
+        return Array.from(options).sort((a: number, b: number) => a - b);
       };
-      
+
       const filteredOptions = generateMultipleOptions(optimalRows);
-      
-      setPageSize(optimalRows);
+
+      // Set both at the same time to ensure they're in sync
       setPageSizeOptions(filteredOptions);
+      setPageSize(optimalRows);
       
     };
 

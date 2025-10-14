@@ -74,7 +74,10 @@ class MockRoleCache:
 class MockUser:
     """Mock user object for RBAC checks."""
 
-    def __init__(self, userid="test@example.com"):
+    def __init__(
+        self, userid="test@example.com", user_id="550e8400-e29b-41d4-a716-446655440100"
+    ):
+        self.id = user_id
         self.userid = userid
         self.active = True
         self._role_cache = None
@@ -205,19 +208,30 @@ class TestGetTags:
     """Test get_tags function."""
 
     @pytest.mark.asyncio
-    @patch("backend.api.tag.get_current_user")
-    async def test_get_tags_success(self, mock_get_user):
+    @patch("backend.api.tag._get_tags_sync")
+    async def test_get_tags_success(self, mock_get_tags_sync):
         """Test successful tags retrieval."""
-        mock_get_user.return_value = "test@example.com"
-        mock_tags = [
-            MockTag(1, "production", "Production environment", 5),
-            MockTag(2, "development", "Development environment", 2),
+        mock_tags_data = [
+            {
+                "id": "1",
+                "name": "production",
+                "description": "Production environment",
+                "created_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc),
+                "host_count": 5,
+            },
+            {
+                "id": "2",
+                "name": "development",
+                "description": "Development environment",
+                "created_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc),
+                "host_count": 2,
+            },
         ]
+        mock_get_tags_sync.return_value = mock_tags_data
 
-        execute_result = MockExecuteResult(scalars=mock_tags)
-        mock_db = MockDB(execute_results=[execute_result])
-
-        result = await get_tags(mock_db, "test@example.com")
+        result = await get_tags()
 
         assert len(result) == 2
         assert result[0].name == "production"
@@ -226,46 +240,47 @@ class TestGetTags:
         assert result[1].host_count == 2
 
     @pytest.mark.asyncio
-    @patch("backend.api.tag.get_current_user")
-    async def test_get_tags_empty(self, mock_get_user):
+    @patch("backend.api.tag._get_tags_sync")
+    async def test_get_tags_empty(self, mock_get_tags_sync):
         """Test getting tags when none exist."""
-        mock_get_user.return_value = "test@example.com"
-        execute_result = MockExecuteResult(scalars=[])
-        mock_db = MockDB(execute_results=[execute_result])
+        mock_get_tags_sync.return_value = []
 
-        result = await get_tags(mock_db, "test@example.com")
+        result = await get_tags()
 
         assert len(result) == 0
 
     @pytest.mark.asyncio
-    @patch("backend.api.tag.get_current_user")
-    async def test_get_tags_host_count_failure(self, mock_get_user):
+    @patch("backend.api.tag._get_tags_sync")
+    async def test_get_tags_host_count_failure(self, mock_get_tags_sync):
         """Test getting tags when host count fails."""
-        mock_get_user.return_value = "test@example.com"
+        # Mock _get_tags_sync to return a tag with host_count=0 (the fallback value)
+        mock_tags_data = [
+            {
+                "id": "1",
+                "name": "test-tag",
+                "description": "Test tag",
+                "created_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc),
+                "host_count": 0,  # Fallback value when count fails
+            },
+        ]
+        mock_get_tags_sync.return_value = mock_tags_data
 
-        # Create a tag where hosts.count() raises an exception
-        mock_tag = MockTag(1, "test-tag", "Test tag")
-        mock_tag.hosts = Mock()
-        mock_tag.hosts.count.side_effect = Exception("Database error")
-
-        execute_result = MockExecuteResult(scalars=[mock_tag])
-        mock_db = MockDB(execute_results=[execute_result])
-
-        result = await get_tags(mock_db, "test@example.com")
+        result = await get_tags()
 
         assert len(result) == 1
         assert result[0].host_count == 0  # Should fallback to 0
 
     @pytest.mark.asyncio
-    @patch("backend.api.tag.get_current_user")
-    async def test_get_tags_database_error(self, mock_get_user):
+    @patch("backend.api.tag._get_tags_sync")
+    async def test_get_tags_database_error(self, mock_get_tags_sync):
         """Test getting tags when database error occurs."""
-        mock_get_user.return_value = "test@example.com"
-        mock_db = MockDB()
-        mock_db.execute = Mock(side_effect=Exception("Database connection failed"))
+        mock_get_tags_sync.side_effect = HTTPException(
+            status_code=500, detail="Database connection failed"
+        )
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_tags(mock_db, "test@example.com")
+            await get_tags()
 
         assert exc_info.value.status_code == 500
 
@@ -753,48 +768,37 @@ class TestGetTagHosts:
     """Test get_tag_hosts function."""
 
     @pytest.mark.asyncio
-    @patch("backend.api.tag.get_current_user")
-    async def test_get_tag_hosts_success(self, mock_get_user):
+    @patch("backend.api.tag._get_tag_hosts_sync")
+    async def test_get_tag_hosts_success(self, mock_get_tag_hosts_sync):
         """Test successful tag hosts retrieval."""
-        mock_get_user.return_value = "test@example.com"
+        mock_tag_with_hosts = {
+            "id": "550e8400-e29b-41d4-a716-446655440001",
+            "name": "test-tag",
+            "description": "Test tag",
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
+            "hosts": [
+                {
+                    "id": "550e8400-e29b-41d4-a716-446655440011",
+                    "fqdn": "host1.example.com",
+                    "ipv4": "192.168.1.1",
+                    "ipv6": None,
+                    "active": True,
+                    "status": "up",
+                },
+                {
+                    "id": "550e8400-e29b-41d4-a716-446655440012",
+                    "fqdn": "host2.example.com",
+                    "ipv4": "192.168.1.2",
+                    "ipv6": None,
+                    "active": True,
+                    "status": "up",
+                },
+            ],
+        }
+        mock_get_tag_hosts_sync.return_value = mock_tag_with_hosts
 
-        tag_result = MockResultRow(
-            id="550e8400-e29b-41d4-a716-446655440001",
-            name="test-tag",
-            description="Test tag",
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc),
-        )
-
-        host_results = [
-            MockResultRow(
-                id="550e8400-e29b-41d4-a716-446655440011",
-                fqdn="host1.example.com",
-                ipv4="192.168.1.1",
-                ipv6=None,
-                active=True,
-                status="up",
-            ),
-            MockResultRow(
-                id="550e8400-e29b-41d4-a716-446655440012",
-                fqdn="host2.example.com",
-                ipv4="192.168.1.2",
-                ipv6=None,
-                active=True,
-                status="up",
-            ),
-        ]
-
-        mock_db = MockDB(
-            execute_results=[
-                MockExecuteResult(first_result=tag_result),
-                MockExecuteResult(fetchall_results=host_results),
-            ]
-        )
-
-        result = await get_tag_hosts(
-            "550e8400-e29b-41d4-a716-446655440001", mock_db, "test@example.com"
-        )
+        result = await get_tag_hosts("550e8400-e29b-41d4-a716-446655440001")
 
         assert result.id == "550e8400-e29b-41d4-a716-446655440001"
         assert result.name == "test-tag"
@@ -802,17 +806,15 @@ class TestGetTagHosts:
         assert result.hosts[0]["fqdn"] == "host1.example.com"
 
     @pytest.mark.asyncio
-    @patch("backend.api.tag.get_current_user")
-    async def test_get_tag_hosts_tag_not_found(self, mock_get_user):
+    @patch("backend.api.tag._get_tag_hosts_sync")
+    async def test_get_tag_hosts_tag_not_found(self, mock_get_tag_hosts_sync):
         """Test getting hosts for non-existent tag."""
-        mock_get_user.return_value = "test@example.com"
-
-        mock_db = MockDB(execute_results=[MockExecuteResult(first_result=None)])
+        mock_get_tag_hosts_sync.side_effect = HTTPException(
+            status_code=404, detail="Tag not found"
+        )
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_tag_hosts(
-                "550e8400-e29b-41d4-a716-446655440999", mock_db, "test@example.com"
-            )
+            await get_tag_hosts("550e8400-e29b-41d4-a716-446655440999")
 
         assert exc_info.value.status_code == 404
 

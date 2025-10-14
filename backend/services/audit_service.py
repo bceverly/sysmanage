@@ -27,7 +27,9 @@ class ActionType(str, Enum):
     LOGIN = "LOGIN"
     LOGOUT = "LOGOUT"
     LOGIN_FAILED = "LOGIN_FAILED"
-    PASSWORD_RESET = "PASSWORD_RESET"
+    PASSWORD_RESET = (
+        "PASSWORD_RESET"  # nosec B105  # This is an enum value, not a password
+    )
     PERMISSION_CHANGE = "PERMISSION_CHANGE"
 
 
@@ -39,7 +41,7 @@ class EntityType(str, Enum):
     USER = "user"
     PACKAGE = "package"
     SCRIPT = "script"
-    SECRET = "secret"
+    SECRET = "secret"  # nosec B105  # This is an enum value, not a password
     TAG = "tag"
     ROLE = "role"
     REPOSITORY = "repository"

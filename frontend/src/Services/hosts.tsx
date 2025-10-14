@@ -177,6 +177,20 @@ type SoftwarePackage = {
     software_updated_at?: string;
 }
 
+type PaginationInfo = {
+    page: number;
+    page_size: number;
+    total_items: number;
+    total_pages: number;
+    has_next: boolean;
+    has_prev: boolean;
+}
+
+type PaginatedSoftwareResponse = {
+    items: SoftwarePackage[];
+    pagination: PaginationInfo;
+}
+
 function processError(error: AxiosError) {
     // Error situation
     if (error.response) {
@@ -485,10 +499,25 @@ const doRequestSystemInfo = async (id: string) => {
     return result;
 };
 
-const doGetHostSoftware = async (id: string) => {
-    let result = [] as SoftwarePackage[];
-    
-    await api.get("/api/host/" + id + "/software")
+const doGetHostSoftware = async (
+    id: string,
+    page: number = 1,
+    pageSize: number = 100,
+    search?: string
+): Promise<PaginatedSoftwareResponse> => {
+    let result = { items: [], pagination: { page: 1, page_size: 100, total_items: 0, total_pages: 0, has_next: false, has_prev: false } } as PaginatedSoftwareResponse;
+
+    // eslint-disable-next-line no-undef
+    const params = new URLSearchParams({
+        page: page.toString(),
+        page_size: pageSize.toString()
+    });
+
+    if (search) {
+        params.append('search', search);
+    }
+
+    await api.get("/api/host/" + id + "/software?" + params.toString())
     .then((response) => {
         result = response.data;
     })
@@ -708,5 +737,5 @@ type UbuntuProInfo = {
     services: UbuntuProService[];
 }
 
-export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, UbuntuProService };
+export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage, PaginatedSoftwareResponse, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, UbuntuProService };
 export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doRequestSystemInfo, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService };

@@ -16,8 +16,10 @@ from . import crud, deployment, types
 router = APIRouter()
 
 # Include all sub-routers
-router.include_router(crud.router, tags=["secrets"])
+# IMPORTANT: Include types.router BEFORE crud.router to avoid route conflicts
+# The /secrets/types route must be registered before /secrets/{secret_id}
 router.include_router(types.router, tags=["secrets"])
+router.include_router(crud.router, tags=["secrets"])
 router.include_router(deployment.router, tags=["secrets"])
 
 __all__ = ["router"]

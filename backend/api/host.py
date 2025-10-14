@@ -2,6 +2,7 @@
 This module houses the API routes for the host object in SysManage.
 """
 
+import asyncio
 import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
@@ -132,6 +133,8 @@ async def delete_host(host_id: str, current_user: str = Depends(get_current_user
             raise HTTPException(status_code=404, detail=_("Host not found"))
 
         deleted_host = hosts[0]
+        # Extract values before deletion to avoid ObjectDeletedError
+        deleted_fqdn = deleted_host.fqdn
 
         # Delete the record
         session.query(models.Host).filter(models.Host.id == host_id).delete()
@@ -144,7 +147,7 @@ async def delete_host(host_id: str, current_user: str = Depends(get_current_user
             username=current_user,
             entity_type=EntityType.HOST,
             entity_id=host_id,
-            entity_name=deleted_host.fqdn,
+            entity_name=deleted_fqdn,
         )
 
     return {"result": True}
@@ -320,12 +323,11 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
         }
 
 
-@auth_router.get("/hosts", dependencies=[Depends(JWTBearer())])
-async def get_all_hosts():
+def _get_all_hosts_sync():
     """
-    This function retrieves all hosts in the system
+    Synchronous helper function to retrieve all hosts.
+    This runs in a thread pool to avoid blocking the event loop.
     """
-
     # Get the SQLAlchemy session
     session_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -403,6 +405,17 @@ async def get_all_hosts():
         return result
 
 
+@auth_router.get("/hosts", dependencies=[Depends(JWTBearer())])
+async def get_all_hosts():
+    """
+    This function retrieves all hosts in the system.
+    Runs the database query in a thread pool to avoid blocking the event loop.
+    """
+    # Run the synchronous database operation in a thread pool
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _get_all_hosts_sync)
+
+
 @auth_router.post("/host", dependencies=[Depends(JWTBearer())])
 async def add_host(new_host: Host, current_user: str = Depends(get_current_user)):
     """
@@ -458,7 +471,21 @@ async def add_host(new_host: Host, current_user: str = Depends(get_current_user)
             },
         )
 
-        return host
+        # Return dictionary to avoid detached object issues
+        return {
+            "id": str(host.id),
+            "active": host.active,
+            "fqdn": host.fqdn,
+            "ipv4": host.ipv4,
+            "ipv6": host.ipv6,
+            "last_access": (
+                host.last_access.replace(tzinfo=timezone.utc).isoformat()
+                if host.last_access
+                else None
+            ),
+            "status": host.status,
+            "approval_status": host.approval_status,
+        }
 
 
 @public_router.post("/host/register")
@@ -600,7 +627,21 @@ async def update_host(
             },
         )
 
-    return updated_host
+        # Return dictionary to avoid detached object issues
+        return {
+            "id": str(updated_host.id),
+            "active": updated_host.active,
+            "fqdn": updated_host.fqdn,
+            "ipv4": updated_host.ipv4,
+            "ipv6": updated_host.ipv6,
+            "last_access": (
+                updated_host.last_access.replace(tzinfo=timezone.utc).isoformat()
+                if updated_host.last_access
+                else None
+            ),
+            "status": updated_host.status,
+            "approval_status": updated_host.approval_status,
+        }
 
 
 @auth_router.put("/host/{host_id}/approve", dependencies=[Depends(JWTBearer())])

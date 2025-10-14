@@ -10,11 +10,7 @@ from sqlalchemy import delete, update
 from sqlalchemy.orm import Session
 
 from backend.i18n import _
-from backend.persistence.models import (
-    Host,
-    UserAccount,
-    UserGroup,
-)
+from backend.persistence.models import Host, UserAccount, UserGroup
 
 # Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")

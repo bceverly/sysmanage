@@ -3,6 +3,7 @@ API routes for third-party repository management in SysManage.
 Provides endpoints for listing, adding, and deleting third-party repositories.
 """
 
+import asyncio
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -11,7 +12,8 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
-from backend.persistence import db as db_module, models
+from backend.persistence import db as db_module
+from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.persistence.models import Host
 from backend.security.roles import SecurityRoles
@@ -86,18 +88,17 @@ class EnableDisableRepositoriesResponse(BaseModel):
     message: str
 
 
-@router.get("/hosts/{host_id}/third-party-repos", response_model=RepositoryListResponse)
-async def list_third_party_repositories(
-    host_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
-):
+def _list_third_party_repositories_sync(host_id: str):
     """
-    List all third-party repositories for a specific host.
+    Synchronous helper function to retrieve third-party repositories.
+    This runs in a thread pool to avoid blocking the event loop.
+    """
+    # Get a fresh session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
 
-    Requires the host to be approved and active.
-    """
-    try:
+    with session_local() as db:
         # Validate host exists and is active
         host = (
             db.query(Host)
@@ -170,6 +171,26 @@ async def list_third_party_repositories(
             success=True,
             repositories=repo_list,
             count=len(repo_list),
+        )
+
+
+@router.get("/hosts/{host_id}/third-party-repos", response_model=RepositoryListResponse)
+async def list_third_party_repositories(
+    host_id: str,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """
+    List all third-party repositories for a specific host.
+
+    Requires the host to be approved and active.
+    Runs the database query in a thread pool to avoid blocking the event loop.
+    """
+    try:
+        # Run the synchronous database operation in a thread pool
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            None, _list_third_party_repositories_sync, host_id
         )
 
     except HTTPException:

@@ -20,8 +20,8 @@ from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.websocket.messages import create_command_message
-from backend.websocket.queue_operations import QueueOperations
 from backend.websocket.queue_enums import QueueDirection
+from backend.websocket.queue_operations import QueueOperations
 
 router = APIRouter()
 queue_ops = QueueOperations()
@@ -346,11 +346,22 @@ async def request_system_info(host_id: str):
 
 
 @router.get("/host/{host_id}/software", dependencies=[Depends(JWTBearer())])
-async def get_host_software(host_id: str):
+async def get_host_software(
+    host_id: str, page: int = 1, page_size: int = 100, search: str = None
+):
     """
-    Get software packages for a specific host from the software_packages table.
+    Get paginated software packages for a specific host from the software_packages table.
+
+    Args:
+        host_id: The host UUID
+        page: Page number (default: 1)
+        page_size: Number of items per page (default: 100, max: 1000)
+        search: Optional search term to filter by package name or description
     """
-    return get_host_software_packages(host_id)
+    # Enforce maximum page size to prevent abuse
+    page_size = min(page_size, 1000)
+
+    return get_host_software_packages(host_id, page, page_size, search)
 
 
 @router.get("/host/{host_id}/ubuntu-pro", dependencies=[Depends(JWTBearer())])

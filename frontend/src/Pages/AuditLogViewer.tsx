@@ -209,7 +209,7 @@ const AuditLogViewer: React.FC = () => {
             {t('auditLog.filters', 'Filters')}
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 label={t('auditLog.search', 'Search (description or entity name)')}
@@ -225,7 +225,7 @@ const AuditLogViewer: React.FC = () => {
                 }}
               />
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth size="small">
                 <InputLabel>{t('auditLog.actionType', 'Action Type')}</InputLabel>
                 <Select
@@ -242,7 +242,7 @@ const AuditLogViewer: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth size="small">
                 <InputLabel>{t('auditLog.entityType', 'Entity Type')}</InputLabel>
                 <Select
@@ -262,7 +262,7 @@ const AuditLogViewer: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth size="small">
                 <InputLabel>{t('auditLog.category', 'Category')}</InputLabel>
                 <Select
@@ -278,7 +278,7 @@ const AuditLogViewer: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth size="small">
                 <InputLabel>{t('auditLog.entryType', 'Entry Type')}</InputLabel>
                 <Select
@@ -294,7 +294,7 @@ const AuditLogViewer: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <TextField
                 fullWidth
                 label={t('auditLog.startDate', 'Start Date')}
@@ -307,7 +307,7 @@ const AuditLogViewer: React.FC = () => {
                 }}
               />
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <TextField
                 fullWidth
                 label={t('auditLog.endDate', 'End Date')}
@@ -320,7 +320,7 @@ const AuditLogViewer: React.FC = () => {
                 }}
               />
             </Grid>
-            <Grid item xs={12} md={12}>
+            <Grid size={{ xs: 12 }}>
               <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
                 <Button variant="outlined" onClick={handleReset}>
                   {t('common.reset', 'Reset Filters')}

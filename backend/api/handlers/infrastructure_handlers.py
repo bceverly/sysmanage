@@ -9,11 +9,7 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from backend.i18n import _
-from backend.persistence.models import (
-    Host,
-    HostCertificate,
-    HostRole,
-)
+from backend.persistence.models import Host, HostCertificate, HostRole
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 # Logger for debugging - use existing root logger configuration

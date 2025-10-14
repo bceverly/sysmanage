@@ -19,8 +19,8 @@ from backend.persistence.models import (
     UbuntuProInfo,
     UbuntuProService,
 )
-from backend.websocket.queue_operations import QueueOperations
 from backend.websocket.queue_enums import QueueDirection
+from backend.websocket.queue_operations import QueueOperations
 
 # Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")

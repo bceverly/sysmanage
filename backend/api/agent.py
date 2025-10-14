@@ -123,7 +123,8 @@ async def agent_connect(websocket: WebSocket):
                 entity_type=EntityType.AGENT,
                 entity_id=None,
                 entity_name="unknown",
-                description=_("Agent WebSocket authentication failed"),
+                description=_("Agent WebSocket authentication failed from %s")
+                % client_host,
                 result=Result.FAILURE,
                 details={"client_host": client_host},
                 error_message=error_msg,
@@ -148,7 +149,8 @@ async def agent_connect(websocket: WebSocket):
             entity_type=EntityType.AGENT,
             entity_id=None,
             entity_name="unknown",
-            description=_("Agent WebSocket connection attempted without token"),
+            description=_("Agent WebSocket connection attempted without token from %s")
+            % client_host,
             result=Result.FAILURE,
             details={"client_host": client_host},
             error_message="No authentication token provided",
@@ -260,8 +262,8 @@ async def _enqueue_inbound_message(message, connection, db):
     Enqueue an inbound message for background processing.
     WebSocket thread should ONLY queue messages, not process them.
     """
+    from backend.websocket.queue_enums import Priority, QueueDirection
     from backend.websocket.queue_operations import QueueOperations
-    from backend.websocket.queue_enums import QueueDirection, Priority
 
     queue_ops = QueueOperations()
 

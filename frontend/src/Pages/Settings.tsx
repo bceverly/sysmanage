@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { 
@@ -216,6 +216,27 @@ const Settings: React.FC = () => {
   const { pageSize, pageSizeOptions } = useTablePageSize({
     reservedHeight: 350,
   });
+
+  // Controlled pagination state for DataGrids
+  const [tagsPaginationModel, setTagsPaginationModel] = useState({ page: 0, pageSize: 10 });
+  const [queuePaginationModel, setQueuePaginationModel] = useState({ page: 0, pageSize: 10 });
+
+  // Update pagination when pageSize from hook changes
+  useEffect(() => {
+    setTagsPaginationModel(prev => ({ ...prev, pageSize }));
+    setQueuePaginationModel(prev => ({ ...prev, pageSize }));
+  }, [pageSize]);
+
+  // Ensure current page size is always in options to avoid MUI warning
+  const safePageSizeOptions = useMemo(() => {
+    const currentPageSizeTags = tagsPaginationModel.pageSize;
+    const currentPageSizeQueue = queuePaginationModel.pageSize;
+    const maxPageSize = Math.max(currentPageSizeTags, currentPageSizeQueue);
+    if (!pageSizeOptions.includes(maxPageSize)) {
+      return [...pageSizeOptions, maxPageSize].sort((a, b) => a - b);
+    }
+    return pageSizeOptions;
+  }, [pageSizeOptions, tagsPaginationModel.pageSize, queuePaginationModel.pageSize]);
 
   // Column visibility preferences for Tags grid
   const {
@@ -636,8 +657,13 @@ const Settings: React.FC = () => {
 
   // Render Tags tab content
   const renderTagsTab = () => (
-    <Box>
-      <Typography variant="h5" sx={{ mb: 2 }}>
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      height: 'calc(100vh - 280px)',
+      gap: 2
+    }}>
+      <Typography variant="h5">
         {t('tags.title', 'Tags')}
       </Typography>
 
@@ -652,7 +678,7 @@ const Settings: React.FC = () => {
       />
 
       {/* Column Visibility Button */}
-      <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+      <Box sx={{ mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
         <ColumnVisibilityButton
           columns={columns
             .filter(col => col.field !== 'actions')
@@ -663,8 +689,8 @@ const Settings: React.FC = () => {
         />
       </Box>
 
-      {/* Data Grid */}
-      <div style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px` }}>
+      {/* Data Grid - flexGrow to fill available space */}
+      <Box sx={{ flexGrow: 1, minHeight: 0 }}>
         <DataGrid
           rows={filteredTags}
           columns={columns}
@@ -673,17 +699,14 @@ const Settings: React.FC = () => {
           onRowSelectionModelChange={setSelectedTags}
           rowSelectionModel={selectedTags}
           columnVisibilityModel={getTagsColumnVisibilityModel()}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: pageSize },
-            },
-          }}
-          pageSizeOptions={pageSizeOptions}
+          paginationModel={tagsPaginationModel}
+          onPaginationModelChange={setTagsPaginationModel}
+          pageSizeOptions={safePageSizeOptions}
         />
-      </div>
+      </Box>
 
-      {/* Action Buttons */}
-      <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+      {/* Action Buttons - flexShrink: 0 to stay at bottom */}
+      <Stack direction="row" spacing={2} sx={{ flexShrink: 0 }}>
         {canEditTags && (
           <Button
             variant="contained"
@@ -709,17 +732,24 @@ const Settings: React.FC = () => {
 
   // Render Queues tab content
   const renderQueuesTab = () => (
-    <Box>
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        {t('queues.title', 'Queue Management')}
-      </Typography>
-      
-      <Typography variant="body1" sx={{ mb: 2 }}>
-        {t('queues.description', 'View and manage expired/failed messages from the message queue.')}
-      </Typography>
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      height: 'calc(100vh - 280px)',
+      gap: 2
+    }}>
+      <Box>
+        <Typography variant="h5" sx={{ mb: 1 }}>
+          {t('queues.title', 'Queue Management')}
+        </Typography>
+
+        <Typography variant="body1">
+          {t('queues.description', 'View and manage expired/failed messages from the message queue.')}
+        </Typography>
+      </Box>
 
       {/* Column Visibility Button */}
-      <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+      <Box sx={{ mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
         <ColumnVisibilityButton
           columns={queueColumns
             .filter(col => col.field !== 'actions')
@@ -730,8 +760,8 @@ const Settings: React.FC = () => {
         />
       </Box>
 
-      {/* Data Grid */}
-      <div style={{ height: `${Math.min(600, Math.max(300, (pageSize + 2) * 52 + 120))}px` }}>
+      {/* Data Grid - flexGrow to fill available space */}
+      <Box sx={{ flexGrow: 1, minHeight: 0 }}>
         <DataGrid
           rows={queueMessages}
           columns={queueColumns}
@@ -740,17 +770,14 @@ const Settings: React.FC = () => {
           onRowSelectionModelChange={setSelectedMessages}
           rowSelectionModel={selectedMessages}
           columnVisibilityModel={getQueueColumnVisibilityModel()}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: pageSize },
-            },
-          }}
-          pageSizeOptions={pageSizeOptions}
+          paginationModel={queuePaginationModel}
+          onPaginationModelChange={setQueuePaginationModel}
+          pageSizeOptions={safePageSizeOptions}
         />
-      </div>
+      </Box>
 
-      {/* Action Buttons */}
-      <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+      {/* Action Buttons - flexShrink: 0 to stay at bottom */}
+      <Stack direction="row" spacing={2} sx={{ flexShrink: 0 }}>
         {canDeleteQueueMessage && (
           <Button
             variant="outlined"
@@ -834,7 +861,7 @@ const Settings: React.FC = () => {
         <Box sx={{ mb: 4 }}>
           <Grid container spacing={2}>
             {packageSummary.map((summary) => (
-              <Grid item xs={12} sm={6} md={4} key={`${summary.os_name}:${summary.os_version}`}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={`${summary.os_name}:${summary.os_version}`}>
                 <Card>
                   <CardContent>
                     <Box display="flex" alignItems="center" mb={1}>
@@ -882,7 +909,7 @@ const Settings: React.FC = () => {
           {t('availablePackages.search', 'Search Packages')}
         </Typography>
         <Grid container spacing={2} alignItems="end">
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <TextField
               fullWidth
               label={t('availablePackages.searchTerm', 'Package name')}
@@ -898,7 +925,7 @@ const Settings: React.FC = () => {
               }}
             />
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid size={{ xs: 12, md: 3 }}>
             <FormControl fullWidth>
               <InputLabel>{t('availablePackages.filterByOS', 'Operating System / Version')}</InputLabel>
               <Select
@@ -917,7 +944,7 @@ const Settings: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid size={{ xs: 12, md: 3 }}>
             <FormControl fullWidth>
               <InputLabel>{t('availablePackages.filterByManager', 'Package Manager')}</InputLabel>
               <Select
@@ -943,7 +970,7 @@ const Settings: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={2}>
+          <Grid size={{ xs: 12, md: 2 }}>
             <Button
               fullWidth
               variant="contained"
@@ -1023,13 +1050,19 @@ const Settings: React.FC = () => {
   );
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      height: 'calc(100vh - 120px)',
+      gap: 2,
+      p: 2
+    }}>
+      <Typography variant="h4">
         {t('nav.settings', 'Settings')}
       </Typography>
 
       {/* Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
         <Tabs value={activeTab} onChange={handleTabChange} aria-label="settings tabs">
           <Tab label={t('tags.title', 'Tags')} />
           <Tab label={t('queues.title', 'Queues')} />
@@ -1040,8 +1073,8 @@ const Settings: React.FC = () => {
         </Tabs>
       </Box>
 
-      {/* Tab content */}
-      <Box sx={{ mt: 3 }}>
+      {/* Tab content - flexGrow to fill available space */}
+      <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
         {activeTab === 0 && renderTagsTab()}
         {activeTab === 1 && renderQueuesTab()}
         {activeTab === 2 && renderIntegrationsTab()}

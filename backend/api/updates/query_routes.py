@@ -2,11 +2,14 @@
 
 import logging
 from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import sessionmaker
+
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import db, models
+
 from .constants import OS_UPGRADE_PACKAGE_MANAGERS
 from .models import UpdateStatsSummary
 

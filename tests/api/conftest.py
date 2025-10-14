@@ -560,6 +560,31 @@ def test_db():
         updated_at = Column(DateTime(timezone=True), nullable=False)
         host = relationship("Host", back_populates="software_installation_logs")
 
+    # Create test version of AuditLog model for SQLite compatibility
+    class AuditLog(TestBase):
+        __tablename__ = "audit_log"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        timestamp = Column(
+            DateTime,
+            nullable=False,
+            default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+            index=True,
+        )
+        user_id = Column(GUID(), nullable=True, index=True)
+        username = Column(String(255), nullable=True)
+        action_type = Column(String(50), nullable=False, index=True)
+        entity_type = Column(String(100), nullable=False, index=True)
+        entity_id = Column(String(255), nullable=True)
+        entity_name = Column(String(255), nullable=True)
+        description = Column(Text, nullable=False)
+        details = Column(Text, nullable=True)  # Using Text instead of JSON for SQLite
+        ip_address = Column(String(45), nullable=True)
+        user_agent = Column(String(500), nullable=True)
+        result = Column(String(20), nullable=False)
+        error_message = Column(Text, nullable=True)
+        category = Column(String(50), nullable=True, index=True)
+        entry_type = Column(String(50), nullable=True, index=True)
+
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)
 
@@ -883,6 +908,7 @@ def test_db():
     original_installation_request = models.InstallationRequest
     original_installation_package = models.InstallationPackage
     original_software_installation_log = models.SoftwareInstallationLog
+    original_audit_log = models.AuditLog
     models.Host = Host
     models.User = User
     models.SecurityRoleGroup = SecurityRoleGroup
@@ -898,6 +924,7 @@ def test_db():
     models.InstallationRequest = InstallationRequest
     models.InstallationPackage = InstallationPackage
     models.SoftwareInstallationLog = SoftwareInstallationLog
+    models.AuditLog = AuditLog
 
     # Override the get_engine dependency
     def override_get_engine():
@@ -943,6 +970,7 @@ def test_db():
     models.InstallationRequest = original_installation_request
     models.InstallationPackage = original_installation_package
     models.SoftwareInstallationLog = original_software_installation_log
+    models.AuditLog = original_audit_log
 
     # Clean up database connections
     test_engine.dispose()  # Close all connections in the connection pool

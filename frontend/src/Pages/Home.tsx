@@ -296,7 +296,7 @@ const Dashboard = () => {
 
             <Grid container spacing={3}>
                 {cardVisibility.hosts && (
-                    <Grid item>
+                    <Grid>
                         <DashboardCard
                             title={t('dashboard.hosts')}
                             value={hostsTotal}
@@ -308,7 +308,7 @@ const Dashboard = () => {
                     </Grid>
                 )}
                 {cardVisibility.updates && (
-                    <Grid item>
+                    <Grid>
                         <DashboardCard
                             title={t('dashboard.updates')}
                             value={hostsWithUpdates}
@@ -320,7 +320,7 @@ const Dashboard = () => {
                     </Grid>
                 )}
                 {cardVisibility.security && (
-                    <Grid item>
+                    <Grid>
                         <DashboardCard
                             title={t('dashboard.security')}
                             value={securityUpdates}
@@ -332,7 +332,7 @@ const Dashboard = () => {
                     </Grid>
                 )}
                 {cardVisibility.reboot && (
-                    <Grid item>
+                    <Grid>
                         <DashboardCard
                             title={t('dashboard.rebootRequired')}
                             value={rebootRequired}
@@ -344,7 +344,7 @@ const Dashboard = () => {
                     </Grid>
                 )}
                 {cardVisibility.antivirus && (
-                    <Grid item>
+                    <Grid>
                         <DashboardCard
                             title={t('dashboard.antivirusCoverage')}
                             value={antivirusCoverage}
@@ -356,7 +356,7 @@ const Dashboard = () => {
                     </Grid>
                 )}
                 {cardVisibility.opentelemetry && (
-                    <Grid item>
+                    <Grid>
                         <DashboardCard
                             title={t('dashboard.openTelemetryCoverage')}
                             value={otelCoverage}

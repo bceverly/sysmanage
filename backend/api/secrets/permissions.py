@@ -6,7 +6,8 @@ from fastapi import HTTPException
 from sqlalchemy.orm import sessionmaker
 
 from backend.i18n import _
-from backend.persistence import db as db_module, models
+from backend.persistence import db as db_module
+from backend.persistence import models
 from backend.security.roles import SecurityRoles
 
 

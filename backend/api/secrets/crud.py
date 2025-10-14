@@ -2,6 +2,7 @@
 CRUD endpoints for secrets management.
 """
 
+import asyncio
 import logging
 import uuid
 from typing import List
@@ -17,25 +18,18 @@ from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.services.vault_service import VaultError, VaultService
 
-from .models import (
-    SecretCreate,
-    SecretResponse,
-    SecretUpdate,
-    SecretWithContent,
-)
+from .models import SecretCreate, SecretResponse, SecretUpdate, SecretWithContent
 from .permissions import check_user_permission
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.get(
-    "/secrets", response_model=List[SecretResponse], dependencies=[Depends(JWTBearer())]
-)
-async def list_secrets(
-    db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)
-):
-    """List all secrets (metadata only, no content)."""
+def _get_secrets_sync(db: Session):
+    """
+    Synchronous helper function to retrieve all secrets.
+    This runs in a thread pool to avoid blocking the event loop.
+    """
     try:
         secrets = db.query(Secret).order_by(Secret.created_at.desc()).all()
         return [SecretResponse(**secret.to_dict()) for secret in secrets]
@@ -44,6 +38,21 @@ async def list_secrets(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=_("secrets.list_error", "Failed to retrieve secrets"),
         ) from e
+
+
+@router.get(
+    "/secrets", response_model=List[SecretResponse], dependencies=[Depends(JWTBearer())]
+)
+async def list_secrets(
+    db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)
+):
+    """
+    List all secrets (metadata only, no content).
+    Runs the database query in a thread pool to avoid blocking the event loop.
+    """
+    # Run the synchronous database operation in a thread pool
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _get_secrets_sync, db)
 
 
 @router.get(

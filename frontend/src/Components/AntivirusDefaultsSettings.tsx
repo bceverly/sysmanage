@@ -221,7 +221,7 @@ const AntivirusDefaultsSettings: React.FC = () => {
                     </Typography>
                     <Grid container spacing={2}>
                       {osList.map((osName) => (
-                        <Grid item xs={12} sm={6} md={4} key={osName}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={osName}>
                           <Box sx={{ p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
                             <Typography variant="body2" fontWeight="medium">
                               {osName}
@@ -249,7 +249,7 @@ const AntivirusDefaultsSettings: React.FC = () => {
                     </Typography>
                     <Grid container spacing={2}>
                       {osList.map((osName) => (
-                        <Grid item xs={12} sm={6} md={4} key={osName}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={osName}>
                           <Typography variant="body2" fontWeight="medium" gutterBottom>
                             {osName}
                           </Typography>

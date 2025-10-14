@@ -87,6 +87,10 @@ class MockSession:
     def add(self, obj):
         self.added_objects.append(obj)
 
+    def refresh(self, obj):
+        """Mock refresh method."""
+        pass
+
     def commit(self):
         self.committed = True
 
@@ -462,7 +466,8 @@ class TestAddUser:
 
         assert result.userid == "new@example.com"
         assert mock_session.committed
-        assert len(mock_session.added_objects) == 1
+        # With audit logging, 2 objects are added: User + AuditLog
+        assert len(mock_session.added_objects) == 2
 
     @pytest.mark.asyncio
     @patch("backend.api.user.sessionmaker")

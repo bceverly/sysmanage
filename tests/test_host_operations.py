@@ -61,12 +61,21 @@ class MockSession:
         self.hosts = hosts or []
         self.users = users or [MockUser()]  # Default user for RBAC checks
         self.committed = False
+        self.added_objects = []
 
     def query(self, model):
         # Return different mock queries based on model type
         if hasattr(model, "__name__") and "User" in model.__name__:
             return MockQuery(self.users)
         return MockQuery(self.hosts)
+
+    def add(self, obj):
+        """Mock add method."""
+        self.added_objects.append(obj)
+
+    def refresh(self, obj):
+        """Mock refresh method."""
+        pass
 
     def commit(self):
         """Mock commit method."""

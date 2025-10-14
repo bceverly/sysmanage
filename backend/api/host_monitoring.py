@@ -3,6 +3,7 @@ Host monitoring endpoints for certificates, roles, and service control.
 This module handles endpoints related to monitoring aspects of hosts.
 """
 
+import asyncio
 import logging
 from datetime import timezone
 from typing import List
@@ -17,8 +18,8 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
 from backend.websocket.messages import create_command_message
-from backend.websocket.queue_operations import QueueOperations
 from backend.websocket.queue_enums import QueueDirection
+from backend.websocket.queue_operations import QueueOperations
 
 router = APIRouter()
 queue_ops = QueueOperations()
@@ -34,10 +35,10 @@ class ServiceControlRequest(BaseModel):
     services: List[str]  # List of service names to control
 
 
-@router.get("/host/{host_id}/certificates", dependencies=[Depends(JWTBearer())])
-async def get_host_certificates(host_id: str):
+def _get_host_certificates_sync(host_id: str):
     """
-    Get SSL certificates collected from a host.
+    Synchronous helper function to retrieve host certificates.
+    This runs in a thread pool to avoid blocking the event loop.
     """
     # Get the SQLAlchemy session
     session_local = sessionmaker(  # pylint: disable=duplicate-code
@@ -106,6 +107,17 @@ async def get_host_certificates(host_id: str):
         }
 
 
+@router.get("/host/{host_id}/certificates", dependencies=[Depends(JWTBearer())])
+async def get_host_certificates(host_id: str):
+    """
+    Get SSL certificates collected from a host.
+    Runs the database query in a thread pool to avoid blocking the event loop.
+    """
+    # Run the synchronous database operation in a thread pool
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _get_host_certificates_sync, host_id)
+
+
 @router.post(
     "/host/{host_id}/request-certificates-collection",
     dependencies=[Depends(JWTBearer())],
@@ -163,10 +175,10 @@ async def request_certificates_collection(host_id: str):
         return {"result": True, "message": _("Certificate collection requested")}
 
 
-@router.get("/host/{host_id}/roles", dependencies=[Depends(JWTBearer())])
-async def get_host_roles(host_id: str):
+def _get_host_roles_sync(host_id: str):
     """
-    Get server roles detected on a host.
+    Synchronous helper function to retrieve host roles.
+    This runs in a thread pool to avoid blocking the event loop.
     """
     # Get the SQLAlchemy session
     session_local = sessionmaker(  # pylint: disable=duplicate-code
@@ -221,6 +233,17 @@ async def get_host_roles(host_id: str):
             "total_roles": len(role_data),
             "roles": role_data,
         }
+
+
+@router.get("/host/{host_id}/roles", dependencies=[Depends(JWTBearer())])
+async def get_host_roles(host_id: str):
+    """
+    Get server roles detected on a host.
+    Runs the database query in a thread pool to avoid blocking the event loop.
+    """
+    # Run the synchronous database operation in a thread pool
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _get_host_roles_sync, host_id)
 
 
 @router.post(

@@ -682,22 +682,32 @@ class TestGetHostSoftwarePackages:
         mock_host = MockHost(host_id=1)
         mock_package = MockSoftwarePackage()
 
+        # Mock the query chain for host lookup
         mock_session.query.return_value.filter.return_value.first.return_value = (
             mock_host
         )
-        mock_session.query.return_value.filter.return_value.order_by.return_value.all.return_value = [
+
+        # Mock the query chain for package counting and fetching
+        mock_query = Mock()
+        mock_query.count.return_value = 1  # Mock count() to return integer
+        mock_query.order_by.return_value.limit.return_value.offset.return_value.all.return_value = [
             mock_package
         ]
+        mock_session.query.return_value.filter.return_value = mock_query
 
         result = host_utils.get_host_software_packages(1)
 
-        assert len(result) == 1
-        package = result[0]
+        # Function now returns dict with items and pagination
+        assert "items" in result
+        assert "pagination" in result
+        assert len(result["items"]) == 1
+        package = result["items"][0]
         assert package["id"] == mock_package.id
         assert package["package_name"] == mock_package.package_name
         assert package["version"] == mock_package.package_version
         assert package["package_manager"] == mock_package.package_manager
         assert package["is_system_package"] == mock_package.is_system_package
+        assert result["pagination"]["total_items"] == 1
 
     @patch("backend.api.host_utils.sessionmaker")
     @patch("backend.api.host_utils.db.get_engine")

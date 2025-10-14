@@ -184,7 +184,9 @@ async def push_configuration(
 
 
 @router.post("/config/logging", dependencies=[Depends(JWTBearer())])
-async def update_logging_config(request: LoggingConfigRequest):
+async def update_logging_config(
+    request: LoggingConfigRequest, current_user=Depends(get_current_user)
+):
     """
     Update logging configuration on agents.
     """
@@ -198,11 +200,13 @@ async def update_logging_config(request: LoggingConfigRequest):
         push_to_all=request.push_to_all,
     )
 
-    return await push_configuration(config_request)
+    return await push_configuration(config_request, current_user)
 
 
 @router.post("/config/websocket", dependencies=[Depends(JWTBearer())])
-async def update_websocket_config(request: WebSocketConfigRequest):
+async def update_websocket_config(
+    request: WebSocketConfigRequest, current_user=Depends(get_current_user)
+):
     """
     Update WebSocket configuration on agents.
     """
@@ -217,11 +221,13 @@ async def update_websocket_config(request: WebSocketConfigRequest):
         push_to_all=request.push_to_all,
     )
 
-    return await push_configuration(config_request)
+    return await push_configuration(config_request, current_user)
 
 
 @router.post("/config/server", dependencies=[Depends(JWTBearer())])
-async def update_server_config(request: ServerConfigRequest):
+async def update_server_config(
+    request: ServerConfigRequest, current_user=Depends(get_current_user)
+):
     """
     Update server connection configuration on agents.
     """
@@ -235,7 +241,7 @@ async def update_server_config(request: ServerConfigRequest):
         push_to_all=request.push_to_all,
     )
 
-    return await push_configuration(config_request)
+    return await push_configuration(config_request, current_user)
 
 
 @router.get("/config/pending", dependencies=[Depends(JWTBearer())])

@@ -210,6 +210,23 @@ async def handle_system_info(db: Session, connection, message_data: dict):
             db.commit()
             db.flush()  # Ensure changes are visible immediately
 
+            # Process software packages if included in SYSTEM_INFO message
+            software_packages = message_data.get("software_packages", [])
+            if software_packages:
+                debug_logger.info(
+                    "Processing %d software packages from SYSTEM_INFO message",
+                    len(software_packages),
+                )
+                from backend.api.handlers import handle_software_update
+
+                # Create software update message data
+                software_message = {
+                    "host_id": str(host.id),
+                    "software_packages": software_packages,
+                }
+                # Call software update handler
+                await handle_software_update(db, connection, software_message)
+
             # Log successful agent registration/connection
             AuditService.log(
                 db=db,
