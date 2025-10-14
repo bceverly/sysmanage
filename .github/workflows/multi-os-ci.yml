@@ -281,18 +281,13 @@ jobs:
       run: npm ci
       working-directory: frontend
 
-    - name: Increase file descriptor limit (macOS)
-      if: runner.os == 'macOS'
-      run: |
-        ulimit -n 10240
-        echo "File descriptor limit increased to $(ulimit -n)"
-      shell: bash
-
     - name: Run frontend tests
       run: |
-        # Increase file descriptor limit if possible
-        if [ "${{ runner.os }}" == "macOS" ] || [ "${{ runner.os }}" == "Darwin" ]; then
-          ulimit -n 10240 || echo "Could not set ulimit, using default"
+        # Increase file descriptor limit for macOS/Windows
+        if [ "${{ runner.os }}" == "macOS" ]; then
+          echo "Setting ulimit for macOS..."
+          ulimit -n 10240
+          echo "File descriptor limit: $(ulimit -n)"
         fi
         npm run test:coverage
       working-directory: frontend

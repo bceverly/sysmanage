@@ -132,13 +132,21 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
     css: true,
+    // Reduce file descriptor usage on macOS/Windows
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: true
+      }
+    },
     deps: {
       optimizer: {
         web: {
           include: [
             '@mui/x-data-grid',
             '@mui/x-data-grid-pro',
-            '@mui/x-data-grid-premium'
+            '@mui/x-data-grid-premium',
+            '@mui/icons-material'
           ]
         }
       }
