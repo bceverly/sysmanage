@@ -132,11 +132,13 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
     css: true,
-    // Reduce file descriptor usage on macOS/Windows
-    pool: 'forks',
+    // Reduce file descriptor usage on macOS/Windows by using threads instead of forks
+    // Threads share the same process, reducing file descriptor usage
+    pool: 'threads',
     poolOptions: {
-      forks: {
-        singleFork: true
+      threads: {
+        maxThreads: 4,
+        minThreads: 1
       }
     },
     deps: {
