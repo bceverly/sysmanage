@@ -110,12 +110,16 @@ else
 	@if [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD - using /var/tmp and excluding Playwright..."; \
 		export TMPDIR=/var/tmp && \
-		export CFLAGS="-I/usr/pkg/include" && \
-		export CXXFLAGS="-std=c++17 -I/usr/pkg/include -fpermissive" && \
-		export LDFLAGS="-L/usr/pkg/lib -Wl,-R/usr/pkg/lib" && \
+		export CC=/usr/pkg/gcc14/bin/gcc && \
+		export CXX=/usr/pkg/gcc14/bin/g++ && \
+		export CFLAGS="-I/usr/pkg/include -fpermissive -Wno-error" && \
+		export CXXFLAGS="-I/usr/pkg/include -fpermissive -Wno-error" && \
+		export LDFLAGS="-L/usr/pkg/gcc14/lib -Wl,-rpath,/usr/pkg/gcc14/lib -lstdc++" && \
+		export LDSHARED="/usr/pkg/gcc14/bin/g++ -pthread -shared -L/usr/pkg/gcc14/lib -Wl,-rpath,/usr/pkg/gcc14/lib" && \
 		export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 && \
 		export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 && \
 		export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
+		export GRPC_PYTHON_BUILD_EXT_COMPILER_JOBS=1 && \
 		grep -v "playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || true; \
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
 	elif [ "$$(uname -s)" = "FreeBSD" ]; then \
@@ -141,23 +145,25 @@ else
 		echo "[INFO] NetBSD detected - rebuilding Pillow with correct library paths..."; \
 		export TMPDIR=/var/tmp && \
 		export CFLAGS="-I/usr/pkg/include" && \
-		export CXXFLAGS="-std=c++17 -I/usr/pkg/include -fpermissive" && \
-		export LDFLAGS="-L/usr/pkg/lib -Wl,-R/usr/pkg/lib" && \
-		export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 && \
-		export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 && \
-		export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
+		export CXXFLAGS="-I/usr/pkg/include" && \
+		export LDFLAGS="-L/usr/pkg/lib -Wl,-rpath,/usr/pkg/lib" && \
 		$(PYTHON) -m pip uninstall -y Pillow && $(PYTHON) -m pip install --no-binary=:all: Pillow; \
 		echo "[OK] Pillow rebuilt for NetBSD"; \
 		echo "[INFO] NetBSD detected - rebuilding grpcio with GCC 14 for C++ compatibility..."; \
 		$(PYTHON) -m pip cache remove grpcio 2>/dev/null || true; \
 		$(PYTHON) -m pip uninstall -y grpcio && \
+		TMPDIR=/var/tmp \
 		CC=/usr/pkg/gcc14/bin/gcc \
 		CXX=/usr/pkg/gcc14/bin/g++ \
 		CFLAGS="-I/usr/pkg/include -fpermissive -Wno-error" \
 		CXXFLAGS="-I/usr/pkg/include -fpermissive -Wno-error" \
-		LDFLAGS="-L/usr/pkg/gcc14/lib -Wl,-R/usr/pkg/gcc14/lib -lstdc++" \
-		LDSHARED="/usr/pkg/gcc14/bin/g++ -pthread -shared -L/usr/pkg/gcc14/lib -Wl,-R/usr/pkg/gcc14/lib" \
-		$(PYTHON) -m pip install --no-binary=:all: grpcio; \
+		LDFLAGS="-L/usr/pkg/gcc14/lib -Wl,-rpath,/usr/pkg/gcc14/lib -lstdc++" \
+		LDSHARED="/usr/pkg/gcc14/bin/g++ -pthread -shared -L/usr/pkg/gcc14/lib -Wl,-rpath,/usr/pkg/gcc14/lib" \
+		GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 \
+		GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 \
+		GRPC_PYTHON_BUILD_SYSTEM_CARES=1 \
+		GRPC_PYTHON_BUILD_EXT_COMPILER_JOBS=1 \
+		$(PYTHON) -m pip install --no-binary=:all: --no-cache-dir grpcio; \
 		echo "[OK] grpcio rebuilt for NetBSD with GCC 14"; \
 		echo "[INFO] Setting up GCC 14 library path in venv activate script..."; \
 		if [ ! -f "$(VENV)/bin/activate.backup" ]; then \
