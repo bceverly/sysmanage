@@ -269,7 +269,7 @@ const GrafanaIntegrationCard: React.FC = () => {
 
         <Grid container spacing={2}>
           {/* Status */}
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Box display="flex" alignItems="center" gap={1} mb={2}>
               <Typography variant="subtitle2">
                 {t('grafana.status.label', 'Status')}:
@@ -291,7 +291,7 @@ const GrafanaIntegrationCard: React.FC = () => {
           </Grid>
 
           {/* Enable/Disable */}
-          <Grid item xs={12}>
+          <Grid size={12}>
             <FormControlLabel
               control={
                 <Switch
@@ -307,7 +307,7 @@ const GrafanaIntegrationCard: React.FC = () => {
           {settings.enabled && (
             <>
               {/* Server Type Selection */}
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <FormControlLabel
                   control={
                     <Switch
@@ -321,11 +321,11 @@ const GrafanaIntegrationCard: React.FC = () => {
 
               {settings.use_managed_server ? (
                 /* Managed Server Dropdown */
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <FormControl fullWidth>
                     <InputLabel>{t('grafana.selectServer.label', 'Select Grafana Server')}</InputLabel>
                     <Select
-                      value={settings.host_id || ''}
+                      value={servers.some(s => s.id === settings.host_id) ? settings.host_id : ''}
                       onChange={handleHostChange}
                       label={t('grafana.selectServer.label', 'Select Grafana Server')}
                       startAdornment={<ComputerIcon sx={{ mr: 1, color: 'action.active' }} />}
@@ -363,7 +363,7 @@ const GrafanaIntegrationCard: React.FC = () => {
                 </Grid>
               ) : (
                 /* Manual URL Input */
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <TextField
                     fullWidth
                     label={t('grafana.manualUrl.label', 'Grafana URL')}
@@ -379,7 +379,7 @@ const GrafanaIntegrationCard: React.FC = () => {
               )}
 
               {/* API Key (Optional) */}
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <TextField
                   fullWidth
                   label={t('grafana.apiKey.label', 'API Key (Optional)')}
@@ -392,7 +392,7 @@ const GrafanaIntegrationCard: React.FC = () => {
 
               {/* Health Status Details */}
               {healthStatus && !healthStatus.healthy && healthStatus.error && (
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <Alert severity="error">
                     <Typography variant="body2">
                       {t('grafana.healthError.label', 'Health Check Error')}: {healthStatus.error}
@@ -404,7 +404,7 @@ const GrafanaIntegrationCard: React.FC = () => {
           )}
 
           {/* Save Button */}
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Box display="flex" justifyContent="flex-end" gap={1}>
               <Button
                 onClick={checkHealth}
