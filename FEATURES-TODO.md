@@ -1,35 +1,28 @@
 Here are the features (in no particular order) that I would
 like to add:
 
-1.  Installer for agent - There should be a text-
-    based command-line installer for the agent that
-    work on MacOS, Windows, Linux and BSD.  The
-    installer should be able to configure the
-    local system to run the agent at startup and
-    shut it down cleanly at shutdown.
-
-2.  Broadcast - Allow the server to send a
+1.  Broadcast - Allow the server to send a
     broadcast request out to all agents to
     perform actions.  This ensures that the
     server doesn't have to scale message
     sends linearly with the number of
     registered agents.
 
-3.  Versioning of the API - We need to make
+2.  Versioning of the API - We need to make
     sure that older clients can talk to
     newer servers and degrade gracefully.
 
-4.  User Management - Ability to manage
+3.  User Management - Ability to manage
     add/edit/delete users and groups on
     the agent hosts.
 
-5.  We need a MFA mechanism using an
+4.  We need a MFA mechanism using an
     authenticator app on someone's
     mobile device as well as the ability
     to send a code via email to their
     registered email address.
 
-6.  Have the agent and the server log
+5.  Have the agent and the server log
     their messages to the operating
     system appropriate location but
     fall back to the local logs dir-
@@ -42,7 +35,7 @@ like to add:
     sysmanage-agent subdirectory in
     which the logs should be placed.
 
-7.  Add an automation tab between
+6.  Add an automation tab between
     updates and scripts in the main
     navbar.  on that tab, have an
     "Updates" subtab that allows you
@@ -77,7 +70,7 @@ like to add:
     string externalization /
     translation.
 
-8. Add the ability to issue and
+7. Add the ability to issue and
     manage SysManage API keys with
     View/Edit/Admin roles.  They
     should be stored in the vault
@@ -90,7 +83,7 @@ like to add:
     prefixed to get the token
     issued / renewed.
 
-9. A cool AI integration would be
+8. A cool AI integration would be
     to have the system pull back
     a diagnostics report from a
     remote agent and do a health
@@ -101,7 +94,7 @@ like to add:
     with the opportunity to have
     sysmanage fix the issues.
 
-10. We should have a settings
+9. We should have a settings
     screen that allows the user
     to specify default third-
     party repositories that
@@ -109,15 +102,15 @@ like to add:
     every host that is approved
     on registration.
 
-11. Add the ability to hook up a
+10. Add the ability to hook up a
     remote host to Graylog for
     log aggregation.
 
-12. Based on server roles that
+11. Based on server roles that
     we detect, recommend firewall
     configuration for that host.
 
-13. Have a "Firewall Configuration"
+12. Have a "Firewall Configuration"
     page on settings that allow
     the user to create a set of
     named configurations that
@@ -136,6 +129,6 @@ like to add:
     ssh allowed config, a data-
     base config and a web
     server config and then stack
-    all three of these and 
+    all three of these and
     associate them with a
     particular host.
