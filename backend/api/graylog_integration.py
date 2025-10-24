@@ -213,7 +213,7 @@ async def update_graylog_integration_settings(
         if (
             request.api_token
             and request.api_token.strip()
-            and request.api_token != "***"
+            and request.api_token != "***"  # nosec B105 - placeholder not password
         ):
             try:
                 vault_service = VaultService()
@@ -453,7 +453,7 @@ async def check_graylog_health():
                         if result == 0:
                             has_gelf_tcp = True
                             gelf_tcp_port = 12201
-                    except Exception:
+                    except Exception:  # nosec B110 - Port scan failure expected
                         pass
 
                     # Check Syslog TCP (1514, then 514)
@@ -467,7 +467,7 @@ async def check_graylog_health():
                                 has_syslog_tcp = True
                                 syslog_tcp_port = port
                                 break
-                        except Exception:
+                        except Exception:  # nosec B110 - Port scan failure expected
                             pass
 
                     # Check Syslog UDP (1514, then 514)
@@ -483,7 +483,7 @@ async def check_graylog_health():
                             sock.close()
                             if has_syslog_udp:
                                 break
-                        except Exception:
+                        except Exception:  # nosec B110 - Port scan failure expected
                             pass
 
                     # Check Windows Sidecar / Beats (5044)
@@ -495,7 +495,7 @@ async def check_graylog_health():
                         if result == 0:
                             has_windows_sidecar = True
                             windows_sidecar_port = 5044
-                    except Exception:
+                    except Exception:  # nosec B110 - Port scan failure expected
                         pass
 
                     # Update the database with detected ports
