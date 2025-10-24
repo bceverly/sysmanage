@@ -85,7 +85,7 @@ jobs:
 
     - name: Run backend database migrations
       run: |
-        python -m alembic upgrade head
+        python -m alembic.config upgrade head
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
@@ -608,7 +608,7 @@ jobs:
 
     - name: Run backend database migrations
       run: |
-        python -m alembic upgrade head
+        python -m alembic.config upgrade head
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
@@ -896,7 +896,7 @@ jobs:
 
     - name: Run backend database migrations
       run: |
-        python -m alembic upgrade head
+        python -m alembic.config upgrade head
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
