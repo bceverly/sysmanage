@@ -115,14 +115,14 @@ class TestOSVersionAPI:
         mock_host.approval_status = "approved"
         mock_session = MockSession()
 
-        with patch("backend.api.host.queue_ops") as mock_queue_ops, patch(
-            "backend.api.host.create_command_message"
+        with patch("backend.api.host_approval.queue_ops") as mock_queue_ops, patch(
+            "backend.api.host_approval.create_command_message"
         ) as mock_create_msg, patch(
-            "backend.api.host.sessionmaker"
+            "backend.api.host_approval.sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.host.db.get_engine"
+            "backend.api.host_approval.db.get_engine"
         ), patch(
-            "backend.api.host.validate_host_approval_status"
+            "backend.api.host_approval.validate_host_approval_status"
         ) as mock_validate:
 
             mock_queue_ops.enqueue_message.return_value = "test-message-id-123"
@@ -131,7 +131,7 @@ class TestOSVersionAPI:
             mock_validate.return_value = None
             mock_sessionmaker.return_value = MockSessionLocal(mock_session)
 
-            from backend.api.host import request_os_version_update
+            from backend.api.host_approval import request_os_version_update
 
             result = await request_os_version_update(1)
 
@@ -181,12 +181,12 @@ class TestOSVersionAPI:
                 return self.mock_session
 
         mock_session = MockSession()
-        with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
-            "backend.api.host.db.get_engine"
-        ), patch(
-            "backend.api.host.validate_host_approval_status"
+        with patch(
+            "backend.api.host_approval.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.host_approval.db.get_engine"), patch(
+            "backend.api.host_approval.validate_host_approval_status"
         ) as mock_validate, patch(
-            "backend.api.host.queue_ops"
+            "backend.api.host_approval.queue_ops"
         ) as mock_queue_ops:
             # Mock queue operations
             mock_queue_ops.enqueue_message.return_value = "test-message-id-123"
@@ -194,7 +194,7 @@ class TestOSVersionAPI:
 
             from fastapi import HTTPException
 
-            from backend.api.host import request_os_version_update
+            from backend.api.host_approval import request_os_version_update
 
             with pytest.raises(HTTPException) as exc_info:
                 await request_os_version_update(999)
@@ -217,9 +217,9 @@ class TestOSVersionAPI:
             mock_host
         )
 
-        with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
-            "backend.api.host.db.get_engine"
-        ):
+        with patch(
+            "backend.api.host_approval.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.host_approval.db.get_engine"):
             # Set up the sessionmaker mock properly for context manager
             mock_session_instance = Mock()
             mock_session_instance.__enter__ = Mock(return_value=mock_session)
@@ -228,7 +228,7 @@ class TestOSVersionAPI:
 
             from fastapi import HTTPException
 
-            from backend.api.host import request_os_version_update
+            from backend.api.host_approval import request_os_version_update
 
             with pytest.raises(HTTPException) as exc_info:
                 await request_os_version_update(1)

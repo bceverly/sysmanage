@@ -81,7 +81,7 @@ class TestHandleUpdateApplyResult:
         assert "Host not registered" in result["error"]
 
     @pytest.mark.asyncio
-    @patch("backend.api.update_handlers.debug_logger")
+    @patch("backend.api.update_handlers.logger")
     async def test_handle_update_apply_result_success_empty_packages(self, mock_logger):
         """Test successful handling with no packages."""
         mock_db = MockDB()
@@ -119,7 +119,7 @@ class TestHandleUpdateApplyResult:
         mock_logger.info.assert_called()
 
     @pytest.mark.asyncio
-    @patch("backend.api.update_handlers.debug_logger")
+    @patch("backend.api.update_handlers.logger")
     async def test_handle_update_apply_result_with_updated_packages(self, mock_logger):
         """Test handling with updated packages."""
         mock_db = MockDB()
@@ -168,7 +168,7 @@ class TestHandleUpdateApplyResult:
         mock_logger.info.assert_called()
 
     @pytest.mark.asyncio
-    @patch("backend.api.update_handlers.debug_logger")
+    @patch("backend.api.update_handlers.logger")
     async def test_handle_update_apply_result_with_failed_packages(self, mock_logger):
         """Test handling with failed packages."""
         mock_db = MockDB()
@@ -216,7 +216,7 @@ class TestHandleUpdateApplyResult:
         mock_logger.info.assert_called()
 
     @pytest.mark.asyncio
-    @patch("backend.api.update_handlers.debug_logger")
+    @patch("backend.api.update_handlers.logger")
     async def test_handle_update_apply_result_with_reboot_required(self, mock_logger):
         """Test handling when reboot is required."""
         mock_db = MockDB()
@@ -255,7 +255,7 @@ class TestHandleUpdateApplyResult:
         mock_logger.info.assert_called()
 
     @pytest.mark.asyncio
-    @patch("backend.api.update_handlers.debug_logger")
+    @patch("backend.api.update_handlers.logger")
     async def test_handle_update_apply_result_mixed_packages(self, mock_logger):
         """Test handling with both updated and failed packages."""
         mock_db = MockDB()
@@ -300,7 +300,7 @@ class TestHandleUpdateApplyResult:
         assert len(mock_db.executed_statements) == 3  # Success + failed + host reboot
 
     @pytest.mark.asyncio
-    @patch("backend.api.update_handlers.debug_logger")
+    @patch("backend.api.update_handlers.logger")
     async def test_handle_update_apply_result_missing_package_fields(self, mock_logger):
         """Test handling packages with missing required fields."""
         mock_db = MockDB()
@@ -355,7 +355,7 @@ class TestHandleUpdateApplyResult:
         )  # Only complete-package and valid-failed
 
     @pytest.mark.asyncio
-    @patch("backend.api.update_handlers.debug_logger")
+    @patch("backend.api.update_handlers.logger")
     async def test_handle_update_apply_result_missing_message_fields(self, mock_logger):
         """Test handling with missing optional message fields."""
         mock_db = MockDB()
@@ -384,7 +384,7 @@ class TestHandleUpdateApplyResult:
         mock_logger.info.assert_called()
 
     @pytest.mark.asyncio
-    @patch("backend.api.update_handlers.debug_logger")
+    @patch("backend.api.update_handlers.logger")
     async def test_handle_update_apply_result_failed_package_no_error(
         self, mock_logger
     ):
@@ -416,7 +416,7 @@ class TestHandleUpdateApplyResult:
         assert len(mock_db.executed_statements) == 1
 
     @pytest.mark.asyncio
-    @patch("backend.api.update_handlers.debug_logger")
+    @patch("backend.api.update_handlers.logger")
     async def test_handle_update_apply_result_database_error(self, mock_logger):
         """Test handling when database operations fail."""
         mock_db = MockDB()
@@ -456,7 +456,7 @@ class TestHandleUpdateApplyResult:
         mock_logger.error.assert_called()
 
     @pytest.mark.asyncio
-    @patch("backend.api.update_handlers.debug_logger")
+    @patch("backend.api.update_handlers.logger")
     async def test_handle_update_apply_result_cache_update(self, mock_logger):
         """Test cache update functionality."""
         mock_db = MockDB()
@@ -494,7 +494,7 @@ class TestHandleUpdateApplyResult:
         datetime.fromisoformat(timestamp.replace("Z", "+00:00"))  # Should not raise
 
     @pytest.mark.asyncio
-    @patch("backend.api.update_handlers.debug_logger")
+    @patch("backend.api.update_handlers.logger")
     async def test_handle_update_apply_result_cache_overwrite(self, mock_logger):
         """Test that cache entries are overwritten correctly."""
         mock_db = MockDB()

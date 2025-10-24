@@ -446,9 +446,7 @@ async def handle_command_result(connection, message_data: dict):
         or "packages" in result_data
         or "package_managers" in result_data
     ):
-        logger.info(
-            "Detected package collection result, routing to package handler"
-        )
+        logger.info("Detected package collection result, routing to package handler")
         # Import here to avoid circular imports
         from backend.api.handlers import handle_package_collection
         from backend.persistence.db import get_db

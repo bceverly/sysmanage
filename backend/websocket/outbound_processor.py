@@ -26,7 +26,9 @@ async def process_outbound_messages(db: Session) -> None:
         db: Database session
     """
     logger.info("Processing outbound messages")
-    print("=== OUTBOUND PROCESSOR: Starting to process outbound messages ===", flush=True)
+    print(
+        "=== OUTBOUND PROCESSOR: Starting to process outbound messages ===", flush=True
+    )
 
     from backend.persistence.models import Host, MessageQueue
 
@@ -43,16 +45,32 @@ async def process_outbound_messages(db: Session) -> None:
         .all()
     )
 
-    print(f"=== OUTBOUND PROCESSOR: Found {len(outbound_messages)} pending outbound messages ===", flush=True)
+    print(
+        f"=== OUTBOUND PROCESSOR: Found {len(outbound_messages)} pending outbound messages ===",
+        flush=True,
+    )
     for msg in outbound_messages:
-        print(f"=== OUTBOUND PROCESSOR: Message ID: {msg.message_id}, Type: {msg.message_type}, Host: {msg.host_id}, Status: {msg.status} ===", flush=True)
+        print(
+            f"=== OUTBOUND PROCESSOR: Message ID: {msg.message_id}, Type: {msg.message_type}, Host: {msg.host_id}, Status: {msg.status} ===",
+            flush=True,
+        )
         # Try to deserialize and show command_type if it's a command
         try:
             msg_data = server_queue_manager.deserialize_message_data(msg)
-            if msg.message_type == "command" and "data" in msg_data and "command_type" in msg_data["data"]:
-                print(f"=== OUTBOUND PROCESSOR: Command type: {msg_data['data']['command_type']} ===", flush=True)
+            if (
+                msg.message_type == "command"
+                and "data" in msg_data
+                and "command_type" in msg_data["data"]
+            ):
+                print(
+                    f"=== OUTBOUND PROCESSOR: Command type: {msg_data['data']['command_type']} ===",
+                    flush=True,
+                )
         except Exception as e:
-            print(f"=== OUTBOUND PROCESSOR: Could not deserialize message: {e} ===", flush=True)
+            print(
+                f"=== OUTBOUND PROCESSOR: Could not deserialize message: {e} ===",
+                flush=True,
+            )
 
     # Group messages by host for efficient processing
     messages_by_host = {}
@@ -177,7 +195,10 @@ async def send_command_to_agent(command_data: dict, host, message_id: str) -> bo
             host.id,
             host.fqdn,
         )
-        print(f"=== OUTBOUND PROCESSOR: About to send command message {message_id} to host {host.fqdn} ===", flush=True)
+        print(
+            f"=== OUTBOUND PROCESSOR: About to send command message {message_id} to host {host.fqdn} ===",
+            flush=True,
+        )
         print(f"=== OUTBOUND PROCESSOR: Command data: {command_data} ===", flush=True)
         success = await connection_manager.send_to_host(host.id, message)
         print(f"=== OUTBOUND PROCESSOR: Send result: {success} ===", flush=True)
