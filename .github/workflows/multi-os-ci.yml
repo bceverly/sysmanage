@@ -86,7 +86,7 @@ jobs:
 
     - name: Run backend database migrations
       run: |
-        python -m alembic.config upgrade head
+        python run_migrations.py
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
@@ -237,7 +237,7 @@ jobs:
 
     - name: Run backend database migrations
       run: |
-        python -m alembic.config upgrade head
+        python run_migrations.py
       env:
         PYTHONPATH: .
         DATABASE_URL: sqlite:///test_${{ runner.os }}.db
@@ -430,7 +430,7 @@ jobs:
     - name: Run database migrations for UI tests
       run: |
         echo "🗄️ Running database migrations..."
-        python -m alembic.config upgrade head
+        python run_migrations.py
       env:
         PYTHONPATH: .
         DATABASE_URL: sqlite:///test.db
