@@ -74,7 +74,7 @@ jobs:
         EOF
 
     - name: Run backend database migrations
-      run: alembic upgrade head
+      run: python -m alembic upgrade head
       env:
         PYTHONPATH: .
 
@@ -183,7 +183,7 @@ jobs:
     - name: Set up database and start servers
       run: |
         # Set up database
-        alembic upgrade head
+        python -m alembic upgrade head
 
         # Start backend
         cd backend && python -m uvicorn main:app --host 0.0.0.0 --port 8080 &
