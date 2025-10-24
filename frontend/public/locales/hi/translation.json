@@ -165,6 +165,51 @@
       "label": "प्रबंधित सर्वर का उपयोग करें"
     }
   },
+  "graylog": {
+    "apiToken": {
+      "help": "बेहतर सुविधाओं और संस्करण का पता लगाने के लिए वैकल्पिक API टोकन",
+      "label": "API टोकन (वैकल्पिक)"
+    },
+    "checkHealth": "स्वास्थ्य जाँचें",
+    "enabled": {
+      "label": "Graylog एकीकरण सक्षम करें"
+    },
+    "healthError": {
+      "label": "स्वास्थ्य जाँच त्रुटि"
+    },
+    "inputs": {
+      "label": "इनपुट"
+    },
+    "mechanism": {
+      "gelfTcp": "GELF TCP",
+      "syslogTcp": "Syslog TCP",
+      "syslogUdp": "Syslog UDP",
+      "windowsSidecar": "Windows Sidecar"
+    },
+    "manualUrl": {
+      "help": "अपने Graylog इंस्टेंस का पूरा URL दर्ज करें",
+      "label": "Graylog URL"
+    },
+    "noServers": "कोई Graylog सर्वर नहीं मिला",
+    "selectServer": {
+      "label": "Graylog सर्वर चुनें"
+    },
+    "serverUrl": {
+      "label": "URL"
+    },
+    "status": {
+      "checking": "जाँच रहा है...",
+      "disabled": "अक्षम",
+      "healthy": "स्वस्थ",
+      "label": "स्थिति",
+      "unhealthy": "अस्वस्थ",
+      "unknown": "अज्ञात"
+    },
+    "title": "Graylog एकीकरण",
+    "useManagedServer": {
+      "label": "प्रबंधित सर्वर का उपयोग करें"
+    }
+  },
   "hostDetail": {
     "accessTab": "एक्सेस",
     "accountName": "खाता नाम",
@@ -382,7 +427,15 @@
     "userAccounts": "उपयोगकर्ता खाते",
     "userGroups": "उपयोगकर्ता समूह",
     "version": "संस्करण",
-    "viewInstallationLog": "इंस्टॉलेशन लॉग देखें"
+    "viewInstallationLog": "इंस्टॉलेशन लॉग देखें",
+    "attachToGraylog": "Graylog से संलग्न करें",
+    "attaching": "संलग्न किया जा रहा है...",
+    "graylogAttached": "Graylog से संलग्न",
+    "graylogMechanism": "तंत्र",
+    "graylogNotConfigured": "Graylog एकीकरण कॉन्फ़िगर नहीं या स्वस्थ नहीं",
+    "graylogRequiresPrivileged": "विशेषाधिकार प्राप्त मोड में एजेंट की आवश्यकता",
+    "graylogStatus": "Graylog स्थिति",
+    "graylogTarget": "लक्ष्य"
   },
   "hosts": {
     "actions": "क्रियाएं",

@@ -180,6 +180,51 @@
       "label": "Verwalteten Server verwenden"
     }
   },
+  "graylog": {
+    "apiToken": {
+      "help": "Optionales API-Token für erweiterte Funktionen und Versionserkennung",
+      "label": "API-Token (Optional)"
+    },
+    "checkHealth": "Gesundheit prüfen",
+    "enabled": {
+      "label": "Graylog-Integration aktivieren"
+    },
+    "healthError": {
+      "label": "Gesundheitscheck-Fehler"
+    },
+    "inputs": {
+      "label": "Eingänge"
+    },
+    "mechanism": {
+      "gelfTcp": "GELF TCP",
+      "syslogTcp": "Syslog TCP",
+      "syslogUdp": "Syslog UDP",
+      "windowsSidecar": "Windows Sidecar"
+    },
+    "manualUrl": {
+      "help": "Geben Sie die vollständige URL zu Ihrer Graylog-Instanz ein",
+      "label": "Graylog-URL"
+    },
+    "noServers": "Keine Graylog-Server gefunden",
+    "selectServer": {
+      "label": "Graylog-Server auswählen"
+    },
+    "serverUrl": {
+      "label": "URL"
+    },
+    "status": {
+      "checking": "Prüfung läuft...",
+      "disabled": "Deaktiviert",
+      "healthy": "Gesund",
+      "label": "Status",
+      "unhealthy": "Ungesund",
+      "unknown": "Unbekannt"
+    },
+    "title": "Graylog-Integration",
+    "useManagedServer": {
+      "label": "Verwalteten Server verwenden"
+    }
+  },
   "hostDetail": {
     "accessTab": "Zugriff",
     "accountName": "Kontoname",
@@ -400,7 +445,15 @@
     "userAccounts": "Benutzerkonten",
     "userGroups": "Benutzergruppen",
     "version": "Version",
-    "viewInstallationLog": "Installationsprotokoll anzeigen"
+    "viewInstallationLog": "Installationsprotokoll anzeigen",
+    "attachToGraylog": "An Graylog anhängen",
+    "attaching": "Wird angehängt...",
+    "graylogAttached": "An Graylog angehängt",
+    "graylogMechanism": "Mechanismus",
+    "graylogNotConfigured": "Graylog-Integration nicht konfiguriert oder nicht gesund",
+    "graylogRequiresPrivileged": "Erfordert Agent im privilegierten Modus",
+    "graylogStatus": "Graylog-Status",
+    "graylogTarget": "Ziel"
   },
   "hosts": {
     "actions": "Aktionen",

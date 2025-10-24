@@ -14,7 +14,6 @@ from backend.services.audit_service import ActionType, AuditService, EntityType,
 
 # Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")
-debug_logger.setLevel(logging.DEBUG)
 
 
 async def handle_script_execution_result(db: Session, connection, message_data: dict):

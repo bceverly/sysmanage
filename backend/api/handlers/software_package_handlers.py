@@ -15,6 +15,7 @@ from backend.persistence.models import (
     AvailablePackage,
     CommercialAntivirusStatus,
     FirewallStatus,
+    GraylogAttachment,
     Host,
     PackageUpdate,
     SoftwarePackage,
@@ -23,7 +24,6 @@ from backend.persistence.models import (
 
 # Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")
-debug_logger.setLevel(logging.DEBUG)
 
 
 async def handle_software_update(db: Session, connection, message_data: dict):
@@ -704,4 +704,78 @@ async def handle_firewall_status_update(db: Session, connection, message_data: d
         return {
             "message_type": "error",
             "error": f"Failed to process firewall status update: {str(e)}",
+        }
+
+
+async def handle_graylog_status_update(db: Session, connection, message_data: dict):
+    """Handle Graylog attachment status update message from agent."""
+    from backend.utils.host_validation import validate_host_id
+
+    # Check for host_id in message data (agent-provided)
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {"message_type": "error", "error": "host_not_registered"}
+
+    if not hasattr(connection, "host_id") or not connection.host_id:
+        return {"message_type": "error", "error": _("Host not registered")}
+
+    try:
+        # Extract Graylog status information
+        is_attached = message_data.get("is_attached", False)
+        target_hostname = message_data.get("target_hostname")
+        target_ip = message_data.get("target_ip")
+        mechanism = message_data.get("mechanism")
+        port = message_data.get("port")
+
+        debug_logger.info(
+            "Processing Graylog status update from %s: is_attached=%s, mechanism=%s",
+            getattr(connection, "hostname", "unknown"),
+            is_attached,
+            mechanism,
+        )
+
+        # Delete existing Graylog status for this host (if any)
+        db.execute(
+            delete(GraylogAttachment).where(
+                GraylogAttachment.host_id == connection.host_id
+            )
+        )
+
+        # Add new Graylog status
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+        graylog_attachment = GraylogAttachment(
+            host_id=connection.host_id,
+            is_attached=is_attached,
+            target_hostname=target_hostname,
+            target_ip=target_ip,
+            mechanism=mechanism,
+            port=port,
+            detected_at=now,
+            updated_at=now,
+        )
+        db.add(graylog_attachment)
+        db.commit()
+
+        debug_logger.info(
+            "Successfully stored Graylog attachment status for host %s",
+            getattr(connection, "hostname", "unknown"),
+        )
+
+        return {
+            "message_type": "graylog_status_update_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "status": "processed",
+        }
+
+    except Exception as e:
+        debug_logger.error(
+            "Error processing Graylog status update from %s: %s",
+            getattr(connection, "hostname", "unknown"),
+            e,
+        )
+        db.rollback()
+        return {
+            "message_type": "error",
+            "error": f"Failed to process Graylog status update: {str(e)}",
         }

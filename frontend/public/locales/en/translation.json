@@ -182,6 +182,51 @@
       "label": "Use Managed Server"
     }
   },
+  "graylog": {
+    "apiToken": {
+      "help": "Optional API token for enhanced features and version detection",
+      "label": "API Token (Optional)"
+    },
+    "checkHealth": "Check Health",
+    "enabled": {
+      "label": "Enable Graylog Integration"
+    },
+    "healthError": {
+      "label": "Health Check Error"
+    },
+    "inputs": {
+      "label": "Inputs"
+    },
+    "mechanism": {
+      "gelfTcp": "GELF TCP",
+      "syslogTcp": "Syslog TCP",
+      "syslogUdp": "Syslog UDP",
+      "windowsSidecar": "Windows Sidecar"
+    },
+    "manualUrl": {
+      "help": "Enter the full URL to your Graylog instance",
+      "label": "Graylog URL"
+    },
+    "noServers": "No Graylog servers found",
+    "selectServer": {
+      "label": "Select Graylog Server"
+    },
+    "serverUrl": {
+      "label": "URL"
+    },
+    "status": {
+      "checking": "Checking...",
+      "disabled": "Disabled",
+      "healthy": "Healthy",
+      "label": "Status",
+      "unhealthy": "Unhealthy",
+      "unknown": "Unknown"
+    },
+    "title": "Graylog Integration",
+    "useManagedServer": {
+      "label": "Use Managed Server"
+    }
+  },
   "hostDetail": {
     "accessTab": "Access",
     "accountName": "Account Name",
@@ -430,7 +475,15 @@
     "userAccounts": "User Accounts",
     "userGroups": "User Groups",
     "version": "Version",
-    "viewInstallationLog": "View Installation Log"
+    "viewInstallationLog": "View Installation Log",
+    "attachToGraylog": "Attach To Graylog",
+    "attaching": "Attaching...",
+    "graylogAttached": "Attached to Graylog",
+    "graylogMechanism": "Mechanism",
+    "graylogNotConfigured": "Graylog integration not configured or not healthy",
+    "graylogRequiresPrivileged": "Requires agent in privileged mode",
+    "graylogStatus": "Graylog Status",
+    "graylogTarget": "Target"
   },
   "hosts": {
     "actions": "Actions",

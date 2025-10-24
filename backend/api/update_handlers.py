@@ -12,29 +12,8 @@ from sqlalchemy.orm import Session
 from backend.i18n import _
 from backend.persistence.models import Host, PackageUpdate
 
-# Logger for debugging
-debug_logger = logging.getLogger("debug_logger")
-debug_logger.setLevel(logging.DEBUG)
-try:
-    import os
-
-    os.makedirs("logs", exist_ok=True)
-    file_handler = logging.FileHandler("logs/backend.log", encoding="utf-8")
-    file_handler.setLevel(logging.DEBUG)
-    from backend.utils.logging_formatter import UTCTimestampFormatter
-
-    formatter = UTCTimestampFormatter("%(levelname)s: %(name)s: %(message)s")
-    file_handler.setFormatter(formatter)
-    debug_logger.addHandler(file_handler)
-except (PermissionError, OSError) as e:
-    # Fall back to console logging if file logging fails
-    from backend.utils.logging_formatter import UTCTimestampFormatter
-
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)
-    formatter = UTCTimestampFormatter("%(levelname)s: %(name)s: %(message)s")
-    console_handler.setFormatter(formatter)
-    debug_logger.addHandler(console_handler)
+# Use standard logger that respects /etc/sysmanage.yaml configuration
+logger = logging.getLogger(__name__)
 
 # Cache for storing update results
 update_results_cache = {}
@@ -59,7 +38,7 @@ async def handle_update_apply_result(db: Session, connection, message_data: dict
         failed_packages = message_data.get("failed_packages", [])
         requires_reboot = message_data.get("requires_reboot", False)
 
-        debug_logger.info(
+        logger.info(
             "Update application result from %s: %d succeeded, %d failed",
             hostname,
             len(updated_packages),
@@ -97,7 +76,7 @@ async def handle_update_apply_result(db: Session, connection, message_data: dict
                     )
                 )
                 result = db.execute(stmt)
-                debug_logger.info(
+                logger.info(
                     "Updated package %s status to completed (rows affected: %d)",
                     package_name,
                     result.rowcount,
@@ -126,7 +105,7 @@ async def handle_update_apply_result(db: Session, connection, message_data: dict
                     )
                 )
                 result = db.execute(stmt)
-                debug_logger.info(
+                logger.info(
                     "Updated package %s status to failed (rows affected: %d)",
                     package_name,
                     result.rowcount,
@@ -143,7 +122,7 @@ async def handle_update_apply_result(db: Session, connection, message_data: dict
 
         db.commit()
 
-        debug_logger.info(
+        logger.info(
             "Update results processed successfully for host %s", connection.host_id
         )
 
@@ -155,7 +134,7 @@ async def handle_update_apply_result(db: Session, connection, message_data: dict
         }
 
     except Exception as e:
-        debug_logger.error("Error processing update results: %s", e)
+        logger.error("Error processing update results: %s", e)
         db.rollback()
         return {
             "message_type": "error",

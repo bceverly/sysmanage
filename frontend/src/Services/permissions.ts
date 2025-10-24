@@ -72,6 +72,8 @@ export const SecurityRoles = {
     DELETE_QUEUE_MESSAGE: 'Delete Queue Message',
     // - Grafana Operations (alphabetical)
     ENABLE_GRAFANA_INTEGRATION: 'Enable Grafana Integration',
+    // - Graylog Operations (alphabetical)
+    ENABLE_GRAYLOG_INTEGRATION: 'Enable Graylog Integration',
     // - OpenTelemetry Operations (alphabetical)
     DEPLOY_OPENTELEMETRY: 'Deploy OpenTelemetry',
     RESTART_OPENTELEMETRY_SERVICE: 'Restart OpenTelemetry Service',

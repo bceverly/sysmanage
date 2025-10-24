@@ -166,6 +166,51 @@
       "label": "使用托管服务器"
     }
   },
+  "graylog": {
+    "apiToken": {
+      "help": "用于增强功能和版本检测的可选 API 令牌",
+      "label": "API 令牌（可选）"
+    },
+    "checkHealth": "检查健康状态",
+    "enabled": {
+      "label": "启用 Graylog 集成"
+    },
+    "healthError": {
+      "label": "健康检查错误"
+    },
+    "inputs": {
+      "label": "输入"
+    },
+    "mechanism": {
+      "gelfTcp": "GELF TCP",
+      "syslogTcp": "Syslog TCP",
+      "syslogUdp": "Syslog UDP",
+      "windowsSidecar": "Windows Sidecar"
+    },
+    "manualUrl": {
+      "help": "输入您的 Graylog 实例的完整 URL",
+      "label": "Graylog URL"
+    },
+    "noServers": "未找到 Graylog 服务器",
+    "selectServer": {
+      "label": "选择 Graylog 服务器"
+    },
+    "serverUrl": {
+      "label": "URL"
+    },
+    "status": {
+      "checking": "检查中...",
+      "disabled": "已禁用",
+      "healthy": "健康",
+      "label": "状态",
+      "unhealthy": "不健康",
+      "unknown": "未知"
+    },
+    "title": "Graylog 集成",
+    "useManagedServer": {
+      "label": "使用托管服务器"
+    }
+  },
   "hostDetail": {
     "accessTab": "访问",
     "accountName": "账户名称",
@@ -383,7 +428,15 @@
     "userAccounts": "用户账户",
     "userGroups": "用户组",
     "version": "版本",
-    "viewInstallationLog": "查看安装日志"
+    "viewInstallationLog": "查看安装日志",
+    "attachToGraylog": "附加到Graylog",
+    "attaching": "附加中...",
+    "graylogAttached": "已附加到Graylog",
+    "graylogMechanism": "机制",
+    "graylogNotConfigured": "Graylog集成未配置或不健康",
+    "graylogRequiresPrivileged": "需要特权模式下的代理",
+    "graylogStatus": "Graylog状态",
+    "graylogTarget": "目标"
   },
   "hosts": {
     "actions": "操作",

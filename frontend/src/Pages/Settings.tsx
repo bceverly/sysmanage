@@ -41,6 +41,7 @@ import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import EmailConfigCard from '../Components/EmailConfigCard';
 import OpenBAOStatusCard from '../Components/OpenBAOStatusCard';
 import GrafanaIntegrationCard from '../Components/GrafanaIntegrationCard';
+import GraylogIntegrationCard from '../Components/GraylogIntegrationCard';
 import OpenTelemetryStatusCard from '../Components/OpenTelemetryStatusCard';
 import PrometheusStatusCard from '../Components/PrometheusStatusCard';
 import UbuntuProSettings from '../Components/UbuntuProSettings';
@@ -813,6 +814,10 @@ const Settings: React.FC = () => {
 
       <Box sx={{ mb: 3 }}>
         <GrafanaIntegrationCard />
+      </Box>
+
+      <Box sx={{ mb: 3 }}>
+        <GraylogIntegrationCard />
       </Box>
 
       <Box sx={{ mb: 3 }}>

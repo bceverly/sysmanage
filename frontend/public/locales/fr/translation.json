@@ -180,6 +180,51 @@
       "label": "Utiliser le serveur géré"
     }
   },
+  "graylog": {
+    "apiToken": {
+      "help": "Jeton API facultatif pour les fonctionnalités améliorées et la détection de version",
+      "label": "Jeton API (Facultatif)"
+    },
+    "checkHealth": "Vérifier la santé",
+    "enabled": {
+      "label": "Activer l'intégration Graylog"
+    },
+    "healthError": {
+      "label": "Erreur de vérification de santé"
+    },
+    "inputs": {
+      "label": "Entrées"
+    },
+    "mechanism": {
+      "gelfTcp": "GELF TCP",
+      "syslogTcp": "Syslog TCP",
+      "syslogUdp": "Syslog UDP",
+      "windowsSidecar": "Windows Sidecar"
+    },
+    "manualUrl": {
+      "help": "Entrez l'URL complète de votre instance Graylog",
+      "label": "URL Graylog"
+    },
+    "noServers": "Aucun serveur Graylog trouvé",
+    "selectServer": {
+      "label": "Sélectionner le serveur Graylog"
+    },
+    "serverUrl": {
+      "label": "URL"
+    },
+    "status": {
+      "checking": "Vérification en cours...",
+      "disabled": "Désactivé",
+      "healthy": "Sain",
+      "label": "Statut",
+      "unhealthy": "Malsain",
+      "unknown": "Inconnu"
+    },
+    "title": "Intégration Graylog",
+    "useManagedServer": {
+      "label": "Utiliser le serveur géré"
+    }
+  },
   "hostDetail": {
     "accessTab": "Accès",
     "accountName": "Nom du compte",
@@ -400,7 +445,15 @@
     "userAccounts": "Comptes Utilisateur",
     "userGroups": "Groupes d'Utilisateurs",
     "version": "Version",
-    "viewInstallationLog": "Voir le Journal d'Installation"
+    "viewInstallationLog": "Voir le Journal d'Installation",
+    "attachToGraylog": "Attacher à Graylog",
+    "attaching": "Attachement...",
+    "graylogAttached": "Attaché à Graylog",
+    "graylogMechanism": "Mécanisme",
+    "graylogNotConfigured": "Intégration Graylog non configurée ou non saine",
+    "graylogRequiresPrivileged": "Nécessite un agent en mode privilégié",
+    "graylogStatus": "État de Graylog",
+    "graylogTarget": "Cible"
   },
   "hosts": {
     "actions": "Actions",

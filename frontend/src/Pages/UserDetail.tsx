@@ -352,7 +352,7 @@ const UserDetail = () => {
 
             <Grid container spacing={3}>
                 {/* Basic Information */}
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Card>
                         <CardContent>
                             <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
@@ -361,15 +361,15 @@ const UserDetail = () => {
                             </Typography>
                             <Grid container spacing={2}>
                                 {/* Left Column */}
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Grid container spacing={2}>
-                                        <Grid item xs={12}>
+                                        <Grid size={{ xs: 12 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('userDetail.userId', 'User ID')}
                                             </Typography>
                                             <Typography variant="body1">{user.id.toString()}</Typography>
                                         </Grid>
-                                        <Grid item xs={12}>
+                                        <Grid size={{ xs: 12 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('userDetail.active', 'Active')}
                                             </Typography>
@@ -379,7 +379,7 @@ const UserDetail = () => {
                                                 size="small"
                                             />
                                         </Grid>
-                                        <Grid item xs={12}>
+                                        <Grid size={{ xs: 12 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('userDetail.lastAccess', 'Last Access')}
                                             </Typography>
@@ -388,21 +388,21 @@ const UserDetail = () => {
                                     </Grid>
                                 </Grid>
                                 {/* Right Column */}
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Grid container spacing={2}>
-                                        <Grid item xs={12}>
+                                        <Grid size={{ xs: 12 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('users.email', 'Email')}
                                             </Typography>
                                             <Typography variant="body1">{user.userid}</Typography>
                                         </Grid>
-                                        <Grid item xs={12}>
+                                        <Grid size={{ xs: 12 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('userDetail.firstName', 'First Name')}
                                             </Typography>
                                             <Typography variant="body1">{user.first_name || t('common.notAvailable', 'N/A')}</Typography>
                                         </Grid>
-                                        <Grid item xs={12}>
+                                        <Grid size={{ xs: 12 }}>
                                             <Typography variant="body2" color="textSecondary">
                                                 {t('userDetail.lastName', 'Last Name')}
                                             </Typography>
@@ -416,7 +416,7 @@ const UserDetail = () => {
                 </Grid>
 
                 {/* Security Information */}
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Card>
                         <CardContent>
                             <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -451,7 +451,7 @@ const UserDetail = () => {
                                 </Box>
                             </Box>
                             <Grid container spacing={2}>
-                                <Grid item xs={12}>
+                                <Grid size={{ xs: 12 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('users.status', 'Status')}
                                     </Typography>
@@ -469,7 +469,7 @@ const UserDetail = () => {
                                         )}
                                     </Box>
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={{ xs: 12 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('userDetail.failedAttempts', 'Failed Login Attempts')}
                                     </Typography>
@@ -477,7 +477,7 @@ const UserDetail = () => {
                                         {user.failed_login_attempts || 0}
                                     </Typography>
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={{ xs: 12 }}>
                                     <Typography variant="body2" color="textSecondary">
                                         {t('userDetail.lockedAt', 'Locked At')}
                                     </Typography>
@@ -492,7 +492,7 @@ const UserDetail = () => {
 
                 {/* Security Roles - Only show if user has VIEW permission */}
                 {canViewUserSecurityRoles && (
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                     <Card>
                         <CardContent>
                             <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -552,7 +552,7 @@ const UserDetail = () => {
                                             <FormGroup>
                                                 <Grid container spacing={1}>
                                                     {group.roles.map((role) => (
-                                                        <Grid item xs={12} sm={6} md={4} key={role.id}>
+                                                        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={role.id}>
                                                             <FormControlLabel
                                                                 control={
                                                                     <Checkbox

@@ -300,7 +300,12 @@ async def _enqueue_inbound_message(message, connection, db):
 
 
 async def _handle_message_by_type(message, connection, db):
-    """Handle message routing by message type."""
+    """
+    Handle time-sensitive messages that need immediate processing.
+
+    Note: This function is ONLY called for HEARTBEAT and SYSTEM_INFO messages.
+    All other message types are queued and processed by the inbound processor.
+    """
     if message.message_type == MessageType.SYSTEM_INFO:
         await _handle_system_info_message(message, connection, db)
 
@@ -311,66 +316,13 @@ async def _handle_message_by_type(message, connection, db):
         heartbeat_data["message_id"] = message.message_id
         await handle_heartbeat(db, connection, heartbeat_data)
 
-    elif message.message_type == MessageType.COMMAND_RESULT:
-        logger.info("Calling handle_command_result")
-        await handle_command_result(connection, message.data)
-
-    elif message.message_type == MessageType.ERROR:
-        logger.info("Processing ERROR message type")
-        # Agent reported error - no action needed
-
-    elif message.message_type == "config_ack":
-        logger.info("Calling handle_config_acknowledgment")
-        # Handle configuration acknowledgment
-        await handle_config_acknowledgment(connection, message.data)
-
-    elif message.message_type in [
-        MessageType.OS_VERSION_UPDATE,
-        MessageType.HARDWARE_UPDATE,
-        MessageType.USER_ACCESS_UPDATE,
-        MessageType.SOFTWARE_INVENTORY_UPDATE,
-        MessageType.PACKAGE_UPDATES_UPDATE,
-        MessageType.REBOOT_STATUS_UPDATE,
-        MessageType.HOST_CERTIFICATES_UPDATE,
-        MessageType.ROLE_DATA,
-        MessageType.THIRD_PARTY_REPOSITORY_UPDATE,
-        MessageType.ANTIVIRUS_STATUS_UPDATE,
-        MessageType.COMMERCIAL_ANTIVIRUS_STATUS_UPDATE,
-        MessageType.FIREWALL_STATUS_UPDATE,
-    ]:
-        # Process inventory message using helper function
-        logger.info("Received inventory message type: %s", message.message_type)
-        await _process_inventory_message(message, connection, db)
-
-    elif message.message_type == MessageType.UPDATE_APPLY_RESULT:
-        await _handle_update_result_message(message, connection, db)
-
-    elif message.message_type == MessageType.SCRIPT_EXECUTION_RESULT:
-        await _handle_script_execution_result(message, connection, db)
-
-    elif message.message_type == MessageType.DIAGNOSTIC_COLLECTION_RESULT:
-        await _handle_diagnostic_result_msg(message, connection, db)
-
-    elif message.message_type == "package_installation_status":
-        logger.info("Calling handle_installation_status")
-        await handle_installation_status(db, connection, message.data)
-
-    elif message.message_type == "available_packages_batch_start":
-        await _handle_packages_batch_message(message, connection, db)
-
-    elif message.message_type == "available_packages_batch":
-        await _handle_packages_batch_message(message, connection, db)
-
-    elif message.message_type == "available_packages_batch_end":
-        await _handle_packages_batch_message(message, connection, db)
-
     else:
-        # Unknown message type - send error
-        error_msg = ErrorMessage(
-            "unknown_message_type",
-            f"Unknown message type: {message.message_type}",
+        # This should never happen - log a warning
+        logger.warning(
+            "Unexpected message type in _handle_message_by_type: %s. "
+            "This function should only be called for HEARTBEAT and SYSTEM_INFO messages.",
+            message.message_type,
         )
-        await connection.send_message(error_msg.to_dict())
 
 
 async def _handle_script_execution_result(message, connection, db):

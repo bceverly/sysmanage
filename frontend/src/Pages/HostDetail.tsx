@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import AntivirusStatusCard from '../Components/AntivirusStatusCard';
 import CommercialAntivirusStatusCard from '../Components/CommercialAntivirusStatusCard';
 import FirewallStatusCard from '../Components/FirewallStatusCard';
+import GraylogAttachmentModal from '../Components/GraylogAttachmentModal';
 import { 
     Box, 
     Card, 
@@ -71,6 +72,7 @@ import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as 
 import { SysManageUser, doGetMe } from '../Services/users';
 import { SecretResponse } from '../Services/secrets';
 import { doCheckOpenTelemetryEligibility, doDeployOpenTelemetry, doGetOpenTelemetryStatus, doStartOpenTelemetry, doStopOpenTelemetry, doRestartOpenTelemetry, doConnectOpenTelemetryToGrafana, doDisconnectOpenTelemetryFromGrafana, doRemoveOpenTelemetry } from '../Services/opentelemetry';
+import { doCheckGraylogHealth, doGetGraylogAttachment } from '../Services/graylog';
 import ThirdPartyRepositories from './ThirdPartyRepositories';
 
 // Certificate interface
@@ -185,8 +187,15 @@ const HostDetail = () => {
     const [serviceControlLoading, setServiceControlLoading] = useState<boolean>(false);
     const [openTelemetryStatus, setOpenTelemetryStatus] = useState<{deployed: boolean, service_status: string, grafana_url: string | null, grafana_configured: boolean} | null>(null);
     const [openTelemetryLoading, setOpenTelemetryLoading] = useState<boolean>(false);
+    const [graylogAttached, setGraylogAttached] = useState<boolean>(false);
+    const [graylogLoading, setGraylogLoading] = useState<boolean>(false);
+    const [graylogMechanism, setGraylogMechanism] = useState<string | null>(null);
+    const [graylogTargetHostname, setGraylogTargetHostname] = useState<string | null>(null);
+    const [graylogTargetIp, setGraylogTargetIp] = useState<string | null>(null);
+    const [graylogPort, setGraylogPort] = useState<number | null>(null);
     const rolesRefreshInterval = useRef<ReturnType<typeof setInterval> | null>(null);
     const openTelemetryRefreshInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+    const graylogRefreshInterval = useRef<ReturnType<typeof setInterval> | null>(null);
     const [certificateFilter, setCertificateFilter] = useState<'all' | 'ca' | 'server' | 'client'>('server');
     const [certificatePaginationModel, setCertificatePaginationModel] = useState({ page: 0, pageSize: 10 });
     const [certificateSearchTerm, setCertificateSearchTerm] = useState<string>('');
@@ -271,6 +280,11 @@ const HostDetail = () => {
     const [canDeployOpenTelemetry, setCanDeployOpenTelemetry] = useState<boolean>(false);  // User has permission to see button
     const [openTelemetryEligible, setOpenTelemetryEligible] = useState<boolean>(false);  // Deployment is actually allowed
     const [openTelemetryDeploying, setOpenTelemetryDeploying] = useState<boolean>(false);
+
+    // Graylog attachment states
+    const [canAttachGraylog, setCanAttachGraylog] = useState<boolean>(false);  // Graylog integration enabled and healthy
+    const [graylogEligible, setGraylogEligible] = useState<boolean>(false);  // Agent is privileged
+    const [graylogAttachModalOpen, setGraylogAttachModalOpen] = useState<boolean>(false);
 
     // Installation history state
     interface InstallationHistoryItem {
@@ -450,6 +464,23 @@ const HostDetail = () => {
             console.error('Error fetching OpenTelemetry status:', err);
         } finally {
             setOpenTelemetryLoading(false);
+        }
+    }, [hostId]);
+
+    const fetchGraylogAttachment = useCallback(async () => {
+        if (!hostId) return;
+        try {
+            setGraylogLoading(true);
+            const attachment = await doGetGraylogAttachment(hostId);
+            setGraylogAttached(attachment.is_attached);
+            setGraylogMechanism(attachment.mechanism);
+            setGraylogTargetHostname(attachment.target_hostname);
+            setGraylogTargetIp(attachment.target_ip);
+            setGraylogPort(attachment.port);
+        } catch (err) {
+            console.error('Error fetching Graylog attachment:', err);
+        } finally {
+            setGraylogLoading(false);
         }
     }, [hostId]);
 
@@ -698,11 +729,45 @@ const HostDetail = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentTab, host?.active, host?.id, fetchOpenTelemetryStatus]);
 
-    // Cleanup OpenTelemetry interval on unmount
+    // Fetch Graylog attachment status when Info tab is active
+    useEffect(() => {
+        if (currentTab === 0 && host && host.active) {
+            fetchGraylogAttachment();
+        }
+    }, [currentTab, host?.active, host, fetchGraylogAttachment]);
+
+    // Auto-refresh Graylog status every 30 seconds when on Info tab
+    useEffect(() => {
+        if (currentTab === 0 && host && host.active) {
+            // Start auto-refresh every 30 seconds
+            const interval = setInterval(() => {
+                fetchGraylogAttachment();
+            }, 30000);
+            graylogRefreshInterval.current = interval;
+
+            return () => {
+                if (interval) {
+                    clearInterval(interval);
+                }
+            };
+        } else {
+            // Clear interval when tab is not active or host is not active
+            if (graylogRefreshInterval.current) {
+                clearInterval(graylogRefreshInterval.current);
+                graylogRefreshInterval.current = null;
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentTab, host?.active, host?.id, fetchGraylogAttachment]);
+
+    // Cleanup intervals on unmount
     useEffect(() => {
         return () => {
             if (openTelemetryRefreshInterval.current) {
                 clearInterval(openTelemetryRefreshInterval.current);
+            }
+            if (graylogRefreshInterval.current) {
+                clearInterval(graylogRefreshInterval.current);
             }
         };
     }, []);
@@ -909,6 +974,35 @@ const HostDetail = () => {
         };
 
         checkOpenTelemetryEligibility();
+    }, [hostId, host]);
+
+    // Check Graylog eligibility when host is loaded
+    useEffect(() => {
+        const checkGraylogEligibility = async () => {
+            if (!hostId || !host) return;
+
+            // Don't check eligibility if host is not active (down)
+            if (!host.active) {
+                setCanAttachGraylog(false);
+                setGraylogEligible(false);
+                return;
+            }
+
+            try {
+                // Check if Graylog integration is enabled and healthy
+                const graylogHealth = await doCheckGraylogHealth();
+                setCanAttachGraylog(graylogHealth.healthy);
+
+                // Check if agent is running in privileged mode
+                setGraylogEligible(host.is_agent_privileged || false);
+            } catch (error) {
+                console.log('Failed to check Graylog eligibility:', error);
+                setCanAttachGraylog(false);
+                setGraylogEligible(false);
+            }
+        };
+
+        checkGraylogEligibility();
     }, [hostId, host]);
 
     // Tag-related functions
@@ -1610,6 +1704,16 @@ const HostDetail = () => {
 
     // Check if diagnostics are currently being processed based on persistent state
     const isDiagnosticsProcessing = host?.diagnostics_request_status === 'pending';
+
+    const handleAttachToGraylog = () => {
+        setGraylogAttachModalOpen(true);
+    };
+
+    const handleGraylogAttachModalClose = () => {
+        setGraylogAttachModalOpen(false);
+        // Refresh Graylog attachment status after modal closes
+        fetchGraylogAttachment();
+    };
 
     const handleDeployOpenTelemetry = async () => {
         if (!hostId) return;
@@ -2982,6 +3086,89 @@ const HostDetail = () => {
                     </Card>
                 </Grid>
 
+                {/* Graylog Status */}
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <Card sx={{ height: '100%' }}>
+                        <CardContent>
+                            <Typography variant="subtitle1" sx={{ mb: 2, display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                <StorageIcon sx={{ mr: 1 }} />
+                                {t('hostDetail.graylogStatus', 'Graylog Status')}
+                            </Typography>
+                            {graylogLoading ? (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                                    <CircularProgress size={24} />
+                                </Box>
+                            ) : (
+                                <Grid container spacing={2}>
+                                    <Grid size={{ xs: 12 }}>
+                                        <Typography variant="body2" color="textSecondary">
+                                            {t('hostDetail.graylogAttached', 'Attached to Graylog')}
+                                        </Typography>
+                                        <Typography variant="body1">
+                                            {graylogAttached ? t('common.yes', 'Yes') : t('common.no', 'No')}
+                                        </Typography>
+                                    </Grid>
+                                    {graylogAttached && (
+                                        <>
+                                            {graylogMechanism && (
+                                                <Grid size={{ xs: 12 }}>
+                                                    <Typography variant="body2" color="textSecondary">
+                                                        {t('hostDetail.graylogMechanism', 'Mechanism')}
+                                                    </Typography>
+                                                    <Typography variant="body1">
+                                                        {graylogMechanism === 'syslog_tcp' && t('graylog.mechanism.syslogTcp', 'Syslog TCP')}
+                                                        {graylogMechanism === 'syslog_udp' && t('graylog.mechanism.syslogUdp', 'Syslog UDP')}
+                                                        {graylogMechanism === 'gelf_tcp' && t('graylog.mechanism.gelfTcp', 'GELF TCP')}
+                                                        {graylogMechanism === 'windows_sidecar' && t('graylog.mechanism.windowsSidecar', 'Windows Sidecar')}
+                                                        {graylogPort && ` (port ${graylogPort})`}
+                                                    </Typography>
+                                                </Grid>
+                                            )}
+                                            {(graylogTargetHostname || graylogTargetIp) && (
+                                                <Grid size={{ xs: 12 }}>
+                                                    <Typography variant="body2" color="textSecondary">
+                                                        {t('hostDetail.graylogTarget', 'Target')}
+                                                    </Typography>
+                                                    <Typography variant="body1">
+                                                        {graylogTargetHostname || graylogTargetIp}
+                                                    </Typography>
+                                                </Grid>
+                                            )}
+                                        </>
+                                    )}
+                                    {!graylogAttached && canAttachGraylog && graylogEligible && (
+                                        <Grid size={{ xs: 12 }}>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                size="small"
+                                                onClick={handleAttachToGraylog}
+                                                disabled={graylogLoading}
+                                            >
+                                                {t('hostDetail.attachToGraylog', 'Attach To Graylog')}
+                                            </Button>
+                                        </Grid>
+                                    )}
+                                    {!canAttachGraylog && (
+                                        <Grid size={{ xs: 12 }}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('hostDetail.graylogNotConfigured', 'Graylog integration not configured or not healthy')}
+                                            </Typography>
+                                        </Grid>
+                                    )}
+                                    {canAttachGraylog && !graylogEligible && (
+                                        <Grid size={{ xs: 12 }}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {t('hostDetail.graylogRequiresPrivileged', 'Requires agent in privileged mode')}
+                                            </Typography>
+                                        </Grid>
+                                    )}
+                                </Grid>
+                            )}
+                        </CardContent>
+                    </Card>
+                </Grid>
+
                 {/* Tags */}
                 <Grid size={{ xs: 12, md: 6 }}>
                     <Card sx={{ height: '100%' }}>
@@ -3400,6 +3587,22 @@ const HostDetail = () => {
                                                 onClick={handleDeployOpenTelemetry}
                                             >
                                                 {t('hostDetail.deployOpenTelemetry', 'Deploy OpenTelemetry')}
+                                            </Button>
+                                        )}
+                                        {canAttachGraylog && (
+                                            <Button
+                                                variant="contained"
+                                                startIcon={<SystemUpdateAltIcon />}
+                                                disabled={!graylogEligible || graylogAttached}
+                                                sx={{
+                                                    backgroundColor: 'info.main',
+                                                    '&:hover': { backgroundColor: 'info.dark' },
+                                                    height: '40px',
+                                                    minHeight: '40px'
+                                                }}
+                                                onClick={handleAttachToGraylog}
+                                            >
+                                                {t('hostDetail.attachToGraylog', 'Attach To Graylog')}
                                             </Button>
                                         )}
                                     </Box>
@@ -5583,6 +5786,13 @@ const HostDetail = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <GraylogAttachmentModal
+                open={graylogAttachModalOpen}
+                onClose={handleGraylogAttachModalClose}
+                hostId={hostId || ''}
+                hostPlatform={host?.os || ''}
+            />
         </Box>
     );
 };

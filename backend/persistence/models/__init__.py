@@ -8,6 +8,8 @@ All models are re-exported here for backward compatibility.
 # Re-export all models for backward compatibility
 from .core import *
 from .grafana_integration import *
+from .graylog_attachment import *
+from .graylog_integration import *
 from .hardware import *
 from .host_certificate import *
 from .host_role import *
@@ -62,6 +64,9 @@ __all__ = [
     "HostRole",
     # Grafana integration models
     "GrafanaIntegrationSettings",
+    # Graylog integration models
+    "GraylogIntegrationSettings",
+    "GraylogAttachment",
     # Security role models
     "SecurityRoleGroup",
     "SecurityRole",

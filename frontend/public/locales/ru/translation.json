@@ -166,6 +166,51 @@
       "label": "Использовать управляемый сервер"
     }
   },
+  "graylog": {
+    "apiToken": {
+      "help": "Необязательный API токен для расширенных функций и определения версии",
+      "label": "API токен (Необязательно)"
+    },
+    "checkHealth": "Проверить состояние",
+    "enabled": {
+      "label": "Включить интеграцию Graylog"
+    },
+    "healthError": {
+      "label": "Ошибка проверки состояния"
+    },
+    "inputs": {
+      "label": "Входы"
+    },
+    "mechanism": {
+      "gelfTcp": "GELF TCP",
+      "syslogTcp": "Syslog TCP",
+      "syslogUdp": "Syslog UDP",
+      "windowsSidecar": "Windows Sidecar"
+    },
+    "manualUrl": {
+      "help": "Введите полный URL к вашему экземпляру Graylog",
+      "label": "URL Graylog"
+    },
+    "noServers": "Серверы Graylog не найдены",
+    "selectServer": {
+      "label": "Выбрать сервер Graylog"
+    },
+    "serverUrl": {
+      "label": "URL"
+    },
+    "status": {
+      "checking": "Проверка...",
+      "disabled": "Отключено",
+      "healthy": "Работает",
+      "label": "Статус",
+      "unhealthy": "Не работает",
+      "unknown": "Неизвестно"
+    },
+    "title": "Интеграция Graylog",
+    "useManagedServer": {
+      "label": "Использовать управляемый сервер"
+    }
+  },
   "hostDetail": {
     "accessTab": "Доступ",
     "accountName": "Название аккаунта",
@@ -370,7 +415,15 @@
     "userAccounts": "Учетные записи пользователей",
     "userGroups": "Группы пользователей",
     "version": "Версия",
-    "viewInstallationLog": "Просмотреть Журнал Установки"
+    "viewInstallationLog": "Просмотреть Журнал Установки",
+    "attachToGraylog": "Подключить к Graylog",
+    "attaching": "Подключение...",
+    "graylogAttached": "Подключено к Graylog",
+    "graylogMechanism": "Механизм",
+    "graylogNotConfigured": "Интеграция Graylog не настроена или не работает",
+    "graylogRequiresPrivileged": "Требуется агент в привилегированном режиме",
+    "graylogStatus": "Статус Graylog",
+    "graylogTarget": "Цель"
   },
   "hosts": {
     "actions": "Действия",

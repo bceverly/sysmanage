@@ -21,6 +21,7 @@ from backend.api import (
     firewall_status,
     fleet,
     grafana_integration,
+    graylog_integration,
     host,
     openbao,
     opentelemetry,
@@ -216,6 +217,12 @@ def register_routes(app: FastAPI):
         grafana_integration.router, prefix="/api/grafana", tags=["grafana"]
     )  # /api/grafana/* (with auth)
     logger.info("Grafana integration router added")
+
+    logger.info("Adding Graylog integration router with /api prefix")
+    app.include_router(
+        graylog_integration.router, prefix="/api/graylog", tags=["graylog"]
+    )  # /api/graylog/* (with auth)
+    logger.info("Graylog integration router added")
 
     logger.info("Adding Telemetry router with /api prefix")
     app.include_router(

@@ -187,6 +187,12 @@ class Host(Base):
     grafana_integration = relationship(
         "GrafanaIntegrationSettings", back_populates="host", uselist=False
     )
+    graylog_integration = relationship(
+        "GraylogIntegrationSettings", back_populates="host", uselist=False
+    )
+    graylog_attachment = relationship(
+        "GraylogAttachment", back_populates="host", uselist=False
+    )
 
     def __repr__(self):
         return f"<Host(id={self.id}, fqdn='{self.fqdn}', active={self.active})>"

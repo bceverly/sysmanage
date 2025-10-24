@@ -102,9 +102,13 @@ like to add:
     every host that is approved
     on registration.
 
-10. Add the ability to hook up a
-    remote host to Graylog for
-    log aggregation.
+10. Add the ability to deploy
+    a Graylog server as well as
+    a Grafana server, given a
+    host that it should be
+    deployed to.  Perhaps do the
+    same with database servers
+    of various ilks as well?
 
 11. Based on server roles that
     we detect, recommend firewall
@@ -132,3 +136,13 @@ like to add:
     all three of these and
     associate them with a
     particular host.
+
+13. Add installer for sysmanage
+    itself.
+
+14. Add snap for sysmanage and
+    sysmanage-agent based off
+    of 24.04
+
+15. Add flatpak for sysmanage and
+    sysmanage-agent.

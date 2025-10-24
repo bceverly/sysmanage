@@ -707,3 +707,39 @@ msgstr "Gebruikersbeveiligingsrollen (RBAC)"
 
 msgid "No security roles assigned"
 msgstr "Geen beveiligingsrollen toegewezen"
+
+msgid "User not found"
+msgstr "Gebruiker niet gevonden"
+
+msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
+msgstr "Toestemming geweigerd: ENABLE_GRAYLOG_INTEGRATION rol vereist"
+
+msgid "Selected host does not have Graylog server role"
+msgstr "Geselecteerde host heeft geen Graylog serverrol"
+
+msgid "Failed to securely store API token"
+msgstr "Veilig opslaan van API-token mislukt"
+
+msgid "Graylog integration settings updated successfully"
+msgstr "Graylog integratie-instellingen succesvol bijgewerkt"
+
+msgid "Graylog integration has not been configured"
+msgstr "Graylog integratie is niet geconfigureerd"
+
+msgid "Graylog integration is not enabled"
+msgstr "Graylog integratie is niet ingeschakeld"
+
+msgid "Error retrieving Graylog URL: %s"
+msgstr "Fout bij ophalen Graylog URL: %s"
+
+msgid "Graylog URL is not configured"
+msgstr "Graylog URL is niet geconfigureerd"
+
+msgid "Connection timeout - Graylog server may be unreachable"
+msgstr "Verbindingstime-out - Graylog server is mogelijk onbereikbaar"
+
+msgid "Connection failed - Graylog server may be down or unreachable"
+msgstr "Verbinding mislukt - Graylog server is mogelijk offline of onbereikbaar"
+
+msgid "Unexpected error checking Graylog health"
+msgstr "Onverwachte fout bij controleren Graylog status"

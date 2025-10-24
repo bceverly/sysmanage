@@ -166,6 +166,51 @@
       "label": "Usa server gestito"
     }
   },
+  "graylog": {
+    "apiToken": {
+      "help": "Token API opzionale per funzionalità avanzate e rilevamento versione",
+      "label": "Token API (Opzionale)"
+    },
+    "checkHealth": "Controlla salute",
+    "enabled": {
+      "label": "Abilita integrazione Graylog"
+    },
+    "healthError": {
+      "label": "Errore controllo salute"
+    },
+    "inputs": {
+      "label": "Input"
+    },
+    "mechanism": {
+      "gelfTcp": "GELF TCP",
+      "syslogTcp": "Syslog TCP",
+      "syslogUdp": "Syslog UDP",
+      "windowsSidecar": "Windows Sidecar"
+    },
+    "manualUrl": {
+      "help": "Inserisci l'URL completo della tua istanza Graylog",
+      "label": "URL Graylog"
+    },
+    "noServers": "Nessun server Graylog trovato",
+    "selectServer": {
+      "label": "Seleziona server Graylog"
+    },
+    "serverUrl": {
+      "label": "URL"
+    },
+    "status": {
+      "checking": "Controllo in corso...",
+      "disabled": "Disabilitato",
+      "healthy": "Sano",
+      "label": "Stato",
+      "unhealthy": "Non sano",
+      "unknown": "Sconosciuto"
+    },
+    "title": "Integrazione Graylog",
+    "useManagedServer": {
+      "label": "Usa server gestito"
+    }
+  },
   "hostDetail": {
     "accessTab": "Accesso",
     "accountName": "Nome dell'account",
@@ -383,7 +428,15 @@
     "userAccounts": "Account Utente",
     "userGroups": "Gruppi Utente",
     "version": "Versione",
-    "viewInstallationLog": "Visualizza Log di Installazione"
+    "viewInstallationLog": "Visualizza Log di Installazione",
+    "attachToGraylog": "Collega a Graylog",
+    "attaching": "Collegamento...",
+    "graylogAttached": "Collegato a Graylog",
+    "graylogMechanism": "Meccanismo",
+    "graylogNotConfigured": "Integrazione Graylog non configurata o non integra",
+    "graylogRequiresPrivileged": "Richiede agente in modalità privilegiata",
+    "graylogStatus": "Stato Graylog",
+    "graylogTarget": "Destinazione"
   },
   "hosts": {
     "actions": "Azioni",
