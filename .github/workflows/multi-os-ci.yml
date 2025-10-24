@@ -143,6 +143,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest pytest-cov pytest-asyncio
+        pip install alembic
+        pip list | grep -i alembic || echo "Alembic not found in pip list"
+      shell: bash
 
     - name: Create test config (macOS with SQLite)
       if: runner.os == 'macOS'
@@ -237,6 +240,7 @@ jobs:
 
     - name: Run backend database migrations
       run: |
+        python -c "import sys; import alembic; print(f'Alembic found at: {alembic.__file__}')"
         python -c "from alembic.config import Config; from alembic import command; cfg = Config('alembic.ini'); command.upgrade(cfg, 'head')"
       env:
         PYTHONPATH: .
