@@ -140,9 +140,8 @@ like to add:
 13. Add installer for sysmanage
     itself.
 
-14. Add snap for sysmanage and
-    sysmanage-agent based off
-    of 24.04
+14. Add snap for sysmanage.
 
-15. Add flatpak for sysmanage and
-    sysmanage-agent.
+15. Add flatpak for sysmanage-agent.
+
+16.  Add a flatpak for sysmanage.
