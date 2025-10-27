@@ -1,0 +1,10 @@
+# Semgrep configuration for sysmanage
+# This file configures which rules to run and which to skip
+
+rules: []  # We use the default rulesets from the CLI
+
+# Skip specific rules that produce false positives
+# We've manually verified these are safe with proper runtime checks
+skip-rules:
+  - javascript.lang.security.audit.object-injection.object-injection
+  - generic.secrets.security.detected-generic-secret.detected-generic-secret

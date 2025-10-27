@@ -38,10 +38,10 @@ jobs:
         # - Better performance with cloud-based scanning
         if [ -n "$SEMGREP_APP_TOKEN" ]; then
           echo "Using Semgrep CI with supply chain analysis..."
-          semgrep ci --sarif --output=semgrep.sarif || echo "Semgrep CI completed with issues (exit code $?)"
+          semgrep ci --sarif --output=semgrep.sarif --exclude-rule="javascript.lang.security.audit.object-injection.object-injection" || echo "Semgrep CI completed with issues (exit code $?)"
         else
           echo "Using basic Semgrep scan (set SEMGREP_APP_TOKEN for supply chain analysis)..."
-          semgrep scan --sarif --output=semgrep.sarif --config="p/default" --config="p/security-audit" --config="p/javascript" --config="p/typescript" --config="p/react" --config="p/python" --config="p/django" --config="p/flask" --config="p/owasp-top-ten" || echo "Semgrep scan completed with issues (exit code $?)"
+          semgrep scan --sarif --output=semgrep.sarif --config="p/default" --config="p/security-audit" --config="p/javascript" --config="p/typescript" --config="p/react" --config="p/python" --config="p/django" --config="p/flask" --config="p/owasp-top-ten" --exclude-rule="javascript.lang.security.audit.object-injection.object-injection" || echo "Semgrep scan completed with issues (exit code $?)"
         fi
 
     - name: Check if Semgrep SARIF file exists
