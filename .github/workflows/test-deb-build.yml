@@ -48,9 +48,18 @@ jobs:
           cd frontend
           npm install
 
+      - name: Determine version
+        id: version
+        run: |
+          # Strip 'v' prefix if present
+          VERSION="${{ github.event.inputs.version }}"
+          VERSION="${VERSION#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Cleaned version: $VERSION"
+
       - name: Update changelog with version
         env:
-          VERSION: ${{ github.event.inputs.version }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           DATE=$(date -R)
 
@@ -63,7 +72,7 @@ jobs:
 
       - name: Build package
         env:
-          VERSION: ${{ github.event.inputs.version }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           echo "Building version: ${VERSION}"
           make installer-deb
@@ -75,7 +84,7 @@ jobs:
 
       - name: Generate SHA256 checksum
         env:
-          VERSION: ${{ github.event.inputs.version }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           cd installer/dist
           sha256sum sysmanage_${VERSION}-1_all.deb > sysmanage_${VERSION}-1_all.deb.sha256
@@ -86,13 +95,13 @@ jobs:
         with:
           name: sysmanage-deb
           path: |
-            installer/dist/sysmanage_${{ github.event.inputs.version }}-1_all.deb
-            installer/dist/sysmanage_${{ github.event.inputs.version }}-1_all.deb.sha256
+            installer/dist/sysmanage_${{ steps.version.outputs.version }}-1_all.deb
+            installer/dist/sysmanage_${{ steps.version.outputs.version }}-1_all.deb.sha256
           retention-days: 30
 
       - name: Test package installation (dry run)
         env:
-          VERSION: ${{ github.event.inputs.version }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           echo "Testing package installation (dry run)..."
           sudo dpkg --dry-run -i installer/dist/sysmanage_${VERSION}-1_all.deb || true
@@ -107,7 +116,7 @@ jobs:
 
       - name: Create installation summary
         env:
-          VERSION: ${{ github.event.inputs.version }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           cat > summary.md <<EOF
           # Debian Package Build Summary
