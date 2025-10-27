@@ -81,6 +81,7 @@ const Reports: React.FC = () => {
     setTabValue(newValue);
     setSearchTerm(''); // Clear search when switching tabs
     // Safely access array element with bounds check
+    // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
     if (newValue >= 0 && newValue < tabNames.length) {
       window.location.hash = tabNames[newValue];
     }

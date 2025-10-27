@@ -59,6 +59,7 @@ export const useColumnVisibility = (gridIdentifier: string) => {
     const model: { [key: string]: boolean } = {};
     hiddenColumns.forEach((field) => {
       // Safely set property to prevent prototype pollution
+      // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
       if (typeof field === 'string' && field !== '__proto__' && field !== 'constructor' && field !== 'prototype') {
         model[field] = false; // false means hidden in MUI DataGrid
       }

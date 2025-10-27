@@ -147,6 +147,7 @@ const Settings: React.FC = () => {
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
     // Safely access array element with bounds check
+    // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
     if (newValue >= 0 && newValue < tabNames.length) {
       window.location.hash = tabNames[newValue];
     }

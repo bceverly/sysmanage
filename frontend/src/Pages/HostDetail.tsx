@@ -2118,6 +2118,7 @@ const HostDetail = () => {
         setCurrentTab(newValue);
         const tabs = getTabNames();
         // Safely access array element with bounds check
+        // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
         if (newValue >= 0 && newValue < tabs.length) {
             window.location.hash = tabs[newValue];
         }
