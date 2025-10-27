@@ -262,10 +262,10 @@ const AntivirusDefaultsSettings: React.FC = () => {
                             <InputLabel id={`antivirus-${osName}-label`}>
                               {t('antivirus.selectProgram', 'Select Antivirus Program')}
                             </InputLabel>
+                            {/* Safe access with hasOwnProperty check - nosemgrep: javascript.lang.security.audit.object-injection.object-injection */}
                             <Select
                               labelId={`antivirus-${osName}-label`}
                               id={`antivirus-${osName}`}
-                              {/* nosemgrep: javascript.lang.security.audit.object-injection.object-injection */}
                               value={(Object.prototype.hasOwnProperty.call(editedDefaults, osName) && editedDefaults[osName]) || ''}
                               onChange={(e) => handleAntivirusChange(osName, e.target.value)}
                               label={t('antivirus.selectProgram', 'Select Antivirus Program')}
