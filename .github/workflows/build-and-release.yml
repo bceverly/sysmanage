@@ -1,10 +1,11 @@
 name: Build and Release
 
 on:
-  # Trigger on version tags (e.g., v1.0.0, v2.1.3)
+  # Trigger on version tags (e.g., v1.0.0, v2.1.3, v0.9.0.3)
   push:
     tags:
       - 'v*.*.*'
+      - 'v*.*.*.*'
 
 permissions:
   contents: write  # Needed for creating releases and pushing to repos
