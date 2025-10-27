@@ -1190,9 +1190,9 @@ sbom:
 	@echo ""
 	@echo "Checking for CycloneDX tools..."
 	@set -e; \
-	if ! $(PYTHON) -c "import cyclonedx_py" 2>/dev/null; then \
+	if ! python3 -c "import cyclonedx_py" 2>/dev/null; then \
 		echo "Installing cyclonedx-bom for Python..."; \
-		$(PYTHON) -m pip install cyclonedx-bom --quiet; \
+		python3 -m pip install cyclonedx-bom --quiet; \
 		echo "✓ cyclonedx-bom installed"; \
 	else \
 		echo "✓ cyclonedx-bom already installed"; \
@@ -1207,7 +1207,7 @@ sbom:
 	@echo ""
 	@echo "Generating Python SBOM from requirements.txt..."
 	@set -e; \
-	$(PYTHON) -m cyclonedx_py requirements \
+	python3 -m cyclonedx_py requirements \
 		requirements.txt \
 		--of JSON \
 		-o sbom/backend-sbom.json
