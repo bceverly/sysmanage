@@ -256,7 +256,7 @@ async def update_graylog_integration_settings(
                 session.add(secret_entry)
 
             except VaultError as e:
-                logger.error("Failed to store Graylog API token in vault: %s", e)
+                logger.error("Failed to store Graylog API token in vault: %s", str(e))
                 raise HTTPException(
                     status_code=500, detail=_("Failed to securely store API token")
                 ) from e
@@ -387,10 +387,11 @@ async def check_graylog_health():
                                 api_token = api_token.strip()
                 except VaultError as e:
                     logger.warning(
-                        "Could not retrieve Graylog API token from vault: %s", e
+                        "Could not retrieve Graylog API token from vault: %s",
+                        str(e),
                     )
                 except Exception as e:  # pylint: disable=broad-except
-                    logger.warning("Unexpected error retrieving API token: %s", e)
+                    logger.warning("Unexpected error retrieving API token: %s", str(e))
 
             # Try to get Graylog health endpoint
             async with httpx.AsyncClient(timeout=10.0) as client:

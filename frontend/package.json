@@ -87,7 +87,7 @@
     "stylelint": "^16.25.0",
     "stylelint-config-standard": "^39.0.1",
     "tldts": "^7.0.17",
-    "vite": "^7.1.9",
+    "vite": "^7.1.11",
     "vitest": "^3.2.4"
   },
   "optionalDependencies": {
@@ -98,7 +98,8 @@
     "nth-check": "^2.1.1",
     "postcss": "^8.4.47",
     "svgo": "^3.3.2",
-    "rollup": "npm:@rollup/wasm-node@4.52.3"
+    "rollup": "npm:@rollup/wasm-node@4.52.3",
+    "@babel/helper-member-expression-to-functions": "^7.28.5"
   },
   "msw": {
     "workerDirectory": [

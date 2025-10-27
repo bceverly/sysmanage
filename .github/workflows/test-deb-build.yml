@@ -50,10 +50,11 @@ jobs:
 
       - name: Determine version
         id: version
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
           # Strip 'v' prefix if present
-          VERSION="${{ github.event.inputs.version }}"
-          VERSION="${VERSION#v}"
+          VERSION="${INPUT_VERSION#v}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Cleaned version: $VERSION"
 
