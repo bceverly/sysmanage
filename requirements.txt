@@ -74,13 +74,15 @@ webdriver-manager>=4.0.0
 requests>=2.32.0  # For UI test health checks
 urllib3>=2.5.0  # Security fix for CVE-2024-37891 (SSRF vulnerability)
 
-# OpenTelemetry for observability (all must use same version for compatibility)
-opentelemetry-api==1.27.0
-opentelemetry-sdk==1.27.0
-opentelemetry-instrumentation==0.48b0
-opentelemetry-instrumentation-fastapi==0.48b0
-opentelemetry-instrumentation-sqlalchemy==0.48b0
-opentelemetry-instrumentation-requests==0.48b0
-opentelemetry-instrumentation-logging==0.48b0
-opentelemetry-exporter-otlp==1.27.0
-opentelemetry-exporter-prometheus==0.48b0
+# OpenTelemetry for observability
+# Note: Using minimum versions to allow pip to resolve compatible version sets
+# Instrumentation packages and exporters must be compatible with the resolved API/SDK version
+opentelemetry-api>=1.12.0
+opentelemetry-sdk>=1.12.0
+opentelemetry-instrumentation>=0.48b0
+opentelemetry-instrumentation-fastapi>=0.48b0
+opentelemetry-instrumentation-sqlalchemy>=0.48b0
+opentelemetry-instrumentation-requests>=0.48b0
+opentelemetry-instrumentation-logging>=0.48b0
+opentelemetry-exporter-otlp>=1.12.0
+opentelemetry-exporter-prometheus>=0.48b0
