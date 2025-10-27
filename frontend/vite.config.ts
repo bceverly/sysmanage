@@ -175,11 +175,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
-    css: {
-      modules: {
-        classNameStrategy: 'non-scoped'
-      }
-    },
+    css: true,  // Enable CSS processing in vitest 4.x
     // Increase timeout for Windows CI environments
     testTimeout: 10000,
     // Reduce file descriptor usage by using threads with limited concurrency
@@ -190,21 +186,13 @@ export default defineConfig({
         minThreads: 1
       }
     },
-    deps: {
-      inline: [
-        '@mui/x-data-grid',
-        '@mui/x-data-grid-pro',
-        '@mui/x-data-grid-premium'
-      ],
-      optimizer: {
-        web: {
-          include: [
-            '@mui/x-data-grid',
-            '@mui/x-data-grid-pro',
-            '@mui/x-data-grid-premium',
-            '@mui/icons-material'
-          ]
-        }
+    server: {
+      deps: {
+        inline: [
+          '@mui/x-data-grid',
+          '@mui/x-data-grid-pro',
+          '@mui/x-data-grid-premium'
+        ]
       }
     },
     coverage: {
