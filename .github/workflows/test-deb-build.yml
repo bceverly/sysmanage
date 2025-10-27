@@ -1,0 +1,177 @@
+name: Test Debian Package Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version string (e.g., 1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build-deb:
+    name: Build .deb Package
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            debhelper \
+            dh-python \
+            python3-all \
+            python3-setuptools \
+            python3-pip \
+            build-essential \
+            devscripts \
+            lintian
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Update changelog with version
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          DATE=$(date -R)
+
+          # Update changelog with actual version and date
+          sed -i "s/0\.1\.0-1/${VERSION}-1/g" installer/ubuntu/debian/changelog
+          sed -i "s/Mon, 14 Oct 2025 00:00:00 -0400/$DATE/g" installer/ubuntu/debian/changelog
+
+          echo "Updated changelog:"
+          head -5 installer/ubuntu/debian/changelog
+
+      - name: Build package
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          echo "Building version: ${VERSION}"
+          make installer-deb
+
+      - name: List built packages
+        run: |
+          echo "Built packages:"
+          ls -lh installer/dist/*.deb
+
+      - name: Generate SHA256 checksum
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          cd installer/dist
+          sha256sum sysmanage_${VERSION}-1_all.deb > sysmanage_${VERSION}-1_all.deb.sha256
+          cat sysmanage_${VERSION}-1_all.deb.sha256
+
+      - name: Upload package as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysmanage-deb
+          path: |
+            installer/dist/sysmanage_${{ github.event.inputs.version }}-1_all.deb
+            installer/dist/sysmanage_${{ github.event.inputs.version }}-1_all.deb.sha256
+          retention-days: 30
+
+      - name: Test package installation (dry run)
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          echo "Testing package installation (dry run)..."
+          sudo dpkg --dry-run -i installer/dist/sysmanage_${VERSION}-1_all.deb || true
+
+          echo ""
+          echo "Package info:"
+          dpkg-deb --info installer/dist/sysmanage_${VERSION}-1_all.deb
+
+          echo ""
+          echo "Package contents:"
+          dpkg-deb --contents installer/dist/sysmanage_${VERSION}-1_all.deb | head -20
+
+      - name: Create installation summary
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          cat > summary.md <<EOF
+          # Debian Package Build Summary
+
+          ## Version
+          ${VERSION}
+
+          ## Package Details
+          **File**: \`sysmanage_${VERSION}-1_all.deb\`
+          **Size**: $(ls -lh installer/dist/sysmanage_${VERSION}-1_all.deb | awk '{print $5}')
+
+          ## SHA256 Checksum
+          \`\`\`
+          $(cat installer/dist/sysmanage_${VERSION}-1_all.deb.sha256)
+          \`\`\`
+
+          ## Installation Instructions
+
+          ### Download and Install
+          \`\`\`bash
+          # Download the artifact from this workflow run
+          # Then install:
+          sudo apt install ./sysmanage_${VERSION}-1_all.deb
+
+          # Install nginx if not already installed
+          sudo apt install nginx
+
+          # Configure the server
+          sudo nano /etc/sysmanage.yaml
+
+          # Run database migrations
+          cd /opt/sysmanage
+          sudo -u sysmanage .venv/bin/python -m alembic upgrade head
+
+          # Start the service
+          sudo systemctl start sysmanage
+          sudo systemctl status sysmanage
+          \`\`\`
+
+          ### Access the Web Interface
+          After configuration and starting the service:
+          - Frontend: http://localhost:3000
+          - Backend API: http://localhost:8080
+
+          ## Package Contents
+          - Backend: \`/opt/sysmanage/backend/\`
+          - Frontend: \`/opt/sysmanage/frontend/dist/\`
+          - Configuration: \`/etc/sysmanage.yaml\`
+          - Systemd service: \`/lib/systemd/system/sysmanage.service\`
+          - Nginx config: \`/etc/nginx/sites-available/sysmanage-nginx.conf\`
+          - Database: \`/var/lib/sysmanage/\`
+          - Logs: \`/var/log/sysmanage/\`
+
+          ## Notes
+          - This is a test build from the tip of the current branch
+          - PostgreSQL database is required (Recommended dependency)
+          - Nginx is required for serving the frontend
+          EOF
+
+          cat summary.md
+
+      - name: Upload summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-summary
+          path: summary.md
+          retention-days: 30
