@@ -102,6 +102,18 @@ jobs:
           cd frontend
           npm install
 
+      - name: Install SBOM generation tools
+        run: |
+          # Install cyclonedx-bom for Python
+          python3 -m pip install cyclonedx-bom
+
+          # Install cyclonedx-npm globally for Node.js
+          sudo npm install -g @cyclonedx/cyclonedx-npm
+
+          # Verify installations
+          python3 -c "import cyclonedx_py; print('✓ cyclonedx-bom installed')"
+          cyclonedx-npm --version
+
       - name: Build frontend
         run: |
           cd frontend

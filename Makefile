@@ -1119,8 +1119,7 @@ installer-deb:
 	echo "✓ Frontend build complete"; \
 	echo ""; \
 	echo "Generating Software Bill of Materials (SBOM)..."; \
-	$(MAKE) sbom > /dev/null 2>&1 || echo "Warning: SBOM generation failed, continuing without SBOM"; \
-	echo "✓ SBOM generation complete"; \
+	$(MAKE) sbom; \
 	echo ""; \
 	echo "Creating build directory..."; \
 	CURRENT_DIR=$$(pwd); \
