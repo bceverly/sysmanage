@@ -99,7 +99,13 @@
     "postcss": "^8.4.47",
     "svgo": "^3.3.2",
     "rollup": "npm:@rollup/wasm-node@4.52.3",
-    "@babel/helper-member-expression-to-functions": "^7.28.5"
+    "@babel/helper-member-expression-to-functions": "^7.28.5",
+    "@babel/generator": "^7.28.5",
+    "@monaco-editor/loader": "^1.6.1",
+    "update-browserslist-db": "^1.1.4",
+    "electron-to-chromium": "^1.5.240",
+    "@inquirer/ansi": "^1.0.1",
+    "@types/chai": "^5.2.3"
   },
   "msw": {
     "workerDirectory": [
