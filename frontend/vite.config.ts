@@ -175,7 +175,11 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
-    css: true,
+    css: {
+      modules: {
+        classNameStrategy: 'non-scoped'
+      }
+    },
     // Increase timeout for Windows CI environments
     testTimeout: 10000,
     // Reduce file descriptor usage by using threads with limited concurrency
@@ -187,6 +191,11 @@ export default defineConfig({
       }
     },
     deps: {
+      inline: [
+        '@mui/x-data-grid',
+        '@mui/x-data-grid-pro',
+        '@mui/x-data-grid-premium'
+      ],
       optimizer: {
         web: {
           include: [

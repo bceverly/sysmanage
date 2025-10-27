@@ -385,9 +385,11 @@ async def check_graylog_health():
                             if api_token:
                                 api_token = api_token.strip()
                 except VaultError:
-                    pass
+                    # Silently continue if vault token retrieval fails - not critical for health check
+                    api_token = None
                 except Exception:  # pylint: disable=broad-except
-                    pass
+                    # Silently continue on any error - not critical for health check
+                    api_token = None
 
             # Try to get Graylog health endpoint
             async with httpx.AsyncClient(timeout=10.0) as client:
