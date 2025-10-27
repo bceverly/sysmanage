@@ -1,0 +1,51 @@
+# SysManage Server Configuration
+#
+# ⚠ IMPORTANT: This is an example configuration file.
+# ⚠ Use the configuration builder at https://sysmanage.org/config-builder.html
+# ⚠ to generate a complete, production-ready configuration.
+#
+# This file should be copied to /etc/sysmanage.yaml and customized for your environment.
+
+# Database Configuration (PostgreSQL required)
+database:
+  type: "postgresql"
+  host: "localhost"
+  port: 5432
+  username: "sysmanage"
+  password: "CHANGE_ME"  # ⚠ Change this to a secure password
+  database: "sysmanage"
+  ssl_mode: "prefer"  # Options: disable, allow, prefer, require, verify-ca, verify-full
+
+# Server Configuration
+server:
+  host: "0.0.0.0"
+  port: 8001
+  # For production, use HTTPS:
+  # ssl_cert: "/etc/ssl/certs/sysmanage.crt"
+  # ssl_key: "/etc/ssl/private/sysmanage.key"
+
+# Authentication
+auth:
+  secret_key: "CHANGE_ME_TO_RANDOM_STRING"  # ⚠ Generate a secure random string
+  session_timeout: 3600  # seconds
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file: "/var/log/sysmanage/sysmanage.log"
+  max_size_mb: 100
+  backup_count: 5
+
+# OpenBAO/Vault Integration (optional)
+openbao:
+  enabled: false
+  address: "http://localhost:8200"
+  token: ""
+
+# OpenTelemetry (optional)
+telemetry:
+  enabled: false
+  endpoint: "http://localhost:4317"
+
+# For a complete configuration with all options, use:
+# https://sysmanage.org/config-builder.html

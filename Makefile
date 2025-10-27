@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry
+.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb
 
 # Default target
 help:
@@ -27,6 +27,10 @@ help:
 	@echo "  make install-dev   - Install all development tools (includes Playwright + WebDriver + MSW for testing)"
 	@echo "  make migrate       - Run database migrations (alembic upgrade head)"
 	@echo "  make check-test-models - Check test model synchronization between conftest files"
+	@echo ""
+	@echo "Packaging targets:"
+	@echo "  make installer     - Build installer package (auto-detects platform)"
+	@echo "  make installer-deb - Build Ubuntu/Debian .deb package (explicit)"
 	@echo ""
 	@echo "OpenBAO (Vault) targets:"
 	@echo "  make start-openbao - Start OpenBAO development server only"
@@ -292,6 +296,204 @@ else
 		cd frontend && npm uninstall esbuild && npm install esbuild --cache=$$HOME/.npm-cache; \
 	else \
 		cd frontend && npm uninstall esbuild && npm install esbuild; \
+	fi
+endif
+	@echo "Installing packaging/installer build tools for your platform..."
+ifeq ($(OS),Windows_NT)
+	@echo "[INFO] Windows detected - checking for WiX Toolset..."
+	@where wix >nul 2>&1 && echo "✓ WiX Toolset already installed" || ( \
+		echo "[WARNING] WiX Toolset not found. Please install manually:" && \
+		echo "  Download from: https://wixtoolset.org/releases/" && \
+		echo "  Or via winget: winget install --id=WiXToolset.WiX -e" \
+	)
+else
+	@if [ -f /etc/redhat-release ]; then \
+		echo "[INFO] Red Hat-based system detected - checking for RPM build tools..."; \
+		MISSING_PKGS=""; \
+		command -v rpmbuild >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS rpm-build"; \
+		command -v rpmdev-setuptree >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS rpmdevtools"; \
+		rpm -q python3-devel >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS python3-devel"; \
+		rpm -q python3-setuptools >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS python3-setuptools"; \
+		rpm -q nodejs >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS nodejs"; \
+		if [ -n "$$MISSING_PKGS" ]; then \
+			echo "Missing packages:$$MISSING_PKGS"; \
+			echo "Installing RPM build tools..."; \
+			if command -v dnf >/dev/null 2>&1; then \
+				echo "Running: sudo dnf install -y rpm-build rpmdevtools python3-devel python3-setuptools nodejs rsync"; \
+				sudo dnf install -y rpm-build rpmdevtools python3-devel python3-setuptools nodejs rsync || \
+				echo "[WARNING] Could not install RPM build tools. Run manually: sudo dnf install -y rpm-build rpmdevtools python3-devel python3-setuptools nodejs rsync"; \
+			else \
+				echo "Running: sudo yum install -y rpm-build rpmdevtools python3-devel python3-setuptools nodejs rsync"; \
+				sudo yum install -y rpm-build rpmdevtools python3-devel python3-setuptools nodejs rsync || \
+				echo "[WARNING] Could not install RPM build tools. Run manually: sudo yum install -y rpm-build rpmdevtools python3-devel python3-setuptools nodejs rsync"; \
+			fi; \
+		else \
+			echo "✓ All RPM build tools already installed"; \
+		fi; \
+		echo "[INFO] Checking for Flatpak build tools..."; \
+		MISSING_FLATPAK=""; \
+		if ! command -v flatpak >/dev/null 2>&1; then \
+			MISSING_FLATPAK="$$MISSING_FLATPAK flatpak"; \
+		fi; \
+		if ! command -v flatpak-builder >/dev/null 2>&1; then \
+			MISSING_FLATPAK="$$MISSING_FLATPAK flatpak-builder"; \
+		fi; \
+		if [ -n "$$MISSING_FLATPAK" ]; then \
+			echo "Missing Flatpak tools:$$MISSING_FLATPAK"; \
+			echo "Installing Flatpak build tools..."; \
+			if command -v dnf >/dev/null 2>&1; then \
+				echo "Running: sudo dnf install -y flatpak flatpak-builder"; \
+				sudo dnf install -y flatpak flatpak-builder || { \
+					echo "[WARNING] Could not install Flatpak tools. Run manually: sudo dnf install -y flatpak flatpak-builder"; \
+				}; \
+			else \
+				echo "Running: sudo yum install -y flatpak flatpak-builder"; \
+				sudo yum install -y flatpak flatpak-builder || { \
+					echo "[WARNING] Could not install Flatpak tools. Run manually: sudo yum install -y flatpak flatpak-builder"; \
+				}; \
+			fi; \
+		else \
+			echo "✓ Flatpak build tools already installed"; \
+		fi; \
+		if command -v flatpak >/dev/null 2>&1; then \
+			if ! flatpak remote-list --user | grep -q flathub; then \
+				echo "Adding Flathub repository (user)..."; \
+				flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || { \
+					echo "[WARNING] Could not add Flathub repository"; \
+				}; \
+			else \
+				echo "✓ Flathub repository already configured (user)"; \
+			fi; \
+		fi; \
+	elif [ -f /etc/os-release ] && grep -qE "^ID=\"?(opensuse-leap|opensuse-tumbleweed|sles)\"?" /etc/os-release; then \
+		echo "[INFO] openSUSE/SLES detected - checking for RPM build tools..."; \
+		MISSING_PKGS=""; \
+		command -v rpmbuild >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS rpm-build"; \
+		command -v rpmdev-setuptree >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS rpmdevtools"; \
+		rpm -q python311-devel >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS python311-devel"; \
+		rpm -q python3-setuptools >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS python3-setuptools"; \
+		rpm -q nodejs >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS nodejs"; \
+		if [ -n "$$MISSING_PKGS" ]; then \
+			echo "Missing packages:$$MISSING_PKGS"; \
+			echo "Installing RPM build tools..."; \
+			echo "Running: sudo zypper install -y rpm-build rpmdevtools python311-devel python3-setuptools nodejs rsync"; \
+			sudo zypper install -y rpm-build rpmdevtools python311-devel python3-setuptools nodejs rsync || \
+			echo "[WARNING] Could not install RPM build tools. Run manually: sudo zypper install -y rpm-build rpmdevtools python311-devel python3-setuptools nodejs rsync"; \
+		else \
+			echo "✓ All RPM build tools already installed"; \
+		fi; \
+		echo "[INFO] Checking for Flatpak build tools..."; \
+		MISSING_FLATPAK=""; \
+		if ! command -v flatpak >/dev/null 2>&1; then \
+			MISSING_FLATPAK="$$MISSING_FLATPAK flatpak"; \
+		fi; \
+		if ! command -v flatpak-builder >/dev/null 2>&1; then \
+			MISSING_FLATPAK="$$MISSING_FLATPAK flatpak-builder"; \
+		fi; \
+		if [ -n "$$MISSING_FLATPAK" ]; then \
+			echo "Missing Flatpak tools:$$MISSING_FLATPAK"; \
+			echo "Installing Flatpak build tools..."; \
+			echo "Running: sudo zypper install -y flatpak flatpak-builder"; \
+			sudo zypper install -y flatpak flatpak-builder || { \
+				echo "[WARNING] Could not install Flatpak tools. Run manually: sudo zypper install -y flatpak flatpak-builder"; \
+			}; \
+		else \
+			echo "✓ Flatpak build tools already installed"; \
+		fi; \
+		if command -v flatpak >/dev/null 2>&1; then \
+			if ! flatpak remote-list --user | grep -q flathub; then \
+				echo "Adding Flathub repository (user)..."; \
+				flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || { \
+					echo "[WARNING] Could not add Flathub repository"; \
+				}; \
+			else \
+				echo "✓ Flathub repository already configured (user)"; \
+			fi; \
+		fi; \
+	elif [ "$$(uname -s)" = "Linux" ] && [ -f /etc/lsb-release ] && grep -q Ubuntu /etc/lsb-release 2>/dev/null; then \
+		echo "[INFO] Ubuntu/Debian detected - checking for packaging build tools..."; \
+		MISSING_PKGS=""; \
+		command -v dpkg-buildpackage >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS devscripts"; \
+		dpkg -l dh-python 2>/dev/null | grep -q "^ii" || MISSING_PKGS="$$MISSING_PKGS dh-python"; \
+		dpkg -l python3-all 2>/dev/null | grep -q "^ii" || MISSING_PKGS="$$MISSING_PKGS python3-all"; \
+		dpkg -l debhelper 2>/dev/null | grep -q "^ii" || MISSING_PKGS="$$MISSING_PKGS debhelper"; \
+		dpkg -l lintian 2>/dev/null | grep -q "^ii" || MISSING_PKGS="$$MISSING_PKGS lintian"; \
+		if [ -n "$$MISSING_PKGS" ]; then \
+			echo "Missing packages:$$MISSING_PKGS"; \
+			echo "Installing Debian packaging build tools..."; \
+			echo "Running: sudo apt-get install -y debhelper dh-python python3-all python3-setuptools build-essential devscripts lintian nodejs npm"; \
+			sudo apt-get update && sudo apt-get install -y debhelper dh-python python3-all python3-setuptools build-essential devscripts lintian nodejs npm || \
+			echo "[WARNING] Could not install packaging tools. Run manually: sudo apt-get install -y debhelper dh-python python3-all python3-setuptools build-essential devscripts lintian nodejs npm"; \
+		else \
+			echo "✓ All packaging build tools already installed"; \
+		fi; \
+		echo "[INFO] Checking for Snap build tools..."; \
+		if ! command -v snap >/dev/null 2>&1; then \
+			echo "snapd not found - installing..."; \
+			echo "Running: sudo apt-get install -y snapd"; \
+			sudo apt-get install -y snapd || { \
+				echo "[WARNING] Could not install snapd. Run manually: sudo apt-get install -y snapd"; \
+			}; \
+			echo "Ensuring snapd service is enabled and started..."; \
+			sudo systemctl enable --now snapd.socket || true; \
+			sudo systemctl start snapd || true; \
+			echo "Waiting for snapd to initialize..."; \
+			sleep 5; \
+		fi; \
+		if ! snap list 2>/dev/null | grep -q snapcraft; then \
+			echo "snapcraft not found - installing..."; \
+			echo "Running: sudo snap install snapcraft --classic"; \
+			sudo snap install snapcraft --classic || { \
+				echo "[WARNING] Could not install snapcraft. Run manually: sudo snap install snapcraft --classic"; \
+			}; \
+		else \
+			echo "✓ snapcraft already installed"; \
+		fi; \
+		echo "[INFO] Checking for Flatpak build tools..."; \
+		MISSING_FLATPAK=""; \
+		if ! command -v flatpak >/dev/null 2>&1; then \
+			MISSING_FLATPAK="$$MISSING_FLATPAK flatpak"; \
+		fi; \
+		if ! command -v flatpak-builder >/dev/null 2>&1; then \
+			MISSING_FLATPAK="$$MISSING_FLATPAK flatpak-builder"; \
+		fi; \
+		if [ -n "$$MISSING_FLATPAK" ]; then \
+			echo "Missing Flatpak tools:$$MISSING_FLATPAK"; \
+			echo "Installing Flatpak build tools..."; \
+			echo "Running: sudo apt-get install -y flatpak flatpak-builder"; \
+			sudo apt-get install -y flatpak flatpak-builder || { \
+				echo "[WARNING] Could not install Flatpak tools. Run manually: sudo apt-get install -y flatpak flatpak-builder"; \
+			}; \
+		else \
+			echo "✓ Flatpak build tools already installed"; \
+		fi; \
+		if command -v flatpak >/dev/null 2>&1; then \
+			if ! flatpak remote-list --user | grep -q flathub; then \
+				echo "Adding Flathub repository (user)..."; \
+				flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || { \
+					echo "[WARNING] Could not add Flathub repository"; \
+				}; \
+			else \
+				echo "✓ Flathub repository already configured (user)"; \
+			fi; \
+		fi; \
+	elif [ "$$(uname -s)" = "FreeBSD" ]; then \
+		echo "[INFO] FreeBSD detected - checking for packaging tools..."; \
+		if ! command -v pkgconf >/dev/null 2>&1; then \
+			echo "pkgconf not found - installing..."; \
+			echo "Running: sudo pkg install -y pkgconf"; \
+			sudo pkg install -y pkgconf || { \
+				echo "[WARNING] Could not install pkgconf. Run manually: sudo pkg install -y pkgconf"; \
+			}; \
+		else \
+			echo "✓ pkgconf already installed"; \
+		fi; \
+	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
+		echo "[INFO] OpenBSD detected - package building uses standard ports system"; \
+		echo "      No additional tools needed beyond base system"; \
+	elif [ "$$(uname -s)" = "NetBSD" ]; then \
+		echo "[INFO] NetBSD detected - package building uses pkg_create (in base)"; \
+		echo "      No additional tools needed beyond base system"; \
 	fi
 endif
 	@echo "Installing ESLint security plugins..."
@@ -859,3 +1061,113 @@ build-grpcio-openbsd: $(VENV_ACTIVATE)
 	fi && \
 	rm -rf $$HOME/tmp/grpcio-1.71.0* && \
 	echo "[OK] grpcio 1.71.0 build completed successfully with OpenBSD patches"
+# Installer targets
+installer:
+	@echo "=== Auto-detecting platform for installer build ==="
+	@if [ -f /etc/lsb-release ] && grep -q Ubuntu /etc/lsb-release 2>/dev/null; then \
+		echo "Ubuntu/Debian detected - building .deb package"; \
+		$(MAKE) installer-deb; \
+	elif [ -f /etc/debian_version ]; then \
+		echo "Debian-based system detected - building .deb package"; \
+		$(MAKE) installer-deb; \
+	elif [ -f /etc/redhat-release ]; then \
+		echo "Red Hat-based system detected - .rpm not yet implemented"; \
+		exit 1; \
+	elif [ "$$(uname -s)" = "FreeBSD" ]; then \
+		echo "FreeBSD detected - .pkg not yet implemented"; \
+		exit 1; \
+	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
+		echo "OpenBSD detected - port not yet implemented"; \
+		exit 1; \
+	elif [ "$$(uname -s)" = "NetBSD" ]; then \
+		echo "NetBSD detected - .tgz not yet implemented"; \
+		exit 1; \
+	else \
+		echo "Unknown platform - cannot auto-detect installer type"; \
+		exit 1; \
+	fi
+
+installer-deb:
+	@echo "=== Building Ubuntu/Debian .deb Package ==="
+	@echo ""
+	@echo "Checking build dependencies..."
+	@command -v dpkg-buildpackage >/dev/null 2>&1 || { \
+		echo "ERROR: dpkg-buildpackage not found."; \
+		echo "Install with: make install-dev"; \
+		echo "Or manually: sudo apt-get install -y debhelper dh-python python3-all build-essential devscripts lintian nodejs npm"; \
+		exit 1; \
+	}
+	@echo "✓ Build tools available"
+	@echo ""
+	@echo "Determining version..."
+	@set -e; \
+	if [ -n "$$VERSION" ]; then \
+		echo "Using VERSION from environment: $$VERSION"; \
+	else \
+		VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+		if [ -z "$$VERSION" ]; then \
+			VERSION="0.1.0"; \
+			echo "No git tags found, using default version: $$VERSION"; \
+		else \
+			echo "Building version: $$VERSION"; \
+		fi; \
+	fi; \
+	echo ""; \
+	echo "Building frontend..."; \
+	cd frontend && npm run build && cd ..; \
+	echo "✓ Frontend build complete"; \
+	echo ""; \
+	echo "Creating build directory..."; \
+	CURRENT_DIR=$$(pwd); \
+	BUILD_TEMP="$$CURRENT_DIR/installer/dist/build-temp"; \
+	BUILD_DIR="$$BUILD_TEMP/sysmanage-$$VERSION"; \
+	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
+	mkdir -p "$$OUTPUT_DIR"; \
+	rm -rf "$$BUILD_TEMP"; \
+	mkdir -p "$$BUILD_DIR"; \
+	echo "✓ Build directory created: $$BUILD_DIR"; \
+	echo ""; \
+	echo "Copying source files..."; \
+	rsync -a --exclude='htmlcov' --exclude='__pycache__' --exclude='*.pyc' --exclude='.pytest_cache' --exclude='node_modules' --exclude='.venv' backend/ "$$BUILD_DIR/backend/"; \
+	mkdir -p "$$BUILD_DIR/frontend"; \
+	rsync -a --exclude='node_modules' --exclude='coverage' frontend/build/ "$$BUILD_DIR/frontend/dist/"; \
+	rsync -a --exclude='node_modules' --exclude='coverage' frontend/public/ "$$BUILD_DIR/frontend/public/"; \
+	cp requirements.txt "$$BUILD_DIR/"; \
+	cp alembic.ini "$$BUILD_DIR/"; \
+	cp -r config "$$BUILD_DIR/" 2>/dev/null || true; \
+	cp -r scripts "$$BUILD_DIR/" 2>/dev/null || true; \
+	cp README.md "$$BUILD_DIR/" 2>/dev/null || touch "$$BUILD_DIR/README.md"; \
+	echo "✓ Application source copied"; \
+	echo ""; \
+	echo "Copying Debian packaging files..."; \
+	cp -r installer/ubuntu/debian "$$BUILD_DIR/"; \
+	mkdir -p "$$BUILD_DIR/installer/ubuntu"; \
+	cp installer/ubuntu/*.service "$$BUILD_DIR/installer/ubuntu/"; \
+	cp installer/ubuntu/*.example "$$BUILD_DIR/installer/ubuntu/"; \
+	cp installer/ubuntu/*.conf "$$BUILD_DIR/installer/ubuntu/" 2>/dev/null || true; \
+	echo "✓ Packaging files copied"; \
+	echo ""; \
+	echo "Building package..."; \
+	cd "$$BUILD_DIR" && dpkg-buildpackage -us -uc -b; \
+	echo ""; \
+	echo "Moving package to output directory..."; \
+	mv "$$BUILD_TEMP"/sysmanage_*.deb "$$OUTPUT_DIR/"; \
+	mv "$$BUILD_TEMP"/sysmanage_*.buildinfo "$$OUTPUT_DIR/" 2>/dev/null || true; \
+	mv "$$BUILD_TEMP"/sysmanage_*.changes "$$OUTPUT_DIR/" 2>/dev/null || true; \
+	echo ""; \
+	echo "Cleaning up build directory..."; \
+	rm -rf "$$BUILD_TEMP"; \
+	echo ""; \
+	echo "✓ Package built successfully!"; \
+	echo ""; \
+	echo "Package location: $$OUTPUT_DIR/sysmanage_$$VERSION-1_all.deb"; \
+	echo ""; \
+	echo "To install:"; \
+	echo "  sudo dpkg -i $$OUTPUT_DIR/sysmanage_$$VERSION-1_all.deb"; \
+	echo "  sudo apt-get install -f  # If dependencies are missing"; \
+	echo ""; \
+	echo "After installation:"; \
+	echo "  1. Configure /etc/sysmanage.yaml (use https://sysmanage.org/config-builder.html)"; \
+	echo "  2. Set up PostgreSQL database"; \
+	echo "  3. Run: cd /opt/sysmanage && sudo -u sysmanage .venv/bin/python -m alembic upgrade head"; \
+	echo "  4. Start: sudo systemctl start sysmanage"

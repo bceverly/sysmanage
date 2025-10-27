@@ -1,0 +1,10 @@
+backend/* opt/sysmanage/backend/
+frontend/dist/* opt/sysmanage/frontend/dist/
+frontend/public/* opt/sysmanage/frontend/public/
+requirements.txt opt/sysmanage/
+alembic.ini opt/sysmanage/
+config/* opt/sysmanage/config/
+scripts/* opt/sysmanage/scripts/
+installer/ubuntu/sysmanage.service lib/systemd/system/
+installer/ubuntu/sysmanage.yaml.example etc/sysmanage/
+installer/ubuntu/sysmanage-nginx.conf etc/nginx/sites-available/

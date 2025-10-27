@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+
+if [ "$1" = "remove" ] || [ "$1" = "deconfigure" ]; then
+	# Stop the service before removal
+	if [ -x "/usr/bin/deb-systemd-invoke" ]; then
+		deb-systemd-invoke stop sysmanage.service >/dev/null 2>&1 || true
+	else
+		systemctl stop sysmanage.service >/dev/null 2>&1 || true
+	fi
+fi
+
+#DEBHELPER#
+
+exit 0

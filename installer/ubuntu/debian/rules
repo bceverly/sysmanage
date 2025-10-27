@@ -1,0 +1,27 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+%:
+	dh $@
+
+override_dh_auto_clean:
+	# Nothing to clean - files are copied via debian/install
+
+override_dh_auto_build:
+	# Nothing to build - frontend built before packaging, backend installed in postinst
+
+override_dh_auto_test:
+	# Skip tests during package build
+
+override_dh_auto_install:
+	# Files are installed via debian/install file
+	dh_auto_install
+
+override_dh_installinit:
+	dh_installinit --name=sysmanage --no-start
+
+override_dh_installsystemd:
+	dh_installsystemd --name=sysmanage --no-start --no-enable

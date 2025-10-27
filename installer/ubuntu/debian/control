@@ -1,0 +1,40 @@
+Source: sysmanage
+Section: admin
+Priority: optional
+Maintainer: Bryan Everly <bryan@theeverlys.com>
+Build-Depends: debhelper-compat (= 13), dh-python, python3-all (>= 3.10), python3-setuptools, nodejs (>= 18), npm
+Standards-Version: 4.6.2
+Homepage: https://sysmanage.org
+Vcs-Git: https://github.com/bceverly/sysmanage.git
+Vcs-Browser: https://github.com/bceverly/sysmanage
+Rules-Requires-Root: no
+
+Package: sysmanage
+Architecture: all
+Depends: ${misc:Depends},
+ python3 (>= 3.10),
+ python3-pip,
+ python3-venv,
+ adduser,
+ systemd,
+ nodejs (>= 18),
+ nginx
+Recommends: postgresql (>= 12)
+Suggests: postgresql-client
+Description: Centralized system management server
+ SysManage is a comprehensive system management platform that provides:
+  * Centralized agent management
+  * System monitoring and metrics
+  * Package management across multiple systems
+  * Security policy enforcement
+  * Certificate management
+  * Firewall configuration
+  * User access control
+  * Web-based administration interface
+ .
+ This package installs the SysManage server which manages connected
+ agents. It requires a PostgreSQL database (can be on a separate host).
+ .
+ After installation, configure /etc/sysmanage.yaml to point to your
+ PostgreSQL database. Use the online config builder at:
+ https://sysmanage.org/config-builder.html
