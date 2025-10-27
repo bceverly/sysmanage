@@ -223,3 +223,6 @@ contrib/netbsd/opentelemetry/build/
 contrib/netbsd/opentelemetry/downloads/
 contrib/freebsd/opentelemetry/build/
 contrib/freebsd/opentelemetry/downloads/
+
+# SBOM (Software Bill of Materials) generated files
+sbom/

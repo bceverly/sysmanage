@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -40,23 +40,17 @@ const DashboardSettingsDialog: React.FC<DashboardSettingsDialogProps> = ({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Available dashboard cards
-  const availableCards: { identifier: string; label: string }[] = [
-    { identifier: 'hosts', label: t('dashboard.hosts', 'Hosts') },
-    { identifier: 'updates', label: t('dashboard.updates', 'Updates') },
-    { identifier: 'security', label: t('dashboard.security', 'Security') },
-    { identifier: 'reboot', label: t('dashboard.rebootRequired', 'Reboot Needed') },
-    { identifier: 'antivirus', label: t('dashboard.antivirusCoverage', 'Antivirus') },
-    { identifier: 'opentelemetry', label: t('dashboard.openTelemetryCoverage', 'OpenTelemetry') },
-  ];
+  const loadPreferences = useCallback(async () => {
+    // Available dashboard cards
+    const availableCards: { identifier: string; label: string }[] = [
+      { identifier: 'hosts', label: t('dashboard.hosts', 'Hosts') },
+      { identifier: 'updates', label: t('dashboard.updates', 'Updates') },
+      { identifier: 'security', label: t('dashboard.security', 'Security') },
+      { identifier: 'reboot', label: t('dashboard.rebootRequired', 'Reboot Needed') },
+      { identifier: 'antivirus', label: t('dashboard.antivirusCoverage', 'Antivirus') },
+      { identifier: 'opentelemetry', label: t('dashboard.openTelemetryCoverage', 'OpenTelemetry') },
+    ];
 
-  useEffect(() => {
-    if (open) {
-      loadPreferences();
-    }
-  }, [open]); // loadPreferences is defined in the component, stable function
-
-  const loadPreferences = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -89,7 +83,13 @@ const DashboardSettingsDialog: React.FC<DashboardSettingsDialogProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    if (open) {
+      loadPreferences();
+    }
+  }, [open, loadPreferences]);
 
   const handleToggle = (identifier: string) => {
     setCards((prevCards) =>

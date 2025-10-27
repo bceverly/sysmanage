@@ -131,7 +131,7 @@ const Settings: React.FC = () => {
   const [viewingTag, setViewingTag] = useState<TagWithHosts | null>(null);
   
   // Tab names for URL hash
-  const tabNames = ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages'];
+  const tabNames = useMemo(() => ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages'], []);
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -188,7 +188,7 @@ const Settings: React.FC = () => {
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []); // tabNames is a constant array, safe to omit from deps
+  }, [tabNames]);
   
   // Queue management state
   const [queueMessages, setQueueMessages] = useState<QueueMessage[]>([]);

@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb
+.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb sbom
 
 # Default target
 help:
@@ -31,6 +31,7 @@ help:
 	@echo "Packaging targets:"
 	@echo "  make installer     - Build installer package (auto-detects platform)"
 	@echo "  make installer-deb - Build Ubuntu/Debian .deb package (explicit)"
+	@echo "  make sbom          - Generate Software Bill of Materials (CycloneDX format)"
 	@echo ""
 	@echo "OpenBAO (Vault) targets:"
 	@echo "  make start-openbao - Start OpenBAO development server only"
@@ -1117,6 +1118,10 @@ installer-deb:
 	cd frontend && npm run build && cd ..; \
 	echo "✓ Frontend build complete"; \
 	echo ""; \
+	echo "Generating Software Bill of Materials (SBOM)..."; \
+	$(MAKE) sbom > /dev/null 2>&1 || echo "Warning: SBOM generation failed, continuing without SBOM"; \
+	echo "✓ SBOM generation complete"; \
+	echo ""; \
 	echo "Creating build directory..."; \
 	CURRENT_DIR=$$(pwd); \
 	BUILD_TEMP="$$CURRENT_DIR/installer/dist/build-temp"; \
@@ -1137,6 +1142,8 @@ installer-deb:
 	cp -r config "$$BUILD_DIR/" 2>/dev/null || true; \
 	cp -r scripts "$$BUILD_DIR/" 2>/dev/null || true; \
 	cp README.md "$$BUILD_DIR/" 2>/dev/null || touch "$$BUILD_DIR/README.md"; \
+	mkdir -p "$$BUILD_DIR/sbom"; \
+	cp sbom/*.json "$$BUILD_DIR/sbom/" 2>/dev/null || echo "Note: SBOM files not found, skipping"; \
 	echo "✓ Application source copied"; \
 	echo ""; \
 	echo "Copying Debian packaging files..."; \
@@ -1171,3 +1178,58 @@ installer-deb:
 	echo "  2. Set up PostgreSQL database"; \
 	echo "  3. Run: cd /opt/sysmanage && sudo -u sysmanage .venv/bin/python -m alembic upgrade head"; \
 	echo "  4. Start: sudo systemctl start sysmanage"
+
+# SBOM (Software Bill of Materials) generation target
+sbom:
+	@echo "=================================================="
+	@echo "Generating Software Bill of Materials (CycloneDX)"
+	@echo "=================================================="
+	@echo ""
+	@echo "Creating SBOM output directory..."
+	@mkdir -p sbom
+	@echo "✓ Directory created: ./sbom/"
+	@echo ""
+	@echo "Checking for CycloneDX tools..."
+	@set -e; \
+	if ! $(PYTHON) -c "import cyclonedx_py" 2>/dev/null; then \
+		echo "Installing cyclonedx-bom for Python..."; \
+		$(PYTHON) -m pip install cyclonedx-bom --quiet; \
+		echo "✓ cyclonedx-bom installed"; \
+	else \
+		echo "✓ cyclonedx-bom already installed"; \
+	fi
+	@if ! command -v cyclonedx-npm >/dev/null 2>&1; then \
+		echo "Installing @cyclonedx/cyclonedx-npm globally..."; \
+		npm install -g @cyclonedx/cyclonedx-npm; \
+		echo "✓ cyclonedx-npm installed"; \
+	else \
+		echo "✓ cyclonedx-npm already installed"; \
+	fi
+	@echo ""
+	@echo "Generating Python SBOM from requirements.txt..."
+	@set -e; \
+	$(PYTHON) -m cyclonedx_py requirements \
+		requirements.txt \
+		--of JSON \
+		-o sbom/backend-sbom.json
+	@echo "✓ Python SBOM generated: sbom/backend-sbom.json"
+	@echo ""
+	@echo "Generating Node.js SBOM from frontend/package.json..."
+	@cd frontend && cyclonedx-npm \
+		--output-format JSON \
+		--output-file ../sbom/frontend-sbom.json \
+		--ignore-npm-errors
+	@echo "✓ Node.js SBOM generated: sbom/frontend-sbom.json"
+	@echo ""
+	@echo "=================================================="
+	@echo "SBOM Generation Complete!"
+	@echo "=================================================="
+	@echo ""
+	@echo "Generated files:"
+	@ls -lh sbom/*.json
+	@echo ""
+	@echo "You can view these files with:"
+	@echo "  cat sbom/backend-sbom.json | jq ."
+	@echo "  cat sbom/frontend-sbom.json | jq ."
+	@echo ""
+	@echo "Or upload them to vulnerability scanning tools that support CycloneDX format."

@@ -158,6 +158,13 @@ jobs:
             installer/dist/sysmanage_*.deb
             installer/dist/sysmanage_*.deb.sha256
 
+      - name: Upload SBOM files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysmanage-sbom
+          path: |
+            sbom/*.json
+
   # Consolidated Release - Push to sysmanage-docs and create GitHub release
   release:
     name: Create Release and Push to Docs
@@ -191,6 +198,7 @@ jobs:
           # Copy all package files to release directory
           find artifacts/ -name "*.deb" -exec cp {} release-files/ \;
           find artifacts/ -name "*.sha256" -exec cp {} release-files/ \;
+          find artifacts/ -name "*.json" -exec cp {} release-files/ \;
 
           echo "Release files:"
           ls -la release-files/
@@ -311,6 +319,27 @@ jobs:
           sha256sum -c sysmanage_${VERSION}-1_all.deb.sha256
           \`\`\`
 
+          ## Software Bill of Materials (SBOM)
+
+          This release includes comprehensive Software Bill of Materials (SBOM) files in CycloneDX JSON format for supply chain security and vulnerability analysis:
+
+          **Standalone Downloads:**
+          - **backend-sbom.json** - Complete inventory of Python dependencies
+          - **frontend-sbom.json** - Complete inventory of Node.js dependencies
+
+          **Download and inspect:**
+          \`\`\`bash
+          # Download SBOM files
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/backend-sbom.json
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/frontend-sbom.json
+
+          # View with jq (if installed)
+          cat backend-sbom.json | jq .
+          cat frontend-sbom.json | jq .
+          \`\`\`
+
+          These SBOM files are compatible with vulnerability scanning tools (Grype, Trivy, Dependency-Track, etc.) and provide complete transparency of all software dependencies. The SBOM files are also embedded in the .deb package at \`/usr/share/doc/sysmanage/sbom/\`.
+
           ## System Requirements
 
           - **Operating System**: Ubuntu 22.04+, Debian 11+
@@ -329,6 +358,7 @@ jobs:
           - Example configuration file
           - Certificate storage directory
           - Comprehensive i18n support (14 languages)
+          - Software Bill of Materials (SBOM) in CycloneDX format
 
           ## Configuration
 

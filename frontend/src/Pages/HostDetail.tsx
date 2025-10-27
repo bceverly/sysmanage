@@ -351,7 +351,7 @@ const HostDetail = () => {
     const getAccessTabIndex = () => supportsThirdPartyRepos() ? 5 : 4;
     const getSecurityTabIndex = () => supportsThirdPartyRepos() ? 6 : 5;
     const getCertificatesTabIndex = () => supportsThirdPartyRepos() ? 7 : 6;
-    const getServerRolesTabIndex = () => supportsThirdPartyRepos() ? 8 : 7;
+    const getServerRolesTabIndex = useCallback(() => supportsThirdPartyRepos() ? 8 : 7, [supportsThirdPartyRepos]);
     const getUbuntuProTabIndex = () => {
         if (!ubuntuProInfo?.available) return -1;
         return supportsThirdPartyRepos() ? 9 : 8;
@@ -687,7 +687,7 @@ const HostDetail = () => {
                 rolesRefreshInterval.current = null;
             }
         }
-    }, [currentTab, host?.active, host?.id]); // fetchRoleStatus is stable, safe to omit
+    }, [currentTab, host?.active, host?.id, fetchRoles, getServerRolesTabIndex, host]);
 
     // Cleanup interval on unmount
     useEffect(() => {
@@ -726,7 +726,7 @@ const HostDetail = () => {
                 openTelemetryRefreshInterval.current = null;
             }
         }
-    }, [currentTab, host?.active, host?.id, fetchOpenTelemetryStatus]);
+    }, [currentTab, host?.active, host?.id, fetchOpenTelemetryStatus, host]);
 
     // Fetch Graylog attachment status when Info tab is active
     useEffect(() => {
@@ -756,7 +756,7 @@ const HostDetail = () => {
                 graylogRefreshInterval.current = null;
             }
         }
-    }, [currentTab, host?.active, host?.id, fetchGraylogAttachment]);
+    }, [currentTab, host?.active, host?.id, fetchGraylogAttachment, host]);
 
     // Cleanup intervals on unmount
     useEffect(() => {

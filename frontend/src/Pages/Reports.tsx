@@ -65,7 +65,7 @@ const Reports: React.FC = () => {
   const navigate = useNavigate();
 
   // Tab names for URL hash
-  const tabNames = ['hosts', 'users', 'security'];
+  const tabNames = useMemo(() => ['hosts', 'users', 'security'], []);
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -98,7 +98,7 @@ const Reports: React.FC = () => {
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []); // tabNames is a constant array, safe to omit from deps
+  }, [tabNames]);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchField, setSearchField] = useState<'name' | 'description'>('name');
 
