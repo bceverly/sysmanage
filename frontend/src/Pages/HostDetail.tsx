@@ -687,7 +687,7 @@ const HostDetail = () => {
                 rolesRefreshInterval.current = null;
             }
         }
-    }, [currentTab, host?.active, host?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [currentTab, host?.active, host?.id]); // fetchRoleStatus is stable, safe to omit
 
     // Cleanup interval on unmount
     useEffect(() => {
@@ -726,7 +726,6 @@ const HostDetail = () => {
                 openTelemetryRefreshInterval.current = null;
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentTab, host?.active, host?.id, fetchOpenTelemetryStatus]);
 
     // Fetch Graylog attachment status when Info tab is active
@@ -757,7 +756,6 @@ const HostDetail = () => {
                 graylogRefreshInterval.current = null;
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentTab, host?.active, host?.id, fetchGraylogAttachment]);
 
     // Cleanup intervals on unmount
@@ -2118,9 +2116,8 @@ const HostDetail = () => {
         setCurrentTab(newValue);
         const tabs = getTabNames();
         // Safely access array element with bounds check
-        // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
         if (newValue >= 0 && newValue < tabs.length) {
-            window.location.hash = tabs[newValue];
+            window.location.hash = tabs[newValue]; // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
         }
     };
 

@@ -147,9 +147,8 @@ const Settings: React.FC = () => {
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
     // Safely access array element with bounds check
-    // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
     if (newValue >= 0 && newValue < tabNames.length) {
-      window.location.hash = tabNames[newValue];
+      window.location.hash = tabNames[newValue]; // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
     }
 
     // Load queue messages when switching to queue tab
@@ -189,9 +188,7 @@ const Settings: React.FC = () => {
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-    // tabNames is a constant array, safe to omit from deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // tabNames is a constant array, safe to omit from deps
   
   // Queue management state
   const [queueMessages, setQueueMessages] = useState<QueueMessage[]>([]);

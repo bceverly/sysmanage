@@ -54,8 +54,7 @@ const DashboardSettingsDialog: React.FC<DashboardSettingsDialogProps> = ({
     if (open) {
       loadPreferences();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open]); // loadPreferences is defined in the component, stable function
 
   const loadPreferences = async () => {
     try {

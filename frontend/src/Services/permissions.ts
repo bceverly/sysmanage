@@ -35,9 +35,8 @@ export const getUserPermissions = async (): Promise<UserPermissions> => {
 export const hasPermission = async (permissionName: string): Promise<boolean> => {
     const permissions = await getUserPermissions();
     // Use hasOwnProperty to prevent prototype pollution attacks
-    // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
     return Object.prototype.hasOwnProperty.call(permissions.permissions, permissionName)
-        && permissions.permissions[permissionName] === true;
+        && permissions.permissions[permissionName] === true; // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
 };
 
 /**

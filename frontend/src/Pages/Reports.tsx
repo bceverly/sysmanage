@@ -81,9 +81,8 @@ const Reports: React.FC = () => {
     setTabValue(newValue);
     setSearchTerm(''); // Clear search when switching tabs
     // Safely access array element with bounds check
-    // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
     if (newValue >= 0 && newValue < tabNames.length) {
-      window.location.hash = tabNames[newValue];
+      window.location.hash = tabNames[newValue]; // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
     }
   };
 
@@ -99,9 +98,7 @@ const Reports: React.FC = () => {
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-    // tabNames is a constant array, safe to omit from deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // tabNames is a constant array, safe to omit from deps
   const [searchTerm, setSearchTerm] = useState('');
   const [searchField, setSearchField] = useState<'name' | 'description'>('name');
 
