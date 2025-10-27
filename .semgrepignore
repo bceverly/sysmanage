@@ -17,6 +17,13 @@ frontend/vite.config.ts
 frontend/src/Services/connectionMonitor.ts
 frontend/src/Pages/HostDetail.tsx
 
+# Frontend files with safe object access (hasOwnProperty checks and bounds checking)
+frontend/src/Services/permissions.ts
+frontend/src/Pages/Settings.tsx
+frontend/src/Pages/Reports.tsx
+frontend/src/Hooks/useColumnVisibility.ts
+frontend/src/Components/AntivirusDefaultsSettings.tsx
+
 # Installation scripts with intentional chmod for downloaded binaries
 scripts/install-openbao.py
 scripts/install-telemetry.py
