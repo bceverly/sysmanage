@@ -10,7 +10,7 @@ coverage>=7.0.0
 click>=8.1.8
 cryptography==46.0.1
 dill==0.4.0
-dnspython==2.8.0
+dnspython>=2.7.0
 email_validator==2.1.1
 fastapi==0.120.0
 gevent==25.9.1
