@@ -1148,7 +1148,7 @@ installer-deb:
 	echo "✓ Packaging files copied"; \
 	echo ""; \
 	echo "Building package..."; \
-	cd "$$BUILD_DIR" && dpkg-buildpackage -us -uc -b; \
+	cd "$$BUILD_DIR" && dpkg-buildpackage -d -us -uc -b; \
 	echo ""; \
 	echo "Moving package to output directory..."; \
 	mv "$$BUILD_TEMP"/sysmanage_*.deb "$$OUTPUT_DIR/"; \
