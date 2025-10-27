@@ -111,7 +111,8 @@
     "@inquirer/figures": "^1.0.14",
     "resolve": "^1.22.11",
     "caniuse-lite": "^1.0.30001751",
-    "dompurify": "^3.2.4"
+    "dompurify": "^3.2.4",
+    "@eslint/object-schema": "^2.1.7"
   },
   "msw": {
     "workerDirectory": [
