@@ -58,7 +58,10 @@ export const useColumnVisibility = (gridIdentifier: string) => {
   const getColumnVisibilityModel = useCallback(() => {
     const model: { [key: string]: boolean } = {};
     hiddenColumns.forEach((field) => {
-      model[field] = false; // false means hidden in MUI DataGrid
+      // Safely set property to prevent prototype pollution
+      if (typeof field === 'string' && field !== '__proto__' && field !== 'constructor' && field !== 'prototype') {
+        model[field] = false; // false means hidden in MUI DataGrid
+      }
     });
     return model;
   }, [hiddenColumns]);

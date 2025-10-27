@@ -2117,7 +2117,10 @@ const HostDetail = () => {
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setCurrentTab(newValue);
         const tabs = getTabNames();
-        window.location.hash = tabs[newValue];
+        // Safely access array element with bounds check
+        if (newValue >= 0 && newValue < tabs.length) {
+            window.location.hash = tabs[newValue];
+        }
     };
 
     // Ubuntu Pro handlers

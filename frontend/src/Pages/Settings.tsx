@@ -146,7 +146,10 @@ const Settings: React.FC = () => {
   // Handle tab change and update URL hash
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
-    window.location.hash = tabNames[newValue];
+    // Safely access array element with bounds check
+    if (newValue >= 0 && newValue < tabNames.length) {
+      window.location.hash = tabNames[newValue];
+    }
 
     // Load queue messages when switching to queue tab
     if (newValue === 1) {

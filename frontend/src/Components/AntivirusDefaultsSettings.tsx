@@ -153,7 +153,10 @@ const AntivirusDefaultsSettings: React.FC = () => {
       // Convert the defaults map to array format for the API
       const defaultsArray = Object.keys(ANTIVIRUS_OPTIONS).map((osName) => ({
         os_name: osName,
-        antivirus_package: editedDefaults[osName] === '' ? null : (editedDefaults[osName] || null),
+        // Safely access with hasOwnProperty check to prevent prototype pollution
+        antivirus_package: Object.prototype.hasOwnProperty.call(editedDefaults, osName)
+          ? (editedDefaults[osName] === '' ? null : (editedDefaults[osName] || null))
+          : null,
       }));
 
       await axiosInstance.put('/api/antivirus-defaults/', {
@@ -227,7 +230,7 @@ const AntivirusDefaultsSettings: React.FC = () => {
                               {osName}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {antivirusDefaults[osName] || t('antivirus.none', 'None')}
+                              {(Object.prototype.hasOwnProperty.call(antivirusDefaults, osName) && antivirusDefaults[osName]) || t('antivirus.none', 'None')}
                             </Typography>
                           </Box>
                         </Grid>
@@ -260,14 +263,14 @@ const AntivirusDefaultsSettings: React.FC = () => {
                             <Select
                               labelId={`antivirus-${osName}-label`}
                               id={`antivirus-${osName}`}
-                              value={editedDefaults[osName] || ''}
+                              value={(Object.prototype.hasOwnProperty.call(editedDefaults, osName) && editedDefaults[osName]) || ''}
                               onChange={(e) => handleAntivirusChange(osName, e.target.value)}
                               label={t('antivirus.selectProgram', 'Select Antivirus Program')}
                             >
                               <MenuItem value="">
                                 {t('antivirus.none', 'None')}
                               </MenuItem>
-                              {ANTIVIRUS_OPTIONS[osName].map((packageName) => (
+                              {(Object.prototype.hasOwnProperty.call(ANTIVIRUS_OPTIONS, osName) ? ANTIVIRUS_OPTIONS[osName] : []).map((packageName) => (
                                 <MenuItem key={packageName} value={packageName}>
                                   {packageName}
                                 </MenuItem>

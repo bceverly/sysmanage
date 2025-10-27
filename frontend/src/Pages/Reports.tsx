@@ -80,7 +80,10 @@ const Reports: React.FC = () => {
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
     setSearchTerm(''); // Clear search when switching tabs
-    window.location.hash = tabNames[newValue];
+    // Safely access array element with bounds check
+    if (newValue >= 0 && newValue < tabNames.length) {
+      window.location.hash = tabNames[newValue];
+    }
   };
 
   // Listen for hash changes (browser back/forward)

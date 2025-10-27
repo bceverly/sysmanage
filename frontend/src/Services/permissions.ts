@@ -34,7 +34,9 @@ export const getUserPermissions = async (): Promise<UserPermissions> => {
  */
 export const hasPermission = async (permissionName: string): Promise<boolean> => {
     const permissions = await getUserPermissions();
-    return permissions.permissions[permissionName] === true;
+    // Use hasOwnProperty to prevent prototype pollution attacks
+    return Object.prototype.hasOwnProperty.call(permissions.permissions, permissionName)
+        && permissions.permissions[permissionName] === true;
 };
 
 /**
