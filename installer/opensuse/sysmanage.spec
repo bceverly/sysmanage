@@ -74,7 +74,12 @@ cp -r frontend/dist %{buildroot}/opt/sysmanage/frontend/
 cp -r frontend/public %{buildroot}/opt/sysmanage/frontend/
 
 # Create virtualenv and install Python dependencies
+# Use python3.11 for openSUSE, python3 for Fedora/RHEL when building on Ubuntu
+%if 0%{?suse_version}
 python3.11 -m venv %{buildroot}/opt/sysmanage/.venv
+%else
+python3 -m venv %{buildroot}/opt/sysmanage/.venv
+%endif
 %{buildroot}/opt/sysmanage/.venv/bin/pip install --upgrade pip
 %{buildroot}/opt/sysmanage/.venv/bin/pip install -r requirements.txt
 
@@ -128,7 +133,11 @@ chmod 750 /etc/sysmanage
 # Recreate the venv using the system's Python to fix all symlinks and paths
 cd /opt/sysmanage
 rm -rf .venv
+%if 0%{?suse_version}
 python3.11 -m venv .venv
+%else
+python3 -m venv .venv
+%endif
 .venv/bin/pip install --quiet --upgrade pip
 .venv/bin/pip install --quiet -r requirements.txt
 cd -
