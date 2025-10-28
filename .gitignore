@@ -228,3 +228,6 @@ contrib/freebsd/opentelemetry/downloads/
 
 # SBOM (Software Bill of Materials) generated files
 sbom/
+
+# Installer build artifacts
+installer/dist/

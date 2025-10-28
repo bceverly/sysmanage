@@ -1555,7 +1555,6 @@ installer-freebsd:
 	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
 	BUILD_DIR="$$CURRENT_DIR/build/freebsd"; \
 	PACKAGE_ROOT="$$BUILD_DIR/package-root"; \
-	MANIFEST_FILE="$$CURRENT_DIR/installer/freebsd/+MANIFEST"; \
 	echo "Determining version from git..."; \
 	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
 	if [ -z "$$VERSION" ]; then \
@@ -1580,6 +1579,13 @@ installer-freebsd:
 	echo "Generating SBOM files..."; \
 	$(MAKE) sbom; \
 	echo "✓ SBOM files generated"; \
+	echo ""; \
+	echo "Copying and updating manifest..."; \
+	MANIFEST_FILE="$$BUILD_DIR/+MANIFEST"; \
+	cp "$$CURRENT_DIR/installer/freebsd/+MANIFEST" "$$MANIFEST_FILE"; \
+	sed -i.bak "s/^version:.*/version: \"$$VERSION\"/" "$$MANIFEST_FILE"; \
+	rm -f "$$MANIFEST_FILE.bak"; \
+	echo "✓ Manifest copied and updated to version $$VERSION"; \
 	echo ""; \
 	echo "Creating package directory structure..."; \
 	mkdir -p "$$PACKAGE_ROOT/usr/local/lib/sysmanage"; \
@@ -1618,11 +1624,6 @@ installer-freebsd:
 		cp sbom/frontend-sbom.json "$$PACKAGE_ROOT/usr/local/share/doc/sysmanage/sbom/"; \
 	fi; \
 	echo "✓ SBOM files copied"; \
-	echo ""; \
-	echo "Updating manifest version..."; \
-	sed -i.bak "s/^version:.*/version: \"$$VERSION\"/" "$$MANIFEST_FILE"; \
-	rm -f "$$MANIFEST_FILE.bak"; \
-	echo "✓ Manifest updated to version $$VERSION"; \
 	echo ""; \
 	echo "Building FreeBSD package..."; \
 	cd "$$BUILD_DIR" && pkg create -M "$$MANIFEST_FILE" -r "$$PACKAGE_ROOT" -o .; \
