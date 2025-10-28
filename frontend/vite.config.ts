@@ -166,7 +166,7 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: 'build',
+    outDir: 'dist',
     sourcemap: process.env.NODE_ENV === 'development' ? 'inline' : false,
     // Reduce console noise in production
     minify: process.env.NODE_ENV === 'production'

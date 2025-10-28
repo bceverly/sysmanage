@@ -1335,6 +1335,7 @@ installer-rpm-centos:
 	TAR_DIR="$$BUILD_TEMP/SOURCES/$$TAR_NAME"; \
 	mkdir -p "$$TAR_DIR"; \
 	rsync -a --exclude='node_modules' --exclude='htmlcov' --exclude='__pycache__' --exclude='*.pyc' --exclude='.pytest_cache' --exclude='.venv' --exclude='installer/dist' backend/ "$$TAR_DIR/backend/"; \
+	mkdir -p "$$TAR_DIR/frontend"; \
 	rsync -a --exclude='node_modules' --exclude='src' frontend/dist/ "$$TAR_DIR/frontend/dist/"; \
 	rsync -a --exclude='node_modules' --exclude='src' frontend/public/ "$$TAR_DIR/frontend/public/"; \
 	cp alembic.ini "$$TAR_DIR/"; \
@@ -1465,6 +1466,7 @@ installer-rpm-opensuse:
 	TAR_DIR="$$BUILD_TEMP/SOURCES/$$TAR_NAME"; \
 	mkdir -p "$$TAR_DIR"; \
 	rsync -a --exclude='node_modules' --exclude='htmlcov' --exclude='__pycache__' --exclude='*.pyc' --exclude='.pytest_cache' --exclude='.venv' --exclude='installer/dist' backend/ "$$TAR_DIR/backend/"; \
+	mkdir -p "$$TAR_DIR/frontend"; \
 	rsync -a --exclude='node_modules' --exclude='src' frontend/dist/ "$$TAR_DIR/frontend/dist/"; \
 	rsync -a --exclude='node_modules' --exclude='src' frontend/public/ "$$TAR_DIR/frontend/public/"; \
 	cp alembic.ini "$$TAR_DIR/"; \
