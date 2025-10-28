@@ -1626,13 +1626,25 @@ installer-freebsd:
 	echo "✓ SBOM files copied"; \
 	echo ""; \
 	echo "Building FreeBSD package..."; \
-	cd "$$BUILD_DIR" && pkg create -M "$$MANIFEST_FILE" -r "$$PACKAGE_ROOT" -o .; \
+	if command -v pkg >/dev/null 2>&1; then \
+		echo "Using native FreeBSD pkg create..."; \
+		cd "$$BUILD_DIR" && pkg create -M "$$MANIFEST_FILE" -r "$$PACKAGE_ROOT" -o .; \
+	else \
+		echo "Using bsdtar for cross-platform build..."; \
+		cd "$$BUILD_DIR"; \
+		cp "$$MANIFEST_FILE" "+MANIFEST"; \
+		bsdtar -czf "sysmanage-$$VERSION.pkg" --format=pax "@+MANIFEST" -C "$$PACKAGE_ROOT" .; \
+	fi; \
 	if [ $$? -eq 0 ]; then \
 		PACKAGE_FILE=$$(ls -1 $$BUILD_DIR/sysmanage-$$VERSION.pkg 2>/dev/null | head -1); \
 		if [ -n "$$PACKAGE_FILE" ]; then \
 			mkdir -p "$$OUTPUT_DIR"; \
 			mv "$$PACKAGE_FILE" "$$OUTPUT_DIR/"; \
-			cd "$$OUTPUT_DIR" && sha256 sysmanage-$$VERSION.pkg > sysmanage-$$VERSION.pkg.sha256; \
+			if command -v sha256 >/dev/null 2>&1; then \
+				cd "$$OUTPUT_DIR" && sha256 sysmanage-$$VERSION.pkg > sysmanage-$$VERSION.pkg.sha256; \
+			else \
+				cd "$$OUTPUT_DIR" && sha256sum sysmanage-$$VERSION.pkg > sysmanage-$$VERSION.pkg.sha256; \
+			fi; \
 			echo ""; \
 			echo "✓ FreeBSD package created successfully: $$OUTPUT_DIR/sysmanage-$$VERSION.pkg"; \
 			echo ""; \
