@@ -1181,7 +1181,7 @@ installer-deb:
 	echo "Copying source files..."; \
 	rsync -a --exclude='htmlcov' --exclude='__pycache__' --exclude='*.pyc' --exclude='.pytest_cache' --exclude='node_modules' --exclude='.venv' backend/ "$$BUILD_DIR/backend/"; \
 	mkdir -p "$$BUILD_DIR/frontend"; \
-	rsync -a --exclude='node_modules' --exclude='coverage' frontend/build/ "$$BUILD_DIR/frontend/dist/"; \
+	rsync -a --exclude='node_modules' --exclude='coverage' frontend/dist/ "$$BUILD_DIR/frontend/dist/"; \
 	rsync -a --exclude='node_modules' --exclude='coverage' frontend/public/ "$$BUILD_DIR/frontend/public/"; \
 	cp requirements.txt "$$BUILD_DIR/"; \
 	cp alembic.ini "$$BUILD_DIR/"; \
@@ -1242,7 +1242,7 @@ installer-openbsd:
 	fi; \
 	echo ""; \
 	echo "Checking prerequisites..."; \
-	if [ ! -d frontend/build ]; then \
+	if [ ! -d frontend/dist ]; then \
 		echo "ERROR: Frontend not built. Run 'make build' first."; \
 		exit 1; \
 	fi; \

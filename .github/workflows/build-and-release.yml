@@ -287,7 +287,7 @@ jobs:
       - name: Install RPM build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y rpm rpmbuild rpm-build
+          sudo apt-get install -y rpm
 
       - name: Install frontend dependencies
         run: |
@@ -357,7 +357,7 @@ jobs:
       - name: Install RPM build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y rpm rpmbuild rpm-build
+          sudo apt-get install -y rpm
 
       - name: Install frontend dependencies
         run: |
