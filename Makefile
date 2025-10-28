@@ -80,7 +80,11 @@ else
 	else \
 		echo "Error: No Python 3 found"; exit 1; \
 	fi
-	@$(PYTHON) -m pip install --upgrade pip
+	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
+		export TMPDIR=$$HOME/tmp && $(PYTHON) -m pip install --upgrade pip; \
+	else \
+		$(PYTHON) -m pip install --upgrade pip; \
+	fi
 endif
 
 setup-venv: $(VENV_ACTIVATE)
@@ -91,7 +95,11 @@ install-dev: setup-venv
 ifeq ($(OS),Windows_NT)
 	@$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep
 else
-	@if [ "$$(uname -s)" = "NetBSD" ]; then \
+	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
+		echo "[INFO] OpenBSD detected - using ~/tmp for builds..."; \
+		export TMPDIR=$$HOME/tmp && \
+		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
+	elif [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD detected - configuring for grpcio build..."; \
 		export TMPDIR=/var/tmp && \
 		export CC=/usr/pkg/gcc14/bin/gcc && \
@@ -134,8 +142,10 @@ else
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
 	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
 		echo "[INFO] OpenBSD - patching and building grpcio with bundled abseil..."; \
+		export TMPDIR=$$HOME/tmp && \
 		$(MAKE) build-grpcio-openbsd || { echo "[ERROR] grpcio build failed - see ~/tmp/grpcio-build.log"; exit 1; }; \
 		echo "[INFO] Now installing remaining dependencies..."; \
+		export TMPDIR=$$HOME/tmp && \
 		grep -v "playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || { echo "[ERROR] Failed to install requirements"; exit 1; }; \
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
 	else \
@@ -183,6 +193,12 @@ else
 		rm -rf $(VENV_DIR)/lib/python*/site-packages/websocket $(VENV_DIR)/lib/python*/site-packages/websocket-*.dist-info 2>/dev/null || true; \
 		$(PYTHON) -m pip install --force-reinstall websocket-client websockets; \
 		echo "[OK] websocket dependencies fixed for NetBSD Selenium support"; \
+	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
+		echo "[INFO] OpenBSD detected - fixing websocket dependencies for Selenium compatibility..."; \
+		$(PYTHON) -m pip uninstall -y websocket 2>/dev/null || true; \
+		rm -rf $(VENV_DIR)/lib/python*/site-packages/websocket $(VENV_DIR)/lib/python*/site-packages/websocket-*.dist-info 2>/dev/null || true; \
+		export TMPDIR=$$HOME/tmp && $(PYTHON) -m pip install --force-reinstall websocket-client websockets; \
+		echo "[OK] websocket dependencies fixed for OpenBSD Selenium support"; \
 	fi
 endif
 	@echo "Installing OpenBAO for secrets management..."

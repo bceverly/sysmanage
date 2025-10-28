@@ -4,7 +4,7 @@ COMMENT =		centralized system management server
 
 GH_ACCOUNT =		bceverly
 GH_PROJECT =		sysmanage
-GH_TAGNAME =		v0.0.0  # Auto-updated by make installer
+GH_TAGNAME =ttv0.9.0.9
 REVISION =		0
 
 CATEGORIES =		sysutils www
