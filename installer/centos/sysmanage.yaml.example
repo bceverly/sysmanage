@@ -1,0 +1,56 @@
+# SysManage Server Configuration Example
+# Copy this file to /etc/sysmanage.yaml and customize
+
+database:
+  # PostgreSQL connection string (required for production)
+  # Format: postgresql://username:password@host:port/database
+  url: "postgresql://sysmanage:change-this-password@localhost/sysmanage"
+
+  # Connection pool settings
+  pool_size: 20
+  max_overflow: 10
+  pool_timeout: 30
+
+server:
+  # Backend API server settings
+  host: "0.0.0.0"
+  port: 8080
+
+  # Frontend will be served by nginx on port 3000
+  # nginx proxies /api/ and /ws requests to this backend
+
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file: "/var/log/sysmanage/sysmanage.log"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+
+security:
+  # Session secret key (change this!)
+  secret_key: "CHANGE-THIS-TO-A-RANDOM-STRING"
+
+  # JWT token settings
+  jwt_algorithm: "HS256"
+  jwt_expiration_hours: 24
+
+  # CORS settings (if needed)
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://127.0.0.1:3000"
+
+# Optional: Graylog integration
+# graylog:
+#   enabled: false
+#   host: "graylog.example.com"
+#   port: 9000
+#   username: "admin"
+#   password: "change-this"
+
+# Optional: Email notifications
+# email:
+#   enabled: false
+#   smtp_host: "smtp.example.com"
+#   smtp_port: 587
+#   smtp_user: "notifications@example.com"
+#   smtp_password: "change-this"
+#   from_address: "sysmanage@example.com"
