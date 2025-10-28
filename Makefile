@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb sbom
+.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb sbom
 
 # Default target
 help:
@@ -24,6 +24,7 @@ help:
 	@echo "  make security-upgrades - Check for security package upgrades"
 	@echo "  make setup         - Install development dependencies"
 	@echo "  make clean         - Clean test artifacts and cache"
+	@echo "  make build         - Build frontend for production"
 	@echo "  make install-dev   - Install all development tools (includes Playwright + WebDriver + MSW for testing)"
 	@echo "  make migrate       - Run database migrations (alembic upgrade head)"
 	@echo "  make check-test-models - Check test model synchronization between conftest files"
@@ -834,6 +835,13 @@ check-test-models:
 test: test-python test-typescript test-ui test-performance
 	@echo "[OK] All tests completed successfully!"
 
+# Build frontend for production
+build:
+	@echo "=== Building Frontend ==="
+	@echo "Building React frontend with Vite..."
+	@cd frontend && npm run build
+	@echo "[OK] Frontend build completed - output in frontend/dist/"
+
 # Clean artifacts
 clean:
 	@echo "Cleaning test artifacts and cache..."
@@ -844,13 +852,14 @@ ifeq ($(OS),Windows_NT)
 	-@rmdir /s /q htmlcov >nul 2>&1
 	-@del /q .coverage >nul 2>&1
 	-@rmdir /s /q frontend\coverage >nul 2>&1
+	-@rmdir /s /q frontend\dist >nul 2>&1
 else
 	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
 	@find . -name "*.pyc" -delete 2>/dev/null || true
 	@rm -rf htmlcov/ .coverage
-	@cd frontend && rm -rf coverage/ 2>/dev/null || true
+	@cd frontend && rm -rf coverage/ dist/ 2>/dev/null || true
 endif
 	@echo "[OK] Clean completed"
 
@@ -1104,7 +1113,7 @@ build-grpcio-openbsd: $(VENV_ACTIVATE)
 	rm -rf $$HOME/tmp/grpcio-1.71.0* && \
 	echo "[OK] grpcio 1.71.0 build completed successfully with OpenBSD patches"
 # Installer targets
-installer:
+installer: build
 	@echo "=== Auto-detecting platform for installer build ==="
 	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
 		echo "OpenBSD detected - building port tarball"; \
