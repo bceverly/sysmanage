@@ -1113,8 +1113,8 @@ installer:
 		echo "FreeBSD detected - .pkg not yet implemented"; \
 		exit 1; \
 	elif [ "$$(uname -s)" = "NetBSD" ]; then \
-		echo "NetBSD detected - .tgz not yet implemented"; \
-		exit 1; \
+		echo "NetBSD detected - building .tgz package"; \
+		$(MAKE) installer-netbsd; \
 	elif [ -f /etc/os-release ]; then \
 		. /etc/os-release; \
 		if [ "$$ID" = "opensuse-leap" ] || [ "$$ID" = "opensuse-tumbleweed" ] || [ "$$ID" = "sles" ]; then \
@@ -1352,7 +1352,7 @@ installer-rpm-centos:
 	echo "✓ Source tarball created"; \
 	echo ""; \
 	echo "Updating spec file with version..."; \
-	cp "$$CURRENT_DIR/installer/centos/sysmanage.spec" "$$BUILD_TEMP/SPECS/"; \
+	cp "$$CURRENT_DIR/installer/centos/sysmanage.spec" "$$BUILD_TEMP/SPECS/sysmanage.spec"; \
 	DATE=$$(date "+%a %b %d %Y"); \
 	sed -i "s/^Version:.*/Version:        $$VERSION/" "$$BUILD_TEMP/SPECS/sysmanage.spec"; \
 	sed -i "s/^\\* Tue Oct 29 2025/\\* $$DATE/" "$$BUILD_TEMP/SPECS/sysmanage.spec"; \
@@ -1484,7 +1484,7 @@ installer-rpm-opensuse:
 	echo "✓ Vendor tarball created"; \
 	echo ""; \
 	echo "Updating spec file with version..."; \
-	cp "$$CURRENT_DIR/installer/opensuse/sysmanage.spec" "$$BUILD_TEMP/SPECS/"; \
+	cp "$$CURRENT_DIR/installer/opensuse/sysmanage.spec" "$$BUILD_TEMP/SPECS/sysmanage.spec"; \
 	DATE=$$(date "+%a %b %d %Y"); \
 	sed -i "s/^Version:.*/Version:        $$VERSION/" "$$BUILD_TEMP/SPECS/sysmanage.spec"; \
 	sed -i "s/^\\* Tue Oct 29 2025/\\* $$DATE/" "$$BUILD_TEMP/SPECS/sysmanage.spec"; \
@@ -1535,6 +1535,132 @@ installer-rpm-opensuse:
 		exit 1; \
 	fi; \
 	rm -rf "$$VENDOR_DIR"
+
+# NetBSD .tgz package
+installer-netbsd:
+	@echo "=== Building NetBSD Package ==="
+	@echo ""
+	@echo "Creating NetBSD .tgz package for sysmanage..."
+	@echo ""
+	@CURRENT_DIR=$$(pwd); \
+	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
+	BUILD_DIR="$$CURRENT_DIR/build/netbsd"; \
+	PACKAGE_ROOT="$$BUILD_DIR/package-root"; \
+	echo "Determining version from git..."; \
+	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+	if [ -z "$$VERSION" ]; then \
+		VERSION="0.1.0"; \
+		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	else \
+		echo "Building version: $$VERSION"; \
+	fi; \
+	echo ""; \
+	echo "Checking prerequisites..."; \
+	if [ ! -d frontend/dist ]; then \
+		echo "ERROR: Frontend not built. Run 'make build' first."; \
+		exit 1; \
+	fi; \
+	echo "✓ Frontend build found"; \
+	echo ""; \
+	echo "Generating SBOM files..."; \
+	$(MAKE) sbom; \
+	echo "✓ SBOM files generated"; \
+	echo ""; \
+	echo "Cleaning build directory..."; \
+	rm -rf "$$BUILD_DIR"; \
+	mkdir -p "$$PACKAGE_ROOT"; \
+	echo "✓ Build directory prepared: $$BUILD_DIR"; \
+	echo ""; \
+	echo "Creating package directory structure..."; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/etc/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/share/examples/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/var/lib/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/var/log/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/var/run/sysmanage"; \
+	echo "✓ Package directories created"; \
+	echo ""; \
+	echo "Copying server files..."; \
+	rsync -a --exclude='htmlcov' --exclude='__pycache__' --exclude='*.pyc' --exclude='.pytest_cache' --exclude='node_modules' --exclude='.venv' backend/ "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/backend/"; \
+	rsync -a --exclude='node_modules' --exclude='coverage' frontend/dist/ "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/frontend/dist/"; \
+	rsync -a --exclude='node_modules' --exclude='coverage' frontend/public/ "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/frontend/public/"; \
+	cp -r alembic "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/"; \
+	cp alembic.ini "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/"; \
+	cp requirements.txt "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/"; \
+	cp -r config "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/" 2>/dev/null || true; \
+	cp -r scripts "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/" 2>/dev/null || true; \
+	echo "✓ Server files copied"; \
+	echo ""; \
+	echo "Copying configuration files..."; \
+	cp installer/netbsd/sysmanage.yaml.example "$$PACKAGE_ROOT/usr/pkg/etc/sysmanage/"; \
+	cp installer/netbsd/sysmanage.rc "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/sysmanage"; \
+	cp installer/netbsd/sysmanage-nginx.conf "$$PACKAGE_ROOT/usr/pkg/share/examples/sysmanage/"; \
+	chmod +x "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/sysmanage"; \
+	echo "✓ Configuration files copied"; \
+	echo ""; \
+	echo "Copying SBOM..."; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/share/doc/sysmanage/sbom"; \
+	if [ -f sbom/backend-sbom.json ]; then \
+		cp sbom/backend-sbom.json "$$PACKAGE_ROOT/usr/pkg/share/doc/sysmanage/sbom/"; \
+	fi; \
+	if [ -f sbom/frontend-sbom.json ]; then \
+		cp sbom/frontend-sbom.json "$$PACKAGE_ROOT/usr/pkg/share/doc/sysmanage/sbom/"; \
+	fi; \
+	echo "✓ SBOM copied"; \
+	echo ""; \
+	echo "Copying package metadata files..."; \
+	cp installer/netbsd/+INSTALL "$$BUILD_DIR/"; \
+	cp installer/netbsd/+DESC "$$BUILD_DIR/"; \
+	cp installer/netbsd/+COMMENT "$$BUILD_DIR/"; \
+	cp installer/netbsd/+BUILD_INFO "$$BUILD_DIR/"; \
+	chmod +x "$$BUILD_DIR/+INSTALL"; \
+	echo "✓ Metadata files copied"; \
+	echo ""; \
+	echo "Creating packing list with dependencies..."; \
+	{ \
+		echo "@name sysmanage-$$VERSION"; \
+		echo "@comment SysManage Server - Centralized system management server for NetBSD"; \
+		echo "@pkgdep python312>=3.12"; \
+		echo "@pkgdep py312-pip"; \
+		echo "@pkgdep postgresql16-server>=16.0"; \
+		echo "@pkgdep nginx>=1.24"; \
+		cd "$$PACKAGE_ROOT" && find . -type f -o -type l | sed 's,^\./,,'; \
+		cd "$$PACKAGE_ROOT" && find . -type d | sed 's,^\./,,' | grep -v '^\.' | sed 's,^,@dirrm ,'; \
+	} | sort -u > "$$BUILD_DIR/+CONTENTS"; \
+	echo "✓ Packing list created with dependencies"; \
+	echo ""; \
+	echo "Building package with pkg_create..."; \
+	pkg_create \
+		-B "$$BUILD_DIR/+BUILD_INFO" \
+		-c "$$BUILD_DIR/+COMMENT" \
+		-d "$$BUILD_DIR/+DESC" \
+		-I "$$BUILD_DIR/+INSTALL" \
+		-f "$$BUILD_DIR/+CONTENTS" \
+		-p "$$PACKAGE_ROOT" \
+		"$$BUILD_DIR/sysmanage-$$VERSION.tgz"; \
+	if [ $$? -eq 0 ]; then \
+		PACKAGE_FILE="sysmanage-$$VERSION.tgz"; \
+		if [ -f "$$BUILD_DIR/$$PACKAGE_FILE" ]; then \
+			mkdir -p "$$OUTPUT_DIR"; \
+			mv "$$BUILD_DIR/$$PACKAGE_FILE" "$$OUTPUT_DIR/"; \
+			echo ""; \
+			echo "✓ NetBSD package created successfully: $$OUTPUT_DIR/$$PACKAGE_FILE"; \
+			echo ""; \
+			echo "Installation commands:"; \
+			echo "  sudo pkg_add $$OUTPUT_DIR/$$PACKAGE_FILE"; \
+			echo "  sudo cp /usr/pkg/share/examples/rc.d/sysmanage /etc/rc.d/"; \
+			echo "  sudo sh -c 'echo sysmanage=YES >> /etc/rc.conf'"; \
+			echo "  sudo /etc/rc.d/sysmanage start"; \
+			echo ""; \
+		else \
+			echo "ERROR: Package file not found after build: $$BUILD_DIR/$$PACKAGE_FILE"; \
+			exit 1; \
+		fi; \
+	else \
+		echo "ERROR: pkg_create command failed"; \
+		exit 1; \
+	fi
 
 # SBOM (Software Bill of Materials) generation target
 sbom:

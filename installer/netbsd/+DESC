@@ -1,0 +1,16 @@
+SysManage is a comprehensive centralized system management server with a
+modern web-based interface. It provides:
+ * Agent management and monitoring
+ * System metrics and health monitoring
+ * Comprehensive reporting system with PDF generation
+ * JWT-based authentication with mTLS security
+ * Multi-user management system with RBAC
+ * Package inventory and updates
+ * Certificate management
+ * Real-time WebSocket communication
+ * Cross-platform support (Linux, Windows, macOS, FreeBSD, OpenBSD, NetBSD)
+
+The server runs as a system service and communicates with SysManage agents
+deployed across your infrastructure to provide centralized management.
+
+Homepage: https://github.com/bceverly/sysmanage

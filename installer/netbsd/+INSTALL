@@ -1,0 +1,128 @@
+#!/bin/sh
+
+PKG_PREFIX=${PKG_PREFIX:-/usr/pkg}
+
+case ${STAGE} in
+PRE-INSTALL)
+	echo "Installing SysManage Server..."
+	;;
+
+POST-INSTALL)
+	# Create sysmanage user and group if they don't exist
+	if ! /usr/sbin/groupinfo sysmanage >/dev/null 2>&1; then
+		/usr/sbin/groupadd -g 9998 sysmanage
+	fi
+	if ! /usr/sbin/userinfo sysmanage >/dev/null 2>&1; then
+		/usr/sbin/useradd -u 9998 -g sysmanage -s /sbin/nologin \
+			-d /usr/pkg/lib/sysmanage -c "SysManage Server User" sysmanage
+	fi
+
+	# Create directories
+	mkdir -p /usr/pkg/lib/sysmanage
+	mkdir -p /usr/pkg/etc/sysmanage
+	mkdir -p /var/lib/sysmanage
+	mkdir -p /var/log/sysmanage
+	mkdir -p /var/run/sysmanage
+	mkdir -p /etc/sysmanage
+
+	# Set ownership
+	chown -R sysmanage:sysmanage /usr/pkg/lib/sysmanage
+	chown -R sysmanage:sysmanage /var/lib/sysmanage
+	chown -R sysmanage:sysmanage /var/log/sysmanage
+	chown -R sysmanage:sysmanage /var/run/sysmanage
+	chown -R sysmanage:sysmanage /etc/sysmanage
+
+	# Use existing config or create from example
+	if [ -f /etc/sysmanage.yaml ]; then
+		ln -sf /etc/sysmanage.yaml /usr/pkg/etc/sysmanage/config.yaml
+	elif [ ! -f /usr/pkg/etc/sysmanage/config.yaml ]; then
+		cp /usr/pkg/etc/sysmanage/sysmanage.yaml.example \
+			/usr/pkg/etc/sysmanage/config.yaml
+	fi
+
+	# Create Python virtual environment and install dependencies
+	cd /usr/pkg/lib/sysmanage
+	/usr/pkg/bin/python3.12 -m venv .venv
+	.venv/bin/pip install --quiet --upgrade pip
+	.venv/bin/pip install --quiet -r requirements.txt
+
+	echo ""
+	echo "==========================================="
+	echo "SysManage Server installed successfully!"
+	echo "==========================================="
+	echo ""
+	echo "[!] IMPORTANT: Configuration Required"
+	echo ""
+	echo "Before starting SysManage, you MUST configure:"
+	echo ""
+	echo "1. PostgreSQL Database Connection"
+	echo "   --------------------------------"
+	echo "   SysManage requires a PostgreSQL database (version 12+)."
+	echo "   The database can be on this server or a remote host."
+	echo ""
+	echo "   To set up a local database:"
+	echo "     pkg_add postgresql16-server postgresql16-client"
+	echo "     su - postgres -c 'initdb --locale=C -D /usr/pkg/pgsql/data'"
+	echo "     echo 'postgresql=YES' >> /etc/rc.conf"
+	echo "     /etc/rc.d/postgresql start"
+	echo "     su - postgres -c 'createuser sysmanage'"
+	echo "     su - postgres -c 'createdb sysmanage -O sysmanage'"
+	echo "     su - postgres -c \"psql -c \\\"ALTER USER sysmanage WITH PASSWORD 'your-password';\\\"\""
+	echo ""
+	echo "2. Configuration File"
+	echo "   ------------------"
+	echo "   Edit: /usr/pkg/etc/sysmanage/config.yaml"
+	echo ""
+	echo "   Use the online configuration builder at:"
+	echo "   https://sysmanage.org/config-builder.html"
+	echo ""
+	echo "3. Database Initialization"
+	echo "   -----------------------"
+	echo "   Run database migrations:"
+	echo "     cd /usr/pkg/lib/sysmanage"
+	echo "     sudo -u sysmanage .venv/bin/python -m alembic upgrade head"
+	echo ""
+	echo "4. Web Server Setup"
+	echo "   ----------------"
+	echo "   Install and configure nginx:"
+	echo "     pkg_add nginx"
+	echo "     cp /usr/pkg/share/examples/sysmanage/sysmanage-nginx.conf /usr/pkg/etc/nginx/conf.d/"
+	echo "     echo 'nginx=YES' >> /etc/rc.conf"
+	echo "     /etc/rc.d/nginx start"
+	echo ""
+	echo "5. Start the Services"
+	echo "   ------------------"
+	echo "     cp /usr/pkg/share/examples/rc.d/sysmanage /etc/rc.d/"
+	echo "     echo 'sysmanage=YES' >> /etc/rc.conf"
+	echo "     /etc/rc.d/sysmanage start"
+	echo ""
+	echo "6. Access the Web Interface"
+	echo "   ------------------------"
+	echo "   Frontend: http://your-server:3000"
+	echo "   Backend API: http://your-server:8080"
+	echo ""
+	echo "Log files: /var/log/sysmanage/"
+	echo ""
+	;;
+
+PRE-DEINSTALL)
+	# Stop service if running
+	if [ -f /etc/rc.d/sysmanage ]; then
+		/etc/rc.d/sysmanage stop 2>/dev/null || true
+	fi
+	;;
+
+POST-DEINSTALL)
+	echo "SysManage Server removed."
+	echo "Configuration files preserved in /usr/pkg/etc/sysmanage/"
+	echo "Logs preserved in /var/log/sysmanage/"
+	echo "Database preserved in /var/lib/sysmanage/"
+	echo ""
+	echo "To completely remove, also run:"
+	echo "  rm -rf /usr/pkg/etc/sysmanage"
+	echo "  rm -rf /var/log/sysmanage"
+	echo "  rm -rf /var/lib/sysmanage"
+	echo "  rm -f /etc/rc.d/sysmanage"
+	echo "  sed -i '/sysmanage/d' /etc/rc.conf"
+	;;
+esac
