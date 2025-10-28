@@ -510,7 +510,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: frontend-build
-        path: frontend/build/
+        path: frontend/dist/
 
   ui-tests:
     name: UI Tests
@@ -675,7 +675,7 @@ jobs:
     - name: Start frontend server
       working-directory: frontend
       run: |
-        npx serve -s build -l 3000 &
+        npx serve -s dist -l 3000 &
         echo $! > /tmp/frontend.pid
         sleep 5
 
@@ -939,7 +939,7 @@ jobs:
     - name: Start frontend server for performance testing
       working-directory: frontend
       run: |
-        npx serve -s build -l 3001 &
+        npx serve -s dist -l 3001 &
         echo $! > /tmp/frontend-perf.pid
         sleep 5
 
