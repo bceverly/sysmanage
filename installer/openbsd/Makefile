@@ -57,8 +57,8 @@ do-install:
 
 	# Frontend static files
 	${INSTALL_DATA_DIR} ${PREFIX}/share/sysmanage/frontend
-	test -d ${WRKSRC}/frontend/build && \
-		cp -R ${WRKSRC}/frontend/build/* ${PREFIX}/share/sysmanage/frontend/ || true
+	test -d ${WRKSRC}/frontend/dist && \
+		cp -R ${WRKSRC}/frontend/dist/* ${PREFIX}/share/sysmanage/frontend/ || true
 
 	# Example configuration
 	${INSTALL_DATA_DIR} ${PREFIX}/share/examples/sysmanage

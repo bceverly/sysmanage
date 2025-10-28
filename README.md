@@ -221,7 +221,7 @@ uvicorn backend.main:app --host 0.0.0.0 --port 6443 --workers 4
 
 # Frontend
 cd frontend && npm run build
-# Serve built files from frontend/build/
+# Serve built files from frontend/dist/
 ```
 
 **📖 For detailed deployment instructions, visit [sysmanage.org/docs/server/deployment.html](https://sysmanage.org/docs/server/deployment.html)**
