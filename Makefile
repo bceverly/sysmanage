@@ -29,9 +29,10 @@ help:
 	@echo "  make check-test-models - Check test model synchronization between conftest files"
 	@echo ""
 	@echo "Packaging targets:"
-	@echo "  make installer     - Build installer package (auto-detects platform)"
-	@echo "  make installer-deb - Build Ubuntu/Debian .deb package (explicit)"
-	@echo "  make sbom          - Generate Software Bill of Materials (CycloneDX format)"
+	@echo "  make installer         - Build installer package (auto-detects platform)"
+	@echo "  make installer-deb     - Build Ubuntu/Debian .deb package (explicit)"
+	@echo "  make installer-openbsd - Build OpenBSD port tarball (explicit)"
+	@echo "  make sbom              - Generate Software Bill of Materials (CycloneDX format)"
 	@echo ""
 	@echo "OpenBAO (Vault) targets:"
 	@echo "  make start-openbao - Start OpenBAO development server only"
@@ -1078,8 +1079,8 @@ installer:
 		echo "FreeBSD detected - .pkg not yet implemented"; \
 		exit 1; \
 	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
-		echo "OpenBSD detected - port not yet implemented"; \
-		exit 1; \
+		echo "OpenBSD detected - building port tarball"; \
+		$(MAKE) installer-openbsd; \
 	elif [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "NetBSD detected - .tgz not yet implemented"; \
 		exit 1; \
@@ -1177,6 +1178,64 @@ installer-deb:
 	echo "  2. Set up PostgreSQL database"; \
 	echo "  3. Run: cd /opt/sysmanage && sudo -u sysmanage .venv/bin/python -m alembic upgrade head"; \
 	echo "  4. Start: sudo systemctl start sysmanage"
+
+# Build OpenBSD port tarball
+installer-openbsd:
+	@echo "=== Building OpenBSD Port Tarball ==="
+	@echo ""
+	@CURRENT_DIR=$$(pwd); \
+	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
+	PORT_DIR="$$CURRENT_DIR/installer/openbsd"; \
+	echo "Determining version from git..."; \
+	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+	if [ -z "$$VERSION" ]; then \
+		VERSION="0.1.0"; \
+		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	else \
+		echo "Building version: $$VERSION"; \
+	fi; \
+	echo ""; \
+	echo "Checking prerequisites..."; \
+	if [ ! -d frontend/build ]; then \
+		echo "ERROR: Frontend not built. Run 'make build' first."; \
+		exit 1; \
+	fi; \
+	echo "✓ Frontend build found"; \
+	echo ""; \
+	echo "Updating port Makefile with version v$$VERSION..."; \
+	sed -i.bak "s/^GH_TAGNAME =.*/GH_TAGNAME =\t\tv$$VERSION/" "$$PORT_DIR/Makefile"; \
+	rm -f "$$PORT_DIR/Makefile.bak"; \
+	echo "✓ Version updated"; \
+	echo ""; \
+	echo "Creating output directory..."; \
+	mkdir -p "$$OUTPUT_DIR"; \
+	echo "✓ Output directory ready: $$OUTPUT_DIR"; \
+	echo ""; \
+	echo "Creating port tarball..."; \
+	cd installer && tar czf "$$OUTPUT_DIR/sysmanage-openbsd-port-$$VERSION.tar.gz" openbsd/; \
+	cd "$$CURRENT_DIR"; \
+	echo ""; \
+	echo "✓ OpenBSD port tarball created: $$OUTPUT_DIR/sysmanage-openbsd-port-$$VERSION.tar.gz"; \
+	echo ""; \
+	ls -lh "$$OUTPUT_DIR/sysmanage-openbsd-port-$$VERSION.tar.gz"; \
+	echo ""; \
+	echo "==================================="; \
+	echo "OpenBSD Port Build Complete!"; \
+	echo "==================================="; \
+	echo ""; \
+	echo "To use this port:"; \
+	echo "  1. Extract to OpenBSD ports tree:"; \
+	echo "     cd /usr/ports/mystuff && mkdir -p www"; \
+	echo "     tar xzf $$OUTPUT_DIR/sysmanage-openbsd-port-$$VERSION.tar.gz -C www/"; \
+	echo ""; \
+	echo "  2. Generate checksums:"; \
+	echo "     cd /usr/ports/mystuff/www/openbsd"; \
+	echo "     doas make makesum"; \
+	echo ""; \
+	echo "  3. Build and install:"; \
+	echo "     doas make install"; \
+	echo ""; \
+	echo "See installer/openbsd/README.md for full instructions"
 
 # SBOM (Software Bill of Materials) generation target
 sbom:

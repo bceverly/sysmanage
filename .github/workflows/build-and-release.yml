@@ -177,11 +177,90 @@ jobs:
           path: |
             sbom/*.json
 
+  # OpenBSD Port Tarball Build
+  build-openbsd-port:
+    name: Build OpenBSD Port Tarball
+    runs-on: ubuntu-22.04
+    needs: wait-for-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Determine version
+        id: version
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building OpenBSD port for version: $VERSION"
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Install SBOM generation tools
+        run: |
+          # Install cyclonedx-bom for Python
+          python3 -m pip install cyclonedx-bom
+
+          # Install cyclonedx-npm globally for Node.js
+          sudo npm install -g @cyclonedx/cyclonedx-npm
+
+          # Verify installations
+          python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
+          cyclonedx-npm --version
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Generate SBOM files
+        run: |
+          echo "Generating SBOM files..."
+          make sbom
+
+      - name: Build OpenBSD port tarball
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "Building OpenBSD port tarball for version: ${VERSION}"
+          make installer-openbsd
+
+      - name: Generate SHA256 checksum
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          cd installer/dist
+          sha256sum "sysmanage-openbsd-port-${VERSION}.tar.gz" > "sysmanage-openbsd-port-${VERSION}.tar.gz.sha256"
+          echo "Checksum generated:"
+          cat "sysmanage-openbsd-port-${VERSION}.tar.gz.sha256"
+
+      - name: Upload OpenBSD port tarball as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysmanage-openbsd-port
+          path: |
+            installer/dist/sysmanage-openbsd-port-*.tar.gz
+            installer/dist/sysmanage-openbsd-port-*.tar.gz.sha256
+
   # Consolidated Release - Push to sysmanage-docs and create GitHub release
   release:
     name: Create Release and Push to Docs
     runs-on: ubuntu-latest
-    needs: [build-ubuntu]
+    needs: [build-ubuntu, build-openbsd-port]
 
     steps:
       - name: Checkout code
@@ -209,6 +288,7 @@ jobs:
 
           # Copy all package files to release directory
           find artifacts/ -name "*.deb" -exec cp {} release-files/ \;
+          find artifacts/ -name "*.tar.gz" -exec cp {} release-files/ \;
           find artifacts/ -name "*.sha256" -exec cp {} release-files/ \;
           find artifacts/ -name "*.json" -exec cp {} release-files/ \;
 
@@ -229,11 +309,16 @@ jobs:
 
           # Create version directory for server packages
           mkdir -p "repo/server/deb/pool/main/$VERSION-1"
+          mkdir -p "repo/server/openbsd/$VERSION"
 
           # Copy package files to appropriate locations
           # DEB packages
           cp ${{ github.workspace }}/release-files/sysmanage_*.deb "repo/server/deb/pool/main/$VERSION-1/" 2>/dev/null || true
           cp ${{ github.workspace }}/release-files/sysmanage_*.deb.sha256 "repo/server/deb/pool/main/$VERSION-1/" 2>/dev/null || true
+
+          # OpenBSD port tarballs
+          cp ${{ github.workspace }}/release-files/sysmanage-openbsd-port-*.tar.gz "repo/server/openbsd/$VERSION/" 2>/dev/null || true
+          cp ${{ github.workspace }}/release-files/sysmanage-openbsd-port-*.tar.gz.sha256 "repo/server/openbsd/$VERSION/" 2>/dev/null || true
 
           # Install repository tools
           echo "Installing repository metadata tools..."
@@ -316,6 +401,47 @@ jobs:
           sudo systemctl enable --now sysmanage
           \`\`\`
 
+          ### OpenBSD
+          \`\`\`bash
+          # Download the port tarball
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-openbsd-port-${VERSION}.tar.gz
+
+          # Extract to OpenBSD ports tree
+          cd /usr/ports/mystuff
+          mkdir -p www
+          tar xzf ~/sysmanage-openbsd-port-${VERSION}.tar.gz -C www/
+
+          # Generate checksums
+          cd /usr/ports/mystuff/www/sysmanage
+          doas make makesum
+
+          # Build and install
+          doas make install
+
+          # Initialize PostgreSQL (if not already done)
+          doas su - _postgresql
+          initdb -D /var/postgresql/data -U postgres -A scram-sha-256 -E UTF8 -W
+          exit
+          doas rcctl enable postgresql
+          doas rcctl start postgresql
+
+          # Create database and user
+          doas su - _postgresql -c "createuser -P sysmanage"
+          doas su - _postgresql -c "createdb -O sysmanage sysmanage"
+
+          # Configure SysManage
+          doas vi /etc/sysmanage.yaml
+          # Update the database connection string
+
+          # Initialize database schema
+          cd /usr/local/libexec/sysmanage
+          doas python3 -m alembic upgrade head
+
+          # Enable and start the service
+          doas rcctl enable sysmanage
+          doas rcctl start sysmanage
+          \`\`\`
+
           ## Access the Web Interface
 
           After configuration and starting the service:
@@ -329,6 +455,11 @@ jobs:
           **Linux (Ubuntu/Debian):**
           \`\`\`bash
           sha256sum -c sysmanage_${VERSION}-1_all.deb.sha256
+          \`\`\`
+
+          **OpenBSD:**
+          \`\`\`bash
+          sha256 -C sysmanage-openbsd-port-${VERSION}.tar.gz.sha256 sysmanage-openbsd-port-${VERSION}.tar.gz
           \`\`\`
 
           ## Software Bill of Materials (SBOM)
