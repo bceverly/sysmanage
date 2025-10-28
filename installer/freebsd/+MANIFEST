@@ -1,0 +1,171 @@
+name: sysmanage
+version: "0.9.0"
+arch: freebsd:*:x86_64
+origin: sysutils/sysmanage
+comment: Centralized system management server with web-based interface
+maintainer: bryan@theeverlys.com
+www: https://sysmanage.org
+prefix: /usr/local
+desc: <<EOD
+SysManage is a comprehensive centralized system management server with a
+modern web-based interface. It provides:
+ * Agent management and monitoring
+ * System metrics and health monitoring
+ * Comprehensive reporting system with PDF generation
+ * JWT-based authentication with mTLS security
+ * Multi-user management system with RBAC
+ * Package inventory and updates
+ * Certificate management
+ * Real-time WebSocket communication
+ * Cross-platform support (Linux, Windows, macOS, FreeBSD, OpenBSD, NetBSD)
+
+The server runs as a system service and communicates with SysManage agents
+deployed across your infrastructure to provide centralized management.
+EOD
+deps: {
+  python311: {origin: lang/python311, version: "3.11"},
+  py311-pip: {origin: devel/py-pip},
+  py311-sqlalchemy20: {origin: databases/py-sqlalchemy20},
+  py311-alembic: {origin: databases/py-alembic},
+  py311-psycopg2: {origin: databases/py-psycopg2},
+  py311-cryptography: {origin: security/py-cryptography},
+  py311-pyyaml: {origin: devel/py-yaml},
+  py311-aiohttp: {origin: www/py-aiohttp},
+  py311-fastapi: {origin: www/py-fastapi},
+  py311-uvicorn: {origin: www/py-uvicorn},
+  py311-websockets: {origin: www/py-websockets},
+  postgresql15-server: {origin: databases/postgresql15-server},
+  nginx: {origin: www/nginx}
+}
+categories: [sysutils, python, www]
+licenselogic: single
+licenses: [AGPL]
+scripts: {
+  pre-install: <<EOD
+#!/bin/sh
+echo "Installing SysManage Server..."
+echo "Note: If installation fails due to missing dependencies, install them with:"
+echo "  pkg install py311-pip py311-sqlalchemy20 py311-alembic py311-psycopg2 py311-cryptography py311-pyyaml py311-aiohttp py311-fastapi py311-uvicorn py311-websockets postgresql15-server nginx"
+echo ""
+EOD
+  post-install: <<EOD
+#!/bin/sh
+# Check for required dependencies
+MISSING_DEPS=""
+REQUIRED_PACKAGES="py311-pip py311-sqlalchemy20 py311-alembic py311-psycopg2 py311-cryptography py311-pyyaml py311-aiohttp py311-fastapi py311-uvicorn py311-websockets postgresql15-server nginx"
+
+for pkg in $REQUIRED_PACKAGES; do
+    if ! pkg info -q "$pkg" >/dev/null 2>&1; then
+        MISSING_DEPS="$MISSING_DEPS $pkg"
+    fi
+done
+
+if [ -n "$MISSING_DEPS" ]; then
+    echo "ERROR: Missing required dependencies:$MISSING_DEPS"
+    echo ""
+    echo "Please install them with:"
+    echo "  pkg install$MISSING_DEPS"
+    echo ""
+    echo "Then reinstall this package."
+    exit 1
+fi
+
+# Create sysmanage user and group if they don't exist
+if ! pw groupshow sysmanage >/dev/null 2>&1; then
+    pw groupadd sysmanage -g 9998
+fi
+if ! pw usershow sysmanage >/dev/null 2>&1; then
+    pw useradd sysmanage -u 9998 -g sysmanage -h - -s /usr/sbin/nologin \
+       -d /usr/local/lib/sysmanage -c "SysManage Server User"
+fi
+
+# Create directories
+mkdir -p /usr/local/lib/sysmanage
+mkdir -p /usr/local/etc/sysmanage
+mkdir -p /var/lib/sysmanage
+mkdir -p /var/log/sysmanage
+mkdir -p /etc/sysmanage
+
+# Set ownership
+chown -R sysmanage:sysmanage /usr/local/lib/sysmanage
+chown -R sysmanage:sysmanage /var/lib/sysmanage
+chown -R sysmanage:sysmanage /var/log/sysmanage
+chown -R sysmanage:sysmanage /etc/sysmanage
+
+# Create Python virtual environment and install dependencies
+cd /usr/local/lib/sysmanage
+python3.11 -m venv .venv
+.venv/bin/pip install --quiet --upgrade pip
+.venv/bin/pip install --quiet -r requirements.txt
+
+# Use existing config or create symlink to system config
+if [ -f /etc/sysmanage.yaml ]; then
+    ln -sf /etc/sysmanage.yaml /usr/local/etc/sysmanage/config.yaml
+elif [ ! -f /usr/local/etc/sysmanage/config.yaml ]; then
+    cp /usr/local/etc/sysmanage/sysmanage.yaml.example \
+       /usr/local/etc/sysmanage/config.yaml
+fi
+
+echo ""
+echo "=========================================="
+echo "SysManage Server installation complete!"
+echo "=========================================="
+echo ""
+echo "[!] IMPORTANT: Configuration Required"
+echo ""
+echo "Before starting SysManage, you MUST configure:"
+echo ""
+echo "1. PostgreSQL Database Connection"
+echo "   --------------------------------"
+echo "   SysManage requires a PostgreSQL database (version 12+)."
+echo ""
+echo "   To set up a local database:"
+echo "     sysrc postgresql_enable=YES"
+echo "     service postgresql initdb"
+echo "     service postgresql start"
+echo "     su - postgres -c 'createuser sysmanage'"
+echo "     su - postgres -c 'createdb sysmanage -O sysmanage'"
+echo "     su - postgres -c \"psql -c \\\"ALTER USER sysmanage WITH PASSWORD 'your-password';\\\"\""
+echo ""
+echo "2. Configuration File"
+echo "   ------------------"
+echo "   Edit: /usr/local/etc/sysmanage/config.yaml"
+echo ""
+echo "3. Database Initialization"
+echo "   -----------------------"
+echo "   Run database migrations:"
+echo "     cd /usr/local/lib/sysmanage"
+echo "     doas -u sysmanage .venv/bin/python -m alembic upgrade head"
+echo ""
+echo "4. Start the Services"
+echo "   ------------------"
+echo "     sysrc sysmanage_enable=YES"
+echo "     sysrc nginx_enable=YES"
+echo "     service sysmanage start"
+echo "     service nginx start"
+echo ""
+echo "Log files: /var/log/sysmanage/"
+echo ""
+EOD
+  pre-deinstall: <<EOD
+#!/bin/sh
+# Stop service if running
+service sysmanage stop 2>/dev/null || true
+EOD
+  post-deinstall: <<EOD
+#!/bin/sh
+echo "SysManage Server removed."
+echo "Configuration files preserved in /usr/local/etc/sysmanage/"
+echo "Logs preserved in /var/log/sysmanage/"
+echo ""
+echo "To completely remove, also run:"
+echo "  sysrc -x sysmanage_enable"
+echo "  rm -rf /usr/local/etc/sysmanage"
+echo "  rm -rf /var/log/sysmanage"
+echo "  rm -rf /var/lib/sysmanage"
+echo "  rm -rf /etc/sysmanage"
+EOD
+}
+files: {
+  /usr/local/etc/rc.d/sysmanage: {uname: root, gname: wheel, perm: 0755}
+}

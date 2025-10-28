@@ -1,0 +1,79 @@
+#!/bin/sh
+
+# PROVIDE: sysmanage
+# REQUIRE: NETWORKING SERVERS postgresql nginx
+# BEFORE: DAEMON
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="sysmanage"
+rcvar="sysmanage_enable"
+desc="SysManage Server - Centralized system management server"
+
+load_rc_config $name
+
+: ${sysmanage_enable:="NO"}
+: ${sysmanage_config:="/usr/local/etc/sysmanage/config.yaml"}
+: ${sysmanage_user:="sysmanage"}
+: ${sysmanage_group:="sysmanage"}
+: ${sysmanage_pidfile:="/var/run/sysmanage/server.pid"}
+: ${sysmanage_logfile:="/var/log/sysmanage/server.log"}
+
+# Command to execute
+command="/usr/sbin/daemon"
+command_args="-P ${sysmanage_pidfile} -r -t ${name} -o ${sysmanage_logfile} \
+    /usr/local/lib/sysmanage/.venv/bin/python -m uvicorn backend.main:app --host 0.0.0.0 --port 8080"
+
+pidfile="${sysmanage_pidfile}"
+required_files="${sysmanage_config}"
+
+start_precmd="${name}_prestart"
+stop_postcmd="${name}_poststop"
+
+sysmanage_prestart()
+{
+	# Create directories if they don't exist
+	install -d -o ${sysmanage_user} -g ${sysmanage_group} \
+		/var/run/sysmanage /var/log/sysmanage /var/lib/sysmanage
+
+	# Check config file exists
+	if [ ! -f "${sysmanage_config}" ]; then
+		echo "Configuration file not found: ${sysmanage_config}"
+		echo "Copy the example: cp /usr/local/etc/sysmanage/sysmanage.yaml.example ${sysmanage_config}"
+		return 1
+	fi
+
+	# Check if database is configured
+	if ! grep -q "database:" "${sysmanage_config}"; then
+		echo "Database not configured in ${sysmanage_config}"
+		echo "Please configure the database connection before starting."
+		return 1
+	fi
+
+	# Check if virtual environment exists
+	if [ ! -d "/usr/local/lib/sysmanage/.venv" ]; then
+		echo "Python virtual environment not found. Recreating dependencies..."
+		cd /usr/local/lib/sysmanage
+		python3.11 -m venv .venv
+		.venv/bin/pip install --quiet --upgrade pip
+		.venv/bin/pip install --quiet -r requirements.txt
+	fi
+
+	# Run database migrations
+	echo "Running database migrations..."
+	cd /usr/local/lib/sysmanage
+	su -m ${sysmanage_user} -c ".venv/bin/python -m alembic upgrade head" || {
+		echo "Database migration failed. Please check your database configuration."
+		return 1
+	}
+
+	echo "Starting SysManage Server..."
+}
+
+sysmanage_poststop()
+{
+	rm -f ${pidfile}
+}
+
+run_rc_command "$1"

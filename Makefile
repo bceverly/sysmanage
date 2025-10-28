@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb sbom
+.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-freebsd sbom
 
 # Default target
 help:
@@ -1119,8 +1119,8 @@ installer: build
 		echo "OpenBSD detected - building port tarball"; \
 		$(MAKE) installer-openbsd; \
 	elif [ "$$(uname -s)" = "FreeBSD" ]; then \
-		echo "FreeBSD detected - .pkg not yet implemented"; \
-		exit 1; \
+		echo "FreeBSD detected - building .pkg package"; \
+		$(MAKE) installer-freebsd; \
 	elif [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "NetBSD detected - building .tgz package"; \
 		$(MAKE) installer-netbsd; \
@@ -1544,6 +1544,111 @@ installer-rpm-opensuse:
 		exit 1; \
 	fi; \
 	rm -rf "$$VENDOR_DIR"
+
+# FreeBSD .pkg package
+installer-freebsd:
+	@echo "=== Building FreeBSD Package ==="
+	@echo ""
+	@echo "Creating FreeBSD .pkg package for sysmanage..."
+	@echo ""
+	@CURRENT_DIR=$$(pwd); \
+	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
+	BUILD_DIR="$$CURRENT_DIR/build/freebsd"; \
+	PACKAGE_ROOT="$$BUILD_DIR/package-root"; \
+	MANIFEST_FILE="$$CURRENT_DIR/installer/freebsd/+MANIFEST"; \
+	echo "Determining version from git..."; \
+	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+	if [ -z "$$VERSION" ]; then \
+		VERSION="0.9.0"; \
+		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	else \
+		echo "Building version: $$VERSION"; \
+	fi; \
+	echo ""; \
+	echo "Cleaning build directory..."; \
+	rm -rf "$$BUILD_DIR"; \
+	mkdir -p "$$PACKAGE_ROOT"; \
+	echo "✓ Build directory prepared: $$BUILD_DIR"; \
+	echo ""; \
+	echo "Checking prerequisites..."; \
+	if [ ! -d frontend/dist ]; then \
+		echo "ERROR: Frontend not built. Run 'make build' first."; \
+		exit 1; \
+	fi; \
+	echo "✓ Frontend build found"; \
+	echo ""; \
+	echo "Generating SBOM files..."; \
+	$(MAKE) sbom; \
+	echo "✓ SBOM files generated"; \
+	echo ""; \
+	echo "Creating package directory structure..."; \
+	mkdir -p "$$PACKAGE_ROOT/usr/local/lib/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/rc.d"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/nginx/conf.d"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/local/share/doc/sysmanage/sbom"; \
+	echo "✓ Package directories created"; \
+	echo ""; \
+	echo "Copying backend files..."; \
+	cp -R backend "$$PACKAGE_ROOT/usr/local/lib/sysmanage/"; \
+	cp -R alembic "$$PACKAGE_ROOT/usr/local/lib/sysmanage/"; \
+	cp alembic.ini "$$PACKAGE_ROOT/usr/local/lib/sysmanage/"; \
+	cp requirements.txt "$$PACKAGE_ROOT/usr/local/lib/sysmanage/"; \
+	cp -R config "$$PACKAGE_ROOT/usr/local/lib/sysmanage/"; \
+	cp -R scripts "$$PACKAGE_ROOT/usr/local/lib/sysmanage/"; \
+	echo "✓ Backend files copied"; \
+	echo ""; \
+	echo "Copying frontend files..."; \
+	cp -R frontend/dist "$$PACKAGE_ROOT/usr/local/lib/sysmanage/frontend"; \
+	cp -R frontend/public "$$PACKAGE_ROOT/usr/local/lib/sysmanage/frontend-public"; \
+	echo "✓ Frontend files copied"; \
+	echo ""; \
+	echo "Copying configuration files..."; \
+	cp installer/freebsd/sysmanage.yaml.example "$$PACKAGE_ROOT/usr/local/etc/sysmanage/"; \
+	cp installer/freebsd/sysmanage-nginx.conf "$$PACKAGE_ROOT/usr/local/etc/nginx/conf.d/"; \
+	cp installer/freebsd/sysmanage.rc "$$PACKAGE_ROOT/usr/local/etc/rc.d/sysmanage"; \
+	chmod +x "$$PACKAGE_ROOT/usr/local/etc/rc.d/sysmanage"; \
+	echo "✓ Configuration files copied"; \
+	echo ""; \
+	echo "Copying SBOM..."; \
+	if [ -f sbom/backend-sbom.json ]; then \
+		cp sbom/backend-sbom.json "$$PACKAGE_ROOT/usr/local/share/doc/sysmanage/sbom/"; \
+	fi; \
+	if [ -f sbom/frontend-sbom.json ]; then \
+		cp sbom/frontend-sbom.json "$$PACKAGE_ROOT/usr/local/share/doc/sysmanage/sbom/"; \
+	fi; \
+	echo "✓ SBOM files copied"; \
+	echo ""; \
+	echo "Updating manifest version..."; \
+	sed -i.bak "s/^version:.*/version: \"$$VERSION\"/" "$$MANIFEST_FILE"; \
+	rm -f "$$MANIFEST_FILE.bak"; \
+	echo "✓ Manifest updated to version $$VERSION"; \
+	echo ""; \
+	echo "Building FreeBSD package..."; \
+	cd "$$BUILD_DIR" && pkg create -M "$$MANIFEST_FILE" -r "$$PACKAGE_ROOT" -o .; \
+	if [ $$? -eq 0 ]; then \
+		PACKAGE_FILE=$$(ls -1 $$BUILD_DIR/sysmanage-$$VERSION.pkg 2>/dev/null | head -1); \
+		if [ -n "$$PACKAGE_FILE" ]; then \
+			mkdir -p "$$OUTPUT_DIR"; \
+			mv "$$PACKAGE_FILE" "$$OUTPUT_DIR/"; \
+			cd "$$OUTPUT_DIR" && sha256 sysmanage-$$VERSION.pkg > sysmanage-$$VERSION.pkg.sha256; \
+			echo ""; \
+			echo "✓ FreeBSD package created successfully: $$OUTPUT_DIR/sysmanage-$$VERSION.pkg"; \
+			echo ""; \
+			echo "Installation commands:"; \
+			echo "  sudo pkg add $$OUTPUT_DIR/sysmanage-$$VERSION.pkg"; \
+			echo "  sudo sysrc sysmanage_enable=YES"; \
+			echo "  sudo sysrc nginx_enable=YES"; \
+			echo "  sudo service sysmanage start"; \
+			echo "  sudo service nginx start"; \
+		else \
+			echo "ERROR: Package file not found after creation"; \
+			exit 1; \
+		fi; \
+	else \
+		echo "ERROR: Package creation failed"; \
+		exit 1; \
+	fi
 
 # NetBSD .tgz package
 installer-netbsd:
