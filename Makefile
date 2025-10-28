@@ -1359,7 +1359,7 @@ installer-rpm-centos:
 	echo "✓ Spec file updated to version $$VERSION"; \
 	echo ""; \
 	echo "Building RPM package..."; \
-	cd "$$BUILD_TEMP" && rpmbuild --define "_topdir $$BUILD_TEMP" -bb SPECS/sysmanage.spec 2>&1 | tee build.log; \
+	cd "$$BUILD_TEMP" && rpmbuild --define "_topdir $$BUILD_TEMP" --nodeps -bb SPECS/sysmanage.spec 2>&1 | tee build.log; \
 	BUILD_STATUS=$$?; \
 	if [ $$BUILD_STATUS -eq 0 ]; then \
 		echo ""; \
@@ -1491,7 +1491,7 @@ installer-rpm-opensuse:
 	echo "✓ Spec file updated to version $$VERSION"; \
 	echo ""; \
 	echo "Building RPM package..."; \
-	cd "$$BUILD_TEMP" && rpmbuild --define "_topdir $$BUILD_TEMP" -bb SPECS/sysmanage.spec 2>&1 | tee build.log; \
+	cd "$$BUILD_TEMP" && rpmbuild --define "_topdir $$BUILD_TEMP" --nodeps -bb SPECS/sysmanage.spec 2>&1 | tee build.log; \
 	BUILD_STATUS=$$?; \
 	if [ $$BUILD_STATUS -eq 0 ]; then \
 		echo ""; \
