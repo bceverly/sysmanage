@@ -1106,30 +1106,30 @@ build-grpcio-openbsd: $(VENV_ACTIVATE)
 # Installer targets
 installer:
 	@echo "=== Auto-detecting platform for installer build ==="
-	@if [ -f /etc/lsb-release ] && grep -q Ubuntu /etc/lsb-release 2>/dev/null; then \
-		echo "Ubuntu/Debian detected - building .deb package"; \
-		$(MAKE) installer-deb; \
-	elif [ -f /etc/debian_version ]; then \
-		echo "Debian-based system detected - building .deb package"; \
-		$(MAKE) installer-deb; \
-	elif [ -f /etc/redhat-release ]; then \
-		echo "Red Hat-based system detected - building .rpm package"; \
-		if grep -q "openSUSE" /etc/os-release 2>/dev/null || grep -q "SUSE" /etc/os-release 2>/dev/null; then \
-			echo "OpenSUSE/SLES detected - building with vendor dependencies"; \
-			$(MAKE) installer-rpm-opensuse; \
-		else \
-			echo "CentOS/RHEL/Fedora detected - building standard RPM"; \
-			$(MAKE) installer-rpm-centos; \
-		fi; \
+	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
+		echo "OpenBSD detected - building port tarball"; \
+		$(MAKE) installer-openbsd; \
 	elif [ "$$(uname -s)" = "FreeBSD" ]; then \
 		echo "FreeBSD detected - .pkg not yet implemented"; \
 		exit 1; \
-	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
-		echo "OpenBSD detected - building port tarball"; \
-		$(MAKE) installer-openbsd; \
 	elif [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "NetBSD detected - .tgz not yet implemented"; \
 		exit 1; \
+	elif [ -f /etc/os-release ]; then \
+		. /etc/os-release; \
+		if [ "$$ID" = "opensuse-leap" ] || [ "$$ID" = "opensuse-tumbleweed" ] || [ "$$ID" = "sles" ]; then \
+			echo "openSUSE/SLES system detected - building RPM package"; \
+			$(MAKE) installer-rpm-opensuse; \
+		elif [ -f /etc/redhat-release ]; then \
+			echo "Red Hat-based system detected - building RPM package"; \
+			$(MAKE) installer-rpm-centos; \
+		elif [ -f /etc/debian_version ] || [ -f /etc/lsb-release ]; then \
+			echo "Debian-based system detected - building DEB package"; \
+			$(MAKE) installer-deb; \
+		else \
+			echo "Unknown Linux distribution - cannot auto-detect installer type"; \
+			exit 1; \
+		fi; \
 	else \
 		echo "Unknown platform - cannot auto-detect installer type"; \
 		exit 1; \
@@ -1310,12 +1310,9 @@ installer-rpm-centos:
 		fi; \
 	fi; \
 	echo ""; \
-	echo "Checking prerequisites..."; \
-	if [ ! -d frontend/dist ]; then \
-		echo "ERROR: Frontend not built. Run 'cd frontend && npm run build' first."; \
-		exit 1; \
-	fi; \
-	echo "✓ Frontend build found"; \
+	echo "Building frontend..."; \
+	cd frontend && npm run build && cd ..; \
+	echo "✓ Frontend build complete"; \
 	echo ""; \
 	echo "Generating SBOM files..."; \
 	$(MAKE) sbom; \
@@ -1433,12 +1430,9 @@ installer-rpm-opensuse:
 		fi; \
 	fi; \
 	echo ""; \
-	echo "Checking prerequisites..."; \
-	if [ ! -d frontend/dist ]; then \
-		echo "ERROR: Frontend not built. Run 'cd frontend && npm run build' first."; \
-		exit 1; \
-	fi; \
-	echo "✓ Frontend build found"; \
+	echo "Building frontend..."; \
+	cd frontend && npm run build && cd ..; \
+	echo "✓ Frontend build complete"; \
 	echo ""; \
 	echo "Generating SBOM files..."; \
 	$(MAKE) sbom; \
@@ -1561,13 +1555,7 @@ sbom:
 	else \
 		echo "✓ cyclonedx-bom already installed"; \
 	fi
-	@if ! command -v cyclonedx-npm >/dev/null 2>&1; then \
-		echo "Installing @cyclonedx/cyclonedx-npm globally..."; \
-		npm install -g @cyclonedx/cyclonedx-npm; \
-		echo "✓ cyclonedx-npm installed"; \
-	else \
-		echo "✓ cyclonedx-npm already installed"; \
-	fi
+	@echo "✓ cyclonedx-npm will be auto-installed via npx if needed"
 	@echo ""
 	@echo "Generating Python SBOM from requirements.txt..."
 	@set -e; \
@@ -1578,7 +1566,7 @@ sbom:
 	@echo "✓ Python SBOM generated: sbom/backend-sbom.json"
 	@echo ""
 	@echo "Generating Node.js SBOM from frontend/package.json..."
-	@cd frontend && cyclonedx-npm \
+	@cd frontend && npx --yes @cyclonedx/cyclonedx-npm \
 		--output-format JSON \
 		--output-file ../sbom/frontend-sbom.json \
 		--ignore-npm-errors

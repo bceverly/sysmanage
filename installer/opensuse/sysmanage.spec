@@ -13,17 +13,16 @@ Source0:        %{name}-%{version}.tar.gz
 %global __os_install_post /usr/lib/rpm/brp-compress %{nil}
 
 # Disable automatic Python dependency generation
-# We manually specify python3 >= 3.12 in Requires
+# We manually specify python3 >= 3.11 in Requires
 %global __requires_exclude ^python\\(abi\\)
 %global __provides_exclude_from ^%{_libdir}/sysmanage/venv/.*$
 
-BuildRequires:  python3-devel >= 3.12
-BuildRequires:  python3-pip
-BuildRequires:  python3-setuptools
+BuildRequires:  python311-devel
+BuildRequires:  python311-pip
 BuildRequires:  systemd-rpm-macros
 
-Requires:       python3 >= 3.12
-Requires:       python3-pip
+Requires:       python311
+Requires:       python311-pip
 Requires:       systemd
 Requires:       nginx
 Requires:       postgresql-server >= 12
@@ -75,7 +74,7 @@ cp -r frontend/dist %{buildroot}/opt/sysmanage/frontend/
 cp -r frontend/public %{buildroot}/opt/sysmanage/frontend/
 
 # Create virtualenv and install Python dependencies
-python3 -m venv %{buildroot}/opt/sysmanage/.venv
+python3.11 -m venv %{buildroot}/opt/sysmanage/.venv
 %{buildroot}/opt/sysmanage/.venv/bin/pip install --upgrade pip
 %{buildroot}/opt/sysmanage/.venv/bin/pip install -r requirements.txt
 
@@ -129,7 +128,7 @@ chmod 750 /etc/sysmanage
 # Recreate the venv using the system's Python to fix all symlinks and paths
 cd /opt/sysmanage
 rm -rf .venv
-python3 -m venv .venv
+python3.11 -m venv .venv
 .venv/bin/pip install --quiet --upgrade pip
 .venv/bin/pip install --quiet -r requirements.txt
 cd -
