@@ -1324,7 +1324,7 @@ installer-rpm-centos:
 	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
 	mkdir -p "$$OUTPUT_DIR"; \
 	rm -rf "$$BUILD_TEMP"; \
-	mkdir -p "$$BUILD_TEMP"/{BUILD,RPMS,SOURCES,SPECS,SRPMS}; \
+	mkdir -p "$$BUILD_TEMP"/BUILD "$$BUILD_TEMP"/RPMS "$$BUILD_TEMP"/SOURCES "$$BUILD_TEMP"/SPECS "$$BUILD_TEMP"/SRPMS; \
 	echo "✓ RPM build tree created"; \
 	echo ""; \
 	echo "Creating source tarball..."; \
@@ -1452,7 +1452,7 @@ installer-rpm-opensuse:
 	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
 	mkdir -p "$$OUTPUT_DIR"; \
 	rm -rf "$$BUILD_TEMP"; \
-	mkdir -p "$$BUILD_TEMP"/{BUILD,RPMS,SOURCES,SPECS,SRPMS}; \
+	mkdir -p "$$BUILD_TEMP"/BUILD "$$BUILD_TEMP"/RPMS "$$BUILD_TEMP"/SOURCES "$$BUILD_TEMP"/SPECS "$$BUILD_TEMP"/SRPMS; \
 	echo "✓ RPM build tree created"; \
 	echo ""; \
 	echo "Creating source tarball..."; \
