@@ -120,12 +120,68 @@ if (-not (Test-Path $NssmExe)) {
 }
 Write-Host ""
 
+# Create SBOM files if they don't exist
+Write-Host "Checking for SBOM files..." -ForegroundColor Cyan
+$SbomDir = Join-Path $CurrentDir "sbom"
+$BackendSbom = Join-Path $SbomDir "backend-sbom.json"
+$FrontendSbom = Join-Path $SbomDir "frontend-sbom.json"
+
+if (-not (Test-Path $SbomDir)) {
+    New-Item -ItemType Directory -Path $SbomDir -Force | Out-Null
+}
+
+if (-not (Test-Path $BackendSbom)) {
+    Write-Host "  Creating placeholder backend SBOM..." -ForegroundColor Yellow
+    $placeholderSbom = @{
+        bomFormat = "CycloneDX"
+        specVersion = "1.4"
+        version = 1
+        metadata = @{
+            component = @{
+                type = "application"
+                name = "sysmanage-backend"
+                version = $VERSION
+            }
+        }
+        components = @()
+    } | ConvertTo-Json -Depth 10
+    Set-Content -Path $BackendSbom -Value $placeholderSbom
+}
+
+if (-not (Test-Path $FrontendSbom)) {
+    Write-Host "  Creating placeholder frontend SBOM..." -ForegroundColor Yellow
+    $placeholderSbom = @{
+        bomFormat = "CycloneDX"
+        specVersion = "1.4"
+        version = 1
+        metadata = @{
+            component = @{
+                type = "application"
+                name = "sysmanage-frontend"
+                version = $VERSION
+            }
+        }
+        components = @()
+    } | ConvertTo-Json -Depth 10
+    Set-Content -Path $FrontendSbom -Value $placeholderSbom
+}
+
+Write-Host "[OK] SBOM files ready" -ForegroundColor Green
+Write-Host ""
+
 # Create ZIP files for packaging
 Write-Host "Preparing source files for packaging..." -ForegroundColor Cyan
 
 $BackendDir = Join-Path $CurrentDir "backend"
-$FrontendDir = Join-Path $CurrentDir "frontend"
+$FrontendDistDir = Join-Path $CurrentDir "frontend\dist"
 $AlembicDir = Join-Path $CurrentDir "alembic"
+
+# Verify frontend build exists
+if (-not (Test-Path $FrontendDistDir)) {
+    Write-Host "ERROR: Frontend build not found at $FrontendDistDir" -ForegroundColor Red
+    Write-Host "Run 'make build' first to build the frontend" -ForegroundColor Yellow
+    exit 1
+}
 
 $BackendZip = Join-Path $CurrentDir "installer\windows\backend.zip"
 $FrontendZip = Join-Path $CurrentDir "installer\windows\frontend.zip"
@@ -136,10 +192,13 @@ if (Test-Path $BackendZip) { Remove-Item -Path $BackendZip -Force }
 if (Test-Path $FrontendZip) { Remove-Item -Path $FrontendZip -Force }
 if (Test-Path $AlembicZip) { Remove-Item -Path $AlembicZip -Force }
 
-# Create ZIPs
+# Create ZIPs (only include what's needed for deployment)
 $ProgressPreference = 'SilentlyContinue'
+Write-Host "  Compressing backend..." -ForegroundColor Gray
 Compress-Archive -Path "$BackendDir\*" -DestinationPath $BackendZip -Force
-Compress-Archive -Path "$FrontendDir\*" -DestinationPath $FrontendZip -Force
+Write-Host "  Compressing frontend (built dist only)..." -ForegroundColor Gray
+Compress-Archive -Path "$FrontendDistDir\*" -DestinationPath $FrontendZip -Force
+Write-Host "  Compressing alembic..." -ForegroundColor Gray
 Compress-Archive -Path "$AlembicDir\*" -DestinationPath $AlembicZip -Force
 $ProgressPreference = 'Continue'
 

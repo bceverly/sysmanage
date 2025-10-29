@@ -231,3 +231,5 @@ sbom/
 
 # Installer build artifacts
 installer/dist/
+installer/windows/*.zip
+installer/windows/nssm.exe

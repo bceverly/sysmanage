@@ -1127,6 +1127,10 @@ build-grpcio-openbsd: $(VENV_ACTIVATE)
 # Installer targets
 installer: build
 	@echo "=== Auto-detecting platform for installer build ==="
+ifeq ($(OS),Windows_NT)
+	@echo "Windows detected - building .msi package"
+	@$(MAKE) installer-msi
+else
 	@if [ "$$(uname -s)" = "Darwin" ]; then \
 		echo "macOS detected - building .pkg package"; \
 		$(MAKE) installer-macos; \
@@ -1158,6 +1162,7 @@ installer: build
 		echo "Unknown platform - cannot auto-detect installer type"; \
 		exit 1; \
 	fi
+endif
 
 installer-deb:
 	@echo "=== Building Ubuntu/Debian .deb Package ==="
