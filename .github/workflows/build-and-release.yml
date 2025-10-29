@@ -606,11 +606,151 @@ jobs:
             installer/dist/sysmanage-*-netbsd.tgz
             installer/dist/sysmanage-*-netbsd.tgz.sha256
 
+  build-windows-msi-x64:
+    name: Build Windows MSI (x64)
+    runs-on: windows-latest
+    needs: wait-for-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building Windows MSI (x64) for version: $VERSION"
+
+      - name: Install WiX Toolset
+        run: |
+          dotnet tool install --global wix
+          wix --version
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Install SBOM generation tools
+        run: |
+          # Install cyclonedx-bom for Python
+          python -m pip install cyclonedx-bom
+
+          # Install cyclonedx-npm globally for Node.js
+          npm install -g @cyclonedx/cyclonedx-npm
+
+          # Verify installations
+          python -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
+          cyclonedx-npm --version
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Build Windows MSI (x64)
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "Building Windows MSI (x64) for version: $Env:VERSION"
+          powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture x64
+
+      - name: Upload Windows MSI (x64) as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysmanage-windows-msi-x64
+          path: |
+            installer/dist/sysmanage-*-windows-x64.msi
+            installer/dist/sysmanage-*-windows-x64.msi.sha256
+
+  build-windows-msi-arm64:
+    name: Build Windows MSI (ARM64)
+    runs-on: windows-latest
+    needs: wait-for-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building Windows MSI (ARM64) for version: $VERSION"
+
+      - name: Install WiX Toolset
+        run: |
+          dotnet tool install --global wix
+          wix --version
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Install SBOM generation tools
+        run: |
+          # Install cyclonedx-bom for Python
+          python -m pip install cyclonedx-bom
+
+          # Install cyclonedx-npm globally for Node.js
+          npm install -g @cyclonedx/cyclonedx-npm
+
+          # Verify installations
+          python -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
+          cyclonedx-npm --version
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Build Windows MSI (ARM64)
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "Building Windows MSI (ARM64) for version: $Env:VERSION"
+          powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture arm64
+
+      - name: Upload Windows MSI (ARM64) as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysmanage-windows-msi-arm64
+          path: |
+            installer/dist/sysmanage-*-windows-arm64.msi
+            installer/dist/sysmanage-*-windows-arm64.msi.sha256
+
   # Consolidated Release - Push to sysmanage-docs and create GitHub release
   release:
     name: Create Release and Push to Docs
     runs-on: ubuntu-latest
-    needs: [build-ubuntu, build-openbsd-port, build-centos-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg]
+    needs: [build-ubuntu, build-openbsd-port, build-centos-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg, build-windows-msi-x64, build-windows-msi-arm64]
 
     steps:
       - name: Checkout code
@@ -642,6 +782,7 @@ jobs:
           find artifacts/ -name "*.pkg" -exec cp {} release-files/ \;
           find artifacts/ -name "*.tar.gz" -exec cp {} release-files/ \;
           find artifacts/ -name "*.tgz" -exec cp {} release-files/ \;
+          find artifacts/ -name "*.msi" -exec cp {} release-files/ \;
           find artifacts/ -name "*.sha256" -exec cp {} release-files/ \;
           find artifacts/ -name "*.json" -exec cp {} release-files/ \;
 
@@ -668,6 +809,7 @@ jobs:
           mkdir -p "repo/server/macos/$VERSION"
           mkdir -p "repo/server/rpm/centos/$VERSION"
           mkdir -p "repo/server/rpm/opensuse/$VERSION"
+          mkdir -p "repo/server/windows/$VERSION"
 
           # Copy package files to appropriate locations
           # DEB packages
@@ -697,6 +839,10 @@ jobs:
           # OpenSUSE RPMs typically have noarch and no dist tag or suse dist tag
           cp ${{ github.workspace }}/release-files/sysmanage-$VERSION-*.noarch.rpm "repo/server/rpm/opensuse/$VERSION/" 2>/dev/null || true
           cp ${{ github.workspace }}/release-files/sysmanage-$VERSION-*.noarch.rpm.sha256 "repo/server/rpm/opensuse/$VERSION/" 2>/dev/null || true
+
+          # Windows MSI packages
+          cp ${{ github.workspace }}/release-files/sysmanage-*-windows-*.msi "repo/server/windows/$VERSION/" 2>/dev/null || true
+          cp ${{ github.workspace }}/release-files/sysmanage-*-windows-*.msi.sha256 "repo/server/windows/$VERSION/" 2>/dev/null || true
 
           # Install repository tools
           echo "Installing repository metadata tools..."
@@ -985,6 +1131,50 @@ jobs:
           sudo systemctl enable --now nginx
           \`\`\`
 
+          ### Windows (x64 and ARM64)
+          \`\`\`powershell
+          # Download the MSI installer (choose your architecture)
+          # For x64:
+          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-windows-x64.msi" -OutFile "sysmanage-${VERSION}-windows-x64.msi"
+
+          # For ARM64:
+          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-windows-arm64.msi" -OutFile "sysmanage-${VERSION}-windows-arm64.msi"
+
+          # Install the MSI package (run as Administrator)
+          # The installer will:
+          # - Check for and install Python 3.12 if needed
+          # - Install Visual C++ Redistributable if needed
+          # - Extract application files to C:\Program Files\SysManage Server
+          # - Create Python virtual environment and install dependencies
+          # - Create Windows Service "SysManageServer"
+          # - Start the service automatically
+
+          msiexec /i sysmanage-${VERSION}-windows-x64.msi
+
+          # Configure SysManage (installer creates example config)
+          notepad "C:\ProgramData\SysManage\sysmanage.yaml"
+          # Update database connection string and other settings
+
+          # The service runs automatically. To manage it:
+          # Stop the service:
+          Stop-Service SysManageServer
+
+          # Start the service:
+          Start-Service SysManageServer
+
+          # Check service status:
+          Get-Service SysManageServer
+
+          # View service logs:
+          Get-Content "C:\ProgramData\SysManage\logs\sysmanage-service.log" -Tail 50
+
+          # To uninstall:
+          # Use "Add or Remove Programs" or run:
+          msiexec /x sysmanage-${VERSION}-windows-x64.msi
+          \`\`\`
+
+          **Note for Windows**: The installer requires administrator privileges. Python 3.12 and Visual C++ Redistributable will be automatically installed if not present. The service runs on port 8080 by default (configurable in sysmanage.yaml).
+
           ## Access the Web Interface
 
           After configuration and starting the service:
@@ -1028,6 +1218,20 @@ jobs:
           **OpenSUSE/SLES:**
           \`\`\`bash
           sha256sum -c sysmanage-${VERSION}-1.noarch.rpm.sha256
+          \`\`\`
+
+          **Windows:**
+          \`\`\`powershell
+          # For x64:
+          certutil -hashfile sysmanage-${VERSION}-windows-x64.msi SHA256
+          # Compare output with sysmanage-${VERSION}-windows-x64.msi.sha256
+
+          # For ARM64:
+          certutil -hashfile sysmanage-${VERSION}-windows-arm64.msi SHA256
+          # Compare output with sysmanage-${VERSION}-windows-arm64.msi.sha256
+
+          # Or using PowerShell:
+          (Get-FileHash sysmanage-${VERSION}-windows-x64.msi -Algorithm SHA256).Hash
           \`\`\`
 
           ## Software Bill of Materials (SBOM)

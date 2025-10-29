@@ -243,6 +243,16 @@ try {
     Get-Item $OutputMsi | Format-Table Name, Length, LastWriteTime -AutoSize
     Write-Host ""
 
+    # Generate SHA256 checksum
+    Write-Host "Generating SHA256 checksum..." -ForegroundColor Cyan
+    $checksumFile = "$OutputMsi.sha256"
+    $hash = (Get-FileHash -Path $OutputMsi -Algorithm SHA256).Hash.ToLower()
+    $msiFileName = Split-Path -Leaf $OutputMsi
+    "$hash  $msiFileName" | Out-File -FilePath $checksumFile -Encoding ASCII -NoNewline
+    Write-Host "[OK] Checksum saved to: $checksumFile" -ForegroundColor Green
+    Write-Host "  SHA256: $hash" -ForegroundColor Gray
+    Write-Host ""
+
     # Check if package is signed
     $signature = Get-AuthenticodeSignature $OutputMsi
     if ($signature.Status -eq "NotSigned") {
