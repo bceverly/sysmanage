@@ -180,6 +180,51 @@
       "label": "Usar servidor administrado"
     }
   },
+  "graylog": {
+    "apiToken": {
+      "help": "Token API opcional para funciones mejoradas y detección de versión",
+      "label": "Token API (Opcional)"
+    },
+    "checkHealth": "Verificar salud",
+    "enabled": {
+      "label": "Habilitar integración de Graylog"
+    },
+    "healthError": {
+      "label": "Error de verificación de salud"
+    },
+    "inputs": {
+      "label": "Entradas"
+    },
+    "mechanism": {
+      "gelfTcp": "GELF TCP",
+      "syslogTcp": "Syslog TCP",
+      "syslogUdp": "Syslog UDP",
+      "windowsSidecar": "Windows Sidecar"
+    },
+    "manualUrl": {
+      "help": "Ingrese la URL completa a su instancia de Graylog",
+      "label": "URL de Graylog"
+    },
+    "noServers": "No se encontraron servidores de Graylog",
+    "selectServer": {
+      "label": "Seleccionar servidor de Graylog"
+    },
+    "serverUrl": {
+      "label": "URL"
+    },
+    "status": {
+      "checking": "Verificando...",
+      "disabled": "Deshabilitado",
+      "healthy": "Saludable",
+      "label": "Estado",
+      "unhealthy": "No saludable",
+      "unknown": "Desconocido"
+    },
+    "title": "Integración de Graylog",
+    "useManagedServer": {
+      "label": "Usar servidor administrado"
+    }
+  },
   "hostDetail": {
     "accessTab": "Acceso",
     "accountName": "Nombre de la cuenta",
@@ -400,7 +445,15 @@
     "userAccounts": "Cuentas de Usuario",
     "userGroups": "Grupos de Usuario",
     "version": "Versión",
-    "viewInstallationLog": "Ver Registro de Instalación"
+    "viewInstallationLog": "Ver Registro de Instalación",
+    "attachToGraylog": "Adjuntar a Graylog",
+    "attaching": "Adjuntando...",
+    "graylogAttached": "Adjuntado a Graylog",
+    "graylogMechanism": "Mecanismo",
+    "graylogNotConfigured": "Integración de Graylog no configurada o no saludable",
+    "graylogRequiresPrivileged": "Requiere agente en modo privilegiado",
+    "graylogStatus": "Estado de Graylog",
+    "graylogTarget": "Objetivo"
   },
   "hosts": {
     "actions": "Acciones",

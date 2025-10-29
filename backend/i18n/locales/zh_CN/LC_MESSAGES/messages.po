@@ -707,3 +707,39 @@ msgstr "用户安全角色 (RBAC)"
 
 msgid "No security roles assigned"
 msgstr "未分配安全角色"
+
+msgid "User not found"
+msgstr "未找到用户"
+
+msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
+msgstr "权限被拒绝：需要 ENABLE_GRAYLOG_INTEGRATION 角色"
+
+msgid "Selected host does not have Graylog server role"
+msgstr "所选主机没有 Graylog 服务器角色"
+
+msgid "Failed to securely store API token"
+msgstr "无法安全存储 API 令牌"
+
+msgid "Graylog integration settings updated successfully"
+msgstr "Graylog 集成设置已成功更新"
+
+msgid "Graylog integration has not been configured"
+msgstr "Graylog 集成尚未配置"
+
+msgid "Graylog integration is not enabled"
+msgstr "Graylog 集成未启用"
+
+msgid "Error retrieving Graylog URL: %s"
+msgstr "检索 Graylog URL 时出错：%s"
+
+msgid "Graylog URL is not configured"
+msgstr "Graylog URL 未配置"
+
+msgid "Connection timeout - Graylog server may be unreachable"
+msgstr "连接超时 - Graylog 服务器可能无法访问"
+
+msgid "Connection failed - Graylog server may be down or unreachable"
+msgstr "连接失败 - Graylog 服务器可能已关闭或无法访问"
+
+msgid "Unexpected error checking Graylog health"
+msgstr "检查 Graylog 健康状态时出现意外错误"

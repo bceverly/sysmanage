@@ -123,7 +123,7 @@ async def send_command_to_agent(
         "status": "sent",
         "command_id": cmd_message.message_id,
         "message": _("Command {command_type} sent to {hostname}").format(
-            command_type=command.command_type, hostname=hostname
+            command_type=command.command_type.value, hostname=hostname
         ),
     }
 

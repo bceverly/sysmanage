@@ -711,3 +711,39 @@ msgstr "ユーザーセキュリティロール (RBAC)"
 
 msgid "No security roles assigned"
 msgstr "セキュリティロールが割り当てられていません"
+
+msgid "User not found"
+msgstr "ユーザーが見つかりません"
+
+msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
+msgstr "アクセス拒否: ENABLE_GRAYLOG_INTEGRATION ロールが必要です"
+
+msgid "Selected host does not have Graylog server role"
+msgstr "選択されたホストにはGraylogサーバーロールがありません"
+
+msgid "Failed to securely store API token"
+msgstr "APIトークンの安全な保存に失敗しました"
+
+msgid "Graylog integration settings updated successfully"
+msgstr "Graylog統合設定が正常に更新されました"
+
+msgid "Graylog integration has not been configured"
+msgstr "Graylog統合が設定されていません"
+
+msgid "Graylog integration is not enabled"
+msgstr "Graylog統合が有効になっていません"
+
+msgid "Error retrieving Graylog URL: %s"
+msgstr "Graylog URLの取得エラー: %s"
+
+msgid "Graylog URL is not configured"
+msgstr "Graylog URLが設定されていません"
+
+msgid "Connection timeout - Graylog server may be unreachable"
+msgstr "接続タイムアウト - Graylogサーバーに到達できない可能性があります"
+
+msgid "Connection failed - Graylog server may be down or unreachable"
+msgstr "接続失敗 - Graylogサーバーがダウンしているか到達できない可能性があります"
+
+msgid "Unexpected error checking Graylog health"
+msgstr "Graylogヘルスチェック中に予期しないエラーが発生しました"

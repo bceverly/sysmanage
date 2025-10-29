@@ -34,7 +34,9 @@ export const getUserPermissions = async (): Promise<UserPermissions> => {
  */
 export const hasPermission = async (permissionName: string): Promise<boolean> => {
     const permissions = await getUserPermissions();
-    return permissions.permissions[permissionName] === true;
+    // Use hasOwnProperty to prevent prototype pollution attacks
+    return Object.prototype.hasOwnProperty.call(permissions.permissions, permissionName)
+        && permissions.permissions[permissionName] === true; // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
 };
 
 /**
@@ -72,6 +74,8 @@ export const SecurityRoles = {
     DELETE_QUEUE_MESSAGE: 'Delete Queue Message',
     // - Grafana Operations (alphabetical)
     ENABLE_GRAFANA_INTEGRATION: 'Enable Grafana Integration',
+    // - Graylog Operations (alphabetical)
+    ENABLE_GRAYLOG_INTEGRATION: 'Enable Graylog Integration',
     // - OpenTelemetry Operations (alphabetical)
     DEPLOY_OPENTELEMETRY: 'Deploy OpenTelemetry',
     RESTART_OPENTELEMETRY_SERVICE: 'Restart OpenTelemetry Service',

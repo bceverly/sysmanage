@@ -701,3 +701,39 @@ msgstr "Benutzersicherheitsrollen (RBAC)"
 
 msgid "No security roles assigned"
 msgstr "Keine Sicherheitsrollen zugewiesen"
+
+msgid "User not found"
+msgstr "Benutzer nicht gefunden"
+
+msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
+msgstr "Zugriff verweigert: ENABLE_GRAYLOG_INTEGRATION-Rolle erforderlich"
+
+msgid "Selected host does not have Graylog server role"
+msgstr "Ausgewählter Host hat keine Graylog-Server-Rolle"
+
+msgid "Failed to securely store API token"
+msgstr "Fehler beim sicheren Speichern des API-Tokens"
+
+msgid "Graylog integration settings updated successfully"
+msgstr "Graylog-Integrationseinstellungen erfolgreich aktualisiert"
+
+msgid "Graylog integration has not been configured"
+msgstr "Graylog-Integration wurde nicht konfiguriert"
+
+msgid "Graylog integration is not enabled"
+msgstr "Graylog-Integration ist nicht aktiviert"
+
+msgid "Error retrieving Graylog URL: %s"
+msgstr "Fehler beim Abrufen der Graylog-URL: %s"
+
+msgid "Graylog URL is not configured"
+msgstr "Graylog-URL ist nicht konfiguriert"
+
+msgid "Connection timeout - Graylog server may be unreachable"
+msgstr "Verbindungszeitüberschreitung - Graylog-Server ist möglicherweise nicht erreichbar"
+
+msgid "Connection failed - Graylog server may be down or unreachable"
+msgstr "Verbindung fehlgeschlagen - Graylog-Server ist möglicherweise ausgefallen oder nicht erreichbar"
+
+msgid "Unexpected error checking Graylog health"
+msgstr "Unerwarteter Fehler beim Überprüfen der Graylog-Gesundheit"

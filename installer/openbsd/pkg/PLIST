@@ -1,0 +1,31 @@
+@comment This file can be auto-generated using: make update-plist
+@comment After first build, run: cd /usr/ports/mystuff/www/sysmanage && make update-plist
+@comment For official port submission, register these in /usr/ports/infrastructure/db/user.list
+@comment @newgroup _sysmanage:828
+@comment @newuser _sysmanage:828:_sysmanage::SysManage Server:/nonexistent:/sbin/nologin
+@comment rc.d script
+@rcscript ${RCDIR}/sysmanage
+@comment Backend application directory
+libexec/sysmanage/
+libexec/sysmanage/alembic.ini
+libexec/sysmanage/alembic/
+libexec/sysmanage/backend/
+@comment Backend Python files will be listed here after make update-plist
+@comment Frontend static files
+share/sysmanage/
+share/sysmanage/frontend/
+@comment Frontend build files will be listed here after make update-plist
+@comment Documentation
+share/doc/sysmanage/
+share/doc/sysmanage/LICENSE
+share/doc/sysmanage/README.md
+share/doc/sysmanage/sbom/
+share/doc/sysmanage/sbom/backend-sbom.json
+share/doc/sysmanage/sbom/frontend-sbom.json
+@comment Example configuration
+share/examples/sysmanage/
+share/examples/sysmanage/sysmanage.yaml
+@sample ${SYSCONFDIR}/sysmanage.yaml
+@comment Data directories
+@sample /var/db/sysmanage/
+@sample /var/log/sysmanage/

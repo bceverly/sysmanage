@@ -1,0 +1,53 @@
+#!/bin/ksh
+#
+# $OpenBSD$
+
+daemon="/usr/local/bin/python3 -m uvicorn backend.main:app --host 0.0.0.0 --port 8080"
+daemon_flags=""
+daemon_timeout=60
+
+. /etc/rc.d/rc.subr
+
+pexp="${daemon}${daemon_flags:+ ${daemon_flags}}"
+
+rc_bg=YES
+rc_reload=NO
+
+# Set environment variables
+export SYSMANAGE_CONFIG=/etc/sysmanage.yaml
+export SYSMANAGE_DB_DIR=/var/db/sysmanage
+export SYSMANAGE_LOG_DIR=/var/log/sysmanage
+
+# Set working directory
+rc_chdir="/usr/local/libexec/sysmanage"
+
+rc_pre() {
+	# Ensure required directories exist with correct permissions
+	install -d -m 0750 ${SYSMANAGE_DB_DIR}
+	install -d -m 0750 ${SYSMANAGE_LOG_DIR}
+
+	# Copy example config if no config exists
+	if [ ! -f ${SYSMANAGE_CONFIG} ] && [ -f /usr/local/share/examples/sysmanage/sysmanage.yaml ]; then
+		cp /usr/local/share/examples/sysmanage/sysmanage.yaml ${SYSMANAGE_CONFIG}
+		chmod 0644 ${SYSMANAGE_CONFIG}
+		echo "Created default configuration at ${SYSMANAGE_CONFIG}"
+		echo "Please edit this file to configure:"
+		echo "  1. PostgreSQL database connection"
+		echo "  2. TLS certificates (if using HTTPS)"
+		echo "  3. Admin user credentials"
+		echo ""
+		echo "Then initialize the database with:"
+		echo "  cd /usr/local/libexec/sysmanage && python3 -m alembic upgrade head"
+		echo ""
+		return 1
+	fi
+
+	# Check if database is configured
+	if ! grep -q "postgresql://" ${SYSMANAGE_CONFIG} 2>/dev/null; then
+		echo "WARNING: PostgreSQL database not configured in ${SYSMANAGE_CONFIG}"
+		echo "Please configure database connection before starting."
+		return 1
+	fi
+}
+
+rc_cmd $1

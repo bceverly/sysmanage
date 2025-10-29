@@ -166,7 +166,7 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: 'build',
+    outDir: 'dist',
     sourcemap: process.env.NODE_ENV === 'development' ? 'inline' : false,
     // Reduce console noise in production
     minify: process.env.NODE_ENV === 'production'
@@ -175,7 +175,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
-    css: true,
+    css: true,  // Enable CSS processing in vitest 4.x
     // Increase timeout for Windows CI environments
     testTimeout: 10000,
     // Reduce file descriptor usage by using threads with limited concurrency
@@ -186,16 +186,13 @@ export default defineConfig({
         minThreads: 1
       }
     },
-    deps: {
-      optimizer: {
-        web: {
-          include: [
-            '@mui/x-data-grid',
-            '@mui/x-data-grid-pro',
-            '@mui/x-data-grid-premium',
-            '@mui/icons-material'
-          ]
-        }
+    server: {
+      deps: {
+        inline: [
+          '@mui/x-data-grid',
+          '@mui/x-data-grid-pro',
+          '@mui/x-data-grid-premium'
+        ]
       }
     },
     coverage: {

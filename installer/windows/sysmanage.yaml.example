@@ -1,0 +1,51 @@
+--- 
+#
+# sysmanage.yaml
+#
+# This is the SysManage server (https://sysmanage.org)  configuration file.
+# It allows the user to specify key configuration items for the sysmanage
+# service such as:
+#
+# api:
+#   host: "FQDN"
+#   port: 443
+#   certFile: "/path_to_file"
+#   chainFile: "/path_to_file"
+#   keyFile: "/path_to_file"
+#
+# database:
+#   user: "db_user"
+#   password: "db_password"
+#   host: "db_fqdn"
+#   port: db_service_port
+#   name: "db_database_name"
+#
+# security:
+#   password_salt: "the salt value"
+#   admin_userid: "hardcoded_admin_login"
+#   admin_password: "password_for_above"
+#   jwt_secret: "secret_for_jwt_tokens"
+#   jwt_algorithm: "HS256"
+#   jwt_auth_timeout: 600
+#   jwt_refresh_timeout: 60000
+#
+# webui:
+#   host: "FQDN"
+#   port: 443
+#   certFile: "/path_to_file"
+#   chainFile: "/path_to_file"
+#   keyFile: "/path_to_file"
+#
+# logging:
+#   # Log levels to include: DEBUG, INFO, WARNING, ERROR, CRITICAL
+#   # Can combine multiple levels with pipe: "INFO|WARNING|ERROR|CRITICAL"
+#   # Examples: "DEBUG" (debug only), "INFO|ERROR" (info and errors only), 
+#   #          "WARNING|ERROR|CRITICAL" (warnings and above)
+#   level: "INFO|WARNING|ERROR|CRITICAL"
+#   
+#   # Log to file (default is logs/* in service directory)
+#   # file: "/var/log/sysmanage.log"
+#   
+#   # Log format - customize the log message appearance
+#   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+#

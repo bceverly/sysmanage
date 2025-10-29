@@ -12,7 +12,7 @@
 [![Linting](https://img.shields.io/badge/pylint-10.00/10-brightgreen.svg)](https://github.com/PyCQA/pylint)
 [![TypeScript](https://img.shields.io/badge/eslint-0%20warnings-brightgreen.svg)]()
 [![Security: bandit](https://img.shields.io/badge/bandit-passing-brightgreen.svg)](https://github.com/PyCQA/bandit) [![Security: semgrep](https://img.shields.io/badge/semgrep-scan-brightgreen.svg)](https://semgrep.dev/) [![Security: safety](https://img.shields.io/badge/safety-passing-brightgreen.svg)](https://pypi.org/project/safety/) [![Security: snyk](https://img.shields.io/badge/snyk-monitored-brightgreen.svg)](https://snyk.io/) [![Security: trufflehog](https://img.shields.io/badge/trufflehog-clean-brightgreen.svg)](https://github.com/trufflesecurity/trufflehog)
-[![Backend Test Coverage](https://img.shields.io/badge/backend%20test%20coverage-60%25-yellow.svg)]()
+[![Backend Test Coverage](https://img.shields.io/badge/backend%20test%20coverage-59%25-orange.svg)]()
 [![UI Tests](https://img.shields.io/badge/ui%20tests-passing-brightgreen.svg)]()
 [![Performance Tests](https://img.shields.io/badge/performance%20tests-optimized-brightgreen.svg)]()
 [![Artillery Load Tests](https://img.shields.io/badge/artillery-0ms-brightgreen.svg)]()
@@ -221,7 +221,7 @@ uvicorn backend.main:app --host 0.0.0.0 --port 6443 --workers 4
 
 # Frontend
 cd frontend && npm run build
-# Serve built files from frontend/build/
+# Serve built files from frontend/dist/
 ```
 
 **📖 For detailed deployment instructions, visit [sysmanage.org/docs/server/deployment.html](https://sysmanage.org/docs/server/deployment.html)**

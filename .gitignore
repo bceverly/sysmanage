@@ -31,6 +31,8 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+# Exception: Allow RPM spec files in installer directories
+!installer/**/*.spec
 
 # Installer logs
 pip-log.txt
@@ -223,3 +225,9 @@ contrib/netbsd/opentelemetry/build/
 contrib/netbsd/opentelemetry/downloads/
 contrib/freebsd/opentelemetry/build/
 contrib/freebsd/opentelemetry/downloads/
+
+# SBOM (Software Bill of Materials) generated files
+sbom/
+
+# Installer build artifacts
+installer/dist/

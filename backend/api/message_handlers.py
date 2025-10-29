@@ -4,7 +4,6 @@ Handles various message types received from agents.
 """
 
 import logging
-import os
 from datetime import datetime, timezone
 
 from sqlalchemy import text, update
@@ -14,31 +13,8 @@ from backend.i18n import _
 from backend.persistence.models import Host, SoftwareInstallationLog
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
-# Logger for debugging
-debug_logger = logging.getLogger("debug_logger")
-debug_logger.setLevel(logging.DEBUG)
-
-# Only add file handler if logs directory exists or can be created
-LOG_FILE = "logs/backend.log"
-try:
-    # Create logs directory if it doesn't exist
-    os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
-    file_handler = logging.FileHandler(LOG_FILE, encoding="utf-8")
-    file_handler.setLevel(logging.DEBUG)
-    from backend.utils.logging_formatter import UTCTimestampFormatter
-
-    formatter = UTCTimestampFormatter("%(levelname)s: %(name)s: %(message)s")
-    file_handler.setFormatter(formatter)
-    debug_logger.addHandler(file_handler)
-except (OSError, PermissionError):
-    # If we can't create the log file, just use console logging
-    from backend.utils.logging_formatter import UTCTimestampFormatter
-
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)
-    formatter = UTCTimestampFormatter("%(levelname)s: %(name)s: %(message)s")
-    console_handler.setFormatter(formatter)
-    debug_logger.addHandler(console_handler)
+# Use standard logger that respects /etc/sysmanage.yaml configuration
+logger = logging.getLogger(__name__)
 
 
 async def validate_host_authentication(
@@ -135,19 +111,19 @@ async def handle_system_info(db: Session, connection, message_data: dict):
     platform = message_data.get("platform")
 
     # System info received from agent
-    debug_logger.info("=== SYSTEM INFO DEBUG ===")
-    debug_logger.info("Hostname: %s", hostname)
-    debug_logger.info("Message data keys: %s", list(message_data.keys()))
-    debug_logger.info(
+    logger.info("=== SYSTEM INFO DEBUG ===")
+    logger.info("Hostname: %s", hostname)
+    logger.info("Message data keys: %s", list(message_data.keys()))
+    logger.info(
         "Script execution enabled in message: %s",
         message_data.get("script_execution_enabled"),
     )
-    debug_logger.info("========================")
+    logger.info("========================")
 
     if hostname:
         # Update database - pass script execution status for new host creation
         script_execution_enabled = message_data.get("script_execution_enabled", False)
-        debug_logger.info(
+        logger.info(
             "Passing script_execution_enabled=%s to update_or_create_host",
             script_execution_enabled,
         )
@@ -156,7 +132,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):
         )
 
         # Check approval status
-        debug_logger.info("Host %s approval status: %s", hostname, host.approval_status)
+        logger.info("Host %s approval status: %s", hostname, host.approval_status)
 
         # Always set hostname on connection so we can send approval messages
         connection.hostname = hostname
@@ -213,7 +189,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):
             # Process software packages if included in SYSTEM_INFO message
             software_packages = message_data.get("software_packages", [])
             if software_packages:
-                debug_logger.info(
+                logger.info(
                     "Processing %d software packages from SYSTEM_INFO message",
                     len(software_packages),
                 )
@@ -381,14 +357,14 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                     db.refresh(host)
                     connection.host_id = host.id
                     result_rowcount = 1
-                    debug_logger.info(
+                    logger.info(
                         "Created new host %s (ID: %s) from heartbeat",
                         connection.hostname,
                         host.id,
                     )
                 else:
                     # Host not found and no connection info - clear the connection state
-                    debug_logger.warning(
+                    logger.warning(
                         "Host ID %s not found in database, clearing connection state",
                         connection.host_id,
                     )
@@ -397,7 +373,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
                     result_rowcount = 0
 
             if result_rowcount == 0:
-                debug_logger.warning(
+                logger.warning(
                     "No host found for heartbeat - connection state cleared, agent should re-register"
                 )
 
@@ -415,7 +391,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
             }
 
         except Exception as e:
-            debug_logger.error("Error processing heartbeat: %s", e)
+            logger.error("Error processing heartbeat: %s", e)
             return {
                 "message_type": "error",
                 "error": _("Failed to process heartbeat"),
@@ -429,7 +405,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
 
 async def handle_command_result(connection, message_data: dict):
     """Handle command execution result from agent."""
-    debug_logger.info(
+    logger.info(
         "Command result from %s: %s",
         getattr(connection, "hostname", "unknown"),
         {
@@ -440,7 +416,7 @@ async def handle_command_result(connection, message_data: dict):
 
     # Check if this is a script execution result
     if "execution_id" in message_data:
-        debug_logger.info("Detected script execution result, routing to script handler")
+        logger.info("Detected script execution result, routing to script handler")
         # Import here to avoid circular imports
         from backend.api.handlers import handle_script_execution_result
         from backend.persistence.db import get_db
@@ -458,8 +434,8 @@ async def handle_command_result(connection, message_data: dict):
     result_data = message_data.get("result", {})
     if result_data is None:
         result_data = {}
-    debug_logger.info("PACKAGE_DEBUG: message_data keys: %s", list(message_data.keys()))
-    debug_logger.info(
+    logger.info("PACKAGE_DEBUG: message_data keys: %s", list(message_data.keys()))
+    logger.info(
         "PACKAGE_DEBUG: result_data type: %s, keys: %s",
         type(result_data),
         list(result_data.keys()) if isinstance(result_data, dict) else "N/A",
@@ -470,9 +446,7 @@ async def handle_command_result(connection, message_data: dict):
         or "packages" in result_data
         or "package_managers" in result_data
     ):
-        debug_logger.info(
-            "Detected package collection result, routing to package handler"
-        )
+        logger.info("Detected package collection result, routing to package handler")
         # Import here to avoid circular imports
         from backend.api.handlers import handle_package_collection
         from backend.persistence.db import get_db
@@ -503,7 +477,7 @@ async def handle_command_result(connection, message_data: dict):
 
 async def handle_config_acknowledgment(connection, message_data: dict):
     """Handle configuration acknowledgment from agent."""
-    debug_logger.info(
+    logger.info(
         "Configuration acknowledged by %s: %s",
         getattr(connection, "hostname", "unknown"),
         message_data.get("status", "unknown"),
@@ -519,7 +493,7 @@ async def handle_diagnostic_result(db: Session, connection, message_data: dict):
     """Handle diagnostic collection result from agent."""
     from backend.api.diagnostics import process_diagnostic_result
 
-    debug_logger.info(
+    logger.info(
         "Diagnostic collection result from %s: %s",
         getattr(connection, "hostname", "unknown"),
         {
@@ -547,7 +521,7 @@ async def handle_diagnostic_result(db: Session, connection, message_data: dict):
             "status": "processed",
         }
     except Exception as e:
-        debug_logger.error(
+        logger.error(
             "Error processing diagnostic result from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -564,7 +538,7 @@ async def handle_diagnostic_result(db: Session, connection, message_data: dict):
                 db.execute(stmt)
                 db.commit()
             except Exception as db_error:
-                debug_logger.error(
+                logger.error(
                     "Failed to update diagnostics request status to failed: %s",
                     db_error,
                 )
@@ -591,7 +565,7 @@ async def handle_installation_status(db: Session, connection, message_data: dict
     installed_version = message_data.get("installed_version")
     installation_log = message_data.get("installation_log")
 
-    debug_logger.info(
+    logger.info(
         "Package installation status from %s: %s - %s (%s)",
         getattr(connection, "hostname", "unknown"),
         package_name,
@@ -600,7 +574,7 @@ async def handle_installation_status(db: Session, connection, message_data: dict
     )
 
     if not installation_id:
-        debug_logger.error("Package installation status missing installation_id")
+        logger.error("Package installation status missing installation_id")
         return {
             "message_type": "error",
             "error": "Missing installation_id in package installation status",
@@ -615,7 +589,7 @@ async def handle_installation_status(db: Session, connection, message_data: dict
         )
 
         if not installation_log_entry:
-            debug_logger.warning(
+            logger.warning(
                 "Installation log entry not found for installation_id: %s",
                 installation_id,
             )
@@ -646,7 +620,7 @@ async def handle_installation_status(db: Session, connection, message_data: dict
         # Commit the changes
         db.commit()
 
-        debug_logger.info(
+        logger.info(
             "Updated package installation status: %s -> %s (ID: %s)",
             package_name,
             status,
@@ -688,7 +662,7 @@ async def handle_installation_status(db: Session, connection, message_data: dict
 
     except Exception as e:
         db.rollback()
-        debug_logger.error(
+        logger.error(
             "Error updating package installation status for %s: %s", installation_id, e
         )
         return {

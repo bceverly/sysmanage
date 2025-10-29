@@ -20,7 +20,16 @@ def configure_logging():
     logger.info("=== CONFIGURING LOGGING ===")
 
     # Ensure logs directory exists
-    logs_dir = "logs"
+    # Use SYSMANAGE_LOG_DIR environment variable if set (for systemd service)
+    # Otherwise fall back to local logs/ directory (for development)
+    env_log_dir = os.environ.get("SYSMANAGE_LOG_DIR")
+    if env_log_dir:
+        logs_dir = env_log_dir
+        logger.info("Using log directory from SYSMANAGE_LOG_DIR: %s", logs_dir)
+    else:
+        logs_dir = "logs"
+        logger.info("Using local logs directory: %s", logs_dir)
+
     logger.info("Creating logs directory: %s", logs_dir)
     os.makedirs(logs_dir, exist_ok=True)
     logger.info("Logs directory exists: %s", os.path.exists(logs_dir))
@@ -31,7 +40,7 @@ def configure_logging():
 
     try:
         # Try to add file handler, but fallback gracefully if permission denied
-        log_file = "logs/backend.log"
+        log_file = os.path.join(logs_dir, "backend.log")
         logger.info("Attempting to create file handler for: %s", log_file)
         file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
         handlers.append(file_handler)

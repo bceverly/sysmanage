@@ -700,3 +700,39 @@ msgstr "أدوار أمان المستخدم (RBAC)"
 
 msgid "No security roles assigned"
 msgstr "لم يتم تعيين أدوار أمان"
+
+msgid "User not found"
+msgstr "المستخدم غير موجود"
+
+msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
+msgstr "تم رفض الإذن: دور ENABLE_GRAYLOG_INTEGRATION مطلوب"
+
+msgid "Selected host does not have Graylog server role"
+msgstr "المضيف المحدد ليس لديه دور خادم Graylog"
+
+msgid "Failed to securely store API token"
+msgstr "فشل في تخزين رمز API بشكل آمن"
+
+msgid "Graylog integration settings updated successfully"
+msgstr "تم تحديث إعدادات تكامل Graylog بنجاح"
+
+msgid "Graylog integration has not been configured"
+msgstr "لم يتم تكوين تكامل Graylog"
+
+msgid "Graylog integration is not enabled"
+msgstr "تكامل Graylog غير مفعل"
+
+msgid "Error retrieving Graylog URL: %s"
+msgstr "خطأ في استرداد عنوان URL لـ Graylog: %s"
+
+msgid "Graylog URL is not configured"
+msgstr "عنوان URL لـ Graylog غير مكون"
+
+msgid "Connection timeout - Graylog server may be unreachable"
+msgstr "انتهت مهلة الاتصال - قد يكون خادم Graylog غير قابل للوصول"
+
+msgid "Connection failed - Graylog server may be down or unreachable"
+msgstr "فشل الاتصال - قد يكون خادم Graylog معطلاً أو غير قابل للوصول"
+
+msgid "Unexpected error checking Graylog health"
+msgstr "خطأ غير متوقع في فحص صحة Graylog"

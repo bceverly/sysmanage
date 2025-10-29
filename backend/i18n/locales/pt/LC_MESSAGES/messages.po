@@ -708,3 +708,39 @@ msgstr "Funções de Segurança do Usuário (RBAC)"
 
 msgid "No security roles assigned"
 msgstr "Nenhuma função de segurança atribuída"
+
+msgid "User not found"
+msgstr "Usuário não encontrado"
+
+msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
+msgstr "Permissão negada: função ENABLE_GRAYLOG_INTEGRATION necessária"
+
+msgid "Selected host does not have Graylog server role"
+msgstr "O host selecionado não possui a função de servidor Graylog"
+
+msgid "Failed to securely store API token"
+msgstr "Falha ao armazenar o token da API com segurança"
+
+msgid "Graylog integration settings updated successfully"
+msgstr "Configurações de integração do Graylog atualizadas com sucesso"
+
+msgid "Graylog integration has not been configured"
+msgstr "A integração do Graylog não foi configurada"
+
+msgid "Graylog integration is not enabled"
+msgstr "A integração do Graylog não está habilitada"
+
+msgid "Error retrieving Graylog URL: %s"
+msgstr "Erro ao recuperar URL do Graylog: %s"
+
+msgid "Graylog URL is not configured"
+msgstr "A URL do Graylog não está configurada"
+
+msgid "Connection timeout - Graylog server may be unreachable"
+msgstr "Tempo limite de conexão - O servidor Graylog pode estar inacessível"
+
+msgid "Connection failed - Graylog server may be down or unreachable"
+msgstr "Falha na conexão - O servidor Graylog pode estar inativo ou inacessível"
+
+msgid "Unexpected error checking Graylog health"
+msgstr "Erro inesperado ao verificar a saúde do Graylog"

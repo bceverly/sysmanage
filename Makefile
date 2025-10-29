@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry
+.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom
 
 # Default target
 help:
@@ -24,9 +24,18 @@ help:
 	@echo "  make security-upgrades - Check for security package upgrades"
 	@echo "  make setup         - Install development dependencies"
 	@echo "  make clean         - Clean test artifacts and cache"
+	@echo "  make build         - Build frontend for production"
 	@echo "  make install-dev   - Install all development tools (includes Playwright + WebDriver + MSW for testing)"
 	@echo "  make migrate       - Run database migrations (alembic upgrade head)"
 	@echo "  make check-test-models - Check test model synchronization between conftest files"
+	@echo ""
+	@echo "Packaging targets:"
+	@echo "  make installer         - Build installer package (auto-detects platform)"
+	@echo "  make installer-deb     - Build Ubuntu/Debian .deb package (explicit)"
+	@echo "  make installer-rpm-centos - Build CentOS/RHEL/Fedora .rpm package (explicit)"
+	@echo "  make installer-rpm-opensuse - Build OpenSUSE/SLES .rpm package with vendor deps (explicit)"
+	@echo "  make installer-openbsd - Build OpenBSD port tarball (explicit)"
+	@echo "  make sbom              - Generate Software Bill of Materials (CycloneDX format)"
 	@echo ""
 	@echo "OpenBAO (Vault) targets:"
 	@echo "  make start-openbao - Start OpenBAO development server only"
@@ -74,7 +83,11 @@ else
 	else \
 		echo "Error: No Python 3 found"; exit 1; \
 	fi
-	@$(PYTHON) -m pip install --upgrade pip
+	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
+		export TMPDIR=$$HOME/tmp && $(PYTHON) -m pip install --upgrade pip; \
+	else \
+		$(PYTHON) -m pip install --upgrade pip; \
+	fi
 endif
 
 setup-venv: $(VENV_ACTIVATE)
@@ -85,7 +98,23 @@ install-dev: setup-venv
 ifeq ($(OS),Windows_NT)
 	@$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep
 else
-	@if [ "$$(uname -s)" = "NetBSD" ]; then \
+	@if [ "$$(uname -s)" = "Darwin" ]; then \
+		echo "[INFO] macOS detected - checking for packaging tools..."; \
+		command -v pkgbuild >/dev/null 2>&1 || { \
+			echo "[WARNING] pkgbuild not found - install with: xcode-select --install"; \
+		}; \
+		command -v productbuild >/dev/null 2>&1 || { \
+			echo "[WARNING] productbuild not found - install with: xcode-select --install"; \
+		}; \
+		if command -v pkgbuild >/dev/null 2>&1 && command -v productbuild >/dev/null 2>&1; then \
+			echo "✓ All macOS packaging tools available"; \
+		fi; \
+		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
+	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
+		echo "[INFO] OpenBSD detected - using ~/tmp for builds..."; \
+		export TMPDIR=$$HOME/tmp && \
+		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
+	elif [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD detected - configuring for grpcio build..."; \
 		export TMPDIR=/var/tmp && \
 		export CC=/usr/pkg/gcc14/bin/gcc && \
@@ -128,8 +157,10 @@ else
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
 	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
 		echo "[INFO] OpenBSD - patching and building grpcio with bundled abseil..."; \
+		export TMPDIR=$$HOME/tmp && \
 		$(MAKE) build-grpcio-openbsd || { echo "[ERROR] grpcio build failed - see ~/tmp/grpcio-build.log"; exit 1; }; \
 		echo "[INFO] Now installing remaining dependencies..."; \
+		export TMPDIR=$$HOME/tmp && \
 		grep -v "playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || { echo "[ERROR] Failed to install requirements"; exit 1; }; \
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
 	else \
@@ -177,6 +208,12 @@ else
 		rm -rf $(VENV_DIR)/lib/python*/site-packages/websocket $(VENV_DIR)/lib/python*/site-packages/websocket-*.dist-info 2>/dev/null || true; \
 		$(PYTHON) -m pip install --force-reinstall websocket-client websockets; \
 		echo "[OK] websocket dependencies fixed for NetBSD Selenium support"; \
+	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
+		echo "[INFO] OpenBSD detected - fixing websocket dependencies for Selenium compatibility..."; \
+		$(PYTHON) -m pip uninstall -y websocket 2>/dev/null || true; \
+		rm -rf $(VENV_DIR)/lib/python*/site-packages/websocket $(VENV_DIR)/lib/python*/site-packages/websocket-*.dist-info 2>/dev/null || true; \
+		export TMPDIR=$$HOME/tmp && $(PYTHON) -m pip install --force-reinstall websocket-client websockets; \
+		echo "[OK] websocket dependencies fixed for OpenBSD Selenium support"; \
 	fi
 endif
 	@echo "Installing OpenBAO for secrets management..."
@@ -292,6 +329,226 @@ else
 		cd frontend && npm uninstall esbuild && npm install esbuild --cache=$$HOME/.npm-cache; \
 	else \
 		cd frontend && npm uninstall esbuild && npm install esbuild; \
+	fi
+endif
+	@echo "Installing packaging/installer build tools for your platform..."
+ifeq ($(OS),Windows_NT)
+	@echo "[INFO] Windows detected - checking for WiX Toolset..."
+	@where wix >nul 2>&1 && echo "✓ WiX Toolset already installed" || ( \
+		echo "[WARNING] WiX Toolset not found. Please install manually:" && \
+		echo "  Download from: https://wixtoolset.org/releases/" && \
+		echo "  Or via winget: winget install --id=WiXToolset.WiX -e" \
+	)
+else
+	@if [ -f /etc/redhat-release ]; then \
+		echo "[INFO] Red Hat-based system detected - checking for RPM build tools..."; \
+		MISSING_PKGS=""; \
+		command -v rpmbuild >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS rpm-build"; \
+		command -v rpmdev-setuptree >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS rpmdevtools"; \
+		rpm -q python3-devel >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS python3-devel"; \
+		rpm -q python3-setuptools >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS python3-setuptools"; \
+		rpm -q nodejs >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS nodejs"; \
+		if [ -n "$$MISSING_PKGS" ]; then \
+			echo "Missing packages:$$MISSING_PKGS"; \
+			echo "Installing RPM build tools..."; \
+			if command -v dnf >/dev/null 2>&1; then \
+				echo "Running: sudo dnf install -y rpm-build rpmdevtools python3-devel python3-setuptools nodejs rsync"; \
+				sudo dnf install -y rpm-build rpmdevtools python3-devel python3-setuptools nodejs rsync || \
+				echo "[WARNING] Could not install RPM build tools. Run manually: sudo dnf install -y rpm-build rpmdevtools python3-devel python3-setuptools nodejs rsync"; \
+			else \
+				echo "Running: sudo yum install -y rpm-build rpmdevtools python3-devel python3-setuptools nodejs rsync"; \
+				sudo yum install -y rpm-build rpmdevtools python3-devel python3-setuptools nodejs rsync || \
+				echo "[WARNING] Could not install RPM build tools. Run manually: sudo yum install -y rpm-build rpmdevtools python3-devel python3-setuptools nodejs rsync"; \
+			fi; \
+		else \
+			echo "✓ All RPM build tools already installed"; \
+		fi; \
+		echo "[INFO] Checking for Flatpak build tools..."; \
+		MISSING_FLATPAK=""; \
+		if ! command -v flatpak >/dev/null 2>&1; then \
+			MISSING_FLATPAK="$$MISSING_FLATPAK flatpak"; \
+		fi; \
+		if ! command -v flatpak-builder >/dev/null 2>&1; then \
+			MISSING_FLATPAK="$$MISSING_FLATPAK flatpak-builder"; \
+		fi; \
+		if [ -n "$$MISSING_FLATPAK" ]; then \
+			echo "Missing Flatpak tools:$$MISSING_FLATPAK"; \
+			echo "Installing Flatpak build tools..."; \
+			if command -v dnf >/dev/null 2>&1; then \
+				echo "Running: sudo dnf install -y flatpak flatpak-builder"; \
+				sudo dnf install -y flatpak flatpak-builder || { \
+					echo "[WARNING] Could not install Flatpak tools. Run manually: sudo dnf install -y flatpak flatpak-builder"; \
+				}; \
+			else \
+				echo "Running: sudo yum install -y flatpak flatpak-builder"; \
+				sudo yum install -y flatpak flatpak-builder || { \
+					echo "[WARNING] Could not install Flatpak tools. Run manually: sudo yum install -y flatpak flatpak-builder"; \
+				}; \
+			fi; \
+		else \
+			echo "✓ Flatpak build tools already installed"; \
+		fi; \
+		if command -v flatpak >/dev/null 2>&1; then \
+			if ! flatpak remote-list --user | grep -q flathub; then \
+				echo "Adding Flathub repository (user)..."; \
+				flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || { \
+					echo "[WARNING] Could not add Flathub repository"; \
+				}; \
+			else \
+				echo "✓ Flathub repository already configured (user)"; \
+			fi; \
+		fi; \
+	elif [ -f /etc/os-release ] && grep -qE "^ID=\"?(opensuse-leap|opensuse-tumbleweed|sles)\"?" /etc/os-release; then \
+		echo "[INFO] openSUSE/SLES detected - checking for RPM build tools..."; \
+		MISSING_PKGS=""; \
+		command -v rpmbuild >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS rpm-build"; \
+		command -v rpmdev-setuptree >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS rpmdevtools"; \
+		rpm -q python311-devel >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS python311-devel"; \
+		rpm -q python3-setuptools >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS python3-setuptools"; \
+		rpm -q nodejs >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS nodejs"; \
+		if [ -n "$$MISSING_PKGS" ]; then \
+			echo "Missing packages:$$MISSING_PKGS"; \
+			echo "Installing RPM build tools..."; \
+			echo "Running: sudo zypper install -y rpm-build rpmdevtools python311-devel python3-setuptools nodejs rsync"; \
+			sudo zypper install -y rpm-build rpmdevtools python311-devel python3-setuptools nodejs rsync || \
+			echo "[WARNING] Could not install RPM build tools. Run manually: sudo zypper install -y rpm-build rpmdevtools python311-devel python3-setuptools nodejs rsync"; \
+		else \
+			echo "✓ All RPM build tools already installed"; \
+		fi; \
+		echo "[INFO] Checking for Flatpak build tools..."; \
+		MISSING_FLATPAK=""; \
+		if ! command -v flatpak >/dev/null 2>&1; then \
+			MISSING_FLATPAK="$$MISSING_FLATPAK flatpak"; \
+		fi; \
+		if ! command -v flatpak-builder >/dev/null 2>&1; then \
+			MISSING_FLATPAK="$$MISSING_FLATPAK flatpak-builder"; \
+		fi; \
+		if [ -n "$$MISSING_FLATPAK" ]; then \
+			echo "Missing Flatpak tools:$$MISSING_FLATPAK"; \
+			echo "Installing Flatpak build tools..."; \
+			echo "Running: sudo zypper install -y flatpak flatpak-builder"; \
+			sudo zypper install -y flatpak flatpak-builder || { \
+				echo "[WARNING] Could not install Flatpak tools. Run manually: sudo zypper install -y flatpak flatpak-builder"; \
+			}; \
+		else \
+			echo "✓ Flatpak build tools already installed"; \
+		fi; \
+		if command -v flatpak >/dev/null 2>&1; then \
+			if ! flatpak remote-list --user | grep -q flathub; then \
+				echo "Adding Flathub repository (user)..."; \
+				flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || { \
+					echo "[WARNING] Could not add Flathub repository"; \
+				}; \
+			else \
+				echo "✓ Flathub repository already configured (user)"; \
+			fi; \
+		fi; \
+	elif [ "$$(uname -s)" = "Linux" ] && [ -f /etc/lsb-release ] && grep -q Ubuntu /etc/lsb-release 2>/dev/null; then \
+		echo "[INFO] Ubuntu/Debian detected - checking for packaging build tools..."; \
+		MISSING_PKGS=""; \
+		command -v dpkg-buildpackage >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS devscripts"; \
+		dpkg -l dh-python 2>/dev/null | grep -q "^ii" || MISSING_PKGS="$$MISSING_PKGS dh-python"; \
+		dpkg -l python3-all 2>/dev/null | grep -q "^ii" || MISSING_PKGS="$$MISSING_PKGS python3-all"; \
+		dpkg -l debhelper 2>/dev/null | grep -q "^ii" || MISSING_PKGS="$$MISSING_PKGS debhelper"; \
+		dpkg -l lintian 2>/dev/null | grep -q "^ii" || MISSING_PKGS="$$MISSING_PKGS lintian"; \
+		if [ -n "$$MISSING_PKGS" ]; then \
+			echo "Missing packages:$$MISSING_PKGS"; \
+			echo "Installing Debian packaging build tools..."; \
+			echo "Running: sudo apt-get install -y debhelper dh-python python3-all python3-setuptools build-essential devscripts lintian nodejs npm"; \
+			sudo apt-get update && sudo apt-get install -y debhelper dh-python python3-all python3-setuptools build-essential devscripts lintian nodejs npm || \
+			echo "[WARNING] Could not install packaging tools. Run manually: sudo apt-get install -y debhelper dh-python python3-all python3-setuptools build-essential devscripts lintian nodejs npm"; \
+		else \
+			echo "✓ All packaging build tools already installed"; \
+		fi; \
+		echo "[INFO] Checking for Snap build tools..."; \
+		if ! command -v snap >/dev/null 2>&1; then \
+			echo "snapd not found - installing..."; \
+			echo "Running: sudo apt-get install -y snapd"; \
+			sudo apt-get install -y snapd || { \
+				echo "[WARNING] Could not install snapd. Run manually: sudo apt-get install -y snapd"; \
+			}; \
+			echo "Ensuring snapd service is enabled and started..."; \
+			sudo systemctl enable --now snapd.socket || true; \
+			sudo systemctl start snapd || true; \
+			echo "Waiting for snapd to initialize..."; \
+			sleep 5; \
+		fi; \
+		if ! snap list 2>/dev/null | grep -q snapcraft; then \
+			echo "snapcraft not found - installing..."; \
+			echo "Running: sudo snap install snapcraft --classic"; \
+			sudo snap install snapcraft --classic || { \
+				echo "[WARNING] Could not install snapcraft. Run manually: sudo snap install snapcraft --classic"; \
+			}; \
+		else \
+			echo "✓ snapcraft already installed"; \
+		fi; \
+		echo "[INFO] Checking for Flatpak build tools..."; \
+		MISSING_FLATPAK=""; \
+		if ! command -v flatpak >/dev/null 2>&1; then \
+			MISSING_FLATPAK="$$MISSING_FLATPAK flatpak"; \
+		fi; \
+		if ! command -v flatpak-builder >/dev/null 2>&1; then \
+			MISSING_FLATPAK="$$MISSING_FLATPAK flatpak-builder"; \
+		fi; \
+		if [ -n "$$MISSING_FLATPAK" ]; then \
+			echo "Missing Flatpak tools:$$MISSING_FLATPAK"; \
+			echo "Installing Flatpak build tools..."; \
+			echo "Running: sudo apt-get install -y flatpak flatpak-builder"; \
+			sudo apt-get install -y flatpak flatpak-builder || { \
+				echo "[WARNING] Could not install Flatpak tools. Run manually: sudo apt-get install -y flatpak flatpak-builder"; \
+			}; \
+		else \
+			echo "✓ Flatpak build tools already installed"; \
+		fi; \
+		if command -v flatpak >/dev/null 2>&1; then \
+			if ! flatpak remote-list --user | grep -q flathub; then \
+				echo "Adding Flathub repository (user)..."; \
+				flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || { \
+					echo "[WARNING] Could not add Flathub repository"; \
+				}; \
+			else \
+				echo "✓ Flathub repository already configured (user)"; \
+			fi; \
+		fi; \
+	elif [ "$$(uname -s)" = "FreeBSD" ]; then \
+		echo "[INFO] FreeBSD detected - checking for packaging tools..."; \
+		if ! command -v pkgconf >/dev/null 2>&1; then \
+			echo "pkgconf not found - installing..."; \
+			echo "Running: sudo pkg install -y pkgconf"; \
+			sudo pkg install -y pkgconf || { \
+				echo "[WARNING] Could not install pkgconf. Run manually: sudo pkg install -y pkgconf"; \
+			}; \
+		else \
+			echo "✓ pkgconf already installed"; \
+		fi; \
+	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
+		echo "[INFO] OpenBSD detected - package building uses standard ports system"; \
+		echo "      No additional tools needed beyond base system"; \
+	elif [ "$$(uname -s)" = "NetBSD" ]; then \
+		echo "[INFO] NetBSD detected - package building uses pkg_create (in base)"; \
+		echo "      No additional tools needed beyond base system"; \
+	elif [ -f /etc/redhat-release ]; then \
+		echo "[INFO] Red Hat-based system detected - checking for RPM build tools..."; \
+		MISSING_PKGS=""; \
+		command -v rpmbuild >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS rpm-build"; \
+		command -v rpmdev-setuptree >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS rpmdevtools"; \
+		rpm -q python3-devel >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS python3-devel"; \
+		rpm -q python3-setuptools >/dev/null 2>&1 || MISSING_PKGS="$$MISSING_PKGS python3-setuptools"; \
+		if [ -n "$$MISSING_PKGS" ]; then \
+			echo "Missing packages:$$MISSING_PKGS"; \
+			echo "Installing RPM build tools..."; \
+			if command -v dnf >/dev/null 2>&1; then \
+				echo "Running: sudo dnf install -y rpm-build rpmdevtools python3-devel python3-setuptools rsync"; \
+				sudo dnf install -y rpm-build rpmdevtools python3-devel python3-setuptools rsync || \
+				echo "[WARNING] Could not install RPM build tools. Run manually: sudo dnf install -y rpm-build rpmdevtools python3-devel python3-setuptools rsync"; \
+			else \
+				echo "Running: sudo yum install -y rpm-build rpmdevtools python3-devel python3-setuptools rsync"; \
+				sudo yum install -y rpm-build rpmdevtools python3-devel python3-setuptools rsync || \
+				echo "[WARNING] Could not install RPM build tools. Run manually: sudo yum install -y rpm-build rpmdevtools python3-devel python3-setuptools rsync"; \
+			fi; \
+		else \
+			echo "✓ RPM build tools already installed"; \
+		fi; \
 	fi
 endif
 	@echo "Installing ESLint security plugins..."
@@ -590,6 +847,13 @@ check-test-models:
 test: test-python test-typescript test-ui test-performance
 	@echo "[OK] All tests completed successfully!"
 
+# Build frontend for production
+build:
+	@echo "=== Building Frontend ==="
+	@echo "Building React frontend with Vite..."
+	@cd frontend && npm run build
+	@echo "[OK] Frontend build completed - output in frontend/dist/"
+
 # Clean artifacts
 clean:
 	@echo "Cleaning test artifacts and cache..."
@@ -600,13 +864,14 @@ ifeq ($(OS),Windows_NT)
 	-@rmdir /s /q htmlcov >nul 2>&1
 	-@del /q .coverage >nul 2>&1
 	-@rmdir /s /q frontend\coverage >nul 2>&1
+	-@rmdir /s /q frontend\dist >nul 2>&1
 else
 	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
 	@find . -name "*.pyc" -delete 2>/dev/null || true
 	@rm -rf htmlcov/ .coverage
-	@cd frontend && rm -rf coverage/ 2>/dev/null || true
+	@cd frontend && rm -rf coverage/ dist/ 2>/dev/null || true
 endif
 	@echo "[OK] Clean completed"
 
@@ -859,3 +1124,919 @@ build-grpcio-openbsd: $(VENV_ACTIVATE)
 	fi && \
 	rm -rf $$HOME/tmp/grpcio-1.71.0* && \
 	echo "[OK] grpcio 1.71.0 build completed successfully with OpenBSD patches"
+# Installer targets
+installer: build
+	@echo "=== Auto-detecting platform for installer build ==="
+	@if [ "$$(uname -s)" = "Darwin" ]; then \
+		echo "macOS detected - building .pkg package"; \
+		$(MAKE) installer-macos; \
+	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
+		echo "OpenBSD detected - building port tarball"; \
+		$(MAKE) installer-openbsd; \
+	elif [ "$$(uname -s)" = "FreeBSD" ]; then \
+		echo "FreeBSD detected - building .pkg package"; \
+		$(MAKE) installer-freebsd; \
+	elif [ "$$(uname -s)" = "NetBSD" ]; then \
+		echo "NetBSD detected - building .tgz package"; \
+		$(MAKE) installer-netbsd; \
+	elif [ -f /etc/os-release ]; then \
+		. /etc/os-release; \
+		if [ "$$ID" = "opensuse-leap" ] || [ "$$ID" = "opensuse-tumbleweed" ] || [ "$$ID" = "sles" ]; then \
+			echo "openSUSE/SLES system detected - building RPM package"; \
+			$(MAKE) installer-rpm-opensuse; \
+		elif [ -f /etc/redhat-release ]; then \
+			echo "Red Hat-based system detected - building RPM package"; \
+			$(MAKE) installer-rpm-centos; \
+		elif [ -f /etc/debian_version ] || [ -f /etc/lsb-release ]; then \
+			echo "Debian-based system detected - building DEB package"; \
+			$(MAKE) installer-deb; \
+		else \
+			echo "Unknown Linux distribution - cannot auto-detect installer type"; \
+			exit 1; \
+		fi; \
+	else \
+		echo "Unknown platform - cannot auto-detect installer type"; \
+		exit 1; \
+	fi
+
+installer-deb:
+	@echo "=== Building Ubuntu/Debian .deb Package ==="
+	@echo ""
+	@echo "Checking build dependencies..."
+	@command -v dpkg-buildpackage >/dev/null 2>&1 || { \
+		echo "ERROR: dpkg-buildpackage not found."; \
+		echo "Install with: make install-dev"; \
+		echo "Or manually: sudo apt-get install -y debhelper dh-python python3-all build-essential devscripts lintian nodejs npm"; \
+		exit 1; \
+	}
+	@echo "✓ Build tools available"
+	@echo ""
+	@echo "Determining version..."
+	@set -e; \
+	if [ -n "$$VERSION" ]; then \
+		echo "Using VERSION from environment: $$VERSION"; \
+	else \
+		VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+		if [ -z "$$VERSION" ]; then \
+			VERSION="0.1.0"; \
+			echo "No git tags found, using default version: $$VERSION"; \
+		else \
+			echo "Building version: $$VERSION"; \
+		fi; \
+	fi; \
+	echo ""; \
+	echo "Building frontend..."; \
+	cd frontend && npm run build && cd ..; \
+	echo "✓ Frontend build complete"; \
+	echo ""; \
+	echo "Generating Software Bill of Materials (SBOM)..."; \
+	$(MAKE) sbom; \
+	echo ""; \
+	echo "Creating build directory..."; \
+	CURRENT_DIR=$$(pwd); \
+	BUILD_TEMP="$$CURRENT_DIR/installer/dist/build-temp"; \
+	BUILD_DIR="$$BUILD_TEMP/sysmanage-$$VERSION"; \
+	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
+	mkdir -p "$$OUTPUT_DIR"; \
+	rm -rf "$$BUILD_TEMP"; \
+	mkdir -p "$$BUILD_DIR"; \
+	echo "✓ Build directory created: $$BUILD_DIR"; \
+	echo ""; \
+	echo "Copying source files..."; \
+	rsync -a --exclude='htmlcov' --exclude='__pycache__' --exclude='*.pyc' --exclude='.pytest_cache' --exclude='node_modules' --exclude='.venv' backend/ "$$BUILD_DIR/backend/"; \
+	mkdir -p "$$BUILD_DIR/frontend"; \
+	rsync -a --exclude='node_modules' --exclude='coverage' frontend/dist/ "$$BUILD_DIR/frontend/dist/"; \
+	rsync -a --exclude='node_modules' --exclude='coverage' frontend/public/ "$$BUILD_DIR/frontend/public/"; \
+	cp requirements.txt "$$BUILD_DIR/"; \
+	cp alembic.ini "$$BUILD_DIR/"; \
+	cp -r config "$$BUILD_DIR/" 2>/dev/null || true; \
+	cp -r scripts "$$BUILD_DIR/" 2>/dev/null || true; \
+	cp README.md "$$BUILD_DIR/" 2>/dev/null || touch "$$BUILD_DIR/README.md"; \
+	mkdir -p "$$BUILD_DIR/sbom"; \
+	cp sbom/*.json "$$BUILD_DIR/sbom/" 2>/dev/null || echo "Note: SBOM files not found, skipping"; \
+	echo "✓ Application source copied"; \
+	echo ""; \
+	echo "Copying Debian packaging files..."; \
+	cp -r installer/ubuntu/debian "$$BUILD_DIR/"; \
+	mkdir -p "$$BUILD_DIR/installer/ubuntu"; \
+	cp installer/ubuntu/*.service "$$BUILD_DIR/installer/ubuntu/"; \
+	cp installer/ubuntu/*.example "$$BUILD_DIR/installer/ubuntu/"; \
+	cp installer/ubuntu/*.conf "$$BUILD_DIR/installer/ubuntu/" 2>/dev/null || true; \
+	echo "✓ Packaging files copied"; \
+	echo ""; \
+	echo "Building package..."; \
+	cd "$$BUILD_DIR" && dpkg-buildpackage -d -us -uc -b; \
+	echo ""; \
+	echo "Moving package to output directory..."; \
+	mv "$$BUILD_TEMP"/sysmanage_*.deb "$$OUTPUT_DIR/"; \
+	mv "$$BUILD_TEMP"/sysmanage_*.buildinfo "$$OUTPUT_DIR/" 2>/dev/null || true; \
+	mv "$$BUILD_TEMP"/sysmanage_*.changes "$$OUTPUT_DIR/" 2>/dev/null || true; \
+	echo ""; \
+	echo "Cleaning up build directory..."; \
+	rm -rf "$$BUILD_TEMP"; \
+	echo ""; \
+	echo "✓ Package built successfully!"; \
+	echo ""; \
+	echo "Package location: $$OUTPUT_DIR/sysmanage_$$VERSION-1_all.deb"; \
+	echo ""; \
+	echo "To install:"; \
+	echo "  sudo dpkg -i $$OUTPUT_DIR/sysmanage_$$VERSION-1_all.deb"; \
+	echo "  sudo apt-get install -f  # If dependencies are missing"; \
+	echo ""; \
+	echo "After installation:"; \
+	echo "  1. Configure /etc/sysmanage.yaml (use https://sysmanage.org/config-builder.html)"; \
+	echo "  2. Set up PostgreSQL database"; \
+	echo "  3. Run: cd /opt/sysmanage && sudo -u sysmanage .venv/bin/python -m alembic upgrade head"; \
+	echo "  4. Start: sudo systemctl start sysmanage"
+
+# Build OpenBSD port tarball
+installer-openbsd:
+	@echo "=== Building OpenBSD Port Tarball ==="
+	@echo ""
+	@CURRENT_DIR=$$(pwd); \
+	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
+	PORT_DIR="$$CURRENT_DIR/installer/openbsd"; \
+	echo "Determining version from git..."; \
+	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+	if [ -z "$$VERSION" ]; then \
+		VERSION="0.1.0"; \
+		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	else \
+		echo "Building version: $$VERSION"; \
+	fi; \
+	echo ""; \
+	echo "Checking prerequisites..."; \
+	if [ ! -d frontend/dist ]; then \
+		echo "ERROR: Frontend not built. Run 'make build' first."; \
+		exit 1; \
+	fi; \
+	echo "✓ Frontend build found"; \
+	echo ""; \
+	echo "Updating port Makefile with version v$$VERSION..."; \
+	sed -i.bak "s/^GH_TAGNAME =.*/GH_TAGNAME =\t\tv$$VERSION/" "$$PORT_DIR/Makefile"; \
+	rm -f "$$PORT_DIR/Makefile.bak"; \
+	echo "✓ Version updated"; \
+	echo ""; \
+	echo "Creating output directory..."; \
+	mkdir -p "$$OUTPUT_DIR"; \
+	echo "✓ Output directory ready: $$OUTPUT_DIR"; \
+	echo ""; \
+	echo "Creating port tarball..."; \
+	cd installer && tar czf "$$OUTPUT_DIR/sysmanage-openbsd-port-$$VERSION.tar.gz" openbsd/; \
+	cd "$$CURRENT_DIR"; \
+	echo ""; \
+	echo "✓ OpenBSD port tarball created: $$OUTPUT_DIR/sysmanage-openbsd-port-$$VERSION.tar.gz"; \
+	echo ""; \
+	ls -lh "$$OUTPUT_DIR/sysmanage-openbsd-port-$$VERSION.tar.gz"; \
+	echo ""; \
+	echo "==================================="; \
+	echo "OpenBSD Port Build Complete!"; \
+	echo "==================================="; \
+	echo ""; \
+	echo "To use this port:"; \
+	echo "  1. Extract to OpenBSD ports tree:"; \
+	echo "     cd /usr/ports/mystuff && mkdir -p www"; \
+	echo "     tar xzf $$OUTPUT_DIR/sysmanage-openbsd-port-$$VERSION.tar.gz -C www/"; \
+	echo ""; \
+	echo "  2. Generate checksums:"; \
+	echo "     cd /usr/ports/mystuff/www/openbsd"; \
+	echo "     doas make makesum"; \
+	echo ""; \
+	echo "  3. Build and install:"; \
+	echo "     doas make install"; \
+	echo ""; \
+	echo "See installer/openbsd/README.md for full instructions"
+
+# Build CentOS/RHEL/Fedora RPM package
+installer-rpm-centos:
+	@echo "=== Building CentOS/RHEL/Fedora .rpm Package ==="
+	@echo ""
+	@echo "Checking build dependencies..."
+	@command -v rpmbuild >/dev/null 2>&1 || { \
+		echo "ERROR: rpmbuild not found."; \
+		echo "Install with: sudo dnf install -y rpm-build rpmdevtools python3-devel python3-setuptools"; \
+		echo "Or run: make install-dev"; \
+		exit 1; \
+	}
+	@echo "✓ Build tools available"
+	@echo ""
+	@set -e; \
+	echo "Determining version..."; \
+	if [ -n "$$VERSION" ]; then \
+		echo "Using VERSION from environment: $$VERSION"; \
+	else \
+		VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+		if [ -z "$$VERSION" ]; then \
+			VERSION="0.1.0"; \
+			echo "No git tags found, using default version: $$VERSION"; \
+		else \
+			echo "Building version: $$VERSION"; \
+		fi; \
+	fi; \
+	echo ""; \
+	echo "Building frontend..."; \
+	cd frontend && npm run build && cd ..; \
+	echo "✓ Frontend build complete"; \
+	echo ""; \
+	echo "Generating SBOM files..."; \
+	$(MAKE) sbom; \
+	echo "✓ SBOM files generated"; \
+	echo ""; \
+	echo "Setting up RPM build tree..."; \
+	CURRENT_DIR=$$(pwd); \
+	BUILD_TEMP="$$CURRENT_DIR/installer/dist/rpmbuild"; \
+	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
+	mkdir -p "$$OUTPUT_DIR"; \
+	rm -rf "$$BUILD_TEMP"; \
+	mkdir -p "$$BUILD_TEMP"/BUILD "$$BUILD_TEMP"/RPMS "$$BUILD_TEMP"/SOURCES "$$BUILD_TEMP"/SPECS "$$BUILD_TEMP"/SRPMS; \
+	echo "✓ RPM build tree created"; \
+	echo ""; \
+	echo "Creating source tarball..."; \
+	TAR_NAME="sysmanage-$$VERSION"; \
+	TAR_DIR="$$BUILD_TEMP/SOURCES/$$TAR_NAME"; \
+	mkdir -p "$$TAR_DIR"; \
+	rsync -a --exclude='node_modules' --exclude='htmlcov' --exclude='__pycache__' --exclude='*.pyc' --exclude='.pytest_cache' --exclude='.venv' --exclude='installer/dist' backend/ "$$TAR_DIR/backend/"; \
+	mkdir -p "$$TAR_DIR/frontend"; \
+	rsync -a --exclude='node_modules' --exclude='src' frontend/dist/ "$$TAR_DIR/frontend/dist/"; \
+	rsync -a --exclude='node_modules' --exclude='src' frontend/public/ "$$TAR_DIR/frontend/public/"; \
+	cp alembic.ini "$$TAR_DIR/"; \
+	cp requirements.txt "$$TAR_DIR/"; \
+	cp -r alembic "$$TAR_DIR/"; \
+	cp -r config "$$TAR_DIR/"; \
+	cp -r scripts "$$TAR_DIR/"; \
+	cp -r sbom "$$TAR_DIR/"; \
+	cp README.md "$$TAR_DIR/" 2>/dev/null || touch "$$TAR_DIR/README.md"; \
+	cp LICENSE "$$TAR_DIR/" 2>/dev/null || touch "$$TAR_DIR/LICENSE"; \
+	mkdir -p "$$TAR_DIR/installer/centos"; \
+	cp installer/centos/*.service "$$TAR_DIR/installer/centos/"; \
+	cp installer/centos/*.conf "$$TAR_DIR/installer/centos/"; \
+	cp installer/centos/*.example "$$TAR_DIR/installer/centos/"; \
+	cd "$$BUILD_TEMP/SOURCES" && tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
+	rm -rf "$$TAR_DIR"; \
+	echo "✓ Source tarball created"; \
+	echo ""; \
+	echo "Updating spec file with version..."; \
+	cp "$$CURRENT_DIR/installer/centos/sysmanage.spec" "$$BUILD_TEMP/SPECS/sysmanage.spec"; \
+	DATE=$$(date "+%a %b %d %Y"); \
+	sed -i "s/^Version:.*/Version:        $$VERSION/" "$$BUILD_TEMP/SPECS/sysmanage.spec"; \
+	sed -i "s/^\\* Tue Oct 29 2025/\\* $$DATE/" "$$BUILD_TEMP/SPECS/sysmanage.spec"; \
+	echo "✓ Spec file updated to version $$VERSION"; \
+	echo ""; \
+	echo "Building RPM package..."; \
+	cd "$$BUILD_TEMP" && rpmbuild --define "_topdir $$BUILD_TEMP" --nodeps -bb SPECS/sysmanage.spec 2>&1 | tee build.log; \
+	BUILD_STATUS=$$?; \
+	if [ $$BUILD_STATUS -eq 0 ]; then \
+		echo ""; \
+		echo "✓ Package built successfully!"; \
+		echo ""; \
+		echo "Moving package to output directory..."; \
+		RPM_FILE=$$(find "$$BUILD_TEMP/RPMS" -name "sysmanage-$$VERSION-*.rpm" | head -1); \
+		if [ -n "$$RPM_FILE" ]; then \
+			cp "$$RPM_FILE" "$$OUTPUT_DIR/"; \
+			RPM_BASENAME=$$(basename "$$RPM_FILE"); \
+			echo "✓ Package moved to: $$OUTPUT_DIR/$$RPM_BASENAME"; \
+			echo ""; \
+			cd "$$OUTPUT_DIR" && sha256sum "$$RPM_BASENAME" > "$$RPM_BASENAME.sha256"; \
+			echo "✓ SHA256 checksum: $$OUTPUT_DIR/$$RPM_BASENAME.sha256"; \
+			echo ""; \
+			echo "==================================="; \
+			echo "CentOS/RHEL RPM Build Complete!"; \
+			echo "==================================="; \
+			echo ""; \
+			ls -lh "$$OUTPUT_DIR/$$RPM_BASENAME"; \
+			echo ""; \
+			rpm -qip "$$OUTPUT_DIR/$$RPM_BASENAME" | head -20; \
+			echo ""; \
+			echo "To install:"; \
+			echo "  sudo dnf install $$OUTPUT_DIR/$$RPM_BASENAME"; \
+			echo ""; \
+			echo "After installation:"; \
+			echo "  1. Configure /etc/sysmanage.yaml"; \
+			echo "  2. Set up PostgreSQL database"; \
+			echo "  3. Run: cd /opt/sysmanage && sudo -u sysmanage .venv/bin/python -m alembic upgrade head"; \
+			echo "  4. Start: sudo systemctl start sysmanage"; \
+		else \
+			echo "ERROR: Could not find built RPM package"; \
+			exit 1; \
+		fi; \
+	else \
+		echo ""; \
+		echo "ERROR: RPM build failed!"; \
+		echo "Check the build log: $$BUILD_TEMP/build.log"; \
+		tail -50 "$$BUILD_TEMP/build.log"; \
+		exit 1; \
+	fi
+
+# Build OpenSUSE/SLES RPM package with vendor dependencies
+installer-rpm-opensuse:
+	@echo "=== Building OpenSUSE/SLES .rpm Package ==="
+	@echo ""
+	@echo "Checking build dependencies..."
+	@command -v rpmbuild >/dev/null 2>&1 || { \
+		echo "ERROR: rpmbuild not found."; \
+		echo "Install with: sudo zypper install rpm-build python311-devel python311-pip"; \
+		echo "Or run: make install-dev"; \
+		exit 1; \
+	}
+	@echo "✓ Build tools available"
+	@echo ""
+	@set -e; \
+	echo "Determining version..."; \
+	if [ -n "$$VERSION" ]; then \
+		echo "Using VERSION from environment: $$VERSION"; \
+	else \
+		VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+		if [ -z "$$VERSION" ]; then \
+			VERSION="0.1.0"; \
+			echo "No git tags found, using default version: $$VERSION"; \
+		else \
+			echo "Building version: $$VERSION"; \
+		fi; \
+	fi; \
+	echo ""; \
+	echo "Building frontend..."; \
+	cd frontend && npm run build && cd ..; \
+	echo "✓ Frontend build complete"; \
+	echo ""; \
+	echo "Generating SBOM files..."; \
+	$(MAKE) sbom; \
+	echo "✓ SBOM files generated"; \
+	echo ""; \
+	echo "Downloading Python vendor dependencies for offline installation..."; \
+	VENDOR_DIR="$$(pwd)/vendor"; \
+	rm -rf "$$VENDOR_DIR"; \
+	mkdir -p "$$VENDOR_DIR"; \
+	pip3 download -r requirements.txt -d "$$VENDOR_DIR" --no-binary :all: 2>/dev/null || \
+	pip3 download -r requirements.txt -d "$$VENDOR_DIR"; \
+	echo "✓ Vendor dependencies downloaded"; \
+	echo ""; \
+	echo "Setting up RPM build tree..."; \
+	CURRENT_DIR=$$(pwd); \
+	BUILD_TEMP="$$CURRENT_DIR/installer/dist/rpmbuild-opensuse"; \
+	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
+	mkdir -p "$$OUTPUT_DIR"; \
+	rm -rf "$$BUILD_TEMP"; \
+	mkdir -p "$$BUILD_TEMP"/BUILD "$$BUILD_TEMP"/RPMS "$$BUILD_TEMP"/SOURCES "$$BUILD_TEMP"/SPECS "$$BUILD_TEMP"/SRPMS; \
+	echo "✓ RPM build tree created"; \
+	echo ""; \
+	echo "Creating source tarball..."; \
+	TAR_NAME="sysmanage-$$VERSION"; \
+	TAR_DIR="$$BUILD_TEMP/SOURCES/$$TAR_NAME"; \
+	mkdir -p "$$TAR_DIR"; \
+	rsync -a --exclude='node_modules' --exclude='htmlcov' --exclude='__pycache__' --exclude='*.pyc' --exclude='.pytest_cache' --exclude='.venv' --exclude='installer/dist' backend/ "$$TAR_DIR/backend/"; \
+	mkdir -p "$$TAR_DIR/frontend"; \
+	rsync -a --exclude='node_modules' --exclude='src' frontend/dist/ "$$TAR_DIR/frontend/dist/"; \
+	rsync -a --exclude='node_modules' --exclude='src' frontend/public/ "$$TAR_DIR/frontend/public/"; \
+	cp alembic.ini "$$TAR_DIR/"; \
+	cp requirements.txt "$$TAR_DIR/"; \
+	cp -r alembic "$$TAR_DIR/"; \
+	cp -r config "$$TAR_DIR/"; \
+	cp -r scripts "$$TAR_DIR/"; \
+	cp -r sbom "$$TAR_DIR/"; \
+	cp README.md "$$TAR_DIR/" 2>/dev/null || touch "$$TAR_DIR/README.md"; \
+	cp LICENSE "$$TAR_DIR/" 2>/dev/null || touch "$$TAR_DIR/LICENSE"; \
+	mkdir -p "$$TAR_DIR/installer/opensuse"; \
+	cp installer/opensuse/*.service "$$TAR_DIR/installer/opensuse/"; \
+	cp installer/opensuse/*.conf "$$TAR_DIR/installer/opensuse/"; \
+	cp installer/opensuse/*.example "$$TAR_DIR/installer/opensuse/"; \
+	cd "$$BUILD_TEMP/SOURCES" && tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
+	rm -rf "$$TAR_DIR"; \
+	echo "✓ Source tarball created"; \
+	echo ""; \
+	echo "Creating vendor tarball..."; \
+	cd "$$CURRENT_DIR" && tar czf "$$BUILD_TEMP/SOURCES/sysmanage-vendor-$$VERSION.tar.gz" vendor/; \
+	echo "✓ Vendor tarball created"; \
+	echo ""; \
+	echo "Updating spec file with version..."; \
+	cp "$$CURRENT_DIR/installer/opensuse/sysmanage.spec" "$$BUILD_TEMP/SPECS/sysmanage.spec"; \
+	DATE=$$(date "+%a %b %d %Y"); \
+	sed -i "s/^Version:.*/Version:        $$VERSION/" "$$BUILD_TEMP/SPECS/sysmanage.spec"; \
+	sed -i "s/^\\* Tue Oct 29 2025/\\* $$DATE/" "$$BUILD_TEMP/SPECS/sysmanage.spec"; \
+	echo "✓ Spec file updated to version $$VERSION"; \
+	echo ""; \
+	echo "Building RPM package..."; \
+	cd "$$BUILD_TEMP" && rpmbuild --define "_topdir $$BUILD_TEMP" --nodeps -bb SPECS/sysmanage.spec 2>&1 | tee build.log; \
+	BUILD_STATUS=$$?; \
+	if [ $$BUILD_STATUS -eq 0 ]; then \
+		echo ""; \
+		echo "✓ Package built successfully!"; \
+		echo ""; \
+		echo "Moving package to output directory..."; \
+		RPM_FILE=$$(find "$$BUILD_TEMP/RPMS" -name "sysmanage-$$VERSION-*.rpm" | head -1); \
+		if [ -n "$$RPM_FILE" ]; then \
+			cp "$$RPM_FILE" "$$OUTPUT_DIR/"; \
+			RPM_BASENAME=$$(basename "$$RPM_FILE"); \
+			echo "✓ Package moved to: $$OUTPUT_DIR/$$RPM_BASENAME"; \
+			echo ""; \
+			cd "$$OUTPUT_DIR" && sha256sum "$$RPM_BASENAME" > "$$RPM_BASENAME.sha256"; \
+			echo "✓ SHA256 checksum: $$OUTPUT_DIR/$$RPM_BASENAME.sha256"; \
+			echo ""; \
+			echo "==================================="; \
+			echo "OpenSUSE/SLES RPM Build Complete!"; \
+			echo "==================================="; \
+			echo ""; \
+			ls -lh "$$OUTPUT_DIR/$$RPM_BASENAME"; \
+			echo ""; \
+			rpm -qip "$$OUTPUT_DIR/$$RPM_BASENAME" | head -20; \
+			echo ""; \
+			echo "To install:"; \
+			echo "  sudo zypper install $$OUTPUT_DIR/$$RPM_BASENAME"; \
+			echo ""; \
+			echo "After installation:"; \
+			echo "  1. Configure /etc/sysmanage.yaml"; \
+			echo "  2. Set up PostgreSQL database"; \
+			echo "  3. Run: cd /opt/sysmanage && sudo -u sysmanage .venv/bin/python -m alembic upgrade head"; \
+			echo "  4. Start: sudo systemctl start sysmanage"; \
+		else \
+			echo "ERROR: Could not find built RPM package"; \
+			exit 1; \
+		fi; \
+	else \
+		echo ""; \
+		echo "ERROR: RPM build failed!"; \
+		echo "Check the build log: $$BUILD_TEMP/build.log"; \
+		tail -50 "$$BUILD_TEMP/build.log"; \
+		exit 1; \
+	fi; \
+	rm -rf "$$VENDOR_DIR"
+
+# FreeBSD .pkg package
+installer-freebsd:
+	@echo "=== Building FreeBSD Package ==="
+	@echo ""
+	@echo "Creating FreeBSD .pkg package for sysmanage..."
+	@echo ""
+	@CURRENT_DIR=$$(pwd); \
+	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
+	BUILD_DIR="$$CURRENT_DIR/build/freebsd"; \
+	PACKAGE_ROOT="$$BUILD_DIR/package-root"; \
+	echo "Determining version from git..."; \
+	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+	if [ -z "$$VERSION" ]; then \
+		VERSION="0.9.0"; \
+		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	else \
+		echo "Building version: $$VERSION"; \
+	fi; \
+	echo ""; \
+	echo "Cleaning build directory..."; \
+	rm -rf "$$BUILD_DIR"; \
+	mkdir -p "$$PACKAGE_ROOT"; \
+	echo "✓ Build directory prepared: $$BUILD_DIR"; \
+	echo ""; \
+	echo "Checking prerequisites..."; \
+	if [ ! -d frontend/dist ]; then \
+		echo "ERROR: Frontend not built. Run 'make build' first."; \
+		exit 1; \
+	fi; \
+	echo "✓ Frontend build found"; \
+	echo ""; \
+	echo "Generating SBOM files..."; \
+	$(MAKE) sbom; \
+	echo "✓ SBOM files generated"; \
+	echo ""; \
+	echo "Copying and updating manifest..."; \
+	MANIFEST_FILE="$$BUILD_DIR/+MANIFEST"; \
+	cp "$$CURRENT_DIR/installer/freebsd/+MANIFEST" "$$MANIFEST_FILE"; \
+	sed -i.bak "s/^version:.*/version: \"$$VERSION\"/" "$$MANIFEST_FILE"; \
+	rm -f "$$MANIFEST_FILE.bak"; \
+	echo "✓ Manifest copied and updated to version $$VERSION"; \
+	echo ""; \
+	echo "Creating package directory structure..."; \
+	mkdir -p "$$PACKAGE_ROOT/usr/local/lib/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/rc.d"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/nginx/conf.d"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/local/share/doc/sysmanage/sbom"; \
+	echo "✓ Package directories created"; \
+	echo ""; \
+	echo "Copying backend files..."; \
+	cp -R backend "$$PACKAGE_ROOT/usr/local/lib/sysmanage/"; \
+	cp -R alembic "$$PACKAGE_ROOT/usr/local/lib/sysmanage/"; \
+	cp alembic.ini "$$PACKAGE_ROOT/usr/local/lib/sysmanage/"; \
+	cp requirements.txt "$$PACKAGE_ROOT/usr/local/lib/sysmanage/"; \
+	cp -R config "$$PACKAGE_ROOT/usr/local/lib/sysmanage/"; \
+	cp -R scripts "$$PACKAGE_ROOT/usr/local/lib/sysmanage/"; \
+	echo "✓ Backend files copied"; \
+	echo ""; \
+	echo "Copying frontend files..."; \
+	cp -R frontend/dist "$$PACKAGE_ROOT/usr/local/lib/sysmanage/frontend"; \
+	cp -R frontend/public "$$PACKAGE_ROOT/usr/local/lib/sysmanage/frontend-public"; \
+	echo "✓ Frontend files copied"; \
+	echo ""; \
+	echo "Copying configuration files..."; \
+	cp installer/freebsd/sysmanage.yaml.example "$$PACKAGE_ROOT/usr/local/etc/sysmanage/"; \
+	cp installer/freebsd/sysmanage-nginx.conf "$$PACKAGE_ROOT/usr/local/etc/nginx/conf.d/"; \
+	cp installer/freebsd/sysmanage.rc "$$PACKAGE_ROOT/usr/local/etc/rc.d/sysmanage"; \
+	chmod +x "$$PACKAGE_ROOT/usr/local/etc/rc.d/sysmanage"; \
+	echo "✓ Configuration files copied"; \
+	echo ""; \
+	echo "Copying SBOM..."; \
+	if [ -f sbom/backend-sbom.json ]; then \
+		cp sbom/backend-sbom.json "$$PACKAGE_ROOT/usr/local/share/doc/sysmanage/sbom/"; \
+	fi; \
+	if [ -f sbom/frontend-sbom.json ]; then \
+		cp sbom/frontend-sbom.json "$$PACKAGE_ROOT/usr/local/share/doc/sysmanage/sbom/"; \
+	fi; \
+	echo "✓ SBOM files copied"; \
+	echo ""; \
+	echo "Building FreeBSD package..."; \
+	if command -v pkg >/dev/null 2>&1; then \
+		echo "Using native FreeBSD pkg create..."; \
+		cd "$$BUILD_DIR" && pkg create -M "$$MANIFEST_FILE" -r "$$PACKAGE_ROOT" -o .; \
+	else \
+		echo "Using bsdtar for cross-platform build..."; \
+		mkdir -p "$$BUILD_DIR/pkg-staging"; \
+		cp "$$MANIFEST_FILE" "$$BUILD_DIR/pkg-staging/+MANIFEST"; \
+		cd "$$BUILD_DIR/pkg-staging" && bsdtar -czf "../sysmanage-$$VERSION.pkg" --format=pax "+MANIFEST" -C "$$PACKAGE_ROOT" .; \
+	fi; \
+	if [ $$? -eq 0 ]; then \
+		PACKAGE_FILE=$$(ls -1 $$BUILD_DIR/sysmanage-$$VERSION.pkg 2>/dev/null | head -1); \
+		if [ -n "$$PACKAGE_FILE" ]; then \
+			mkdir -p "$$OUTPUT_DIR"; \
+			mv "$$PACKAGE_FILE" "$$OUTPUT_DIR/"; \
+			if command -v sha256 >/dev/null 2>&1; then \
+				cd "$$OUTPUT_DIR" && sha256 sysmanage-$$VERSION.pkg > sysmanage-$$VERSION.pkg.sha256; \
+			else \
+				cd "$$OUTPUT_DIR" && sha256sum sysmanage-$$VERSION.pkg > sysmanage-$$VERSION.pkg.sha256; \
+			fi; \
+			echo ""; \
+			echo "✓ FreeBSD package created successfully: $$OUTPUT_DIR/sysmanage-$$VERSION.pkg"; \
+			echo ""; \
+			echo "Installation commands:"; \
+			echo "  sudo pkg add $$OUTPUT_DIR/sysmanage-$$VERSION.pkg"; \
+			echo "  sudo sysrc sysmanage_enable=YES"; \
+			echo "  sudo sysrc nginx_enable=YES"; \
+			echo "  sudo service sysmanage start"; \
+			echo "  sudo service nginx start"; \
+		else \
+			echo "ERROR: Package file not found after creation"; \
+			exit 1; \
+		fi; \
+	else \
+		echo "ERROR: Package creation failed"; \
+		exit 1; \
+	fi
+
+# macOS .pkg package
+installer-macos: build
+	@echo "=== Building macOS Package ==="
+	@echo ""
+	@echo "Creating macOS .pkg installer for sysmanage..."
+	@echo ""
+	@echo "Checking build dependencies..."; \
+	command -v pkgbuild >/dev/null 2>&1 || { \
+		echo "ERROR: pkgbuild not found."; \
+		echo "Install with: xcode-select --install"; \
+		exit 1; \
+	}; \
+	command -v productbuild >/dev/null 2>&1 || { \
+		echo "ERROR: productbuild not found."; \
+		echo "Install with: xcode-select --install"; \
+		exit 1; \
+	}; \
+	echo "✓ Build tools available"; \
+	echo ""; \
+	CURRENT_DIR=$$(pwd); \
+	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
+	BUILD_TEMP="$$OUTPUT_DIR/build-temp-macos"; \
+	PAYLOAD_DIR="$$BUILD_TEMP/payload"; \
+	SCRIPTS_DIR="$$BUILD_TEMP/scripts"; \
+	echo "Determining version from git..."; \
+	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+	if [ -z "$$VERSION" ]; then \
+		VERSION="0.9.0"; \
+		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	else \
+		echo "Building version: $$VERSION"; \
+	fi; \
+	echo ""; \
+	echo "Checking prerequisites..."; \
+	if [ ! -d frontend/dist ]; then \
+		echo "ERROR: Frontend not built. Run 'make build' first."; \
+		exit 1; \
+	fi; \
+	echo "✓ Frontend build found"; \
+	echo ""; \
+	echo "Generating SBOM files..."; \
+	$(MAKE) sbom; \
+	echo "✓ SBOM files generated"; \
+	echo ""; \
+	echo "Cleaning build directory..."; \
+	rm -rf "$$BUILD_TEMP"; \
+	mkdir -p "$$PAYLOAD_DIR"; \
+	mkdir -p "$$SCRIPTS_DIR"; \
+	mkdir -p "$$OUTPUT_DIR"; \
+	echo "✓ Build directories created"; \
+	echo ""; \
+	echo "Creating payload structure..."; \
+	mkdir -p "$$PAYLOAD_DIR/usr/local/lib/sysmanage"; \
+	mkdir -p "$$PAYLOAD_DIR/usr/local/etc/sysmanage"; \
+	mkdir -p "$$PAYLOAD_DIR/usr/local/share/doc/sysmanage/sbom"; \
+	mkdir -p "$$PAYLOAD_DIR/var/lib/sysmanage"; \
+	mkdir -p "$$PAYLOAD_DIR/var/log/sysmanage"; \
+	mkdir -p "$$PAYLOAD_DIR/Library/LaunchDaemons"; \
+	echo "✓ Payload directories created"; \
+	echo ""; \
+	echo "Copying backend files..."; \
+	rsync -a --exclude='htmlcov' --exclude='__pycache__' --exclude='*.pyc' --exclude='.pytest_cache' --exclude='node_modules' --exclude='.venv' backend/ "$$PAYLOAD_DIR/usr/local/lib/sysmanage/backend/"; \
+	rsync -a alembic/ "$$PAYLOAD_DIR/usr/local/lib/sysmanage/alembic/"; \
+	cp alembic.ini "$$PAYLOAD_DIR/usr/local/lib/sysmanage/"; \
+	cp requirements.txt "$$PAYLOAD_DIR/usr/local/lib/sysmanage/"; \
+	echo "✓ Backend files copied"; \
+	echo ""; \
+	echo "Copying frontend files..."; \
+	rsync -a --exclude='node_modules' --exclude='coverage' frontend/dist/ "$$PAYLOAD_DIR/usr/local/lib/sysmanage/frontend/dist/"; \
+	rsync -a --exclude='node_modules' --exclude='coverage' frontend/public/ "$$PAYLOAD_DIR/usr/local/lib/sysmanage/frontend/public/"; \
+	echo "✓ Frontend files copied"; \
+	echo ""; \
+	echo "Copying configuration files..."; \
+	cp installer/macos/sysmanage.yaml.example "$$PAYLOAD_DIR/usr/local/etc/sysmanage/"; \
+	cp installer/macos/sysmanage-nginx.conf "$$PAYLOAD_DIR/usr/local/etc/sysmanage/"; \
+	echo "✓ Configuration files copied"; \
+	echo ""; \
+	echo "Copying SBOM files..."; \
+	if [ -f sbom/backend-sbom.json ]; then \
+		cp sbom/backend-sbom.json "$$PAYLOAD_DIR/usr/local/share/doc/sysmanage/sbom/"; \
+	fi; \
+	if [ -f sbom/frontend-sbom.json ]; then \
+		cp sbom/frontend-sbom.json "$$PAYLOAD_DIR/usr/local/share/doc/sysmanage/sbom/"; \
+	fi; \
+	echo "✓ SBOM files copied"; \
+	echo ""; \
+	echo "Copying LaunchDaemon plist..."; \
+	cp installer/macos/com.sysmanage.server.plist "$$PAYLOAD_DIR/Library/LaunchDaemons/com.sysmanage.server.plist"; \
+	echo "✓ LaunchDaemon plist copied"; \
+	echo ""; \
+	echo "Copying postinstall script..."; \
+	cp installer/macos/postinstall.sh "$$SCRIPTS_DIR/postinstall"; \
+	chmod +x "$$SCRIPTS_DIR/postinstall"; \
+	echo "✓ Postinstall script copied"; \
+	echo ""; \
+	echo "Building component package..."; \
+	pkgbuild --root "$$PAYLOAD_DIR" \
+		--scripts "$$SCRIPTS_DIR" \
+		--identifier com.sysmanage.server \
+		--version "$$VERSION" \
+		--install-location / \
+		"$$BUILD_TEMP/sysmanage-server-component.pkg"; \
+	echo "✓ Component package created"; \
+	echo ""; \
+	echo "Copying distribution XML..."; \
+	cp installer/macos/distribution.xml "$$BUILD_TEMP/distribution.xml"; \
+	echo "✓ Distribution XML copied"; \
+	echo ""; \
+	echo "Building final installer package..."; \
+	productbuild --distribution "$$BUILD_TEMP/distribution.xml" \
+		--package-path "$$BUILD_TEMP" \
+		"$$OUTPUT_DIR/sysmanage-$$VERSION-macos.pkg"; \
+	echo ""; \
+	echo "✓ macOS package created successfully: $$OUTPUT_DIR/sysmanage-$$VERSION-macos.pkg"; \
+	echo ""; \
+	echo "Installation commands:"; \
+	echo "  sudo installer -pkg $$OUTPUT_DIR/sysmanage-$$VERSION-macos.pkg -target /"; \
+	echo ""; \
+	ls -lh "$$OUTPUT_DIR/sysmanage-$$VERSION-macos.pkg"
+
+# NetBSD .tgz package
+installer-netbsd:
+	@echo "=== Building NetBSD Package ==="
+	@echo ""
+	@echo "Creating NetBSD .tgz package for sysmanage..."
+	@echo ""
+	@CURRENT_DIR=$$(pwd); \
+	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
+	BUILD_DIR="$$CURRENT_DIR/build/netbsd"; \
+	PACKAGE_ROOT="$$BUILD_DIR/package-root"; \
+	echo "Determining version from git..."; \
+	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+	if [ -z "$$VERSION" ]; then \
+		VERSION="0.1.0"; \
+		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	else \
+		echo "Building version: $$VERSION"; \
+	fi; \
+	echo ""; \
+	echo "Checking prerequisites..."; \
+	if [ ! -d frontend/dist ]; then \
+		echo "ERROR: Frontend not built. Run 'make build' first."; \
+		exit 1; \
+	fi; \
+	echo "✓ Frontend build found"; \
+	echo ""; \
+	echo "Generating SBOM files..."; \
+	$(MAKE) sbom; \
+	echo "✓ SBOM files generated"; \
+	echo ""; \
+	echo "Cleaning build directory..."; \
+	rm -rf "$$BUILD_DIR"; \
+	mkdir -p "$$PACKAGE_ROOT"; \
+	echo "✓ Build directory prepared: $$BUILD_DIR"; \
+	echo ""; \
+	echo "Creating package directory structure..."; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/backend"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/frontend/dist"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/frontend/public"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/etc/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/share/examples/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/share/doc/sysmanage/sbom"; \
+	mkdir -p "$$PACKAGE_ROOT/var/lib/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/var/log/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/var/run/sysmanage"; \
+	echo "✓ Package directories created"; \
+	echo ""; \
+	echo "Copying server files..."; \
+	rsync -a --exclude='htmlcov' --exclude='__pycache__' --exclude='*.pyc' --exclude='.pytest_cache' --exclude='node_modules' --exclude='.venv' backend/ "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/backend/"; \
+	rsync -a --exclude='node_modules' --exclude='coverage' frontend/dist/ "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/frontend/dist/"; \
+	rsync -a --exclude='node_modules' --exclude='coverage' frontend/public/ "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/frontend/public/"; \
+	cp -r alembic "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/"; \
+	cp alembic.ini "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/"; \
+	cp requirements.txt "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/"; \
+	cp -r config "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/" 2>/dev/null || true; \
+	cp -r scripts "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/" 2>/dev/null || true; \
+	echo "✓ Server files copied"; \
+	echo ""; \
+	echo "Copying configuration files..."; \
+	cp installer/netbsd/sysmanage.yaml.example "$$PACKAGE_ROOT/usr/pkg/etc/sysmanage/"; \
+	cp installer/netbsd/sysmanage.rc "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/sysmanage"; \
+	cp installer/netbsd/sysmanage-nginx.conf "$$PACKAGE_ROOT/usr/pkg/share/examples/sysmanage/"; \
+	chmod +x "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/sysmanage"; \
+	echo "✓ Configuration files copied"; \
+	echo ""; \
+	echo "Copying SBOM..."; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/share/doc/sysmanage/sbom"; \
+	if [ -f sbom/backend-sbom.json ]; then \
+		cp sbom/backend-sbom.json "$$PACKAGE_ROOT/usr/pkg/share/doc/sysmanage/sbom/"; \
+	fi; \
+	if [ -f sbom/frontend-sbom.json ]; then \
+		cp sbom/frontend-sbom.json "$$PACKAGE_ROOT/usr/pkg/share/doc/sysmanage/sbom/"; \
+	fi; \
+	echo "✓ SBOM copied"; \
+	echo ""; \
+	echo "Copying package metadata files..."; \
+	cp installer/netbsd/+INSTALL "$$BUILD_DIR/"; \
+	cp installer/netbsd/+DESC "$$BUILD_DIR/"; \
+	cp installer/netbsd/+COMMENT "$$BUILD_DIR/"; \
+	cp installer/netbsd/+BUILD_INFO "$$BUILD_DIR/"; \
+	chmod +x "$$BUILD_DIR/+INSTALL"; \
+	echo "✓ Metadata files copied"; \
+	echo ""; \
+	echo "Creating packing list with dependencies..."; \
+	{ \
+		echo "@name sysmanage-$$VERSION"; \
+		echo "@comment SysManage Server - Centralized system management server for NetBSD"; \
+		echo "@pkgdep python312>=3.12"; \
+		echo "@pkgdep py312-pip"; \
+		echo "@pkgdep postgresql16-server>=16.0"; \
+		echo "@pkgdep nginx>=1.24"; \
+		cd "$$PACKAGE_ROOT" && find . -type f -o -type l | sed 's,^\./,,'; \
+		cd "$$PACKAGE_ROOT" && find . -type d | sed 's,^\./,,' | grep -v '^\.' | sed 's,^,@dirrm ,'; \
+	} | sort -u > "$$BUILD_DIR/+CONTENTS"; \
+	echo "✓ Packing list created with dependencies"; \
+	echo ""; \
+	echo "Building package..."; \
+	if command -v pkg_create >/dev/null 2>&1; then \
+		echo "Using native NetBSD pkg_create..."; \
+		pkg_create \
+			-B "$$BUILD_DIR/+BUILD_INFO" \
+			-c "$$BUILD_DIR/+COMMENT" \
+			-d "$$BUILD_DIR/+DESC" \
+			-I "$$BUILD_DIR/+INSTALL" \
+			-f "$$BUILD_DIR/+CONTENTS" \
+			-p "$$PACKAGE_ROOT" \
+			"$$BUILD_DIR/sysmanage-$$VERSION-netbsd.tgz"; \
+	else \
+		echo "Using tar for cross-platform build..."; \
+		mkdir -p "$$BUILD_DIR/pkg-staging"; \
+		cp "$$BUILD_DIR/+BUILD_INFO" "$$BUILD_DIR/pkg-staging/"; \
+		cp "$$BUILD_DIR/+COMMENT" "$$BUILD_DIR/pkg-staging/"; \
+		cp "$$BUILD_DIR/+DESC" "$$BUILD_DIR/pkg-staging/"; \
+		cp "$$BUILD_DIR/+INSTALL" "$$BUILD_DIR/pkg-staging/"; \
+		cp "$$BUILD_DIR/+CONTENTS" "$$BUILD_DIR/pkg-staging/"; \
+		cd "$$BUILD_DIR/pkg-staging" && tar -czf "../sysmanage-$$VERSION-netbsd.tgz" \
+			+BUILD_INFO +COMMENT +DESC +INSTALL +CONTENTS \
+			-C "$$PACKAGE_ROOT" .; \
+	fi; \
+	if [ $$? -eq 0 ]; then \
+		PACKAGE_FILE="sysmanage-$$VERSION-netbsd.tgz"; \
+		if [ -f "$$BUILD_DIR/$$PACKAGE_FILE" ]; then \
+			mkdir -p "$$OUTPUT_DIR"; \
+			mv "$$BUILD_DIR/$$PACKAGE_FILE" "$$OUTPUT_DIR/"; \
+			if command -v sha256 >/dev/null 2>&1; then \
+				cd "$$OUTPUT_DIR" && sha256 $$PACKAGE_FILE > $$PACKAGE_FILE.sha256; \
+			else \
+				cd "$$OUTPUT_DIR" && sha256sum $$PACKAGE_FILE > $$PACKAGE_FILE.sha256; \
+			fi; \
+			echo ""; \
+			echo "✓ NetBSD package created successfully: $$OUTPUT_DIR/$$PACKAGE_FILE"; \
+			echo ""; \
+			echo "Installation commands:"; \
+			echo "  sudo pkg_add $$OUTPUT_DIR/$$PACKAGE_FILE"; \
+			echo "  sudo cp /usr/pkg/share/examples/rc.d/sysmanage /etc/rc.d/"; \
+			echo "  sudo sh -c 'echo sysmanage=YES >> /etc/rc.conf'"; \
+			echo "  sudo /etc/rc.d/sysmanage start"; \
+			echo ""; \
+		else \
+			echo "ERROR: Package file not found after build: $$BUILD_DIR/$$PACKAGE_FILE"; \
+			exit 1; \
+		fi; \
+	else \
+		echo "ERROR: pkg_create command failed"; \
+		exit 1; \
+	fi
+
+# Windows .msi installer (requires Windows with WiX Toolset)
+installer-msi: installer-msi-all
+
+# Build Windows .msi installer for x64
+installer-msi-x64: build
+	@powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture x64
+
+# Build Windows .msi installer for ARM64
+installer-msi-arm64: build
+	@powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture arm64
+
+# Build Windows .msi installers for both x64 and ARM64
+installer-msi-all: build
+	@echo ""
+	@echo "=================================================="
+	@echo "Building Windows installers for all architectures"
+	@echo "=================================================="
+	@echo ""
+	@powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture x64
+	@echo ""
+	@echo "=================================================="
+	@echo ""
+	@powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture arm64
+	@echo ""
+	@echo "=================================================="
+	@echo "All Windows installers built!"
+	@echo "=================================================="
+
+# Development environment setup for Windows
+install-dev:
+	@echo "=== Installing development dependencies ==="
+	@echo ""
+	@echo "Installing WiX Toolset (if not already installed)..."
+	@powershell -Command "if (-not (Get-Command wix -ErrorAction SilentlyContinue)) { \
+		Write-Host 'WiX Toolset not found. Please install manually from:'; \
+		Write-Host 'https://wixtoolset.org/docs/intro/'; \
+		Write-Host ''; \
+		Write-Host 'Run: dotnet tool install --global wix'; \
+		exit 1; \
+	} else { \
+		Write-Host 'WiX Toolset is already installed'; \
+		wix --version; \
+	}"
+	@echo ""
+	@echo "Development environment ready for Windows MSI builds"
+
+# SBOM (Software Bill of Materials) generation target
+sbom:
+	@echo "=================================================="
+	@echo "Generating Software Bill of Materials (CycloneDX)"
+	@echo "=================================================="
+	@echo ""
+	@echo "Creating SBOM output directory..."
+	@mkdir -p sbom
+	@echo "✓ Directory created: ./sbom/"
+	@echo ""
+	@echo "Checking for CycloneDX tools..."
+	@set -e; \
+	if ! python3 -c "import cyclonedx_py" 2>/dev/null; then \
+		echo "Installing cyclonedx-bom for Python..."; \
+		python3 -m pip install cyclonedx-bom --quiet; \
+		echo "✓ cyclonedx-bom installed"; \
+	else \
+		echo "✓ cyclonedx-bom already installed"; \
+	fi
+	@echo "✓ cyclonedx-npm will be auto-installed via npx if needed"
+	@echo ""
+	@echo "Generating Python SBOM from requirements.txt..."
+	@set -e; \
+	python3 -m cyclonedx_py requirements \
+		requirements.txt \
+		--of JSON \
+		-o sbom/backend-sbom.json
+	@echo "✓ Python SBOM generated: sbom/backend-sbom.json"
+	@echo ""
+	@echo "Generating Node.js SBOM from frontend/package.json..."
+	@cd frontend && npx --yes @cyclonedx/cyclonedx-npm \
+		--output-format JSON \
+		--output-file ../sbom/frontend-sbom.json \
+		--ignore-npm-errors
+	@echo "✓ Node.js SBOM generated: sbom/frontend-sbom.json"
+	@echo ""
+	@echo "=================================================="
+	@echo "SBOM Generation Complete!"
+	@echo "=================================================="
+	@echo ""
+	@echo "Generated files:"
+	@ls -lh sbom/*.json
+	@echo ""
+	@echo "You can view these files with:"
+	@echo "  cat sbom/backend-sbom.json | jq ."
+	@echo "  cat sbom/frontend-sbom.json | jq ."
+	@echo ""
+	@echo "Or upload them to vulnerability scanning tools that support CycloneDX format."

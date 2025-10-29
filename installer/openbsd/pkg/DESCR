@@ -1,0 +1,24 @@
+SysManage is a comprehensive centralized system management platform that
+provides real-time monitoring, management, and control of Linux and BSD
+systems through a web-based interface.
+
+The server component consists of:
+  * Python-based backend using FastAPI and WebSockets
+  * React-based frontend with Material-UI
+  * PostgreSQL database for data persistence
+  * Real-time agent communication via secure WebSockets
+  * Multi-language support (14 languages)
+  * Role-based access control (RBAC)
+  * Package management across multiple Linux distributions
+  * System monitoring and metrics collection
+  * Remote command execution with audit logging
+  * Certificate and secret management
+  * Firewall configuration management
+
+SysManage Server coordinates with SysManage Agent instances deployed on
+managed systems to provide centralized visibility and control across your
+infrastructure.
+
+The server requires PostgreSQL and serves both the API backend and the
+static frontend files. It communicates securely with agents using TLS-
+encrypted WebSocket connections.

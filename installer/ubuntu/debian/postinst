@@ -1,0 +1,128 @@
+#!/bin/bash
+set -e
+
+# Automatically added by dh_installinit/13.11.4
+if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-deconfigure" ] || [ "$1" = "abort-remove" ] ; then
+	# Create sysmanage user if it doesn't exist
+	if ! getent passwd sysmanage >/dev/null; then
+		echo "Creating sysmanage system user..."
+		adduser --system --group --home /nonexistent --no-create-home \
+			--disabled-password --disabled-login \
+			--gecos "SysManage Server" sysmanage
+	fi
+
+	# Create required directories
+	mkdir -p /var/lib/sysmanage
+	mkdir -p /var/log/sysmanage
+	mkdir -p /etc/sysmanage
+
+	# Set ownership of application directories
+	chown -R sysmanage:sysmanage /opt/sysmanage
+	chown -R sysmanage:sysmanage /var/lib/sysmanage
+	chown -R sysmanage:sysmanage /var/log/sysmanage
+	chown -R sysmanage:sysmanage /etc/sysmanage
+
+	# Set proper permissions
+	chmod 755 /opt/sysmanage
+	chmod 755 /var/lib/sysmanage
+	chmod 755 /var/log/sysmanage
+	chmod 750 /etc/sysmanage
+
+	# Fix virtualenv to work with system Python
+	echo "Setting up Python virtual environment..."
+	cd /opt/sysmanage
+	rm -rf .venv
+	python3 -m venv .venv
+	.venv/bin/pip install --quiet --upgrade pip
+	.venv/bin/pip install --quiet -r requirements.txt
+	cd -
+	echo "✓ Python dependencies installed"
+
+	# Create config file if it doesn't exist
+	if [ ! -f /etc/sysmanage.yaml ]; then
+		echo "Creating default configuration file..."
+		cp /etc/sysmanage/sysmanage.yaml.example /etc/sysmanage.yaml
+		chown sysmanage:sysmanage /etc/sysmanage.yaml
+		chmod 640 /etc/sysmanage.yaml
+	fi
+
+	# Reload systemd daemon
+	if [ -d /run/systemd/system ]; then
+		systemctl --system daemon-reload >/dev/null 2>&1 || true
+	fi
+
+	# Enable but DON'T start the service (user needs to configure first)
+	if [ -x "/usr/bin/deb-systemd-invoke" ]; then
+		deb-systemd-invoke enable sysmanage.service >/dev/null 2>&1 || true
+	elif [ -x "/usr/bin/deb-systemd-helper" ]; then
+		deb-systemd-helper enable sysmanage.service >/dev/null 2>&1 || true
+	else
+		systemctl enable sysmanage.service >/dev/null 2>&1 || true
+	fi
+
+	# Configure nginx if installed
+	if [ -x "/usr/sbin/nginx" ]; then
+		echo "Configuring nginx..."
+		# Enable the sysmanage site
+		if [ -f /etc/nginx/sites-available/sysmanage-nginx.conf ]; then
+			ln -sf /etc/nginx/sites-available/sysmanage-nginx.conf /etc/nginx/sites-enabled/sysmanage 2>/dev/null || true
+			# Test nginx config
+			nginx -t >/dev/null 2>&1 && systemctl reload nginx >/dev/null 2>&1 || echo "⚠ nginx configuration may need manual review"
+		fi
+	fi
+
+	echo ""
+	echo "=========================================="
+	echo "SysManage Server installation complete!"
+	echo "=========================================="
+	echo ""
+	echo "⚠ IMPORTANT: Configuration Required"
+	echo ""
+	echo "Before starting SysManage, you MUST configure:"
+	echo ""
+	echo "1. PostgreSQL Database Connection"
+	echo "   --------------------------------"
+	echo "   SysManage requires a PostgreSQL database (version 12+)."
+	echo "   The database can be on this server or a remote host."
+	echo ""
+	echo "   To set up a local database:"
+	echo "     sudo apt-get install postgresql"
+	echo "     sudo -u postgres createuser sysmanage"
+	echo "     sudo -u postgres createdb sysmanage -O sysmanage"
+	echo "     sudo -u postgres psql -c \"ALTER USER sysmanage WITH PASSWORD 'your-password';\""
+	echo ""
+	echo "2. Configuration File"
+	echo "   ------------------"
+	echo "   Edit: /etc/sysmanage.yaml"
+	echo ""
+	echo "   Use the online configuration builder at:"
+	echo "   https://sysmanage.org/config-builder.html"
+	echo ""
+	echo "   This tool will help you generate a complete configuration"
+	echo "   with all required settings including:"
+	echo "     • Database connection (PostgreSQL)"
+	echo "     • Server hostname and ports"
+	echo "     • SSL/TLS certificates"
+	echo "     • Authentication settings"
+	echo "     • Logging configuration"
+	echo ""
+	echo "3. Database Migration"
+	echo "   ------------------"
+	echo "   After configuring the database connection, run:"
+	echo "     cd /opt/sysmanage"
+	echo "     sudo -u sysmanage .venv/bin/python -m alembic upgrade head"
+	echo ""
+	echo "4. Start the Service"
+	echo "   -----------------"
+	echo "   After configuration and migration:"
+	echo "     sudo systemctl start sysmanage"
+	echo "     sudo systemctl status sysmanage"
+	echo ""
+	echo "Log files: /var/log/sysmanage/"
+	echo "Web interface: https://your-server:8443/ (after configuration)"
+	echo ""
+fi
+
+#DEBHELPER#
+
+exit 0

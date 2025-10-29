@@ -14,7 +14,6 @@ from backend.persistence.models import AvailablePackage, Host
 
 # Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")
-debug_logger.setLevel(logging.DEBUG)
 
 
 # OLD NON-PAGINATED HANDLER REMOVED - USE PAGINATED HANDLERS ONLY

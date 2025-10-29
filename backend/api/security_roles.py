@@ -232,7 +232,7 @@ async def update_user_roles(
         user_id=current_user_uuid,
         username=current_user,
         action_type=ActionType.UPDATE,
-        entity_type=EntityType.USER_ROLE,
+        entity_type=EntityType.USER,
         entity_id=str(user_id),
         entity_name=user.userid,
         description=f"Security roles updated for user {user.userid} by {current_user}",

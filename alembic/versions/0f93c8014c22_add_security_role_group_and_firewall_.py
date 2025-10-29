@@ -27,13 +27,22 @@ def upgrade() -> None:
 
     # Create the Security role group with a fixed UUID
     security_group_id = '00000000-0000-0000-0000-000000000009'
-    op.execute(
-        f"""
-        INSERT INTO security_role_groups (id, name, description)
-        VALUES ('{security_group_id}', 'Security',
-                'Security-related operations including firewall and antivirus management')
-        """
+
+    # Check if the security group already exists
+    bind = op.get_bind()
+    result = bind.execute(
+        sa.text(f"SELECT COUNT(*) FROM security_role_groups WHERE id = '{security_group_id}'")
     )
+    group_exists = result.scalar() > 0
+
+    if not group_exists:
+        op.execute(
+            f"""
+            INSERT INTO security_role_groups (id, name, description)
+            VALUES ('{security_group_id}', 'Security',
+                    'Security-related operations including firewall and antivirus management')
+            """
+        )
 
     # Add the 4 new firewall roles to the Security group with explicit UUIDs
     firewall_roles = [
@@ -44,13 +53,20 @@ def upgrade() -> None:
     ]
 
     for role_name, role_desc in firewall_roles:
-        role_id = str(uuid.uuid4())
-        op.execute(
-            f"""
-            INSERT INTO security_roles (id, name, description, group_id)
-            VALUES ('{role_id}', '{role_name}', '{role_desc}', '{security_group_id}')
-            """
+        # Check if role already exists
+        result = bind.execute(
+            sa.text(f"SELECT COUNT(*) FROM security_roles WHERE name = '{role_name}'")
         )
+        role_exists = result.scalar() > 0
+
+        if not role_exists:
+            role_id = str(uuid.uuid4())
+            op.execute(
+                f"""
+                INSERT INTO security_roles (id, name, description, group_id)
+                VALUES ('{role_id}', '{role_name}', '{role_desc}', '{security_group_id}')
+                """
+            )
 
     # Move antivirus roles from Package group to Security group
     antivirus_roles = [
@@ -60,13 +76,20 @@ def upgrade() -> None:
     ]
 
     for role_name in antivirus_roles:
-        op.execute(
-            f"""
-            UPDATE security_roles
-            SET group_id = '{security_group_id}'
-            WHERE name = '{role_name}'
-            """
+        # Check if role exists before updating
+        result = bind.execute(
+            sa.text(f"SELECT COUNT(*) FROM security_roles WHERE name = '{role_name}'")
         )
+        role_exists = result.scalar() > 0
+
+        if role_exists:
+            op.execute(
+                f"""
+                UPDATE security_roles
+                SET group_id = '{security_group_id}'
+                WHERE name = '{role_name}'
+                """
+            )
 
 
 def downgrade() -> None:

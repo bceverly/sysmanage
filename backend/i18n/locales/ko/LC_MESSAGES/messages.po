@@ -708,3 +708,39 @@ msgstr "사용자 보안 역할 (RBAC)"
 
 msgid "No security roles assigned"
 msgstr "보안 역할이 할당되지 않음"
+
+msgid "User not found"
+msgstr "사용자를 찾을 수 없음"
+
+msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
+msgstr "권한 거부: ENABLE_GRAYLOG_INTEGRATION 역할이 필요합니다"
+
+msgid "Selected host does not have Graylog server role"
+msgstr "선택한 호스트에 Graylog 서버 역할이 없습니다"
+
+msgid "Failed to securely store API token"
+msgstr "API 토큰을 안전하게 저장하지 못했습니다"
+
+msgid "Graylog integration settings updated successfully"
+msgstr "Graylog 통합 설정이 성공적으로 업데이트되었습니다"
+
+msgid "Graylog integration has not been configured"
+msgstr "Graylog 통합이 구성되지 않았습니다"
+
+msgid "Graylog integration is not enabled"
+msgstr "Graylog 통합이 활성화되지 않았습니다"
+
+msgid "Error retrieving Graylog URL: %s"
+msgstr "Graylog URL 검색 오류: %s"
+
+msgid "Graylog URL is not configured"
+msgstr "Graylog URL이 구성되지 않았습니다"
+
+msgid "Connection timeout - Graylog server may be unreachable"
+msgstr "연결 시간 초과 - Graylog 서버에 연결할 수 없을 수 있습니다"
+
+msgid "Connection failed - Graylog server may be down or unreachable"
+msgstr "연결 실패 - Graylog 서버가 다운되었거나 연결할 수 없을 수 있습니다"
+
+msgid "Unexpected error checking Graylog health"
+msgstr "Graylog 상태 확인 중 예기치 않은 오류 발생"

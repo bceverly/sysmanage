@@ -707,3 +707,39 @@ msgstr "उपयोगकर्ता सुरक्षा भूमिका�
 
 msgid "No security roles assigned"
 msgstr "कोई सुरक्षा भूमिका नहीं सौंपी गई"
+
+msgid "User not found"
+msgstr "उपयोगकर्ता नहीं मिला"
+
+msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
+msgstr "अनुमति अस्वीकार: ENABLE_GRAYLOG_INTEGRATION भूमिका आवश्यक है"
+
+msgid "Selected host does not have Graylog server role"
+msgstr "चयनित होस्ट में Graylog सर्वर भूमिका नहीं है"
+
+msgid "Failed to securely store API token"
+msgstr "API टोकन को सुरक्षित रूप से संग्रहीत करने में विफल"
+
+msgid "Graylog integration settings updated successfully"
+msgstr "Graylog एकीकरण सेटिंग्स सफलतापूर्वक अपडेट की गईं"
+
+msgid "Graylog integration has not been configured"
+msgstr "Graylog एकीकरण कॉन्फ़िगर नहीं किया गया है"
+
+msgid "Graylog integration is not enabled"
+msgstr "Graylog एकीकरण सक्षम नहीं है"
+
+msgid "Error retrieving Graylog URL: %s"
+msgstr "Graylog URL प्राप्त करने में त्रुटि: %s"
+
+msgid "Graylog URL is not configured"
+msgstr "Graylog URL कॉन्फ़िगर नहीं है"
+
+msgid "Connection timeout - Graylog server may be unreachable"
+msgstr "कनेक्शन टाइमआउट - Graylog सर्वर पहुंच योग्य नहीं हो सकता"
+
+msgid "Connection failed - Graylog server may be down or unreachable"
+msgstr "कनेक्शन विफल - Graylog सर्वर डाउन या पहुंच योग्य नहीं हो सकता"
+
+msgid "Unexpected error checking Graylog health"
+msgstr "Graylog स्वास्थ्य जांचने में अप्रत्याशित त्रुटि"

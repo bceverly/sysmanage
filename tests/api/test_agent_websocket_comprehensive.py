@@ -125,7 +125,11 @@ class TestMessageTypeHandling:
 
     @pytest.mark.asyncio
     async def test_handle_command_result_message(self, mock_connection, mock_db):
-        """Test handling command result message."""
+        """Test that command result messages are NOT handled by _handle_message_by_type.
+
+        COMMAND_RESULT messages should be queued, not handled directly.
+        This test verifies that passing one to _handle_message_by_type logs a warning.
+        """
         message = Mock()
         message.message_type = MessageType.COMMAND_RESULT
         message.data = {
@@ -134,12 +138,13 @@ class TestMessageTypeHandling:
             "output": "Command executed successfully",
         }
 
-        with patch("backend.api.agent.handle_command_result") as mock_command:
-            mock_command.return_value = None
-
+        with patch("backend.api.agent.logger") as mock_logger:
             await _handle_message_by_type(message, mock_connection, mock_db)
 
-            mock_command.assert_called_once()
+            # Should log a warning about unexpected message type
+            mock_logger.warning.assert_called_once()
+            warning_call = mock_logger.warning.call_args[0][0]
+            assert "Unexpected message type" in warning_call
 
     @pytest.mark.asyncio
     async def test_handle_script_execution_result_message(

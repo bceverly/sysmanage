@@ -11,12 +11,18 @@ permissions:
 
 jobs:
   test-backend:
-    name: Backend Tests
+    name: Backend Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Allow writing to update README badge
       pull-requests: write  # Allow creating pull requests
-    
+
+    strategy:
+      fail-fast: false  # Continue testing other versions even if one fails
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13']
+        # Python 3.10 included for Ubuntu 22.04 LTS compatibility
+
     services:
       postgres:
         image: postgres:15
@@ -35,17 +41,19 @@ jobs:
     steps:
     - uses: actions/checkout@v5
 
-    - name: Set up Python 3.12
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v6
       with:
-        python-version: '3.12'
+        python-version: ${{ matrix.python-version }}
+        allow-prereleases: true  # Allow testing on pre-release Python versions
 
     - name: Cache pip packages
       uses: actions/cache@v4
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
           ${{ runner.os }}-pip-
 
     - name: Install Python dependencies
@@ -85,7 +93,7 @@ jobs:
 
     - name: Run backend database migrations
       run: |
-        python -m alembic upgrade head
+        python -c "from alembic.config import Config; from alembic import command; cfg = Config('alembic.ini'); command.upgrade(cfg, 'head')"
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
@@ -143,7 +151,7 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: actions/upload-artifact@v4
       with:
-        name: backend-coverage-data
+        name: backend-coverage-data-py${{ matrix.python-version }}
         path: |
           backend-coverage.txt
           backend-color.txt
@@ -502,7 +510,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: frontend-build
-        path: frontend/build/
+        path: frontend/dist/
 
   ui-tests:
     name: UI Tests
@@ -608,7 +616,7 @@ jobs:
 
     - name: Run backend database migrations
       run: |
-        python -m alembic upgrade head
+        python -c "from alembic.config import Config; from alembic import command; cfg = Config('alembic.ini'); command.upgrade(cfg, 'head')"
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
@@ -667,7 +675,7 @@ jobs:
     - name: Start frontend server
       working-directory: frontend
       run: |
-        npx serve -s build -l 3000 &
+        npx serve -s dist -l 3000 &
         echo $! > /tmp/frontend.pid
         sleep 5
 
@@ -896,7 +904,7 @@ jobs:
 
     - name: Run backend database migrations
       run: |
-        python -m alembic upgrade head
+        python -c "from alembic.config import Config; from alembic import command; cfg = Config('alembic.ini'); command.upgrade(cfg, 'head')"
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
@@ -931,7 +939,7 @@ jobs:
     - name: Start frontend server for performance testing
       working-directory: frontend
       run: |
-        npx serve -s build -l 3001 &
+        npx serve -s dist -l 3001 &
         echo $! > /tmp/frontend-perf.pid
         sleep 5
 

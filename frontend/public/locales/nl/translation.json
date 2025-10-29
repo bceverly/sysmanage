@@ -166,6 +166,51 @@
       "label": "Beheerde server gebruiken"
     }
   },
+  "graylog": {
+    "apiToken": {
+      "help": "Optioneel API token voor verbeterde functies en versiedetectie",
+      "label": "API Token (Optioneel)"
+    },
+    "checkHealth": "Gezondheid controleren",
+    "enabled": {
+      "label": "Graylog integratie inschakelen"
+    },
+    "healthError": {
+      "label": "Gezondheidscontrole fout"
+    },
+    "inputs": {
+      "label": "Invoer"
+    },
+    "mechanism": {
+      "gelfTcp": "GELF TCP",
+      "syslogTcp": "Syslog TCP",
+      "syslogUdp": "Syslog UDP",
+      "windowsSidecar": "Windows Sidecar"
+    },
+    "manualUrl": {
+      "help": "Voer de volledige URL naar uw Graylog instantie in",
+      "label": "Graylog URL"
+    },
+    "noServers": "Geen Graylog servers gevonden",
+    "selectServer": {
+      "label": "Graylog server selecteren"
+    },
+    "serverUrl": {
+      "label": "URL"
+    },
+    "status": {
+      "checking": "Controleren...",
+      "disabled": "Uitgeschakeld",
+      "healthy": "Gezond",
+      "label": "Status",
+      "unhealthy": "Ongezond",
+      "unknown": "Onbekend"
+    },
+    "title": "Graylog Integratie",
+    "useManagedServer": {
+      "label": "Beheerde server gebruiken"
+    }
+  },
   "hostDetail": {
     "accessTab": "Toegang",
     "accountName": "Accountnaam",
@@ -370,7 +415,15 @@
     "userAccounts": "Gebruikersaccounts",
     "userGroups": "Gebruikersgroepen",
     "version": "Versie",
-    "viewInstallationLog": "Installatielog bekijken"
+    "viewInstallationLog": "Installatielog bekijken",
+    "attachToGraylog": "Koppelen aan Graylog",
+    "attaching": "Koppelen...",
+    "graylogAttached": "Gekoppeld aan Graylog",
+    "graylogMechanism": "Mechanisme",
+    "graylogNotConfigured": "Graylog-integratie niet geconfigureerd of niet gezond",
+    "graylogRequiresPrivileged": "Vereist agent in geprivilegieerde modus",
+    "graylogStatus": "Graylog-status",
+    "graylogTarget": "Doel"
   },
   "hosts": {
     "actions": "Acties",

@@ -1,0 +1,9 @@
+sysmanage (0.1.0-1) unstable; urgency=medium
+
+  * Initial release of SysManage Server
+  * Web-based system management platform
+  * Agent management and monitoring
+  * PostgreSQL backend support
+  * Multi-language support (15 languages)
+
+ -- Bryan Everly <bryan@theeverlys.com>  Sun, 26 Oct 2025 20:00:00 +0000

@@ -166,6 +166,51 @@
       "label": "管理サーバーを使用"
     }
   },
+  "graylog": {
+    "apiToken": {
+      "help": "拡張機能とバージョン検出のためのオプションのAPIトークン",
+      "label": "APIトークン（オプション）"
+    },
+    "checkHealth": "ヘルスチェック",
+    "enabled": {
+      "label": "Graylog連携を有効にする"
+    },
+    "healthError": {
+      "label": "ヘルスチェックエラー"
+    },
+    "inputs": {
+      "label": "入力"
+    },
+    "mechanism": {
+      "gelfTcp": "GELF TCP",
+      "syslogTcp": "Syslog TCP",
+      "syslogUdp": "Syslog UDP",
+      "windowsSidecar": "Windows Sidecar"
+    },
+    "manualUrl": {
+      "help": "GraylogインスタンスのフルURLを入力してください",
+      "label": "Graylog URL"
+    },
+    "noServers": "Graylogサーバーが見つかりません",
+    "selectServer": {
+      "label": "Graylogサーバーを選択"
+    },
+    "serverUrl": {
+      "label": "URL"
+    },
+    "status": {
+      "checking": "確認中...",
+      "disabled": "無効",
+      "healthy": "正常",
+      "label": "ステータス",
+      "unhealthy": "異常",
+      "unknown": "不明"
+    },
+    "title": "Graylog連携",
+    "useManagedServer": {
+      "label": "管理サーバーを使用"
+    }
+  },
   "hostDetail": {
     "accessTab": "アクセス",
     "accountName": "アカウント名",
@@ -383,7 +428,15 @@
     "userAccounts": "ユーザーアカウント",
     "userGroups": "ユーザーグループ",
     "version": "バージョン",
-    "viewInstallationLog": "インストールログを表示"
+    "viewInstallationLog": "インストールログを表示",
+    "attachToGraylog": "Graylogに接続",
+    "attaching": "接続中...",
+    "graylogAttached": "Graylogに接続済み",
+    "graylogMechanism": "メカニズム",
+    "graylogNotConfigured": "Graylog統合が未設定または正常でない",
+    "graylogRequiresPrivileged": "特権モードでのエージェントが必要",
+    "graylogStatus": "Graylogステータス",
+    "graylogTarget": "ターゲット"
   },
   "hosts": {
     "actions": "アクション",

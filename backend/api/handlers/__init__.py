@@ -32,6 +32,7 @@ from backend.api.handlers.software_package_handlers import (
     handle_antivirus_status_update,
     handle_commercial_antivirus_status_update,
     handle_firewall_status_update,
+    handle_graylog_status_update,
     handle_package_collection,
     handle_package_updates_update,
     handle_software_update,
@@ -42,7 +43,6 @@ from backend.api.handlers.software_package_handlers import (
 from backend.api.handlers.user_access_handlers import (
     SYSTEM_USERNAMES,
     handle_user_access_update,
-    handle_user_access_update_legacy,
 )
 
 __all__ = [
@@ -54,7 +54,6 @@ __all__ = [
     # User Access handlers
     "SYSTEM_USERNAMES",
     "handle_user_access_update",
-    "handle_user_access_update_legacy",
     # Software and Package handlers
     "handle_software_update",
     "handle_package_updates_update",
@@ -63,6 +62,7 @@ __all__ = [
     "handle_antivirus_status_update",
     "handle_commercial_antivirus_status_update",
     "handle_firewall_status_update",
+    "handle_graylog_status_update",
     # Infrastructure handlers
     "handle_script_execution_result",
     "handle_reboot_status_update",

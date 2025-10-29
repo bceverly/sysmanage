@@ -166,6 +166,51 @@
       "label": "관리 서버 사용"
     }
   },
+  "graylog": {
+    "apiToken": {
+      "help": "향상된 기능 및 버전 감지를 위한 선택적 API 토큰",
+      "label": "API 토큰 (선택사항)"
+    },
+    "checkHealth": "상태 확인",
+    "enabled": {
+      "label": "Graylog 통합 활성화"
+    },
+    "healthError": {
+      "label": "상태 확인 오류"
+    },
+    "inputs": {
+      "label": "입력"
+    },
+    "mechanism": {
+      "gelfTcp": "GELF TCP",
+      "syslogTcp": "Syslog TCP",
+      "syslogUdp": "Syslog UDP",
+      "windowsSidecar": "Windows Sidecar"
+    },
+    "manualUrl": {
+      "help": "Graylog 인스턴스의 전체 URL을 입력하세요",
+      "label": "Graylog URL"
+    },
+    "noServers": "Graylog 서버를 찾을 수 없습니다",
+    "selectServer": {
+      "label": "Graylog 서버 선택"
+    },
+    "serverUrl": {
+      "label": "URL"
+    },
+    "status": {
+      "checking": "확인 중...",
+      "disabled": "비활성화됨",
+      "healthy": "정상",
+      "label": "상태",
+      "unhealthy": "비정상",
+      "unknown": "알 수 없음"
+    },
+    "title": "Graylog 통합",
+    "useManagedServer": {
+      "label": "관리 서버 사용"
+    }
+  },
   "hostDetail": {
     "accessTab": "액세스",
     "accountName": "계정 이름",
@@ -383,7 +428,15 @@
     "userAccounts": "사용자 계정",
     "userGroups": "사용자 그룹",
     "version": "버전",
-    "viewInstallationLog": "설치 로그 보기"
+    "viewInstallationLog": "설치 로그 보기",
+    "attachToGraylog": "Graylog에 연결",
+    "attaching": "연결 중...",
+    "graylogAttached": "Graylog에 연결됨",
+    "graylogMechanism": "메커니즘",
+    "graylogNotConfigured": "Graylog 통합이 구성되지 않았거나 정상이 아님",
+    "graylogRequiresPrivileged": "권한 모드의 에이전트 필요",
+    "graylogStatus": "Graylog 상태",
+    "graylogTarget": "대상"
   },
   "hosts": {
     "actions": "작업",

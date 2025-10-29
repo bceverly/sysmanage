@@ -19,18 +19,24 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create user_dashboard_card_preference table
-    op.create_table(
-        'user_dashboard_card_preference',
-        sa.Column('id', sa.UUID(), nullable=False),
-        sa.Column('user_id', sa.UUID(), nullable=False),
-        sa.Column('card_identifier', sa.String(length=100), nullable=False),
-        sa.Column('visible', sa.Boolean(), nullable=False, server_default='true'),
-        sa.Column('created_at', sa.DateTime(), nullable=False),
-        sa.Column('updated_at', sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
-        sa.PrimaryKeyConstraint('id')
-    )
+    # Check if table already exists
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    tables = inspector.get_table_names()
+
+    if 'user_dashboard_card_preference' not in tables:
+        # Create user_dashboard_card_preference table
+        op.create_table(
+            'user_dashboard_card_preference',
+            sa.Column('id', sa.UUID(), nullable=False),
+            sa.Column('user_id', sa.UUID(), nullable=False),
+            sa.Column('card_identifier', sa.String(length=100), nullable=False),
+            sa.Column('visible', sa.Boolean(), nullable=False, server_default='true'),
+            sa.Column('created_at', sa.DateTime(), nullable=False),
+            sa.Column('updated_at', sa.DateTime(), nullable=False),
+            sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
+            sa.PrimaryKeyConstraint('id')
+        )
 
 
 def downgrade() -> None:

@@ -1,0 +1,1106 @@
+name: Build and Release
+
+on:
+  # Trigger on version tags (e.g., v1.0.0, v2.1.3, v0.9.0.3)
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*.*'
+
+permissions:
+  contents: write  # Needed for creating releases and pushing to repos
+
+jobs:
+  # Wait for CI tests to pass before building
+  wait-for-tests:
+    name: Wait for CI Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Backend Tests (Python 3.10)
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: 'Backend Tests (Python 3.10)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 30
+
+      - name: Wait for Backend Tests (Linux + PostgreSQL)
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: 'Backend Tests (Linux + PostgreSQL)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 30
+
+      - name: Wait for Frontend Tests (ubuntu-latest)
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: 'Frontend Tests (ubuntu-latest)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 30
+
+      - name: Wait for Frontend Tests (windows-latest)
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: 'Frontend Tests (windows-latest)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 30
+
+      - name: Wait for Frontend Tests (macos-latest)
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: 'Frontend Tests (macos-latest)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 30
+
+  # Ubuntu/Debian .deb Package Build
+  build-ubuntu:
+    name: Build .deb Package
+    runs-on: ubuntu-22.04
+    needs: wait-for-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Determine version
+        id: version
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            debhelper \
+            dh-python \
+            python3-all \
+            python3-setuptools \
+            python3-pip \
+            build-essential \
+            devscripts \
+            lintian
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Install SBOM generation tools
+        run: |
+          # Install cyclonedx-bom for Python
+          python3 -m pip install cyclonedx-bom
+
+          # Install cyclonedx-npm globally for Node.js
+          sudo npm install -g @cyclonedx/cyclonedx-npm
+
+          # Verify installations
+          python3 -c "import cyclonedx_py; print('✓ cyclonedx-bom installed')"
+          cyclonedx-npm --version
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Update changelog with version
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          DATE=$(date -R)
+
+          # Update changelog with actual version and date
+          sed -i "s/0\.1\.0-1/${VERSION}-1/g" installer/ubuntu/debian/changelog
+          sed -i "s/Mon, 14 Oct 2025 00:00:00 -0400/$DATE/g" installer/ubuntu/debian/changelog
+
+          echo "Updated changelog:"
+          head -5 installer/ubuntu/debian/changelog
+
+      - name: Build package
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "Building version: ${VERSION}"
+          make installer-deb
+
+      - name: Run lintian on package
+        run: |
+          lintian --no-tag-display-limit installer/dist/sysmanage_*.deb || true
+
+      - name: Generate package information
+        id: package_info
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          DEB_FILE="installer/dist/sysmanage_${VERSION}-1_all.deb"
+          echo "deb_file=$DEB_FILE" >> $GITHUB_OUTPUT
+
+          # Get package info
+          dpkg-deb --info "$DEB_FILE"
+          dpkg-deb --contents "$DEB_FILE" | head -20
+
+          # Generate SHA256 checksum
+          cd installer/dist
+          sha256sum "sysmanage_${VERSION}-1_all.deb" > "sysmanage_${VERSION}-1_all.deb.sha256"
+
+          echo "Package built: $DEB_FILE"
+          echo "Size: $(du -h $DEB_FILE | cut -f1)"
+
+      - name: Upload .deb as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysmanage-server-deb
+          path: |
+            installer/dist/sysmanage_*.deb
+            installer/dist/sysmanage_*.deb.sha256
+
+      - name: Upload SBOM files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysmanage-sbom
+          path: |
+            sbom/*.json
+
+  # OpenBSD Port Tarball Build
+  build-openbsd-port:
+    name: Build OpenBSD Port Tarball
+    runs-on: ubuntu-22.04
+    needs: wait-for-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Determine version
+        id: version
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building OpenBSD port for version: $VERSION"
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Install SBOM generation tools
+        run: |
+          # Install cyclonedx-bom for Python
+          python3 -m pip install cyclonedx-bom
+
+          # Install cyclonedx-npm globally for Node.js
+          sudo npm install -g @cyclonedx/cyclonedx-npm
+
+          # Verify installations
+          python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
+          cyclonedx-npm --version
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Generate SBOM files
+        run: |
+          echo "Generating SBOM files..."
+          make sbom
+
+      - name: Build OpenBSD port tarball
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "Building OpenBSD port tarball for version: ${VERSION}"
+          make installer-openbsd
+
+      - name: Generate SHA256 checksum
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          cd installer/dist
+          sha256sum "sysmanage-openbsd-port-${VERSION}.tar.gz" > "sysmanage-openbsd-port-${VERSION}.tar.gz.sha256"
+          echo "Checksum generated:"
+          cat "sysmanage-openbsd-port-${VERSION}.tar.gz.sha256"
+
+      - name: Upload OpenBSD port tarball as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysmanage-openbsd-port
+          path: |
+            installer/dist/sysmanage-openbsd-port-*.tar.gz
+            installer/dist/sysmanage-openbsd-port-*.tar.gz.sha256
+
+  # CentOS/RHEL/Fedora RPM Build
+  build-centos-rpm:
+    name: Build CentOS/RHEL RPM
+    runs-on: ubuntu-22.04
+    needs: wait-for-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Determine version
+        id: version
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building CentOS RPM for version: $VERSION"
+
+      - name: Install RPM build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Install SBOM generation tools
+        run: |
+          # Install cyclonedx-bom for Python
+          python3 -m pip install cyclonedx-bom
+
+          # Install cyclonedx-npm globally for Node.js
+          sudo npm install -g @cyclonedx/cyclonedx-npm
+
+          # Verify installations
+          python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
+          cyclonedx-npm --version
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Build CentOS RPM package
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "Building CentOS RPM for version: ${VERSION}"
+          make installer-rpm-centos
+
+      - name: Upload CentOS RPM as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysmanage-centos-rpm
+          path: |
+            installer/dist/sysmanage-*.rpm
+            installer/dist/sysmanage-*.rpm.sha256
+
+  # OpenSUSE/SLES RPM Build
+  build-opensuse-rpm:
+    name: Build OpenSUSE/SLES RPM
+    runs-on: ubuntu-22.04
+    needs: wait-for-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Determine version
+        id: version
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building OpenSUSE RPM for version: $VERSION"
+
+      - name: Install RPM build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Install SBOM generation tools
+        run: |
+          # Install cyclonedx-bom for Python
+          python3 -m pip install cyclonedx-bom
+
+          # Install cyclonedx-npm globally for Node.js
+          sudo npm install -g @cyclonedx/cyclonedx-npm
+
+          # Verify installations
+          python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
+          cyclonedx-npm --version
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Build OpenSUSE RPM package
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "Building OpenSUSE RPM for version: ${VERSION}"
+          make installer-rpm-opensuse
+
+      - name: Upload OpenSUSE RPM as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysmanage-opensuse-rpm
+          path: |
+            installer/dist/sysmanage-*.rpm
+            installer/dist/sysmanage-*.rpm.sha256
+
+  # FreeBSD Package Build
+  build-freebsd-pkg:
+    name: Build FreeBSD Package
+    runs-on: ubuntu-22.04
+    needs: wait-for-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Determine version
+        id: version
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building FreeBSD package for version: $VERSION"
+
+      - name: Install FreeBSD packaging tools
+        run: |
+          sudo apt-get update
+          # Install libarchive-tools for bsdtar which is compatible with FreeBSD pkg format
+          sudo apt-get install -y libarchive-tools
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Install SBOM generation tools
+        run: |
+          # Install cyclonedx-bom for Python
+          python3 -m pip install cyclonedx-bom
+
+          # Install cyclonedx-npm globally for Node.js
+          sudo npm install -g @cyclonedx/cyclonedx-npm
+
+          # Verify installations
+          python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
+          cyclonedx-npm --version
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Build FreeBSD package
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "Building FreeBSD package for version: ${VERSION}"
+          make installer-freebsd
+
+      - name: Upload FreeBSD package as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysmanage-freebsd-pkg
+          path: |
+            installer/dist/sysmanage-*.pkg
+            installer/dist/sysmanage-*.pkg.sha256
+
+  build-macos-pkg:
+    name: Build macOS Package
+    runs-on: macos-14
+    needs: wait-for-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Determine version
+        id: version
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building macOS package for version: $VERSION"
+
+      - name: Install Xcode Command Line Tools
+        run: |
+          # Ensure Xcode command line tools are installed
+          xcode-select -p || xcode-select --install
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Install SBOM generation tools
+        run: |
+          # Install cyclonedx-bom for Python
+          python3 -m pip install cyclonedx-bom
+
+          # Install cyclonedx-npm globally for Node.js
+          npm install -g @cyclonedx/cyclonedx-npm
+
+          # Verify installations
+          python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
+          cyclonedx-npm --version
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Build macOS package
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "Building macOS package for version: ${VERSION}"
+          make installer-macos
+
+      - name: Upload macOS package as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysmanage-macos-pkg
+          path: |
+            installer/dist/sysmanage-*-macos.pkg
+            installer/dist/sysmanage-*-macos.pkg.sha256
+
+  build-netbsd-pkg:
+    name: Build NetBSD Package
+    runs-on: ubuntu-latest
+    needs: wait-for-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Determine version
+        id: version
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building NetBSD package for version: $VERSION"
+
+      - name: Install NetBSD package tools
+        run: |
+          # Install pkg_create and related tools
+          sudo apt-get update
+          sudo apt-get install -y pkg-config
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Install SBOM generation tools
+        run: |
+          # Install cyclonedx-bom for Python
+          python3 -m pip install cyclonedx-bom
+
+          # Install cyclonedx-npm globally for Node.js
+          npm install -g @cyclonedx/cyclonedx-npm
+
+          # Verify installations
+          python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
+          cyclonedx-npm --version
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Build NetBSD package
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "Building NetBSD package for version: ${VERSION}"
+          make installer-netbsd
+
+      - name: Upload NetBSD package as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysmanage-netbsd-pkg
+          path: |
+            installer/dist/sysmanage-*-netbsd.tgz
+            installer/dist/sysmanage-*-netbsd.tgz.sha256
+
+  # Consolidated Release - Push to sysmanage-docs and create GitHub release
+  release:
+    name: Create Release and Push to Docs
+    runs-on: ubuntu-latest
+    needs: [build-ubuntu, build-openbsd-port, build-centos-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Determine version
+        id: version
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building consolidated release for version: $VERSION"
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Organize artifacts
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "Organizing artifacts for release..."
+          mkdir -p release-files
+
+          # Copy all package files to release directory
+          find artifacts/ -name "*.deb" -exec cp {} release-files/ \;
+          find artifacts/ -name "*.rpm" -exec cp {} release-files/ \;
+          find artifacts/ -name "*.pkg" -exec cp {} release-files/ \;
+          find artifacts/ -name "*.tar.gz" -exec cp {} release-files/ \;
+          find artifacts/ -name "*.tgz" -exec cp {} release-files/ \;
+          find artifacts/ -name "*.sha256" -exec cp {} release-files/ \;
+          find artifacts/ -name "*.json" -exec cp {} release-files/ \;
+
+          echo "Release files:"
+          ls -la release-files/
+
+      - name: Push packages to sysmanage-docs repository
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          DOCS_REPO_TOKEN: ${{ secrets.DOCS_REPO_TOKEN }}
+        run: |
+          echo "Cloning sysmanage-docs repository..."
+          git clone https://x-access-token:${DOCS_REPO_TOKEN}@github.com/bceverly/sysmanage-docs.git /tmp/sysmanage-docs
+
+          cd /tmp/sysmanage-docs
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          # Create version directory for server packages
+          mkdir -p "repo/server/deb/pool/main/$VERSION-1"
+          mkdir -p "repo/server/openbsd/$VERSION"
+          mkdir -p "repo/server/freebsd/$VERSION"
+          mkdir -p "repo/server/netbsd/$VERSION"
+          mkdir -p "repo/server/macos/$VERSION"
+          mkdir -p "repo/server/rpm/centos/$VERSION"
+          mkdir -p "repo/server/rpm/opensuse/$VERSION"
+
+          # Copy package files to appropriate locations
+          # DEB packages
+          cp ${{ github.workspace }}/release-files/sysmanage_*.deb "repo/server/deb/pool/main/$VERSION-1/" 2>/dev/null || true
+          cp ${{ github.workspace }}/release-files/sysmanage_*.deb.sha256 "repo/server/deb/pool/main/$VERSION-1/" 2>/dev/null || true
+
+          # OpenBSD port tarballs
+          cp ${{ github.workspace }}/release-files/sysmanage-openbsd-port-*.tar.gz "repo/server/openbsd/$VERSION/" 2>/dev/null || true
+          cp ${{ github.workspace }}/release-files/sysmanage-openbsd-port-*.tar.gz.sha256 "repo/server/openbsd/$VERSION/" 2>/dev/null || true
+
+          # FreeBSD packages
+          cp ${{ github.workspace }}/release-files/sysmanage-*.pkg "repo/server/freebsd/$VERSION/" 2>/dev/null || true
+          cp ${{ github.workspace }}/release-files/sysmanage-*.pkg.sha256 "repo/server/freebsd/$VERSION/" 2>/dev/null || true
+
+          # macOS packages
+          cp ${{ github.workspace }}/release-files/sysmanage-*-macos.pkg "repo/server/macos/$VERSION/" 2>/dev/null || true
+          cp ${{ github.workspace }}/release-files/sysmanage-*-macos.pkg.sha256 "repo/server/macos/$VERSION/" 2>/dev/null || true
+
+          # NetBSD packages
+          cp ${{ github.workspace }}/release-files/sysmanage-*-netbsd.tgz "repo/server/netbsd/$VERSION/" 2>/dev/null || true
+          cp ${{ github.workspace }}/release-files/sysmanage-*-netbsd.tgz.sha256 "repo/server/netbsd/$VERSION/" 2>/dev/null || true
+
+          # RPM packages - separate CentOS and OpenSUSE by architecture pattern
+          # CentOS RPMs typically have x86_64 or noarch in filename with el* dist tag
+          cp ${{ github.workspace }}/release-files/sysmanage-*el*.rpm "repo/server/rpm/centos/$VERSION/" 2>/dev/null || true
+          cp ${{ github.workspace }}/release-files/sysmanage-*el*.rpm.sha256 "repo/server/rpm/centos/$VERSION/" 2>/dev/null || true
+          # OpenSUSE RPMs typically have noarch and no dist tag or suse dist tag
+          cp ${{ github.workspace }}/release-files/sysmanage-$VERSION-*.noarch.rpm "repo/server/rpm/opensuse/$VERSION/" 2>/dev/null || true
+          cp ${{ github.workspace }}/release-files/sysmanage-$VERSION-*.noarch.rpm.sha256 "repo/server/rpm/opensuse/$VERSION/" 2>/dev/null || true
+
+          # Install repository tools
+          echo "Installing repository metadata tools..."
+          sudo apt-get update && sudo apt-get install -y dpkg-dev
+
+          # Regenerate apt repository metadata
+          echo "Regenerating apt repository metadata..."
+          cd repo/server/deb
+
+          # Generate Packages files
+          dpkg-scanpackages pool/ /dev/null > dists/stable/main/binary-amd64/Packages
+          gzip -9c dists/stable/main/binary-amd64/Packages > dists/stable/main/binary-amd64/Packages.gz
+
+          # Generate Release file with checksums
+          cd dists/stable
+          {
+            echo "Date: $(date -R -u)"
+            echo "MD5Sum:"
+            md5sum main/binary-amd64/Packages | awk '{printf " %s %16d %s\n", $1, 0, $2}'
+            md5sum main/binary-amd64/Packages.gz | awk '{printf " %s %16d %s\n", $1, 0, $2}'
+            echo "SHA1:"
+            sha1sum main/binary-amd64/Packages | awk '{printf " %s %16d %s\n", $1, 0, $2}'
+            sha1sum main/binary-amd64/Packages.gz | awk '{printf " %s %16d %s\n", $1, 0, $2}'
+            echo "SHA256:"
+            sha256sum main/binary-amd64/Packages | awk '{printf " %s %16d %s\n", $1, 0, $2}'
+            sha256sum main/binary-amd64/Packages.gz | awk '{printf " %s %16d %s\n", $1, 0, $2}'
+            echo "SHA512:"
+            sha512sum main/binary-amd64/Packages | awk '{printf " %s %16d %s\n", $1, 0, $2}'
+            sha512sum main/binary-amd64/Packages.gz | awk '{printf " %s %16d %s\n", $1, 0, $2}'
+          } > Release.tmp
+
+          # Add file sizes to Release file
+          SIZE_PACKAGES=$(stat -c%s main/binary-amd64/Packages)
+          SIZE_PACKAGES_GZ=$(stat -c%s main/binary-amd64/Packages.gz)
+          sed -i "s/ 0 main\/binary-amd64\/Packages$/ $SIZE_PACKAGES main\/binary-amd64\/Packages/" Release.tmp
+          sed -i "s/ 0 main\/binary-amd64\/Packages.gz$/ $SIZE_PACKAGES_GZ main\/binary-amd64\/Packages.gz/" Release.tmp
+          mv Release.tmp Release
+
+          cd /tmp/sysmanage-docs
+
+          # Commit and push changes
+          git add .
+          git commit -m "Add SysManage Server packages for v$VERSION" || echo "No changes to commit"
+          git push origin main
+
+      - name: Generate consolidated release notes
+        id: release_notes
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # Get tag annotation message if it exists
+          TAG_MESSAGE=$(git tag -l --format='%(contents)' ${{ github.ref_name }} | sed '/^$/d')
+
+          cat > release_notes.md << EOF
+          # SysManage Server v$VERSION
+
+          ${TAG_MESSAGE:+$TAG_MESSAGE}
+          ${TAG_MESSAGE:+}
+          Multi-platform system management and monitoring server with web-based interface.
+
+          ## Installation Instructions
+
+          ### Ubuntu/Debian
+          \`\`\`bash
+          # Download and install
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage_${VERSION}-1_all.deb
+          sudo apt install ./sysmanage_${VERSION}-1_all.deb
+
+          # Install nginx if not already installed
+          sudo apt install nginx
+
+          # Configure the server
+          sudo nano /etc/sysmanage.yaml
+
+          # Run database migrations
+          cd /opt/sysmanage
+          sudo -u sysmanage .venv/bin/python -m alembic upgrade head
+
+          # Start the service
+          sudo systemctl enable --now sysmanage
+          \`\`\`
+
+          ### OpenBSD
+          \`\`\`bash
+          # Download the port tarball
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-openbsd-port-${VERSION}.tar.gz
+
+          # Extract to OpenBSD ports tree
+          cd /usr/ports/mystuff
+          mkdir -p www
+          tar xzf ~/sysmanage-openbsd-port-${VERSION}.tar.gz -C www/
+
+          # Generate checksums
+          cd /usr/ports/mystuff/www/sysmanage
+          doas make makesum
+
+          # Build and install
+          doas make install
+
+          # Initialize PostgreSQL (if not already done)
+          doas su - _postgresql
+          initdb -D /var/postgresql/data -U postgres -A scram-sha-256 -E UTF8 -W
+          exit
+          doas rcctl enable postgresql
+          doas rcctl start postgresql
+
+          # Create database and user
+          doas su - _postgresql -c "createuser -P sysmanage"
+          doas su - _postgresql -c "createdb -O sysmanage sysmanage"
+
+          # Configure SysManage
+          doas vi /etc/sysmanage.yaml
+          # Update the database connection string
+
+          # Initialize database schema
+          cd /usr/local/libexec/sysmanage
+          doas python3 -m alembic upgrade head
+
+          # Enable and start the service
+          doas rcctl enable sysmanage
+          doas rcctl start sysmanage
+          \`\`\`
+
+          ### FreeBSD
+          \`\`\`bash
+          # Download and install
+          fetch https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}.pkg
+          sudo pkg add ./sysmanage-${VERSION}.pkg
+
+          # The package automatically installs nginx and PostgreSQL as dependencies
+          # Initialize PostgreSQL (if not already done)
+          sudo sysrc postgresql_enable=YES
+          sudo service postgresql initdb
+          sudo service postgresql start
+
+          # Create database and user
+          sudo su - postgres -c "createuser sysmanage"
+          sudo su - postgres -c "createdb sysmanage -O sysmanage"
+          sudo su - postgres -c "psql -c \\"ALTER USER sysmanage WITH PASSWORD 'your-password';\\""
+
+          # Configure SysManage
+          sudo vi /usr/local/etc/sysmanage/config.yaml
+          # Update the database connection string
+
+          # Run database migrations
+          cd /usr/local/lib/sysmanage
+          sudo -u sysmanage .venv/bin/python -m alembic upgrade head
+
+          # Enable and start the services
+          sudo sysrc sysmanage_enable=YES
+          sudo sysrc nginx_enable=YES
+          sudo service sysmanage start
+          sudo service nginx start
+          \`\`\`
+
+          ### macOS
+          \`\`\`bash
+          # Download and install
+          curl -L -O https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-macos.pkg
+          sudo installer -pkg sysmanage-${VERSION}-macos.pkg -target /
+
+          # The installer automatically creates the virtual environment and copies files
+          # Install PostgreSQL (if not already installed)
+          brew install postgresql@16
+          brew services start postgresql@16
+
+          # Create database
+          createdb sysmanage
+
+          # Configure SysManage
+          sudo cp /etc/sysmanage.yaml.example /etc/sysmanage.yaml
+          sudo vi /etc/sysmanage.yaml
+          # Update the database connection string
+
+          # Run database migrations
+          cd /usr/local/lib/sysmanage
+          .venv/bin/python -m alembic upgrade head
+
+          # Install and configure nginx (if not already installed)
+          brew install nginx
+          cp /usr/local/etc/sysmanage/sysmanage-nginx.conf /usr/local/etc/nginx/servers/
+          brew services start nginx
+
+          # Load and start the service
+          sudo launchctl load /Library/LaunchDaemons/com.sysmanage.server.plist
+          \`\`\`
+
+          ### NetBSD
+          \`\`\`bash
+          # Download and verify
+          ftp https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-netbsd.tgz
+          ftp https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-netbsd.tgz.sha256
+          sha256 -c sysmanage-${VERSION}-netbsd.tgz.sha256 sysmanage-${VERSION}-netbsd.tgz
+
+          # Install package
+          su -
+          pkg_add sysmanage-${VERSION}-netbsd.tgz
+
+          # The package automatically installs PostgreSQL 16 and nginx as dependencies
+          # Initialize PostgreSQL (if not already done)
+          /etc/rc.d/pgsql initdb
+          echo "pgsql=YES" >> /etc/rc.conf
+          /etc/rc.d/pgsql start
+
+          # Create database and user
+          su - pgsql -c "createuser -P sysmanage"
+          su - pgsql -c "createdb -O sysmanage sysmanage"
+
+          # Configure SysManage
+          cp /usr/pkg/etc/sysmanage/sysmanage.yaml.example /usr/pkg/etc/sysmanage.yaml
+          vi /usr/pkg/etc/sysmanage.yaml
+          # Update the database connection string
+
+          # Initialize database schema
+          cd /usr/pkg/lib/sysmanage
+          python3.12 -m venv .venv
+          .venv/bin/pip install -r requirements.txt
+          .venv/bin/python -m alembic upgrade head
+
+          # Configure nginx (optional)
+          cp /usr/pkg/share/examples/sysmanage/sysmanage-nginx.conf /usr/pkg/etc/nginx/sites-enabled/
+          echo "nginx=YES" >> /etc/rc.conf
+
+          # Enable and start the services
+          cp /usr/pkg/share/examples/rc.d/sysmanage /etc/rc.d/
+          chmod +x /etc/rc.d/sysmanage
+          echo "sysmanage=YES" >> /etc/rc.conf
+          /etc/rc.d/sysmanage start
+          /etc/rc.d/nginx start
+          \`\`\`
+
+          ### CentOS/RHEL/Fedora/Rocky Linux/AlmaLinux
+          \`\`\`bash
+          # Download and install
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-1.*.rpm
+          sudo dnf install ./sysmanage-${VERSION}-1.*.rpm
+
+          # The package automatically installs nginx and PostgreSQL as dependencies
+          # Initialize PostgreSQL (if not already done)
+          sudo postgresql-setup --initdb
+          sudo systemctl enable --now postgresql
+
+          # Create database and user
+          sudo -u postgres createuser sysmanage
+          sudo -u postgres createdb sysmanage -O sysmanage
+          sudo -u postgres psql -c "ALTER USER sysmanage WITH PASSWORD 'your-password';"
+
+          # Configure SysManage
+          sudo vi /etc/sysmanage.yaml
+          # Update the database connection string
+
+          # Initialize database schema
+          cd /opt/sysmanage
+          sudo -u sysmanage .venv/bin/python -m alembic upgrade head
+
+          # Start the services
+          sudo systemctl enable --now sysmanage
+          sudo systemctl enable --now nginx
+          \`\`\`
+
+          ### OpenSUSE/SLES
+          \`\`\`bash
+          # Download and install
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-1.noarch.rpm
+          sudo zypper install ./sysmanage-${VERSION}-1.noarch.rpm
+
+          # The package automatically installs nginx and PostgreSQL as dependencies
+          # Initialize and start PostgreSQL (if not already done)
+          sudo systemctl enable --now postgresql
+
+          # Create database and user
+          sudo -u postgres createuser sysmanage
+          sudo -u postgres createdb sysmanage -O sysmanage
+          sudo -u postgres psql -c "ALTER USER sysmanage WITH PASSWORD 'your-password';"
+
+          # Configure SysManage
+          sudo vi /etc/sysmanage.yaml
+          # Update the database connection string
+
+          # Initialize database schema
+          cd /opt/sysmanage
+          sudo -u sysmanage .venv/bin/python -m alembic upgrade head
+
+          # Start the services
+          sudo systemctl enable --now sysmanage
+          sudo systemctl enable --now nginx
+          \`\`\`
+
+          ## Access the Web Interface
+
+          After configuration and starting the service:
+          - Frontend: http://localhost:3000
+          - Backend API: http://localhost:8080
+
+          ## Checksum Verification
+
+          All packages include SHA256 checksums. Download both files and verify:
+
+          **Linux (Ubuntu/Debian):**
+          \`\`\`bash
+          sha256sum -c sysmanage_${VERSION}-1_all.deb.sha256
+          \`\`\`
+
+          **OpenBSD:**
+          \`\`\`bash
+          sha256 -C sysmanage-openbsd-port-${VERSION}.tar.gz.sha256 sysmanage-openbsd-port-${VERSION}.tar.gz
+          \`\`\`
+
+          **FreeBSD:**
+          \`\`\`bash
+          sha256 -c sysmanage-${VERSION}.pkg.sha256 sysmanage-${VERSION}.pkg
+          \`\`\`
+
+          **macOS:**
+          \`\`\`bash
+          shasum -a 256 -c sysmanage-${VERSION}-macos.pkg.sha256
+          \`\`\`
+
+          **NetBSD:**
+          \`\`\`bash
+          sha256 -c sysmanage-${VERSION}-netbsd.tgz.sha256 sysmanage-${VERSION}-netbsd.tgz
+          \`\`\`
+
+          **CentOS/RHEL/Fedora:**
+          \`\`\`bash
+          sha256sum -c sysmanage-${VERSION}-1.*.rpm.sha256
+          \`\`\`
+
+          **OpenSUSE/SLES:**
+          \`\`\`bash
+          sha256sum -c sysmanage-${VERSION}-1.noarch.rpm.sha256
+          \`\`\`
+
+          ## Software Bill of Materials (SBOM)
+
+          This release includes comprehensive Software Bill of Materials (SBOM) files in CycloneDX JSON format for supply chain security and vulnerability analysis:
+
+          **Standalone Downloads:**
+          - **backend-sbom.json** - Complete inventory of Python dependencies
+          - **frontend-sbom.json** - Complete inventory of Node.js dependencies
+
+          **Download and inspect:**
+          \`\`\`bash
+          # Download SBOM files
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/backend-sbom.json
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/frontend-sbom.json
+
+          # View with jq (if installed)
+          cat backend-sbom.json | jq .
+          cat frontend-sbom.json | jq .
+          \`\`\`
+
+          These SBOM files are compatible with vulnerability scanning tools (Grype, Trivy, Dependency-Track, etc.) and provide complete transparency of all software dependencies. The SBOM files are also embedded in the .deb package at \`/usr/share/doc/sysmanage/sbom/\`.
+
+          ## System Requirements
+
+          - **Operating System**: Ubuntu 22.04+, Debian 11+
+          - **Database**: PostgreSQL 12+ (recommended) or SQLite
+          - **Web Server**: Nginx (for serving frontend)
+          - **Python**: 3.10+ (included in package)
+          - **Node.js**: Not required at runtime (frontend pre-built)
+
+          ## What's Included
+
+          - Backend API server with WebSocket support
+          - React-based web frontend (pre-built)
+          - Systemd service configuration
+          - Nginx configuration template
+          - Alembic database migrations
+          - Example configuration file
+          - Certificate storage directory
+          - Comprehensive i18n support (14 languages)
+          - Software Bill of Materials (SBOM) in CycloneDX format
+
+          ## Configuration
+
+          The server uses \`/etc/sysmanage.yaml\` for configuration. Key settings:
+
+          - Database connection (PostgreSQL recommended for production)
+          - Listen addresses and ports
+          - SSL/TLS certificates
+          - Graylog integration (optional)
+          - Authentication settings
+          - Logging configuration
+
+          ## Post-Installation Steps
+
+          1. Configure database connection in \`/etc/sysmanage.yaml\`
+          2. Run database migrations: \`cd /opt/sysmanage && sudo -u sysmanage .venv/bin/python -m alembic upgrade head\`
+          3. Start the service: \`sudo systemctl start sysmanage\`
+          4. Configure nginx to proxy requests to the backend
+          5. Access the web interface at configured URL
+
+          ## Documentation
+
+          Full documentation is available at: https://sysmanage.org
+
+          EOF
+
+      - name: Create consolidated GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-files/*
+          body_path: release_notes.md
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -188,10 +188,7 @@ class TestSendCommand:
         assert data["status"] == "sent"
         assert "command_id" in data
         # Use exact matching for security - check specific message format
-        assert (
-            data["message"]
-            == "Command CommandType.GET_SYSTEM_INFO sent to test.example.com"
-        )
+        assert data["message"] == "Command get_system_info sent to test.example.com"
 
         # Verify enqueue_message was called
         mock_queue_ops.enqueue_message.assert_called_once()

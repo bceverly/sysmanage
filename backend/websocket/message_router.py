@@ -11,6 +11,7 @@ from backend.api.handlers import (
     handle_antivirus_status_update,
     handle_commercial_antivirus_status_update,
     handle_firewall_status_update,
+    handle_graylog_status_update,
     handle_hardware_update,
     handle_host_certificates_update,
     handle_host_role_data_update,
@@ -22,6 +23,7 @@ from backend.api.handlers import (
     handle_third_party_repository_update,
     handle_user_access_update,
 )
+from backend.api.message_handlers import handle_command_result
 from backend.api.package_handlers import (
     handle_packages_batch,
     handle_packages_batch_end,
@@ -153,6 +155,18 @@ async def route_inbound_message(
             await handle_firewall_status_update(db, mock_connection, message_data)
             success = True
             print("Successfully processed firewall status update", flush=True)
+
+        elif message_type == MessageType.GRAYLOG_STATUS_UPDATE:
+            print("About to call handle_graylog_status_update", flush=True)
+            await handle_graylog_status_update(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed Graylog status update", flush=True)
+
+        elif message_type == MessageType.COMMAND_RESULT:
+            print("About to call handle_command_result", flush=True)
+            await handle_command_result(mock_connection, message_data)
+            success = True
+            print("Successfully processed command result", flush=True)
 
         else:
             print(f"Unknown message type: {message_type}", flush=True)

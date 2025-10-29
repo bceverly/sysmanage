@@ -19,15 +19,26 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # Check if columns and indexes already exist
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    columns = [col['name'] for col in inspector.get_columns('audit_log')]
+    indexes = inspector.get_indexes('audit_log')
+    index_names = [idx['name'] for idx in indexes]
+
     # Add category column
-    op.add_column('audit_log', sa.Column('category', sa.String(length=50), nullable=True))
+    if 'category' not in columns:
+        op.add_column('audit_log', sa.Column('category', sa.String(length=50), nullable=True))
 
     # Add entry_type column
-    op.add_column('audit_log', sa.Column('entry_type', sa.String(length=50), nullable=True))
+    if 'entry_type' not in columns:
+        op.add_column('audit_log', sa.Column('entry_type', sa.String(length=50), nullable=True))
 
     # Add indexes for better query performance
-    op.create_index('ix_audit_log_category', 'audit_log', ['category'])
-    op.create_index('ix_audit_log_entry_type', 'audit_log', ['entry_type'])
+    if 'ix_audit_log_category' not in index_names:
+        op.create_index('ix_audit_log_category', 'audit_log', ['category'])
+    if 'ix_audit_log_entry_type' not in index_names:
+        op.create_index('ix_audit_log_entry_type', 'audit_log', ['entry_type'])
 
 
 def downgrade() -> None:

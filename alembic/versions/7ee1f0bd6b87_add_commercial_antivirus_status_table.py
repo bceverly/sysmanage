@@ -19,29 +19,41 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.create_table(
-        'commercial_antivirus_status',
-        sa.Column('id', sa.UUID(), nullable=False),
-        sa.Column('host_id', sa.UUID(), nullable=False),
-        sa.Column('product_name', sa.String(length=255), nullable=True),
-        sa.Column('product_version', sa.String(length=100), nullable=True),
-        sa.Column('service_enabled', sa.Boolean(), nullable=True),
-        sa.Column('antispyware_enabled', sa.Boolean(), nullable=True),
-        sa.Column('antivirus_enabled', sa.Boolean(), nullable=True),
-        sa.Column('realtime_protection_enabled', sa.Boolean(), nullable=True),
-        sa.Column('full_scan_age', sa.Integer(), nullable=True),
-        sa.Column('quick_scan_age', sa.Integer(), nullable=True),
-        sa.Column('full_scan_end_time', sa.DateTime(), nullable=True),
-        sa.Column('quick_scan_end_time', sa.DateTime(), nullable=True),
-        sa.Column('signature_last_updated', sa.DateTime(), nullable=True),
-        sa.Column('signature_version', sa.String(length=100), nullable=True),
-        sa.Column('tamper_protection_enabled', sa.Boolean(), nullable=True),
-        sa.Column('created_at', sa.DateTime(), nullable=False),
-        sa.Column('last_updated', sa.DateTime(), nullable=False),
-        sa.PrimaryKeyConstraint('id'),
-        sa.ForeignKeyConstraint(['host_id'], ['host.id'], ondelete='CASCADE'),
-    )
-    op.create_index(op.f('ix_commercial_antivirus_status_host_id'), 'commercial_antivirus_status', ['host_id'], unique=False)
+    # Check if table already exists
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    tables = inspector.get_table_names()
+
+    if 'commercial_antivirus_status' not in tables:
+        op.create_table(
+            'commercial_antivirus_status',
+            sa.Column('id', sa.UUID(), nullable=False),
+            sa.Column('host_id', sa.UUID(), nullable=False),
+            sa.Column('product_name', sa.String(length=255), nullable=True),
+            sa.Column('product_version', sa.String(length=100), nullable=True),
+            sa.Column('service_enabled', sa.Boolean(), nullable=True),
+            sa.Column('antispyware_enabled', sa.Boolean(), nullable=True),
+            sa.Column('antivirus_enabled', sa.Boolean(), nullable=True),
+            sa.Column('realtime_protection_enabled', sa.Boolean(), nullable=True),
+            sa.Column('full_scan_age', sa.Integer(), nullable=True),
+            sa.Column('quick_scan_age', sa.Integer(), nullable=True),
+            sa.Column('full_scan_end_time', sa.DateTime(), nullable=True),
+            sa.Column('quick_scan_end_time', sa.DateTime(), nullable=True),
+            sa.Column('signature_last_updated', sa.DateTime(), nullable=True),
+            sa.Column('signature_version', sa.String(length=100), nullable=True),
+            sa.Column('tamper_protection_enabled', sa.Boolean(), nullable=True),
+            sa.Column('created_at', sa.DateTime(), nullable=False),
+            sa.Column('last_updated', sa.DateTime(), nullable=False),
+            sa.PrimaryKeyConstraint('id'),
+            sa.ForeignKeyConstraint(['host_id'], ['host.id'], ondelete='CASCADE'),
+        )
+        op.create_index(op.f('ix_commercial_antivirus_status_host_id'), 'commercial_antivirus_status', ['host_id'], unique=False)
+    else:
+        # Table already exists, check if index exists
+        indexes = inspector.get_indexes('commercial_antivirus_status')
+        index_names = [idx['name'] for idx in indexes]
+        if 'ix_commercial_antivirus_status_host_id' not in index_names:
+            op.create_index(op.f('ix_commercial_antivirus_status_host_id'), 'commercial_antivirus_status', ['host_id'], unique=False)
 
 
 def downgrade() -> None:

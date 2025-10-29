@@ -161,17 +161,21 @@ const Hosts = () => {
                 );
             }
         },
-        { 
-            field: 'is_agent_privileged', 
-            headerName: t('hosts.privileged'), 
+        {
+            field: 'is_agent_privileged',
+            headerName: t('hosts.privileged'),
             width: 100,
             renderCell: (params) => {
+                // Don't show anything if host is down
+                if (params.row.status === 'down') {
+                    return null;
+                }
                 const isPrivileged = params.value;
                 if (isPrivileged === undefined || isPrivileged === null) {
                     return <span style={{ color: '#666', fontStyle: 'italic' }}>Unknown</span>;
                 }
                 return (
-                    <Chip 
+                    <Chip
                         label={isPrivileged ? t('common.yes') : t('common.no')}
                         color={isPrivileged ? 'success' : 'error'}
                         size="small"
@@ -181,17 +185,21 @@ const Hosts = () => {
                 );
             }
         },
-        { 
-            field: 'script_execution_enabled', 
-            headerName: t('hosts.scriptsEnabled'), 
+        {
+            field: 'script_execution_enabled',
+            headerName: t('hosts.scriptsEnabled'),
             width: 120,
             renderCell: (params) => {
+                // Don't show anything if host is down
+                if (params.row.status === 'down') {
+                    return null;
+                }
                 const scriptsEnabled = params.value;
                 if (scriptsEnabled === undefined || scriptsEnabled === null) {
                     return <span style={{ color: '#666', fontStyle: 'italic' }}>Unknown</span>;
                 }
                 return (
-                    <Chip 
+                    <Chip
                         label={scriptsEnabled ? t('common.yes') : t('common.no')}
                         color={scriptsEnabled ? 'success' : 'error'}
                         size="small"

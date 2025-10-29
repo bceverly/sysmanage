@@ -24,7 +24,6 @@ from backend.websocket.queue_operations import QueueOperations
 
 # Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")
-debug_logger.setLevel(logging.DEBUG)
 
 # Initialize queue operations
 queue_ops = QueueOperations()

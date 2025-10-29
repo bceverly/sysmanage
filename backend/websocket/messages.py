@@ -36,6 +36,7 @@ class MessageType(str, Enum):
     ANTIVIRUS_STATUS_UPDATE = "antivirus_status_update"
     COMMERCIAL_ANTIVIRUS_STATUS_UPDATE = "commercial_antivirus_status_update"
     FIREWALL_STATUS_UPDATE = "firewall_status_update"
+    GRAYLOG_STATUS_UPDATE = "graylog_status_update"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -69,6 +70,7 @@ class CommandType(str, Enum):
     ENABLE_FIREWALL = "enable_firewall"
     DISABLE_FIREWALL = "disable_firewall"
     RESTART_FIREWALL = "restart_firewall"
+    ATTACH_TO_GRAYLOG = "attach_to_graylog"
 
 
 class Message:

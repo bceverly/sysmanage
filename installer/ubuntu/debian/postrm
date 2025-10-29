@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+if [ "$1" = "purge" ]; then
+	# Remove user and directories only on purge
+	if getent passwd sysmanage >/dev/null; then
+		deluser --system sysmanage >/dev/null 2>&1 || true
+		delgroup --system sysmanage >/dev/null 2>&1 || true
+	fi
+
+	# Remove data directories (but preserve database - that's managed separately)
+	rm -rf /var/lib/sysmanage
+	rm -rf /var/log/sysmanage
+	rm -rf /etc/sysmanage
+fi
+
+#DEBHELPER#
+
+exit 0

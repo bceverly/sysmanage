@@ -41,6 +41,7 @@ import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import EmailConfigCard from '../Components/EmailConfigCard';
 import OpenBAOStatusCard from '../Components/OpenBAOStatusCard';
 import GrafanaIntegrationCard from '../Components/GrafanaIntegrationCard';
+import GraylogIntegrationCard from '../Components/GraylogIntegrationCard';
 import OpenTelemetryStatusCard from '../Components/OpenTelemetryStatusCard';
 import PrometheusStatusCard from '../Components/PrometheusStatusCard';
 import UbuntuProSettings from '../Components/UbuntuProSettings';
@@ -130,7 +131,7 @@ const Settings: React.FC = () => {
   const [viewingTag, setViewingTag] = useState<TagWithHosts | null>(null);
   
   // Tab names for URL hash
-  const tabNames = ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages'];
+  const tabNames = useMemo(() => ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages'], []);
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -145,7 +146,10 @@ const Settings: React.FC = () => {
   // Handle tab change and update URL hash
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
-    window.location.hash = tabNames[newValue];
+    // Safely access array element with bounds check
+    if (newValue >= 0 && newValue < tabNames.length) {
+      window.location.hash = tabNames[newValue]; // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
+    }
 
     // Load queue messages when switching to queue tab
     if (newValue === 1) {
@@ -184,9 +188,7 @@ const Settings: React.FC = () => {
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-    // tabNames is a constant array, safe to omit from deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [tabNames]);
   
   // Queue management state
   const [queueMessages, setQueueMessages] = useState<QueueMessage[]>([]);
@@ -813,6 +815,10 @@ const Settings: React.FC = () => {
 
       <Box sx={{ mb: 3 }}>
         <GrafanaIntegrationCard />
+      </Box>
+
+      <Box sx={{ mb: 3 }}>
+        <GraylogIntegrationCard />
       </Box>
 
       <Box sx={{ mb: 3 }}>

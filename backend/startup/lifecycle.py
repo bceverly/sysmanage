@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from backend.discovery.discovery_service import discovery_beacon
+from backend.monitoring.graylog_health_monitor import graylog_health_monitor_service
 from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
 from backend.security.certificate_manager import certificate_manager
 from backend.utils.verbosity_logger import get_logger
@@ -30,6 +31,7 @@ async def lifespan(_fastapi_app: FastAPI):
     logger.info("FastAPI app instance ID: %s", id(_fastapi_app))
 
     heartbeat_task = None
+    graylog_health_task = None
     message_processor_task = None
 
     try:
@@ -51,6 +53,13 @@ async def lifespan(_fastapi_app: FastAPI):
         heartbeat_task = asyncio.create_task(heartbeat_monitor_service())
         logger.info("Heartbeat monitor task created: %s", heartbeat_task)
         logger.info("Heartbeat monitor service started successfully")
+
+        # Startup: Start the Graylog health monitor service
+        logger.info("=== GRAYLOG HEALTH MONITOR STARTUP ===")
+        logger.info("About to start Graylog health monitor service")
+        graylog_health_task = asyncio.create_task(graylog_health_monitor_service())
+        logger.info("Graylog health monitor task created: %s", graylog_health_task)
+        logger.info("Graylog health monitor service started successfully")
 
         # Startup: Start the message processor service
         logger.info("=== MESSAGE PROCESSOR STARTUP ===")
@@ -138,6 +147,19 @@ async def lifespan(_fastapi_app: FastAPI):
         logger.info("Message processor service stopped")
     except Exception as e:
         logger.error("Error stopping message processor: %s", e)
+
+    # Shutdown: Cancel the Graylog health monitor service
+    logger.info("Stopping Graylog health monitor service")
+    try:
+        if graylog_health_task:
+            graylog_health_task.cancel()
+            try:
+                await graylog_health_task
+            except asyncio.CancelledError:
+                logger.info("Graylog health monitor task cancelled successfully")
+        logger.info("Graylog health monitor service stopped")
+    except Exception as e:
+        logger.error("Error stopping Graylog health monitor: %s", e)
 
     # Shutdown: Cancel the heartbeat monitor service
     logger.info("Stopping heartbeat monitor service")

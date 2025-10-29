@@ -180,6 +180,51 @@
       "label": "استخدام الخادم المُدار"
     }
   },
+  "graylog": {
+    "apiToken": {
+      "help": "رمز API اختياري للميزات المحسنة وكشف الإصدار",
+      "label": "رمز API (اختياري)"
+    },
+    "checkHealth": "فحص الصحة",
+    "enabled": {
+      "label": "تفعيل تكامل Graylog"
+    },
+    "healthError": {
+      "label": "خطأ فحص الصحة"
+    },
+    "inputs": {
+      "label": "المدخلات"
+    },
+    "mechanism": {
+      "gelfTcp": "GELF TCP",
+      "syslogTcp": "Syslog TCP",
+      "syslogUdp": "Syslog UDP",
+      "windowsSidecar": "Windows Sidecar"
+    },
+    "manualUrl": {
+      "help": "أدخل الرابط الكامل لمثيل Graylog الخاص بك",
+      "label": "رابط Graylog"
+    },
+    "noServers": "لم يتم العثور على خوادم Graylog",
+    "selectServer": {
+      "label": "اختر خادم Graylog"
+    },
+    "serverUrl": {
+      "label": "الرابط"
+    },
+    "status": {
+      "checking": "فحص جاري...",
+      "disabled": "معطل",
+      "healthy": "سليم",
+      "label": "الحالة",
+      "unhealthy": "غير سليم",
+      "unknown": "غير معروف"
+    },
+    "title": "تكامل Graylog",
+    "useManagedServer": {
+      "label": "استخدام الخادم المُدار"
+    }
+  },
   "hostDetail": {
     "accessTab": "الوصول",
     "accountName": "اسم الحساب",
@@ -399,7 +444,15 @@
     "userAccounts": "حسابات المستخدمين",
     "userGroups": "مجموعات المستخدمين",
     "version": "الإصدار",
-    "viewInstallationLog": "عرض سجل التثبيت"
+    "viewInstallationLog": "عرض سجل التثبيت",
+    "attachToGraylog": "إرفاق بـ Graylog",
+    "attaching": "جارٍ الإرفاق...",
+    "graylogAttached": "مرفق بـ Graylog",
+    "graylogMechanism": "آلية",
+    "graylogNotConfigured": "تكامل Graylog غير مكوّن أو غير صحي",
+    "graylogRequiresPrivileged": "يتطلب الوكيل في الوضع المميز",
+    "graylogStatus": "حالة Graylog",
+    "graylogTarget": "الهدف"
   },
   "hosts": {
     "actions": "الإجراءات",

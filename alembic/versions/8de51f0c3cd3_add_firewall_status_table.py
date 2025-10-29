@@ -19,20 +19,32 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create firewall_status table
-    op.create_table(
-        'firewall_status',
-        sa.Column('id', sa.UUID(), nullable=False),
-        sa.Column('host_id', sa.UUID(), nullable=False),
-        sa.Column('firewall_name', sa.String(length=255), nullable=True),
-        sa.Column('enabled', sa.Boolean(), nullable=False, server_default='false'),
-        sa.Column('tcp_open_ports', sa.Text(), nullable=True),
-        sa.Column('udp_open_ports', sa.Text(), nullable=True),
-        sa.Column('last_updated', sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(['host_id'], ['host.id'], ondelete='CASCADE'),
-        sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_firewall_status_host_id'), 'firewall_status', ['host_id'], unique=False)
+    # Check if table already exists
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    tables = inspector.get_table_names()
+
+    if 'firewall_status' not in tables:
+        # Create firewall_status table
+        op.create_table(
+            'firewall_status',
+            sa.Column('id', sa.UUID(), nullable=False),
+            sa.Column('host_id', sa.UUID(), nullable=False),
+            sa.Column('firewall_name', sa.String(length=255), nullable=True),
+            sa.Column('enabled', sa.Boolean(), nullable=False, server_default='false'),
+            sa.Column('tcp_open_ports', sa.Text(), nullable=True),
+            sa.Column('udp_open_ports', sa.Text(), nullable=True),
+            sa.Column('last_updated', sa.DateTime(), nullable=False),
+            sa.ForeignKeyConstraint(['host_id'], ['host.id'], ondelete='CASCADE'),
+            sa.PrimaryKeyConstraint('id')
+        )
+        op.create_index(op.f('ix_firewall_status_host_id'), 'firewall_status', ['host_id'], unique=False)
+    else:
+        # Table already exists, check if index exists
+        indexes = inspector.get_indexes('firewall_status')
+        index_names = [idx['name'] for idx in indexes]
+        if 'ix_firewall_status_host_id' not in index_names:
+            op.create_index(op.f('ix_firewall_status_host_id'), 'firewall_status', ['host_id'], unique=False)
 
 
 def downgrade() -> None:

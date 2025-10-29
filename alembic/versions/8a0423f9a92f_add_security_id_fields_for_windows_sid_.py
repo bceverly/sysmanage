@@ -19,11 +19,19 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # Check if columns already exist
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+
     # Add security_id field to user_accounts table for Windows SID storage
-    op.add_column('user_accounts', sa.Column('security_id', sa.String(255), nullable=True))
+    user_accounts_columns = [col['name'] for col in inspector.get_columns('user_accounts')]
+    if 'security_id' not in user_accounts_columns:
+        op.add_column('user_accounts', sa.Column('security_id', sa.String(255), nullable=True))
 
     # Add security_id field to user_groups table for Windows SID storage
-    op.add_column('user_groups', sa.Column('security_id', sa.String(255), nullable=True))
+    user_groups_columns = [col['name'] for col in inspector.get_columns('user_groups')]
+    if 'security_id' not in user_groups_columns:
+        op.add_column('user_groups', sa.Column('security_id', sa.String(255), nullable=True))
 
 
 def downgrade() -> None:
