@@ -12,7 +12,7 @@ cryptography==46.0.1
 dill==0.4.0
 dnspython>=2.7.0
 email_validator==2.1.1
-fastapi==0.120.0
+fastapi==0.120.2
 gevent==25.9.1
 greenlet==3.2.4
 h11>=0.16.0
@@ -49,7 +49,12 @@ PyYAML==6.0.2
 setuptools>=80.9.0
 sniffio==1.3.1
 SQLAlchemy==2.0.43
-starlette==0.49.1
+# SECURITY NOTE: Starlette 0.49.1 fixes CVE-2025-62727 (DoS via crafted Range headers)
+# However, FastAPI 0.120.2 requires starlette<0.49.0
+# TODO: Upgrade to starlette>=0.49.1 when FastAPI adds support
+# Mitigation: CVE-2025-62727 affects FileResponse - we don't use StaticFiles in backend
+# (nginx serves static files directly, not through Python)
+starlette>=0.48.0,<0.49.0
 tomlkit==0.12.4
 typing_extensions>=4.12.2
 ujson==5.11.0
