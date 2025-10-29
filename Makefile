@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-freebsd sbom
+.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-freebsd installer-macos sbom
 
 # Default target
 help:
@@ -98,7 +98,19 @@ install-dev: setup-venv
 ifeq ($(OS),Windows_NT)
 	@$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep
 else
-	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
+	@if [ "$$(uname -s)" = "Darwin" ]; then \
+		echo "[INFO] macOS detected - checking for packaging tools..."; \
+		command -v pkgbuild >/dev/null 2>&1 || { \
+			echo "[WARNING] pkgbuild not found - install with: xcode-select --install"; \
+		}; \
+		command -v productbuild >/dev/null 2>&1 || { \
+			echo "[WARNING] productbuild not found - install with: xcode-select --install"; \
+		}; \
+		if command -v pkgbuild >/dev/null 2>&1 && command -v productbuild >/dev/null 2>&1; then \
+			echo "✓ All macOS packaging tools available"; \
+		fi; \
+		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
+	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
 		echo "[INFO] OpenBSD detected - using ~/tmp for builds..."; \
 		export TMPDIR=$$HOME/tmp && \
 		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
@@ -1115,7 +1127,10 @@ build-grpcio-openbsd: $(VENV_ACTIVATE)
 # Installer targets
 installer: build
 	@echo "=== Auto-detecting platform for installer build ==="
-	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
+	@if [ "$$(uname -s)" = "Darwin" ]; then \
+		echo "macOS detected - building .pkg package"; \
+		$(MAKE) installer-macos; \
+	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
 		echo "OpenBSD detected - building port tarball"; \
 		$(MAKE) installer-openbsd; \
 	elif [ "$$(uname -s)" = "FreeBSD" ]; then \
@@ -1662,6 +1677,265 @@ installer-freebsd:
 		echo "ERROR: Package creation failed"; \
 		exit 1; \
 	fi
+
+# macOS .pkg package
+installer-macos: build
+	@echo "=== Building macOS Package ==="
+	@echo ""
+	@echo "Creating macOS .pkg installer for sysmanage..."
+	@echo ""
+	@echo "Checking build dependencies..."; \
+	command -v pkgbuild >/dev/null 2>&1 || { \
+		echo "ERROR: pkgbuild not found."; \
+		echo "Install with: xcode-select --install"; \
+		exit 1; \
+	}; \
+	command -v productbuild >/dev/null 2>&1 || { \
+		echo "ERROR: productbuild not found."; \
+		echo "Install with: xcode-select --install"; \
+		exit 1; \
+	}; \
+	echo "✓ Build tools available"; \
+	echo ""; \
+	CURRENT_DIR=$$(pwd); \
+	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
+	BUILD_TEMP="$$OUTPUT_DIR/build-temp-macos"; \
+	PAYLOAD_DIR="$$BUILD_TEMP/payload"; \
+	SCRIPTS_DIR="$$BUILD_TEMP/scripts"; \
+	echo "Determining version from git..."; \
+	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+	if [ -z "$$VERSION" ]; then \
+		VERSION="0.9.0"; \
+		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	else \
+		echo "Building version: $$VERSION"; \
+	fi; \
+	echo ""; \
+	echo "Checking prerequisites..."; \
+	if [ ! -d frontend/dist ]; then \
+		echo "ERROR: Frontend not built. Run 'make build' first."; \
+		exit 1; \
+	fi; \
+	echo "✓ Frontend build found"; \
+	echo ""; \
+	echo "Generating SBOM files..."; \
+	$(MAKE) sbom; \
+	echo "✓ SBOM files generated"; \
+	echo ""; \
+	echo "Cleaning build directory..."; \
+	rm -rf "$$BUILD_TEMP"; \
+	mkdir -p "$$PAYLOAD_DIR"; \
+	mkdir -p "$$SCRIPTS_DIR"; \
+	mkdir -p "$$OUTPUT_DIR"; \
+	echo "✓ Build directories created"; \
+	echo ""; \
+	echo "Creating payload structure..."; \
+	mkdir -p "$$PAYLOAD_DIR/usr/local/lib/sysmanage"; \
+	mkdir -p "$$PAYLOAD_DIR/usr/local/etc/sysmanage"; \
+	mkdir -p "$$PAYLOAD_DIR/usr/local/share/doc/sysmanage/sbom"; \
+	mkdir -p "$$PAYLOAD_DIR/var/lib/sysmanage"; \
+	mkdir -p "$$PAYLOAD_DIR/var/log/sysmanage"; \
+	mkdir -p "$$PAYLOAD_DIR/Library/LaunchDaemons"; \
+	echo "✓ Payload directories created"; \
+	echo ""; \
+	echo "Copying backend files..."; \
+	rsync -a --exclude='htmlcov' --exclude='__pycache__' --exclude='*.pyc' --exclude='.pytest_cache' --exclude='node_modules' --exclude='.venv' backend/ "$$PAYLOAD_DIR/usr/local/lib/sysmanage/backend/"; \
+	rsync -a alembic/ "$$PAYLOAD_DIR/usr/local/lib/sysmanage/alembic/"; \
+	cp alembic.ini "$$PAYLOAD_DIR/usr/local/lib/sysmanage/"; \
+	cp requirements.txt "$$PAYLOAD_DIR/usr/local/lib/sysmanage/"; \
+	echo "✓ Backend files copied"; \
+	echo ""; \
+	echo "Copying frontend files..."; \
+	rsync -a --exclude='node_modules' --exclude='coverage' frontend/dist/ "$$PAYLOAD_DIR/usr/local/lib/sysmanage/frontend/dist/"; \
+	rsync -a --exclude='node_modules' --exclude='coverage' frontend/public/ "$$PAYLOAD_DIR/usr/local/lib/sysmanage/frontend/public/"; \
+	echo "✓ Frontend files copied"; \
+	echo ""; \
+	echo "Copying configuration files..."; \
+	cp installer/macos/sysmanage.yaml.example "$$PAYLOAD_DIR/usr/local/etc/sysmanage/"; \
+	cp installer/macos/sysmanage-nginx.conf "$$PAYLOAD_DIR/usr/local/etc/sysmanage/"; \
+	echo "✓ Configuration files copied"; \
+	echo ""; \
+	echo "Copying SBOM files..."; \
+	if [ -f sbom/backend-sbom.json ]; then \
+		cp sbom/backend-sbom.json "$$PAYLOAD_DIR/usr/local/share/doc/sysmanage/sbom/"; \
+	fi; \
+	if [ -f sbom/frontend-sbom.json ]; then \
+		cp sbom/frontend-sbom.json "$$PAYLOAD_DIR/usr/local/share/doc/sysmanage/sbom/"; \
+	fi; \
+	echo "✓ SBOM files copied"; \
+	echo ""; \
+	echo "Creating LaunchDaemon plist..."; \
+	cat > "$$PAYLOAD_DIR/Library/LaunchDaemons/com.sysmanage.server.plist" << 'PLIST_EOF' ; \
+<?xml version="1.0" encoding="UTF-8"?> \
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> \
+<plist version="1.0"> \
+<dict> \
+	<key>Label</key> \
+	<string>com.sysmanage.server</string> \
+	<key>ProgramArguments</key> \
+	<array> \
+		<string>/usr/local/lib/sysmanage/.venv/bin/python</string> \
+		<string>-m</string> \
+		<string>uvicorn</string> \
+		<string>backend.main:app</string> \
+		<string>--host</string> \
+		<string>0.0.0.0</string> \
+		<string>--port</string> \
+		<string>8080</string> \
+	</array> \
+	<key>WorkingDirectory</key> \
+	<string>/usr/local/lib/sysmanage</string> \
+	<key>RunAtLoad</key> \
+	<true/> \
+	<key>KeepAlive</key> \
+	<true/> \
+	<key>StandardOutPath</key> \
+	<string>/var/log/sysmanage/server.log</string> \
+	<key>StandardErrorPath</key> \
+	<string>/var/log/sysmanage/server-error.log</string> \
+	<key>EnvironmentVariables</key> \
+	<dict> \
+		<key>PATH</key> \
+		<string>/usr/local/lib/sysmanage/.venv/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string> \
+		<key>SYSMANAGE_CONFIG</key> \
+		<string>/etc/sysmanage.yaml</string> \
+	</dict> \
+</dict> \
+</plist> \
+PLIST_EOF \
+	echo "✓ LaunchDaemon plist created"; \
+	echo ""; \
+	echo "Creating postinstall script..."; \
+	cat > "$$SCRIPTS_DIR/postinstall" << 'POST_EOF' ; \
+#!/bin/bash \
+set -e \
+ \
+LOGFILE="/tmp/sysmanage-server-install.log" \
+exec > >(tee -a "$$LOGFILE") 2>&1 \
+ \
+echo "=== SysManage Server Installation ===" \
+echo "Date: $$(date)" \
+echo "Architecture: $$(uname -m)" \
+echo "Python: $$(which python3)" \
+echo "Python version: $$(python3 --version)" \
+ \
+cd /usr/local/lib/sysmanage \
+ \
+if [ -d ".venv" ]; then \
+	echo "Removing old virtual environment..." \
+	rm -rf .venv \
+fi \
+ \
+echo "Creating virtual environment..." \
+ACTUAL_ARCH=$$(sysctl -n machdep.cpu.brand_string | grep -q "Apple" && echo "arm64" || uname -m) \
+echo "Detected architecture: $$ACTUAL_ARCH" \
+ \
+if [ "$$ACTUAL_ARCH" = "arm64" ]; then \
+	echo "Apple Silicon detected - forcing ARM64 architecture" \
+	export ARCHFLAGS="-arch arm64" \
+	export _PYTHON_HOST_PLATFORM="macosx-11.0-arm64" \
+	arch -arm64 python3 -m venv .venv \
+	echo "Installing Python dependencies for ARM64..." \
+	arch -arm64 ./.venv/bin/pip install --upgrade pip setuptools wheel \
+	arch -arm64 ./.venv/bin/pip install -r requirements.txt \
+else \
+	echo "Intel architecture detected" \
+	python3 -m venv .venv \
+	./.venv/bin/pip install --upgrade pip setuptools wheel \
+	./.venv/bin/pip install -r requirements.txt \
+fi \
+ \
+if [ ! -f "/etc/sysmanage.yaml" ]; then \
+	echo "Creating example configuration..." \
+	cp /usr/local/etc/sysmanage/sysmanage.yaml.example /etc/sysmanage.yaml.example \
+	echo "IMPORTANT: Configure /etc/sysmanage.yaml before starting the service" \
+fi \
+ \
+chown -R root:wheel /usr/local/lib/sysmanage \
+chown -R root:wheel /var/lib/sysmanage \
+chown -R root:wheel /var/log/sysmanage \
+ \
+echo "Checking for nginx..." \
+if command -v nginx >/dev/null 2>&1; then \
+	echo "✓ nginx found - configuring automatically" \
+	NGINX_CONF_DIR="/usr/local/etc/nginx/servers" \
+	if [ -d "$$NGINX_CONF_DIR" ]; then \
+		cp /usr/local/etc/sysmanage/sysmanage-nginx.conf "$$NGINX_CONF_DIR/" \
+		echo "✓ nginx configuration installed to $$NGINX_CONF_DIR/" \
+		echo "  Restart nginx to apply: brew services restart nginx" \
+	else \
+		echo "[WARNING] nginx servers directory not found at $$NGINX_CONF_DIR" \
+		echo "  Manual configuration needed - see /usr/local/etc/sysmanage/sysmanage-nginx.conf" \
+	fi \
+else \
+	echo "[INFO] nginx not installed - will need to be installed separately" \
+fi \
+ \
+echo "" \
+echo "Installation complete!" \
+echo "" \
+echo "Next steps:" \
+if ! command -v psql >/dev/null 2>&1; then \
+	echo "1. Install PostgreSQL: brew install postgresql@16"; \
+	echo "2. Start PostgreSQL: brew services start postgresql@16"; \
+	echo "3. Create database: createdb sysmanage"; \
+fi \
+echo "4. Copy and configure: cp /etc/sysmanage.yaml.example /etc/sysmanage.yaml" \
+echo "5. Run migrations: cd /usr/local/lib/sysmanage && .venv/bin/python -m alembic upgrade head" \
+echo "6. Load LaunchDaemon: sudo launchctl load /Library/LaunchDaemons/com.sysmanage.server.plist" \
+if ! command -v nginx >/dev/null 2>&1; then \
+	echo "7. Install nginx: brew install nginx"; \
+	echo "8. Configure nginx: cp /usr/local/etc/sysmanage/sysmanage-nginx.conf /usr/local/etc/nginx/servers/"; \
+	echo "9. Start nginx: brew services start nginx"; \
+else \
+	echo "7. Restart nginx: brew services restart nginx"; \
+fi \
+POST_EOF \
+	chmod +x "$$SCRIPTS_DIR/postinstall"; \
+	echo "✓ Postinstall script created"; \
+	echo ""; \
+	echo "Building component package..."; \
+	pkgbuild --root "$$PAYLOAD_DIR" \
+		--scripts "$$SCRIPTS_DIR" \
+		--identifier com.sysmanage.server \
+		--version "$$VERSION" \
+		--install-location / \
+		"$$BUILD_TEMP/sysmanage-server-component.pkg"; \
+	echo "✓ Component package created"; \
+	echo ""; \
+	echo "Creating distribution XML..."; \
+	cat > "$$BUILD_TEMP/distribution.xml" << 'DIST_EOF' ; \
+<?xml version="1.0" encoding="utf-8"?> \
+<installer-gui-script minSpecVersion="1"> \
+	<title>SysManage Server</title> \
+	<organization>com.sysmanage</organization> \
+	<domains enable_localSystem="true"/> \
+	<options customize="never" require-scripts="true" rootVolumeOnly="true" /> \
+	<choices-outline> \
+		<line choice="default"> \
+			<line choice="com.sysmanage.server"/> \
+		</line> \
+	</choices-outline> \
+	<choice id="default"/> \
+	<choice id="com.sysmanage.server" visible="false"> \
+		<pkg-ref id="com.sysmanage.server"/> \
+	</choice> \
+	<pkg-ref id="com.sysmanage.server" onConclusion="none">sysmanage-server-component.pkg</pkg-ref> \
+</installer-gui-script> \
+DIST_EOF \
+	echo "✓ Distribution XML created"; \
+	echo ""; \
+	echo "Building final installer package..."; \
+	productbuild --distribution "$$BUILD_TEMP/distribution.xml" \
+		--package-path "$$BUILD_TEMP" \
+		"$$OUTPUT_DIR/sysmanage-$$VERSION-macos.pkg"; \
+	echo ""; \
+	echo "✓ macOS package created successfully: $$OUTPUT_DIR/sysmanage-$$VERSION-macos.pkg"; \
+	echo ""; \
+	echo "Installation commands:"; \
+	echo "  sudo installer -pkg $$OUTPUT_DIR/sysmanage-$$VERSION-macos.pkg -target /"; \
+	echo ""; \
+	ls -lh "$$OUTPUT_DIR/sysmanage-$$VERSION-macos.pkg"
 
 # NetBSD .tgz package
 installer-netbsd:
