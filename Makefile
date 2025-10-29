@@ -1631,9 +1631,9 @@ installer-freebsd:
 		cd "$$BUILD_DIR" && pkg create -M "$$MANIFEST_FILE" -r "$$PACKAGE_ROOT" -o .; \
 	else \
 		echo "Using bsdtar for cross-platform build..."; \
-		cd "$$BUILD_DIR"; \
-		cp "$$MANIFEST_FILE" "+MANIFEST"; \
-		bsdtar -czf "sysmanage-$$VERSION.pkg" --format=pax "@+MANIFEST" -C "$$PACKAGE_ROOT" .; \
+		mkdir -p "$$BUILD_DIR/pkg-staging"; \
+		cp "$$MANIFEST_FILE" "$$BUILD_DIR/pkg-staging/+MANIFEST"; \
+		cd "$$BUILD_DIR/pkg-staging" && bsdtar -czf "../sysmanage-$$VERSION.pkg" --format=pax "+MANIFEST" -C "$$PACKAGE_ROOT" .; \
 	fi; \
 	if [ $$? -eq 0 ]; then \
 		PACKAGE_FILE=$$(ls -1 $$BUILD_DIR/sysmanage-$$VERSION.pkg 2>/dev/null | head -1); \
