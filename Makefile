@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-freebsd installer-macos sbom
+.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom
 
 # Default target
 help:
@@ -1945,6 +1945,52 @@ installer-netbsd:
 		echo "ERROR: pkg_create command failed"; \
 		exit 1; \
 	fi
+
+# Windows .msi installer (requires Windows with WiX Toolset)
+installer-msi: installer-msi-all
+
+# Build Windows .msi installer for x64
+installer-msi-x64: build
+	@powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture x64
+
+# Build Windows .msi installer for ARM64
+installer-msi-arm64: build
+	@powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture arm64
+
+# Build Windows .msi installers for both x64 and ARM64
+installer-msi-all: build
+	@echo ""
+	@echo "=================================================="
+	@echo "Building Windows installers for all architectures"
+	@echo "=================================================="
+	@echo ""
+	@powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture x64
+	@echo ""
+	@echo "=================================================="
+	@echo ""
+	@powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture arm64
+	@echo ""
+	@echo "=================================================="
+	@echo "All Windows installers built!"
+	@echo "=================================================="
+
+# Development environment setup for Windows
+install-dev:
+	@echo "=== Installing development dependencies ==="
+	@echo ""
+	@echo "Installing WiX Toolset (if not already installed)..."
+	@powershell -Command "if (-not (Get-Command wix -ErrorAction SilentlyContinue)) { \
+		Write-Host 'WiX Toolset not found. Please install manually from:'; \
+		Write-Host 'https://wixtoolset.org/docs/intro/'; \
+		Write-Host ''; \
+		Write-Host 'Run: dotnet tool install --global wix'; \
+		exit 1; \
+	} else { \
+		Write-Host 'WiX Toolset is already installed'; \
+		wix --version; \
+	}"
+	@echo ""
+	@echo "Development environment ready for Windows MSI builds"
 
 # SBOM (Software Bill of Materials) generation target
 sbom:
