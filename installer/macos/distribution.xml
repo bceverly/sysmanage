@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="1">
+	<title>SysManage Server</title>
+	<organization>com.sysmanage</organization>
+	<domains enable_localSystem="true"/>
+	<options customize="never" require-scripts="true" rootVolumeOnly="true" />
+	<choices-outline>
+		<line choice="default">
+			<line choice="com.sysmanage.server"/>
+		</line>
+	</choices-outline>
+	<choice id="default"/>
+	<choice id="com.sysmanage.server" visible="false">
+		<pkg-ref id="com.sysmanage.server"/>
+	</choice>
+	<pkg-ref id="com.sysmanage.server" onConclusion="none">sysmanage-server-component.pkg</pkg-ref>
+</installer-gui-script>
