@@ -24,10 +24,17 @@ def upgrade() -> None:
     Keep existing tcp_open_ports and udp_open_ports for backward compatibility,
     but add new columns that separate by IP version and include protocol tags.
     """
-    # Add new columns for IPv4 and IPv6 ports
+    # Check if columns already exist
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    columns = [col['name'] for col in inspector.get_columns('firewall_status')]
+
+    # Add new columns for IPv4 and IPv6 ports only if they don't exist
     # Each column stores a JSON array of objects like: [{"port": "22", "protocols": ["tcp"]}, {"port": "8080", "protocols": ["tcp", "udp"]}]
-    op.add_column('firewall_status', sa.Column('ipv4_ports', sa.Text(), nullable=True))
-    op.add_column('firewall_status', sa.Column('ipv6_ports', sa.Text(), nullable=True))
+    if 'ipv4_ports' not in columns:
+        op.add_column('firewall_status', sa.Column('ipv4_ports', sa.Text(), nullable=True))
+    if 'ipv6_ports' not in columns:
+        op.add_column('firewall_status', sa.Column('ipv6_ports', sa.Text(), nullable=True))
 
 
 def downgrade() -> None:
