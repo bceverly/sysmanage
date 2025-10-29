@@ -1834,10 +1834,13 @@ installer-netbsd:
 	echo "✓ Build directory prepared: $$BUILD_DIR"; \
 	echo ""; \
 	echo "Creating package directory structure..."; \
-	mkdir -p "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/backend"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/frontend/dist"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage/frontend/public"; \
 	mkdir -p "$$PACKAGE_ROOT/usr/pkg/etc/sysmanage"; \
 	mkdir -p "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d"; \
 	mkdir -p "$$PACKAGE_ROOT/usr/pkg/share/examples/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/share/doc/sysmanage/sbom"; \
 	mkdir -p "$$PACKAGE_ROOT/var/lib/sysmanage"; \
 	mkdir -p "$$PACKAGE_ROOT/var/log/sysmanage"; \
 	mkdir -p "$$PACKAGE_ROOT/var/run/sysmanage"; \
@@ -1892,20 +1895,39 @@ installer-netbsd:
 	} | sort -u > "$$BUILD_DIR/+CONTENTS"; \
 	echo "✓ Packing list created with dependencies"; \
 	echo ""; \
-	echo "Building package with pkg_create..."; \
-	pkg_create \
-		-B "$$BUILD_DIR/+BUILD_INFO" \
-		-c "$$BUILD_DIR/+COMMENT" \
-		-d "$$BUILD_DIR/+DESC" \
-		-I "$$BUILD_DIR/+INSTALL" \
-		-f "$$BUILD_DIR/+CONTENTS" \
-		-p "$$PACKAGE_ROOT" \
-		"$$BUILD_DIR/sysmanage-$$VERSION.tgz"; \
+	echo "Building package..."; \
+	if command -v pkg_create >/dev/null 2>&1; then \
+		echo "Using native NetBSD pkg_create..."; \
+		pkg_create \
+			-B "$$BUILD_DIR/+BUILD_INFO" \
+			-c "$$BUILD_DIR/+COMMENT" \
+			-d "$$BUILD_DIR/+DESC" \
+			-I "$$BUILD_DIR/+INSTALL" \
+			-f "$$BUILD_DIR/+CONTENTS" \
+			-p "$$PACKAGE_ROOT" \
+			"$$BUILD_DIR/sysmanage-$$VERSION-netbsd.tgz"; \
+	else \
+		echo "Using tar for cross-platform build..."; \
+		mkdir -p "$$BUILD_DIR/pkg-staging"; \
+		cp "$$BUILD_DIR/+BUILD_INFO" "$$BUILD_DIR/pkg-staging/"; \
+		cp "$$BUILD_DIR/+COMMENT" "$$BUILD_DIR/pkg-staging/"; \
+		cp "$$BUILD_DIR/+DESC" "$$BUILD_DIR/pkg-staging/"; \
+		cp "$$BUILD_DIR/+INSTALL" "$$BUILD_DIR/pkg-staging/"; \
+		cp "$$BUILD_DIR/+CONTENTS" "$$BUILD_DIR/pkg-staging/"; \
+		cd "$$BUILD_DIR/pkg-staging" && tar -czf "../sysmanage-$$VERSION-netbsd.tgz" \
+			+BUILD_INFO +COMMENT +DESC +INSTALL +CONTENTS \
+			-C "$$PACKAGE_ROOT" .; \
+	fi; \
 	if [ $$? -eq 0 ]; then \
-		PACKAGE_FILE="sysmanage-$$VERSION.tgz"; \
+		PACKAGE_FILE="sysmanage-$$VERSION-netbsd.tgz"; \
 		if [ -f "$$BUILD_DIR/$$PACKAGE_FILE" ]; then \
 			mkdir -p "$$OUTPUT_DIR"; \
 			mv "$$BUILD_DIR/$$PACKAGE_FILE" "$$OUTPUT_DIR/"; \
+			if command -v sha256 >/dev/null 2>&1; then \
+				cd "$$OUTPUT_DIR" && sha256 $$PACKAGE_FILE > $$PACKAGE_FILE.sha256; \
+			else \
+				cd "$$OUTPUT_DIR" && sha256sum $$PACKAGE_FILE > $$PACKAGE_FILE.sha256; \
+			fi; \
 			echo ""; \
 			echo "✓ NetBSD package created successfully: $$OUTPUT_DIR/$$PACKAGE_FILE"; \
 			echo ""; \
