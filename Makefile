@@ -1811,7 +1811,7 @@ PLIST_EOF \
 set -e \
  \
 LOGFILE="/tmp/sysmanage-server-install.log" \
-exec > >(tee -a "$$LOGFILE") 2>&1 \
+exec >> "$$LOGFILE" 2>&1 \
  \
 echo "=== SysManage Server Installation ===" \
 echo "Date: $$(date)" \
