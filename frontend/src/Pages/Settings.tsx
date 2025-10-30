@@ -148,7 +148,7 @@ const Settings: React.FC = () => {
     setActiveTab(newValue);
     // Safely access array element with bounds check
     if (newValue >= 0 && newValue < tabNames.length) {
-      window.location.hash = tabNames[newValue]; // nosemgrep: javascript.lang.security.audit.object-injection.object-injection
+      window.location.hash = tabNames[newValue]; // nosemgrep: eslint.detect-object-injection
     }
 
     // Load queue messages when switching to queue tab
