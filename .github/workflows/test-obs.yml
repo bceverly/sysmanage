@@ -104,6 +104,17 @@ jobs:
           echo "Frontend build complete"
           ls -lh build/ | head -10
 
+      - name: Verify frontend build
+        run: |
+          if [ ! -d "frontend/build" ]; then
+            echo "ERROR: frontend/build directory does not exist!"
+            echo "Checking frontend directory contents:"
+            ls -la frontend/
+            exit 1
+          fi
+          echo "Frontend build directory verified"
+          echo "Build directory size: $(du -sh frontend/build)"
+
       - name: Update package files
         env:
           VERSION: ${{ steps.version.outputs.version }}
@@ -132,6 +143,7 @@ jobs:
           # Copy backend source files
           echo "Copying backend source files..."
           cp -r $WORKSPACE/backend /tmp/$TAR_NAME/
+          cp -r $WORKSPACE/alembic /tmp/$TAR_NAME/
           cp $WORKSPACE/alembic.ini /tmp/$TAR_NAME/
           cp $WORKSPACE/requirements.txt /tmp/$TAR_NAME/
           cp $WORKSPACE/requirements-prod.txt /tmp/$TAR_NAME/
