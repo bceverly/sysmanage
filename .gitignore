@@ -233,3 +233,6 @@ sbom/
 installer/dist/
 installer/windows/*.zip
 installer/windows/nssm.exe
+
+# Auto-generated requirements file (generated from requirements.txt)
+requirements-prod.txt
