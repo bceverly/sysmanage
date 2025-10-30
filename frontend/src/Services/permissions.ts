@@ -35,8 +35,9 @@ export const getUserPermissions = async (): Promise<UserPermissions> => {
 export const hasPermission = async (permissionName: string): Promise<boolean> => {
     const permissions = await getUserPermissions();
     // Use hasOwnProperty to prevent prototype pollution attacks
+    // deepcode ignore GenericObjectInjectionSink: Protected by hasOwnProperty check above
     return Object.prototype.hasOwnProperty.call(permissions.permissions, permissionName)
-        && permissions.permissions[permissionName] === true; // nosemgrep: eslint.detect-object-injection
+        && permissions.permissions[permissionName] === true; // nosemgrep: detect-object-injection
 };
 
 /**

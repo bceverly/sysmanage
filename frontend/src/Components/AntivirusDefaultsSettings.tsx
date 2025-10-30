@@ -154,8 +154,9 @@ const AntivirusDefaultsSettings: React.FC = () => {
       const defaultsArray = Object.keys(ANTIVIRUS_OPTIONS).map((osName) => ({
         os_name: osName,
         // Safely access with hasOwnProperty check to prevent prototype pollution
-        antivirus_package: Object.prototype.hasOwnProperty.call(editedDefaults, osName) // nosemgrep: eslint.detect-object-injection
-          ? (editedDefaults[osName] === '' ? null : (editedDefaults[osName] || null)) // nosemgrep: eslint.detect-object-injection
+        // deepcode ignore GenericObjectInjectionSink: Protected by hasOwnProperty check on line 157
+        antivirus_package: Object.prototype.hasOwnProperty.call(editedDefaults, osName) // nosemgrep: detect-object-injection
+          ? (editedDefaults[osName] === '' ? null : (editedDefaults[osName] || null)) // nosemgrep: detect-object-injection
           : null,
       }));
 
@@ -230,8 +231,8 @@ const AntivirusDefaultsSettings: React.FC = () => {
                               {osName}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {/* nosemgrep */}
-                              {(Object.prototype.hasOwnProperty.call(antivirusDefaults, osName) && antivirusDefaults[osName]) || t('antivirus.none', 'None')} {/* nosemgrep: eslint.detect-object-injection */}
+                              {/* deepcode ignore GenericObjectInjectionSink: Protected by hasOwnProperty check */}
+                              {(Object.prototype.hasOwnProperty.call(antivirusDefaults, osName) && antivirusDefaults[osName]) || t('antivirus.none', 'None')} {/* nosemgrep: detect-object-injection */}
                             </Typography>
                           </Box>
                         </Grid>
@@ -261,7 +262,8 @@ const AntivirusDefaultsSettings: React.FC = () => {
                             <InputLabel id={`antivirus-${osName}-label`}>
                               {t('antivirus.selectProgram', 'Select Antivirus Program')}
                             </InputLabel>
-                            {/* Safe access with hasOwnProperty check - nosemgrep: eslint.detect-object-injection */}
+                            {/* Safe access with hasOwnProperty check - nosemgrep: detect-object-injection */}
+                            {/* deepcode ignore GenericObjectInjectionSink: Protected by hasOwnProperty checks on lines 269 and 277 */}
                             <Select
                               labelId={`antivirus-${osName}-label`}
                               id={`antivirus-${osName}`}
@@ -272,7 +274,7 @@ const AntivirusDefaultsSettings: React.FC = () => {
                               <MenuItem value="">
                                 {t('antivirus.none', 'None')}
                               </MenuItem>
-                              {/* nosemgrep: eslint.detect-object-injection */}
+                              {/* nosemgrep: detect-object-injection */}
                               {(Object.prototype.hasOwnProperty.call(ANTIVIRUS_OPTIONS, osName) ? ANTIVIRUS_OPTIONS[osName] : []).map((packageName) => (
                                 <MenuItem key={packageName} value={packageName}>
                                   {packageName}

@@ -148,7 +148,8 @@ const Settings: React.FC = () => {
     setActiveTab(newValue);
     // Safely access array element with bounds check
     if (newValue >= 0 && newValue < tabNames.length) {
-      window.location.hash = tabNames[newValue]; // nosemgrep: eslint.detect-object-injection
+      // deepcode ignore GenericObjectInjectionSink: Array access is bounds-checked above
+      window.location.hash = tabNames[newValue]; // nosemgrep: detect-object-injection
     }
 
     // Load queue messages when switching to queue tab
