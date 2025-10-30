@@ -6,6 +6,7 @@ Summary:        Centralized system management server with web-based interface
 License:        AGPL-3.0-only
 URL:            https://sysmanage.org
 Source0:        %{name}-%{version}.tar.gz
+Source1:        %{name}-vendor-%{version}.tar.gz
 
 # Disable debug package generation (no debug symbols in Python bytecode)
 %global debug_package %{nil}
@@ -49,6 +50,8 @@ deployed across your infrastructure to provide centralized management.
 
 %prep
 %autosetup -n %{name}-%{version}
+# Extract vendor tarball for offline pip installation
+tar -xzf %{SOURCE1} -C %{_builddir}
 
 %build
 # No build step needed - Python application with pre-built frontend
@@ -73,15 +76,15 @@ install -d %{buildroot}/opt/sysmanage/frontend
 cp -r frontend/dist %{buildroot}/opt/sysmanage/frontend/
 cp -r frontend/public %{buildroot}/opt/sysmanage/frontend/
 
-# Create virtualenv and install Python dependencies
-# Use python3.11 for openSUSE, python3 for Fedora/RHEL when building on Ubuntu
+# Create virtualenv and install Python dependencies from vendor tarball (offline)
+# Use python3.11 for openSUSE, python3 for Fedora/RHEL
 %if 0%{?suse_version}
 python3.11 -m venv %{buildroot}/opt/sysmanage/.venv
 %else
 python3 -m venv %{buildroot}/opt/sysmanage/.venv
 %endif
-%{buildroot}/opt/sysmanage/.venv/bin/pip install --upgrade pip
-%{buildroot}/opt/sysmanage/.venv/bin/pip install -r requirements.txt
+# Install from vendor directory (offline installation - no network required)
+%{buildroot}/opt/sysmanage/.venv/bin/pip install --no-index --find-links=%{_builddir}/vendor -r requirements.txt
 
 # Fix virtualenv paths to use final installation directory instead of buildroot
 sed -i 's|%{buildroot}||g' %{buildroot}/opt/sysmanage/.venv/pyvenv.cfg
@@ -129,18 +132,9 @@ chmod 755 /var/lib/sysmanage
 chmod 755 /var/log/sysmanage
 chmod 750 /etc/sysmanage
 
-# Fix virtualenv to work with system Python
-# Recreate the venv using the system's Python to fix all symlinks and paths
-cd /opt/sysmanage
-rm -rf .venv
-%if 0%{?suse_version}
-python3.11 -m venv .venv
-%else
-python3 -m venv .venv
-%endif
-.venv/bin/pip install --quiet --upgrade pip
-.venv/bin/pip install --quiet -r requirements.txt
-cd -
+# Note: The virtualenv is already installed in %install
+# We don't need to recreate it here - just ensure ownership is correct
+# The venv paths have been fixed during build to point to /opt/sysmanage
 
 # Create config file if it doesn't exist
 if [ ! -f /etc/sysmanage.yaml ]; then
@@ -243,7 +237,7 @@ fi
 %doc /usr/share/doc/sysmanage/sbom/
 
 %changelog
-* Tue Oct 29 2025 Bryan Everly <bryan@theeverlys.com> - 0.9.0-1
+* Tue Oct 29 2024 Bryan Everly <bryan@theeverlys.com> - 0.9.0-1
 - Initial RPM release
 - Support for OpenSUSE Leap and Tumbleweed
 - Web-based management interface
