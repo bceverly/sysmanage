@@ -82,7 +82,6 @@ const Reports: React.FC = () => {
     setSearchTerm(''); // Clear search when switching tabs
     // Safely access array element with bounds check
     if (newValue >= 0 && newValue < tabNames.length) {
-      // eslint-disable-next-line security/detect-object-injection
       window.location.hash = tabNames[newValue]; // nosemgrep: detect-object-injection
     }
   };

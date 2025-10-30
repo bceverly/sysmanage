@@ -2117,7 +2117,6 @@ const HostDetail = () => {
         const tabs = getTabNames();
         // Safely access array element with bounds check
         if (newValue >= 0 && newValue < tabs.length) {
-            // eslint-disable-next-line security/detect-object-injection
             window.location.hash = tabs[newValue]; // nosemgrep: detect-object-injection
         }
     };

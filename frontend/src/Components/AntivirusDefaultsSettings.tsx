@@ -152,14 +152,12 @@ const AntivirusDefaultsSettings: React.FC = () => {
     try {
       // Convert the defaults map to array format for the API
       // Safely access with hasOwnProperty check to prevent prototype pollution
-      // eslint-disable security/detect-object-injection
       const defaultsArray = Object.keys(ANTIVIRUS_OPTIONS).map((osName) => ({
         os_name: osName,
         antivirus_package: Object.prototype.hasOwnProperty.call(editedDefaults, osName) // nosemgrep: detect-object-injection
-          ? (editedDefaults[osName] === '' ? null : (editedDefaults[osName] || null)) // eslint-disable-line security/detect-object-injection
+          ? (editedDefaults[osName] === '' ? null : (editedDefaults[osName] || null)) // nosemgrep: detect-object-injection
           : null,
       }));
-      // eslint-enable security/detect-object-injection
 
       await axiosInstance.put('/api/antivirus-defaults/', {
         defaults: defaultsArray,
@@ -232,7 +230,6 @@ const AntivirusDefaultsSettings: React.FC = () => {
                               {osName}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {/* eslint-disable-next-line security/detect-object-injection */}
                               {(Object.prototype.hasOwnProperty.call(antivirusDefaults, osName) && antivirusDefaults[osName]) || t('antivirus.none', 'None')} {/* nosemgrep: detect-object-injection */}
                             </Typography>
                           </Box>
@@ -264,7 +261,6 @@ const AntivirusDefaultsSettings: React.FC = () => {
                               {t('antivirus.selectProgram', 'Select Antivirus Program')}
                             </InputLabel>
                             {/* Safe access with hasOwnProperty check - nosemgrep: detect-object-injection */}
-                            {/* eslint-disable security/detect-object-injection */}
                             <Select
                               labelId={`antivirus-${osName}-label`}
                               id={`antivirus-${osName}`}
@@ -281,7 +277,6 @@ const AntivirusDefaultsSettings: React.FC = () => {
                                 </MenuItem>
                               ))}
                             </Select>
-                            {/* eslint-enable security/detect-object-injection */}
                           </FormControl>
                         </Grid>
                       ))}

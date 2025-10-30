@@ -60,7 +60,6 @@ export const useColumnVisibility = (gridIdentifier: string) => {
     hiddenColumns.forEach((field) => {
       // Safely set property to prevent prototype pollution
       if (typeof field === 'string' && field !== '__proto__' && field !== 'constructor' && field !== 'prototype') {
-        // eslint-disable-next-line security/detect-object-injection
         model[field] = false; // nosemgrep: detect-object-injection
       }
     });

@@ -36,7 +36,7 @@ export const hasPermission = async (permissionName: string): Promise<boolean> =>
     const permissions = await getUserPermissions();
     // Use hasOwnProperty to prevent prototype pollution attacks
     return Object.prototype.hasOwnProperty.call(permissions.permissions, permissionName)
-        && permissions.permissions[permissionName] === true; // eslint-disable-line security/detect-object-injection
+        && permissions.permissions[permissionName] === true; // nosemgrep: detect-object-injection
 };
 
 /**
