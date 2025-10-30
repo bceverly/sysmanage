@@ -102,18 +102,18 @@ jobs:
           npm run build
 
           echo "Frontend build complete"
-          ls -lh build/ | head -10
+          ls -lh dist/ | head -10
 
       - name: Verify frontend build
         run: |
-          if [ ! -d "frontend/build" ]; then
-            echo "ERROR: frontend/build directory does not exist!"
+          if [ ! -d "frontend/dist" ]; then
+            echo "ERROR: frontend/dist directory does not exist!"
             echo "Checking frontend directory contents:"
             ls -la frontend/
             exit 1
           fi
           echo "Frontend build directory verified"
-          echo "Build directory size: $(du -sh frontend/build)"
+          echo "Build directory size: $(du -sh frontend/dist)"
 
       - name: Update package files
         env:
@@ -145,6 +145,8 @@ jobs:
           cp -r $WORKSPACE/backend /tmp/$TAR_NAME/
           cp -r $WORKSPACE/alembic /tmp/$TAR_NAME/
           cp $WORKSPACE/alembic.ini /tmp/$TAR_NAME/
+          cp -r $WORKSPACE/config /tmp/$TAR_NAME/
+          cp -r $WORKSPACE/scripts /tmp/$TAR_NAME/
           cp $WORKSPACE/requirements.txt /tmp/$TAR_NAME/
           cp $WORKSPACE/requirements-prod.txt /tmp/$TAR_NAME/
           cp $WORKSPACE/README.md /tmp/$TAR_NAME/ || touch /tmp/$TAR_NAME/README.md
@@ -153,7 +155,8 @@ jobs:
           # Copy frontend build
           echo "Copying frontend build..."
           mkdir -p /tmp/$TAR_NAME/frontend
-          cp -r $WORKSPACE/frontend/build /tmp/$TAR_NAME/frontend/
+          cp -r $WORKSPACE/frontend/dist /tmp/$TAR_NAME/frontend/
+          cp -r $WORKSPACE/frontend/public /tmp/$TAR_NAME/frontend/
           cp $WORKSPACE/frontend/package.json /tmp/$TAR_NAME/frontend/ || true
 
           # Copy installer files
