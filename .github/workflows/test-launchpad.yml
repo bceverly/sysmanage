@@ -178,8 +178,9 @@ jobs:
           head -10 debian/changelog
 
           # Build source package (unsigned)
+          # Use -d to skip build dependency checking (Launchpad will handle dependencies)
           echo "Building source package..."
-          debuild -S -sa -us -uc
+          debuild -S -sa -us -uc -d
 
           # Move to /tmp where files are
           cd ..
