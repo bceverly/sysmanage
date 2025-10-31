@@ -178,14 +178,14 @@ jobs:
           echo "Creating vendor tarball with pip dependencies..."
           mkdir -p /tmp/vendor
 
-          # Download all dependencies (including transitive ones) for Python 3.11
-          # Two-pass approach (from sysmanage-agent):
-          # Pass 1: Download binary wheels for Python 3.11
-          echo "Pass 1: Downloading binary wheels for Python 3.11..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 311 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --only-binary=:all: || echo "WARNING: Some packages may not have wheels"
-          # Pass 2: Download source distributions for pure Python packages that may not have wheels
-          echo "Pass 2: Downloading source distributions for packages without wheels..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 311 --no-binary :all: 2>/dev/null || true
+          # Download all dependencies for offline installation
+          # Use a hybrid approach:
+          # 1. Download wheels/packages normally (will get cp312 wheels + universal wheels)
+          echo "Pass 1: Downloading wheels and packages..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor
+          # 2. Also download source distributions as fallback for packages that need building in Python 3.11
+          echo "Pass 2: Downloading source distributions as fallback..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --no-binary :all: --no-deps || true
 
           echo ""
           echo "Downloaded packages (total: $(ls /tmp/vendor/ | wc -l)):"
