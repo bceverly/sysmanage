@@ -179,8 +179,9 @@ jobs:
           mkdir -p /tmp/vendor
 
           # Download all dependencies for offline installation
-          echo "Pass 1: Downloading all packages (wheels + source distributions)..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor
+          # Prefer binary wheels to avoid requiring Rust/network access in OBS
+          echo "Pass 1: Downloading all packages (prefer wheels, source as fallback)..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --prefer-binary
 
           # Download common build dependencies (for PEP 517 packages that need building from source)
           # pip download doesn't automatically include build dependencies, so we add them manually
