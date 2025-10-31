@@ -180,8 +180,17 @@ jobs:
 
           # Download all dependencies for offline installation
           # Prefer binary wheels to avoid requiring Rust/network access in OBS
+          # Target Python 3.11 on Linux x86_64 (matches OBS build environment)
           echo "Pass 1: Downloading all packages (prefer wheels, source as fallback)..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --prefer-binary
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
+            --prefer-binary \
+            --platform manylinux_2_17_x86_64 \
+            --platform manylinux2014_x86_64 \
+            --platform linux_x86_64 \
+            --python-version 311 \
+            --implementation cp \
+            --abi cp311 \
+            --only-binary cryptography
 
           # Download common build dependencies (for PEP 517 packages that need building from source)
           # pip download doesn't automatically include build dependencies, so we add them manually
