@@ -179,13 +179,27 @@ jobs:
           mkdir -p /tmp/vendor
 
           # Download all dependencies for offline installation
-          # Hybrid approach: download both wheels (for speed) and source distributions (for compatibility)
-          echo "Downloading all packages (wheels + source distributions)..."
+          echo "Pass 1: Downloading all packages (wheels + source distributions)..."
           pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor
 
-          # Also download source distributions without dependencies for top-level packages
+          # Download common build dependencies (for PEP 517 packages that need building from source)
+          # pip download doesn't automatically include build dependencies, so we add them manually
+          echo "Pass 2: Downloading build system dependencies..."
+          pip3 download -d /tmp/vendor \
+            "hatchling>=1.20.0" \
+            "setuptools>=65.0.0" \
+            "wheel" \
+            "setuptools-scm" \
+            "flit-core" \
+            "poetry-core" \
+            "meson-python" \
+            "scikit-build-core" \
+            "pybind11" \
+            2>/dev/null || echo "  (some build tools may not be needed)"
+
+          # Also download source distributions for top-level packages as fallback
           # This ensures we have fallbacks for packages where wheels don't match Python version
-          echo "Downloading source distributions for top-level packages as fallback..."
+          echo "Pass 3: Downloading source distributions for top-level packages as fallback..."
           while IFS= read -r line; do
             # Skip comments and empty lines
             [[ "$line" =~ ^#.*$ ]] && continue
