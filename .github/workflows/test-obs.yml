@@ -179,11 +179,14 @@ jobs:
           mkdir -p /tmp/vendor
 
           # Download all dependencies for offline installation
-          # Force binary for cryptography specifically to avoid Rust/network issues in OBS
-          echo "Pass 1: Downloading all packages (prefer binary wheels)..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
-            --prefer-binary \
-            --only-binary cryptography
+          # First download cryptography wheel explicitly to avoid source distribution
+          echo "Pass 1a: Downloading cryptography wheel explicitly..."
+          pip3 download cryptography==46.0.1 -d /tmp/vendor --only-binary=:all:
+
+          # Then download everything else with prefer-binary (excluding cryptography to avoid overwrite)
+          echo "Pass 1b: Downloading remaining packages (prefer binary wheels)..."
+          grep -v "^cryptography==" $WORKSPACE/requirements-prod.txt > /tmp/requirements-no-crypto.txt
+          pip3 download -r /tmp/requirements-no-crypto.txt -d /tmp/vendor --prefer-binary
 
           # Download common build dependencies (for PEP 517 packages that need building from source)
           # pip download doesn't automatically include build dependencies, so we add them manually
