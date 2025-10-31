@@ -179,13 +179,22 @@ jobs:
           mkdir -p /tmp/vendor
 
           # Download all dependencies for offline installation
-          # Use a hybrid approach:
-          # 1. Download wheels/packages normally (will get cp312 wheels + universal wheels)
-          echo "Pass 1: Downloading wheels and packages..."
+          # Hybrid approach: download both wheels (for speed) and source distributions (for compatibility)
+          echo "Downloading all packages (wheels + source distributions)..."
           pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor
-          # 2. Also download source distributions as fallback for packages that need building in Python 3.11
-          echo "Pass 2: Downloading source distributions as fallback..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --no-binary :all: --no-deps || true
+
+          # Also download source distributions without dependencies for top-level packages
+          # This ensures we have fallbacks for packages where wheels don't match Python version
+          echo "Downloading source distributions for top-level packages as fallback..."
+          while IFS= read -r line; do
+            # Skip comments and empty lines
+            [[ "$line" =~ ^#.*$ ]] && continue
+            [[ -z "$line" ]] && continue
+            # Extract package name (before any version specifier)
+            pkg=$(echo "$line" | sed 's/[>=<~!].*//')
+            echo "  Downloading source for: $pkg"
+            pip3 download "$line" -d /tmp/vendor --no-binary "$pkg" --no-deps 2>/dev/null || echo "    (no source available or already present)"
+          done < $WORKSPACE/requirements-prod.txt
 
           echo ""
           echo "Downloaded packages (total: $(ls /tmp/vendor/ | wc -l)):"
