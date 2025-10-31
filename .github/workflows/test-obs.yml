@@ -178,15 +178,14 @@ jobs:
           echo "Creating vendor tarball with pip dependencies..."
           mkdir -p /tmp/vendor
 
-          # Download ALL dependencies (with transitive deps)
-          # This will get wheels when available and source distributions when not
-          # Using current Python version (3.12) which is compatible with target Python 3.11
-          echo "Downloading dependencies from requirements-prod.txt..."
-          echo "Contents of requirements-prod.txt:"
-          head -20 $WORKSPACE/requirements-prod.txt
-          echo ""
-          echo "Running: pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor"
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor || echo "WARNING: pip download had errors!"
+          # Download all dependencies (including transitive ones) for Python 3.11
+          # Two-pass approach (from sysmanage-agent):
+          # Pass 1: Download binary wheels for Python 3.11
+          echo "Pass 1: Downloading binary wheels for Python 3.11..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 311 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --only-binary=:all: || echo "WARNING: Some packages may not have wheels"
+          # Pass 2: Download source distributions for pure Python packages that may not have wheels
+          echo "Pass 2: Downloading source distributions for packages without wheels..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 311 --no-binary :all: 2>/dev/null || true
 
           echo ""
           echo "Downloaded packages (total: $(ls /tmp/vendor/ | wc -l)):"
@@ -202,6 +201,9 @@ jobs:
           tar czf sysmanage-vendor-$VERSION.tar.gz vendor/
           echo "Created vendor tarball: sysmanage-vendor-$VERSION.tar.gz ($(du -h sysmanage-vendor-$VERSION.tar.gz | cut -f1))"
           echo "Vendor tarball contains $(ls -1 /tmp/vendor/*.whl 2>/dev/null | wc -l) wheels and $(ls -1 /tmp/vendor/*.tar.gz 2>/dev/null | wc -l) source packages"
+          echo ""
+          echo "Verifying tarball contents..."
+          tar -tzf sysmanage-vendor-$VERSION.tar.gz | grep -i black || echo "ERROR: black NOT in tarball!"
 
           # Copy both tarballs to OBS directory
           cp sysmanage-$VERSION.tar.gz $GITHUB_WORKSPACE/home:${OBS_USERNAME}/sysmanage/
