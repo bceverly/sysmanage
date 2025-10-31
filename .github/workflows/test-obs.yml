@@ -180,8 +180,14 @@ jobs:
 
           # Download all dependencies for offline installation
           # First download cryptography wheel explicitly to avoid source distribution
+          # Use platform-specific wheel for Linux x86_64 Python 3.11
           echo "Pass 1a: Downloading cryptography wheel explicitly..."
-          pip3 download cryptography==46.0.1 -d /tmp/vendor --only-binary=:all:
+          pip3 download cryptography==46.0.1 -d /tmp/vendor \
+            --only-binary=:all: \
+            --platform manylinux_2_28_x86_64 \
+            --python-version 311 \
+            --implementation cp \
+            --abi cp311
 
           # Then download everything else with prefer-binary (excluding cryptography to avoid overwrite)
           echo "Pass 1b: Downloading remaining packages (prefer binary wheels)..."
