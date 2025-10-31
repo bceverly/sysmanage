@@ -179,9 +179,11 @@ jobs:
           mkdir -p /tmp/vendor
 
           # Download all dependencies for offline installation
-          # Prefer binary wheels but allow source as fallback to avoid Rust/network issues
+          # Force binary for cryptography specifically to avoid Rust/network issues in OBS
           echo "Pass 1: Downloading all packages (prefer binary wheels)..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --prefer-binary
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
+            --prefer-binary \
+            --only-binary cryptography
 
           # Download common build dependencies (for PEP 517 packages that need building from source)
           # pip download doesn't automatically include build dependencies, so we add them manually
