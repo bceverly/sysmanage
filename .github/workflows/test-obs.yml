@@ -179,18 +179,9 @@ jobs:
           mkdir -p /tmp/vendor
 
           # Download all dependencies for offline installation
-          # Use --only-binary=:all: to force all packages to be wheels (required when using --platform)
-          # This avoids Rust/network access requirements in OBS for packages like cryptography
-          # Target Python 3.11 on Linux x86_64 (matches OBS build environment)
-          echo "Pass 1: Downloading all packages as wheels only..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
-            --only-binary=:all: \
-            --platform manylinux_2_17_x86_64 \
-            --platform manylinux2014_x86_64 \
-            --platform linux_x86_64 \
-            --python-version 311 \
-            --implementation cp \
-            --abi cp311
+          # Prefer binary wheels but allow source as fallback to avoid Rust/network issues
+          echo "Pass 1: Downloading all packages (prefer binary wheels)..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --prefer-binary
 
           # Download common build dependencies (for PEP 517 packages that need building from source)
           # pip download doesn't automatically include build dependencies, so we add them manually
