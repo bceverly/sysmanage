@@ -202,6 +202,8 @@ jobs:
           echo "pathspec" >> /tmp/build-requirements.txt
           echo "pluggy" >> /tmp/build-requirements.txt
           echo "trove-classifiers" >> /tmp/build-requirements.txt
+          echo "maturin>=1.9.4" >> /tmp/build-requirements.txt
+          echo "Cython" >> /tmp/build-requirements.txt
 
           echo "  Downloading all build tools and their dependencies..."
           pip3 download -r /tmp/build-requirements.txt -d /tmp/vendor 2>&1 | grep -E "(Collecting|Downloading|Saved|ERROR)" || true
