@@ -178,9 +178,10 @@ jobs:
           echo "Creating vendor tarball with pip dependencies..."
           mkdir -p /tmp/vendor
 
-          # Download ALL dependencies (with transitive deps) for Python 3.11
+          # Download ALL dependencies (with transitive deps)
           # This will get wheels when available and source distributions when not
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 311
+          # Using current Python version (3.12) which is compatible with target Python 3.11
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor
 
           cd /tmp
           tar czf sysmanage-vendor-$VERSION.tar.gz vendor/
