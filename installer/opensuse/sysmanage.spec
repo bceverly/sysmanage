@@ -23,6 +23,8 @@ BuildRequires:  python311-pip
 BuildRequires:  systemd-rpm-macros
 BuildRequires:  libffi-devel
 BuildRequires:  gcc
+BuildRequires:  rust
+BuildRequires:  cargo
 
 Requires:       python311
 Requires:       python311-pip
