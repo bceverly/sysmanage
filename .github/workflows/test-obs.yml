@@ -184,9 +184,13 @@ jobs:
 
           # Download common build dependencies (for PEP 517 packages that need building from source)
           # pip download doesn't automatically include build dependencies, so we add them manually
-          echo "Pass 2: Downloading build system dependencies..."
-          pip3 download -d /tmp/vendor \
-            "hatchling>=1.20.0" \
+          # We download each build tool separately to ensure full dependency resolution
+          echo "Pass 2: Downloading build system dependencies (with their dependencies)..."
+
+          # Download each build system and its full dependency tree
+          # This ensures we have everything needed to build any package from source
+          for build_tool in \
+            "hatchling" \
             "setuptools>=65.0.0" \
             "wheel" \
             "setuptools-scm" \
@@ -194,8 +198,10 @@ jobs:
             "poetry-core" \
             "meson-python" \
             "scikit-build-core" \
-            "pybind11" \
-            2>/dev/null || echo "  (some build tools may not be needed)"
+            "pybind11"; do
+            echo "  Downloading $build_tool and dependencies..."
+            pip3 download -d /tmp/vendor "$build_tool" 2>/dev/null || echo "    (skipped: $build_tool)"
+          done
 
           # Also download source distributions for top-level packages as fallback
           # This ensures we have fallbacks for packages where wheels don't match Python version
