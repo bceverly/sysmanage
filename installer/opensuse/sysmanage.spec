@@ -21,6 +21,8 @@ Source1:        %{name}-vendor-%{version}.tar.gz
 BuildRequires:  python311-devel
 BuildRequires:  python311-pip
 BuildRequires:  systemd-rpm-macros
+BuildRequires:  libffi-devel
+BuildRequires:  gcc
 
 Requires:       python311
 Requires:       python311-pip
