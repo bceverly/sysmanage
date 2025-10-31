@@ -178,11 +178,9 @@ jobs:
           echo "Creating vendor tarball with pip dependencies..."
           mkdir -p /tmp/vendor
 
-          # Download binary wheels for Python 3.11 on Linux x86_64
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --platform manylinux2014_x86_64 --only-binary=:all: --python-version 311 || true
-
-          # Also download without deps for pure Python packages that may not have platform-specific wheels
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --no-deps 2>/dev/null || true
+          # Download ALL dependencies (with transitive deps) for Python 3.11
+          # This will get wheels when available and source distributions when not
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 311
 
           cd /tmp
           tar czf sysmanage-vendor-$VERSION.tar.gz vendor/
