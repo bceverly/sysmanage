@@ -181,7 +181,22 @@ jobs:
           # Download ALL dependencies (with transitive deps)
           # This will get wheels when available and source distributions when not
           # Using current Python version (3.12) which is compatible with target Python 3.11
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor
+          echo "Downloading dependencies from requirements-prod.txt..."
+          echo "Contents of requirements-prod.txt:"
+          head -20 $WORKSPACE/requirements-prod.txt
+          echo ""
+          echo "Running: pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor"
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor || echo "WARNING: pip download had errors!"
+
+          echo ""
+          echo "Downloaded packages (total: $(ls /tmp/vendor/ | wc -l)):"
+          ls /tmp/vendor/
+          echo ""
+          echo "Checking for black..."
+          ls /tmp/vendor/ | grep -i black || echo "ERROR: black not found in vendor directory!"
+          echo ""
+          echo "Checking for other key packages..."
+          ls /tmp/vendor/ | grep -E "fastapi|alembic|pydantic" || echo "WARNING: Some key packages missing!"
 
           cd /tmp
           tar czf sysmanage-vendor-$VERSION.tar.gz vendor/
