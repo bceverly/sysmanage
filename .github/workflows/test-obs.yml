@@ -187,21 +187,27 @@ jobs:
           # We download each build tool separately to ensure full dependency resolution
           echo "Pass 2: Downloading build system dependencies (with their dependencies)..."
 
-          # Download each build system and its full dependency tree
-          # This ensures we have everything needed to build any package from source
-          for build_tool in \
-            "hatchling" \
-            "setuptools>=65.0.0" \
-            "wheel" \
-            "setuptools-scm" \
-            "flit-core" \
-            "poetry-core" \
-            "meson-python" \
-            "scikit-build-core" \
-            "pybind11"; do
-            echo "  Downloading $build_tool and dependencies..."
-            pip3 download -d /tmp/vendor "$build_tool" 2>/dev/null || echo "    (skipped: $build_tool)"
-          done
+          # First, create a temporary requirements file with all build tools
+          # This allows pip to resolve the entire dependency graph at once
+          cat > /tmp/build-requirements.txt << 'EOF'
+hatchling
+hatch-vcs
+hatch-fancy-pypi-readme
+setuptools>=65.0.0
+wheel
+setuptools-scm
+flit-core
+poetry-core
+meson-python
+scikit-build-core
+pybind11
+pathspec
+pluggy
+trove-classifiers
+EOF
+
+          echo "  Downloading all build tools and their dependencies..."
+          pip3 download -r /tmp/build-requirements.txt -d /tmp/vendor 2>&1 | grep -E "(Collecting|Downloading|Saved|ERROR)" || true
 
           # Also download source distributions for top-level packages as fallback
           # This ensures we have fallbacks for packages where wheels don't match Python version
