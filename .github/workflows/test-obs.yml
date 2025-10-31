@@ -184,27 +184,24 @@ jobs:
 
           # Download common build dependencies (for PEP 517 packages that need building from source)
           # pip download doesn't automatically include build dependencies, so we add them manually
-          # We download each build tool separately to ensure full dependency resolution
           echo "Pass 2: Downloading build system dependencies (with their dependencies)..."
 
-          # First, create a temporary requirements file with all build tools
+          # Create a temporary requirements file with all build tools
           # This allows pip to resolve the entire dependency graph at once
-          cat > /tmp/build-requirements.txt << 'EOF'
-hatchling
-hatch-vcs
-hatch-fancy-pypi-readme
-setuptools>=65.0.0
-wheel
-setuptools-scm
-flit-core
-poetry-core
-meson-python
-scikit-build-core
-pybind11
-pathspec
-pluggy
-trove-classifiers
-EOF
+          echo "hatchling" > /tmp/build-requirements.txt
+          echo "hatch-vcs" >> /tmp/build-requirements.txt
+          echo "hatch-fancy-pypi-readme" >> /tmp/build-requirements.txt
+          echo "setuptools>=65.0.0" >> /tmp/build-requirements.txt
+          echo "wheel" >> /tmp/build-requirements.txt
+          echo "setuptools-scm" >> /tmp/build-requirements.txt
+          echo "flit-core" >> /tmp/build-requirements.txt
+          echo "poetry-core" >> /tmp/build-requirements.txt
+          echo "meson-python" >> /tmp/build-requirements.txt
+          echo "scikit-build-core" >> /tmp/build-requirements.txt
+          echo "pybind11" >> /tmp/build-requirements.txt
+          echo "pathspec" >> /tmp/build-requirements.txt
+          echo "pluggy" >> /tmp/build-requirements.txt
+          echo "trove-classifiers" >> /tmp/build-requirements.txt
 
           echo "  Downloading all build tools and their dependencies..."
           pip3 download -r /tmp/build-requirements.txt -d /tmp/vendor 2>&1 | grep -E "(Collecting|Downloading|Saved|ERROR)" || true
