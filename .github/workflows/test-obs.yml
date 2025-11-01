@@ -178,62 +178,20 @@ jobs:
           echo "Creating vendor tarball with pip dependencies..."
           mkdir -p /tmp/vendor
 
-          # Download all dependencies for offline installation
-          # First download cryptography wheel explicitly to avoid source distribution
-          # Use platform-specific wheel for Linux x86_64 Python 3.11
-          # Use --no-deps because platform-specific download can't resolve dependencies
-          echo "Pass 1a: Downloading cryptography wheel explicitly..."
-          pip3 download cryptography==46.0.1 -d /tmp/vendor \
-            --only-binary=:all: \
-            --platform manylinux_2_28_x86_64 \
+          # Download all dependencies (including transitive ones) for Python 3.11
+          # Pass 1: Download binary wheels for the target platform
+          echo "Pass 1: Downloading binary wheels for Python 3.11 on Linux x86_64..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
             --python-version 311 \
-            --implementation cp \
-            --abi cp311 \
-            --no-deps
+            --platform manylinux2014_x86_64 \
+            --platform manylinux_2_17_x86_64 \
+            --only-binary=:all:
 
-          # Then download everything else with prefer-binary (excluding cryptography to avoid overwrite)
-          echo "Pass 1b: Downloading remaining packages (prefer binary wheels)..."
-          grep -v "^cryptography==" $WORKSPACE/requirements-prod.txt > /tmp/requirements-no-crypto.txt
-          pip3 download -r /tmp/requirements-no-crypto.txt -d /tmp/vendor --prefer-binary
-
-          # Download common build dependencies (for PEP 517 packages that need building from source)
-          # pip download doesn't automatically include build dependencies, so we add them manually
-          echo "Pass 2: Downloading build system dependencies (with their dependencies)..."
-
-          # Create a temporary requirements file with all build tools
-          # This allows pip to resolve the entire dependency graph at once
-          echo "hatchling" > /tmp/build-requirements.txt
-          echo "hatch-vcs" >> /tmp/build-requirements.txt
-          echo "hatch-fancy-pypi-readme" >> /tmp/build-requirements.txt
-          echo "setuptools>=65.0.0" >> /tmp/build-requirements.txt
-          echo "wheel" >> /tmp/build-requirements.txt
-          echo "setuptools-scm" >> /tmp/build-requirements.txt
-          echo "flit-core" >> /tmp/build-requirements.txt
-          echo "poetry-core" >> /tmp/build-requirements.txt
-          echo "meson-python" >> /tmp/build-requirements.txt
-          echo "scikit-build-core" >> /tmp/build-requirements.txt
-          echo "pybind11" >> /tmp/build-requirements.txt
-          echo "pathspec" >> /tmp/build-requirements.txt
-          echo "pluggy" >> /tmp/build-requirements.txt
-          echo "trove-classifiers" >> /tmp/build-requirements.txt
-          echo "maturin>=1.9.4" >> /tmp/build-requirements.txt
-          echo "Cython>=3.0.0" >> /tmp/build-requirements.txt
-
-          echo "  Downloading all build tools and their dependencies..."
-          pip3 download -r /tmp/build-requirements.txt -d /tmp/vendor
-
-          # Also download source distributions for top-level packages as fallback
-          # This ensures we have fallbacks for packages where wheels don't match Python version
-          echo "Pass 3: Downloading source distributions for top-level packages as fallback..."
-          while IFS= read -r line; do
-            # Skip comments and empty lines
-            [[ "$line" =~ ^#.*$ ]] && continue
-            [[ -z "$line" ]] && continue
-            # Extract package name (before any version specifier)
-            pkg=$(echo "$line" | sed 's/[>=<~!].*//')
-            echo "  Downloading source for: $pkg"
-            pip3 download "$line" -d /tmp/vendor --no-binary "$pkg" --no-deps 2>/dev/null || echo "    (no source available or already present)"
-          done < $WORKSPACE/requirements-prod.txt
+          # Pass 2: Download source distributions as fallback for packages without matching wheels
+          echo "Pass 2: Downloading source distributions as fallback..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
+            --python-version 311 \
+            --no-binary :all: 2>/dev/null || true
 
           echo ""
           echo "Downloaded packages (total: $(ls /tmp/vendor/ | wc -l)):"
