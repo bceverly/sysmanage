@@ -397,7 +397,7 @@ jobs:
           libdrm2 libxkbcommon0 libgtk-3-0 libgdk-pixbuf2.0-0
 
     - name: Download frontend build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: frontend-build-${{ matrix.os }}
         path: frontend/dist/
@@ -682,7 +682,7 @@ jobs:
     - uses: actions/checkout@v5
 
     - name: Download all performance results
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         pattern: performance-results-*
         merge-multiple: true
