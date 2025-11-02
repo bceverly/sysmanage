@@ -19,10 +19,8 @@ addFilter("python-bytecode-inconsistent-mtime")
 # Some Python library files don't need shebangs as they're imported, not executed
 addFilter("script-without-shebang .*/\.venv/lib/python.*/site-packages/.*")
 
-# Zero-length files are used as package markers in Python (__init__.py, py.typed, etc.)
-addFilter("zero-length .*/\.venv/lib/python.*/site-packages/.*/__init__\.py$")
-addFilter("zero-length .*/\.venv/lib/python.*/site-packages/.*/py\.typed$")
-addFilter("zero-length .*/\.venv/lib/python.*/site-packages/.*\.pth$")
+# Zero-length files are used as package markers in Python (gevent test files, etc.)
+addFilter("zero-length /opt/sysmanage/\.venv/lib/python.*/site-packages/.*")
 
 # Scripts using /usr/bin/env are acceptable for cross-platform compatibility
 addFilter("env-script-interpreter")
@@ -30,13 +28,16 @@ addFilter("env-script-interpreter")
 # Installing to /opt is acceptable for third-party/self-contained applications
 # This is the standard location for application-specific software
 addFilter("suse-filelist-forbidden-opt")
+addFilter("filelist-forbidden-opt")
 
 # File duplication in Python packages is common and acceptable
 # Many packages include duplicate files (LICENSE, README, etc.)
 addFilter("files-duplicated-waste")
+addFilter("files-duplicate")
 
-# Hidden files in packages are acceptable (e.g., .dist-info directories)
-addFilter("hidden-file-or-dir .*/\.venv/lib/python.*/site-packages/.*")
+# Hidden files in packages are acceptable (.venv directory, .pylintrc config files)
+addFilter("hidden-file-or-dir /opt/sysmanage/\.venv")
+addFilter("hidden-file-or-dir .*/\.pylintrc$")
 
 # Static libraries in Python packages are needed for some extensions
 addFilter("devel-file-in-non-devel-package .*/\.venv/.*\.a$")
@@ -46,3 +47,36 @@ addFilter("devel-file-in-non-devel-package .*/\.venv/.*\.pc$")
 
 # Documentation files in unexpected locations are fine for Python site-packages
 addFilter("package-with-huge-docs")
+
+# RPATH in Python binary wheels is intentional and correct
+# Packages like Pillow and psycopg2-binary bundle their own libraries with RPATH
+addFilter("binary-or-shlib-defines-rpath")
+
+# Non-executable scripts with shebangs in Python packages are test/example files
+addFilter("non-executable-script /opt/sysmanage/\.venv/lib/python.*/site-packages/.*")
+addFilter("non-executable-script /opt/sysmanage/scripts/.*\.py")
+
+# Python dependency warnings - we manually specify python311 requirement
+addFilter("python-missing-require")
+addFilter("python-leftover-require python311-pip")
+
+# Unstripped binaries in Python packages are expected from binary wheels
+addFilter("unstripped-binary-or-object /opt/sysmanage/\.venv/lib/python.*/site-packages/.*")
+
+# gethostbyname calls in vendored libraries (psycopg2, cryptography, etc.)
+addFilter("binary-or-shlib-calls-gethostbyname")
+
+# Dangling symlink to system Python is intentional for venv
+addFilter("dangling-symlink /opt/sysmanage/\.venv/bin/python3.11 /usr/bin/python3.11")
+
+# Non-conffile in /etc - the .example file is intentionally not marked as %config
+addFilter("non-conffile-in-etc /etc/sysmanage/sysmanage.yaml.example")
+
+# No %check section - we don't run tests during RPM build
+addFilter("no-%check-section")
+
+# Macro in comment is intentional in spec file
+addFilter("macro-in-comment")
+
+# systemd service macros - we use service_add_post, not service_add_pre
+addFilter("systemd-service-without-service_add_pre")
