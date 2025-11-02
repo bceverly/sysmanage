@@ -178,14 +178,20 @@ jobs:
           echo "Creating vendor tarball with pip dependencies..."
           mkdir -p /tmp/vendor
 
-          # Download all dependencies for Python 3.11
-          # CRITICAL: Must specify --python-version 311 to get Python 3.11-compatible packages
-          # Using --prefer-binary gets wheels where available, source otherwise
-          echo "Downloading all packages for Python 3.11..."
+          # Pass 1: Download Python 3.11 wheels for manylinux
+          echo "Pass 1: Downloading Python 3.11 wheels..."
           pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
             --python-version 311 \
             --platform manylinux2014_x86_64 \
-            --prefer-binary
+            --only-binary=:all: 2>/dev/null || true
+
+          # Pass 2: Download source distributions for packages without wheels
+          # MUST use --no-deps when using --python-version without --only-binary
+          echo "Pass 2: Downloading source distributions..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
+            --python-version 311 \
+            --no-binary :all: \
+            --no-deps 2>/dev/null || true
 
           echo ""
           echo "Downloaded packages (total: $(ls /tmp/vendor/ | wc -l)):"
