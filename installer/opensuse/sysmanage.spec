@@ -238,8 +238,11 @@ fi
 %dir /var/lib/sysmanage
 %dir /var/log/sysmanage
 /usr/lib/systemd/system/sysmanage.service
+%dir /etc/nginx
+%dir /etc/nginx/conf.d
 %config(noreplace) /etc/nginx/conf.d/sysmanage-nginx.conf
-%doc /usr/share/doc/sysmanage/sbom/
+%dir /usr/share/doc/sysmanage
+%dir /usr/share/doc/sysmanage/sbom
 
 %changelog
 * Tue Oct 29 2024 Bryan Everly <bryan@theeverlys.com> - 0.9.0-1
