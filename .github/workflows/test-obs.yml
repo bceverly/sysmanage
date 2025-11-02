@@ -179,17 +179,18 @@ jobs:
           mkdir -p /tmp/vendor
 
           # Download all dependencies (including transitive ones) for Python 3.11
-          # Pass 1: Download binary wheels for the target platform
+          # Pass 1: Try to download binary wheels with platform constraint
+          # This will fail on packages without wheels (like peewee), but that's okay
           echo "Pass 1: Downloading binary wheels for Python 3.11 on Linux x86_64..."
           pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
             --platform manylinux2014_x86_64 \
             --only-binary=:all: \
-            --python-version 311 2>/dev/null || true
+            --python-version 311 2>&1 | grep -v "ERROR:" || true
 
-          # Pass 2: Download source distributions as fallback for packages without wheels
-          echo "Pass 2: Downloading source distributions as fallback..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
-            --no-binary :all: 2>/dev/null || true
+          # Pass 2: Download everything (wheels AND source) without platform constraints
+          # This will get packages that Pass 1 missed (like peewee)
+          echo "Pass 2: Downloading remaining packages without platform constraints..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor 2>&1 | grep -v "Requirement already satisfied" || true
 
           echo ""
           echo "Downloaded packages (total: $(ls /tmp/vendor/ | wc -l)):"
