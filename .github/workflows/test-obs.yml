@@ -179,10 +179,13 @@ jobs:
           mkdir -p /tmp/vendor
 
           # Download all dependencies for Python 3.11
-          # Simple approach: just download everything without platform constraints
-          # This will get wheels where available, source distributions otherwise
+          # CRITICAL: Must specify --python-version 311 to get Python 3.11-compatible packages
+          # Using --prefer-binary gets wheels where available, source otherwise
           echo "Downloading all packages for Python 3.11..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
+            --python-version 311 \
+            --platform manylinux2014_x86_64 \
+            --prefer-binary
 
           echo ""
           echo "Downloaded packages (total: $(ls /tmp/vendor/ | wc -l)):"
