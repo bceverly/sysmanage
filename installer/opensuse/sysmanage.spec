@@ -242,9 +242,6 @@ fi
 %dir /etc/nginx/conf.d
 %config(noreplace) /etc/nginx/conf.d/sysmanage-nginx.conf
 %dir /usr/share/doc/sysmanage
-%dir /usr/share/doc/sysmanage/sbom
-/usr/share/doc/sysmanage/sbom/backend-sbom.json
-/usr/share/doc/sysmanage/sbom/frontend-sbom.json
 
 %changelog
 * Tue Oct 29 2024 Bryan Everly <bryan@theeverlys.com> - 0.9.0-1
