@@ -17,6 +17,14 @@ def parse_requirements(requirements_file: Path) -> tuple[list[str], list[str]]:
     Returns:
         tuple: (production_deps, dev_deps)
     """
+    # Dev/test tools that should be excluded from production
+    DEV_PACKAGES = {
+        "black", "isort", "pylint", "astroid", "mccabe", "dill", "tomlkit",
+        "pytest", "pytest-asyncio", "pytest-cov", "coverage", "iniconfig",
+        "pluggy", "bandit", "safety", "safety-schemas", "semgrep",
+        "playwright", "selenium", "webdriver-manager"
+    }
+
     production_deps = []
     dev_deps = []
     in_dev_section = False
@@ -44,10 +52,17 @@ def parse_requirements(requirements_file: Path) -> tuple[list[str], list[str]]:
             if line.startswith("#") and in_dev_section:
                 continue
 
+            # Check if this is a dev package by extracting package name
+            is_dev_package = False
+            if not line.startswith("#"):
+                # Extract package name (before ==, >=, etc.)
+                pkg_name = re.split(r'[<>=!]', line)[0].strip()
+                is_dev_package = pkg_name in DEV_PACKAGES
+
             # Add dependencies to appropriate list
-            if not in_dev_section and not line.startswith("#"):
+            if not in_dev_section and not line.startswith("#") and not is_dev_package:
                 production_deps.append(line)
-            elif in_dev_section and not line.startswith("#"):
+            elif (in_dev_section or is_dev_package) and not line.startswith("#"):
                 dev_deps.append(line)
 
     return production_deps, dev_deps

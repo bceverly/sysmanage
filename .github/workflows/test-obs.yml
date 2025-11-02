@@ -179,19 +179,19 @@ jobs:
           mkdir -p /tmp/vendor
 
           # Pass 1: Download Python 3.11 wheels for manylinux
-          echo "Pass 1: Downloading Python 3.11 wheels..."
+          # Download all dependencies (including transitive ones) for Python 3.11
+          echo "Pass 1: Downloading Python 3.11 wheels for manylinux..."
           pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
             --python-version 311 \
             --platform manylinux2014_x86_64 \
-            --only-binary=:all: 2>/dev/null || true
+            --platform manylinux_2_17_x86_64 \
+            --only-binary=:all:
 
-          # Pass 2: Download source distributions for packages without wheels
-          # MUST use --no-deps when using --python-version without --only-binary
-          echo "Pass 2: Downloading source distributions..."
+          # Pass 2: Download source distributions for pure Python packages that may not have wheels
+          echo "Pass 2: Downloading source distributions for packages without wheels..."
           pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
             --python-version 311 \
-            --no-binary :all: \
-            --no-deps 2>/dev/null || true
+            --no-binary :all: 2>/dev/null || true
 
           echo ""
           echo "Downloaded packages (total: $(ls /tmp/vendor/ | wc -l)):"
