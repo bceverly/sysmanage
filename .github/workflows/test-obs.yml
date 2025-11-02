@@ -184,12 +184,12 @@ jobs:
           pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
             --platform manylinux2014_x86_64 \
             --only-binary=:all: \
-            --python-version 311
+            --python-version 311 2>/dev/null || true
 
-          # Pass 2: Download for any platform (for pure Python packages without wheels)
-          echo "Pass 2: Downloading source distributions for pure Python packages..."
+          # Pass 2: Download source distributions as fallback for packages without wheels
+          echo "Pass 2: Downloading source distributions as fallback..."
           pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
-            --no-deps 2>/dev/null || true
+            --no-binary :all: 2>/dev/null || true
 
           echo ""
           echo "Downloaded packages (total: $(ls /tmp/vendor/ | wc -l)):"
