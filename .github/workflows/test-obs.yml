@@ -187,10 +187,11 @@ jobs:
             --only-binary=:all: \
             --python-version 311 2>&1 | grep -v "ERROR:" || true
 
-          # Pass 2: Download everything (wheels AND source) without platform constraints
+          # Pass 2: Download everything (wheels AND source) for Python 3.11 without platform constraints
           # This will get packages that Pass 1 missed (like peewee)
-          echo "Pass 2: Downloading remaining packages without platform constraints..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor 2>&1 | grep -v "Requirement already satisfied" || true
+          echo "Pass 2: Downloading remaining packages for Python 3.11..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
+            --python-version 311 2>&1 | grep -v "Requirement already satisfied" || true
 
           echo ""
           echo "Downloaded packages (total: $(ls /tmp/vendor/ | wc -l)):"
