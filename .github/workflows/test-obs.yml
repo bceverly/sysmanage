@@ -182,10 +182,9 @@ jobs:
           # Pass 1: Download binary wheels for the target platform
           echo "Pass 1: Downloading binary wheels for Python 3.11 on Linux x86_64..."
           pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
-            --python-version 311 \
             --platform manylinux2014_x86_64 \
-            --platform manylinux_2_17_x86_64 \
-            --only-binary=:all:
+            --only-binary=:all: \
+            --python-version 311
 
           # Pass 2: Download for any platform (for pure Python packages without wheels)
           echo "Pass 2: Downloading source distributions for pure Python packages..."
