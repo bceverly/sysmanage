@@ -1459,6 +1459,10 @@ installer-rpm-opensuse:
 		fi; \
 	fi; \
 	echo ""; \
+	echo "Generating requirements-prod.txt..."; \
+	python3 scripts/update-requirements-prod.py; \
+	echo "✓ requirements-prod.txt generated"; \
+	echo ""; \
 	echo "Building frontend..."; \
 	cd frontend && npm run build && cd ..; \
 	echo "✓ Frontend build complete"; \
@@ -1494,6 +1498,7 @@ installer-rpm-opensuse:
 	rsync -a --exclude='node_modules' --exclude='src' frontend/public/ "$$TAR_DIR/frontend/public/"; \
 	cp alembic.ini "$$TAR_DIR/"; \
 	cp requirements.txt "$$TAR_DIR/"; \
+	cp requirements-prod.txt "$$TAR_DIR/"; \
 	cp -r alembic "$$TAR_DIR/"; \
 	cp -r config "$$TAR_DIR/"; \
 	cp -r scripts "$$TAR_DIR/"; \
