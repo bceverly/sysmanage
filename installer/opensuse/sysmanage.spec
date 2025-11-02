@@ -107,13 +107,19 @@ install -m 644 installer/opensuse/sysmanage.service %{buildroot}/usr/lib/systemd
 install -d %{buildroot}/etc/nginx/conf.d
 install -m 644 installer/opensuse/sysmanage-nginx.conf %{buildroot}/etc/nginx/conf.d/
 
-# Install SBOM (Software Bill of Materials)
-install -d %{buildroot}/usr/share/doc/sysmanage/sbom
-if [ -f sbom/backend-sbom.json ]; then
-    install -m 644 sbom/backend-sbom.json %{buildroot}/usr/share/doc/sysmanage/sbom/
+# Install SBOM (Software Bill of Materials) if present
+if [ -f sbom/backend-sbom.json ] || [ -f sbom/frontend-sbom.json ]; then
+    install -d %{buildroot}/usr/share/doc/sysmanage/sbom
+    [ -f sbom/backend-sbom.json ] && install -m 644 sbom/backend-sbom.json %{buildroot}/usr/share/doc/sysmanage/sbom/ || true
+    [ -f sbom/frontend-sbom.json ] && install -m 644 sbom/frontend-sbom.json %{buildroot}/usr/share/doc/sysmanage/sbom/ || true
 fi
-if [ -f sbom/frontend-sbom.json ]; then
-    install -m 644 sbom/frontend-sbom.json %{buildroot}/usr/share/doc/sysmanage/sbom/
+
+# Generate file list for SBOM files (if they exist)
+echo "%dir /usr/share/doc/sysmanage" > %{_builddir}/sbom-files.list
+if [ -d %{buildroot}/usr/share/doc/sysmanage/sbom ]; then
+    echo "%dir /usr/share/doc/sysmanage/sbom" >> %{_builddir}/sbom-files.list
+    find %{buildroot}/usr/share/doc/sysmanage/sbom -type f | \
+        sed "s|%{buildroot}||g" >> %{_builddir}/sbom-files.list
 fi
 
 %pre
@@ -230,7 +236,7 @@ if [ $1 -eq 0 ]; then
     fi
 fi
 
-%files
+%files -f %{_builddir}/sbom-files.list
 %license LICENSE
 %doc README.md
 /opt/sysmanage/
@@ -241,10 +247,6 @@ fi
 %dir /etc/nginx
 %dir /etc/nginx/conf.d
 %config(noreplace) /etc/nginx/conf.d/sysmanage-nginx.conf
-%dir /usr/share/doc/sysmanage
-%dir /usr/share/doc/sysmanage/sbom
-%optional /usr/share/doc/sysmanage/sbom/backend-sbom.json
-%optional /usr/share/doc/sysmanage/sbom/frontend-sbom.json
 
 %changelog
 * Tue Oct 29 2024 Bryan Everly <bryan@theeverlys.com> - 0.9.0-1
