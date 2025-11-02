@@ -1,0 +1,48 @@
+# RPM lint configuration for sysmanage
+# Suppress expected warnings that are acceptable for this package
+
+# Virtual environment scripts use /opt/sysmanage/.venv/bin/python3.11 interpreter
+# This is correct for a venv and should not be changed to /usr/bin/python
+addFilter("wrong-script-interpreter .*/\.venv/bin/.*")
+
+# Python packages legitimately include development header files (.h, .cpp, etc.)
+# These are needed for building Python C extensions at runtime if needed
+addFilter("devel-file-in-non-devel-package .*/\.venv/.*\.h$")
+addFilter("devel-file-in-non-devel-package .*/\.venv/.*\.cpp$")
+addFilter("devel-file-in-non-devel-package .*/\.venv/.*\.hpp$")
+addFilter("devel-file-in-non-devel-package .*/\.venv/.*\.c$")
+
+# Python bytecode timestamp warnings are expected with pip-installed packages
+# The .pyc files are generated during installation and may have different timestamps
+addFilter("python-bytecode-inconsistent-mtime")
+
+# Some Python library files don't need shebangs as they're imported, not executed
+addFilter("script-without-shebang .*/\.venv/lib/python.*/site-packages/.*")
+
+# Zero-length files are used as package markers in Python (__init__.py, py.typed, etc.)
+addFilter("zero-length .*/\.venv/lib/python.*/site-packages/.*/__init__\.py$")
+addFilter("zero-length .*/\.venv/lib/python.*/site-packages/.*/py\.typed$")
+addFilter("zero-length .*/\.venv/lib/python.*/site-packages/.*\.pth$")
+
+# Scripts using /usr/bin/env are acceptable for cross-platform compatibility
+addFilter("env-script-interpreter")
+
+# Installing to /opt is acceptable for third-party/self-contained applications
+# This is the standard location for application-specific software
+addFilter("suse-filelist-forbidden-opt")
+
+# File duplication in Python packages is common and acceptable
+# Many packages include duplicate files (LICENSE, README, etc.)
+addFilter("files-duplicated-waste")
+
+# Hidden files in packages are acceptable (e.g., .dist-info directories)
+addFilter("hidden-file-or-dir .*/\.venv/lib/python.*/site-packages/.*")
+
+# Static libraries in Python packages are needed for some extensions
+addFilter("devel-file-in-non-devel-package .*/\.venv/.*\.a$")
+
+# pkg-config files in Python packages are needed for some C extensions
+addFilter("devel-file-in-non-devel-package .*/\.venv/.*\.pc$")
+
+# Documentation files in unexpected locations are fine for Python site-packages
+addFilter("package-with-huge-docs")
