@@ -72,6 +72,7 @@ cp -r backend %{buildroot}/opt/sysmanage/
 cp -r alembic %{buildroot}/opt/sysmanage/
 install -m 644 alembic.ini %{buildroot}/opt/sysmanage/
 install -m 644 requirements.txt %{buildroot}/opt/sysmanage/
+install -m 644 requirements-prod.txt %{buildroot}/opt/sysmanage/
 cp -r config %{buildroot}/opt/sysmanage/
 cp -r scripts %{buildroot}/opt/sysmanage/
 
@@ -88,7 +89,7 @@ python3.11 -m venv %{buildroot}/opt/sysmanage/.venv
 python3 -m venv %{buildroot}/opt/sysmanage/.venv
 %endif
 # Install from vendor directory (offline installation - no network required)
-%{buildroot}/opt/sysmanage/.venv/bin/pip install --no-index --find-links=%{_builddir}/vendor -r requirements.txt
+%{buildroot}/opt/sysmanage/.venv/bin/pip install --no-index --find-links=%{_builddir}/vendor -r requirements-prod.txt
 
 # Fix virtualenv paths to use final installation directory instead of buildroot
 sed -i 's|%{buildroot}||g' %{buildroot}/opt/sysmanage/.venv/pyvenv.cfg
