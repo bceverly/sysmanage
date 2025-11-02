@@ -187,11 +187,10 @@ jobs:
             --platform manylinux_2_17_x86_64 \
             --only-binary=:all:
 
-          # Pass 2: Download source distributions as fallback for packages without matching wheels
-          echo "Pass 2: Downloading source distributions as fallback..."
+          # Pass 2: Download for any platform (for pure Python packages without wheels)
+          echo "Pass 2: Downloading source distributions for pure Python packages..."
           pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
-            --python-version 311 \
-            --no-binary :all: 2>/dev/null || true
+            --no-deps 2>/dev/null || true
 
           echo ""
           echo "Downloaded packages (total: $(ls /tmp/vendor/ | wc -l)):"
