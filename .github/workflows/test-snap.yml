@@ -1,24 +1,6 @@
 name: Test Snap Build
 
 on:
-  push:
-    branches: [ main, develop ]
-    paths:
-      - 'installer/snap/**'
-      - 'backend/**'
-      - 'frontend/**'
-      - 'requirements.txt'
-      - 'scripts/update-requirements-prod.py'
-      - '.github/workflows/test-snap.yml'
-  pull_request:
-    branches: [ main, develop ]
-    paths:
-      - 'installer/snap/**'
-      - 'backend/**'
-      - 'frontend/**'
-      - 'requirements.txt'
-      - 'scripts/update-requirements-prod.py'
-      - '.github/workflows/test-snap.yml'
   workflow_dispatch:
 
 jobs:

@@ -1989,7 +1989,7 @@ installer-msi-all: build
 	@echo "=================================================="
 
 # Snap package targets
-snap: build
+snap:
 	@echo ""
 	@echo "=================================================="
 	@echo "Building Snap package"
