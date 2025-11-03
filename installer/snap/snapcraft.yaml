@@ -19,6 +19,14 @@ description: |
   The server runs as a service and communicates with SysManage agents
   deployed across your infrastructure to provide centralized management.
 
+license: AGPL-3.0
+website: https://sysmanage.org
+source-code: https://github.com/bceverly/sysmanage
+issues: https://github.com/bceverly/sysmanage/issues
+contact: https://github.com/bceverly/sysmanage/issues
+
+icon: snap/gui/icon.png
+
 grade: stable
 confinement: strict
 
