@@ -28,6 +28,7 @@ jobs:
         id: build_snap
         with:
           path: installer/snap
+          snapcraft-channel: latest/edge
 
       - name: List built snap
         run: |
