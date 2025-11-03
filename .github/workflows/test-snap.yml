@@ -6,7 +6,7 @@ on:
 jobs:
   build-snap:
     name: Build Snap Package
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
@@ -19,41 +19,37 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install and configure LXD
+      - name: Generate requirements-prod.txt
         run: |
-          sudo snap install lxd
-          sudo lxd init --auto
-          sudo usermod -a -G lxd $USER
+          python3 scripts/update-requirements-prod.py
 
-          # Wait for LXD to be ready
-          sudo lxd waitready
+      - name: Build snap with snapcraft
+        uses: snapcore/action-build@v1
+        id: build_snap
+        with:
+          path: installer/snap
 
-          # Configure LXD network
-          sudo lxc network set lxdbr0 ipv6.address none
-
-          # Need to use sg to activate the group without logging out
-          sudo snap install snapcraft --classic
-
-      - name: Build snap
+      - name: List built snap
         run: |
-          # Use sg to run with lxd group active
-          sg lxd -c "make snap"
+          ls -lh installer/snap/*.snap
 
-      - name: Verify snap was created
+      - name: Get snap filename
+        id: snap_file
         run: |
-          ls -lh *.snap
-          snap info --verbose $(ls -t *.snap | head -1)
+          SNAP_FILE=$(ls installer/snap/*.snap | head -1)
+          echo "snap_file=$SNAP_FILE" >> $GITHUB_OUTPUT
+          echo "Built snap: $SNAP_FILE"
 
       - name: Upload snap artifact
         uses: actions/upload-artifact@v4
         with:
           name: sysmanage-snap
-          path: '*.snap'
+          path: 'installer/snap/*.snap'
           retention-days: 7
 
       - name: Test snap installation
         run: |
-          SNAP_FILE=$(ls -t *.snap | head -1)
+          SNAP_FILE="${{ steps.snap_file.outputs.snap_file }}"
           echo "Testing installation of $SNAP_FILE"
           sudo snap install --dangerous $SNAP_FILE
 
@@ -61,7 +57,7 @@ jobs:
           snap list sysmanage
 
           # Check snap info
-          snap info --verbose sysmanage
+          snap info sysmanage
 
           # Verify confinement is strict
           if ! snap info sysmanage | grep -q "confinement:.*strict"; then
@@ -69,10 +65,6 @@ jobs:
             exit 1
           fi
           echo "✓ Snap is using strict confinement"
-
-          # Verify snap data directories exist
-          echo "Checking snap data directories..."
-          sudo ls -la /var/snap/sysmanage/ || true
 
       - name: Cleanup
         if: always()
