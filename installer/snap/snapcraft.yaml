@@ -1,0 +1,137 @@
+name: sysmanage
+base: core24
+version: git
+summary: Centralized system management server with web-based interface
+description: |
+  SysManage is a comprehensive centralized system management server with a
+  modern web-based interface. It provides:
+
+  * Agent management and monitoring
+  * System metrics and health monitoring
+  * Comprehensive reporting system with PDF generation
+  * JWT-based authentication with mTLS security
+  * Multi-user management system with RBAC
+  * Package inventory and updates
+  * Certificate management
+  * Real-time WebSocket communication
+  * Cross-platform support (Linux, Windows, macOS, FreeBSD, OpenBSD)
+
+  The server runs as a service and communicates with SysManage agents
+  deployed across your infrastructure to provide centralized management.
+
+grade: stable
+confinement: strict
+
+platforms:
+  amd64:
+    build-on: [amd64]
+    build-for: [amd64]
+  arm64:
+    build-on: [arm64]
+    build-for: [arm64]
+
+apps:
+  sysmanage:
+    command: bin/sysmanage-wrapper
+    daemon: simple
+    restart-condition: always
+    restart-delay: 10s
+    plugs:
+      - network
+      - network-bind
+    environment:
+      PYTHONPATH: $SNAP/lib/python3.12/site-packages
+      PATH: $SNAP/usr/bin:$SNAP/bin:$PATH
+
+parts:
+  backend:
+    plugin: python
+    source: .
+    source-type: local
+    stage-packages:
+      - libpq5
+      - postgresql-client
+    build-packages:
+      - python3-dev
+      - python3-pip
+      - python3-setuptools
+      - libpq-dev
+      - gcc
+      - g++
+      - libffi-dev
+      - libssl-dev
+    override-build: |
+      # Generate requirements-prod.txt if it doesn't exist
+      if [ ! -f "$CRAFT_PART_SRC/requirements-prod.txt" ]; then
+        python3 "$CRAFT_PART_SRC/scripts/update-requirements-prod.py"
+      fi
+      # Install Python packages using requirements-prod.txt
+      pip install --prefix="$CRAFT_PART_INSTALL" -r "$CRAFT_PART_SRC/requirements-prod.txt"
+      # Copy application files
+      mkdir -p $CRAFT_PART_INSTALL/app
+      cp -r $CRAFT_PART_SRC/backend $CRAFT_PART_INSTALL/app/
+      cp -r $CRAFT_PART_SRC/alembic $CRAFT_PART_INSTALL/app/
+      cp $CRAFT_PART_SRC/alembic.ini $CRAFT_PART_INSTALL/app/
+      cp -r $CRAFT_PART_SRC/config $CRAFT_PART_INSTALL/app/
+      cp -r $CRAFT_PART_SRC/scripts $CRAFT_PART_INSTALL/app/
+
+  frontend:
+    plugin: nil
+    source: frontend
+    source-type: local
+    build-packages:
+      - curl
+    override-build: |
+      # Install Node.js 20 LTS from NodeSource
+      curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+      apt-get install -y nodejs
+
+      # Now npm should be recent enough
+      npm install --legacy-peer-deps
+      npm run build
+      mkdir -p $CRAFT_PART_INSTALL/app/frontend
+      cp -r dist $CRAFT_PART_INSTALL/app/frontend/
+      cp -r public $CRAFT_PART_INSTALL/app/frontend/
+
+  wrapper:
+    plugin: nil
+    override-build: |
+      mkdir -p $CRAFT_PART_INSTALL/bin
+      cat > $CRAFT_PART_INSTALL/bin/sysmanage-wrapper <<'EOF'
+      #!/bin/bash
+      set -e
+
+      # Set up environment using snap-specific paths
+      # $SNAP_DATA: writable per-revision data (/var/snap/sysmanage/current)
+      # $SNAP_COMMON: writable common data (/var/snap/sysmanage/common)
+      export SYSMANAGE_CONFIG_PATH="${SYSMANAGE_CONFIG_PATH:-$SNAP_DATA/sysmanage.yaml}"
+      export SYSMANAGE_CERT_PATH="${SYSMANAGE_CERT_PATH:-$SNAP_DATA/certs}"
+      export SYSMANAGE_LOG_DIR="${SYSMANAGE_LOG_DIR:-$SNAP_COMMON/logs}"
+      export PYTHONPATH="$SNAP/app:$SNAP/lib/python3.12/site-packages"
+
+      # Ensure directories exist
+      mkdir -p "$SYSMANAGE_CERT_PATH"
+      mkdir -p "$SYSMANAGE_LOG_DIR"
+
+      # Check for config file, copy example if missing
+      if [ ! -f "$SYSMANAGE_CONFIG_PATH" ]; then
+        echo "Configuration file not found at $SYSMANAGE_CONFIG_PATH"
+        echo "Creating from example template..."
+        cp "$SNAP/app/config/sysmanage.yaml.example" "$SYSMANAGE_CONFIG_PATH"
+        echo ""
+        echo "IMPORTANT: You must edit the configuration file before starting:"
+        echo "  $SYSMANAGE_CONFIG_PATH"
+        echo ""
+        echo "At minimum, configure:"
+        echo "  - Database connection settings"
+        echo "  - JWT secret key"
+        echo "  - TLS certificates"
+        echo ""
+        exit 1
+      fi
+
+      # Start the application
+      cd $SNAP/app
+      exec $SNAP/usr/bin/python3 -m backend.main
+      EOF
+      chmod +x $CRAFT_PART_INSTALL/bin/sysmanage-wrapper

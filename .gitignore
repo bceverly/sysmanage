@@ -237,9 +237,9 @@ installer/windows/nssm.exe
 # Auto-generated requirements file (generated from requirements.txt)
 requirements-prod.txt
 
-# Snap build artifacts and symlinks
-snapcraft.yaml
-snap.yaml
+# Snap build artifacts and symlinks (root level only)
+/snapcraft.yaml
+/snap.yaml
 *.snap
-prime/
-stage/
+/prime/
+/stage/
