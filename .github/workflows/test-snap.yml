@@ -19,19 +19,18 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install snapcraft
+      - name: Install and configure LXD
         run: |
+          sudo snap install lxd
+          sudo lxd init --auto
+          sudo usermod -a -G lxd $USER
+          # Need to use sg to activate the group without logging out
           sudo snap install snapcraft --classic
-
-      - name: Debug - List files
-        run: |
-          pwd
-          ls -la
-          ls -la installer/snap/ || echo "installer/snap/ not found"
 
       - name: Build snap
         run: |
-          make snap
+          # Use sg to run with lxd group active
+          sg lxd -c "make snap"
 
       - name: Verify snap was created
         run: |
