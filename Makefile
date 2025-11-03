@@ -35,7 +35,7 @@ help:
 	@echo "  make installer-rpm-centos - Build CentOS/RHEL/Fedora .rpm package (explicit)"
 	@echo "  make installer-rpm-opensuse - Build OpenSUSE/SLES .rpm package with vendor deps (explicit)"
 	@echo "  make installer-openbsd - Build OpenBSD port tarball (explicit)"
-	@echo "  make snap              - Build Snap package (strict confinement, core24)"
+	@echo "  make snap              - Build Snap package (strict confinement, core22, Python 3.10)"
 	@echo "  make snap-clean        - Clean snap build artifacts"
 	@echo "  make snap-install      - Install snap package locally for testing"
 	@echo "  make snap-uninstall    - Uninstall snap package"
@@ -485,6 +485,49 @@ else
 			}; \
 		else \
 			echo "✓ snapcraft already installed"; \
+		fi; \
+		echo "[INFO] Checking for LXD..."; \
+		if ! snap list 2>/dev/null | grep -q lxd; then \
+			echo "LXD not found - installing..."; \
+			echo "Running: sudo snap install lxd"; \
+			sudo snap install lxd || { \
+				echo "[WARNING] Could not install LXD. Run manually: sudo snap install lxd"; \
+			}; \
+		else \
+			echo "✓ LXD already installed"; \
+		fi; \
+		echo "[INFO] Configuring LXD..."; \
+		sudo lxd init --auto 2>/dev/null || true; \
+		echo "[INFO] Adding /dev/random, /dev/urandom, and /dev/zero to LXD profiles..."; \
+		lxc profile device show default | grep -q "random:" || { \
+			lxc profile device add default random unix-char path=/dev/random source=/dev/random || \
+			echo "[WARNING] Could not add /dev/random to LXD profile. Run manually: lxc profile device add default random unix-char path=/dev/random source=/dev/random"; \
+		}; \
+		lxc profile device show default | grep -q "urandom:" || { \
+			lxc profile device add default urandom unix-char path=/dev/urandom source=/dev/urandom || \
+			echo "[WARNING] Could not add /dev/urandom to LXD profile. Run manually: lxc profile device add default urandom unix-char path=/dev/urandom source=/dev/urandom"; \
+		}; \
+		lxc profile device show default | grep -q "zero:" || { \
+			lxc profile device add default zero unix-char path=/dev/zero source=/dev/zero || \
+			echo "[WARNING] Could not add /dev/zero to LXD profile. Run manually: lxc profile device add default zero unix-char path=/dev/zero source=/dev/zero"; \
+		}; \
+		echo "✓ LXD configured for snapcraft"; \
+		if ! groups | grep -q lxd; then \
+			echo ""; \
+			echo "=============================================="; \
+			echo "IMPORTANT: Adding your user to the lxd group"; \
+			echo "=============================================="; \
+			sudo usermod -aG lxd $$USER || { \
+				echo "[WARNING] Could not add user to lxd group. Run manually: sudo usermod -aG lxd $$USER"; \
+			}; \
+			echo ""; \
+			echo "✓ You have been added to the lxd group"; \
+			echo ""; \
+			echo "IMPORTANT: You MUST log out and log back in for this to take effect!"; \
+			echo "          After logging back in, you can run 'make snap' to build snaps."; \
+			echo ""; \
+		else \
+			echo "✓ User already in lxd group"; \
 		fi; \
 		echo "[INFO] Checking for Flatpak build tools..."; \
 		MISSING_FLATPAK=""; \
@@ -2004,14 +2047,24 @@ snap:
 		echo "ERROR: installer/snap/snapcraft.yaml not found"; \
 		exit 1; \
 	fi
+	@echo "Cleaning old LXD containers..."
+	@$(MAKE) snap-clean 2>/dev/null || true
 	@ln -sf installer/snap/snapcraft.yaml snapcraft.yaml
 	@echo "Generating requirements-prod.txt..."
 	@python3 scripts/update-requirements-prod.py
 	@echo "Building snap package..."
-	@snapcraft pack
+	@echo "This will take several minutes due to Python compilation and LXD container setup..."
+	@echo ""
+	@snapcraft pack --verbose
 	@echo ""
 	@echo "✓ Snap package built successfully!"
 	@echo ""
+	@SNAP_FILE=$$(ls -t *.snap 2>/dev/null | head -1); \
+	if [ -n "$$SNAP_FILE" ]; then \
+		echo "Package: $$SNAP_FILE"; \
+		ls -lh "$$SNAP_FILE"; \
+		echo ""; \
+	fi
 	@echo "To install locally:"
 	@echo "  make snap-install"
 	@echo ""
@@ -2019,7 +2072,18 @@ snap:
 snap-clean:
 	@echo "Cleaning snap build artifacts..."
 	@rm -rf parts/ prime/ stage/ *.snap snapcraft.yaml
-	@snapcraft clean 2>/dev/null || true
+	@echo "Cleaning LXD containers from snapcraft project..."
+	@if command -v lxc >/dev/null 2>&1; then \
+		lxc --project snapcraft list --format=csv -c n 2>/dev/null | tail -n +1 | while read container; do \
+			if [ -n "$$container" ] && [ "$$container" != "{}" ]; then \
+				echo "  Deleting container: $$container"; \
+				lxc --project snapcraft delete "$$container" --force 2>/dev/null || true; \
+			fi; \
+		done; \
+		echo "✓ LXD containers cleaned"; \
+	else \
+		echo "✓ LXD not available, skipping container cleanup"; \
+	fi
 	@echo "✓ Snap build artifacts cleaned"
 
 snap-install:

@@ -1,0 +1,18 @@
+# Snapcraft ignore file - exclude paths that shouldn't be copied during snap build
+/snap
+snap
+.git
+.venv
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.coverage
+htmlcov
+*.snap
+parts
+prime
+stage
+node_modules
+.vscode
+.idea

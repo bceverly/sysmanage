@@ -1,5 +1,5 @@
 name: sysmanage
-base: core24
+base: core22
 version: git
 summary: Centralized system management server with web-based interface
 description: |
@@ -22,13 +22,8 @@ description: |
 grade: stable
 confinement: strict
 
-platforms:
-  amd64:
-    build-on: [amd64]
-    build-for: [amd64]
-  arm64:
-    build-on: [arm64]
-    build-for: [arm64]
+architectures:
+  - build-on: amd64
 
 apps:
   sysmanage:
@@ -39,54 +34,84 @@ apps:
     plugs:
       - network
       - network-bind
-    environment:
-      PYTHONPATH: $SNAP/lib/python3.12/site-packages
-      PATH: $SNAP/usr/bin:$SNAP/bin:$PATH
 
 parts:
-  backend:
-    plugin: python
-    source: ../..
-    source-type: local
-    stage-packages:
-      - libpq5
-      - postgresql-client
+  python310:
+    plugin: nil
+    source: https://www.python.org/ftp/python/3.10.15/Python-3.10.15.tgz
+    source-checksum: sha256/a27864e5ba2a4474f8f6c58ab92ff52767ac8b66f1646923355a53fe3ef15074
+    build-attributes:
+      - enable-patchelf
     build-packages:
-      - python3-dev
-      - python3-pip
-      - python3-setuptools
+      - build-essential
+      - libssl-dev
+      - zlib1g-dev
+      - libncurses5-dev
+      - libncursesw5-dev
+      - libreadline-dev
+      - libsqlite3-dev
+      - libgdbm-dev
+      - libdb-dev
+      - libbz2-dev
+      - libexpat1-dev
+      - liblzma-dev
+      - libffi-dev
+      - uuid-dev
+      - wget
+    override-build: |
+      ./configure --prefix=/usr --enable-optimizations --enable-shared LDFLAGS="-Wl,-rpath,/usr/lib"
+      make -j$(nproc)
+      make DESTDIR=$CRAFT_PART_INSTALL install
+      # Ensure shared libraries can be found
+      ldconfig -n $CRAFT_PART_INSTALL/usr/lib || true
+
+  backend:
+    after: [python310]
+    plugin: nil
+    build-packages:
       - libpq-dev
       - gcc
       - g++
       - libffi-dev
       - libssl-dev
     override-build: |
+      # Copy source files from project root (avoiding /snap mounts)
+      PROJECT_ROOT="$CRAFT_PROJECT_DIR"
+
       # Generate requirements-prod.txt if it doesn't exist
-      if [ ! -f "$CRAFT_PART_SRC/requirements-prod.txt" ]; then
-        python3 "$CRAFT_PART_SRC/scripts/update-requirements-prod.py"
+      if [ ! -f "$PROJECT_ROOT/requirements-prod.txt" ]; then
+        python3 "$PROJECT_ROOT/scripts/update-requirements-prod.py"
       fi
-      # Install Python packages using requirements-prod.txt
-      pip install --prefix="$CRAFT_PART_INSTALL" -r "$CRAFT_PART_SRC/requirements-prod.txt"
+
+      # Install Python packages using our compiled Python 3.10
+      export LD_LIBRARY_PATH=$CRAFT_STAGE/usr/lib:${LD_LIBRARY_PATH:-}
+      export PYTHONHASHSEED=0
+      $CRAFT_STAGE/usr/bin/python3.10 -m pip install --no-cache-dir --target=$CRAFT_PART_INSTALL/lib/python3.10/site-packages \
+        -r "$PROJECT_ROOT/requirements-prod.txt"
+
       # Copy application files
       mkdir -p $CRAFT_PART_INSTALL/app
-      cp -r $CRAFT_PART_SRC/backend $CRAFT_PART_INSTALL/app/
-      cp -r $CRAFT_PART_SRC/alembic $CRAFT_PART_INSTALL/app/
-      cp $CRAFT_PART_SRC/alembic.ini $CRAFT_PART_INSTALL/app/
-      cp -r $CRAFT_PART_SRC/config $CRAFT_PART_INSTALL/app/
-      cp -r $CRAFT_PART_SRC/scripts $CRAFT_PART_INSTALL/app/
+      cp -r $PROJECT_ROOT/backend $CRAFT_PART_INSTALL/app/
+      cp -r $PROJECT_ROOT/alembic $CRAFT_PART_INSTALL/app/
+      cp $PROJECT_ROOT/alembic.ini $CRAFT_PART_INSTALL/app/
+      cp -r $PROJECT_ROOT/config $CRAFT_PART_INSTALL/app/
+      cp -r $PROJECT_ROOT/scripts $CRAFT_PART_INSTALL/app/
 
   frontend:
     plugin: nil
-    source: ../../frontend
-    source-type: local
+    build-attributes:
+      - enable-patchelf
     build-packages:
       - curl
+      - ca-certificates
+      - gnupg
     override-build: |
       # Install Node.js 20 LTS from NodeSource
       curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
       apt-get install -y nodejs
 
-      # Now npm should be recent enough
+      # Build frontend from project root
+      cd $CRAFT_PROJECT_DIR/frontend
       npm install --legacy-peer-deps
       npm run build
       mkdir -p $CRAFT_PART_INSTALL/app/frontend
@@ -107,7 +132,8 @@ parts:
       export SYSMANAGE_CONFIG_PATH="${SYSMANAGE_CONFIG_PATH:-$SNAP_DATA/sysmanage.yaml}"
       export SYSMANAGE_CERT_PATH="${SYSMANAGE_CERT_PATH:-$SNAP_DATA/certs}"
       export SYSMANAGE_LOG_DIR="${SYSMANAGE_LOG_DIR:-$SNAP_COMMON/logs}"
-      export PYTHONPATH="$SNAP/app:$SNAP/lib/python3.12/site-packages"
+      export PYTHONPATH="$SNAP/app:$SNAP/lib/python3.10/site-packages"
+      export LD_LIBRARY_PATH="$SNAP/usr/lib:$LD_LIBRARY_PATH"
 
       # Ensure directories exist
       mkdir -p "$SYSMANAGE_CERT_PATH"
@@ -132,6 +158,6 @@ parts:
 
       # Start the application
       cd $SNAP/app
-      exec $SNAP/usr/bin/python3 -m backend.main
+      exec $SNAP/usr/bin/python3.10 -m backend.main
       EOF
       chmod +x $CRAFT_PART_INSTALL/bin/sysmanage-wrapper
