@@ -24,6 +24,13 @@ jobs:
           sudo snap install lxd
           sudo lxd init --auto
           sudo usermod -a -G lxd $USER
+
+          # Wait for LXD to be ready
+          sudo lxd waitready
+
+          # Configure LXD network
+          sudo lxc network set lxdbr0 ipv6.address none
+
           # Need to use sg to activate the group without logging out
           sudo snap install snapcraft --classic
 
