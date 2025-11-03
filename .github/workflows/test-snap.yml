@@ -23,22 +23,24 @@ jobs:
         run: |
           python3 scripts/update-requirements-prod.py
 
+      - name: Copy snapcraft.yaml to root
+        run: |
+          cp installer/snap/snapcraft.yaml .
+
       - name: Build snap with snapcraft
         uses: snapcore/action-build@v1
         id: build_snap
         with:
-          path: installer/snap
           snapcraft-channel: latest/edge
-          snapcraft-args: pack
 
       - name: List built snap
         run: |
-          ls -lh installer/snap/*.snap
+          ls -lh *.snap
 
       - name: Get snap filename
         id: snap_file
         run: |
-          SNAP_FILE=$(ls installer/snap/*.snap | head -1)
+          SNAP_FILE=$(ls *.snap | head -1)
           echo "snap_file=$SNAP_FILE" >> $GITHUB_OUTPUT
           echo "Built snap: $SNAP_FILE"
 
@@ -46,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sysmanage-snap
-          path: 'installer/snap/*.snap'
+          path: '*.snap'
           retention-days: 7
 
       - name: Test snap installation
