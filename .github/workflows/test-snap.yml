@@ -60,12 +60,24 @@ jobs:
           # Verify snap is installed
           snap list sysmanage
 
-          # Check snap info
-          snap info sysmanage
+          # Check snap info (both local and installed)
+          echo "=== Snap info from store ==="
+          snap info sysmanage || true
 
-          # Verify confinement is strict
-          if ! snap info sysmanage | grep -q "confinement:.*strict"; then
-            echo "ERROR: Snap is not using strict confinement!"
+          echo "=== Snap list with verbose ==="
+          snap list --all sysmanage
+
+          # Verify confinement is strict by checking the snap file metadata
+          echo "=== Checking snap file metadata ==="
+          unsquashfs -l "$SNAP_FILE" | grep -E "meta/(snap.yaml|gui)" | head -5 || true
+          unsquashfs -cat "$SNAP_FILE" meta/snap.yaml | grep -E "^(name|confinement):" || true
+
+          # Check confinement from the yaml
+          CONFINEMENT=$(unsquashfs -cat "$SNAP_FILE" meta/snap.yaml | grep "^confinement:" | awk '{print $2}')
+          echo "Detected confinement: $CONFINEMENT"
+
+          if [ "$CONFINEMENT" != "strict" ]; then
+            echo "ERROR: Snap is not using strict confinement! Found: $CONFINEMENT"
             exit 1
           fi
           echo "✓ Snap is using strict confinement"
