@@ -23,6 +23,12 @@ jobs:
         run: |
           sudo snap install snapcraft --classic
 
+      - name: Debug - List files
+        run: |
+          pwd
+          ls -la
+          ls -la installer/snap/ || echo "installer/snap/ not found"
+
       - name: Build snap
         run: |
           make snap
