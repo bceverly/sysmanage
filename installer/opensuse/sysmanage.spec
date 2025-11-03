@@ -115,8 +115,10 @@ if [ -f sbom/backend-sbom.json ] || [ -f sbom/frontend-sbom.json ]; then
 fi
 
 # Generate file list for SBOM files (if they exist)
-echo "%dir /usr/share/doc/sysmanage" > %{_builddir}/sbom-files.list
+# Create empty file list - will populate only if SBOM files exist
+> %{_builddir}/sbom-files.list
 if [ -d %{buildroot}/usr/share/doc/sysmanage/sbom ]; then
+    echo "%dir /usr/share/doc/sysmanage" >> %{_builddir}/sbom-files.list
     echo "%dir /usr/share/doc/sysmanage/sbom" >> %{_builddir}/sbom-files.list
     find %{buildroot}/usr/share/doc/sysmanage/sbom -type f | \
         sed "s|%{buildroot}||g" >> %{_builddir}/sbom-files.list
