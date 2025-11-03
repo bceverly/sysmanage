@@ -1,5 +1,4 @@
 # Snapcraft ignore file - exclude paths that shouldn't be copied during snap build
-/snap
 snap
 .git
 .venv
@@ -16,3 +15,6 @@ stage
 node_modules
 .vscode
 .idea
+installer/snap/parts
+installer/snap/prime
+installer/snap/stage

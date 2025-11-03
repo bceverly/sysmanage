@@ -74,28 +74,44 @@ parts:
       - g++
       - libffi-dev
       - libssl-dev
+      - rsync
     override-build: |
-      # Copy source files from project root (avoiding /snap mounts)
-      PROJECT_ROOT="$CRAFT_PROJECT_DIR"
+      # $CRAFT_PROJECT_DIR is the project root when running snapcraft from root with path to snapcraft.yaml
+      # Create temp build directory
+      mkdir -p /tmp/build
+
+      # Copy only the files and directories we need using cp with exclusions
+      cp "$CRAFT_PROJECT_DIR/requirements.txt" /tmp/build/
+      cp -r "$CRAFT_PROJECT_DIR/scripts" /tmp/build/
+      cp -r "$CRAFT_PROJECT_DIR/backend" /tmp/build/
+      cp -r "$CRAFT_PROJECT_DIR/alembic" /tmp/build/
+      cp "$CRAFT_PROJECT_DIR/alembic.ini" /tmp/build/
+      cp -r "$CRAFT_PROJECT_DIR/config" /tmp/build/
+
+      # Copy requirements-prod.txt if it exists
+      if [ -f "$CRAFT_PROJECT_DIR/requirements-prod.txt" ]; then
+        cp "$CRAFT_PROJECT_DIR/requirements-prod.txt" /tmp/build/
+      fi
 
       # Generate requirements-prod.txt if it doesn't exist
-      if [ ! -f "$PROJECT_ROOT/requirements-prod.txt" ]; then
-        python3 "$PROJECT_ROOT/scripts/update-requirements-prod.py"
+      if [ ! -f "/tmp/build/requirements-prod.txt" ]; then
+        cd /tmp/build
+        python3 scripts/update-requirements-prod.py
       fi
 
       # Install Python packages using our compiled Python 3.10
       export LD_LIBRARY_PATH=$CRAFT_STAGE/usr/lib:${LD_LIBRARY_PATH:-}
       export PYTHONHASHSEED=0
       $CRAFT_STAGE/usr/bin/python3.10 -m pip install --no-cache-dir --target=$CRAFT_PART_INSTALL/lib/python3.10/site-packages \
-        -r "$PROJECT_ROOT/requirements-prod.txt"
+        -r /tmp/build/requirements-prod.txt
 
       # Copy application files
       mkdir -p $CRAFT_PART_INSTALL/app
-      cp -r $PROJECT_ROOT/backend $CRAFT_PART_INSTALL/app/
-      cp -r $PROJECT_ROOT/alembic $CRAFT_PART_INSTALL/app/
-      cp $PROJECT_ROOT/alembic.ini $CRAFT_PART_INSTALL/app/
-      cp -r $PROJECT_ROOT/config $CRAFT_PART_INSTALL/app/
-      cp -r $PROJECT_ROOT/scripts $CRAFT_PART_INSTALL/app/
+      cp -r /tmp/build/backend $CRAFT_PART_INSTALL/app/
+      cp -r /tmp/build/alembic $CRAFT_PART_INSTALL/app/
+      cp /tmp/build/alembic.ini $CRAFT_PART_INSTALL/app/
+      cp -r /tmp/build/config $CRAFT_PART_INSTALL/app/
+      cp -r /tmp/build/scripts $CRAFT_PART_INSTALL/app/
 
   frontend:
     plugin: nil
@@ -105,13 +121,21 @@ parts:
       - curl
       - ca-certificates
       - gnupg
+      - rsync
     override-build: |
+      # $CRAFT_PROJECT_DIR is the project root when running snapcraft from root with path to snapcraft.yaml
+      # Create temp build directory
+      mkdir -p /tmp/build-frontend
+
+      # Copy the frontend directory (excluding node_modules and dist which will be rebuilt)
+      cp -r "$CRAFT_PROJECT_DIR/frontend/"* /tmp/build-frontend/
+
       # Install Node.js 20 LTS from NodeSource
       curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
       apt-get install -y nodejs
 
-      # Build frontend from project root
-      cd $CRAFT_PROJECT_DIR/frontend
+      # Build frontend
+      cd /tmp/build-frontend
       npm install --legacy-peer-deps
       npm run build
       mkdir -p $CRAFT_PART_INSTALL/app/frontend

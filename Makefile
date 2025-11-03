@@ -2049,9 +2049,10 @@ snap:
 	fi
 	@echo "Cleaning old LXD containers..."
 	@$(MAKE) snap-clean 2>/dev/null || true
-	@ln -sf installer/snap/snapcraft.yaml snapcraft.yaml
 	@echo "Generating requirements-prod.txt..."
 	@python3 scripts/update-requirements-prod.py
+	@echo "Copying snapcraft.yaml to project root..."
+	@cp installer/snap/snapcraft.yaml .
 	@echo "Building snap package..."
 	@echo "This will take several minutes due to Python compilation and LXD container setup..."
 	@echo ""
@@ -2071,7 +2072,7 @@ snap:
 
 snap-clean:
 	@echo "Cleaning snap build artifacts..."
-	@rm -rf parts/ prime/ stage/ *.snap snapcraft.yaml
+	@rm -rf parts/ prime/ stage/ *.snap snapcraft.yaml installer/snap/parts/ installer/snap/prime/ installer/snap/stage/ installer/snap/*.snap
 	@echo "Cleaning LXD containers from snapcraft project..."
 	@if command -v lxc >/dev/null 2>&1; then \
 		lxc --project snapcraft list --format=csv -c n 2>/dev/null | tail -n +1 | while read container; do \
@@ -2088,7 +2089,7 @@ snap-clean:
 
 snap-install:
 	@echo "Installing snap package..."
-	@if [ ! -f *.snap ]; then \
+	@if ! ls *.snap 1> /dev/null 2>&1; then \
 		echo "ERROR: No snap file found. Run 'make snap' first."; \
 		exit 1; \
 	fi
