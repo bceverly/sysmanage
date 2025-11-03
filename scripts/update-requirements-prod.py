@@ -18,10 +18,15 @@ def parse_requirements(requirements_file: Path) -> tuple[list[str], list[str]]:
         tuple: (production_deps, dev_deps)
     """
     # Dev/test tools that should be excluded from production
+    # These are only needed for development, testing, linting, and security scanning
     DEV_PACKAGES = {
+        # Code quality and linting
         "black", "isort", "pylint", "astroid", "mccabe", "dill", "tomlkit",
-        "pytest", "pytest-asyncio", "pytest-cov", "coverage", "iniconfig",
-        "pluggy", "bandit", "safety", "safety-schemas", "semgrep",
+        # Testing frameworks and tools
+        "pytest", "pytest-asyncio", "pytest-cov", "coverage", "iniconfig", "pluggy",
+        # Security scanning tools (used in CI/CD, not at runtime)
+        "bandit", "safety", "safety-schemas", "semgrep",
+        # UI testing and browser automation (used in tests, not at runtime)
         "playwright", "selenium", "webdriver-manager"
     }
 

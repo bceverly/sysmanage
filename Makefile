@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom
+.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall
 
 # Default target
 help:
@@ -35,6 +35,10 @@ help:
 	@echo "  make installer-rpm-centos - Build CentOS/RHEL/Fedora .rpm package (explicit)"
 	@echo "  make installer-rpm-opensuse - Build OpenSUSE/SLES .rpm package with vendor deps (explicit)"
 	@echo "  make installer-openbsd - Build OpenBSD port tarball (explicit)"
+	@echo "  make snap              - Build Snap package (strict confinement, core24)"
+	@echo "  make snap-clean        - Clean snap build artifacts"
+	@echo "  make snap-install      - Install snap package locally for testing"
+	@echo "  make snap-uninstall    - Uninstall snap package"
 	@echo "  make sbom              - Generate Software Bill of Materials (CycloneDX format)"
 	@echo ""
 	@echo "OpenBAO (Vault) targets:"
@@ -1984,23 +1988,71 @@ installer-msi-all: build
 	@echo "All Windows installers built!"
 	@echo "=================================================="
 
-# Development environment setup for Windows
-install-dev:
-	@echo "=== Installing development dependencies ==="
+# Snap package targets
+snap: build
 	@echo ""
-	@echo "Installing WiX Toolset (if not already installed)..."
-	@powershell -Command "if (-not (Get-Command wix -ErrorAction SilentlyContinue)) { \
-		Write-Host 'WiX Toolset not found. Please install manually from:'; \
-		Write-Host 'https://wixtoolset.org/docs/intro/'; \
-		Write-Host ''; \
-		Write-Host 'Run: dotnet tool install --global wix'; \
+	@echo "=================================================="
+	@echo "Building Snap package"
+	@echo "=================================================="
+	@echo ""
+	@if ! command -v snapcraft >/dev/null 2>&1; then \
+		echo "ERROR: snapcraft not found"; \
+		echo "Install with: sudo snap install snapcraft --classic"; \
 		exit 1; \
-	} else { \
-		Write-Host 'WiX Toolset is already installed'; \
-		wix --version; \
-	}"
+	fi
+	@if [ ! -f "installer/snap/snapcraft.yaml" ]; then \
+		echo "ERROR: installer/snap/snapcraft.yaml not found"; \
+		exit 1; \
+	fi
+	@ln -sf installer/snap/snapcraft.yaml snapcraft.yaml
+	@echo "Generating requirements-prod.txt..."
+	@python3 scripts/update-requirements-prod.py
+	@echo "Building snap package..."
+	@snapcraft pack
 	@echo ""
-	@echo "Development environment ready for Windows MSI builds"
+	@echo "✓ Snap package built successfully!"
+	@echo ""
+	@echo "To install locally:"
+	@echo "  make snap-install"
+	@echo ""
+
+snap-clean:
+	@echo "Cleaning snap build artifacts..."
+	@rm -rf parts/ prime/ stage/ *.snap snapcraft.yaml
+	@snapcraft clean 2>/dev/null || true
+	@echo "✓ Snap build artifacts cleaned"
+
+snap-install:
+	@echo "Installing snap package..."
+	@if [ ! -f *.snap ]; then \
+		echo "ERROR: No snap file found. Run 'make snap' first."; \
+		exit 1; \
+	fi
+	@SNAP_FILE=$$(ls -t *.snap | head -1); \
+	echo "Installing $$SNAP_FILE..."; \
+	sudo snap install --dangerous $$SNAP_FILE
+	@echo ""
+	@echo "✓ Snap installed successfully!"
+	@echo ""
+	@echo "Configuration:"
+	@echo "  The snap uses strict confinement and stores data in:"
+	@echo "    Config: /var/snap/sysmanage/current/sysmanage.yaml"
+	@echo "    Certs:  /var/snap/sysmanage/current/certs/"
+	@echo "    Logs:   /var/snap/sysmanage/common/logs/"
+	@echo ""
+	@echo "  On first run, a default config will be created from the example."
+	@echo "  Edit it with: sudo nano /var/snap/sysmanage/current/sysmanage.yaml"
+	@echo ""
+	@echo "  Start service: sudo snap start sysmanage"
+	@echo "  View logs: sudo snap logs sysmanage"
+	@echo ""
+
+snap-uninstall:
+	@echo "Uninstalling sysmanage snap..."
+	@sudo snap remove sysmanage || echo "Snap not installed or already removed"
+	@echo "✓ Snap uninstalled"
+
+# Development environment setup for Windows
 
 # SBOM (Software Bill of Materials) generation target
 sbom:

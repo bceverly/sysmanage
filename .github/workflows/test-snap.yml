@@ -1,0 +1,86 @@
+name: Test Snap Build
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'installer/snap/**'
+      - 'backend/**'
+      - 'frontend/**'
+      - 'requirements.txt'
+      - 'scripts/update-requirements-prod.py'
+      - '.github/workflows/test-snap.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'installer/snap/**'
+      - 'backend/**'
+      - 'frontend/**'
+      - 'requirements.txt'
+      - 'scripts/update-requirements-prod.py'
+      - '.github/workflows/test-snap.yml'
+  workflow_dispatch:
+
+jobs:
+  build-snap:
+    name: Build Snap Package
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install snapcraft
+        run: |
+          sudo snap install snapcraft --classic
+
+      - name: Build snap
+        run: |
+          make snap
+
+      - name: Verify snap was created
+        run: |
+          ls -lh *.snap
+          snap info --verbose $(ls -t *.snap | head -1)
+
+      - name: Upload snap artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysmanage-snap
+          path: '*.snap'
+          retention-days: 7
+
+      - name: Test snap installation
+        run: |
+          SNAP_FILE=$(ls -t *.snap | head -1)
+          echo "Testing installation of $SNAP_FILE"
+          sudo snap install --dangerous $SNAP_FILE
+
+          # Verify snap is installed
+          snap list sysmanage
+
+          # Check snap info
+          snap info --verbose sysmanage
+
+          # Verify confinement is strict
+          if ! snap info sysmanage | grep -q "confinement:.*strict"; then
+            echo "ERROR: Snap is not using strict confinement!"
+            exit 1
+          fi
+          echo "✓ Snap is using strict confinement"
+
+          # Verify snap data directories exist
+          echo "Checking snap data directories..."
+          sudo ls -la /var/snap/sysmanage/ || true
+
+      - name: Cleanup
+        if: always()
+        run: |
+          sudo snap remove sysmanage || true
