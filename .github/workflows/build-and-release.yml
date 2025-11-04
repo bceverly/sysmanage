@@ -1746,9 +1746,11 @@ jobs:
         run: |
           python3 scripts/update-requirements-prod.py
 
-      - name: Copy snapcraft.yaml to root
+      - name: Copy snapcraft.yaml and icon to root
         run: |
           cp installer/snap/snapcraft.yaml .
+          mkdir -p snap/gui
+          cp installer/snap/gui/icon.png snap/gui/icon.png
 
       - name: Build and publish snap
         uses: snapcore/action-build@v1
