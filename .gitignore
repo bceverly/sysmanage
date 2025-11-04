@@ -243,3 +243,4 @@ requirements-prod.txt
 *.snap
 /prime/
 /stage/
+/snap/

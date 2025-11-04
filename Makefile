@@ -2051,8 +2051,10 @@ snap:
 	@$(MAKE) snap-clean 2>/dev/null || true
 	@echo "Generating requirements-prod.txt..."
 	@python3 scripts/update-requirements-prod.py
-	@echo "Copying snapcraft.yaml to project root..."
+	@echo "Copying snapcraft.yaml and icon to project root..."
 	@cp installer/snap/snapcraft.yaml .
+	@mkdir -p snap/gui
+	@cp installer/snap/gui/icon.svg snap/gui/icon.svg
 	@echo "Building snap package..."
 	@echo "This will take several minutes due to Python compilation and LXD container setup..."
 	@echo ""
@@ -2072,7 +2074,7 @@ snap:
 
 snap-clean:
 	@echo "Cleaning snap build artifacts..."
-	@rm -rf parts/ prime/ stage/ *.snap snapcraft.yaml installer/snap/parts/ installer/snap/prime/ installer/snap/stage/ installer/snap/*.snap
+	@rm -rf parts/ prime/ stage/ *.snap snapcraft.yaml snap/ installer/snap/parts/ installer/snap/prime/ installer/snap/stage/ installer/snap/*.snap
 	@echo "Cleaning LXD containers from snapcraft project..."
 	@if command -v lxc >/dev/null 2>&1; then \
 		lxc --project snapcraft list --format=csv -c n 2>/dev/null | tail -n +1 | while read container; do \
