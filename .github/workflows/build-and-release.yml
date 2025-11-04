@@ -1750,7 +1750,7 @@ jobs:
         run: |
           cp installer/snap/snapcraft.yaml .
           mkdir -p snap/gui
-          cp installer/snap/gui/icon.png snap/gui/icon.png
+          cp installer/snap/gui/icon.svg snap/gui/icon.svg
 
       - name: Build and publish snap
         uses: snapcore/action-build@v1

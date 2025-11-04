@@ -25,7 +25,7 @@ source-code: https://github.com/bceverly/sysmanage
 issues: https://github.com/bceverly/sysmanage/issues
 contact: https://github.com/bceverly/sysmanage/issues
 
-icon: snap/gui/icon.png
+icon: snap/gui/icon.svg
 
 grade: stable
 confinement: strict
