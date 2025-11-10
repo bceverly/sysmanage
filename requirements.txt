@@ -64,7 +64,7 @@ zope.interface==8.1
 Babel==2.16.0
 reportlab==4.4.4
 safety==3.7.0
-safety-schemas==0.0.14
+safety-schemas==0.0.16
 semgrep>=1.95.0
 
 # Note: On OpenBSD 7.7, coverage.py C tracer requires gcc and py3-cffi
