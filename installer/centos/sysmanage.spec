@@ -6,6 +6,7 @@ Summary:        Centralized system management server with web-based interface
 License:        AGPLv3
 URL:            https://sysmanage.org
 Source0:        %{name}-%{version}.tar.gz
+Source1:        %{name}-vendor-%{version}.tar.gz
 
 # Disable debug package generation (no debug symbols in Python bytecode)
 %global debug_package %{nil}
@@ -50,6 +51,8 @@ deployed across your infrastructure to provide centralized management.
 
 %prep
 %autosetup -n %{name}-%{version}
+# Extract vendor tarball for offline installation
+tar xzf %{SOURCE1}
 
 %build
 # No build step needed - Python application with pre-built frontend
@@ -74,10 +77,13 @@ install -d %{buildroot}/opt/sysmanage/frontend
 cp -r frontend/dist %{buildroot}/opt/sysmanage/frontend/
 cp -r frontend/public %{buildroot}/opt/sysmanage/frontend/
 
-# Create virtualenv and install Python dependencies
+# Copy vendor directory for offline installation
+cp -r vendor %{buildroot}/opt/sysmanage/
+
+# Create virtualenv and install Python dependencies from vendor directory (offline)
 python3 -m venv %{buildroot}/opt/sysmanage/.venv
-%{buildroot}/opt/sysmanage/.venv/bin/pip install --upgrade pip
-%{buildroot}/opt/sysmanage/.venv/bin/pip install -r requirements.txt
+%{buildroot}/opt/sysmanage/.venv/bin/pip install --upgrade pip --no-index --find-links=%{_builddir}/%{name}-%{version}/vendor
+%{buildroot}/opt/sysmanage/.venv/bin/pip install -r requirements.txt --no-index --find-links=%{_builddir}/%{name}-%{version}/vendor
 
 # Fix virtualenv paths to use final installation directory instead of buildroot
 sed -i 's|%{buildroot}||g' %{buildroot}/opt/sysmanage/.venv/pyvenv.cfg
@@ -130,8 +136,16 @@ chmod 750 /etc/sysmanage
 cd /opt/sysmanage
 rm -rf .venv
 python3 -m venv .venv
-.venv/bin/pip install --quiet --upgrade pip
-.venv/bin/pip install --quiet -r requirements.txt
+
+# Check if we have a vendor directory from the RPM (for COPR/OBS builds)
+if [ -d vendor ]; then
+  .venv/bin/pip install --quiet --upgrade pip --no-index --find-links=vendor
+  .venv/bin/pip install --quiet -r requirements.txt --no-index --find-links=vendor
+else
+  # Fallback to network install (for direct RPM installs outside COPR/OBS)
+  .venv/bin/pip install --quiet --upgrade pip
+  .venv/bin/pip install --quiet -r requirements.txt
+fi
 cd -
 
 # Create config file if it doesn't exist
