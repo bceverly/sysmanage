@@ -11,8 +11,8 @@
     "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
-    "@mui/system": "^7.3.3",
-    "@mui/x-charts": "^8.15.0",
+    "@mui/system": "^7.3.5",
+    "@mui/x-charts": "^8.17.0",
     "@mui/x-data-grid": "^8.15.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.8.0",
@@ -30,7 +30,7 @@
     "monaco-editor": "^0.54.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.2",
-    "react-i18next": "^16.1.0",
+    "react-i18next": "^16.2.4",
     "react-icons": "^5.3.0",
     "react-responsive": "^10.0.0",
     "react-router": "^7.9.4",
@@ -64,7 +64,7 @@
   },
   "devDependencies": {
     "@asamuzakjp/css-color": "^4.0.5",
-    "@asamuzakjp/dom-selector": "^6.6.1",
+    "@asamuzakjp/dom-selector": "^6.7.4",
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@eslint/js": "^9.38.0",
     "@mswjs/interceptors": "^0.39.7",
@@ -74,7 +74,7 @@
     "@vitejs/plugin-react": "^5.1.0",
     "@vitest/coverage-v8": "^4.0.3",
     "@vitest/ui": "^4.0.3",
-    "eslint": "^9.37.0",
+    "eslint": "^9.39.1",
     "eslint-plugin-css-modules": "^2.12.0",
     "eslint-plugin-no-unsanitized": "^4.1.4",
     "eslint-plugin-react": "^7.37.5",
@@ -105,6 +105,7 @@
     "update-browserslist-db": "^1.1.4",
     "electron-to-chromium": "^1.5.240",
     "@inquirer/ansi": "^1.0.1",
+    "@inquirer/confirm": "^5.1.20",
     "@types/chai": "^5.2.3",
     "@types/yargs": "^17.0.34",
     "magic-string": "^0.30.21",
@@ -112,7 +113,11 @@
     "resolve": "^1.22.11",
     "caniuse-lite": "^1.0.30001751",
     "dompurify": "^3.2.4",
-    "@eslint/object-schema": "^2.1.7"
+    "@eslint/object-schema": "^2.1.7",
+    "@eslint/plugin-kit": "^0.4.1",
+    "@eslint/config-array": "^0.21.1",
+    "@eslint-community/regexpp": "^4.12.2",
+    "@mui/styled-engine": "^7.3.5"
   },
   "msw": {
     "workerDirectory": [

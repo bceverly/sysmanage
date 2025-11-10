@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Wait for Backend Tests (Python 3.10)
-        uses: lewagon/wait-on-check-action@v1.3.4
+        uses: lewagon/wait-on-check-action@v1.4.1
         with:
           ref: ${{ github.sha }}
           check-name: 'Backend Tests (Python 3.10)'
@@ -25,7 +25,7 @@ jobs:
           wait-interval: 30
 
       - name: Wait for Backend Tests (Linux + PostgreSQL)
-        uses: lewagon/wait-on-check-action@v1.3.4
+        uses: lewagon/wait-on-check-action@v1.4.1
         with:
           ref: ${{ github.sha }}
           check-name: 'Backend Tests (Linux + PostgreSQL)'
@@ -33,7 +33,7 @@ jobs:
           wait-interval: 30
 
       - name: Wait for Frontend Tests (ubuntu-latest)
-        uses: lewagon/wait-on-check-action@v1.3.4
+        uses: lewagon/wait-on-check-action@v1.4.1
         with:
           ref: ${{ github.sha }}
           check-name: 'Frontend Tests (ubuntu-latest)'
@@ -41,7 +41,7 @@ jobs:
           wait-interval: 30
 
       - name: Wait for Frontend Tests (windows-latest)
-        uses: lewagon/wait-on-check-action@v1.3.4
+        uses: lewagon/wait-on-check-action@v1.4.1
         with:
           ref: ${{ github.sha }}
           check-name: 'Frontend Tests (windows-latest)'
@@ -49,7 +49,7 @@ jobs:
           wait-interval: 30
 
       - name: Wait for Frontend Tests (macos-latest)
-        uses: lewagon/wait-on-check-action@v1.3.4
+        uses: lewagon/wait-on-check-action@v1.4.1
         with:
           ref: ${{ github.sha }}
           check-name: 'Frontend Tests (macos-latest)'
@@ -67,12 +67,12 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -163,7 +163,7 @@ jobs:
           echo "Size: $(du -h $DEB_FILE | cut -f1)"
 
       - name: Upload .deb as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sysmanage-server-deb
           path: |
@@ -171,7 +171,7 @@ jobs:
             installer/dist/sysmanage_*.deb.sha256
 
       - name: Upload SBOM files as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sysmanage-sbom
           path: |
@@ -188,12 +188,12 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -249,7 +249,7 @@ jobs:
           cat "sysmanage-openbsd-port-${VERSION}.tar.gz.sha256"
 
       - name: Upload OpenBSD port tarball as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sysmanage-openbsd-port
           path: |
@@ -267,12 +267,12 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -319,7 +319,7 @@ jobs:
           make installer-rpm-centos
 
       - name: Upload CentOS RPM as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sysmanage-centos-rpm
           path: |
@@ -337,12 +337,12 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -389,7 +389,7 @@ jobs:
           make installer-rpm-opensuse
 
       - name: Upload OpenSUSE RPM as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sysmanage-opensuse-rpm
           path: |
@@ -407,12 +407,12 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -460,7 +460,7 @@ jobs:
           make installer-freebsd
 
       - name: Upload FreeBSD package as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sysmanage-freebsd-pkg
           path: |
@@ -477,12 +477,12 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -529,7 +529,7 @@ jobs:
           make installer-macos
 
       - name: Upload macOS package as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sysmanage-macos-pkg
           path: |
@@ -546,12 +546,12 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -599,7 +599,7 @@ jobs:
           make installer-netbsd
 
       - name: Upload NetBSD package as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sysmanage-netbsd-pkg
           path: |
@@ -616,12 +616,12 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -669,7 +669,7 @@ jobs:
           powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture x64
 
       - name: Upload Windows MSI (x64) as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sysmanage-windows-msi-x64
           path: |
@@ -686,12 +686,12 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -739,7 +739,7 @@ jobs:
           powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture arm64
 
       - name: Upload Windows MSI (ARM64) as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sysmanage-windows-msi-arm64
           path: |
@@ -765,7 +765,7 @@ jobs:
           echo "Building consolidated release for version: $VERSION"
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           path: artifacts/
 
@@ -1343,7 +1343,7 @@ jobs:
           echo "Deploying version $VERSION to Launchpad PPA"
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -1504,7 +1504,7 @@ jobs:
           echo "Deploying version $VERSION to OBS"
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -1731,7 +1731,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
