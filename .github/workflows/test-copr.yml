@@ -103,6 +103,13 @@ jobs:
         run: |
           echo "Preparing source files for version $VERSION"
 
+          # Generate requirements-prod.txt from requirements.txt (excludes dev dependencies)
+          echo "Generating requirements-prod.txt..."
+          python3 $WORKSPACE/scripts/update-requirements-prod.py
+          echo ""
+          echo "Production requirements:"
+          cat requirements-prod.txt
+
           # Create source tarball
           echo "Creating source tarball..."
           TAR_NAME="sysmanage-$VERSION"
@@ -113,6 +120,7 @@ jobs:
           cp -r $WORKSPACE/alembic /tmp/$TAR_NAME/
           cp $WORKSPACE/alembic.ini /tmp/$TAR_NAME/
           cp $WORKSPACE/requirements.txt /tmp/$TAR_NAME/
+          cp $WORKSPACE/requirements-prod.txt /tmp/$TAR_NAME/
           cp -r $WORKSPACE/config /tmp/$TAR_NAME/
           cp -r $WORKSPACE/scripts /tmp/$TAR_NAME/
 
@@ -148,13 +156,13 @@ jobs:
 
           # Download wheels for Python 3.12 (EPEL 10)
           echo "Downloading wheels for Python 3.12 (EPEL 10)..."
-          pip3 download -r $WORKSPACE/requirements.txt -d /tmp/vendor --python-version 3.12.11 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --only-binary=:all:
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.12.11 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --only-binary=:all:
           echo "Downloaded wheels for Python 3.12"
 
           # Download wheels for Python 3.13 (Fedora 41, 42)
           echo ""
           echo "Downloading wheels for Python 3.13 (Fedora 41, 42)..."
-          pip3 download -r $WORKSPACE/requirements.txt -d /tmp/vendor --python-version 3.13.1 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --only-binary=:all:
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.13.1 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --only-binary=:all:
           echo "Downloaded wheels for Python 3.13"
 
           # Verify packages
