@@ -65,7 +65,7 @@ zope.event==5.0
 zope.interface==8.0.1
 Babel==2.16.0
 reportlab==4.4.4
-safety==3.6.1
+safety==3.7.0
 safety-schemas==0.0.14
 semgrep>=1.95.0
 
