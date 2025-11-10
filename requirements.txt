@@ -54,7 +54,7 @@ SQLAlchemy==2.0.43
 # TODO: Upgrade to starlette>=0.49.1 when FastAPI adds support
 # Mitigation: CVE-2025-62727 affects FileResponse - we don't use StaticFiles in backend
 # (nginx serves static files directly, not through Python)
-starlette>=0.48.0,<0.49.0
+starlette>=0.48.0,<0.51.0
 tomlkit==0.12.4
 typing_extensions>=4.12.2
 ujson==5.10.0
