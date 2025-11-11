@@ -69,6 +69,7 @@ cp -r backend %{buildroot}/opt/sysmanage/
 cp -r alembic %{buildroot}/opt/sysmanage/
 install -m 644 alembic.ini %{buildroot}/opt/sysmanage/
 install -m 644 requirements.txt %{buildroot}/opt/sysmanage/
+install -m 644 requirements-prod.txt %{buildroot}/opt/sysmanage/
 cp -r config %{buildroot}/opt/sysmanage/
 cp -r scripts %{buildroot}/opt/sysmanage/
 
@@ -83,7 +84,7 @@ cp -r vendor %{buildroot}/opt/sysmanage/
 # Create virtualenv and install Python dependencies from vendor directory (offline)
 python3 -m venv %{buildroot}/opt/sysmanage/.venv
 %{buildroot}/opt/sysmanage/.venv/bin/pip install --upgrade pip --no-index --find-links=%{_builddir}/%{name}-%{version}/vendor
-%{buildroot}/opt/sysmanage/.venv/bin/pip install -r requirements.txt --no-index --find-links=%{_builddir}/%{name}-%{version}/vendor
+%{buildroot}/opt/sysmanage/.venv/bin/pip install -r requirements-prod.txt --no-index --find-links=%{_builddir}/%{name}-%{version}/vendor
 
 # Fix virtualenv paths to use final installation directory instead of buildroot
 sed -i 's|%{buildroot}||g' %{buildroot}/opt/sysmanage/.venv/pyvenv.cfg
@@ -140,11 +141,11 @@ python3 -m venv .venv
 # Check if we have a vendor directory from the RPM (for COPR/OBS builds)
 if [ -d vendor ]; then
   .venv/bin/pip install --quiet --upgrade pip --no-index --find-links=vendor
-  .venv/bin/pip install --quiet -r requirements.txt --no-index --find-links=vendor
+  .venv/bin/pip install --quiet -r requirements-prod.txt --no-index --find-links=vendor
 else
   # Fallback to network install (for direct RPM installs outside COPR/OBS)
   .venv/bin/pip install --quiet --upgrade pip
-  .venv/bin/pip install --quiet -r requirements.txt
+  .venv/bin/pip install --quiet -r requirements-prod.txt
 fi
 cd -
 
