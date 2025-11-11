@@ -1394,6 +1394,10 @@ installer-rpm-centos:
 	$(MAKE) sbom; \
 	echo "✓ SBOM files generated"; \
 	echo ""; \
+	echo "Generating requirements-prod.txt..."; \
+	python3 scripts/update-requirements-prod.py; \
+	echo "✓ requirements-prod.txt generated"; \
+	echo ""; \
 	echo "Setting up RPM build tree..."; \
 	CURRENT_DIR=$$(pwd); \
 	BUILD_TEMP="$$CURRENT_DIR/installer/dist/rpmbuild"; \
@@ -1413,6 +1417,7 @@ installer-rpm-centos:
 	rsync -a --exclude='node_modules' --exclude='src' frontend/public/ "$$TAR_DIR/frontend/public/"; \
 	cp alembic.ini "$$TAR_DIR/"; \
 	cp requirements.txt "$$TAR_DIR/"; \
+	cp requirements-prod.txt "$$TAR_DIR/"; \
 	cp -r alembic "$$TAR_DIR/"; \
 	cp -r config "$$TAR_DIR/"; \
 	cp -r scripts "$$TAR_DIR/"; \
