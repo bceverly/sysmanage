@@ -51,8 +51,11 @@ deployed across your infrastructure to provide centralized management.
 
 %prep
 %autosetup -n %{name}-%{version}
-# Extract vendor tarball for offline installation
-tar xzf %{SOURCE1}
+# Extract vendor tarball for offline installation (if present in COPR/OBS builds)
+# Local Makefile builds don't provide vendor tarball - will use network install in %post
+if [ -f %{SOURCE1} ]; then
+    tar xzf %{SOURCE1}
+fi
 
 %build
 # No build step needed - Python application with pre-built frontend
@@ -78,13 +81,19 @@ install -d %{buildroot}/opt/sysmanage/frontend
 cp -r frontend/dist %{buildroot}/opt/sysmanage/frontend/
 cp -r frontend/public %{buildroot}/opt/sysmanage/frontend/
 
-# Copy vendor directory for offline installation
-cp -r vendor %{buildroot}/opt/sysmanage/
+# Copy vendor directory for offline installation (if present)
+if [ -d vendor ]; then
+    cp -r vendor %{buildroot}/opt/sysmanage/
+fi
 
-# Create virtualenv and install Python dependencies from vendor directory (offline)
+# Create virtualenv and install Python dependencies
+# If vendor directory exists (COPR/OBS builds), use offline installation
+# If not (local Makefile builds), skip pip install here - will happen in %post with network
 python3 -m venv %{buildroot}/opt/sysmanage/.venv
-%{buildroot}/opt/sysmanage/.venv/bin/pip install --upgrade pip --no-index --find-links=%{_builddir}/%{name}-%{version}/vendor
-%{buildroot}/opt/sysmanage/.venv/bin/pip install -r requirements-prod.txt --no-index --find-links=%{_builddir}/%{name}-%{version}/vendor
+if [ -d %{_builddir}/%{name}-%{version}/vendor ]; then
+    %{buildroot}/opt/sysmanage/.venv/bin/pip install --upgrade pip --no-index --find-links=%{_builddir}/%{name}-%{version}/vendor
+    %{buildroot}/opt/sysmanage/.venv/bin/pip install -r requirements-prod.txt --no-index --find-links=%{_builddir}/%{name}-%{version}/vendor
+fi
 
 # Fix virtualenv paths to use final installation directory instead of buildroot
 sed -i 's|%{buildroot}||g' %{buildroot}/opt/sysmanage/.venv/pyvenv.cfg
