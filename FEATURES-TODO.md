@@ -136,12 +136,3 @@ like to add:
     all three of these and
     associate them with a
     particular host.
-
-13. Add installer for sysmanage
-    itself.
-
-14. Add snap for sysmanage.
-
-15. Add flatpak for sysmanage-agent.
-
-16.  Add a flatpak for sysmanage.
