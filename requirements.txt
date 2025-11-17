@@ -4,7 +4,7 @@ anyio>=4.5.0
 astroid>=3.3.8
 bandit==1.8.6
 black>=25.1.0
-certifi==2025.10.5
+certifi==2025.11.12
 cffi>=2.0.0
 coverage>=7.0.0
 click>=8.1.8
@@ -37,7 +37,7 @@ argon2-cffi==25.1.0
 pycparser==2.22
 pydantic>=2.9.0,<2.13.0
 pydantic-extra-types==2.10.5
-pydantic-settings==2.11.0
+pydantic-settings==2.12.0
 PyJWT==2.10.1
 pylint>=3.0.0
 pytest>=7.0.0
@@ -70,7 +70,7 @@ semgrep>=1.95.0
 # Note: On OpenBSD 7.7, coverage.py C tracer requires gcc and py3-cffi
 # Install with: doas pkg_add gcc py3-cffi
 # The install-dev target will automatically handle C tracer setup
-playwright==1.55.0  # Cross-browser UI testing (preferred for Linux/macOS/Windows)
+playwright==1.56.0  # Cross-browser UI testing (preferred for Linux/macOS/Windows)
 selenium>=4.0.0  # Web automation framework (fallback for OpenBSD/FreeBSD where Playwright unavailable)
 webdriver-manager>=4.0.0
 requests>=2.32.0  # For UI test health checks
