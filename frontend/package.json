@@ -88,7 +88,7 @@
     "stylelint-config-standard": "^39.0.1",
     "tldts": "^7.0.17",
     "vite": "^7.1.11",
-    "vitest": "^4.0.3"
+    "vitest": "^4.0.9"
   },
   "optionalDependencies": {
     "@esbuild/freebsd-x64": "^0.25.10",
