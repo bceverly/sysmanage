@@ -67,7 +67,7 @@
     "@asamuzakjp/dom-selector": "^6.7.4",
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@eslint/js": "^9.38.0",
-    "@mswjs/interceptors": "^0.39.7",
+    "@mswjs/interceptors": "^0.40.0",
     "@types/node": "^24.3.0",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.1",
