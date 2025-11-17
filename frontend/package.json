@@ -87,7 +87,7 @@
     "stylelint": "^16.25.0",
     "stylelint-config-standard": "^39.0.1",
     "tldts": "^7.0.17",
-    "vite": "^7.1.11",
+    "vite": "^7.2.2",
     "vitest": "^4.0.3"
   },
   "optionalDependencies": {
