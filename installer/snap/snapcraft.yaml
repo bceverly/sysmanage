@@ -43,15 +43,6 @@ apps:
       - network
       - network-bind
 
-  nginx:
-    command: bin/nginx-wrapper
-    daemon: simple
-    restart-condition: always
-    restart-delay: 10s
-    plugs:
-      - network
-      - network-bind
-
 parts:
   python310:
     plugin: nil
@@ -133,11 +124,25 @@ parts:
 
   frontend:
     plugin: nil
+    build-packages:
+      - curl
     override-build: |
-      # Copy pre-built frontend from project directory
+      # Install Node.js 20.x
+      curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+      apt-get install -y nodejs
+
+      # Copy frontend source
+      cp -r "$CRAFT_PROJECT_DIR/frontend" /tmp/frontend-build
+      cd /tmp/frontend-build
+
+      # Install dependencies and build
+      npm ci
+      npm run build
+
+      # Copy built frontend to install directory
       mkdir -p $CRAFT_PART_INSTALL/app/frontend
-      cp -r "$CRAFT_PROJECT_DIR/frontend/dist" $CRAFT_PART_INSTALL/app/frontend/
-      cp -r "$CRAFT_PROJECT_DIR/frontend/public" $CRAFT_PART_INSTALL/app/frontend/
+      cp -r dist $CRAFT_PART_INSTALL/app/frontend/
+      cp -r public $CRAFT_PART_INSTALL/app/frontend/
 
   wrapper:
     plugin: nil
@@ -174,17 +179,6 @@ parts:
         echo "  - JWT secret key"
         echo ""
       fi
-
-      # Start the application
-      cd $SNAP/app
-      exec $SNAP/usr/bin/python3.10 -m backend.main
-      EOF
-      chmod +x $CRAFT_PART_INSTALL/bin/sysmanage-wrapper
-
-      # Create nginx wrapper
-      cat > $CRAFT_PART_INSTALL/bin/nginx-wrapper <<'EOF'
-      #!/bin/bash
-      set -e
 
       # Set up nginx directories in writable snap locations
       mkdir -p $SNAP_DATA/nginx/logs
@@ -243,7 +237,7 @@ parts:
                   root $SNAP/app/frontend/dist;
                   try_files \$uri \$uri/ /index.html;
 
-                  location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+                  location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)\$ {
                       expires 1y;
                       add_header Cache-Control "public, immutable";
                   }
@@ -251,7 +245,7 @@ parts:
 
               # Proxy API requests to backend
               location /api/ {
-                  proxy_pass http://127.0.0.1:8081;
+                  proxy_pass http://127.0.0.1:8080;
                   proxy_http_version 1.1;
                   proxy_set_header Upgrade \$http_upgrade;
                   proxy_set_header Connection \$connection_upgrade;
@@ -269,7 +263,7 @@ parts:
                       return 400 "Invalid upgrade request";
                   }
 
-                  proxy_pass http://127.0.0.1:8081;
+                  proxy_pass http://127.0.0.1:8080;
                   proxy_http_version 1.1;
                   proxy_set_header Upgrade \$http_upgrade;
                   proxy_set_header Connection \$connection_upgrade;
@@ -282,57 +276,44 @@ parts:
               }
           }
 
-          # Additional server block on port 8080 for direct API access
-          # This is needed because the frontend is configured to call the backend on port 8080
-          server {
-              listen 8080;
-              listen [::]:8080;
-
-              # Proxy all requests to the actual backend
-              location / {
-                  # Handle preflight requests
-                  if (\$request_method = 'OPTIONS') {
-                      add_header 'Access-Control-Allow-Origin' \$http_origin;
-                      add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, PATCH, OPTIONS';
-                      add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type, X-Requested-With';
-                      add_header 'Access-Control-Allow-Credentials' 'true';
-                      add_header 'Content-Length' 0;
-                      add_header 'Content-Type' 'text/plain';
-                      return 204;
-                  }
-
-                  # Add CORS headers for non-OPTIONS responses
-                  # Remove any CORS headers from backend to avoid duplicates
-                  proxy_hide_header 'Access-Control-Allow-Origin';
-                  proxy_hide_header 'Access-Control-Allow-Methods';
-                  proxy_hide_header 'Access-Control-Allow-Headers';
-                  proxy_hide_header 'Access-Control-Allow-Credentials';
-
-                  add_header 'Access-Control-Allow-Origin' \$http_origin always;
-                  add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, PATCH, OPTIONS' always;
-                  add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type, X-Requested-With' always;
-                  add_header 'Access-Control-Allow-Credentials' 'true' always;
-
-                  proxy_pass http://127.0.0.1:8081;
-                  proxy_http_version 1.1;
-                  proxy_set_header Upgrade \$http_upgrade;
-                  proxy_set_header Connection \$connection_upgrade;
-                  proxy_set_header Host \$host;
-                  proxy_set_header X-Real-IP \$remote_addr;
-                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-                  proxy_set_header X-Forwarded-Proto \$scheme;
-                  proxy_cache_bypass \$http_upgrade;
-                  proxy_read_timeout 86400;
-                  proxy_send_timeout 86400;
-              }
-          }
       }
       NGINXCONF
 
-      # Start nginx
-      exec $SNAP/usr/sbin/nginx -c $SNAP_DATA/nginx/nginx.conf
+      # Function to handle cleanup on exit
+      cleanup() {
+        echo "Shutting down services..."
+        if [ ! -z "$BACKEND_PID" ]; then
+          kill $BACKEND_PID 2>/dev/null || true
+        fi
+        if [ ! -z "$NGINX_PID" ]; then
+          kill $NGINX_PID 2>/dev/null || true
+        fi
+        exit 0
+      }
+
+      # Set up signal handlers
+      trap cleanup SIGTERM SIGINT
+
+      # Start the backend in the background
+      cd $SNAP/app
+      $SNAP/usr/bin/python3.10 -m backend.main &
+      BACKEND_PID=$!
+      echo "Backend started with PID $BACKEND_PID"
+
+      # Give backend a moment to start listening
+      sleep 2
+
+      # Start nginx in the background
+      $SNAP/usr/sbin/nginx -c $SNAP_DATA/nginx/nginx.conf &
+      NGINX_PID=$!
+      echo "Nginx started with PID $NGINX_PID"
+
+      # Wait for both processes
+      # If either exits, the wrapper will exit and snapd will restart it
+      wait -n
+      cleanup
       EOF
-      chmod +x $CRAFT_PART_INSTALL/bin/nginx-wrapper
+      chmod +x $CRAFT_PART_INSTALL/bin/sysmanage-wrapper
 
   nginx:
     plugin: nil
