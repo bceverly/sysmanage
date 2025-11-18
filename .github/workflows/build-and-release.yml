@@ -1322,8 +1322,6 @@ jobs:
             release_name: "25.10 Questing"
           - release: plucky
             release_name: "25.04 Plucky"
-          - release: oracular
-            release_name: "24.10 Oracular"
           - release: noble
             release_name: "24.04 Noble"
           - release: jammy
@@ -1979,6 +1977,8 @@ jobs:
       - name: Copy snapcraft.yaml and icon to root
         run: |
           cp installer/snap/snapcraft.yaml .
+          # Replace version: git with the actual tag version
+          sed -i "s/^version: git$/version: ${{ steps.version.outputs.version }}/" snapcraft.yaml
           mkdir -p snap/gui
           cp installer/snap/gui/icon.svg snap/gui/icon.svg
 
