@@ -2100,20 +2100,33 @@ snap-install:
 		echo "ERROR: No snap file found. Run 'make snap' first."; \
 		exit 1; \
 	fi
+	@# Back up existing config if it exists
+	@if [ -f /var/snap/sysmanage/common/sysmanage.yaml ]; then \
+		echo "Backing up existing configuration..."; \
+		sudo cp /var/snap/sysmanage/common/sysmanage.yaml /tmp/sysmanage.yaml.backup; \
+		echo "✓ Config backed up to /tmp/sysmanage.yaml.backup"; \
+	fi
 	@SNAP_FILE=$$(ls -t *.snap | head -1); \
 	echo "Installing $$SNAP_FILE..."; \
 	sudo snap install --dangerous $$SNAP_FILE
+	@# Restore backed up config if it was saved
+	@if [ -f /tmp/sysmanage.yaml.backup ]; then \
+		echo "Restoring your configuration..."; \
+		sudo cp /tmp/sysmanage.yaml.backup /var/snap/sysmanage/common/sysmanage.yaml; \
+		sudo rm /tmp/sysmanage.yaml.backup; \
+		echo "✓ Config restored"; \
+	fi
 	@echo ""
 	@echo "✓ Snap installed successfully!"
 	@echo ""
 	@echo "Configuration:"
 	@echo "  The snap uses strict confinement and stores data in:"
-	@echo "    Config: /var/snap/sysmanage/current/sysmanage.yaml"
-	@echo "    Certs:  /var/snap/sysmanage/current/certs/"
+	@echo "    Config: /var/snap/sysmanage/common/sysmanage.yaml"
+	@echo "    Certs:  /var/snap/sysmanage/common/certs/"
 	@echo "    Logs:   /var/snap/sysmanage/common/logs/"
 	@echo ""
-	@echo "  On first run, a default config will be created from the example."
-	@echo "  Edit it with: sudo nano /var/snap/sysmanage/current/sysmanage.yaml"
+	@echo "  If this is a fresh install, a default config was created."
+	@echo "  Edit it with: sudo nano /var/snap/sysmanage/common/sysmanage.yaml"
 	@echo ""
 	@echo "  Start service: sudo snap start sysmanage"
 	@echo "  View logs: sudo snap logs sysmanage"

@@ -1,0 +1,23 @@
+version: 2
+updates:
+  # Frontend npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # Ignore major version updates for @mui/x-data-grid until we're ready to migrate to v8
+      - dependency-name: "@mui/x-data-grid"
+        update-types: ["version-update:semver-major"]
+
+  # Backend pip dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -43,6 +43,15 @@ apps:
       - network
       - network-bind
 
+  nginx:
+    command: bin/nginx-wrapper
+    daemon: simple
+    restart-condition: always
+    restart-delay: 10s
+    plugs:
+      - network
+      - network-bind
+
 parts:
   python310:
     plugin: nil
@@ -95,6 +104,7 @@ parts:
       cp -r "$CRAFT_PROJECT_DIR/alembic" /tmp/build/
       cp "$CRAFT_PROJECT_DIR/alembic.ini" /tmp/build/
       cp -r "$CRAFT_PROJECT_DIR/config" /tmp/build/
+      cp "$CRAFT_PROJECT_DIR/sysmanage.yaml.example" /tmp/build/config/
 
       # Copy requirements-prod.txt if it exists
       if [ -f "$CRAFT_PROJECT_DIR/requirements-prod.txt" ]; then
@@ -123,32 +133,11 @@ parts:
 
   frontend:
     plugin: nil
-    build-attributes:
-      - enable-patchelf
-    build-packages:
-      - curl
-      - ca-certificates
-      - gnupg
-      - rsync
     override-build: |
-      # $CRAFT_PROJECT_DIR is the project root when running snapcraft from root with path to snapcraft.yaml
-      # Create temp build directory
-      mkdir -p /tmp/build-frontend
-
-      # Copy the frontend directory (excluding node_modules and dist which will be rebuilt)
-      cp -r "$CRAFT_PROJECT_DIR/frontend/"* /tmp/build-frontend/
-
-      # Install Node.js 20 LTS from NodeSource
-      curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-      apt-get install -y nodejs
-
-      # Build frontend
-      cd /tmp/build-frontend
-      npm install --legacy-peer-deps
-      npm run build
+      # Copy pre-built frontend from project directory
       mkdir -p $CRAFT_PART_INSTALL/app/frontend
-      cp -r dist $CRAFT_PART_INSTALL/app/frontend/
-      cp -r public $CRAFT_PART_INSTALL/app/frontend/
+      cp -r "$CRAFT_PROJECT_DIR/frontend/dist" $CRAFT_PART_INSTALL/app/frontend/
+      cp -r "$CRAFT_PROJECT_DIR/frontend/public" $CRAFT_PART_INSTALL/app/frontend/
 
   wrapper:
     plugin: nil
@@ -161,8 +150,8 @@ parts:
       # Set up environment using snap-specific paths
       # $SNAP_DATA: writable per-revision data (/var/snap/sysmanage/current)
       # $SNAP_COMMON: writable common data (/var/snap/sysmanage/common)
-      export SYSMANAGE_CONFIG_PATH="${SYSMANAGE_CONFIG_PATH:-$SNAP_DATA/sysmanage.yaml}"
-      export SYSMANAGE_CERT_PATH="${SYSMANAGE_CERT_PATH:-$SNAP_DATA/certs}"
+      export SYSMANAGE_CONFIG_PATH="${SYSMANAGE_CONFIG_PATH:-$SNAP_COMMON/sysmanage.yaml}"
+      export SYSMANAGE_CERT_PATH="${SYSMANAGE_CERT_PATH:-$SNAP_COMMON/certs}"
       export SYSMANAGE_LOG_DIR="${SYSMANAGE_LOG_DIR:-$SNAP_COMMON/logs}"
       export PYTHONPATH="$SNAP/app:$SNAP/lib/python3.10/site-packages"
       export LD_LIBRARY_PATH="$SNAP/usr/lib:$LD_LIBRARY_PATH"
@@ -171,21 +160,19 @@ parts:
       mkdir -p "$SYSMANAGE_CERT_PATH"
       mkdir -p "$SYSMANAGE_LOG_DIR"
 
-      # Check for config file, copy example if missing
+      # Check for config file, copy example if missing (but don't overwrite existing)
       if [ ! -f "$SYSMANAGE_CONFIG_PATH" ]; then
         echo "Configuration file not found at $SYSMANAGE_CONFIG_PATH"
         echo "Creating from example template..."
         cp "$SNAP/app/config/sysmanage.yaml.example" "$SYSMANAGE_CONFIG_PATH"
         echo ""
-        echo "IMPORTANT: You must edit the configuration file before starting:"
+        echo "WARNING: Using default configuration. Edit the config file:"
         echo "  $SYSMANAGE_CONFIG_PATH"
         echo ""
-        echo "At minimum, configure:"
+        echo "Recommended changes:"
         echo "  - Database connection settings"
         echo "  - JWT secret key"
-        echo "  - TLS certificates"
         echo ""
-        exit 1
       fi
 
       # Start the application
@@ -193,3 +180,166 @@ parts:
       exec $SNAP/usr/bin/python3.10 -m backend.main
       EOF
       chmod +x $CRAFT_PART_INSTALL/bin/sysmanage-wrapper
+
+      # Create nginx wrapper
+      cat > $CRAFT_PART_INSTALL/bin/nginx-wrapper <<'EOF'
+      #!/bin/bash
+      set -e
+
+      # Set up nginx directories in writable snap locations
+      mkdir -p $SNAP_DATA/nginx/logs
+      mkdir -p $SNAP_DATA/nginx/run
+      mkdir -p $SNAP_DATA/nginx/tmp/client_body
+      mkdir -p $SNAP_DATA/nginx/tmp/proxy
+      mkdir -p $SNAP_DATA/nginx/tmp/fastcgi
+      mkdir -p $SNAP_DATA/nginx/tmp/uwsgi
+      mkdir -p $SNAP_DATA/nginx/tmp/scgi
+
+      # Create nginx config that uses snap paths
+      cat > $SNAP_DATA/nginx/nginx.conf <<NGINXCONF
+      # Run as root in snap environment (snap handles user isolation)
+      user root;
+      daemon off;
+      error_log $SNAP_DATA/nginx/logs/error.log;
+      pid $SNAP_DATA/nginx/run/nginx.pid;
+
+      events {
+          worker_connections 1024;
+      }
+
+      http {
+          include $SNAP/etc/nginx/mime.types;
+          default_type application/octet-stream;
+          access_log $SNAP_DATA/nginx/logs/access.log;
+
+          # Configure temp paths to use writable snap directories
+          client_body_temp_path $SNAP_DATA/nginx/tmp/client_body;
+          proxy_temp_path $SNAP_DATA/nginx/tmp/proxy;
+          fastcgi_temp_path $SNAP_DATA/nginx/tmp/fastcgi;
+          uwsgi_temp_path $SNAP_DATA/nginx/tmp/uwsgi;
+          scgi_temp_path $SNAP_DATA/nginx/tmp/scgi;
+
+          # Map to handle WebSocket upgrades securely
+          map \$http_upgrade \$connection_upgrade {
+              default upgrade;
+              '' close;
+              ~*^h2c$ '';
+              ~^websocket$ upgrade;
+          }
+
+          map \$http_upgrade \$upgrade_validated {
+              default 0;
+              '' 1;
+              ~^websocket$ 1;
+              ~*^h2c$ 0;
+          }
+
+          server {
+              listen 3000;
+              listen [::]:3000;
+
+              # Frontend static files
+              location / {
+                  root $SNAP/app/frontend/dist;
+                  try_files \$uri \$uri/ /index.html;
+
+                  location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+                      expires 1y;
+                      add_header Cache-Control "public, immutable";
+                  }
+              }
+
+              # Proxy API requests to backend
+              location /api/ {
+                  proxy_pass http://127.0.0.1:8081;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade \$http_upgrade;
+                  proxy_set_header Connection \$connection_upgrade;
+                  proxy_set_header Host \$host;
+                  proxy_set_header X-Real-IP \$remote_addr;
+                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto \$scheme;
+                  proxy_cache_bypass \$http_upgrade;
+                  proxy_read_timeout 86400;
+              }
+
+              # Proxy WebSocket connections
+              location /ws {
+                  if (\$upgrade_validated = 0) {
+                      return 400 "Invalid upgrade request";
+                  }
+
+                  proxy_pass http://127.0.0.1:8081;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade \$http_upgrade;
+                  proxy_set_header Connection \$connection_upgrade;
+                  proxy_set_header Host \$host;
+                  proxy_set_header X-Real-IP \$remote_addr;
+                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto \$scheme;
+                  proxy_read_timeout 86400;
+                  proxy_send_timeout 86400;
+              }
+          }
+
+          # Additional server block on port 8080 for direct API access
+          # This is needed because the frontend is configured to call the backend on port 8080
+          server {
+              listen 8080;
+              listen [::]:8080;
+
+              # Proxy all requests to the actual backend
+              location / {
+                  # Handle preflight requests
+                  if (\$request_method = 'OPTIONS') {
+                      add_header 'Access-Control-Allow-Origin' \$http_origin;
+                      add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, PATCH, OPTIONS';
+                      add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type, X-Requested-With';
+                      add_header 'Access-Control-Allow-Credentials' 'true';
+                      add_header 'Content-Length' 0;
+                      add_header 'Content-Type' 'text/plain';
+                      return 204;
+                  }
+
+                  # Add CORS headers for non-OPTIONS responses
+                  # Remove any CORS headers from backend to avoid duplicates
+                  proxy_hide_header 'Access-Control-Allow-Origin';
+                  proxy_hide_header 'Access-Control-Allow-Methods';
+                  proxy_hide_header 'Access-Control-Allow-Headers';
+                  proxy_hide_header 'Access-Control-Allow-Credentials';
+
+                  add_header 'Access-Control-Allow-Origin' \$http_origin always;
+                  add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, PATCH, OPTIONS' always;
+                  add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type, X-Requested-With' always;
+                  add_header 'Access-Control-Allow-Credentials' 'true' always;
+
+                  proxy_pass http://127.0.0.1:8081;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade \$http_upgrade;
+                  proxy_set_header Connection \$connection_upgrade;
+                  proxy_set_header Host \$host;
+                  proxy_set_header X-Real-IP \$remote_addr;
+                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto \$scheme;
+                  proxy_cache_bypass \$http_upgrade;
+                  proxy_read_timeout 86400;
+                  proxy_send_timeout 86400;
+              }
+          }
+      }
+      NGINXCONF
+
+      # Start nginx
+      exec $SNAP/usr/sbin/nginx -c $SNAP_DATA/nginx/nginx.conf
+      EOF
+      chmod +x $CRAFT_PART_INSTALL/bin/nginx-wrapper
+
+  nginx:
+    plugin: nil
+    stage-packages:
+      - nginx-light
+    override-build: |
+      craftctl default
+      # Remove default nginx files we don't need
+      rm -rf $CRAFT_PART_INSTALL/etc/nginx/sites-*
+      rm -rf $CRAFT_PART_INSTALL/var

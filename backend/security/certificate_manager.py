@@ -26,13 +26,19 @@ class CertificateManager:
 
     def __init__(self):
         self.config = get_config()
-        # Set platform-specific default certificate path
-        if os.name == "nt":  # Windows
-            default_cert_path = r"C:\ProgramData\SysManage\certs"
-        else:  # Unix-like (Linux, macOS, BSD)
-            default_cert_path = "/etc/sysmanage/certs"
+        # Check environment variable first (for snap/containers)
+        cert_path = os.environ.get("SYSMANAGE_CERT_PATH")
 
-        cert_path = self.config.get("certificates", {}).get("path", default_cert_path)
+        if not cert_path:
+            # Set platform-specific default certificate path
+            if os.name == "nt":  # Windows
+                default_cert_path = r"C:\ProgramData\SysManage\certs"
+            else:  # Unix-like (Linux, macOS, BSD)
+                default_cert_path = "/etc/sysmanage/certs"
+
+            cert_path = self.config.get("certificates", {}).get(
+                "path", default_cert_path
+            )
 
         # Use a safe default path for testing
         if "PYTEST_CURRENT_TEST" in os.environ:
@@ -40,15 +46,15 @@ class CertificateManager:
 
         self.cert_dir = Path(cert_path)
 
-        # Try to create the system directory, fall back to local directory if permission denied
+        # Try to create the system directory, fall back to local directory if permission/filesystem errors
         try:
             self.cert_dir.mkdir(parents=True, exist_ok=True)
-        except PermissionError:
+        except (PermissionError, OSError) as e:
             # Fall back to local directory in the project
             project_dir = Path(__file__).parent.parent.parent  # Go up to sysmanage root
             fallback_dir = project_dir / ".sysmanage-certs"
 
-            print(f"⚠️  Cannot access {cert_path}, falling back to {fallback_dir}")
+            print(f"⚠️  Cannot access {cert_path} ({e}), falling back to {fallback_dir}")
             self.cert_dir = fallback_dir
             self.cert_dir.mkdir(parents=True, exist_ok=True)
 

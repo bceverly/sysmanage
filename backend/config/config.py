@@ -10,11 +10,14 @@ import sys
 import yaml
 
 # Read/validate the configuration file
-# Check for system config first (security), then fall back to development config
-if os.name == "nt":  # Windows
-    CONFIG_PATH = r"C:\ProgramData\SysManage\sysmanage.yaml"
-else:  # Unix-like (Linux, macOS, BSD)
-    CONFIG_PATH = "/etc/sysmanage.yaml"
+# Check environment variable first (for snap/containers), then system config
+CONFIG_PATH = os.environ.get("SYSMANAGE_CONFIG_PATH")
+if not CONFIG_PATH:
+    # Check for system config first (security), then fall back to development config
+    if os.name == "nt":  # Windows
+        CONFIG_PATH = r"C:\ProgramData\SysManage\sysmanage.yaml"
+    else:  # Unix-like (Linux, macOS, BSD)
+        CONFIG_PATH = "/etc/sysmanage.yaml"
 
 # Fallback to development config if system config doesn't exist
 # Check for sysmanage-dev.yaml first (user's local config), then .example
@@ -28,6 +31,13 @@ if not os.path.exists(CONFIG_PATH):
 try:
     with open(CONFIG_PATH, "r", encoding="utf-8") as file:
         config = yaml.safe_load(file)
+        # Handle empty/comments-only YAML files
+        if config is None:
+            print(
+                f"ERROR: Configuration file {CONFIG_PATH} is empty or contains only comments"
+            )
+            print("Please configure the file with valid YAML settings")
+            sys.exit(1)
         if not "host" in config["api"].keys():
             config["api"]["host"] = "localhost"
         if not "port" in config["api"].keys():

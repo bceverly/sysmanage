@@ -308,7 +308,7 @@ class TestCertificateManagerError:
 
     @patch("backend.security.certificate_manager.get_config")
     def test_certificate_directory_creation_failure(self, mock_get_config):
-        """Test handling of certificate directory creation failure."""
+        """Test handling of certificate directory creation failure falls back to local directory."""
         import platform
 
         # Use platform-appropriate invalid path that should cause directory creation to fail
@@ -323,8 +323,10 @@ class TestCertificateManagerError:
 
         # Mock os.environ to prevent pytest detection
         with patch("backend.security.certificate_manager.os.environ", {}):
-            with pytest.raises(Exception):
-                CertificateManager()
+            # Should fall back to .sysmanage-certs instead of raising an exception
+            cert_manager = CertificateManager()
+            # Verify it fell back to the local directory
+            assert ".sysmanage-certs" in str(cert_manager.cert_dir)
 
     @patch("backend.security.certificate_manager.get_config")
     def test_missing_ca_for_client_cert_generation(self, mock_get_config):
