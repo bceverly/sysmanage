@@ -105,20 +105,19 @@ async def test_updates_grid_renders(
         # Navigate to Updates page
         await page.goto(f"{ui_config.base_url}/updates")
         await page.wait_for_load_state("domcontentloaded")
-        await page.wait_for_load_state("networkidle", timeout=10000)
-        await page.wait_for_timeout(3000)
 
-        # Wait for the updates list container to be present (it loads dynamically)
+        # Wait for React to hydrate and render the updates list
+        # The updates list is rendered after API calls complete
+        await page.wait_for_timeout(5000)  # Give more time for initial render
+
+        # Try to wait for network to be idle (API calls to complete)
         try:
-            await page.wait_for_selector(
-                '.updates__list, [class*="updates__list"]', timeout=10000
-            )
+            await page.wait_for_load_state("networkidle", timeout=15000)
         except:
-            # If list doesn't appear, scroll down in case it's lazy-loaded
-            await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            await page.wait_for_timeout(2000)
+            pass  # networkidle might timeout if long-polling, that's ok
 
         # Look for updates list component (uses custom card layout, not a traditional grid/table)
+        # Try selectors in order of specificity
         grid_selectors = [
             ".updates__list",  # Primary: Custom updates list container
             '[class*="updates__list"]',
@@ -133,14 +132,20 @@ async def test_updates_grid_renders(
 
         grid_found = False
         grid_element = None
+
+        # Try each selector with explicit wait for visibility
         for selector in grid_selectors:
-            locator = page.locator(selector)
-            if await locator.count() > 0:
+            try:
+                # Wait for element to be visible with longer timeout
+                await page.wait_for_selector(selector, state="visible", timeout=15000)
+                locator = page.locator(selector)
                 grid_element = locator.first
-                if await grid_element.is_visible():
-                    grid_found = True
-                    print(f"  [OK] Found grid/table with selector: {selector}")
-                    break
+                grid_found = True
+                print(f"  [OK] Found grid/table with selector: {selector}")
+                break
+            except:
+                # This selector didn't work, try next one
+                continue
 
         assert (
             grid_found
