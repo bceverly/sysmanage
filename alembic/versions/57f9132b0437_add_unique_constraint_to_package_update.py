@@ -60,17 +60,38 @@ def upgrade() -> None:
     constraint_names = [c['name'] for c in constraints]
 
     if 'uq_package_update_host_package_manager' not in constraint_names:
-        op.create_unique_constraint(
-            'uq_package_update_host_package_manager',
-            'package_update',
-            ['host_id', 'package_name', 'package_manager']
-        )
+        if dialect_name == 'sqlite':
+            # SQLite requires batch mode for adding constraints
+            with op.batch_alter_table('package_update', schema=None) as batch_op:
+                batch_op.create_unique_constraint(
+                    'uq_package_update_host_package_manager',
+                    ['host_id', 'package_name', 'package_manager']
+                )
+        else:
+            # PostgreSQL can add constraints directly
+            op.create_unique_constraint(
+                'uq_package_update_host_package_manager',
+                'package_update',
+                ['host_id', 'package_name', 'package_manager']
+            )
 
 
 def downgrade() -> None:
     # Remove the unique constraint
-    op.drop_constraint(
-        'uq_package_update_host_package_manager',
-        'package_update',
-        type_='unique'
-    )
+    bind = op.get_bind()
+    dialect_name = bind.dialect.name
+
+    if dialect_name == 'sqlite':
+        # SQLite requires batch mode for dropping constraints
+        with op.batch_alter_table('package_update', schema=None) as batch_op:
+            batch_op.drop_constraint(
+                'uq_package_update_host_package_manager',
+                type_='unique'
+            )
+    else:
+        # PostgreSQL can drop constraints directly
+        op.drop_constraint(
+            'uq_package_update_host_package_manager',
+            'package_update',
+            type_='unique'
+        )
