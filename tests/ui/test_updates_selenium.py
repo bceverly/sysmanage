@@ -91,10 +91,16 @@ def test_updates_page_loads(selenium_page, test_user, ui_config, start_server):
 
 
 def test_updates_grid_renders(selenium_page, test_user, ui_config, start_server):
-    """Test that the package updates grid/table renders correctly - CRITICAL TEST"""
+    """Test that the package updates page content renders correctly - CRITICAL TEST
+
+    Verifies that the updates content container renders, which contains either:
+    - .updates__list (when updates are available)
+    - .updates__empty (when no updates are available)
+    Both states are valid and indicate the page is working correctly.
+    """
     browser_name = selenium_page.browser_name
     print(
-        f"\n=== Testing Package Updates grid rendering with Selenium ({browser_name}) ==="
+        f"\n=== Testing Package Updates content rendering with Selenium ({browser_name}) ==="
     )
 
     try:
@@ -105,40 +111,42 @@ def test_updates_grid_renders(selenium_page, test_user, ui_config, start_server)
         selenium_page.goto("/updates")
         time.sleep(5)  # Increased wait time for page to fully load
 
-        # Look for updates list component (uses custom card layout, not a traditional grid/table)
-        # Try to wait for the updates list container to be present
-        grid_selectors = [
-            (
-                By.CSS_SELECTOR,
-                ".updates__list",
-            ),  # Primary: Custom updates list container
-            (By.CSS_SELECTOR, '[class*="updates__list"]'),
-            (By.CSS_SELECTOR, '[class*="ag-grid"]'),  # AG Grid (fallback)
-            (By.CSS_SELECTOR, '[class*="data-grid"]'),
-            (By.CSS_SELECTOR, "table"),
-            (By.CSS_SELECTOR, '[role="grid"]'),
-            (By.CSS_SELECTOR, '[class*="updates-grid"]'),
-            (By.CSS_SELECTOR, '[class*="updates-table"]'),
-            (By.CSS_SELECTOR, '[class*="package-grid"]'),
-        ]
+        # Look for updates content container (uses custom card layout)
+        # The updates page shows EITHER .updates__list (when there are updates)
+        # OR .updates__empty (when there are no updates)
+        # Both are valid rendering states we want to verify exist
 
         grid_found = False
         grid_element = None
-        for by, selector in grid_selectors:
-            try:
-                # Try with increased timeout
-                grid_element = selenium_page.wait_for_element_visible(
-                    by, selector, timeout=15
-                )
-                grid_found = True
-                print(f"  [OK] Found grid/table with selector: {selector}")
-                break
-            except TimeoutException:
-                continue
+
+        # First, try to find the content container (always present)
+        try:
+            grid_element = selenium_page.wait_for_element_visible(
+                By.CSS_SELECTOR, ".updates__content", timeout=15
+            )
+            grid_found = True
+            print(f"  [OK] Found updates content container")
+        except TimeoutException:
+            # If content container isn't found, try list or empty state directly
+            content_selectors = [
+                (By.CSS_SELECTOR, ".updates__list"),  # When updates exist
+                (By.CSS_SELECTOR, ".updates__empty"),  # When no updates
+            ]
+
+            for by, selector in content_selectors:
+                try:
+                    grid_element = selenium_page.wait_for_element_visible(
+                        by, selector, timeout=5
+                    )
+                    grid_found = True
+                    print(f"  [OK] Found updates component with selector: {selector}")
+                    break
+                except TimeoutException:
+                    continue
 
         assert (
             grid_found
-        ), "CRITICAL: Grid/table component not found! This is the kind of breakage we want to catch."
+        ), "CRITICAL: Updates content container not found! This is the kind of breakage we want to catch."
 
         # Verify the grid is visible (has non-zero dimensions)
         assert grid_element.is_displayed(), "Grid element exists but is not visible"

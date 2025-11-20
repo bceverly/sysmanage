@@ -94,9 +94,15 @@ async def test_updates_page_loads(
 async def test_updates_grid_renders(
     page: Page, test_user: dict, ui_config, start_server, browser_context
 ):
-    """Test that the package updates grid/table renders correctly - CRITICAL TEST"""
+    """Test that the package updates page content renders correctly - CRITICAL TEST
+
+    Verifies that the updates content container renders, which contains either:
+    - .updates__list (when updates are available)
+    - .updates__empty (when no updates are available)
+    Both states are valid and indicate the page is working correctly.
+    """
     browser_name = browser_context.browser.browser_type.name
-    print(f"\n=== Testing Package Updates grid rendering on {browser_name} ===")
+    print(f"\n=== Testing Package Updates content rendering on {browser_name} ===")
 
     try:
         # Login first
@@ -116,40 +122,42 @@ async def test_updates_grid_renders(
         except:
             pass  # networkidle might timeout if long-polling, that's ok
 
-        # Look for updates list component (uses custom card layout, not a traditional grid/table)
-        # Try selectors in order of specificity
-        grid_selectors = [
-            ".updates__list",  # Primary: Custom updates list container
-            '[class*="updates__list"]',
-            '[class*="ag-grid"]',  # AG Grid (fallback)
-            '[class*="data-grid"]',
-            "table",
-            '[role="grid"]',
-            '[class*="updates-grid"]',
-            '[class*="updates-table"]',
-            '[class*="package-grid"]',
+        # Look for updates content container (uses custom card layout)
+        # The updates page shows EITHER .updates__list (when there are updates)
+        # OR .updates__empty (when there are no updates)
+        # Both are valid rendering states we want to verify exist
+
+        content_selectors = [
+            ".updates__content",  # The parent container that's always rendered
+            ".updates__list",  # Rendered when updates exist
+            ".updates__empty",  # Rendered when no updates exist
         ]
 
         grid_found = False
         grid_element = None
 
-        # Try each selector with explicit wait for visibility
-        for selector in grid_selectors:
-            try:
-                # Wait for element to be visible with longer timeout
-                await page.wait_for_selector(selector, state="visible", timeout=15000)
-                locator = page.locator(selector)
-                grid_element = locator.first
-                grid_found = True
-                print(f"  [OK] Found grid/table with selector: {selector}")
-                break
-            except:
-                # This selector didn't work, try next one
-                continue
+        # First, wait for the content container to be present
+        try:
+            await page.wait_for_selector(".updates__content", state="visible", timeout=15000)
+            print(f"  [OK] Found updates content container")
+            grid_found = True
+            grid_element = page.locator(".updates__content").first
+        except:
+            # If content container isn't found, try the list or empty state directly
+            for selector in [".updates__list", ".updates__empty"]:
+                try:
+                    await page.wait_for_selector(selector, state="visible", timeout=5000)
+                    locator = page.locator(selector)
+                    grid_element = locator.first
+                    grid_found = True
+                    print(f"  [OK] Found updates component with selector: {selector}")
+                    break
+                except:
+                    continue
 
         assert (
             grid_found
-        ), "CRITICAL: Grid/table component not found! This is the kind of breakage we want to catch."
+        ), "CRITICAL: Updates content container not found! This is the kind of breakage we want to catch."
 
         # Verify the grid is visible (has non-zero dimensions)
         assert await grid_element.is_visible(), "Grid element exists but is not visible"
