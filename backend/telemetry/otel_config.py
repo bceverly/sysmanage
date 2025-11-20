@@ -2,35 +2,45 @@
 OpenTelemetry configuration and setup for SysManage.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import platform
 from typing import Optional
 
-from opentelemetry import metrics, trace
-from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.exporter.prometheus import PrometheusMetricReader
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from opentelemetry.instrumentation.logging import LoggingInstrumentor
-from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-from opentelemetry.sdk.resources import SERVICE_NAME, SERVICE_VERSION, Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from prometheus_client import start_http_server
-
 logger = logging.getLogger(__name__)
 
-# Check if OpenTelemetry packages are available
+# Check if OpenTelemetry packages are available and import dependencies
 try:
-    import opentelemetry
+    from opentelemetry import metrics, trace
+    from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (
+        OTLPMetricExporter,
+    )
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+    from opentelemetry.exporter.prometheus import PrometheusMetricReader
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+    from opentelemetry.instrumentation.logging import LoggingInstrumentor
+    from opentelemetry.instrumentation.requests import RequestsInstrumentor
+    from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+    from opentelemetry.sdk.metrics import MeterProvider
+    from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+    from opentelemetry.sdk.resources import SERVICE_NAME, SERVICE_VERSION, Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+    from prometheus_client import start_http_server
 
     TELEMETRY_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    logger.warning(
+        "OpenTelemetry dependencies not available (grpcio issue?): %s. "
+        "Telemetry will be disabled.",
+        e,
+    )
     TELEMETRY_AVAILABLE = False
+    # Define stub objects so the code doesn't break
+    metrics = None  # type: ignore
+    trace = None  # type: ignore
 
 # Global state for telemetry
 _telemetry_enabled = False
@@ -202,10 +212,10 @@ def get_tracer(name: str):
         name: The name of the tracer (usually __name__ of the calling module)
 
     Returns:
-        A tracer instance
+        A tracer instance or None if telemetry is not available
     """
-    if not _telemetry_enabled:
-        return trace.get_tracer(name)
+    if not TELEMETRY_AVAILABLE or trace is None:
+        return None
     return trace.get_tracer(name)
 
 
@@ -217,8 +227,8 @@ def get_meter(name: str):
         name: The name of the meter (usually __name__ of the calling module)
 
     Returns:
-        A meter instance
+        A meter instance or None if telemetry is not available
     """
-    if not _telemetry_enabled:
-        return metrics.get_meter(name)
+    if not TELEMETRY_AVAILABLE or metrics is None:
+        return None
     return metrics.get_meter(name)

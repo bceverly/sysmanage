@@ -44,7 +44,23 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
             print("  [WARNING] Form element not found, continuing anyway")
 
         # Additional wait for React/MUI to render
+        # On NetBSD, React components take longer to render in headless Chrome
         time.sleep(3)
+
+        # Wait for React to finish rendering the input fields
+        if not selenium_page.wait_for_react_ready(timeout=30):
+            print("  [WARNING] React may not be fully ready, continuing anyway")
+            diagnostics = selenium_page.get_page_diagnostics()
+            print(f"  [DEBUG] Page diagnostics: {diagnostics}")
+            # Also get the page source to see what's actually there
+            page_source = selenium_page.driver.page_source[:1000]
+            print(f"  [DEBUG] Page source (first 1000 chars): {page_source}")
+            # Get browser console logs
+            console_logs = selenium_page.get_console_logs()
+            if console_logs:
+                print(f"  [DEBUG] Browser console logs ({len(console_logs)} entries):")
+                for log in console_logs[:10]:  # Print first 10 log entries
+                    print(f"    [{log.get('level', 'UNKNOWN')}] {log.get('message', 'no message')}")
 
         # Verify we're on the login page
         title = selenium_page.get_title()
@@ -248,6 +264,10 @@ def test_invalid_login_selenium(selenium_page, ui_config, start_server):
         pass
 
     time.sleep(3)  # Extra wait for MUI components
+
+    # Wait for React to finish rendering the input fields
+    if not selenium_page.wait_for_react_ready(timeout=30):
+        print("  [WARNING] React may not be fully ready, continuing anyway")
 
     # Find input fields (MUI TextField selectors)
     username_selectors = [

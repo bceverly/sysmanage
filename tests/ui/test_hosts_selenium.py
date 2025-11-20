@@ -26,6 +26,10 @@ def login_helper(selenium_page, test_user):
 
     time.sleep(3)  # Extra wait for MUI components to render
 
+    # Wait for React to finish rendering the input fields
+    if not selenium_page.wait_for_react_ready(timeout=30):
+        print("  [WARNING] React may not be fully ready, continuing anyway")
+
     # Find and fill login form (MUI TextField selectors)
     # Try multiple selectors for username field
     username_selectors = [
