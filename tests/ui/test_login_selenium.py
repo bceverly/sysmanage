@@ -100,7 +100,7 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
                 password_input = selenium_page.wait_for_element_visible(
                     by, selector, timeout=5
                 )
-                print(f"  [OK] Found password field with selector: {selector}")
+                print("  [OK] Found password field")
                 break
             except TimeoutException:
                 continue
