@@ -12,6 +12,7 @@ If either browser/driver is missing, tests will be skipped for that browser.
 """
 
 import os
+import subprocess
 import time
 import pytest
 import yaml
