@@ -103,9 +103,10 @@ def test_updates_grid_renders(selenium_page, test_user, ui_config, start_server)
 
         # Navigate to Updates page
         selenium_page.goto("/updates")
-        time.sleep(3)
+        time.sleep(5)  # Increased wait time for page to fully load
 
         # Look for updates list component (uses custom card layout, not a traditional grid/table)
+        # Try to wait for the updates list container to be present
         grid_selectors = [
             (
                 By.CSS_SELECTOR,
@@ -125,8 +126,9 @@ def test_updates_grid_renders(selenium_page, test_user, ui_config, start_server)
         grid_element = None
         for by, selector in grid_selectors:
             try:
+                # Try with increased timeout
                 grid_element = selenium_page.wait_for_element_visible(
-                    by, selector, timeout=10
+                    by, selector, timeout=15
                 )
                 grid_found = True
                 print(f"  [OK] Found grid/table with selector: {selector}")

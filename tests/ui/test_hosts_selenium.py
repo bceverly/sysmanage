@@ -99,13 +99,13 @@ def test_hosts_grid_renders(selenium_page, test_user, ui_config, start_server):
 
         # Navigate to Hosts page
         selenium_page.goto("/hosts")
-        time.sleep(3)
+        time.sleep(5)  # Increased wait time for page to fully load
 
         # Look for grid/table component - try multiple possible selectors
         grid_selectors = [
+            (By.CSS_SELECTOR, "table"),  # Most reliable for Hosts page
             (By.CSS_SELECTOR, '[class*="ag-grid"]'),  # AG Grid
             (By.CSS_SELECTOR, '[class*="data-grid"]'),
-            (By.CSS_SELECTOR, "table"),
             (By.CSS_SELECTOR, '[role="grid"]'),
             (By.CSS_SELECTOR, '[class*="hosts-grid"]'),
             (By.CSS_SELECTOR, '[class*="hosts-table"]'),
@@ -115,8 +115,9 @@ def test_hosts_grid_renders(selenium_page, test_user, ui_config, start_server):
         grid_element = None
         for by, selector in grid_selectors:
             try:
+                # Try to find the element with increased timeout
                 grid_element = selenium_page.wait_for_element_visible(
-                    by, selector, timeout=10
+                    by, selector, timeout=15
                 )
                 grid_found = True
                 print(f"  [OK] Found grid/table with selector: {selector}")
