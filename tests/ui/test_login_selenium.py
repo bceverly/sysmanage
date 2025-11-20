@@ -29,38 +29,78 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
     try:
         # Navigate to login page
         selenium_page.goto("/login")
-        time.sleep(2)  # Wait for page load
+
+        # Wait for page body to load
+        try:
+            selenium_page.wait_for_element_visible(By.CSS_SELECTOR, 'body', timeout=10)
+        except TimeoutException:
+            print("  [WARNING] Body element not found")
+
+        # Wait for MUI Container to load
+        try:
+            selenium_page.wait_for_element_visible(By.CSS_SELECTOR, 'form', timeout=10)
+            print("  [OK] Login form container loaded")
+        except TimeoutException:
+            print("  [WARNING] Form element not found, continuing anyway")
+
+        # Additional wait for React/MUI to render
+        time.sleep(3)
 
         # Verify we're on the login page
         title = selenium_page.get_title()
         assert "SysManage" in title, f"Expected SysManage in title, got: {title}"
 
         # Find and fill login form
-        # Try multiple selectors for username/email field
+        # Try multiple selectors for username/email field (MUI TextField specific)
         username_selectors = [
-            (By.CSS_SELECTOR, 'input[type="text"]'),
+            (By.CSS_SELECTOR, 'input[id="userid"]'),  # MUI TextField id
+            (By.CSS_SELECTOR, 'input[name="userid"]'),  # MUI TextField name
+            (By.CSS_SELECTOR, 'input[type="text"]'),  # Fallback
             (By.CSS_SELECTOR, 'input[placeholder*="email" i]'),
             (By.CSS_SELECTOR, 'input[placeholder*="username" i]'),
             (By.CSS_SELECTOR, 'input[name="username"]'),
             (By.CSS_SELECTOR, 'input[name="email"]'),
+            (By.CSS_SELECTOR, 'input[autocomplete="email"]'),  # MUI TextField autocomplete
         ]
 
         username_input = None
+        attempted_username_selectors = []
         for by, selector in username_selectors:
+            attempted_username_selectors.append(selector)
             try:
                 username_input = selenium_page.wait_for_element_visible(
                     by, selector, timeout=5
                 )
+                print(f"  [OK] Found username field with selector: {selector}")
                 break
             except TimeoutException:
                 continue
 
+        if username_input is None:
+            print(f"  [DEBUG] Failed to find username field. Tried: {', '.join(attempted_username_selectors)}")
+            print(f"  [DEBUG] Current URL: {selenium_page.get_current_url()}")
+
         assert username_input is not None, "Could not find username input field"
 
-        # Find password field
-        password_input = selenium_page.wait_for_element_visible(
-            By.CSS_SELECTOR, 'input[type="password"]'
-        )
+        # Find password field (try multiple selectors)
+        password_selectors = [
+            (By.CSS_SELECTOR, 'input[id="password"]'),  # MUI TextField id
+            (By.CSS_SELECTOR, 'input[name="password"]'),  # MUI TextField name
+            (By.CSS_SELECTOR, 'input[type="password"]'),  # Standard
+        ]
+
+        password_input = None
+        for by, selector in password_selectors:
+            try:
+                password_input = selenium_page.wait_for_element_visible(
+                    by, selector, timeout=5
+                )
+                print(f"  [OK] Found password field with selector: {selector}")
+                break
+            except TimeoutException:
+                continue
+
+        assert password_input is not None, "Could not find password input field"
 
         # Fill in credentials
         username_input.clear()
@@ -195,15 +235,49 @@ def test_invalid_login_selenium(selenium_page, ui_config, start_server):
 
     # Navigate to login page
     selenium_page.goto("/login")
-    time.sleep(2)
 
-    # Find input fields
-    username_input = selenium_page.wait_for_element_visible(
-        By.CSS_SELECTOR, 'input[type="text"]'
-    )
-    password_input = selenium_page.wait_for_element_visible(
-        By.CSS_SELECTOR, 'input[type="password"]'
-    )
+    # Wait for form to load
+    try:
+        selenium_page.wait_for_element_visible(By.CSS_SELECTOR, 'form', timeout=10)
+    except TimeoutException:
+        pass
+
+    time.sleep(3)  # Extra wait for MUI components
+
+    # Find input fields (MUI TextField selectors)
+    username_selectors = [
+        (By.CSS_SELECTOR, 'input[id="userid"]'),
+        (By.CSS_SELECTOR, 'input[name="userid"]'),
+        (By.CSS_SELECTOR, 'input[type="text"]'),
+    ]
+
+    username_input = None
+    for by, selector in username_selectors:
+        try:
+            username_input = selenium_page.wait_for_element_visible(by, selector, timeout=5)
+            break
+        except TimeoutException:
+            continue
+
+    if username_input is None:
+        raise Exception("Could not find username input field in login form")
+
+    password_selectors = [
+        (By.CSS_SELECTOR, 'input[id="password"]'),
+        (By.CSS_SELECTOR, 'input[name="password"]'),
+        (By.CSS_SELECTOR, 'input[type="password"]'),
+    ]
+
+    password_input = None
+    for by, selector in password_selectors:
+        try:
+            password_input = selenium_page.wait_for_element_visible(by, selector, timeout=5)
+            break
+        except TimeoutException:
+            continue
+
+    if password_input is None:
+        raise Exception("Could not find password input field in login form")
 
     # Try invalid credentials
     username_input.clear()

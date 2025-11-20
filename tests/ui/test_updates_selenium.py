@@ -17,15 +17,52 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 def login_helper(selenium_page, test_user):
     """Helper function to log in before running tests"""
     selenium_page.goto("/login")
-    time.sleep(2)
 
-    # Find and fill login form
-    username_input = selenium_page.wait_for_element_visible(
-        By.CSS_SELECTOR, 'input[type="text"]'
-    )
-    password_input = selenium_page.wait_for_element_visible(
-        By.CSS_SELECTOR, 'input[type="password"]'
-    )
+    # Wait for page to load and React to render
+    try:
+        selenium_page.wait_for_element_visible(By.CSS_SELECTOR, 'form', timeout=10)
+    except TimeoutException:
+        pass  # Continue anyway
+
+    time.sleep(3)  # Extra wait for MUI components to render
+
+    # Find and fill login form (MUI TextField selectors)
+    # Try multiple selectors for username field
+    username_selectors = [
+        (By.CSS_SELECTOR, 'input[id="userid"]'),
+        (By.CSS_SELECTOR, 'input[name="userid"]'),
+        (By.CSS_SELECTOR, 'input[type="text"]'),
+        (By.CSS_SELECTOR, 'input[autocomplete="email"]'),
+    ]
+
+    username_input = None
+    for by, selector in username_selectors:
+        try:
+            username_input = selenium_page.wait_for_element_visible(by, selector, timeout=5)
+            break
+        except TimeoutException:
+            continue
+
+    if username_input is None:
+        raise Exception("Could not find username input field in login form")
+
+    # Try multiple selectors for password field
+    password_selectors = [
+        (By.CSS_SELECTOR, 'input[id="password"]'),
+        (By.CSS_SELECTOR, 'input[name="password"]'),
+        (By.CSS_SELECTOR, 'input[type="password"]'),
+    ]
+
+    password_input = None
+    for by, selector in password_selectors:
+        try:
+            password_input = selenium_page.wait_for_element_visible(by, selector, timeout=5)
+            break
+        except TimeoutException:
+            continue
+
+    if password_input is None:
+        raise Exception("Could not find password input field in login form")
 
     username_input.clear()
     username_input.send_keys(test_user["username"])
@@ -105,40 +142,48 @@ def test_updates_grid_renders(selenium_page, test_user, ui_config, start_server)
         selenium_page.goto("/updates")
         time.sleep(5)  # Increased wait time for page to fully load
 
-        # Look for updates list component (uses custom card layout, not a traditional grid/table)
-        # Try to wait for the updates list container to be present
-        grid_selectors = [
-            (
-                By.CSS_SELECTOR,
-                ".updates__list",
-            ),  # Primary: Custom updates list container
-            (By.CSS_SELECTOR, '[class*="updates__list"]'),
-            (By.CSS_SELECTOR, '[class*="ag-grid"]'),  # AG Grid (fallback)
-            (By.CSS_SELECTOR, '[class*="data-grid"]'),
-            (By.CSS_SELECTOR, "table"),
-            (By.CSS_SELECTOR, '[role="grid"]'),
-            (By.CSS_SELECTOR, '[class*="updates-grid"]'),
-            (By.CSS_SELECTOR, '[class*="updates-table"]'),
-            (By.CSS_SELECTOR, '[class*="package-grid"]'),
+        # Look for updates page content container (uses custom card layout, not a traditional grid/table)
+        # First check if the main content area is loaded
+        content_selectors = [
+            (By.CSS_SELECTOR, ".updates__content"),  # Main content container
+            (By.CSS_SELECTOR, ".updates"),  # Page wrapper
+        ]
+
+        content_found = False
+        for by, selector in content_selectors:
+            try:
+                selenium_page.wait_for_element_visible(by, selector, timeout=15)
+                content_found = True
+                print(f"  [OK] Found updates page content container: {selector}")
+                break
+            except TimeoutException:
+                continue
+
+        assert content_found, "CRITICAL: Updates page content not found! Page may not have loaded."
+
+        # Now look for either the updates list OR the "no updates" message
+        # (Both are valid - page is working either way)
+        list_or_empty_selectors = [
+            (By.CSS_SELECTOR, ".updates__list"),  # Updates list container
+            (By.CSS_SELECTOR, ".updates__empty"),  # "No updates" message
         ]
 
         grid_found = False
         grid_element = None
-        for by, selector in grid_selectors:
+        for by, selector in list_or_empty_selectors:
             try:
-                # Try with increased timeout
                 grid_element = selenium_page.wait_for_element_visible(
-                    by, selector, timeout=15
+                    by, selector, timeout=5
                 )
                 grid_found = True
-                print(f"  [OK] Found grid/table with selector: {selector}")
+                print(f"  [OK] Found updates component with selector: {selector}")
                 break
             except TimeoutException:
                 continue
 
         assert (
             grid_found
-        ), "CRITICAL: Grid/table component not found! This is the kind of breakage we want to catch."
+        ), "CRITICAL: Neither updates list nor 'no updates' message found! This indicates the page is broken."
 
         # Verify the grid is visible (has non-zero dimensions)
         assert grid_element.is_displayed(), "Grid element exists but is not visible"
@@ -148,69 +193,45 @@ def test_updates_grid_renders(selenium_page, test_user, ui_config, start_server)
         ), f"Grid has zero dimensions: {size}"
 
         print(
-            f"  [OK] Grid is visible with dimensions: {size['width']}x{size['height']}"
+            f"  [OK] Updates component is visible with dimensions: {size['width']}x{size['height']}"
         )
 
-        # Look for column headers
-        header_selectors = [
-            (By.CSS_SELECTOR, '[class*="ag-header"]'),
-            (By.CSS_SELECTOR, "thead"),
-            (By.CSS_SELECTOR, '[role="columnheader"]'),
-            (By.CSS_SELECTOR, "th"),
+        # Since Updates uses a card layout (not a table), look for update items or stats instead of columns
+        # Check for statistics cards (always present)
+        stats_selectors = [
+            (By.CSS_SELECTOR, '.updates__stats'),  # Stats container
+            (By.CSS_SELECTOR, '.updates__stat-card'),  # Individual stat cards
         ]
 
-        headers_found = False
-        for by, selector in header_selectors:
+        stats_found = False
+        for by, selector in stats_selectors:
             try:
-                headers = selenium_page.driver.find_elements(by, selector)
-                if headers:
-                    headers_found = True
-                    print(f"  [OK] Found {len(headers)} column header(s)")
+                stats_elements = selenium_page.driver.find_elements(by, selector)
+                if stats_elements:
+                    stats_found = True
+                    print(f"  [OK] Found {len(stats_elements)} statistics element(s)")
                     break
             except NoSuchElementException:
                 continue
 
-        if not headers_found:
-            print(
-                "  [WARNING] No column headers found - grid may not be fully initialized"
+        # Check for update items (if any exist)
+        update_items = []
+        try:
+            update_items = selenium_page.driver.find_elements(
+                By.CSS_SELECTOR, '.updates__item'
             )
+            if update_items:
+                print(f"  [OK] Found {len(update_items)} update item(s) in the list")
+        except NoSuchElementException:
+            print("  [INFO] No update items found - may indicate no updates available")
 
-        # Look for expected column names (based on typical package updates table columns)
-        expected_columns = [
-            "Package",
-            "Host",
-            "Current",
-            "Available",
-            "Version",
-            "Manager",
-            "Type",
-            "Status",
-        ]
-
-        found_columns = []
-        for column in expected_columns:
-            column_selectors = [
-                (By.XPATH, f'//*[contains(text(), "{column}")]'),
-                (By.XPATH, f'//th[contains(text(), "{column}")]'),
-                (By.XPATH, f'//*[@role="columnheader"][contains(text(), "{column}")]'),
-            ]
-
-            for by, selector in column_selectors:
-                try:
-                    selenium_page.driver.find_element(by, selector)
-                    found_columns.append(column)
-                    print(f"  [OK] Found column: {column}")
-                    break
-                except NoSuchElementException:
-                    continue
-
-        # We should find at least a couple of the expected columns
-        assert (
-            len(found_columns) >= 2
-        ), f"Expected at least 2 columns, found: {found_columns}"
+        # Page is valid if we found either stats or the empty message
+        element_class = grid_element.get_attribute("class") or ""
+        assert stats_found or "updates__empty" in element_class, \
+            "Expected to find either update statistics or 'no updates' message"
 
         print(
-            f"  [OK] Package Updates grid rendered successfully with {len(found_columns)} recognized columns ({browser_name})"
+            f"  [OK] Package Updates page rendered successfully ({browser_name})"
         )
 
     except Exception as e:
