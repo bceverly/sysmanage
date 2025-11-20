@@ -587,7 +587,7 @@ jobs:
           echo "🐧 ${{ runner.os }} detected - testing Chrome and Firefox"
         fi
 
-        PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_login_cross_browser.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short
+        PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_login_cross_browser.py tests/ui/test_hosts_playwright.py tests/ui/test_updates_playwright.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short
       shell: bash
       env:
         PYTHONPATH: .
