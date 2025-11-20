@@ -17,15 +17,52 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 def login_helper(selenium_page, test_user):
     """Helper function to log in before running tests"""
     selenium_page.goto("/login")
-    time.sleep(2)
 
-    # Find and fill login form
-    username_input = selenium_page.wait_for_element_visible(
-        By.CSS_SELECTOR, 'input[type="text"]'
-    )
-    password_input = selenium_page.wait_for_element_visible(
-        By.CSS_SELECTOR, 'input[type="password"]'
-    )
+    # Wait for page to load and React to render
+    try:
+        selenium_page.wait_for_element_visible(By.CSS_SELECTOR, 'form', timeout=10)
+    except TimeoutException:
+        pass  # Continue anyway
+
+    time.sleep(3)  # Extra wait for MUI components to render
+
+    # Find and fill login form (MUI TextField selectors)
+    # Try multiple selectors for username field
+    username_selectors = [
+        (By.CSS_SELECTOR, 'input[id="userid"]'),
+        (By.CSS_SELECTOR, 'input[name="userid"]'),
+        (By.CSS_SELECTOR, 'input[type="text"]'),
+        (By.CSS_SELECTOR, 'input[autocomplete="email"]'),
+    ]
+
+    username_input = None
+    for by, selector in username_selectors:
+        try:
+            username_input = selenium_page.wait_for_element_visible(by, selector, timeout=5)
+            break
+        except TimeoutException:
+            continue
+
+    if username_input is None:
+        raise Exception("Could not find username input field in login form")
+
+    # Try multiple selectors for password field
+    password_selectors = [
+        (By.CSS_SELECTOR, 'input[id="password"]'),
+        (By.CSS_SELECTOR, 'input[name="password"]'),
+        (By.CSS_SELECTOR, 'input[type="password"]'),
+    ]
+
+    password_input = None
+    for by, selector in password_selectors:
+        try:
+            password_input = selenium_page.wait_for_element_visible(by, selector, timeout=5)
+            break
+        except TimeoutException:
+            continue
+
+    if password_input is None:
+        raise Exception("Could not find password input field in login form")
 
     username_input.clear()
     username_input.send_keys(test_user["username"])
@@ -99,31 +136,72 @@ def test_hosts_grid_renders(selenium_page, test_user, ui_config, start_server):
 
         # Navigate to Hosts page
         selenium_page.goto("/hosts")
-        time.sleep(5)  # Increased wait time for page to fully load
+
+        # Wait for React app to mount
+        time.sleep(2)
+
+        # Wait for page content to start rendering (look for any content)
+        content_loaded = False
+        content_selectors = [
+            (By.TAG_NAME, 'main'),
+            (By.CSS_SELECTOR, '[class*="MuiBox"]'),
+            (By.TAG_NAME, 'body'),
+        ]
+
+        for by, selector in content_selectors:
+            try:
+                selenium_page.wait_for_element_visible(by, selector, timeout=5)
+                print(f"  [OK] Page content container found: {selector}")
+                content_loaded = True
+                break
+            except TimeoutException:
+                continue
+
+        if not content_loaded:
+            print("  [WARNING] No page content container found")
+
+        # Wait longer for DataGrid to render (it may take time to fetch data)
+        print("  [INFO] Waiting for grid to render...")
+        time.sleep(5)
 
         # Look for grid/table component - try multiple possible selectors
         grid_selectors = [
-            (By.CSS_SELECTOR, "table"),  # Most reliable for Hosts page
+            (By.CSS_SELECTOR, '[class*="MuiDataGrid-root"]'),  # MUI DataGrid (primary)
+            (By.CSS_SELECTOR, '[role="grid"]'),  # Generic ARIA grid role
+            (By.CSS_SELECTOR, "table"),  # Fallback for plain tables
             (By.CSS_SELECTOR, '[class*="ag-grid"]'),  # AG Grid
             (By.CSS_SELECTOR, '[class*="data-grid"]'),
-            (By.CSS_SELECTOR, '[role="grid"]'),
             (By.CSS_SELECTOR, '[class*="hosts-grid"]'),
             (By.CSS_SELECTOR, '[class*="hosts-table"]'),
         ]
 
         grid_found = False
         grid_element = None
+        attempted_selectors = []
+
         for by, selector in grid_selectors:
+            attempted_selectors.append(selector)
             try:
                 # Try to find the element with increased timeout
                 grid_element = selenium_page.wait_for_element_visible(
-                    by, selector, timeout=15
+                    by, selector, timeout=10
                 )
                 grid_found = True
                 print(f"  [OK] Found grid/table with selector: {selector}")
                 break
             except TimeoutException:
                 continue
+
+        if not grid_found:
+            # Debug: print current URL and page source snippet
+            print(f"  [DEBUG] Current URL: {selenium_page.get_current_url()}")
+            print(f"  [DEBUG] Page title: {selenium_page.get_title()}")
+            print(f"  [DEBUG] Attempted selectors: {', '.join(attempted_selectors)}")
+
+            # Take a debug screenshot
+            debug_screenshot = f"tests/ui/test-results/hosts_grid_debug_{int(time.time())}.png"
+            selenium_page.screenshot(debug_screenshot)
+            print(f"  [DEBUG] Screenshot saved: {debug_screenshot}")
 
         assert (
             grid_found
@@ -142,10 +220,11 @@ def test_hosts_grid_renders(selenium_page, test_user, ui_config, start_server):
 
         # Look for column headers
         header_selectors = [
-            (By.CSS_SELECTOR, '[class*="ag-header"]'),
-            (By.CSS_SELECTOR, "thead"),
-            (By.CSS_SELECTOR, '[role="columnheader"]'),
-            (By.CSS_SELECTOR, "th"),
+            (By.CSS_SELECTOR, '[class*="MuiDataGrid-columnHeader"]'),  # MUI DataGrid headers
+            (By.CSS_SELECTOR, '[role="columnheader"]'),  # Generic ARIA columnheader role
+            (By.CSS_SELECTOR, '[class*="ag-header"]'),  # AG Grid
+            (By.CSS_SELECTOR, "thead"),  # Plain table headers
+            (By.CSS_SELECTOR, "th"),  # Plain table header cells
         ]
 
         headers_found = False
@@ -226,9 +305,10 @@ def test_hosts_data_displays(selenium_page, test_user, ui_config, start_server):
 
         # Look for row data in the grid
         row_selectors = [
-            (By.CSS_SELECTOR, '[class*="ag-row"]'),
-            (By.CSS_SELECTOR, "tbody tr"),
-            (By.CSS_SELECTOR, '[role="row"]'),
+            (By.CSS_SELECTOR, '[class*="MuiDataGrid-row"]'),  # MUI DataGrid rows
+            (By.CSS_SELECTOR, '[role="row"]'),  # Generic ARIA row role
+            (By.CSS_SELECTOR, '[class*="ag-row"]'),  # AG Grid
+            (By.CSS_SELECTOR, "tbody tr"),  # Plain table rows
         ]
 
         rows_found = False
@@ -315,9 +395,10 @@ def test_hosts_grid_interactive(selenium_page, test_user, ui_config, start_serve
 
         # Try to find and click a column header to test sorting
         header_selectors = [
-            (By.CSS_SELECTOR, '[class*="ag-header-cell"]'),
-            (By.CSS_SELECTOR, "th"),
-            (By.CSS_SELECTOR, '[role="columnheader"]'),
+            (By.CSS_SELECTOR, '[class*="MuiDataGrid-columnHeader"]'),  # MUI DataGrid headers
+            (By.CSS_SELECTOR, '[role="columnheader"]'),  # Generic ARIA columnheader role
+            (By.CSS_SELECTOR, '[class*="ag-header-cell"]'),  # AG Grid
+            (By.CSS_SELECTOR, "th"),  # Plain table headers
         ]
 
         clickable_header = None
@@ -344,8 +425,9 @@ def test_hosts_grid_interactive(selenium_page, test_user, ui_config, start_serve
 
         # Try to select a row (if rows exist)
         row_selectors = [
-            (By.CSS_SELECTOR, '[class*="ag-row"]'),
-            (By.CSS_SELECTOR, "tbody tr"),
+            (By.CSS_SELECTOR, '[class*="MuiDataGrid-row"]'),  # MUI DataGrid rows
+            (By.CSS_SELECTOR, '[class*="ag-row"]'),  # AG Grid
+            (By.CSS_SELECTOR, "tbody tr"),  # Plain table rows
         ]
 
         for by, selector in row_selectors:

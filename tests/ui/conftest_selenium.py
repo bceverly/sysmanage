@@ -12,6 +12,7 @@ If either browser/driver is missing, tests will be skipped for that browser.
 """
 
 import os
+import signal
 import subprocess
 import time
 import pytest
@@ -295,16 +296,9 @@ def _create_firefox_driver():
     try:
         print(f"Using Firefox binary: {firefox_binary}")
         print(f"Using GeckoDriver: {geckodriver_path}")
-        # Set longer timeout for Firefox startup (especially on OpenBSD)
-        import selenium.webdriver.remote.webdriver as remote_webdriver
-
-        original_timeout = remote_webdriver.WebDriver.DEFAULT_TIMEOUT
-        remote_webdriver.WebDriver.DEFAULT_TIMEOUT = 60
-
+        # Note: WebDriver.DEFAULT_TIMEOUT was removed in newer Selenium versions
+        # Firefox startup timeout is now handled by service timeout
         driver = webdriver.Firefox(service=service, options=options)
-
-        # Restore original timeout
-        remote_webdriver.WebDriver.DEFAULT_TIMEOUT = original_timeout
         yield driver
     except Exception as e:
         print(f"Warning: Firefox failed to start: {e}")
@@ -383,11 +377,13 @@ def start_server(ui_config):
             print(f"   Server process started (PID: {server_process.pid})")
             print("   Waiting for server to be ready...")
 
-            # Wait up to 60 seconds for server to be ready
+            # Wait up to 60 seconds for backend API to be ready
             max_wait = 60
             wait_interval = 2
             elapsed = 0
+            backend_ready = False
 
+            print("   Waiting for backend API...")
             while elapsed < max_wait:
                 time.sleep(wait_interval)
                 elapsed += wait_interval
@@ -397,25 +393,41 @@ def start_server(ui_config):
                         f"{ui_config.api_url}/api/health", timeout=5
                     )
                     if response.status_code == 200:
-                        print(f"   [OK] Server ready after {elapsed} seconds")
+                        print(f"   [OK] Backend API ready after {elapsed} seconds")
+                        backend_ready = True
+                        break
+                except:
+                    pass
+
+                if elapsed % 10 == 0:  # Print every 10 seconds
+                    print(f"   Waiting for backend... ({elapsed}/{max_wait}s)")
+
+            if not backend_ready:
+                raise Exception(f"Backend API failed to start within {max_wait} seconds")
+
+            # Now wait for frontend WebUI to be ready
+            print("   Waiting for frontend WebUI...")
+            elapsed = 0
+            frontend_ready = False
+
+            while elapsed < max_wait:
+                time.sleep(wait_interval)
+                elapsed += wait_interval
+
+                try:
+                    response = requests.get(f"{ui_config.base_url}/", timeout=5)
+                    if response.status_code in [200, 304]:  # 200 OK or 304 Not Modified
+                        print(f"   [OK] Frontend WebUI ready after {elapsed} seconds")
+                        frontend_ready = True
                         server_running = True
                         break
                 except:
-                    # Try root endpoint as fallback
-                    try:
-                        response = requests.get(f"{ui_config.base_url}/", timeout=5)
-                        if response.status_code in [200, 404]:
-                            print(
-                                f"   [OK] Server ready after {elapsed} seconds (via root endpoint)"
-                            )
-                            server_running = True
-                            break
-                    except:
-                        pass
+                    pass
 
-                print(f"   Waiting... ({elapsed}/{max_wait}s)")
+                if elapsed % 10 == 0:  # Print every 10 seconds
+                    print(f"   Waiting for frontend... ({elapsed}/{max_wait}s)")
 
-            if not server_running:
+            if not frontend_ready:
                 # Clean up failed server process
                 if server_process:
                     (
@@ -423,7 +435,7 @@ def start_server(ui_config):
                         if os.name != "nt"
                         else server_process.terminate()
                     )
-                raise Exception(f"Server failed to start within {max_wait} seconds")
+                raise Exception(f"Frontend WebUI failed to start within {max_wait} seconds")
 
         except Exception as e:
             print(f"   [ERROR] Failed to start server: {e}")
