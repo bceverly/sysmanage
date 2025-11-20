@@ -746,20 +746,20 @@ const Hosts = () => {
             {/* DataGrid - flexGrow to fill available space */}
             <Box sx={{ flexGrow: 1, minHeight: 0 }}>
                 <DataGrid
-                    rows={filteredData}
-                    columns={columns}
+                    rows={filteredData || []}
+                    columns={columns || []}
                     loading={loading}
-                    paginationModel={paginationModel}
+                    paginationModel={paginationModel || { page: 0, pageSize: 10 }}
                     onPaginationModelChange={setPaginationModel}
                     initialState={{
                         sorting: {
                             sortModel: [{ field: 'fqdn', sort: 'asc'}],
                         },
                     }}
-                    columnVisibilityModel={columnVisibilityModel}
+                    columnVisibilityModel={columnVisibilityModel || { id: false }}
                     pageSizeOptions={safePageSizeOptions}
                     checkboxSelection
-                    rowSelectionModel={selection}
+                    rowSelectionModel={selection || []}
                     onRowSelectionModelChange={setSelection}
                     localeText={{
                         MuiTablePagination: {

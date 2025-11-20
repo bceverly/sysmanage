@@ -494,6 +494,36 @@ def start_server(ui_config):
 
 
 @pytest.fixture(scope="session")
+def vite_warmup(start_server, browser_driver, ui_config):
+    """
+    Warm up Vite's module cache by pre-loading the Hosts page once.
+
+    On OpenBSD, Vite's first compilation/load of modules is significantly slower,
+    causing the first test that loads content-heavy pages (like /hosts with DataGrid)
+    to fail due to incomplete module loading.  By pre-loading /hosts once at the
+    session start, we ensure Vite has compiled and cached all necessary modules
+    before the actual tests run.
+    """
+    import time
+
+    print("[INFO] Warming up Vite module cache by pre-loading /hosts page...")
+    try:
+        # Navigate to /hosts to trigger Vite compilation and caching
+        browser_driver.get(f"{ui_config.base_url}/hosts")
+
+        # Wait for Vite to compile and serve modules
+        # This is critical on OpenBSD where I/O is slower
+        time.sleep(10)
+
+        print("[OK] Vite module cache warmed up successfully")
+    except Exception as e:
+        print(f"[WARNING] Failed to warm up Vite cache: {e}")
+        # Don't fail the test session if warmup fails, just log it
+
+    return True
+
+
+@pytest.fixture(scope="session")
 def database_session(ui_config):
     """Create database session for test user management - use production database"""
     from backend.persistence.models.core import Base
@@ -630,5 +660,23 @@ def selenium_page(browser_driver, ui_config):
 
         def screenshot(self, filename):
             self.driver.save_screenshot(filename)
+
+    # Clear browser state before each test to prevent interference from previous tests
+    # This is critical because browser_driver is session-scoped (reused across tests)
+    # but test_user is function-scoped (new user per test)
+    try:
+        # Navigate to the base URL first to establish a domain for cookies/localStorage
+        browser_driver.get(ui_config.base_url)
+
+        # Clear all cookies
+        browser_driver.delete_all_cookies()
+
+        # Clear localStorage and sessionStorage
+        browser_driver.execute_script("window.localStorage.clear();")
+        browser_driver.execute_script("window.sessionStorage.clear();")
+
+        print("[INFO] Cleared browser state (cookies, localStorage, sessionStorage)")
+    except Exception as e:
+        print(f"[WARNING] Failed to clear browser state: {e}")
 
     return SeleniumPage(browser_driver, ui_config)
