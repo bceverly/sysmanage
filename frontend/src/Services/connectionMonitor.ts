@@ -36,7 +36,7 @@ class ConnectionMonitor {
     maxRetryDelay: 300, // Max 5 minutes
     maxRetries: 10, // Try 10 times before giving up
     backoffMultiplier: 2, // Double the delay each time
-    healthCheckInterval: 30, // Check every 30 seconds when connected
+    healthCheckInterval: 60, // Check every 60 seconds when connected
   };
 
   private callbacks: Set<ConnectionStatusCallback> = new Set();
@@ -160,7 +160,7 @@ class ConnectionMonitor {
     try {
       // Simple health check - try to fetch from the API
       const response = await axiosInstance.head('/api/health', {
-        timeout: 5000,
+        timeout: 15000,
       });
 
       if (response.status === 200) {
@@ -231,7 +231,7 @@ class ConnectionMonitor {
     try {
       // Try to connect to the server
       const response = await axiosInstance.head('/api/health', {
-        timeout: 10000,
+        timeout: 15000,
       });
 
       if (response.status === 200) {

@@ -29,6 +29,7 @@ from backend.api.package_handlers import (
     handle_packages_batch_end,
     handle_packages_batch_start,
 )
+from backend.api.update_handlers import handle_update_apply_result
 from backend.i18n import _
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.messages import MessageType
@@ -167,6 +168,12 @@ async def route_inbound_message(
             await handle_command_result(mock_connection, message_data)
             success = True
             print("Successfully processed command result", flush=True)
+
+        elif message_type == MessageType.UPDATE_APPLY_RESULT:
+            print("About to call handle_update_apply_result", flush=True)
+            await handle_update_apply_result(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed update apply result", flush=True)
 
         else:
             print(f"Unknown message type: {message_type}", flush=True)

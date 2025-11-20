@@ -169,9 +169,15 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
             else:
                 update_type = "enhancement"
 
+            # Get bundle_id or update_id (Windows Update uses update_id)
+            bundle_id = package_update.get("bundle_id") or package_update.get(
+                "update_id"
+            )
+
             package_update_record = PackageUpdate(
                 host_id=connection.host_id,
                 package_name=package_update.get("package_name"),
+                bundle_id=bundle_id,  # Actual package ID for package managers (bundle_id for winget, update_id for Windows Update)
                 current_version=package_update.get("current_version") or "unknown",
                 available_version=new_version,  # Use validated version
                 package_manager=package_update.get("package_manager", "unknown"),

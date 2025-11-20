@@ -116,6 +116,9 @@ class PackageUpdate(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     package_name = Column(String(255), nullable=False, index=True)
+    bundle_id = Column(
+        String(255), nullable=True, index=True
+    )  # Actual package ID for package managers
     current_version = Column(String(100), nullable=False)
     available_version = Column(String(100), nullable=False)
     package_manager = Column(String(50), nullable=False)
@@ -124,6 +127,9 @@ class PackageUpdate(Base):
     description = Column(Text, nullable=True)
     size_bytes = Column(BigInteger, nullable=True)
     requires_reboot = Column(Boolean, nullable=False, default=False)
+    status = Column(
+        String(20), nullable=False, default="available", index=True
+    )  # available, updating, failed
     discovered_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, nullable=False)

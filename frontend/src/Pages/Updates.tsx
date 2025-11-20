@@ -800,10 +800,10 @@ const Updates: React.FC = () => {
               .map(update => {
               const key = `${update.host_id}-${update.package_name}-${update.package_manager}`;
               const isSelected = selectedUpdates.has(key);
-              
+
               return (
                 <div
-                  key={key}
+                  key={update.id}
                   className={`updates__item ${isSelected ? 'selected' : ''} ${update.is_security_update ? 'security' : ''}`}
                 >
                   <div className="updates__item-select">

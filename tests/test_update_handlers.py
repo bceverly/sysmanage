@@ -29,6 +29,16 @@ class MockDB:
         self.executed_statements = []
         self.execute_results = []
 
+    def query(self, model):
+        """Mock query method that returns a mock query object."""
+        mock_query = Mock()
+        mock_query.filter.return_value = mock_query
+        mock_query.order_by.return_value = mock_query
+        mock_query.first.return_value = None
+        mock_query.delete.return_value = 1
+        # Don't add query to executed_statements - only track execute() calls
+        return mock_query
+
     def execute(self, stmt):
         self.executed_statements.append(stmt)
         mock_result = Mock()
@@ -81,9 +91,13 @@ class TestHandleUpdateApplyResult:
         assert "Host not registered" in result["error"]
 
     @pytest.mark.asyncio
+    @patch("backend.utils.host_validation.validate_host_id")
     @patch("backend.api.update_handlers.logger")
-    async def test_handle_update_apply_result_success_empty_packages(self, mock_logger):
+    async def test_handle_update_apply_result_success_empty_packages(
+        self, mock_logger, mock_validate
+    ):
         """Test successful handling with no packages."""
+        mock_validate.return_value = True
         mock_db = MockDB()
         mock_connection = MockConnection("host-123")
 
@@ -119,9 +133,13 @@ class TestHandleUpdateApplyResult:
         mock_logger.info.assert_called()
 
     @pytest.mark.asyncio
+    @patch("backend.utils.host_validation.validate_host_id")
     @patch("backend.api.update_handlers.logger")
-    async def test_handle_update_apply_result_with_updated_packages(self, mock_logger):
+    async def test_handle_update_apply_result_with_updated_packages(
+        self, mock_logger, mock_validate
+    ):
         """Test handling with updated packages."""
+        mock_validate.return_value = True
         mock_db = MockDB()
         mock_connection = MockConnection("host-123")
 
@@ -162,15 +180,20 @@ class TestHandleUpdateApplyResult:
 
         # Verify database operations
         assert mock_db.committed is True
-        assert len(mock_db.executed_statements) == 2  # Two package updates
+        # query().delete() doesn't call execute(), so no executed_statements for successful updates
+        assert len(mock_db.executed_statements) == 0
 
         # Verify logging
         mock_logger.info.assert_called()
 
     @pytest.mark.asyncio
+    @patch("backend.utils.host_validation.validate_host_id")
     @patch("backend.api.update_handlers.logger")
-    async def test_handle_update_apply_result_with_failed_packages(self, mock_logger):
+    async def test_handle_update_apply_result_with_failed_packages(
+        self, mock_logger, mock_validate
+    ):
         """Test handling with failed packages."""
+        mock_validate.return_value = True
         mock_db = MockDB()
         mock_connection = MockConnection("host-456")
 
@@ -216,9 +239,13 @@ class TestHandleUpdateApplyResult:
         mock_logger.info.assert_called()
 
     @pytest.mark.asyncio
+    @patch("backend.utils.host_validation.validate_host_id")
     @patch("backend.api.update_handlers.logger")
-    async def test_handle_update_apply_result_with_reboot_required(self, mock_logger):
+    async def test_handle_update_apply_result_with_reboot_required(
+        self, mock_logger, mock_validate
+    ):
         """Test handling when reboot is required."""
+        mock_validate.return_value = True
         mock_db = MockDB()
         mock_connection = MockConnection("host-789")
 
@@ -245,19 +272,22 @@ class TestHandleUpdateApplyResult:
         assert result["failed_count"] == 0
         assert result["requires_reboot"] is True
 
-        # Verify database operations - should have package update + host reboot update
+        # Verify database operations - should have host reboot update only
+        # (query().delete() doesn't call execute())
         assert mock_db.committed is True
-        assert (
-            len(mock_db.executed_statements) == 2
-        )  # Package update + host reboot update
+        assert len(mock_db.executed_statements) == 1  # Host reboot update only
 
         # Verify logging
         mock_logger.info.assert_called()
 
     @pytest.mark.asyncio
+    @patch("backend.utils.host_validation.validate_host_id")
     @patch("backend.api.update_handlers.logger")
-    async def test_handle_update_apply_result_mixed_packages(self, mock_logger):
+    async def test_handle_update_apply_result_mixed_packages(
+        self, mock_logger, mock_validate
+    ):
         """Test handling with both updated and failed packages."""
+        mock_validate.return_value = True
         mock_db = MockDB()
         mock_connection = MockConnection("host-mixed")
 
@@ -297,12 +327,19 @@ class TestHandleUpdateApplyResult:
 
         # Verify database operations
         assert mock_db.committed is True
-        assert len(mock_db.executed_statements) == 3  # Success + failed + host reboot
+        # Successful package uses query().delete() (no execute()), failed uses execute()
+        assert (
+            len(mock_db.executed_statements) == 2
+        )  # Failed package update + host reboot
 
     @pytest.mark.asyncio
+    @patch("backend.utils.host_validation.validate_host_id")
     @patch("backend.api.update_handlers.logger")
-    async def test_handle_update_apply_result_missing_package_fields(self, mock_logger):
+    async def test_handle_update_apply_result_missing_package_fields(
+        self, mock_logger, mock_validate
+    ):
         """Test handling packages with missing required fields."""
+        mock_validate.return_value = True
         mock_db = MockDB()
         mock_connection = MockConnection("host-incomplete")
 
@@ -349,10 +386,8 @@ class TestHandleUpdateApplyResult:
         assert result["updated_count"] == 3  # All packages in result count
         assert result["failed_count"] == 2
 
-        # Only valid packages should have generated DB updates
-        assert (
-            len(mock_db.executed_statements) == 2
-        )  # Only complete-package and valid-failed
+        # Only valid failed packages generate execute() calls (success uses query().delete())
+        assert len(mock_db.executed_statements) == 1  # Only valid-failed package
 
     @pytest.mark.asyncio
     @patch("backend.api.update_handlers.logger")
@@ -384,11 +419,13 @@ class TestHandleUpdateApplyResult:
         mock_logger.info.assert_called()
 
     @pytest.mark.asyncio
+    @patch("backend.utils.host_validation.validate_host_id")
     @patch("backend.api.update_handlers.logger")
     async def test_handle_update_apply_result_failed_package_no_error(
-        self, mock_logger
+        self, mock_logger, mock_validate
     ):
         """Test handling failed package without error message."""
+        mock_validate.return_value = True
         mock_db = MockDB()
         mock_connection = MockConnection("host-no-error")
 
@@ -422,11 +459,15 @@ class TestHandleUpdateApplyResult:
         mock_db = MockDB()
         mock_connection = MockConnection("host-db-error")
 
-        # Make database execute fail
+        # Make database operations fail
         def failing_execute(stmt):
             raise Exception("Database connection failed")
 
+        def failing_query(model):
+            raise Exception("Database connection failed")
+
         mock_db.execute = failing_execute
+        mock_db.query = failing_query
 
         message_data = {
             "hostname": "test-host",

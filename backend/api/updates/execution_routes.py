@@ -121,12 +121,11 @@ async def execute_updates(
                     # Create execution log
                     execution_log = models.UpdateExecutionLog(
                         host_id=host_id,
-                        package_update_id=update.id,
                         package_name=update.package_name,
                         package_manager=update.package_manager,
                         from_version=update.current_version,
                         to_version=update.available_version,
-                        status="pending",
+                        execution_status="pending",
                         created_at=datetime.now(timezone.utc),
                         updated_at=datetime.now(timezone.utc),
                     )
@@ -137,11 +136,21 @@ async def execute_updates(
 
                 # Send command to agent via WebSocket
                 try:
+                    # Build package list with bundle_id for each package
+                    packages_to_update = []
+                    for update in updates:
+                        packages_to_update.append(
+                            {
+                                "package_name": update.package_name,
+                                "bundle_id": update.bundle_id,
+                                "package_manager": update.package_manager,
+                            }
+                        )
+
                     command_message = create_command_message(
                         "apply_updates",
                         {
-                            "package_names": request.package_names,
-                            "package_managers": request.package_managers,
+                            "packages": packages_to_update,
                         },
                     )
 

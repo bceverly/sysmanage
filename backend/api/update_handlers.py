@@ -10,7 +10,7 @@ from sqlalchemy import and_, text, update
 from sqlalchemy.orm import Session
 
 from backend.i18n import _
-from backend.persistence.models import Host, PackageUpdate
+from backend.persistence.models import Host, PackageUpdate, UpdateExecutionLog
 
 # Use standard logger that respects /etc/sysmanage.yaml configuration
 logger = logging.getLogger(__name__)
@@ -56,31 +56,47 @@ async def handle_update_apply_result(db: Session, connection, message_data: dict
         for package in updated_packages:
             package_name = package.get("package_name")
             package_manager = package.get("package_manager")
-            new_version = package.get("new_version")
 
             if package_name and package_manager:
-                # Update the package status to completed
-                stmt = (
-                    update(PackageUpdate)
-                    .where(
+                # Delete the package_update entry since it was successfully applied
+                result = (
+                    db.query(PackageUpdate)
+                    .filter(
                         and_(
                             PackageUpdate.host_id == connection.host_id,
                             PackageUpdate.package_name == package_name,
                             PackageUpdate.package_manager == package_manager,
                         )
                     )
-                    .values(
-                        status="completed",
-                        applied_date=datetime.now(timezone.utc).replace(tzinfo=None),
-                        new_version=new_version,
-                    )
+                    .delete()
                 )
-                result = db.execute(stmt)
+
                 logger.info(
-                    "Updated package %s status to completed (rows affected: %d)",
+                    "Removed successfully updated package %s from pending updates (rows affected: %d)",
                     package_name,
-                    result.rowcount,
+                    result,
                 )
+
+                # Update execution log to success
+                exec_result = (
+                    db.query(UpdateExecutionLog)
+                    .filter(
+                        and_(
+                            UpdateExecutionLog.host_id == connection.host_id,
+                            UpdateExecutionLog.package_name == package_name,
+                            UpdateExecutionLog.package_manager == package_manager,
+                            UpdateExecutionLog.execution_status == "pending",
+                        )
+                    )
+                    .order_by(UpdateExecutionLog.created_at.desc())
+                    .first()
+                )
+
+                if exec_result:
+                    exec_result.execution_status = "success"
+                    exec_result.completed_at = datetime.now(timezone.utc)
+                    exec_result.updated_at = datetime.now(timezone.utc)
+                    logger.info("Updated execution log for %s to success", package_name)
 
         for package in failed_packages:
             package_name = package.get("package_name")
@@ -100,8 +116,7 @@ async def handle_update_apply_result(db: Session, connection, message_data: dict
                     )
                     .values(
                         status="failed",
-                        error_message=error,
-                        applied_date=datetime.now(timezone.utc).replace(tzinfo=None),
+                        updated_at=datetime.now(timezone.utc).replace(tzinfo=None),
                     )
                 )
                 result = db.execute(stmt)
@@ -110,6 +125,28 @@ async def handle_update_apply_result(db: Session, connection, message_data: dict
                     package_name,
                     result.rowcount,
                 )
+
+                # Update execution log to failed
+                exec_result = (
+                    db.query(UpdateExecutionLog)
+                    .filter(
+                        and_(
+                            UpdateExecutionLog.host_id == connection.host_id,
+                            UpdateExecutionLog.package_name == package_name,
+                            UpdateExecutionLog.package_manager == package_manager,
+                            UpdateExecutionLog.execution_status == "pending",
+                        )
+                    )
+                    .order_by(UpdateExecutionLog.created_at.desc())
+                    .first()
+                )
+
+                if exec_result:
+                    exec_result.execution_status = "failed"
+                    exec_result.completed_at = datetime.now(timezone.utc)
+                    exec_result.updated_at = datetime.now(timezone.utc)
+                    exec_result.error_log = error
+                    logger.info("Updated execution log for %s to failed", package_name)
 
         # Update host reboot requirement
         if requires_reboot:
