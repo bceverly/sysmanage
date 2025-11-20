@@ -142,18 +142,30 @@ def start_server(ui_config):
             )
             print(f"   Project root: {project_root}")
 
-            # Start server in background using scripts/start.sh
-            run_script = os.path.join(project_root, "scripts", "start.sh")
+            # Start server in background using appropriate script for OS
+            if os.name == "nt":
+                run_script = os.path.join(project_root, "scripts", "start.cmd")
+            else:
+                run_script = os.path.join(project_root, "scripts", "start.sh")
             if not os.path.exists(run_script):
-                raise FileNotFoundError(f"start.sh not found at {run_script}")
+                raise FileNotFoundError(f"Start script not found at {run_script}")
 
-            server_process = subprocess.Popen(
-                [run_script],
-                cwd=project_root,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                preexec_fn=os.setsid if os.name != "nt" else None,
-            )
+            # On Windows, cmd files need to be called through cmd.exe
+            if os.name == "nt":
+                server_process = subprocess.Popen(
+                    ["cmd.exe", "/c", run_script],
+                    cwd=project_root,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+            else:
+                server_process = subprocess.Popen(
+                    [run_script],
+                    cwd=project_root,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    preexec_fn=os.setsid,
+                )
 
             print(f"   Server process started (PID: {server_process.pid})")
             print("   Waiting for server to be ready...")

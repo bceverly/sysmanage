@@ -808,7 +808,7 @@ test-ui: $(VENV_ACTIVATE)
 ifeq ($(OS),Windows_NT)
 	@echo "=== Running UI Integration Tests (Playwright) ==="
 	@echo "[INFO] Windows detected - testing Chrome and Firefox"
-	@cmd /c "set OTEL_ENABLED=false && set PYTHONPATH=tests/ui;%PYTHONPATH% && $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py tests/ui/test_hosts_playwright.py tests/ui/test_updates_playwright.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short" || (exit /b 0)
+	@cmd /c "set OTEL_ENABLED=false && set PYTHONPATH=tests/ui && $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py tests/ui/test_hosts_playwright.py tests/ui/test_updates_playwright.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short" || (exit /b 0)
 	@echo "[OK] Playwright UI integration tests completed"
 else
 	@if [ "$(shell uname -s)" != "OpenBSD" ] && [ "$(shell uname -s)" != "FreeBSD" ] && [ "$(shell uname -s)" != "NetBSD" ]; then \
