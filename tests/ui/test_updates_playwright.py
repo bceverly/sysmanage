@@ -138,7 +138,9 @@ async def test_updates_grid_renders(
 
         # First, wait for the content container to be present
         try:
-            await page.wait_for_selector(".updates__content", state="visible", timeout=15000)
+            await page.wait_for_selector(
+                ".updates__content", state="visible", timeout=15000
+            )
             print(f"  [OK] Found updates content container")
             grid_found = True
             grid_element = page.locator(".updates__content").first
@@ -146,7 +148,9 @@ async def test_updates_grid_renders(
             # If content container isn't found, try the list or empty state directly
             for selector in [".updates__list", ".updates__empty"]:
                 try:
-                    await page.wait_for_selector(selector, state="visible", timeout=5000)
+                    await page.wait_for_selector(
+                        selector, state="visible", timeout=5000
+                    )
                     locator = page.locator(selector)
                     grid_element = locator.first
                     grid_found = True

@@ -403,7 +403,9 @@ def start_server(ui_config):
                     print(f"   Waiting for backend... ({elapsed}/{max_wait}s)")
 
             if not backend_ready:
-                raise Exception(f"Backend API failed to start within {max_wait} seconds")
+                raise Exception(
+                    f"Backend API failed to start within {max_wait} seconds"
+                )
 
             # Now wait for frontend WebUI to be ready
             print("   Waiting for frontend WebUI...")
@@ -435,7 +437,9 @@ def start_server(ui_config):
                         if os.name != "nt"
                         else server_process.terminate()
                     )
-                raise Exception(f"Frontend WebUI failed to start within {max_wait} seconds")
+                raise Exception(
+                    f"Frontend WebUI failed to start within {max_wait} seconds"
+                )
 
         except Exception as e:
             print(f"   [ERROR] Failed to start server: {e}")

@@ -20,7 +20,7 @@ def login_helper(selenium_page, test_user):
 
     # Wait for page to load and React to render
     try:
-        selenium_page.wait_for_element_visible(By.CSS_SELECTOR, 'form', timeout=10)
+        selenium_page.wait_for_element_visible(By.CSS_SELECTOR, "form", timeout=10)
     except TimeoutException:
         pass  # Continue anyway
 
@@ -38,7 +38,9 @@ def login_helper(selenium_page, test_user):
     username_input = None
     for by, selector in username_selectors:
         try:
-            username_input = selenium_page.wait_for_element_visible(by, selector, timeout=5)
+            username_input = selenium_page.wait_for_element_visible(
+                by, selector, timeout=5
+            )
             break
         except TimeoutException:
             continue
@@ -56,7 +58,9 @@ def login_helper(selenium_page, test_user):
     password_input = None
     for by, selector in password_selectors:
         try:
-            password_input = selenium_page.wait_for_element_visible(by, selector, timeout=5)
+            password_input = selenium_page.wait_for_element_visible(
+                by, selector, timeout=5
+            )
             break
         except TimeoutException:
             continue
@@ -143,9 +147,9 @@ def test_hosts_grid_renders(selenium_page, test_user, ui_config, start_server):
         # Wait for page content to start rendering (look for any content)
         content_loaded = False
         content_selectors = [
-            (By.TAG_NAME, 'main'),
+            (By.TAG_NAME, "main"),
             (By.CSS_SELECTOR, '[class*="MuiBox"]'),
-            (By.TAG_NAME, 'body'),
+            (By.TAG_NAME, "body"),
         ]
 
         for by, selector in content_selectors:
@@ -199,7 +203,9 @@ def test_hosts_grid_renders(selenium_page, test_user, ui_config, start_server):
             print(f"  [DEBUG] Attempted selectors: {', '.join(attempted_selectors)}")
 
             # Take a debug screenshot
-            debug_screenshot = f"tests/ui/test-results/hosts_grid_debug_{int(time.time())}.png"
+            debug_screenshot = (
+                f"tests/ui/test-results/hosts_grid_debug_{int(time.time())}.png"
+            )
             selenium_page.screenshot(debug_screenshot)
             print(f"  [DEBUG] Screenshot saved: {debug_screenshot}")
 
@@ -220,8 +226,14 @@ def test_hosts_grid_renders(selenium_page, test_user, ui_config, start_server):
 
         # Look for column headers
         header_selectors = [
-            (By.CSS_SELECTOR, '[class*="MuiDataGrid-columnHeader"]'),  # MUI DataGrid headers
-            (By.CSS_SELECTOR, '[role="columnheader"]'),  # Generic ARIA columnheader role
+            (
+                By.CSS_SELECTOR,
+                '[class*="MuiDataGrid-columnHeader"]',
+            ),  # MUI DataGrid headers
+            (
+                By.CSS_SELECTOR,
+                '[role="columnheader"]',
+            ),  # Generic ARIA columnheader role
             (By.CSS_SELECTOR, '[class*="ag-header"]'),  # AG Grid
             (By.CSS_SELECTOR, "thead"),  # Plain table headers
             (By.CSS_SELECTOR, "th"),  # Plain table header cells
@@ -395,8 +407,14 @@ def test_hosts_grid_interactive(selenium_page, test_user, ui_config, start_serve
 
         # Try to find and click a column header to test sorting
         header_selectors = [
-            (By.CSS_SELECTOR, '[class*="MuiDataGrid-columnHeader"]'),  # MUI DataGrid headers
-            (By.CSS_SELECTOR, '[role="columnheader"]'),  # Generic ARIA columnheader role
+            (
+                By.CSS_SELECTOR,
+                '[class*="MuiDataGrid-columnHeader"]',
+            ),  # MUI DataGrid headers
+            (
+                By.CSS_SELECTOR,
+                '[role="columnheader"]',
+            ),  # Generic ARIA columnheader role
             (By.CSS_SELECTOR, '[class*="ag-header-cell"]'),  # AG Grid
             (By.CSS_SELECTOR, "th"),  # Plain table headers
         ]
