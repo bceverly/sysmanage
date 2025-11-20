@@ -132,10 +132,16 @@ def test_updates_page_loads(selenium_page, test_user, ui_config, start_server):
 
 
 def test_updates_grid_renders(selenium_page, test_user, ui_config, start_server):
-    """Test that the package updates grid/table renders correctly - CRITICAL TEST"""
+    """Test that the package updates page content renders correctly - CRITICAL TEST
+
+    Verifies that the updates content container renders, which contains either:
+    - .updates__list (when updates are available)
+    - .updates__empty (when no updates are available)
+    Both states are valid and indicate the page is working correctly.
+    """
     browser_name = selenium_page.browser_name
     print(
-        f"\n=== Testing Package Updates grid rendering with Selenium ({browser_name}) ==="
+        f"\n=== Testing Package Updates content rendering with Selenium ({browser_name}) ==="
     )
 
     try:
