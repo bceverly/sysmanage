@@ -62,12 +62,17 @@ const Hosts = () => {
 
     // Ensure current page size is always in options to avoid MUI warning
     const safePageSizeOptions = useMemo(() => {
-        const currentPageSize = paginationModel.pageSize;
+        // Defensive check: ensure pageSizeOptions is defined and is an array
+        if (!pageSizeOptions || !Array.isArray(pageSizeOptions)) {
+            return [5, 10, 25, 50]; // Fallback to default options
+        }
+
+        const currentPageSize = paginationModel?.pageSize || 10;
         if (!pageSizeOptions.includes(currentPageSize)) {
             return [...pageSizeOptions, currentPageSize].sort((a, b) => a - b);
         }
         return pageSizeOptions;
-    }, [pageSizeOptions, paginationModel.pageSize]);
+    }, [pageSizeOptions, paginationModel?.pageSize]);
 
     // Column visibility preferences
     const {

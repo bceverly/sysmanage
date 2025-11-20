@@ -117,8 +117,11 @@ def _get_browser_params():
     """Get browser parameters based on platform"""
     import platform
 
-    # On NetBSD, only test Chrome due to Firefox WebDriver compatibility issues
-    if platform.system() == "NetBSD":
+    system = platform.system()
+
+    # On NetBSD and OpenBSD, only test Chrome due to Firefox WebDriver compatibility issues
+    # Firefox in headless mode has rendering problems on these BSD platforms
+    if system in ["NetBSD", "OpenBSD"]:
         return ["chrome"]
     else:
         return ["chrome", "firefox"]
@@ -403,7 +406,9 @@ def start_server(ui_config):
                     print(f"   Waiting for backend... ({elapsed}/{max_wait}s)")
 
             if not backend_ready:
-                raise Exception(f"Backend API failed to start within {max_wait} seconds")
+                raise Exception(
+                    f"Backend API failed to start within {max_wait} seconds"
+                )
 
             # Now wait for frontend WebUI to be ready
             print("   Waiting for frontend WebUI...")
@@ -435,7 +440,9 @@ def start_server(ui_config):
                         if os.name != "nt"
                         else server_process.terminate()
                     )
-                raise Exception(f"Frontend WebUI failed to start within {max_wait} seconds")
+                raise Exception(
+                    f"Frontend WebUI failed to start within {max_wait} seconds"
+                )
 
         except Exception as e:
             print(f"   [ERROR] Failed to start server: {e}")

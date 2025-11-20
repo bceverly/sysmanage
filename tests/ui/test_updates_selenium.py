@@ -20,7 +20,7 @@ def login_helper(selenium_page, test_user):
 
     # Wait for page to load and React to render
     try:
-        selenium_page.wait_for_element_visible(By.CSS_SELECTOR, 'form', timeout=10)
+        selenium_page.wait_for_element_visible(By.CSS_SELECTOR, "form", timeout=10)
     except TimeoutException:
         pass  # Continue anyway
 
@@ -38,7 +38,9 @@ def login_helper(selenium_page, test_user):
     username_input = None
     for by, selector in username_selectors:
         try:
-            username_input = selenium_page.wait_for_element_visible(by, selector, timeout=5)
+            username_input = selenium_page.wait_for_element_visible(
+                by, selector, timeout=5
+            )
             break
         except TimeoutException:
             continue
@@ -56,7 +58,9 @@ def login_helper(selenium_page, test_user):
     password_input = None
     for by, selector in password_selectors:
         try:
-            password_input = selenium_page.wait_for_element_visible(by, selector, timeout=5)
+            password_input = selenium_page.wait_for_element_visible(
+                by, selector, timeout=5
+            )
             break
         except TimeoutException:
             continue
@@ -159,7 +163,9 @@ def test_updates_grid_renders(selenium_page, test_user, ui_config, start_server)
             except TimeoutException:
                 continue
 
-        assert content_found, "CRITICAL: Updates page content not found! Page may not have loaded."
+        assert (
+            content_found
+        ), "CRITICAL: Updates page content not found! Page may not have loaded."
 
         # Now look for either the updates list OR the "no updates" message
         # (Both are valid - page is working either way)
@@ -199,8 +205,8 @@ def test_updates_grid_renders(selenium_page, test_user, ui_config, start_server)
         # Since Updates uses a card layout (not a table), look for update items or stats instead of columns
         # Check for statistics cards (always present)
         stats_selectors = [
-            (By.CSS_SELECTOR, '.updates__stats'),  # Stats container
-            (By.CSS_SELECTOR, '.updates__stat-card'),  # Individual stat cards
+            (By.CSS_SELECTOR, ".updates__stats"),  # Stats container
+            (By.CSS_SELECTOR, ".updates__stat-card"),  # Individual stat cards
         ]
 
         stats_found = False
@@ -218,7 +224,7 @@ def test_updates_grid_renders(selenium_page, test_user, ui_config, start_server)
         update_items = []
         try:
             update_items = selenium_page.driver.find_elements(
-                By.CSS_SELECTOR, '.updates__item'
+                By.CSS_SELECTOR, ".updates__item"
             )
             if update_items:
                 print(f"  [OK] Found {len(update_items)} update item(s) in the list")
@@ -227,12 +233,11 @@ def test_updates_grid_renders(selenium_page, test_user, ui_config, start_server)
 
         # Page is valid if we found either stats or the empty message
         element_class = grid_element.get_attribute("class") or ""
-        assert stats_found or "updates__empty" in element_class, \
-            "Expected to find either update statistics or 'no updates' message"
+        assert (
+            stats_found or "updates__empty" in element_class
+        ), "Expected to find either update statistics or 'no updates' message"
 
-        print(
-            f"  [OK] Package Updates page rendered successfully ({browser_name})"
-        )
+        print(f"  [OK] Package Updates page rendered successfully ({browser_name})")
 
     except Exception as e:
         screenshot_path = f"tests/ui/test-results/selenium_updates_grid_failure_{int(time.time())}.png"

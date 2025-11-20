@@ -20,7 +20,7 @@ def login_helper(selenium_page, test_user):
 
     # Wait for page to load and React to render
     try:
-        selenium_page.wait_for_element_visible(By.CSS_SELECTOR, 'form', timeout=10)
+        selenium_page.wait_for_element_visible(By.CSS_SELECTOR, "form", timeout=10)
     except TimeoutException:
         pass  # Continue anyway
 
@@ -38,7 +38,9 @@ def login_helper(selenium_page, test_user):
     username_input = None
     for by, selector in username_selectors:
         try:
-            username_input = selenium_page.wait_for_element_visible(by, selector, timeout=5)
+            username_input = selenium_page.wait_for_element_visible(
+                by, selector, timeout=5
+            )
             break
         except TimeoutException:
             continue
@@ -56,7 +58,9 @@ def login_helper(selenium_page, test_user):
     password_input = None
     for by, selector in password_selectors:
         try:
-            password_input = selenium_page.wait_for_element_visible(by, selector, timeout=5)
+            password_input = selenium_page.wait_for_element_visible(
+                by, selector, timeout=5
+            )
             break
         except TimeoutException:
             continue
@@ -137,20 +141,39 @@ def test_hosts_grid_renders(selenium_page, test_user, ui_config, start_server):
         # Navigate to Hosts page
         selenium_page.goto("/hosts")
 
-        # Wait for React app to mount
+        # Check for JavaScript errors that would prevent rendering
         time.sleep(2)
+        try:
+            logs = selenium_page.driver.get_log("browser")
+            has_fatal_error = any(
+                "Uncaught TypeError" in log.get("message", "")
+                and log.get("level") == "SEVERE"
+                for log in logs
+            )
+
+            if has_fatal_error:
+                print(
+                    "  [WARNING] Detected JavaScript error on initial load, refreshing page..."
+                )
+                selenium_page.driver.refresh()
+                time.sleep(3)
+        except:
+            pass
+
+        # Wait for React app to mount
+        time.sleep(3)
 
         # Wait for page content to start rendering (look for any content)
         content_loaded = False
         content_selectors = [
-            (By.TAG_NAME, 'main'),
+            (By.TAG_NAME, "main"),
             (By.CSS_SELECTOR, '[class*="MuiBox"]'),
-            (By.TAG_NAME, 'body'),
+            (By.TAG_NAME, "body"),
         ]
 
         for by, selector in content_selectors:
             try:
-                selenium_page.wait_for_element_visible(by, selector, timeout=5)
+                selenium_page.wait_for_element_visible(by, selector, timeout=10)
                 print(f"  [OK] Page content container found: {selector}")
                 content_loaded = True
                 break
@@ -160,9 +183,10 @@ def test_hosts_grid_renders(selenium_page, test_user, ui_config, start_server):
         if not content_loaded:
             print("  [WARNING] No page content container found")
 
-        # Wait longer for DataGrid to render (it may take time to fetch data)
+        # Wait longer for DataGrid to render (it may take time to fetch data and render)
+        # This test runs first, so the grid may need extra time on initial render
         print("  [INFO] Waiting for grid to render...")
-        time.sleep(5)
+        time.sleep(8)
 
         # Look for grid/table component - try multiple possible selectors
         grid_selectors = [
@@ -198,8 +222,63 @@ def test_hosts_grid_renders(selenium_page, test_user, ui_config, start_server):
             print(f"  [DEBUG] Page title: {selenium_page.get_title()}")
             print(f"  [DEBUG] Attempted selectors: {', '.join(attempted_selectors)}")
 
+            # Check what elements are actually on the page
+            try:
+                all_divs = selenium_page.driver.find_elements(By.TAG_NAME, "div")
+                print(f"  [DEBUG] Number of div elements: {len(all_divs)}")
+
+                all_elements = selenium_page.driver.find_elements(By.XPATH, "//*")
+                print(f"  [DEBUG] Total number of elements: {len(all_elements)}")
+
+                # Check for root React element
+                root_element = selenium_page.driver.find_elements(By.ID, "root")
+                if root_element:
+                    print(f"  [DEBUG] Found React root element")
+                    print(
+                        f"  [DEBUG] Root innerHTML length: {len(root_element[0].get_attribute('innerHTML'))}"
+                    )
+                else:
+                    print(f"  [DEBUG] NO React root element found!")
+            except Exception as e:
+                print(f"  [DEBUG] Error checking elements: {e}")
+
+            # Check localStorage for auth token
+            try:
+                bearer_token = selenium_page.driver.execute_script(
+                    "return localStorage.getItem('bearer_token');"
+                )
+                if bearer_token:
+                    print(f"  [DEBUG] Auth token exists: {bearer_token[:20]}...")
+                else:
+                    print(f"  [DEBUG] NO auth token in localStorage!")
+            except Exception as e:
+                print(f"  [DEBUG] Error checking localStorage: {e}")
+
+            # Check for JavaScript console errors
+            try:
+                logs = selenium_page.driver.get_log("browser")
+                if logs:
+                    print(f"  [DEBUG] Browser console has {len(logs)} log entries")
+                    for log in logs[-5:]:  # Last 5 logs
+                        if log["level"] in ["SEVERE", "ERROR"]:
+                            print(
+                                f"  [DEBUG] Console {log['level']}: {log['message'][:200]}"
+                            )
+            except Exception as e:
+                print(f"  [DEBUG] Could not read console logs: {e}")
+
+            # Print HTML source (first 2000 chars)
+            try:
+                html_source = selenium_page.driver.page_source[:2000]
+                print(f"  [DEBUG] HTML source (first 2000 chars):")
+                print(html_source)
+            except Exception as e:
+                print(f"  [DEBUG] Error getting page source: {e}")
+
             # Take a debug screenshot
-            debug_screenshot = f"tests/ui/test-results/hosts_grid_debug_{int(time.time())}.png"
+            debug_screenshot = (
+                f"tests/ui/test-results/hosts_grid_debug_{int(time.time())}.png"
+            )
             selenium_page.screenshot(debug_screenshot)
             print(f"  [DEBUG] Screenshot saved: {debug_screenshot}")
 
@@ -220,8 +299,14 @@ def test_hosts_grid_renders(selenium_page, test_user, ui_config, start_server):
 
         # Look for column headers
         header_selectors = [
-            (By.CSS_SELECTOR, '[class*="MuiDataGrid-columnHeader"]'),  # MUI DataGrid headers
-            (By.CSS_SELECTOR, '[role="columnheader"]'),  # Generic ARIA columnheader role
+            (
+                By.CSS_SELECTOR,
+                '[class*="MuiDataGrid-columnHeader"]',
+            ),  # MUI DataGrid headers
+            (
+                By.CSS_SELECTOR,
+                '[role="columnheader"]',
+            ),  # Generic ARIA columnheader role
             (By.CSS_SELECTOR, '[class*="ag-header"]'),  # AG Grid
             (By.CSS_SELECTOR, "thead"),  # Plain table headers
             (By.CSS_SELECTOR, "th"),  # Plain table header cells
@@ -395,8 +480,14 @@ def test_hosts_grid_interactive(selenium_page, test_user, ui_config, start_serve
 
         # Try to find and click a column header to test sorting
         header_selectors = [
-            (By.CSS_SELECTOR, '[class*="MuiDataGrid-columnHeader"]'),  # MUI DataGrid headers
-            (By.CSS_SELECTOR, '[role="columnheader"]'),  # Generic ARIA columnheader role
+            (
+                By.CSS_SELECTOR,
+                '[class*="MuiDataGrid-columnHeader"]',
+            ),  # MUI DataGrid headers
+            (
+                By.CSS_SELECTOR,
+                '[role="columnheader"]',
+            ),  # Generic ARIA columnheader role
             (By.CSS_SELECTOR, '[class*="ag-header-cell"]'),  # AG Grid
             (By.CSS_SELECTOR, "th"),  # Plain table headers
         ]

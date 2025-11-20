@@ -32,13 +32,13 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
 
         # Wait for page body to load
         try:
-            selenium_page.wait_for_element_visible(By.CSS_SELECTOR, 'body', timeout=10)
+            selenium_page.wait_for_element_visible(By.CSS_SELECTOR, "body", timeout=10)
         except TimeoutException:
             print("  [WARNING] Body element not found")
 
         # Wait for MUI Container to load
         try:
-            selenium_page.wait_for_element_visible(By.CSS_SELECTOR, 'form', timeout=10)
+            selenium_page.wait_for_element_visible(By.CSS_SELECTOR, "form", timeout=10)
             print("  [OK] Login form container loaded")
         except TimeoutException:
             print("  [WARNING] Form element not found, continuing anyway")
@@ -60,7 +60,10 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
             (By.CSS_SELECTOR, 'input[placeholder*="username" i]'),
             (By.CSS_SELECTOR, 'input[name="username"]'),
             (By.CSS_SELECTOR, 'input[name="email"]'),
-            (By.CSS_SELECTOR, 'input[autocomplete="email"]'),  # MUI TextField autocomplete
+            (
+                By.CSS_SELECTOR,
+                'input[autocomplete="email"]',
+            ),  # MUI TextField autocomplete
         ]
 
         username_input = None
@@ -77,7 +80,9 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
                 continue
 
         if username_input is None:
-            print(f"  [DEBUG] Failed to find username field. Tried: {', '.join(attempted_username_selectors)}")
+            print(
+                f"  [DEBUG] Failed to find username field. Tried: {', '.join(attempted_username_selectors)}"
+            )
             print(f"  [DEBUG] Current URL: {selenium_page.get_current_url()}")
 
         assert username_input is not None, "Could not find username input field"
@@ -238,7 +243,7 @@ def test_invalid_login_selenium(selenium_page, ui_config, start_server):
 
     # Wait for form to load
     try:
-        selenium_page.wait_for_element_visible(By.CSS_SELECTOR, 'form', timeout=10)
+        selenium_page.wait_for_element_visible(By.CSS_SELECTOR, "form", timeout=10)
     except TimeoutException:
         pass
 
@@ -254,7 +259,9 @@ def test_invalid_login_selenium(selenium_page, ui_config, start_server):
     username_input = None
     for by, selector in username_selectors:
         try:
-            username_input = selenium_page.wait_for_element_visible(by, selector, timeout=5)
+            username_input = selenium_page.wait_for_element_visible(
+                by, selector, timeout=5
+            )
             break
         except TimeoutException:
             continue
@@ -271,7 +278,9 @@ def test_invalid_login_selenium(selenium_page, ui_config, start_server):
     password_input = None
     for by, selector in password_selectors:
         try:
-            password_input = selenium_page.wait_for_element_visible(by, selector, timeout=5)
+            password_input = selenium_page.wait_for_element_visible(
+                by, selector, timeout=5
+            )
             break
         except TimeoutException:
             continue
