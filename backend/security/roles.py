@@ -128,6 +128,11 @@ class SecurityRoles(str, Enum):
     VIEW_AUDIT_LOG = "View Audit Log"
     EXPORT_AUDIT_LOG = "Export Audit Log"
 
+    # Default Repository Management Roles
+    ADD_DEFAULT_REPOSITORY = "Add Default Repository"
+    REMOVE_DEFAULT_REPOSITORY = "Remove Default Repository"
+    VIEW_DEFAULT_REPOSITORIES = "View Default Repositories"
+
 
 class UserRoleCache:
     """

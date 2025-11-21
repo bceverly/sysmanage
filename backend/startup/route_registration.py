@@ -16,6 +16,7 @@ from backend.api import (
     certificates,
     commercial_antivirus_status,
     config_management,
+    default_repositories,
     diagnostics,
     email,
     firewall_status,
@@ -249,6 +250,16 @@ def register_routes(app: FastAPI):
     logger.info("Adding Audit Log router")
     app.include_router(audit_log.router)  # /api/audit-log/* (with auth)
     logger.info("Audit Log router added")
+
+    logger.info(
+        "Adding Default Repositories router with /api/default-repositories prefix"
+    )
+    app.include_router(
+        default_repositories.router,
+        prefix="/api/default-repositories",
+        tags=["default-repositories"],
+    )  # /api/default-repositories/* (with auth)
+    logger.info("Default Repositories router added")
 
     logger.info("=== ALL ROUTES REGISTERED ===")
 

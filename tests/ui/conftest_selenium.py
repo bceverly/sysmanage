@@ -126,7 +126,7 @@ def _get_browser_params():
             "UI tests skipped on NetBSD: Both Chromium and Firefox crash in headless mode. "
             "This is a known NetBSD browser compatibility issue. "
             "The backend and non-UI tests work correctly.",
-            allow_module_level=True
+            allow_module_level=True,
         )
     elif system == "OpenBSD":
         return ["chrome"]
@@ -173,7 +173,7 @@ def _create_chrome_driver():
     options.add_argument("--disable-renderer-backgrounding")
 
     # Enable browser logging to capture console errors
-    options.set_capability('goog:loggingPrefs', {'browser': 'ALL'})
+    options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
 
     # Set Chrome binary location based on platform
     import platform
@@ -713,7 +713,7 @@ def selenium_page(browser_driver, ui_config):
         def get_console_logs(self):
             """Get browser console logs"""
             try:
-                logs = self.driver.get_log('browser')
+                logs = self.driver.get_log("browser")
                 return logs
             except Exception as e:
                 return [{"level": "ERROR", "message": f"Could not get logs: {str(e)}"}]

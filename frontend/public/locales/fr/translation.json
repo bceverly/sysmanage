@@ -225,6 +225,25 @@
       "label": "Utiliser le serveur géré"
     }
   },
+  "hostDefaults": {
+    "addNewRepository": "Ajouter un Nouveau Dépôt par Défaut",
+    "configuredRepositories": "Dépôts par Défaut Configurés",
+    "errorAddingRepository": "Échec de l'ajout du dépôt par défaut",
+    "errorDeletingRepository": "Échec de la suppression du dépôt par défaut",
+    "errorLoadingOSOptions": "Échec du chargement des options du système d'exploitation",
+    "errorLoadingRepositories": "Échec du chargement des dépôts par défaut",
+    "noRepositories": "Aucun dépôt par défaut configuré. Ajoutez des dépôts ci-dessus pour les appliquer automatiquement aux nouveaux hôtes.",
+    "noViewPermission": "Vous n'avez pas la permission de voir les dépôts par défaut.",
+    "operatingSystem": "Système d'Exploitation",
+    "packageManager": "Gestionnaire de Paquets",
+    "repositoriesSubheader": "Configurez les dépôts tiers par défaut qui seront appliqués aux nouveaux hôtes lors de leur approbation",
+    "repositoriesTitle": "Dépôts",
+    "repositoryAdded": "Dépôt par défaut ajouté avec succès",
+    "repositoryDeleted": "Dépôt par défaut supprimé avec succès",
+    "repositoryUrl": "URL du Dépôt / PPA",
+    "repositoryUrlPlaceholder": "ex. ppa:exemple/ppa ou https://...",
+    "title": "Paramètres par Défaut de l'Hôte"
+  },
   "hostDetail": {
     "accessTab": "Accès",
     "accountName": "Nom du compte",
@@ -1073,7 +1092,10 @@
     "type": "Type",
     "url": "URL",
     "urlExample": "Exemple : https://download.opensuse.org/repositories/...",
-    "urlRequired": "L'URL du dépôt est requise"
+    "urlRequired": "L'URL du dépôt est requise",
+    "source": "Source",
+    "default": "Par défaut",
+    "hostSpecific": "Spécifique à l'hôte"
   },
   "ubuntuPro": {
     "actions": {

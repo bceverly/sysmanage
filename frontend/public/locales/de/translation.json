@@ -225,6 +225,25 @@
       "label": "Verwalteten Server verwenden"
     }
   },
+  "hostDefaults": {
+    "addNewRepository": "Neues Standard-Repository hinzufügen",
+    "configuredRepositories": "Konfigurierte Standard-Repositories",
+    "errorAddingRepository": "Fehler beim Hinzufügen des Standard-Repositories",
+    "errorDeletingRepository": "Fehler beim Löschen des Standard-Repositories",
+    "errorLoadingOSOptions": "Fehler beim Laden der Betriebssystemoptionen",
+    "errorLoadingRepositories": "Fehler beim Laden der Standard-Repositories",
+    "noRepositories": "Keine Standard-Repositories konfiguriert. Fügen Sie oben Repositories hinzu, um sie automatisch auf neue Hosts anzuwenden.",
+    "noViewPermission": "Sie haben keine Berechtigung, Standard-Repositories anzuzeigen.",
+    "operatingSystem": "Betriebssystem",
+    "packageManager": "Paketmanager",
+    "repositoriesSubheader": "Konfigurieren Sie Standard-Drittanbieter-Repositories, die bei der Genehmigung auf neue Hosts angewendet werden",
+    "repositoriesTitle": "Repositories",
+    "repositoryAdded": "Standard-Repository erfolgreich hinzugefügt",
+    "repositoryDeleted": "Standard-Repository erfolgreich gelöscht",
+    "repositoryUrl": "Repository-URL / PPA",
+    "repositoryUrlPlaceholder": "z.B. ppa:beispiel/ppa oder https://...",
+    "title": "Host-Standardeinstellungen"
+  },
   "hostDetail": {
     "accessTab": "Zugriff",
     "accountName": "Kontoname",
@@ -1075,7 +1094,10 @@
     "type": "Typ",
     "url": "URL",
     "urlExample": "Beispiel: https://download.opensuse.org/repositories/...",
-    "urlRequired": "Repository-URL ist erforderlich"
+    "urlRequired": "Repository-URL ist erforderlich",
+    "source": "Quelle",
+    "default": "Standard",
+    "hostSpecific": "Host-spezifisch"
   },
   "ubuntuPro": {
     "actions": {

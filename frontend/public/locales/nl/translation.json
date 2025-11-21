@@ -211,6 +211,25 @@
       "label": "Beheerde server gebruiken"
     }
   },
+  "hostDefaults": {
+    "addNewRepository": "Nieuwe Standaard Repository Toevoegen",
+    "configuredRepositories": "Geconfigureerde Standaard Repositories",
+    "errorAddingRepository": "Kan standaard repository niet toevoegen",
+    "errorDeletingRepository": "Kan standaard repository niet verwijderen",
+    "errorLoadingOSOptions": "Kan besturingssysteemopties niet laden",
+    "errorLoadingRepositories": "Kan standaard repositories niet laden",
+    "noRepositories": "Geen standaard repositories geconfigureerd. Voeg repositories toe om ze automatisch toe te passen op nieuwe hosts.",
+    "noViewPermission": "U heeft geen toestemming om standaard repositories te bekijken.",
+    "operatingSystem": "Besturingssysteem",
+    "packageManager": "Pakketbeheerder",
+    "repositoriesSubheader": "Configureer standaard repositories van derden die worden toegepast op nieuwe hosts bij goedkeuring",
+    "repositoriesTitle": "Repositories",
+    "repositoryAdded": "Standaard repository succesvol toegevoegd",
+    "repositoryDeleted": "Standaard repository succesvol verwijderd",
+    "repositoryUrl": "Repository URL / PPA",
+    "repositoryUrlPlaceholder": "bijv. ppa:voorbeeld/ppa of https://...",
+    "title": "Host Standaardinstellingen"
+  },
   "hostDetail": {
     "accessTab": "Toegang",
     "accountName": "Accountnaam",
@@ -1039,7 +1058,10 @@
     "type": "Type",
     "url": "URL",
     "urlExample": "Voorbeeld: https://download.opensuse.org/repositories/...",
-    "urlRequired": "Repository-URL is verplicht"
+    "urlRequired": "Repository-URL is verplicht",
+    "source": "Bron",
+    "default": "Standaard",
+    "hostSpecific": "Host-specifiek"
   },
   "ubuntuPro": {
     "actions": {

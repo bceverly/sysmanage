@@ -393,7 +393,7 @@ async def delete_third_party_repositories(
             )
 
         # Check if host has privileged mode enabled
-        if not host.privileged_mode:
+        if not host.is_agent_privileged:
             raise HTTPException(
                 status_code=403,
                 detail=_("Repository management requires privileged agent mode"),
@@ -406,7 +406,35 @@ async def delete_third_party_repositories(
                 detail=_("No repositories specified for deletion"),
             )
 
-        # Create command message to delete repositories
+        # Import the model for database operations
+        from backend.persistence.models import (
+            ThirdPartyRepository as ThirdPartyRepositoryModel,
+        )
+
+        # Delete repositories from the database immediately for responsive UI
+        deleted_count = 0
+        for repo in request.repositories:
+            repo_name = repo.get("name")
+            repo_file_path = repo.get("file_path")
+
+            # Try to find and delete by file_path first (most specific), then by name
+            query = db.query(ThirdPartyRepositoryModel).filter(
+                ThirdPartyRepositoryModel.host_id == host_id
+            )
+
+            if repo_file_path:
+                query = query.filter(
+                    ThirdPartyRepositoryModel.file_path == repo_file_path
+                )
+            elif repo_name:
+                query = query.filter(ThirdPartyRepositoryModel.name == repo_name)
+            else:
+                continue
+
+            deleted = query.delete(synchronize_session=False)
+            deleted_count += deleted
+
+        # Create command message to delete repositories on the agent
         command_message = create_command_message(
             command_type="generic_command",
             parameters={
@@ -427,7 +455,7 @@ async def delete_third_party_repositories(
             db=db,
         )
 
-        # Commit the session to persist the queued message
+        # Commit both the database deletions and the queued message
         db.commit()
 
         # Get user for audit logging

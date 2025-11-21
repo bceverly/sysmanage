@@ -77,15 +77,7 @@ like to add:
     with the opportunity to have
     sysmanage fix the issues.
 
-7.  We should have a settings
-    screen that allows the user
-    to specify default third-
-    party repositories that
-    should be auto-applied to
-    every host that is approved
-    on registration.
-
-8.  Add the ability to deploy
+7.  Add the ability to deploy
     a Graylog server as well as
     a Grafana server, given a
     host that it should be
@@ -93,11 +85,11 @@ like to add:
     same with database servers
     of various ilks as well?
 
-9.  Based on server roles that
+8.  Based on server roles that
     we detect, recommend firewall
     configuration for that host.
 
-10. Have a "Firewall Configuration"
+9.  Have a "Firewall Configuration"
     page on settings that allow
     the user to create a set of
     named configurations that

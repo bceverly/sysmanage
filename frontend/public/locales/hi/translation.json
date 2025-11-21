@@ -210,6 +210,25 @@
       "label": "प्रबंधित सर्वर का उपयोग करें"
     }
   },
+  "hostDefaults": {
+    "addNewRepository": "नया डिफ़ॉल्ट रिपॉजिटरी जोड़ें",
+    "configuredRepositories": "कॉन्फ़िगर किए गए डिफ़ॉल्ट रिपॉजिटरी",
+    "errorAddingRepository": "डिफ़ॉल्ट रिपॉजिटरी जोड़ने में विफल",
+    "errorDeletingRepository": "डिफ़ॉल्ट रिपॉजिटरी हटाने में विफल",
+    "errorLoadingOSOptions": "ऑपरेटिंग सिस्टम विकल्प लोड करने में विफल",
+    "errorLoadingRepositories": "डिफ़ॉल्ट रिपॉजिटरी लोड करने में विफल",
+    "noRepositories": "कोई डिफ़ॉल्ट रिपॉजिटरी कॉन्फ़िगर नहीं की गई है। नए होस्ट पर स्वचालित रूप से लागू करने के लिए ऊपर रिपॉजिटरी जोड़ें।",
+    "noViewPermission": "आपके पास डिफ़ॉल्ट रिपॉजिटरी देखने की अनुमति नहीं है।",
+    "operatingSystem": "ऑपरेटिंग सिस्टम",
+    "packageManager": "पैकेज मैनेजर",
+    "repositoriesSubheader": "डिफ़ॉल्ट थर्ड-पार्टी रिपॉजिटरी कॉन्फ़िगर करें जो अनुमोदन पर नए होस्ट पर लागू होंगी",
+    "repositoriesTitle": "रिपॉजिटरी",
+    "repositoryAdded": "डिफ़ॉल्ट रिपॉजिटरी सफलतापूर्वक जोड़ी गई",
+    "repositoryDeleted": "डिफ़ॉल्ट रिपॉजिटरी सफलतापूर्वक हटाई गई",
+    "repositoryUrl": "रिपॉजिटरी URL / PPA",
+    "repositoryUrlPlaceholder": "उदा. ppa:example/ppa या https://...",
+    "title": "होस्ट डिफ़ॉल्ट"
+  },
   "hostDetail": {
     "accessTab": "एक्सेस",
     "accountName": "खाता नाम",
@@ -1051,7 +1070,10 @@
     "type": "प्रकार",
     "url": "URL",
     "urlExample": "उदाहरण: https://download.opensuse.org/repositories/...",
-    "urlRequired": "रिपॉजिटरी URL आवश्यक है"
+    "urlRequired": "रिपॉजिटरी URL आवश्यक है",
+    "source": "स्रोत",
+    "default": "डिफ़ॉल्ट",
+    "hostSpecific": "होस्ट-विशिष्ट"
   },
   "ubuntuPro": {
     "actions": {

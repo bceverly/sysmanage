@@ -3744,7 +3744,7 @@ const HostDetail = () => {
                 <ThirdPartyRepositories
                     hostId={hostId || ''}
                     privilegedMode={host.is_agent_privileged || false}
-                    osName={host.platform || host.platform_release || ''}
+                    osName={host.platform_release || host.platform || ''}
                 />
             )}
 

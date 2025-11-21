@@ -225,6 +225,25 @@
       "label": "استخدام الخادم المُدار"
     }
   },
+  "hostDefaults": {
+    "addNewRepository": "إضافة مستودع افتراضي جديد",
+    "configuredRepositories": "المستودعات الافتراضية المكونة",
+    "errorAddingRepository": "فشل في إضافة المستودع الافتراضي",
+    "errorDeletingRepository": "فشل في حذف المستودع الافتراضي",
+    "errorLoadingOSOptions": "فشل في تحميل خيارات نظام التشغيل",
+    "errorLoadingRepositories": "فشل في تحميل المستودعات الافتراضية",
+    "noRepositories": "لم يتم تكوين أي مستودعات افتراضية. أضف المستودعات أعلاه لتطبيقها تلقائياً على المضيفين الجدد.",
+    "noViewPermission": "ليس لديك إذن لعرض المستودعات الافتراضية.",
+    "operatingSystem": "نظام التشغيل",
+    "packageManager": "مدير الحزم",
+    "repositoriesSubheader": "قم بتكوين مستودعات الطرف الثالث الافتراضية التي سيتم تطبيقها على المضيفين الجدد عند الموافقة عليهم",
+    "repositoriesTitle": "المستودعات",
+    "repositoryAdded": "تمت إضافة المستودع الافتراضي بنجاح",
+    "repositoryDeleted": "تم حذف المستودع الافتراضي بنجاح",
+    "repositoryUrl": "عنوان URL للمستودع / PPA",
+    "repositoryUrlPlaceholder": "مثال: ppa:example/ppa أو https://...",
+    "title": "الإعدادات الافتراضية للمضيف"
+  },
   "hostDetail": {
     "accessTab": "الوصول",
     "accountName": "اسم الحساب",
@@ -1072,7 +1091,10 @@
     "type": "النوع",
     "url": "URL",
     "urlExample": "مثال: https://download.opensuse.org/repositories/...",
-    "urlRequired": "URL المستودع مطلوب"
+    "urlRequired": "URL المستودع مطلوب",
+    "source": "المصدر",
+    "default": "افتراضي",
+    "hostSpecific": "خاص بالمضيف"
   },
   "ubuntuPro": {
     "actions": {

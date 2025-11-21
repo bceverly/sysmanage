@@ -211,6 +211,25 @@
       "label": "使用託管伺服器"
     }
   },
+  "hostDefaults": {
+    "addNewRepository": "新增預設儲存庫",
+    "configuredRepositories": "已設定的預設儲存庫",
+    "errorAddingRepository": "新增預設儲存庫失敗",
+    "errorDeletingRepository": "刪除預設儲存庫失敗",
+    "errorLoadingOSOptions": "載入作業系統選項失敗",
+    "errorLoadingRepositories": "載入預設儲存庫失敗",
+    "noRepositories": "未設定預設儲存庫。在上方新增儲存庫以自動套用到新主機。",
+    "noViewPermission": "您沒有檢視預設儲存庫的權限。",
+    "operatingSystem": "作業系統",
+    "packageManager": "套件管理員",
+    "repositoriesSubheader": "設定將在核准時套用於新主機的預設第三方儲存庫",
+    "repositoriesTitle": "儲存庫",
+    "repositoryAdded": "預設儲存庫新增成功",
+    "repositoryDeleted": "預設儲存庫刪除成功",
+    "repositoryUrl": "儲存庫 URL / PPA",
+    "repositoryUrlPlaceholder": "例如 ppa:example/ppa 或 https://...",
+    "title": "主機預設設定"
+  },
   "hostDetail": {
     "accessTab": "存取",
     "accountName": "帳戶名稱",
@@ -1038,7 +1057,10 @@
     "type": "類型",
     "url": "URL",
     "urlExample": "範例: https://download.opensuse.org/repositories/...",
-    "urlRequired": "儲存庫URL是必需的"
+    "urlRequired": "儲存庫URL是必需的",
+    "source": "來源",
+    "default": "預設",
+    "hostSpecific": "主機專用"
   },
   "ubuntuPro": {
     "actions": {

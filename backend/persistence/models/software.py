@@ -493,3 +493,35 @@ class FirewallStatus(Base):
             f"<FirewallStatus(id={self.id}, host_id={self.host_id}, "
             f"firewall_name='{self.firewall_name}', enabled={self.enabled})>"
         )
+
+
+class DefaultRepository(Base):
+    """
+    This class holds the object mapping for the default_repository table.
+    Stores default third-party repositories that should be applied to new hosts
+    based on their operating system and package manager.
+    """
+
+    __tablename__ = "default_repository"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    os_name = Column(String(100), nullable=False, index=True)
+    package_manager = Column(String(50), nullable=False, index=True)
+    repository_url = Column(String(1000), nullable=False)
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    created_by = Column(
+        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
+
+    # Relationship to User
+    creator = relationship("User", foreign_keys=[created_by])
+
+    def __repr__(self):
+        return (
+            f"<DefaultRepository(id={self.id}, os_name='{self.os_name}', "
+            f"package_manager='{self.package_manager}', repository_url='{self.repository_url}')>"
+        )

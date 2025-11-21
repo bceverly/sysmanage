@@ -211,6 +211,25 @@
       "label": "Usar servidor gerenciado"
     }
   },
+  "hostDefaults": {
+    "addNewRepository": "Adicionar Novo Repositório Padrão",
+    "configuredRepositories": "Repositórios Padrão Configurados",
+    "errorAddingRepository": "Falha ao adicionar repositório padrão",
+    "errorDeletingRepository": "Falha ao excluir repositório padrão",
+    "errorLoadingOSOptions": "Falha ao carregar opções do sistema operacional",
+    "errorLoadingRepositories": "Falha ao carregar repositórios padrão",
+    "noRepositories": "Nenhum repositório padrão configurado. Adicione repositórios acima para aplicá-los automaticamente a novos hosts.",
+    "noViewPermission": "Você não tem permissão para visualizar repositórios padrão.",
+    "operatingSystem": "Sistema Operacional",
+    "packageManager": "Gerenciador de Pacotes",
+    "repositoriesSubheader": "Configure repositórios de terceiros padrão que serão aplicados a novos hosts quando aprovados",
+    "repositoriesTitle": "Repositórios",
+    "repositoryAdded": "Repositório padrão adicionado com sucesso",
+    "repositoryDeleted": "Repositório padrão excluído com sucesso",
+    "repositoryUrl": "URL do Repositório / PPA",
+    "repositoryUrlPlaceholder": "ex. ppa:exemplo/ppa ou https://...",
+    "title": "Padrões do Host"
+  },
   "hostDetail": {
     "accessTab": "Acesso",
     "accountName": "Nome da Conta",
@@ -1054,7 +1073,10 @@
     "type": "Tipo",
     "url": "URL",
     "urlExample": "Exemplo: https://download.opensuse.org/repositories/...",
-    "urlRequired": "A URL do repositório é obrigatória"
+    "urlRequired": "A URL do repositório é obrigatória",
+    "source": "Origem",
+    "default": "Padrão",
+    "hostSpecific": "Específico do Host"
   },
   "ubuntuPro": {
     "actions": {

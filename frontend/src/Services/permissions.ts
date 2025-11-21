@@ -154,5 +154,10 @@ export const SecurityRoles = {
 
     // Audit Log Management
     VIEW_AUDIT_LOG: 'View Audit Log',
-    EXPORT_AUDIT_LOG: 'Export Audit Log'
+    EXPORT_AUDIT_LOG: 'Export Audit Log',
+
+    // Default Repository Management
+    ADD_DEFAULT_REPOSITORY: 'Add Default Repository',
+    REMOVE_DEFAULT_REPOSITORY: 'Remove Default Repository',
+    VIEW_DEFAULT_REPOSITORIES: 'View Default Repositories'
 } as const;

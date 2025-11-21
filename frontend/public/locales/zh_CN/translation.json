@@ -211,6 +211,25 @@
       "label": "使用托管服务器"
     }
   },
+  "hostDefaults": {
+    "addNewRepository": "添加新的默认仓库",
+    "configuredRepositories": "已配置的默认仓库",
+    "errorAddingRepository": "添加默认仓库失败",
+    "errorDeletingRepository": "删除默认仓库失败",
+    "errorLoadingOSOptions": "加载操作系统选项失败",
+    "errorLoadingRepositories": "加载默认仓库失败",
+    "noRepositories": "未配置默认仓库。在上方添加仓库以自动应用到新主机。",
+    "noViewPermission": "您没有查看默认仓库的权限。",
+    "operatingSystem": "操作系统",
+    "packageManager": "包管理器",
+    "repositoriesSubheader": "配置将在批准时应用于新主机的默认第三方仓库",
+    "repositoriesTitle": "仓库",
+    "repositoryAdded": "默认仓库添加成功",
+    "repositoryDeleted": "默认仓库删除成功",
+    "repositoryUrl": "仓库 URL / PPA",
+    "repositoryUrlPlaceholder": "例如 ppa:example/ppa 或 https://...",
+    "title": "主机默认设置"
+  },
   "hostDetail": {
     "accessTab": "访问",
     "accountName": "账户名称",
@@ -1052,7 +1071,10 @@
     "type": "类型",
     "url": "URL",
     "urlExample": "示例: https://download.opensuse.org/repositories/...",
-    "urlRequired": "仓库URL是必需的"
+    "urlRequired": "仓库URL是必需的",
+    "source": "来源",
+    "default": "默认",
+    "hostSpecific": "主机专用"
   },
   "ubuntuPro": {
     "actions": {

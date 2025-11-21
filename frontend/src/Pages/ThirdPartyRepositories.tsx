@@ -32,6 +32,14 @@ interface ThirdPartyRepository {
     url: string;
     enabled: boolean;
     file_path?: string;
+    isDefault?: boolean;
+}
+
+interface DefaultRepository {
+    id: string;
+    os_name: string;
+    package_manager: string;
+    repository_url: string;
 }
 
 interface ThirdPartyRepositoriesProps {
@@ -47,6 +55,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
 }) => {
     const { t } = useTranslation();
     const [repositories, setRepositories] = useState<ThirdPartyRepository[]>([]);
+    const [defaultRepositories, setDefaultRepositories] = useState<DefaultRepository[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -56,6 +65,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
     const [canDelete, setCanDelete] = useState<boolean>(false);
     const [canEnable, setCanEnable] = useState<boolean>(false);
     const [canDisable, setCanDisable] = useState<boolean>(false);
+    const [canViewDefaults, setCanViewDefaults] = useState<boolean>(false);
 
     // OS-specific fields
     const [ppaOwner, setPpaOwner] = useState<string>('');
@@ -126,13 +136,50 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
             const deletePerm = await hasPermission(SecurityRoles.DELETE_THIRD_PARTY_REPOSITORY);
             const enablePerm = await hasPermission(SecurityRoles.ENABLE_THIRD_PARTY_REPOSITORY);
             const disablePerm = await hasPermission(SecurityRoles.DISABLE_THIRD_PARTY_REPOSITORY);
+            const viewDefaultsPerm = await hasPermission(SecurityRoles.VIEW_DEFAULT_REPOSITORIES);
             setCanAdd(addPerm);
             setCanDelete(deletePerm);
             setCanEnable(enablePerm);
             setCanDisable(disablePerm);
+            setCanViewDefaults(viewDefaultsPerm);
         };
         loadPermissions();
     }, []);
+
+    // Extract OS name for API call (e.g., "Ubuntu" from "Ubuntu 25.04" or "Linux Ubuntu 25.04")
+    const extractedOsName = useMemo(() => {
+        if (!osName) return '';
+        // Try to match common OS names
+        const osPatterns = [
+            'Ubuntu', 'Debian', 'RHEL', 'CentOS', 'CentOS Stream', 'Fedora',
+            'Rocky Linux', 'AlmaLinux', 'openSUSE', 'SLES', 'FreeBSD', 'OpenBSD',
+            'NetBSD', 'macOS', 'Windows'
+        ];
+        for (const pattern of osPatterns) {
+            if (osName.includes(pattern)) {
+                return pattern;
+            }
+        }
+        return '';
+    }, [osName]);
+
+    // Load default repositories for this OS
+    const loadDefaultRepositories = useCallback(async () => {
+        if (!extractedOsName || !canViewDefaults) {
+            setDefaultRepositories([]);
+            return;
+        }
+
+        try {
+            const response = await axiosInstance.get(
+                `/api/default-repositories/by-os/${encodeURIComponent(extractedOsName)}`
+            );
+            setDefaultRepositories(response.data || []);
+        } catch {
+            // Silently fail - defaults are optional
+            setDefaultRepositories([]);
+        }
+    }, [extractedOsName, canViewDefaults]);
 
     // Load repositories
     const loadRepositories = useCallback(async () => {
@@ -148,10 +195,11 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                 `/api/hosts/${hostId}/third-party-repos`
             );
             const repos = response.data.repositories || [];
-            // Add unique IDs for DataGrid
+            // Add unique IDs for DataGrid and mark as not default
             const reposWithIds = repos.map((repo: ThirdPartyRepository, index: number) => ({
                 ...repo,
-                id: `${repo.name}-${index}`,
+                id: `host-${repo.name}-${index}`,
+                isDefault: false,
             }));
             setRepositories(reposWithIds);
         } catch (err: unknown) {
@@ -212,12 +260,41 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
 
     useEffect(() => {
         loadRepositories();
+        loadDefaultRepositories();
         // Auto-refresh every 30 seconds
         const refreshInterval = setInterval(() => {
             loadRepositories();
+            loadDefaultRepositories();
         }, 30000);
         return () => clearInterval(refreshInterval);
-    }, [hostId, privilegedMode, loadRepositories]);
+    }, [hostId, privilegedMode, loadRepositories, loadDefaultRepositories]);
+
+    // Combine host repositories with default repositories, filtering out duplicates
+    const combinedRepositories = useMemo(() => {
+        // Convert default repositories to the ThirdPartyRepository format
+        const defaultRepos: ThirdPartyRepository[] = defaultRepositories.map((repo, index) => ({
+            id: `default-${repo.id}-${index}`,
+            name: repo.repository_url,
+            type: repo.package_manager,
+            url: repo.repository_url,
+            enabled: true, // Default repositories are always shown as enabled
+            isDefault: true,
+        }));
+
+        // Create a set of default repo names for deduplication
+        // Use the name field (which is repository_url for defaults) for comparison
+        const defaultNames = new Set(defaultRepositories.map(r => r.repository_url.toLowerCase()));
+
+        // Filter host repositories to exclude any that match default names
+        // This prevents showing the same repository twice (once as Default, once as Host-Specific)
+        const filteredHostRepos = repositories.filter(repo => {
+            const repoName = (repo.name || '').toLowerCase();
+            return !defaultNames.has(repoName);
+        });
+
+        // Return defaults first, then host-specific repos
+        return [...defaultRepos, ...filteredHostRepos];
+    }, [repositories, defaultRepositories]);
 
     const handleAddRepository = async () => {
         if (!constructedRepo.trim()) {
@@ -411,6 +488,23 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
             minWidth: 300,
         },
         {
+            field: 'isDefault',
+            headerName: t('thirdPartyRepos.source'),
+            flex: 1,
+            minWidth: 100,
+            renderCell: (params) => {
+                const isDefault = params.value;
+                return (
+                    <Chip
+                        label={isDefault ? t('thirdPartyRepos.default') : t('thirdPartyRepos.hostSpecific')}
+                        color={isDefault ? 'info' : 'default'}
+                        size="small"
+                        variant="outlined"
+                    />
+                );
+            },
+        },
+        {
             field: 'enabled',
             headerName: t('thirdPartyRepos.enabled'),
             flex: 1,
@@ -477,7 +571,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
             )}
 
             {/* Loading Spinner or DataGrid */}
-            {loading && repositories.length === 0 ? (
+            {loading && combinedRepositories.length === 0 ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', p: 3, flexShrink: 0 }}>
                     <CircularProgress />
                 </Box>
@@ -496,13 +590,19 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                     {/* DataGrid - flexGrow to fill available space */}
                     <Box sx={{ flexGrow: 1, minHeight: 0 }}>
                         <DataGrid
-                            rows={repositories}
+                            rows={combinedRepositories}
                             columns={columns}
                             loading={loading}
                             checkboxSelection={canDelete || canEnable || canDisable}
                             disableRowSelectionOnClick
+                            isRowSelectable={(params) => !params.row.isDefault}
                             onRowSelectionModelChange={(newSelection) => {
-                                setSelectedRows(newSelection);
+                                // Filter out any default repository IDs that might have been selected
+                                const filteredSelection = newSelection.filter(id => {
+                                    const row = combinedRepositories.find(r => r.id === id);
+                                    return row && !row.isDefault;
+                                });
+                                setSelectedRows(filteredSelection);
                             }}
                             rowSelectionModel={selectedRows}
                             paginationModel={paginationModel}

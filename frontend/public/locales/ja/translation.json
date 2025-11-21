@@ -211,6 +211,25 @@
       "label": "管理サーバーを使用"
     }
   },
+  "hostDefaults": {
+    "addNewRepository": "新しいデフォルトリポジトリを追加",
+    "configuredRepositories": "設定済みデフォルトリポジトリ",
+    "errorAddingRepository": "デフォルトリポジトリの追加に失敗しました",
+    "errorDeletingRepository": "デフォルトリポジトリの削除に失敗しました",
+    "errorLoadingOSOptions": "オペレーティングシステムオプションの読み込みに失敗しました",
+    "errorLoadingRepositories": "デフォルトリポジトリの読み込みに失敗しました",
+    "noRepositories": "デフォルトリポジトリが設定されていません。上記でリポジトリを追加すると、新しいホストに自動的に適用されます。",
+    "noViewPermission": "デフォルトリポジトリを表示する権限がありません。",
+    "operatingSystem": "オペレーティングシステム",
+    "packageManager": "パッケージマネージャー",
+    "repositoriesSubheader": "承認時に新しいホストに適用されるデフォルトのサードパーティリポジトリを設定します",
+    "repositoriesTitle": "リポジトリ",
+    "repositoryAdded": "デフォルトリポジトリが正常に追加されました",
+    "repositoryDeleted": "デフォルトリポジトリが正常に削除されました",
+    "repositoryUrl": "リポジトリURL / PPA",
+    "repositoryUrlPlaceholder": "例: ppa:example/ppa または https://...",
+    "title": "ホストデフォルト"
+  },
   "hostDetail": {
     "accessTab": "アクセス",
     "accountName": "アカウント名",
@@ -1054,7 +1073,10 @@
     "type": "タイプ",
     "url": "URL",
     "urlExample": "例: https://download.opensuse.org/repositories/...",
-    "urlRequired": "リポジトリURLは必須です"
+    "urlRequired": "リポジトリURLは必須です",
+    "source": "ソース",
+    "default": "デフォルト",
+    "hostSpecific": "ホスト固有"
   },
   "ubuntuPro": {
     "actions": {

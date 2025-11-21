@@ -227,6 +227,25 @@
       "label": "Use Managed Server"
     }
   },
+  "hostDefaults": {
+    "addNewRepository": "Add New Default Repository",
+    "configuredRepositories": "Configured Default Repositories",
+    "errorAddingRepository": "Failed to add default repository",
+    "errorDeletingRepository": "Failed to delete default repository",
+    "errorLoadingOSOptions": "Failed to load operating system options",
+    "errorLoadingRepositories": "Failed to load default repositories",
+    "noRepositories": "No default repositories configured. Add repositories above to have them automatically applied to new hosts.",
+    "noViewPermission": "You do not have permission to view default repositories.",
+    "operatingSystem": "Operating System",
+    "packageManager": "Package Manager",
+    "repositoriesSubheader": "Configure default third-party repositories that will be applied to new hosts when approved",
+    "repositoriesTitle": "Repositories",
+    "repositoryAdded": "Default repository added successfully",
+    "repositoryDeleted": "Default repository deleted successfully",
+    "repositoryUrl": "Repository URL / PPA",
+    "repositoryUrlPlaceholder": "e.g., ppa:example/ppa or https://...",
+    "title": "Host Defaults"
+  },
   "hostDetail": {
     "accessTab": "Access",
     "accountName": "Account Name",
@@ -1156,7 +1175,10 @@
     "type": "Type",
     "url": "URL",
     "urlExample": "Example: https://download.opensuse.org/repositories/...",
-    "urlRequired": "Repository URL is required"
+    "urlRequired": "Repository URL is required",
+    "source": "Source",
+    "default": "Default",
+    "hostSpecific": "Host-Specific"
   },
   "ubuntuPro": {
     "actions": {

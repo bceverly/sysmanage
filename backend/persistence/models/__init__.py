@@ -76,4 +76,6 @@ __all__ = [
     "UserDashboardCardPreference",
     # Audit models
     "AuditLog",
+    # Default repository models
+    "DefaultRepository",
 ]

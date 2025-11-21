@@ -90,6 +90,20 @@ async def approve_host(
         host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
         session.commit()
 
+        # Apply default repositories for this host's operating system
+        try:
+            from backend.api.default_repositories import (
+                apply_default_repositories_to_host,
+            )
+
+            await apply_default_repositories_to_host(session, host)
+        except Exception as e:
+            # Don't fail the approval process if we can't apply default repos
+            print(
+                f"DEBUG: Error applying default repositories to {host.id} ({host.fqdn}): {e}",
+                flush=True,
+            )
+
         # Audit log host approval
         AuditService.log_update(
             db=session,

@@ -211,6 +211,25 @@
       "label": "Использовать управляемый сервер"
     }
   },
+  "hostDefaults": {
+    "addNewRepository": "Добавить новый репозиторий по умолчанию",
+    "configuredRepositories": "Настроенные репозитории по умолчанию",
+    "errorAddingRepository": "Не удалось добавить репозиторий по умолчанию",
+    "errorDeletingRepository": "Не удалось удалить репозиторий по умолчанию",
+    "errorLoadingOSOptions": "Не удалось загрузить параметры операционной системы",
+    "errorLoadingRepositories": "Не удалось загрузить репозитории по умолчанию",
+    "noRepositories": "Репозитории по умолчанию не настроены. Добавьте репозитории выше, чтобы автоматически применять их к новым хостам.",
+    "noViewPermission": "У вас нет разрешения на просмотр репозиториев по умолчанию.",
+    "operatingSystem": "Операционная система",
+    "packageManager": "Менеджер пакетов",
+    "repositoriesSubheader": "Настройте сторонние репозитории по умолчанию, которые будут применены к новым хостам при утверждении",
+    "repositoriesTitle": "Репозитории",
+    "repositoryAdded": "Репозиторий по умолчанию успешно добавлен",
+    "repositoryDeleted": "Репозиторий по умолчанию успешно удален",
+    "repositoryUrl": "URL репозитория / PPA",
+    "repositoryUrlPlaceholder": "напр. ppa:example/ppa или https://...",
+    "title": "Настройки хоста по умолчанию"
+  },
   "hostDetail": {
     "accessTab": "Доступ",
     "accountName": "Название аккаунта",
@@ -1039,7 +1058,10 @@
     "type": "Тип",
     "url": "URL",
     "urlExample": "Пример: https://download.opensuse.org/repositories/...",
-    "urlRequired": "Требуется URL репозитория"
+    "urlRequired": "Требуется URL репозитория",
+    "source": "Источник",
+    "default": "По умолчанию",
+    "hostSpecific": "Специфичный для хоста"
   },
   "ubuntuPro": {
     "actions": {

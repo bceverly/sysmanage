@@ -60,7 +60,9 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
             if console_logs:
                 print(f"  [DEBUG] Browser console logs ({len(console_logs)} entries):")
                 for log in console_logs[:10]:  # Print first 10 log entries
-                    print(f"    [{log.get('level', 'UNKNOWN')}] {log.get('message', 'no message')}")
+                    print(
+                        f"    [{log.get('level', 'UNKNOWN')}] {log.get('message', 'no message')}"
+                    )
 
         # Verify we're on the login page
         title = selenium_page.get_title()
