@@ -8,21 +8,17 @@ like to add:
     sends linearly with the number of
     registered agents.
 
-2.  Versioning of the API - We need to make
-    sure that older clients can talk to
-    newer servers and degrade gracefully.
-
-3.  User Management - Ability to manage
+2.  User Management - Ability to manage
     add/edit/delete users and groups on
     the agent hosts.
 
-4.  We need a MFA mechanism using an
+3.  We need a MFA mechanism using an
     authenticator app on someone's
     mobile device as well as the ability
     to send a code via email to their
     registered email address.
 
-5.  Have the agent and the server log
+4.  Have the agent and the server log
     their messages to the operating
     system appropriate location but
     fall back to the local logs dir-
@@ -35,7 +31,7 @@ like to add:
     sysmanage-agent subdirectory in
     which the logs should be placed.
 
-6.  Add an automation tab between
+5.  Add an automation tab between
     updates and scripts in the main
     navbar.  on that tab, have an
     "Updates" subtab that allows you
@@ -70,20 +66,7 @@ like to add:
     string externalization /
     translation.
 
-7. Add the ability to issue and
-    manage SysManage API keys with
-    View/Edit/Admin roles.  They
-    should be stored in the vault
-    and have an expiration date
-    after which they are invalid.
-    They key should be able to be
-    used to get a JWT token for
-    the API so there should be
-    an endpoint that is not /api/
-    prefixed to get the token
-    issued / renewed.
-
-8. A cool AI integration would be
+6.  A cool AI integration would be
     to have the system pull back
     a diagnostics report from a
     remote agent and do a health
@@ -94,7 +77,7 @@ like to add:
     with the opportunity to have
     sysmanage fix the issues.
 
-9. We should have a settings
+7.  We should have a settings
     screen that allows the user
     to specify default third-
     party repositories that
@@ -102,7 +85,7 @@ like to add:
     every host that is approved
     on registration.
 
-10. Add the ability to deploy
+8.  Add the ability to deploy
     a Graylog server as well as
     a Grafana server, given a
     host that it should be
@@ -110,11 +93,11 @@ like to add:
     same with database servers
     of various ilks as well?
 
-11. Based on server roles that
+9.  Based on server roles that
     we detect, recommend firewall
     configuration for that host.
 
-12. Have a "Firewall Configuration"
+10. Have a "Firewall Configuration"
     page on settings that allow
     the user to create a set of
     named configurations that
