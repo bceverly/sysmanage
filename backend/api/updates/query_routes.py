@@ -118,9 +118,10 @@ async def get_host_updates(
             if not host:
                 raise HTTPException(status_code=404, detail=_("Host not found"))
 
-            # Build query with filters
+            # Build query with filters - exclude OS upgrades (they have their own page)
             query = session.query(models.PackageUpdate).filter(
-                models.PackageUpdate.host_id == host_id
+                models.PackageUpdate.host_id == host_id,
+                ~models.PackageUpdate.package_manager.in_(OS_UPGRADE_PACKAGE_MANAGERS),
             )
 
             if package_manager:
@@ -208,9 +209,15 @@ async def get_all_updates(  # pylint: disable=too-many-positional-arguments
     try:
         session_factory = sessionmaker(bind=db.get_engine())
         with session_factory() as session:
-            # Build base query
-            query = session.query(models.PackageUpdate, models.Host.fqdn).join(
-                models.Host
+            # Build base query - exclude OS upgrades (they have their own page)
+            query = (
+                session.query(models.PackageUpdate, models.Host.fqdn)
+                .join(models.Host)
+                .filter(
+                    ~models.PackageUpdate.package_manager.in_(
+                        OS_UPGRADE_PACKAGE_MANAGERS
+                    )
+                )
             )
 
             # Apply filters
