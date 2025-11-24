@@ -92,7 +92,7 @@
   },
   "optionalDependencies": {
     "@esbuild/freebsd-x64": "^0.25.10",
-    "@esbuild/win32-x64": "^0.25.10"
+    "@esbuild/win32-x64": "^0.27.0"
   },
   "overrides": {
     "nth-check": "^2.1.1",
