@@ -112,6 +112,8 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
         db.execute(
             delete(PackageUpdate).where(PackageUpdate.host_id == connection.host_id)
         )
+        # Flush to ensure DELETE completes before INSERT operations
+        db.flush()
 
         # Process available updates
         available_updates = message_data.get("available_updates", [])
@@ -128,6 +130,23 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
             debug_logger.info(
                 "Sample package update structure: %s", available_updates[0]
             )
+
+        # Deduplicate updates based on (package_name, package_manager)
+        # Keep the last occurrence of each unique package
+        seen_packages = {}
+        for package_update in available_updates:
+            key = (
+                package_update.get("package_name"),
+                package_update.get("package_manager"),
+            )
+            seen_packages[key] = package_update
+
+        # Convert back to list for processing
+        available_updates = list(seen_packages.values())
+        debug_logger.info(
+            "After deduplication: %d unique package updates",
+            len(available_updates),
+        )
 
         for package_update in available_updates:
             now = datetime.now(timezone.utc).replace(tzinfo=None)
