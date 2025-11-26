@@ -585,6 +585,19 @@ def test_db():
         category = Column(String(50), nullable=True, index=True)
         entry_type = Column(String(50), nullable=True, index=True)
 
+    # Create test version of EnabledPackageManager model for SQLite compatibility
+    class EnabledPackageManager(TestBase):
+        __tablename__ = "enabled_package_manager"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        os_name = Column(String(100), nullable=False, index=True)
+        package_manager = Column(String(50), nullable=False, index=True)
+        created_at = Column(
+            DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+        )
+        created_by = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)
 
@@ -634,6 +647,11 @@ def test_db():
                 id=uuid.UUID("00000000-0000-0000-0000-000000000008"),
                 name="Ubuntu Pro",
                 description="Permissions related to Ubuntu Pro management",
+            ),
+            SecurityRoleGroup(
+                id=uuid.UUID("00000000-0000-0000-0000-000000000010"),
+                name="Settings",
+                description="Permissions related to system settings",
             ),
         ]
         for group in role_groups:
@@ -872,6 +890,44 @@ def test_db():
                 "Change the Ubuntu Pro master key",
                 "00000000-0000-0000-0000-000000000008",
             ),
+            # Settings group - Default Repositories
+            (
+                "10000000-0000-0000-0000-000000000060",
+                "Add Default Repository",
+                "Add default repositories to the system",
+                "00000000-0000-0000-0000-000000000010",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000061",
+                "Remove Default Repository",
+                "Remove default repositories from the system",
+                "00000000-0000-0000-0000-000000000010",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000062",
+                "View Default Repositories",
+                "View default repositories in the system",
+                "00000000-0000-0000-0000-000000000010",
+            ),
+            # Settings group - Enabled Package Managers
+            (
+                "10000000-0000-0000-0000-000000000063",
+                "Add Enabled Package Manager",
+                "Add enabled package managers to the system",
+                "00000000-0000-0000-0000-000000000010",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000064",
+                "Remove Enabled Package Manager",
+                "Remove enabled package managers from the system",
+                "00000000-0000-0000-0000-000000000010",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000065",
+                "View Enabled Package Managers",
+                "View enabled package managers in the system",
+                "00000000-0000-0000-0000-000000000010",
+            ),
         ]
 
         for role_id, name, description, group_id in roles_data:
@@ -909,6 +965,7 @@ def test_db():
     original_installation_package = models.InstallationPackage
     original_software_installation_log = models.SoftwareInstallationLog
     original_audit_log = models.AuditLog
+    original_enabled_package_manager = models.EnabledPackageManager
     models.Host = Host
     models.User = User
     models.SecurityRoleGroup = SecurityRoleGroup
@@ -925,6 +982,7 @@ def test_db():
     models.InstallationPackage = InstallationPackage
     models.SoftwareInstallationLog = SoftwareInstallationLog
     models.AuditLog = AuditLog
+    models.EnabledPackageManager = EnabledPackageManager
 
     # Override the get_engine dependency
     def override_get_engine():
@@ -971,6 +1029,7 @@ def test_db():
     models.InstallationPackage = original_installation_package
     models.SoftwareInstallationLog = original_software_installation_log
     models.AuditLog = original_audit_log
+    models.EnabledPackageManager = original_enabled_package_manager
 
     # Clean up database connections
     test_engine.dispose()  # Close all connections in the connection pool

@@ -133,6 +133,11 @@ class SecurityRoles(str, Enum):
     REMOVE_DEFAULT_REPOSITORY = "Remove Default Repository"
     VIEW_DEFAULT_REPOSITORIES = "View Default Repositories"
 
+    # Enabled Package Manager Management Roles
+    ADD_ENABLED_PACKAGE_MANAGER = "Add Enabled Package Manager"
+    REMOVE_ENABLED_PACKAGE_MANAGER = "Remove Enabled Package Manager"
+    VIEW_ENABLED_PACKAGE_MANAGERS = "View Enabled Package Managers"
+
 
 class UserRoleCache:
     """

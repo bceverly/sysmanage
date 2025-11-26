@@ -104,6 +104,54 @@ async def approve_host(
                 flush=True,
             )
 
+        # Apply enabled package managers for this host's operating system
+        try:
+            import json
+
+            # Get the distribution from os_details
+            os_details = json.loads(host.os_details) if host.os_details else {}
+            distribution = os_details.get("distribution", "")
+
+            if distribution and host.is_agent_privileged:
+                # Get all enabled package managers for this OS
+                enabled_pms = (
+                    session.query(models.EnabledPackageManager)
+                    .filter(models.EnabledPackageManager.os_name == distribution)
+                    .all()
+                )
+
+                if enabled_pms:
+                    for pm in enabled_pms:
+                        command_message = create_command_message(
+                            command_type="enable_package_manager",
+                            parameters={
+                                "package_manager": pm.package_manager,
+                                "os_name": pm.os_name,
+                            },
+                        )
+                        queue_ops.enqueue_message(
+                            message_type="command",
+                            message_data=command_message,
+                            direction=QueueDirection.OUTBOUND,
+                            host_id=str(host.id),
+                            db=session,
+                        )
+                    session.commit()
+                    logger.info(
+                        "Queued %d enabled package manager commands for newly approved host %s (%s)",
+                        len(enabled_pms),
+                        host.fqdn,
+                        distribution,
+                    )
+        except Exception as e:
+            # Don't fail the approval process if we can't apply enabled PMs
+            logger.error(
+                "Error applying enabled package managers to %s (%s): %s",
+                host.id,
+                host.fqdn,
+                e,
+            )
+
         # Audit log host approval
         AuditService.log_update(
             db=session,

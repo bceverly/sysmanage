@@ -22,6 +22,7 @@ import {
   Storage as StorageIcon,
   Add as AddIcon,
   Delete as DeleteIcon,
+  Settings as SettingsIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
@@ -36,9 +37,23 @@ interface DefaultRepository {
   created_by: string | null;
 }
 
+interface EnabledPackageManager {
+  id: string;
+  os_name: string;
+  package_manager: string;
+  created_at: string;
+  created_by: string | null;
+}
+
 interface OSPackageManagersResponse {
   operating_systems: string[];
   package_managers: Record<string, string[]>;
+}
+
+interface PMOSOptionsResponse {
+  operating_systems: string[];
+  default_package_managers: Record<string, string | null>;
+  optional_package_managers: Record<string, string[]>;
 }
 
 // Group repositories by OS and package manager for display
@@ -91,22 +106,44 @@ const HostDefaultsSettings: React.FC = () => {
   const [snackbarMessage, setSnackbarMessage] = useState<string>('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
 
-  // Permission state
+  // Permission state for repositories
   const [canAdd, setCanAdd] = useState<boolean>(false);
   const [canRemove, setCanRemove] = useState<boolean>(false);
   const [canView, setCanView] = useState<boolean>(false);
 
+  // Enabled Package Managers state
+  const [enabledPMs, setEnabledPMs] = useState<EnabledPackageManager[]>([]);
+  const [pmOSOptions, setPmOSOptions] = useState<string[]>([]);
+  const [pmDefaultManagers, setPmDefaultManagers] = useState<Record<string, string | null>>({});
+  const [pmOptionalManagers, setPmOptionalManagers] = useState<Record<string, string[]>>({});
+  const [selectedPMOS, setSelectedPMOS] = useState<string>('');
+  const [selectedOptionalPM, setSelectedOptionalPM] = useState<string>('');
+  const [pmLoading, setPmLoading] = useState<boolean>(true);
+  const [pmSaving, setPmSaving] = useState<boolean>(false);
+  const [pmError, setPmError] = useState<string | null>(null);
+
+  // Permission state for enabled package managers
+  const [canAddPM, setCanAddPM] = useState<boolean>(false);
+  const [canRemovePM, setCanRemovePM] = useState<boolean>(false);
+  const [canViewPM, setCanViewPM] = useState<boolean>(false);
+
   // Check permissions
   useEffect(() => {
     const checkPermissions = async () => {
-      const [addPerm, removePerm, viewPerm] = await Promise.all([
+      const [addPerm, removePerm, viewPerm, addPMPerm, removePMPerm, viewPMPerm] = await Promise.all([
         hasPermission(SecurityRoles.ADD_DEFAULT_REPOSITORY),
         hasPermission(SecurityRoles.REMOVE_DEFAULT_REPOSITORY),
         hasPermission(SecurityRoles.VIEW_DEFAULT_REPOSITORIES),
+        hasPermission(SecurityRoles.ADD_ENABLED_PACKAGE_MANAGER),
+        hasPermission(SecurityRoles.REMOVE_ENABLED_PACKAGE_MANAGER),
+        hasPermission(SecurityRoles.VIEW_ENABLED_PACKAGE_MANAGERS),
       ]);
       setCanAdd(addPerm);
       setCanRemove(removePerm);
       setCanView(viewPerm);
+      setCanAddPM(addPMPerm);
+      setCanRemovePM(removePMPerm);
+      setCanViewPM(viewPMPerm);
     };
     checkPermissions();
   }, []);
@@ -140,10 +177,41 @@ const HostDefaultsSettings: React.FC = () => {
     }
   }, [canView, t]);
 
+  // Load enabled package managers OS options
+  const loadPMOSOptions = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get<PMOSOptionsResponse>('/api/enabled-package-managers/os-options');
+      setPmOSOptions(response.data.operating_systems);
+      setPmDefaultManagers(response.data.default_package_managers);
+      setPmOptionalManagers(response.data.optional_package_managers);
+    } catch (err) {
+      console.error('Error loading PM OS options:', err);
+      setPmError(t('hostDefaults.errorLoadingOSOptions', 'Failed to load operating system options'));
+    }
+  }, [t]);
+
+  // Load enabled package managers
+  const loadEnabledPMs = useCallback(async () => {
+    if (!canViewPM) return;
+
+    setPmLoading(true);
+    try {
+      const response = await axiosInstance.get<EnabledPackageManager[]>('/api/enabled-package-managers/');
+      setEnabledPMs(response.data);
+      setPmError(null);
+    } catch (err) {
+      console.error('Error loading enabled package managers:', err);
+      setPmError(t('hostDefaults.errorLoadingPackageManagers', 'Failed to load enabled package managers'));
+    } finally {
+      setPmLoading(false);
+    }
+  }, [canViewPM, t]);
+
   // Initial load
   useEffect(() => {
     loadOSOptions();
-  }, [loadOSOptions]);
+    loadPMOSOptions();
+  }, [loadOSOptions, loadPMOSOptions]);
 
   useEffect(() => {
     if (canView) {
@@ -153,8 +221,24 @@ const HostDefaultsSettings: React.FC = () => {
     }
   }, [canView, loadRepositories]);
 
+  useEffect(() => {
+    if (canViewPM) {
+      loadEnabledPMs();
+    } else {
+      setPmLoading(false);
+    }
+  }, [canViewPM, loadEnabledPMs]);
+
   // Get available package managers for selected OS
   const availablePackageManagers = selectedOS ? (packageManagerOptions[selectedOS] || []) : [];
+
+  // Get available optional package managers for selected PM OS
+  const availableOptionalPMs = selectedPMOS ? (pmOptionalManagers[selectedPMOS] || []) : [];
+
+  // Reset optional PM selection when PM OS changes
+  useEffect(() => {
+    setSelectedOptionalPM('');
+  }, [selectedPMOS]);
 
   // Reset package manager when OS changes
   useEffect(() => {
@@ -306,6 +390,63 @@ const HostDefaultsSettings: React.FC = () => {
     }
   };
 
+  // Check if PM form is valid
+  const isPMFormValid = selectedPMOS && selectedOptionalPM;
+
+  // Handle add enabled package manager
+  const handleAddEnabledPM = async () => {
+    if (!isPMFormValid) return;
+
+    setPmSaving(true);
+    try {
+      await axiosInstance.post('/api/enabled-package-managers/', {
+        os_name: selectedPMOS,
+        package_manager: selectedOptionalPM,
+      });
+
+      // Reset form
+      setSelectedPMOS('');
+      setSelectedOptionalPM('');
+
+      // Reload enabled package managers
+      await loadEnabledPMs();
+
+      setSnackbarMessage(t('hostDefaults.packageManagerAdded', 'Enabled package manager added successfully'));
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+    } catch (err: unknown) {
+      console.error('Error adding enabled package manager:', err);
+      const errorMessage = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+        t('hostDefaults.errorAddingPackageManager', 'Failed to add enabled package manager');
+      setSnackbarMessage(errorMessage);
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    } finally {
+      setPmSaving(false);
+    }
+  };
+
+  // Handle delete enabled package manager
+  const handleDeleteEnabledPM = async (pmId: string) => {
+    try {
+      await axiosInstance.delete(`/api/enabled-package-managers/${pmId}`);
+
+      // Reload enabled package managers
+      await loadEnabledPMs();
+
+      setSnackbarMessage(t('hostDefaults.packageManagerDeleted', 'Enabled package manager removed successfully'));
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+    } catch (err: unknown) {
+      console.error('Error removing enabled package manager:', err);
+      const errorMessage = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+        t('hostDefaults.errorDeletingPackageManager', 'Failed to remove enabled package manager');
+      setSnackbarMessage(errorMessage);
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
   // Group repositories by OS and package manager
   const groupedRepositories: GroupedRepositories = repositories.reduce((acc, repo) => {
     if (!acc[repo.os_name]) {
@@ -321,17 +462,29 @@ const HostDefaultsSettings: React.FC = () => {
   // Sort OS names
   const sortedOSNames = Object.keys(groupedRepositories).sort();
 
-  if (!canView) {
+  // Group enabled package managers by OS
+  const groupedEnabledPMs: Record<string, EnabledPackageManager[]> = enabledPMs.reduce((acc, pm) => {
+    if (!acc[pm.os_name]) {
+      acc[pm.os_name] = [];
+    }
+    acc[pm.os_name].push(pm);
+    return acc;
+  }, {} as Record<string, EnabledPackageManager[]>);
+
+  // Sort PM OS names
+  const sortedPMOSNames = Object.keys(groupedEnabledPMs).sort();
+
+  if (!canView && !canViewPM) {
     return (
       <Alert severity="warning">
-        {t('hostDefaults.noViewPermission', 'You do not have permission to view default repositories.')}
+        {t('hostDefaults.noViewPermissionAll', 'You do not have permission to view host default settings.')}
       </Alert>
     );
   }
 
   return (
-    <Box>
-      <Card>
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+      <Card sx={{ flex: '1 1 400px', maxWidth: { xs: '100%', lg: '49%' } }}>
         <CardHeader
           avatar={<StorageIcon color="primary" />}
           title={t('hostDefaults.repositoriesTitle', 'Repositories')}
@@ -651,6 +804,156 @@ const HostDefaultsSettings: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Enabled Package Managers Card */}
+      {canViewPM && (
+        <Card sx={{ flex: '1 1 400px', maxWidth: { xs: '100%', lg: '49%' } }}>
+          <CardHeader
+            avatar={<SettingsIcon color="primary" />}
+            title={t('hostDefaults.packageManagersTitle', 'Package Managers')}
+            subheader={t('hostDefaults.packageManagersSubheader', 'Enable additional (non-default) package managers for specific operating systems')}
+          />
+          <CardContent>
+            {pmError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {pmError}
+              </Alert>
+            )}
+
+            {/* Add Enabled Package Manager Form */}
+            {canAddPM && (
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                  {t('hostDefaults.addNewPackageManager', 'Add New Package Manager')}
+                </Typography>
+                <Stack spacing={2}>
+                  <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="flex-start">
+                    <FormControl sx={{ minWidth: 200 }}>
+                      <InputLabel>{t('hostDefaults.operatingSystem', 'Operating System')}</InputLabel>
+                      <Select
+                        value={selectedPMOS}
+                        label={t('hostDefaults.operatingSystem', 'Operating System')}
+                        onChange={(e) => setSelectedPMOS(e.target.value)}
+                      >
+                        {pmOSOptions.map((os) => (
+                          <MenuItem key={os} value={os}>
+                            {os}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl sx={{ minWidth: 180 }} disabled={!selectedPMOS || availableOptionalPMs.length === 0}>
+                      <InputLabel>{t('hostDefaults.packageManager', 'Package Manager')}</InputLabel>
+                      <Select
+                        value={availableOptionalPMs.includes(selectedOptionalPM) ? selectedOptionalPM : ''}
+                        label={t('hostDefaults.packageManager', 'Package Manager')}
+                        onChange={(e) => setSelectedOptionalPM(e.target.value)}
+                      >
+                        {availableOptionalPMs.map((pm) => (
+                          <MenuItem key={pm} value={pm}>
+                            {pm}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <Button
+                      variant="contained"
+                      startIcon={pmSaving ? <CircularProgress size={20} color="inherit" /> : <AddIcon />}
+                      onClick={handleAddEnabledPM}
+                      disabled={!isPMFormValid || pmSaving}
+                      sx={{ mt: { xs: 0, md: 1 } }}
+                    >
+                      {t('common.add', 'Add')}
+                    </Button>
+                  </Stack>
+
+                  {/* Show default package manager info */}
+                  {selectedPMOS && pmDefaultManagers[selectedPMOS] && (
+                    <Alert severity="info" sx={{ mt: 1 }}>
+                      {t('hostDefaults.defaultPackageManagerInfo', 'Default package manager for {{os}}: {{pm}}', {
+                        os: selectedPMOS,
+                        pm: pmDefaultManagers[selectedPMOS],
+                      })}
+                    </Alert>
+                  )}
+
+                  {/* Show message if no optional package managers available */}
+                  {selectedPMOS && availableOptionalPMs.length === 0 && (
+                    <Alert severity="warning" sx={{ mt: 1 }}>
+                      {t('hostDefaults.noOptionalPackageManagers', 'No additional package managers available for this operating system.')}
+                    </Alert>
+                  )}
+                </Stack>
+              </Box>
+            )}
+
+            <Divider sx={{ my: 2 }} />
+
+            {/* Enabled Package Manager List */}
+            <Typography variant="subtitle1" sx={{ mb: 2 }}>
+              {t('hostDefaults.configuredPackageManagers', 'Configured Package Managers')}
+            </Typography>
+
+            {pmLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : enabledPMs.length === 0 ? (
+              <Alert severity="info">
+                {t('hostDefaults.noPackageManagers', 'No additional package managers enabled. Each operating system uses its default package manager. Add optional package managers above to enable them.')}
+              </Alert>
+            ) : (
+              <Box>
+                {sortedPMOSNames.map((osName) => (
+                  <Box key={osName} sx={{ mb: 3 }}>
+                    <Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>
+                      {osName}
+                    </Typography>
+                    <Box sx={{ ml: 2 }}>
+                      {pmDefaultManagers[osName] && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                          {t('hostDefaults.defaultLabel', 'Default')}: {pmDefaultManagers[osName]}
+                        </Typography>
+                      )}
+                      {groupedEnabledPMs[osName].map((pm) => (
+                        <Box
+                          key={pm.id}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            py: 1,
+                            px: 2,
+                            bgcolor: 'action.hover',
+                            borderRadius: 1,
+                            mb: 1,
+                          }}
+                        >
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {pm.package_manager}
+                          </Typography>
+                          {canRemovePM && (
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => handleDeleteEnabledPM(pm.id)}
+                              title={t('common.delete', 'Delete')}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          )}
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Snackbar
         open={snackbarOpen}

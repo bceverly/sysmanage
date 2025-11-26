@@ -14,6 +14,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import TypeDecorator
@@ -524,4 +525,41 @@ class DefaultRepository(Base):
         return (
             f"<DefaultRepository(id={self.id}, os_name='{self.os_name}', "
             f"package_manager='{self.package_manager}', repository_url='{self.repository_url}')>"
+        )
+
+
+class EnabledPackageManager(Base):
+    """
+    This class holds the object mapping for the enabled_package_manager table.
+    Stores additional (non-default) package managers that should be enabled on hosts
+    based on their operating system. For example, enabling snap or flatpak on Ubuntu
+    in addition to the default APT.
+    """
+
+    __tablename__ = "enabled_package_manager"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    os_name = Column(String(100), nullable=False, index=True)
+    package_manager = Column(String(50), nullable=False, index=True)
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    created_by = Column(
+        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
+
+    # Relationship to User
+    creator = relationship("User", foreign_keys=[created_by])
+
+    # Unique constraint on os_name + package_manager
+    __table_args__ = (
+        UniqueConstraint("os_name", "package_manager", name="uq_enabled_pm_os_pm"),
+    )
+
+    def __repr__(self):
+        return (
+            f"<EnabledPackageManager(id={self.id}, os_name='{self.os_name}', "
+            f"package_manager='{self.package_manager}')>"
         )

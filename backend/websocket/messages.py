@@ -71,6 +71,7 @@ class CommandType(str, Enum):
     DISABLE_FIREWALL = "disable_firewall"
     RESTART_FIREWALL = "restart_firewall"
     ATTACH_TO_GRAYLOG = "attach_to_graylog"
+    ENABLE_PACKAGE_MANAGER = "enable_package_manager"
 
 
 class Message:

@@ -159,5 +159,10 @@ export const SecurityRoles = {
     // Default Repository Management
     ADD_DEFAULT_REPOSITORY: 'Add Default Repository',
     REMOVE_DEFAULT_REPOSITORY: 'Remove Default Repository',
-    VIEW_DEFAULT_REPOSITORIES: 'View Default Repositories'
+    VIEW_DEFAULT_REPOSITORIES: 'View Default Repositories',
+
+    // Enabled Package Manager Management
+    ADD_ENABLED_PACKAGE_MANAGER: 'Add Enabled Package Manager',
+    REMOVE_ENABLED_PACKAGE_MANAGER: 'Remove Enabled Package Manager',
+    VIEW_ENABLED_PACKAGE_MANAGERS: 'View Enabled Package Managers'
 } as const;

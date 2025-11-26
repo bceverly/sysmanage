@@ -19,6 +19,7 @@ from backend.api import (
     default_repositories,
     diagnostics,
     email,
+    enabled_package_managers,
     firewall_status,
     fleet,
     grafana_integration,
@@ -260,6 +261,16 @@ def register_routes(app: FastAPI):
         tags=["default-repositories"],
     )  # /api/default-repositories/* (with auth)
     logger.info("Default Repositories router added")
+
+    logger.info(
+        "Adding Enabled Package Managers router with /api/enabled-package-managers prefix"
+    )
+    app.include_router(
+        enabled_package_managers.router,
+        prefix="/api/enabled-package-managers",
+        tags=["enabled-package-managers"],
+    )  # /api/enabled-package-managers/* (with auth)
+    logger.info("Enabled Package Managers router added")
 
     logger.info("=== ALL ROUTES REGISTERED ===")
 
