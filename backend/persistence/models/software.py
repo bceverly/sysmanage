@@ -563,3 +563,130 @@ class EnabledPackageManager(Base):
             f"<EnabledPackageManager(id={self.id}, os_name='{self.os_name}', "
             f"package_manager='{self.package_manager}')>"
         )
+
+
+class FirewallRole(Base):
+    """
+    This class holds the object mapping for the firewall_role table.
+    Stores named firewall roles that define sets of open ports.
+    These roles can be assigned to hosts to configure their firewall settings.
+    Uses default-deny policy, so only open ports need to be specified.
+    """
+
+    __tablename__ = "firewall_role"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    name = Column(String(100), nullable=False, unique=True, index=True)
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    created_by = Column(
+        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
+    updated_at = Column(DateTime, nullable=True)
+    updated_by = Column(
+        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
+
+    # Relationships
+    creator = relationship("User", foreign_keys=[created_by])
+    updater = relationship("User", foreign_keys=[updated_by])
+    open_ports = relationship(
+        "FirewallRoleOpenPort",
+        back_populates="firewall_role",
+        cascade="all, delete-orphan",
+    )
+    host_assignments = relationship(
+        "HostFirewallRole",
+        back_populates="firewall_role",
+        cascade="all, delete-orphan",
+    )
+
+    def __repr__(self):
+        return f"<FirewallRole(id={self.id}, name='{self.name}')>"
+
+
+class FirewallRoleOpenPort(Base):
+    """
+    This class holds the object mapping for the firewall_role_open_port table.
+    Stores ports that should be open for a firewall role.
+    """
+
+    __tablename__ = "firewall_role_open_port"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    firewall_role_id = Column(
+        GUID(),
+        ForeignKey("firewall_role.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    port_number = Column(Integer, nullable=False, index=True)
+    tcp = Column(Boolean, nullable=False, default=True)
+    udp = Column(Boolean, nullable=False, default=False)
+    ipv4 = Column(Boolean, nullable=False, default=True)
+    ipv6 = Column(Boolean, nullable=False, default=True)
+
+    # Relationship
+    firewall_role = relationship("FirewallRole", back_populates="open_ports")
+
+    def __repr__(self):
+        protocols = []
+        if self.tcp:
+            protocols.append("TCP")
+        if self.udp:
+            protocols.append("UDP")
+        ip_versions = []
+        if self.ipv4:
+            ip_versions.append("IPv4")
+        if self.ipv6:
+            ip_versions.append("IPv6")
+        return (
+            f"<FirewallRoleOpenPort(id={self.id}, port={self.port_number}, "
+            f"protocols={'/'.join(protocols)}, ip={'/'.join(ip_versions)}, "
+            f"role_id={self.firewall_role_id})>"
+        )
+
+
+class HostFirewallRole(Base):
+    """
+    This class holds the object mapping for the host_firewall_role table.
+    Maps firewall roles to hosts (many-to-many relationship).
+    """
+
+    __tablename__ = "host_firewall_role"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(
+        GUID(),
+        ForeignKey("host.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    firewall_role_id = Column(
+        GUID(),
+        ForeignKey("firewall_role.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    created_by = Column(
+        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
+
+    # Relationships
+    host = relationship("Host", back_populates="firewall_roles")
+    firewall_role = relationship("FirewallRole", back_populates="host_assignments")
+    creator = relationship("User", foreign_keys=[created_by])
+
+    def __repr__(self):
+        return (
+            f"<HostFirewallRole(id={self.id}, host_id={self.host_id}, "
+            f"firewall_role_id={self.firewall_role_id})>"
+        )

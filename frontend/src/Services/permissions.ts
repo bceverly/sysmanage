@@ -164,5 +164,12 @@ export const SecurityRoles = {
     // Enabled Package Manager Management
     ADD_ENABLED_PACKAGE_MANAGER: 'Add Enabled Package Manager',
     REMOVE_ENABLED_PACKAGE_MANAGER: 'Remove Enabled Package Manager',
-    VIEW_ENABLED_PACKAGE_MANAGERS: 'View Enabled Package Managers'
+    VIEW_ENABLED_PACKAGE_MANAGERS: 'View Enabled Package Managers',
+
+    // Firewall Role Management
+    ADD_FIREWALL_ROLE: 'Add Firewall Role',
+    EDIT_FIREWALL_ROLE: 'Edit Firewall Role',
+    DELETE_FIREWALL_ROLE: 'Delete Firewall Role',
+    VIEW_FIREWALL_ROLES: 'View Firewall Roles',
+    ASSIGN_HOST_FIREWALL_ROLES: 'Assign Host Firewall Roles'
 } as const;

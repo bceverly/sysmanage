@@ -47,6 +47,7 @@ import PrometheusStatusCard from '../Components/PrometheusStatusCard';
 import UbuntuProSettings from '../Components/UbuntuProSettings';
 import AntivirusDefaultsSettings from '../Components/AntivirusDefaultsSettings';
 import HostDefaultsSettings from '../Components/HostDefaultsSettings';
+import FirewallRolesSettings from '../Components/FirewallRolesSettings';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 
@@ -132,7 +133,7 @@ const Settings: React.FC = () => {
   const [viewingTag, setViewingTag] = useState<TagWithHosts | null>(null);
   
   // Tab names for URL hash
-  const tabNames = useMemo(() => ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages', 'host-defaults'], []);
+  const tabNames = useMemo(() => ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages', 'host-defaults', 'firewall-roles'], []);
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -1078,6 +1079,7 @@ const Settings: React.FC = () => {
           <Tab label={t('antivirus.title', 'Antivirus')} />
           <Tab label={t('availablePackages.title', 'Available Packages')} />
           <Tab label={t('hostDefaults.title', 'Host Defaults')} />
+          <Tab label={t('firewallRoles.title', 'Firewall Roles')} />
         </Tabs>
       </Box>
 
@@ -1090,6 +1092,7 @@ const Settings: React.FC = () => {
         {activeTab === 4 && <AntivirusDefaultsSettings />}
         {activeTab === 5 && renderAvailablePackagesTab()}
         {activeTab === 6 && <HostDefaultsSettings />}
+        {activeTab === 7 && <FirewallRolesSettings />}
       </Box>
 
       {/* Add Tag Dialog */}

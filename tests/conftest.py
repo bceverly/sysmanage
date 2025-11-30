@@ -209,6 +209,11 @@ def client(engine, db_session, mock_config):
             "name": "Ubuntu Pro Management",
             "description": "Roles for Ubuntu Pro",
         },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000010"),
+            "name": "Settings",
+            "description": "Permissions related to system settings",
+        },
     ]
 
     for group_data in groups:
@@ -269,6 +274,13 @@ def client(engine, db_session, mock_config):
         SecurityRoles.CHANGE_UBUNTU_PRO_MASTER_KEY: UUID(
             "00000000-0000-0000-0000-000000000008"
         ),
+        # Settings group - Firewall Roles
+        SecurityRoles.ADD_FIREWALL_ROLE: UUID("00000000-0000-0000-0000-000000000010"),
+        SecurityRoles.EDIT_FIREWALL_ROLE: UUID("00000000-0000-0000-0000-000000000010"),
+        SecurityRoles.DELETE_FIREWALL_ROLE: UUID(
+            "00000000-0000-0000-0000-000000000010"
+        ),
+        SecurityRoles.VIEW_FIREWALL_ROLES: UUID("00000000-0000-0000-0000-000000000010"),
     }
 
     for role_enum, group_id in role_to_group.items():
@@ -408,6 +420,11 @@ def authenticated_client(db_session, mock_config):
             "name": "Ubuntu Pro Management",
             "description": "Roles for Ubuntu Pro",
         },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000010"),
+            "name": "Settings",
+            "description": "Permissions related to system settings",
+        },
     ]
 
     for group_data in groups:
@@ -468,6 +485,13 @@ def authenticated_client(db_session, mock_config):
         SecurityRoles.CHANGE_UBUNTU_PRO_MASTER_KEY: UUID(
             "00000000-0000-0000-0000-000000000008"
         ),
+        # Settings group - Firewall Roles
+        SecurityRoles.ADD_FIREWALL_ROLE: UUID("00000000-0000-0000-0000-000000000010"),
+        SecurityRoles.EDIT_FIREWALL_ROLE: UUID("00000000-0000-0000-0000-000000000010"),
+        SecurityRoles.DELETE_FIREWALL_ROLE: UUID(
+            "00000000-0000-0000-0000-000000000010"
+        ),
+        SecurityRoles.VIEW_FIREWALL_ROLES: UUID("00000000-0000-0000-0000-000000000010"),
     }
 
     for role_enum, group_id in role_to_group.items():
@@ -626,6 +650,11 @@ def security_roles_populated(db_session):
             "name": "Ubuntu Pro Management",
             "description": "Roles for Ubuntu Pro",
         },
+        {
+            "id": UUID("00000000-0000-0000-0000-000000000010"),
+            "name": "Settings",
+            "description": "Permissions related to system settings",
+        },
     ]
 
     for group_data in groups:
@@ -689,6 +718,13 @@ def security_roles_populated(db_session):
         SecurityRoles.CHANGE_UBUNTU_PRO_MASTER_KEY: UUID(
             "00000000-0000-0000-0000-000000000008"
         ),
+        # Settings group - Firewall Roles
+        SecurityRoles.ADD_FIREWALL_ROLE: UUID("00000000-0000-0000-0000-000000000010"),
+        SecurityRoles.EDIT_FIREWALL_ROLE: UUID("00000000-0000-0000-0000-000000000010"),
+        SecurityRoles.DELETE_FIREWALL_ROLE: UUID(
+            "00000000-0000-0000-0000-000000000010"
+        ),
+        SecurityRoles.VIEW_FIREWALL_ROLES: UUID("00000000-0000-0000-0000-000000000010"),
     }
 
     import hashlib

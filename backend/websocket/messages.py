@@ -70,6 +70,8 @@ class CommandType(str, Enum):
     ENABLE_FIREWALL = "enable_firewall"
     DISABLE_FIREWALL = "disable_firewall"
     RESTART_FIREWALL = "restart_firewall"
+    APPLY_FIREWALL_ROLES = "apply_firewall_roles"
+    REMOVE_FIREWALL_PORTS = "remove_firewall_ports"
     ATTACH_TO_GRAYLOG = "attach_to_graylog"
     ENABLE_PACKAGE_MANAGER = "enable_package_manager"
 

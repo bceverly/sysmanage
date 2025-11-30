@@ -111,3 +111,9 @@ like to add:
     all three of these and
     associate them with a
     particular host.
+
+10. Add support for WSL, hypervisors
+    so that an admin can kick off
+    the creation / automatic regist-
+    ration of virtual machines from
+    the sysmanage ui.

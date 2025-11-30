@@ -20,6 +20,7 @@ from backend.api import (
     diagnostics,
     email,
     enabled_package_managers,
+    firewall_roles,
     firewall_status,
     fleet,
     grafana_integration,
@@ -271,6 +272,14 @@ def register_routes(app: FastAPI):
         tags=["enabled-package-managers"],
     )  # /api/enabled-package-managers/* (with auth)
     logger.info("Enabled Package Managers router added")
+
+    logger.info("Adding Firewall Roles router with /api/firewall-roles prefix")
+    app.include_router(
+        firewall_roles.router,
+        prefix="/api/firewall-roles",
+        tags=["firewall-roles"],
+    )  # /api/firewall-roles/* (with auth)
+    logger.info("Firewall Roles router added")
 
     logger.info("=== ALL ROUTES REGISTERED ===")
 

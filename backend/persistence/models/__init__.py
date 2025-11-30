@@ -78,4 +78,10 @@ __all__ = [
     "AuditLog",
     # Default repository models
     "DefaultRepository",
+    # Firewall role models
+    "FirewallRole",
+    "FirewallRoleOpenPort",
+    "HostFirewallRole",
+    # Enabled package manager models
+    "EnabledPackageManager",
 ]

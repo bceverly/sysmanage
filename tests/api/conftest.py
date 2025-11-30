@@ -152,6 +152,9 @@ def test_db():
         software_installation_logs = relationship(
             "SoftwareInstallationLog", back_populates="host"
         )
+        firewall_roles = relationship(
+            "HostFirewallRole", back_populates="host", cascade="all, delete-orphan"
+        )
 
     # Create test version of User model with Integer ID for SQLite compatibility
     class User(TestBase):
@@ -598,6 +601,80 @@ def test_db():
             GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
         )
 
+    # Create test version of FirewallRole model for SQLite compatibility
+    class FirewallRole(TestBase):
+        __tablename__ = "firewall_role"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        name = Column(String(100), nullable=False, unique=True, index=True)
+        created_at = Column(
+            DateTime,
+            nullable=False,
+            default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        )
+        created_by = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+        updated_at = Column(DateTime, nullable=True)
+        updated_by = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+        # Relationships
+        open_ports = relationship(
+            "FirewallRoleOpenPort",
+            back_populates="firewall_role",
+            cascade="all, delete-orphan",
+        )
+        host_assignments = relationship(
+            "HostFirewallRole",
+            back_populates="firewall_role",
+            cascade="all, delete-orphan",
+        )
+
+    # Create test version of FirewallRoleOpenPort model for SQLite compatibility
+    class FirewallRoleOpenPort(TestBase):
+        __tablename__ = "firewall_role_open_port"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        firewall_role_id = Column(
+            GUID(),
+            ForeignKey("firewall_role.id", ondelete="CASCADE"),
+            nullable=False,
+            index=True,
+        )
+        port_number = Column(Integer, nullable=False, index=True)
+        tcp = Column(Boolean, nullable=False, default=True)
+        udp = Column(Boolean, nullable=False, default=False)
+        ipv4 = Column(Boolean, nullable=False, default=True)
+        ipv6 = Column(Boolean, nullable=False, default=True)
+        firewall_role = relationship("FirewallRole", back_populates="open_ports")
+
+    # Create test version of HostFirewallRole model for SQLite compatibility
+    class HostFirewallRole(TestBase):
+        __tablename__ = "host_firewall_role"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        host_id = Column(
+            GUID(),
+            ForeignKey("host.id", ondelete="CASCADE"),
+            nullable=False,
+            index=True,
+        )
+        firewall_role_id = Column(
+            GUID(),
+            ForeignKey("firewall_role.id", ondelete="CASCADE"),
+            nullable=False,
+            index=True,
+        )
+        created_at = Column(
+            DateTime,
+            nullable=False,
+            default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        )
+        created_by = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+        # Relationships
+        host = relationship("Host", back_populates="firewall_roles")
+        firewall_role = relationship("FirewallRole", back_populates="host_assignments")
+
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)
 
@@ -928,6 +1005,31 @@ def test_db():
                 "View enabled package managers in the system",
                 "00000000-0000-0000-0000-000000000010",
             ),
+            # Settings group - Firewall Roles
+            (
+                "10000000-0000-0000-0000-000000000070",
+                "Add Firewall Role",
+                "Add firewall roles to the system",
+                "00000000-0000-0000-0000-000000000010",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000071",
+                "Edit Firewall Role",
+                "Edit firewall roles in the system",
+                "00000000-0000-0000-0000-000000000010",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000072",
+                "Delete Firewall Role",
+                "Delete firewall roles from the system",
+                "00000000-0000-0000-0000-000000000010",
+            ),
+            (
+                "10000000-0000-0000-0000-000000000073",
+                "View Firewall Roles",
+                "View firewall roles in the system",
+                "00000000-0000-0000-0000-000000000010",
+            ),
         ]
 
         for role_id, name, description, group_id in roles_data:
@@ -966,6 +1068,8 @@ def test_db():
     original_software_installation_log = models.SoftwareInstallationLog
     original_audit_log = models.AuditLog
     original_enabled_package_manager = models.EnabledPackageManager
+    original_firewall_role = models.FirewallRole
+    original_firewall_role_open_port = models.FirewallRoleOpenPort
     models.Host = Host
     models.User = User
     models.SecurityRoleGroup = SecurityRoleGroup
@@ -983,6 +1087,9 @@ def test_db():
     models.SoftwareInstallationLog = SoftwareInstallationLog
     models.AuditLog = AuditLog
     models.EnabledPackageManager = EnabledPackageManager
+    models.FirewallRole = FirewallRole
+    models.FirewallRoleOpenPort = FirewallRoleOpenPort
+    models.HostFirewallRole = HostFirewallRole
 
     # Override the get_engine dependency
     def override_get_engine():
@@ -1030,6 +1137,8 @@ def test_db():
     models.SoftwareInstallationLog = original_software_installation_log
     models.AuditLog = original_audit_log
     models.EnabledPackageManager = original_enabled_package_manager
+    models.FirewallRole = original_firewall_role
+    models.FirewallRoleOpenPort = original_firewall_role_open_port
 
     # Clean up database connections
     test_engine.dispose()  # Close all connections in the connection pool
