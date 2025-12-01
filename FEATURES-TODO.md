@@ -8,17 +8,13 @@ like to add:
     sends linearly with the number of
     registered agents.
 
-2.  User Management - Ability to manage
-    add/edit/delete users and groups on
-    the agent hosts.
-
-3.  We need a MFA mechanism using an
+2.  We need a MFA mechanism using an
     authenticator app on someone's
     mobile device as well as the ability
     to send a code via email to their
     registered email address.
 
-4.  Have the agent and the server log
+3.  Have the agent and the server log
     their messages to the operating
     system appropriate location but
     fall back to the local logs dir-
@@ -31,7 +27,7 @@ like to add:
     sysmanage-agent subdirectory in
     which the logs should be placed.
 
-5.  Add an automation tab between
+4.  Add an automation tab between
     updates and scripts in the main
     navbar.  on that tab, have an
     "Updates" subtab that allows you
@@ -66,7 +62,7 @@ like to add:
     string externalization /
     translation.
 
-6.  A cool AI integration would be
+5.  A cool AI integration would be
     to have the system pull back
     a diagnostics report from a
     remote agent and do a health
@@ -77,7 +73,7 @@ like to add:
     with the opportunity to have
     sysmanage fix the issues.
 
-7.  Add the ability to deploy
+6.  Add the ability to deploy
     a Graylog server as well as
     a Grafana server, given a
     host that it should be
@@ -85,11 +81,11 @@ like to add:
     same with database servers
     of various ilks as well?
 
-8.  Based on server roles that
+7.  Based on server roles that
     we detect, recommend firewall
     configuration for that host.
 
-9.  Add support for WSL, hypervisors
+8.  Add support for WSL, hypervisors
     so that an admin can kick off
     the creation / automatic regist-
     ration of virtual machines from
