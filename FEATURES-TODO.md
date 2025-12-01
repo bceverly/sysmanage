@@ -90,3 +90,6 @@ like to add:
     the creation / automatic regist-
     ration of virtual machines from
     the sysmanage ui.
+
+9.  Add the ability to delete users
+    and groups from the remote agent.

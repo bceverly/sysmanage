@@ -34,7 +34,7 @@ jobs:
           - 5432:5432
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python 3.12
       uses: actions/setup-python@v6
@@ -120,7 +120,7 @@ jobs:
         python-version: ['3.12']
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v6
@@ -281,7 +281,7 @@ jobs:
         node-version: ['20']
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v6
@@ -345,7 +345,7 @@ jobs:
         node-version: ['20']
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v6
@@ -679,7 +679,7 @@ jobs:
     if: always()
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Download all performance results
       uses: actions/download-artifact@v5
