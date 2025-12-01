@@ -89,30 +89,7 @@ like to add:
     we detect, recommend firewall
     configuration for that host.
 
-9.  Have a "Firewall Configuration"
-    page on settings that allow
-    the user to create a set of
-    named configurations that
-    explicitly enable or disable
-    inbound or outbound ports
-    generically for any firewall
-    and save it under a name.
-    The user can then turn around
-    and use that named config
-    to deploy rulesets to a
-    remote host.  The UI for the
-    deployment should allow the
-    user to deploy one OR MORE
-    of these so that the admin
-    can create things like an
-    ssh allowed config, a data-
-    base config and a web
-    server config and then stack
-    all three of these and
-    associate them with a
-    particular host.
-
-10. Add support for WSL, hypervisors
+9.  Add support for WSL, hypervisors
     so that an admin can kick off
     the creation / automatic regist-
     ration of virtual machines from

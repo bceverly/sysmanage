@@ -15,6 +15,7 @@ from sqlalchemy.orm import sessionmaker
 
 # Import the new router modules
 from backend.api import (
+    host_account_management,
     host_approval,
     host_data_updates,
     host_graylog,
@@ -654,3 +655,4 @@ auth_router.include_router(host_graylog.router, tags=["hosts"])
 auth_router.include_router(host_monitoring.router, tags=["hosts"])
 auth_router.include_router(host_operations.router, tags=["hosts"])
 auth_router.include_router(host_ubuntu_pro.router, tags=["hosts"])
+auth_router.include_router(host_account_management.router, tags=["hosts"])

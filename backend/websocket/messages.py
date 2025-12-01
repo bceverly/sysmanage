@@ -74,6 +74,8 @@ class CommandType(str, Enum):
     REMOVE_FIREWALL_PORTS = "remove_firewall_ports"
     ATTACH_TO_GRAYLOG = "attach_to_graylog"
     ENABLE_PACKAGE_MANAGER = "enable_package_manager"
+    CREATE_HOST_USER = "create_host_user"
+    CREATE_HOST_GROUP = "create_host_group"
 
 
 class Message:

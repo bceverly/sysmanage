@@ -74,6 +74,8 @@ import { SecretResponse } from '../Services/secrets';
 import { doCheckOpenTelemetryEligibility, doDeployOpenTelemetry, doGetOpenTelemetryStatus, doStartOpenTelemetry, doStopOpenTelemetry, doRestartOpenTelemetry, doConnectOpenTelemetryToGrafana, doDisconnectOpenTelemetryFromGrafana, doRemoveOpenTelemetry } from '../Services/opentelemetry';
 import { doCheckGraylogHealth, doGetGraylogAttachment } from '../Services/graylog';
 import ThirdPartyRepositories from './ThirdPartyRepositories';
+import AddHostAccountModal from '../Components/AddHostAccountModal';
+import AddHostGroupModal from '../Components/AddHostGroupModal';
 
 // Certificate interface
 interface Certificate {
@@ -275,6 +277,12 @@ const HostDetail = () => {
     const [canDisableAntivirus, setCanDisableAntivirus] = useState<boolean>(false);
     const [canRemoveAntivirus, setCanRemoveAntivirus] = useState<boolean>(false);
     const [antivirusRefreshTrigger, setAntivirusRefreshTrigger] = useState<number>(0);
+
+    // Host account management states
+    const [canAddHostAccount, setCanAddHostAccount] = useState<boolean>(false);
+    const [canAddHostGroup, setCanAddHostGroup] = useState<boolean>(false);
+    const [addUserModalOpen, setAddUserModalOpen] = useState<boolean>(false);
+    const [addGroupModalOpen, setAddGroupModalOpen] = useState<boolean>(false);
 
     // OpenTelemetry deployment states
     const [canDeployOpenTelemetry, setCanDeployOpenTelemetry] = useState<boolean>(false);  // User has permission to see button
@@ -773,7 +781,7 @@ const HostDetail = () => {
     // Check permissions
     useEffect(() => {
         const checkPermissions = async () => {
-            const [editTags, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro, deployAntivirus, enableAntivirus, disableAntivirus, removeAntivirus] = await Promise.all([
+            const [editTags, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro, deployAntivirus, enableAntivirus, disableAntivirus, removeAntivirus, addHostAccount, addHostGroup] = await Promise.all([
                 hasPermission(SecurityRoles.EDIT_TAGS),
                 hasPermission(SecurityRoles.STOP_HOST_SERVICE),
                 hasPermission(SecurityRoles.START_HOST_SERVICE),
@@ -786,7 +794,9 @@ const HostDetail = () => {
                 hasPermission(SecurityRoles.DEPLOY_ANTIVIRUS),
                 hasPermission(SecurityRoles.ENABLE_ANTIVIRUS),
                 hasPermission(SecurityRoles.DISABLE_ANTIVIRUS),
-                hasPermission(SecurityRoles.REMOVE_ANTIVIRUS)
+                hasPermission(SecurityRoles.REMOVE_ANTIVIRUS),
+                hasPermission(SecurityRoles.ADD_HOST_ACCOUNT),
+                hasPermission(SecurityRoles.ADD_HOST_GROUP)
             ]);
             setCanEditTags(editTags);
             setCanStopService(stopService);
@@ -801,6 +811,8 @@ const HostDetail = () => {
             setCanEnableAntivirus(enableAntivirus);
             setCanDisableAntivirus(disableAntivirus);
             setCanRemoveAntivirus(removeAntivirus);
+            setCanAddHostAccount(addHostAccount);
+            setCanAddHostGroup(addHostGroup);
         };
         checkPermissions();
     }, []);
@@ -1138,6 +1150,32 @@ const HostDetail = () => {
             }
         };
     }, [hostId, ubuntuProInfo?.available, servicesMessage]);
+
+    // Auto-refresh user accounts and groups every 60 seconds
+    useEffect(() => {
+        let interval: ReturnType<typeof window.setInterval> | null = null;
+
+        if (hostId) {
+            interval = window.setInterval(async () => {
+                try {
+                    const [usersData, groupsData] = await Promise.all([
+                        doGetHostUsers(hostId),
+                        doGetHostGroups(hostId),
+                    ]);
+                    setUserAccounts(usersData);
+                    setUserGroups(groupsData);
+                } catch {
+                    // Silently ignore errors during auto-refresh
+                }
+            }, 60000); // 60 seconds
+        }
+
+        return () => {
+            if (interval) {
+                window.clearInterval(interval);
+            }
+        };
+    }, [hostId]);
 
     // Listen for hash changes (browser back/forward)
     useEffect(() => {
@@ -3765,27 +3803,40 @@ const HostDetail = () => {
                                             {t('hosts.updated', 'Updated')}: {formatTimestamp(host.user_access_updated_at)}
                                         </Typography>
                                     </Box>
-                                    <ToggleButtonGroup
-                                        value={userFilter}
-                                        exclusive
-                                        onChange={(_, newFilter) => {
-                                            if (newFilter !== null) {
-                                                setUserFilter(newFilter);
-                                            }
-                                        }}
-                                        size="small"
-                                        sx={{ ml: 2 }}
-                                    >
-                                        <ToggleButton value="regular" aria-label="regular users">
-                                            {t('hostDetail.regularUsers', 'Regular')}
-                                        </ToggleButton>
-                                        <ToggleButton value="system" aria-label="system users">
-                                            {t('hostDetail.systemUsers', 'System')}
-                                        </ToggleButton>
-                                        <ToggleButton value="all" aria-label="all users">
-                                            {t('hostDetail.allUsers', 'All')}
-                                        </ToggleButton>
-                                    </ToggleButtonGroup>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        {canAddHostAccount && host?.is_agent_privileged && (
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                size="small"
+                                                startIcon={<AddIcon />}
+                                                onClick={() => setAddUserModalOpen(true)}
+                                                disabled={!host?.active}
+                                            >
+                                                {t('hostAccount.add', 'Add')}
+                                            </Button>
+                                        )}
+                                        <ToggleButtonGroup
+                                            value={userFilter}
+                                            exclusive
+                                            onChange={(_, newFilter) => {
+                                                if (newFilter !== null) {
+                                                    setUserFilter(newFilter);
+                                                }
+                                            }}
+                                            size="small"
+                                        >
+                                            <ToggleButton value="regular" aria-label="regular users">
+                                                {t('hostDetail.regularUsers', 'Regular')}
+                                            </ToggleButton>
+                                            <ToggleButton value="system" aria-label="system users">
+                                                {t('hostDetail.systemUsers', 'System')}
+                                            </ToggleButton>
+                                            <ToggleButton value="all" aria-label="all users">
+                                                {t('hostDetail.allUsers', 'All')}
+                                            </ToggleButton>
+                                        </ToggleButtonGroup>
+                                    </Box>
                                 </Box>
                                 {filteredUsers.length === 0 ? (
                                     <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 2 }}>
@@ -3919,27 +3970,40 @@ const HostDetail = () => {
                                             {t('hosts.updated', 'Updated')}: {formatTimestamp(host.user_access_updated_at)}
                                         </Typography>
                                     </Box>
-                                    <ToggleButtonGroup
-                                        value={groupFilter}
-                                        exclusive
-                                        onChange={(_, newFilter) => {
-                                            if (newFilter !== null) {
-                                                setGroupFilter(newFilter);
-                                            }
-                                        }}
-                                        size="small"
-                                        sx={{ ml: 2 }}
-                                    >
-                                        <ToggleButton value="regular" aria-label="regular groups">
-                                            {t('hostDetail.regularGroups', 'Regular')}
-                                        </ToggleButton>
-                                        <ToggleButton value="system" aria-label="system groups">
-                                            {t('hostDetail.systemGroups', 'System')}
-                                        </ToggleButton>
-                                        <ToggleButton value="all" aria-label="all groups">
-                                            {t('hostDetail.allGroups', 'All')}
-                                        </ToggleButton>
-                                    </ToggleButtonGroup>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        {canAddHostGroup && host?.is_agent_privileged && (
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                size="small"
+                                                startIcon={<AddIcon />}
+                                                onClick={() => setAddGroupModalOpen(true)}
+                                                disabled={!host?.active}
+                                            >
+                                                {t('hostGroup.add', 'Add')}
+                                            </Button>
+                                        )}
+                                        <ToggleButtonGroup
+                                            value={groupFilter}
+                                            exclusive
+                                            onChange={(_, newFilter) => {
+                                                if (newFilter !== null) {
+                                                    setGroupFilter(newFilter);
+                                                }
+                                            }}
+                                            size="small"
+                                        >
+                                            <ToggleButton value="regular" aria-label="regular groups">
+                                                {t('hostDetail.regularGroups', 'Regular')}
+                                            </ToggleButton>
+                                            <ToggleButton value="system" aria-label="system groups">
+                                                {t('hostDetail.systemGroups', 'System')}
+                                            </ToggleButton>
+                                            <ToggleButton value="all" aria-label="all groups">
+                                                {t('hostDetail.allGroups', 'All')}
+                                            </ToggleButton>
+                                        </ToggleButtonGroup>
+                                    </Box>
                                 </Box>
                                 {filteredGroups.length === 0 ? (
                                     <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 2 }}>
@@ -5793,6 +5857,34 @@ const HostDetail = () => {
                 onClose={handleGraylogAttachModalClose}
                 hostId={hostId || ''}
                 hostPlatform={host?.os || ''}
+            />
+
+            {/* Add Host Account Modal */}
+            <AddHostAccountModal
+                open={addUserModalOpen}
+                onClose={() => setAddUserModalOpen(false)}
+                hostId={hostId || ''}
+                hostPlatform={host?.platform || ''}
+                onSuccess={() => {
+                    // Refresh user accounts after successful creation
+                    if (hostId) {
+                        doGetHostUsers(hostId).then(setUserAccounts).catch(console.error);
+                    }
+                }}
+            />
+
+            {/* Add Host Group Modal */}
+            <AddHostGroupModal
+                open={addGroupModalOpen}
+                onClose={() => setAddGroupModalOpen(false)}
+                hostId={hostId || ''}
+                hostPlatform={host?.platform || ''}
+                onSuccess={() => {
+                    // Refresh groups after successful creation
+                    if (hostId) {
+                        doGetHostGroups(hostId).then(setUserGroups).catch(console.error);
+                    }
+                }}
             />
         </Box>
     );

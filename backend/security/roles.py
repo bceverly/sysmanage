@@ -145,6 +145,16 @@ class SecurityRoles(str, Enum):
     VIEW_FIREWALL_ROLES = "View Firewall Roles"
     ASSIGN_HOST_FIREWALL_ROLES = "Assign Host Firewall Roles"
 
+    # Host Account Management Roles
+    # - Host Account (User) Operations (alphabetical)
+    ADD_HOST_ACCOUNT = "Add Host Account"
+    DELETE_HOST_ACCOUNT = "Delete Host Account"
+    EDIT_HOST_ACCOUNT = "Edit Host Account"
+    # - Host Group Operations (alphabetical)
+    ADD_HOST_GROUP = "Add Host Group"
+    DELETE_HOST_GROUP = "Delete Host Group"
+    EDIT_HOST_GROUP = "Edit Host Group"
+
 
 class UserRoleCache:
     """
