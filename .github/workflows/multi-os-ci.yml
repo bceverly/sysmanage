@@ -336,6 +336,7 @@ jobs:
     name: UI & Performance Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     needs: [test-frontend]
+    timeout-minutes: 30
 
     strategy:
       fail-fast: false
@@ -375,7 +376,7 @@ jobs:
           pip install -r requirements.txt
         fi
 
-        pip install pytest pytest-asyncio
+        pip install pytest pytest-asyncio pytest-timeout
       shell: bash
 
     - name: Install Playwright browsers
@@ -581,13 +582,13 @@ jobs:
     - name: Run UI tests with performance metrics
       run: |
         echo "🎭 Running UI tests with performance metrics collection..."
-        if [ "${{ runner.os }}" == "Darwin" ]; then
+        if [ "${{ runner.os }}" == "macOS" ]; then
           echo "🍎 macOS detected - testing Chrome, Firefox, and WebKit/Safari"
         else
           echo "🐧 ${{ runner.os }} detected - testing Chrome and Firefox"
         fi
 
-        PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_login_cross_browser.py tests/ui/test_hosts_playwright.py tests/ui/test_updates_playwright.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short
+        PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_login_cross_browser.py tests/ui/test_hosts_playwright.py tests/ui/test_updates_playwright.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short --timeout=120
       shell: bash
       env:
         PYTHONPATH: .
@@ -596,7 +597,7 @@ jobs:
       if: runner.os != 'Windows'
       run: |
         echo "🚀 Running performance tests..."
-        PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short
+        PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short --timeout=180
       shell: bash
       env:
         PYTHONPATH: .
