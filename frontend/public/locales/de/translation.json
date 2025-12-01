@@ -1402,7 +1402,13 @@
     "username": "Benutzername",
     "usernameHelp": "Buchstaben, Zahlen, Unterstriche und Bindestriche erlaubt",
     "usernameRequired": "Benutzername ist erforderlich",
-    "windowsDescription": "Erstellen Sie ein neues lokales Benutzerkonto auf diesem Windows-Host."
+    "windowsDescription": "Erstellen Sie ein neues lokales Benutzerkonto auf diesem Windows-Host.",
+    "deleteUser": "Benutzer löschen",
+    "confirmDeleteTitle": "Benutzerkonto löschen",
+    "confirmDelete": "Sind Sie sicher, dass Sie das Benutzerkonto \"{{username}}\" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteSuccess": "Löschung des Benutzerkontos angefordert. Die Benutzerliste wird automatisch aktualisiert.",
+    "deleteFailed": "Fehler beim Löschen des Benutzerkontos",
+    "deleteDefaultGroup": "Auch die Standardgruppe des Benutzers löschen (falls vorhanden und mit gleichem Namen)"
   },
   "hostGroup": {
     "add": "Hinzufügen",
@@ -1420,6 +1426,11 @@
     "invalidGroupName": "Gruppenname muss mit einem Buchstaben beginnen und darf nur Buchstaben, Zahlen, Unterstriche und Bindestriche enthalten",
     "notImplemented": "Gruppenerstellung ist noch nicht implementiert. Backend-API kommt bald.",
     "unixDescription": "Erstellen Sie eine neue Gruppe auf diesem Host.",
-    "windowsDescription": "Erstellen Sie eine neue lokale Gruppe auf diesem Windows-Host."
+    "windowsDescription": "Erstellen Sie eine neue lokale Gruppe auf diesem Windows-Host.",
+    "deleteGroup": "Gruppe löschen",
+    "confirmDeleteTitle": "Gruppe löschen",
+    "confirmDelete": "Sind Sie sicher, dass Sie die Gruppe \"{{groupName}}\" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteSuccess": "Löschung der Gruppe angefordert. Die Gruppenliste wird automatisch aktualisiert.",
+    "deleteFailed": "Fehler beim Löschen der Gruppe"
   }
 }

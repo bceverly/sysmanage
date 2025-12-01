@@ -1400,7 +1400,13 @@
     "username": "Nom d'utilisateur",
     "usernameHelp": "Lettres, chiffres, tirets bas et tirets autorisés",
     "usernameRequired": "Le nom d'utilisateur est requis",
-    "windowsDescription": "Créer un nouveau compte utilisateur local sur cet hôte Windows."
+    "windowsDescription": "Créer un nouveau compte utilisateur local sur cet hôte Windows.",
+    "deleteUser": "Supprimer l'utilisateur",
+    "confirmDeleteTitle": "Supprimer le compte utilisateur",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer le compte utilisateur \"{{username}}\" ? Cette action est irréversible.",
+    "deleteSuccess": "Suppression du compte utilisateur demandée. La liste des utilisateurs sera mise à jour automatiquement.",
+    "deleteFailed": "Échec de la suppression du compte utilisateur",
+    "deleteDefaultGroup": "Supprimer également le groupe par défaut de l'utilisateur (s'il existe et porte le même nom)"
   },
   "hostGroup": {
     "add": "Ajouter",
@@ -1418,6 +1424,11 @@
     "invalidGroupName": "Le nom du groupe doit commencer par une lettre et contenir uniquement des lettres, des chiffres, des tirets bas et des tirets",
     "notImplemented": "La création de groupe n'est pas encore implémentée. API backend à venir.",
     "unixDescription": "Créer un nouveau groupe sur cet hôte.",
-    "windowsDescription": "Créer un nouveau groupe local sur cet hôte Windows."
+    "windowsDescription": "Créer un nouveau groupe local sur cet hôte Windows.",
+    "deleteGroup": "Supprimer le groupe",
+    "confirmDeleteTitle": "Supprimer le groupe",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer le groupe \"{{groupName}}\" ? Cette action est irréversible.",
+    "deleteSuccess": "Suppression du groupe demandée. La liste des groupes sera mise à jour automatiquement.",
+    "deleteFailed": "Échec de la suppression du groupe"
   }
 }

@@ -1506,7 +1506,13 @@
     "username": "ユーザー名",
     "usernameHelp": "文字、数字、アンダースコア、ハイフンが使用可能",
     "usernameRequired": "ユーザー名は必須です",
-    "windowsDescription": "このWindowsホストに新しいローカルユーザーアカウントを作成します。"
+    "windowsDescription": "このWindowsホストに新しいローカルユーザーアカウントを作成します。",
+    "deleteUser": "ユーザーを削除",
+    "confirmDeleteTitle": "ユーザーアカウントの削除",
+    "confirmDelete": "ユーザーアカウント「{{username}}」を削除してもよろしいですか？この操作は元に戻せません。",
+    "deleteSuccess": "ユーザーアカウントの削除をリクエストしました。ユーザーリストは自動的に更新されます。",
+    "deleteFailed": "ユーザーアカウントの削除に失敗しました",
+    "deleteDefaultGroup": "ユーザーのデフォルトグループも削除する（存在し、同じ名前の場合）"
   },
   "hostGroup": {
     "add": "追加",
@@ -1524,6 +1530,11 @@
     "invalidGroupName": "グループ名は文字で始まり、文字、数字、アンダースコア、ハイフンのみを含む必要があります",
     "notImplemented": "グループ作成はまだ実装されていません。バックエンドAPIは近日公開予定です。",
     "unixDescription": "このホストに新しいグループを作成します。",
-    "windowsDescription": "このWindowsホストに新しいローカルグループを作成します。"
+    "windowsDescription": "このWindowsホストに新しいローカルグループを作成します。",
+    "deleteGroup": "グループを削除",
+    "confirmDeleteTitle": "グループの削除",
+    "confirmDelete": "グループ「{{groupName}}」を削除してもよろしいですか？この操作は元に戻せません。",
+    "deleteSuccess": "グループの削除をリクエストしました。グループリストは自動的に更新されます。",
+    "deleteFailed": "グループの削除に失敗しました"
   }
 }

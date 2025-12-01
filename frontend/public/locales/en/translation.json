@@ -1604,7 +1604,13 @@
     "username": "Username",
     "usernameHelp": "Letters, numbers, underscores, and dashes allowed",
     "usernameRequired": "Username is required",
-    "windowsDescription": "Create a new local user account on this Windows host."
+    "windowsDescription": "Create a new local user account on this Windows host.",
+    "deleteUser": "Delete User",
+    "confirmDeleteTitle": "Delete User Account",
+    "confirmDelete": "Are you sure you want to delete the user account \"{{username}}\"? This action cannot be undone.",
+    "deleteDefaultGroup": "Also delete the user's default group (if it exists and has the same name)",
+    "deleteSuccess": "User account deletion requested. The user list will update automatically.",
+    "deleteFailed": "Failed to delete user account"
   },
   "hostGroup": {
     "add": "Add",
@@ -1622,6 +1628,11 @@
     "invalidGroupName": "Group name must start with a letter and contain only letters, numbers, underscores, and dashes",
     "notImplemented": "Group creation is not yet implemented. Backend API coming soon.",
     "unixDescription": "Create a new group on this host.",
-    "windowsDescription": "Create a new local group on this Windows host."
+    "windowsDescription": "Create a new local group on this Windows host.",
+    "deleteGroup": "Delete Group",
+    "confirmDeleteTitle": "Delete Group",
+    "confirmDelete": "Are you sure you want to delete the group \"{{groupName}}\"? This action cannot be undone.",
+    "deleteSuccess": "Group deletion requested. The group list will update automatically.",
+    "deleteFailed": "Failed to delete group"
   }
 }

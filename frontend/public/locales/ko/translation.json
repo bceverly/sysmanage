@@ -1503,7 +1503,13 @@
     "username": "사용자 이름",
     "usernameHelp": "문자, 숫자, 밑줄, 대시 허용",
     "usernameRequired": "사용자 이름이 필요합니다",
-    "windowsDescription": "이 Windows 호스트에 새 로컬 사용자 계정을 만듭니다."
+    "windowsDescription": "이 Windows 호스트에 새 로컬 사용자 계정을 만듭니다.",
+    "deleteUser": "사용자 삭제",
+    "confirmDeleteTitle": "사용자 계정 삭제",
+    "confirmDelete": "\"{{username}}\" 사용자 계정을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
+    "deleteSuccess": "사용자 계정 삭제가 요청되었습니다. 사용자 목록이 자동으로 업데이트됩니다.",
+    "deleteFailed": "사용자 계정 삭제 실패",
+    "deleteDefaultGroup": "사용자의 기본 그룹도 삭제 (존재하고 같은 이름인 경우)"
   },
   "hostGroup": {
     "add": "추가",
@@ -1521,6 +1527,11 @@
     "invalidGroupName": "그룹 이름은 문자로 시작해야 하며 문자, 숫자, 밑줄, 대시만 포함해야 합니다",
     "notImplemented": "그룹 생성은 아직 구현되지 않았습니다. 백엔드 API가 곧 제공됩니다.",
     "unixDescription": "이 호스트에 새 그룹을 만듭니다.",
-    "windowsDescription": "이 Windows 호스트에 새 로컬 그룹을 만듭니다."
+    "windowsDescription": "이 Windows 호스트에 새 로컬 그룹을 만듭니다.",
+    "deleteGroup": "그룹 삭제",
+    "confirmDeleteTitle": "그룹 삭제",
+    "confirmDelete": "\"{{groupName}}\" 그룹을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
+    "deleteSuccess": "그룹 삭제가 요청되었습니다. 그룹 목록이 자동으로 업데이트됩니다.",
+    "deleteFailed": "그룹 삭제 실패"
   }
 }

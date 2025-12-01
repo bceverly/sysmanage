@@ -76,6 +76,9 @@ class CommandType(str, Enum):
     ENABLE_PACKAGE_MANAGER = "enable_package_manager"
     CREATE_HOST_USER = "create_host_user"
     CREATE_HOST_GROUP = "create_host_group"
+    DELETE_HOST_USER = "delete_host_user"
+    DELETE_HOST_GROUP = "delete_host_group"
+    REFRESH_USER_ACCESS = "refresh_user_access"
 
 
 class Message:

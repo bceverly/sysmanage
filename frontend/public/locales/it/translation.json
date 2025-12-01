@@ -1381,7 +1381,13 @@
     "username": "Nome utente",
     "usernameHelp": "Sono consentiti lettere, numeri, trattini bassi e trattini",
     "usernameRequired": "Il nome utente è richiesto",
-    "windowsDescription": "Crea un nuovo account utente locale su questo host Windows."
+    "windowsDescription": "Crea un nuovo account utente locale su questo host Windows.",
+    "deleteUser": "Elimina utente",
+    "confirmDeleteTitle": "Elimina account utente",
+    "confirmDelete": "Sei sicuro di voler eliminare l'account utente \"{{username}}\"? Questa azione non può essere annullata.",
+    "deleteSuccess": "Eliminazione account utente richiesta. L'elenco utenti verrà aggiornato automaticamente.",
+    "deleteFailed": "Impossibile eliminare l'account utente",
+    "deleteDefaultGroup": "Elimina anche il gruppo predefinito dell'utente (se esiste e ha lo stesso nome)"
   },
   "hostGroup": {
     "add": "Aggiungi",
@@ -1399,6 +1405,11 @@
     "invalidGroupName": "Il nome del gruppo deve iniziare con una lettera e contenere solo lettere, numeri, trattini bassi e trattini",
     "notImplemented": "La creazione del gruppo non è ancora implementata. API backend in arrivo.",
     "unixDescription": "Crea un nuovo gruppo su questo host.",
-    "windowsDescription": "Crea un nuovo gruppo locale su questo host Windows."
+    "windowsDescription": "Crea un nuovo gruppo locale su questo host Windows.",
+    "deleteGroup": "Elimina gruppo",
+    "confirmDeleteTitle": "Elimina gruppo",
+    "confirmDelete": "Sei sicuro di voler eliminare il gruppo \"{{groupName}}\"? Questa azione non può essere annullata.",
+    "deleteSuccess": "Eliminazione gruppo richiesta. L'elenco gruppi verrà aggiornato automaticamente.",
+    "deleteFailed": "Impossibile eliminare il gruppo"
   }
 }

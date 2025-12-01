@@ -116,16 +116,26 @@ async def test_hosts_grid_renders(
             '[class*="hosts-table"]',
         ]
 
+        # Retry logic for grid detection (helps with slower CI environments)
         grid_found = False
         grid_element = None
-        for selector in grid_selectors:
-            locator = page.locator(selector)
-            if await locator.count() > 0:
-                grid_element = locator.first
-                if await grid_element.is_visible():
-                    grid_found = True
-                    print(f"  [OK] Found grid/table with selector: {selector}")
-                    break
+        max_retries = 3
+        for attempt in range(max_retries):
+            for selector in grid_selectors:
+                locator = page.locator(selector)
+                if await locator.count() > 0:
+                    grid_element = locator.first
+                    if await grid_element.is_visible():
+                        grid_found = True
+                        print(f"  [OK] Found grid/table with selector: {selector}")
+                        break
+            if grid_found:
+                break
+            if attempt < max_retries - 1:
+                print(
+                    f"  [RETRY] Grid not found, waiting 2 more seconds (attempt {attempt + 1}/{max_retries})"
+                )
+                await page.wait_for_timeout(2000)
 
         assert (
             grid_found

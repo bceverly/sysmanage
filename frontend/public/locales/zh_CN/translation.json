@@ -1504,7 +1504,13 @@
     "username": "用户名",
     "usernameHelp": "允许字母、数字、下划线和破折号",
     "usernameRequired": "需要用户名",
-    "windowsDescription": "在此Windows主机上创建新的本地用户账户。"
+    "windowsDescription": "在此Windows主机上创建新的本地用户账户。",
+    "deleteUser": "删除用户",
+    "confirmDeleteTitle": "删除用户账户",
+    "confirmDelete": "您确定要删除用户账户 \"{{username}}\" 吗？此操作无法撤消。",
+    "deleteSuccess": "已请求删除用户账户。用户列表将自动更新。",
+    "deleteFailed": "删除用户账户失败",
+    "deleteDefaultGroup": "同时删除用户的默认组（如果存在且同名）"
   },
   "hostGroup": {
     "add": "添加",
@@ -1522,6 +1528,11 @@
     "invalidGroupName": "组名必须以字母开头，只能包含字母、数字、下划线和破折号",
     "notImplemented": "组创建尚未实现。后端API即将推出。",
     "unixDescription": "在此主机上创建新组。",
-    "windowsDescription": "在此Windows主机上创建新的本地组。"
+    "windowsDescription": "在此Windows主机上创建新的本地组。",
+    "deleteGroup": "删除组",
+    "confirmDeleteTitle": "删除组",
+    "confirmDelete": "您确定要删除组 \"{{groupName}}\" 吗？此操作无法撤消。",
+    "deleteSuccess": "已请求删除组。组列表将自动更新。",
+    "deleteFailed": "删除组失败"
   }
 }

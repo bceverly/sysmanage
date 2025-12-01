@@ -1366,7 +1366,13 @@
     "username": "Gebruikersnaam",
     "usernameHelp": "Letters, cijfers, underscores en streepjes toegestaan",
     "usernameRequired": "Gebruikersnaam is vereist",
-    "windowsDescription": "Maak een nieuw lokaal gebruikersaccount aan op deze Windows-host."
+    "windowsDescription": "Maak een nieuw lokaal gebruikersaccount aan op deze Windows-host.",
+    "deleteUser": "Gebruiker verwijderen",
+    "confirmDeleteTitle": "Gebruikersaccount verwijderen",
+    "confirmDelete": "Weet u zeker dat u het gebruikersaccount \"{{username}}\" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+    "deleteSuccess": "Verwijdering van gebruikersaccount aangevraagd. De gebruikerslijst wordt automatisch bijgewerkt.",
+    "deleteFailed": "Kan gebruikersaccount niet verwijderen",
+    "deleteDefaultGroup": "Ook de standaardgroep van de gebruiker verwijderen (indien aanwezig en dezelfde naam)"
   },
   "hostGroup": {
     "add": "Toevoegen",
@@ -1384,6 +1390,11 @@
     "invalidGroupName": "Groepsnaam moet beginnen met een letter en mag alleen letters, cijfers, underscores en streepjes bevatten",
     "notImplemented": "Groep aanmaken is nog niet geïmplementeerd. Backend API komt binnenkort.",
     "unixDescription": "Maak een nieuwe groep aan op deze host.",
-    "windowsDescription": "Maak een nieuwe lokale groep aan op deze Windows-host."
+    "windowsDescription": "Maak een nieuwe lokale groep aan op deze Windows-host.",
+    "deleteGroup": "Groep verwijderen",
+    "confirmDeleteTitle": "Groep verwijderen",
+    "confirmDelete": "Weet u zeker dat u de groep \"{{groupName}}\" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+    "deleteSuccess": "Verwijdering van groep aangevraagd. De groepslijst wordt automatisch bijgewerkt.",
+    "deleteFailed": "Kan groep niet verwijderen"
   }
 }

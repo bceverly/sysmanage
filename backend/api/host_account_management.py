@@ -291,3 +291,226 @@ async def create_host_group(
                 "The group list will update automatically after creation."
             ),
         }
+
+
+@router.delete(
+    "/host/{host_id}/accounts/{username}", dependencies=[Depends(JWTBearer())]
+)
+async def delete_host_user(
+    host_id: str,
+    username: str,
+    delete_default_group: bool = True,
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Delete a user account from a remote host.
+    Requires DELETE_HOST_ACCOUNT permission and the host agent must be running
+    in privileged mode.
+    """
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Get user for permission check and audit logging
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        # Load role cache if not already loaded
+        if user._role_cache is None:
+            user.load_role_cache(session)
+
+        # Check for DELETE_HOST_ACCOUNT role
+        if not user.has_role(SecurityRoles.DELETE_HOST_ACCOUNT):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: DELETE_HOST_ACCOUNT role required"),
+            )
+
+        # Find the host
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+        if not host:
+            raise HTTPException(status_code=404, detail=_("Host not found"))
+
+        # Verify host is active
+        if not host.active:
+            raise HTTPException(
+                status_code=400,
+                detail=_("Host is not active"),
+            )
+
+        # Verify agent is running in privileged mode
+        if not host.is_agent_privileged:
+            raise HTTPException(
+                status_code=400,
+                detail=_(
+                    "Agent must be running in privileged mode to delete user accounts"
+                ),
+            )
+
+        # Build parameters for the command
+        parameters = {
+            "username": username,
+            "delete_default_group": delete_default_group,
+        }
+
+        # Create command message
+        command_message = create_command_message(
+            command_type="delete_host_user", parameters=parameters
+        )
+
+        # Queue the message for delivery to the agent
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+
+        # Audit log the user deletion request
+        from backend.services.audit_service import (
+            ActionType,
+            AuditService,
+            EntityType,
+            Result,
+        )
+
+        AuditService.log(
+            db=session,
+            user_id=user.id,
+            username=current_user,
+            action_type=ActionType.DELETE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            description=(
+                f"Requested user account deletion for '{username}' "
+                f"on host {host.fqdn}"
+            ),
+            result=Result.SUCCESS,
+        )
+
+        session.commit()
+
+        return {
+            "result": True,
+            "message": _(
+                "User account deletion requested. "
+                "The user list will update automatically after deletion."
+            ),
+        }
+
+
+@router.delete(
+    "/host/{host_id}/groups/{group_name}", dependencies=[Depends(JWTBearer())]
+)
+async def delete_host_group(
+    host_id: str,
+    group_name: str,
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Delete a group from a remote host.
+    Requires DELETE_HOST_GROUP permission and the host agent must be running
+    in privileged mode.
+    """
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Get user for permission check and audit logging
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+
+        # Load role cache if not already loaded
+        if user._role_cache is None:
+            user.load_role_cache(session)
+
+        # Check for DELETE_HOST_GROUP role
+        if not user.has_role(SecurityRoles.DELETE_HOST_GROUP):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: DELETE_HOST_GROUP role required"),
+            )
+
+        # Find the host
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+        if not host:
+            raise HTTPException(status_code=404, detail=_("Host not found"))
+
+        # Verify host is active
+        if not host.active:
+            raise HTTPException(
+                status_code=400,
+                detail=_("Host is not active"),
+            )
+
+        # Verify agent is running in privileged mode
+        if not host.is_agent_privileged:
+            raise HTTPException(
+                status_code=400,
+                detail=_("Agent must be running in privileged mode to delete groups"),
+            )
+
+        # Build parameters for the command
+        parameters = {
+            "group_name": group_name,
+        }
+
+        # Create command message
+        command_message = create_command_message(
+            command_type="delete_host_group", parameters=parameters
+        )
+
+        # Queue the message for delivery to the agent
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+
+        # Audit log the group deletion request
+        from backend.services.audit_service import (
+            ActionType,
+            AuditService,
+            EntityType,
+            Result,
+        )
+
+        AuditService.log(
+            db=session,
+            user_id=user.id,
+            username=current_user,
+            action_type=ActionType.DELETE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            description=(
+                f"Requested group deletion for '{group_name}' " f"on host {host.fqdn}"
+            ),
+            result=Result.SUCCESS,
+        )
+
+        session.commit()
+
+        return {
+            "result": True,
+            "message": _(
+                "Group deletion requested. "
+                "The group list will update automatically after deletion."
+            ),
+        }

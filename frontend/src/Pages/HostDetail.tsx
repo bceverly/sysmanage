@@ -281,8 +281,17 @@ const HostDetail = () => {
     // Host account management states
     const [canAddHostAccount, setCanAddHostAccount] = useState<boolean>(false);
     const [canAddHostGroup, setCanAddHostGroup] = useState<boolean>(false);
+    const [canDeleteHostAccount, setCanDeleteHostAccount] = useState<boolean>(false);
+    const [canDeleteHostGroup, setCanDeleteHostGroup] = useState<boolean>(false);
     const [addUserModalOpen, setAddUserModalOpen] = useState<boolean>(false);
     const [addGroupModalOpen, setAddGroupModalOpen] = useState<boolean>(false);
+    const [deleteUserConfirmOpen, setDeleteUserConfirmOpen] = useState<boolean>(false);
+    const [deleteGroupConfirmOpen, setDeleteGroupConfirmOpen] = useState<boolean>(false);
+    const [userToDelete, setUserToDelete] = useState<UserAccount | null>(null);
+    const [groupToDelete, setGroupToDelete] = useState<UserGroup | null>(null);
+    const [deletingUser, setDeletingUser] = useState<boolean>(false);
+    const [deletingGroup, setDeletingGroup] = useState<boolean>(false);
+    const [deleteDefaultGroup, setDeleteDefaultGroup] = useState<boolean>(true);
 
     // OpenTelemetry deployment states
     const [canDeployOpenTelemetry, setCanDeployOpenTelemetry] = useState<boolean>(false);  // User has permission to see button
@@ -781,7 +790,7 @@ const HostDetail = () => {
     // Check permissions
     useEffect(() => {
         const checkPermissions = async () => {
-            const [editTags, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro, deployAntivirus, enableAntivirus, disableAntivirus, removeAntivirus, addHostAccount, addHostGroup] = await Promise.all([
+            const [editTags, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro, deployAntivirus, enableAntivirus, disableAntivirus, removeAntivirus, addHostAccount, addHostGroup, deleteHostAccount, deleteHostGroup] = await Promise.all([
                 hasPermission(SecurityRoles.EDIT_TAGS),
                 hasPermission(SecurityRoles.STOP_HOST_SERVICE),
                 hasPermission(SecurityRoles.START_HOST_SERVICE),
@@ -796,7 +805,9 @@ const HostDetail = () => {
                 hasPermission(SecurityRoles.DISABLE_ANTIVIRUS),
                 hasPermission(SecurityRoles.REMOVE_ANTIVIRUS),
                 hasPermission(SecurityRoles.ADD_HOST_ACCOUNT),
-                hasPermission(SecurityRoles.ADD_HOST_GROUP)
+                hasPermission(SecurityRoles.ADD_HOST_GROUP),
+                hasPermission(SecurityRoles.DELETE_HOST_ACCOUNT),
+                hasPermission(SecurityRoles.DELETE_HOST_GROUP)
             ]);
             setCanEditTags(editTags);
             setCanStopService(stopService);
@@ -813,6 +824,8 @@ const HostDetail = () => {
             setCanRemoveAntivirus(removeAntivirus);
             setCanAddHostAccount(addHostAccount);
             setCanAddHostGroup(addHostGroup);
+            setCanDeleteHostAccount(deleteHostAccount);
+            setCanDeleteHostGroup(deleteHostGroup);
         };
         checkPermissions();
     }, []);
@@ -1308,6 +1321,85 @@ const HostDetail = () => {
         setFilteredSSHKeys([]);
         setSelectedSSHKeys([]);
         setSshKeySearchTerm('');
+    };
+
+    // Delete user account handlers
+    const handleDeleteUserClick = (user: UserAccount) => {
+        setUserToDelete(user);
+        setDeleteDefaultGroup(true);  // Reset to default checked
+        setDeleteUserConfirmOpen(true);
+    };
+
+    const handleDeleteUserConfirm = async () => {
+        if (!userToDelete || !hostId) return;
+
+        setDeletingUser(true);
+        try {
+            await axiosInstance.delete(`/api/host/${hostId}/accounts/${encodeURIComponent(userToDelete.username)}?delete_default_group=${deleteDefaultGroup}`);
+            setSnackbarMessage(t('hostAccount.deleteSuccess', 'User account deletion requested. The user list will update automatically.'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            setDeleteUserConfirmOpen(false);
+            setUserToDelete(null);
+        } catch (error: unknown) {
+            console.error('Failed to delete user:', error);
+            let errorMessage = t('hostAccount.deleteFailed', 'Failed to delete user account');
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { data?: { detail?: string } } };
+                if (axiosError.response?.data?.detail) {
+                    errorMessage = axiosError.response.data.detail;
+                }
+            }
+            setSnackbarMessage(errorMessage);
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setDeletingUser(false);
+        }
+    };
+
+    const handleDeleteUserCancel = () => {
+        setDeleteUserConfirmOpen(false);
+        setUserToDelete(null);
+    };
+
+    // Delete group handlers
+    const handleDeleteGroupClick = (group: UserGroup) => {
+        setGroupToDelete(group);
+        setDeleteGroupConfirmOpen(true);
+    };
+
+    const handleDeleteGroupConfirm = async () => {
+        if (!groupToDelete || !hostId) return;
+
+        setDeletingGroup(true);
+        try {
+            await axiosInstance.delete(`/api/host/${hostId}/groups/${encodeURIComponent(groupToDelete.group_name)}`);
+            setSnackbarMessage(t('hostGroup.deleteSuccess', 'Group deletion requested. The group list will update automatically.'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            setDeleteGroupConfirmOpen(false);
+            setGroupToDelete(null);
+        } catch (error: unknown) {
+            console.error('Failed to delete group:', error);
+            let errorMessage = t('hostGroup.deleteFailed', 'Failed to delete group');
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { data?: { detail?: string } } };
+                if (axiosError.response?.data?.detail) {
+                    errorMessage = axiosError.response.data.detail;
+                }
+            }
+            setSnackbarMessage(errorMessage);
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setDeletingGroup(false);
+        }
+    };
+
+    const handleDeleteGroupCancel = () => {
+        setDeleteGroupConfirmOpen(false);
+        setGroupToDelete(null);
     };
 
     const handleSSHKeySearch = () => {
@@ -3852,18 +3944,32 @@ const HostDetail = () => {
                                                             <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
                                                                 {user.username}
                                                             </Typography>
-                                                            {canDeploySshKey && (
-                                                                <Button
-                                                                    size="small"
-                                                                    variant="outlined"
-                                                                    color="primary"
-                                                                    onClick={() => handleAddSSHKey(user)}
-                                                                    disabled={!host?.active || !host?.is_agent_privileged}
-                                                                    sx={{ minWidth: 'auto', fontSize: '0.7rem', py: 0.25, px: 1 }}
-                                                                >
-                                                                    {t('hostDetail.addSSHKey', 'Add SSH Key')}
-                                                                </Button>
-                                                            )}
+                                                            <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                                {canDeploySshKey && (
+                                                                    <Button
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                        color="primary"
+                                                                        onClick={() => handleAddSSHKey(user)}
+                                                                        disabled={!host?.active || !host?.is_agent_privileged}
+                                                                        sx={{ minWidth: 'auto', fontSize: '0.7rem', py: 0.25, px: 1 }}
+                                                                    >
+                                                                        {t('hostDetail.addSSHKey', 'Add SSH Key')}
+                                                                    </Button>
+                                                                )}
+                                                                {canDeleteHostAccount && host?.is_agent_privileged && !user.is_system_user && (
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        color="error"
+                                                                        onClick={() => handleDeleteUserClick(user)}
+                                                                        disabled={!host?.active}
+                                                                        title={t('hostAccount.deleteUser', 'Delete User')}
+                                                                        sx={{ p: 0.25 }}
+                                                                    >
+                                                                        <DeleteIcon fontSize="small" />
+                                                                    </IconButton>
+                                                                )}
+                                                            </Box>
                                                         </Box>
                                                         <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
                                                             {host?.platform?.toLowerCase().includes('windows') ? 'SID' : 'UID'}: {host?.platform?.toLowerCase().includes('windows') ? (user.security_id || t('common.notAvailable')) : (user.uid !== undefined ? user.uid : t('common.notAvailable'))}
@@ -4015,14 +4121,28 @@ const HostDetail = () => {
                                             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={group.id || index}>
                                                 <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
                                                     <CardContent sx={{ p: 2 }}>
-                                                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                                            {group.group_name}
-                                                        </Typography>
+                                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                                                            <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                                                                {group.group_name}
+                                                            </Typography>
+                                                            {canDeleteHostGroup && host?.is_agent_privileged && !group.is_system_group && (
+                                                                <IconButton
+                                                                    size="small"
+                                                                    color="error"
+                                                                    onClick={() => handleDeleteGroupClick(group)}
+                                                                    disabled={!host?.active}
+                                                                    title={t('hostGroup.deleteGroup', 'Delete Group')}
+                                                                    sx={{ p: 0.25 }}
+                                                                >
+                                                                    <DeleteIcon fontSize="small" />
+                                                                </IconButton>
+                                                            )}
+                                                        </Box>
                                                         <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
                                                             {host?.platform?.toLowerCase().includes('windows') ? 'SID' : 'GID'}: {host?.platform?.toLowerCase().includes('windows') ? (group.security_id || t('common.notAvailable')) : (group.gid !== undefined && group.gid !== null ? group.gid : t('common.notAvailable'))}
                                                         </Typography>
                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, mb: 1 }}>
-                                                            <Chip 
+                                                            <Chip
                                                                 label={group.is_system_group ? t('hostDetail.systemGroup', 'System') : t('hostDetail.regularGroup', 'Regular')}
                                                                 color={group.is_system_group ? 'default' : 'primary'}
                                                                 size="small"
@@ -5886,6 +6006,82 @@ const HostDetail = () => {
                     }
                 }}
             />
+
+            {/* Delete User Confirmation Dialog */}
+            <Dialog
+                open={deleteUserConfirmOpen}
+                onClose={handleDeleteUserCancel}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>
+                    <Typography variant="h6" component="div">
+                        {t('hostAccount.confirmDeleteTitle', 'Delete User Account')}
+                    </Typography>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant="body1" sx={{ mb: 2 }}>
+                        {t('hostAccount.confirmDelete', 'Are you sure you want to delete the user account "{{username}}"? This action cannot be undone.', { username: userToDelete?.username || '' })}
+                    </Typography>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={deleteDefaultGroup}
+                                onChange={(e) => setDeleteDefaultGroup(e.target.checked)}
+                                color="primary"
+                            />
+                        }
+                        label={t('hostAccount.deleteDefaultGroup', 'Also delete the user\'s default group (if it exists and has the same name)')}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteUserCancel} disabled={deletingUser}>
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleDeleteUserConfirm}
+                        disabled={deletingUser}
+                        startIcon={deletingUser ? <CircularProgress size={16} /> : <DeleteIcon />}
+                    >
+                        {t('common.delete', 'Delete')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Delete Group Confirmation Dialog */}
+            <Dialog
+                open={deleteGroupConfirmOpen}
+                onClose={handleDeleteGroupCancel}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>
+                    <Typography variant="h6" component="div">
+                        {t('hostGroup.confirmDeleteTitle', 'Delete Group')}
+                    </Typography>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant="body1">
+                        {t('hostGroup.confirmDelete', 'Are you sure you want to delete the group "{{groupName}}"? This action cannot be undone.', { groupName: groupToDelete?.group_name || '' })}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteGroupCancel} disabled={deletingGroup}>
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleDeleteGroupConfirm}
+                        disabled={deletingGroup}
+                        startIcon={deletingGroup ? <CircularProgress size={16} /> : <DeleteIcon />}
+                    >
+                        {t('common.delete', 'Delete')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };

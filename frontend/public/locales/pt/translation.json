@@ -1381,7 +1381,13 @@
     "username": "Nome de utilizador",
     "usernameHelp": "São permitidos letras, números, sublinhados e hífens",
     "usernameRequired": "O nome de utilizador é obrigatório",
-    "windowsDescription": "Criar uma nova conta de utilizador local neste host Windows."
+    "windowsDescription": "Criar uma nova conta de utilizador local neste host Windows.",
+    "deleteUser": "Excluir usuário",
+    "confirmDeleteTitle": "Excluir conta de usuário",
+    "confirmDelete": "Tem certeza de que deseja excluir a conta de usuário \"{{username}}\"? Esta ação não pode ser desfeita.",
+    "deleteSuccess": "Exclusão de conta de usuário solicitada. A lista de usuários será atualizada automaticamente.",
+    "deleteFailed": "Falha ao excluir conta de usuário",
+    "deleteDefaultGroup": "Também excluir o grupo padrão do usuário (se existir e tiver o mesmo nome)"
   },
   "hostGroup": {
     "add": "Adicionar",
@@ -1399,6 +1405,11 @@
     "invalidGroupName": "O nome do grupo deve começar com uma letra e conter apenas letras, números, sublinhados e hífens",
     "notImplemented": "A criação de grupo ainda não está implementada. API do backend em breve.",
     "unixDescription": "Criar um novo grupo neste host.",
-    "windowsDescription": "Criar um novo grupo local neste host Windows."
+    "windowsDescription": "Criar um novo grupo local neste host Windows.",
+    "deleteGroup": "Excluir grupo",
+    "confirmDeleteTitle": "Excluir grupo",
+    "confirmDelete": "Tem certeza de que deseja excluir o grupo \"{{groupName}}\"? Esta ação não pode ser desfeita.",
+    "deleteSuccess": "Exclusão de grupo solicitada. A lista de grupos será atualizada automaticamente.",
+    "deleteFailed": "Falha ao excluir grupo"
   }
 }
