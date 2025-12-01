@@ -39,7 +39,7 @@ jobs:
           - 5432:5432
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v6
@@ -158,7 +158,7 @@ jobs:
 
     - name: Checkout repository for backend badge update
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
 
@@ -210,7 +210,7 @@ jobs:
       contents: read
     
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python 3.12
       uses: actions/setup-python@v6
@@ -251,7 +251,7 @@ jobs:
       pull-requests: write  # Allow creating pull requests
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Node.js
       uses: actions/setup-node@v6
@@ -371,7 +371,7 @@ jobs:
 
     - name: Checkout repository for frontend badge update
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
 
@@ -457,7 +457,7 @@ jobs:
     needs: [test-frontend]  # Only run after frontend tests pass
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Node.js
       uses: actions/setup-node@v6
@@ -537,7 +537,7 @@ jobs:
           - 5432:5432
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python 3.12
       uses: actions/setup-python@v6
@@ -753,7 +753,7 @@ jobs:
 
     - name: Checkout repository for UI badge update
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
 
@@ -828,7 +828,7 @@ jobs:
           - 5432:5432
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python 3.12
       uses: actions/setup-python@v6
@@ -1172,7 +1172,7 @@ jobs:
 
     - name: Checkout repository for performance badge update
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
 
@@ -1255,7 +1255,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0  # Shallow clones should be disabled for better analysis
 
