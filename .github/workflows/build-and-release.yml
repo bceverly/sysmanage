@@ -1461,8 +1461,9 @@ jobs:
           rm -rf "$WORK_DIR"
           mkdir -p "$WORK_DIR"
 
-          # Copy source to working directory
-          cp -r . "$WORK_DIR/"
+          # Copy source to working directory, excluding node_modules
+          # (node_modules contains minified files that trigger lintian source-is-missing errors)
+          rsync -a --exclude 'node_modules' --exclude '.git' . "$WORK_DIR/"
           cd "$WORK_DIR"
 
           # Copy debian directory
