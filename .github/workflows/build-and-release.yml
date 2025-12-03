@@ -1415,6 +1415,18 @@ jobs:
           echo "Generating requirements-prod.txt from requirements.txt..."
           python3 scripts/update-requirements-prod.py
 
+      - name: Install SBOM generation tools
+        run: |
+          # Install cyclonedx-bom for Python
+          python3 -m pip install cyclonedx-bom
+
+          # Install cyclonedx-npm globally for Node.js
+          sudo npm install -g @cyclonedx/cyclonedx-npm
+
+          # Verify installations
+          python3 -c "import cyclonedx_py; print('cyclonedx-bom installed')"
+          cyclonedx-npm --version
+
       - name: Build frontend
         working-directory: frontend
         run: |
@@ -1423,6 +1435,11 @@ jobs:
 
           echo "Building frontend..."
           npm run build
+
+      - name: Generate SBOM files
+        run: |
+          echo "Generating SBOM files..."
+          make sbom
 
       - name: Build and upload source package
         env:
