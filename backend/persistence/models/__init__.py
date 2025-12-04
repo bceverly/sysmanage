@@ -6,6 +6,7 @@ All models are re-exported here for backward compatibility.
 """
 
 # Re-export all models for backward compatibility
+from .child_host import *
 from .core import *
 from .grafana_integration import *
 from .graylog_attachment import *
@@ -84,4 +85,7 @@ __all__ = [
     "HostFirewallRole",
     # Enabled package manager models
     "EnabledPackageManager",
+    # Child host models
+    "HostChild",
+    "ChildHostDistribution",
 ]

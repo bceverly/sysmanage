@@ -310,6 +310,7 @@ async def request_system_info(host_id: str):
     Request an agent to send updated system information.
     This sends a GET_SYSTEM_INFO command via WebSocket to the agent requesting fresh system data
     including hardware, network, storage, users, groups, software, Ubuntu Pro info, and antivirus status.
+    Also requests virtualization support check for child host capabilities.
     """
     # Get the SQLAlchemy session
     session_local = sessionmaker(
@@ -339,7 +340,21 @@ async def request_system_info(host_id: str):
             db=session,
         )
 
-        # Commit the session to persist the queued message
+        # Also request virtualization support check for child host capabilities
+        # This includes WSL support on Windows, LXD on Linux, etc.
+        virtualization_command = create_command_message(
+            command_type="check_virtualization_support", parameters={}
+        )
+
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=virtualization_command,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+
+        # Commit the session to persist the queued messages
         session.commit()
 
         return {"result": True, "message": _("System info update requested")}

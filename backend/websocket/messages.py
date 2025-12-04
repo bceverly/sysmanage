@@ -16,6 +16,9 @@ class MessageType(str, Enum):
     SYSTEM_INFO = "system_info"
     HEARTBEAT = "heartbeat"
     COMMAND_RESULT = "command_result"
+    COMMAND_ACKNOWLEDGMENT = (
+        "command_acknowledgment"  # Agent confirms receipt of command
+    )
     ERROR = "error"
     OS_VERSION_UPDATE = "os_version_update"
     HARDWARE_UPDATE = "hardware_update"
@@ -37,6 +40,18 @@ class MessageType(str, Enum):
     COMMERCIAL_ANTIVIRUS_STATUS_UPDATE = "commercial_antivirus_status_update"
     FIREWALL_STATUS_UPDATE = "firewall_status_update"
     GRAYLOG_STATUS_UPDATE = "graylog_status_update"
+
+    # Child Host / Virtualization responses
+    VIRTUALIZATION_SUPPORT_UPDATE = "virtualization_support_update"
+    CHILD_HOST_LIST_UPDATE = "child_host_list_update"
+    CHILD_HOST_CREATED = "child_host_created"
+    CHILD_HOST_CREATION_PROGRESS = "child_host_creation_progress"
+    CHILD_HOST_CREATION_FAILED = "child_host_creation_failed"
+    CHILD_HOST_DELETED = "child_host_deleted"
+    CHILD_HOST_STARTED = "child_host_started"
+    CHILD_HOST_STOPPED = "child_host_stopped"
+    CHILD_HOST_RESTARTED = "child_host_restarted"
+    CHILD_HOST_STATUS_UPDATE = "child_host_status_update"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -79,6 +94,16 @@ class CommandType(str, Enum):
     DELETE_HOST_USER = "delete_host_user"
     DELETE_HOST_GROUP = "delete_host_group"
     REFRESH_USER_ACCESS = "refresh_user_access"
+
+    # Child Host / Virtualization Commands
+    CHECK_VIRTUALIZATION_SUPPORT = "check_virtualization_support"
+    CREATE_CHILD_HOST = "create_child_host"
+    DELETE_CHILD_HOST = "delete_child_host"
+    START_CHILD_HOST = "start_child_host"
+    STOP_CHILD_HOST = "stop_child_host"
+    RESTART_CHILD_HOST = "restart_child_host"
+    LIST_CHILD_HOSTS = "list_child_hosts"
+    CHILD_HOST_STATUS = "child_host_status"
 
 
 class Message:

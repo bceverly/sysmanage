@@ -205,22 +205,56 @@ async def handle_reboot_status_update(db: Session, connection, message_data: dic
     try:
         hostname = message_data.get("hostname")
         reboot_required = message_data.get("reboot_required", False)
+        reboot_reason = message_data.get("reboot_required_reason")
 
-        if not hostname:
+        # Try to find the host by hostname or by host_id from connection info
+        host = None
+        if hostname:
+            host = db.query(Host).filter(Host.fqdn == hostname).first()
+
+        # If no hostname provided or host not found, try connection info
+        if not host:
+            conn_info = message_data.get("_connection_info", {})
+            conn_hostname = conn_info.get("hostname")
+            if conn_hostname:
+                host = db.query(Host).filter(Host.fqdn == conn_hostname).first()
+                if host:
+                    hostname = conn_hostname
+
+        if not host:
+            debug_logger.error(
+                "Host not found for reboot status update: hostname=%s", hostname
+            )
             return {
                 "message_type": "error",
-                "error": _("Hostname is required for reboot status update"),
+                "error": _("Host not found for reboot status update"),
             }
 
         debug_logger.info("Processing reboot status update from %s", hostname)
 
-        # Find the host
-        host = db.query(Host).filter(Host.fqdn == hostname).first()
-        if not host:
-            debug_logger.error("Host not found: %s", hostname)
+        # Protect WSL enablement pending reboot flag from being overwritten
+        # If the host has reboot_required=True with reason "WSL feature enablement pending",
+        # don't allow the agent to clear it until the reboot actually happens
+        # (which will be detected by the agent after reboot)
+        protected_reasons = ["WSL feature enablement pending"]
+        current_reason = host.reboot_required_reason or ""
+
+        if (
+            host.reboot_required
+            and current_reason in protected_reasons
+            and not reboot_required
+        ):
+            debug_logger.info(
+                "Preserving protected reboot_required flag for host %s (reason: %s)",
+                hostname,
+                current_reason,
+            )
+            # Don't update - preserve the protected state
             return {
-                "message_type": "error",
-                "error": _("Host not found: %s") % hostname,
+                "message_type": "reboot_status_preserved",
+                "host_id": host.id,
+                "reboot_required": host.reboot_required,
+                "reason": current_reason,
             }
 
         # Update the reboot status
@@ -229,18 +263,27 @@ async def handle_reboot_status_update(db: Session, connection, message_data: dic
             tzinfo=None
         )
 
+        # Set or clear the reason based on reboot_required status
+        if reboot_required and reboot_reason:
+            host.reboot_required_reason = reboot_reason
+        elif not reboot_required:
+            host.reboot_required_reason = None
+
         db.commit()
 
         debug_logger.info(
-            "Successfully updated reboot status for host %s: reboot_required=%s",
+            "Successfully updated reboot status for host %s: "
+            "reboot_required=%s, reason=%s",
             hostname,
             reboot_required,
+            reboot_reason,
         )
 
         return {
             "message_type": "reboot_status_updated",
             "host_id": host.id,
             "reboot_required": reboot_required,
+            "reason": reboot_reason,
         }
 
     except Exception as e:

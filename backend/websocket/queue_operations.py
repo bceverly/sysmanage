@@ -485,6 +485,210 @@ class QueueOperations:
             if not session_provided:
                 db.close()
 
+    def mark_sent(self, message_id: str, db: Session = None) -> bool:
+        """
+        Mark a message as sent to the agent, awaiting acknowledgment.
+
+        This status indicates the message was successfully transmitted over the
+        websocket, but we haven't received confirmation the agent processed it.
+
+        Args:
+            message_id: ID of message to mark as sent
+            db: Optional database session
+
+        Returns:
+            bool: True if successfully marked, False if message not found
+        """
+        session_provided = db is not None
+        if not session_provided:
+            db = next(get_db())
+
+        try:
+            message = db.query(MessageQueue).filter_by(message_id=message_id).first()
+
+            if not message:
+                return False
+
+            message.status = QueueStatus.SENT
+            message.started_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+            if not session_provided:
+                db.commit()
+
+            logger.debug(_("Marked message as sent (awaiting ack): %s"), message_id)
+            return True
+
+        except Exception as e:
+            if not session_provided:
+                db.rollback()
+            logger.error(
+                _("Failed to mark message %s as sent: %s"),
+                message_id,
+                str(e),
+            )
+            return False
+        finally:
+            if not session_provided:
+                db.close()
+
+    def mark_acknowledged(self, message_id: str, db: Session = None) -> bool:
+        """
+        Mark a sent message as acknowledged by the agent.
+
+        This marks the message as COMPLETED since the agent confirmed receipt.
+
+        Args:
+            message_id: ID of message that was acknowledged
+            db: Optional database session
+
+        Returns:
+            bool: True if successfully marked, False if message not found or wrong status
+        """
+        session_provided = db is not None
+        if not session_provided:
+            db = next(get_db())
+
+        try:
+            message = db.query(MessageQueue).filter_by(message_id=message_id).first()
+
+            if not message:
+                logger.warning(_("Cannot acknowledge unknown message: %s"), message_id)
+                return False
+
+            # Only acknowledge messages that are in SENT status
+            if message.status != QueueStatus.SENT:
+                logger.debug(
+                    _("Message %s not in SENT status (is %s), skipping ack"),
+                    message_id,
+                    message.status,
+                )
+                # Still return True if already completed - idempotent behavior
+                return message.status == QueueStatus.COMPLETED
+
+            message.status = QueueStatus.COMPLETED
+            message.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+            if not session_provided:
+                db.commit()
+
+            logger.info(_("Message acknowledged by agent: %s"), message_id)
+            return True
+
+        except Exception as e:
+            if not session_provided:
+                db.rollback()
+            logger.error(
+                _("Failed to mark message %s as acknowledged: %s"),
+                message_id,
+                str(e),
+            )
+            return False
+        finally:
+            if not session_provided:
+                db.close()
+
+    def retry_unacknowledged_messages(
+        self, timeout_seconds: int = 60, db: Session = None
+    ) -> int:
+        """
+        Find messages in SENT status that haven't been acknowledged and retry them.
+
+        This should be called periodically to handle messages that were sent but
+        the agent crashed/disconnected before acknowledging.
+
+        Args:
+            timeout_seconds: How long to wait for ack before considering it lost
+            db: Optional database session
+
+        Returns:
+            int: Number of messages marked for retry
+        """
+        session_provided = db is not None
+        if not session_provided:
+            db = next(get_db())
+
+        try:
+            cutoff_time = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
+                seconds=timeout_seconds
+            )
+
+            # Find SENT messages older than timeout
+            stale_messages = (
+                db.query(MessageQueue)
+                .filter(
+                    MessageQueue.status == QueueStatus.SENT,
+                    MessageQueue.started_at < cutoff_time,
+                )
+                .all()
+            )
+
+            retry_count = 0
+            for message in stale_messages:
+                # Log details about what we're retrying
+                try:
+                    msg_data = (
+                        json.loads(message.message_data)
+                        if isinstance(message.message_data, str)
+                        else message.message_data
+                    )
+                    command_type = msg_data.get("data", {}).get(
+                        "command_type", "unknown"
+                    )
+                    if command_type == "create_child_host":
+                        distribution = (
+                            msg_data.get("data", {})
+                            .get("parameters", {})
+                            .get("distribution", "unknown")
+                        )
+                        logger.warning(
+                            "NO ACK RECEIVED for create_child_host: message_id=%s, distribution=%s, sent_at=%s - scheduling retry",
+                            message.message_id,
+                            distribution,
+                            message.started_at,
+                        )
+                    else:
+                        logger.warning(
+                            "NO ACK RECEIVED: message_id=%s, command_type=%s, sent_at=%s - scheduling retry",
+                            message.message_id,
+                            command_type,
+                            message.started_at,
+                        )
+                except Exception:
+                    logger.warning(
+                        "NO ACK RECEIVED: message_id=%s, sent_at=%s - scheduling retry",
+                        message.message_id,
+                        message.started_at,
+                    )
+
+                # Use mark_failed to handle retry logic
+                if self.mark_failed(
+                    message.message_id,
+                    error_message=_("No acknowledgment received within %d seconds")
+                    % timeout_seconds,
+                    retry=True,
+                    db=db,
+                ):
+                    retry_count += 1
+
+            if not session_provided:
+                db.commit()
+
+            if retry_count > 0:
+                logger.info(
+                    _("Scheduled %d unacknowledged messages for retry"), retry_count
+                )
+
+            return retry_count
+
+        except Exception as e:
+            if not session_provided:
+                db.rollback()
+            logger.error(_("Error retrying unacknowledged messages: %s"), str(e))
+            return 0
+        finally:
+            if not session_provided:
+                db.close()
+
     def mark_failed(
         self,
         message_id: str,

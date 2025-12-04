@@ -9,6 +9,7 @@ class QueueStatus:
 
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
+    SENT = "sent"  # Message sent to agent, awaiting acknowledgment
     COMPLETED = "completed"
     FAILED = "failed"
     EXPIRED = "expired"

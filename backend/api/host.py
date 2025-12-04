@@ -240,6 +240,12 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
                 host, "script_execution_enabled", False
             ),
             "enabled_shells": getattr(host, "enabled_shells", None),
+            # Include parent host ID for child host filtering
+            "parent_host_id": (
+                str(getattr(host, "parent_host_id", None))
+                if getattr(host, "parent_host_id", None)
+                else None
+            ),
             # Include update counts
             "security_updates_count": security_updates_count,
             "system_updates_count": system_updates_count,
@@ -390,6 +396,12 @@ def _get_all_hosts_sync():
                     host, "script_execution_enabled", False
                 ),
                 "enabled_shells": getattr(host, "enabled_shells", None),
+                # Include parent host ID for child host filtering
+                "parent_host_id": (
+                    str(getattr(host, "parent_host_id", None))
+                    if getattr(host, "parent_host_id", None)
+                    else None
+                ),
                 # Include update counts
                 "security_updates_count": security_updates_count,
                 "system_updates_count": system_updates_count,

@@ -744,3 +744,34 @@ msgstr "연결 실패 - Graylog 서버가 다운되었거나 연결할 수 없�
 
 msgid "Unexpected error checking Graylog health"
 msgstr "Graylog 상태 확인 중 예기치 않은 오류 발생"
+
+# Message acknowledgment strings
+msgid "Marked message as sent (awaiting ack): %s"
+msgstr "메시지를 전송됨으로 표시 (확인 대기 중): %s"
+
+msgid "Cannot acknowledge unknown message: %s"
+msgstr "알 수 없는 메시지를 확인할 수 없습니다: %s"
+
+msgid "Message %s not in SENT status (is %s), skipping ack"
+msgstr "메시지 %s이(가) 전송됨 상태가 아님 (%s임), 확인 건너뜀"
+
+msgid "Message acknowledged by agent: %s"
+msgstr "에이전트가 메시지를 확인함: %s"
+
+msgid "Retrying unacknowledged message %s (was sent at %s)"
+msgstr "확인되지 않은 메시지 %s 재시도 (%s에 전송됨)"
+
+msgid "Scheduled %d unacknowledged messages for retry"
+msgstr "%d개의 확인되지 않은 메시지를 재시도 예약함"
+
+msgid "Error retrying unacknowledged messages: %s"
+msgstr "확인되지 않은 메시지 재시도 오류: %s"
+
+msgid "No acknowledgment received within %d seconds"
+msgstr "%d초 이내에 확인을 받지 못함"
+
+msgid "Failed to mark message %s as sent: %s"
+msgstr "메시지 %s을(를) 전송됨으로 표시하지 못함: %s"
+
+msgid "Failed to mark message %s as acknowledged: %s"
+msgstr "메시지 %s을(를) 확인됨으로 표시하지 못함: %s"

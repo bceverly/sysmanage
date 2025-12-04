@@ -13,6 +13,7 @@ from backend.api.host_utils import validate_host_approval_status
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.persistence.models import HostChild
 from backend.security.certificate_manager import certificate_manager
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
@@ -89,6 +90,82 @@ async def approve_host(
         host.approval_status = "approved"
         host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
         session.commit()
+
+        # Check if this host was created as a child host and link them
+        try:
+            # Look for HostChild records that match this host's hostname
+            # and haven't been linked yet (child_host_id is null)
+            # The hostname in HostChild might be short (e.g., "afedora") or FQDN
+            # while host.fqdn is always FQDN (e.g., "afedora.theeverlys.com")
+            # So we check if FQDN starts with the stored hostname
+            host_short_name = host.fqdn.split(".")[0] if host.fqdn else None
+
+            matching_child = None
+            if host_short_name:
+                # First try exact FQDN match
+                matching_child = (
+                    session.query(HostChild)
+                    .filter(
+                        HostChild.hostname == host.fqdn,
+                        HostChild.child_host_id.is_(None),
+                        HostChild.status == "running",
+                    )
+                    .first()
+                )
+
+                # If no exact match, try matching short hostname
+                if not matching_child:
+                    matching_child = (
+                        session.query(HostChild)
+                        .filter(
+                            HostChild.hostname == host_short_name,
+                            HostChild.child_host_id.is_(None),
+                            HostChild.status == "running",
+                        )
+                        .first()
+                    )
+
+                # If still no match, check if host.fqdn starts with HostChild.hostname
+                if not matching_child:
+                    # Get all unlinked running child hosts and check prefix match
+                    unlinked_children = (
+                        session.query(HostChild)
+                        .filter(
+                            HostChild.child_host_id.is_(None),
+                            HostChild.status == "running",
+                            HostChild.hostname.isnot(None),
+                        )
+                        .all()
+                    )
+                    for child in unlinked_children:
+                        if host.fqdn.startswith(child.hostname + "."):
+                            matching_child = child
+                            break
+
+            if matching_child:
+                # Link the child host to the approved host
+                matching_child.child_host_id = host.id
+                matching_child.installed_at = datetime.now(timezone.utc).replace(
+                    tzinfo=None
+                )
+                # Also set parent_host_id on the host record for easier filtering
+                host.parent_host_id = matching_child.parent_host_id
+                session.commit()
+                logger.info(
+                    "Linked child host %s to approved host %s (%s), parent=%s",
+                    matching_child.id,
+                    host.id,
+                    host.fqdn,
+                    matching_child.parent_host_id,
+                )
+        except Exception as e:
+            # Don't fail the approval process if we can't link child host
+            logger.error(
+                "Error linking child host for %s (%s): %s",
+                host.id,
+                host.fqdn,
+                e,
+            )
 
         # Apply default repositories for this host's operating system
         try:

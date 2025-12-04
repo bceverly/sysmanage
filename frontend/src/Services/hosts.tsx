@@ -98,6 +98,8 @@ type SysManageHost = {
     system_updates_count?: number;
     total_updates_count?: number;
     os_upgrades_count?: number;
+    // Parent host ID for child hosts (WSL, VMs, containers)
+    parent_host_id?: string;
 }
 
 type StorageDevice = {

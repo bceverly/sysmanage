@@ -743,3 +743,34 @@ msgstr "连接失败 - Graylog 服务器可能已关闭或无法访问"
 
 msgid "Unexpected error checking Graylog health"
 msgstr "检查 Graylog 健康状态时出现意外错误"
+
+# Message acknowledgment strings
+msgid "Marked message as sent (awaiting ack): %s"
+msgstr "消息已标记为已发送（等待确认）：%s"
+
+msgid "Cannot acknowledge unknown message: %s"
+msgstr "无法确认未知消息：%s"
+
+msgid "Message %s not in SENT status (is %s), skipping ack"
+msgstr "消息 %s 不在已发送状态（当前为 %s），跳过确认"
+
+msgid "Message acknowledged by agent: %s"
+msgstr "代理已确认消息：%s"
+
+msgid "Retrying unacknowledged message %s (was sent at %s)"
+msgstr "重试未确认的消息 %s（发送于 %s）"
+
+msgid "Scheduled %d unacknowledged messages for retry"
+msgstr "已安排 %d 条未确认消息进行重试"
+
+msgid "Error retrying unacknowledged messages: %s"
+msgstr "重试未确认消息时出错：%s"
+
+msgid "No acknowledgment received within %d seconds"
+msgstr "在 %d 秒内未收到确认"
+
+msgid "Failed to mark message %s as sent: %s"
+msgstr "无法将消息 %s 标记为已发送：%s"
+
+msgid "Failed to mark message %s as acknowledged: %s"
+msgstr "无法将消息 %s 标记为已确认：%s"

@@ -409,7 +409,12 @@ async def handle_command_result(connection, message_data: dict):
         "Command result from %s: %s",
         getattr(connection, "hostname", "unknown"),
         {
-            k: v if k not in ["packages", "package_managers"] else f"<{len(v)} items>"
+            k: (
+                v
+                if k
+                not in ["packages", "package_managers", "child_hosts", "capabilities"]
+                else f"<{len(v) if isinstance(v, list) else 'dict'} items>"
+            )
             for k, v in message_data.items()
         },
     )
@@ -430,10 +435,113 @@ async def handle_command_result(connection, message_data: dict):
         finally:
             db_session.close()
 
-    # Check if this is a package collection result
+    # Check if this is a virtualization support result
     result_data = message_data.get("result", {})
     if result_data is None:
         result_data = {}
+
+    if "supported_types" in result_data or "capabilities" in result_data:
+        logger.info("Detected virtualization support result, routing to handler")
+        from backend.api.handlers import handle_virtualization_support_update
+        from backend.persistence.db import get_db
+
+        db_session = next(get_db())
+        try:
+            return await handle_virtualization_support_update(
+                db_session, connection, message_data
+            )
+        finally:
+            db_session.close()
+
+    # Check if this is a child hosts list result
+    if "child_hosts" in result_data:
+        logger.info("Detected child hosts list result, routing to handler")
+        from backend.api.handlers import handle_child_hosts_list_update
+        from backend.persistence.db import get_db
+
+        db_session = next(get_db())
+        try:
+            return await handle_child_hosts_list_update(
+                db_session, connection, message_data
+            )
+        finally:
+            db_session.close()
+
+    # Check if this is a child host control result (start/stop/restart/delete)
+    # This must be checked BEFORE the creation result check since control results
+    # also have child_name and child_type in them
+    command_type = message_data.get("command_type") or message_data.get("data", {}).get(
+        "command_type"
+    )
+    if command_type in [
+        "start_child_host",
+        "stop_child_host",
+        "restart_child_host",
+        "delete_child_host",
+    ]:
+        logger.info(
+            "Detected child host control result (%s), routing to handler", command_type
+        )
+        from backend.api.handlers.child_host_handlers import (
+            handle_child_host_start_result,
+            handle_child_host_stop_result,
+            handle_child_host_restart_result,
+            handle_child_host_delete_result,
+        )
+        from backend.persistence.db import get_db
+
+        handler_map = {
+            "start_child_host": handle_child_host_start_result,
+            "stop_child_host": handle_child_host_stop_result,
+            "restart_child_host": handle_child_host_restart_result,
+            "delete_child_host": handle_child_host_delete_result,
+        }
+
+        db_session = next(get_db())
+        try:
+            return await handler_map[command_type](db_session, connection, message_data)
+        finally:
+            db_session.close()
+
+    # Check if this is a child host creation result
+    # This must be checked AFTER control commands since they also have child_name/child_type
+    if "child_name" in result_data and result_data.get("child_type"):
+        # Only route to creation handler if it's not a control command result
+        # Control commands are already handled above
+        if command_type not in [
+            "start_child_host",
+            "stop_child_host",
+            "restart_child_host",
+            "delete_child_host",
+        ]:
+            logger.info("Detected child host creation result, routing to handler")
+            from backend.api.handlers import handle_child_host_created
+            from backend.persistence.db import get_db
+
+            db_session = next(get_db())
+            try:
+                return await handle_child_host_created(
+                    db_session, connection, message_data
+                )
+            finally:
+                db_session.close()
+
+    # Check if this is a WSL enable result
+    if "reboot_required" in result_data and result_data.get("success") is not None:
+        # Check if this looks like a WSL enable result (not a generic reboot status)
+        if command_type == "enable_wsl":
+            logger.info("Detected WSL enable result, routing to handler")
+            from backend.api.handlers import handle_wsl_enable_result
+            from backend.persistence.db import get_db
+
+            db_session = next(get_db())
+            try:
+                return await handle_wsl_enable_result(
+                    db_session, connection, message_data
+                )
+            finally:
+                db_session.close()
+
     logger.info("PACKAGE_DEBUG: message_data keys: %s", list(message_data.keys()))
     logger.info(
         "PACKAGE_DEBUG: result_data type: %s, keys: %s",
@@ -547,6 +655,106 @@ async def handle_diagnostic_result(db: Session, connection, message_data: dict):
             "message_type": "error",
             "error": f"Failed to process diagnostic result: {str(e)}",
         }
+
+
+async def handle_command_acknowledgment(db: Session, connection, message_data: dict):
+    """
+    Handle command acknowledgment from agent.
+
+    When the agent receives a command, it sends an acknowledgment back to confirm receipt.
+    This allows us to mark the message as completed and avoid retrying it.
+
+    Args:
+        db: Database session
+        connection: The WebSocket connection
+        message_data: The acknowledgment message data containing 'message_id'
+
+    Returns:
+        Acknowledgment response dict
+    """
+    from backend.websocket.queue_manager import server_queue_manager
+
+    message_id = message_data.get("message_id")
+    hostname = getattr(connection, "hostname", "unknown")
+
+    if not message_id:
+        logger.warning("Command acknowledgment from %s missing message_id", hostname)
+        return {
+            "message_type": "error",
+            "error": "Missing message_id in command acknowledgment",
+        }
+
+    # Look up the original message to get command details for logging
+    from backend.persistence.models import MessageQueue
+
+    original_msg = db.query(MessageQueue).filter_by(message_id=message_id).first()
+
+    if original_msg:
+        try:
+            import json
+
+            msg_data = (
+                json.loads(original_msg.message_data)
+                if isinstance(original_msg.message_data, str)
+                else original_msg.message_data
+            )
+            command_type = msg_data.get("data", {}).get("command_type", "unknown")
+            if command_type == "create_child_host":
+                distribution = (
+                    msg_data.get("data", {})
+                    .get("parameters", {})
+                    .get("distribution", "unknown")
+                )
+                logger.info(
+                    "ACK RECEIVED for create_child_host: message_id=%s, distribution=%s, from=%s, current_status=%s",
+                    message_id,
+                    distribution,
+                    hostname,
+                    original_msg.status,
+                )
+            else:
+                logger.info(
+                    "ACK RECEIVED: message_id=%s, command_type=%s, from=%s, current_status=%s",
+                    message_id,
+                    command_type,
+                    hostname,
+                    original_msg.status,
+                )
+        except Exception as e:
+            logger.info(
+                "ACK RECEIVED: message_id=%s, from=%s (could not parse details: %s)",
+                message_id,
+                hostname,
+                str(e),
+            )
+    else:
+        logger.warning(
+            "ACK RECEIVED for UNKNOWN message: message_id=%s, from=%s",
+            message_id,
+            hostname,
+        )
+
+    # Mark the message as acknowledged (completed)
+    success = server_queue_manager.mark_acknowledged(message_id, db=db)
+
+    if success:
+        logger.info(
+            "ACK PROCESSED: message %s marked as completed from %s",
+            message_id,
+            hostname,
+        )
+    else:
+        logger.warning(
+            "ACK FAILED: Could not mark message %s as acknowledged from %s - may not exist or wrong status",
+            message_id,
+            hostname,
+        )
+
+    return {
+        "message_type": "command_acknowledgment_received",
+        "message_id": message_id,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 async def handle_installation_status(db: Session, connection, message_data: dict):

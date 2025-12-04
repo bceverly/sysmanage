@@ -206,6 +206,57 @@ class ServerMessageQueueManager:
         """
         return self._operations.deserialize_message_data(message=message)
 
+    def mark_sent(self, message_id: str, db: Session = None) -> bool:
+        """
+        Mark a message as sent to the agent, awaiting acknowledgment.
+
+        This status indicates the message was successfully transmitted over the
+        websocket, but we haven't received confirmation the agent processed it.
+
+        Args:
+            message_id: ID of message to mark as sent
+            db: Optional database session
+
+        Returns:
+            bool: True if successfully marked, False if message not found
+        """
+        return self._operations.mark_sent(message_id=message_id, db=db)
+
+    def mark_acknowledged(self, message_id: str, db: Session = None) -> bool:
+        """
+        Mark a sent message as acknowledged by the agent.
+
+        This marks the message as COMPLETED since the agent confirmed receipt.
+
+        Args:
+            message_id: ID of message that was acknowledged
+            db: Optional database session
+
+        Returns:
+            bool: True if successfully marked, False if message not found or wrong status
+        """
+        return self._operations.mark_acknowledged(message_id=message_id, db=db)
+
+    def retry_unacknowledged_messages(
+        self, timeout_seconds: int = 60, db: Session = None
+    ) -> int:
+        """
+        Find messages in SENT status that haven't been acknowledged and retry them.
+
+        This should be called periodically to handle messages that were sent but
+        the agent crashed/disconnected before acknowledging.
+
+        Args:
+            timeout_seconds: How long to wait for ack before considering it lost
+            db: Optional database session
+
+        Returns:
+            int: Number of messages marked for retry
+        """
+        return self._operations.retry_unacknowledged_messages(
+            timeout_seconds=timeout_seconds, db=db
+        )
+
     # Delegate maintenance operations to QueueMaintenance
     def cleanup_old_messages(
         self, older_than_days: int = 7, keep_failed: bool = True, db: Session = None

@@ -14,6 +14,7 @@ from backend.api import (
     audit_log,
     auth,
     certificates,
+    child_host,
     commercial_antivirus_status,
     config_management,
     default_repositories,
@@ -280,6 +281,14 @@ def register_routes(app: FastAPI):
         tags=["firewall-roles"],
     )  # /api/firewall-roles/* (with auth)
     logger.info("Firewall Roles router added")
+
+    logger.info("Adding Child Host router with /api prefix")
+    app.include_router(
+        child_host.router,
+        prefix="/api",
+        tags=["child-hosts"],
+    )  # /api/host/{host_id}/children/*, /api/child-host-distributions/* (with auth)
+    logger.info("Child Host router added")
 
     logger.info("=== ALL ROUTES REGISTERED ===")
 

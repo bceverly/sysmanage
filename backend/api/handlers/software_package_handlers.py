@@ -42,12 +42,14 @@ async def handle_software_update(db: Session, connection, message_data: dict):
         # Handle software packages
         software_packages = message_data.get("software_packages", [])
         if software_packages:
-            # Delete existing software packages for this host
+            # Delete existing software packages for this host and commit
+            # to ensure deletion is fully persisted before inserting new data
             db.execute(
                 delete(SoftwarePackage).where(
                     SoftwarePackage.host_id == connection.host_id
                 )
             )
+            db.commit()
 
             # Add new software packages
             for package in software_packages:

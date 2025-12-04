@@ -144,6 +144,7 @@ class Host(Base):
 
     # Update management fields
     reboot_required = Column(Boolean, nullable=False, default=False)
+    reboot_required_reason = Column(String(255), nullable=True)
     reboot_required_updated_at = Column(DateTime, nullable=True)
 
     # Agent privilege status
@@ -154,6 +155,17 @@ class Host(Base):
 
     # Available shells on the host (JSON)
     enabled_shells = Column(Text, nullable=True)
+
+    # Virtualization capabilities (JSON - list of supported types like ["wsl", "hyperv"])
+    virtualization_types = Column(Text, nullable=True)
+    # Detailed virtualization capabilities (JSON - dict with per-type info)
+    virtualization_capabilities = Column(Text, nullable=True)
+    # When virtualization info was last updated
+    virtualization_updated_at = Column(DateTime, nullable=True)
+
+    # Parent host reference for child hosts (WSL instances, VMs, containers)
+    # NULL for standalone hosts, populated for child hosts
+    parent_host_id = Column(GUID(), nullable=True, index=True)
 
     # Relationships
     tags = relationship(

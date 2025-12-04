@@ -747,3 +747,34 @@ msgstr "Соединение не удалось - сервер Graylog може
 
 msgid "Unexpected error checking Graylog health"
 msgstr "Неожиданная ошибка при проверке состояния Graylog"
+
+# Message acknowledgment strings
+msgid "Marked message as sent (awaiting ack): %s"
+msgstr "Сообщение помечено как отправленное (ожидание подтверждения): %s"
+
+msgid "Cannot acknowledge unknown message: %s"
+msgstr "Невозможно подтвердить неизвестное сообщение: %s"
+
+msgid "Message %s not in SENT status (is %s), skipping ack"
+msgstr "Сообщение %s не в статусе ОТПРАВЛЕНО (статус %s), пропуск подтверждения"
+
+msgid "Message acknowledged by agent: %s"
+msgstr "Сообщение подтверждено агентом: %s"
+
+msgid "Retrying unacknowledged message %s (was sent at %s)"
+msgstr "Повторная отправка неподтвержденного сообщения %s (отправлено в %s)"
+
+msgid "Scheduled %d unacknowledged messages for retry"
+msgstr "Запланировано %d неподтвержденных сообщений для повторной отправки"
+
+msgid "Error retrying unacknowledged messages: %s"
+msgstr "Ошибка при повторной отправке неподтвержденных сообщений: %s"
+
+msgid "No acknowledgment received within %d seconds"
+msgstr "Подтверждение не получено в течение %d секунд"
+
+msgid "Failed to mark message %s as sent: %s"
+msgstr "Не удалось пометить сообщение %s как отправленное: %s"
+
+msgid "Failed to mark message %s as acknowledged: %s"
+msgstr "Не удалось пометить сообщение %s как подтвержденное: %s"

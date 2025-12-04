@@ -738,3 +738,34 @@ msgstr "Connexion échouée - Le serveur Graylog peut être hors service ou inac
 
 msgid "Unexpected error checking Graylog health"
 msgstr "Erreur inattendue lors de la vérification de l'état de Graylog"
+
+# Message acknowledgment strings
+msgid "Marked message as sent (awaiting ack): %s"
+msgstr "Message marqué comme envoyé (en attente d'accusé de réception): %s"
+
+msgid "Cannot acknowledge unknown message: %s"
+msgstr "Impossible de confirmer un message inconnu: %s"
+
+msgid "Message %s not in SENT status (is %s), skipping ack"
+msgstr "Message %s pas dans le statut ENVOYÉ (est %s), accusé de réception ignoré"
+
+msgid "Message acknowledged by agent: %s"
+msgstr "Message confirmé par l'agent: %s"
+
+msgid "Retrying unacknowledged message %s (was sent at %s)"
+msgstr "Nouvelle tentative pour le message non confirmé %s (envoyé à %s)"
+
+msgid "Scheduled %d unacknowledged messages for retry"
+msgstr "%d messages non confirmés programmés pour nouvelle tentative"
+
+msgid "Error retrying unacknowledged messages: %s"
+msgstr "Erreur lors de la nouvelle tentative des messages non confirmés: %s"
+
+msgid "No acknowledgment received within %d seconds"
+msgstr "Aucun accusé de réception reçu dans les %d secondes"
+
+msgid "Failed to mark message %s as sent: %s"
+msgstr "Échec du marquage du message %s comme envoyé: %s"
+
+msgid "Failed to mark message %s as acknowledged: %s"
+msgstr "Échec du marquage du message %s comme confirmé: %s"

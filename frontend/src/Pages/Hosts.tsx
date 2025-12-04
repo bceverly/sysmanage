@@ -13,7 +13,8 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
 import SecurityIcon from '@mui/icons-material/Security';
-import { Chip, IconButton, Autocomplete, TextField } from '@mui/material';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import { Chip, IconButton, Autocomplete, TextField, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost, doRequestHostDiagnostics } from '../Services/hosts'
@@ -35,6 +36,8 @@ const Hosts = () => {
     const [searchColumn, setSearchColumn] = useState<string>('fqdn');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [allTags, setAllTags] = useState<Array<{id: string, name: string}>>([]);
+    // Child host filter: 'all' = show all, 'parents' = hide child hosts, 'children' = child hosts only
+    const [childHostFilter, setChildHostFilter] = useState<'all' | 'parents' | 'children'>('all');
     const [canApproveHosts, setCanApproveHosts] = useState<boolean>(false);
     const [canDeleteHost, setCanDeleteHost] = useState<boolean>(false);
     const [canViewHostDetails, setCanViewHostDetails] = useState<boolean>(false);
@@ -85,7 +88,34 @@ const Hosts = () => {
     // Memoize columns to prevent recreation on every render
     const columns: GridColDef[] = useMemo(() => [
         { field: 'id', headerName: t('common.id', 'ID'), width: 70 },
-        { field: 'fqdn', headerName: t('hosts.fqdn'), width: 200 },
+        {
+            field: 'fqdn',
+            headerName: t('hosts.fqdn'),
+            width: 220,
+            renderCell: (params) => {
+                const row = params.row;
+                const isChildHost = !!row.parent_host_id;
+                // Find parent hostname for tooltip
+                const parentHost = isChildHost ? tableData.find(h => h.id === row.parent_host_id) : null;
+
+                return (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        {isChildHost && (
+                            <Tooltip title={t('hosts.childHostOf', 'Child host of {{parent}}', { parent: parentHost?.fqdn || row.parent_host_id })}>
+                                <AccountTreeIcon
+                                    sx={{
+                                        fontSize: 16,
+                                        color: 'info.main',
+                                        ml: 1
+                                    }}
+                                />
+                            </Tooltip>
+                        )}
+                        <span>{row.fqdn}</span>
+                    </Box>
+                );
+            }
+        },
         { field: 'platform', headerName: t('hosts.platform'), width: 120 },
         { field: 'ipv4', headerName: t('hosts.ipv4'), width: 150 },
         { field: 'ipv6', headerName: t('hosts.ipv6'), width: 200 },
@@ -314,7 +344,7 @@ const Hosts = () => {
                 ) : null
             )
         }
-    ], [t, navigate, canViewHostDetails]);
+    ], [t, navigate, canViewHostDetails, tableData]);
 
     // Search columns configuration (excluding irrelevant columns)
     const searchColumns = [
@@ -630,6 +660,16 @@ const Hosts = () => {
     const performSearchAndFilter = useCallback(() => {
         let filtered = [...tableData];
 
+        // Apply child host filter
+        if (childHostFilter === 'parents') {
+            // Hide child hosts - only show hosts without a parent
+            filtered = filtered.filter(host => !host.parent_host_id);
+        } else if (childHostFilter === 'children') {
+            // Show only child hosts - hosts that have a parent
+            filtered = filtered.filter(host => !!host.parent_host_id);
+        }
+        // 'all' - no filtering needed
+
         // Apply search filter
         if (searchTerm.trim()) {
             filtered = filtered.filter(host => {
@@ -648,17 +688,17 @@ const Hosts = () => {
                 if (!host.tags || !Array.isArray(host.tags)) {
                     return false; // If host has no tags, it doesn't match
                 }
-                
+
                 // Check if ALL selected tags are present on this host
                 const hostTagIds = host.tags.map(tag => tag.id);
-                return selectedTags.every(selectedTagId => 
+                return selectedTags.every(selectedTagId =>
                     hostTagIds.includes(selectedTagId)
                 );
             });
         }
 
         setFilteredData(filtered);
-    }, [tableData, searchTerm, searchColumn, selectedTags]);
+    }, [tableData, searchTerm, searchColumn, selectedTags, childHostFilter]);
 
     // Update filtered data when any filter criteria changes
     React.useEffect(() => {
@@ -729,6 +769,35 @@ const Hosts = () => {
                     )}
                     sx={{ minWidth: 300, flexGrow: 1 }}
                 />
+
+                {/* Child Host Filter */}
+                <ToggleButtonGroup
+                    value={childHostFilter}
+                    exclusive
+                    onChange={(_event, newValue) => {
+                        if (newValue !== null) {
+                            setChildHostFilter(newValue);
+                        }
+                    }}
+                    size="small"
+                    aria-label={t('hosts.childHostFilter', 'Child host filter')}
+                >
+                    <ToggleButton value="all" aria-label={t('hosts.showAllHosts', 'Show all hosts')}>
+                        <Tooltip title={t('hosts.showAllHosts', 'Show all hosts')}>
+                            <span>{t('hosts.allHosts', 'All')}</span>
+                        </Tooltip>
+                    </ToggleButton>
+                    <ToggleButton value="parents" aria-label={t('hosts.hideChildHosts', 'Hide child hosts')}>
+                        <Tooltip title={t('hosts.hideChildHosts', 'Hide child hosts')}>
+                            <span>{t('hosts.parentsOnly', 'Parents')}</span>
+                        </Tooltip>
+                    </ToggleButton>
+                    <ToggleButton value="children" aria-label={t('hosts.childHostsOnly', 'Child hosts only')}>
+                        <Tooltip title={t('hosts.childHostsOnly', 'Child hosts only')}>
+                            <span>{t('hosts.childrenOnly', 'Children')}</span>
+                        </Tooltip>
+                    </ToggleButton>
+                </ToggleButtonGroup>
             </Box>
 
             {/* Column Visibility Button */}

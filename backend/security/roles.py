@@ -155,6 +155,16 @@ class SecurityRoles(str, Enum):
     DELETE_HOST_GROUP = "Delete Host Group"
     EDIT_HOST_GROUP = "Edit Host Group"
 
+    # Virtualization Roles
+    # - Child Host Operations (alphabetical)
+    CONFIGURE_CHILD_HOST = "Configure Child Host"
+    CREATE_CHILD_HOST = "Create Child Host"
+    DELETE_CHILD_HOST = "Delete Child Host"
+    RESTART_CHILD_HOST = "Restart Child Host"
+    START_CHILD_HOST = "Start Child Host"
+    STOP_CHILD_HOST = "Stop Child Host"
+    VIEW_CHILD_HOST = "View Child Host"
+
 
 class UserRoleCache:
     """

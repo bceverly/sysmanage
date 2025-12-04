@@ -10,6 +10,7 @@ from backend.persistence.db import get_db
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.inbound_processor import process_pending_messages
 from backend.websocket.outbound_processor import process_outbound_messages
+from backend.websocket.queue_manager import server_queue_manager
 
 logger = get_logger(__name__)
 
@@ -101,6 +102,17 @@ class MessageProcessor:
 
             # Process outbound messages (from server to agents)
             await process_outbound_messages(db)
+
+            # Retry any messages that were sent but not acknowledged within timeout
+            # This handles cases where the websocket send succeeded but the agent
+            # disconnected before processing the message
+            retry_count = server_queue_manager.retry_unacknowledged_messages(
+                timeout_seconds=60, db=db
+            )
+            if retry_count > 0:
+                logger.info(
+                    "Scheduled %d unacknowledged messages for retry", retry_count
+                )
 
             # Commit all changes made during this processing cycle
             db.commit()

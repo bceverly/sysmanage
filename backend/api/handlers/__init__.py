@@ -7,9 +7,19 @@ organized into logical modules:
 - user_access_handlers: User accounts and groups with Windows SID support
 - software_package_handlers: Software inventory, package updates, and repositories
 - infrastructure_handlers: Script execution, reboot status, certificates, and roles
+- child_host_handlers: Child host (VM, container, WSL) management
 
 All handlers are re-exported here for backwards compatibility.
 """
+
+# Import from child_host_handlers
+from backend.api.handlers.child_host_handlers import (
+    handle_child_host_created,
+    handle_child_host_creation_progress,
+    handle_child_hosts_list_update,
+    handle_virtualization_support_update,
+    handle_wsl_enable_result,
+)
 
 # Import from infrastructure_handlers
 from backend.api.handlers.infrastructure_handlers import (
@@ -68,4 +78,10 @@ __all__ = [
     "handle_reboot_status_update",
     "handle_host_certificates_update",
     "handle_host_role_data_update",
+    # Child host handlers
+    "handle_virtualization_support_update",
+    "handle_child_hosts_list_update",
+    "handle_child_host_creation_progress",
+    "handle_child_host_created",
+    "handle_wsl_enable_result",
 ]

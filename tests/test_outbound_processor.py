@@ -224,9 +224,9 @@ class TestProcessOutboundMessage:
             message_id = message.message_id
             await process_outbound_message(message, host, session)
 
-        # Verify message was marked as completed
+        # Verify message was marked as sent (awaiting acknowledgment from agent)
         msg = session.query(MessageQueue).filter_by(message_id=message_id).first()
-        assert msg is None or msg.status == QueueStatus.COMPLETED
+        assert msg is None or msg.status == QueueStatus.SENT
 
     @pytest.mark.asyncio
     async def test_process_outbound_message_command_failure(self, session):
@@ -365,7 +365,10 @@ class TestSendCommandToAgent:
             result = await send_command_to_agent(command_data, host, message_id)
 
         assert result is True
-        mock_manager.send_to_host.assert_called_once_with(host.id, command_data)
+        # The function copies command_data and adds queue_message_id
+        expected_message = command_data.copy()
+        expected_message["queue_message_id"] = message_id
+        mock_manager.send_to_host.assert_called_once_with(host.id, expected_message)
 
     @pytest.mark.asyncio
     async def test_send_command_to_agent_failure(self):

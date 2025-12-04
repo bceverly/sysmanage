@@ -9,6 +9,9 @@ from sqlalchemy.orm import Session
 
 from backend.api.handlers import (
     handle_antivirus_status_update,
+    handle_child_host_created,
+    handle_child_host_creation_progress,
+    handle_child_hosts_list_update,
     handle_commercial_antivirus_status_update,
     handle_firewall_status_update,
     handle_graylog_status_update,
@@ -22,8 +25,12 @@ from backend.api.handlers import (
     handle_software_update,
     handle_third_party_repository_update,
     handle_user_access_update,
+    handle_virtualization_support_update,
 )
-from backend.api.message_handlers import handle_command_result
+from backend.api.message_handlers import (
+    handle_command_acknowledgment,
+    handle_command_result,
+)
 from backend.api.package_handlers import (
     handle_packages_batch,
     handle_packages_batch_end,
@@ -163,11 +170,43 @@ async def route_inbound_message(
             success = True
             print("Successfully processed Graylog status update", flush=True)
 
+        elif message_type == MessageType.VIRTUALIZATION_SUPPORT_UPDATE:
+            print("About to call handle_virtualization_support_update", flush=True)
+            await handle_virtualization_support_update(
+                db, mock_connection, message_data
+            )
+            success = True
+            print("Successfully processed virtualization support update", flush=True)
+
+        elif message_type == MessageType.CHILD_HOST_LIST_UPDATE:
+            print("About to call handle_child_hosts_list_update", flush=True)
+            await handle_child_hosts_list_update(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed child host list update", flush=True)
+
+        elif message_type == MessageType.CHILD_HOST_CREATION_PROGRESS:
+            print("About to call handle_child_host_creation_progress", flush=True)
+            await handle_child_host_creation_progress(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed child host creation progress", flush=True)
+
+        elif message_type == MessageType.CHILD_HOST_CREATED:
+            print("About to call handle_child_host_created", flush=True)
+            await handle_child_host_created(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed child host created", flush=True)
+
         elif message_type == MessageType.COMMAND_RESULT:
             print("About to call handle_command_result", flush=True)
             await handle_command_result(mock_connection, message_data)
             success = True
             print("Successfully processed command result", flush=True)
+
+        elif message_type == MessageType.COMMAND_ACKNOWLEDGMENT:
+            print("About to call handle_command_acknowledgment", flush=True)
+            await handle_command_acknowledgment(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed command acknowledgment", flush=True)
 
         elif message_type == MessageType.UPDATE_APPLY_RESULT:
             print("About to call handle_update_apply_result", flush=True)

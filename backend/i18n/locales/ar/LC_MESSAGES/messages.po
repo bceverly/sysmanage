@@ -736,3 +736,34 @@ msgstr "فشل الاتصال - قد يكون خادم Graylog معطلاً أو
 
 msgid "Unexpected error checking Graylog health"
 msgstr "خطأ غير متوقع في فحص صحة Graylog"
+
+# Message acknowledgment strings
+msgid "Marked message as sent (awaiting ack): %s"
+msgstr "تم تعليم الرسالة كمرسلة (في انتظار التأكيد): %s"
+
+msgid "Cannot acknowledge unknown message: %s"
+msgstr "لا يمكن تأكيد رسالة غير معروفة: %s"
+
+msgid "Message %s not in SENT status (is %s), skipping ack"
+msgstr "الرسالة %s ليست في حالة مُرسَل (هي %s)، تخطي التأكيد"
+
+msgid "Message acknowledged by agent: %s"
+msgstr "تم تأكيد الرسالة بواسطة الوكيل: %s"
+
+msgid "Retrying unacknowledged message %s (was sent at %s)"
+msgstr "إعادة محاولة الرسالة غير المؤكدة %s (تم إرسالها في %s)"
+
+msgid "Scheduled %d unacknowledged messages for retry"
+msgstr "تمت جدولة %d رسالة غير مؤكدة لإعادة المحاولة"
+
+msgid "Error retrying unacknowledged messages: %s"
+msgstr "خطأ في إعادة محاولة الرسائل غير المؤكدة: %s"
+
+msgid "No acknowledgment received within %d seconds"
+msgstr "لم يتم استلام أي تأكيد خلال %d ثانية"
+
+msgid "Failed to mark message %s as sent: %s"
+msgstr "فشل في تعليم الرسالة %s كمرسلة: %s"
+
+msgid "Failed to mark message %s as acknowledged: %s"
+msgstr "فشل في تعليم الرسالة %s كمؤكدة: %s"

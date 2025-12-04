@@ -737,3 +737,34 @@ msgstr "Verbindung fehlgeschlagen - Graylog-Server ist möglicherweise ausgefall
 
 msgid "Unexpected error checking Graylog health"
 msgstr "Unerwarteter Fehler beim Überprüfen der Graylog-Gesundheit"
+
+# Message acknowledgment strings
+msgid "Marked message as sent (awaiting ack): %s"
+msgstr "Nachricht als gesendet markiert (warte auf Bestätigung): %s"
+
+msgid "Cannot acknowledge unknown message: %s"
+msgstr "Unbekannte Nachricht kann nicht bestätigt werden: %s"
+
+msgid "Message %s not in SENT status (is %s), skipping ack"
+msgstr "Nachricht %s nicht im Status GESENDET (ist %s), Bestätigung übersprungen"
+
+msgid "Message acknowledged by agent: %s"
+msgstr "Nachricht vom Agent bestätigt: %s"
+
+msgid "Retrying unacknowledged message %s (was sent at %s)"
+msgstr "Nicht bestätigte Nachricht %s wird erneut gesendet (gesendet um %s)"
+
+msgid "Scheduled %d unacknowledged messages for retry"
+msgstr "%d nicht bestätigte Nachrichten für erneuten Versuch eingeplant"
+
+msgid "Error retrying unacknowledged messages: %s"
+msgstr "Fehler beim erneuten Senden nicht bestätigter Nachrichten: %s"
+
+msgid "No acknowledgment received within %d seconds"
+msgstr "Keine Bestätigung innerhalb von %d Sekunden erhalten"
+
+msgid "Failed to mark message %s as sent: %s"
+msgstr "Nachricht %s konnte nicht als gesendet markiert werden: %s"
+
+msgid "Failed to mark message %s as acknowledged: %s"
+msgstr "Nachricht %s konnte nicht als bestätigt markiert werden: %s"

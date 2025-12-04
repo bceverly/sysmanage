@@ -437,3 +437,34 @@ msgstr "Connection failed - Graylog server may be down or unreachable"
 
 msgid "Unexpected error checking Graylog health"
 msgstr "Unexpected error checking Graylog health"
+
+# Message acknowledgment strings
+msgid "Marked message as sent (awaiting ack): %s"
+msgstr "Marked message as sent (awaiting ack): %s"
+
+msgid "Cannot acknowledge unknown message: %s"
+msgstr "Cannot acknowledge unknown message: %s"
+
+msgid "Message %s not in SENT status (is %s), skipping ack"
+msgstr "Message %s not in SENT status (is %s), skipping ack"
+
+msgid "Message acknowledged by agent: %s"
+msgstr "Message acknowledged by agent: %s"
+
+msgid "Retrying unacknowledged message %s (was sent at %s)"
+msgstr "Retrying unacknowledged message %s (was sent at %s)"
+
+msgid "Scheduled %d unacknowledged messages for retry"
+msgstr "Scheduled %d unacknowledged messages for retry"
+
+msgid "Error retrying unacknowledged messages: %s"
+msgstr "Error retrying unacknowledged messages: %s"
+
+msgid "No acknowledgment received within %d seconds"
+msgstr "No acknowledgment received within %d seconds"
+
+msgid "Failed to mark message %s as sent: %s"
+msgstr "Failed to mark message %s as sent: %s"
+
+msgid "Failed to mark message %s as acknowledged: %s"
+msgstr "Failed to mark message %s as acknowledged: %s"

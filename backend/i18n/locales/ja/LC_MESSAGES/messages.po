@@ -747,3 +747,34 @@ msgstr "接続失敗 - Graylogサーバーがダウンしているか到達で�
 
 msgid "Unexpected error checking Graylog health"
 msgstr "Graylogヘルスチェック中に予期しないエラーが発生しました"
+
+# Message acknowledgment strings
+msgid "Marked message as sent (awaiting ack): %s"
+msgstr "メッセージを送信済みとしてマーク（確認待ち）: %s"
+
+msgid "Cannot acknowledge unknown message: %s"
+msgstr "不明なメッセージを確認できません: %s"
+
+msgid "Message %s not in SENT status (is %s), skipping ack"
+msgstr "メッセージ %s は送信済み状態ではありません（%s）、確認をスキップ"
+
+msgid "Message acknowledged by agent: %s"
+msgstr "エージェントによりメッセージが確認されました: %s"
+
+msgid "Retrying unacknowledged message %s (was sent at %s)"
+msgstr "未確認メッセージ %s を再試行（%s に送信済み）"
+
+msgid "Scheduled %d unacknowledged messages for retry"
+msgstr "%d 件の未確認メッセージを再試行にスケジュール"
+
+msgid "Error retrying unacknowledged messages: %s"
+msgstr "未確認メッセージの再試行エラー: %s"
+
+msgid "No acknowledgment received within %d seconds"
+msgstr "%d 秒以内に確認を受信しませんでした"
+
+msgid "Failed to mark message %s as sent: %s"
+msgstr "メッセージ %s を送信済みとしてマークできませんでした: %s"
+
+msgid "Failed to mark message %s as acknowledged: %s"
+msgstr "メッセージ %s を確認済みとしてマークできませんでした: %s"

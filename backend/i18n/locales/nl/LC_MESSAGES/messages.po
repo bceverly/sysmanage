@@ -743,3 +743,34 @@ msgstr "Verbinding mislukt - Graylog server is mogelijk offline of onbereikbaar"
 
 msgid "Unexpected error checking Graylog health"
 msgstr "Onverwachte fout bij controleren Graylog status"
+
+# Message acknowledgment strings
+msgid "Marked message as sent (awaiting ack): %s"
+msgstr "Bericht gemarkeerd als verzonden (wacht op bevestiging): %s"
+
+msgid "Cannot acknowledge unknown message: %s"
+msgstr "Kan onbekend bericht niet bevestigen: %s"
+
+msgid "Message %s not in SENT status (is %s), skipping ack"
+msgstr "Bericht %s niet in VERZONDEN status (is %s), bevestiging overgeslagen"
+
+msgid "Message acknowledged by agent: %s"
+msgstr "Bericht bevestigd door agent: %s"
+
+msgid "Retrying unacknowledged message %s (was sent at %s)"
+msgstr "Niet-bevestigd bericht %s opnieuw proberen (verzonden om %s)"
+
+msgid "Scheduled %d unacknowledged messages for retry"
+msgstr "%d niet-bevestigde berichten gepland voor nieuwe poging"
+
+msgid "Error retrying unacknowledged messages: %s"
+msgstr "Fout bij opnieuw proberen van niet-bevestigde berichten: %s"
+
+msgid "No acknowledgment received within %d seconds"
+msgstr "Geen bevestiging ontvangen binnen %d seconden"
+
+msgid "Failed to mark message %s as sent: %s"
+msgstr "Kan bericht %s niet markeren als verzonden: %s"
+
+msgid "Failed to mark message %s as acknowledged: %s"
+msgstr "Kan bericht %s niet markeren als bevestigd: %s"

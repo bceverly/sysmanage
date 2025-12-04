@@ -3,8 +3,10 @@ Outbound message processor for SysManage.
 Handles processing and sending of messages from server to agents.
 """
 
+from datetime import datetime, timezone
 from typing import Dict
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from backend.i18n import _
@@ -32,13 +34,22 @@ async def process_outbound_messages(db: Session) -> None:
 
     from backend.persistence.models import Host, MessageQueue
 
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+
     # Get outbound messages for all hosts
+    # Only pick up messages that are ready to be processed:
+    # - scheduled_at is NULL (immediate), OR
+    # - scheduled_at <= now (scheduled time has passed, including retries)
     outbound_messages = (
         db.query(MessageQueue)
         .filter(
             MessageQueue.direction == QueueDirection.OUTBOUND,
             MessageQueue.status == QueueStatus.PENDING,
             MessageQueue.host_id.is_not(None),
+            or_(
+                MessageQueue.scheduled_at.is_(None),
+                MessageQueue.scheduled_at <= now,
+            ),
         )
         .order_by(MessageQueue.priority.desc(), MessageQueue.created_at.asc())
         .limit(20)
@@ -149,12 +160,28 @@ async def process_outbound_message(message, host, db: Session) -> None:
             logger.warning("Unknown outbound message type: %s", message.message_type)
 
         if success:
-            server_queue_manager.mark_completed(message.message_id, db=db)
-            logger.info(
-                "Successfully sent outbound message: %s to host %s",
-                message.message_id,
-                host.fqdn,
-            )
+            # Mark as SENT (not COMPLETED) - wait for agent acknowledgment
+            server_queue_manager.mark_sent(message.message_id, db=db)
+            # Log details for create_child_host commands to help debug delivery issues
+            command_type = message_data.get("data", {}).get("command_type", "unknown")
+            if command_type == "create_child_host":
+                distribution = (
+                    message_data.get("data", {})
+                    .get("parameters", {})
+                    .get("distribution", "unknown")
+                )
+                logger.info(
+                    "SENT create_child_host command: message_id=%s, distribution=%s, host=%s (awaiting ack)",
+                    message.message_id,
+                    distribution,
+                    host.fqdn,
+                )
+            else:
+                logger.info(
+                    "Sent outbound message: %s to host %s (awaiting acknowledgment)",
+                    message.message_id,
+                    host.fqdn,
+                )
         else:
             server_queue_manager.mark_failed(
                 message.message_id, "Failed to send message to agent", db=db
@@ -169,14 +196,16 @@ async def process_outbound_message(message, host, db: Session) -> None:
         )
 
 
-async def send_command_to_agent(command_data: dict, host, message_id: str) -> bool:
+async def send_command_to_agent(
+    command_data: dict, host, queue_message_id: str
+) -> bool:
     """
     Send a command message to an agent.
 
     Args:
         command_data: The command data to send
         host: The host to send the command to
-        message_id: The message ID for logging
+        queue_message_id: The queue message ID (for acknowledgment tracking)
 
     Returns:
         True if command was sent successfully, False otherwise
@@ -186,17 +215,19 @@ async def send_command_to_agent(command_data: dict, host, message_id: str) -> bo
     try:
         # The command_data is already a properly formatted message from create_command_message
         # called in the API endpoints, so we can send it directly without wrapping again
-        message = command_data
+        message = command_data.copy()
+        # Add the queue message_id so the agent knows which ID to acknowledge
+        message["queue_message_id"] = queue_message_id
 
         # Send via connection manager
         logger.info(
             "Sending command message %s to host %s (%s)",
-            message_id,
+            queue_message_id,
             host.id,
             host.fqdn,
         )
         print(
-            f"=== OUTBOUND PROCESSOR: About to send command message {message_id} to host {host.fqdn} ===",
+            f"=== OUTBOUND PROCESSOR: About to send command message {queue_message_id} to host {host.fqdn} ===",
             flush=True,
         )
         print(f"=== OUTBOUND PROCESSOR: Command data: {command_data} ===", flush=True)
