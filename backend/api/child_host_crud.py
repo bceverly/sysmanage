@@ -178,7 +178,11 @@ async def create_child_host(
         api_port = config["api"].get("port", 8443)
         # Use the host's FQDN as the server URL since the agent needs to reach it
         # If api_host is 0.0.0.0, use the server's actual FQDN
-        if api_host in ("0.0.0.0", "localhost", "127.0.0.1"):
+        if api_host in (
+            "0.0.0.0",
+            "localhost",
+            "127.0.0.1",
+        ):  # nosec B104 - string comparison, not binding
             # Use the parent host's FQDN as the server URL
             # The agent will connect back to the same server
             import socket

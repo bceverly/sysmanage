@@ -345,7 +345,11 @@ async def create_child_host_request(
         use_https = bool(key_file and cert_file)
 
         # Use the actual server FQDN for the agent to connect back
-        if api_host in ("0.0.0.0", "localhost", "127.0.0.1"):
+        if api_host in (
+            "0.0.0.0",
+            "localhost",
+            "127.0.0.1",
+        ):  # nosec B104 - string comparison, not binding
             import socket
 
             try:
