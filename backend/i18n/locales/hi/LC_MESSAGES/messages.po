@@ -774,3 +774,20 @@ msgstr "संदेश %s को भेजा गया के रूप मे
 
 msgid "Failed to mark message %s as acknowledged: %s"
 msgstr "संदेश %s को पुष्टि के रूप में चिह्नित करने में विफल: %s"
+
+# LXD Container Management strings
+
+msgid "LXD is only supported on Linux hosts"
+msgstr "LXD केवल Linux होस्ट पर समर्थित है"
+
+msgid "Agent must be running with root privileges to initialize LXD"
+msgstr "LXD को इनिशियलाइज़ करने के लिए एजेंट को रूट विशेषाधिकारों के साथ चलना चाहिए"
+
+msgid "LXD initialization requested"
+msgstr "LXD इनिशियलाइज़ेशन का अनुरोध किया गया"
+
+msgid "LXD initialization requested. The agent will install and configure LXD automatically."
+msgstr "LXD इनिशियलाइज़ेशन का अनुरोध किया गया। एजेंट स्वचालित रूप से LXD इंस्टॉल और कॉन्फ़िगर करेगा।"
+
+msgid "LXD initialized successfully"
+msgstr "LXD सफलतापूर्वक इनिशियलाइज़ हुआ"

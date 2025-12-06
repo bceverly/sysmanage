@@ -144,6 +144,20 @@ def test_db():
             String, nullable=True
         )  # Using String instead of Text for SQLite
 
+        # Virtualization capability fields
+        virtualization_types = Column(
+            String, nullable=True
+        )  # Comma-separated list of virtualization types
+        virtualization_capabilities = Column(
+            String, nullable=True
+        )  # JSON dict with per-type info
+        virtualization_updated_at = Column(DateTime, nullable=True)
+
+        # Parent host for child hosts (WSL, containers, VMs)
+        parent_host_id = Column(
+            GUID(), ForeignKey("host.id", ondelete="SET NULL"), nullable=True
+        )
+
         # Add relationship
         tags = relationship(
             "Tag", secondary="host_tags", back_populates="hosts", lazy="dynamic"

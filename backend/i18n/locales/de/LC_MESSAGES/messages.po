@@ -768,3 +768,20 @@ msgstr "Nachricht %s konnte nicht als gesendet markiert werden: %s"
 
 msgid "Failed to mark message %s as acknowledged: %s"
 msgstr "Nachricht %s konnte nicht als bestätigt markiert werden: %s"
+
+# LXD Container Management strings
+
+msgid "LXD is only supported on Linux hosts"
+msgstr "LXD wird nur auf Linux-Hosts unterstützt"
+
+msgid "Agent must be running with root privileges to initialize LXD"
+msgstr "Der Agent muss mit Root-Rechten laufen, um LXD zu initialisieren"
+
+msgid "LXD initialization requested"
+msgstr "LXD-Initialisierung angefordert"
+
+msgid "LXD initialization requested. The agent will install and configure LXD automatically."
+msgstr "LXD-Initialisierung angefordert. Der Agent wird LXD automatisch installieren und konfigurieren."
+
+msgid "LXD initialized successfully"
+msgstr "LXD erfolgreich initialisiert"

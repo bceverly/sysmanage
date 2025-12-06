@@ -775,3 +775,20 @@ msgstr "메시지 %s을(를) 전송됨으로 표시하지 못함: %s"
 
 msgid "Failed to mark message %s as acknowledged: %s"
 msgstr "메시지 %s을(를) 확인됨으로 표시하지 못함: %s"
+
+# LXD Container Management strings
+
+msgid "LXD is only supported on Linux hosts"
+msgstr "LXD는 Linux 호스트에서만 지원됩니다"
+
+msgid "Agent must be running with root privileges to initialize LXD"
+msgstr "LXD를 초기화하려면 에이전트가 루트 권한으로 실행되어야 합니다"
+
+msgid "LXD initialization requested"
+msgstr "LXD 초기화가 요청되었습니다"
+
+msgid "LXD initialization requested. The agent will install and configure LXD automatically."
+msgstr "LXD 초기화가 요청되었습니다. 에이전트가 자동으로 LXD를 설치하고 구성합니다."
+
+msgid "LXD initialized successfully"
+msgstr "LXD가 성공적으로 초기화되었습니다"

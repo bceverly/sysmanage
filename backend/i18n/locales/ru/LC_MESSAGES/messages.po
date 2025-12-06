@@ -778,3 +778,20 @@ msgstr "Не удалось пометить сообщение %s как отп
 
 msgid "Failed to mark message %s as acknowledged: %s"
 msgstr "Не удалось пометить сообщение %s как подтвержденное: %s"
+
+# LXD Container Management strings
+
+msgid "LXD is only supported on Linux hosts"
+msgstr "LXD поддерживается только на хостах Linux"
+
+msgid "Agent must be running with root privileges to initialize LXD"
+msgstr "Агент должен работать с правами root для инициализации LXD"
+
+msgid "LXD initialization requested"
+msgstr "Запрошена инициализация LXD"
+
+msgid "LXD initialization requested. The agent will install and configure LXD automatically."
+msgstr "Запрошена инициализация LXD. Агент автоматически установит и настроит LXD."
+
+msgid "LXD initialized successfully"
+msgstr "LXD успешно инициализирован"

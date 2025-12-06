@@ -52,6 +52,8 @@ class MessageType(str, Enum):
     CHILD_HOST_STOPPED = "child_host_stopped"
     CHILD_HOST_RESTARTED = "child_host_restarted"
     CHILD_HOST_STATUS_UPDATE = "child_host_status_update"
+    LXD_INITIALIZED = "lxd_initialized"
+    LXD_INITIALIZATION_FAILED = "lxd_initialization_failed"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -104,6 +106,7 @@ class CommandType(str, Enum):
     RESTART_CHILD_HOST = "restart_child_host"
     LIST_CHILD_HOSTS = "list_child_hosts"
     CHILD_HOST_STATUS = "child_host_status"
+    INITIALIZE_LXD = "initialize_lxd"
 
 
 class Message:

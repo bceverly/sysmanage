@@ -68,6 +68,7 @@ import { useColumnVisibility } from '../Hooks/useColumnVisibility';
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axiosInstance from '../Services/api';
+import { distributionService } from '../Services/childHostDistributions';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 
 import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck, doRequestSystemInfo } from '../Services/hosts';
@@ -184,8 +185,8 @@ const HostDetail = () => {
     const supportsChildHosts = useCallback(() => {
         if (!host?.platform) return false;
         const platform = host.platform || '';
-        // Currently only Windows with WSL is supported
-        return platform.includes('Windows');
+        // Windows hosts support WSL, Linux hosts support LXD (Ubuntu 22.04+)
+        return platform.includes('Windows') || platform.includes('Linux');
     }, [host]);
 
     // Tab names for URL hash (static tabs only - dynamic tabs handled separately)
@@ -246,6 +247,15 @@ const HostDetail = () => {
                 version?: string;
                 default_version?: number;
             };
+            lxd?: {
+                available: boolean;
+                installed: boolean;
+                initialized: boolean;
+                user_in_group: boolean;
+                needs_install: boolean;
+                needs_init: boolean;
+                snap_available: boolean;
+            };
             [key: string]: unknown;
         };
         reboot_required: boolean;
@@ -253,18 +263,27 @@ const HostDetail = () => {
     const [virtualizationStatus, setVirtualizationStatus] = useState<VirtualizationStatus | null>(null);
     const [virtualizationLoading, setVirtualizationLoading] = useState<boolean>(false);
     const [enableWslLoading, setEnableWslLoading] = useState<boolean>(false);
+    const [initializeLxdLoading, setInitializeLxdLoading] = useState<boolean>(false);
 
     // Create child host modal state
     const [createChildHostOpen, setCreateChildHostOpen] = useState<boolean>(false);
     const [createChildHostLoading, setCreateChildHostLoading] = useState<boolean>(false);
     const [childHostFormData, setChildHostFormData] = useState({
+        childType: 'wsl',  // 'wsl' for Windows, 'lxd' for Linux
         distribution: '',
+        containerName: '',  // For LXD containers
         hostname: '',
         username: '',
         password: '',
         confirmPassword: '',
     });
     const [childHostCreationProgress, setChildHostCreationProgress] = useState<string>('');
+    const [availableDistributions, setAvailableDistributions] = useState<Array<{
+        id: string;
+        display_name: string;
+        install_identifier: string;
+        child_type: string;
+    }>>([]);
 
     // Compute FQDN from hostname - appends server domain if not already an FQDN
     const getServerDomain = useCallback(() => {
@@ -287,6 +306,40 @@ const HostDetail = () => {
         // Append the server's domain
         return `${hostname}.${getServerDomain()}`;
     }, [childHostFormData.hostname, getServerDomain]);
+
+    // Fetch distributions when create child host dialog opens
+    const fetchDistributions = useCallback(async (childType: string) => {
+        try {
+            const distributions = await distributionService.getAll(childType);
+            const activeDistributions = distributions
+                .filter(d => d.is_active)
+                .map(d => ({
+                    id: d.id,
+                    display_name: d.display_name,
+                    install_identifier: d.install_identifier || '',
+                    child_type: d.child_type,
+                }));
+            setAvailableDistributions(activeDistributions);
+        } catch (error) {
+            console.error('Error fetching distributions:', error);
+            setAvailableDistributions([]);
+        }
+    }, []);
+
+    // Set child type based on platform and fetch distributions when dialog opens
+    useEffect(() => {
+        if (createChildHostOpen && host) {
+            const platform = host.platform || '';
+            const isLinux = platform.toLowerCase().includes('linux');
+            const childType = isLinux ? 'lxd' : 'wsl';
+            setChildHostFormData(prev => ({
+                ...prev,
+                childType,
+                distribution: '',  // Reset distribution when type changes
+            }));
+            fetchDistributions(childType);
+        }
+    }, [createChildHostOpen, host, fetchDistributions]);
 
     // Child host control state (start/stop/restart/delete)
     const [childHostOperationLoading, setChildHostOperationLoading] = useState<Record<string, string | null>>({});
@@ -595,21 +648,47 @@ const HostDetail = () => {
         }
     }, [hostId]);
 
+    // Fetch virtualization status
+    const fetchVirtualizationStatus = useCallback(async () => {
+        if (!hostId) return;
+        try {
+            setVirtualizationLoading(true);
+            const response = await axiosInstance.get(`/api/host/${hostId}/virtualization/status`);
+            if (response.status === 200) {
+                setVirtualizationStatus(response.data);
+            }
+        } catch (error) {
+            console.error('Error fetching virtualization status:', error);
+            // Don't fail the whole page load for virtualization errors
+            setVirtualizationStatus(null);
+        } finally {
+            setVirtualizationLoading(false);
+        }
+    }, [hostId]);
+
     const requestChildHostsRefresh = useCallback(async (showSnackbar: boolean = true) => {
         if (!hostId) return;
         try {
             setChildHostsRefreshRequested(true);
-            // Request the agent to list child hosts with fresh status
-            const response = await axiosInstance.post(`/api/host/${hostId}/children/refresh`);
-            if (response.status === 200) {
+            // Request the agent to list child hosts with fresh status and refresh virtualization status
+            const [childHostsResponse] = await Promise.all([
+                axiosInstance.post(`/api/host/${hostId}/children/refresh`),
+                // Also request virtualization status refresh
+                axiosInstance.get(`/api/host/${hostId}/virtualization`).catch(err => {
+                    console.log('Virtualization check request failed (optional):', err);
+                    return null;
+                })
+            ]);
+            if (childHostsResponse.status === 200) {
                 if (showSnackbar) {
                     setSnackbarMessage(t('hostDetail.childHostsRefreshRequested', 'Child hosts refresh requested'));
                     setSnackbarSeverity('success');
                     setSnackbarOpen(true);
                 }
-                // Refetch child hosts after a short delay to allow collection to complete
+                // Refetch child hosts and virtualization status after a short delay to allow collection to complete
                 setTimeout(() => {
                     fetchChildHosts(false);
+                    fetchVirtualizationStatus();
                     setChildHostsRefreshRequested(false);
                 }, 3000);
             }
@@ -622,7 +701,7 @@ const HostDetail = () => {
             }
             setChildHostsRefreshRequested(false);
         }
-    }, [hostId, fetchChildHosts, t]);
+    }, [hostId, fetchChildHosts, fetchVirtualizationStatus, t]);
 
     // Child host control functions (start/stop/restart/delete)
     const handleChildHostStart = useCallback(async (child: ChildHost) => {
@@ -725,24 +804,6 @@ const HostDetail = () => {
         }
     }, [hostId, childHostToDelete, fetchChildHosts, t]);
 
-    // Fetch virtualization status
-    const fetchVirtualizationStatus = useCallback(async () => {
-        if (!hostId) return;
-        try {
-            setVirtualizationLoading(true);
-            const response = await axiosInstance.get(`/api/host/${hostId}/virtualization/status`);
-            if (response.status === 200) {
-                setVirtualizationStatus(response.data);
-            }
-        } catch (error) {
-            console.error('Error fetching virtualization status:', error);
-            // Don't fail the whole page load for virtualization errors
-            setVirtualizationStatus(null);
-        } finally {
-            setVirtualizationLoading(false);
-        }
-    }, [hostId]);
-
     // Enable WSL on Windows host
     const handleEnableWsl = useCallback(async () => {
         if (!hostId) return;
@@ -770,6 +831,31 @@ const HostDetail = () => {
             setSnackbarOpen(true);
         } finally {
             setEnableWslLoading(false);
+        }
+    }, [hostId, fetchVirtualizationStatus, t]);
+
+    // Initialize LXD on Linux host
+    const handleInitializeLxd = useCallback(async () => {
+        if (!hostId) return;
+        try {
+            setInitializeLxdLoading(true);
+            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/initialize-lxd`);
+            if (response.status === 200) {
+                setSnackbarMessage(t('hostDetail.lxdInitializedSuccess', 'LXD initialization requested. The agent will install and configure LXD.'));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+                // Refresh virtualization status after a delay
+                setTimeout(() => {
+                    fetchVirtualizationStatus();
+                }, 5000);
+            }
+        } catch (error) {
+            console.error('Error initializing LXD:', error);
+            setSnackbarMessage(t('hostDetail.lxdInitializeFailed', 'Failed to initialize LXD'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setInitializeLxdLoading(false);
         }
     }, [hostId, fetchVirtualizationStatus, t]);
 
@@ -813,13 +899,21 @@ const HostDetail = () => {
             setCreateChildHostLoading(true);
             setChildHostCreationProgress(t('hostDetail.childHostCreationStarting', 'Starting child host creation...'));
 
-            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/create-child`, {
-                child_type: 'wsl',
+            // Build request based on child type
+            const requestData: Record<string, string> = {
+                child_type: childHostFormData.childType,
                 distribution: childHostFormData.distribution,
                 hostname: computedFqdn,  // Always send the computed FQDN
                 username: childHostFormData.username,
                 password: childHostFormData.password,
-            });
+            };
+
+            // For LXD, also send container name
+            if (childHostFormData.childType === 'lxd' && childHostFormData.containerName) {
+                requestData.container_name = childHostFormData.containerName;
+            }
+
+            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/create-child`, requestData);
 
             if (response.status === 200) {
                 const result = response.data;
@@ -830,7 +924,9 @@ const HostDetail = () => {
                     setCreateChildHostOpen(false);
                     // Reset form
                     setChildHostFormData({
+                        childType: childHostFormData.childType,  // Keep the child type
                         distribution: '',
+                        containerName: '',
                         hostname: '',
                         username: '',
                         password: '',
@@ -1393,7 +1489,8 @@ const HostDetail = () => {
                         console.log('Roles data not available or failed to load:', error);
                     }
                     // Fetch child hosts data and virtualization status if supported
-                    if (hostData.platform?.includes('Windows')) {
+                    // Windows hosts support WSL, Linux hosts support LXD (Ubuntu 22.04+)
+                    if (hostData.platform?.includes('Windows') || hostData.platform?.includes('Linux')) {
                         try {
                             await fetchChildHosts();
                             await fetchVirtualizationStatus();
@@ -5191,66 +5288,106 @@ const HostDetail = () => {
                                 {virtualizationStatus && (
                                     <Box sx={{ mt: 2 }}>
                                         <Grid container spacing={2}>
-                                            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                                                <Typography variant="body2" color="textSecondary">
-                                                    {t('hostDetail.wslStatus', 'WSL Status')}
-                                                </Typography>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                                                    {virtualizationStatus.capabilities?.wsl?.enabled ? (
-                                                        <Chip
-                                                            label={t('hostDetail.wslEnabled', 'Enabled')}
-                                                            color="success"
-                                                            size="small"
-                                                        />
-                                                    ) : virtualizationStatus.capabilities?.wsl?.needs_bios_virtualization ? (
-                                                        <Chip
-                                                            label={t('hostDetail.wslNeedsBios', 'BIOS Virtualization Required')}
-                                                            color="error"
-                                                            size="small"
-                                                        />
-                                                    ) : virtualizationStatus.capabilities?.wsl?.needs_enable ? (
-                                                        <Chip
-                                                            label={t('hostDetail.wslNotEnabled', 'Not Enabled')}
-                                                            color="warning"
-                                                            size="small"
-                                                        />
-                                                    ) : (
-                                                        <Chip
-                                                            label={t('hostDetail.wslNotAvailable', 'Not Available')}
-                                                            color="default"
-                                                            size="small"
-                                                        />
+                                            {/* WSL Status - show for Windows hosts */}
+                                            {host?.platform?.includes('Windows') && (
+                                                <>
+                                                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                                        <Typography variant="body2" color="textSecondary">
+                                                            {t('hostDetail.wslStatus', 'WSL Status')}
+                                                        </Typography>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                                                            {virtualizationStatus.capabilities?.wsl?.enabled ? (
+                                                                <Chip
+                                                                    label={t('hostDetail.wslEnabled', 'Enabled')}
+                                                                    color="success"
+                                                                    size="small"
+                                                                />
+                                                            ) : virtualizationStatus.capabilities?.wsl?.needs_bios_virtualization ? (
+                                                                <Chip
+                                                                    label={t('hostDetail.wslNeedsBios', 'BIOS Virtualization Required')}
+                                                                    color="error"
+                                                                    size="small"
+                                                                />
+                                                            ) : virtualizationStatus.capabilities?.wsl?.needs_enable ? (
+                                                                <Chip
+                                                                    label={t('hostDetail.wslNotEnabled', 'Not Enabled')}
+                                                                    color="warning"
+                                                                    size="small"
+                                                                />
+                                                            ) : (
+                                                                <Chip
+                                                                    label={t('hostDetail.wslNotAvailable', 'Not Available')}
+                                                                    color="default"
+                                                                    size="small"
+                                                                />
+                                                            )}
+                                                        </Box>
+                                                    </Grid>
+                                                    {virtualizationStatus.capabilities?.wsl?.version && (
+                                                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                                            <Typography variant="body2" color="textSecondary">
+                                                                {t('hostDetail.wslVersion', 'WSL Version')}
+                                                            </Typography>
+                                                            <Typography variant="body1">
+                                                                {virtualizationStatus.capabilities.wsl.version}
+                                                            </Typography>
+                                                        </Grid>
                                                     )}
-                                                </Box>
-                                            </Grid>
-                                            {virtualizationStatus.capabilities?.wsl?.version && (
+                                                    {virtualizationStatus.reboot_required && (
+                                                        <Grid size={{ xs: 12 }}>
+                                                            <Chip
+                                                                label={t('hostDetail.rebootRequiredForWsl', 'Reboot required to complete WSL enablement')}
+                                                                color="warning"
+                                                                size="small"
+                                                                icon={<WarningIcon />}
+                                                            />
+                                                        </Grid>
+                                                    )}
+                                                    {virtualizationStatus.capabilities?.wsl?.needs_bios_virtualization && (
+                                                        <Grid size={{ xs: 12 }}>
+                                                            <Chip
+                                                                label={t('hostDetail.biosVirtualizationRequired', 'Enable virtualization in BIOS/UEFI settings and restart the computer')}
+                                                                color="error"
+                                                                size="small"
+                                                                icon={<WarningIcon />}
+                                                            />
+                                                        </Grid>
+                                                    )}
+                                                </>
+                                            )}
+                                            {/* LXD Status - show for Linux hosts */}
+                                            {host?.platform?.includes('Linux') && (
                                                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                                                     <Typography variant="body2" color="textSecondary">
-                                                        {t('hostDetail.wslVersion', 'WSL Version')}
+                                                        {t('hostDetail.lxdStatus', 'LXD Status')}
                                                     </Typography>
-                                                    <Typography variant="body1">
-                                                        {virtualizationStatus.capabilities.wsl.version}
-                                                    </Typography>
-                                                </Grid>
-                                            )}
-                                            {virtualizationStatus.reboot_required && (
-                                                <Grid size={{ xs: 12 }}>
-                                                    <Chip
-                                                        label={t('hostDetail.rebootRequiredForWsl', 'Reboot required to complete WSL enablement')}
-                                                        color="warning"
-                                                        size="small"
-                                                        icon={<WarningIcon />}
-                                                    />
-                                                </Grid>
-                                            )}
-                                            {virtualizationStatus.capabilities?.wsl?.needs_bios_virtualization && (
-                                                <Grid size={{ xs: 12 }}>
-                                                    <Chip
-                                                        label={t('hostDetail.biosVirtualizationRequired', 'Enable virtualization in BIOS/UEFI settings and restart the computer')}
-                                                        color="error"
-                                                        size="small"
-                                                        icon={<WarningIcon />}
-                                                    />
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                                                        {virtualizationStatus.capabilities?.lxd?.installed && virtualizationStatus.capabilities?.lxd?.initialized ? (
+                                                            <Chip
+                                                                label={t('hostDetail.lxdReady', 'Ready')}
+                                                                color="success"
+                                                                size="small"
+                                                            />
+                                                        ) : virtualizationStatus.capabilities?.lxd?.installed && !virtualizationStatus.capabilities?.lxd?.initialized ? (
+                                                            <Chip
+                                                                label={t('hostDetail.lxdNotInitialized', 'Not Initialized')}
+                                                                color="warning"
+                                                                size="small"
+                                                            />
+                                                        ) : virtualizationStatus.capabilities?.lxd?.available ? (
+                                                            <Chip
+                                                                label={t('hostDetail.lxdNotInstalled', 'Not Installed')}
+                                                                color="warning"
+                                                                size="small"
+                                                            />
+                                                        ) : (
+                                                            <Chip
+                                                                label={t('hostDetail.lxdNotAvailable', 'Not Available')}
+                                                                color="default"
+                                                                size="small"
+                                                            />
+                                                        )}
+                                                    </Box>
                                                 </Grid>
                                             )}
                                         </Grid>
@@ -5287,8 +5424,23 @@ const HostDetail = () => {
                                                 {t('hostDetail.enableWsl', 'Enable WSL')}
                                             </Button>
                                         )}
-                                        {/* Create Child Host Button - show if WSL is enabled */}
-                                        {virtualizationStatus?.capabilities?.wsl?.enabled && (
+                                        {/* Enable LXD Button - show for Linux hosts if LXD needs install or init */}
+                                        {host?.platform?.includes('Linux') && virtualizationStatus?.capabilities?.lxd?.available &&
+                                         (virtualizationStatus?.capabilities?.lxd?.needs_install || virtualizationStatus?.capabilities?.lxd?.needs_init) && (
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                size="small"
+                                                startIcon={initializeLxdLoading ? <CircularProgress size={16} /> : <AddIcon />}
+                                                onClick={handleInitializeLxd}
+                                                disabled={initializeLxdLoading || !host?.is_agent_privileged}
+                                            >
+                                                {t('hostDetail.enableLxd', 'Enable LXD')}
+                                            </Button>
+                                        )}
+                                        {/* Create Child Host Button - show if WSL is enabled (Windows) or LXD is ready (Linux) */}
+                                        {(virtualizationStatus?.capabilities?.wsl?.enabled ||
+                                          (virtualizationStatus?.capabilities?.lxd?.installed && virtualizationStatus?.capabilities?.lxd?.initialized)) && (
                                             <Button
                                                 variant="contained"
                                                 color="primary"
@@ -5327,12 +5479,22 @@ const HostDetail = () => {
                                             {t('hostDetail.childHostsEmpty', 'No child hosts found')}
                                         </Typography>
                                         <Typography variant="body2" color="textSecondary">
-                                            {virtualizationStatus?.capabilities?.wsl?.enabled
-                                                ? t('hostDetail.childHostsEmptyWslEnabled', 'Click "Create Child Host" to create a new WSL instance.')
-                                                : virtualizationStatus?.capabilities?.wsl?.needs_enable
-                                                    ? t('hostDetail.childHostsEmptyWslNotEnabled', 'Enable WSL to create virtual machines on this host.')
-                                                    : t('hostDetail.childHostsEmptyDescription', 'WSL instances and other virtual machines on this Windows host will appear here.')
-                                            }
+                                            {/* Windows hosts - WSL messages */}
+                                            {host?.platform?.includes('Windows') && (
+                                                virtualizationStatus?.capabilities?.wsl?.enabled
+                                                    ? t('hostDetail.childHostsEmptyWslEnabled', 'Click "Create Child Host" to create a new WSL instance.')
+                                                    : virtualizationStatus?.capabilities?.wsl?.needs_enable
+                                                        ? t('hostDetail.childHostsEmptyWslNotEnabled', 'Enable WSL to create virtual machines on this host.')
+                                                        : t('hostDetail.childHostsEmptyDescription', 'WSL instances and other virtual machines on this Windows host will appear here.')
+                                            )}
+                                            {/* Linux hosts - LXD messages */}
+                                            {host?.platform?.includes('Linux') && (
+                                                virtualizationStatus?.capabilities?.lxd?.installed && virtualizationStatus?.capabilities?.lxd?.initialized
+                                                    ? t('hostDetail.childHostsEmptyLxdReady', 'Click "Create Child Host" to create a new LXD container.')
+                                                    : virtualizationStatus?.capabilities?.lxd?.available
+                                                        ? t('hostDetail.childHostsEmptyLxdNotReady', 'Enable LXD to create containers on this host.')
+                                                        : t('hostDetail.childHostsEmptyLxdNotAvailable', 'LXD is not available on this host. Ubuntu 22.04 or newer is required.')
+                                            )}
                                         </Typography>
                                     </Box>
                                 )}
@@ -6920,7 +7082,9 @@ const HostDetail = () => {
                 fullWidth
             >
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    {t('hostDetail.createChildHostTitle', 'Create WSL Instance')}
+                    {childHostFormData.childType === 'lxd'
+                        ? t('hostDetail.createLxdContainerTitle', 'Create LXD Container')
+                        : t('hostDetail.createChildHostTitle', 'Create WSL Instance')}
                     <IconButton
                         onClick={() => setCreateChildHostOpen(false)}
                         disabled={createChildHostLoading}
@@ -6932,30 +7096,45 @@ const HostDetail = () => {
                     <Box sx={{ mt: 2 }}>
                         <FormControl fullWidth sx={{ mb: 2 }}>
                             <InputLabel id="distribution-select-label">
-                                {t('hostDetail.childHostDistributionLabel', 'Distribution')}
+                                {childHostFormData.childType === 'lxd'
+                                    ? t('hostDetail.childHostImageLabel', 'Image')
+                                    : t('hostDetail.childHostDistributionLabel', 'Distribution')}
                             </InputLabel>
                             <Select
                                 labelId="distribution-select-label"
                                 value={childHostFormData.distribution}
-                                label={t('hostDetail.childHostDistributionLabel', 'Distribution')}
+                                label={childHostFormData.childType === 'lxd'
+                                    ? t('hostDetail.childHostImageLabel', 'Image')
+                                    : t('hostDetail.childHostDistributionLabel', 'Distribution')}
                                 onChange={(e) => setChildHostFormData({
                                     ...childHostFormData,
                                     distribution: e.target.value
                                 })}
                                 disabled={createChildHostLoading}
                             >
-                                <MenuItem value="Ubuntu-24.04">Ubuntu 24.04 LTS</MenuItem>
-                                <MenuItem value="Ubuntu-22.04">Ubuntu 22.04 LTS</MenuItem>
-                                <MenuItem value="Ubuntu-20.04">Ubuntu 20.04 LTS</MenuItem>
-                                <MenuItem value="Debian">Debian</MenuItem>
-                                <MenuItem value="kali-linux">Kali Linux</MenuItem>
-                                <MenuItem value="openSUSE-Tumbleweed">openSUSE Tumbleweed</MenuItem>
-                                <MenuItem value="openSUSE-Leap-15">openSUSE Leap 15</MenuItem>
-                                <MenuItem value="Fedora">Fedora</MenuItem>
-                                <MenuItem value="AlmaLinux-9">AlmaLinux 9</MenuItem>
-                                <MenuItem value="RockyLinux-9">Rocky Linux 9</MenuItem>
+                                {availableDistributions.map((dist) => (
+                                    <MenuItem key={dist.id} value={dist.install_identifier}>
+                                        {dist.display_name}
+                                    </MenuItem>
+                                ))}
                             </Select>
                         </FormControl>
+
+                        {/* Container name field for LXD */}
+                        {childHostFormData.childType === 'lxd' && (
+                            <TextField
+                                fullWidth
+                                label={t('hostDetail.childHostContainerNameLabel', 'Container Name')}
+                                value={childHostFormData.containerName}
+                                onChange={(e) => setChildHostFormData({
+                                    ...childHostFormData,
+                                    containerName: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+                                })}
+                                disabled={createChildHostLoading}
+                                sx={{ mb: 2 }}
+                                helperText={t('hostDetail.childHostContainerNameHelp', 'Name for the LXD container (lowercase, alphanumeric, hyphens)')}
+                            />
+                        )}
 
                         <TextField
                             fullWidth
@@ -6979,7 +7158,9 @@ const HostDetail = () => {
                             InputProps={{
                                 readOnly: true,
                             }}
-                            helperText={t('hostDetail.childHostFqdnHelp', 'This FQDN will be used for the WSL instance')}
+                            helperText={childHostFormData.childType === 'lxd'
+                                ? t('hostDetail.childHostFqdnHelpLxd', 'This FQDN will be used for the LXD container')
+                                : t('hostDetail.childHostFqdnHelp', 'This FQDN will be used for the WSL instance')}
                         />
 
                         <TextField

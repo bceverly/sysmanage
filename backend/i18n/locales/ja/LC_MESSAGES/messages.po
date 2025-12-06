@@ -778,3 +778,20 @@ msgstr "メッセージ %s を送信済みとしてマークできませんで�
 
 msgid "Failed to mark message %s as acknowledged: %s"
 msgstr "メッセージ %s を確認済みとしてマークできませんでした: %s"
+
+# LXD Container Management strings
+
+msgid "LXD is only supported on Linux hosts"
+msgstr "LXDはLinuxホストでのみサポートされています"
+
+msgid "Agent must be running with root privileges to initialize LXD"
+msgstr "LXDを初期化するにはエージェントがroot権限で実行されている必要があります"
+
+msgid "LXD initialization requested"
+msgstr "LXDの初期化がリクエストされました"
+
+msgid "LXD initialization requested. The agent will install and configure LXD automatically."
+msgstr "LXDの初期化がリクエストされました。エージェントがLXDを自動的にインストールして設定します。"
+
+msgid "LXD initialized successfully"
+msgstr "LXDが正常に初期化されました"

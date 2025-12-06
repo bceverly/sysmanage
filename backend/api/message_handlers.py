@@ -542,6 +542,20 @@ async def handle_command_result(connection, message_data: dict):
             finally:
                 db_session.close()
 
+    # Check if this is a LXD initialize result
+    if command_type == "initialize_lxd":
+        logger.info("Detected LXD initialize result, routing to handler")
+        from backend.api.handlers import handle_lxd_initialize_result
+        from backend.persistence.db import get_db
+
+        db_session = next(get_db())
+        try:
+            return await handle_lxd_initialize_result(
+                db_session, connection, message_data
+            )
+        finally:
+            db_session.close()
+
     logger.info("PACKAGE_DEBUG: message_data keys: %s", list(message_data.keys()))
     logger.info(
         "PACKAGE_DEBUG: result_data type: %s, keys: %s",

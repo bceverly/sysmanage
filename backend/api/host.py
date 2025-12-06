@@ -415,6 +415,9 @@ def _get_all_hosts_sync():
                     }
                     for tag in host_tags
                 ],
+                # Include virtualization support info
+                "virtualization_types": host.virtualization_types,
+                "virtualization_capabilities": host.virtualization_capabilities,
             }
             result.append(host_dict)
 

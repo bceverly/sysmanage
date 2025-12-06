@@ -775,3 +775,20 @@ msgstr "Impossibile contrassegnare il messaggio %s come inviato: %s"
 
 msgid "Failed to mark message %s as acknowledged: %s"
 msgstr "Impossibile contrassegnare il messaggio %s come confermato: %s"
+
+# LXD Container Management strings
+
+msgid "LXD is only supported on Linux hosts"
+msgstr "LXD è supportato solo su host Linux"
+
+msgid "Agent must be running with root privileges to initialize LXD"
+msgstr "L'agente deve essere in esecuzione con privilegi di root per inizializzare LXD"
+
+msgid "LXD initialization requested"
+msgstr "Inizializzazione LXD richiesta"
+
+msgid "LXD initialization requested. The agent will install and configure LXD automatically."
+msgstr "Inizializzazione LXD richiesta. L'agente installerà e configurerà LXD automaticamente."
+
+msgid "LXD initialized successfully"
+msgstr "LXD inizializzato con successo"

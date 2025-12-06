@@ -774,3 +774,20 @@ msgstr "無法將訊息 %s 標記為已傳送：%s"
 
 msgid "Failed to mark message %s as acknowledged: %s"
 msgstr "無法將訊息 %s 標記為已確認：%s"
+
+# LXD Container Management strings
+
+msgid "LXD is only supported on Linux hosts"
+msgstr "LXD僅支援Linux主機"
+
+msgid "Agent must be running with root privileges to initialize LXD"
+msgstr "代理必須以root權限執行才能初始化LXD"
+
+msgid "LXD initialization requested"
+msgstr "已請求LXD初始化"
+
+msgid "LXD initialization requested. The agent will install and configure LXD automatically."
+msgstr "已請求LXD初始化。代理將自動安裝和配置LXD。"
+
+msgid "LXD initialized successfully"
+msgstr "LXD初始化成功"

@@ -662,8 +662,25 @@ const Hosts = () => {
 
         // Apply child host filter
         if (childHostFilter === 'parents') {
-            // Hide child hosts - only show hosts without a parent
-            filtered = filtered.filter(host => !host.parent_host_id);
+            // Show only hosts that can be parents (have virtualization ready)
+            filtered = filtered.filter(host => {
+                // Must not be a child host itself
+                if (host.parent_host_id) return false;
+
+                // Check if virtualization is ready (LXD initialized or WSL enabled)
+                if (!host.virtualization_capabilities) return false;
+
+                try {
+                    const caps = JSON.parse(host.virtualization_capabilities);
+                    // Check LXD - must be initialized
+                    if (caps.lxd?.initialized) return true;
+                    // Check WSL - must be enabled (not just available)
+                    if (caps.wsl?.enabled) return true;
+                    return false;
+                } catch {
+                    return false;
+                }
+            });
         } else if (childHostFilter === 'children') {
             // Show only child hosts - hosts that have a parent
             filtered = filtered.filter(host => !!host.parent_host_id);

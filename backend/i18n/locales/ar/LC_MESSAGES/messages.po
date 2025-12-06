@@ -767,3 +767,20 @@ msgstr "فشل في تعليم الرسالة %s كمرسلة: %s"
 
 msgid "Failed to mark message %s as acknowledged: %s"
 msgstr "فشل في تعليم الرسالة %s كمؤكدة: %s"
+
+# LXD Container Management strings
+
+msgid "LXD is only supported on Linux hosts"
+msgstr "LXD مدعوم فقط على أجهزة Linux"
+
+msgid "Agent must be running with root privileges to initialize LXD"
+msgstr "يجب أن يعمل الوكيل بصلاحيات الجذر لتهيئة LXD"
+
+msgid "LXD initialization requested"
+msgstr "تم طلب تهيئة LXD"
+
+msgid "LXD initialization requested. The agent will install and configure LXD automatically."
+msgstr "تم طلب تهيئة LXD. سيقوم الوكيل بتثبيت وتكوين LXD تلقائياً."
+
+msgid "LXD initialized successfully"
+msgstr "تم تهيئة LXD بنجاح"

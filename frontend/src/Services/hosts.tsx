@@ -100,6 +100,9 @@ type SysManageHost = {
     os_upgrades_count?: number;
     // Parent host ID for child hosts (WSL, VMs, containers)
     parent_host_id?: string;
+    // Virtualization support (for hosts that can be parents)
+    virtualization_types?: string;  // JSON string like '["wsl"]' or '["lxd"]'
+    virtualization_capabilities?: string;  // JSON string with detailed capabilities
 }
 
 type StorageDevice = {

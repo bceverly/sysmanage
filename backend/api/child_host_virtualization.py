@@ -1,6 +1,6 @@
 """
 Virtualization management API endpoints.
-Handles WSL status, enabling WSL, and creating child hosts.
+Handles WSL status, LXD status, enabling WSL/LXD, and creating child hosts.
 """
 
 import json
@@ -133,11 +133,13 @@ async def get_virtualization_status(
                 pass  # Fall through to inference logic
 
         # Fallback: infer from platform and child hosts if no stored data
-        wsl_enabled = False
-        wsl_available = is_windows
-        needs_enable = False
+        is_linux = host.platform and "Linux" in host.platform
 
         if is_windows:
+            wsl_enabled = False
+            wsl_available = True
+            needs_enable = False
+
             # Check if there are any WSL child hosts - if so, WSL is enabled
             child_hosts = (
                 session.query(models.HostChild)
@@ -153,24 +155,70 @@ async def get_virtualization_status(
                 # WSL is available but may need enabling
                 needs_enable = True
 
-        if reboot_required:
-            # WSL enablement in progress, waiting for reboot
-            needs_enable = False
+            if reboot_required:
+                # WSL enablement in progress, waiting for reboot
+                needs_enable = False
 
-        return {
-            "supported_types": ["wsl"] if is_windows else [],
-            "capabilities": (
-                {
+            return {
+                "supported_types": ["wsl"],
+                "capabilities": {
                     "wsl": {
                         "available": wsl_available,
                         "enabled": wsl_enabled,
                         "needs_enable": needs_enable and not wsl_enabled,
                     }
+                },
+                "reboot_required": reboot_required,
+            }
+
+        if is_linux:
+            # For Linux hosts, assume LXD is available (Ubuntu 22.04+)
+            # and needs initialization if no stored data
+            lxd_child_hosts = (
+                session.query(models.HostChild)
+                .filter(
+                    models.HostChild.parent_host_id == host_id,
+                    models.HostChild.child_type == "lxd",
+                )
+                .count()
+            )
+
+            # If there are LXD containers, LXD must be installed and initialized
+            if lxd_child_hosts > 0:
+                return {
+                    "supported_types": ["lxd"],
+                    "capabilities": {
+                        "lxd": {
+                            "available": True,
+                            "installed": True,
+                            "initialized": True,
+                            "needs_install": False,
+                            "needs_init": False,
+                        }
+                    },
+                    "reboot_required": False,
                 }
-                if is_windows
-                else {}
-            ),
-            "reboot_required": reboot_required,
+
+            # No stored data and no containers - assume LXD available but needs setup
+            return {
+                "supported_types": ["lxd"],
+                "capabilities": {
+                    "lxd": {
+                        "available": True,
+                        "installed": False,
+                        "initialized": False,
+                        "needs_install": True,
+                        "needs_init": True,
+                    }
+                },
+                "reboot_required": False,
+            }
+
+        # Unknown platform
+        return {
+            "supported_types": [],
+            "capabilities": {},
+            "reboot_required": False,
         }
 
 
@@ -250,6 +298,82 @@ async def enable_wsl(
 
 
 @router.post(
+    "/host/{host_id}/virtualization/initialize-lxd",
+    dependencies=[Depends(JWTBearer())],
+)
+async def initialize_lxd(
+    host_id: str,
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Initialize LXD on an Ubuntu host.
+    Installs LXD via snap if not installed, and runs lxd init --auto.
+    Requires CREATE_CHILD_HOST permission.
+    """
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        user = get_user_with_role_check(
+            session, current_user, SecurityRoles.CREATE_CHILD_HOST
+        )
+
+        host = get_host_or_404(session, host_id)
+        verify_host_active(host)
+
+        # Verify it's a Linux host (LXD is Linux-only)
+        if not host.platform or "Linux" not in host.platform:
+            raise HTTPException(
+                status_code=400,
+                detail=_("LXD is only supported on Linux hosts"),
+            )
+
+        # Verify the agent is privileged (needed to install/init LXD)
+        if not host.is_agent_privileged:
+            raise HTTPException(
+                status_code=400,
+                detail=_(
+                    "Agent must be running with root privileges to initialize LXD"
+                ),
+            )
+
+        # Queue a command to initialize LXD
+        command_message = create_command_message(
+            command_type="initialize_lxd", parameters={}
+        )
+
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+
+        # Log the action
+        audit_log(
+            session,
+            user,
+            current_user,
+            "CREATE",
+            str(host.id),
+            host.fqdn,
+            _("LXD initialization requested"),
+        )
+
+        session.commit()
+
+        return {
+            "result": True,
+            "message": _(
+                "LXD initialization requested. The agent will install and "
+                "configure LXD automatically."
+            ),
+        }
+
+
+@router.post(
     "/host/{host_id}/virtualization/create-child",
     dependencies=[Depends(JWTBearer())],
 )
@@ -292,12 +416,25 @@ async def create_child_host_request(
                 ),
             )
 
+        # Determine the child name based on type
+        # For LXD, use container_name; for WSL, use distribution
+        if request.child_type == "lxd":
+            child_name = request.container_name
+            if not child_name:
+                raise HTTPException(
+                    status_code=400,
+                    detail=_("Container name is required for LXD containers"),
+                )
+        else:
+            # WSL uses distribution as the name
+            child_name = request.distribution
+
         # Check for existing child host with same name
         existing = (
             session.query(models.HostChild)
             .filter(
                 models.HostChild.parent_host_id == host_id,
-                models.HostChild.child_name == request.distribution,
+                models.HostChild.child_name == child_name,
                 models.HostChild.child_type == request.child_type,
             )
             .first()
@@ -364,7 +501,7 @@ async def create_child_host_request(
         now = datetime.now(timezone.utc).replace(tzinfo=None)
         new_child = models.HostChild(
             parent_host_id=host_id,
-            child_name=request.distribution,
+            child_name=child_name,
             child_type=request.child_type,
             hostname=request.hostname,
             default_username=request.username,
@@ -380,20 +517,25 @@ async def create_child_host_request(
         session.flush()  # Get the ID assigned
 
         # Queue a command to create the child host
+        command_params = {
+            "child_type": request.child_type,
+            "distribution": request.distribution,
+            "hostname": request.hostname,
+            "username": request.username,
+            "password": request.password,
+            "agent_install_commands": agent_install_commands,
+            "server_url": server_url,
+            "server_port": api_port,
+            "use_https": use_https,
+            "child_host_id": str(new_child.id),  # Pass ID for status updates
+        }
+        # For LXD, include container_name
+        if request.child_type == "lxd":
+            command_params["container_name"] = request.container_name
+
         command_message = create_command_message(
             command_type="create_child_host",
-            parameters={
-                "child_type": request.child_type,
-                "distribution": request.distribution,
-                "hostname": request.hostname,
-                "username": request.username,
-                "password": request.password,
-                "agent_install_commands": agent_install_commands,
-                "server_url": server_url,
-                "server_port": api_port,
-                "use_https": use_https,
-                "child_host_id": str(new_child.id),  # Pass ID for status updates
-            },
+            parameters=command_params,
         )
 
         queue_ops.enqueue_message(

@@ -468,3 +468,20 @@ msgstr "Failed to mark message %s as sent: %s"
 
 msgid "Failed to mark message %s as acknowledged: %s"
 msgstr "Failed to mark message %s as acknowledged: %s"
+
+# LXD Container Management strings
+
+msgid "LXD is only supported on Linux hosts"
+msgstr "LXD is only supported on Linux hosts"
+
+msgid "Agent must be running with root privileges to initialize LXD"
+msgstr "Agent must be running with root privileges to initialize LXD"
+
+msgid "LXD initialization requested"
+msgstr "LXD initialization requested"
+
+msgid "LXD initialization requested. The agent will install and configure LXD automatically."
+msgstr "LXD initialization requested. The agent will install and configure LXD automatically."
+
+msgid "LXD initialized successfully"
+msgstr "LXD initialized successfully"

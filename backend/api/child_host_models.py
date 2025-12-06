@@ -19,13 +19,14 @@ class CreateChildHostRequest(BaseModel):
 
 
 class CreateWslChildHostRequest(BaseModel):
-    """Request body for creating a WSL child host."""
+    """Request body for creating a WSL or LXD child host."""
 
     child_type: str = "wsl"
     distribution: str
     hostname: str
     username: str
     password: str
+    container_name: Optional[str] = None  # For LXD containers
 
 
 class EnableWslRequest(BaseModel):

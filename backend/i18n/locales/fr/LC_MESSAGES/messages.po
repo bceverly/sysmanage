@@ -769,3 +769,20 @@ msgstr "Échec du marquage du message %s comme envoyé: %s"
 
 msgid "Failed to mark message %s as acknowledged: %s"
 msgstr "Échec du marquage du message %s comme confirmé: %s"
+
+# LXD Container Management strings
+
+msgid "LXD is only supported on Linux hosts"
+msgstr "LXD n'est pris en charge que sur les hôtes Linux"
+
+msgid "Agent must be running with root privileges to initialize LXD"
+msgstr "L'agent doit s'exécuter avec les privilèges root pour initialiser LXD"
+
+msgid "LXD initialization requested"
+msgstr "Initialisation de LXD demandée"
+
+msgid "LXD initialization requested. The agent will install and configure LXD automatically."
+msgstr "Initialisation de LXD demandée. L'agent va installer et configurer LXD automatiquement."
+
+msgid "LXD initialized successfully"
+msgstr "LXD initialisé avec succès"
