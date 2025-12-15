@@ -70,7 +70,7 @@ semgrep>=1.95.0
 # Note: On OpenBSD 7.7, coverage.py C tracer requires gcc and py3-cffi
 # Install with: doas pkg_add gcc py3-cffi
 # The install-dev target will automatically handle C tracer setup
-playwright==1.56.0  # Cross-browser UI testing (preferred for Linux/macOS/Windows)
+playwright==1.57.0  # Cross-browser UI testing (preferred for Linux/macOS/Windows)
 selenium>=4.0.0  # Web automation framework (fallback for OpenBSD/FreeBSD where Playwright unavailable)
 webdriver-manager>=4.0.0
 requests>=2.32.0  # For UI test health checks
