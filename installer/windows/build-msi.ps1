@@ -74,50 +74,18 @@ if (-not (Test-Path $OutputDir)) {
 Write-Host "[OK] Output directory ready: $OutputDir" -ForegroundColor Green
 Write-Host ""
 
-# Download NSSM if not already present
+# Check for NSSM (bundled in repo)
 Write-Host "Checking for NSSM (Non-Sucking Service Manager)..." -ForegroundColor Cyan
-$NssmDir = Join-Path $CurrentDir "installer\windows"
+$NssmDir = Join-Path $CurrentDir "installer\windows\nssm"
 $NssmExe = Join-Path $NssmDir "nssm.exe"
 
 if (-not (Test-Path $NssmExe)) {
-    Write-Host "Downloading NSSM for bundling with installer..." -ForegroundColor Yellow
-
-    $nssmArch = if ($Architecture -eq "x64" -or $Architecture -eq "arm64") { "win64" } else { "win32" }
-    $nssmVersion = "2.24"
-    $nssmUrl = "https://nssm.cc/release/nssm-$nssmVersion.zip"
-    $nssmZip = Join-Path $env:TEMP "nssm-download.zip"
-    $nssmExtract = Join-Path $env:TEMP "nssm-extract"
-
-    try {
-        Invoke-WebRequest -Uri $nssmUrl -OutFile $nssmZip -UseBasicParsing
-        Write-Host "  Downloaded NSSM archive" -ForegroundColor Gray
-
-        if (Test-Path $nssmExtract) {
-            Remove-Item -Path $nssmExtract -Recurse -Force
-        }
-        $ProgressPreference = 'SilentlyContinue'
-        Expand-Archive -Path $nssmZip -DestinationPath $nssmExtract -Force
-        $ProgressPreference = 'Continue'
-
-        $nssmSource = Join-Path $nssmExtract "nssm-$nssmVersion\$nssmArch\nssm.exe"
-        if (Test-Path $nssmSource) {
-            Copy-Item $nssmSource $NssmExe -Force
-            Write-Host "[OK] NSSM downloaded and ready for bundling" -ForegroundColor Green
-        } else {
-            throw "NSSM executable not found in downloaded archive"
-        }
-
-        Remove-Item -Path $nssmZip -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path $nssmExtract -Recurse -Force -ErrorAction SilentlyContinue
-
-    } catch {
-        Write-Host "ERROR: Failed to download NSSM: $_" -ForegroundColor Red
-        Write-Host "Please manually download from https://nssm.cc/download" -ForegroundColor Red
-        exit 1
-    }
-} else {
-    Write-Host "[OK] NSSM already present" -ForegroundColor Green
+    Write-Host "ERROR: NSSM not found at $NssmExe" -ForegroundColor Red
+    Write-Host "NSSM should be bundled in the repository at installer/windows/nssm/nssm.exe" -ForegroundColor Red
+    Write-Host "Download from https://nssm.cc/download and extract nssm.exe to that location" -ForegroundColor Yellow
+    exit 1
 }
+Write-Host "[OK] NSSM found" -ForegroundColor Green
 Write-Host ""
 
 # Create SBOM files if they don't exist

@@ -75,7 +75,7 @@
 
       <!-- NSSM (Non-Sucking Service Manager) -->
       <Component Id="NssmExecutable" Guid="B8C9D0E1-F2A3-4B5C-8D9E-0F1A2B3C4D5E">
-        <File Id="NssmExe" Source="nssm.exe" />
+        <File Id="NssmExe" Source="nssm\nssm.exe" />
       </Component>
 
       <!-- SBOM (Software Bill of Materials) - Backend -->
