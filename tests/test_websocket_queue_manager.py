@@ -32,6 +32,26 @@ class TestServerMessageQueueManager(unittest.TestCase):
         mock_db = Mock()
         mock_get_db.return_value = iter([mock_db])
 
+        # Create a mock host for host validation
+        mock_host = Mock()
+        mock_host.id = "550e8400-e29b-41d4-a716-446655440011"
+        mock_host.fqdn = "test.example.com"
+
+        # Create a mock message for verification query
+        mock_message = Mock()
+        mock_message.message_id = "test-msg"
+        mock_message.status = QueueStatus.PENDING
+
+        # Query order:
+        # 1. Host validation (mock_host)
+        # 2. Duplicate message_id check (None - no duplicate)
+        # 3. Verification after commit (mock_message)
+        mock_db.query.return_value.filter.return_value.first.side_effect = [
+            mock_host,
+            None,
+            mock_message,
+        ]
+
         message_id = self.queue_manager.enqueue_message(
             host_id="550e8400-e29b-41d4-a716-446655440011",
             message_type="test",

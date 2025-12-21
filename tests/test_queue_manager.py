@@ -54,7 +54,19 @@ class TestServerMessageQueueManager:
         """Test basic message enqueuing."""
         mock_db = Mock()
         mock_get_db.return_value = iter([mock_db])
-        mock_db.query.return_value.filter.return_value.first.return_value = MockHost()
+
+        # Create mock message for verification query
+        mock_message = MockMessageQueue()
+
+        # Query order:
+        # 1. Host validation (MockHost)
+        # 2. Duplicate message_id check (None - no duplicate)
+        # 3. Verification after commit (MockMessageQueue)
+        mock_db.query.return_value.filter.return_value.first.side_effect = [
+            MockHost(),
+            None,
+            mock_message,
+        ]
 
         manager = ServerMessageQueueManager()
 
@@ -74,6 +86,17 @@ class TestServerMessageQueueManager:
         """Test message enqueuing without host ID (broadcast)."""
         mock_db = Mock()
         mock_get_db.return_value = iter([mock_db])
+
+        # Create mock message for verification query
+        mock_message = MockMessageQueue()
+
+        # Query order (no host_id means no host validation):
+        # 1. Duplicate message_id check (None - no duplicate)
+        # 2. Verification after commit (MockMessageQueue)
+        mock_db.query.return_value.filter.return_value.first.side_effect = [
+            None,
+            mock_message,
+        ]
 
         manager = ServerMessageQueueManager()
 
@@ -163,9 +186,19 @@ class TestQueueManagerIntegration:
         with patch("backend.websocket.queue_operations.get_db") as mock_get_db:
             mock_db = Mock()
             mock_get_db.return_value = iter([mock_db])
-            mock_db.query.return_value.filter.return_value.first.return_value = (
-                MockHost()
-            )
+
+            # Create mock message for verification query
+            mock_message = MockMessageQueue()
+
+            # Query order:
+            # 1. Host validation (MockHost)
+            # 2. Duplicate message_id check (None - no duplicate)
+            # 3. Verification after commit (MockMessageQueue)
+            mock_db.query.return_value.filter.return_value.first.side_effect = [
+                MockHost(),
+                None,
+                mock_message,
+            ]
 
             message_id = manager.enqueue_message(
                 message_type="test",
