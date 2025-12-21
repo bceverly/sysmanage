@@ -16,17 +16,22 @@ class CreateChildHostRequest(BaseModel):
     username: str  # Non-root user to create
     password: str  # Password for the user
     install_path: Optional[str] = None  # Optional custom install location
+    auto_approve: bool = False  # Automatically approve the child host when it registers
 
 
 class CreateWslChildHostRequest(BaseModel):
-    """Request body for creating a WSL or LXD child host."""
+    """Request body for creating a WSL, LXD, or VMM child host."""
 
     child_type: str = "wsl"
     distribution: str
     hostname: str
     username: str
     password: str
+    root_password: Optional[str] = None  # For VMM: separate root password
     container_name: Optional[str] = None  # For LXD containers
+    vm_name: Optional[str] = None  # For VMM virtual machines
+    iso_url: Optional[str] = None  # For VMM: URL to download install ISO
+    auto_approve: bool = False  # Automatically approve the child host when it registers
 
 
 class EnableWslRequest(BaseModel):

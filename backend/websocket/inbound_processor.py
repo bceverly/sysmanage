@@ -30,6 +30,10 @@ async def process_pending_messages(db: Session) -> None:
     print("_process_pending_messages() called", flush=True)
     logger.info("_process_pending_messages() called")
 
+    # Expire all cached objects to ensure we get fresh data from the database
+    # This prevents stale objects from being returned by queries
+    db.expire_all()
+
     print(f"Got database session: {db}", flush=True)
     logger.info("Got database session")
 

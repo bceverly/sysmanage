@@ -795,3 +795,21 @@ msgstr "LXDの初期化がリクエストされました。エージェントが
 
 msgid "LXD initialized successfully"
 msgstr "LXDが正常に初期化されました"
+
+msgid "VMM is only supported on OpenBSD hosts"
+msgstr "VMMはOpenBSDホストでのみサポートされています"
+
+msgid "Agent must be running with root privileges to initialize VMM"
+msgstr "VMMを初期化するにはエージェントがroot権限で実行されている必要があります"
+
+msgid "VMM initialization requested"
+msgstr "VMMの初期化がリクエストされました"
+
+msgid "VMM initialization requested. The agent will enable and start the vmd daemon."
+msgstr "VMMの初期化がリクエストされました。エージェントがvmdデーモンを有効化して起動します。"
+
+msgid "VM name is required for VMM virtual machines"
+msgstr "VMM仮想マシンにはVM名が必要です"
+
+msgid "A child host named '%s' already exists on this host"
+msgstr "'%s' という名前の子ホストはこのホストに既に存在します"

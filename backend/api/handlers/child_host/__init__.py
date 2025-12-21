@@ -9,6 +9,7 @@ from backend.api.handlers.child_host.virtualization import (
     handle_virtualization_support_update,
     handle_wsl_enable_result,
     handle_lxd_initialize_result,
+    handle_vmm_initialize_result,
 )
 from backend.api.handlers.child_host.listing import (
     handle_child_hosts_list_update,
@@ -29,6 +30,7 @@ __all__ = [
     "handle_virtualization_support_update",
     "handle_wsl_enable_result",
     "handle_lxd_initialize_result",
+    "handle_vmm_initialize_result",
     # Listing
     "handle_child_hosts_list_update",
     # Creation

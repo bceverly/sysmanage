@@ -72,6 +72,10 @@ class HostChild(Base):
     # Used to prevent stale delete commands from affecting newly created instances
     wsl_guid = Column(String(36), nullable=True)
 
+    # Auto-approve token: UUID sent to agent during creation, returned during registration
+    # When this token is present and matches, the child host is automatically approved
+    auto_approve_token = Column(String(36), nullable=True, index=True)
+
     # State tracking
     status = Column(
         String(50), nullable=False, default="pending"

@@ -67,6 +67,7 @@ import { useTranslation } from 'react-i18next';
 import { useColumnVisibility } from '../Hooks/useColumnVisibility';
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
+import axios from 'axios';
 import axiosInstance from '../Services/api';
 import { distributionService } from '../Services/childHostDistributions';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
@@ -185,8 +186,8 @@ const HostDetail = () => {
     const supportsChildHosts = useCallback(() => {
         if (!host?.platform) return false;
         const platform = host.platform || '';
-        // Windows hosts support WSL, Linux hosts support LXD (Ubuntu 22.04+)
-        return platform.includes('Windows') || platform.includes('Linux');
+        // Windows hosts support WSL, Linux hosts support LXD, OpenBSD hosts support VMM
+        return platform.includes('Windows') || platform.includes('Linux') || platform.includes('OpenBSD');
     }, [host]);
 
     // Tab names for URL hash (static tabs only - dynamic tabs handled separately)
@@ -256,6 +257,14 @@ const HostDetail = () => {
                 needs_init: boolean;
                 snap_available: boolean;
             };
+            vmm?: {
+                available: boolean;
+                enabled: boolean;
+                running: boolean;
+                initialized: boolean;
+                kernel_supported: boolean;
+                needs_enable: boolean;
+            };
             [key: string]: unknown;
         };
         reboot_required: boolean;
@@ -264,18 +273,23 @@ const HostDetail = () => {
     const [virtualizationLoading, setVirtualizationLoading] = useState<boolean>(false);
     const [enableWslLoading, setEnableWslLoading] = useState<boolean>(false);
     const [initializeLxdLoading, setInitializeLxdLoading] = useState<boolean>(false);
+    const [initializeVmmLoading, setInitializeVmmLoading] = useState<boolean>(false);
 
     // Create child host modal state
     const [createChildHostOpen, setCreateChildHostOpen] = useState<boolean>(false);
     const [createChildHostLoading, setCreateChildHostLoading] = useState<boolean>(false);
     const [childHostFormData, setChildHostFormData] = useState({
-        childType: 'wsl',  // 'wsl' for Windows, 'lxd' for Linux
+        childType: 'wsl',  // 'wsl' for Windows, 'lxd' for Linux, 'vmm' for OpenBSD
         distribution: '',
         containerName: '',  // For LXD containers
+        vmName: '',  // For VMM virtual machines
         hostname: '',
         username: '',
         password: '',
         confirmPassword: '',
+        rootPassword: '',  // For VMM: separate root password
+        confirmRootPassword: '',  // For VMM: confirm root password
+        autoApprove: false,  // Automatically approve when the child host connects
     });
     const [childHostCreationProgress, setChildHostCreationProgress] = useState<string>('');
     const [availableDistributions, setAvailableDistributions] = useState<Array<{
@@ -331,7 +345,9 @@ const HostDetail = () => {
         if (createChildHostOpen && host) {
             const platform = host.platform || '';
             const isLinux = platform.toLowerCase().includes('linux');
-            const childType = isLinux ? 'lxd' : 'wsl';
+            const isOpenBSD = platform.includes('OpenBSD');
+            // Determine child type based on platform: OpenBSD -> vmm, Linux -> lxd, Windows -> wsl
+            const childType = isOpenBSD ? 'vmm' : (isLinux ? 'lxd' : 'wsl');
             setChildHostFormData(prev => ({
                 ...prev,
                 childType,
@@ -364,7 +380,7 @@ const HostDetail = () => {
     const [snackbarMessage, setSnackbarMessage] = useState<string>('');
     const [rebootConfirmOpen, setRebootConfirmOpen] = useState<boolean>(false);
     const [shutdownConfirmOpen, setShutdownConfirmOpen] = useState<boolean>(false);
-    const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+    const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'warning'>('success');
     const [diagnosticDetailOpen, setDiagnosticDetailOpen] = useState<boolean>(false);
     const [selectedDiagnostic, setSelectedDiagnostic] = useState<DiagnosticDetailResponse | null>(null);
 
@@ -794,10 +810,25 @@ const HostDetail = () => {
                 fetchChildHosts(false);
             }, 3000);
         } catch (error) {
-            console.error('Error deleting child host:', error);
-            setSnackbarMessage(t('hostDetail.childHostDeleteError', 'Error deleting child host'));
-            setSnackbarSeverity('error');
-            setSnackbarOpen(true);
+            // Check if this is a 404 (child host already removed)
+            if (axios.isAxiosError(error) && error.response?.status === 404) {
+                setSnackbarMessage(t('hostDetail.childHostNotFound', 'Child host not found - it may have already been deleted'));
+                setSnackbarSeverity('warning');
+                setSnackbarOpen(true);
+                // Refresh the list to remove the stale entry
+                setTimeout(() => {
+                    fetchChildHosts(false);
+                }, 1000);
+            } else {
+                console.error('Error deleting child host:', error);
+                let errorMessage = t('hostDetail.childHostDeleteError', 'Error deleting child host');
+                if (axios.isAxiosError(error) && error.response?.data?.detail) {
+                    errorMessage = error.response.data.detail;
+                }
+                setSnackbarMessage(errorMessage);
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+            }
         } finally {
             setChildHostOperationLoading(prev => ({ ...prev, [childHostToDelete.id]: null }));
             setChildHostToDelete(null);
@@ -859,6 +890,31 @@ const HostDetail = () => {
         }
     }, [hostId, fetchVirtualizationStatus, t]);
 
+    // Initialize VMM on OpenBSD host
+    const handleInitializeVmm = useCallback(async () => {
+        if (!hostId) return;
+        try {
+            setInitializeVmmLoading(true);
+            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/initialize-vmm`);
+            if (response.status === 200) {
+                setSnackbarMessage(t('hostDetail.vmmInitializedSuccess', 'VMM initialization requested. The agent will enable and start the vmd daemon.'));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+                // Refresh virtualization status after a delay
+                setTimeout(() => {
+                    fetchVirtualizationStatus();
+                }, 5000);
+            }
+        } catch (error) {
+            console.error('Error initializing VMM:', error);
+            setSnackbarMessage(t('hostDetail.vmmInitializeFailed', 'Failed to initialize VMM'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setInitializeVmmLoading(false);
+        }
+    }, [hostId, fetchVirtualizationStatus, t]);
+
     // Create child host
     const handleCreateChildHost = useCallback(async () => {
         if (!hostId) return;
@@ -894,23 +950,56 @@ const HostDetail = () => {
             setSnackbarOpen(true);
             return;
         }
+        // For VMM, require VM name and root password
+        if (childHostFormData.childType === 'vmm') {
+            if (!childHostFormData.vmName) {
+                setSnackbarMessage(t('hostDetail.childHostVmNameRequired', 'Please enter a VM name'));
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+                return;
+            }
+            if (!childHostFormData.rootPassword) {
+                setSnackbarMessage(t('hostDetail.childHostRootPasswordRequired', 'Please enter a root password'));
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+                return;
+            }
+            if (childHostFormData.rootPassword !== childHostFormData.confirmRootPassword) {
+                setSnackbarMessage(t('hostDetail.childHostRootPasswordMismatch', 'Root passwords do not match'));
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+                return;
+            }
+        }
 
         try {
             setCreateChildHostLoading(true);
             setChildHostCreationProgress(t('hostDetail.childHostCreationStarting', 'Starting child host creation...'));
 
             // Build request based on child type
-            const requestData: Record<string, string> = {
+            const requestData: Record<string, string | boolean> = {
                 child_type: childHostFormData.childType,
                 distribution: childHostFormData.distribution,
                 hostname: computedFqdn,  // Always send the computed FQDN
                 username: childHostFormData.username,
                 password: childHostFormData.password,
+                auto_approve: childHostFormData.autoApprove,
             };
 
             // For LXD, also send container name
             if (childHostFormData.childType === 'lxd' && childHostFormData.containerName) {
                 requestData.container_name = childHostFormData.containerName;
+            }
+
+            // For VMM, send vm_name, iso_url, and root_password
+            if (childHostFormData.childType === 'vmm') {
+                requestData.vm_name = childHostFormData.vmName || childHostFormData.hostname;
+                // For VMM, the install_identifier contains the ISO URL
+                if (childHostFormData.distribution) {
+                    requestData.iso_url = childHostFormData.distribution;
+                }
+                // VMM requires separate root password
+                requestData.root_password = childHostFormData.rootPassword;
             }
 
             const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/create-child`, requestData);
@@ -927,10 +1016,14 @@ const HostDetail = () => {
                         childType: childHostFormData.childType,  // Keep the child type
                         distribution: '',
                         containerName: '',
+                        vmName: '',
                         hostname: '',
                         username: '',
                         password: '',
                         confirmPassword: '',
+                        rootPassword: '',
+                        confirmRootPassword: '',
+                        autoApprove: false,
                     });
                     // Refresh child hosts list
                     setTimeout(() => {
@@ -950,11 +1043,8 @@ const HostDetail = () => {
             console.error('Error creating child host:', error);
             // Extract error message from axios error response
             let errorMessage = t('hostDetail.childHostCreationFailed', 'Failed to create child host');
-            if (error && typeof error === 'object' && 'response' in error) {
-                const axiosError = error as { response?: { data?: { detail?: string } } };
-                if (axiosError.response?.data?.detail) {
-                    errorMessage = axiosError.response.data.detail;
-                }
+            if (axios.isAxiosError(error) && error.response?.data?.detail) {
+                errorMessage = error.response.data.detail;
             }
             setSnackbarMessage(errorMessage);
             setSnackbarSeverity('error');
@@ -1887,11 +1977,8 @@ const HostDetail = () => {
         } catch (error: unknown) {
             console.error('Failed to delete user:', error);
             let errorMessage = t('hostAccount.deleteFailed', 'Failed to delete user account');
-            if (error && typeof error === 'object' && 'response' in error) {
-                const axiosError = error as { response?: { data?: { detail?: string } } };
-                if (axiosError.response?.data?.detail) {
-                    errorMessage = axiosError.response.data.detail;
-                }
+            if (axios.isAxiosError(error) && error.response?.data?.detail) {
+                errorMessage = error.response.data.detail;
             }
             setSnackbarMessage(errorMessage);
             setSnackbarSeverity('error');
@@ -1926,11 +2013,8 @@ const HostDetail = () => {
         } catch (error: unknown) {
             console.error('Failed to delete group:', error);
             let errorMessage = t('hostGroup.deleteFailed', 'Failed to delete group');
-            if (error && typeof error === 'object' && 'response' in error) {
-                const axiosError = error as { response?: { data?: { detail?: string } } };
-                if (axiosError.response?.data?.detail) {
-                    errorMessage = axiosError.response.data.detail;
-                }
+            if (axios.isAxiosError(error) && error.response?.data?.detail) {
+                errorMessage = error.response.data.detail;
             }
             setSnackbarMessage(errorMessage);
             setSnackbarSeverity('error');
@@ -1999,11 +2083,8 @@ const HostDetail = () => {
         } catch (error: unknown) {
             console.error('Failed to deploy certificates:', error);
             let errorMessage = t('hostDetail.certificatesDeployedError', 'Failed to deploy certificates');
-            if (error && typeof error === 'object' && 'response' in error) {
-                const axiosError = error as { response?: { data?: { detail?: string } } };
-                if (axiosError.response?.data?.detail) {
-                    errorMessage = axiosError.response.data.detail;
-                }
+            if (axios.isAxiosError(error) && error.response?.data?.detail) {
+                errorMessage = error.response.data.detail;
             }
 
             setSnackbarMessage(errorMessage);
@@ -2126,11 +2207,8 @@ const HostDetail = () => {
             console.error('Failed to deploy SSH keys:', error);
             let errorMessage = t('hostDetail.sshKeysDeployedError', 'Failed to deploy SSH keys');
 
-            if (error && typeof error === 'object' && 'response' in error) {
-                const axiosError = error as { response?: { data?: { detail?: string } } };
-                if (axiosError.response?.data?.detail) {
-                    errorMessage = axiosError.response.data.detail;
-                }
+            if (axios.isAxiosError(error) && error.response?.data?.detail) {
+                errorMessage = error.response.data.detail;
             }
 
             setSnackbarMessage(errorMessage);
@@ -5390,6 +5468,47 @@ const HostDetail = () => {
                                                     </Box>
                                                 </Grid>
                                             )}
+                                            {/* VMM Status - show for OpenBSD hosts */}
+                                            {host?.platform?.includes('OpenBSD') && (
+                                                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                                    <Typography variant="body2" color="textSecondary">
+                                                        {t('hostDetail.vmmStatus', 'VMM Status')}
+                                                    </Typography>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                                                        {virtualizationStatus.capabilities?.vmm?.running ? (
+                                                            <Chip
+                                                                label={t('hostDetail.vmmReady', 'Ready')}
+                                                                color="success"
+                                                                size="small"
+                                                            />
+                                                        ) : virtualizationStatus.capabilities?.vmm?.enabled && !virtualizationStatus.capabilities?.vmm?.running ? (
+                                                            <Chip
+                                                                label={t('hostDetail.vmmNotRunning', 'Not Running')}
+                                                                color="warning"
+                                                                size="small"
+                                                            />
+                                                        ) : virtualizationStatus.capabilities?.vmm?.kernel_supported ? (
+                                                            <Chip
+                                                                label={t('hostDetail.vmmNotEnabled', 'Not Enabled')}
+                                                                color="warning"
+                                                                size="small"
+                                                            />
+                                                        ) : virtualizationStatus.capabilities?.vmm?.available ? (
+                                                            <Chip
+                                                                label={t('hostDetail.vmmNoKernelSupport', 'No Kernel Support')}
+                                                                color="error"
+                                                                size="small"
+                                                            />
+                                                        ) : (
+                                                            <Chip
+                                                                label={t('hostDetail.vmmNotAvailable', 'Not Available')}
+                                                                color="default"
+                                                                size="small"
+                                                            />
+                                                        )}
+                                                    </Box>
+                                                </Grid>
+                                            )}
                                         </Grid>
                                     </Box>
                                 )}
@@ -5438,9 +5557,24 @@ const HostDetail = () => {
                                                 {t('hostDetail.enableLxd', 'Enable LXD')}
                                             </Button>
                                         )}
-                                        {/* Create Child Host Button - show if WSL is enabled (Windows) or LXD is ready (Linux) */}
+                                        {/* Enable VMM Button - show for OpenBSD hosts if VMM needs to be enabled */}
+                                        {host?.platform?.includes('OpenBSD') && virtualizationStatus?.capabilities?.vmm?.available &&
+                                         virtualizationStatus?.capabilities?.vmm?.kernel_supported && virtualizationStatus?.capabilities?.vmm?.needs_enable && (
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                size="small"
+                                                startIcon={initializeVmmLoading ? <CircularProgress size={16} /> : <AddIcon />}
+                                                onClick={handleInitializeVmm}
+                                                disabled={initializeVmmLoading || !host?.is_agent_privileged}
+                                            >
+                                                {t('hostDetail.enableVmm', 'Enable VMM')}
+                                            </Button>
+                                        )}
+                                        {/* Create Child Host Button - show if WSL is enabled (Windows), LXD is ready (Linux), or VMM is running (OpenBSD) */}
                                         {(virtualizationStatus?.capabilities?.wsl?.enabled ||
-                                          (virtualizationStatus?.capabilities?.lxd?.installed && virtualizationStatus?.capabilities?.lxd?.initialized)) && (
+                                          (virtualizationStatus?.capabilities?.lxd?.installed && virtualizationStatus?.capabilities?.lxd?.initialized) ||
+                                          virtualizationStatus?.capabilities?.vmm?.running) && (
                                             <Button
                                                 variant="contained"
                                                 color="primary"
@@ -5540,7 +5674,7 @@ const HostDetail = () => {
                                                             {child.hostname || (child.status === 'running' ? '-' : t('hostDetail.childHostNotRunning', 'Not running'))}
                                                         </TableCell>
                                                         <TableCell>
-                                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                                            <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
                                                                 <Chip
                                                                     icon={child.status === 'creating' ? <CircularProgress size={12} color="inherit" /> : undefined}
                                                                     label={
@@ -5615,18 +5749,18 @@ const HostDetail = () => {
                                                                         {currentOperation === 'restart' ? <CircularProgress size={16} /> : <RestartAltIcon fontSize="small" />}
                                                                     </IconButton>
                                                                 )}
-                                                                {/* Delete button - show for all except creating status */}
-                                                                {child.status !== 'creating' && (
-                                                                    <IconButton
-                                                                        size="small"
-                                                                        color="error"
-                                                                        onClick={() => handleChildHostDeleteConfirm(child)}
-                                                                        disabled={isOperationLoading}
-                                                                        title={t('hostDetail.deleteChildHost', 'Delete')}
-                                                                    >
-                                                                        {currentOperation === 'delete' ? <CircularProgress size={16} /> : <DeleteIcon fontSize="small" />}
-                                                                    </IconButton>
-                                                                )}
+                                                                {/* Delete/Cancel button - show for all statuses */}
+                                                                <IconButton
+                                                                    size="small"
+                                                                    color="error"
+                                                                    onClick={() => handleChildHostDeleteConfirm(child)}
+                                                                    disabled={isOperationLoading}
+                                                                    title={child.status === 'creating' || child.status === 'pending'
+                                                                        ? t('hostDetail.cancelChildHost', 'Cancel')
+                                                                        : t('hostDetail.deleteChildHost', 'Delete')}
+                                                                >
+                                                                    {currentOperation === 'delete' ? <CircularProgress size={16} /> : <DeleteIcon fontSize="small" />}
+                                                                </IconButton>
                                                             </Box>
                                                         </TableCell>
                                                     </TableRow>
@@ -6182,7 +6316,7 @@ const HostDetail = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Delete Child Host Confirmation Dialog */}
+            {/* Delete/Cancel Child Host Confirmation Dialog */}
             <Dialog
                 open={deleteChildHostConfirmOpen}
                 onClose={handleChildHostDeleteCancel}
@@ -6193,31 +6327,51 @@ const HostDetail = () => {
                 }}
             >
                 <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <WarningIcon color="error" />
-                    {t('hostDetail.deleteChildHostConfirmTitle', 'Delete Child Host')}
+                    <WarningIcon color={childHostToDelete?.status === 'creating' || childHostToDelete?.status === 'pending' ? 'warning' : 'error'} />
+                    {childHostToDelete?.status === 'creating' || childHostToDelete?.status === 'pending'
+                        ? t('hostDetail.cancelChildHostConfirmTitle', 'Cancel Child Host Creation')
+                        : t('hostDetail.deleteChildHostConfirmTitle', 'Delete Child Host')}
                 </DialogTitle>
                 <DialogContent>
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        {t('hostDetail.deleteChildHostWarning', 'This action is irreversible!')}
-                    </Alert>
-                    <Typography variant="body1" paragraph>
-                        {t('hostDetail.deleteChildHostMessage', 'Are you sure you want to delete the child host "{{name}}"?', { name: childHostToDelete?.child_name })}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                        {t('hostDetail.deleteChildHostDataWarning', 'This will permanently delete the virtual machine and ALL of its data, including:')}
-                    </Typography>
-                    <Box component="ul" sx={{ pl: 2, mt: 1, color: 'text.secondary' }}>
-                        <li>{t('hostDetail.deleteChildHostDataItem1', 'All files and user data')}</li>
-                        <li>{t('hostDetail.deleteChildHostDataItem2', 'Installed applications')}</li>
-                        <li>{t('hostDetail.deleteChildHostDataItem3', 'System configuration')}</li>
-                    </Box>
+                    {childHostToDelete?.status === 'creating' || childHostToDelete?.status === 'pending' ? (
+                        <>
+                            <Alert severity="warning" sx={{ mb: 2 }}>
+                                {t('hostDetail.cancelChildHostWarning', 'This will cancel the child host creation.')}
+                            </Alert>
+                            <Typography variant="body1" paragraph>
+                                {t('hostDetail.cancelChildHostMessage', 'Are you sure you want to cancel the creation of "{{name}}"?', { name: childHostToDelete?.child_name })}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary">
+                                {t('hostDetail.cancelChildHostNote', 'The creation record will be removed from the database. If the agent is currently creating this child host, the partial installation may need to be cleaned up manually.')}
+                            </Typography>
+                        </>
+                    ) : (
+                        <>
+                            <Alert severity="error" sx={{ mb: 2 }}>
+                                {t('hostDetail.deleteChildHostWarning', 'This action is irreversible!')}
+                            </Alert>
+                            <Typography variant="body1" paragraph>
+                                {t('hostDetail.deleteChildHostMessage', 'Are you sure you want to delete the child host "{{name}}"?', { name: childHostToDelete?.child_name })}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary">
+                                {t('hostDetail.deleteChildHostDataWarning', 'This will permanently delete the virtual machine and ALL of its data, including:')}
+                            </Typography>
+                            <Box component="ul" sx={{ pl: 2, mt: 1, color: 'text.secondary' }}>
+                                <li>{t('hostDetail.deleteChildHostDataItem1', 'All files and user data')}</li>
+                                <li>{t('hostDetail.deleteChildHostDataItem2', 'Installed applications')}</li>
+                                <li>{t('hostDetail.deleteChildHostDataItem3', 'System configuration')}</li>
+                            </Box>
+                        </>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleChildHostDeleteCancel}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button onClick={handleChildHostDelete} color="error" variant="contained">
-                        {t('hostDetail.deleteChildHostConfirmButton', 'Delete Permanently')}
+                    <Button onClick={handleChildHostDelete} color={childHostToDelete?.status === 'creating' || childHostToDelete?.status === 'pending' ? 'warning' : 'error'} variant="contained">
+                        {childHostToDelete?.status === 'creating' || childHostToDelete?.status === 'pending'
+                            ? t('hostDetail.cancelChildHostConfirmButton', 'Cancel Creation')
+                            : t('hostDetail.deleteChildHostConfirmButton', 'Delete Permanently')}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -7084,6 +7238,8 @@ const HostDetail = () => {
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     {childHostFormData.childType === 'lxd'
                         ? t('hostDetail.createLxdContainerTitle', 'Create LXD Container')
+                        : childHostFormData.childType === 'vmm'
+                        ? t('hostDetail.createVmmVmTitle', 'Create VMM Virtual Machine')
                         : t('hostDetail.createChildHostTitle', 'Create WSL Instance')}
                     <IconButton
                         onClick={() => setCreateChildHostOpen(false)}
@@ -7140,10 +7296,16 @@ const HostDetail = () => {
                             fullWidth
                             label={t('hostDetail.childHostHostnameLabel', 'Hostname')}
                             value={childHostFormData.hostname}
-                            onChange={(e) => setChildHostFormData({
-                                ...childHostFormData,
-                                hostname: e.target.value
-                            })}
+                            onChange={(e) => {
+                                const newHostname = e.target.value;
+                                // For VMM, auto-compute vmName from short hostname
+                                const shortName = newHostname.split('.')[0].toLowerCase().replace(/[^a-z0-9-]/g, '');
+                                setChildHostFormData({
+                                    ...childHostFormData,
+                                    hostname: newHostname,
+                                    vmName: childHostFormData.childType === 'vmm' ? shortName : childHostFormData.vmName
+                                });
+                            }}
                             disabled={createChildHostLoading}
                             sx={{ mb: 1 }}
                             helperText={t('hostDetail.childHostHostnameHelp', 'Enter hostname (e.g., "myhost") or FQDN (e.g., "myhost.example.com")')}
@@ -7160,8 +7322,64 @@ const HostDetail = () => {
                             }}
                             helperText={childHostFormData.childType === 'lxd'
                                 ? t('hostDetail.childHostFqdnHelpLxd', 'This FQDN will be used for the LXD container')
+                                : childHostFormData.childType === 'vmm'
+                                ? t('hostDetail.childHostFqdnHelpVmm', 'This FQDN will be used for the VMM virtual machine')
                                 : t('hostDetail.childHostFqdnHelp', 'This FQDN will be used for the WSL instance')}
                         />
+
+                        {/* VM name field for VMM - read-only, derived from hostname */}
+                        {childHostFormData.childType === 'vmm' && (
+                            <TextField
+                                fullWidth
+                                label={t('hostDetail.childHostVmNameLabel', 'VM Name')}
+                                value={childHostFormData.vmName}
+                                disabled
+                                sx={{ mb: 2 }}
+                                InputProps={{
+                                    readOnly: true,
+                                }}
+                                helperText={t('hostDetail.childHostVmNameHelpReadonly', 'VM name is derived from the hostname')}
+                            />
+                        )}
+
+                        {/* Root password fields for VMM - before username (matches OpenBSD installer order) */}
+                        {childHostFormData.childType === 'vmm' && (
+                            <>
+                                <TextField
+                                    fullWidth
+                                    required
+                                    label={t('hostDetail.childHostRootPassword', 'Root Password')}
+                                    type="password"
+                                    value={childHostFormData.rootPassword}
+                                    onChange={(e) => setChildHostFormData({
+                                        ...childHostFormData,
+                                        rootPassword: e.target.value
+                                    })}
+                                    disabled={createChildHostLoading}
+                                    helperText={t('hostDetail.childHostRootPasswordHelp', 'Password for the root user on the OpenBSD VM')}
+                                    sx={{ mb: 2 }}
+                                />
+                                <TextField
+                                    fullWidth
+                                    required
+                                    label={t('hostDetail.childHostConfirmRootPassword', 'Confirm Root Password')}
+                                    type="password"
+                                    value={childHostFormData.confirmRootPassword}
+                                    onChange={(e) => setChildHostFormData({
+                                        ...childHostFormData,
+                                        confirmRootPassword: e.target.value
+                                    })}
+                                    disabled={createChildHostLoading}
+                                    error={childHostFormData.rootPassword !== childHostFormData.confirmRootPassword && childHostFormData.confirmRootPassword !== ''}
+                                    helperText={
+                                        childHostFormData.rootPassword !== childHostFormData.confirmRootPassword && childHostFormData.confirmRootPassword !== ''
+                                            ? t('hostDetail.childHostRootPasswordMismatch', 'Root passwords do not match')
+                                            : ''
+                                    }
+                                    sx={{ mb: 2 }}
+                                />
+                            </>
+                        )}
 
                         <TextField
                             fullWidth
@@ -7207,6 +7425,25 @@ const HostDetail = () => {
                             }
                             sx={{ mb: 2 }}
                         />
+
+                        {/* Auto-approve checkbox */}
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={childHostFormData.autoApprove}
+                                    onChange={(e) => setChildHostFormData({
+                                        ...childHostFormData,
+                                        autoApprove: e.target.checked
+                                    })}
+                                    disabled={createChildHostLoading}
+                                />
+                            }
+                            label={t('hostDetail.childHostAutoApprove', 'Auto-approve when connected')}
+                            sx={{ mb: 2 }}
+                        />
+                        <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: -1, mb: 2, ml: 4 }}>
+                            {t('hostDetail.childHostAutoApproveHelp', 'When enabled, the host will be automatically approved when it connects to the server.')}
+                        </Typography>
 
                         {/* Progress indicator during creation */}
                         {createChildHostLoading && childHostCreationProgress && (

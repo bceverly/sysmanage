@@ -20,6 +20,7 @@ from backend.api.handlers.child_host_handlers import (
     handle_virtualization_support_update,
     handle_wsl_enable_result,
     handle_lxd_initialize_result,
+    handle_vmm_initialize_result,
 )
 
 # Import from infrastructure_handlers
@@ -86,4 +87,5 @@ __all__ = [
     "handle_child_host_created",
     "handle_wsl_enable_result",
     "handle_lxd_initialize_result",
+    "handle_vmm_initialize_result",
 ]

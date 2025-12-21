@@ -36,16 +36,26 @@ const Hosts = () => {
     const [searchColumn, setSearchColumn] = useState<string>('fqdn');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [allTags, setAllTags] = useState<Array<{id: string, name: string}>>([]);
+    const navigate = useNavigate();
+    const { t } = useTranslation();
+
+    // Helper to get initial filter from URL hash
+    const getFilterFromHash = useCallback((): 'all' | 'parents' | 'children' => {
+        const hash = window.location.hash.slice(1); // Remove the '#'
+        if (hash === 'parents' || hash === 'children') {
+            return hash;
+        }
+        return 'all';
+    }, []);
+
     // Child host filter: 'all' = show all, 'parents' = hide child hosts, 'children' = child hosts only
-    const [childHostFilter, setChildHostFilter] = useState<'all' | 'parents' | 'children'>('all');
+    const [childHostFilter, setChildHostFilter] = useState<'all' | 'parents' | 'children'>(getFilterFromHash);
     const [canApproveHosts, setCanApproveHosts] = useState<boolean>(false);
     const [canDeleteHost, setCanDeleteHost] = useState<boolean>(false);
     const [canViewHostDetails, setCanViewHostDetails] = useState<boolean>(false);
     const [canRebootHost, setCanRebootHost] = useState<boolean>(false);
     const [canShutdownHost, setCanShutdownHost] = useState<boolean>(false);
     const [canDeployAntivirus, setCanDeployAntivirus] = useState<boolean>(false);
-    const navigate = useNavigate();
-    const { t } = useTranslation();
     const { triggerRefresh } = useNotificationRefresh();
 
     // Dynamic table page sizing based on window height
@@ -62,6 +72,30 @@ const Hosts = () => {
     useEffect(() => {
         setPaginationModel(prev => ({ ...prev, pageSize }));
     }, [pageSize]);
+
+    // Sync child host filter with URL hash
+    useEffect(() => {
+        // Update URL hash when filter changes (without adding to browser history for 'all')
+        const newHash = childHostFilter === 'all' ? '' : `#${childHostFilter}`;
+        const currentHash = window.location.hash;
+        if (newHash !== currentHash) {
+            // Use replaceState to avoid polluting browser history
+            window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${newHash}`);
+        }
+    }, [childHostFilter]);
+
+    // Listen for hash changes (browser back/forward)
+    useEffect(() => {
+        const handleHashChange = () => {
+            const newFilter = getFilterFromHash();
+            if (newFilter !== childHostFilter) {
+                setChildHostFilter(newFilter);
+            }
+        };
+
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, [childHostFilter, getFilterFromHash]);
 
     // Ensure current page size is always in options to avoid MUI warning
     const safePageSizeOptions = useMemo(() => {
@@ -119,10 +153,11 @@ const Hosts = () => {
         { field: 'platform', headerName: t('hosts.platform'), width: 120 },
         { field: 'ipv4', headerName: t('hosts.ipv4'), width: 150 },
         { field: 'ipv6', headerName: t('hosts.ipv6'), width: 200 },
-        { 
-            field: 'status', 
-            headerName: t('hosts.status'), 
+        {
+            field: 'status',
+            headerName: t('hosts.status'),
             width: 280,  // Increased width for status and update chips
+            display: 'flex',
             renderCell: (params) => {
                 const row = params.row;
                 // Server sends naive UTC timestamps as ISO strings with Z suffix
@@ -138,20 +173,19 @@ const Hosts = () => {
                 const needsApproval = row.approval_status === 'pending';
                 
                 return (
-                    <Box>
-                        <Chip 
+                    <Box component="span" sx={{ display: 'inline-flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
+                        <Chip
                             label={displayStatus === 'up' ? t('hosts.up') : t('hosts.down')}
                             color={displayStatus === 'up' ? 'success' : 'error'}
                             size="small"
                             title={t('hosts.lastSeen', 'Last seen {{minutes}} minutes ago', { minutes: diffMinutes })}
                         />
                         {needsApproval && (
-                            <Chip 
+                            <Chip
                                 label={t('hosts.approvalNeeded')}
                                 color="warning"
                                 size="small"
                                 variant="outlined"
-                                sx={{ ml: 0.5 }}
                             />
                         )}
                         {row.reboot_required && (
@@ -160,7 +194,6 @@ const Hosts = () => {
                                 color="error"
                                 size="small"
                                 variant="outlined"
-                                sx={{ ml: 0.5 }}
                             />
                         )}
                         {(row.security_updates_count > 0 || row.system_updates_count > 0) && (
@@ -169,7 +202,6 @@ const Hosts = () => {
                                 color={row.security_updates_count > 0 ? 'error' : 'warning'}
                                 size="small"
                                 variant="outlined"
-                                sx={{ ml: 0.5 }}
                                 title={
                                     row.security_updates_count > 0 && row.system_updates_count > 0
                                         ? t('hosts.securityAndSystemUpdates', '{{security}} security, {{system}} system updates', {
@@ -188,7 +220,6 @@ const Hosts = () => {
                                 color="info"
                                 size="small"
                                 variant="outlined"
-                                sx={{ ml: 0.5 }}
                                 title={t('hosts.osUpgradeAvailable', 'OS upgrade available for this host')}
                             />
                         )}
@@ -667,7 +698,7 @@ const Hosts = () => {
                 // Must not be a child host itself
                 if (host.parent_host_id) return false;
 
-                // Check if virtualization is ready (LXD initialized or WSL enabled)
+                // Check if virtualization is ready (LXD initialized, WSL enabled, or VMM running)
                 if (!host.virtualization_capabilities) return false;
 
                 try {
@@ -676,6 +707,8 @@ const Hosts = () => {
                     if (caps.lxd?.initialized) return true;
                     // Check WSL - must be enabled (not just available)
                     if (caps.wsl?.enabled) return true;
+                    // Check VMM (OpenBSD) - must be running
+                    if (caps.vmm?.running) return true;
                     return false;
                 } catch {
                     return false;

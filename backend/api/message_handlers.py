@@ -96,9 +96,11 @@ async def validate_host_authentication(
 async def handle_system_info(db: Session, connection, message_data: dict):
     """Handle system info message from agent."""
     from backend.api.host_utils import update_or_create_host
+    from backend.persistence.models import HostChild
     from backend.utils.host_validation import validate_host_id
 
     hostname = message_data.get("hostname")
+    auto_approve_token = message_data.get("auto_approve_token")
 
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
@@ -130,6 +132,90 @@ async def handle_system_info(db: Session, connection, message_data: dict):
         host = await update_or_create_host(
             db, hostname, ipv4, ipv6, script_execution_enabled
         )
+
+        # Check for auto-approve token and perform auto-approval if valid
+        if auto_approve_token and host.approval_status == "pending":
+            matching_child = (
+                db.query(HostChild)
+                .filter(
+                    HostChild.auto_approve_token == auto_approve_token,
+                    HostChild.status.in_(["creating", "running", "pending"]),
+                )
+                .first()
+            )
+
+            if matching_child:
+                logger.info(
+                    "Auto-approving host %s with matching token from child host %s",
+                    hostname,
+                    matching_child.child_name,
+                )
+
+                # Generate client certificate for the auto-approved host
+                from cryptography import x509
+                from backend.security.certificate_manager import certificate_manager
+
+                cert_pem, _unused = certificate_manager.generate_client_certificate(
+                    host.fqdn, host.id
+                )
+
+                # Store certificate information in host record
+                host.client_certificate = cert_pem.decode("utf-8")
+                host.certificate_issued_at = datetime.now(timezone.utc).replace(
+                    tzinfo=None
+                )
+
+                # Extract serial number for tracking
+                cert = x509.load_pem_x509_certificate(cert_pem)
+                host.certificate_serial = str(cert.serial_number)
+
+                # Update approval status
+                host.approval_status = "approved"
+                host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
+
+                # Link the child host to the approved host
+                matching_child.child_host_id = host.id
+                matching_child.installed_at = datetime.now(timezone.utc).replace(
+                    tzinfo=None
+                )
+                if matching_child.status == "creating":
+                    matching_child.status = "running"
+
+                # Set parent_host_id on the host record for easier filtering
+                host.parent_host_id = matching_child.parent_host_id
+
+                # Clear the auto_approve_token now that it's been used
+                matching_child.auto_approve_token = None
+
+                db.commit()
+
+                logger.info(
+                    "Auto-approved host %s, linked to child %s (parent=%s)",
+                    hostname,
+                    matching_child.child_name,
+                    matching_child.parent_host_id,
+                )
+
+                # Log auto-approval in audit
+                AuditService.log(
+                    db=db,
+                    action_type=ActionType.AGENT_MESSAGE,
+                    entity_type=EntityType.HOST,
+                    entity_id=str(host.id),
+                    entity_name=hostname,
+                    description=_("Host auto-approved via child host creation"),
+                    result=Result.SUCCESS,
+                    details={
+                        "child_host_id": str(matching_child.id),
+                        "child_name": matching_child.child_name,
+                        "parent_host_id": str(matching_child.parent_host_id),
+                    },
+                )
+            else:
+                logger.warning(
+                    "Auto-approve token provided but no matching child host found: %s",
+                    auto_approve_token[:8] + "..." if auto_approve_token else "None",
+                )
 
         # Check approval status
         logger.info("Host %s approval status: %s", hostname, host.approval_status)

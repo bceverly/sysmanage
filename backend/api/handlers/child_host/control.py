@@ -9,6 +9,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Dict
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from backend.i18n import _
@@ -218,12 +219,62 @@ async def handle_child_host_delete_result(
         )
 
         if child:
-            # If the child was linked to a host record, unlink it
-            # (but don't delete the host record - that's a separate concern)
+            # Store child info before deleting
             child_host_id = child.child_host_id
+            child_hostname = child.hostname
 
+            # Delete the child host record first
             db.delete(child)
             db.commit()
+
+            # Also delete any registered host record for this child
+            deleted_host_info = None
+            if child_host_id:
+                # Delete the linked host record
+                linked_host = db.query(Host).filter(Host.id == child_host_id).first()
+                if linked_host:
+                    deleted_host_info = {
+                        "id": str(linked_host.id),
+                        "hostname": linked_host.hostname,
+                        "fqdn": linked_host.fqdn,
+                    }
+                    logger.info(
+                        "Deleting linked host record for child %s: host_id=%s, hostname=%s",
+                        child_name,
+                        child_host_id,
+                        linked_host.hostname,
+                    )
+                    db.delete(linked_host)
+                    db.commit()
+            elif child_hostname:
+                # If no linked host but we have a hostname, try to find and delete
+                # a host record with matching hostname
+                matching_host = (
+                    db.query(Host)
+                    .filter(func.lower(Host.hostname) == func.lower(child_hostname))
+                    .first()
+                )
+                if not matching_host:
+                    # Also try matching on fqdn
+                    matching_host = (
+                        db.query(Host)
+                        .filter(func.lower(Host.fqdn) == func.lower(child_hostname))
+                        .first()
+                    )
+                if matching_host:
+                    deleted_host_info = {
+                        "id": str(matching_host.id),
+                        "hostname": matching_host.hostname,
+                        "fqdn": matching_host.fqdn,
+                    }
+                    logger.info(
+                        "Deleting matching host record for child %s: host_id=%s, hostname=%s",
+                        child_name,
+                        matching_host.id,
+                        matching_host.hostname,
+                    )
+                    db.delete(matching_host)
+                    db.commit()
 
             AuditService.log(
                 db=db,
@@ -237,6 +288,7 @@ async def handle_child_host_delete_result(
                     "child_name": child_name,
                     "child_type": child_type,
                     "child_host_id": str(child_host_id) if child_host_id else None,
+                    "deleted_host": deleted_host_info,
                 },
             )
 

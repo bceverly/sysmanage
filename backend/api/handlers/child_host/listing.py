@@ -6,9 +6,10 @@ including discovery and synchronization of child hosts.
 """
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from backend.i18n import _
@@ -103,7 +104,10 @@ async def handle_child_hosts_list_update(
             if key in existing_by_key:
                 # Update existing child host
                 child = existing_by_key[key]
-                child.status = status
+                # Don't overwrite "uninstalling" status - it should only clear
+                # when the delete completes and agent stops reporting the child
+                if child.status != "uninstalling":
+                    child.status = status
                 child.updated_at = now
                 if distribution_name:
                     child.distribution = distribution_name
@@ -136,10 +140,14 @@ async def handle_child_hosts_list_update(
         # Remove children that were not reported by the agent
         # If the agent doesn't see them, they've been deleted outside of sysmanage
         # BUT preserve records in "creating" status - they're still being set up
+        # AND preserve "uninstalling" records briefly to allow the delete handler to
+        # process the confirmation and clean up host records properly
         missing_count = 0
+        stale_threshold = now - timedelta(minutes=10)  # 10 minutes is long enough
+
         for key, child in existing_by_key.items():
             if key not in seen_keys:
-                # Don't delete if still in "creating" status - the WSL instance
+                # Don't delete if still in "creating" status - the instance
                 # doesn't exist yet so the agent won't report it
                 if child.status == "creating":
                     logger.debug(
@@ -148,6 +156,67 @@ async def handle_child_hosts_list_update(
                         child.child_type,
                     )
                     continue
+
+                # For "uninstalling" status, preserve briefly to allow delete handler
+                # to process, but clean up if stale (delete command failed/timed out)
+                if child.status == "uninstalling":
+                    if child.updated_at and child.updated_at > stale_threshold:
+                        logger.debug(
+                            "Preserving child host %s (%s) - uninstalling in progress",
+                            child.child_name,
+                            child.child_type,
+                        )
+                        continue
+
+                    # Stale uninstalling record - the delete command likely failed
+                    # Also delete any corresponding host record
+                    if child.child_host_id:
+                        linked_host = (
+                            db.query(Host)
+                            .filter(Host.id == child.child_host_id)
+                            .first()
+                        )
+                        if linked_host:
+                            logger.info(
+                                "Deleting linked host record for stale uninstalling "
+                                "child %s: host_id=%s",
+                                child.child_name,
+                                child.child_host_id,
+                            )
+                            db.delete(linked_host)
+                    elif child.hostname:
+                        # Try to find host by hostname or fqdn
+                        matching_host = (
+                            db.query(Host)
+                            .filter(
+                                func.lower(Host.hostname) == func.lower(child.hostname)
+                            )
+                            .first()
+                        )
+                        if not matching_host:
+                            matching_host = (
+                                db.query(Host)
+                                .filter(
+                                    func.lower(Host.fqdn) == func.lower(child.hostname)
+                                )
+                                .first()
+                            )
+                        if matching_host:
+                            logger.info(
+                                "Deleting matching host record for stale uninstalling "
+                                "child %s: hostname=%s",
+                                child.child_name,
+                                matching_host.hostname,
+                            )
+                            db.delete(matching_host)
+
+                    logger.info(
+                        "Deleting stale uninstalling child host %s (%s) - "
+                        "not reported by agent for >10 minutes",
+                        child.child_name,
+                        child.child_type,
+                    )
+
                 # Child was not reported - it has been removed
                 db.delete(child)
                 missing_count += 1

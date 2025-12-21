@@ -157,6 +157,21 @@ class QueueOperations:
                         )
                         return similar_command.message_id
 
+            # Check for duplicate message_id to prevent re-enqueuing the same message
+            # This can happen when agents retry/reconnect and resend messages
+            existing_message = (
+                db.query(MessageQueue)
+                .filter(MessageQueue.message_id == message_id)
+                .first()
+            )
+            if existing_message:
+                logger.debug(
+                    "Message %s already exists in queue (status=%s), skipping duplicate enqueue",
+                    message_id,
+                    existing_message.status,
+                )
+                return message_id
+
             queue_item = MessageQueue(
                 host_id=host_id,
                 message_id=message_id,
@@ -417,11 +432,27 @@ class QueueOperations:
         try:
             message = db.query(MessageQueue).filter_by(message_id=message_id).first()
 
-            if not message or message.status != QueueStatus.PENDING:
+            if not message:
+                logger.warning(
+                    "mark_processing: Message %s not found in database",
+                    message_id,
+                )
+                return False
+
+            if message.status != QueueStatus.PENDING:
+                logger.warning(
+                    "mark_processing: Message %s has status %s (expected PENDING)",
+                    message_id,
+                    message.status,
+                )
                 return False
 
             message.status = QueueStatus.IN_PROGRESS
             message.started_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+            # Always flush to ensure the status change is visible to other queries
+            # within the same session/transaction
+            db.flush()
 
             if not session_provided:
                 db.commit()

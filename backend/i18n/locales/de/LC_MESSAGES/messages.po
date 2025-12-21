@@ -785,3 +785,21 @@ msgstr "LXD-Initialisierung angefordert. Der Agent wird LXD automatisch installi
 
 msgid "LXD initialized successfully"
 msgstr "LXD erfolgreich initialisiert"
+
+msgid "VMM is only supported on OpenBSD hosts"
+msgstr "VMM wird nur auf OpenBSD-Hosts unterstützt"
+
+msgid "Agent must be running with root privileges to initialize VMM"
+msgstr "Der Agent muss mit Root-Rechten laufen, um VMM zu initialisieren"
+
+msgid "VMM initialization requested"
+msgstr "VMM-Initialisierung angefordert"
+
+msgid "VMM initialization requested. The agent will enable and start the vmd daemon."
+msgstr "VMM-Initialisierung angefordert. Der Agent wird den vmd-Daemon aktivieren und starten."
+
+msgid "VM name is required for VMM virtual machines"
+msgstr "VM-Name ist für VMM-VMs erforderlich"
+
+msgid "A child host named '%s' already exists on this host"
+msgstr "Ein untergeordneter Host mit dem Namen '%s' existiert bereits auf diesem Host"

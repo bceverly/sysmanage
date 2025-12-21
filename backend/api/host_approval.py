@@ -103,12 +103,14 @@ async def approve_host(
             matching_child = None
             if host_short_name:
                 # First try exact FQDN match
+                # Match both "running" and "creating" status - child may register
+                # before parent agent reports it as running
                 matching_child = (
                     session.query(HostChild)
                     .filter(
                         HostChild.hostname == host.fqdn,
                         HostChild.child_host_id.is_(None),
-                        HostChild.status == "running",
+                        HostChild.status.in_(["running", "creating"]),
                     )
                     .first()
                 )
@@ -120,19 +122,19 @@ async def approve_host(
                         .filter(
                             HostChild.hostname == host_short_name,
                             HostChild.child_host_id.is_(None),
-                            HostChild.status == "running",
+                            HostChild.status.in_(["running", "creating"]),
                         )
                         .first()
                     )
 
                 # If still no match, check if host.fqdn starts with HostChild.hostname
                 if not matching_child:
-                    # Get all unlinked running child hosts and check prefix match
+                    # Get all unlinked child hosts (running or creating) and check prefix match
                     unlinked_children = (
                         session.query(HostChild)
                         .filter(
                             HostChild.child_host_id.is_(None),
-                            HostChild.status == "running",
+                            HostChild.status.in_(["running", "creating"]),
                             HostChild.hostname.isnot(None),
                         )
                         .all()
@@ -148,6 +150,9 @@ async def approve_host(
                 matching_child.installed_at = datetime.now(timezone.utc).replace(
                     tzinfo=None
                 )
+                # Update status from "creating" to "running" if needed
+                if matching_child.status == "creating":
+                    matching_child.status = "running"
                 # Also set parent_host_id on the host record for easier filtering
                 host.parent_host_id = matching_child.parent_host_id
                 session.commit()

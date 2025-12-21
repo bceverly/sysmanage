@@ -3,9 +3,11 @@ Child host CRUD (Create, Read, Update, Delete) API endpoints.
 """
 
 import json
+import uuid
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
 
 from datetime import datetime, timezone
@@ -143,6 +145,11 @@ async def create_child_host(
                 detail=_("A child host with this name already exists"),
             )
 
+        # Generate auto-approve token if requested
+        auto_approve_token = None
+        if request.auto_approve:
+            auto_approve_token = str(uuid.uuid4())
+
         # Create the host_child record
         child_host = HostChild(
             parent_host_id=host.id,
@@ -154,6 +161,7 @@ async def create_child_host(
             default_username=request.username,
             install_path=request.install_path,
             status="pending",
+            auto_approve_token=auto_approve_token,
         )
         session.add(child_host)
         session.flush()  # Get the ID
@@ -212,6 +220,8 @@ async def create_child_host(
         }
         if request.install_path:
             parameters["install_path"] = request.install_path
+        if auto_approve_token:
+            parameters["auto_approve_token"] = auto_approve_token
 
         # Create command message
         command_message = create_command_message(
@@ -241,14 +251,24 @@ async def create_child_host(
 
         session.commit()
 
-        return {
-            "result": True,
-            "child_host_id": str(child_host.id),
-            "message": _(
+        # Build response message based on auto-approve setting
+        if auto_approve_token:
+            response_message = _(
+                "Child host creation started. "
+                "The host will be automatically approved when it connects."
+            )
+        else:
+            response_message = _(
                 "Child host creation started. "
                 "After installation completes, you must approve the new host "
                 "in the Hosts list."
-            ),
+            )
+
+        return {
+            "result": True,
+            "child_host_id": str(child_host.id),
+            "auto_approve": bool(auto_approve_token),
+            "message": response_message,
         }
 
 
@@ -339,6 +359,76 @@ async def delete_child_host(
         if not child:
             raise HTTPException(status_code=404, detail=_("Child host not found"))
 
+        child_name = child.child_name
+        child_type = child.child_type
+
+        # If status is "creating" or "pending", just delete the DB record
+        # No need to send a command to the agent since nothing was created yet
+        if child.status in ("creating", "pending"):
+            # Store child info before deleting
+            child_host_id = child.child_host_id
+            child_hostname = child.hostname
+
+            session.delete(child)
+
+            # Also delete any registered host record for this child
+            deleted_host_info = None
+            if child_host_id:
+                linked_host = (
+                    session.query(models.Host)
+                    .filter(models.Host.id == child_host_id)
+                    .first()
+                )
+                if linked_host:
+                    deleted_host_info = linked_host.hostname
+                    session.delete(linked_host)
+            elif child_hostname:
+                # Try to find host by hostname or fqdn
+                matching_host = (
+                    session.query(models.Host)
+                    .filter(
+                        func.lower(models.Host.hostname) == func.lower(child_hostname)
+                    )
+                    .first()
+                )
+                if not matching_host:
+                    matching_host = (
+                        session.query(models.Host)
+                        .filter(
+                            func.lower(models.Host.fqdn) == func.lower(child_hostname)
+                        )
+                        .first()
+                    )
+                if matching_host:
+                    deleted_host_info = matching_host.hostname
+                    session.delete(matching_host)
+
+            # Audit log
+            description = (
+                f"Cancelled child host creation '{child_name}' "
+                f"({child_type}) on host {host.fqdn}"
+            )
+            if deleted_host_info:
+                description += f" (also deleted host record: {deleted_host_info})"
+
+            audit_log(
+                session,
+                user,
+                current_user,
+                "DELETE",
+                host_id,
+                host.fqdn,
+                description,
+            )
+
+            session.commit()
+
+            return {
+                "result": True,
+                "message": _("Child host creation cancelled and record removed."),
+            }
+
+        # For existing child hosts, send delete command to the agent
         # Update status to uninstalling
         child.status = "uninstalling"
         session.flush()

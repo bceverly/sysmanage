@@ -4,8 +4,10 @@ Handles WSL status, LXD status, enabling WSL/LXD, and creating child hosts.
 """
 
 import json
+import uuid
 from datetime import datetime, timezone
 
+import bcrypt
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import sessionmaker
 
@@ -214,6 +216,52 @@ async def get_virtualization_status(
                 "reboot_required": False,
             }
 
+        # Check for OpenBSD (VMM support)
+        is_openbsd = host.platform and "OpenBSD" in host.platform
+        if is_openbsd:
+            # For OpenBSD hosts, check VMM availability
+            vmm_child_hosts = (
+                session.query(models.HostChild)
+                .filter(
+                    models.HostChild.parent_host_id == host_id,
+                    models.HostChild.child_type == "vmm",
+                )
+                .count()
+            )
+
+            # If there are VMM VMs, VMM must be enabled and running
+            if vmm_child_hosts > 0:
+                return {
+                    "supported_types": ["vmm"],
+                    "capabilities": {
+                        "vmm": {
+                            "available": True,
+                            "enabled": True,
+                            "running": True,
+                            "initialized": True,
+                            "kernel_supported": True,
+                            "needs_enable": False,
+                        }
+                    },
+                    "reboot_required": False,
+                }
+
+            # No stored data and no VMs - assume VMM available but needs setup
+            return {
+                "supported_types": ["vmm"],
+                "capabilities": {
+                    "vmm": {
+                        "available": True,
+                        "enabled": False,
+                        "running": False,
+                        "initialized": False,
+                        "kernel_supported": True,
+                        "needs_enable": True,
+                    }
+                },
+                "reboot_required": False,
+            }
+
         # Unknown platform
         return {
             "supported_types": [],
@@ -374,6 +422,82 @@ async def initialize_lxd(
 
 
 @router.post(
+    "/host/{host_id}/virtualization/initialize-vmm",
+    dependencies=[Depends(JWTBearer())],
+)
+async def initialize_vmm(
+    host_id: str,
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Initialize VMM/vmd on an OpenBSD host.
+    Enables and starts the vmd daemon for virtual machine management.
+    Requires CREATE_CHILD_HOST permission.
+    """
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        user = get_user_with_role_check(
+            session, current_user, SecurityRoles.CREATE_CHILD_HOST
+        )
+
+        host = get_host_or_404(session, host_id)
+        verify_host_active(host)
+
+        # Verify it's an OpenBSD host (VMM is OpenBSD-only)
+        if not host.platform or "OpenBSD" not in host.platform:
+            raise HTTPException(
+                status_code=400,
+                detail=_("VMM is only supported on OpenBSD hosts"),
+            )
+
+        # Verify the agent is privileged (needed to enable/start vmd)
+        if not host.is_agent_privileged:
+            raise HTTPException(
+                status_code=400,
+                detail=_(
+                    "Agent must be running with root privileges to initialize VMM"
+                ),
+            )
+
+        # Queue a command to initialize VMM
+        command_message = create_command_message(
+            command_type="initialize_vmm", parameters={}
+        )
+
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+
+        # Log the action
+        audit_log(
+            session,
+            user,
+            current_user,
+            "CREATE",
+            str(host.id),
+            host.fqdn,
+            _("VMM initialization requested"),
+        )
+
+        session.commit()
+
+        return {
+            "result": True,
+            "message": _(
+                "VMM initialization requested. The agent will enable and "
+                "start the vmd daemon."
+            ),
+        }
+
+
+@router.post(
     "/host/{host_id}/virtualization/create-child",
     dependencies=[Depends(JWTBearer())],
 )
@@ -417,13 +541,20 @@ async def create_child_host_request(
             )
 
         # Determine the child name based on type
-        # For LXD, use container_name; for WSL, use distribution
+        # For LXD, use container_name; for VMM, use vm_name; for WSL, use distribution
         if request.child_type == "lxd":
             child_name = request.container_name
             if not child_name:
                 raise HTTPException(
                     status_code=400,
                     detail=_("Container name is required for LXD containers"),
+                )
+        elif request.child_type == "vmm":
+            child_name = request.vm_name
+            if not child_name:
+                raise HTTPException(
+                    status_code=400,
+                    detail=_("VM name is required for VMM virtual machines"),
                 )
         else:
             # WSL uses distribution as the name
@@ -443,7 +574,8 @@ async def create_child_host_request(
         if existing:
             raise HTTPException(
                 status_code=400,
-                detail=_("A child host with this distribution already exists"),
+                detail=_("A child host named '%s' already exists on this host")
+                % child_name,
             )
 
         # Look up the distribution to get agent install commands
@@ -496,6 +628,11 @@ async def create_child_host_request(
         else:
             server_url = api_host
 
+        # Generate auto-approve token if requested
+        auto_approve_token = None
+        if request.auto_approve:
+            auto_approve_token = str(uuid.uuid4())
+
         # Create a placeholder HostChild record with "creating" status
         # This provides immediate feedback in the UI while the agent works
         now = datetime.now(timezone.utc).replace(tzinfo=None)
@@ -510,11 +647,18 @@ async def create_child_host_request(
             distribution_version=(
                 distribution.distribution_version if distribution else None
             ),
+            auto_approve_token=auto_approve_token,
             created_at=now,
             updated_at=now,
         )
         session.add(new_child)
         session.flush()  # Get the ID assigned
+
+        # Hash password before sending to agent (security: avoid clear text in transit)
+        # Use bcrypt for all platforms - agent expects pre-hashed passwords
+        password_hash = bcrypt.hashpw(
+            request.password.encode("utf-8"), bcrypt.gensalt(rounds=8)
+        ).decode("utf-8")
 
         # Queue a command to create the child host
         command_params = {
@@ -522,7 +666,7 @@ async def create_child_host_request(
             "distribution": request.distribution,
             "hostname": request.hostname,
             "username": request.username,
-            "password": request.password,
+            "password_hash": password_hash,  # Send hashed, not clear text
             "agent_install_commands": agent_install_commands,
             "server_url": server_url,
             "server_port": api_port,
@@ -532,6 +676,24 @@ async def create_child_host_request(
         # For LXD, include container_name
         if request.child_type == "lxd":
             command_params["container_name"] = request.container_name
+
+        # For VMM, include vm_name, iso_url, and root_password_hash
+        if request.child_type == "vmm":
+            command_params["vm_name"] = request.vm_name
+            if request.iso_url:
+                command_params["iso_url"] = request.iso_url
+            # VMM needs separate root password - hash it too
+            root_pwd = (
+                request.root_password if request.root_password else request.password
+            )
+            root_password_hash = bcrypt.hashpw(
+                root_pwd.encode("utf-8"), bcrypt.gensalt(rounds=8)
+            ).decode("utf-8")
+            command_params["root_password_hash"] = root_password_hash
+
+        # Include auto_approve_token if set
+        if auto_approve_token:
+            command_params["auto_approve_token"] = auto_approve_token
 
         command_message = create_command_message(
             command_type="create_child_host",
@@ -559,11 +721,21 @@ async def create_child_host_request(
 
         session.commit()
 
+        # Build response message based on auto-approve setting
+        if auto_approve_token:
+            response_message = _(
+                "Child host creation requested. This may take several minutes. "
+                "The host will be automatically approved when it connects."
+            )
+        else:
+            response_message = _(
+                "Child host creation requested. This may take several minutes."
+            )
+
         return {
             "result": True,
             "success": True,
-            "message": _(
-                "Child host creation requested. This may take several minutes."
-            ),
+            "message": response_message,
             "child_host_id": str(new_child.id),
+            "auto_approve": bool(auto_approve_token),
         }

@@ -26,6 +26,7 @@ from backend.api.handlers import (
     handle_third_party_repository_update,
     handle_user_access_update,
     handle_virtualization_support_update,
+    handle_vmm_initialize_result,
 )
 from backend.api.message_handlers import (
     handle_command_acknowledgment,
@@ -213,6 +214,12 @@ async def route_inbound_message(
             await handle_update_apply_result(db, mock_connection, message_data)
             success = True
             print("Successfully processed update apply result", flush=True)
+
+        elif message_type == MessageType.VMM_INITIALIZED:
+            print("About to call handle_vmm_initialize_result", flush=True)
+            await handle_vmm_initialize_result(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed VMM initialized", flush=True)
 
         else:
             print(f"Unknown message type: {message_type}", flush=True)

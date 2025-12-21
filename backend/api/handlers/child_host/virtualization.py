@@ -349,3 +349,126 @@ async def handle_lxd_initialize_result(
             exc_info=True,
         )
         return {"message_type": "error", "error": str(e)}
+
+
+async def handle_vmm_initialize_result(
+    db: Session, connection: Any, message_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Handle VMM/vmd initialization result from agent.
+
+    After vmd is started, queues a virtualization check to refresh
+    the host's virtualization capabilities.
+
+    Args:
+        db: Database session
+        connection: WebSocket connection object
+        message_data: Message data containing VMM init result
+
+    Returns:
+        Acknowledgment message
+    """
+    host_id = getattr(connection, "host_id", None)
+    if not host_id:
+        logger.warning("VMM initialize result received but no host_id on connection")
+        return {"message_type": "error", "error": "No host_id on connection"}
+
+    result_data = message_data.get("result", {})
+    if not result_data:
+        result_data = message_data
+
+    success = result_data.get("success", False)
+    needs_reboot = result_data.get("needs_reboot", False)
+    already_enabled = result_data.get("already_enabled", False)
+    error = result_data.get("error")
+    message = result_data.get("message", "")
+
+    if not success:
+        logger.error("VMM initialization failed for host %s: %s", host_id, error)
+        return {"message_type": "error", "error": error}
+
+    logger.info(
+        "VMM initialization result for host %s: success=%s, needs_reboot=%s, "
+        "already_enabled=%s",
+        host_id,
+        success,
+        needs_reboot,
+        already_enabled,
+    )
+
+    try:
+        host = db.query(Host).filter(Host.id == host_id).first()
+        if not host:
+            logger.warning("Host not found for VMM initialize result: %s", host_id)
+            return {"message_type": "error", "error": "Host not found"}
+
+        if needs_reboot:
+            # Set reboot required with specific reason
+            host.reboot_required = True
+            host.reboot_required_reason = "VMM kernel support requires reboot"
+            db.commit()
+
+            AuditService.log(
+                db=db,
+                action_type=ActionType.AGENT_MESSAGE,
+                entity_type=EntityType.HOST,
+                entity_id=str(host_id),
+                entity_name=host.fqdn,
+                description=_("VMM initialization requires reboot"),
+                result=Result.SUCCESS,
+                details={"needs_reboot": True},
+            )
+        else:
+            # VMM initialized - queue a virtualization check to refresh
+            # the host's virtualization state in the UI
+            from backend.websocket.messages import create_command_message
+            from backend.websocket.queue_enums import QueueDirection
+            from backend.websocket.queue_operations import QueueOperations
+
+            queue_ops = QueueOperations()
+            virtualization_command = create_command_message(
+                command_type="check_virtualization_support", parameters={}
+            )
+            queue_ops.enqueue_message(
+                message_type="command",
+                message_data=virtualization_command,
+                direction=QueueDirection.OUTBOUND,
+                host_id=str(host_id),
+                db=db,
+            )
+            db.commit()
+
+            AuditService.log(
+                db=db,
+                action_type=ActionType.AGENT_MESSAGE,
+                entity_type=EntityType.HOST,
+                entity_id=str(host_id),
+                entity_name=host.fqdn,
+                description=_("VMM/vmd initialized successfully"),
+                result=Result.SUCCESS,
+                details={
+                    "message": message,
+                    "already_enabled": already_enabled,
+                },
+            )
+
+            logger.info(
+                "VMM initialized for host %s, queued virtualization check",
+                host_id,
+            )
+
+        return {
+            "message_type": "vmm_initialize_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "needs_reboot": needs_reboot,
+            "already_enabled": already_enabled,
+        }
+
+    except Exception as e:
+        logger.error(
+            "Error updating VMM initialize status for host %s: %s",
+            host_id,
+            e,
+            exc_info=True,
+        )
+        return {"message_type": "error", "error": str(e)}

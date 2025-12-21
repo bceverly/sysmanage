@@ -791,3 +791,21 @@ msgstr "LXD इनिशियलाइज़ेशन का अनुरोध
 
 msgid "LXD initialized successfully"
 msgstr "LXD सफलतापूर्वक इनिशियलाइज़ हुआ"
+
+msgid "VMM is only supported on OpenBSD hosts"
+msgstr "VMM केवल OpenBSD होस्ट पर समर्थित है"
+
+msgid "Agent must be running with root privileges to initialize VMM"
+msgstr "VMM को इनिशियलाइज़ करने के लिए एजेंट को रूट विशेषाधिकारों के साथ चलना चाहिए"
+
+msgid "VMM initialization requested"
+msgstr "VMM इनिशियलाइज़ेशन का अनुरोध किया गया"
+
+msgid "VMM initialization requested. The agent will enable and start the vmd daemon."
+msgstr "VMM इनिशियलाइज़ेशन का अनुरोध किया गया। एजेंट vmd डेमॉन को सक्षम और प्रारंभ करेगा।"
+
+msgid "VM name is required for VMM virtual machines"
+msgstr "VMM वर्चुअल मशीनों के लिए VM नाम आवश्यक है"
+
+msgid "A child host named '%s' already exists on this host"
+msgstr "'%s' नाम का एक चाइल्ड होस्ट इस होस्ट पर पहले से मौजूद है"

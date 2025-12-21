@@ -792,3 +792,21 @@ msgstr "LXD 초기화가 요청되었습니다. 에이전트가 자동으로 LXD
 
 msgid "LXD initialized successfully"
 msgstr "LXD가 성공적으로 초기화되었습니다"
+
+msgid "VMM is only supported on OpenBSD hosts"
+msgstr "VMM은 OpenBSD 호스트에서만 지원됩니다"
+
+msgid "Agent must be running with root privileges to initialize VMM"
+msgstr "VMM을 초기화하려면 에이전트가 루트 권한으로 실행되어야 합니다"
+
+msgid "VMM initialization requested"
+msgstr "VMM 초기화가 요청되었습니다"
+
+msgid "VMM initialization requested. The agent will enable and start the vmd daemon."
+msgstr "VMM 초기화가 요청되었습니다. 에이전트가 vmd 데몬을 활성화하고 시작합니다."
+
+msgid "VM name is required for VMM virtual machines"
+msgstr "VMM 가상 머신에는 VM 이름이 필요합니다"
+
+msgid "A child host named '%s' already exists on this host"
+msgstr "이 호스트에 '%s'라는 이름의 자식 호스트가 이미 존재합니다"
