@@ -185,28 +185,18 @@ async def handle_child_hosts_list_update(
                             )
                             db.delete(linked_host)
                     elif child.hostname:
-                        # Try to find host by hostname or fqdn
+                        # Try to find host by fqdn (Host model uses fqdn, not hostname)
                         matching_host = (
                             db.query(Host)
-                            .filter(
-                                func.lower(Host.hostname) == func.lower(child.hostname)
-                            )
+                            .filter(func.lower(Host.fqdn) == func.lower(child.hostname))
                             .first()
                         )
-                        if not matching_host:
-                            matching_host = (
-                                db.query(Host)
-                                .filter(
-                                    func.lower(Host.fqdn) == func.lower(child.hostname)
-                                )
-                                .first()
-                            )
                         if matching_host:
                             logger.info(
                                 "Deleting matching host record for stale uninstalling "
-                                "child %s: hostname=%s",
+                                "child %s: fqdn=%s",
                                 child.child_name,
-                                matching_host.hostname,
+                                matching_host.fqdn,
                             )
                             db.delete(matching_host)
 

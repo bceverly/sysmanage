@@ -230,47 +230,55 @@ async def handle_system_info(db: Session, connection, message_data: dict):
             connection.agent_id, hostname, ipv4, ipv6, platform
         )
 
-        # Set host_id only if approved
+        # Always set host_id so heartbeats work (even for unapproved hosts)
+        connection.host_id = host.id
+
+        # Always update last_access so we know the host is actively connecting
+        # This prevents unapproved hosts from showing as "down" when they're actually up
+        update_values = {
+            "platform": platform,
+        }
+
+        # Update privileged status if provided
+        is_privileged = message_data.get("is_privileged")
+        if is_privileged is not None:
+            update_values["is_agent_privileged"] = is_privileged
+
+        # Update enabled shells if provided
+        enabled_shells = message_data.get("enabled_shells")
+        if enabled_shells is not None:
+            import json
+
+            update_values["enabled_shells"] = (
+                json.dumps(enabled_shells) if enabled_shells else None
+            )
+
+        # Always update last_access (for both approved and unapproved hosts)
+        if (
+            not hasattr(connection, "is_mock_connection")
+            or not connection.is_mock_connection
+        ):
+            update_values["last_access"] = datetime.now(timezone.utc).replace(
+                tzinfo=None
+            )
+
+        # Only set status to "up" for approved hosts
         if host.approval_status == "approved":
-            connection.host_id = host.id
+            update_values["status"] = "up"
 
-            # Update host online status
-            # Only update last_access for actual heartbeat/checkin messages, not queued data
-            update_values = {
-                "status": "up",
-                "platform": platform,
-            }
+        # NOTE: Script execution status should not be updated from system_info messages
+        # This prevents agent registration from overwriting the server-configured setting
+        # Script execution capability should only be set through explicit admin configuration
+        # or during initial host creation, not during agent reconnection/registration
 
-            # Update privileged status if provided
-            is_privileged = message_data.get("is_privileged")
-            if is_privileged is not None:
-                update_values["is_agent_privileged"] = is_privileged
+        # Always update the database (last_access for all hosts, status only for approved)
+        stmt = update(Host).where(Host.id == host.id).values(**update_values)
+        db.execute(stmt)
+        db.commit()
+        db.flush()  # Ensure changes are visible immediately
 
-            # NOTE: Script execution status should not be updated from system_info messages
-            # This prevents agent registration from overwriting the server-configured setting
-            # Script execution capability should only be set through explicit admin configuration
-            # or during initial host creation, not during agent reconnection/registration
-
-            # Update enabled shells if provided
-            enabled_shells = message_data.get("enabled_shells")
-            if enabled_shells is not None:
-                import json
-
-                update_values["enabled_shells"] = (
-                    json.dumps(enabled_shells) if enabled_shells else None
-                )
-            if (
-                not hasattr(connection, "is_mock_connection")
-                or not connection.is_mock_connection
-            ):
-                update_values["last_access"] = datetime.now(timezone.utc).replace(
-                    tzinfo=None
-                )
-
-            stmt = update(Host).where(Host.id == host.id).values(**update_values)
-            db.execute(stmt)
-            db.commit()
-            db.flush()  # Ensure changes are visible immediately
+        # Only process additional data for approved hosts
+        if host.approval_status == "approved":
 
             # Process software packages if included in SYSTEM_INFO message
             software_packages = message_data.get("software_packages", [])
