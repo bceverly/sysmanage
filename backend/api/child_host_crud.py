@@ -361,10 +361,12 @@ async def delete_child_host(
 
         child_name = child.child_name
         child_type = child.child_type
+        child_status = child.status
 
-        # If status is "creating" or "pending", just delete the DB record
+        # If status is "creating", "pending", or "failed", just delete the DB record
         # No need to send a command to the agent since nothing was created yet
-        if child.status in ("creating", "pending"):
+        # or the creation failed before the child host was fully set up
+        if child_status in ("creating", "pending", "failed"):
             # Store child info before deleting
             child_host_id = child.child_host_id
             child_hostname = child.hostname
@@ -380,34 +382,41 @@ async def delete_child_host(
                     .first()
                 )
                 if linked_host:
-                    deleted_host_info = linked_host.hostname
+                    deleted_host_info = linked_host.fqdn
                     session.delete(linked_host)
             elif child_hostname:
-                # Try to find host by hostname or fqdn
+                # Try to find host by fqdn matching the child hostname
                 matching_host = (
                     session.query(models.Host)
-                    .filter(
-                        func.lower(models.Host.hostname) == func.lower(child_hostname)
-                    )
+                    .filter(func.lower(models.Host.fqdn) == func.lower(child_hostname))
                     .first()
                 )
+                # Also try prefix match (hostname without domain)
                 if not matching_host:
                     matching_host = (
                         session.query(models.Host)
                         .filter(
-                            func.lower(models.Host.fqdn) == func.lower(child_hostname)
+                            func.lower(models.Host.fqdn).like(
+                                func.lower(child_hostname + ".%")
+                            )
                         )
                         .first()
                     )
                 if matching_host:
-                    deleted_host_info = matching_host.hostname
+                    deleted_host_info = matching_host.fqdn
                     session.delete(matching_host)
 
-            # Audit log
-            description = (
-                f"Cancelled child host creation '{child_name}' "
-                f"({child_type}) on host {host.fqdn}"
-            )
+            # Audit log - use appropriate message based on status
+            if child_status == "failed":
+                description = (
+                    f"Removed failed child host '{child_name}' "
+                    f"({child_type}) from host {host.fqdn}"
+                )
+            else:
+                description = (
+                    f"Cancelled child host creation '{child_name}' "
+                    f"({child_type}) on host {host.fqdn}"
+                )
             if deleted_host_info:
                 description += f" (also deleted host record: {deleted_host_info})"
 
@@ -423,6 +432,12 @@ async def delete_child_host(
 
             session.commit()
 
+            # Return appropriate message based on original status
+            if child_status == "failed":
+                return {
+                    "result": True,
+                    "message": _("Failed child host record removed."),
+                }
             return {
                 "result": True,
                 "message": _("Child host creation cancelled and record removed."),

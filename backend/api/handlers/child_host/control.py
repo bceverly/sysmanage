@@ -235,43 +235,45 @@ async def handle_child_host_delete_result(
                 if linked_host:
                     deleted_host_info = {
                         "id": str(linked_host.id),
-                        "hostname": linked_host.hostname,
                         "fqdn": linked_host.fqdn,
                     }
                     logger.info(
-                        "Deleting linked host record for child %s: host_id=%s, hostname=%s",
+                        "Deleting linked host record for child %s: host_id=%s, fqdn=%s",
                         child_name,
                         child_host_id,
-                        linked_host.hostname,
+                        linked_host.fqdn,
                     )
                     db.delete(linked_host)
                     db.commit()
             elif child_hostname:
                 # If no linked host but we have a hostname, try to find and delete
-                # a host record with matching hostname
+                # a host record with matching fqdn
                 matching_host = (
                     db.query(Host)
-                    .filter(func.lower(Host.hostname) == func.lower(child_hostname))
+                    .filter(func.lower(Host.fqdn) == func.lower(child_hostname))
                     .first()
                 )
+                # Also try prefix match (hostname without domain)
                 if not matching_host:
-                    # Also try matching on fqdn
                     matching_host = (
                         db.query(Host)
-                        .filter(func.lower(Host.fqdn) == func.lower(child_hostname))
+                        .filter(
+                            func.lower(Host.fqdn).like(
+                                func.lower(child_hostname + ".%")
+                            )
+                        )
                         .first()
                     )
                 if matching_host:
                     deleted_host_info = {
                         "id": str(matching_host.id),
-                        "hostname": matching_host.hostname,
                         "fqdn": matching_host.fqdn,
                     }
                     logger.info(
-                        "Deleting matching host record for child %s: host_id=%s, hostname=%s",
+                        "Deleting matching host record for child %s: host_id=%s, fqdn=%s",
                         child_name,
                         matching_host.id,
-                        matching_host.hostname,
+                        matching_host.fqdn,
                     )
                     db.delete(matching_host)
                     db.commit()

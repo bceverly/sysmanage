@@ -197,13 +197,22 @@ class Host(Base):
         "HostRole", back_populates="host", cascade="all, delete-orphan"
     )
     grafana_integration = relationship(
-        "GrafanaIntegrationSettings", back_populates="host", uselist=False
+        "GrafanaIntegrationSettings",
+        back_populates="host",
+        uselist=False,
+        cascade="all, delete-orphan",
     )
     graylog_integration = relationship(
-        "GraylogIntegrationSettings", back_populates="host", uselist=False
+        "GraylogIntegrationSettings",
+        back_populates="host",
+        uselist=False,
+        cascade="all, delete-orphan",
     )
     graylog_attachment = relationship(
-        "GraylogAttachment", back_populates="host", uselist=False
+        "GraylogAttachment",
+        back_populates="host",
+        uselist=False,
+        cascade="all, delete-orphan",
     )
     firewall_roles = relationship(
         "HostFirewallRole", back_populates="host", cascade="all, delete-orphan"

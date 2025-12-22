@@ -899,10 +899,23 @@ jobs:
           mkdir -p sbom
           cd ${{ github.workspace }}
 
-          # Generate Python backend SBOM
+          # Generate Python backend SBOM using the cyclonedx-py CLI tool
           if [ -f "requirements.txt" ]; then
-            python3 -m cyclonedx_py requirements -i requirements.txt -o sbom/alpine-${{ matrix.alpine-version }}-backend-sbom.json --format json || true
+            echo "Generating SBOM from requirements.txt..."
+            echo "cyclonedx-bom version:"
+            cyclonedx-py --version || echo "Version check failed"
+
+            if cyclonedx-py requirements --input-file requirements.txt --output-file sbom/alpine-${{ matrix.alpine-version }}-backend-sbom.json --output-format json 2>&1; then
+              echo "SBOM generation succeeded"
+              ls -la sbom/
+            else
+              echo "SBOM generation failed, removing empty file if present"
+              rm -f sbom/alpine-${{ matrix.alpine-version }}-backend-sbom.json
+            fi
           fi
+
+          # Remove any empty or nearly empty SBOM files (less than 500 bytes is invalid)
+          find sbom/ -name "*.json" -size -500c -delete 2>/dev/null || true
 
           echo "SBOM files generated:"
           ls -la sbom/ 2>/dev/null || echo "No SBOM files found"
@@ -963,6 +976,12 @@ jobs:
           find artifacts/ -name "*.msi" -exec cp {} release-files/ \;
           find artifacts/ -name "*.sha256" -exec cp {} release-files/ \;
           find artifacts/ -name "*.json" -exec cp {} release-files/ \;
+
+          # Remove any empty files (GitHub rejects files with size < 1 byte)
+          echo "Removing any empty files..."
+          find release-files/ -type f -empty -delete 2>/dev/null || true
+          # Also remove very small JSON files (likely failed SBOM generation)
+          find release-files/ -name "*.json" -size -500c -delete 2>/dev/null || true
 
           echo "Release files:"
           ls -la release-files/
