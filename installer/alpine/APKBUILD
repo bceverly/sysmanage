@@ -9,6 +9,7 @@ license="AGPL-3.0-or-later"
 depends="
 	python3
 	py3-pip
+	libgcc
 	py3-sqlalchemy
 	py3-alembic
 	py3-psycopg2
@@ -70,7 +71,13 @@ package() {
 	# Create a local pip packages directory within the application
 	install -d "$pkgdir"/usr/libexec/sysmanage/pip-packages
 	pip3 install --target="$pkgdir"/usr/libexec/sysmanage/pip-packages \
+		--no-compile \
 		uvicorn fastapi
+
+	# Remove bundled .libs directories from pip packages
+	# These contain bundled copies of libgcc_s, etc. that confuse abuild's
+	# dependency tracing. The system libraries will be used instead.
+	find "$pkgdir"/usr/libexec/sysmanage/pip-packages -type d -name '*.libs' -exec rm -rf {} + 2>/dev/null || true
 
 	# Install alembic for database migrations
 	if [ -f alembic.ini ]; then
