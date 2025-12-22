@@ -746,11 +746,188 @@ jobs:
             installer/dist/sysmanage-*-windows-arm64.msi
             installer/dist/sysmanage-*-windows-arm64.msi.sha256
 
+  # Alpine Linux APK Package Build
+  build-alpine:
+    name: Build Alpine ${{ matrix.alpine-version }} Package
+    runs-on: ubuntu-latest
+    needs: wait-for-tests
+
+    strategy:
+      fail-fast: false
+      matrix:
+        alpine-version: ['3.19', '3.20', '3.21']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Determine version
+        id: version
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building Alpine ${{ matrix.alpine-version }} package for version: $VERSION"
+
+      - name: Set up Alpine container
+        run: |
+          docker pull alpine:${{ matrix.alpine-version }}
+
+      - name: Build package in Alpine container
+        env:
+          ALPINE_VERSION: ${{ matrix.alpine-version }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          cat > build-apk.sh << 'BUILDSCRIPT'
+          #!/bin/sh
+          set -ex
+
+          # Get Alpine version for repository URLs
+          ALPINE_VER=$(cat /etc/alpine-release | cut -d. -f1,2)
+          echo "Building on Alpine $ALPINE_VER"
+
+          # Enable community repository (required for Python packages)
+          echo "https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VER}/main" > /etc/apk/repositories
+          echo "https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VER}/community" >> /etc/apk/repositories
+          cat /etc/apk/repositories
+
+          # Update package index
+          apk update
+
+          # Install build dependencies
+          apk add --no-cache \
+            alpine-sdk \
+            sudo \
+            python3 \
+            py3-pip \
+            nodejs \
+            npm
+
+          # Set up abuild user (required for building packages)
+          adduser -D builder
+          addgroup builder abuild
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+          # Create build directory structure
+          mkdir -p /home/builder/packages
+          mkdir -p /home/builder/aports/sysutils/sysmanage
+
+          # Copy installer files
+          cp /workspace/installer/alpine/APKBUILD /home/builder/aports/sysutils/sysmanage/
+          cp /workspace/installer/alpine/sysmanage.initd /home/builder/aports/sysutils/sysmanage/
+          cp /workspace/installer/alpine/sysmanage.confd /home/builder/aports/sysutils/sysmanage/
+          cp /workspace/installer/alpine/sysmanage.post-install /home/builder/aports/sysutils/sysmanage/
+          cp /workspace/installer/alpine/sysmanage-nginx.conf /home/builder/aports/sysutils/sysmanage/
+
+          # Update version in APKBUILD
+          cd /home/builder/aports/sysutils/sysmanage
+          sed -i "s/^pkgver=.*/pkgver=$VERSION/" APKBUILD
+
+          # Fix ownership
+          chown -R builder:builder /home/builder
+
+          # Generate signing key (for local builds)
+          sudo -u builder abuild-keygen -a -i -n
+
+          # Download source and generate checksums
+          sudo -u builder abuild checksum
+
+          # Build the package
+          sudo -u builder abuild -r
+
+          # Find and copy the built package
+          find /home/builder/packages -name "*.apk" -type f
+          cp /home/builder/packages/sysutils/$(uname -m)/*.apk /workspace/ || \
+            cp /home/builder/packages/*/$(uname -m)/*.apk /workspace/ || \
+            find /home/builder/packages -name "*.apk" -exec cp {} /workspace/ \;
+
+          echo "Build complete!"
+          BUILDSCRIPT
+
+          chmod +x build-apk.sh
+
+          docker run --rm \
+            -v "${{ github.workspace }}:/workspace" \
+            -e VERSION="${VERSION}" \
+            alpine:${{ matrix.alpine-version }} \
+            /workspace/build-apk.sh
+
+      - name: Rename package with Alpine version
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          ALPINE_VERSION: ${{ matrix.alpine-version }}
+        run: |
+          ALPINE_NODOT=$(echo "$ALPINE_VERSION" | tr -d '.')
+
+          for pkg in sysmanage-*.apk; do
+            if [ -f "$pkg" ]; then
+              newname="sysmanage-${VERSION}-alpine${ALPINE_NODOT}.apk"
+              mv "$pkg" "$newname"
+              echo "Renamed $pkg to $newname"
+            fi
+          done
+
+          ls -la *.apk 2>/dev/null || echo "No packages found"
+
+      - name: Generate SHA256 checksum
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          ALPINE_VERSION: ${{ matrix.alpine-version }}
+        run: |
+          ALPINE_NODOT=$(echo "$ALPINE_VERSION" | tr -d '.')
+          PKG_FILE="sysmanage-${VERSION}-alpine${ALPINE_NODOT}.apk"
+          sha256sum "$PKG_FILE" > "${PKG_FILE}.sha256"
+          echo "Checksum:"
+          cat "${PKG_FILE}.sha256"
+
+      - name: Generate Alpine SBOM
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          ALPINE_VERSION: ${{ matrix.alpine-version }}
+        run: |
+          # Install cyclonedx for Python SBOM generation
+          pip3 install cyclonedx-bom
+
+          # Generate SBOM for Python dependencies
+          mkdir -p sbom
+          cd ${{ github.workspace }}
+
+          # Generate Python backend SBOM
+          if [ -f "requirements.txt" ]; then
+            python3 -m cyclonedx_py requirements -i requirements.txt -o sbom/alpine-${{ matrix.alpine-version }}-backend-sbom.json --format json || true
+          fi
+
+          echo "SBOM files generated:"
+          ls -la sbom/ 2>/dev/null || echo "No SBOM files found"
+
+      - name: Upload Alpine ${{ matrix.alpine-version }} package
+        uses: actions/upload-artifact@v5
+        with:
+          name: sysmanage-alpine-${{ matrix.alpine-version }}
+          path: |
+            sysmanage-*.apk
+            sysmanage-*.apk.sha256
+          if-no-files-found: error
+
+      - name: Upload Alpine SBOM
+        uses: actions/upload-artifact@v5
+        with:
+          name: sysmanage-alpine-sbom-${{ matrix.alpine-version }}
+          path: sbom/
+          if-no-files-found: warn
+
   # Consolidated Release - Push to sysmanage-docs and create GitHub release
   release:
     name: Create Release and Push to Docs
     runs-on: ubuntu-latest
-    needs: [build-ubuntu, build-openbsd-port, build-centos-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg, build-windows-msi-x64, build-windows-msi-arm64]
+    needs: [build-ubuntu, build-openbsd-port, build-centos-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg, build-windows-msi-x64, build-windows-msi-arm64, build-alpine]
 
     steps:
       - name: Checkout code
@@ -780,6 +957,7 @@ jobs:
           find artifacts/ -name "*.deb" -exec cp {} release-files/ \;
           find artifacts/ -name "*.rpm" -exec cp {} release-files/ \;
           find artifacts/ -name "*.pkg" -exec cp {} release-files/ \;
+          find artifacts/ -name "*.apk" -exec cp {} release-files/ \;
           find artifacts/ -name "*.tar.gz" -exec cp {} release-files/ \;
           find artifacts/ -name "*.tgz" -exec cp {} release-files/ \;
           find artifacts/ -name "*.msi" -exec cp {} release-files/ \;
@@ -810,6 +988,7 @@ jobs:
           mkdir -p "repo/server/rpm/centos/$VERSION"
           mkdir -p "repo/server/rpm/opensuse/$VERSION"
           mkdir -p "repo/server/windows/$VERSION"
+          mkdir -p "repo/server/alpine/$VERSION"
 
           # Copy package files to appropriate locations
           # DEB packages
@@ -843,6 +1022,10 @@ jobs:
           # Windows MSI packages
           cp ${{ github.workspace }}/release-files/sysmanage-*-windows-*.msi "repo/server/windows/$VERSION/" 2>/dev/null || true
           cp ${{ github.workspace }}/release-files/sysmanage-*-windows-*.msi.sha256 "repo/server/windows/$VERSION/" 2>/dev/null || true
+
+          # Alpine Linux APK packages
+          cp ${{ github.workspace }}/release-files/sysmanage-*-alpine*.apk "repo/server/alpine/$VERSION/" 2>/dev/null || true
+          cp ${{ github.workspace }}/release-files/sysmanage-*-alpine*.apk.sha256 "repo/server/alpine/$VERSION/" 2>/dev/null || true
 
           # Install repository tools
           echo "Installing repository metadata tools..."
@@ -1131,6 +1314,41 @@ jobs:
           sudo systemctl enable --now nginx
           \`\`\`
 
+          ### Alpine Linux (3.19, 3.20, 3.21)
+          \`\`\`bash
+          # Download the APK package for your Alpine version (e.g., alpine319, alpine320, alpine321)
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-alpine320.apk
+
+          # Allow installation of unsigned packages (required for GitHub releases)
+          apk add --allow-untrusted ./sysmanage-${VERSION}-alpine320.apk
+
+          # The package installs to /usr/libexec/sysmanage with pip packages in a subdirectory
+          # Dependencies: python3, nginx, postgresql are automatically installed
+
+          # Initialize and start PostgreSQL
+          rc-update add postgresql default
+          rc-service postgresql start
+
+          # Create database and user
+          su - postgres -c "createuser -P sysmanage"
+          su - postgres -c "createdb -O sysmanage sysmanage"
+
+          # Configure SysManage
+          cp /etc/sysmanage/sysmanage.yaml.example /etc/sysmanage/sysmanage.yaml
+          vi /etc/sysmanage/sysmanage.yaml
+          # Update the database connection string
+
+          # Initialize database schema
+          cd /usr/libexec/sysmanage
+          PYTHONPATH=/usr/libexec/sysmanage/pip-packages python3 -m alembic upgrade head
+
+          # Enable and start the services
+          rc-update add sysmanage default
+          rc-update add nginx default
+          rc-service sysmanage start
+          rc-service nginx start
+          \`\`\`
+
           ### Windows (x64 and ARM64)
           \`\`\`powershell
           # Download the MSI installer (choose your architecture)
@@ -1220,6 +1438,18 @@ jobs:
           sha256sum -c sysmanage-${VERSION}-1.noarch.rpm.sha256
           \`\`\`
 
+          **Alpine Linux:**
+          \`\`\`bash
+          # For Alpine 3.19:
+          sha256sum -c sysmanage-${VERSION}-alpine319.apk.sha256
+
+          # For Alpine 3.20:
+          sha256sum -c sysmanage-${VERSION}-alpine320.apk.sha256
+
+          # For Alpine 3.21:
+          sha256sum -c sysmanage-${VERSION}-alpine321.apk.sha256
+          \`\`\`
+
           **Windows:**
           \`\`\`powershell
           # For x64:
@@ -1257,7 +1487,7 @@ jobs:
 
           ## System Requirements
 
-          - **Operating System**: Ubuntu 22.04+, Debian 11+
+          - **Operating System**: Ubuntu 22.04+, Debian 11+, Alpine Linux 3.19+, and other supported platforms
           - **Database**: PostgreSQL 12+ (recommended) or SQLite
           - **Web Server**: Nginx (for serving frontend)
           - **Python**: 3.10+ (included in package)
@@ -1267,7 +1497,8 @@ jobs:
 
           - Backend API server with WebSocket support
           - React-based web frontend (pre-built)
-          - Systemd service configuration
+          - Systemd service configuration (for Linux distros with systemd)
+          - OpenRC service configuration (for Alpine Linux)
           - Nginx configuration template
           - Alembic database migrations
           - Example configuration file
