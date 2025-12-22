@@ -7,7 +7,7 @@ including discovery and synchronization of child hosts.
 
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -17,6 +17,91 @@ from backend.persistence.models import Host, HostChild
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 logger = logging.getLogger(__name__)
+
+
+def _try_link_child_to_approved_host(
+    db: Session, child: HostChild, now: datetime
+) -> Optional[Host]:
+    """
+    Try to link a running child host to an already-approved Host record.
+
+    This handles the race condition where a host is approved before the parent
+    agent reports it as a child host. When the parent later reports the child,
+    we check if there's an approved host with matching hostname and link them.
+
+    Args:
+        db: Database session
+        child: The HostChild record to potentially link
+        now: Current timestamp for setting installed_at
+
+    Returns:
+        The matched Host if linked, None otherwise
+    """
+    if not child.hostname:
+        return None
+
+    # Already linked
+    if child.child_host_id is not None:
+        return None
+
+    # Only link running children
+    if child.status != "running":
+        return None
+
+    # Try exact FQDN match first (case-insensitive)
+    matching_host = (
+        db.query(Host)
+        .filter(
+            func.lower(Host.fqdn) == func.lower(child.hostname),
+            Host.approval_status == "approved",
+        )
+        .first()
+    )
+
+    # If no exact match, try matching by short hostname
+    if not matching_host:
+        child_short_name = (
+            child.hostname.split(".")[0] if "." in child.hostname else None
+        )
+        if child_short_name:
+            # Find hosts where fqdn starts with the short name followed by a dot
+            matching_host = (
+                db.query(Host)
+                .filter(
+                    func.lower(Host.fqdn).like(func.lower(child_short_name + ".%")),
+                    Host.approval_status == "approved",
+                )
+                .first()
+            )
+
+    # If still no match, check if child.hostname is a short name that matches
+    # a host's fqdn prefix
+    if not matching_host and "." not in child.hostname:
+        matching_host = (
+            db.query(Host)
+            .filter(
+                func.lower(Host.fqdn).like(func.lower(child.hostname + ".%")),
+                Host.approval_status == "approved",
+            )
+            .first()
+        )
+
+    if matching_host:
+        # Link the child to the approved host
+        child.child_host_id = matching_host.id
+        child.installed_at = now
+        # Also set parent_host_id on the host record for easier filtering
+        matching_host.parent_host_id = child.parent_host_id
+        logger.info(
+            "Linked child host %s (%s) to approved host %s (%s) - late linking",
+            child.child_name,
+            child.id,
+            matching_host.id,
+            matching_host.fqdn,
+        )
+        return matching_host
+
+    return None
 
 
 async def handle_child_hosts_list_update(
@@ -74,6 +159,7 @@ async def handle_child_hosts_list_update(
         seen_keys = set()
         new_count = 0
         updated_count = 0
+        linked_count = 0
 
         for child_data in child_hosts:
             child_name = child_data.get("child_name")
@@ -120,6 +206,12 @@ async def handle_child_hosts_list_update(
                 if wsl_guid:
                     child.wsl_guid = wsl_guid
                 updated_count += 1
+
+                # Try to link unlinked running children to approved hosts
+                # This handles race condition where host was approved before
+                # the parent reported this child
+                if _try_link_child_to_approved_host(db, child, now):
+                    linked_count += 1
             else:
                 # Create new child host record
                 child = HostChild(
@@ -136,6 +228,11 @@ async def handle_child_hosts_list_update(
                 )
                 db.add(child)
                 new_count += 1
+
+                # Flush to get the child ID, then try to link
+                db.flush()
+                if _try_link_child_to_approved_host(db, child, now):
+                    linked_count += 1
 
         # Remove children that were not reported by the agent
         # If the agent doesn't see them, they've been deleted outside of sysmanage
@@ -219,10 +316,11 @@ async def handle_child_hosts_list_update(
         db.commit()
 
         logger.info(
-            "Child hosts update for host %s: new=%d, updated=%d, missing=%d",
+            "Child hosts update for host %s: new=%d, updated=%d, linked=%d, missing=%d",
             host_id,
             new_count,
             updated_count,
+            linked_count,
             missing_count,
         )
 
@@ -238,6 +336,7 @@ async def handle_child_hosts_list_update(
                 "total_reported": count,
                 "new_count": new_count,
                 "updated_count": updated_count,
+                "linked_count": linked_count,
                 "missing_count": missing_count,
             },
         )
@@ -248,6 +347,7 @@ async def handle_child_hosts_list_update(
             "status": "updated",
             "new_count": new_count,
             "updated_count": updated_count,
+            "linked_count": linked_count,
         }
 
     except Exception as e:
