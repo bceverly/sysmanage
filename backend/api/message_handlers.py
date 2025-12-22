@@ -145,6 +145,8 @@ async def handle_system_info(db: Session, connection, message_data: dict):
             )
 
             if matching_child:
+                # nosemgrep: python.lang.security.audit.logging.logger-credential-leak
+                # False positive: logging hostname and child_name, not credentials
                 logger.info(
                     "Auto-approving host %s with matching token from child host %s",
                     hostname,
@@ -212,6 +214,8 @@ async def handle_system_info(db: Session, connection, message_data: dict):
                     },
                 )
             else:
+                # nosemgrep: python.lang.security.audit.logging.logger-credential-leak
+                # False positive: intentionally truncating token to first 8 chars for debugging
                 logger.warning(
                     "Auto-approve token provided but no matching child host found: %s",
                     auto_approve_token[:8] + "..." if auto_approve_token else "None",

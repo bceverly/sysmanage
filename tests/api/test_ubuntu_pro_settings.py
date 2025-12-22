@@ -63,7 +63,7 @@ class TestUbuntuProSettingsGet:
     def test_get_settings_unauthorized(self, client, session):
         """Test that unauthorized requests are rejected."""
         response = client.get("/api/ubuntu-pro/")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_get_settings_creates_default_with_proper_timestamps(
         self, client, session, auth_headers
@@ -270,7 +270,7 @@ class TestUbuntuProSettingsUpdate:
         update_data = {"master_key": "C1234567890123456789012345"}
 
         response = client.put("/api/ubuntu-pro/", json=update_data)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestUbuntuProSettingsClearKey:
@@ -315,7 +315,7 @@ class TestUbuntuProSettingsClearKey:
     def test_clear_master_key_unauthorized(self, client, session):
         """Test that unauthorized requests are rejected."""
         response = client.delete("/api/ubuntu-pro/master-key")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestUbuntuProSettingsKeyStatus:
@@ -620,4 +620,4 @@ class TestUbuntuProEnrollment:
         }
 
         response = client.post("/api/ubuntu-pro/enroll", json=enrollment_data)
-        assert response.status_code == 403
+        assert response.status_code == 401

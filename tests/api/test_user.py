@@ -53,7 +53,7 @@ class TestUserDelete:
     def test_delete_user_unauthorized(self, client):
         """Test deleting user without authentication."""
         response = client.delete("/api/user/1")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestUserMe:
@@ -72,7 +72,7 @@ class TestUserMe:
     def test_get_user_me_unauthorized(self, client):
         """Test getting current user without authentication."""
         response = client.get("/api/user/me")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestUserGet:
@@ -110,7 +110,7 @@ class TestUserGet:
     def test_get_user_unauthorized(self, client):
         """Test getting user without authentication."""
         response = client.get("/api/user/1")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestUserGetByUserid:
@@ -151,7 +151,7 @@ class TestUserGetByUserid:
     def test_get_user_by_userid_unauthorized(self, client):
         """Test getting user by userid without authentication."""
         response = client.get("/api/user/by_userid/test@example.com")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestUsersList:
@@ -208,7 +208,7 @@ class TestUsersList:
     def test_get_users_unauthorized(self, client):
         """Test getting users without authentication."""
         response = client.get("/api/users")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestUserCreate:
@@ -322,7 +322,7 @@ class TestUserCreate:
             "last_name": "User",
         }
         response = client.post("/api/user", json=user_data)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestUserUpdate:
@@ -430,7 +430,7 @@ class TestUserUpdate:
             "last_name": "User",
         }
         response = client.put("/api/user/1", json=update_data)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestUserUnlock:
@@ -485,4 +485,4 @@ class TestUserUnlock:
     def test_unlock_user_unauthorized(self, client):
         """Test unlocking user without authentication."""
         response = client.post("/api/user/1/unlock")
-        assert response.status_code == 403
+        assert response.status_code == 401

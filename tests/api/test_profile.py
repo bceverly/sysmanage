@@ -167,7 +167,7 @@ class TestProfileAPI:
         """Test profile retrieval without authentication"""
         response = client.get("/api/profile")
 
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     @patch("backend.auth.auth_handler.decode_jwt")
     def test_get_profile_invalid_token(self, mock_decode_jwt, client):
@@ -359,7 +359,7 @@ class TestProfileAPI:
 
         response = client.put("/api/profile", json=update_data)
 
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     @patch("backend.auth.auth_handler.decode_jwt")
     def test_update_profile_invalid_token(self, mock_decode_jwt, client):

@@ -159,7 +159,7 @@ class TestConfigPush:
         config_data = {"config_data": {"test": "value"}, "push_to_all": True}
 
         response = client.post("/api/config/push", json=config_data)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestLoggingConfig:
@@ -290,7 +290,7 @@ class TestLoggingConfig:
         logging_data = {"log_level": "DEBUG", "push_to_all": True}
 
         response = client.post("/api/config/logging", json=logging_data)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestWebSocketConfig:
@@ -400,7 +400,7 @@ class TestWebSocketConfig:
         ws_config_data = {"ping_interval": 30, "push_to_all": True}
 
         response = client.post("/api/config/websocket", json=ws_config_data)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestServerConfig:
@@ -517,7 +517,7 @@ class TestServerConfig:
         }
 
         response = client.post("/api/config/server", json=server_config_data)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestConfigPending:
@@ -580,7 +580,7 @@ class TestConfigPending:
     def test_get_pending_configs_unauthorized(self, client):
         """Test getting pending configs without authentication."""
         response = client.get("/api/config/pending")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestConfigAcknowledge:
@@ -657,7 +657,7 @@ class TestConfigAcknowledge:
         response = client.post(
             "/api/config/acknowledge?hostname=agent.example.com&version=1&success=true"
         )
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestConfigManagementIntegration:

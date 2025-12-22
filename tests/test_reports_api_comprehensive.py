@@ -308,10 +308,10 @@ class TestReportsAPIEndpoints:
                 response = unauthenticated_client.get(
                     "/api/reports/view/registered-hosts"
                 )
-                assert response.status_code == 403
+                assert response.status_code == 401
 
                 response = unauthenticated_client.get("/api/reports/generate/hosts")
-                assert response.status_code == 403
+                assert response.status_code == 401
 
                 # Screenshots endpoint is public for UI cards
                 response = unauthenticated_client.get("/api/reports/screenshots/test")

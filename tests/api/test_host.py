@@ -50,7 +50,7 @@ class TestHostDelete:
     def test_delete_host_unauthorized(self, client):
         """Test deleting host without authentication."""
         response = client.delete("/api/host/1")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestHostGet:
@@ -89,7 +89,7 @@ class TestHostGet:
     def test_get_host_unauthorized(self, client):
         """Test getting host without authentication."""
         response = client.get("/api/host/1")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestHostsList:
@@ -152,7 +152,7 @@ class TestHostsList:
     def test_get_hosts_unauthorized(self, client):
         """Test getting hosts without authentication."""
         response = client.get("/api/hosts")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestHostCreate:
@@ -241,7 +241,7 @@ class TestHostCreate:
             "active": True,
         }
         response = client.post("/api/host", json=host_data)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestHostUpdate:
@@ -348,7 +348,7 @@ class TestHostUpdate:
             "active": True,
         }
         response = client.put("/api/host/1", json=update_data)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestHostRegister:

@@ -12,9 +12,9 @@ cryptography==46.0.1
 dill==0.4.0
 dnspython>=2.7.0
 email_validator==2.1.1
-fastapi==0.121.1
+fastapi==0.127.0
 gevent==25.9.1
-greenlet==3.2.4
+greenlet==3.3.0
 h11>=0.16.0
 httpcore>=1.0.6
 httptools==0.7.1
@@ -57,7 +57,7 @@ starlette>=0.48.0,<0.51.0
 tomlkit==0.12.4
 typing_extensions>=4.12.2
 ujson==5.10.0
-uvicorn==0.38.0
+uvicorn==0.40.0
 watchfiles==1.1.0
 websockets==15.0.1
 zope.event==6.1
@@ -71,7 +71,7 @@ semgrep>=1.95.0
 # Note: On OpenBSD 7.7, coverage.py C tracer requires gcc and py3-cffi
 # Install with: doas pkg_add gcc py3-cffi
 # The install-dev target will automatically handle C tracer setup
-playwright==1.56.0  # Cross-browser UI testing (preferred for Linux/macOS/Windows)
+playwright==1.57.0  # Cross-browser UI testing (preferred for Linux/macOS/Windows)
 selenium>=4.0.0  # Web automation framework (fallback for OpenBSD/FreeBSD where Playwright unavailable)
 webdriver-manager>=4.0.0
 requests>=2.32.0  # For UI test health checks

@@ -488,7 +488,7 @@ class TestAdminResetUserPassword:
         session.commit()
 
         response = client.post(f"/api/admin/reset-user-password/{user.id}")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestPasswordResetUtilityFunctions:

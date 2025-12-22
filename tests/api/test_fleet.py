@@ -61,7 +61,7 @@ class TestFleetStatus:
     def test_get_fleet_status_unauthorized(self, client):
         """Test getting fleet status without authentication."""
         response = client.get("/api/fleet/status")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestListAgents:
@@ -101,7 +101,7 @@ class TestListAgents:
     def test_list_agents_unauthorized(self, client):
         """Test listing agents without authentication."""
         response = client.get("/api/fleet/agents")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestGetAgent:
@@ -146,7 +146,7 @@ class TestGetAgent:
     def test_get_agent_unauthorized(self, client):
         """Test getting agent without authentication."""
         response = client.get("/api/fleet/agent/test.example.com")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestSendCommand:
@@ -248,7 +248,7 @@ class TestSendCommand:
         response = client.post(
             "/api/fleet/agent/test.example.com/command", json=command_data
         )
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestShellCommand:
@@ -323,7 +323,7 @@ class TestShellCommand:
         response = client.post(
             "/api/fleet/agent/test.example.com/shell", json=shell_data
         )
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 class TestPackageManagement:
@@ -543,4 +543,4 @@ class TestBroadcastCommand:
         broadcast_data = {"message": "Test message", "message_type": "NOTIFICATION"}
 
         response = client.post("/api/fleet/broadcast/command", json=broadcast_data)
-        assert response.status_code == 403
+        assert response.status_code == 401

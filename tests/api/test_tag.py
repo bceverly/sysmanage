@@ -452,31 +452,31 @@ class TestTagEndpointsAuth:
     def test_get_tags_unauthorized(self, client: TestClient):
         """Test that getting tags requires authentication"""
         response = client.get("/api/tags")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_create_tag_unauthorized(self, client: TestClient):
         """Test that creating tags requires authentication"""
         tag_data = {"name": "Test", "description": "Test tag"}
         response = client.post("/api/tags", json=tag_data)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_update_tag_unauthorized(self, client: TestClient):
         """Test that updating tags requires authentication"""
         update_data = {"name": "Updated"}
         response = client.put("/api/tags/1", json=update_data)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_delete_tag_unauthorized(self, client: TestClient):
         """Test that deleting tags requires authentication"""
         response = client.delete("/api/tags/1")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_add_tag_to_host_unauthorized(self, client: TestClient):
         """Test that adding tags to hosts requires authentication"""
         response = client.post("/api/hosts/1/tags/1")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_remove_tag_from_host_unauthorized(self, client: TestClient):
         """Test that removing tags from hosts requires authentication"""
         response = client.delete("/api/hosts/1/tags/1")
-        assert response.status_code == 403
+        assert response.status_code == 401

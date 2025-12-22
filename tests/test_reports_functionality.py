@@ -74,7 +74,7 @@ class TestReportsBasicFunctionality:
 
         try:
             with TestClient(app) as unauthenticated_client:
-                # Test that protected endpoints return 403 without auth
+                # Test that protected endpoints return 401 without auth
                 protected_endpoints = [
                     "/api/reports/view/registered-hosts",
                     "/api/reports/view/users-list",
@@ -84,7 +84,7 @@ class TestReportsBasicFunctionality:
 
                 for endpoint in protected_endpoints:
                     response = unauthenticated_client.get(endpoint)
-                    assert response.status_code == 403
+                    assert response.status_code == 401
 
                 # Screenshots endpoint is public for UI cards
                 response = unauthenticated_client.get("/api/reports/screenshots/test")
