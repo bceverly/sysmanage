@@ -4,7 +4,7 @@ pkgver=0.0.0
 pkgrel=0
 pkgdesc="Centralized system management server"
 url="https://sysmanage.org"
-arch="noarch"
+arch="all"
 license="AGPL-3.0-or-later"
 depends="
 	python3
