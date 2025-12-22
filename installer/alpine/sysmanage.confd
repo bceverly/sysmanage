@@ -1,0 +1,16 @@
+# Configuration for sysmanage
+
+# Path to the configuration file
+#SYSMANAGE_CONFIG="/etc/sysmanage/sysmanage.yaml"
+
+# Directory for database files
+#SYSMANAGE_DB_DIR="/var/lib/sysmanage"
+
+# Directory for log files
+#SYSMANAGE_LOG_DIR="/var/log/sysmanage"
+
+# Host to bind to
+#SYSMANAGE_HOST="0.0.0.0"
+
+# Port to listen on
+#SYSMANAGE_PORT="8080"

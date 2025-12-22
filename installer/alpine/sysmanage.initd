@@ -1,0 +1,52 @@
+#!/sbin/openrc-run
+# OpenRC init script for sysmanage
+
+name="sysmanage"
+description="SysManage centralized system management server"
+
+command="/usr/bin/python3"
+command_args="-m uvicorn backend.main:app --host ${SYSMANAGE_HOST:-0.0.0.0} --port ${SYSMANAGE_PORT:-8080}"
+command_background="yes"
+pidfile="/run/${RC_SVCNAME}.pid"
+directory="/usr/libexec/sysmanage"
+
+# Configuration
+export SYSMANAGE_CONFIG="${SYSMANAGE_CONFIG:-/etc/sysmanage/sysmanage.yaml}"
+export SYSMANAGE_DB_DIR="${SYSMANAGE_DB_DIR:-/var/lib/sysmanage}"
+export SYSMANAGE_LOG_DIR="${SYSMANAGE_LOG_DIR:-/var/log/sysmanage}"
+
+depend() {
+	need net
+	use postgresql
+	after firewall
+}
+
+start_pre() {
+	# Ensure required directories exist
+	checkpath --directory --mode 0750 "$SYSMANAGE_DB_DIR"
+	checkpath --directory --mode 0750 "$SYSMANAGE_LOG_DIR"
+
+	# Create default config if it doesn't exist
+	if [ ! -f "$SYSMANAGE_CONFIG" ]; then
+		if [ -f /etc/sysmanage/sysmanage.yaml.example ]; then
+			cp /etc/sysmanage/sysmanage.yaml.example "$SYSMANAGE_CONFIG"
+			chmod 0644 "$SYSMANAGE_CONFIG"
+			ewarn "Created default configuration at $SYSMANAGE_CONFIG"
+			ewarn "Please edit this file to configure:"
+			ewarn "  1. PostgreSQL database connection"
+			ewarn "  2. TLS certificates (if using HTTPS)"
+			ewarn "  3. Admin user credentials"
+			ewarn ""
+			ewarn "Then initialize the database with:"
+			ewarn "  cd /usr/libexec/sysmanage && python3 -m alembic upgrade head"
+			return 1
+		fi
+	fi
+
+	# Check if database is configured
+	if ! grep -q "postgresql://" "$SYSMANAGE_CONFIG" 2>/dev/null; then
+		ewarn "PostgreSQL database not configured in $SYSMANAGE_CONFIG"
+		ewarn "Please configure database connection before starting."
+		return 1
+	fi
+}

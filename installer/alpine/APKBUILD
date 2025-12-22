@@ -1,0 +1,112 @@
+# Maintainer: SysManage <support@sysmanage.org>
+pkgname=sysmanage
+pkgver=0.0.0
+pkgrel=0
+pkgdesc="Centralized system management server"
+url="https://sysmanage.org"
+arch="noarch"
+license="AGPL-3.0-or-later"
+depends="
+	python3
+	py3-sqlalchemy
+	py3-alembic
+	py3-psycopg2
+	py3-babel
+	py3-websockets
+	py3-cryptography
+	py3-yaml
+	py3-aiohttp
+	py3-uvicorn
+	py3-fastapi
+	py3-pydantic
+	py3-jinja2
+	py3-pillow
+	py3-bcrypt
+	py3-jwt
+	postgresql
+	nginx
+"
+makedepends="nodejs npm"
+install="$pkgname.post-install"
+source="
+	$pkgname-$pkgver.tar.gz::https://github.com/bceverly/sysmanage/archive/refs/tags/v$pkgver.tar.gz
+	sysmanage.initd
+	sysmanage.confd
+	sysmanage-nginx.conf
+"
+options="!check"  # No test suite in package
+
+build() {
+	cd "$srcdir/$pkgname-$pkgver"
+
+	# Build frontend if source exists
+	if [ -d frontend ] && [ -f frontend/package.json ]; then
+		cd frontend
+		npm ci --legacy-peer-deps 2>/dev/null || npm install --legacy-peer-deps
+		npm run build
+		cd ..
+	fi
+}
+
+package() {
+	cd "$srcdir/$pkgname-$pkgver"
+
+	# Create directories
+	install -d "$pkgdir"/usr/libexec/sysmanage
+	install -d "$pkgdir"/usr/share/sysmanage/frontend
+	install -d "$pkgdir"/etc/sysmanage
+	install -d "$pkgdir"/etc/init.d
+	install -d "$pkgdir"/etc/conf.d
+	install -d -m 750 "$pkgdir"/var/lib/sysmanage
+	install -d -m 750 "$pkgdir"/var/log/sysmanage
+	install -d "$pkgdir"/usr/share/doc/sysmanage
+
+	# Install backend Python application
+	if [ -d backend ]; then
+		cp -R backend "$pkgdir"/usr/libexec/sysmanage/
+	fi
+
+	# Install alembic for database migrations
+	if [ -f alembic.ini ]; then
+		install -m 644 alembic.ini "$pkgdir"/usr/libexec/sysmanage/
+	fi
+	if [ -d alembic ]; then
+		cp -R alembic "$pkgdir"/usr/libexec/sysmanage/
+	fi
+
+	# Install frontend static files
+	if [ -d frontend/dist ]; then
+		cp -R frontend/dist/* "$pkgdir"/usr/share/sysmanage/frontend/
+	fi
+
+	# Install example config
+	if [ -f sysmanage.yaml.example ]; then
+		install -m 644 sysmanage.yaml.example \
+			"$pkgdir"/etc/sysmanage/sysmanage.yaml.example
+	fi
+
+	# Install documentation
+	install -m 644 README.md "$pkgdir"/usr/share/doc/sysmanage/
+	if [ -f LICENSE ]; then
+		install -m 644 LICENSE "$pkgdir"/usr/share/doc/sysmanage/
+	fi
+
+	# Install SBOM if present
+	if [ -d sbom ]; then
+		install -d "$pkgdir"/usr/share/doc/sysmanage/sbom
+		cp -R sbom/* "$pkgdir"/usr/share/doc/sysmanage/sbom/ 2>/dev/null || true
+	fi
+
+	# Install OpenRC init script
+	install -m 755 "$srcdir"/sysmanage.initd \
+		"$pkgdir"/etc/init.d/sysmanage
+	install -m 644 "$srcdir"/sysmanage.confd \
+		"$pkgdir"/etc/conf.d/sysmanage
+
+	# Install nginx configuration
+	install -d "$pkgdir"/etc/nginx/http.d
+	install -m 644 "$srcdir"/sysmanage-nginx.conf \
+		"$pkgdir"/etc/nginx/http.d/sysmanage.conf
+}
+
+sha512sums=""
