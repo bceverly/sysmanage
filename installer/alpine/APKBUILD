@@ -34,7 +34,7 @@ source="
 	sysmanage.confd
 	sysmanage-nginx.conf
 "
-options="!check"  # No test suite in package
+options="!check !tracedeps"  # No test suite; skip tracing pip-installed binary deps
 
 build() {
 	cd "$srcdir/$pkgname-$pkgver"
