@@ -8,6 +8,7 @@ arch="noarch"
 license="AGPL-3.0-or-later"
 depends="
 	python3
+	py3-pip
 	py3-sqlalchemy
 	py3-alembic
 	py3-psycopg2
@@ -16,8 +17,6 @@ depends="
 	py3-cryptography
 	py3-yaml
 	py3-aiohttp
-	py3-uvicorn
-	py3-fastapi
 	py3-pydantic
 	py3-jinja2
 	py3-pillow
@@ -26,7 +25,8 @@ depends="
 	postgresql
 	nginx
 "
-makedepends="nodejs npm"
+makedepends="nodejs npm py3-pip"
+# Note: uvicorn and fastapi are installed via pip as they're not in stable Alpine repos
 install="$pkgname.post-install"
 source="
 	$pkgname-$pkgver.tar.gz::https://github.com/bceverly/sysmanage/archive/refs/tags/v$pkgver.tar.gz
@@ -65,6 +65,12 @@ package() {
 	if [ -d backend ]; then
 		cp -R backend "$pkgdir"/usr/libexec/sysmanage/
 	fi
+
+	# Install uvicorn and fastapi via pip (not available in stable Alpine repos)
+	# Create a local pip packages directory within the application
+	install -d "$pkgdir"/usr/libexec/sysmanage/pip-packages
+	pip3 install --target="$pkgdir"/usr/libexec/sysmanage/pip-packages \
+		uvicorn fastapi
 
 	# Install alembic for database migrations
 	if [ -f alembic.ini ]; then

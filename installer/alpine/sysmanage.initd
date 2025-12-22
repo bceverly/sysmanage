@@ -15,6 +15,9 @@ export SYSMANAGE_CONFIG="${SYSMANAGE_CONFIG:-/etc/sysmanage/sysmanage.yaml}"
 export SYSMANAGE_DB_DIR="${SYSMANAGE_DB_DIR:-/var/lib/sysmanage}"
 export SYSMANAGE_LOG_DIR="${SYSMANAGE_LOG_DIR:-/var/log/sysmanage}"
 
+# Add pip-installed packages to Python path (uvicorn, fastapi)
+export PYTHONPATH="/usr/libexec/sysmanage/pip-packages:${PYTHONPATH}"
+
 depend() {
 	need net
 	use postgresql
