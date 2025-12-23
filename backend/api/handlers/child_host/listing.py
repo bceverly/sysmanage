@@ -192,9 +192,11 @@ async def handle_child_hosts_list_update(
                 child = existing_by_key[key]
                 # Don't overwrite "uninstalling" status - it should only clear
                 # when the delete completes and agent stops reporting the child
+                # Also don't update updated_at for uninstalling children so they
+                # can properly become stale and get cleaned up
                 if child.status != "uninstalling":
                     child.status = status
-                child.updated_at = now
+                    child.updated_at = now
                 if distribution_name:
                     child.distribution = distribution_name
                 if distribution_version:
