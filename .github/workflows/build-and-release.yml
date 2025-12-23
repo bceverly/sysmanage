@@ -1088,6 +1088,8 @@ jobs:
           # Commit and push changes
           git add .
           git commit -m "Add SysManage Server packages for v$VERSION" || echo "No changes to commit"
+          # Pull any changes that occurred during the build to avoid push rejection
+          git pull --rebase origin main || true
           git push origin main
 
       - name: Generate consolidated release notes
