@@ -388,6 +388,7 @@
     "childHostDistribution": "Distribution",
     "childHostDistributionLabel": "Distribution",
     "childHostDistributionRequired": "Veuillez sélectionner une distribution",
+    "childHostImageRequired": "Veuillez sélectionner une image",
     "childHostHostname": "Nom d'hôte",
     "childHostHostnameHelp": "Entrez le nom d'hôte (ex. \"myhost\") ou FQDN (ex. \"myhost.example.com\")",
     "childHostHostnameLabel": "Nom d'hôte",

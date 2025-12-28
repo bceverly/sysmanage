@@ -372,6 +372,7 @@
     "childHostDistribution": "发行版",
     "childHostDistributionLabel": "发行版",
     "childHostDistributionRequired": "请选择一个发行版",
+    "childHostImageRequired": "请选择一个镜像",
     "childHostHostname": "主机名",
     "childHostHostnameHelp": "输入主机名(例如 \"myhost\")或FQDN(例如 \"myhost.example.com\")",
     "childHostHostnameLabel": "主机名",

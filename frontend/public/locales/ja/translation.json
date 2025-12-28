@@ -372,6 +372,7 @@
     "childHostDistribution": "ディストリビューション",
     "childHostDistributionLabel": "ディストリビューション",
     "childHostDistributionRequired": "ディストリビューションを選択してください",
+    "childHostImageRequired": "イメージを選択してください",
     "childHostHostname": "ホスト名",
     "childHostHostnameHelp": "ホスト名(例: \"myhost\")またはFQDN(例: \"myhost.example.com\")を入力",
     "childHostHostnameLabel": "ホスト名",

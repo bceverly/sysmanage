@@ -809,3 +809,6 @@ msgstr "VMM虛擬機器需要VM名稱"
 
 msgid "A child host named '%s' already exists on this host"
 msgstr "此主機上已存在名為 '%s' 的子主機"
+
+msgid "Child host creation requested: %s (%s)"
+msgstr "已請求建立子主機: %s (%s)"

@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import typescript from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 import react from 'eslint-plugin-react';
+import reactHooks from 'eslint-plugin-react-hooks';
 import security from 'eslint-plugin-security';
 import noUnsanitized from 'eslint-plugin-no-unsanitized';
 
@@ -38,6 +39,7 @@ export default [
     plugins: {
       '@typescript-eslint': typescript,
       'react': react,
+      'react-hooks': reactHooks,
       'security': security,
       'no-unsanitized': noUnsanitized
     },
@@ -67,7 +69,10 @@ export default [
       'no-undef': 'off',
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
-      'react/no-unescaped-entities': 'off'
+      'react/no-unescaped-entities': 'off',
+      // React hooks rules - off for security config, but plugin needed for disable comments
+      'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/rules-of-hooks': 'off'
     },
     settings: {
       react: {

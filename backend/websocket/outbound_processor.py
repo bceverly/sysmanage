@@ -165,15 +165,23 @@ async def process_outbound_message(message, host, db: Session) -> None:
             # Log details for create_child_host commands to help debug delivery issues
             command_type = message_data.get("data", {}).get("command_type", "unknown")
             if command_type == "create_child_host":
-                distribution = (
-                    message_data.get("data", {})
-                    .get("parameters", {})
-                    .get("distribution", "unknown")
-                )
+                params = message_data.get("data", {}).get("parameters", {})
+                distribution = params.get("distribution", "unknown")
+                vm_name = params.get("vm_name")
+                container_name = params.get("container_name")
+                child_type = params.get("child_type", "unknown")
+                hostname = params.get("hostname", "unknown")
+                # Log the specific name being sent based on child type
+                child_name = vm_name or container_name or distribution
                 logger.info(
-                    "SENT create_child_host command: message_id=%s, distribution=%s, host=%s (awaiting ack)",
+                    "SENT create_child_host command to agent: "
+                    "message_id=%s, child_name=%s, child_type=%s, "
+                    "distribution=%s, hostname=%s, host=%s (awaiting ack)",
                     message.message_id,
+                    child_name,
+                    child_type,
                     distribution,
+                    hostname,
                     host.fqdn,
                 )
             else:

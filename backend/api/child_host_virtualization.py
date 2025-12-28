@@ -708,7 +708,7 @@ async def create_child_host_request(
             db=session,
         )
 
-        # Log the action
+        # Log the action with full details for debugging
         audit_log(
             session,
             user,
@@ -716,7 +716,18 @@ async def create_child_host_request(
             "CREATE",
             str(host.id),
             host.fqdn,
-            _("Child host creation requested: %s") % request.distribution,
+            _("Child host creation requested: %s (%s)")
+            % (child_name, request.distribution),
+            details={
+                "child_name": child_name,
+                "child_type": request.child_type,
+                "distribution": request.distribution,
+                "hostname": request.hostname,
+                "vm_name": request.vm_name if request.child_type == "vmm" else None,
+                "container_name": (
+                    request.container_name if request.child_type == "lxd" else None
+                ),
+            },
         )
 
         session.commit()

@@ -803,3 +803,6 @@ msgstr "VM-Name ist für VMM-VMs erforderlich"
 
 msgid "A child host named '%s' already exists on this host"
 msgstr "Ein untergeordneter Host mit dem Namen '%s' existiert bereits auf diesem Host"
+
+msgid "Child host creation requested: %s (%s)"
+msgstr "Erstellung eines untergeordneten Hosts angefordert: %s (%s)"

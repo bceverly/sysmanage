@@ -390,6 +390,7 @@
     "childHostDistribution": "Distribution",
     "childHostDistributionLabel": "Distribution",
     "childHostDistributionRequired": "Please select a distribution",
+    "childHostImageRequired": "Please select an image",
     "childHostHostname": "Hostname",
     "childHostHostnameHelp": "Enter hostname (e.g., \"myhost\") or FQDN (e.g., \"myhost.example.com\")",
     "childHostHostnameLabel": "Hostname",

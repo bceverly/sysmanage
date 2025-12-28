@@ -49,6 +49,7 @@ def audit_log(
     host_id: str,
     host_fqdn: str,
     description: str,
+    details: dict = None,
 ):
     """Log an audit entry."""
     from backend.services.audit_service import (
@@ -74,4 +75,5 @@ def audit_log(
         entity_name=host_fqdn,
         description=description,
         result=Result.SUCCESS,
+        details=details,
     )

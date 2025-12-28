@@ -372,6 +372,7 @@
     "childHostDistribution": "Distributie",
     "childHostDistributionLabel": "Distributie",
     "childHostDistributionRequired": "Selecteer een distributie",
+    "childHostImageRequired": "Selecteer een image",
     "childHostHostname": "Hostnaam",
     "childHostHostnameHelp": "Voer hostnaam (bijv. \"myhost\") of FQDN (bijv. \"myhost.example.com\") in",
     "childHostHostnameLabel": "Hostnaam",

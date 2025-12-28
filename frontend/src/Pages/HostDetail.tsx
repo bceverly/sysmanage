@@ -60,7 +60,7 @@ import SourceIcon from '@mui/icons-material/Source';
 import ShieldIcon from '@mui/icons-material/Shield';
 import WarningIcon from '@mui/icons-material/Warning';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField, List, ListItem, ListItemText, Divider, TableContainer, TableHead, InputAdornment, Pagination } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField, List, ListItem, ListItemText, Divider, TableContainer, TableHead, InputAdornment, Pagination, FormHelperText } from '@mui/material';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
@@ -292,6 +292,7 @@ const HostDetail = () => {
         autoApprove: false,  // Automatically approve when the child host connects
     });
     const [childHostCreationProgress, setChildHostCreationProgress] = useState<string>('');
+    const [childHostFormValidated, setChildHostFormValidated] = useState<boolean>(false);
     const [availableDistributions, setAvailableDistributions] = useState<Array<{
         id: string;
         display_name: string;
@@ -919,11 +920,12 @@ const HostDetail = () => {
     const handleCreateChildHost = useCallback(async () => {
         if (!hostId) return;
 
+        // Mark form as validated to show inline errors
+        setChildHostFormValidated(true);
+
         // Validate form
         if (!childHostFormData.distribution) {
-            setSnackbarMessage(t('hostDetail.childHostDistributionRequired', 'Please select a distribution'));
-            setSnackbarSeverity('error');
-            setSnackbarOpen(true);
+            // Error is shown inline on the field
             return;
         }
         if (!childHostFormData.hostname || !computedFqdn) {
@@ -1012,6 +1014,7 @@ const HostDetail = () => {
                     setSnackbarOpen(true);
                     setCreateChildHostOpen(false);
                     // Reset form
+                    setChildHostFormValidated(false);
                     setChildHostFormData({
                         childType: childHostFormData.childType,  // Keep the child type
                         distribution: '',
@@ -7231,7 +7234,12 @@ const HostDetail = () => {
             {/* Create Child Host Dialog */}
             <Dialog
                 open={createChildHostOpen}
-                onClose={() => !createChildHostLoading && setCreateChildHostOpen(false)}
+                onClose={() => {
+                    if (!createChildHostLoading) {
+                        setChildHostFormValidated(false);
+                        setCreateChildHostOpen(false);
+                    }
+                }}
                 maxWidth="sm"
                 fullWidth
             >
@@ -7242,7 +7250,10 @@ const HostDetail = () => {
                         ? t('hostDetail.createVmmVmTitle', 'Create VMM Virtual Machine')
                         : t('hostDetail.createChildHostTitle', 'Create WSL Instance')}
                     <IconButton
-                        onClick={() => setCreateChildHostOpen(false)}
+                        onClick={() => {
+                            setChildHostFormValidated(false);
+                            setCreateChildHostOpen(false);
+                        }}
                         disabled={createChildHostLoading}
                     >
                         <CloseIcon />
@@ -7250,7 +7261,11 @@ const HostDetail = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Box sx={{ mt: 2 }}>
-                        <FormControl fullWidth sx={{ mb: 2 }}>
+                        <FormControl
+                            fullWidth
+                            sx={{ mb: 2 }}
+                            error={childHostFormValidated && !childHostFormData.distribution}
+                        >
                             <InputLabel id="distribution-select-label">
                                 {childHostFormData.childType === 'lxd'
                                     ? t('hostDetail.childHostImageLabel', 'Image')
@@ -7267,6 +7282,7 @@ const HostDetail = () => {
                                     distribution: e.target.value
                                 })}
                                 disabled={createChildHostLoading}
+                                error={childHostFormValidated && !childHostFormData.distribution}
                             >
                                 {availableDistributions.map((dist) => (
                                     <MenuItem key={dist.id} value={dist.install_identifier}>
@@ -7274,6 +7290,13 @@ const HostDetail = () => {
                                     </MenuItem>
                                 ))}
                             </Select>
+                            {childHostFormValidated && !childHostFormData.distribution && (
+                                <FormHelperText>
+                                    {childHostFormData.childType === 'lxd'
+                                        ? t('hostDetail.childHostImageRequired', 'Please select an image')
+                                        : t('hostDetail.childHostDistributionRequired', 'Please select a distribution')}
+                                </FormHelperText>
+                            )}
                         </FormControl>
 
                         {/* Container name field for LXD */}
@@ -7458,7 +7481,10 @@ const HostDetail = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button
-                        onClick={() => setCreateChildHostOpen(false)}
+                        onClick={() => {
+                            setChildHostFormValidated(false);
+                            setCreateChildHostOpen(false);
+                        }}
                         disabled={createChildHostLoading}
                     >
                         {t('common.cancel', 'Cancel')}

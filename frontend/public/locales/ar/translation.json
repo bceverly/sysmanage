@@ -388,6 +388,7 @@
     "childHostDistribution": "التوزيعة",
     "childHostDistributionLabel": "التوزيعة",
     "childHostDistributionRequired": "يرجى اختيار توزيعة",
+    "childHostImageRequired": "يرجى اختيار صورة",
     "childHostHostname": "اسم المضيف",
     "childHostHostnameHelp": "أدخل اسم المضيف (مثل \"myhost\") أو FQDN (مثل \"myhost.example.com\")",
     "childHostHostnameLabel": "اسم المضيف",

@@ -371,6 +371,7 @@
     "childHostDistribution": "वितरण",
     "childHostDistributionLabel": "वितरण",
     "childHostDistributionRequired": "कृपया एक वितरण चुनें",
+    "childHostImageRequired": "कृपया एक इमेज चुनें",
     "childHostHostname": "होस्टनाम",
     "childHostHostnameHelp": "होस्टनाम (जैसे \"myhost\") या FQDN (जैसे \"myhost.example.com\") दर्ज करें",
     "childHostHostnameLabel": "होस्टनाम",

@@ -372,6 +372,7 @@
     "childHostDistribution": "Дистрибутив",
     "childHostDistributionLabel": "Дистрибутив",
     "childHostDistributionRequired": "Пожалуйста, выберите дистрибутив",
+    "childHostImageRequired": "Пожалуйста, выберите образ",
     "childHostHostname": "Имя хоста",
     "childHostHostnameHelp": "Введите имя хоста (напр. \"myhost\") или FQDN (напр. \"myhost.example.com\")",
     "childHostHostnameLabel": "Имя хоста",

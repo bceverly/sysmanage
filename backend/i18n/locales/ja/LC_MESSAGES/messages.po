@@ -813,3 +813,6 @@ msgstr "VMM仮想マシンにはVM名が必要です"
 
 msgid "A child host named '%s' already exists on this host"
 msgstr "'%s' という名前の子ホストはこのホストに既に存在します"
+
+msgid "Child host creation requested: %s (%s)"
+msgstr "子ホスト作成がリクエストされました: %s (%s)"

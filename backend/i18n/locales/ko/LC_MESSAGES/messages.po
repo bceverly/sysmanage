@@ -810,3 +810,6 @@ msgstr "VMM 가상 머신에는 VM 이름이 필요합니다"
 
 msgid "A child host named '%s' already exists on this host"
 msgstr "이 호스트에 '%s'라는 이름의 자식 호스트가 이미 존재합니다"
+
+msgid "Child host creation requested: %s (%s)"
+msgstr "자식 호스트 생성 요청됨: %s (%s)"

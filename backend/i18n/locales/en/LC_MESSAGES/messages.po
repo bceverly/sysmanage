@@ -509,3 +509,6 @@ msgstr "VM name is required for VMM virtual machines"
 
 msgid "A child host named '%s' already exists on this host"
 msgstr "A child host named '%s' already exists on this host"
+
+msgid "Child host creation requested: %s (%s)"
+msgstr "Child host creation requested: %s (%s)"

@@ -802,3 +802,6 @@ msgstr "اسم الجهاز الافتراضي مطلوب لأجهزة VMM ال�
 
 msgid "A child host named '%s' already exists on this host"
 msgstr "يوجد بالفعل مضيف فرعي باسم '%s' على هذا المضيف"
+
+msgid "Child host creation requested: %s (%s)"
+msgstr "تم طلب إنشاء مضيف فرعي: %s (%s)"

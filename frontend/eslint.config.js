@@ -3,12 +3,17 @@ import typescript from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
+import security from 'eslint-plugin-security';
 
 export default [
   js.configs.recommended,
   {
     files: ['src/**/*.{js,jsx,ts,tsx}'],
     ignores: ['src/**/*.test.{js,jsx,ts,tsx}', 'src/__tests__/**/*'],
+    linterOptions: {
+      // Disable reporting of unused disable directives - some are for security lint config
+      reportUnusedDisableDirectives: 'off'
+    },
     languageOptions: {
       parser: typescriptParser,
       ecmaVersion: 2022,
@@ -43,7 +48,8 @@ export default [
     plugins: {
       '@typescript-eslint': typescript,
       'react': react,
-      'react-hooks': reactHooks
+      'react-hooks': reactHooks,
+      'security': security
     },
     rules: {
       ...typescript.configs.recommended.rules,
@@ -57,7 +63,9 @@ export default [
       '@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/ban-ts-comment': 'warn',
-      '@typescript-eslint/no-wrapper-object-types': 'off'
+      '@typescript-eslint/no-wrapper-object-types': 'off',
+      // Security plugin rule - disabled by default, but plugin needed for eslint-disable comments
+      'security/detect-possible-timing-attacks': 'off'
     },
     settings: {
       react: {

@@ -810,3 +810,6 @@ msgstr "Il nome della VM è richiesto per le macchine virtuali VMM"
 
 msgid "A child host named '%s' already exists on this host"
 msgstr "Un host figlio con il nome '%s' esiste già su questo host"
+
+msgid "Child host creation requested: %s (%s)"
+msgstr "Creazione host figlio richiesta: %s (%s)"

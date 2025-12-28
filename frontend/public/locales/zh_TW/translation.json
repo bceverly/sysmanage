@@ -372,6 +372,7 @@
     "childHostDistribution": "發行版",
     "childHostDistributionLabel": "發行版",
     "childHostDistributionRequired": "請選擇一個發行版",
+    "childHostImageRequired": "請選擇一個映像",
     "childHostHostname": "主機名稱",
     "childHostHostnameHelp": "新WSL實例的主機名稱",
     "childHostHostnameLabel": "主機名稱",

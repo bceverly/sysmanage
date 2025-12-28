@@ -372,6 +372,7 @@
     "childHostDistribution": "Distribuzione",
     "childHostDistributionLabel": "Distribuzione",
     "childHostDistributionRequired": "Seleziona una distribuzione",
+    "childHostImageRequired": "Seleziona un'immagine",
     "childHostHostname": "Nome host",
     "childHostHostnameHelp": "Inserisci hostname (es. \"myhost\") o FQDN (es. \"myhost.example.com\")",
     "childHostHostnameLabel": "Nome host",
