@@ -24,6 +24,7 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.persistence.models import ChildHostDistribution
 from backend.security.roles import SecurityRoles
+from backend.utils.password_hash import hash_password_for_os
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
@@ -655,10 +656,20 @@ async def create_child_host_request(
         session.flush()  # Get the ID assigned
 
         # Hash password before sending to agent (security: avoid clear text in transit)
-        # Use bcrypt for all platforms - agent expects pre-hashed passwords
-        password_hash = bcrypt.hashpw(
-            request.password.encode("utf-8"), bcrypt.gensalt(rounds=8)
-        ).decode("utf-8")
+        # Use appropriate hash format based on target OS:
+        # - Debian/Ubuntu: SHA-512 crypt ($6$...) for preseed
+        # - Alpine/OpenBSD: bcrypt ($2b$...)
+        # - WSL: bcrypt (default)
+        if request.child_type == "vmm":
+            # VMM uses OS-specific hash format
+            password_hash = hash_password_for_os(
+                request.password, request.distribution or ""
+            )
+        else:
+            # WSL and LXD use bcrypt
+            password_hash = bcrypt.hashpw(
+                request.password.encode("utf-8"), bcrypt.gensalt(rounds=8)
+            ).decode("utf-8")
 
         # Queue a command to create the child host
         command_params = {
@@ -682,13 +693,13 @@ async def create_child_host_request(
             command_params["vm_name"] = request.vm_name
             if request.iso_url:
                 command_params["iso_url"] = request.iso_url
-            # VMM needs separate root password - hash it too
+            # VMM needs separate root password - use OS-appropriate hash
             root_pwd = (
                 request.root_password if request.root_password else request.password
             )
-            root_password_hash = bcrypt.hashpw(
-                root_pwd.encode("utf-8"), bcrypt.gensalt(rounds=8)
-            ).decode("utf-8")
+            root_password_hash = hash_password_for_os(
+                root_pwd, request.distribution or ""
+            )
             command_params["root_password_hash"] = root_password_hash
 
         # Include auto_approve_token if set
