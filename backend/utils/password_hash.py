@@ -10,6 +10,21 @@ Different autoinstall/preseed systems require different hash formats:
 
 Note: Python's crypt module on some platforms (e.g., OpenBSD) doesn't support
 SHA-512 ($6$), so we implement it using hashlib following the glibc specification.
+
+SECURITY NOTE (CodeQL false positive suppression):
+The use of hashlib.sha512() in this module is NOT a security vulnerability.
+This code implements the SHA-512 crypt password hashing algorithm as specified
+by glibc (used in /etc/shadow on Linux systems). SHA-512 crypt is:
+- A key derivation function with 5000+ rounds of hashing (not raw SHA-512)
+- Uses a cryptographically random 16-character salt
+- Compliant with IEEE Std 1003.1-2008 (POSIX) crypt() specification
+- The standard password hash format for Debian/Ubuntu preseed automation
+
+This is fundamentally different from using raw SHA-512 to hash passwords, which
+would indeed be insecure. The SHA-512 crypt algorithm ($6$) provides equivalent
+security to bcrypt or PBKDF2 when properly configured.
+
+See: https://www.akkadia.org/drepper/SHA-crypt.txt
 """
 
 import hashlib
