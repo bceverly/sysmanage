@@ -163,7 +163,7 @@ jobs:
           echo "Size: $(du -h $DEB_FILE | cut -f1)"
 
       - name: Upload .deb as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sysmanage-server-deb
           path: |
@@ -171,7 +171,7 @@ jobs:
             installer/dist/sysmanage_*.deb.sha256
 
       - name: Upload SBOM files as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sysmanage-sbom
           path: |
@@ -249,7 +249,7 @@ jobs:
           cat "sysmanage-openbsd-port-${VERSION}.tar.gz.sha256"
 
       - name: Upload OpenBSD port tarball as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sysmanage-openbsd-port
           path: |
@@ -319,7 +319,7 @@ jobs:
           make installer-rpm-centos
 
       - name: Upload CentOS RPM as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sysmanage-centos-rpm
           path: |
@@ -389,7 +389,7 @@ jobs:
           make installer-rpm-opensuse
 
       - name: Upload OpenSUSE RPM as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sysmanage-opensuse-rpm
           path: |
@@ -460,7 +460,7 @@ jobs:
           make installer-freebsd
 
       - name: Upload FreeBSD package as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sysmanage-freebsd-pkg
           path: |
@@ -529,7 +529,7 @@ jobs:
           make installer-macos
 
       - name: Upload macOS package as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sysmanage-macos-pkg
           path: |
@@ -599,7 +599,7 @@ jobs:
           make installer-netbsd
 
       - name: Upload NetBSD package as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sysmanage-netbsd-pkg
           path: |
@@ -669,7 +669,7 @@ jobs:
           powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture x64
 
       - name: Upload Windows MSI (x64) as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sysmanage-windows-msi-x64
           path: |
@@ -739,7 +739,7 @@ jobs:
           powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture arm64
 
       - name: Upload Windows MSI (ARM64) as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sysmanage-windows-msi-arm64
           path: |
@@ -921,7 +921,7 @@ jobs:
           ls -la sbom/ 2>/dev/null || echo "No SBOM files found"
 
       - name: Upload Alpine ${{ matrix.alpine-version }} package
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sysmanage-alpine-${{ matrix.alpine-version }}
           path: |
@@ -930,7 +930,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload Alpine SBOM
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sysmanage-alpine-sbom-${{ matrix.alpine-version }}
           path: sbom/

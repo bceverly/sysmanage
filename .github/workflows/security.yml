@@ -75,7 +75,7 @@ jobs:
         safety scan --output screen || true
         
     - name: Upload Safety results
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       if: hashFiles('safety-report.json') != ''
       with:
         name: safety-report
@@ -98,7 +98,7 @@ jobs:
         npm audit --audit-level=moderate || true
         
     - name: Upload npm audit results
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: npm-audit-report
         path: frontend/npm-audit-report.json

@@ -326,7 +326,7 @@ jobs:
       working-directory: frontend
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: frontend-build-${{ matrix.os }}
         path: frontend/dist/
@@ -654,7 +654,7 @@ jobs:
         PYTHONPATH: .
 
     - name: Upload performance results
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: performance-results-${{ matrix.os }}
         path: |
@@ -664,7 +664,7 @@ jobs:
 
     - name: Upload UI test artifacts
       if: always()
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: ui-test-artifacts-${{ matrix.os }}-${{ github.run_number }}
         path: |
@@ -724,7 +724,7 @@ jobs:
       shell: bash
 
     - name: Upload performance summary
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: performance-summary
         path: |
