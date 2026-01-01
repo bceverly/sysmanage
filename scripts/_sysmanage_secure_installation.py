@@ -57,6 +57,88 @@ except ImportError as e:
     print("Please ensure you are running this script from the SysManage project root directory.")
     sys.exit(1)
 
+def is_valid_unix_username(username: str) -> bool:
+    """
+    Validate that a string is a valid Unix username.
+
+    Valid usernames:
+    - Start with a lowercase letter or underscore
+    - Contain only lowercase letters, digits, underscores, and hyphens
+    - Are 1-32 characters long
+
+    Args:
+        username: The username to validate
+
+    Returns:
+        True if valid, False otherwise
+    """
+    if not username:
+        return False
+    # POSIX portable username: starts with letter/underscore, alphanumeric/underscore/hyphen
+    pattern = r"^[a-z_][a-z0-9_-]{0,31}$"
+    return bool(re.match(pattern, username))
+
+
+# Allowlist of safe directories for vault/bao binary
+VAULT_SAFE_PATHS = [
+    # Linux/Unix system paths
+    "/usr/bin",
+    "/usr/local/bin",
+    "/usr/sbin",
+    "/usr/local/sbin",
+    "/opt/openbao/bin",
+    "/opt/vault/bin",
+    # User local paths (validated separately)
+    ".local/bin",
+]
+
+
+def is_safe_vault_path(path: str) -> bool:
+    """
+    Validate that a vault/bao binary path is in a safe location.
+
+    Args:
+        path: Path to the vault/bao binary
+
+    Returns:
+        True if the path is in a known safe directory, False otherwise
+    """
+    if not path:
+        return False
+
+    # Normalize the path
+    normalized = os.path.normpath(os.path.abspath(path))
+
+    # Check Unix/Linux/macOS safe paths
+    for safe_dir in VAULT_SAFE_PATHS:
+        if safe_dir.startswith("."):
+            # Relative path like .local/bin - check if normalized ends with this pattern
+            # after a user home directory
+            if f"/{safe_dir}/" in normalized or normalized.endswith(f"/{safe_dir}"):
+                return True
+        else:
+            if normalized.startswith(safe_dir + os.sep) or normalized.startswith(
+                safe_dir + "/"
+            ):
+                return True
+
+    # Check Windows paths
+    if platform.system() == "Windows":
+        lower_path = normalized.lower()
+        # Check for bao/vault in standard Windows locations
+        if "\\openbao\\" in lower_path or "\\vault\\" in lower_path:
+            if (
+                "\\program files\\" in lower_path
+                or "\\program files (x86)\\" in lower_path
+            ):
+                return True
+        # Also allow in user's AppData\Local\bin
+        if "\\appdata\\local\\bin\\" in lower_path:
+            return True
+
+    return False
+
+
 def check_elevated_privileges():
     """Check if the script is running with elevated privileges."""
     system = platform.system()
@@ -106,23 +188,28 @@ def get_make_command():
 def get_original_user():
     """Get the original user who invoked sudo/doas, if running under elevated privileges."""
     # Check for explicitly passed original user (for doas)
+    # Validate to prevent command injection via environment variables
     original_user = os.environ.get('ORIGINAL_USER')
-    if original_user:
+    if original_user and is_valid_unix_username(original_user):
         return original_user
 
     # Check if running under sudo
     sudo_user = os.environ.get('SUDO_USER')
-    if sudo_user:
+    if sudo_user and is_valid_unix_username(sudo_user):
         return sudo_user
 
     # Check if running under doas (OpenBSD/FreeBSD)
     doas_user = os.environ.get('DOAS_USER')
-    if doas_user:
+    if doas_user and is_valid_unix_username(doas_user):
         return doas_user
 
     # Fall back to current user
     if platform.system() == "Windows":
-        return os.environ.get('USERNAME', 'user')
+        username = os.environ.get('USERNAME', 'user')
+        # Windows usernames can contain more characters, but validate basic sanity
+        if username and re.match(r'^[\w\.-]{1,64}$', username):
+            return username
+        return 'user'
     else:
         import pwd
         return pwd.getpwuid(os.getuid()).pw_name
@@ -973,7 +1060,7 @@ def find_vault_binary():
         # Check for bao/vault in PATH first
         for cmd in ['bao.exe', 'bao', 'vault.exe', 'vault']:
             binary_path = shutil.which(cmd)
-            if binary_path and os.path.exists(binary_path):
+            if binary_path and os.path.exists(binary_path) and is_safe_vault_path(binary_path):
                 return binary_path
 
         # Check common Windows locations
@@ -983,7 +1070,7 @@ def find_vault_binary():
             r'C:\Program Files (x86)\OpenBAO\bao.exe',
         ]
         for path in common_paths:
-            if os.path.exists(path):
+            if os.path.exists(path) and is_safe_vault_path(path):
                 return path
 
     else:
@@ -997,7 +1084,7 @@ def find_vault_binary():
             user_info = pwd.getpwnam(original_user)
             user_home = user_info.pw_dir
             bao_path = os.path.join(user_home, '.local', 'bin', 'bao')
-            if os.path.exists(bao_path):
+            if os.path.exists(bao_path) and is_safe_vault_path(bao_path):
                 return bao_path
         except Exception as e:
             print(f"  Debug: Could not check user home for bao: {e}")
@@ -1011,7 +1098,7 @@ def find_vault_binary():
                     if binary_path:
                         # Expand ~ if present (which sometimes returns unexpanded paths)
                         expanded_path = os.path.expanduser(binary_path)
-                        if os.path.exists(expanded_path):
+                        if os.path.exists(expanded_path) and is_safe_vault_path(expanded_path):
                             return expanded_path
             except:
                 pass
@@ -1115,8 +1202,10 @@ ui = true
     vault_config_abs_path = str(vault_config_path.absolute())
 
     # Start vault server with platform-specific handling
+    # vault_cmd is validated by is_safe_vault_path() in find_vault_binary()
     if platform.system() == "Windows":
         # On Windows, use CREATE_NEW_PROCESS_GROUP to properly detach
+        # nosemgrep: dangerous-subprocess-use-tainted-env-args
         vault_process = subprocess.Popen([
             vault_cmd, 'server', f'-config={vault_config_abs_path}'
         ],
@@ -1125,6 +1214,7 @@ ui = true
         cwd=str(project_root),
         creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
     else:
+        # nosemgrep: dangerous-subprocess-use-tainted-env-args
         vault_process = subprocess.Popen([
             vault_cmd, 'server', f'-config={vault_config_abs_path}'
         ], stdout=open(log_file, 'w'), stderr=subprocess.STDOUT, cwd=str(project_root))
@@ -1145,6 +1235,7 @@ ui = true
     # Verify the vault server is actually running and responding
     print("  Verifying vault server is running...")
     try:
+        # nosemgrep: dangerous-subprocess-use-tainted-env-args
         status_result = subprocess.run([
             vault_cmd, 'status'
         ], env=env, capture_output=True, text=True, timeout=10)
@@ -1159,6 +1250,7 @@ ui = true
         print("  Initializing vault...")
         print(f"  DEBUG: Running command: {vault_cmd} operator init -key-shares=1 -key-threshold=1 -format=json")
         print(f"  DEBUG: BAO_ADDR={env.get('BAO_ADDR')}")
+        # nosemgrep: dangerous-subprocess-use-tainted-env-args
         result = subprocess.run([
             vault_cmd, 'operator', 'init',
             '-key-shares=1', '-key-threshold=1', '-format=json'
@@ -1200,6 +1292,7 @@ ui = true
 
         # Unseal vault
         print("  Unsealing vault...")
+        # nosemgrep: dangerous-subprocess-use-tainted-env-args
         result = subprocess.run([
             vault_cmd, 'operator', 'unseal', unseal_key
         ], env=env, capture_output=True, text=True, timeout=30)
@@ -1214,6 +1307,7 @@ ui = true
 
         # Enable KV v2 secrets engine
         print("  Enabling KV v2 secrets engine...")
+        # nosemgrep: dangerous-subprocess-use-tainted-env-args
         result = subprocess.run([
             vault_cmd, 'secrets', 'enable', '-version=2', '-path=secret', 'kv'
         ], env=env, capture_output=True, text=True, timeout=30)
