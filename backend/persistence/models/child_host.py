@@ -135,6 +135,10 @@ class ChildHostDistribution(Base):
         String(200), nullable=True
     )  # WSL: 'Ubuntu-24.04', LXD: 'ubuntu:24.04'
     executable_name = Column(String(100), nullable=True)  # WSL only: 'ubuntu2404.exe'
+    cloud_image_url = Column(
+        String(500), nullable=True
+    )  # KVM: URL to cloud image for cloud-init based provisioning
+    iso_url = Column(String(500), nullable=True)  # VMM/KVM: URL to installation ISO
 
     # Agent installation
     agent_install_method = Column(

@@ -484,8 +484,73 @@
     "vmmNotEnabled": "有効化されていません",
     "vmmNoKernelSupport": "カーネルサポートなし",
     "vmmNotAvailable": "利用不可",
+    "kvmStatus": "KVMステータス",
+    "kvmReady": "準備完了",
+    "kvmNeedsInit": "ネットワーク初期化が必要",
+    "kvmNotEnabled": "未有効化",
+    "kvmNotInstalled": "未インストール",
+    "kvmAvailable": "利用可能",
+    "kvmNotAvailable": "利用不可",
+    "enableKvm": "KVMを有効化",
+    "kvmInitializedSuccess": "KVM初期化がリクエストされました。エージェントがlibvirtをインストールして設定します。",
+    "kvmInitializeFailed": "KVMの初期化に失敗しました",
+    "virtualizationCapabilities": "仮想化機能",
+    "hypervisor": {
+      "kvm": {
+        "name": "KVM/QEMU",
+        "description": "Linuxカーネルベースの仮想化",
+        "createLabel": "VM作成",
+        "enableLabel": "KVMを有効化"
+      },
+      "lxd": {
+        "name": "LXD",
+        "description": "Linuxコンテナ管理",
+        "createLabel": "コンテナ作成",
+        "enableLabel": "LXDを有効化"
+      },
+      "vmm": {
+        "name": "VMM/vmd",
+        "description": "OpenBSD仮想マシンモニター",
+        "createLabel": "VM作成",
+        "enableLabel": "VMMを有効化"
+      },
+      "wsl": {
+        "name": "WSL",
+        "description": "Windows Subsystem for Linux",
+        "createLabel": "インスタンス作成",
+        "enableLabel": "WSLを有効化"
+      },
+      "createLabel": "作成",
+      "enableLabel": "有効化",
+      "state": {
+        "unknown": "不明",
+        "biosRequired": "BIOS仮想化が必要",
+        "notAvailable": "利用不可",
+        "noKernelSupport": "カーネルサポートなし",
+        "ready": "準備完了",
+        "needsInit": "初期化が必要",
+        "notRunning": "実行されていません",
+        "notEnabled": "有効化されていません",
+        "notInstalled": "インストールされていません",
+        "available": "利用可能"
+      },
+      "indicator": {
+        "available": "利用可能",
+        "installed": "インストール済み",
+        "enabled": "有効",
+        "running": "実行中",
+        "initialized": "初期化済み",
+        "kernelSupport": "カーネルサポート"
+      },
+      "rebootRequired": "再起動が必要",
+      "notAvailableMessage": "このプラットフォームでは利用できません",
+      "noKernelSupportMessage": "カーネルがこのハイパーバイザーをサポートしていません",
+      "biosVirtualizationMessage": "BIOS/UEFI設定で仮想化を有効にしてください"
+    },
     "createVmmVmTitle": "VMM仮想マシンを作成",
     "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
+    "createKvmVmTitle": "Create KVM Virtual Machine",
+    "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
     "cancelChildHost": "Cancel",
     "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
     "cancelChildHostWarning": "This will cancel the child host creation.",

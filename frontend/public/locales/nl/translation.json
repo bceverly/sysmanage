@@ -484,8 +484,73 @@
     "vmmNotEnabled": "Niet ingeschakeld",
     "vmmNoKernelSupport": "Geen kernelondersteuning",
     "vmmNotAvailable": "Niet beschikbaar",
+    "kvmStatus": "KVM-status",
+    "kvmReady": "Gereed",
+    "kvmNeedsInit": "Netwerk-init nodig",
+    "kvmNotEnabled": "Niet ingeschakeld",
+    "kvmNotInstalled": "Niet geïnstalleerd",
+    "kvmAvailable": "Beschikbaar",
+    "kvmNotAvailable": "Niet beschikbaar",
+    "enableKvm": "KVM inschakelen",
+    "kvmInitializedSuccess": "KVM-initialisatie aangevraagd. De agent zal libvirt installeren en configureren.",
+    "kvmInitializeFailed": "KVM-initialisatie mislukt",
+    "virtualizationCapabilities": "Virtualisatiemogelijkheden",
+    "hypervisor": {
+      "kvm": {
+        "name": "KVM/QEMU",
+        "description": "Linux kernel-gebaseerde virtualisatie",
+        "createLabel": "VM aanmaken",
+        "enableLabel": "KVM inschakelen"
+      },
+      "lxd": {
+        "name": "LXD",
+        "description": "Linux containerbeheer",
+        "createLabel": "Container aanmaken",
+        "enableLabel": "LXD inschakelen"
+      },
+      "vmm": {
+        "name": "VMM/vmd",
+        "description": "OpenBSD virtuele machine monitor",
+        "createLabel": "VM aanmaken",
+        "enableLabel": "VMM inschakelen"
+      },
+      "wsl": {
+        "name": "WSL",
+        "description": "Windows Subsystem voor Linux",
+        "createLabel": "Instantie aanmaken",
+        "enableLabel": "WSL inschakelen"
+      },
+      "createLabel": "Aanmaken",
+      "enableLabel": "Inschakelen",
+      "state": {
+        "unknown": "Onbekend",
+        "biosRequired": "BIOS-virtualisatie vereist",
+        "notAvailable": "Niet beschikbaar",
+        "noKernelSupport": "Geen kernelondersteuning",
+        "ready": "Gereed",
+        "needsInit": "Initialisatie vereist",
+        "notRunning": "Niet actief",
+        "notEnabled": "Niet ingeschakeld",
+        "notInstalled": "Niet geïnstalleerd",
+        "available": "Beschikbaar"
+      },
+      "indicator": {
+        "available": "Beschikbaar",
+        "installed": "Geïnstalleerd",
+        "enabled": "Ingeschakeld",
+        "running": "Actief",
+        "initialized": "Geïnitialiseerd",
+        "kernelSupport": "Kernelondersteuning"
+      },
+      "rebootRequired": "Herstart vereist",
+      "notAvailableMessage": "Niet beschikbaar op dit platform",
+      "noKernelSupportMessage": "Kernel ondersteunt deze hypervisor niet",
+      "biosVirtualizationMessage": "Schakel virtualisatie in de BIOS/UEFI-instellingen in"
+    },
     "createVmmVmTitle": "VMM virtuele machine aanmaken",
     "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
+    "createKvmVmTitle": "Create KVM Virtual Machine",
+    "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
     "cancelChildHost": "Cancel",
     "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
     "cancelChildHostWarning": "This will cancel the child host creation.",

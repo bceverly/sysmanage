@@ -20,7 +20,7 @@ class CreateChildHostRequest(BaseModel):
 
 
 class CreateWslChildHostRequest(BaseModel):
-    """Request body for creating a WSL, LXD, or VMM child host."""
+    """Request body for creating a WSL, LXD, VMM, or KVM child host."""
 
     child_type: str = "wsl"
     distribution: str
@@ -29,9 +29,13 @@ class CreateWslChildHostRequest(BaseModel):
     password: str
     root_password: Optional[str] = None  # For VMM: separate root password
     container_name: Optional[str] = None  # For LXD containers
-    vm_name: Optional[str] = None  # For VMM virtual machines
+    vm_name: Optional[str] = None  # For VMM/KVM virtual machines
     iso_url: Optional[str] = None  # For VMM: URL to download install ISO
     auto_approve: bool = False  # Automatically approve the child host when it registers
+    # KVM-specific fields
+    memory: Optional[str] = "2G"  # Memory allocation (e.g., "2G", "4096M")
+    disk_size: Optional[str] = "20G"  # Disk size (e.g., "20G", "50G")
+    cpus: Optional[int] = 2  # Number of vCPUs
 
 
 class EnableWslRequest(BaseModel):
@@ -136,3 +140,15 @@ class VirtualizationSupportResponse(BaseModel):
     wsl_enabled: Optional[bool] = None
     wsl_version: Optional[int] = None
     requires_reboot: bool = False
+
+
+class ConfigureKvmNetworkingRequest(BaseModel):
+    """Request model for configuring KVM networking."""
+
+    mode: str = "nat"  # 'nat' (default) or 'bridged'
+    network_name: Optional[str] = (
+        None  # Name for the network (default: 'default' for NAT)
+    )
+    bridge: Optional[str] = (
+        None  # Linux bridge interface name (required for bridged mode)
+    )

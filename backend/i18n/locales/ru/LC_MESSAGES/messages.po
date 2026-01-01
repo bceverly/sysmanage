@@ -811,8 +811,51 @@ msgstr "Запрошена инициализация VMM. Агент включ
 msgid "VM name is required for VMM virtual machines"
 msgstr "Имя ВМ обязательно для виртуальных машин VMM"
 
+msgid "VM name is required for KVM virtual machines"
+msgstr "Имя ВМ обязательно для виртуальных машин KVM"
+
 msgid "A child host named '%s' already exists on this host"
 msgstr "Дочерний хост с именем '%s' уже существует на этом хосте"
 
 msgid "Child host creation requested: %s (%s)"
 msgstr "Запрошено создание дочернего хоста: %s (%s)"
+
+# KVM/libvirt Virtual Machine Management strings
+
+msgid "KVM is only supported on Linux hosts"
+msgstr "KVM поддерживается только на хостах Linux"
+
+msgid "Agent must be running with root privileges to initialize KVM"
+msgstr "Агент должен работать с правами root для инициализации KVM"
+
+msgid "KVM initialization requested"
+msgstr "Запрошена инициализация KVM"
+
+msgid "KVM initialization requested. The agent will install libvirt and configure KVM for virtual machine management."
+msgstr "Запрошена инициализация KVM. Агент установит libvirt и настроит KVM для управления виртуальными машинами."
+
+msgid "KVM/libvirt initialized successfully"
+msgstr "KVM/libvirt успешно инициализирован"
+
+# KVM Networking Configuration strings
+
+msgid "KVM networking is only supported on Linux hosts"
+msgstr "KVM networking is only supported on Linux hosts"
+
+msgid "Agent must be running with root privileges to configure KVM networking"
+msgstr "Agent must be running with root privileges to configure KVM networking"
+
+msgid "Bridge interface name is required for bridged networking mode"
+msgstr "Bridge interface name is required for bridged networking mode"
+
+msgid "KVM networking configuration requested: %s mode"
+msgstr "KVM networking configuration requested: %s mode"
+
+msgid "KVM networking configuration requested. The agent will configure the %s network."
+msgstr "KVM networking configuration requested. The agent will configure the %s network."
+
+msgid "KVM networks are only available on Linux hosts"
+msgstr "KVM networks are only available on Linux hosts"
+
+msgid "KVM network list requested. Results will be returned shortly."
+msgstr "KVM network list requested. Results will be returned shortly."

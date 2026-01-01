@@ -484,8 +484,73 @@
     "vmmNotEnabled": "Не включен",
     "vmmNoKernelSupport": "Нет поддержки ядра",
     "vmmNotAvailable": "Недоступен",
+    "kvmStatus": "Статус KVM",
+    "kvmReady": "Готов",
+    "kvmNeedsInit": "Требуется инициализация сети",
+    "kvmNotEnabled": "Не включен",
+    "kvmNotInstalled": "Не установлен",
+    "kvmAvailable": "Доступен",
+    "kvmNotAvailable": "Недоступен",
+    "enableKvm": "Включить KVM",
+    "kvmInitializedSuccess": "Запрошена инициализация KVM. Агент установит и настроит libvirt.",
+    "kvmInitializeFailed": "Не удалось инициализировать KVM",
+    "virtualizationCapabilities": "Возможности виртуализации",
+    "hypervisor": {
+      "kvm": {
+        "name": "KVM/QEMU",
+        "description": "Виртуализация на основе ядра Linux",
+        "createLabel": "Создать ВМ",
+        "enableLabel": "Включить KVM"
+      },
+      "lxd": {
+        "name": "LXD",
+        "description": "Управление контейнерами Linux",
+        "createLabel": "Создать контейнер",
+        "enableLabel": "Включить LXD"
+      },
+      "vmm": {
+        "name": "VMM/vmd",
+        "description": "Монитор виртуальных машин OpenBSD",
+        "createLabel": "Создать ВМ",
+        "enableLabel": "Включить VMM"
+      },
+      "wsl": {
+        "name": "WSL",
+        "description": "Подсистема Windows для Linux",
+        "createLabel": "Создать экземпляр",
+        "enableLabel": "Включить WSL"
+      },
+      "createLabel": "Создать",
+      "enableLabel": "Включить",
+      "state": {
+        "unknown": "Неизвестно",
+        "biosRequired": "Требуется виртуализация BIOS",
+        "notAvailable": "Недоступен",
+        "noKernelSupport": "Нет поддержки ядра",
+        "ready": "Готов",
+        "needsInit": "Требуется инициализация",
+        "notRunning": "Не запущен",
+        "notEnabled": "Не включен",
+        "notInstalled": "Не установлен",
+        "available": "Доступен"
+      },
+      "indicator": {
+        "available": "Доступен",
+        "installed": "Установлен",
+        "enabled": "Включен",
+        "running": "Работает",
+        "initialized": "Инициализирован",
+        "kernelSupport": "Поддержка ядра"
+      },
+      "rebootRequired": "Требуется перезагрузка",
+      "notAvailableMessage": "Недоступно на этой платформе",
+      "noKernelSupportMessage": "Ядро не поддерживает этот гипервизор",
+      "biosVirtualizationMessage": "Включите виртуализацию в настройках BIOS/UEFI"
+    },
     "createVmmVmTitle": "Создать виртуальную машину VMM",
     "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
+    "createKvmVmTitle": "Create KVM Virtual Machine",
+    "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
     "cancelChildHost": "Cancel",
     "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
     "cancelChildHostWarning": "This will cancel the child host creation.",

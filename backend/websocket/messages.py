@@ -56,6 +56,8 @@ class MessageType(str, Enum):
     LXD_INITIALIZATION_FAILED = "lxd_initialization_failed"
     VMM_INITIALIZED = "vmm_initialized"
     VMM_INITIALIZATION_FAILED = "vmm_initialization_failed"
+    KVM_INITIALIZED = "kvm_initialized"
+    KVM_INITIALIZATION_FAILED = "kvm_initialization_failed"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -110,6 +112,7 @@ class CommandType(str, Enum):
     CHILD_HOST_STATUS = "child_host_status"
     INITIALIZE_LXD = "initialize_lxd"
     INITIALIZE_VMM = "initialize_vmm"
+    INITIALIZE_KVM = "initialize_kvm"
 
 
 class Message:

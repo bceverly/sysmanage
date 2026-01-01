@@ -484,8 +484,73 @@
     "vmmNotEnabled": "Non abilitato",
     "vmmNoKernelSupport": "Nessun supporto kernel",
     "vmmNotAvailable": "Non disponibile",
+    "kvmStatus": "Stato KVM",
+    "kvmReady": "Pronto",
+    "kvmNeedsInit": "Init rete richiesto",
+    "kvmNotEnabled": "Non abilitato",
+    "kvmNotInstalled": "Non installato",
+    "kvmAvailable": "Disponibile",
+    "kvmNotAvailable": "Non disponibile",
+    "enableKvm": "Abilita KVM",
+    "kvmInitializedSuccess": "Inizializzazione KVM richiesta. L'agente installerà e configurerà libvirt.",
+    "kvmInitializeFailed": "Inizializzazione KVM fallita",
+    "virtualizationCapabilities": "Capacità di Virtualizzazione",
+    "hypervisor": {
+      "kvm": {
+        "name": "KVM/QEMU",
+        "description": "Virtualizzazione basata sul kernel Linux",
+        "createLabel": "Crea VM",
+        "enableLabel": "Abilita KVM"
+      },
+      "lxd": {
+        "name": "LXD",
+        "description": "Gestione container Linux",
+        "createLabel": "Crea Container",
+        "enableLabel": "Abilita LXD"
+      },
+      "vmm": {
+        "name": "VMM/vmd",
+        "description": "Monitor macchina virtuale OpenBSD",
+        "createLabel": "Crea VM",
+        "enableLabel": "Abilita VMM"
+      },
+      "wsl": {
+        "name": "WSL",
+        "description": "Sottosistema Windows per Linux",
+        "createLabel": "Crea Istanza",
+        "enableLabel": "Abilita WSL"
+      },
+      "createLabel": "Crea",
+      "enableLabel": "Abilita",
+      "state": {
+        "unknown": "Sconosciuto",
+        "biosRequired": "Virtualizzazione BIOS richiesta",
+        "notAvailable": "Non disponibile",
+        "noKernelSupport": "Nessun supporto kernel",
+        "ready": "Pronto",
+        "needsInit": "Necessita inizializzazione",
+        "notRunning": "Non in esecuzione",
+        "notEnabled": "Non abilitato",
+        "notInstalled": "Non installato",
+        "available": "Disponibile"
+      },
+      "indicator": {
+        "available": "Disponibile",
+        "installed": "Installato",
+        "enabled": "Abilitato",
+        "running": "In esecuzione",
+        "initialized": "Inizializzato",
+        "kernelSupport": "Supporto kernel"
+      },
+      "rebootRequired": "Riavvio richiesto",
+      "notAvailableMessage": "Non disponibile su questa piattaforma",
+      "noKernelSupportMessage": "Il kernel non supporta questo hypervisor",
+      "biosVirtualizationMessage": "Abilita la virtualizzazione nelle impostazioni BIOS/UEFI"
+    },
     "createVmmVmTitle": "Crea macchina virtuale VMM",
     "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
+    "createKvmVmTitle": "Create KVM Virtual Machine",
+    "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
     "cancelChildHost": "Cancel",
     "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
     "cancelChildHostWarning": "This will cancel the child host creation.",

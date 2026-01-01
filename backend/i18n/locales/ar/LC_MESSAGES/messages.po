@@ -800,8 +800,51 @@ msgstr "تم طلب تهيئة VMM. سيقوم الوكيل بتمكين وبد�
 msgid "VM name is required for VMM virtual machines"
 msgstr "اسم الجهاز الافتراضي مطلوب لأجهزة VMM الافتراضية"
 
+msgid "VM name is required for KVM virtual machines"
+msgstr "اسم الجهاز الافتراضي مطلوب لأجهزة KVM الافتراضية"
+
 msgid "A child host named '%s' already exists on this host"
 msgstr "يوجد بالفعل مضيف فرعي باسم '%s' على هذا المضيف"
 
 msgid "Child host creation requested: %s (%s)"
 msgstr "تم طلب إنشاء مضيف فرعي: %s (%s)"
+
+# KVM/libvirt Virtual Machine Management strings
+
+msgid "KVM is only supported on Linux hosts"
+msgstr "يُدعم KVM فقط على مضيفي Linux"
+
+msgid "Agent must be running with root privileges to initialize KVM"
+msgstr "يجب أن يعمل الوكيل بصلاحيات الجذر لتهيئة KVM"
+
+msgid "KVM initialization requested"
+msgstr "تم طلب تهيئة KVM"
+
+msgid "KVM initialization requested. The agent will install libvirt and configure KVM for virtual machine management."
+msgstr "تم طلب تهيئة KVM. سيقوم الوكيل بتثبيت libvirt وتكوين KVM لإدارة الآلات الافتراضية."
+
+msgid "KVM/libvirt initialized successfully"
+msgstr "تم تهيئة KVM/libvirt بنجاح"
+
+# KVM Networking Configuration strings
+
+msgid "KVM networking is only supported on Linux hosts"
+msgstr "KVM networking is only supported on Linux hosts"
+
+msgid "Agent must be running with root privileges to configure KVM networking"
+msgstr "Agent must be running with root privileges to configure KVM networking"
+
+msgid "Bridge interface name is required for bridged networking mode"
+msgstr "Bridge interface name is required for bridged networking mode"
+
+msgid "KVM networking configuration requested: %s mode"
+msgstr "KVM networking configuration requested: %s mode"
+
+msgid "KVM networking configuration requested. The agent will configure the %s network."
+msgstr "KVM networking configuration requested. The agent will configure the %s network."
+
+msgid "KVM networks are only available on Linux hosts"
+msgstr "KVM networks are only available on Linux hosts"
+
+msgid "KVM network list requested. Results will be returned shortly."
+msgstr "KVM network list requested. Results will be returned shortly."

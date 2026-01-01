@@ -811,8 +811,51 @@ msgstr "VMMの初期化がリクエストされました。エージェントが
 msgid "VM name is required for VMM virtual machines"
 msgstr "VMM仮想マシンにはVM名が必要です"
 
+msgid "VM name is required for KVM virtual machines"
+msgstr "KVM仮想マシンにはVM名が必要です"
+
 msgid "A child host named '%s' already exists on this host"
 msgstr "'%s' という名前の子ホストはこのホストに既に存在します"
 
 msgid "Child host creation requested: %s (%s)"
 msgstr "子ホスト作成がリクエストされました: %s (%s)"
+
+# KVM/libvirt Virtual Machine Management strings
+
+msgid "KVM is only supported on Linux hosts"
+msgstr "KVMはLinuxホストでのみサポートされています"
+
+msgid "Agent must be running with root privileges to initialize KVM"
+msgstr "KVMを初期化するには、エージェントがroot権限で実行されている必要があります"
+
+msgid "KVM initialization requested"
+msgstr "KVMの初期化がリクエストされました"
+
+msgid "KVM initialization requested. The agent will install libvirt and configure KVM for virtual machine management."
+msgstr "KVMの初期化がリクエストされました。エージェントはlibvirtをインストールし、仮想マシン管理用にKVMを設定します。"
+
+msgid "KVM/libvirt initialized successfully"
+msgstr "KVM/libvirtが正常に初期化されました"
+
+# KVM Networking Configuration strings
+
+msgid "KVM networking is only supported on Linux hosts"
+msgstr "KVM networking is only supported on Linux hosts"
+
+msgid "Agent must be running with root privileges to configure KVM networking"
+msgstr "Agent must be running with root privileges to configure KVM networking"
+
+msgid "Bridge interface name is required for bridged networking mode"
+msgstr "Bridge interface name is required for bridged networking mode"
+
+msgid "KVM networking configuration requested: %s mode"
+msgstr "KVM networking configuration requested: %s mode"
+
+msgid "KVM networking configuration requested. The agent will configure the %s network."
+msgstr "KVM networking configuration requested. The agent will configure the %s network."
+
+msgid "KVM networks are only available on Linux hosts"
+msgstr "KVM networks are only available on Linux hosts"
+
+msgid "KVM network list requested. Results will be returned shortly."
+msgstr "KVM network list requested. Results will be returned shortly."

@@ -500,8 +500,73 @@
     "vmmNotEnabled": "غير ممكّن",
     "vmmNoKernelSupport": "لا يوجد دعم للنواة",
     "vmmNotAvailable": "غير متوفر",
+    "kvmStatus": "حالة KVM",
+    "kvmReady": "جاهز",
+    "kvmNeedsInit": "يحتاج إلى تهيئة الشبكة",
+    "kvmNotEnabled": "غير مفعل",
+    "kvmNotInstalled": "غير مثبت",
+    "kvmAvailable": "متاح",
+    "kvmNotAvailable": "غير متاح",
+    "enableKvm": "تفعيل KVM",
+    "kvmInitializedSuccess": "تم طلب تهيئة KVM. سيقوم الوكيل بتثبيت وتكوين libvirt.",
+    "kvmInitializeFailed": "فشل في تهيئة KVM",
+    "virtualizationCapabilities": "إمكانيات المحاكاة الافتراضية",
+    "hypervisor": {
+      "kvm": {
+        "name": "KVM/QEMU",
+        "description": "المحاكاة الافتراضية المبنية على نواة Linux",
+        "createLabel": "إنشاء VM",
+        "enableLabel": "تفعيل KVM"
+      },
+      "lxd": {
+        "name": "LXD",
+        "description": "إدارة حاويات Linux",
+        "createLabel": "إنشاء حاوية",
+        "enableLabel": "تفعيل LXD"
+      },
+      "vmm": {
+        "name": "VMM/vmd",
+        "description": "مراقب الأجهزة الافتراضية لـ OpenBSD",
+        "createLabel": "إنشاء VM",
+        "enableLabel": "تفعيل VMM"
+      },
+      "wsl": {
+        "name": "WSL",
+        "description": "نظام Windows الفرعي لـ Linux",
+        "createLabel": "إنشاء مثيل",
+        "enableLabel": "تفعيل WSL"
+      },
+      "createLabel": "إنشاء",
+      "enableLabel": "تفعيل",
+      "state": {
+        "unknown": "غير معروف",
+        "biosRequired": "مطلوب تفعيل المحاكاة الافتراضية في BIOS",
+        "notAvailable": "غير متاح",
+        "noKernelSupport": "لا يوجد دعم في النواة",
+        "ready": "جاهز",
+        "needsInit": "يحتاج إلى تهيئة",
+        "notRunning": "لا يعمل",
+        "notEnabled": "غير مفعل",
+        "notInstalled": "غير مثبت",
+        "available": "متاح"
+      },
+      "indicator": {
+        "available": "متاح",
+        "installed": "مثبت",
+        "enabled": "مفعل",
+        "running": "يعمل",
+        "initialized": "تمت التهيئة",
+        "kernelSupport": "دعم النواة"
+      },
+      "rebootRequired": "مطلوب إعادة التشغيل",
+      "notAvailableMessage": "غير متاح على هذه المنصة",
+      "noKernelSupportMessage": "النواة لا تدعم هذا المشرف الافتراضي",
+      "biosVirtualizationMessage": "قم بتفعيل المحاكاة الافتراضية في إعدادات BIOS/UEFI"
+    },
     "createVmmVmTitle": "إنشاء جهاز افتراضي VMM",
     "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
+    "createKvmVmTitle": "Create KVM Virtual Machine",
+    "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
     "cancelChildHost": "Cancel",
     "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
     "cancelChildHostWarning": "This will cancel the child host creation.",

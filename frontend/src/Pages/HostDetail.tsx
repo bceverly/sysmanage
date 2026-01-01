@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import AntivirusStatusCard from '../Components/AntivirusStatusCard';
 import CommercialAntivirusStatusCard from '../Components/CommercialAntivirusStatusCard';
 import FirewallStatusCard from '../Components/FirewallStatusCard';
+import HypervisorStatusCard from '../Components/HypervisorStatusCard';
 import GraylogAttachmentModal from '../Components/GraylogAttachmentModal';
 import { 
     Box, 
@@ -265,6 +266,15 @@ const HostDetail = () => {
                 kernel_supported: boolean;
                 needs_enable: boolean;
             };
+            kvm?: {
+                available: boolean;
+                installed: boolean;
+                enabled: boolean;
+                running: boolean;
+                initialized: boolean;
+                needs_install: boolean;
+                needs_enable: boolean;
+            };
             [key: string]: unknown;
         };
         reboot_required: boolean;
@@ -274,6 +284,7 @@ const HostDetail = () => {
     const [enableWslLoading, setEnableWslLoading] = useState<boolean>(false);
     const [initializeLxdLoading, setInitializeLxdLoading] = useState<boolean>(false);
     const [initializeVmmLoading, setInitializeVmmLoading] = useState<boolean>(false);
+    const [initializeKvmLoading, setInitializeKvmLoading] = useState<boolean>(false);
 
     // Create child host modal state
     const [createChildHostOpen, setCreateChildHostOpen] = useState<boolean>(false);
@@ -347,8 +358,21 @@ const HostDetail = () => {
             const platform = host.platform || '';
             const isLinux = platform.toLowerCase().includes('linux');
             const isOpenBSD = platform.includes('OpenBSD');
-            // Determine child type based on platform: OpenBSD -> vmm, Linux -> lxd, Windows -> wsl
-            const childType = isOpenBSD ? 'vmm' : (isLinux ? 'lxd' : 'wsl');
+            // Determine child type based on platform and available virtualization:
+            // - OpenBSD -> vmm
+            // - Linux -> kvm (if initialized) or lxd (fallback)
+            // - Windows -> wsl
+            let childType = 'wsl';
+            if (isOpenBSD) {
+                childType = 'vmm';
+            } else if (isLinux) {
+                // Prefer KVM if initialized, otherwise use LXD
+                if (virtualizationStatus?.capabilities?.kvm?.initialized) {
+                    childType = 'kvm';
+                } else {
+                    childType = 'lxd';
+                }
+            }
             setChildHostFormData(prev => ({
                 ...prev,
                 childType,
@@ -356,7 +380,7 @@ const HostDetail = () => {
             }));
             fetchDistributions(childType);
         }
-    }, [createChildHostOpen, host, fetchDistributions]);
+    }, [createChildHostOpen, host, fetchDistributions, virtualizationStatus]);
 
     // Child host control state (start/stop/restart/delete)
     const [childHostOperationLoading, setChildHostOperationLoading] = useState<Record<string, string | null>>({});
@@ -467,6 +491,12 @@ const HostDetail = () => {
     const [canAttachGraylog, setCanAttachGraylog] = useState<boolean>(false);  // Graylog integration enabled and healthy
     const [graylogEligible, setGraylogEligible] = useState<boolean>(false);  // Agent is privileged
     const [graylogAttachModalOpen, setGraylogAttachModalOpen] = useState<boolean>(false);
+
+    // Virtualization enablement permission states
+    const [canEnableWsl, setCanEnableWsl] = useState<boolean>(false);
+    const [canEnableLxd, setCanEnableLxd] = useState<boolean>(false);
+    const [canEnableKvm, setCanEnableKvm] = useState<boolean>(false);
+    const [canEnableVmm, setCanEnableVmm] = useState<boolean>(false);
 
     // Installation history state
     interface InstallationHistoryItem {
@@ -916,6 +946,51 @@ const HostDetail = () => {
         }
     }, [hostId, fetchVirtualizationStatus, t]);
 
+    // Initialize KVM on Linux host
+    const handleInitializeKvm = useCallback(async () => {
+        if (!hostId) return;
+        try {
+            setInitializeKvmLoading(true);
+            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/initialize-kvm`);
+            if (response.status === 200) {
+                setSnackbarMessage(t('hostDetail.kvmInitializedSuccess', 'KVM initialization requested. The agent will install and configure libvirt.'));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+                // Refresh virtualization status after a delay
+                setTimeout(() => {
+                    fetchVirtualizationStatus();
+                }, 5000);
+            }
+        } catch (error) {
+            console.error('Error initializing KVM:', error);
+            setSnackbarMessage(t('hostDetail.kvmInitializeFailed', 'Failed to initialize KVM'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setInitializeKvmLoading(false);
+        }
+    }, [hostId, fetchVirtualizationStatus, t]);
+
+    // Open create dialog with a specific child type (called from HypervisorStatusCard)
+    const openCreateDialogWithType = useCallback((childType: string) => {
+        setChildHostFormData(prev => ({
+            ...prev,
+            childType,
+            distribution: '',  // Reset distribution when type changes
+            containerName: '',
+            vmName: '',
+            hostname: '',
+            username: '',
+            password: '',
+            confirmPassword: '',
+            rootPassword: '',
+            confirmRootPassword: '',
+            autoApprove: false,
+        }));
+        fetchDistributions(childType);
+        setCreateChildHostOpen(true);
+    }, [fetchDistributions]);
+
     // Create child host
     const handleCreateChildHost = useCallback(async () => {
         if (!hostId) return;
@@ -952,14 +1027,17 @@ const HostDetail = () => {
             setSnackbarOpen(true);
             return;
         }
-        // For VMM, require VM name and root password
-        if (childHostFormData.childType === 'vmm') {
+        // For VMM and KVM, require VM name
+        if (childHostFormData.childType === 'vmm' || childHostFormData.childType === 'kvm') {
             if (!childHostFormData.vmName) {
                 setSnackbarMessage(t('hostDetail.childHostVmNameRequired', 'Please enter a VM name'));
                 setSnackbarSeverity('error');
                 setSnackbarOpen(true);
                 return;
             }
+        }
+        // For VMM specifically, require root password (KVM uses cloud-init with user password)
+        if (childHostFormData.childType === 'vmm') {
             if (!childHostFormData.rootPassword) {
                 setSnackbarMessage(t('hostDetail.childHostRootPasswordRequired', 'Please enter a root password'));
                 setSnackbarSeverity('error');
@@ -1002,6 +1080,15 @@ const HostDetail = () => {
                 }
                 // VMM requires separate root password
                 requestData.root_password = childHostFormData.rootPassword;
+            }
+
+            // For KVM, send vm_name and cloud_image_url
+            if (childHostFormData.childType === 'kvm') {
+                requestData.vm_name = childHostFormData.vmName || childHostFormData.hostname;
+                // For KVM, the install_identifier contains the cloud image URL
+                if (childHostFormData.distribution) {
+                    requestData.cloud_image_url = childHostFormData.distribution;
+                }
             }
 
             const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/create-child`, requestData);
@@ -1415,7 +1502,7 @@ const HostDetail = () => {
     // Check permissions
     useEffect(() => {
         const checkPermissions = async () => {
-            const [editTags, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro, deployAntivirus, enableAntivirus, disableAntivirus, removeAntivirus, addHostAccount, addHostGroup, deleteHostAccount, deleteHostGroup] = await Promise.all([
+            const [editTags, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro, deployAntivirus, enableAntivirus, disableAntivirus, removeAntivirus, addHostAccount, addHostGroup, deleteHostAccount, deleteHostGroup, enableWsl, enableLxd, enableKvm, enableVmm] = await Promise.all([
                 hasPermission(SecurityRoles.EDIT_TAGS),
                 hasPermission(SecurityRoles.STOP_HOST_SERVICE),
                 hasPermission(SecurityRoles.START_HOST_SERVICE),
@@ -1432,7 +1519,11 @@ const HostDetail = () => {
                 hasPermission(SecurityRoles.ADD_HOST_ACCOUNT),
                 hasPermission(SecurityRoles.ADD_HOST_GROUP),
                 hasPermission(SecurityRoles.DELETE_HOST_ACCOUNT),
-                hasPermission(SecurityRoles.DELETE_HOST_GROUP)
+                hasPermission(SecurityRoles.DELETE_HOST_GROUP),
+                hasPermission(SecurityRoles.ENABLE_WSL),
+                hasPermission(SecurityRoles.ENABLE_LXD),
+                hasPermission(SecurityRoles.ENABLE_KVM),
+                hasPermission(SecurityRoles.ENABLE_VMM)
             ]);
             setCanEditTags(editTags);
             setCanStopService(stopService);
@@ -1451,6 +1542,10 @@ const HostDetail = () => {
             setCanAddHostGroup(addHostGroup);
             setCanDeleteHostAccount(deleteHostAccount);
             setCanDeleteHostGroup(deleteHostGroup);
+            setCanEnableWsl(enableWsl);
+            setCanEnableLxd(enableLxd);
+            setCanEnableKvm(enableKvm);
+            setCanEnableVmm(enableVmm);
         };
         checkPermissions();
     }, []);
@@ -5356,172 +5451,95 @@ const HostDetail = () => {
             {/* Child Hosts Tab */}
             {currentTab === getChildHostsTabIndex() && supportsChildHosts() && (
                 <Grid container spacing={3}>
-                    {/* Virtualization Status Card */}
+                    {/* Virtualization Capabilities - Card-based layout */}
                     <Grid size={{ xs: 12 }}>
-                        <Card variant="outlined">
-                            <CardContent>
-                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                        {t('hostDetail.virtualizationStatus', 'Virtualization Status')}
-                                    </Typography>
-                                    {virtualizationLoading && <CircularProgress size={20} />}
-                                </Box>
-                                {virtualizationStatus && (
-                                    <Box sx={{ mt: 2 }}>
-                                        <Grid container spacing={2}>
-                                            {/* WSL Status - show for Windows hosts */}
-                                            {host?.platform?.includes('Windows') && (
-                                                <>
-                                                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                                                        <Typography variant="body2" color="textSecondary">
-                                                            {t('hostDetail.wslStatus', 'WSL Status')}
-                                                        </Typography>
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                                                            {virtualizationStatus.capabilities?.wsl?.enabled ? (
-                                                                <Chip
-                                                                    label={t('hostDetail.wslEnabled', 'Enabled')}
-                                                                    color="success"
-                                                                    size="small"
-                                                                />
-                                                            ) : virtualizationStatus.capabilities?.wsl?.needs_bios_virtualization ? (
-                                                                <Chip
-                                                                    label={t('hostDetail.wslNeedsBios', 'BIOS Virtualization Required')}
-                                                                    color="error"
-                                                                    size="small"
-                                                                />
-                                                            ) : virtualizationStatus.capabilities?.wsl?.needs_enable ? (
-                                                                <Chip
-                                                                    label={t('hostDetail.wslNotEnabled', 'Not Enabled')}
-                                                                    color="warning"
-                                                                    size="small"
-                                                                />
-                                                            ) : (
-                                                                <Chip
-                                                                    label={t('hostDetail.wslNotAvailable', 'Not Available')}
-                                                                    color="default"
-                                                                    size="small"
-                                                                />
-                                                            )}
-                                                        </Box>
-                                                    </Grid>
-                                                    {virtualizationStatus.capabilities?.wsl?.version && (
-                                                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                                                            <Typography variant="body2" color="textSecondary">
-                                                                {t('hostDetail.wslVersion', 'WSL Version')}
-                                                            </Typography>
-                                                            <Typography variant="body1">
-                                                                {virtualizationStatus.capabilities.wsl.version}
-                                                            </Typography>
-                                                        </Grid>
-                                                    )}
-                                                    {virtualizationStatus.reboot_required && (
-                                                        <Grid size={{ xs: 12 }}>
-                                                            <Chip
-                                                                label={t('hostDetail.rebootRequiredForWsl', 'Reboot required to complete WSL enablement')}
-                                                                color="warning"
-                                                                size="small"
-                                                                icon={<WarningIcon />}
-                                                            />
-                                                        </Grid>
-                                                    )}
-                                                    {virtualizationStatus.capabilities?.wsl?.needs_bios_virtualization && (
-                                                        <Grid size={{ xs: 12 }}>
-                                                            <Chip
-                                                                label={t('hostDetail.biosVirtualizationRequired', 'Enable virtualization in BIOS/UEFI settings and restart the computer')}
-                                                                color="error"
-                                                                size="small"
-                                                                icon={<WarningIcon />}
-                                                            />
-                                                        </Grid>
-                                                    )}
-                                                </>
-                                            )}
-                                            {/* LXD Status - show for Linux hosts */}
-                                            {host?.platform?.includes('Linux') && (
-                                                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        {t('hostDetail.lxdStatus', 'LXD Status')}
-                                                    </Typography>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                                                        {virtualizationStatus.capabilities?.lxd?.installed && virtualizationStatus.capabilities?.lxd?.initialized ? (
-                                                            <Chip
-                                                                label={t('hostDetail.lxdReady', 'Ready')}
-                                                                color="success"
-                                                                size="small"
-                                                            />
-                                                        ) : virtualizationStatus.capabilities?.lxd?.installed && !virtualizationStatus.capabilities?.lxd?.initialized ? (
-                                                            <Chip
-                                                                label={t('hostDetail.lxdNotInitialized', 'Not Initialized')}
-                                                                color="warning"
-                                                                size="small"
-                                                            />
-                                                        ) : virtualizationStatus.capabilities?.lxd?.available ? (
-                                                            <Chip
-                                                                label={t('hostDetail.lxdNotInstalled', 'Not Installed')}
-                                                                color="warning"
-                                                                size="small"
-                                                            />
-                                                        ) : (
-                                                            <Chip
-                                                                label={t('hostDetail.lxdNotAvailable', 'Not Available')}
-                                                                color="default"
-                                                                size="small"
-                                                            />
-                                                        )}
-                                                    </Box>
-                                                </Grid>
-                                            )}
-                                            {/* VMM Status - show for OpenBSD hosts */}
-                                            {host?.platform?.includes('OpenBSD') && (
-                                                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        {t('hostDetail.vmmStatus', 'VMM Status')}
-                                                    </Typography>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                                                        {virtualizationStatus.capabilities?.vmm?.running ? (
-                                                            <Chip
-                                                                label={t('hostDetail.vmmReady', 'Ready')}
-                                                                color="success"
-                                                                size="small"
-                                                            />
-                                                        ) : virtualizationStatus.capabilities?.vmm?.enabled && !virtualizationStatus.capabilities?.vmm?.running ? (
-                                                            <Chip
-                                                                label={t('hostDetail.vmmNotRunning', 'Not Running')}
-                                                                color="warning"
-                                                                size="small"
-                                                            />
-                                                        ) : virtualizationStatus.capabilities?.vmm?.kernel_supported ? (
-                                                            <Chip
-                                                                label={t('hostDetail.vmmNotEnabled', 'Not Enabled')}
-                                                                color="warning"
-                                                                size="small"
-                                                            />
-                                                        ) : virtualizationStatus.capabilities?.vmm?.available ? (
-                                                            <Chip
-                                                                label={t('hostDetail.vmmNoKernelSupport', 'No Kernel Support')}
-                                                                color="error"
-                                                                size="small"
-                                                            />
-                                                        ) : (
-                                                            <Chip
-                                                                label={t('hostDetail.vmmNotAvailable', 'Not Available')}
-                                                                color="default"
-                                                                size="small"
-                                                            />
-                                                        )}
-                                                    </Box>
-                                                </Grid>
-                                            )}
+                        <Box sx={{ mb: 2 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                    {t('hostDetail.virtualizationCapabilities', 'Virtualization Capabilities')}
+                                </Typography>
+                                {virtualizationLoading && <CircularProgress size={20} />}
+                            </Box>
+
+                            {!virtualizationStatus && !virtualizationLoading && (
+                                <Typography variant="body2" color="textSecondary">
+                                    {t('hostDetail.virtualizationStatusUnavailable', 'Virtualization status not available')}
+                                </Typography>
+                            )}
+
+                            {virtualizationStatus && (
+                                <Grid container spacing={2}>
+                                    {/* WSL Card - Windows hosts */}
+                                    {host?.platform?.includes('Windows') && (
+                                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                                            <HypervisorStatusCard
+                                                type="wsl"
+                                                capabilities={virtualizationStatus.capabilities?.wsl}
+                                                onEnable={handleEnableWsl}
+                                                onCreate={() => openCreateDialogWithType('wsl')}
+                                                canEnable={canEnableWsl}
+                                                canCreate={hasPermission(SecurityRoles.CREATE_CHILD_HOST)}
+                                                isLoading={virtualizationLoading}
+                                                isEnableLoading={enableWslLoading}
+                                                isAgentPrivileged={host?.is_agent_privileged || false}
+                                                rebootRequired={virtualizationStatus.reboot_required}
+                                            />
                                         </Grid>
-                                    </Box>
-                                )}
-                                {!virtualizationStatus && !virtualizationLoading && (
-                                    <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                                        {t('hostDetail.virtualizationStatusUnavailable', 'Virtualization status not available')}
-                                    </Typography>
-                                )}
-                            </CardContent>
-                        </Card>
+                                    )}
+
+                                    {/* LXD Card - Linux hosts */}
+                                    {host?.platform?.includes('Linux') && (
+                                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                                            <HypervisorStatusCard
+                                                type="lxd"
+                                                capabilities={virtualizationStatus.capabilities?.lxd}
+                                                onEnable={handleInitializeLxd}
+                                                onCreate={() => openCreateDialogWithType('lxd')}
+                                                canEnable={canEnableLxd}
+                                                canCreate={hasPermission(SecurityRoles.CREATE_CHILD_HOST)}
+                                                isLoading={virtualizationLoading}
+                                                isEnableLoading={initializeLxdLoading}
+                                                isAgentPrivileged={host?.is_agent_privileged || false}
+                                            />
+                                        </Grid>
+                                    )}
+
+                                    {/* KVM Card - Linux hosts */}
+                                    {host?.platform?.includes('Linux') && (
+                                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                                            <HypervisorStatusCard
+                                                type="kvm"
+                                                capabilities={virtualizationStatus.capabilities?.kvm}
+                                                onEnable={handleInitializeKvm}
+                                                onCreate={() => openCreateDialogWithType('kvm')}
+                                                canEnable={canEnableKvm}
+                                                canCreate={hasPermission(SecurityRoles.CREATE_CHILD_HOST)}
+                                                isLoading={virtualizationLoading}
+                                                isEnableLoading={initializeKvmLoading}
+                                                isAgentPrivileged={host?.is_agent_privileged || false}
+                                            />
+                                        </Grid>
+                                    )}
+
+                                    {/* VMM Card - OpenBSD hosts */}
+                                    {host?.platform?.includes('OpenBSD') && (
+                                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                                            <HypervisorStatusCard
+                                                type="vmm"
+                                                capabilities={virtualizationStatus.capabilities?.vmm}
+                                                onEnable={handleInitializeVmm}
+                                                onCreate={() => openCreateDialogWithType('vmm')}
+                                                canEnable={canEnableVmm}
+                                                canCreate={hasPermission(SecurityRoles.CREATE_CHILD_HOST)}
+                                                isLoading={virtualizationLoading}
+                                                isEnableLoading={initializeVmmLoading}
+                                                isAgentPrivileged={host?.is_agent_privileged || false}
+                                            />
+                                        </Grid>
+                                    )}
+                                </Grid>
+                            )}
+                        </Box>
                     </Grid>
 
                     <Grid size={{ xs: 12 }}>
@@ -5533,62 +5551,6 @@ const HostDetail = () => {
                                         {t('hostDetail.childHostsTitle', 'Child Hosts')}
                                     </Typography>
                                     <Box sx={{ display: 'flex', gap: 1 }}>
-                                        {/* Enable WSL Button - show if WSL not enabled but can be (not if BIOS virtualization required) */}
-                                        {virtualizationStatus?.capabilities?.wsl?.needs_enable && !virtualizationStatus?.reboot_required && !virtualizationStatus?.capabilities?.wsl?.needs_bios_virtualization && (
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                size="small"
-                                                startIcon={enableWslLoading ? <CircularProgress size={16} /> : <AddIcon />}
-                                                onClick={handleEnableWsl}
-                                                disabled={enableWslLoading || !host?.is_agent_privileged}
-                                            >
-                                                {t('hostDetail.enableWsl', 'Enable WSL')}
-                                            </Button>
-                                        )}
-                                        {/* Enable LXD Button - show for Linux hosts if LXD needs install or init */}
-                                        {host?.platform?.includes('Linux') && virtualizationStatus?.capabilities?.lxd?.available &&
-                                         (virtualizationStatus?.capabilities?.lxd?.needs_install || virtualizationStatus?.capabilities?.lxd?.needs_init) && (
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                size="small"
-                                                startIcon={initializeLxdLoading ? <CircularProgress size={16} /> : <AddIcon />}
-                                                onClick={handleInitializeLxd}
-                                                disabled={initializeLxdLoading || !host?.is_agent_privileged}
-                                            >
-                                                {t('hostDetail.enableLxd', 'Enable LXD')}
-                                            </Button>
-                                        )}
-                                        {/* Enable VMM Button - show for OpenBSD hosts if VMM needs to be enabled */}
-                                        {host?.platform?.includes('OpenBSD') && virtualizationStatus?.capabilities?.vmm?.available &&
-                                         virtualizationStatus?.capabilities?.vmm?.kernel_supported && virtualizationStatus?.capabilities?.vmm?.needs_enable && (
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                size="small"
-                                                startIcon={initializeVmmLoading ? <CircularProgress size={16} /> : <AddIcon />}
-                                                onClick={handleInitializeVmm}
-                                                disabled={initializeVmmLoading || !host?.is_agent_privileged}
-                                            >
-                                                {t('hostDetail.enableVmm', 'Enable VMM')}
-                                            </Button>
-                                        )}
-                                        {/* Create Child Host Button - show if WSL is enabled (Windows), LXD is ready (Linux), or VMM is running (OpenBSD) */}
-                                        {(virtualizationStatus?.capabilities?.wsl?.enabled ||
-                                          (virtualizationStatus?.capabilities?.lxd?.installed && virtualizationStatus?.capabilities?.lxd?.initialized) ||
-                                          virtualizationStatus?.capabilities?.vmm?.running) && (
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                size="small"
-                                                startIcon={<AddIcon />}
-                                                onClick={() => setCreateChildHostOpen(true)}
-                                                disabled={!host?.is_agent_privileged}
-                                            >
-                                                {t('hostDetail.createChildHost', 'Create Child Host')}
-                                            </Button>
-                                        )}
                                         <Button
                                             variant="outlined"
                                             size="small"
@@ -7248,6 +7210,8 @@ const HostDetail = () => {
                         ? t('hostDetail.createLxdContainerTitle', 'Create LXD Container')
                         : childHostFormData.childType === 'vmm'
                         ? t('hostDetail.createVmmVmTitle', 'Create VMM Virtual Machine')
+                        : childHostFormData.childType === 'kvm'
+                        ? t('hostDetail.createKvmVmTitle', 'Create KVM Virtual Machine')
                         : t('hostDetail.createChildHostTitle', 'Create WSL Instance')}
                     <IconButton
                         onClick={() => {
@@ -7321,12 +7285,12 @@ const HostDetail = () => {
                             value={childHostFormData.hostname}
                             onChange={(e) => {
                                 const newHostname = e.target.value;
-                                // For VMM, auto-compute vmName from short hostname
+                                // For VMM and KVM, auto-compute vmName from short hostname
                                 const shortName = newHostname.split('.')[0].toLowerCase().replace(/[^a-z0-9-]/g, '');
                                 setChildHostFormData({
                                     ...childHostFormData,
                                     hostname: newHostname,
-                                    vmName: childHostFormData.childType === 'vmm' ? shortName : childHostFormData.vmName
+                                    vmName: (childHostFormData.childType === 'vmm' || childHostFormData.childType === 'kvm') ? shortName : childHostFormData.vmName
                                 });
                             }}
                             disabled={createChildHostLoading}
@@ -7347,11 +7311,13 @@ const HostDetail = () => {
                                 ? t('hostDetail.childHostFqdnHelpLxd', 'This FQDN will be used for the LXD container')
                                 : childHostFormData.childType === 'vmm'
                                 ? t('hostDetail.childHostFqdnHelpVmm', 'This FQDN will be used for the VMM virtual machine')
+                                : childHostFormData.childType === 'kvm'
+                                ? t('hostDetail.childHostFqdnHelpKvm', 'This FQDN will be used for the KVM virtual machine')
                                 : t('hostDetail.childHostFqdnHelp', 'This FQDN will be used for the WSL instance')}
                         />
 
-                        {/* VM name field for VMM - read-only, derived from hostname */}
-                        {childHostFormData.childType === 'vmm' && (
+                        {/* VM name field for VMM and KVM - read-only, derived from hostname */}
+                        {(childHostFormData.childType === 'vmm' || childHostFormData.childType === 'kvm') && (
                             <TextField
                                 fullWidth
                                 label={t('hostDetail.childHostVmNameLabel', 'VM Name')}

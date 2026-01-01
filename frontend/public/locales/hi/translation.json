@@ -483,8 +483,73 @@
     "vmmNotEnabled": "सक्षम नहीं",
     "vmmNoKernelSupport": "कर्नेल समर्थन नहीं",
     "vmmNotAvailable": "उपलब्ध नहीं",
+    "kvmStatus": "KVM स्थिति",
+    "kvmReady": "तैयार",
+    "kvmNeedsInit": "नेटवर्क इनिट आवश्यक",
+    "kvmNotEnabled": "सक्षम नहीं",
+    "kvmNotInstalled": "इंस्टॉल नहीं",
+    "kvmAvailable": "उपलब्ध",
+    "kvmNotAvailable": "उपलब्ध नहीं",
+    "enableKvm": "KVM सक्षम करें",
+    "kvmInitializedSuccess": "KVM इनिशियलाइज़ेशन का अनुरोध किया गया। एजेंट libvirt इंस्टॉल और कॉन्फ़िगर करेगा।",
+    "kvmInitializeFailed": "KVM इनिशियलाइज़ करने में विफल",
+    "virtualizationCapabilities": "वर्चुअलाइज़ेशन क्षमताएं",
+    "hypervisor": {
+      "kvm": {
+        "name": "KVM/QEMU",
+        "description": "Linux कर्नेल-आधारित वर्चुअलाइज़ेशन",
+        "createLabel": "VM बनाएं",
+        "enableLabel": "KVM सक्षम करें"
+      },
+      "lxd": {
+        "name": "LXD",
+        "description": "Linux कंटेनर प्रबंधन",
+        "createLabel": "कंटेनर बनाएं",
+        "enableLabel": "LXD सक्षम करें"
+      },
+      "vmm": {
+        "name": "VMM/vmd",
+        "description": "OpenBSD वर्चुअल मशीन मॉनिटर",
+        "createLabel": "VM बनाएं",
+        "enableLabel": "VMM सक्षम करें"
+      },
+      "wsl": {
+        "name": "WSL",
+        "description": "Linux के लिए Windows सबसिस्टम",
+        "createLabel": "इंस्टेंस बनाएं",
+        "enableLabel": "WSL सक्षम करें"
+      },
+      "createLabel": "बनाएं",
+      "enableLabel": "सक्षम करें",
+      "state": {
+        "unknown": "अज्ञात",
+        "biosRequired": "BIOS वर्चुअलाइज़ेशन आवश्यक",
+        "notAvailable": "उपलब्ध नहीं",
+        "noKernelSupport": "कर्नेल समर्थन नहीं",
+        "ready": "तैयार",
+        "needsInit": "इनिशियलाइज़ेशन आवश्यक",
+        "notRunning": "चल नहीं रहा",
+        "notEnabled": "सक्षम नहीं",
+        "notInstalled": "इंस्टॉल नहीं",
+        "available": "उपलब्ध"
+      },
+      "indicator": {
+        "available": "उपलब्ध",
+        "installed": "इंस्टॉल",
+        "enabled": "सक्षम",
+        "running": "चल रहा",
+        "initialized": "इनिशियलाइज़्ड",
+        "kernelSupport": "कर्नेल समर्थन"
+      },
+      "rebootRequired": "रीबूट आवश्यक",
+      "notAvailableMessage": "इस प्लेटफ़ॉर्म पर उपलब्ध नहीं",
+      "noKernelSupportMessage": "कर्नेल इस हाइपरवाइज़र का समर्थन नहीं करता",
+      "biosVirtualizationMessage": "BIOS/UEFI सेटिंग्स में वर्चुअलाइज़ेशन सक्षम करें"
+    },
     "createVmmVmTitle": "VMM वर्चुअल मशीन बनाएं",
     "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
+    "createKvmVmTitle": "Create KVM Virtual Machine",
+    "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
     "cancelChildHost": "Cancel",
     "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
     "cancelChildHostWarning": "This will cancel the child host creation.",

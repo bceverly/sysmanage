@@ -18,6 +18,7 @@ from backend.api.handlers import (
     handle_hardware_update,
     handle_host_certificates_update,
     handle_host_role_data_update,
+    handle_kvm_initialize_result,
     handle_os_version_update,
     handle_package_updates_update,
     handle_reboot_status_update,
@@ -220,6 +221,12 @@ async def route_inbound_message(
             await handle_vmm_initialize_result(db, mock_connection, message_data)
             success = True
             print("Successfully processed VMM initialized", flush=True)
+
+        elif message_type == MessageType.KVM_INITIALIZED:
+            print("About to call handle_kvm_initialize_result", flush=True)
+            await handle_kvm_initialize_result(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed KVM initialized", flush=True)
 
         else:
             print(f"Unknown message type: {message_type}", flush=True)

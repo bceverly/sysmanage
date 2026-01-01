@@ -164,6 +164,11 @@ class SecurityRoles(str, Enum):
     START_CHILD_HOST = "Start Child Host"
     STOP_CHILD_HOST = "Stop Child Host"
     VIEW_CHILD_HOST = "View Child Host"
+    # - Virtualization Enablement Operations (alphabetical)
+    ENABLE_KVM = "Enable KVM"
+    ENABLE_LXD = "Enable LXD"
+    ENABLE_VMM = "Enable VMM"
+    ENABLE_WSL = "Enable WSL"
 
 
 class UserRoleCache:

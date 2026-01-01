@@ -136,7 +136,7 @@ async def view_report_html(
 
         # Use HTMLResponse which is the proper FastAPI way to return HTML
         # Input validation via Enum + HTML escaping in generators = XSS protection
-        # nosemgrep: python.fastapi.web.tainted-direct-response-fastapi.tainted-direct-response-fastapi
+        # nosemgrep: python.fastapi.web.tainted-direct-response-fastapi.tainted-direct-response-fastapi, tainted-direct-response-fastapi
         return HTMLResponse(content=html_content)
 
     except HTTPException:

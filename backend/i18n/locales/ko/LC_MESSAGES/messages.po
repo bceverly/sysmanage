@@ -808,8 +808,51 @@ msgstr "VMM 초기화가 요청되었습니다. 에이전트가 vmd 데몬을 �
 msgid "VM name is required for VMM virtual machines"
 msgstr "VMM 가상 머신에는 VM 이름이 필요합니다"
 
+msgid "VM name is required for KVM virtual machines"
+msgstr "KVM 가상 머신에는 VM 이름이 필요합니다"
+
 msgid "A child host named '%s' already exists on this host"
 msgstr "이 호스트에 '%s'라는 이름의 자식 호스트가 이미 존재합니다"
 
 msgid "Child host creation requested: %s (%s)"
 msgstr "자식 호스트 생성 요청됨: %s (%s)"
+
+# KVM/libvirt Virtual Machine Management strings
+
+msgid "KVM is only supported on Linux hosts"
+msgstr "KVM은 Linux 호스트에서만 지원됩니다"
+
+msgid "Agent must be running with root privileges to initialize KVM"
+msgstr "KVM을 초기화하려면 에이전트가 루트 권한으로 실행되어야 합니다"
+
+msgid "KVM initialization requested"
+msgstr "KVM 초기화가 요청되었습니다"
+
+msgid "KVM initialization requested. The agent will install libvirt and configure KVM for virtual machine management."
+msgstr "KVM 초기화가 요청되었습니다. 에이전트가 libvirt를 설치하고 가상 머신 관리를 위해 KVM을 구성합니다."
+
+msgid "KVM/libvirt initialized successfully"
+msgstr "KVM/libvirt가 성공적으로 초기화되었습니다"
+
+# KVM Networking Configuration strings
+
+msgid "KVM networking is only supported on Linux hosts"
+msgstr "KVM networking is only supported on Linux hosts"
+
+msgid "Agent must be running with root privileges to configure KVM networking"
+msgstr "Agent must be running with root privileges to configure KVM networking"
+
+msgid "Bridge interface name is required for bridged networking mode"
+msgstr "Bridge interface name is required for bridged networking mode"
+
+msgid "KVM networking configuration requested: %s mode"
+msgstr "KVM networking configuration requested: %s mode"
+
+msgid "KVM networking configuration requested. The agent will configure the %s network."
+msgstr "KVM networking configuration requested. The agent will configure the %s network."
+
+msgid "KVM networks are only available on Linux hosts"
+msgstr "KVM networks are only available on Linux hosts"
+
+msgid "KVM network list requested. Results will be returned shortly."
+msgstr "KVM network list requested. Results will be returned shortly."

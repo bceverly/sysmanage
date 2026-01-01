@@ -807,8 +807,51 @@ msgstr "已請求VMM初始化。代理將啟用並啟動vmd守護程序。"
 msgid "VM name is required for VMM virtual machines"
 msgstr "VMM虛擬機器需要VM名稱"
 
+msgid "VM name is required for KVM virtual machines"
+msgstr "KVM虛擬機器需要VM名稱"
+
 msgid "A child host named '%s' already exists on this host"
 msgstr "此主機上已存在名為 '%s' 的子主機"
 
 msgid "Child host creation requested: %s (%s)"
 msgstr "已請求建立子主機: %s (%s)"
+
+# KVM/libvirt Virtual Machine Management strings
+
+msgid "KVM is only supported on Linux hosts"
+msgstr "KVM僅在Linux主機上受支援"
+
+msgid "Agent must be running with root privileges to initialize KVM"
+msgstr "代理必須以root權限執行才能初始化KVM"
+
+msgid "KVM initialization requested"
+msgstr "已請求KVM初始化"
+
+msgid "KVM initialization requested. The agent will install libvirt and configure KVM for virtual machine management."
+msgstr "已請求KVM初始化。代理將安裝libvirt並配置KVM以進行虛擬機管理。"
+
+msgid "KVM/libvirt initialized successfully"
+msgstr "KVM/libvirt初始化成功"
+
+# KVM Networking Configuration strings
+
+msgid "KVM networking is only supported on Linux hosts"
+msgstr "KVM networking is only supported on Linux hosts"
+
+msgid "Agent must be running with root privileges to configure KVM networking"
+msgstr "Agent must be running with root privileges to configure KVM networking"
+
+msgid "Bridge interface name is required for bridged networking mode"
+msgstr "Bridge interface name is required for bridged networking mode"
+
+msgid "KVM networking configuration requested: %s mode"
+msgstr "KVM networking configuration requested: %s mode"
+
+msgid "KVM networking configuration requested. The agent will configure the %s network."
+msgstr "KVM networking configuration requested. The agent will configure the %s network."
+
+msgid "KVM networks are only available on Linux hosts"
+msgstr "KVM networks are only available on Linux hosts"
+
+msgid "KVM network list requested. Results will be returned shortly."
+msgstr "KVM network list requested. Results will be returned shortly."

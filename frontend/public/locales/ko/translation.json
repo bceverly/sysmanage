@@ -484,8 +484,73 @@
     "vmmNotEnabled": "활성화되지 않음",
     "vmmNoKernelSupport": "커널 지원 없음",
     "vmmNotAvailable": "사용 불가",
+    "kvmStatus": "KVM 상태",
+    "kvmReady": "준비됨",
+    "kvmNeedsInit": "네트워크 초기화 필요",
+    "kvmNotEnabled": "활성화되지 않음",
+    "kvmNotInstalled": "설치되지 않음",
+    "kvmAvailable": "사용 가능",
+    "kvmNotAvailable": "사용 불가",
+    "enableKvm": "KVM 활성화",
+    "kvmInitializedSuccess": "KVM 초기화가 요청되었습니다. 에이전트가 libvirt를 설치하고 구성합니다.",
+    "kvmInitializeFailed": "KVM 초기화 실패",
+    "virtualizationCapabilities": "가상화 기능",
+    "hypervisor": {
+      "kvm": {
+        "name": "KVM/QEMU",
+        "description": "Linux 커널 기반 가상화",
+        "createLabel": "VM 생성",
+        "enableLabel": "KVM 활성화"
+      },
+      "lxd": {
+        "name": "LXD",
+        "description": "Linux 컨테이너 관리",
+        "createLabel": "컨테이너 생성",
+        "enableLabel": "LXD 활성화"
+      },
+      "vmm": {
+        "name": "VMM/vmd",
+        "description": "OpenBSD 가상 머신 모니터",
+        "createLabel": "VM 생성",
+        "enableLabel": "VMM 활성화"
+      },
+      "wsl": {
+        "name": "WSL",
+        "description": "Linux용 Windows 하위 시스템",
+        "createLabel": "인스턴스 생성",
+        "enableLabel": "WSL 활성화"
+      },
+      "createLabel": "생성",
+      "enableLabel": "활성화",
+      "state": {
+        "unknown": "알 수 없음",
+        "biosRequired": "BIOS 가상화 필요",
+        "notAvailable": "사용 불가",
+        "noKernelSupport": "커널 지원 없음",
+        "ready": "준비됨",
+        "needsInit": "초기화 필요",
+        "notRunning": "실행되지 않음",
+        "notEnabled": "활성화되지 않음",
+        "notInstalled": "설치되지 않음",
+        "available": "사용 가능"
+      },
+      "indicator": {
+        "available": "사용 가능",
+        "installed": "설치됨",
+        "enabled": "활성화됨",
+        "running": "실행 중",
+        "initialized": "초기화됨",
+        "kernelSupport": "커널 지원"
+      },
+      "rebootRequired": "재부팅 필요",
+      "notAvailableMessage": "이 플랫폼에서 사용할 수 없음",
+      "noKernelSupportMessage": "커널이 이 하이퍼바이저를 지원하지 않음",
+      "biosVirtualizationMessage": "BIOS/UEFI 설정에서 가상화를 활성화하세요"
+    },
     "createVmmVmTitle": "VMM 가상 머신 생성",
     "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
+    "createKvmVmTitle": "Create KVM Virtual Machine",
+    "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
     "cancelChildHost": "Cancel",
     "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
     "cancelChildHostWarning": "This will cancel the child host creation.",

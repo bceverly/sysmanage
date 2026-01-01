@@ -472,3 +472,110 @@ async def handle_vmm_initialize_result(
             exc_info=True,
         )
         return {"message_type": "error", "error": str(e)}
+
+
+async def handle_kvm_initialize_result(
+    db: Session, connection: Any, message_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Handle KVM/libvirt initialization result from agent.
+
+    After libvirt is installed and configured, queues a virtualization check
+    to refresh the host's virtualization capabilities.
+
+    Args:
+        db: Database session
+        connection: WebSocket connection object
+        message_data: Message data containing KVM init result
+
+    Returns:
+        Acknowledgment message
+    """
+    host_id = getattr(connection, "host_id", None)
+    if not host_id:
+        logger.warning("KVM initialize result received but no host_id on connection")
+        return {"message_type": "error", "error": "No host_id on connection"}
+
+    result_data = message_data.get("result", {})
+    if not result_data:
+        result_data = message_data
+
+    success = result_data.get("success", False)
+    needs_relogin = result_data.get("needs_relogin", False)
+    already_installed = result_data.get("already_installed", False)
+    error = result_data.get("error")
+    message = result_data.get("message", "")
+
+    if not success:
+        logger.error("KVM initialization failed for host %s: %s", host_id, error)
+        return {"message_type": "error", "error": error}
+
+    logger.info(
+        "KVM initialization result for host %s: success=%s, needs_relogin=%s, "
+        "already_installed=%s",
+        host_id,
+        success,
+        needs_relogin,
+        already_installed,
+    )
+
+    try:
+        host = db.query(Host).filter(Host.id == host_id).first()
+        if not host:
+            logger.warning("Host not found for KVM initialize result: %s", host_id)
+            return {"message_type": "error", "error": "Host not found"}
+
+        # KVM initialized - queue a virtualization check to refresh
+        # the host's virtualization state in the UI
+        from backend.websocket.messages import create_command_message
+        from backend.websocket.queue_enums import QueueDirection
+        from backend.websocket.queue_operations import QueueOperations
+
+        queue_ops = QueueOperations()
+        virtualization_command = create_command_message(
+            command_type="check_virtualization_support", parameters={}
+        )
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=virtualization_command,
+            direction=QueueDirection.OUTBOUND,
+            host_id=str(host_id),
+            db=db,
+        )
+        db.commit()
+
+        AuditService.log(
+            db=db,
+            action_type=ActionType.AGENT_MESSAGE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host_id),
+            entity_name=host.fqdn,
+            description=_("KVM/libvirt initialized successfully"),
+            result=Result.SUCCESS,
+            details={
+                "message": message,
+                "already_installed": already_installed,
+                "needs_relogin": needs_relogin,
+            },
+        )
+
+        logger.info(
+            "KVM initialized for host %s, queued virtualization check",
+            host_id,
+        )
+
+        return {
+            "message_type": "kvm_initialize_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "needs_relogin": needs_relogin,
+            "already_installed": already_installed,
+        }
+
+    except Exception as e:
+        logger.error(
+            "Error updating KVM initialize status for host %s: %s",
+            host_id,
+            e,
+            exc_info=True,
+        )
+        return {"message_type": "error", "error": str(e)}

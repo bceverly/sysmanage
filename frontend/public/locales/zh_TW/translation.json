@@ -482,8 +482,73 @@
     "vmmNotEnabled": "未啟用",
     "vmmNoKernelSupport": "無核心支援",
     "vmmNotAvailable": "不可用",
+    "kvmStatus": "KVM狀態",
+    "kvmReady": "就緒",
+    "kvmNeedsInit": "需要網路初始化",
+    "kvmNotEnabled": "未啟用",
+    "kvmNotInstalled": "未安裝",
+    "kvmAvailable": "可用",
+    "kvmNotAvailable": "不可用",
+    "enableKvm": "啟用KVM",
+    "kvmInitializedSuccess": "已請求KVM初始化。代理將安裝並配置libvirt。",
+    "kvmInitializeFailed": "KVM初始化失敗",
+    "virtualizationCapabilities": "虛擬化功能",
+    "hypervisor": {
+      "kvm": {
+        "name": "KVM/QEMU",
+        "description": "基於Linux核心的虛擬化",
+        "createLabel": "建立虛擬機",
+        "enableLabel": "啟用KVM"
+      },
+      "lxd": {
+        "name": "LXD",
+        "description": "Linux容器管理",
+        "createLabel": "建立容器",
+        "enableLabel": "啟用LXD"
+      },
+      "vmm": {
+        "name": "VMM/vmd",
+        "description": "OpenBSD虛擬機器監視器",
+        "createLabel": "建立虛擬機",
+        "enableLabel": "啟用VMM"
+      },
+      "wsl": {
+        "name": "WSL",
+        "description": "Windows Linux子系統",
+        "createLabel": "建立執行個體",
+        "enableLabel": "啟用WSL"
+      },
+      "createLabel": "建立",
+      "enableLabel": "啟用",
+      "state": {
+        "unknown": "未知",
+        "biosRequired": "需要BIOS虛擬化",
+        "notAvailable": "不可用",
+        "noKernelSupport": "無核心支援",
+        "ready": "就緒",
+        "needsInit": "需要初始化",
+        "notRunning": "未執行",
+        "notEnabled": "未啟用",
+        "notInstalled": "未安裝",
+        "available": "可用"
+      },
+      "indicator": {
+        "available": "可用",
+        "installed": "已安裝",
+        "enabled": "已啟用",
+        "running": "執行中",
+        "initialized": "已初始化",
+        "kernelSupport": "核心支援"
+      },
+      "rebootRequired": "需要重新啟動",
+      "notAvailableMessage": "此平台不可用",
+      "noKernelSupportMessage": "核心不支援此虛擬機器監視器",
+      "biosVirtualizationMessage": "請在BIOS/UEFI設定中啟用虛擬化"
+    },
     "createVmmVmTitle": "建立 VMM 虛擬機器",
     "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
+    "createKvmVmTitle": "Create KVM Virtual Machine",
+    "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
     "cancelChildHost": "Cancel",
     "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
     "cancelChildHostWarning": "This will cancel the child host creation.",
