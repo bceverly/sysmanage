@@ -173,7 +173,7 @@ jobs:
     - name: Create PR for backend coverage badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       id: backend-pr
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@v8
       with:
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
         commit-message: "Update backend test coverage badge to ${{ steps.coverage.outputs.percentage }}% [skip ci]"
@@ -386,7 +386,7 @@ jobs:
     - name: Create PR for frontend coverage badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       id: frontend-pr
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@v8
       with:
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
         commit-message: "Update frontend test coverage badge to ${{ steps.frontend-coverage.outputs.percentage }}% [skip ci]"
@@ -768,7 +768,7 @@ jobs:
     - name: Create PR for UI tests badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       id: ui-tests-pr
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@v8
       with:
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
         commit-message: "Update UI tests badge to ${{ steps.ui-tests.outputs.status }} [skip ci]"
@@ -1188,7 +1188,7 @@ jobs:
     - name: Create PR for performance badges
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       id: performance-pr
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@v8
       with:
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
         commit-message: "Update performance test badges [skip ci]"
