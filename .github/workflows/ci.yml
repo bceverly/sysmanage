@@ -48,7 +48,7 @@ jobs:
         allow-prereleases: true  # Allow testing on pre-release Python versions
 
     - name: Cache pip packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
@@ -149,7 +149,7 @@ jobs:
 
     - name: Upload backend coverage data
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: backend-coverage-data-py${{ matrix.python-version }}
         path: |
@@ -173,7 +173,7 @@ jobs:
     - name: Create PR for backend coverage badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       id: backend-pr
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@v8
       with:
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
         commit-message: "Update backend test coverage badge to ${{ steps.coverage.outputs.percentage }}% [skip ci]"
@@ -237,7 +237,7 @@ jobs:
         python -m bandit -r backend/ -f json -x backend/tests/ -o bandit-report.json || true
     
     - name: Upload Bandit results
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: bandit-security-report
         path: bandit-report.json
@@ -304,7 +304,7 @@ jobs:
         npm audit --audit-level=high || true
     
     - name: Upload npm audit results
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: npm-audit-ci-report
         path: frontend/npm-audit-ci.json
@@ -386,7 +386,7 @@ jobs:
     - name: Create PR for frontend coverage badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       id: frontend-pr
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@v8
       with:
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
         commit-message: "Update frontend test coverage badge to ${{ steps.frontend-coverage.outputs.percentage }}% [skip ci]"
@@ -432,7 +432,7 @@ jobs:
         fi
 
     - name: Upload MSW test artifacts
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       if: always()
       with:
         name: msw-test-coverage-${{ github.run_number }}
@@ -507,7 +507,7 @@ jobs:
       run: npm run build
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: frontend-build
         path: frontend/dist/
@@ -553,7 +553,7 @@ jobs:
         cache-dependency-path: frontend/package-lock.json
 
     - name: Cache pip packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -727,7 +727,7 @@ jobs:
         CI: true
 
     - name: Upload UI test artifacts on failure
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       if: failure()
       with:
         name: ui-test-results-${{ github.run_number }}
@@ -744,7 +744,7 @@ jobs:
 
     - name: Upload UI test status data
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: ui-test-status-data
         path: |
@@ -768,7 +768,7 @@ jobs:
     - name: Create PR for UI tests badge
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       id: ui-tests-pr
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@v8
       with:
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
         commit-message: "Update UI tests badge to ${{ steps.ui-tests.outputs.status }} [skip ci]"
@@ -844,7 +844,7 @@ jobs:
         cache-dependency-path: frontend/package-lock.json
 
     - name: Cache pip packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -1138,7 +1138,7 @@ jobs:
         fi
 
     - name: Upload performance test artifacts
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       if: always()
       with:
         name: performance-test-results-${{ github.run_number }}
@@ -1159,7 +1159,7 @@ jobs:
 
     - name: Upload performance test status data
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: performance-test-status-data
         path: |
@@ -1188,7 +1188,7 @@ jobs:
     - name: Create PR for performance badges
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       id: performance-pr
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@v8
       with:
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
         commit-message: "Update performance test badges [skip ci]"
@@ -1273,7 +1273,7 @@ jobs:
         cache-dependency-path: frontend/package-lock.json
 
     - name: Cache pip packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-3.12-${{ hashFiles('**/requirements.txt') }}
@@ -1348,7 +1348,7 @@ jobs:
         npm run test:coverage
 
     - name: Cache SonarCloud packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-sonar
