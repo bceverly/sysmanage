@@ -1205,8 +1205,7 @@ ui = true
     # vault_cmd is validated by is_safe_vault_path() in find_vault_binary()
     if platform.system() == "Windows":
         # On Windows, use CREATE_NEW_PROCESS_GROUP to properly detach
-        # nosemgrep: dangerous-subprocess-use-tainted-env-args
-        vault_process = subprocess.Popen([
+        vault_process = subprocess.Popen([  # nosemgrep: dangerous-subprocess-use-tainted-env-args
             vault_cmd, 'server', f'-config={vault_config_abs_path}'
         ],
         stdout=open(log_file, 'w'),
@@ -1214,8 +1213,7 @@ ui = true
         cwd=str(project_root),
         creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
     else:
-        # nosemgrep: dangerous-subprocess-use-tainted-env-args
-        vault_process = subprocess.Popen([
+        vault_process = subprocess.Popen([  # nosemgrep: dangerous-subprocess-use-tainted-env-args
             vault_cmd, 'server', f'-config={vault_config_abs_path}'
         ], stdout=open(log_file, 'w'), stderr=subprocess.STDOUT, cwd=str(project_root))
 
@@ -1235,8 +1233,7 @@ ui = true
     # Verify the vault server is actually running and responding
     print("  Verifying vault server is running...")
     try:
-        # nosemgrep: dangerous-subprocess-use-tainted-env-args
-        status_result = subprocess.run([
+        status_result = subprocess.run([  # nosemgrep: dangerous-subprocess-use-tainted-env-args
             vault_cmd, 'status'
         ], env=env, capture_output=True, text=True, timeout=10)
         print(f"  Vault status check: {status_result.returncode}")
@@ -1250,8 +1247,7 @@ ui = true
         print("  Initializing vault...")
         print(f"  DEBUG: Running command: {vault_cmd} operator init -key-shares=1 -key-threshold=1 -format=json")
         print(f"  DEBUG: BAO_ADDR={env.get('BAO_ADDR')}")
-        # nosemgrep: dangerous-subprocess-use-tainted-env-args
-        result = subprocess.run([
+        result = subprocess.run([  # nosemgrep: dangerous-subprocess-use-tainted-env-args
             vault_cmd, 'operator', 'init',
             '-key-shares=1', '-key-threshold=1', '-format=json'
         ], env=env, capture_output=True, text=True, timeout=30)
@@ -1292,8 +1288,7 @@ ui = true
 
         # Unseal vault
         print("  Unsealing vault...")
-        # nosemgrep: dangerous-subprocess-use-tainted-env-args
-        result = subprocess.run([
+        result = subprocess.run([  # nosemgrep: dangerous-subprocess-use-tainted-env-args
             vault_cmd, 'operator', 'unseal', unseal_key
         ], env=env, capture_output=True, text=True, timeout=30)
 
@@ -1307,8 +1302,7 @@ ui = true
 
         # Enable KV v2 secrets engine
         print("  Enabling KV v2 secrets engine...")
-        # nosemgrep: dangerous-subprocess-use-tainted-env-args
-        result = subprocess.run([
+        result = subprocess.run([  # nosemgrep: dangerous-subprocess-use-tainted-env-args
             vault_cmd, 'secrets', 'enable', '-version=2', '-path=secret', 'kv'
         ], env=env, capture_output=True, text=True, timeout=30)
 
