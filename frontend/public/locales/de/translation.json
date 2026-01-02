@@ -510,13 +510,31 @@
     "enableKvm": "KVM aktivieren",
     "kvmInitializedSuccess": "KVM-Initialisierung angefordert. Der Agent wird libvirt installieren und konfigurieren.",
     "kvmInitializeFailed": "KVM-Initialisierung fehlgeschlagen",
+    "kvmModulesEnableSuccess": "KVM-Modul-Aktivierung angefordert. Der Agent wird die Kernel-Module laden.",
+    "kvmModulesEnableFailed": "KVM-Module konnten nicht aktiviert werden",
+    "kvmModulesDisableSuccess": "KVM-Modul-Deaktivierung angefordert. Der Agent wird die Kernel-Module entladen.",
+    "kvmModulesDisableFailed": "KVM-Module konnten nicht deaktiviert werden. Stellen Sie sicher, dass keine VMs ausgeführt werden.",
+    "enableBhyve": "bhyve aktivieren",
+    "bhyveInitializedSuccess": "bhyve-Initialisierung angefordert. Der Agent wird vmm.ko laden und das System konfigurieren.",
+    "bhyveInitializeFailed": "bhyve-Initialisierung fehlgeschlagen",
+    "bhyveStatus": "bhyve-Status",
+    "bhyveReady": "Bereit",
+    "bhyveNotRunning": "Nicht ausgeführt",
+    "bhyveNotEnabled": "Nicht aktiviert",
+    "bhyveNoCpuSupport": "Keine CPU-Unterstützung",
+    "bhyveNotAvailable": "Nicht verfügbar",
+    "childHostsEmptyBhyveReady": "Klicken Sie auf \"Child-Host erstellen\", um eine neue bhyve-virtuelle Maschine zu erstellen.",
+    "childHostsEmptyBhyveNotReady": "Aktivieren Sie bhyve, um virtuelle Maschinen auf diesem Host zu erstellen.",
+    "childHostsEmptyBhyveNotAvailable": "bhyve ist auf diesem Host nicht verfügbar. FreeBSD mit CPU-Virtualisierungsunterstützung ist erforderlich.",
     "virtualizationCapabilities": "Virtualisierungsfunktionen",
     "hypervisor": {
       "kvm": {
         "name": "KVM/QEMU",
         "description": "Linux-Kernel-basierte Virtualisierung",
         "createLabel": "VM erstellen",
-        "enableLabel": "KVM aktivieren"
+        "enableLabel": "KVM aktivieren",
+        "loadModules": "Module laden",
+        "unloadModules": "Module entladen"
       },
       "lxd": {
         "name": "LXD",
@@ -529,6 +547,12 @@
         "description": "OpenBSD Virtual Machine Monitor",
         "createLabel": "VM erstellen",
         "enableLabel": "VMM aktivieren"
+      },
+      "bhyve": {
+        "name": "bhyve",
+        "description": "FreeBSD-Hypervisor",
+        "createLabel": "VM erstellen",
+        "enableLabel": "bhyve aktivieren"
       },
       "wsl": {
         "name": "WSL",
@@ -556,7 +580,9 @@
         "enabled": "Aktiviert",
         "running": "Ausgeführt",
         "initialized": "Initialisiert",
-        "kernelSupport": "Kernel-Unterstützung"
+        "kernelSupport": "Kernel-Unterstützung",
+        "cpuSupport": "CPU-Unterstützung",
+        "modulesLoaded": "Module geladen"
       },
       "rebootRequired": "Neustart erforderlich",
       "notAvailableMessage": "Auf dieser Plattform nicht verfügbar",

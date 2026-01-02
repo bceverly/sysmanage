@@ -494,13 +494,31 @@
     "enableKvm": "Включить KVM",
     "kvmInitializedSuccess": "Запрошена инициализация KVM. Агент установит и настроит libvirt.",
     "kvmInitializeFailed": "Не удалось инициализировать KVM",
+    "kvmModulesEnableSuccess": "Запрошено включение модулей KVM. Агент загрузит модули ядра.",
+    "kvmModulesEnableFailed": "Не удалось включить модули KVM",
+    "kvmModulesDisableSuccess": "Запрошено отключение модулей KVM. Агент выгрузит модули ядра.",
+    "kvmModulesDisableFailed": "Не удалось отключить модули KVM. Убедитесь, что нет работающих ВМ.",
+    "enableBhyve": "Включить bhyve",
+    "bhyveInitializedSuccess": "Запрошена инициализация bhyve. Агент загрузит vmm.ko и настроит систему.",
+    "bhyveInitializeFailed": "Не удалось инициализировать bhyve",
+    "bhyveStatus": "Статус bhyve",
+    "bhyveReady": "Готов",
+    "bhyveNotRunning": "Не запущен",
+    "bhyveNotEnabled": "Не включен",
+    "bhyveNoCpuSupport": "ЦП не поддерживается",
+    "bhyveNotAvailable": "Недоступен",
+    "childHostsEmptyBhyveReady": "Нажмите \"Создать дочерний хост\" для создания новой виртуальной машины bhyve.",
+    "childHostsEmptyBhyveNotReady": "Включите bhyve для создания виртуальных машин на этом хосте.",
+    "childHostsEmptyBhyveNotAvailable": "bhyve недоступен на этом хосте. Требуется FreeBSD с поддержкой виртуализации ЦП.",
     "virtualizationCapabilities": "Возможности виртуализации",
     "hypervisor": {
       "kvm": {
         "name": "KVM/QEMU",
         "description": "Виртуализация на основе ядра Linux",
         "createLabel": "Создать ВМ",
-        "enableLabel": "Включить KVM"
+        "enableLabel": "Включить KVM",
+        "loadModules": "Загрузить модули",
+        "unloadModules": "Выгрузить модули"
       },
       "lxd": {
         "name": "LXD",
@@ -513,6 +531,12 @@
         "description": "Монитор виртуальных машин OpenBSD",
         "createLabel": "Создать ВМ",
         "enableLabel": "Включить VMM"
+      },
+      "bhyve": {
+        "name": "bhyve",
+        "description": "Гипервизор FreeBSD",
+        "createLabel": "Создать ВМ",
+        "enableLabel": "Включить bhyve"
       },
       "wsl": {
         "name": "WSL",
@@ -540,7 +564,9 @@
         "enabled": "Включен",
         "running": "Работает",
         "initialized": "Инициализирован",
-        "kernelSupport": "Поддержка ядра"
+        "kernelSupport": "Поддержка ядра",
+        "cpuSupport": "Поддержка ЦП",
+        "modulesLoaded": "Модули загружены"
       },
       "rebootRequired": "Требуется перезагрузка",
       "notAvailableMessage": "Недоступно на этой платформе",

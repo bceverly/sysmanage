@@ -512,13 +512,31 @@
     "enableKvm": "Enable KVM",
     "kvmInitializedSuccess": "KVM initialization requested. The agent will install and configure libvirt.",
     "kvmInitializeFailed": "Failed to initialize KVM",
+    "kvmModulesEnableSuccess": "KVM modules enable requested. The agent will load the kernel modules.",
+    "kvmModulesEnableFailed": "Failed to enable KVM modules",
+    "kvmModulesDisableSuccess": "KVM modules disable requested. The agent will unload the kernel modules.",
+    "kvmModulesDisableFailed": "Failed to disable KVM modules. Ensure no VMs are running.",
+    "enableBhyve": "Enable bhyve",
+    "bhyveInitializedSuccess": "bhyve initialization requested. The agent will load vmm.ko and configure the system.",
+    "bhyveInitializeFailed": "Failed to initialize bhyve",
+    "bhyveStatus": "bhyve Status",
+    "bhyveReady": "Ready",
+    "bhyveNotRunning": "Not Running",
+    "bhyveNotEnabled": "Not Enabled",
+    "bhyveNoCpuSupport": "No CPU Support",
+    "bhyveNotAvailable": "Not Available",
+    "childHostsEmptyBhyveReady": "Click \"Create Child Host\" to create a new bhyve virtual machine.",
+    "childHostsEmptyBhyveNotReady": "Enable bhyve to create virtual machines on this host.",
+    "childHostsEmptyBhyveNotAvailable": "bhyve is not available on this host. FreeBSD with CPU virtualization support is required.",
     "virtualizationCapabilities": "Virtualization Capabilities",
     "hypervisor": {
       "kvm": {
         "name": "KVM/QEMU",
         "description": "Linux kernel-based virtualization",
         "createLabel": "Create VM",
-        "enableLabel": "Enable KVM"
+        "enableLabel": "Enable KVM",
+        "loadModules": "Load Modules",
+        "unloadModules": "Unload Modules"
       },
       "lxd": {
         "name": "LXD",
@@ -531,6 +549,12 @@
         "description": "OpenBSD virtual machine monitor",
         "createLabel": "Create VM",
         "enableLabel": "Enable VMM"
+      },
+      "bhyve": {
+        "name": "bhyve",
+        "description": "FreeBSD hypervisor",
+        "createLabel": "Create VM",
+        "enableLabel": "Enable bhyve"
       },
       "wsl": {
         "name": "WSL",
@@ -558,7 +582,9 @@
         "enabled": "Enabled",
         "running": "Running",
         "initialized": "Initialized",
-        "kernelSupport": "Kernel Support"
+        "kernelSupport": "Kernel Support",
+        "cpuSupport": "CPU Support",
+        "modulesLoaded": "Modules Loaded"
       },
       "rebootRequired": "Reboot Required",
       "notAvailableMessage": "Not available on this platform",

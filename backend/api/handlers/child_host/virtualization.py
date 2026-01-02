@@ -579,3 +579,313 @@ async def handle_kvm_initialize_result(
             exc_info=True,
         )
         return {"message_type": "error", "error": str(e)}
+
+
+async def handle_bhyve_initialize_result(
+    db: Session, connection: Any, message_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Handle bhyve initialization result from agent.
+
+    After vmm.ko is loaded and configured, queues a virtualization check
+    to refresh the host's virtualization capabilities.
+
+    Args:
+        db: Database session
+        connection: WebSocket connection object
+        message_data: Message data containing bhyve init result
+
+    Returns:
+        Acknowledgment message
+    """
+    host_id = getattr(connection, "host_id", None)
+    if not host_id:
+        logger.warning("bhyve initialize result received but no host_id on connection")
+        return {"message_type": "error", "error": "No host_id on connection"}
+
+    result_data = message_data.get("result", {})
+    if not result_data:
+        result_data = message_data
+
+    success = result_data.get("success", False)
+    already_initialized = result_data.get("already_initialized", False)
+    vmm_loaded = result_data.get("vmm_loaded", False)
+    loader_conf_updated = result_data.get("loader_conf_updated", False)
+    error = result_data.get("error")
+    message = result_data.get("message", "")
+
+    if not success:
+        logger.error("bhyve initialization failed for host %s: %s", host_id, error)
+        return {"message_type": "error", "error": error}
+
+    logger.info(
+        "bhyve initialization result for host %s: success=%s, already_initialized=%s, "
+        "vmm_loaded=%s",
+        host_id,
+        success,
+        already_initialized,
+        vmm_loaded,
+    )
+
+    try:
+        host = db.query(Host).filter(Host.id == host_id).first()
+        if not host:
+            logger.warning("Host not found for bhyve initialize result: %s", host_id)
+            return {"message_type": "error", "error": "Host not found"}
+
+        # bhyve initialized - queue a virtualization check to refresh
+        # the host's virtualization state in the UI
+        from backend.websocket.messages import create_command_message
+        from backend.websocket.queue_enums import QueueDirection
+        from backend.websocket.queue_operations import QueueOperations
+
+        queue_ops = QueueOperations()
+        virtualization_command = create_command_message(
+            command_type="check_virtualization_support", parameters={}
+        )
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=virtualization_command,
+            direction=QueueDirection.OUTBOUND,
+            host_id=str(host_id),
+            db=db,
+        )
+        db.commit()
+
+        AuditService.log(
+            db=db,
+            action_type=ActionType.AGENT_MESSAGE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host_id),
+            entity_name=host.fqdn,
+            description=_("bhyve initialized successfully"),
+            result=Result.SUCCESS,
+            details={
+                "message": message,
+                "already_initialized": already_initialized,
+                "vmm_loaded": vmm_loaded,
+                "loader_conf_updated": loader_conf_updated,
+            },
+        )
+
+        logger.info(
+            "bhyve initialized for host %s, queued virtualization check",
+            host_id,
+        )
+
+        return {
+            "message_type": "bhyve_initialize_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "already_initialized": already_initialized,
+        }
+
+    except Exception as e:
+        logger.error(
+            "Error updating bhyve initialize status for host %s: %s",
+            host_id,
+            e,
+            exc_info=True,
+        )
+        return {"message_type": "error", "error": str(e)}
+
+
+async def handle_kvm_modules_enable_result(
+    db: Session, connection: Any, message_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Handle KVM modules enable result from agent.
+
+    After KVM modules are loaded via modprobe, queues a virtualization check
+    to refresh the host's virtualization capabilities.
+
+    Args:
+        db: Database session
+        connection: WebSocket connection object
+        message_data: Message data containing KVM modules enable result
+
+    Returns:
+        Acknowledgment message
+    """
+    host_id = getattr(connection, "host_id", None)
+    if not host_id:
+        logger.warning(
+            "KVM modules enable result received but no host_id on connection"
+        )
+        return {"message_type": "error", "error": "No host_id on connection"}
+
+    result_data = message_data.get("result", {})
+    if not result_data:
+        result_data = message_data
+
+    success = result_data.get("success", False)
+    module = result_data.get("module", "")
+    error = result_data.get("error")
+    message = result_data.get("message", "")
+
+    if not success:
+        logger.error("KVM modules enable failed for host %s: %s", host_id, error)
+        return {"message_type": "error", "error": error}
+
+    logger.info(
+        "KVM modules enable result for host %s: success=%s, module=%s",
+        host_id,
+        success,
+        module,
+    )
+
+    try:
+        host = db.query(Host).filter(Host.id == host_id).first()
+        if not host:
+            logger.warning("Host not found for KVM modules enable result: %s", host_id)
+            return {"message_type": "error", "error": "Host not found"}
+
+        # KVM modules loaded - queue a virtualization check to refresh
+        # the host's virtualization state in the UI
+        from backend.websocket.messages import create_command_message
+        from backend.websocket.queue_enums import QueueDirection
+        from backend.websocket.queue_operations import QueueOperations
+
+        queue_ops = QueueOperations()
+        virtualization_command = create_command_message(
+            command_type="check_virtualization_support", parameters={}
+        )
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=virtualization_command,
+            direction=QueueDirection.OUTBOUND,
+            host_id=str(host_id),
+            db=db,
+        )
+        db.commit()
+
+        AuditService.log(
+            db=db,
+            action_type=ActionType.AGENT_MESSAGE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host_id),
+            entity_name=host.fqdn,
+            description=_("KVM kernel modules enabled successfully"),
+            result=Result.SUCCESS,
+            details={
+                "message": message,
+                "module": module,
+            },
+        )
+
+        logger.info(
+            "KVM modules enabled for host %s, queued virtualization check",
+            host_id,
+        )
+
+        return {
+            "message_type": "kvm_modules_enable_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "module": module,
+        }
+
+    except Exception as e:
+        logger.error(
+            "Error updating KVM modules enable status for host %s: %s",
+            host_id,
+            e,
+            exc_info=True,
+        )
+        return {"message_type": "error", "error": str(e)}
+
+
+async def handle_kvm_modules_disable_result(
+    db: Session, connection: Any, message_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Handle KVM modules disable result from agent.
+
+    After KVM modules are unloaded via modprobe -r, queues a virtualization check
+    to refresh the host's virtualization capabilities.
+
+    Args:
+        db: Database session
+        connection: WebSocket connection object
+        message_data: Message data containing KVM modules disable result
+
+    Returns:
+        Acknowledgment message
+    """
+    host_id = getattr(connection, "host_id", None)
+    if not host_id:
+        logger.warning(
+            "KVM modules disable result received but no host_id on connection"
+        )
+        return {"message_type": "error", "error": "No host_id on connection"}
+
+    result_data = message_data.get("result", {})
+    if not result_data:
+        result_data = message_data
+
+    success = result_data.get("success", False)
+    error = result_data.get("error")
+    message = result_data.get("message", "")
+
+    if not success:
+        logger.error("KVM modules disable failed for host %s: %s", host_id, error)
+        return {"message_type": "error", "error": error}
+
+    logger.info(
+        "KVM modules disable result for host %s: success=%s",
+        host_id,
+        success,
+    )
+
+    try:
+        host = db.query(Host).filter(Host.id == host_id).first()
+        if not host:
+            logger.warning("Host not found for KVM modules disable result: %s", host_id)
+            return {"message_type": "error", "error": "Host not found"}
+
+        # KVM modules unloaded - queue a virtualization check to refresh
+        # the host's virtualization state in the UI
+        from backend.websocket.messages import create_command_message
+        from backend.websocket.queue_enums import QueueDirection
+        from backend.websocket.queue_operations import QueueOperations
+
+        queue_ops = QueueOperations()
+        virtualization_command = create_command_message(
+            command_type="check_virtualization_support", parameters={}
+        )
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=virtualization_command,
+            direction=QueueDirection.OUTBOUND,
+            host_id=str(host_id),
+            db=db,
+        )
+        db.commit()
+
+        AuditService.log(
+            db=db,
+            action_type=ActionType.AGENT_MESSAGE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host_id),
+            entity_name=host.fqdn,
+            description=_("KVM kernel modules disabled successfully"),
+            result=Result.SUCCESS,
+            details={"message": message},
+        )
+
+        logger.info(
+            "KVM modules disabled for host %s, queued virtualization check",
+            host_id,
+        )
+
+        return {
+            "message_type": "kvm_modules_disable_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+    except Exception as e:
+        logger.error(
+            "Error updating KVM modules disable status for host %s: %s",
+            host_id,
+            e,
+            exc_info=True,
+        )
+        return {"message_type": "error", "error": str(e)}

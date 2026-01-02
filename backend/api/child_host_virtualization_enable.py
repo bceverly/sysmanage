@@ -322,6 +322,231 @@ async def initialize_kvm(
 
 
 @router.post(
+    "/host/{host_id}/virtualization/initialize-bhyve",
+    dependencies=[Depends(JWTBearer())],
+)
+async def initialize_bhyve(
+    host_id: str,
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Initialize bhyve on a FreeBSD host.
+    Loads vmm.ko and configures /boot/loader.conf for persistence.
+    Requires ENABLE_BHYVE permission.
+    """
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        user = get_user_with_role_check(
+            session, current_user, SecurityRoles.ENABLE_BHYVE
+        )
+
+        host = get_host_or_404(session, host_id)
+        verify_host_active(host)
+
+        # Verify it's a FreeBSD host (bhyve is FreeBSD-only)
+        if not host.platform or "FreeBSD" not in host.platform:
+            raise HTTPException(
+                status_code=400,
+                detail=_("bhyve is only supported on FreeBSD hosts"),
+            )
+
+        # Verify the agent is privileged (needed to load vmm.ko)
+        if not host.is_agent_privileged:
+            raise HTTPException(
+                status_code=400,
+                detail=_(
+                    "Agent must be running with root privileges to initialize bhyve"
+                ),
+            )
+
+        # Queue a command to initialize bhyve
+        command_message = create_command_message(
+            command_type="initialize_bhyve", parameters={}
+        )
+
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+
+        # Log the action
+        audit_log(
+            session,
+            user,
+            current_user,
+            "CREATE",
+            str(host.id),
+            host.fqdn,
+            _("bhyve initialization requested"),
+        )
+
+        session.commit()
+
+        return {
+            "result": True,
+            "message": _(
+                "bhyve initialization requested. The agent will load vmm.ko "
+                "and configure the system for bhyve virtual machines."
+            ),
+        }
+
+
+@router.post(
+    "/host/{host_id}/virtualization/enable-kvm-modules",
+    dependencies=[Depends(JWTBearer())],
+)
+async def enable_kvm_modules(
+    host_id: str,
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Enable KVM kernel modules on a Linux host.
+    Loads the kvm and kvm_intel/kvm_amd kernel modules via modprobe.
+    Requires ENABLE_KVM permission.
+    """
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_KVM)
+
+        host = get_host_or_404(session, host_id)
+        verify_host_active(host)
+
+        # Verify it's a Linux host (KVM is Linux-only)
+        if not host.platform or "Linux" not in host.platform:
+            raise HTTPException(
+                status_code=400,
+                detail=_("KVM is only supported on Linux hosts"),
+            )
+
+        # Verify the agent is privileged (needed to run modprobe)
+        if not host.is_agent_privileged:
+            raise HTTPException(
+                status_code=400,
+                detail=_(
+                    "Agent must be running with root privileges to enable KVM modules"
+                ),
+            )
+
+        # Queue a command to enable KVM modules
+        command_message = create_command_message(
+            command_type="enable_kvm_modules", parameters={}
+        )
+
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+
+        # Log the action
+        audit_log(
+            session,
+            user,
+            current_user,
+            "CREATE",
+            str(host.id),
+            host.fqdn,
+            _("KVM modules enable requested"),
+        )
+
+        session.commit()
+
+        return {
+            "result": True,
+            "message": _(
+                "KVM modules enable requested. The agent will load the KVM "
+                "kernel modules via modprobe."
+            ),
+        }
+
+
+@router.post(
+    "/host/{host_id}/virtualization/disable-kvm-modules",
+    dependencies=[Depends(JWTBearer())],
+)
+async def disable_kvm_modules(
+    host_id: str,
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Disable KVM kernel modules on a Linux host.
+    Unloads the kvm and kvm_intel/kvm_amd kernel modules via modprobe -r.
+    Note: This will fail if any VMs are running.
+    Requires ENABLE_KVM permission.
+    """
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_KVM)
+
+        host = get_host_or_404(session, host_id)
+        verify_host_active(host)
+
+        # Verify it's a Linux host (KVM is Linux-only)
+        if not host.platform or "Linux" not in host.platform:
+            raise HTTPException(
+                status_code=400,
+                detail=_("KVM is only supported on Linux hosts"),
+            )
+
+        # Verify the agent is privileged (needed to run modprobe)
+        if not host.is_agent_privileged:
+            raise HTTPException(
+                status_code=400,
+                detail=_(
+                    "Agent must be running with root privileges to disable KVM modules"
+                ),
+            )
+
+        # Queue a command to disable KVM modules
+        command_message = create_command_message(
+            command_type="disable_kvm_modules", parameters={}
+        )
+
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+
+        # Log the action
+        audit_log(
+            session,
+            user,
+            current_user,
+            "DELETE",
+            str(host.id),
+            host.fqdn,
+            _("KVM modules disable requested"),
+        )
+
+        session.commit()
+
+        return {
+            "result": True,
+            "message": _(
+                "KVM modules disable requested. The agent will unload the KVM "
+                "kernel modules via modprobe -r. This will fail if any VMs are running."
+            ),
+        }
+
+
+@router.post(
     "/host/{host_id}/virtualization/configure-kvm-networking",
     dependencies=[Depends(JWTBearer())],
 )

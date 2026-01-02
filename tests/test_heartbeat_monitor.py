@@ -21,7 +21,8 @@ class TestHeartbeatMonitor:
     def mock_db_session(self):
         """Create a mock database session."""
         session = Mock(spec=Session)
-        session.query.return_value.filter.return_value.filter.return_value.all.return_value = (
+        # The heartbeat monitor has 3 filter calls: last_access, status, approval_status
+        session.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = (
             []
         )
         session.commit = Mock()
@@ -62,7 +63,8 @@ class TestHeartbeatMonitor:
         # Setup
         mock_timeout.return_value = 5
         mock_get_db.return_value = iter([mock_db_session])
-        mock_db_session.query.return_value.filter.return_value.filter.return_value.all.return_value = (
+        # 3 filter calls: last_access, status, approval_status
+        mock_db_session.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = (
             []
         )
 
@@ -83,7 +85,8 @@ class TestHeartbeatMonitor:
         # Setup
         mock_timeout.return_value = 5
         mock_get_db.return_value = iter([mock_db_session])
-        mock_db_session.query.return_value.filter.return_value.filter.return_value.all.return_value = [
+        # 3 filter calls: last_access, status, approval_status
+        mock_db_session.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = [
             mock_host_down
         ]
 
@@ -118,7 +121,8 @@ class TestHeartbeatMonitor:
         host2.active = True
 
         stale_hosts = [host1, host2]
-        mock_db_session.query.return_value.filter.return_value.filter.return_value.all.return_value = (
+        # 3 filter calls: last_access, status, approval_status
+        mock_db_session.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = (
             stale_hosts
         )
 

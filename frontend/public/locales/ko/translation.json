@@ -494,13 +494,31 @@
     "enableKvm": "KVM 활성화",
     "kvmInitializedSuccess": "KVM 초기화가 요청되었습니다. 에이전트가 libvirt를 설치하고 구성합니다.",
     "kvmInitializeFailed": "KVM 초기화 실패",
+    "kvmModulesEnableSuccess": "KVM 모듈 활성화가 요청되었습니다. 에이전트가 커널 모듈을 로드합니다.",
+    "kvmModulesEnableFailed": "KVM 모듈 활성화 실패",
+    "kvmModulesDisableSuccess": "KVM 모듈 비활성화가 요청되었습니다. 에이전트가 커널 모듈을 언로드합니다.",
+    "kvmModulesDisableFailed": "KVM 모듈 비활성화 실패. 실행 중인 VM이 없는지 확인하세요.",
+    "enableBhyve": "bhyve 활성화",
+    "bhyveInitializedSuccess": "bhyve 초기화가 요청되었습니다. 에이전트가 vmm.ko를 로드하고 시스템을 구성합니다.",
+    "bhyveInitializeFailed": "bhyve 초기화 실패",
+    "bhyveStatus": "bhyve 상태",
+    "bhyveReady": "준비됨",
+    "bhyveNotRunning": "실행되지 않음",
+    "bhyveNotEnabled": "활성화되지 않음",
+    "bhyveNoCpuSupport": "CPU 지원 안 됨",
+    "bhyveNotAvailable": "사용 불가",
+    "childHostsEmptyBhyveReady": "\"자식 호스트 생성\"을 클릭하여 새 bhyve 가상 머신을 만드세요.",
+    "childHostsEmptyBhyveNotReady": "이 호스트에서 가상 머신을 만들려면 bhyve를 활성화하세요.",
+    "childHostsEmptyBhyveNotAvailable": "이 호스트에서는 bhyve를 사용할 수 없습니다. CPU 가상화를 지원하는 FreeBSD가 필요합니다.",
     "virtualizationCapabilities": "가상화 기능",
     "hypervisor": {
       "kvm": {
         "name": "KVM/QEMU",
         "description": "Linux 커널 기반 가상화",
         "createLabel": "VM 생성",
-        "enableLabel": "KVM 활성화"
+        "enableLabel": "KVM 활성화",
+        "loadModules": "모듈 로드",
+        "unloadModules": "모듈 언로드"
       },
       "lxd": {
         "name": "LXD",
@@ -513,6 +531,12 @@
         "description": "OpenBSD 가상 머신 모니터",
         "createLabel": "VM 생성",
         "enableLabel": "VMM 활성화"
+      },
+      "bhyve": {
+        "name": "bhyve",
+        "description": "FreeBSD 하이퍼바이저",
+        "createLabel": "VM 생성",
+        "enableLabel": "bhyve 활성화"
       },
       "wsl": {
         "name": "WSL",
@@ -540,7 +564,9 @@
         "enabled": "활성화됨",
         "running": "실행 중",
         "initialized": "초기화됨",
-        "kernelSupport": "커널 지원"
+        "kernelSupport": "커널 지원",
+        "cpuSupport": "CPU 지원",
+        "modulesLoaded": "모듈 로드됨"
       },
       "rebootRequired": "재부팅 필요",
       "notAvailableMessage": "이 플랫폼에서 사용할 수 없음",

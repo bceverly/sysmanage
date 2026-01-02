@@ -187,8 +187,8 @@ const HostDetail = () => {
     const supportsChildHosts = useCallback(() => {
         if (!host?.platform) return false;
         const platform = host.platform || '';
-        // Windows hosts support WSL, Linux hosts support LXD, OpenBSD hosts support VMM
-        return platform.includes('Windows') || platform.includes('Linux') || platform.includes('OpenBSD');
+        // Windows hosts support WSL, Linux hosts support LXD/KVM, OpenBSD hosts support VMM, FreeBSD hosts support bhyve
+        return platform.includes('Windows') || platform.includes('Linux') || platform.includes('OpenBSD') || platform.includes('FreeBSD');
     }, [host]);
 
     // Tab names for URL hash (static tabs only - dynamic tabs handled separately)
@@ -285,6 +285,8 @@ const HostDetail = () => {
     const [initializeLxdLoading, setInitializeLxdLoading] = useState<boolean>(false);
     const [initializeVmmLoading, setInitializeVmmLoading] = useState<boolean>(false);
     const [initializeKvmLoading, setInitializeKvmLoading] = useState<boolean>(false);
+    const [initializeBhyveLoading, setInitializeBhyveLoading] = useState<boolean>(false);
+    const [kvmModulesLoading, setKvmModulesLoading] = useState<boolean>(false);
 
     // Create child host modal state
     const [createChildHostOpen, setCreateChildHostOpen] = useState<boolean>(false);
@@ -497,6 +499,7 @@ const HostDetail = () => {
     const [canEnableLxd, setCanEnableLxd] = useState<boolean>(false);
     const [canEnableKvm, setCanEnableKvm] = useState<boolean>(false);
     const [canEnableVmm, setCanEnableVmm] = useState<boolean>(false);
+    const [canEnableBhyve, setCanEnableBhyve] = useState<boolean>(false);
 
     // Installation history state
     interface InstallationHistoryItem {
@@ -968,6 +971,81 @@ const HostDetail = () => {
             setSnackbarOpen(true);
         } finally {
             setInitializeKvmLoading(false);
+        }
+    }, [hostId, fetchVirtualizationStatus, t]);
+
+    // Initialize bhyve on FreeBSD host
+    const handleInitializeBhyve = useCallback(async () => {
+        if (!hostId) return;
+        try {
+            setInitializeBhyveLoading(true);
+            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/initialize-bhyve`);
+            if (response.status === 200) {
+                setSnackbarMessage(t('hostDetail.bhyveInitializedSuccess', 'bhyve initialization requested. The agent will load vmm.ko and configure the system.'));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+                // Refresh virtualization status after a delay
+                setTimeout(() => {
+                    fetchVirtualizationStatus();
+                }, 5000);
+            }
+        } catch (error) {
+            console.error('Error initializing bhyve:', error);
+            setSnackbarMessage(t('hostDetail.bhyveInitializeFailed', 'Failed to initialize bhyve'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setInitializeBhyveLoading(false);
+        }
+    }, [hostId, fetchVirtualizationStatus, t]);
+
+    // Enable KVM modules via modprobe
+    const handleEnableKvmModules = useCallback(async () => {
+        if (!hostId) return;
+        try {
+            setKvmModulesLoading(true);
+            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/enable-kvm-modules`);
+            if (response.status === 200) {
+                setSnackbarMessage(t('hostDetail.kvmModulesEnableSuccess', 'KVM modules enable requested. The agent will load the kernel modules.'));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+                // Refresh virtualization status after a delay (needs time for queue round-trip)
+                setTimeout(() => {
+                    fetchVirtualizationStatus();
+                }, 6000);
+            }
+        } catch (error) {
+            console.error('Error enabling KVM modules:', error);
+            setSnackbarMessage(t('hostDetail.kvmModulesEnableFailed', 'Failed to enable KVM modules'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setKvmModulesLoading(false);
+        }
+    }, [hostId, fetchVirtualizationStatus, t]);
+
+    // Disable KVM modules via modprobe -r
+    const handleDisableKvmModules = useCallback(async () => {
+        if (!hostId) return;
+        try {
+            setKvmModulesLoading(true);
+            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/disable-kvm-modules`);
+            if (response.status === 200) {
+                setSnackbarMessage(t('hostDetail.kvmModulesDisableSuccess', 'KVM modules disable requested. The agent will unload the kernel modules.'));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+                // Refresh virtualization status after a delay (needs time for queue round-trip)
+                setTimeout(() => {
+                    fetchVirtualizationStatus();
+                }, 6000);
+            }
+        } catch (error) {
+            console.error('Error disabling KVM modules:', error);
+            setSnackbarMessage(t('hostDetail.kvmModulesDisableFailed', 'Failed to disable KVM modules. Ensure no VMs are running.'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setKvmModulesLoading(false);
         }
     }, [hostId, fetchVirtualizationStatus, t]);
 
@@ -1502,7 +1580,7 @@ const HostDetail = () => {
     // Check permissions
     useEffect(() => {
         const checkPermissions = async () => {
-            const [editTags, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro, deployAntivirus, enableAntivirus, disableAntivirus, removeAntivirus, addHostAccount, addHostGroup, deleteHostAccount, deleteHostGroup, enableWsl, enableLxd, enableKvm, enableVmm] = await Promise.all([
+            const [editTags, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro, deployAntivirus, enableAntivirus, disableAntivirus, removeAntivirus, addHostAccount, addHostGroup, deleteHostAccount, deleteHostGroup, enableWsl, enableLxd, enableKvm, enableVmm, enableBhyve] = await Promise.all([
                 hasPermission(SecurityRoles.EDIT_TAGS),
                 hasPermission(SecurityRoles.STOP_HOST_SERVICE),
                 hasPermission(SecurityRoles.START_HOST_SERVICE),
@@ -1523,7 +1601,8 @@ const HostDetail = () => {
                 hasPermission(SecurityRoles.ENABLE_WSL),
                 hasPermission(SecurityRoles.ENABLE_LXD),
                 hasPermission(SecurityRoles.ENABLE_KVM),
-                hasPermission(SecurityRoles.ENABLE_VMM)
+                hasPermission(SecurityRoles.ENABLE_VMM),
+                hasPermission(SecurityRoles.ENABLE_BHYVE)
             ]);
             setCanEditTags(editTags);
             setCanStopService(stopService);
@@ -1546,6 +1625,7 @@ const HostDetail = () => {
             setCanEnableLxd(enableLxd);
             setCanEnableKvm(enableKvm);
             setCanEnableVmm(enableVmm);
+            setCanEnableBhyve(enableBhyve);
         };
         checkPermissions();
     }, []);
@@ -5512,10 +5592,13 @@ const HostDetail = () => {
                                                 capabilities={virtualizationStatus.capabilities?.kvm}
                                                 onEnable={handleInitializeKvm}
                                                 onCreate={() => openCreateDialogWithType('kvm')}
+                                                onEnableModules={handleEnableKvmModules}
+                                                onDisableModules={handleDisableKvmModules}
                                                 canEnable={canEnableKvm}
                                                 canCreate={hasPermission(SecurityRoles.CREATE_CHILD_HOST)}
                                                 isLoading={virtualizationLoading}
                                                 isEnableLoading={initializeKvmLoading}
+                                                isModulesLoading={kvmModulesLoading}
                                                 isAgentPrivileged={host?.is_agent_privileged || false}
                                             />
                                         </Grid>
@@ -5533,6 +5616,23 @@ const HostDetail = () => {
                                                 canCreate={hasPermission(SecurityRoles.CREATE_CHILD_HOST)}
                                                 isLoading={virtualizationLoading}
                                                 isEnableLoading={initializeVmmLoading}
+                                                isAgentPrivileged={host?.is_agent_privileged || false}
+                                            />
+                                        </Grid>
+                                    )}
+
+                                    {/* bhyve Card - FreeBSD hosts */}
+                                    {host?.platform?.includes('FreeBSD') && (
+                                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                                            <HypervisorStatusCard
+                                                type="bhyve"
+                                                capabilities={virtualizationStatus.capabilities?.bhyve}
+                                                onEnable={handleInitializeBhyve}
+                                                onCreate={() => openCreateDialogWithType('bhyve')}
+                                                canEnable={canEnableBhyve}
+                                                canCreate={hasPermission(SecurityRoles.CREATE_CHILD_HOST)}
+                                                isLoading={virtualizationLoading}
+                                                isEnableLoading={initializeBhyveLoading}
                                                 isAgentPrivileged={host?.is_agent_privileged || false}
                                             />
                                         </Grid>
@@ -5593,6 +5693,22 @@ const HostDetail = () => {
                                                     : virtualizationStatus?.capabilities?.lxd?.available
                                                         ? t('hostDetail.childHostsEmptyLxdNotReady', 'Enable LXD to create containers on this host.')
                                                         : t('hostDetail.childHostsEmptyLxdNotAvailable', 'LXD is not available on this host. Ubuntu 22.04 or newer is required.')
+                                            )}
+                                            {/* OpenBSD hosts - VMM messages */}
+                                            {host?.platform?.includes('OpenBSD') && (
+                                                virtualizationStatus?.capabilities?.vmm?.enabled && virtualizationStatus?.capabilities?.vmm?.running
+                                                    ? t('hostDetail.childHostsEmptyVmmReady', 'Click "Create Child Host" to create a new VMM virtual machine.')
+                                                    : virtualizationStatus?.capabilities?.vmm?.available
+                                                        ? t('hostDetail.childHostsEmptyVmmNotReady', 'Enable VMM to create virtual machines on this host.')
+                                                        : t('hostDetail.childHostsEmptyVmmNotAvailable', 'VMM is not available on this host.')
+                                            )}
+                                            {/* FreeBSD hosts - bhyve messages */}
+                                            {host?.platform?.includes('FreeBSD') && (
+                                                virtualizationStatus?.capabilities?.bhyve?.enabled && virtualizationStatus?.capabilities?.bhyve?.running
+                                                    ? t('hostDetail.childHostsEmptyBhyveReady', 'Click "Create Child Host" to create a new bhyve virtual machine.')
+                                                    : virtualizationStatus?.capabilities?.bhyve?.available
+                                                        ? t('hostDetail.childHostsEmptyBhyveNotReady', 'Enable bhyve to create virtual machines on this host.')
+                                                        : t('hostDetail.childHostsEmptyBhyveNotAvailable', 'bhyve is not available on this host.')
                                             )}
                                         </Typography>
                                     </Box>

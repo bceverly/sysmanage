@@ -494,13 +494,31 @@
     "enableKvm": "Habilitar KVM",
     "kvmInitializedSuccess": "Inicialização do KVM solicitada. O agente instalará e configurará o libvirt.",
     "kvmInitializeFailed": "Falha ao inicializar KVM",
+    "kvmModulesEnableSuccess": "Habilitação de módulos KVM solicitada. O agente carregará os módulos do kernel.",
+    "kvmModulesEnableFailed": "Falha ao habilitar módulos KVM",
+    "kvmModulesDisableSuccess": "Desabilitação de módulos KVM solicitada. O agente descarregará os módulos do kernel.",
+    "kvmModulesDisableFailed": "Falha ao desabilitar módulos KVM. Certifique-se de que não há VMs em execução.",
+    "enableBhyve": "Habilitar bhyve",
+    "bhyveInitializedSuccess": "Inicialização do bhyve solicitada. O agente carregará vmm.ko e configurará o sistema.",
+    "bhyveInitializeFailed": "Falha ao inicializar bhyve",
+    "bhyveStatus": "Status do bhyve",
+    "bhyveReady": "Pronto",
+    "bhyveNotRunning": "Não está em execução",
+    "bhyveNotEnabled": "Não habilitado",
+    "bhyveNoCpuSupport": "CPU não suportada",
+    "bhyveNotAvailable": "Não disponível",
+    "childHostsEmptyBhyveReady": "Clique em \"Criar Host Filho\" para criar uma nova máquina virtual bhyve.",
+    "childHostsEmptyBhyveNotReady": "Habilite o bhyve para criar máquinas virtuais neste host.",
+    "childHostsEmptyBhyveNotAvailable": "bhyve não está disponível neste host. É necessário FreeBSD com suporte a virtualização de CPU.",
     "virtualizationCapabilities": "Capacidades de Virtualização",
     "hypervisor": {
       "kvm": {
         "name": "KVM/QEMU",
         "description": "Virtualização baseada no kernel Linux",
         "createLabel": "Criar VM",
-        "enableLabel": "Habilitar KVM"
+        "enableLabel": "Habilitar KVM",
+        "loadModules": "Carregar módulos",
+        "unloadModules": "Descarregar módulos"
       },
       "lxd": {
         "name": "LXD",
@@ -513,6 +531,12 @@
         "description": "Monitor de máquina virtual OpenBSD",
         "createLabel": "Criar VM",
         "enableLabel": "Habilitar VMM"
+      },
+      "bhyve": {
+        "name": "bhyve",
+        "description": "Hypervisor FreeBSD",
+        "createLabel": "Criar VM",
+        "enableLabel": "Habilitar bhyve"
       },
       "wsl": {
         "name": "WSL",
@@ -540,7 +564,9 @@
         "enabled": "Habilitado",
         "running": "Em execução",
         "initialized": "Inicializado",
-        "kernelSupport": "Suporte do kernel"
+        "kernelSupport": "Suporte do kernel",
+        "cpuSupport": "Suporte de CPU",
+        "modulesLoaded": "Módulos carregados"
       },
       "rebootRequired": "Reinicialização necessária",
       "notAvailableMessage": "Não disponível nesta plataforma",

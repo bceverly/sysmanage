@@ -493,13 +493,31 @@
     "enableKvm": "KVM सक्षम करें",
     "kvmInitializedSuccess": "KVM इनिशियलाइज़ेशन का अनुरोध किया गया। एजेंट libvirt इंस्टॉल और कॉन्फ़िगर करेगा।",
     "kvmInitializeFailed": "KVM इनिशियलाइज़ करने में विफल",
+    "kvmModulesEnableSuccess": "KVM मॉड्यूल सक्षम करने का अनुरोध किया गया। एजेंट कर्नेल मॉड्यूल लोड करेगा।",
+    "kvmModulesEnableFailed": "KVM मॉड्यूल सक्षम करने में विफल",
+    "kvmModulesDisableSuccess": "KVM मॉड्यूल अक्षम करने का अनुरोध किया गया। एजेंट कर्नेल मॉड्यूल अनलोड करेगा।",
+    "kvmModulesDisableFailed": "KVM मॉड्यूल अक्षम करने में विफल। सुनिश्चित करें कि कोई VM नहीं चल रहा।",
+    "enableBhyve": "bhyve सक्षम करें",
+    "bhyveInitializedSuccess": "bhyve इनिशियलाइज़ेशन का अनुरोध किया गया। एजेंट vmm.ko लोड करेगा और सिस्टम कॉन्फ़िगर करेगा।",
+    "bhyveInitializeFailed": "bhyve इनिशियलाइज़ करने में विफल",
+    "bhyveStatus": "bhyve स्थिति",
+    "bhyveReady": "तैयार",
+    "bhyveNotRunning": "चल नहीं रहा",
+    "bhyveNotEnabled": "सक्षम नहीं",
+    "bhyveNoCpuSupport": "CPU समर्थित नहीं",
+    "bhyveNotAvailable": "उपलब्ध नहीं",
+    "childHostsEmptyBhyveReady": "नया bhyve वर्चुअल मशीन बनाने के लिए \"चाइल्ड होस्ट बनाएं\" पर क्लिक करें।",
+    "childHostsEmptyBhyveNotReady": "इस होस्ट पर वर्चुअल मशीन बनाने के लिए bhyve सक्षम करें।",
+    "childHostsEmptyBhyveNotAvailable": "bhyve इस होस्ट पर उपलब्ध नहीं है। CPU वर्चुअलाइज़ेशन समर्थन वाला FreeBSD आवश्यक है।",
     "virtualizationCapabilities": "वर्चुअलाइज़ेशन क्षमताएं",
     "hypervisor": {
       "kvm": {
         "name": "KVM/QEMU",
         "description": "Linux कर्नेल-आधारित वर्चुअलाइज़ेशन",
         "createLabel": "VM बनाएं",
-        "enableLabel": "KVM सक्षम करें"
+        "enableLabel": "KVM सक्षम करें",
+        "loadModules": "मॉड्यूल लोड करें",
+        "unloadModules": "मॉड्यूल अनलोड करें"
       },
       "lxd": {
         "name": "LXD",
@@ -512,6 +530,12 @@
         "description": "OpenBSD वर्चुअल मशीन मॉनिटर",
         "createLabel": "VM बनाएं",
         "enableLabel": "VMM सक्षम करें"
+      },
+      "bhyve": {
+        "name": "bhyve",
+        "description": "FreeBSD हाइपरवाइज़र",
+        "createLabel": "VM बनाएं",
+        "enableLabel": "bhyve सक्षम करें"
       },
       "wsl": {
         "name": "WSL",
@@ -539,7 +563,9 @@
         "enabled": "सक्षम",
         "running": "चल रहा",
         "initialized": "इनिशियलाइज़्ड",
-        "kernelSupport": "कर्नेल समर्थन"
+        "kernelSupport": "कर्नेल समर्थन",
+        "cpuSupport": "CPU समर्थन",
+        "modulesLoaded": "मॉड्यूल लोडेड"
       },
       "rebootRequired": "रीबूट आवश्यक",
       "notAvailableMessage": "इस प्लेटफ़ॉर्म पर उपलब्ध नहीं",

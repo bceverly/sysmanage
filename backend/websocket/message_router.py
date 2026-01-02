@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from backend.api.handlers import (
     handle_antivirus_status_update,
+    handle_bhyve_initialize_result,
     handle_child_host_created,
     handle_child_host_creation_progress,
     handle_child_hosts_list_update,
@@ -19,6 +20,8 @@ from backend.api.handlers import (
     handle_host_certificates_update,
     handle_host_role_data_update,
     handle_kvm_initialize_result,
+    handle_kvm_modules_disable_result,
+    handle_kvm_modules_enable_result,
     handle_os_version_update,
     handle_package_updates_update,
     handle_reboot_status_update,
@@ -227,6 +230,24 @@ async def route_inbound_message(
             await handle_kvm_initialize_result(db, mock_connection, message_data)
             success = True
             print("Successfully processed KVM initialized", flush=True)
+
+        elif message_type == MessageType.BHYVE_INITIALIZED:
+            print("About to call handle_bhyve_initialize_result", flush=True)
+            await handle_bhyve_initialize_result(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed bhyve initialized", flush=True)
+
+        elif message_type == MessageType.KVM_MODULES_ENABLED:
+            print("About to call handle_kvm_modules_enable_result", flush=True)
+            await handle_kvm_modules_enable_result(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed KVM modules enabled", flush=True)
+
+        elif message_type == MessageType.KVM_MODULES_DISABLED:
+            print("About to call handle_kvm_modules_disable_result", flush=True)
+            await handle_kvm_modules_disable_result(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed KVM modules disabled", flush=True)
 
         else:
             print(f"Unknown message type: {message_type}", flush=True)

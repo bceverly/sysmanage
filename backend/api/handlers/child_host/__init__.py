@@ -11,6 +11,9 @@ from backend.api.handlers.child_host.virtualization import (
     handle_lxd_initialize_result,
     handle_vmm_initialize_result,
     handle_kvm_initialize_result,
+    handle_bhyve_initialize_result,
+    handle_kvm_modules_enable_result,
+    handle_kvm_modules_disable_result,
 )
 from backend.api.handlers.child_host.listing import (
     handle_child_hosts_list_update,
@@ -33,6 +36,9 @@ __all__ = [
     "handle_lxd_initialize_result",
     "handle_vmm_initialize_result",
     "handle_kvm_initialize_result",
+    "handle_bhyve_initialize_result",
+    "handle_kvm_modules_enable_result",
+    "handle_kvm_modules_disable_result",
     # Listing
     "handle_child_hosts_list_update",
     # Creation

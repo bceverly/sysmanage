@@ -58,6 +58,12 @@ class MessageType(str, Enum):
     VMM_INITIALIZATION_FAILED = "vmm_initialization_failed"
     KVM_INITIALIZED = "kvm_initialized"
     KVM_INITIALIZATION_FAILED = "kvm_initialization_failed"
+    KVM_MODULES_ENABLED = "kvm_modules_enabled"
+    KVM_MODULES_ENABLE_FAILED = "kvm_modules_enable_failed"
+    KVM_MODULES_DISABLED = "kvm_modules_disabled"
+    KVM_MODULES_DISABLE_FAILED = "kvm_modules_disable_failed"
+    BHYVE_INITIALIZED = "bhyve_initialized"
+    BHYVE_INITIALIZATION_FAILED = "bhyve_initialization_failed"
 
     # Server -> Agent messages
     COMMAND = "command"
@@ -113,6 +119,9 @@ class CommandType(str, Enum):
     INITIALIZE_LXD = "initialize_lxd"
     INITIALIZE_VMM = "initialize_vmm"
     INITIALIZE_KVM = "initialize_kvm"
+    INITIALIZE_BHYVE = "initialize_bhyve"
+    ENABLE_KVM_MODULES = "enable_kvm_modules"
+    DISABLE_KVM_MODULES = "disable_kvm_modules"
 
 
 class Message:

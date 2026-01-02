@@ -510,13 +510,31 @@
     "enableKvm": "تفعيل KVM",
     "kvmInitializedSuccess": "تم طلب تهيئة KVM. سيقوم الوكيل بتثبيت وتكوين libvirt.",
     "kvmInitializeFailed": "فشل في تهيئة KVM",
+    "kvmModulesEnableSuccess": "تم طلب تفعيل وحدات KVM. سيقوم الوكيل بتحميل وحدات النواة.",
+    "kvmModulesEnableFailed": "فشل في تفعيل وحدات KVM",
+    "kvmModulesDisableSuccess": "تم طلب تعطيل وحدات KVM. سيقوم الوكيل بإزالة وحدات النواة.",
+    "kvmModulesDisableFailed": "فشل في تعطيل وحدات KVM. تأكد من عدم وجود أجهزة افتراضية قيد التشغيل.",
+    "enableBhyve": "تفعيل bhyve",
+    "bhyveInitializedSuccess": "تم طلب تهيئة bhyve. سيقوم الوكيل بتحميل vmm.ko وتكوين النظام.",
+    "bhyveInitializeFailed": "فشل في تهيئة bhyve",
+    "bhyveStatus": "حالة bhyve",
+    "bhyveReady": "جاهز",
+    "bhyveNotRunning": "لا يعمل",
+    "bhyveNotEnabled": "غير مفعل",
+    "bhyveNoCpuSupport": "المعالج غير مدعوم",
+    "bhyveNotAvailable": "غير متاح",
+    "childHostsEmptyBhyveReady": "انقر على \"إنشاء مضيف فرعي\" لإنشاء جهاز افتراضي bhyve جديد.",
+    "childHostsEmptyBhyveNotReady": "قم بتفعيل bhyve لإنشاء أجهزة افتراضية على هذا المضيف.",
+    "childHostsEmptyBhyveNotAvailable": "bhyve غير متاح على هذا المضيف. مطلوب FreeBSD مع دعم المحاكاة الافتراضية للمعالج.",
     "virtualizationCapabilities": "إمكانيات المحاكاة الافتراضية",
     "hypervisor": {
       "kvm": {
         "name": "KVM/QEMU",
         "description": "المحاكاة الافتراضية المبنية على نواة Linux",
         "createLabel": "إنشاء VM",
-        "enableLabel": "تفعيل KVM"
+        "enableLabel": "تفعيل KVM",
+        "loadModules": "تحميل الوحدات",
+        "unloadModules": "إزالة الوحدات"
       },
       "lxd": {
         "name": "LXD",
@@ -529,6 +547,12 @@
         "description": "مراقب الأجهزة الافتراضية لـ OpenBSD",
         "createLabel": "إنشاء VM",
         "enableLabel": "تفعيل VMM"
+      },
+      "bhyve": {
+        "name": "bhyve",
+        "description": "مراقب الأجهزة الافتراضية لـ FreeBSD",
+        "createLabel": "إنشاء VM",
+        "enableLabel": "تفعيل bhyve"
       },
       "wsl": {
         "name": "WSL",
@@ -556,7 +580,9 @@
         "enabled": "مفعل",
         "running": "يعمل",
         "initialized": "تمت التهيئة",
-        "kernelSupport": "دعم النواة"
+        "kernelSupport": "دعم النواة",
+        "cpuSupport": "دعم المعالج",
+        "modulesLoaded": "الوحدات محملة"
       },
       "rebootRequired": "مطلوب إعادة التشغيل",
       "notAvailableMessage": "غير متاح على هذه المنصة",

@@ -14,12 +14,14 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddIcon from '@mui/icons-material/Add';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import StopIcon from '@mui/icons-material/Stop';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DownloadIcon from '@mui/icons-material/Download';
 import ComputerIcon from '@mui/icons-material/Computer';
 import StorageIcon from '@mui/icons-material/Storage';
 import DnsIcon from '@mui/icons-material/Dns';
 import TerminalIcon from '@mui/icons-material/Terminal';
+import MemoryIcon from '@mui/icons-material/Memory';
 import { useTranslation } from 'react-i18next';
 
 export interface HypervisorCapabilities {
@@ -34,19 +36,27 @@ export interface HypervisorCapabilities {
   needs_bios_virtualization?: boolean;
   kernel_supported?: boolean;
   version?: string;
+  // KVM-specific module state
+  modules_loaded?: boolean;
+  modules_available?: boolean;
+  needs_modprobe?: boolean;
+  cpu_vendor?: string;
 }
 
-export type HypervisorType = 'kvm' | 'lxd' | 'vmm' | 'wsl';
+export type HypervisorType = 'bhyve' | 'kvm' | 'lxd' | 'vmm' | 'wsl';
 
 interface HypervisorStatusCardProps {
   type: HypervisorType;
   capabilities: HypervisorCapabilities | undefined;
   onEnable?: () => void;
   onCreate?: () => void;
+  onEnableModules?: () => void;
+  onDisableModules?: () => void;
   canEnable?: boolean;
   canCreate?: boolean;
   isLoading?: boolean;
   isEnableLoading?: boolean;
+  isModulesLoading?: boolean;
   isAgentPrivileged?: boolean;
   rebootRequired?: boolean;
 }
@@ -56,10 +66,13 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
   capabilities,
   onEnable,
   onCreate,
+  onEnableModules,
+  onDisableModules,
   canEnable = false,
   canCreate = false,
   isLoading = false,
   isEnableLoading = false,
+  isModulesLoading = false,
   isAgentPrivileged = false,
   rebootRequired = false,
 }) => {
@@ -68,6 +81,14 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
   // Get hypervisor display info
   const getHypervisorInfo = () => {
     switch (type) {
+      case 'bhyve':
+        return {
+          name: t('hostDetail.hypervisor.bhyve.name', 'bhyve'),
+          description: t('hostDetail.hypervisor.bhyve.description', 'FreeBSD hypervisor'),
+          icon: <ComputerIcon />,
+          createLabel: t('hostDetail.hypervisor.bhyve.createLabel', 'Create VM'),
+          enableLabel: t('hostDetail.hypervisor.bhyve.enableLabel', 'Enable bhyve'),
+        };
       case 'kvm':
         return {
           name: t('hostDetail.hypervisor.kvm.name', 'KVM/QEMU'),
@@ -137,8 +158,8 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
       };
     }
 
-    // Check for VMM kernel support
-    if (type === 'vmm' && capabilities.available && !capabilities.kernel_supported) {
+    // Check for VMM or bhyve kernel support
+    if ((type === 'vmm' || type === 'bhyve') && capabilities.available && !capabilities.kernel_supported) {
       return {
         state: 'no_kernel_support',
         color: 'error' as const,
@@ -150,7 +171,7 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
     if (type === 'wsl' && capabilities.enabled) {
       return { state: 'ready', color: 'success' as const, label: t('hostDetail.hypervisor.state.ready', 'Ready') };
     }
-    if (type === 'vmm' && capabilities.running) {
+    if ((type === 'vmm' || type === 'bhyve') && capabilities.running) {
       return { state: 'ready', color: 'success' as const, label: t('hostDetail.hypervisor.state.ready', 'Ready') };
     }
     if ((type === 'kvm' || type === 'lxd') && capabilities.initialized) {
@@ -174,7 +195,7 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
     }
 
     // Needs to be enabled/started
-    if (type === 'vmm' && capabilities.enabled && !capabilities.running) {
+    if ((type === 'vmm' || type === 'bhyve') && capabilities.enabled && !capabilities.running) {
       return {
         state: 'not_running',
         color: 'warning' as const,
@@ -209,8 +230,8 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
       };
     }
 
-    // VMM needs enable
-    if (type === 'vmm' && capabilities.needs_enable) {
+    // VMM or bhyve needs enable
+    if ((type === 'vmm' || type === 'bhyve') && capabilities.needs_enable) {
       return {
         state: 'needs_enable',
         color: 'warning' as const,
@@ -262,6 +283,7 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
       case 'kvm':
         return [
           { checked: !!capabilities.available, label: t('hostDetail.hypervisor.indicator.available', 'Available') },
+          { checked: !!capabilities.modules_loaded, label: t('hostDetail.hypervisor.indicator.modulesLoaded', 'Modules Loaded') },
           { checked: !!capabilities.installed, label: t('hostDetail.hypervisor.indicator.installed', 'Installed') },
           { checked: !!capabilities.enabled, label: t('hostDetail.hypervisor.indicator.enabled', 'Enabled') },
           { checked: !!capabilities.running, label: t('hostDetail.hypervisor.indicator.running', 'Running') },
@@ -277,6 +299,13 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
         return [
           { checked: !!capabilities.available, label: t('hostDetail.hypervisor.indicator.available', 'Available') },
           { checked: !!capabilities.kernel_supported, label: t('hostDetail.hypervisor.indicator.kernelSupport', 'Kernel Support') },
+          { checked: !!capabilities.enabled, label: t('hostDetail.hypervisor.indicator.enabled', 'Enabled') },
+          { checked: !!capabilities.running, label: t('hostDetail.hypervisor.indicator.running', 'Running') },
+        ];
+      case 'bhyve':
+        return [
+          { checked: !!capabilities.available, label: t('hostDetail.hypervisor.indicator.available', 'Available') },
+          { checked: !!capabilities.kernel_supported, label: t('hostDetail.hypervisor.indicator.cpuSupport', 'CPU Support') },
           { checked: !!capabilities.enabled, label: t('hostDetail.hypervisor.indicator.enabled', 'Enabled') },
           { checked: !!capabilities.running, label: t('hostDetail.hypervisor.indicator.running', 'Running') },
         ];
@@ -374,8 +403,49 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
             </Tooltip>
           )}
 
-          {/* Create Button */}
-          {isReady && canCreate && onCreate && (
+          {/* KVM Module Control Buttons */}
+          {type === 'kvm' && capabilities?.modules_available && !capabilities?.modules_loaded && canEnable && onEnableModules && (
+            <Tooltip
+              title={!isAgentPrivileged ? t('hostDetail.privilegedModeRequired', 'Privileged mode required') : ''}
+            >
+              <span>
+                <Button
+                  variant="contained"
+                  color="warning"
+                  size="small"
+                  startIcon={isModulesLoading ? <CircularProgress size={16} color="inherit" /> : <MemoryIcon />}
+                  onClick={onEnableModules}
+                  disabled={isModulesLoading || !isAgentPrivileged}
+                  fullWidth
+                >
+                  {t('hostDetail.hypervisor.kvm.loadModules', 'Load Modules')}
+                </Button>
+              </span>
+            </Tooltip>
+          )}
+
+          {type === 'kvm' && capabilities?.modules_loaded && canEnable && onDisableModules && (
+            <Tooltip
+              title={!isAgentPrivileged ? t('hostDetail.privilegedModeRequired', 'Privileged mode required') : ''}
+            >
+              <span>
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  size="small"
+                  startIcon={isModulesLoading ? <CircularProgress size={16} color="inherit" /> : <StopIcon />}
+                  onClick={onDisableModules}
+                  disabled={isModulesLoading || !isAgentPrivileged}
+                  fullWidth
+                >
+                  {t('hostDetail.hypervisor.kvm.unloadModules', 'Unload Modules')}
+                </Button>
+              </span>
+            </Tooltip>
+          )}
+
+          {/* Create Button - hidden for KVM if modules need to be loaded first */}
+          {isReady && canCreate && onCreate && !(type === 'kvm' && capabilities?.needs_modprobe) && (
             <Tooltip
               title={!isAgentPrivileged ? t('hostDetail.privilegedModeRequired', 'Privileged mode required') : ''}
             >

@@ -492,13 +492,31 @@
     "enableKvm": "啟用KVM",
     "kvmInitializedSuccess": "已請求KVM初始化。代理將安裝並配置libvirt。",
     "kvmInitializeFailed": "KVM初始化失敗",
+    "kvmModulesEnableSuccess": "已請求啟用KVM模組。代理將載入核心模組。",
+    "kvmModulesEnableFailed": "啟用KVM模組失敗",
+    "kvmModulesDisableSuccess": "已請求停用KVM模組。代理將卸載核心模組。",
+    "kvmModulesDisableFailed": "停用KVM模組失敗。請確保沒有正在執行的虛擬機。",
+    "enableBhyve": "啟用bhyve",
+    "bhyveInitializedSuccess": "已請求bhyve初始化。代理將載入vmm.ko並配置系統。",
+    "bhyveInitializeFailed": "bhyve初始化失敗",
+    "bhyveStatus": "bhyve狀態",
+    "bhyveReady": "就緒",
+    "bhyveNotRunning": "未執行",
+    "bhyveNotEnabled": "未啟用",
+    "bhyveNoCpuSupport": "CPU不支援",
+    "bhyveNotAvailable": "不可用",
+    "childHostsEmptyBhyveReady": "點擊\"建立子主機\"來建立新的bhyve虛擬機。",
+    "childHostsEmptyBhyveNotReady": "啟用bhyve以在此主機上建立虛擬機。",
+    "childHostsEmptyBhyveNotAvailable": "此主機上不可用bhyve。需要支援CPU虛擬化的FreeBSD。",
     "virtualizationCapabilities": "虛擬化功能",
     "hypervisor": {
       "kvm": {
         "name": "KVM/QEMU",
         "description": "基於Linux核心的虛擬化",
         "createLabel": "建立虛擬機",
-        "enableLabel": "啟用KVM"
+        "enableLabel": "啟用KVM",
+        "loadModules": "載入模組",
+        "unloadModules": "卸載模組"
       },
       "lxd": {
         "name": "LXD",
@@ -511,6 +529,12 @@
         "description": "OpenBSD虛擬機器監視器",
         "createLabel": "建立虛擬機",
         "enableLabel": "啟用VMM"
+      },
+      "bhyve": {
+        "name": "bhyve",
+        "description": "FreeBSD虛擬化管理程式",
+        "createLabel": "建立虛擬機",
+        "enableLabel": "啟用bhyve"
       },
       "wsl": {
         "name": "WSL",
@@ -538,7 +562,9 @@
         "enabled": "已啟用",
         "running": "執行中",
         "initialized": "已初始化",
-        "kernelSupport": "核心支援"
+        "kernelSupport": "核心支援",
+        "cpuSupport": "CPU支援",
+        "modulesLoaded": "模組已載入"
       },
       "rebootRequired": "需要重新啟動",
       "notAvailableMessage": "此平台不可用",

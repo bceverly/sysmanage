@@ -494,13 +494,31 @@
     "enableKvm": "启用KVM",
     "kvmInitializedSuccess": "已请求KVM初始化。代理将安装并配置libvirt。",
     "kvmInitializeFailed": "KVM初始化失败",
+    "kvmModulesEnableSuccess": "已请求启用KVM模块。代理将加载内核模块。",
+    "kvmModulesEnableFailed": "启用KVM模块失败",
+    "kvmModulesDisableSuccess": "已请求禁用KVM模块。代理将卸载内核模块。",
+    "kvmModulesDisableFailed": "禁用KVM模块失败。请确保没有正在运行的虚拟机。",
+    "enableBhyve": "启用bhyve",
+    "bhyveInitializedSuccess": "已请求bhyve初始化。代理将加载vmm.ko并配置系统。",
+    "bhyveInitializeFailed": "bhyve初始化失败",
+    "bhyveStatus": "bhyve状态",
+    "bhyveReady": "就绪",
+    "bhyveNotRunning": "未运行",
+    "bhyveNotEnabled": "未启用",
+    "bhyveNoCpuSupport": "CPU不支持",
+    "bhyveNotAvailable": "不可用",
+    "childHostsEmptyBhyveReady": "点击\"创建子主机\"来创建新的bhyve虚拟机。",
+    "childHostsEmptyBhyveNotReady": "启用bhyve以在此主机上创建虚拟机。",
+    "childHostsEmptyBhyveNotAvailable": "此主机上不可用bhyve。需要支持CPU虚拟化的FreeBSD。",
     "virtualizationCapabilities": "虚拟化功能",
     "hypervisor": {
       "kvm": {
         "name": "KVM/QEMU",
         "description": "基于Linux内核的虚拟化",
         "createLabel": "创建虚拟机",
-        "enableLabel": "启用KVM"
+        "enableLabel": "启用KVM",
+        "loadModules": "加载模块",
+        "unloadModules": "卸载模块"
       },
       "lxd": {
         "name": "LXD",
@@ -513,6 +531,12 @@
         "description": "OpenBSD虚拟机监视器",
         "createLabel": "创建虚拟机",
         "enableLabel": "启用VMM"
+      },
+      "bhyve": {
+        "name": "bhyve",
+        "description": "FreeBSD虚拟化管理程序",
+        "createLabel": "创建虚拟机",
+        "enableLabel": "启用bhyve"
       },
       "wsl": {
         "name": "WSL",
@@ -540,7 +564,9 @@
         "enabled": "已启用",
         "running": "运行中",
         "initialized": "已初始化",
-        "kernelSupport": "内核支持"
+        "kernelSupport": "内核支持",
+        "cpuSupport": "CPU支持",
+        "modulesLoaded": "模块已加载"
       },
       "rebootRequired": "需要重启",
       "notAvailableMessage": "此平台不可用",

@@ -494,13 +494,31 @@
     "enableKvm": "KVMを有効化",
     "kvmInitializedSuccess": "KVM初期化がリクエストされました。エージェントがlibvirtをインストールして設定します。",
     "kvmInitializeFailed": "KVMの初期化に失敗しました",
+    "kvmModulesEnableSuccess": "KVMモジュールの有効化がリクエストされました。エージェントがカーネルモジュールをロードします。",
+    "kvmModulesEnableFailed": "KVMモジュールの有効化に失敗しました",
+    "kvmModulesDisableSuccess": "KVMモジュールの無効化がリクエストされました。エージェントがカーネルモジュールをアンロードします。",
+    "kvmModulesDisableFailed": "KVMモジュールの無効化に失敗しました。VMが実行されていないことを確認してください。",
+    "enableBhyve": "bhyveを有効化",
+    "bhyveInitializedSuccess": "bhyve初期化がリクエストされました。エージェントがvmm.koをロードしてシステムを設定します。",
+    "bhyveInitializeFailed": "bhyveの初期化に失敗しました",
+    "bhyveStatus": "bhyveステータス",
+    "bhyveReady": "準備完了",
+    "bhyveNotRunning": "実行されていません",
+    "bhyveNotEnabled": "有効化されていません",
+    "bhyveNoCpuSupport": "CPUがサポートされていません",
+    "bhyveNotAvailable": "利用不可",
+    "childHostsEmptyBhyveReady": "「子ホスト作成」をクリックして新しいbhyve仮想マシンを作成してください。",
+    "childHostsEmptyBhyveNotReady": "このホストで仮想マシンを作成するにはbhyveを有効にしてください。",
+    "childHostsEmptyBhyveNotAvailable": "このホストではbhyveを利用できません。CPU仮想化をサポートするFreeBSDが必要です。",
     "virtualizationCapabilities": "仮想化機能",
     "hypervisor": {
       "kvm": {
         "name": "KVM/QEMU",
         "description": "Linuxカーネルベースの仮想化",
         "createLabel": "VM作成",
-        "enableLabel": "KVMを有効化"
+        "enableLabel": "KVMを有効化",
+        "loadModules": "モジュール読込",
+        "unloadModules": "モジュール解除"
       },
       "lxd": {
         "name": "LXD",
@@ -513,6 +531,12 @@
         "description": "OpenBSD仮想マシンモニター",
         "createLabel": "VM作成",
         "enableLabel": "VMMを有効化"
+      },
+      "bhyve": {
+        "name": "bhyve",
+        "description": "FreeBSDハイパーバイザー",
+        "createLabel": "VM作成",
+        "enableLabel": "bhyveを有効化"
       },
       "wsl": {
         "name": "WSL",
@@ -540,7 +564,9 @@
         "enabled": "有効",
         "running": "実行中",
         "initialized": "初期化済み",
-        "kernelSupport": "カーネルサポート"
+        "kernelSupport": "カーネルサポート",
+        "cpuSupport": "CPUサポート",
+        "modulesLoaded": "モジュール読込済"
       },
       "rebootRequired": "再起動が必要",
       "notAvailableMessage": "このプラットフォームでは利用できません",

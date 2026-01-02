@@ -494,13 +494,31 @@
     "enableKvm": "KVM inschakelen",
     "kvmInitializedSuccess": "KVM-initialisatie aangevraagd. De agent zal libvirt installeren en configureren.",
     "kvmInitializeFailed": "KVM-initialisatie mislukt",
+    "kvmModulesEnableSuccess": "KVM-modules inschakelen aangevraagd. De agent zal de kernelmodules laden.",
+    "kvmModulesEnableFailed": "Inschakelen van KVM-modules mislukt",
+    "kvmModulesDisableSuccess": "KVM-modules uitschakelen aangevraagd. De agent zal de kernelmodules verwijderen.",
+    "kvmModulesDisableFailed": "Uitschakelen van KVM-modules mislukt. Zorg ervoor dat er geen VMs actief zijn.",
+    "enableBhyve": "bhyve inschakelen",
+    "bhyveInitializedSuccess": "bhyve-initialisatie aangevraagd. De agent zal vmm.ko laden en het systeem configureren.",
+    "bhyveInitializeFailed": "bhyve-initialisatie mislukt",
+    "bhyveStatus": "bhyve-status",
+    "bhyveReady": "Gereed",
+    "bhyveNotRunning": "Niet actief",
+    "bhyveNotEnabled": "Niet ingeschakeld",
+    "bhyveNoCpuSupport": "CPU niet ondersteund",
+    "bhyveNotAvailable": "Niet beschikbaar",
+    "childHostsEmptyBhyveReady": "Klik op \"Child Host aanmaken\" om een nieuwe bhyve virtuele machine te maken.",
+    "childHostsEmptyBhyveNotReady": "Schakel bhyve in om virtuele machines op deze host te maken.",
+    "childHostsEmptyBhyveNotAvailable": "bhyve is niet beschikbaar op deze host. FreeBSD met CPU-virtualisatie-ondersteuning is vereist.",
     "virtualizationCapabilities": "Virtualisatiemogelijkheden",
     "hypervisor": {
       "kvm": {
         "name": "KVM/QEMU",
         "description": "Linux kernel-gebaseerde virtualisatie",
         "createLabel": "VM aanmaken",
-        "enableLabel": "KVM inschakelen"
+        "enableLabel": "KVM inschakelen",
+        "loadModules": "Modules laden",
+        "unloadModules": "Modules verwijderen"
       },
       "lxd": {
         "name": "LXD",
@@ -513,6 +531,12 @@
         "description": "OpenBSD virtuele machine monitor",
         "createLabel": "VM aanmaken",
         "enableLabel": "VMM inschakelen"
+      },
+      "bhyve": {
+        "name": "bhyve",
+        "description": "FreeBSD hypervisor",
+        "createLabel": "VM aanmaken",
+        "enableLabel": "bhyve inschakelen"
       },
       "wsl": {
         "name": "WSL",
@@ -540,7 +564,9 @@
         "enabled": "Ingeschakeld",
         "running": "Actief",
         "initialized": "Geïnitialiseerd",
-        "kernelSupport": "Kernelondersteuning"
+        "kernelSupport": "Kernelondersteuning",
+        "cpuSupport": "CPU-ondersteuning",
+        "modulesLoaded": "Modules geladen"
       },
       "rebootRequired": "Herstart vereist",
       "notAvailableMessage": "Niet beschikbaar op dit platform",

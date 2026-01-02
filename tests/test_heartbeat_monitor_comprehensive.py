@@ -30,7 +30,7 @@ class TestCheckHostHeartbeats:
         mock_get_timeout.return_value = 5
 
         # No stale hosts found
-        mock_db.query.return_value.filter.return_value.filter.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = (
             []
         )
 
@@ -62,7 +62,7 @@ class TestCheckHostHeartbeats:
         stale_host2.status = "up"
         stale_host2.active = True
 
-        mock_db.query.return_value.filter.return_value.filter.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = [
             stale_host1,
             stale_host2,
         ]
@@ -95,7 +95,7 @@ class TestCheckHostHeartbeats:
         stale_host.status = "up"
         stale_host.active = True
 
-        mock_db.query.return_value.filter.return_value.filter.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = [
             stale_host
         ]
 
@@ -155,7 +155,7 @@ class TestCheckHostHeartbeats:
         stale_host.status = "up"
         stale_host.active = True
 
-        mock_db.query.return_value.filter.return_value.filter.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = [
             stale_host
         ]
         mock_db.commit.side_effect = Exception("Commit failed")
@@ -180,7 +180,7 @@ class TestCheckHostHeartbeats:
         mock_get_db.return_value = iter([mock_db])
         mock_get_timeout.return_value = 15  # 15 minutes timeout
 
-        mock_db.query.return_value.filter.return_value.filter.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = (
             []
         )
 
@@ -251,7 +251,7 @@ class TestHeartbeatMonitorIntegration:
         stale_host.last_access = datetime.now(timezone.utc) - timedelta(hours=1)  # Old
 
         # Mock query to return only stale host (filtering should work)
-        mock_db.query.return_value.filter.return_value.filter.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = [
             stale_host
         ]
 
@@ -274,7 +274,7 @@ class TestHeartbeatMonitorIntegration:
         mock_get_timeout.return_value = 5
 
         # Empty result
-        mock_db.query.return_value.filter.return_value.filter.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = (
             []
         )
 
@@ -297,7 +297,7 @@ class TestHeartbeatMonitorEdgeCases:
         mock_get_db.return_value = iter([mock_db])
         mock_get_timeout.return_value = 0  # Zero timeout
 
-        mock_db.query.return_value.filter.return_value.filter.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = (
             []
         )
 
@@ -315,7 +315,7 @@ class TestHeartbeatMonitorEdgeCases:
         mock_get_db.return_value = iter([mock_db])
         mock_get_timeout.return_value = -5  # Negative timeout
 
-        mock_db.query.return_value.filter.return_value.filter.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = (
             []
         )
 
@@ -333,7 +333,7 @@ class TestHeartbeatMonitorEdgeCases:
         mock_get_db.return_value = iter([mock_db])
         mock_get_timeout.return_value = 999999  # Very large timeout
 
-        mock_db.query.return_value.filter.return_value.filter.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = (
             []
         )
 
@@ -357,7 +357,7 @@ class TestHeartbeatMonitorEdgeCases:
         host_no_fqdn.status = "up"
         host_no_fqdn.active = True
 
-        mock_db.query.return_value.filter.return_value.filter.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = [
             host_no_fqdn
         ]
 

@@ -32,11 +32,14 @@ async def check_host_heartbeats():
             minutes=timeout_minutes
         )
 
-        # Find hosts that haven't been seen within the timeout period
+        # Find approved hosts that haven't been seen within the timeout period
+        # Only approved hosts should be marked as down - pending hosts are expected
+        # to have gaps in communication while awaiting approval
         stale_hosts = (
             db.query(Host)
             .filter(Host.last_access < timeout_threshold)
             .filter(Host.status == "up")
+            .filter(Host.approval_status == "approved")
             .all()
         )
 

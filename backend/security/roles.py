@@ -165,6 +165,7 @@ class SecurityRoles(str, Enum):
     STOP_CHILD_HOST = "Stop Child Host"
     VIEW_CHILD_HOST = "View Child Host"
     # - Virtualization Enablement Operations (alphabetical)
+    ENABLE_BHYVE = "Enable bhyve"
     ENABLE_KVM = "Enable KVM"
     ENABLE_LXD = "Enable LXD"
     ENABLE_VMM = "Enable VMM"

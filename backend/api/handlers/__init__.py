@@ -14,6 +14,7 @@ All handlers are re-exported here for backwards compatibility.
 
 # Import from child_host_handlers
 from backend.api.handlers.child_host_handlers import (
+    handle_bhyve_initialize_result,
     handle_child_host_created,
     handle_child_host_creation_progress,
     handle_child_hosts_list_update,
@@ -22,6 +23,8 @@ from backend.api.handlers.child_host_handlers import (
     handle_lxd_initialize_result,
     handle_vmm_initialize_result,
     handle_kvm_initialize_result,
+    handle_kvm_modules_enable_result,
+    handle_kvm_modules_disable_result,
 )
 
 # Import from infrastructure_handlers
@@ -90,4 +93,7 @@ __all__ = [
     "handle_lxd_initialize_result",
     "handle_vmm_initialize_result",
     "handle_kvm_initialize_result",
+    "handle_bhyve_initialize_result",
+    "handle_kvm_modules_enable_result",
+    "handle_kvm_modules_disable_result",
 ]
