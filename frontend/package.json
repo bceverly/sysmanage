@@ -91,7 +91,7 @@
     "vitest": "^4.0.9"
   },
   "optionalDependencies": {
-    "@esbuild/freebsd-x64": "^0.27.0",
+    "@esbuild/freebsd-x64": "^0.27.2",
     "@esbuild/win32-x64": "^0.27.0"
   },
   "overrides": {
