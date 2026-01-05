@@ -386,6 +386,9 @@ async def delete_child_host(
                     session.delete(linked_host)
             elif child_hostname:
                 # Try to find host by fqdn matching the child hostname
+                # Extract short hostname (first part before any dot)
+                child_short_hostname = child_hostname.split(".")[0]
+
                 matching_host = (
                     session.query(models.Host)
                     .filter(func.lower(models.Host.fqdn) == func.lower(child_hostname))
@@ -398,6 +401,38 @@ async def delete_child_host(
                         .filter(
                             func.lower(models.Host.fqdn).like(
                                 func.lower(child_hostname + ".%")
+                            )
+                        )
+                        .first()
+                    )
+                # Try reverse prefix match (Host.fqdn is short, child_hostname is FQDN)
+                if not matching_host:
+                    matching_host = (
+                        session.query(models.Host)
+                        .filter(
+                            func.lower(child_hostname).like(
+                                func.lower(models.Host.fqdn) + ".%"
+                            )
+                        )
+                        .first()
+                    )
+                # Try matching just the short hostname
+                if not matching_host:
+                    matching_host = (
+                        session.query(models.Host)
+                        .filter(
+                            func.lower(models.Host.fqdn)
+                            == func.lower(child_short_hostname)
+                        )
+                        .first()
+                    )
+                # Try matching short hostname as prefix of Host.fqdn
+                if not matching_host:
+                    matching_host = (
+                        session.query(models.Host)
+                        .filter(
+                            func.lower(models.Host.fqdn).like(
+                                func.lower(child_short_hostname + ".%")
                             )
                         )
                         .first()

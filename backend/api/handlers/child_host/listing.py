@@ -285,11 +285,57 @@ async def handle_child_hosts_list_update(
                             db.delete(linked_host)
                     elif child.hostname:
                         # Try to find host by fqdn (Host model uses fqdn, not hostname)
+                        # Extract short hostname (first part before any dot)
+                        child_short_hostname = child.hostname.split(".")[0]
+
                         matching_host = (
                             db.query(Host)
                             .filter(func.lower(Host.fqdn) == func.lower(child.hostname))
                             .first()
                         )
+                        # Try prefix match (hostname without domain)
+                        if not matching_host:
+                            matching_host = (
+                                db.query(Host)
+                                .filter(
+                                    func.lower(Host.fqdn).like(
+                                        func.lower(child.hostname + ".%")
+                                    )
+                                )
+                                .first()
+                            )
+                        # Try reverse prefix match (Host.fqdn is short, hostname is FQDN)
+                        if not matching_host:
+                            matching_host = (
+                                db.query(Host)
+                                .filter(
+                                    func.lower(child.hostname).like(
+                                        func.lower(Host.fqdn) + ".%"
+                                    )
+                                )
+                                .first()
+                            )
+                        # Try matching just the short hostname
+                        if not matching_host:
+                            matching_host = (
+                                db.query(Host)
+                                .filter(
+                                    func.lower(Host.fqdn)
+                                    == func.lower(child_short_hostname)
+                                )
+                                .first()
+                            )
+                        # Try matching short hostname as prefix of Host.fqdn
+                        if not matching_host:
+                            matching_host = (
+                                db.query(Host)
+                                .filter(
+                                    func.lower(Host.fqdn).like(
+                                        func.lower(child_short_hostname + ".%")
+                                    )
+                                )
+                                .first()
+                            )
                         if matching_host:
                             logger.info(
                                 "Deleting matching host record for stale uninstalling "

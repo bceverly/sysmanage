@@ -248,6 +248,9 @@ async def handle_child_host_delete_result(
             elif child_hostname:
                 # If no linked host but we have a hostname, try to find and delete
                 # a host record with matching fqdn
+                # Extract short hostname (first part before any dot)
+                child_short_hostname = child_hostname.split(".")[0]
+
                 matching_host = (
                     db.query(Host)
                     .filter(func.lower(Host.fqdn) == func.lower(child_hostname))
@@ -260,6 +263,37 @@ async def handle_child_host_delete_result(
                         .filter(
                             func.lower(Host.fqdn).like(
                                 func.lower(child_hostname + ".%")
+                            )
+                        )
+                        .first()
+                    )
+                # Try reverse prefix match (Host.fqdn is short, child_hostname is FQDN)
+                if not matching_host:
+                    matching_host = (
+                        db.query(Host)
+                        .filter(
+                            func.lower(child_hostname).like(
+                                func.lower(Host.fqdn) + ".%"
+                            )
+                        )
+                        .first()
+                    )
+                # Try matching just the short hostname
+                if not matching_host:
+                    matching_host = (
+                        db.query(Host)
+                        .filter(
+                            func.lower(Host.fqdn) == func.lower(child_short_hostname)
+                        )
+                        .first()
+                    )
+                # Try matching short hostname as prefix of Host.fqdn
+                if not matching_host:
+                    matching_host = (
+                        db.query(Host)
+                        .filter(
+                            func.lower(Host.fqdn).like(
+                                func.lower(child_short_hostname + ".%")
                             )
                         )
                         .first()
