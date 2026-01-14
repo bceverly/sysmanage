@@ -193,16 +193,24 @@ const HostDetail = () => {
         return platform.includes('Windows') || platform.includes('Linux') || platform.includes('OpenBSD') || platform.includes('FreeBSD');
     }, [host]);
 
+    // Check if host is running Ubuntu (for Ubuntu Pro feature)
+    const isUbuntu = useCallback(() => {
+        if (!host?.platform && !host?.platform_release) return false;
+        const platform = (host.platform || '').toLowerCase();
+        const platformRelease = (host.platform_release || '').toLowerCase();
+        return platform.includes('ubuntu') || platformRelease.includes('ubuntu');
+    }, [host]);
+
     // Tab names for URL hash (static tabs only - dynamic tabs handled separately)
     const getTabNames = useCallback(() => {
         const tabs = ['info', 'hardware', 'software', 'software-changes'];
         if (supportsThirdPartyRepos()) tabs.push('third-party-repos');
         tabs.push('access', 'security', 'certificates', 'server-roles');
         if (supportsChildHosts()) tabs.push('child-hosts');
-        if (ubuntuProInfo?.available) tabs.push('ubuntu-pro');
+        if (isUbuntu() && ubuntuProInfo?.available) tabs.push('ubuntu-pro');
         tabs.push('diagnostics');
         return tabs;
-    }, [ubuntuProInfo, supportsThirdPartyRepos, supportsChildHosts]);
+    }, [ubuntuProInfo, supportsThirdPartyRepos, supportsChildHosts, isUbuntu]);
 
     // Initialize tab from URL hash
     const getInitialTab = useCallback(() => {
@@ -579,7 +587,7 @@ const HostDetail = () => {
         return supportsThirdPartyRepos() ? 9 : 8;
     }, [supportsThirdPartyRepos, supportsChildHosts]);
     const getUbuntuProTabIndex = () => {
-        if (!ubuntuProInfo?.available) return -1;
+        if (!isUbuntu() || !ubuntuProInfo?.available) return -1;
         let baseIndex = supportsThirdPartyRepos() ? 9 : 8;
         if (supportsChildHosts()) baseIndex += 1;
         return baseIndex;
@@ -587,7 +595,7 @@ const HostDetail = () => {
     const getDiagnosticsTabIndex = () => {
         let baseIndex = supportsThirdPartyRepos() ? 9 : 8;
         if (supportsChildHosts()) baseIndex += 1;
-        return ubuntuProInfo?.available ? baseIndex + 1 : baseIndex;
+        return (isUbuntu() && ubuntuProInfo?.available) ? baseIndex + 1 : baseIndex;
     };
 
     // Certificate-related functions
@@ -1994,7 +2002,7 @@ const HostDetail = () => {
     useEffect(() => {
         let interval: ReturnType<typeof window.setInterval> | null = null;
 
-        if (hostId && ubuntuProInfo?.available) {
+        if (hostId && isUbuntu() && ubuntuProInfo?.available) {
             interval = window.setInterval(async () => {
                 try {
                     const ubuntuProData = await doGetHostUbuntuPro(hostId);
@@ -2014,7 +2022,7 @@ const HostDetail = () => {
                 window.clearInterval(interval);
             }
         };
-    }, [hostId, ubuntuProInfo?.available, servicesMessage]);
+    }, [hostId, isUbuntu, ubuntuProInfo?.available, servicesMessage]);
 
     // Auto-refresh user accounts and groups every 60 seconds
     useEffect(() => {
@@ -3746,7 +3754,7 @@ const HostDetail = () => {
                             sx={{ textTransform: 'none' }}
                         />
                     )}
-                    {ubuntuProInfo?.available && (
+                    {isUbuntu() && ubuntuProInfo?.available && (
                         <Tab
                             icon={<VerifiedUserIcon />}
                             label={t('hostDetail.ubuntuProTab', 'Ubuntu Pro')}
@@ -5901,7 +5909,7 @@ const HostDetail = () => {
             )}
 
             {/* Ubuntu Pro Tab */}
-            {currentTab === getUbuntuProTabIndex() && ubuntuProInfo?.available && (
+            {currentTab === getUbuntuProTabIndex() && isUbuntu() && ubuntuProInfo?.available && (
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12 }}>
                         <Card>
