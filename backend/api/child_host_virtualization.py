@@ -122,6 +122,13 @@ async def create_child_host_request(
                     status_code=400,
                     detail=_("VM name is required for KVM virtual machines"),
                 )
+        elif request.child_type == "bhyve":
+            child_name = request.vm_name
+            if not child_name:
+                raise HTTPException(
+                    status_code=400,
+                    detail=_("VM name is required for bhyve virtual machines"),
+                )
         else:
             # WSL uses distribution as the name
             child_name = request.distribution
@@ -235,6 +242,11 @@ async def create_child_host_request(
             password_hash = hash_password_for_os(
                 request.password, request.distribution or ""
             )
+        elif request.child_type == "bhyve":
+            # bhyve uses OS-specific hash format (similar to KVM)
+            password_hash = hash_password_for_os(
+                request.password, request.distribution or ""
+            )
         else:
             # WSL and LXD use bcrypt
             password_hash = bcrypt.hashpw(
@@ -278,6 +290,20 @@ async def create_child_host_request(
             command_params["memory"] = request.memory or "2G"
             command_params["disk_size"] = request.disk_size or "20G"
             command_params["cpus"] = request.cpus or 2
+            # Get cloud_image_url from the distribution record
+            if distribution and distribution.cloud_image_url:
+                command_params["cloud_image_url"] = distribution.cloud_image_url
+            elif distribution and distribution.install_identifier:
+                # Fallback: use install_identifier if it's a URL
+                if distribution.install_identifier.startswith("http"):
+                    command_params["cloud_image_url"] = distribution.install_identifier
+
+        # For bhyve, include vm_name, cloud_image_url, memory, disk_size, cpus
+        if request.child_type == "bhyve":
+            command_params["vm_name"] = request.vm_name
+            command_params["memory"] = request.memory or "1G"
+            command_params["disk_size"] = request.disk_size or "20G"
+            command_params["cpus"] = request.cpus or 1
             # Get cloud_image_url from the distribution record
             if distribution and distribution.cloud_image_url:
                 command_params["cloud_image_url"] = distribution.cloud_image_url

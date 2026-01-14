@@ -398,6 +398,81 @@ async def initialize_bhyve(
 
 
 @router.post(
+    "/host/{host_id}/virtualization/disable-bhyve",
+    dependencies=[Depends(JWTBearer())],
+)
+async def disable_bhyve(
+    host_id: str,
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Disable bhyve on a FreeBSD host.
+    Unloads vmm.ko and removes the persistent configuration from /boot/loader.conf.
+    Note: This will fail if any VMs are running.
+    Requires ENABLE_BHYVE permission.
+    """
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        user = get_user_with_role_check(
+            session, current_user, SecurityRoles.ENABLE_BHYVE
+        )
+
+        host = get_host_or_404(session, host_id)
+        verify_host_active(host)
+
+        # Verify it's a FreeBSD host (bhyve is FreeBSD-only)
+        if not host.platform or "FreeBSD" not in host.platform:
+            raise HTTPException(
+                status_code=400,
+                detail=_("bhyve is only supported on FreeBSD hosts"),
+            )
+
+        # Verify the agent is privileged (needed to unload vmm.ko)
+        if not host.is_agent_privileged:
+            raise HTTPException(
+                status_code=400,
+                detail=_("Agent must be running with root privileges to disable bhyve"),
+            )
+
+        # Queue a command to disable bhyve
+        command_message = create_command_message(
+            command_type="disable_bhyve", parameters={}
+        )
+
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+
+        # Log the action
+        audit_log(
+            session,
+            user,
+            current_user,
+            "DELETE",
+            str(host.id),
+            host.fqdn,
+            _("bhyve disable requested"),
+        )
+
+        session.commit()
+
+        return {
+            "result": True,
+            "message": _(
+                "bhyve disable requested. The agent will unload vmm.ko "
+                "and update the system configuration. This will fail if any VMs are running."
+            ),
+        }
+
+
+@router.post(
     "/host/{host_id}/virtualization/enable-kvm-modules",
     dependencies=[Depends(JWTBearer())],
 )

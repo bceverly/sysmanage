@@ -566,7 +566,8 @@
         "initialized": "Geïnitialiseerd",
         "kernelSupport": "Kernelondersteuning",
         "cpuSupport": "CPU-ondersteuning",
-        "modulesLoaded": "Modules geladen"
+        "modulesLoaded": "Modules geladen",
+        "uefiAvailable": "UEFI-firmware"
       },
       "rebootRequired": "Herstart vereist",
       "notAvailableMessage": "Niet beschikbaar op dit platform",
@@ -577,6 +578,8 @@
     "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
     "createKvmVmTitle": "Create KVM Virtual Machine",
     "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
+    "createBhyveVmTitle": "bhyve virtuele machine aanmaken",
+    "childHostFqdnHelpBhyve": "Deze FQDN wordt gebruikt voor de bhyve virtuele machine",
     "cancelChildHost": "Cancel",
     "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
     "cancelChildHostWarning": "This will cancel the child host creation.",

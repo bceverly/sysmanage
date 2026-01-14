@@ -186,6 +186,8 @@ const HostDetail = () => {
     // Check if host supports child hosts (virtualization)
     const supportsChildHosts = useCallback(() => {
         if (!host?.platform) return false;
+        // Child hosts (VMs, containers, WSL instances) cannot have their own child hosts
+        if (host.parent_host_id) return false;
         const platform = host.platform || '';
         // Windows hosts support WSL, Linux hosts support LXD/KVM, OpenBSD hosts support VMM, FreeBSD hosts support bhyve
         return platform.includes('Windows') || platform.includes('Linux') || platform.includes('OpenBSD') || platform.includes('FreeBSD');
@@ -286,6 +288,7 @@ const HostDetail = () => {
     const [initializeVmmLoading, setInitializeVmmLoading] = useState<boolean>(false);
     const [initializeKvmLoading, setInitializeKvmLoading] = useState<boolean>(false);
     const [initializeBhyveLoading, setInitializeBhyveLoading] = useState<boolean>(false);
+    const [disableBhyveLoading, setDisableBhyveLoading] = useState<boolean>(false);
     const [kvmModulesLoading, setKvmModulesLoading] = useState<boolean>(false);
 
     // Create child host modal state
@@ -360,12 +363,16 @@ const HostDetail = () => {
             const platform = host.platform || '';
             const isLinux = platform.toLowerCase().includes('linux');
             const isOpenBSD = platform.includes('OpenBSD');
+            const isFreeBSD = platform.includes('FreeBSD');
             // Determine child type based on platform and available virtualization:
+            // - FreeBSD -> bhyve
             // - OpenBSD -> vmm
             // - Linux -> kvm (if initialized) or lxd (fallback)
             // - Windows -> wsl
             let childType = 'wsl';
-            if (isOpenBSD) {
+            if (isFreeBSD) {
+                childType = 'bhyve';
+            } else if (isOpenBSD) {
                 childType = 'vmm';
             } else if (isLinux) {
                 // Prefer KVM if initialized, otherwise use LXD
@@ -999,6 +1006,31 @@ const HostDetail = () => {
         }
     }, [hostId, fetchVirtualizationStatus, t]);
 
+    // Disable bhyve on FreeBSD host
+    const handleDisableBhyve = useCallback(async () => {
+        if (!hostId) return;
+        try {
+            setDisableBhyveLoading(true);
+            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/disable-bhyve`);
+            if (response.status === 200) {
+                setSnackbarMessage(t('hostDetail.bhyveDisabledSuccess', 'bhyve disable requested. The agent will unload vmm.ko and update the configuration.'));
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+                // Refresh virtualization status after a delay
+                setTimeout(() => {
+                    fetchVirtualizationStatus();
+                }, 5000);
+            }
+        } catch (error) {
+            console.error('Error disabling bhyve:', error);
+            setSnackbarMessage(t('hostDetail.bhyveDisableFailed', 'Failed to disable bhyve'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setDisableBhyveLoading(false);
+        }
+    }, [hostId, fetchVirtualizationStatus, t]);
+
     // Enable KVM modules via modprobe
     const handleEnableKvmModules = useCallback(async () => {
         if (!hostId) return;
@@ -1105,8 +1137,8 @@ const HostDetail = () => {
             setSnackbarOpen(true);
             return;
         }
-        // For VMM and KVM, require VM name
-        if (childHostFormData.childType === 'vmm' || childHostFormData.childType === 'kvm') {
+        // For VMM, KVM, and bhyve, require VM name
+        if (childHostFormData.childType === 'vmm' || childHostFormData.childType === 'kvm' || childHostFormData.childType === 'bhyve') {
             if (!childHostFormData.vmName) {
                 setSnackbarMessage(t('hostDetail.childHostVmNameRequired', 'Please enter a VM name'));
                 setSnackbarSeverity('error');
@@ -1164,6 +1196,15 @@ const HostDetail = () => {
             if (childHostFormData.childType === 'kvm') {
                 requestData.vm_name = childHostFormData.vmName || childHostFormData.hostname;
                 // For KVM, the install_identifier contains the cloud image URL
+                if (childHostFormData.distribution) {
+                    requestData.cloud_image_url = childHostFormData.distribution;
+                }
+            }
+
+            // For bhyve, send vm_name and cloud_image_url (similar to KVM)
+            if (childHostFormData.childType === 'bhyve') {
+                requestData.vm_name = childHostFormData.vmName || childHostFormData.hostname;
+                // For bhyve, the install_identifier contains the cloud image URL
                 if (childHostFormData.distribution) {
                     requestData.cloud_image_url = childHostFormData.distribution;
                 }
@@ -5628,11 +5669,13 @@ const HostDetail = () => {
                                                 type="bhyve"
                                                 capabilities={virtualizationStatus.capabilities?.bhyve}
                                                 onEnable={handleInitializeBhyve}
+                                                onDisable={handleDisableBhyve}
                                                 onCreate={() => openCreateDialogWithType('bhyve')}
                                                 canEnable={canEnableBhyve}
                                                 canCreate={hasPermission(SecurityRoles.CREATE_CHILD_HOST)}
                                                 isLoading={virtualizationLoading}
                                                 isEnableLoading={initializeBhyveLoading}
+                                                isDisableLoading={disableBhyveLoading}
                                                 isAgentPrivileged={host?.is_agent_privileged || false}
                                             />
                                         </Grid>
@@ -7328,6 +7371,8 @@ const HostDetail = () => {
                         ? t('hostDetail.createVmmVmTitle', 'Create VMM Virtual Machine')
                         : childHostFormData.childType === 'kvm'
                         ? t('hostDetail.createKvmVmTitle', 'Create KVM Virtual Machine')
+                        : childHostFormData.childType === 'bhyve'
+                        ? t('hostDetail.createBhyveVmTitle', 'Create bhyve Virtual Machine')
                         : t('hostDetail.createChildHostTitle', 'Create WSL Instance')}
                     <IconButton
                         onClick={() => {
@@ -7401,12 +7446,12 @@ const HostDetail = () => {
                             value={childHostFormData.hostname}
                             onChange={(e) => {
                                 const newHostname = e.target.value;
-                                // For VMM and KVM, auto-compute vmName from short hostname
+                                // For VMM, KVM, and bhyve, auto-compute vmName from short hostname
                                 const shortName = newHostname.split('.')[0].toLowerCase().replace(/[^a-z0-9-]/g, '');
                                 setChildHostFormData({
                                     ...childHostFormData,
                                     hostname: newHostname,
-                                    vmName: (childHostFormData.childType === 'vmm' || childHostFormData.childType === 'kvm') ? shortName : childHostFormData.vmName
+                                    vmName: (childHostFormData.childType === 'vmm' || childHostFormData.childType === 'kvm' || childHostFormData.childType === 'bhyve') ? shortName : childHostFormData.vmName
                                 });
                             }}
                             disabled={createChildHostLoading}
@@ -7429,11 +7474,13 @@ const HostDetail = () => {
                                 ? t('hostDetail.childHostFqdnHelpVmm', 'This FQDN will be used for the VMM virtual machine')
                                 : childHostFormData.childType === 'kvm'
                                 ? t('hostDetail.childHostFqdnHelpKvm', 'This FQDN will be used for the KVM virtual machine')
+                                : childHostFormData.childType === 'bhyve'
+                                ? t('hostDetail.childHostFqdnHelpBhyve', 'This FQDN will be used for the bhyve virtual machine')
                                 : t('hostDetail.childHostFqdnHelp', 'This FQDN will be used for the WSL instance')}
                         />
 
-                        {/* VM name field for VMM and KVM - read-only, derived from hostname */}
-                        {(childHostFormData.childType === 'vmm' || childHostFormData.childType === 'kvm') && (
+                        {/* VM name field for VMM, KVM, and bhyve - read-only, derived from hostname */}
+                        {(childHostFormData.childType === 'vmm' || childHostFormData.childType === 'kvm' || childHostFormData.childType === 'bhyve') && (
                             <TextField
                                 fullWidth
                                 label={t('hostDetail.childHostVmNameLabel', 'VM Name')}

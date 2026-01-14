@@ -582,7 +582,8 @@
         "initialized": "تمت التهيئة",
         "kernelSupport": "دعم النواة",
         "cpuSupport": "دعم المعالج",
-        "modulesLoaded": "الوحدات محملة"
+        "modulesLoaded": "الوحدات محملة",
+        "uefiAvailable": "برنامج UEFI الثابت"
       },
       "rebootRequired": "مطلوب إعادة التشغيل",
       "notAvailableMessage": "غير متاح على هذه المنصة",
@@ -593,6 +594,8 @@
     "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
     "createKvmVmTitle": "Create KVM Virtual Machine",
     "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
+    "createBhyveVmTitle": "إنشاء جهاز افتراضي bhyve",
+    "childHostFqdnHelpBhyve": "سيتم استخدام هذا FQDN للجهاز الافتراضي bhyve",
     "cancelChildHost": "Cancel",
     "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
     "cancelChildHostWarning": "This will cancel the child host creation.",

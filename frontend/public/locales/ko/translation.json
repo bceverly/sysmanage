@@ -566,7 +566,8 @@
         "initialized": "초기화됨",
         "kernelSupport": "커널 지원",
         "cpuSupport": "CPU 지원",
-        "modulesLoaded": "모듈 로드됨"
+        "modulesLoaded": "모듈 로드됨",
+        "uefiAvailable": "UEFI 펌웨어"
       },
       "rebootRequired": "재부팅 필요",
       "notAvailableMessage": "이 플랫폼에서 사용할 수 없음",
@@ -577,6 +578,8 @@
     "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
     "createKvmVmTitle": "Create KVM Virtual Machine",
     "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
+    "createBhyveVmTitle": "bhyve 가상 머신 생성",
+    "childHostFqdnHelpBhyve": "이 FQDN은 bhyve 가상 머신에 사용됩니다",
     "cancelChildHost": "Cancel",
     "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
     "cancelChildHostWarning": "This will cancel the child host creation.",

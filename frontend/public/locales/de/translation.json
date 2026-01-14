@@ -582,7 +582,8 @@
         "initialized": "Initialisiert",
         "kernelSupport": "Kernel-Unterstützung",
         "cpuSupport": "CPU-Unterstützung",
-        "modulesLoaded": "Module geladen"
+        "modulesLoaded": "Module geladen",
+        "uefiAvailable": "UEFI-Firmware"
       },
       "rebootRequired": "Neustart erforderlich",
       "notAvailableMessage": "Auf dieser Plattform nicht verfügbar",
@@ -593,6 +594,8 @@
     "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
     "createKvmVmTitle": "Create KVM Virtual Machine",
     "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
+    "createBhyveVmTitle": "bhyve-virtuelle Maschine erstellen",
+    "childHostFqdnHelpBhyve": "Dieser FQDN wird für die bhyve-VM verwendet",
     "cancelChildHost": "Cancel",
     "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
     "cancelChildHostWarning": "This will cancel the child host creation.",

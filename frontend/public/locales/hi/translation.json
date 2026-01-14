@@ -565,7 +565,8 @@
         "initialized": "इनिशियलाइज़्ड",
         "kernelSupport": "कर्नेल समर्थन",
         "cpuSupport": "CPU समर्थन",
-        "modulesLoaded": "मॉड्यूल लोडेड"
+        "modulesLoaded": "मॉड्यूल लोडेड",
+        "uefiAvailable": "UEFI फर्मवेयर"
       },
       "rebootRequired": "रीबूट आवश्यक",
       "notAvailableMessage": "इस प्लेटफ़ॉर्म पर उपलब्ध नहीं",
@@ -576,6 +577,8 @@
     "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
     "createKvmVmTitle": "Create KVM Virtual Machine",
     "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
+    "createBhyveVmTitle": "bhyve वर्चुअल मशीन बनाएं",
+    "childHostFqdnHelpBhyve": "यह FQDN bhyve वर्चुअल मशीन के लिए उपयोग किया जाएगा",
     "cancelChildHost": "Cancel",
     "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
     "cancelChildHostWarning": "This will cancel the child host creation.",

@@ -41,6 +41,8 @@ export interface HypervisorCapabilities {
   modules_available?: boolean;
   needs_modprobe?: boolean;
   cpu_vendor?: string;
+  // bhyve-specific UEFI firmware state
+  uefi_available?: boolean;
 }
 
 export type HypervisorType = 'bhyve' | 'kvm' | 'lxd' | 'vmm' | 'wsl';
@@ -49,6 +51,7 @@ interface HypervisorStatusCardProps {
   type: HypervisorType;
   capabilities: HypervisorCapabilities | undefined;
   onEnable?: () => void;
+  onDisable?: () => void;
   onCreate?: () => void;
   onEnableModules?: () => void;
   onDisableModules?: () => void;
@@ -56,6 +59,7 @@ interface HypervisorStatusCardProps {
   canCreate?: boolean;
   isLoading?: boolean;
   isEnableLoading?: boolean;
+  isDisableLoading?: boolean;
   isModulesLoading?: boolean;
   isAgentPrivileged?: boolean;
   rebootRequired?: boolean;
@@ -65,6 +69,7 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
   type,
   capabilities,
   onEnable,
+  onDisable,
   onCreate,
   onEnableModules,
   onDisableModules,
@@ -72,6 +77,7 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
   canCreate = false,
   isLoading = false,
   isEnableLoading = false,
+  isDisableLoading = false,
   isModulesLoading = false,
   isAgentPrivileged = false,
   rebootRequired = false,
@@ -88,6 +94,7 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
           icon: <ComputerIcon />,
           createLabel: t('hostDetail.hypervisor.bhyve.createLabel', 'Create VM'),
           enableLabel: t('hostDetail.hypervisor.bhyve.enableLabel', 'Enable bhyve'),
+          disableLabel: t('hostDetail.hypervisor.bhyve.disableLabel', 'Disable bhyve'),
         };
       case 'kvm':
         return {
@@ -308,6 +315,7 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
           { checked: !!capabilities.kernel_supported, label: t('hostDetail.hypervisor.indicator.cpuSupport', 'CPU Support') },
           { checked: !!capabilities.enabled, label: t('hostDetail.hypervisor.indicator.enabled', 'Enabled') },
           { checked: !!capabilities.running, label: t('hostDetail.hypervisor.indicator.running', 'Running') },
+          { checked: !!capabilities.uefi_available, label: t('hostDetail.hypervisor.indicator.uefiAvailable', 'UEFI Firmware') },
         ];
       case 'wsl':
         return [
@@ -460,6 +468,27 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
                   fullWidth
                 >
                   {hypervisorInfo.createLabel}
+                </Button>
+              </span>
+            </Tooltip>
+          )}
+
+          {/* Disable Button for bhyve */}
+          {type === 'bhyve' && isReady && canEnable && onDisable && (
+            <Tooltip
+              title={!isAgentPrivileged ? t('hostDetail.privilegedModeRequired', 'Privileged mode required') : ''}
+            >
+              <span>
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  size="small"
+                  startIcon={isDisableLoading ? <CircularProgress size={16} color="inherit" /> : <StopIcon />}
+                  onClick={onDisable}
+                  disabled={isDisableLoading || !isAgentPrivileged}
+                  fullWidth
+                >
+                  {hypervisorInfo.disableLabel}
                 </Button>
               </span>
             </Tooltip>

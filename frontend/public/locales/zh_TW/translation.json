@@ -564,7 +564,8 @@
         "initialized": "已初始化",
         "kernelSupport": "核心支援",
         "cpuSupport": "CPU支援",
-        "modulesLoaded": "模組已載入"
+        "modulesLoaded": "模組已載入",
+        "uefiAvailable": "UEFI 韌體"
       },
       "rebootRequired": "需要重新啟動",
       "notAvailableMessage": "此平台不可用",
@@ -575,6 +576,8 @@
     "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
     "createKvmVmTitle": "Create KVM Virtual Machine",
     "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
+    "createBhyveVmTitle": "建立 bhyve 虛擬機器",
+    "childHostFqdnHelpBhyve": "此 FQDN 將用於 bhyve 虛擬機器",
     "cancelChildHost": "Cancel",
     "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
     "cancelChildHostWarning": "This will cancel the child host creation.",
