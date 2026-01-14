@@ -10,7 +10,7 @@
     "@fontsource/roboto": "^5.2.8",
     "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^7.3.4",
-    "@mui/material": "^7.3.5",
+    "@mui/material": "^7.3.6",
     "@mui/system": "^7.3.5",
     "@mui/x-charts": "^8.19.0",
     "@mui/x-data-grid": "^7.29.9",
@@ -21,7 +21,7 @@
     "@types/jest": "^30.0.0",
     "@types/react": "^19.1.15",
     "@types/react-dom": "^19.1.10",
-    "axios": "^1.12.0",
+    "axios": "^1.13.2",
     "esbuild": "^0.27.0",
     "i18next": "^25.6.3",
     "i18next-browser-languagedetector": "^8.2.0",
@@ -40,7 +40,7 @@
     "stylis-plugin-rtl": "^2.1.1",
     "typescript": "^5.9.3",
     "web-vitals": "^2.1.4",
-    "yaml": "^2.8.1"
+    "yaml": "^2.8.2"
   },
   "scripts": {
     "start": "vite",
@@ -81,17 +81,17 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-security": "^3.0.1",
     "identity-obj-proxy": "^3.0.0",
-    "jsdom": "^27.2.0",
-    "msw": "^2.12.2",
+    "jsdom": "^27.4.0",
+    "msw": "^2.12.7",
     "strip-literal": "^3.1.0",
-    "stylelint": "^16.25.0",
+    "stylelint": "^16.26.1",
     "stylelint-config-standard": "^39.0.1",
     "tldts": "^7.0.17",
     "vite": "^7.2.2",
     "vitest": "^4.0.9"
   },
   "optionalDependencies": {
-    "@esbuild/freebsd-x64": "^0.27.0",
+    "@esbuild/freebsd-x64": "^0.27.2",
     "@esbuild/win32-x64": "^0.27.0"
   },
   "overrides": {
@@ -111,8 +111,8 @@
     "magic-string": "^0.30.21",
     "@inquirer/figures": "^1.0.14",
     "resolve": "^1.22.11",
-    "caniuse-lite": "^1.0.30001759",
-    "dompurify": "^3.2.4",
+    "caniuse-lite": "^1.0.30001762",
+    "dompurify": "^3.3.1",
     "@eslint/object-schema": "^2.1.7",
     "@eslint/plugin-kit": "^0.4.1",
     "@eslint/config-array": "^0.21.1",
