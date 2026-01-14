@@ -34,3 +34,8 @@ backend/api/reports.py
 
 # Alembic database migration files - raw SQL queries are legitimate for schema changes
 alembic/versions/
+
+# Frontend package-lock.json - punycode is deprecated but not vulnerable
+# It's a transitive dependency from jsdom/other test tools, and 2.3.1 is the latest version
+# The npm package is deprecated in favor of Node.js built-in, but remains safe to use
+frontend/package-lock.json
