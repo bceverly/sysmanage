@@ -61,7 +61,12 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     # Check if we have any way to identify the host
     has_hostname = hasattr(connection, "hostname") and connection.hostname
@@ -75,7 +80,12 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
     # If we have no way to identify the host, return early without acknowledgment
     if not has_hostname and not has_ipv4 and not has_websocket_client:
         debug_logger.warning("OS version update received with no host identification")
-        return {"message_type": "error", "error": _("No host identification available")}
+        return {
+            "message_type": "error",
+            "error_type": "no_host_identification",
+            "message": _("No host identification available"),
+            "data": {},
+        }
 
     # For test compatibility - check for hostname instead of host_id if needed
     if not hasattr(connection, "host_id") or not connection.host_id:
@@ -85,7 +95,12 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
             if host:
                 connection.host_id = host.id
             else:
-                return {"message_type": "error", "error": _("Host not registered")}
+                return {
+                    "message_type": "error",
+                    "error_type": "host_not_registered",
+                    "message": _("Host not registered"),
+                    "data": {},
+                }
         # If no hostname, try IP lookup via websocket client
         elif has_websocket_client:
             client_ip = connection.websocket.client.host
@@ -94,9 +109,19 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
                 connection.host_id = host.id
                 connection.hostname = host.fqdn
             else:
-                return {"message_type": "error", "error": _("Host not registered")}
+                return {
+                    "message_type": "error",
+                    "error_type": "host_not_registered",
+                    "message": _("Host not registered"),
+                    "data": {},
+                }
         else:
-            return {"message_type": "error", "error": _("Host not registered")}
+            return {
+                "message_type": "error",
+                "error_type": "host_not_registered",
+                "message": _("Host not registered"),
+                "data": {},
+            }
 
     try:
         # Extract OS information mapping message fields to database columns
@@ -218,7 +243,9 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
 
         return {
             "message_type": "error",
-            "error": _("No OS information provided"),
+            "error_type": "no_os_info",
+            "message": _("No OS information provided"),
+            "data": {},
         }
 
     except Exception as e:
@@ -226,7 +253,9 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
         db.rollback()
         return {
             "message_type": "error",
-            "error": _("Failed to update OS version"),
+            "error_type": "os_update_failed",
+            "message": _("Failed to update OS version"),
+            "data": {},
         }
 
 
@@ -237,10 +266,20 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     if not hasattr(connection, "host_id") or not connection.host_id:
-        return {"message_type": "error", "error": _("Host not registered")}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     try:
         # Map hardware data from agent message to database fields
@@ -402,7 +441,9 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
         db.rollback()
         return {
             "message_type": "error",
-            "error": _("Failed to update hardware information"),
+            "error_type": "hardware_update_failed",
+            "message": _("Failed to update hardware information"),
+            "data": {},
         }
 
 

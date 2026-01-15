@@ -5,6 +5,7 @@ This module handles virtualization-related messages from agents,
 including virtualization support checks, WSL enablement, and LXD initialization.
 """
 
+import json
 import logging
 from datetime import datetime, timezone
 from typing import Any, Dict
@@ -13,7 +14,18 @@ from sqlalchemy.orm import Session
 
 from backend.i18n import _
 from backend.persistence.models import Host
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+
+from .virtualization_helpers import (
+    check_success_or_error,
+    extract_result_data,
+    get_host_id_or_error,
+    get_host_or_error,
+    handle_simple_init_result,
+    log_audit_success,
+    make_ack_response,
+    make_error_response,
+    queue_virtualization_check,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -25,35 +37,22 @@ async def handle_virtualization_support_update(
     Handle virtualization support check result from agent.
 
     Updates the host record with supported virtualization types.
-
-    Args:
-        db: Database session
-        connection: WebSocket connection object
-        message_data: Message data containing virtualization support info
-
-    Returns:
-        Acknowledgment message
     """
-    host_id = getattr(connection, "host_id", None)
-    if not host_id:
+    host_id, error = get_host_id_or_error(connection)
+    if error:
         logger.warning(
             "Virtualization support update received but no host_id on connection"
         )
-        return {"message_type": "error", "error": "No host_id on connection"}
+        return error
 
-    result_data = message_data.get("result", {})
-    if not result_data:
-        result_data = message_data
+    result_data = extract_result_data(message_data)
+    success, error_msg = check_success_or_error(message_data, result_data)
 
-    # Check success at both levels - command_result has success at top level,
-    # but result_data may also have it for direct updates
-    success = message_data.get("success", result_data.get("success", False))
     if not success:
-        error = message_data.get("error") or result_data.get("error", "Unknown error")
         logger.error(
-            "Virtualization support check failed for host %s: %s", host_id, error
+            "Virtualization support check failed for host %s: %s", host_id, error_msg
         )
-        return {"message_type": "error", "error": error}
+        return make_error_response("operation_failed", error_msg or _("Unknown error"))
 
     supported_types = result_data.get("supported_types", [])
     capabilities = result_data.get("capabilities", {})
@@ -69,8 +68,6 @@ async def handle_virtualization_support_update(
     try:
         host = db.query(Host).filter(Host.id == host_id).first()
         if host:
-            import json
-
             # Store virtualization info in host record
             host.virtualization_types = json.dumps(supported_types)
             host.virtualization_capabilities = json.dumps(capabilities)
@@ -104,25 +101,18 @@ async def handle_virtualization_support_update(
 
             db.commit()
 
-            AuditService.log(
-                db=db,
-                action_type=ActionType.AGENT_MESSAGE,
-                entity_type=EntityType.HOST,
-                entity_id=str(host_id),
-                entity_name=host.fqdn,
-                description=_("Virtualization support updated"),
-                result=Result.SUCCESS,
-                details={
+            log_audit_success(
+                db,
+                host_id,
+                host.fqdn,
+                _("Virtualization support updated"),
+                {
                     "supported_types": supported_types,
                     "reboot_required": reboot_required,
                 },
             )
 
-        return {
-            "message_type": "virtualization_support_ack",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "status": "updated",
-        }
+        return make_ack_response("virtualization_support_ack", {"status": "updated"})
 
     except Exception as e:
         logger.error(
@@ -131,7 +121,7 @@ async def handle_virtualization_support_update(
             e,
             exc_info=True,
         )
-        return {"message_type": "error", "error": str(e)}
+        return make_error_response("operation_failed", str(e))
 
 
 async def handle_wsl_enable_result(
@@ -141,31 +131,20 @@ async def handle_wsl_enable_result(
     Handle WSL enable result from agent.
 
     Updates the host's reboot_required flag if WSL enablement requires a reboot.
-
-    Args:
-        db: Database session
-        connection: WebSocket connection object
-        message_data: Message data containing WSL enable result
-
-    Returns:
-        Acknowledgment message
     """
-    host_id = getattr(connection, "host_id", None)
-    if not host_id:
+    host_id, error = get_host_id_or_error(connection)
+    if error:
         logger.warning("WSL enable result received but no host_id on connection")
-        return {"message_type": "error", "error": "No host_id on connection"}
+        return error
 
-    result_data = message_data.get("result", {})
-    if not result_data:
-        result_data = message_data
-
+    result_data = extract_result_data(message_data)
     success = result_data.get("success", False)
     reboot_required = result_data.get("reboot_required", False)
-    error = result_data.get("error")
+    error_msg = result_data.get("error")
 
     if not success:
-        logger.error("WSL enable failed for host %s: %s", host_id, error)
-        return {"message_type": "error", "error": error}
+        logger.error("WSL enable failed for host %s: %s", host_id, error_msg)
+        return make_error_response("operation_failed", error_msg or _("Unknown error"))
 
     logger.info(
         "WSL enable result for host %s: success=%s, reboot_required=%s",
@@ -175,57 +154,34 @@ async def handle_wsl_enable_result(
     )
 
     try:
-        host = db.query(Host).filter(Host.id == host_id).first()
-        if not host:
-            logger.warning("Host not found for WSL enable result: %s", host_id)
-            return {"message_type": "error", "error": "Host not found"}
+        host, error = get_host_or_error(db, host_id, "WSL enable result")
+        if error:
+            return error
 
         if reboot_required:
             # Set reboot required with specific reason
-            # This reason is protected from being overwritten by other updates
             host.reboot_required = True
             host.reboot_required_reason = "WSL feature enablement pending"
             db.commit()
 
-            AuditService.log(
-                db=db,
-                action_type=ActionType.AGENT_MESSAGE,
-                entity_type=EntityType.HOST,
-                entity_id=str(host_id),
-                entity_name=host.fqdn,
-                description=_("WSL enabled - reboot required"),
-                result=Result.SUCCESS,
-                details={"reboot_required": True},
+            log_audit_success(
+                db,
+                host_id,
+                host.fqdn,
+                _("WSL enabled - reboot required"),
+                {"reboot_required": True},
             )
         else:
             # WSL enabled without reboot - queue a virtualization check
-            # to refresh the host's virtualization state in the UI
-            from backend.websocket.messages import create_command_message
-            from backend.websocket.queue_enums import QueueDirection
-            from backend.websocket.queue_operations import QueueOperations
-
-            queue_ops = QueueOperations()
-            virtualization_command = create_command_message(
-                command_type="check_virtualization_support", parameters={}
-            )
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=virtualization_command,
-                direction=QueueDirection.OUTBOUND,
-                host_id=str(host_id),
-                db=db,
-            )
+            queue_virtualization_check(db, host_id)
             db.commit()
 
-            AuditService.log(
-                db=db,
-                action_type=ActionType.AGENT_MESSAGE,
-                entity_type=EntityType.HOST,
-                entity_id=str(host_id),
-                entity_name=host.fqdn,
-                description=_("WSL enabled successfully"),
-                result=Result.SUCCESS,
-                details={"reboot_required": False},
+            log_audit_success(
+                db,
+                host_id,
+                host.fqdn,
+                _("WSL enabled successfully"),
+                {"reboot_required": False},
             )
 
             logger.info(
@@ -233,11 +189,7 @@ async def handle_wsl_enable_result(
                 host_id,
             )
 
-        return {
-            "message_type": "wsl_enable_ack",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "reboot_required": reboot_required,
-        }
+        return make_ack_response("wsl_enable_ack", {"reboot_required": reboot_required})
 
     except Exception as e:
         logger.error(
@@ -246,109 +198,23 @@ async def handle_wsl_enable_result(
             e,
             exc_info=True,
         )
-        return {"message_type": "error", "error": str(e)}
+        return make_error_response("operation_failed", str(e))
 
 
 async def handle_lxd_initialize_result(
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
-    """
-    Handle LXD initialization result from agent.
-
-    After LXD is initialized, queues a virtualization check to refresh
-    the host's virtualization capabilities.
-
-    Args:
-        db: Database session
-        connection: WebSocket connection object
-        message_data: Message data containing LXD init result
-
-    Returns:
-        Acknowledgment message
-    """
-    host_id = getattr(connection, "host_id", None)
-    if not host_id:
-        logger.warning("LXD initialize result received but no host_id on connection")
-        return {"message_type": "error", "error": "No host_id on connection"}
-
-    result_data = message_data.get("result", {})
-    if not result_data:
-        result_data = message_data
-
-    success = result_data.get("success", False)
-    user_needs_relogin = result_data.get("user_needs_relogin", False)
-    error = result_data.get("error")
-    message = result_data.get("message", "")
-
-    if not success:
-        logger.error("LXD initialization failed for host %s: %s", host_id, error)
-        return {"message_type": "error", "error": error}
-
-    logger.info(
-        "LXD initialization result for host %s: success=%s, user_needs_relogin=%s",
-        host_id,
-        success,
-        user_needs_relogin,
+    """Handle LXD initialization result from agent."""
+    return await handle_simple_init_result(
+        db=db,
+        connection=connection,
+        message_data=message_data,
+        hypervisor_name="LXD",
+        ack_message_type="lxd_initialize_ack",
+        audit_description=_("LXD initialized successfully"),
+        extra_result_fields=["user_needs_relogin"],
+        extra_ack_fields=["user_needs_relogin"],
     )
-
-    try:
-        host = db.query(Host).filter(Host.id == host_id).first()
-        if not host:
-            logger.warning("Host not found for LXD initialize result: %s", host_id)
-            return {"message_type": "error", "error": "Host not found"}
-
-        # LXD initialized - queue a virtualization check to refresh
-        # the host's virtualization state in the UI
-        from backend.websocket.messages import create_command_message
-        from backend.websocket.queue_enums import QueueDirection
-        from backend.websocket.queue_operations import QueueOperations
-
-        queue_ops = QueueOperations()
-        virtualization_command = create_command_message(
-            command_type="check_virtualization_support", parameters={}
-        )
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=virtualization_command,
-            direction=QueueDirection.OUTBOUND,
-            host_id=str(host_id),
-            db=db,
-        )
-        db.commit()
-
-        AuditService.log(
-            db=db,
-            action_type=ActionType.AGENT_MESSAGE,
-            entity_type=EntityType.HOST,
-            entity_id=str(host_id),
-            entity_name=host.fqdn,
-            description=_("LXD initialized successfully"),
-            result=Result.SUCCESS,
-            details={
-                "message": message,
-                "user_needs_relogin": user_needs_relogin,
-            },
-        )
-
-        logger.info(
-            "LXD initialized for host %s, queued virtualization check",
-            host_id,
-        )
-
-        return {
-            "message_type": "lxd_initialize_ack",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "user_needs_relogin": user_needs_relogin,
-        }
-
-    except Exception as e:
-        logger.error(
-            "Error updating LXD initialize status for host %s: %s",
-            host_id,
-            e,
-            exc_info=True,
-        )
-        return {"message_type": "error", "error": str(e)}
 
 
 async def handle_vmm_initialize_result(
@@ -357,35 +223,23 @@ async def handle_vmm_initialize_result(
     """
     Handle VMM/vmd initialization result from agent.
 
-    After vmd is started, queues a virtualization check to refresh
-    the host's virtualization capabilities.
-
-    Args:
-        db: Database session
-        connection: WebSocket connection object
-        message_data: Message data containing VMM init result
-
-    Returns:
-        Acknowledgment message
+    This handler has special logic for reboot requirements.
     """
-    host_id = getattr(connection, "host_id", None)
-    if not host_id:
+    host_id, error = get_host_id_or_error(connection)
+    if error:
         logger.warning("VMM initialize result received but no host_id on connection")
-        return {"message_type": "error", "error": "No host_id on connection"}
+        return error
 
-    result_data = message_data.get("result", {})
-    if not result_data:
-        result_data = message_data
-
-    success = result_data.get("success", False)
-    needs_reboot = result_data.get("needs_reboot", False)
-    already_enabled = result_data.get("already_enabled", False)
-    error = result_data.get("error")
-    message = result_data.get("message", "")
+    result_data = extract_result_data(message_data)
+    success, error_msg = check_success_or_error(message_data, result_data)
 
     if not success:
-        logger.error("VMM initialization failed for host %s: %s", host_id, error)
-        return {"message_type": "error", "error": error}
+        logger.error("VMM initialization failed for host %s: %s", host_id, error_msg)
+        return make_error_response("operation_failed", error_msg or _("Unknown error"))
+
+    needs_reboot = result_data.get("needs_reboot", False)
+    already_enabled = result_data.get("already_enabled", False)
+    message = result_data.get("message", "")
 
     logger.info(
         "VMM initialization result for host %s: success=%s, needs_reboot=%s, "
@@ -397,10 +251,9 @@ async def handle_vmm_initialize_result(
     )
 
     try:
-        host = db.query(Host).filter(Host.id == host_id).first()
-        if not host:
-            logger.warning("Host not found for VMM initialize result: %s", host_id)
-            return {"message_type": "error", "error": "Host not found"}
+        host, error = get_host_or_error(db, host_id, "VMM initialize result")
+        if error:
+            return error
 
         if needs_reboot:
             # Set reboot required with specific reason
@@ -408,48 +261,24 @@ async def handle_vmm_initialize_result(
             host.reboot_required_reason = "VMM kernel support requires reboot"
             db.commit()
 
-            AuditService.log(
-                db=db,
-                action_type=ActionType.AGENT_MESSAGE,
-                entity_type=EntityType.HOST,
-                entity_id=str(host_id),
-                entity_name=host.fqdn,
-                description=_("VMM initialization requires reboot"),
-                result=Result.SUCCESS,
-                details={"needs_reboot": True},
+            log_audit_success(
+                db,
+                host_id,
+                host.fqdn,
+                _("VMM initialization requires reboot"),
+                {"needs_reboot": True},
             )
         else:
-            # VMM initialized - queue a virtualization check to refresh
-            # the host's virtualization state in the UI
-            from backend.websocket.messages import create_command_message
-            from backend.websocket.queue_enums import QueueDirection
-            from backend.websocket.queue_operations import QueueOperations
-
-            queue_ops = QueueOperations()
-            virtualization_command = create_command_message(
-                command_type="check_virtualization_support", parameters={}
-            )
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=virtualization_command,
-                direction=QueueDirection.OUTBOUND,
-                host_id=str(host_id),
-                db=db,
-            )
+            # VMM initialized - queue a virtualization check
+            queue_virtualization_check(db, host_id)
             db.commit()
 
-            AuditService.log(
-                db=db,
-                action_type=ActionType.AGENT_MESSAGE,
-                entity_type=EntityType.HOST,
-                entity_id=str(host_id),
-                entity_name=host.fqdn,
-                description=_("VMM/vmd initialized successfully"),
-                result=Result.SUCCESS,
-                details={
-                    "message": message,
-                    "already_enabled": already_enabled,
-                },
+            log_audit_success(
+                db,
+                host_id,
+                host.fqdn,
+                _("VMM/vmd initialized successfully"),
+                {"message": message, "already_enabled": already_enabled},
             )
 
             logger.info(
@@ -457,12 +286,10 @@ async def handle_vmm_initialize_result(
                 host_id,
             )
 
-        return {
-            "message_type": "vmm_initialize_ack",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "needs_reboot": needs_reboot,
-            "already_enabled": already_enabled,
-        }
+        return make_ack_response(
+            "vmm_initialize_ack",
+            {"needs_reboot": needs_reboot, "already_enabled": already_enabled},
+        )
 
     except Exception as e:
         logger.error(
@@ -471,421 +298,72 @@ async def handle_vmm_initialize_result(
             e,
             exc_info=True,
         )
-        return {"message_type": "error", "error": str(e)}
+        return make_error_response("operation_failed", str(e))
 
 
 async def handle_kvm_initialize_result(
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
-    """
-    Handle KVM/libvirt initialization result from agent.
-
-    After libvirt is installed and configured, queues a virtualization check
-    to refresh the host's virtualization capabilities.
-
-    Args:
-        db: Database session
-        connection: WebSocket connection object
-        message_data: Message data containing KVM init result
-
-    Returns:
-        Acknowledgment message
-    """
-    host_id = getattr(connection, "host_id", None)
-    if not host_id:
-        logger.warning("KVM initialize result received but no host_id on connection")
-        return {"message_type": "error", "error": "No host_id on connection"}
-
-    result_data = message_data.get("result", {})
-    if not result_data:
-        result_data = message_data
-
-    success = result_data.get("success", False)
-    needs_relogin = result_data.get("needs_relogin", False)
-    already_installed = result_data.get("already_installed", False)
-    error = result_data.get("error")
-    message = result_data.get("message", "")
-
-    if not success:
-        logger.error("KVM initialization failed for host %s: %s", host_id, error)
-        return {"message_type": "error", "error": error}
-
-    logger.info(
-        "KVM initialization result for host %s: success=%s, needs_relogin=%s, "
-        "already_installed=%s",
-        host_id,
-        success,
-        needs_relogin,
-        already_installed,
+    """Handle KVM/libvirt initialization result from agent."""
+    return await handle_simple_init_result(
+        db=db,
+        connection=connection,
+        message_data=message_data,
+        hypervisor_name="KVM",
+        ack_message_type="kvm_initialize_ack",
+        audit_description=_("KVM/libvirt initialized successfully"),
+        extra_result_fields=["already_installed", "needs_relogin"],
+        extra_ack_fields=["needs_relogin", "already_installed"],
     )
-
-    try:
-        host = db.query(Host).filter(Host.id == host_id).first()
-        if not host:
-            logger.warning("Host not found for KVM initialize result: %s", host_id)
-            return {"message_type": "error", "error": "Host not found"}
-
-        # KVM initialized - queue a virtualization check to refresh
-        # the host's virtualization state in the UI
-        from backend.websocket.messages import create_command_message
-        from backend.websocket.queue_enums import QueueDirection
-        from backend.websocket.queue_operations import QueueOperations
-
-        queue_ops = QueueOperations()
-        virtualization_command = create_command_message(
-            command_type="check_virtualization_support", parameters={}
-        )
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=virtualization_command,
-            direction=QueueDirection.OUTBOUND,
-            host_id=str(host_id),
-            db=db,
-        )
-        db.commit()
-
-        AuditService.log(
-            db=db,
-            action_type=ActionType.AGENT_MESSAGE,
-            entity_type=EntityType.HOST,
-            entity_id=str(host_id),
-            entity_name=host.fqdn,
-            description=_("KVM/libvirt initialized successfully"),
-            result=Result.SUCCESS,
-            details={
-                "message": message,
-                "already_installed": already_installed,
-                "needs_relogin": needs_relogin,
-            },
-        )
-
-        logger.info(
-            "KVM initialized for host %s, queued virtualization check",
-            host_id,
-        )
-
-        return {
-            "message_type": "kvm_initialize_ack",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "needs_relogin": needs_relogin,
-            "already_installed": already_installed,
-        }
-
-    except Exception as e:
-        logger.error(
-            "Error updating KVM initialize status for host %s: %s",
-            host_id,
-            e,
-            exc_info=True,
-        )
-        return {"message_type": "error", "error": str(e)}
 
 
 async def handle_bhyve_initialize_result(
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
-    """
-    Handle bhyve initialization result from agent.
-
-    After vmm.ko is loaded and configured, queues a virtualization check
-    to refresh the host's virtualization capabilities.
-
-    Args:
-        db: Database session
-        connection: WebSocket connection object
-        message_data: Message data containing bhyve init result
-
-    Returns:
-        Acknowledgment message
-    """
-    host_id = getattr(connection, "host_id", None)
-    if not host_id:
-        logger.warning("bhyve initialize result received but no host_id on connection")
-        return {"message_type": "error", "error": "No host_id on connection"}
-
-    result_data = message_data.get("result", {})
-    if not result_data:
-        result_data = message_data
-
-    success = result_data.get("success", False)
-    already_initialized = result_data.get("already_initialized", False)
-    vmm_loaded = result_data.get("vmm_loaded", False)
-    loader_conf_updated = result_data.get("loader_conf_updated", False)
-    error = result_data.get("error")
-    message = result_data.get("message", "")
-
-    if not success:
-        logger.error("bhyve initialization failed for host %s: %s", host_id, error)
-        return {"message_type": "error", "error": error}
-
-    logger.info(
-        "bhyve initialization result for host %s: success=%s, already_initialized=%s, "
-        "vmm_loaded=%s",
-        host_id,
-        success,
-        already_initialized,
-        vmm_loaded,
+    """Handle bhyve initialization result from agent."""
+    return await handle_simple_init_result(
+        db=db,
+        connection=connection,
+        message_data=message_data,
+        hypervisor_name="bhyve",
+        ack_message_type="bhyve_initialize_ack",
+        audit_description=_("bhyve initialized successfully"),
+        extra_result_fields=[
+            "already_initialized",
+            "vmm_loaded",
+            "loader_conf_updated",
+        ],
+        extra_ack_fields=["already_initialized"],
     )
-
-    try:
-        host = db.query(Host).filter(Host.id == host_id).first()
-        if not host:
-            logger.warning("Host not found for bhyve initialize result: %s", host_id)
-            return {"message_type": "error", "error": "Host not found"}
-
-        # bhyve initialized - queue a virtualization check to refresh
-        # the host's virtualization state in the UI
-        from backend.websocket.messages import create_command_message
-        from backend.websocket.queue_enums import QueueDirection
-        from backend.websocket.queue_operations import QueueOperations
-
-        queue_ops = QueueOperations()
-        virtualization_command = create_command_message(
-            command_type="check_virtualization_support", parameters={}
-        )
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=virtualization_command,
-            direction=QueueDirection.OUTBOUND,
-            host_id=str(host_id),
-            db=db,
-        )
-        db.commit()
-
-        AuditService.log(
-            db=db,
-            action_type=ActionType.AGENT_MESSAGE,
-            entity_type=EntityType.HOST,
-            entity_id=str(host_id),
-            entity_name=host.fqdn,
-            description=_("bhyve initialized successfully"),
-            result=Result.SUCCESS,
-            details={
-                "message": message,
-                "already_initialized": already_initialized,
-                "vmm_loaded": vmm_loaded,
-                "loader_conf_updated": loader_conf_updated,
-            },
-        )
-
-        logger.info(
-            "bhyve initialized for host %s, queued virtualization check",
-            host_id,
-        )
-
-        return {
-            "message_type": "bhyve_initialize_ack",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "already_initialized": already_initialized,
-        }
-
-    except Exception as e:
-        logger.error(
-            "Error updating bhyve initialize status for host %s: %s",
-            host_id,
-            e,
-            exc_info=True,
-        )
-        return {"message_type": "error", "error": str(e)}
 
 
 async def handle_kvm_modules_enable_result(
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
-    """
-    Handle KVM modules enable result from agent.
-
-    After KVM modules are loaded via modprobe, queues a virtualization check
-    to refresh the host's virtualization capabilities.
-
-    Args:
-        db: Database session
-        connection: WebSocket connection object
-        message_data: Message data containing KVM modules enable result
-
-    Returns:
-        Acknowledgment message
-    """
-    host_id = getattr(connection, "host_id", None)
-    if not host_id:
-        logger.warning(
-            "KVM modules enable result received but no host_id on connection"
-        )
-        return {"message_type": "error", "error": "No host_id on connection"}
-
-    result_data = message_data.get("result", {})
-    if not result_data:
-        result_data = message_data
-
-    success = result_data.get("success", False)
-    module = result_data.get("module", "")
-    error = result_data.get("error")
-    message = result_data.get("message", "")
-
-    if not success:
-        logger.error("KVM modules enable failed for host %s: %s", host_id, error)
-        return {"message_type": "error", "error": error}
-
-    logger.info(
-        "KVM modules enable result for host %s: success=%s, module=%s",
-        host_id,
-        success,
-        module,
+    """Handle KVM modules enable result from agent."""
+    return await handle_simple_init_result(
+        db=db,
+        connection=connection,
+        message_data=message_data,
+        hypervisor_name="KVM modules",
+        ack_message_type="kvm_modules_enable_ack",
+        audit_description=_("KVM kernel modules enabled successfully"),
+        extra_result_fields=["module"],
+        extra_ack_fields=["module"],
     )
-
-    try:
-        host = db.query(Host).filter(Host.id == host_id).first()
-        if not host:
-            logger.warning("Host not found for KVM modules enable result: %s", host_id)
-            return {"message_type": "error", "error": "Host not found"}
-
-        # KVM modules loaded - queue a virtualization check to refresh
-        # the host's virtualization state in the UI
-        from backend.websocket.messages import create_command_message
-        from backend.websocket.queue_enums import QueueDirection
-        from backend.websocket.queue_operations import QueueOperations
-
-        queue_ops = QueueOperations()
-        virtualization_command = create_command_message(
-            command_type="check_virtualization_support", parameters={}
-        )
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=virtualization_command,
-            direction=QueueDirection.OUTBOUND,
-            host_id=str(host_id),
-            db=db,
-        )
-        db.commit()
-
-        AuditService.log(
-            db=db,
-            action_type=ActionType.AGENT_MESSAGE,
-            entity_type=EntityType.HOST,
-            entity_id=str(host_id),
-            entity_name=host.fqdn,
-            description=_("KVM kernel modules enabled successfully"),
-            result=Result.SUCCESS,
-            details={
-                "message": message,
-                "module": module,
-            },
-        )
-
-        logger.info(
-            "KVM modules enabled for host %s, queued virtualization check",
-            host_id,
-        )
-
-        return {
-            "message_type": "kvm_modules_enable_ack",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "module": module,
-        }
-
-    except Exception as e:
-        logger.error(
-            "Error updating KVM modules enable status for host %s: %s",
-            host_id,
-            e,
-            exc_info=True,
-        )
-        return {"message_type": "error", "error": str(e)}
 
 
 async def handle_kvm_modules_disable_result(
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
-    """
-    Handle KVM modules disable result from agent.
-
-    After KVM modules are unloaded via modprobe -r, queues a virtualization check
-    to refresh the host's virtualization capabilities.
-
-    Args:
-        db: Database session
-        connection: WebSocket connection object
-        message_data: Message data containing KVM modules disable result
-
-    Returns:
-        Acknowledgment message
-    """
-    host_id = getattr(connection, "host_id", None)
-    if not host_id:
-        logger.warning(
-            "KVM modules disable result received but no host_id on connection"
-        )
-        return {"message_type": "error", "error": "No host_id on connection"}
-
-    result_data = message_data.get("result", {})
-    if not result_data:
-        result_data = message_data
-
-    success = result_data.get("success", False)
-    error = result_data.get("error")
-    message = result_data.get("message", "")
-
-    if not success:
-        logger.error("KVM modules disable failed for host %s: %s", host_id, error)
-        return {"message_type": "error", "error": error}
-
-    logger.info(
-        "KVM modules disable result for host %s: success=%s",
-        host_id,
-        success,
+    """Handle KVM modules disable result from agent."""
+    return await handle_simple_init_result(
+        db=db,
+        connection=connection,
+        message_data=message_data,
+        hypervisor_name="KVM modules",
+        ack_message_type="kvm_modules_disable_ack",
+        audit_description=_("KVM kernel modules disabled successfully"),
+        extra_result_fields=[],
+        extra_ack_fields=[],
     )
-
-    try:
-        host = db.query(Host).filter(Host.id == host_id).first()
-        if not host:
-            logger.warning("Host not found for KVM modules disable result: %s", host_id)
-            return {"message_type": "error", "error": "Host not found"}
-
-        # KVM modules unloaded - queue a virtualization check to refresh
-        # the host's virtualization state in the UI
-        from backend.websocket.messages import create_command_message
-        from backend.websocket.queue_enums import QueueDirection
-        from backend.websocket.queue_operations import QueueOperations
-
-        queue_ops = QueueOperations()
-        virtualization_command = create_command_message(
-            command_type="check_virtualization_support", parameters={}
-        )
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=virtualization_command,
-            direction=QueueDirection.OUTBOUND,
-            host_id=str(host_id),
-            db=db,
-        )
-        db.commit()
-
-        AuditService.log(
-            db=db,
-            action_type=ActionType.AGENT_MESSAGE,
-            entity_type=EntityType.HOST,
-            entity_id=str(host_id),
-            entity_name=host.fqdn,
-            description=_("KVM kernel modules disabled successfully"),
-            result=Result.SUCCESS,
-            details={"message": message},
-        )
-
-        logger.info(
-            "KVM modules disabled for host %s, queued virtualization check",
-            host_id,
-        )
-
-        return {
-            "message_type": "kvm_modules_disable_ack",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        }
-
-    except Exception as e:
-        logger.error(
-            "Error updating KVM modules disable status for host %s: %s",
-            host_id,
-            e,
-            exc_info=True,
-        )
-        return {"message_type": "error", "error": str(e)}

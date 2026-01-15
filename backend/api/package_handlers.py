@@ -30,21 +30,41 @@ async def handle_packages_batch_start(db: Session, connection, message_data: dic
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     if not hasattr(connection, "host_id") or not connection.host_id:
-        return {"message_type": "error", "error": _("Host not registered")}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     try:
         # Get host information for OS details
         host = db.query(Host).filter(Host.id == connection.host_id).first()
         if not host:
-            return {"message_type": "error", "error": _("Host not found")}
+            return {
+                "message_type": "error",
+                "error_type": "host_not_found",
+                "message": _("Host not found"),
+                "data": {},
+            }
 
         # Get batch information
         batch_id = message_data.get("batch_id")
         if not batch_id:
-            return {"message_type": "error", "error": _("Missing batch_id")}
+            return {
+                "message_type": "error",
+                "error_type": "missing_batch_id",
+                "message": _("Missing batch_id"),
+                "data": {},
+            }
 
         os_name = message_data.get("os_name") or host.platform or "Unknown"
         os_version = (
@@ -65,7 +85,12 @@ async def handle_packages_batch_start(db: Session, connection, message_data: dic
                     os_version,
                 )
                 debug_logger.error(error_msg)
-                return {"message_type": "error", "error": error_msg}
+                return {
+                    "message_type": "error",
+                    "error_type": "os_mismatch",
+                    "message": error_msg,
+                    "data": {},
+                }
 
         debug_logger.info(
             "Starting available packages batch %s for host %s (%s %s) with managers: %s",
@@ -112,7 +137,9 @@ async def handle_packages_batch_start(db: Session, connection, message_data: dic
         )
         return {
             "message_type": "error",
-            "error": _("Failed to start packages batch: %s") % str(e),
+            "error_type": "batch_start_failed",
+            "message": _("Failed to start packages batch: %s") % str(e),
+            "data": {},
         }
 
 
@@ -123,15 +150,30 @@ async def handle_packages_batch(db: Session, connection, message_data: dict):
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     if not hasattr(connection, "host_id") or not connection.host_id:
-        return {"message_type": "error", "error": _("Host not registered")}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     try:
         batch_id = message_data.get("batch_id")
         if not batch_id or batch_id not in _batch_sessions:
-            return {"message_type": "error", "error": _("Invalid or expired batch_id")}
+            return {
+                "message_type": "error",
+                "error_type": "invalid_batch_id",
+                "message": _("Invalid or expired batch_id"),
+                "data": {},
+            }
 
         batch_session = _batch_sessions[batch_id]
 
@@ -139,7 +181,9 @@ async def handle_packages_batch(db: Session, connection, message_data: dict):
         if batch_session["host_id"] != connection.host_id:
             return {
                 "message_type": "error",
-                "error": _("Batch belongs to different host"),
+                "error_type": "batch_host_mismatch",
+                "message": _("Batch belongs to different host"),
+                "data": {},
             }
 
         # Process packages from this batch
@@ -217,7 +261,9 @@ async def handle_packages_batch(db: Session, connection, message_data: dict):
         )
         return {
             "message_type": "error",
-            "error": _("Failed to process packages batch: %s") % str(e),
+            "error_type": "batch_process_failed",
+            "message": _("Failed to process packages batch: %s") % str(e),
+            "data": {},
         }
 
 
@@ -228,15 +274,30 @@ async def handle_packages_batch_end(db: Session, connection, message_data: dict)
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     if not hasattr(connection, "host_id") or not connection.host_id:
-        return {"message_type": "error", "error": _("Host not registered")}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     try:
         batch_id = message_data.get("batch_id")
         if not batch_id or batch_id not in _batch_sessions:
-            return {"message_type": "error", "error": _("Invalid or expired batch_id")}
+            return {
+                "message_type": "error",
+                "error_type": "invalid_batch_id",
+                "message": _("Invalid or expired batch_id"),
+                "data": {},
+            }
 
         batch_session = _batch_sessions[batch_id]
 
@@ -244,7 +305,9 @@ async def handle_packages_batch_end(db: Session, connection, message_data: dict)
         if batch_session["host_id"] != connection.host_id:
             return {
                 "message_type": "error",
-                "error": _("Batch belongs to different host"),
+                "error_type": "batch_host_mismatch",
+                "message": _("Batch belongs to different host"),
+                "data": {},
             }
 
         total_packages = batch_session["total_packages"]
@@ -276,5 +339,7 @@ async def handle_packages_batch_end(db: Session, connection, message_data: dict)
         )
         return {
             "message_type": "error",
-            "error": _("Failed to end packages batch: %s") % str(e),
+            "error_type": "batch_end_failed",
+            "message": _("Failed to end packages batch: %s") % str(e),
+            "data": {},
         }

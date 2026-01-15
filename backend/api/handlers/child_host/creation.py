@@ -40,7 +40,12 @@ async def handle_child_host_creation_progress(
         logger.warning(
             "Child host creation progress received but no host_id on connection"
         )
-        return {"message_type": "error", "error": "No host_id on connection"}
+        return {
+            "message_type": "error",
+            "error_type": "no_host_id",
+            "message": _("No host_id on connection"),
+            "data": {},
+        }
 
     data = message_data.get("data", message_data)
     step = data.get("step", "unknown")
@@ -85,7 +90,12 @@ async def handle_child_host_created(
         logger.warning(
             "Child host created message received but no host_id on connection"
         )
-        return {"message_type": "error", "error": "No host_id on connection"}
+        return {
+            "message_type": "error",
+            "error_type": "no_host_id",
+            "message": _("No host_id on connection"),
+            "data": {},
+        }
 
     result_data = message_data.get("result", {})
     if not result_data:
@@ -175,7 +185,12 @@ async def handle_child_host_created(
         host = db.query(Host).filter(Host.id == host_id).first()
         if not host:
             logger.warning("Host not found for child host creation: %s", host_id)
-            return {"message_type": "error", "error": "Host not found"}
+            return {
+                "message_type": "error",
+                "error_type": "host_not_found",
+                "message": _("Host not found"),
+                "data": {},
+            }
 
         now = datetime.now(timezone.utc).replace(tzinfo=None)
 
@@ -245,4 +260,9 @@ async def handle_child_host_created(
             e,
             exc_info=True,
         )
-        return {"message_type": "error", "error": str(e)}
+        return {
+            "message_type": "error",
+            "error_type": "child_creation_failed",
+            "message": _("Failed to record child host creation: %s") % str(e),
+            "data": {},
+        }

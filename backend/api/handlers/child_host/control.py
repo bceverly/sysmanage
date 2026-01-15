@@ -101,7 +101,12 @@ async def handle_child_host_delete_result(
     host_id = getattr(connection, "host_id", None)
     if not host_id:
         logger.warning("Child host delete result received but no host_id on connection")
-        return {"message_type": "error", "error": "No host_id on connection"}
+        return {
+            "message_type": "error",
+            "error_type": "no_host_id",
+            "message": _("No host_id on connection"),
+            "data": {},
+        }
 
     result_data = message_data.get("result", {})
     if not result_data:
@@ -192,7 +197,12 @@ async def handle_child_host_delete_result(
             except Exception as e:
                 logger.error("Error updating child host status: %s", e)
 
-        return {"message_type": "error", "error": error}
+        return {
+            "message_type": "error",
+            "error_type": "operation_failed",
+            "message": error or _("Unknown error"),
+            "data": {},
+        }
 
     logger.info(
         "Child host deleted for host %s: name=%s, type=%s",
@@ -205,7 +215,12 @@ async def handle_child_host_delete_result(
         host = db.query(Host).filter(Host.id == host_id).first()
         if not host:
             logger.warning("Host not found for child host delete: %s", host_id)
-            return {"message_type": "error", "error": "Host not found"}
+            return {
+                "message_type": "error",
+                "error_type": "host_not_found",
+                "message": _("Host not found"),
+                "data": {},
+            }
 
         # Delete the child host record
         child = (
@@ -343,7 +358,12 @@ async def handle_child_host_delete_result(
             e,
             exc_info=True,
         )
-        return {"message_type": "error", "error": str(e)}
+        return {
+            "message_type": "error",
+            "error_type": "operation_failed",
+            "message": str(e),
+            "data": {},
+        }
 
 
 async def _handle_child_host_control_result(
@@ -371,7 +391,12 @@ async def _handle_child_host_control_result(
         logger.warning(
             "Child host %s result received but no host_id on connection", action
         )
-        return {"message_type": "error", "error": "No host_id on connection"}
+        return {
+            "message_type": "error",
+            "error_type": "no_host_id",
+            "message": _("No host_id on connection"),
+            "data": {},
+        }
 
     result_data = message_data.get("result", {})
     if not result_data:
@@ -393,7 +418,12 @@ async def _handle_child_host_control_result(
             child_name,
             error,
         )
-        return {"message_type": "error", "error": error}
+        return {
+            "message_type": "error",
+            "error_type": "operation_failed",
+            "message": error or _("Unknown error"),
+            "data": {},
+        }
 
     logger.info(
         "Child host %s succeeded for host %s: name=%s, new_status=%s",
@@ -407,7 +437,12 @@ async def _handle_child_host_control_result(
         host = db.query(Host).filter(Host.id == host_id).first()
         if not host:
             logger.warning("Host not found for child host %s: %s", action, host_id)
-            return {"message_type": "error", "error": "Host not found"}
+            return {
+                "message_type": "error",
+                "error_type": "host_not_found",
+                "message": _("Host not found"),
+                "data": {},
+            }
 
         # Update the child host status
         child = (
@@ -458,4 +493,9 @@ async def _handle_child_host_control_result(
             e,
             exc_info=True,
         )
-        return {"message_type": "error", "error": str(e)}
+        return {
+            "message_type": "error",
+            "error_type": "operation_failed",
+            "message": str(e),
+            "data": {},
+        }
