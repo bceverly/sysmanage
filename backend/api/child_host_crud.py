@@ -440,6 +440,30 @@ async def delete_child_host(
                 if matching_host:
                     deleted_host_info = matching_host.fqdn
                     session.delete(matching_host)
+            else:
+                # Final fallback: try matching by child_name
+                # This handles cases where hostname was NULL (e.g., bhyve VMs
+                # created before metadata storage was implemented)
+                # Try child_name as exact FQDN match
+                matching_host = (
+                    session.query(models.Host)
+                    .filter(func.lower(models.Host.fqdn) == func.lower(child_name))
+                    .first()
+                )
+                # Try child_name as prefix of Host.fqdn
+                if not matching_host:
+                    matching_host = (
+                        session.query(models.Host)
+                        .filter(
+                            func.lower(models.Host.fqdn).like(
+                                func.lower(child_name + ".%")
+                            )
+                        )
+                        .first()
+                    )
+                if matching_host:
+                    deleted_host_info = matching_host.fqdn
+                    session.delete(matching_host)
 
             # Audit log - use appropriate message based on status
             if child_status == "failed":

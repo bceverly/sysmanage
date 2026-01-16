@@ -1376,7 +1376,7 @@
     "aliasExample": "例: my-repo",
     "constructedRepo": "構築されたリポジトリ",
     "coprExample": "例: user/project",
-    "coprHelp": "Fedora/RHEL/CentOSの場合、COPRリポジトリまたはサードパーティYUM/DNFリポジトリを追加します。",
+    "coprHelp": "Fedora/RHEL/CentOS/Oracle Linuxの場合、COPRリポジトリまたはサードパーティYUM/DNFリポジトリを追加します。",
     "coprIdentifier": "COPR識別子",
     "coprOwner": "COPR所有者",
     "coprOwnerHelp": "例: @python",

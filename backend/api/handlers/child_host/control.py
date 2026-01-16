@@ -326,6 +326,38 @@ async def handle_child_host_delete_result(
                     )
                     db.delete(matching_host)
                     db.commit()
+            else:
+                # Final fallback: try matching by child_name
+                # This handles cases where hostname was NULL (e.g., bhyve VMs
+                # created before metadata storage was implemented)
+                # Try child_name as exact FQDN match
+                matching_host = (
+                    db.query(Host)
+                    .filter(func.lower(Host.fqdn) == func.lower(child_name))
+                    .first()
+                )
+                # Try child_name as prefix of Host.fqdn
+                if not matching_host:
+                    matching_host = (
+                        db.query(Host)
+                        .filter(
+                            func.lower(Host.fqdn).like(func.lower(child_name + ".%"))
+                        )
+                        .first()
+                    )
+                if matching_host:
+                    deleted_host_info = {
+                        "id": str(matching_host.id),
+                        "fqdn": matching_host.fqdn,
+                    }
+                    logger.info(
+                        "Deleting host record matched by child_name for %s: host_id=%s, fqdn=%s",
+                        child_name,
+                        matching_host.id,
+                        matching_host.fqdn,
+                    )
+                    db.delete(matching_host)
+                    db.commit()
 
             AuditService.log(
                 db=db,

@@ -1477,7 +1477,7 @@
     "addSuccess": "Repository added successfully. Package list will be updated shortly.",
     "aliasExample": "Example: my-repo",
     "coprExample": "Example: user/project",
-    "coprHelp": "For Fedora/RHEL/CentOS, add COPR repositories or Third-Party YUM/DNF repositories.",
+    "coprHelp": "For Fedora/RHEL/CentOS/Oracle Linux, add COPR repositories or Third-Party YUM/DNF repositories.",
     "coprIdentifier": "COPR Identifier",
     "coprOwner": "COPR Owner",
     "coprOwnerHelp": "e.g., @python",

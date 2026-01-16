@@ -1394,7 +1394,7 @@
     "aliasExample": "مثال: my-repo",
     "constructedRepo": "المستودع المُنشأ",
     "coprExample": "مثال: user/project",
-    "coprHelp": "لـ Fedora/RHEL/CentOS، أضف مستودعات COPR أو مستودعات YUM/DNF للطرف الثالث.",
+    "coprHelp": "لـ Fedora/RHEL/CentOS/Oracle Linux، أضف مستودعات COPR أو مستودعات YUM/DNF للطرف الثالث.",
     "coprIdentifier": "معرف COPR",
     "coprOwner": "مالك COPR",
     "coprOwnerHelp": "مثال: @python",

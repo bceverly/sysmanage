@@ -210,6 +210,7 @@ OS_PACKAGE_MANAGERS = {
     "Fedora": ["dnf", "flatpak"],
     "Rocky Linux": ["dnf", "yum", "flatpak"],
     "AlmaLinux": ["dnf", "yum", "flatpak"],
+    "Oracle Linux": ["dnf", "yum", "flatpak"],
     "openSUSE": ["zypper", "flatpak"],
     "SLES": ["zypper"],
     # BSD variants

@@ -1397,7 +1397,7 @@
     "aliasExample": "Ejemplo: my-repo",
     "constructedRepo": "Repositorio Construido",
     "coprExample": "Ejemplo: user/project",
-    "coprHelp": "Para Fedora/RHEL/CentOS, agregue repositorios COPR o repositorios YUM/DNF de terceros.",
+    "coprHelp": "Para Fedora/RHEL/CentOS/Oracle Linux, agregue repositorios COPR o repositorios YUM/DNF de terceros.",
     "coprIdentifier": "Identificador COPR",
     "coprOwner": "Propietario de COPR",
     "coprOwnerHelp": "p. ej., @python",

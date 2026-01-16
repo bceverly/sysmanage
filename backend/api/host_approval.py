@@ -144,6 +144,31 @@ async def approve_host(
                             matching_child = child
                             break
 
+                # Fallback: If hostname is NULL, try matching child_name to short hostname
+                # This handles cases where VMs were reported by agent before
+                # metadata was available (e.g., bhyve VMs discovered by listing)
+                if not matching_child:
+                    matching_child = (
+                        session.query(HostChild)
+                        .filter(
+                            HostChild.child_name == host_short_name,
+                            HostChild.child_host_id.is_(None),
+                            HostChild.status.in_(["running", "creating"]),
+                            HostChild.hostname.is_(
+                                None
+                            ),  # Only match if hostname is NULL
+                        )
+                        .first()
+                    )
+                    if matching_child:
+                        # Update the hostname field while we're at it
+                        matching_child.hostname = host.fqdn
+                        logger.info(
+                            "Matched by child_name '%s', updated hostname to '%s'",
+                            host_short_name,
+                            host.fqdn,
+                        )
+
             if matching_child:
                 # Link the child host to the approved host
                 matching_child.child_host_id = host.id

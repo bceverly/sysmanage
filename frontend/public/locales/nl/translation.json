@@ -1361,7 +1361,7 @@
     "aliasExample": "Voorbeeld: my-repo",
     "constructedRepo": "Samengestelde Repository",
     "coprExample": "Voorbeeld: user/project",
-    "coprHelp": "Voor Fedora/RHEL/CentOS, voeg COPR-repositories of repositories van derden voor YUM/DNF toe.",
+    "coprHelp": "Voor Fedora/RHEL/CentOS/Oracle Linux, voeg COPR-repositories of repositories van derden voor YUM/DNF toe.",
     "coprIdentifier": "COPR-identificatie",
     "coprOwner": "COPR-eigenaar",
     "coprOwnerHelp": "bijv. @python",

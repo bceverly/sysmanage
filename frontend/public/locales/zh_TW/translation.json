@@ -1358,7 +1358,7 @@
     "aliasExample": "範例: my-repo",
     "constructedRepo": "已構建儲存庫",
     "coprExample": "範例: user/project",
-    "coprHelp": "對於Fedora/RHEL/CentOS，新增COPR儲存庫或第三方YUM/DNF儲存庫。",
+    "coprHelp": "對於Fedora/RHEL/CentOS/Oracle Linux，新增COPR儲存庫或第三方YUM/DNF儲存庫。",
     "coprIdentifier": "COPR 識別碼",
     "coprOwner": "COPR擁有者",
     "coprOwnerHelp": "例如，@python",

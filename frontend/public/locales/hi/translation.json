@@ -1373,7 +1373,7 @@
     "aliasExample": "उदाहरण: my-repo",
     "constructedRepo": "निर्मित रिपॉजिटरी",
     "coprExample": "उदाहरण: user/project",
-    "coprHelp": "Fedora/RHEL/CentOS के लिए, COPR रिपॉजिटरी या थर्ड-पार्टी YUM/DNF रिपॉजिटरी जोड़ें।",
+    "coprHelp": "Fedora/RHEL/CentOS/Oracle Linux के लिए, COPR रिपॉजिटरी या थर्ड-पार्टी YUM/DNF रिपॉजिटरी जोड़ें।",
     "coprIdentifier": "COPR पहचानकर्ता",
     "coprOwner": "COPR स्वामी",
     "coprOwnerHelp": "उदा., @python",

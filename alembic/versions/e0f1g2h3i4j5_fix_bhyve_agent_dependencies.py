@@ -1,7 +1,7 @@
 """fix_bhyve_agent_dependencies
 
 Revision ID: e0f1g2h3i4j5
-Revises: d9e0f1g2h3i4
+Revises: z5a6b7c8d9e0
 Create Date: 2026-01-14 10:00:00.000000
 
 This migration fixes the agent install commands to pre-install all required
@@ -17,7 +17,7 @@ from sqlalchemy import text
 
 # revision identifiers, used by Alembic.
 revision: str = "e0f1g2h3i4j5"
-down_revision: Union[str, None] = "d9e0f1g2h3i4"
+down_revision: Union[str, None] = "z5a6b7c8d9e0"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

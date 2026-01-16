@@ -40,6 +40,7 @@ OS_DEFAULT_PACKAGE_MANAGERS = {
     "Fedora": "dnf",
     "Rocky Linux": "dnf",
     "AlmaLinux": "dnf",
+    "Oracle Linux": "dnf",
     "openSUSE": "zypper",
     "SLES": "zypper",
     "FreeBSD": "pkg",
@@ -59,6 +60,7 @@ OS_OPTIONAL_PACKAGE_MANAGERS = {
     "Fedora": ["flatpak", "snap"],
     "Rocky Linux": ["flatpak", "snap"],
     "AlmaLinux": ["flatpak", "snap"],
+    "Oracle Linux": ["flatpak", "snap"],
     "openSUSE": ["flatpak", "snap"],
     "SLES": ["flatpak"],
     "FreeBSD": [],  # No optional managers

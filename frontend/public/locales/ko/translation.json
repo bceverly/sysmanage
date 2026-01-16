@@ -1374,7 +1374,7 @@
     "aliasExample": "예: my-repo",
     "constructedRepo": "구성된 저장소",
     "coprExample": "예: user/project",
-    "coprHelp": "Fedora/RHEL/CentOS의 경우 COPR 저장소 또는 타사 YUM/DNF 저장소를 추가하세요.",
+    "coprHelp": "Fedora/RHEL/CentOS/Oracle Linux의 경우 COPR 저장소 또는 타사 YUM/DNF 저장소를 추가하세요.",
     "coprIdentifier": "COPR 식별자",
     "coprOwner": "COPR 소유자",
     "coprOwnerHelp": "예: @python",
