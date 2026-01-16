@@ -30,9 +30,10 @@ async def login_helper(page: Page, test_user: dict, ui_config):
     await page.wait_for_load_state("domcontentloaded")
     await page.wait_for_timeout(2000)
 
-    # Fill login form
-    await page.fill('input[type="text"]', test_user["username"])
-    await page.fill('input[type="password"]', test_user["password"])
+    # Fill login form using specific selectors for MUI TextField components
+    # The userid field has id="userid" and password field has id="password"
+    await page.fill('#userid', test_user["username"])
+    await page.fill('#password', test_user["password"])
     await page.click('button[type="submit"]')
     await page.wait_for_timeout(3000)
 

@@ -131,6 +131,7 @@ def test_db():
 
         # Update management fields
         reboot_required = Column(Boolean, nullable=False, default=False)
+        reboot_required_reason = Column(String(255), nullable=True)
         reboot_required_updated_at = Column(DateTime, nullable=True)
 
         # Agent privilege status
