@@ -134,7 +134,7 @@ class TestPackageHandlers:
             )
 
             assert result["message_type"] == "error"
-            assert "Missing batch_id" in result["error"]
+            assert "Missing batch_id" in result["message"]
 
     @pytest.mark.asyncio
     async def test_handle_packages_batch_success(
@@ -201,7 +201,7 @@ class TestPackageHandlers:
             )
 
             assert result["message_type"] == "error"
-            assert "Invalid or expired batch_id" in result["error"]
+            assert "Invalid or expired batch_id" in result["message"]
 
     @pytest.mark.asyncio
     async def test_handle_packages_batch_end_success(
@@ -255,7 +255,7 @@ class TestPackageHandlers:
             )
 
             assert result["message_type"] == "error"
-            assert "Invalid or expired batch_id" in result["error"]
+            assert "Invalid or expired batch_id" in result["message"]
 
     @pytest.mark.asyncio
     async def test_handle_packages_batch_wrong_host(
@@ -284,7 +284,7 @@ class TestPackageHandlers:
             )
 
             assert result["message_type"] == "error"
-            assert "Batch belongs to different host" in result["error"]
+            assert "Batch belongs to different host" in result["message"]
 
     @pytest.mark.asyncio
     async def test_handle_packages_batch_invalid_packages(

@@ -123,7 +123,12 @@ async def handle_child_hosts_list_update(
     host_id = getattr(connection, "host_id", None)
     if not host_id:
         logger.warning("Child hosts list update received but no host_id on connection")
-        return {"message_type": "error", "error": "No host_id on connection"}
+        return {
+            "message_type": "error",
+            "error_type": "no_host_id",
+            "message": _("No host_id on connection"),
+            "data": {},
+        }
 
     result_data = message_data.get("result", {})
     if not result_data:
@@ -134,7 +139,12 @@ async def handle_child_hosts_list_update(
     if not success:
         error = message_data.get("error") or result_data.get("error", "Unknown error")
         logger.error("Child hosts list failed for host %s: %s", host_id, error)
-        return {"message_type": "error", "error": error}
+        return {
+            "message_type": "error",
+            "error_type": "operation_failed",
+            "message": error,
+            "data": {},
+        }
 
     child_hosts = result_data.get("child_hosts", [])
     count = result_data.get("count", len(child_hosts))
@@ -145,7 +155,12 @@ async def handle_child_hosts_list_update(
         host = db.query(Host).filter(Host.id == host_id).first()
         if not host:
             logger.warning("Host not found for child hosts update: %s", host_id)
-            return {"message_type": "error", "error": "Host not found"}
+            return {
+                "message_type": "error",
+                "error_type": "host_not_found",
+                "message": _("Host not found"),
+                "data": {},
+            }
 
         now = datetime.now(timezone.utc).replace(tzinfo=None)
 
@@ -403,4 +418,9 @@ async def handle_child_hosts_list_update(
         logger.error(
             "Error updating child hosts list for host %s: %s", host_id, e, exc_info=True
         )
-        return {"message_type": "error", "error": str(e)}
+        return {
+            "message_type": "error",
+            "error_type": "operation_failed",
+            "message": str(e),
+            "data": {},
+        }

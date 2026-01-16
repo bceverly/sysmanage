@@ -216,12 +216,13 @@ async def _process_websocket_message(data, connection, db, connection_id):
         raw_message = json.loads(data)
 
         # Validate message integrity and structure
-        if not websocket_security.validate_message_integrity(
+        is_valid, validation_error = websocket_security.validate_message_integrity(
             raw_message, connection_id or connection.agent_id
-        ):
+        )
+        if not is_valid:
             error_msg = ErrorMessage(
                 "message_validation_failed",
-                _("Message failed security validation"),
+                validation_error or _("Message failed security validation"),
             )
             await connection.send_message(error_msg.to_dict())
             return

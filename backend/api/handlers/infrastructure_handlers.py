@@ -23,7 +23,12 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     debug_logger.info(
         "Processing script execution result from %s", message_data.get("hostname")
@@ -35,7 +40,12 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
 
         if not execution_id:
             debug_logger.error("No execution_id provided in script execution result")
-            return {"message_type": "error", "error": _("Execution ID is required")}
+            return {
+                "message_type": "error",
+                "error_type": "missing_execution_id",
+                "message": _("Execution ID is required"),
+                "data": {},
+            }
 
         # Check for duplicate execution UUID to prevent duplicate processing
         if execution_uuid:
@@ -56,8 +66,12 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
                 )
                 return {
                     "message_type": "error",
-                    "error": _("Script execution result with UUID %s already processed")
+                    "error_type": "duplicate_execution",
+                    "message": _(
+                        "Script execution result with UUID %s already processed"
+                    )
                     % execution_uuid,
+                    "data": {},
                 }
 
         # Use connection object's host_id if available (from message processor)
@@ -71,7 +85,12 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
             hostname = message_data.get("hostname")
             if not hostname:
                 debug_logger.error("No hostname provided and no host_id in connection")
-                return {"message_type": "error", "error": _("Hostname is required")}
+                return {
+                    "message_type": "error",
+                    "error_type": "missing_hostname",
+                    "message": _("Hostname is required"),
+                    "data": {},
+                }
 
             # Find the host (case-insensitive)
             host = db.query(Host).filter(Host.fqdn.ilike(hostname)).first()
@@ -79,7 +98,9 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
                 debug_logger.error("Host not found: %s", hostname)
                 return {
                     "message_type": "error",
-                    "error": _("Host not found: %s") % hostname,
+                    "error_type": "host_not_found",
+                    "message": _("Host not found: %s") % hostname,
+                    "data": {},
                 }
 
         # Find existing script execution log entry by execution_id
@@ -189,7 +210,9 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
         db.rollback()
         return {
             "message_type": "error",
-            "error": _("Failed to store script execution result: %s") % str(e),
+            "error_type": "operation_failed",
+            "message": _("Failed to store script execution result: %s") % str(e),
+            "data": {},
         }
 
 
@@ -200,7 +223,12 @@ async def handle_reboot_status_update(db: Session, connection, message_data: dic
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     try:
         hostname = message_data.get("hostname")
@@ -227,7 +255,9 @@ async def handle_reboot_status_update(db: Session, connection, message_data: dic
             )
             return {
                 "message_type": "error",
-                "error": _("Host not found for reboot status update"),
+                "error_type": "host_not_found",
+                "message": _("Host not found for reboot status update"),
+                "data": {},
             }
 
         debug_logger.info("Processing reboot status update from %s", hostname)
@@ -291,7 +321,9 @@ async def handle_reboot_status_update(db: Session, connection, message_data: dic
         db.rollback()
         return {
             "message_type": "error",
-            "error": _("Failed to update reboot status: %s") % str(e),
+            "error_type": "operation_failed",
+            "message": _("Failed to update reboot status: %s") % str(e),
+            "data": {},
         }
 
 
@@ -303,7 +335,12 @@ async def handle_host_certificates_update(db: Session, connection, message_data:
         # Check for host_id in message data (agent-provided)
         agent_host_id = message_data.get("host_id")
         if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-            return {"message_type": "error", "error": "host_not_registered"}
+            return {
+                "message_type": "error",
+                "error_type": "host_not_registered",
+                "message": _("Host not registered"),
+                "data": {},
+            }
 
         # Find the host by hostname or other connection attributes
         host = None
@@ -318,7 +355,12 @@ async def handle_host_certificates_update(db: Session, connection, message_data:
                 "Could not identify host for certificates update from connection %s",
                 getattr(connection, "hostname", "unknown"),
             )
-            return {"message_type": "error", "error": "host_identification_failed"}
+            return {
+                "message_type": "error",
+                "error_type": "host_identification_failed",
+                "message": _("Could not identify host"),
+                "data": {},
+            }
 
         # Get certificates data from message
         certificates_data = message_data.get("certificates", [])
@@ -411,7 +453,9 @@ async def handle_host_certificates_update(db: Session, connection, message_data:
 
         return {
             "message_type": "error",
-            "error": f"Failed to process certificates update: {str(e)}",
+            "error_type": "operation_failed",
+            "message": _("Failed to process certificates update: %s") % str(e),
+            "data": {},
         }
 
 
@@ -423,7 +467,12 @@ async def handle_host_role_data_update(db: Session, connection, message_data: di
         # Check for host_id in message data (agent-provided)
         agent_host_id = message_data.get("host_id")
         if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-            return {"message_type": "error", "error": "host_not_registered"}
+            return {
+                "message_type": "error",
+                "error_type": "host_not_registered",
+                "message": _("Host not registered"),
+                "data": {},
+            }
 
         # Find the host by hostname or other connection attributes
         host = None
@@ -437,7 +486,12 @@ async def handle_host_role_data_update(db: Session, connection, message_data: di
                 "Could not identify host for role data update from connection %s",
                 getattr(connection, "hostname", "unknown"),
             )
-            return {"message_type": "error", "error": "host_identification_failed"}
+            return {
+                "message_type": "error",
+                "error_type": "host_identification_failed",
+                "message": _("Could not identify host"),
+                "data": {},
+            }
 
         # Get role data from message
         roles_data = message_data.get("roles", [])
@@ -513,5 +567,7 @@ async def handle_host_role_data_update(db: Session, connection, message_data: di
         db.rollback()
         return {
             "message_type": "error",
-            "error": f"Failed to process role data update: {str(e)}",
+            "error_type": "operation_failed",
+            "message": _("Failed to process role data update: %s") % str(e),
+            "data": {},
         }

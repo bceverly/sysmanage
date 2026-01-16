@@ -33,10 +33,20 @@ async def handle_software_update(db: Session, connection, message_data: dict):
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     if not hasattr(connection, "host_id") or not connection.host_id:
-        return {"message_type": "error", "error": _("Host not registered")}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     try:
         # Handle software packages
@@ -93,7 +103,9 @@ async def handle_software_update(db: Session, connection, message_data: dict):
         db.rollback()
         return {
             "message_type": "error",
-            "error": _("Failed to update software inventory"),
+            "error_type": "operation_failed",
+            "message": _("Failed to update software inventory"),
+            "data": {},
         }
 
 
@@ -104,10 +116,20 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     if not hasattr(connection, "host_id") or not connection.host_id:
-        return {"message_type": "error", "error": _("Host not registered")}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     try:
         # Clear existing updates for this host first
@@ -257,7 +279,9 @@ async def handle_package_updates_update(db: Session, connection, message_data: d
         db.rollback()
         return {
             "message_type": "error",
-            "error": _("Failed to store updates: %s") % str(e),
+            "error_type": "operation_failed",
+            "message": _("Failed to store updates: %s") % str(e),
+            "data": {},
         }
 
 
@@ -370,7 +394,9 @@ async def handle_package_collection(db: Session, connection, message_data: dict)
 
         return {
             "message_type": "error",
-            "error": f"Failed to process package collection result: {str(e)}",
+            "error_type": "operation_failed",
+            "message": _("Failed to process package collection result: %s") % str(e),
+            "data": {},
         }
 
 
@@ -383,10 +409,20 @@ async def handle_third_party_repository_update(
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     if not hasattr(connection, "host_id") or not connection.host_id:
-        return {"message_type": "error", "error": _("Host not registered")}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     try:
         # Handle third-party repositories
@@ -452,7 +488,10 @@ async def handle_third_party_repository_update(
         db.rollback()
         return {
             "message_type": "error",
-            "error": f"Failed to process third-party repository update: {str(e)}",
+            "error_type": "operation_failed",
+            "message": _("Failed to process third-party repository update: %s")
+            % str(e),
+            "data": {},
         }
 
 
@@ -463,10 +502,20 @@ async def handle_antivirus_status_update(db: Session, connection, message_data: 
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     if not hasattr(connection, "host_id") or not connection.host_id:
-        return {"message_type": "error", "error": _("Host not registered")}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     try:
         # Extract antivirus status information
@@ -522,7 +571,9 @@ async def handle_antivirus_status_update(db: Session, connection, message_data: 
         db.rollback()
         return {
             "message_type": "error",
-            "error": f"Failed to process antivirus status update: {str(e)}",
+            "error_type": "operation_failed",
+            "message": _("Failed to process antivirus status update: %s") % str(e),
+            "data": {},
         }
 
 
@@ -535,10 +586,20 @@ async def handle_commercial_antivirus_status_update(
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     if not hasattr(connection, "host_id") or not connection.host_id:
-        return {"message_type": "error", "error": _("Host not registered")}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     try:
         # Extract commercial antivirus status information
@@ -641,7 +702,10 @@ async def handle_commercial_antivirus_status_update(
         db.rollback()
         return {
             "message_type": "error",
-            "error": f"Failed to process commercial antivirus status update: {str(e)}",
+            "error_type": "operation_failed",
+            "message": _("Failed to process commercial antivirus status update: %s")
+            % str(e),
+            "data": {},
         }
 
 
@@ -652,10 +716,20 @@ async def handle_firewall_status_update(db: Session, connection, message_data: d
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     if not hasattr(connection, "host_id") or not connection.host_id:
-        return {"message_type": "error", "error": _("Host not registered")}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     try:
         # Extract firewall status information
@@ -730,7 +804,9 @@ async def handle_firewall_status_update(db: Session, connection, message_data: d
         db.rollback()
         return {
             "message_type": "error",
-            "error": f"Failed to process firewall status update: {str(e)}",
+            "error_type": "operation_failed",
+            "message": _("Failed to process firewall status update: %s") % str(e),
+            "data": {},
         }
 
 
@@ -741,10 +817,20 @@ async def handle_graylog_status_update(db: Session, connection, message_data: di
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     if not hasattr(connection, "host_id") or not connection.host_id:
-        return {"message_type": "error", "error": _("Host not registered")}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     try:
         # Extract Graylog status information
@@ -804,5 +890,7 @@ async def handle_graylog_status_update(db: Session, connection, message_data: di
         db.rollback()
         return {
             "message_type": "error",
-            "error": f"Failed to process Graylog status update: {str(e)}",
+            "error_type": "operation_failed",
+            "message": _("Failed to process Graylog status update: %s") % str(e),
+            "data": {},
         }

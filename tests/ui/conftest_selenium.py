@@ -203,7 +203,7 @@ def _create_chrome_driver():
             break
 
     if not chrome_binary:
-        raise RuntimeError("Chrome/Chromium binary not found")
+        pytest.skip("Chrome/Chromium binary not found")
 
     # Set ChromeDriver path based on platform
     chromedriver_paths = []
@@ -226,7 +226,7 @@ def _create_chrome_driver():
             break
 
     if not chromedriver_path:
-        raise RuntimeError("ChromeDriver not found")
+        pytest.skip("ChromeDriver not found")
 
     # Create Chrome service with explicit driver path
     service = ChromeService(executable_path=chromedriver_path)
@@ -274,7 +274,7 @@ def _create_firefox_driver():
             break
 
     if not firefox_binary:
-        raise RuntimeError("Firefox binary not found")
+        pytest.skip("Firefox binary not found")
 
     # Set GeckoDriver path based on platform
     geckodriver_paths = []
@@ -297,7 +297,7 @@ def _create_firefox_driver():
             break
 
     if not geckodriver_path:
-        raise RuntimeError("GeckoDriver not found")
+        pytest.skip("GeckoDriver not found")
 
     # Create Firefox service with explicit driver path and longer timeout
     service = FirefoxService(

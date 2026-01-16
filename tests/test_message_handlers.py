@@ -306,7 +306,7 @@ class TestHandleHeartbeat:
         result = await handle_heartbeat(mock_session, connection, message_data)
 
         assert result["message_type"] == "error"
-        assert "not registered" in result["error"]
+        assert "not registered" in result["message"]
 
     @pytest.mark.asyncio
     async def test_heartbeat_database_error(self):
@@ -324,7 +324,7 @@ class TestHandleHeartbeat:
         result = await handle_heartbeat(mock_session, connection, message_data)
 
         assert result["message_type"] == "error"
-        assert "Failed to process heartbeat" in result["error"]
+        assert "Failed to process heartbeat" in result["message"]
 
     @pytest.mark.asyncio
     async def test_heartbeat_mock_connection_no_last_access_update(self):
@@ -476,7 +476,7 @@ class TestHandleDiagnosticResult:
         result = await handle_diagnostic_result(mock_session, connection, message_data)
 
         assert result["message_type"] == "error"
-        assert "Failed to process diagnostic result" in result["error"]
+        assert "Failed to process diagnostic result" in result["message"]
         assert mock_session.committed
 
     @pytest.mark.asyncio
@@ -630,9 +630,9 @@ class TestMessageHandlersIntegration:
         result = await handle_heartbeat(mock_session, connection, {})
 
         if result["message_type"] == "error":
-            assert "error" in result
-            assert isinstance(result["error"], str)
-            assert len(result["error"]) > 0
+            assert "message" in result
+            assert isinstance(result["message"], str)
+            assert len(result["message"]) > 0
 
 
 class TestMessageHandlersLogging:

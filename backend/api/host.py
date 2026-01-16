@@ -63,6 +63,9 @@ class HostRegistration(BaseModel):
     ipv4: Optional[str] = None
     ipv6: Optional[str] = None
     script_execution_enabled: Optional[bool] = None
+    is_privileged: Optional[bool] = None
+    enabled_shells: Optional[List[str]] = None
+    auto_approve_token: Optional[str] = None
 
 
 class HostRegistrationLegacy(BaseModel):

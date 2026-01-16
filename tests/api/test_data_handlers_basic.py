@@ -195,4 +195,5 @@ class TestErrorHandling:
 
         # Should return error
         assert result["message_type"] == "error"
-        assert "error" in result
+        assert "error_type" in result
+        assert "message" in result

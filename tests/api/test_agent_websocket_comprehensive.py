@@ -42,7 +42,7 @@ class TestWebSocketMessageProcessing:
             "backend.api.agent._handle_message_by_type"
         ) as mock_handle:
 
-            mock_security.validate_message_integrity.return_value = True
+            mock_security.validate_message_integrity.return_value = (True, "")
             mock_handle.return_value = None
 
             await _process_websocket_message(
@@ -73,7 +73,10 @@ class TestWebSocketMessageProcessing:
         valid_message = {"message_type": "heartbeat", "data": {"status": "online"}}
 
         with patch("backend.api.agent.websocket_security") as mock_security:
-            mock_security.validate_message_integrity.return_value = False
+            mock_security.validate_message_integrity.return_value = (
+                False,
+                "Validation failed",
+            )
 
             await _process_websocket_message(
                 json.dumps(valid_message), mock_connection, mock_db, "connection-123"
@@ -250,7 +253,7 @@ class TestBasicFunctionality:
         simple_message = {"message_type": "heartbeat", "data": {}}
 
         with patch("backend.api.agent.websocket_security") as mock_security:
-            mock_security.validate_message_integrity.return_value = True
+            mock_security.validate_message_integrity.return_value = (True, "")
 
             # Should not raise exceptions
             await _process_websocket_message(

@@ -236,19 +236,21 @@ class TestWebSocketSecurityManager:
             "last_activity": int(time.time()),
         }
 
-        is_valid = self.security_manager.validate_message_integrity(
+        is_valid, error_msg = self.security_manager.validate_message_integrity(
             message, "test-conn"
         )
         assert is_valid is True
+        assert error_msg == ""
 
     def test_validate_message_integrity_missing_connection(self):
         """Test message integrity validation with missing connection."""
         message = {"message_type": "heartbeat"}
 
-        is_valid = self.security_manager.validate_message_integrity(
+        is_valid, error_msg = self.security_manager.validate_message_integrity(
             message, "nonexistent-conn"
         )
         assert is_valid is False
+        assert "message_id" in error_msg
 
     def test_validate_message_integrity_unauthenticated_connection(self):
         """Test message integrity validation with unauthenticated connection."""
@@ -259,10 +261,11 @@ class TestWebSocketSecurityManager:
             "last_activity": int(time.time()),
         }
 
-        is_valid = self.security_manager.validate_message_integrity(
+        is_valid, error_msg = self.security_manager.validate_message_integrity(
             message, "test-conn"
         )
         assert is_valid is False
+        assert "message_id" in error_msg
 
     def test_validate_message_integrity_missing_message_type(self):
         """Test message integrity validation with missing message type."""
@@ -273,10 +276,11 @@ class TestWebSocketSecurityManager:
             "last_activity": int(time.time()),
         }
 
-        is_valid = self.security_manager.validate_message_integrity(
+        is_valid, error_msg = self.security_manager.validate_message_integrity(
             message, "test-conn"
         )
         assert is_valid is False
+        assert "message_type" in error_msg
 
     def test_validate_message_integrity_old_timestamp(self):
         """Test message integrity validation with old timestamp."""
@@ -296,10 +300,11 @@ class TestWebSocketSecurityManager:
             "last_activity": int(time.time()),
         }
 
-        is_valid = self.security_manager.validate_message_integrity(
+        is_valid, error_msg = self.security_manager.validate_message_integrity(
             message, "test-conn"
         )
         assert is_valid is False
+        assert "timestamp too old" in error_msg
 
     def test_validate_message_integrity_script_execution_result_no_message_id(self):
         """Test message integrity validation for script execution result without message_id."""
@@ -315,10 +320,11 @@ class TestWebSocketSecurityManager:
             "last_activity": int(time.time()),
         }
 
-        is_valid = self.security_manager.validate_message_integrity(
+        is_valid, error_msg = self.security_manager.validate_message_integrity(
             message, "test-conn"
         )
         assert is_valid is True
+        assert error_msg == ""
 
     def test_validate_message_integrity_invalid_message_id(self):
         """Test message integrity validation with invalid message ID format."""
@@ -334,10 +340,11 @@ class TestWebSocketSecurityManager:
             "last_activity": int(time.time()),
         }
 
-        is_valid = self.security_manager.validate_message_integrity(
+        is_valid, error_msg = self.security_manager.validate_message_integrity(
             message, "test-conn"
         )
         assert is_valid is False
+        assert "message_id format" in error_msg
 
     def test_is_connection_rate_limited_under_limit(self):
         """Test rate limiting when under the limit."""
@@ -592,10 +599,10 @@ class TestWebSocketSecurityManagerMissingCoverage:
             "message_id": "12345678-1234-1234-1234-123456789012",
         }
 
-        result = self.security_manager.validate_message_integrity(
+        is_valid, error_msg = self.security_manager.validate_message_integrity(
             message_data, "test-conn"
         )
-        assert result is False
+        assert is_valid is False
 
     def test_validate_message_timestamp_missing_attribute(self):
         """Test timestamp validation with AttributeError (lines 195-200)."""
@@ -605,10 +612,10 @@ class TestWebSocketSecurityManagerMissingCoverage:
             "message_id": "12345678-1234-1234-1234-123456789012",
         }
 
-        result = self.security_manager.validate_message_integrity(
+        is_valid, error_msg = self.security_manager.validate_message_integrity(
             message_data, "test-conn"
         )
-        assert result is False
+        assert is_valid is False
 
     def test_cleanup_expired_connections(self):
         """Test cleanup of expired connections (lines 271, 274)."""

@@ -107,7 +107,12 @@ async def handle_system_info(db: Session, connection, message_data: dict):
     if agent_host_id and not await validate_host_id(
         db, connection, agent_host_id, hostname
     ):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
     ipv4 = message_data.get("ipv4")
     ipv6 = message_data.get("ipv6")
     platform = message_data.get("platform")
@@ -359,7 +364,12 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     if hasattr(connection, "host_id") and connection.host_id:
         try:
@@ -492,10 +502,14 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
             logger.error("Error processing heartbeat: %s", e)
             return {
                 "message_type": "error",
-                "error": _("Failed to process heartbeat"),
+                "error_type": "operation_failed",
+                "message": _("Failed to process heartbeat"),
+                "data": {},
             }
 
     return {
         "message_type": "error",
-        "error": _("Host not registered"),
+        "error_type": "host_not_registered",
+        "message": _("Host not registered"),
+        "data": {},
     }

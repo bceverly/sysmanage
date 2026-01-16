@@ -331,7 +331,9 @@ async def handle_diagnostic_result(db: Session, connection, message_data: dict):
 
         return {
             "message_type": "error",
-            "error": f"Failed to process diagnostic result: {str(e)}",
+            "error_type": "operation_failed",
+            "message": _("Failed to process diagnostic result: %s") % str(e),
+            "data": {},
         }
 
 
@@ -359,7 +361,9 @@ async def handle_command_acknowledgment(db: Session, connection, message_data: d
         logger.warning("Command acknowledgment from %s missing message_id", hostname)
         return {
             "message_type": "error",
-            "error": "Missing message_id in command acknowledgment",
+            "error_type": "missing_message_id",
+            "message": _("Missing message_id in command acknowledgment"),
+            "data": {},
         }
 
     # Look up the original message to get command details for logging
@@ -442,7 +446,12 @@ async def handle_installation_status(db: Session, connection, message_data: dict
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     installation_id = message_data.get("installation_id")
     status = message_data.get("status")
@@ -463,7 +472,9 @@ async def handle_installation_status(db: Session, connection, message_data: dict
         logger.error("Package installation status missing installation_id")
         return {
             "message_type": "error",
-            "error": "Missing installation_id in package installation status",
+            "error_type": "missing_installation_id",
+            "message": _("Missing installation_id in package installation status"),
+            "data": {},
         }
 
     try:
@@ -481,7 +492,10 @@ async def handle_installation_status(db: Session, connection, message_data: dict
             )
             return {
                 "message_type": "error",
-                "error": f"Installation log entry not found for ID: {installation_id}",
+                "error_type": "installation_not_found",
+                "message": _("Installation log entry not found for ID: %s")
+                % installation_id,
+                "data": {},
             }
 
         # Update the installation log with the new status
@@ -553,5 +567,7 @@ async def handle_installation_status(db: Session, connection, message_data: dict
         )
         return {
             "message_type": "error",
-            "error": f"Failed to update package installation status: {str(e)}",
+            "error_type": "operation_failed",
+            "message": _("Failed to update package installation status: %s") % str(e),
+            "data": {},
         }

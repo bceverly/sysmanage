@@ -73,7 +73,7 @@ class TestHandleUpdateApplyResult:
         )
 
         assert result["message_type"] == "error"
-        assert "Host not registered" in result["error"]
+        assert "Host not registered" in result["message"]
 
     @pytest.mark.asyncio
     async def test_handle_update_apply_result_no_host_id_attribute(self):
@@ -88,7 +88,7 @@ class TestHandleUpdateApplyResult:
         )
 
         assert result["message_type"] == "error"
-        assert "Host not registered" in result["error"]
+        assert "Host not registered" in result["message"]
 
     @pytest.mark.asyncio
     @patch("backend.utils.host_validation.validate_host_id")
@@ -488,7 +488,7 @@ class TestHandleUpdateApplyResult:
 
         # Should return error
         assert result["message_type"] == "error"
-        assert "Failed to process update results" in result["error"]
+        assert "Failed to process update results" in result["message"]
 
         # Should rollback the database
         assert mock_db.rolled_back is True

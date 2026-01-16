@@ -227,7 +227,7 @@ class TestMessageProcessingErrorHandling:
         ) as mock_create:
 
             # Mock security validation to pass
-            mock_security.validate_message_integrity.return_value = True
+            mock_security.validate_message_integrity.return_value = (True, "")
 
             # Mock create_message to raise exception
             mock_create.side_effect = Exception("Processing error")

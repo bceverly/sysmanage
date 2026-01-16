@@ -246,12 +246,27 @@ class ErrorMessage(Message):
     def __init__(
         self, error_code: str, error_message: str, details: Dict[str, Any] = None
     ):
-        data = {
-            "error_code": error_code,
-            "error_message": error_message,
-            "details": details or {},
+        # Store error info for custom to_dict method
+        self._error_code = error_code
+        self._error_message = error_message
+        self._details = details or {}
+        super().__init__(MessageType.ERROR, {})
+
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convert error message to dictionary for JSON serialization.
+
+        Uses the standard error format expected by agents:
+        - error_type: The error code/type
+        - message: The human-readable error message
+        - data: Additional details (empty dict if none)
+        """
+        return {
+            "message_type": self.message_type,
+            "error_type": self._error_code,
+            "message": self._error_message,
+            "data": self._details,
         }
-        super().__init__(MessageType.ERROR, data)
 
 
 class OSVersionUpdateMessage(Message):
@@ -516,11 +531,15 @@ def create_message(raw_data: Dict[str, Any]) -> Message:
             }
         )
     if message_type == MessageType.ERROR:
+        # Handle both old format (data.error_code) and new format (error_type at top level)
         data = raw_data.get("data", {})
+        error_code = raw_data.get("error_type") or data.get("error_code", "")
+        error_message = raw_data.get("message") or data.get("error_message", "")
+        details = data.get("details") if data else raw_data.get("data", {})
         return ErrorMessage(
-            error_code=data.get("error_code", ""),
-            error_message=data.get("error_message", ""),
-            details=data.get("details"),
+            error_code=error_code,
+            error_message=error_message,
+            details=details if isinstance(details, dict) else {},
         )
     if message_type == MessageType.OS_VERSION_UPDATE:
         data = raw_data.get("data", {})

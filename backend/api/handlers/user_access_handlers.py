@@ -251,10 +251,20 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
     # Check for host_id in message data (agent-provided)
     agent_host_id = message_data.get("host_id")
     if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
-        return {"message_type": "error", "error": "host_not_registered"}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     if not hasattr(connection, "host_id") or not connection.host_id:
-        return {"message_type": "error", "error": _("Host not registered")}
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": _("Host not registered"),
+            "data": {},
+        }
 
     try:
         # Handle user accounts
@@ -314,5 +324,7 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
         db.rollback()
         return {
             "message_type": "error",
-            "error": "Failed to update user access information",
+            "error_type": "operation_failed",
+            "message": _("Failed to update user access information"),
+            "data": {},
         }

@@ -172,7 +172,7 @@ class TestHandleSoftwareUpdate:
             result = await handle_software_update(session, connection, message_data)
 
         assert result["message_type"] == "error"
-        assert "Host not registered" in result["error"]
+        assert "Host not registered" in result["message"]
 
     @pytest.mark.asyncio
     async def test_handle_software_update_invalid_host_id(
@@ -193,7 +193,7 @@ class TestHandleSoftwareUpdate:
             )
 
         assert result["message_type"] == "error"
-        assert result["error"] == "host_not_registered"
+        assert result["error_type"] == "host_not_registered"
 
     @pytest.mark.asyncio
     async def test_handle_software_update_missing_version(
@@ -241,7 +241,7 @@ class TestHandleSoftwareUpdate:
             )
 
         assert result["message_type"] == "error"
-        assert "Failed to update software inventory" in result["error"]
+        assert "Failed to update software inventory" in result["message"]
 
 
 class TestHandlePackageUpdatesUpdate:
@@ -669,7 +669,7 @@ class TestHandleAntivirusStatusUpdate:
             )
 
         assert result["message_type"] == "error"
-        assert "Host not registered" in result["error"]
+        assert "Host not registered" in result["message"]
 
     @pytest.mark.asyncio
     async def test_handle_antivirus_status_database_error(
@@ -689,4 +689,4 @@ class TestHandleAntivirusStatusUpdate:
             )
 
         assert result["message_type"] == "error"
-        assert "Failed to process antivirus status update" in result["error"]
+        assert "Failed to process antivirus status update" in result["message"]

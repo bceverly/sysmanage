@@ -144,7 +144,7 @@ class WebSocketSecurityManager:
 
     def validate_message_integrity(
         self, message: Dict[str, Any], connection_id: str
-    ) -> bool:
+    ) -> Tuple[bool, str]:
         """
         Validate the integrity of a WebSocket message.
 
@@ -153,7 +153,7 @@ class WebSocketSecurityManager:
             connection_id: ID of the connection
 
         Returns:
-            True if message is valid
+            Tuple of (is_valid, error_reason) - error_reason is empty string if valid
         """
         # Check required fields - script_execution_result messages have different format
         message_type = message.get("message_type", "")
@@ -166,12 +166,15 @@ class WebSocketSecurityManager:
 
         for field in required_fields:
             if field not in message:
+                error_msg = (
+                    f"Missing required field '{field}' in {message_type} message"
+                )
                 logger.warning(
-                    "Missing required field '%s' in message from connection %s",
-                    field,
+                    "%s from connection %s",
+                    error_msg,
                     connection_id,
                 )
-                return False
+                return False, error_msg
 
         # Validate timestamp (should be within last 30 minutes to handle post-approval scenarios)
         # Skip timestamp validation for script execution results
@@ -186,34 +189,40 @@ class WebSocketSecurityManager:
                 if (
                     time_diff > 1800
                 ):  # 30 minutes (increased tolerance for inventory messages after host approval)
+                    error_msg = f"Message timestamp too old ({int(time_diff)}s) in {message_type} message"
                     logger.warning(
-                        "Message timestamp too old: %ss from connection %s",
-                        time_diff,
+                        "%s from connection %s",
+                        error_msg,
                         connection_id,
                     )
-                    return False
+                    return False, error_msg
             except (ValueError, AttributeError):
+                error_msg = f"Invalid timestamp format in {message_type} message"
                 logger.warning(
-                    "Invalid timestamp format in message from connection %s",
+                    "%s from connection %s",
+                    error_msg,
                     connection_id,
                 )
-                return False
+                return False, error_msg
 
         # Validate message ID format (should be UUID-like)
         # Script execution results use execution_id instead of message_id
         if message_type != "script_execution_result":
             message_id = message.get("message_id", "")
             if len(message_id) < 20 or not message_id.replace("-", "").isalnum():
+                error_msg = f"Invalid message_id format '{message_id[:20]}...' in {message_type} message"
                 logger.warning(
-                    "Invalid message ID format from connection %s", connection_id
+                    "%s from connection %s",
+                    error_msg,
+                    connection_id,
                 )
-                return False
+                return False, error_msg
 
         # Update connection activity
         if connection_id in self.active_connections:
             self.active_connections[connection_id]["last_activity"] = int(time.time())
 
-        return True
+        return True, ""
 
     def is_connection_rate_limited(self, client_ip: str) -> bool:
         """Check if connection attempts from IP are rate limited."""

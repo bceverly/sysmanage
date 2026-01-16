@@ -272,18 +272,20 @@ class TestErrorMessage:
         message = ErrorMessage("AUTH_FAILED", "Authentication failed")
 
         assert message.message_type == MessageType.ERROR
-        assert message.data["error_code"] == "AUTH_FAILED"
-        assert message.data["error_message"] == "Authentication failed"
-        assert message.data["details"] == {}
+        msg_dict = message.to_dict()
+        assert msg_dict["error_type"] == "AUTH_FAILED"
+        assert msg_dict["message"] == "Authentication failed"
+        assert msg_dict["data"] == {}
 
     def test_error_message_with_details(self):
         """Test error message with details."""
         details = {"attempt_count": 3, "ip": "192.168.1.100"}
         message = ErrorMessage("RATE_LIMITED", "Too many attempts", details)
 
-        assert message.data["error_code"] == "RATE_LIMITED"
-        assert message.data["error_message"] == "Too many attempts"
-        assert message.data["details"] == details
+        msg_dict = message.to_dict()
+        assert msg_dict["error_type"] == "RATE_LIMITED"
+        assert msg_dict["message"] == "Too many attempts"
+        assert msg_dict["data"] == details
 
 
 class TestOSVersionUpdateMessage:
@@ -647,9 +649,10 @@ class TestMessageFactory:
         message = create_message(raw_data)
 
         assert isinstance(message, ErrorMessage)
-        assert message.data["error_code"] == "TIMEOUT"
-        assert message.data["error_message"] == "Operation timed out"
-        assert message.data["details"] == {"timeout_seconds": 30}
+        msg_dict = message.to_dict()
+        assert msg_dict["error_type"] == "TIMEOUT"
+        assert msg_dict["message"] == "Operation timed out"
+        assert msg_dict["data"] == {"timeout_seconds": 30}
 
     def test_create_message_script_execution_result_special_format(self):
         """Test creating script execution result with special top-level format."""
