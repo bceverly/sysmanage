@@ -57,6 +57,12 @@ class HostRegistration(BaseModel):
     class Config:
         extra = "forbid"  # Forbid extra fields to enforce data separation
 
+    # Message envelope fields (sent by agent, not stored)
+    message_type: Optional[str] = None
+    message_id: Optional[str] = None
+    timestamp: Optional[str] = None
+
+    # Registration data
     active: bool
     fqdn: str
     hostname: str
