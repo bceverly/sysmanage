@@ -194,19 +194,20 @@ class TestAuditServiceLogCreate:
 
     def test_log_create_creates_entry(self, session):
         """Test that log_create() creates an audit log entry."""
+        test_entity_name = "new-host.example.com"
         entry = AuditService.log_create(
             db=session,
             entity_type=EntityType.HOST,
-            entity_name="new-host.example.com",
+            entity_name=test_entity_name,
         )
 
         assert entry is not None
         assert entry.action_type == "CREATE"
         assert entry.entity_type == "host"
-        assert entry.entity_name == "new-host.example.com"
+        assert entry.entity_name == test_entity_name
         assert entry.result == "SUCCESS"
         assert "Created" in entry.description
-        assert "new-host.example.com" in entry.description
+        assert test_entity_name in entry.description
 
     def test_log_create_with_user_info(self, session):
         """Test that log_create() correctly stores user information."""
