@@ -62,34 +62,34 @@ async def validate_host_authentication(
         return False, None
 
     # Fall back to host_id (legacy method)
-    if host_id:
-        host = db.query(Host).filter(Host.id == host_id).first()
-        if host:
-            return True, host
+    # At this point host_id is guaranteed to be truthy since:
+    # - We returned early if both were falsy (line 33)
+    # - We returned if host_token was truthy (lines 40 or 62)
+    host = db.query(Host).filter(Host.id == host_id).first()
+    if host:
+        return True, host
 
-        # Log authentication failure
-        AuditService.log(
-            db=db,
-            action_type=ActionType.AGENT_MESSAGE,
-            entity_type=EntityType.AGENT,
-            entity_id=str(host_id),
-            entity_name="unknown",
-            description=_("Agent authentication failed: invalid host ID"),
-            result=Result.FAILURE,
-            details={"host_id": str(host_id)},
-            error_message="Host with ID is not registered",
-        )
+    # Log authentication failure
+    AuditService.log(
+        db=db,
+        action_type=ActionType.AGENT_MESSAGE,
+        entity_type=EntityType.AGENT,
+        entity_id=str(host_id),
+        entity_name="unknown",
+        description=_("Agent authentication failed: invalid host ID"),
+        result=Result.FAILURE,
+        details={"host_id": str(host_id)},
+        error_message="Host with ID is not registered",
+    )
 
-        error_message = {
-            "message_type": "error",
-            "error_type": "host_not_registered",
-            "message": _("Host with ID %s is not registered. Please re-register.")
-            % host_id,
-            "data": {"host_id": host_id},
-        }
-        await connection.send_message(error_message)
-        return False, None
-
+    error_message = {
+        "message_type": "error",
+        "error_type": "host_not_registered",
+        "message": _("Host with ID %s is not registered. Please re-register.")
+        % host_id,
+        "data": {"host_id": host_id},
+    }
+    await connection.send_message(error_message)
     return False, None
 
 

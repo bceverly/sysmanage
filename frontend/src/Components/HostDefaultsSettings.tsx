@@ -459,8 +459,8 @@ const HostDefaultsSettings: React.FC = () => {
     return acc;
   }, {} as GroupedRepositories);
 
-  // Sort OS names
-  const sortedOSNames = Object.keys(groupedRepositories).sort();
+  // Sort OS names using localeCompare for proper alphabetical ordering
+  const sortedOSNames = Object.keys(groupedRepositories).sort((a, b) => a.localeCompare(b));
 
   // Group enabled package managers by OS
   const groupedEnabledPMs: Record<string, EnabledPackageManager[]> = enabledPMs.reduce((acc, pm) => {
@@ -471,8 +471,8 @@ const HostDefaultsSettings: React.FC = () => {
     return acc;
   }, {} as Record<string, EnabledPackageManager[]>);
 
-  // Sort PM OS names
-  const sortedPMOSNames = Object.keys(groupedEnabledPMs).sort();
+  // Sort PM OS names using localeCompare for proper alphabetical ordering
+  const sortedPMOSNames = Object.keys(groupedEnabledPMs).sort((a, b) => a.localeCompare(b));
 
   if (!canView && !canViewPM) {
     return (
@@ -761,7 +761,7 @@ const HostDefaultsSettings: React.FC = () => {
                   <Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>
                     {osName}
                   </Typography>
-                  {Object.keys(groupedRepositories[osName]).sort().map((packageManager) => (
+                  {Object.keys(groupedRepositories[osName]).sort((a, b) => a.localeCompare(b)).map((packageManager) => (
                     <Box key={`${osName}-${packageManager}`} sx={{ ml: 2, mb: 2 }}>
                       <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
                         {packageManager}
