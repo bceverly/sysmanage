@@ -250,7 +250,7 @@ async def create_child_host_request(
         else:
             # WSL and LXD use bcrypt
             password_hash = bcrypt.hashpw(
-                request.password.encode("utf-8"), bcrypt.gensalt(rounds=8)
+                request.password.encode("utf-8"), bcrypt.gensalt(rounds=12)
             ).decode("utf-8")
 
         # Queue a command to create the child host

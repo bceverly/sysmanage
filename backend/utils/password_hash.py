@@ -224,7 +224,7 @@ def hash_password_bcrypt(password: str) -> str:
     Returns:
         bcrypt formatted password hash
     """
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(rounds=8)).decode(
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(rounds=12)).decode(
         "utf-8"
     )
 
