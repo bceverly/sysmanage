@@ -313,8 +313,7 @@ def test_user(ui_config, database_session):
 
         # Insert user directly into production database
         database_session.execute(
-            text(
-                """
+            text("""
                 INSERT INTO "user" (id, userid, hashed_password, active, is_locked, failed_login_attempts, is_admin, created_at, updated_at)
                 VALUES (:id, :userid, :hashed_password, :active, :is_locked, :failed_login_attempts, :is_admin, :created_at, :updated_at)
                 ON CONFLICT (userid) DO UPDATE SET
@@ -323,8 +322,7 @@ def test_user(ui_config, database_session):
                     is_locked = EXCLUDED.is_locked,
                     failed_login_attempts = EXCLUDED.failed_login_attempts,
                     updated_at = :updated_at
-                """
-            ),
+                """),
             {
                 "id": test_user_id,
                 "userid": test_username,

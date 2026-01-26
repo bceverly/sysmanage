@@ -33,7 +33,6 @@ import string
 
 import bcrypt
 
-
 # Base64 alphabet used by SHA-512 crypt (different from standard base64)
 CRYPT_B64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 

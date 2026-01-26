@@ -36,8 +36,7 @@ class TestSysManagePerformance:
         print(f"🕐 Total page load time: {load_time:.2f}s")
 
         # Collect performance metrics
-        performance_metrics = await page.evaluate(
-            """
+        performance_metrics = await page.evaluate("""
             () => {
                 const navigation = performance.getEntriesByType('navigation')[0];
                 const paintEntries = performance.getEntriesByType('paint');
@@ -59,8 +58,7 @@ class TestSysManagePerformance:
                     memoryTotal: performance.memory ? performance.memory.totalJSHeapSize : null
                 };
             }
-        """
-        )
+        """)
 
         print(f"🎨 First Paint: {performance_metrics['firstPaint']:.2f}ms")
         print(
@@ -249,8 +247,7 @@ class TestSysManagePerformance:
         print("\n=== Saving Performance Results ===")
 
         # Collect comprehensive performance data
-        performance_data = await page.evaluate(
-            """
+        performance_data = await page.evaluate("""
             () => {
                 const navigation = performance.getEntriesByType('navigation')[0];
                 const resources = performance.getEntriesByType('resource');
@@ -293,8 +290,7 @@ class TestSysManagePerformance:
                     } : null
                 };
             }
-        """
-        )
+        """)
 
         # Add test environment info
         performance_data["test_environment"] = {
@@ -346,15 +342,13 @@ if platform.system() == "Darwin":
                     pass  # networkidle may timeout on CI, continue anyway
 
                 # WebKit-specific metrics
-                webkit_metrics = await page.evaluate(
-                    r"""
+                webkit_metrics = await page.evaluate(r"""
                     () => ({
                         webkitPerformance: window.webkitPerformance ? true : false,
                         safariVersion: navigator.userAgent.includes('Safari') ?
                             navigator.userAgent.match(/Version\/([\d.]+)/)?.[1] : null
                     })
-                """
-                )
+                """)
 
                 print(
                     f"🍎 WebKit Performance API available: {webkit_metrics['webkitPerformance']}"

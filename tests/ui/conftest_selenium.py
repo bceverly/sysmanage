@@ -585,8 +585,7 @@ def test_user(ui_config, database_session):
     try:
         # Insert user directly into production database
         database_session.execute(
-            text(
-                """
+            text("""
                 INSERT INTO "user" (id, userid, hashed_password, active, is_locked, failed_login_attempts, is_admin, created_at, updated_at)
                 VALUES (:id, :userid, :hashed_password, :active, :is_locked, :failed_login_attempts, :is_admin, NOW(), NOW())
                 ON CONFLICT (userid) DO UPDATE SET
@@ -595,8 +594,7 @@ def test_user(ui_config, database_session):
                     is_locked = EXCLUDED.is_locked,
                     failed_login_attempts = EXCLUDED.failed_login_attempts,
                     updated_at = NOW()
-                """
-            ),
+                """),
             {
                 "id": test_user_id,
                 "userid": test_username,
@@ -663,8 +661,7 @@ def selenium_page(browser_driver, ui_config):
             while time.time() < end_time:
                 try:
                     # Check if React has finished rendering by verifying DOM is stable
-                    ready = self.driver.execute_script(
-                        """
+                    ready = self.driver.execute_script("""
                         // Check if document is ready
                         if (document.readyState !== 'complete') return false;
 
@@ -679,8 +676,7 @@ def selenium_page(browser_driver, ui_config):
                         if (style.display === 'none' || style.visibility === 'hidden') return false;
 
                         return true;
-                        """
-                    )
+                        """)
                     if ready:
                         return True
                 except Exception:
@@ -691,8 +687,7 @@ def selenium_page(browser_driver, ui_config):
         def get_page_diagnostics(self):
             """Get diagnostic information about the current page state"""
             try:
-                diagnostics = self.driver.execute_script(
-                    """
+                diagnostics = self.driver.execute_script("""
                     return {
                         url: window.location.href,
                         readyState: document.readyState,
@@ -704,8 +699,7 @@ def selenium_page(browser_driver, ui_config):
                         formCount: document.querySelectorAll('form').length,
                         errors: window.console ? 'see logs' : 'no console'
                     };
-                    """
-                )
+                    """)
                 return diagnostics
             except Exception as e:
                 return {"error": str(e)}

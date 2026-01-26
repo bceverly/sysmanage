@@ -30,8 +30,7 @@ if platform.system() == "Darwin":
 async def collect_performance_metrics(page: Page, browser_name: str):
     """Collect performance metrics from the page"""
     try:
-        metrics = await page.evaluate(
-            """
+        metrics = await page.evaluate("""
             () => {
                 const navigation = performance.getEntriesByType('navigation')[0];
                 const paintEntries = performance.getEntriesByType('paint');
@@ -53,8 +52,7 @@ async def collect_performance_metrics(page: Page, browser_name: str):
                     memoryUsed: performance.memory ? performance.memory.usedJSHeapSize : null
                 };
             }
-        """
-        )
+        """)
 
         # Log metrics for this browser
         print(f"[INFO] {browser_name} Performance Metrics:")

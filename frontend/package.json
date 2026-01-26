@@ -23,7 +23,7 @@
     "@types/react-dom": "^19.1.10",
     "axios": "^1.13.2",
     "esbuild": "^0.27.0",
-    "i18next": "^25.6.3",
+    "i18next": "^25.7.4",
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-http-backend": "^3.0.2",
     "localStorage": "^1.0.4",
@@ -72,8 +72,8 @@
     "@typescript-eslint/eslint-plugin": "^8.50.1",
     "@typescript-eslint/parser": "^8.46.1",
     "@vitejs/plugin-react": "^5.1.0",
-    "@vitest/coverage-v8": "^4.0.9",
-    "@vitest/ui": "^4.0.9",
+    "@vitest/coverage-v8": "^4.0.17",
+    "@vitest/ui": "^4.0.17",
     "eslint": "^9.39.1",
     "eslint-plugin-css-modules": "^2.12.0",
     "eslint-plugin-no-unsanitized": "^4.1.4",
@@ -87,8 +87,8 @@
     "stylelint": "^16.26.1",
     "stylelint-config-standard": "^39.0.1",
     "tldts": "^7.0.17",
-    "vite": "^7.2.2",
-    "vitest": "^4.0.9"
+    "vite": "^7.3.1",
+    "vitest": "^4.0.17"
   },
   "optionalDependencies": {
     "@esbuild/freebsd-x64": "^0.27.2",
@@ -100,7 +100,7 @@
     "svgo": "^3.3.2",
     "rollup": "npm:@rollup/wasm-node@4.52.3",
     "@babel/helper-member-expression-to-functions": "^7.28.5",
-    "@babel/generator": "^7.28.5",
+    "@babel/generator": "^7.28.6",
     "@monaco-editor/loader": "^1.7.0",
     "update-browserslist-db": "^1.1.4",
     "electron-to-chromium": "^1.5.267",
@@ -119,7 +119,8 @@
     "@eslint-community/regexpp": "^4.12.2",
     "@mui/styled-engine": "^7.3.6",
     "ast-v8-to-istanbul": "^0.3.8",
-    "js-yaml": "^4.1.1"
+    "js-yaml": "^4.1.1",
+    "lodash": "^4.17.23"
   },
   "msw": {
     "workerDirectory": [
