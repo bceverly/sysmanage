@@ -29,7 +29,7 @@ from backend.websocket.queue_manager import (
 )
 
 
-async def install_packages_operation(
+async def install_packages_operation(  # NOSONAR - async for API compatibility
     host_id: str,
     request: PackageInstallRequest,
     db: Session = Depends(get_db),
@@ -188,7 +188,7 @@ async def install_packages_operation(
         ) from e
 
 
-async def uninstall_packages_operation(
+async def uninstall_packages_operation(  # NOSONAR - async for API compatibility
     host_id: str,
     request: PackageUninstallRequest,
     db: Session = Depends(get_db),

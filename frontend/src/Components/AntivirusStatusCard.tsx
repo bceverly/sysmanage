@@ -52,6 +52,95 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
   sx = {},
 }) => {
   const { t } = useTranslation();
+
+  // Helper to get the status chip based on enabled state
+  const getStatusChip = (enabled: boolean | undefined) => {
+    if (enabled === true) {
+      return (
+        <Chip
+          icon={<CheckCircleIcon />}
+          label={t('security.enabled', 'Enabled')}
+          color="success"
+          size="small"
+        />
+      );
+    }
+    if (enabled === false) {
+      return (
+        <Chip
+          icon={<CancelIcon />}
+          label={t('security.disabled', 'Disabled')}
+          color="error"
+          size="small"
+        />
+      );
+    }
+    return (
+      <Chip
+        label={t('security.unknown', 'Unknown')}
+        size="small"
+      />
+    );
+  };
+
+  // Helper to get tooltip/title for deploy button
+  const getDeployButtonTitle = (status: AntivirusStatus | null): string => {
+    if (status?.software_name) {
+      return t('security.alreadyDeployed', 'Antivirus already deployed');
+    }
+    if (!hasOsDefault) {
+      return t('hostDetail.noAntivirusDefault', 'No antivirus default configured for this OS');
+    }
+    if (!isAgentPrivileged) {
+      return t('hostDetail.notPrivileged', 'Agent not running in privileged mode');
+    }
+    if (!isHostActive) {
+      return t('hostDetail.hostInactive', 'Host is not active');
+    }
+    return '';
+  };
+
+  // Helper to get tooltip/title for remove button
+  const getRemoveButtonTitle = (status: AntivirusStatus | null): string => {
+    if (!status?.software_name) {
+      return t('security.notDeployed', 'No antivirus deployed');
+    }
+    if (!isAgentPrivileged) {
+      return t('hostDetail.notPrivileged', 'Agent not running in privileged mode');
+    }
+    if (!isHostActive) {
+      return t('hostDetail.hostInactive', 'Host is not active');
+    }
+    return '';
+  };
+
+  // Helper to get tooltip/title for enable button
+  const getEnableButtonTitle = (status: AntivirusStatus): string => {
+    if (status.enabled === true) {
+      return t('security.alreadyEnabled', 'Antivirus already enabled');
+    }
+    if (!isAgentPrivileged) {
+      return t('hostDetail.notPrivileged', 'Agent not running in privileged mode');
+    }
+    if (!isHostActive) {
+      return t('hostDetail.hostInactive', 'Host is not active');
+    }
+    return '';
+  };
+
+  // Helper to get tooltip/title for disable button
+  const getDisableButtonTitle = (status: AntivirusStatus): string => {
+    if (status.enabled === false) {
+      return t('security.alreadyDisabled', 'Antivirus already disabled');
+    }
+    if (!isAgentPrivileged) {
+      return t('hostDetail.notPrivileged', 'Agent not running in privileged mode');
+    }
+    if (!isHostActive) {
+      return t('hostDetail.hostInactive', 'Host is not active');
+    }
+    return '';
+  };
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [antivirusStatus, setAntivirusStatus] = useState<AntivirusStatus | null>(null);
@@ -176,26 +265,7 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 {t('security.status', 'Status')}
               </Typography>
-              {antivirusStatus.enabled === true ? (
-                <Chip
-                  icon={<CheckCircleIcon />}
-                  label={t('security.enabled', 'Enabled')}
-                  color="success"
-                  size="small"
-                />
-              ) : antivirusStatus.enabled === false ? (
-                <Chip
-                  icon={<CancelIcon />}
-                  label={t('security.disabled', 'Disabled')}
-                  color="error"
-                  size="small"
-                />
-              ) : (
-                <Chip
-                  label={t('security.unknown', 'Unknown')}
-                  size="small"
-                />
-              )}
+              {getStatusChip(antivirusStatus.enabled)}
             </Box>
 
             {antivirusStatus.last_updated && (
@@ -224,19 +294,9 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
                 !isHostActive ||
                 !isAgentPrivileged ||
                 !hasOsDefault ||
-                (antivirusStatus && antivirusStatus.software_name !== null && antivirusStatus.software_name !== '')
+                Boolean(antivirusStatus?.software_name)
               }
-              title={
-                antivirusStatus && antivirusStatus.software_name
-                  ? t('security.alreadyDeployed', 'Antivirus already deployed')
-                  : !hasOsDefault
-                  ? t('hostDetail.noAntivirusDefault', 'No antivirus default configured for this OS')
-                  : !isAgentPrivileged
-                  ? t('hostDetail.notPrivileged', 'Agent not running in privileged mode')
-                  : !isHostActive
-                  ? t('hostDetail.hostInactive', 'Host is not active')
-                  : ''
-              }
+              title={getDeployButtonTitle(antivirusStatus)}
             >
               {t('hostDetail.deployAntivirus', 'Deploy Antivirus')}
             </Button>
@@ -251,25 +311,16 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
               disabled={
                 !isHostActive ||
                 !isAgentPrivileged ||
-                !antivirusStatus ||
-                !antivirusStatus.software_name
+                !antivirusStatus?.software_name
               }
-              title={
-                !antivirusStatus || !antivirusStatus.software_name
-                  ? t('security.notDeployed', 'No antivirus deployed')
-                  : !isAgentPrivileged
-                  ? t('hostDetail.notPrivileged', 'Agent not running in privileged mode')
-                  : !isHostActive
-                  ? t('hostDetail.hostInactive', 'Host is not active')
-                  : ''
-              }
+              title={getRemoveButtonTitle(antivirusStatus)}
             >
               {t('security.removeAntivirus', 'Remove Antivirus')}
             </Button>
           )}
 
           {/* Enable Button */}
-          {canEnableAntivirus && onEnableAntivirus && antivirusStatus && antivirusStatus.software_name && (
+          {canEnableAntivirus && onEnableAntivirus && antivirusStatus?.software_name && (
             <Button
               variant="contained"
               color="primary"
@@ -279,22 +330,14 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
                 !isAgentPrivileged ||
                 antivirusStatus.enabled === true
               }
-              title={
-                antivirusStatus.enabled === true
-                  ? t('security.alreadyEnabled', 'Antivirus already enabled')
-                  : !isAgentPrivileged
-                  ? t('hostDetail.notPrivileged', 'Agent not running in privileged mode')
-                  : !isHostActive
-                  ? t('hostDetail.hostInactive', 'Host is not active')
-                  : ''
-              }
+              title={getEnableButtonTitle(antivirusStatus)}
             >
               {t('security.enableAntivirus', 'Enable Antivirus')}
             </Button>
           )}
 
           {/* Disable Button */}
-          {canDisableAntivirus && onDisableAntivirus && antivirusStatus && antivirusStatus.software_name && (
+          {canDisableAntivirus && onDisableAntivirus && antivirusStatus?.software_name && (
             <Button
               variant="contained"
               color="warning"
@@ -304,15 +347,7 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
                 !isAgentPrivileged ||
                 antivirusStatus.enabled === false
               }
-              title={
-                antivirusStatus.enabled === false
-                  ? t('security.alreadyDisabled', 'Antivirus already disabled')
-                  : !isAgentPrivileged
-                  ? t('hostDetail.notPrivileged', 'Agent not running in privileged mode')
-                  : !isHostActive
-                  ? t('hostDetail.hostInactive', 'Host is not active')
-                  : ''
-              }
+              title={getDisableButtonTitle(antivirusStatus)}
             >
               {t('security.disableAntivirus', 'Disable Antivirus')}
             </Button>

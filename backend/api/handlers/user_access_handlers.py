@@ -79,7 +79,9 @@ SYSTEM_USERNAMES = {
 }
 
 
-def _create_user_account_with_security_id(connection, account, now):
+def _create_user_account_with_security_id(
+    connection, account, now
+):  # NOSONAR - complex business logic
     """Create a UserAccount with proper Windows SID handling."""
     uid = account.get("uid", 0)
     username = account.get("username", "")

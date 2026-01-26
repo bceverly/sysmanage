@@ -49,7 +49,7 @@ class ReportType(str, Enum):
 
 
 @router.get("/view/{report_type}", response_class=HTMLResponse)
-async def view_report_html(
+async def view_report_html(  # NOSONAR - complex business logic
     report_type: ReportType,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),

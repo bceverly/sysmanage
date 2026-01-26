@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from backend.api.error_constants import ERROR_CURRENT_USER_NOT_FOUND
 from backend.auth.auth_bearer import get_current_user
 from backend.persistence.db import get_db
 from backend.persistence.models import (
@@ -76,7 +77,7 @@ async def get_all_role_groups(
     # Check if current user has permission to view user security roles
     current_user_obj = db.query(User).filter(User.userid == current_user).first()
     if not current_user_obj:
-        raise HTTPException(status_code=401, detail="Current user not found")
+        raise HTTPException(status_code=401, detail=ERROR_CURRENT_USER_NOT_FOUND())
 
     if not check_user_has_role(
         db, current_user_obj.id, SecurityRoles.VIEW_USER_SECURITY_ROLES
@@ -133,7 +134,7 @@ async def get_user_roles(
     # Check if current user has permission to view user security roles
     current_user_obj = db.query(User).filter(User.userid == current_user).first()
     if not current_user_obj:
-        raise HTTPException(status_code=401, detail="Current user not found")
+        raise HTTPException(status_code=401, detail=ERROR_CURRENT_USER_NOT_FOUND())
 
     if not check_user_has_role(
         db, current_user_obj.id, SecurityRoles.VIEW_USER_SECURITY_ROLES
@@ -174,7 +175,7 @@ async def update_user_roles(
     # Get current user's UUID from their userid (email)
     current_user_obj = db.query(User).filter(User.userid == current_user).first()
     if not current_user_obj:
-        raise HTTPException(status_code=401, detail="Current user not found")
+        raise HTTPException(status_code=401, detail=ERROR_CURRENT_USER_NOT_FOUND())
     current_user_uuid = current_user_obj.id
 
     # Check if current user has permission to edit user security roles

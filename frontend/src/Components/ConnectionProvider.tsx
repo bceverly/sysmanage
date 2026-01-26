@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { connectionMonitor, ConnectionStatus } from '../Services/connectionMonitor';
 import ServerDownModal from './ServerDownModal';
 
@@ -44,8 +44,8 @@ const ConnectionProvider: React.FC<ConnectionProviderProps> = ({ children }) => 
     const unsubscribe = connectionMonitor.onStatusChange(setStatus);
 
     // Set up global error handlers for fetch requests
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async (...args) => {
       try {
         const response = await originalFetch(...args);
         
@@ -72,16 +72,16 @@ const ConnectionProvider: React.FC<ConnectionProviderProps> = ({ children }) => 
     // Cleanup
     return () => {
       unsubscribe();
-      window.fetch = originalFetch;
+      globalThis.fetch = originalFetch;
       connectionMonitor.destroy();
     };
   }, []);
 
-  const contextValue: ConnectionContextType = {
+  const contextValue: ConnectionContextType = useMemo(() => ({
     status,
     markConnectionFailed: connectionMonitor.markConnectionFailed.bind(connectionMonitor),
     markConnectionRestored: connectionMonitor.markConnectionRestored.bind(connectionMonitor),
-  };
+  }), [status]);
 
   return (
     <ConnectionContext.Provider value={contextValue}>

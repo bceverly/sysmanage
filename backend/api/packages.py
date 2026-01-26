@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import distinct
 from sqlalchemy.orm import Session
 
+from backend.api.error_constants import FILTER_BY_OS_NAME, FILTER_BY_OS_VERSION
 from backend.api.package_host_selector import find_hosts_for_os, select_best_host
 from backend.api.packages_helpers import (
     get_packages_summary_sync,
@@ -68,8 +69,8 @@ async def get_packages_summary():
 
 @router.get("/managers", response_model=List[str])
 async def get_package_managers(
-    os_name: Optional[str] = Query(None, description="Filter by OS name"),
-    os_version: Optional[str] = Query(None, description="Filter by OS version"),
+    os_name: Optional[str] = Query(None, description=FILTER_BY_OS_NAME),
+    os_version: Optional[str] = Query(None, description=FILTER_BY_OS_VERSION),
     db: Session = Depends(get_db),
 ):
     """
@@ -100,8 +101,8 @@ async def get_package_managers(
 async def search_packages_count(
     *,
     query: str = Query(..., min_length=1, description="Search term for package name"),
-    os_name: Optional[str] = Query(None, description="Filter by OS name"),
-    os_version: Optional[str] = Query(None, description="Filter by OS version"),
+    os_name: Optional[str] = Query(None, description=FILTER_BY_OS_NAME),
+    os_version: Optional[str] = Query(None, description=FILTER_BY_OS_VERSION),
     package_manager: Optional[str] = Query(
         None, description="Filter by package manager"
     ),
@@ -123,8 +124,8 @@ async def search_packages_count(
 async def search_packages(
     *,
     query: str = Query(..., min_length=1, description="Search term for package name"),
-    os_name: Optional[str] = Query(None, description="Filter by OS name"),
-    os_version: Optional[str] = Query(None, description="Filter by OS version"),
+    os_name: Optional[str] = Query(None, description=FILTER_BY_OS_NAME),
+    os_version: Optional[str] = Query(None, description=FILTER_BY_OS_VERSION),
     package_manager: Optional[str] = Query(
         None, description="Filter by package manager"
     ),
@@ -183,8 +184,8 @@ async def get_os_versions(db: Session = Depends(get_db)):
 async def get_packages_by_manager(
     manager_name: str,
     *,
-    os_name: Optional[str] = Query(None, description="Filter by OS name"),
-    os_version: Optional[str] = Query(None, description="Filter by OS version"),
+    os_name: Optional[str] = Query(None, description=FILTER_BY_OS_NAME),
+    os_version: Optional[str] = Query(None, description=FILTER_BY_OS_VERSION),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of results"),
     offset: int = Query(0, ge=0, description="Number of results to skip"),
     db: Session = Depends(get_db),

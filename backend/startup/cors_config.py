@@ -13,7 +13,7 @@ from backend.utils.verbosity_logger import get_logger
 logger = get_logger("backend.startup.cors")
 
 
-def get_cors_origins(web_ui_port, backend_api_port):
+def get_cors_origins(web_ui_port, backend_api_port):  # NOSONAR - cognitive complexity
     """Generate CORS origins including dynamic hostname discovery."""
     logger.info("=== CORS ORIGINS GENERATION START ===")
     logger.info("Web UI port: %s, Backend API port: %s", web_ui_port, backend_api_port)

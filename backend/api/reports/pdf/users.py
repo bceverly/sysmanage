@@ -17,7 +17,9 @@ from backend.persistence.models import SecurityRole, SecurityRoleGroup, User
 class UsersReportGenerator(ReportGenerator):
     """Generator for user-related reports"""
 
-    def generate_users_list_report(self) -> io.BytesIO:
+    def generate_users_list_report(
+        self,
+    ) -> io.BytesIO:  # NOSONAR - complex business logic
         """Generate SysManage users list report"""
         users = self.db.query(User).order_by(User.userid).all()
 
@@ -66,11 +68,6 @@ class UsersReportGenerator(ReportGenerator):
             ]
 
             for user in users:
-                # Combine first and last name
-                full_name = f"{user.first_name or ''} {user.last_name or ''}".strip()
-                if not full_name:
-                    full_name = _("N/A")
-
                 # Format last access
                 last_access = (
                     user.last_access.strftime("%Y-%m-%d %H:%M")
@@ -125,7 +122,9 @@ class UsersReportGenerator(ReportGenerator):
 
         return self.create_pdf_buffer(_("SysManage Users"), content)
 
-    def generate_user_rbac_report(self) -> io.BytesIO:
+    def generate_user_rbac_report(
+        self,
+    ) -> io.BytesIO:  # NOSONAR - complex business logic
         """Generate User RBAC report showing security roles grouped by role groups"""
         users = self.db.query(User).order_by(User.userid).all()
 

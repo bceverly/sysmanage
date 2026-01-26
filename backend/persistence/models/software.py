@@ -22,6 +22,12 @@ from sqlalchemy.types import TypeDecorator
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
+# Constants for commonly used values
+HOST_ID_FK = "host.id"
+CASCADE_DELETE_ORPHAN = "all, delete-orphan"
+SET_NULL_ACTION = "SET NULL"
+USER_ID_FK = "user.id"
+
 
 class CrossPlatformDateTime(TypeDecorator):  # pylint: disable=too-many-ancestors
     """
@@ -84,7 +90,7 @@ class SoftwarePackage(Base):
 
     __tablename__ = "software_package"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
     package_name = Column(String(255), nullable=False, index=True)
     package_version = Column(String(100), nullable=False)
     package_description = Column(Text, nullable=True)
@@ -115,7 +121,7 @@ class PackageUpdate(Base):
 
     __tablename__ = "package_update"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
     package_name = Column(String(255), nullable=False, index=True)
     bundle_id = Column(
         String(255), nullable=True, index=True
@@ -173,7 +179,7 @@ class SoftwareInstallationLog(Base):
     __tablename__ = "software_installation_log"
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
 
     # Installation request details
     package_name = Column(String(255), nullable=False)
@@ -226,7 +232,7 @@ class InstallationRequest(Base):
     __tablename__ = "installation_requests"
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
 
     # Request metadata
     requested_by = Column(
@@ -257,7 +263,7 @@ class InstallationRequest(Base):
     packages = relationship(
         "InstallationPackage",
         back_populates="installation_request",
-        cascade="all, delete-orphan",
+        cascade=CASCADE_DELETE_ORPHAN,
     )
 
     def __repr__(self):
@@ -309,7 +315,7 @@ class ThirdPartyRepository(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     host_id = Column(
-        GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False, index=True
     )
     name = Column(String(255), nullable=False)  # Repository name
     type = Column(String(50), nullable=False)  # ppa, copr, obs, zypper, etc.
@@ -360,7 +366,7 @@ class AntivirusStatus(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     host_id = Column(
-        GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False, index=True
     )
     software_name = Column(String(255), nullable=True)  # Name of antivirus software
     install_path = Column(String(512), nullable=True)  # Installation path
@@ -388,7 +394,7 @@ class CommercialAntivirusStatus(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     host_id = Column(
-        GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False, index=True
     )
 
     # Product identification
@@ -460,7 +466,7 @@ class FirewallStatus(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     host_id = Column(
-        GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False, index=True
     )
     firewall_name = Column(
         String(255), nullable=True
@@ -515,7 +521,7 @@ class DefaultRepository(Base):
         default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
     created_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        GUID(), ForeignKey(USER_ID_FK, ondelete=SET_NULL_ACTION), nullable=True
     )
 
     # Relationship to User
@@ -547,7 +553,7 @@ class EnabledPackageManager(Base):
         default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
     created_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        GUID(), ForeignKey(USER_ID_FK, ondelete=SET_NULL_ACTION), nullable=True
     )
 
     # Relationship to User
@@ -583,11 +589,11 @@ class FirewallRole(Base):
         default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
     created_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        GUID(), ForeignKey(USER_ID_FK, ondelete=SET_NULL_ACTION), nullable=True
     )
     updated_at = Column(DateTime, nullable=True)
     updated_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        GUID(), ForeignKey(USER_ID_FK, ondelete=SET_NULL_ACTION), nullable=True
     )
 
     # Relationships
@@ -596,12 +602,12 @@ class FirewallRole(Base):
     open_ports = relationship(
         "FirewallRoleOpenPort",
         back_populates="firewall_role",
-        cascade="all, delete-orphan",
+        cascade=CASCADE_DELETE_ORPHAN,
     )
     host_assignments = relationship(
         "HostFirewallRole",
         back_populates="firewall_role",
-        cascade="all, delete-orphan",
+        cascade=CASCADE_DELETE_ORPHAN,
     )
 
     def __repr__(self):
@@ -661,7 +667,7 @@ class HostFirewallRole(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     host_id = Column(
         GUID(),
-        ForeignKey("host.id", ondelete="CASCADE"),
+        ForeignKey(HOST_ID_FK, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -677,7 +683,7 @@ class HostFirewallRole(Base):
         default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
     created_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        GUID(), ForeignKey(USER_ID_FK, ondelete=SET_NULL_ACTION), nullable=True
     )
 
     # Relationships

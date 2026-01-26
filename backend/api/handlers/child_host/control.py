@@ -82,7 +82,7 @@ async def handle_child_host_restart_result(
     )
 
 
-async def handle_child_host_delete_result(
+async def handle_child_host_delete_result(  # NOSONAR - async handler for message processing
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
@@ -398,7 +398,7 @@ async def handle_child_host_delete_result(
         }
 
 
-async def _handle_child_host_control_result(
+async def _handle_child_host_control_result(  # NOSONAR - async handler for message processing
     db: Session,
     connection: Any,
     message_data: Dict[str, Any],

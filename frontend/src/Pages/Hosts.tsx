@@ -41,7 +41,7 @@ const Hosts = () => {
 
     // Helper to get initial filter from URL hash
     const getFilterFromHash = useCallback((): 'all' | 'parents' | 'children' => {
-        const hash = window.location.hash.slice(1); // Remove the '#'
+        const hash = globalThis.location.hash.slice(1); // Remove the '#'
         if (hash === 'parents' || hash === 'children') {
             return hash;
         }
@@ -77,10 +77,10 @@ const Hosts = () => {
     useEffect(() => {
         // Update URL hash when filter changes (without adding to browser history for 'all')
         const newHash = childHostFilter === 'all' ? '' : `#${childHostFilter}`;
-        const currentHash = window.location.hash;
+        const currentHash = globalThis.location.hash;
         if (newHash !== currentHash) {
             // Use replaceState to avoid polluting browser history
-            window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${newHash}`);
+            globalThis.history.replaceState(null, '', `${globalThis.location.pathname}${globalThis.location.search}${newHash}`);
         }
     }, [childHostFilter]);
 
@@ -93,8 +93,8 @@ const Hosts = () => {
             }
         };
 
-        window.addEventListener('hashchange', handleHashChange);
-        return () => window.removeEventListener('hashchange', handleHashChange);
+        globalThis.addEventListener('hashchange', handleHashChange);
+        return () => globalThis.removeEventListener('hashchange', handleHashChange);
     }, [childHostFilter, getFilterFromHash]);
 
     // Ensure current page size is always in options to avoid MUI warning
@@ -196,24 +196,30 @@ const Hosts = () => {
                                 variant="outlined"
                             />
                         )}
-                        {(row.security_updates_count > 0 || row.system_updates_count > 0) && (
-                            <Chip
-                                label={t('hosts.swUpdates', 'SW Updates')}
-                                color={row.security_updates_count > 0 ? 'error' : 'warning'}
-                                size="small"
-                                variant="outlined"
-                                title={
-                                    row.security_updates_count > 0 && row.system_updates_count > 0
-                                        ? t('hosts.securityAndSystemUpdates', '{{security}} security, {{system}} system updates', {
-                                            security: row.security_updates_count,
-                                            system: row.system_updates_count
-                                        })
-                                        : row.security_updates_count > 0
-                                        ? t('hosts.securityUpdatesOnly', '{{count}} security updates', { count: row.security_updates_count })
-                                        : t('hosts.systemUpdatesOnly', '{{count}} system updates', { count: row.system_updates_count })
-                                }
-                            />
-                        )}
+                        {(row.security_updates_count > 0 || row.system_updates_count > 0) && (() => {
+                            const hasBothUpdates = row.security_updates_count > 0 && row.system_updates_count > 0;
+                            const hasSecurityOnly = row.security_updates_count > 0;
+                            let updatesTitle: string;
+                            if (hasBothUpdates) {
+                                updatesTitle = t('hosts.securityAndSystemUpdates', '{{security}} security, {{system}} system updates', {
+                                    security: row.security_updates_count,
+                                    system: row.system_updates_count
+                                });
+                            } else if (hasSecurityOnly) {
+                                updatesTitle = t('hosts.securityUpdatesOnly', '{{count}} security updates', { count: row.security_updates_count });
+                            } else {
+                                updatesTitle = t('hosts.systemUpdatesOnly', '{{count}} system updates', { count: row.system_updates_count });
+                            }
+                            return (
+                                <Chip
+                                    label={t('hosts.swUpdates', 'SW Updates')}
+                                    color={row.security_updates_count > 0 ? 'error' : 'warning'}
+                                    size="small"
+                                    variant="outlined"
+                                    title={updatesTitle}
+                                />
+                            );
+                        })()}
                         {(row.os_upgrades_count && row.os_upgrades_count > 0) && (
                             <Chip
                                 label={t('hosts.osUpgrade', 'OS Upgrade')}
@@ -285,7 +291,7 @@ const Hosts = () => {
                 const now = new Date();
 
                 // Check if date is valid
-                if (isNaN(date.getTime())) {
+                if (Number.isNaN(date.getTime())) {
                     return <span style={{ color: '#f44336' }}>{t('hosts.invalidDate', 'Invalid date')}</span>;
                 }
 
@@ -305,9 +311,19 @@ const Hosts = () => {
                     timeText = t('hosts.daysAgo', '{{days}}d ago', { days: Math.floor(absDiff / 86400) });
                 }
 
+                // Determine status color based on time difference
+                let statusColor: string;
+                if (absDiff < 120) {
+                    statusColor = '#4caf50'; // green - very recent
+                } else if (absDiff < 300) {
+                    statusColor = '#ff9800'; // orange - somewhat recent
+                } else {
+                    statusColor = '#f44336'; // red - stale
+                }
+
                 return (
                     <div title={date.toLocaleString()}>
-                        <div style={{ fontSize: '0.85em', color: absDiff < 120 ? '#4caf50' : absDiff < 300 ? '#ff9800' : '#f44336' }}>
+                        <div style={{ fontSize: '0.85em', color: statusColor }}>
                             {timeText}
                         </div>
                         <div style={{ fontSize: '0.7em', color: '#666' }}>
@@ -586,7 +602,7 @@ const Hosts = () => {
 
             // Call backend API to deploy antivirus
             const response = await axiosInstance.post('/api/deploy', {
-                host_ids: eligibleHosts.map(id => String(id))
+                host_ids: eligibleHosts.map(String)
             });
 
             // Check for errors
@@ -639,13 +655,13 @@ const Hosts = () => {
         refreshHosts();
 
         // Set up periodic refresh every 60 seconds (increased from 30 to reduce load)
-        const intervalId = window.setInterval(() => {
+        const intervalId = globalThis.setInterval(() => {
             // Refresh hosts periodically
             refreshHosts();
         }, 60000);
 
         // Cleanup interval on unmount
-        return () => window.clearInterval(intervalId);
+        return () => globalThis.clearInterval(intervalId);
     }, [navigate]);
 
     // Check permissions
@@ -727,7 +743,11 @@ const Hosts = () => {
                 if (fieldValue === null || fieldValue === undefined) {
                     return false;
                 }
-                return String(fieldValue).toLowerCase().includes(searchTerm.toLowerCase());
+                // Handle object values by converting to JSON string, otherwise use String()
+                const stringValue = typeof fieldValue === 'object'
+                    ? JSON.stringify(fieldValue)
+                    : String(fieldValue);
+                return stringValue.toLowerCase().includes(searchTerm.toLowerCase());
             });
         }
 
@@ -740,9 +760,9 @@ const Hosts = () => {
                 }
 
                 // Check if ALL selected tags are present on this host
-                const hostTagIds = host.tags.map(tag => tag.id);
+                const hostTagIds = new Set(host.tags.map(tag => tag.id));
                 return selectedTags.every(selectedTagId =>
-                    hostTagIds.includes(selectedTagId)
+                    hostTagIds.has(selectedTagId)
                 );
             });
         }
@@ -883,15 +903,17 @@ const Hosts = () => {
                     localeText={{
                         MuiTablePagination: {
                             labelRowsPerPage: t('common.rowsPerPage'),
-                            labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) =>
-                                `${from}–${to} ${t('common.of')} ${count !== -1 ? count : `${t('common.of')} ${to}`}`,
+                            labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) => {
+                                const countDisplay = count === -1 ? `${t('common.of')} ${to}` : count;
+                                return `${from}–${to} ${t('common.of')} ${countDisplay}`;
+                            },
                         },
                         noRowsLabel: t('hosts.noRows'),
                         noResultsOverlayLabel: t('hosts.noResults'),
                         footerRowSelected: (count: number) =>
-                            count !== 1
-                                ? `${count.toLocaleString()} ${t('common.rowsSelected')}`
-                                : `${count.toLocaleString()} ${t('common.rowSelected')}`,
+                            count === 1
+                                ? `${count.toLocaleString()} ${t('common.rowSelected')}`
+                                : `${count.toLocaleString()} ${t('common.rowsSelected')}`,
                     }}
                 />
             </Box>

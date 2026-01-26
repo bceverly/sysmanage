@@ -14,7 +14,7 @@ export const useColumnVisibility = (gridIdentifier: string) => {
     const loadPreferences = async () => {
       try {
         const preferences = await getColumnPreferences(gridIdentifier);
-        if (preferences && preferences.hidden_columns) {
+        if (preferences?.hidden_columns) {
           setHiddenColumns(preferences.hidden_columns);
         }
       } catch (error) {

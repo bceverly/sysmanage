@@ -5,7 +5,7 @@ Handles message enqueuing, dequeuing, and status updates.
 
 import json
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 from sqlalchemy import and_, asc, or_
 from sqlalchemy.orm import Session
@@ -22,19 +22,19 @@ logger = get_logger(__name__)
 class QueueOperations:
     """Core operations for message queue management."""
 
-    def enqueue_message(  # pylint: disable=too-many-positional-arguments
+    def enqueue_message(  # pylint: disable=too-many-positional-arguments  # NOSONAR - cognitive complexity
         self,
         message_type: str,
         message_data: Dict[str, Any],
-        direction: Union[str, QueueDirection],
-        host_id: str = None,
-        priority: Union[str, Priority] = Priority.NORMAL,
-        message_id: str = None,
-        scheduled_at: datetime = None,
+        direction: str | QueueDirection,
+        host_id: str | None = None,
+        priority: str | Priority = Priority.NORMAL,
+        message_id: str | None = None,
+        scheduled_at: datetime | None = None,
         max_retries: int = 3,
-        correlation_id: str = None,
-        reply_to: str = None,
-        db: Session = None,
+        correlation_id: str | None = None,
+        reply_to: str | None = None,
+        db: Session | None = None,
     ) -> str:
         """
         Add a message to the server queue.
@@ -296,7 +296,7 @@ class QueueOperations:
     def dequeue_messages_for_host(  # pylint: disable=too-many-positional-arguments
         self,
         host_id: str,
-        direction: Union[str, QueueDirection] = QueueDirection.OUTBOUND,
+        direction: str | QueueDirection = QueueDirection.OUTBOUND,
         limit: int = 10,
         priority_order: bool = True,
         db: Session = None,
@@ -337,11 +337,9 @@ class QueueOperations:
                 )
             )
 
-            if priority_order:
-                # Order by creation time for now, priority sorting done in Python
-                query = query.order_by(asc(MessageQueue.created_at))
-            else:
-                query = query.order_by(asc(MessageQueue.created_at))
+            # Order by creation time first; if priority_order is requested,
+            # additional sorting by priority is done in Python after the query
+            query = query.order_by(asc(MessageQueue.created_at))
 
             messages = query.limit(limit).all()
 
@@ -366,7 +364,7 @@ class QueueOperations:
 
     def dequeue_broadcast_messages(
         self,
-        direction: Union[str, QueueDirection] = QueueDirection.OUTBOUND,
+        direction: str | QueueDirection = QueueDirection.OUTBOUND,
         limit: int = 10,
         db: Session = None,
     ) -> List[MessageQueue]:
@@ -618,7 +616,7 @@ class QueueOperations:
             if not session_provided:
                 db.close()
 
-    def retry_unacknowledged_messages(
+    def retry_unacknowledged_messages(  # NOSONAR - cognitive complexity
         self, timeout_seconds: int = 60, db: Session = None
     ) -> int:
         """

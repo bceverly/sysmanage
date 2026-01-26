@@ -144,7 +144,7 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
         }
 
         // UID validation if provided (platform-specific minimum)
-        if (uid && (isNaN(Number(uid)) || Number(uid) < minUid)) {
+        if (uid && (Number.isNaN(Number(uid)) || Number(uid) < minUid)) {
             setError(t('hostAccount.invalidUidPlatform', `UID must be a number >= ${minUid}`));
             return false;
         }
@@ -152,7 +152,7 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
         return true;
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async () => {  // NOSONAR - cognitive complexity
         if (!validateForm()) {
             return;
         }
@@ -184,7 +184,13 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
                 payload.full_name = fullName.trim();
             }
 
-            if (!isWindows) {
+            if (isWindows) {
+                // Windows-specific fields
+                payload.password = password;
+                payload.password_never_expires = passwordNeverExpires;
+                payload.user_must_change_password = userMustChangePassword;
+                payload.account_disabled = accountDisabled;
+            } else {
                 // Unix-specific fields
                 if (homeDirectory) {
                     payload.home_directory = homeDirectory;
@@ -199,12 +205,6 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
                 if (primaryGroup) {
                     payload.primary_group = primaryGroup;
                 }
-            } else {
-                // Windows-specific fields
-                payload.password = password;
-                payload.password_never_expires = passwordNeverExpires;
-                payload.user_must_change_password = userMustChangePassword;
-                payload.account_disabled = accountDisabled;
             }
 
             await axiosInstance.post(`/api/host/${hostId}/accounts`, payload);
@@ -329,8 +329,8 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
                                 onChange={(e) => setUid(e.target.value)}
                                 fullWidth
                                 disabled={submitting}
-                                error={uid !== '' && (isNaN(Number(uid)) || Number(uid) < minUid)}
-                                helperText={uid !== '' && (isNaN(Number(uid)) || Number(uid) < minUid)
+                                error={uid !== '' && (Number.isNaN(Number(uid)) || Number(uid) < minUid)}
+                                helperText={uid !== '' && (Number.isNaN(Number(uid)) || Number(uid) < minUid)
                                     ? t('hostAccount.invalidUidPlatform', `UID must be a number >= ${minUid}`)
                                     : t('hostAccount.uidHelpPlatform', `Leave empty to auto-assign. Must be >= ${minUid} if specified.`)}
                             />
@@ -433,7 +433,7 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
                     disabled={
                         submitting ||
                         !username.trim() ||
-                        (!isWindows && uid !== '' && (isNaN(Number(uid)) || Number(uid) < minUid)) ||
+                        (!isWindows && uid !== '' && (Number.isNaN(Number(uid)) || Number(uid) < minUid)) ||
                         (isWindows && (!password || password.length < 8 || password !== confirmPassword))
                     }
                 >

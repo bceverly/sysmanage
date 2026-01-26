@@ -172,8 +172,10 @@ const UbuntuProEnrollmentDialog: React.FC<UbuntuProEnrollmentDialogProps> = ({
             <ListItemText
               primary={host.fqdn}
               secondary={host.ipv4}
-              primaryTypographyProps={{ fontSize: '0.875rem' }}
-              secondaryTypographyProps={{ fontSize: '0.75rem' }}
+              slotProps={{
+                primary: { fontSize: '0.875rem' },
+                secondary: { fontSize: '0.75rem' }
+              }}
             />
           </ListItem>
         ))}
@@ -181,7 +183,9 @@ const UbuntuProEnrollmentDialog: React.FC<UbuntuProEnrollmentDialogProps> = ({
           <ListItem>
             <ListItemText
               primary={t('ubuntuPro.enrollment.andMore', 'And {count} more...', { count: hosts.length - 5 })}
-              primaryTypographyProps={{ fontSize: '0.875rem', fontStyle: 'italic' }}
+              slotProps={{
+                primary: { fontSize: '0.875rem', fontStyle: 'italic' }
+              }}
             />
           </ListItem>
         )}
@@ -244,18 +248,20 @@ const UbuntuProEnrollmentDialog: React.FC<UbuntuProEnrollmentDialogProps> = ({
               helperText={t('ubuntuPro.enrollment.customKeyHelp',
                 'Contract-based Ubuntu Pro key starting with "C"')}
               error={customKey.trim() !== '' && !validateCustomKey(customKey)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowCustomKey(!showCustomKey)}
-                      edge="end"
-                      aria-label={t('common.togglePasswordVisibility', 'Toggle password visibility')}
-                    >
-                      {showCustomKey ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowCustomKey(!showCustomKey)}
+                        edge="end"
+                        aria-label={t('common.togglePasswordVisibility', 'Toggle password visibility')}
+                      >
+                        {showCustomKey ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
               }}
             />
           )}
@@ -277,9 +283,9 @@ const UbuntuProEnrollmentDialog: React.FC<UbuntuProEnrollmentDialogProps> = ({
         {t('ubuntuPro.enrollment.results', 'Enrollment Results')}
       </Typography>
 
-      {enrollmentResults.map((result, index) => (
+      {enrollmentResults.map((result) => (
         <Alert
-          key={index}
+          key={result.host_id}
           severity={result.success ? 'success' : 'error'}
         >
           <Typography variant="subtitle2">

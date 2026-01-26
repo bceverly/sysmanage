@@ -65,6 +65,24 @@ interface HypervisorStatusCardProps {
   rebootRequired?: boolean;
 }
 
+interface StatusIndicatorProps {
+  checked: boolean;
+  label: string;
+}
+
+const StatusIndicator: React.FC<StatusIndicatorProps> = ({ checked, label }) => (
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+    {checked ? (
+      <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main' }} />
+    ) : (
+      <CancelIcon sx={{ fontSize: 16, color: 'text.disabled' }} />
+    )}
+    <Typography variant="caption" color={checked ? 'text.primary' : 'text.disabled'}>
+      {label}
+    </Typography>
+  </Box>
+);
+
 const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
   type,
   capabilities,
@@ -141,117 +159,102 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
 
   const hypervisorInfo = getHypervisorInfo();
 
+  // Type definitions for state results
+  type StateResult = { state: string; color: 'default' | 'error' | 'success' | 'warning' | 'info'; label: string };
+
+  // Helper to create state result objects
+  const createState = (state: string, color: StateResult['color'], labelKey: string, defaultLabel: string): StateResult => ({
+    state,
+    color,
+    label: t(`hostDetail.hypervisor.state.${labelKey}`, defaultLabel),
+  });
+
+  // Helper to check if hypervisor is BSD-based (vmm or bhyve)
+  const isBsdHypervisor = type === 'vmm' || type === 'bhyve';
+
+  // Helper to check if hypervisor is Linux-based (kvm or lxd)
+  const isLinuxHypervisor = type === 'kvm' || type === 'lxd';
+
+  // Check if hypervisor is in "ready" state
+  const isHypervisorReady = (caps: HypervisorCapabilities): boolean => {
+    if (type === 'wsl' && caps.enabled) return true;
+    if (isBsdHypervisor && caps.running) return true;
+    if (isLinuxHypervisor && caps.initialized) return true;
+    return false;
+  };
+
+  // Check if hypervisor needs initialization
+  const needsInitialization = (caps: HypervisorCapabilities): boolean => {
+    if (type === 'kvm' && caps.running && !caps.initialized) return true;
+    if (type === 'lxd' && caps.installed && !caps.initialized) return true;
+    return false;
+  };
+
+  // Check if BSD hypervisor is enabled but not running
+  const isBsdEnabledButNotRunning = (caps: HypervisorCapabilities): boolean => {
+    return isBsdHypervisor && !!caps.enabled && !caps.running;
+  };
+
+  // Check if hypervisor needs to be enabled
+  const needsEnabling = (caps: HypervisorCapabilities): boolean => {
+    if (type === 'wsl' && caps.needs_enable) return true;
+    if (isBsdHypervisor && caps.needs_enable) return true;
+    return false;
+  };
+
   // Determine current state and what action is needed
-  const getState = () => {
+  const getState = (): StateResult => {
     if (!capabilities) {
-      return { state: 'unknown', color: 'default' as const, label: t('hostDetail.hypervisor.state.unknown', 'Unknown') };
+      return createState('unknown', 'default', 'unknown', 'Unknown');
     }
 
-    // Check for BIOS virtualization requirement (WSL specific)
+    // BIOS virtualization requirement (WSL specific)
     if (capabilities.needs_bios_virtualization) {
-      return {
-        state: 'bios_required',
-        color: 'error' as const,
-        label: t('hostDetail.hypervisor.state.biosRequired', 'BIOS Virtualization Required')
-      };
+      return createState('bios_required', 'error', 'biosRequired', 'BIOS Virtualization Required');
     }
 
     // Not available at all
     if (!capabilities.available) {
-      return {
-        state: 'not_available',
-        color: 'default' as const,
-        label: t('hostDetail.hypervisor.state.notAvailable', 'Not Available')
-      };
+      return createState('not_available', 'default', 'notAvailable', 'Not Available');
     }
 
-    // Check for VMM or bhyve kernel support
-    if ((type === 'vmm' || type === 'bhyve') && capabilities.available && !capabilities.kernel_supported) {
-      return {
-        state: 'no_kernel_support',
-        color: 'error' as const,
-        label: t('hostDetail.hypervisor.state.noKernelSupport', 'No Kernel Support')
-      };
+    // BSD hypervisors require kernel support
+    if (isBsdHypervisor && !capabilities.kernel_supported) {
+      return createState('no_kernel_support', 'error', 'noKernelSupport', 'No Kernel Support');
     }
 
     // Fully ready
-    if (type === 'wsl' && capabilities.enabled) {
-      return { state: 'ready', color: 'success' as const, label: t('hostDetail.hypervisor.state.ready', 'Ready') };
-    }
-    if ((type === 'vmm' || type === 'bhyve') && capabilities.running) {
-      return { state: 'ready', color: 'success' as const, label: t('hostDetail.hypervisor.state.ready', 'Ready') };
-    }
-    if ((type === 'kvm' || type === 'lxd') && capabilities.initialized) {
-      return { state: 'ready', color: 'success' as const, label: t('hostDetail.hypervisor.state.ready', 'Ready') };
+    if (isHypervisorReady(capabilities)) {
+      return createState('ready', 'success', 'ready', 'Ready');
     }
 
-    // Needs initialization (running but not initialized)
-    if (type === 'kvm' && capabilities.running && !capabilities.initialized) {
-      return {
-        state: 'needs_init',
-        color: 'warning' as const,
-        label: t('hostDetail.hypervisor.state.needsInit', 'Needs Initialization')
-      };
-    }
-    if (type === 'lxd' && capabilities.installed && !capabilities.initialized) {
-      return {
-        state: 'needs_init',
-        color: 'warning' as const,
-        label: t('hostDetail.hypervisor.state.needsInit', 'Needs Initialization')
-      };
+    // Needs initialization
+    if (needsInitialization(capabilities)) {
+      return createState('needs_init', 'warning', 'needsInit', 'Needs Initialization');
     }
 
-    // Needs to be enabled/started
-    if ((type === 'vmm' || type === 'bhyve') && capabilities.enabled && !capabilities.running) {
-      return {
-        state: 'not_running',
-        color: 'warning' as const,
-        label: t('hostDetail.hypervisor.state.notRunning', 'Not Running')
-      };
+    // BSD hypervisor enabled but not running
+    if (isBsdEnabledButNotRunning(capabilities)) {
+      return createState('not_running', 'warning', 'notRunning', 'Not Running');
     }
 
     // Installed but not enabled
     if (capabilities.installed && !capabilities.enabled) {
-      return {
-        state: 'not_enabled',
-        color: 'warning' as const,
-        label: t('hostDetail.hypervisor.state.notEnabled', 'Not Enabled')
-      };
+      return createState('not_enabled', 'warning', 'notEnabled', 'Not Enabled');
     }
 
     // Available but not installed
     if (capabilities.available && !capabilities.installed) {
-      return {
-        state: 'not_installed',
-        color: 'warning' as const,
-        label: t('hostDetail.hypervisor.state.notInstalled', 'Not Installed')
-      };
+      return createState('not_installed', 'warning', 'notInstalled', 'Not Installed');
     }
 
-    // WSL needs enable
-    if (type === 'wsl' && capabilities.needs_enable) {
-      return {
-        state: 'needs_enable',
-        color: 'warning' as const,
-        label: t('hostDetail.hypervisor.state.notEnabled', 'Not Enabled')
-      };
+    // Needs enabling (WSL, VMM, bhyve)
+    if (needsEnabling(capabilities)) {
+      return createState('needs_enable', 'warning', 'notEnabled', 'Not Enabled');
     }
 
-    // VMM or bhyve needs enable
-    if ((type === 'vmm' || type === 'bhyve') && capabilities.needs_enable) {
-      return {
-        state: 'needs_enable',
-        color: 'warning' as const,
-        label: t('hostDetail.hypervisor.state.notEnabled', 'Not Enabled')
-      };
-    }
-
-    // Available (generic fallback)
-    return {
-      state: 'available',
-      color: 'info' as const,
-      label: t('hostDetail.hypervisor.state.available', 'Available')
-    };
+    // Fallback
+    return createState('available', 'info', 'available', 'Available');
   };
 
   const stateInfo = getState();
@@ -261,26 +264,6 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
     stateInfo.state !== 'bios_required' &&
     stateInfo.state !== 'no_kernel_support' &&
     stateInfo.state !== 'unknown';
-
-  // Status indicators
-  const StatusIndicator = ({
-    checked,
-    label
-  }: {
-    checked: boolean;
-    label: string;
-  }) => (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-      {checked ? (
-        <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main' }} />
-      ) : (
-        <CancelIcon sx={{ fontSize: 16, color: 'text.disabled' }} />
-      )}
-      <Typography variant="caption" color={checked ? 'text.primary' : 'text.disabled'}>
-        {label}
-      </Typography>
-    </Box>
-  );
 
   // Get status indicators based on hypervisor type
   const getStatusIndicators = () => {
@@ -383,8 +366,8 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
 
         {/* Status Indicators */}
         <Stack spacing={0.5} sx={{ flex: 1, mb: 2 }}>
-          {indicators.map((indicator, index) => (
-            <StatusIndicator key={index} {...indicator} />
+          {indicators.map((indicator) => (
+            <StatusIndicator key={indicator.label} {...indicator} />
           ))}
         </Stack>
 

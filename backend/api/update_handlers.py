@@ -19,7 +19,9 @@ logger = logging.getLogger(__name__)
 update_results_cache = {}
 
 
-async def handle_update_apply_result(db: Session, connection, message_data: dict):
+async def handle_update_apply_result(
+    db: Session, connection, message_data: dict
+):  # NOSONAR - complex business logic
     """Handle update application result message from agent."""
     # Import validation helper
     from backend.utils.host_validation import validate_host_id

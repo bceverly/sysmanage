@@ -23,6 +23,10 @@ from sqlalchemy.types import TypeDecorator
 
 from backend.persistence.db import Base
 
+# Constants for commonly used values
+CASCADE_DELETE_ORPHAN = "all, delete-orphan"
+USER_ID_FK = "user.id"
+
 
 class GUID(TypeDecorator):  # pylint: disable=too-many-ancestors
     """
@@ -191,31 +195,31 @@ class Host(Base):
     user_accounts = relationship("UserAccount", back_populates="host")
     user_groups = relationship("UserGroup", back_populates="host")
     certificates = relationship(
-        "HostCertificate", back_populates="host", cascade="all, delete-orphan"
+        "HostCertificate", back_populates="host", cascade=CASCADE_DELETE_ORPHAN
     )
     roles = relationship(
-        "HostRole", back_populates="host", cascade="all, delete-orphan"
+        "HostRole", back_populates="host", cascade=CASCADE_DELETE_ORPHAN
     )
     grafana_integration = relationship(
         "GrafanaIntegrationSettings",
         back_populates="host",
         uselist=False,
-        cascade="all, delete-orphan",
+        cascade=CASCADE_DELETE_ORPHAN,
     )
     graylog_integration = relationship(
         "GraylogIntegrationSettings",
         back_populates="host",
         uselist=False,
-        cascade="all, delete-orphan",
+        cascade=CASCADE_DELETE_ORPHAN,
     )
     graylog_attachment = relationship(
         "GraylogAttachment",
         back_populates="host",
         uselist=False,
-        cascade="all, delete-orphan",
+        cascade=CASCADE_DELETE_ORPHAN,
     )
     firewall_roles = relationship(
-        "HostFirewallRole", back_populates="host", cascade="all, delete-orphan"
+        "HostFirewallRole", back_populates="host", cascade=CASCADE_DELETE_ORPHAN
     )
 
     def __repr__(self):
@@ -266,7 +270,7 @@ class User(Base):
     dashboard_card_preferences = relationship(
         "UserDashboardCardPreference",
         back_populates="user",
-        cascade="all, delete-orphan",
+        cascade=CASCADE_DELETE_ORPHAN,
     )
 
     # Runtime role cache (not stored in database)
@@ -376,7 +380,7 @@ class SecurityRoleGroup(Base):
 
     # Relationships
     roles = relationship(
-        "SecurityRole", back_populates="group", cascade="all, delete-orphan"
+        "SecurityRole", back_populates="group", cascade=CASCADE_DELETE_ORPHAN
     )
 
     def __repr__(self):
@@ -428,7 +432,7 @@ class UserSecurityRole(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
     user_id = Column(
-        GUID(), ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey(USER_ID_FK, ondelete="CASCADE"), nullable=False, index=True
     )
     role_id = Column(
         GUID(),
@@ -442,7 +446,7 @@ class UserSecurityRole(Base):
         default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
     granted_by = Column(
-        GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        GUID(), ForeignKey(USER_ID_FK, ondelete="SET NULL"), nullable=True
     )
 
     def __repr__(self):
@@ -459,7 +463,7 @@ class UserDataGridColumnPreference(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     user_id = Column(
-        GUID(), ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey(USER_ID_FK, ondelete="CASCADE"), nullable=False, index=True
     )
     grid_identifier = Column(
         String(255), nullable=False, index=True
@@ -492,7 +496,7 @@ class UserDashboardCardPreference(Base):
     __tablename__ = "user_dashboard_card_preference"
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    user_id = Column(GUID(), ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(GUID(), ForeignKey(USER_ID_FK, ondelete="CASCADE"), nullable=False)
     card_identifier = Column(
         String(100), nullable=False
     )  # e.g., "hosts", "updates", "security", "reboot", "antivirus", "opentelemetry"

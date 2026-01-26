@@ -12,6 +12,11 @@ from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
 from backend.api.host_utils import validate_host_approval_status
+from backend.api.error_constants import (
+    GRAFANA_API_KEY,
+    GRAFANA_API_KEY_LABEL,
+    MONITORING_SERVER,
+)
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -23,7 +28,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-async def configure_prometheus_datasource(
+async def configure_prometheus_datasource(  # NOSONAR - complex business logic
     settings: "models.GrafanaIntegrationSettings", session
 ) -> None:
     """
@@ -55,9 +60,9 @@ async def configure_prometheus_datasource(
         secret = (
             session.query(models.Secret)
             .filter(
-                models.Secret.name == "Grafana API Key",
+                models.Secret.name == GRAFANA_API_KEY,
                 models.Secret.secret_type
-                == "API Key",  # nosec B105 - type label not password
+                == GRAFANA_API_KEY_LABEL,  # nosec B105 - type label not password
                 models.Secret.vault_token == settings.api_key_vault_token,
             )
             .first()
@@ -188,7 +193,7 @@ class GrafanaServerInfo(BaseModel):
 
     id: str
     fqdn: str
-    role: str = "Monitoring Server"
+    role: str = MONITORING_SERVER
     package_name: str = "grafana"
     package_version: Optional[str] = None
     is_active: bool = False
@@ -218,7 +223,7 @@ async def get_grafana_servers():
             session.query(models.Host)
             .join(models.HostRole)
             .filter(
-                models.HostRole.role == "Monitoring Server",
+                models.HostRole.role == MONITORING_SERVER,
                 models.HostRole.package_name == "grafana",
                 models.Host.active == True,
                 models.Host.approval_status == "approved",
@@ -233,7 +238,7 @@ async def get_grafana_servers():
                 session.query(models.HostRole)
                 .filter(
                     models.HostRole.host_id == host.id,
-                    models.HostRole.role == "Monitoring Server",
+                    models.HostRole.role == MONITORING_SERVER,
                     models.HostRole.package_name == "grafana",
                 )
                 .first()
@@ -254,7 +259,7 @@ async def get_grafana_servers():
 
 
 @router.get("/settings", dependencies=[Depends(JWTBearer())])
-async def get_grafana_integration_settings():
+async def get_grafana_integration_settings():  # NOSONAR - complex business logic
     """
     Get current Grafana integration settings.
     """
@@ -285,7 +290,7 @@ async def get_grafana_integration_settings():
 
 
 @router.post("/settings", dependencies=[Depends(JWTBearer())])
-async def update_grafana_integration_settings(
+async def update_grafana_integration_settings(  # NOSONAR - complex business logic
     request: GrafanaIntegrationRequest,
     req: Request,
     current_user=Depends(get_current_user),
@@ -329,7 +334,7 @@ async def update_grafana_integration_settings(
                 session.query(models.HostRole)
                 .filter(
                     models.HostRole.host_id == request.host_id,
-                    models.HostRole.role == "Monitoring Server",
+                    models.HostRole.role == MONITORING_SERVER,
                     models.HostRole.package_name == "grafana",
                 )
                 .first()
@@ -357,9 +362,9 @@ async def update_grafana_integration_settings(
 
                 # Store API key in vault (trimmed to remove any leading/trailing whitespace)
                 vault_result = vault_service.store_secret(
-                    secret_name="Grafana API Key",  # nosec B106 - name not password
+                    secret_name=GRAFANA_API_KEY,  # nosec B106 - name not password
                     secret_data=request.api_key.strip(),
-                    secret_type="API Key",  # nosec B106 - type label not password
+                    secret_type=GRAFANA_API_KEY_LABEL,  # nosec B106 - type label not password
                     secret_subtype="grafana",
                 )
 
@@ -367,8 +372,8 @@ async def update_grafana_integration_settings(
 
                 # Create database entry for the secret (will show up in secrets screen)
                 secret_entry = models.Secret(
-                    name="Grafana API Key",  # nosec B106 - name not password
-                    secret_type="API Key",  # nosec B106 - type label not password
+                    name=GRAFANA_API_KEY,  # nosec B106 - name not password
+                    secret_type=GRAFANA_API_KEY_LABEL,  # nosec B106 - type label not password
                     secret_subtype="grafana",
                     vault_token=vault_token,
                     vault_path=vault_result["vault_path"],
@@ -380,9 +385,9 @@ async def update_grafana_integration_settings(
                 existing_secret = (
                     session.query(models.Secret)
                     .filter(
-                        models.Secret.name == "Grafana API Key",
+                        models.Secret.name == GRAFANA_API_KEY,
                         models.Secret.secret_type
-                        == "API Key",  # nosec B105 - type label not password
+                        == GRAFANA_API_KEY_LABEL,  # nosec B105 - type label not password
                     )
                     .first()
                 )
@@ -501,9 +506,9 @@ async def check_grafana_health():
                     secret = (
                         session.query(models.Secret)
                         .filter(
-                            models.Secret.name == "Grafana API Key",
+                            models.Secret.name == GRAFANA_API_KEY,
                             models.Secret.secret_type
-                            == "API Key",  # nosec B105 - type label not password
+                            == GRAFANA_API_KEY_LABEL,  # nosec B105 - type label not password
                             models.Secret.vault_token == settings.api_key_vault_token,
                         )
                         .first()
@@ -529,7 +534,9 @@ async def check_grafana_health():
                 health_response = await client.get(f"{grafana_url}/api/health")
 
                 if health_response.status_code == 200:
-                    health_data = health_response.json()
+                    _health_data = (
+                        health_response.json()
+                    )  # NOSONAR - parsed for validation
 
                     # Try to get version info
                     version_info = None

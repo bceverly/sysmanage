@@ -3,7 +3,7 @@ Graylog integration API endpoints for managing Graylog server connections.
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 import httpx
@@ -12,6 +12,11 @@ from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
 from backend.api.host_utils import validate_host_approval_status
+from backend.api.error_constants import (
+    GRAYLOG_API_TOKEN,
+    GRAYLOG_API_TOKEN_LABEL,
+    LOG_AGGREGATION_SERVER,
+)
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -38,7 +43,7 @@ class GraylogServerInfo(BaseModel):
 
     id: str
     fqdn: str
-    role: str = "Log Aggregation Server"
+    role: str = LOG_AGGREGATION_SERVER
     package_name: str = "graylog-server"
     package_version: Optional[str] = None
     is_active: bool = False
@@ -77,7 +82,7 @@ async def get_graylog_servers():
             session.query(models.Host)
             .join(models.HostRole)
             .filter(
-                models.HostRole.role == "Log Aggregation Server",
+                models.HostRole.role == LOG_AGGREGATION_SERVER,
                 models.HostRole.package_name == "graylog-server",
                 models.Host.active == True,
                 models.Host.approval_status == "approved",
@@ -92,7 +97,7 @@ async def get_graylog_servers():
                 session.query(models.HostRole)
                 .filter(
                     models.HostRole.host_id == host.id,
-                    models.HostRole.role == "Log Aggregation Server",
+                    models.HostRole.role == LOG_AGGREGATION_SERVER,
                     models.HostRole.package_name == "graylog-server",
                 )
                 .first()
@@ -113,7 +118,7 @@ async def get_graylog_servers():
 
 
 @router.get("/settings", dependencies=[Depends(JWTBearer())])
-async def get_graylog_integration_settings():
+async def get_graylog_integration_settings():  # NOSONAR - complex business logic
     """
     Get current Graylog integration settings.
     """
@@ -144,7 +149,7 @@ async def get_graylog_integration_settings():
 
 
 @router.post("/settings", dependencies=[Depends(JWTBearer())])
-async def update_graylog_integration_settings(
+async def update_graylog_integration_settings(  # NOSONAR - complex business logic
     request: GraylogIntegrationRequest,
     req: Request,
     current_user=Depends(get_current_user),
@@ -188,7 +193,7 @@ async def update_graylog_integration_settings(
                 session.query(models.HostRole)
                 .filter(
                     models.HostRole.host_id == request.host_id,
-                    models.HostRole.role == "Log Aggregation Server",
+                    models.HostRole.role == LOG_AGGREGATION_SERVER,
                     models.HostRole.package_name == "graylog-server",
                 )
                 .first()
@@ -220,9 +225,9 @@ async def update_graylog_integration_settings(
 
                 # Store API token in vault (trimmed to remove any leading/trailing whitespace)
                 vault_result = vault_service.store_secret(
-                    secret_name="Graylog API Token",  # nosec B106 - name not password
+                    secret_name=GRAYLOG_API_TOKEN,  # nosec B106 - name not password
                     secret_data=request.api_token.strip(),
-                    secret_type="API Token",  # nosec B106 - type label not password
+                    secret_type=GRAYLOG_API_TOKEN_LABEL,  # nosec B106 - type label not password
                     secret_subtype="graylog",
                 )
 
@@ -230,8 +235,8 @@ async def update_graylog_integration_settings(
 
                 # Create database entry for the secret (will show up in secrets screen)
                 secret_entry = models.Secret(
-                    name="Graylog API Token",  # nosec B106 - name not password
-                    secret_type="API Token",  # nosec B106 - type label not password
+                    name=GRAYLOG_API_TOKEN,  # nosec B106 - name not password
+                    secret_type=GRAYLOG_API_TOKEN_LABEL,  # nosec B106 - type label not password
                     secret_subtype="graylog",
                     vault_token=vault_token,
                     vault_path=vault_result["vault_path"],
@@ -243,9 +248,9 @@ async def update_graylog_integration_settings(
                 existing_secret = (
                     session.query(models.Secret)
                     .filter(
-                        models.Secret.name == "Graylog API Token",
+                        models.Secret.name == GRAYLOG_API_TOKEN,
                         models.Secret.secret_type
-                        == "API Token",  # nosec B105 - type label not password
+                        == GRAYLOG_API_TOKEN_LABEL,  # nosec B105 - type label not password
                     )
                     .first()
                 )
@@ -355,9 +360,9 @@ async def check_graylog_health():
                     secret = (
                         session.query(models.Secret)
                         .filter(
-                            models.Secret.name == "Graylog API Token",
+                            models.Secret.name == GRAYLOG_API_TOKEN,
                             models.Secret.secret_type
-                            == "API Token",  # nosec B105 - type label not password
+                            == GRAYLOG_API_TOKEN_LABEL,  # nosec B105 - type label not password
                             models.Secret.vault_token == settings.api_token_vault_token,
                         )
                         .first()
@@ -506,7 +511,7 @@ async def check_graylog_health():
                     settings.syslog_udp_port = syslog_udp_port
                     settings.has_windows_sidecar = has_windows_sidecar
                     settings.windows_sidecar_port = windows_sidecar_port
-                    settings.inputs_last_checked = datetime.utcnow()
+                    settings.inputs_last_checked = datetime.now(timezone.utc)
                     session.commit()
 
                     return GraylogHealthStatus(

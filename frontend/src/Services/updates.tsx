@@ -104,7 +104,7 @@ class UpdatesService {
     offset = 0
   ): Promise<UpdatesResponse> {
     try {
-      const params = new window.URLSearchParams();
+      const params = new globalThis.URLSearchParams();
       if (securityOnly) params.append('security_only', 'true');
       if (systemOnly) params.append('system_only', 'true');
       if (applicationOnly) params.append('application_only', 'true');
@@ -128,7 +128,7 @@ class UpdatesService {
     applicationOnly?: boolean
   ): Promise<HostUpdatesResponse> {
     try {
-      const params = new window.URLSearchParams();
+      const params = new globalThis.URLSearchParams();
       if (packageManager) params.append('package_manager', packageManager);
       if (securityOnly) params.append('security_only', 'true');
       if (systemOnly) params.append('system_only', 'true');
@@ -160,7 +160,7 @@ class UpdatesService {
 
   async getExecutionLog(hostId: string, limit = 50, offset = 0): Promise<unknown> {
     try {
-      const params = new window.URLSearchParams();
+      const params = new globalThis.URLSearchParams();
       params.append('limit', limit.toString());
       params.append('offset', offset.toString());
 

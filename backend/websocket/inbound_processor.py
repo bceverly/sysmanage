@@ -20,7 +20,9 @@ from backend.websocket.queue_manager import (
 logger = get_logger(__name__)
 
 
-async def process_pending_messages(db: Session) -> None:
+async def process_pending_messages(
+    db: Session,
+) -> None:  # NOSONAR - cognitive complexity
     """
     Process all pending messages in the queue.
 
@@ -383,7 +385,7 @@ async def process_system_info_message(message, db: Session) -> None:
         # Call the system_info handler
         from backend.api.message_handlers import handle_system_info
 
-        response = await handle_system_info(db, mock_connection, message_data)
+        _response = await handle_system_info(db, mock_connection, message_data)
 
         # Mark as completed
         server_queue_manager.mark_completed(message.message_id, db=db)

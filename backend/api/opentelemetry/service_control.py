@@ -7,6 +7,10 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from backend.api.error_constants import (
+    ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE,
+    ERROR_USER_NOT_FOUND,
+)
 from backend.api.host_utils import validate_host_approval_status
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
@@ -55,7 +59,7 @@ async def start_opentelemetry(
             db.query(models.User).filter(models.User.userid == current_user).first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(db)
@@ -81,7 +85,7 @@ async def start_opentelemetry(
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=_("Host not found or not active"),
+                detail=ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE(),
             )
 
         validate_host_approval_status(host)
@@ -153,7 +157,7 @@ async def stop_opentelemetry(
             db.query(models.User).filter(models.User.userid == current_user).first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(db)
@@ -177,7 +181,7 @@ async def stop_opentelemetry(
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=_("Host not found or not active"),
+                detail=ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE(),
             )
 
         validate_host_approval_status(host)
@@ -249,7 +253,7 @@ async def restart_opentelemetry(
             db.query(models.User).filter(models.User.userid == current_user).first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(db)
@@ -275,7 +279,7 @@ async def restart_opentelemetry(
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=_("Host not found or not active"),
+                detail=ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE(),
             )
 
         validate_host_approval_status(host)

@@ -10,6 +10,12 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from backend.api.error_constants import (
+    ERROR_INVALID_SECRET_ID,
+    ERROR_SECRET_NOT_FOUND,
+    SECRETS_INVALID_ID_KEY,
+    SECRETS_NOT_FOUND_KEY,
+)
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence.db import get_db
@@ -71,13 +77,13 @@ async def get_secret_metadata(
         if not secret:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=_("secrets.not_found", "Secret not found"),
+                detail=_(SECRETS_NOT_FOUND_KEY, ERROR_SECRET_NOT_FOUND()),
             )
         return SecretResponse(**secret.to_dict())
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=_("secrets.invalid_id", "Invalid secret ID"),
+            detail=_(SECRETS_INVALID_ID_KEY, ERROR_INVALID_SECRET_ID()),
         ) from exc
     except HTTPException:
         raise
@@ -104,7 +110,7 @@ async def get_secret_content(
         if not secret:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=_("secrets.not_found", "Secret not found"),
+                detail=_(SECRETS_NOT_FOUND_KEY, ERROR_SECRET_NOT_FOUND()),
             )
 
         # Retrieve content from vault
@@ -131,7 +137,7 @@ async def get_secret_content(
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=_("secrets.invalid_id", "Invalid secret ID"),
+            detail=_(SECRETS_INVALID_ID_KEY, ERROR_INVALID_SECRET_ID()),
         ) from exc
     except HTTPException:
         raise
@@ -229,7 +235,7 @@ async def create_secret(
     response_model=SecretResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def update_secret(
+async def update_secret(  # NOSONAR - complex business logic
     secret_id: str,
     secret_data: SecretUpdate,
     db: Session = Depends(get_db),
@@ -244,7 +250,7 @@ async def update_secret(
         if not secret:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=_("secrets.not_found", "Secret not found"),
+                detail=_(SECRETS_NOT_FOUND_KEY, ERROR_SECRET_NOT_FOUND()),
             )
 
         # Check if new name conflicts with existing secrets
@@ -328,7 +334,7 @@ async def update_secret(
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=_("secrets.invalid_id", "Invalid secret ID"),
+            detail=_(SECRETS_INVALID_ID_KEY, ERROR_INVALID_SECRET_ID()),
         ) from exc
     except HTTPException:
         raise
@@ -355,7 +361,7 @@ async def delete_secret(
         if not secret:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=_("secrets.not_found", "Secret not found"),
+                detail=_(SECRETS_NOT_FOUND_KEY, ERROR_SECRET_NOT_FOUND()),
             )
 
         # Delete from vault
@@ -397,7 +403,7 @@ async def delete_secret(
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=_("secrets.invalid_id", "Invalid secret ID"),
+            detail=_(SECRETS_INVALID_ID_KEY, ERROR_INVALID_SECRET_ID()),
         ) from exc
     except HTTPException:
         raise
@@ -434,9 +440,9 @@ async def delete_multiple_secrets(
             except ValueError as exc:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=_("secrets.invalid_id", "Invalid secret ID: {id}").format(
-                        id=secret_id
-                    ),
+                    detail=_(
+                        SECRETS_INVALID_ID_KEY, ERROR_INVALID_SECRET_ID() + ": {id}"
+                    ).format(id=secret_id),
                 ) from exc
 
         # Get all secrets to delete

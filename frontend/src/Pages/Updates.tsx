@@ -82,15 +82,7 @@ const Updates: React.FC = () => {
   // Permission state
   const [canApplySoftwareUpdate, setCanApplySoftwareUpdate] = useState<boolean>(false);
 
-  // Auto-refresh state (disabled)
-  // const [refreshCountdown, setRefreshCountdown] = useState(30);
-  // const [hasActiveUpdates, setHasActiveUpdates] = useState(false);
-  // const refreshTimerRef = useRef<number | null>(null);
-  // const countdownTimerRef = useRef<number | null>(null);
-
   const ITEMS_PER_PAGE = 50;
-  // const STANDARD_REFRESH_INTERVAL = 30000; // 30 seconds
-  // const ACTIVE_UPDATES_REFRESH_INTERVAL = 15000; // 15 seconds when updates are running
 
   // Check permissions
   useEffect(() => {
@@ -224,54 +216,7 @@ const Updates: React.FC = () => {
 
   const handleManualRefresh = async () => {
     await refreshAll();
-    // resetAutoRefreshTimer(); // Auto-refresh disabled
   };
-
-  // Store timer function in ref to avoid useCallback dependencies (disabled)
-  // const resetAutoRefreshTimerRef = useRef<() => void>();
-  
-  // Auto-refresh timer function disabled
-  // resetAutoRefreshTimerRef.current = () => {
-  //   // Clear existing timers
-  //   if (refreshTimerRef.current) {
-  //     window.clearTimeout(refreshTimerRef.current);
-  //   }
-  //   if (countdownTimerRef.current) {
-  //     window.clearInterval(countdownTimerRef.current);
-  //   }
-
-  //   // Choose interval based on whether updates are active
-  //   const interval = hasActiveUpdates ? ACTIVE_UPDATES_REFRESH_INTERVAL : STANDARD_REFRESH_INTERVAL;
-  //   const countdownSeconds = Math.floor(interval / 1000);
-  //   
-  //   setRefreshCountdown(countdownSeconds);
-
-  //   // Start countdown timer (updates every second)
-  //   countdownTimerRef.current = window.setInterval(() => {
-  //     setRefreshCountdown((prev) => {
-  //       if (prev <= 1) {
-  //         return countdownSeconds; // Reset countdown
-  //       }
-  //       return prev - 1;
-  //     });
-  //   }, 1000);
-
-  //   // Set main refresh timer
-  //   refreshTimerRef.current = window.setTimeout(() => {
-  //     refreshAll();
-  //     if (resetAutoRefreshTimerRef.current) {
-  //       resetAutoRefreshTimerRef.current(); // Schedule next refresh
-  //     }
-  //   }, interval);
-  // };
-
-  // const resetAutoRefreshTimer = useCallback(() => {
-  //   if (resetAutoRefreshTimerRef.current) {
-  //     resetAutoRefreshTimerRef.current();
-  //   }
-  // }, []);
-
-  // Remove user interaction timer resets to prevent excessive refreshing
 
   useEffect(() => {
     Promise.all([
@@ -280,17 +225,6 @@ const Updates: React.FC = () => {
       fetchUpdates(0)
     ]);
   }, [filters, searchQuery, fetchUpdates, fetchHostsWithUpdates, fetchUpdatesSummary]);
-
-  // Check for active updates on component mount and when updateStatuses changes (disabled)
-  // useEffect(() => {
-  //   let hasPending = false;
-  //   updateStatuses.forEach((status) => {
-  //     if (status.status === 'pending') {
-  //       hasPending = true;
-  //     }
-  //   });
-  //   // setHasActiveUpdates(hasPending);
-  // }, [updateStatuses]);
 
   // Watch for changes in search parameters and update filters accordingly
   useEffect(() => {
@@ -302,108 +236,102 @@ const Updates: React.FC = () => {
     }));
   }, [searchParams]);
 
-  // Auto-refresh disabled
-  // useEffect(() => {
-  //   if (resetAutoRefreshTimerRef.current) {
-  //     resetAutoRefreshTimerRef.current();
-  //   }
-  //   
-  //   // Cleanup timers on component unmount
-  //   return () => {
-  //     if (refreshTimerRef.current) {
-  //       window.clearTimeout(refreshTimerRef.current);
-  //     }
-  //     if (countdownTimerRef.current) {
-  //       window.clearInterval(countdownTimerRef.current);
-  //     }
-  //   };
-  // }, []);
+  // Helper function to process successful package updates
+  const processSuccessfulPackage = (
+    pkg: UpdatePackage,
+    hostId: string,
+    newStatuses: Map<string, UpdateStatus>
+  ): boolean => {
+    const key = `${hostId}-${pkg.package_name}-${pkg.package_manager}`;
+    if (newStatuses.has(key)) {
+      newStatuses.set(key, {
+        status: 'success',
+        newVersion: pkg.new_version,
+        timestamp: Date.now()
+      });
+      return true;
+    }
+    return false;
+  };
 
-  // useEffect(() => {
-  //   if (resetAutoRefreshTimerRef.current) {
-  //     resetAutoRefreshTimerRef.current();
-  //   }
-  // }, [hasActiveUpdates]);
+  // Helper function to process failed package updates
+  const processFailedPackage = (
+    pkg: UpdatePackage,
+    hostId: string,
+    newStatuses: Map<string, UpdateStatus>
+  ): boolean => {
+    const key = `${hostId}-${pkg.package_name}-${pkg.package_manager}`;
+    if (newStatuses.has(key)) {
+      newStatuses.set(key, {
+        status: 'failed',
+        timestamp: Date.now()
+      });
+      return true;
+    }
+    return false;
+  };
 
-  // Removed excessive user interaction listeners that were causing timer resets
+  // Helper function to process host results
+  const processHostResults = useCallback((
+    results: Record<string, unknown>,
+    newStatuses: Map<string, UpdateStatus>
+  ): boolean => {
+    let hasUpdates = false;
+    Object.entries(results).forEach(([hostId, hostResult]: [string, unknown]) => {
+      const result = hostResult as HostResult;
+      result.updated_packages?.forEach((pkg: UpdatePackage) => {
+        if (processSuccessfulPackage(pkg, hostId, newStatuses)) {
+          hasUpdates = true;
+        }
+      });
+      result.failed_packages?.forEach((pkg: UpdatePackage) => {
+        if (processFailedPackage(pkg, hostId, newStatuses)) {
+          hasUpdates = true;
+        }
+      });
+    });
+    return hasUpdates;
+  }, []);
+
+  // Helper function to clear completed selections
+  const clearCompletedSelections = (newStatuses: Map<string, UpdateStatus>) => {
+    const completedKeys = new Set<string>();
+    newStatuses.forEach((status, key) => {
+      if (status.status === 'success' || status.status === 'failed') {
+        completedKeys.add(key);
+      }
+    });
+
+    if (completedKeys.size > 0) {
+      setSelectedUpdates(prev => {
+        const newSelected = new Set(prev);
+        completedKeys.forEach(key => newSelected.delete(key));
+        return newSelected;
+      });
+    }
+  };
 
   // Poll for update results when there are pending updates
   useEffect(() => {
     const pollForResults = async () => {
       if (updateStatuses.size === 0) return;
-      
+
       try {
         const response = await updatesService.getUpdateResults();
         const results = response.results || {};
-        
+
         // Process results and update status for matching packages
         const newStatuses = new Map(updateStatuses);
-        let hasUpdates = false;
-        
-        Object.entries(results).forEach(([hostId, hostResult]: [string, unknown]) => {
-          const result = hostResult as HostResult;
-          // Handle successful updates
-          result.updated_packages?.forEach((pkg: UpdatePackage) => {
-            const key = `${hostId}-${pkg.package_name}-${pkg.package_manager}`;
-            if (newStatuses.has(key)) {
-              newStatuses.set(key, {
-                status: 'success',
-                newVersion: pkg.new_version,
-                timestamp: Date.now()
-              });
-              hasUpdates = true;
-            }
-          });
-          
-          // Handle failed updates
-          result.failed_packages?.forEach((pkg: UpdatePackage) => {
-            const key = `${hostId}-${pkg.package_name}-${pkg.package_manager}`;
-            if (newStatuses.has(key)) {
-              newStatuses.set(key, {
-                status: 'failed',
-                timestamp: Date.now()
-              });
-              hasUpdates = true;
-            }
-          });
-        });
-        
+        const hasUpdates = processHostResults(results, newStatuses);
+
         if (hasUpdates) {
           setUpdateStatuses(newStatuses);
-          
+
           // Trigger notification bell refresh when packages are updated
           triggerRefresh();
-          
-          // Check if all updates are complete (no pending updates remaining)
-          let hasPendingUpdates = false;
-          newStatuses.forEach((status) => {
-            if (status.status === 'pending') {
-              hasPendingUpdates = true;
-            }
-          });
-          
-          // Disable fast polling if no pending updates remain
-          if (!hasPendingUpdates) {
-            // setHasActiveUpdates(false);
-          }
-          
+
           // Clear selections for completed updates after a delay
-          setTimeout(() => {
-            const completedKeys = new Set<string>();
-            newStatuses.forEach((status, key) => {
-              if (status.status === 'success' || status.status === 'failed') {
-                completedKeys.add(key);
-              }
-            });
-            
-            if (completedKeys.size > 0) {
-              setSelectedUpdates(prev => {
-                const newSelected = new Set(prev);
-                completedKeys.forEach(key => newSelected.delete(key));
-                return newSelected;
-              });
-            }
-          }, 3000); // Clear selections after 3 seconds
+          setTimeout(() => clearCompletedSelections(newStatuses), 3000);
         }
       } catch (error) {
         console.error('Failed to poll for update results:', error);
@@ -412,10 +340,10 @@ const Updates: React.FC = () => {
 
     // Only poll if there are pending updates, and use a reasonable interval
     if (updateStatuses.size === 0) return;
-    
-    const interval = window.setInterval(pollForResults, 10000); // Poll every 10 seconds only when needed
-    return () => window.clearInterval(interval);
-  }, [updateStatuses, triggerRefresh]);
+
+    const interval = globalThis.setInterval(pollForResults, 10000); // Poll every 10 seconds only when needed
+    return () => globalThis.clearInterval(interval);
+  }, [updateStatuses, triggerRefresh, processHostResults]);
 
   const handleFilterChange = (key: string, value: boolean | string) => {
     setFilters(prev => ({
@@ -484,7 +412,6 @@ const Updates: React.FC = () => {
       });
     });
     setUpdateStatuses(newStatuses);
-    // setHasActiveUpdates(true); // Enable fast polling
 
     // Clear checkboxes immediately after setting pending status
     setSelectedUpdates(new Set());
@@ -560,6 +487,59 @@ const Updates: React.FC = () => {
     
     return null;
   };
+
+  // Helper function to render checkbox based on permission and selection state
+  const renderSelectAllCheckbox = () => {
+    if (!canApplySoftwareUpdate) {
+      return <IoSquareOutline style={{ opacity: 0.3, cursor: 'not-allowed' }} />;
+    }
+    if (selectedUpdates.size === updates.length) {
+      return <IoCheckbox onClick={handleSelectAll} />;
+    }
+    return <IoSquareOutline onClick={handleSelectAll} />;
+  };
+
+  // Helper function to render individual update item checkbox
+  const renderUpdateCheckbox = (update: PackageUpdate, isSelected: boolean) => {
+    if (!canApplySoftwareUpdate) {
+      return <IoSquareOutline style={{ opacity: 0.3, cursor: 'not-allowed' }} />;
+    }
+    if (isSelected) {
+      return <IoCheckbox onClick={() => handleSelectUpdate(update)} />;
+    }
+    return <IoSquareOutline onClick={() => handleSelectUpdate(update)} />;
+  };
+
+  // Helper function to render update type icon
+  const renderUpdateIcon = (update: PackageUpdate) => {
+    if (update.is_security_update) {
+      return <IoShieldCheckmark className="update-icon security" />;
+    }
+    if (update.is_system_update) {
+      return <IoHardwareChip className="update-icon system" />;
+    }
+    return <IoApps className="update-icon application" />;
+  };
+
+  // Helper function to get update type priority for sorting
+  const getTypePriority = (update: PackageUpdate): number => {
+    if (update.is_security_update) return 0;
+    if (update.is_system_update) return 1;
+    return 2;
+  };
+
+  // Sort updates: security first, then system, then application, then by name
+  const sortedUpdates = [...updates].sort((a, b) => {
+    const priorityA = getTypePriority(a);
+    const priorityB = getTypePriority(b);
+
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB;
+    }
+
+    // If same type, sort by package name
+    return a.package_name.localeCompare(b.package_name);
+  });
 
   // Use host-specific stats if available, otherwise use global stats
   const displayStats = hostSpecificStats ? {
@@ -742,15 +722,7 @@ const Updates: React.FC = () => {
         <div className="updates__actions">
           <div className="updates__selection">
             <label className="updates__select-all">
-              {canApplySoftwareUpdate ? (
-                selectedUpdates.size === updates.length ? (
-                  <IoCheckbox onClick={handleSelectAll} />
-                ) : (
-                  <IoSquareOutline onClick={handleSelectAll} />
-                )
-              ) : (
-                <IoSquareOutline style={{ opacity: 0.3, cursor: 'not-allowed' }} />
-              )}
+              {renderSelectAllCheckbox()}
               {t('updates.selectAll', 'Select All')} ({selectedUpdates.size}/{updates.length})
             </label>
           </div>
@@ -771,33 +743,14 @@ const Updates: React.FC = () => {
       <div className="updates__content">
         {updates.length === 0 && !isLoading ? (
           <div className="updates__empty">
-            {filters.security_only || filters.system_only || filters.application_only || filters.package_manager || filters.host_id ? 
+            {filters.security_only || filters.system_only || filters.application_only || filters.package_manager || filters.host_id ?
               t('updates.noMatchingUpdates', 'No updates match the current filters') :
               t('updates.noUpdates', 'All systems are up to date')
             }
           </div>
         ) : (
           <div className="updates__list">
-            {updates
-              .sort((a, b) => {
-                // Sort priority: security (0), system (1), application (2)
-                const getTypePriority = (update: PackageUpdate) => {
-                  if (update.is_security_update) return 0;
-                  if (update.is_system_update) return 1;
-                  return 2;
-                };
-
-                const priorityA = getTypePriority(a);
-                const priorityB = getTypePriority(b);
-
-                if (priorityA !== priorityB) {
-                  return priorityA - priorityB;
-                }
-
-                // If same type, sort by package name
-                return a.package_name.localeCompare(b.package_name);
-              })
-              .map(update => {
+            {sortedUpdates.map(update => {
               const key = `${update.host_id}-${update.package_name}-${update.package_manager}`;
               const isSelected = selectedUpdates.has(key);
 
@@ -807,25 +760,11 @@ const Updates: React.FC = () => {
                   className={`updates__item ${isSelected ? 'selected' : ''} ${update.is_security_update ? 'security' : ''}`}
                 >
                   <div className="updates__item-select">
-                    {canApplySoftwareUpdate ? (
-                      isSelected ? (
-                        <IoCheckbox onClick={() => handleSelectUpdate(update)} />
-                      ) : (
-                        <IoSquareOutline onClick={() => handleSelectUpdate(update)} />
-                      )
-                    ) : (
-                      <IoSquareOutline style={{ opacity: 0.3, cursor: 'not-allowed' }} />
-                    )}
+                    {renderUpdateCheckbox(update, isSelected)}
                   </div>
-                  
+
                   <div className="updates__item-icon">
-                    {update.is_security_update ? (
-                      <IoShieldCheckmark className="update-icon security" />
-                    ) : update.is_system_update ? (
-                      <IoHardwareChip className="update-icon system" />
-                    ) : (
-                      <IoApps className="update-icon application" />
-                    )}
+                    {renderUpdateIcon(update)}
                   </div>
                   
                   <div className="updates__item-content">

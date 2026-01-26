@@ -49,7 +49,7 @@ declare global {
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 // Polyfill for React 19's scheduler in test environment
-Object.defineProperty(window, 'MessageChannel', {
+Object.defineProperty(globalThis, 'MessageChannel', {
   writable: true,
   value: class MessageChannel {
     port1 = {
@@ -75,7 +75,7 @@ if (typeof globalThis !== 'undefined') {
       unstable_requestPaint: () => {},
       unstable_runWithPriority: (_priority: unknown, callback: () => void) => callback(),
       get unstable_now() {
-        return (typeof globalThis.performance !== 'undefined' && globalThis.performance.now) || Date.now;
+        return globalThis.performance?.now ?? Date.now;
       }
     }
   });

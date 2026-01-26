@@ -11,6 +11,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy import desc
 from sqlalchemy.orm import sessionmaker
 
+from backend.api.error_constants import AD_HOC_SCRIPT, ERROR_USER_NOT_FOUND
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -35,7 +36,7 @@ router = APIRouter()
 
 
 @router.post("/execute", response_model=ScriptExecutionResponse)
-async def execute_script(
+async def execute_script(  # NOSONAR - complex business logic
     execution_request: ScriptExecutionRequest,
     current_user=Depends(get_current_user),
 ):
@@ -50,7 +51,7 @@ async def execute_script(
                 .first()
             )
             if not auth_user:
-                raise HTTPException(status_code=401, detail=_("User not found"))
+                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
             if auth_user._role_cache is None:
                 auth_user.load_role_cache(db_session)
@@ -134,7 +135,7 @@ async def execute_script(
                 "script_content": script_content,
                 "shell_type": shell_type,
                 "run_as_user": execution_request.run_as_user,
-                "script_name": script_name or "ad-hoc script",
+                "script_name": script_name or AD_HOC_SCRIPT,
             }
 
             # Queue the message for delivery to the agent
@@ -172,13 +173,13 @@ async def execute_script(
                     action_type=ActionType.EXECUTE,
                     entity_type=EntityType.SCRIPT,
                     entity_id=str(execution_log.id),
-                    entity_name=script_name or "ad-hoc script",
+                    entity_name=script_name or AD_HOC_SCRIPT,
                     user_id=auth_user.id,
                     username=current_user,
                     description=_(
                         "Executed script '{script_name}' on host '{host_fqdn}'"
                     ).format(
-                        script_name=script_name or "ad-hoc script", host_fqdn=host.fqdn
+                        script_name=script_name or AD_HOC_SCRIPT, host_fqdn=host.fqdn
                     ),
                     details={
                         "execution_id": execution_id,
@@ -330,7 +331,7 @@ async def delete_script_execution(
                 .first()
             )
             if not auth_user:
-                raise HTTPException(status_code=401, detail=_("User not found"))
+                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
             if auth_user._role_cache is None:
                 auth_user.load_role_cache(db_session)
@@ -404,7 +405,7 @@ async def delete_script_executions_bulk(
                 .first()
             )
             if not auth_user:
-                raise HTTPException(status_code=401, detail=_("User not found"))
+                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
             if auth_user._role_cache is None:
                 auth_user.load_role_cache(db_session)

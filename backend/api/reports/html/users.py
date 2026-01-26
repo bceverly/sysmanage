@@ -9,7 +9,9 @@ from backend.api.reports.html.common import escape as _escape
 from backend.i18n import _
 
 
-def generate_users_html(users, report_title: str) -> str:
+def generate_users_html(
+    users, report_title: str
+) -> str:  # NOSONAR - complex business logic
     """Generate HTML content for user reports"""
 
     html_content = f"""
@@ -150,7 +152,9 @@ def generate_users_html(users, report_title: str) -> str:
     return html_content
 
 
-def generate_user_rbac_html(db, users, report_title: str) -> str:
+def generate_user_rbac_html(
+    db, users, report_title: str
+) -> str:  # NOSONAR - complex business logic
     """Generate HTML content for user RBAC report showing roles grouped by role groups"""
     from backend.persistence.models import SecurityRole, SecurityRoleGroup
 
@@ -316,7 +320,9 @@ def generate_user_rbac_html(db, users, report_title: str) -> str:
     return html_content
 
 
-def generate_audit_log_html(audit_entries, report_title: str) -> str:
+def generate_audit_log_html(
+    audit_entries, report_title: str
+) -> str:  # NOSONAR - complex business logic
     """Generate HTML content for audit log report"""
 
     html_content = f"""

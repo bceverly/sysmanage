@@ -130,7 +130,7 @@ async def get_antivirus_default_for_os(
 
 
 @router.put("/", response_model=List[AntivirusDefaultResponse])
-async def update_antivirus_defaults(
+async def update_antivirus_defaults(  # NOSONAR - business logic requires complexity
     bulk_update: AntivirusDefaultsBulkUpdate,
     db_session: Session = Depends(get_db),
     dependencies=Depends(JWTBearer()),

@@ -66,7 +66,7 @@ async def get_opentelemetry_status():
 
 
 @router.get("/prometheus/status", dependencies=[Depends(JWTBearer())])
-async def get_prometheus_status():
+async def get_prometheus_status():  # NOSONAR - complex business logic
     """
     Get Prometheus server status by checking the Prometheus API.
     """

@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
 from backend.api.host_utils import validate_host_approval_status
+from backend.api.error_constants import ERROR_HOST_NOT_FOUND
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -50,7 +51,7 @@ def _get_host_certificates_sync(host_id: str):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail=_("Host not found"))
+            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
         validate_host_approval_status(host)
 
@@ -140,7 +141,7 @@ async def request_certificates_collection(host_id: str):
 
         if not host:
             logger.warning("CERTIFICATE COLLECTION: Host not found: %s", host_id)
-            raise HTTPException(status_code=404, detail=_("Host not found"))
+            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
         logger.info(
             "CERTIFICATE COLLECTION: Found host %s (fqdn: %s)", host_id, host.fqdn
@@ -190,7 +191,7 @@ def _get_host_roles_sync(host_id: str):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail=_("Host not found"))
+            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
         validate_host_approval_status(host)
 
@@ -267,7 +268,7 @@ async def request_roles_collection(host_id: str):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail=_("Host not found"))
+            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
         validate_host_approval_status(host)
 
@@ -367,7 +368,7 @@ async def control_services(
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail=_("Host not found"))
+            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
         validate_host_approval_status(host)
 

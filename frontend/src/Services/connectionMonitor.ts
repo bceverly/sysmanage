@@ -31,7 +31,7 @@ class ConnectionMonitor {
     nextRetryIn: 0,
   };
 
-  private options: ConnectionMonitorOptions = {
+  private readonly options: ConnectionMonitorOptions = {
     initialRetryDelay: 5, // Start with 5 seconds
     maxRetryDelay: 300, // Max 5 minutes
     maxRetries: 10, // Try 10 times before giving up
@@ -39,7 +39,7 @@ class ConnectionMonitor {
     healthCheckInterval: 60, // Check every 60 seconds when connected
   };
 
-  private callbacks: Set<ConnectionStatusCallback> = new Set();
+  private readonly callbacks: Set<ConnectionStatusCallback> = new Set();
   private retryTimeoutId: number | null = null;
   private healthCheckTimeoutId: number | null = null;
   private isRetrying = false;
@@ -137,7 +137,7 @@ class ConnectionMonitor {
 
   private startHealthCheck(): void {
     this.stopHealthCheck();
-    this.healthCheckTimeoutId = window.setTimeout(() => {
+    this.healthCheckTimeoutId = globalThis.setTimeout(() => {
       this.performHealthCheck();
     }, this.options.healthCheckInterval * 1000);
   }
@@ -198,13 +198,13 @@ class ConnectionMonitor {
       if (this.status.nextRetryIn > 0) {
         this.status.nextRetryIn--;
         this.notifyStatusChange();
-        this.retryTimeoutId = window.setTimeout(updateCountdown, 1000);
+        this.retryTimeoutId = globalThis.setTimeout(updateCountdown, 1000);
       } else {
         this.performRetry();
       }
     };
 
-    this.retryTimeoutId = window.setTimeout(updateCountdown, 1000);
+    this.retryTimeoutId = globalThis.setTimeout(updateCountdown, 1000);
   }
 
   private stopRetryProcess(): void {

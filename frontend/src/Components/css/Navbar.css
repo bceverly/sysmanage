@@ -21,13 +21,10 @@
   }
   
   .nav__logo {
-/*    color: var(--first-color); */
     color: rgb(36 157 239);
     transition: color 0.4s;
     font-size: var(--h2-font-size);
     font-weight: var(--font-semi-bold);
-
-/*    font-family: var(--second-font); */
   }
 
   .nav__logo-img {
@@ -83,7 +80,6 @@
   }
   
   .nav__cta {
-/*    background-color: var(--first-color); */
     background-color: rgb(36 157 239);
     color: var(--title-color);
     border: none;

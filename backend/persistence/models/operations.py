@@ -20,6 +20,9 @@ from sqlalchemy.orm import relationship
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
+# Constants for commonly used values
+HOST_ID_FK = "host.id"
+
 
 class UserAccount(Base):
     """
@@ -29,7 +32,7 @@ class UserAccount(Base):
 
     __tablename__ = "user_accounts"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
     username = Column(String(255), nullable=False)
     uid = Column(Integer, nullable=True)  # Linux/macOS user ID
     security_id = Column(String(255), nullable=True)  # Windows SID
@@ -51,7 +54,7 @@ class UserGroup(Base):
 
     __tablename__ = "user_groups"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
     group_name = Column(String(255), nullable=False)
     gid = Column(Integer, nullable=True)  # Linux/macOS group ID
     security_id = Column(String(255), nullable=True)  # Windows SID
@@ -72,7 +75,7 @@ class UserGroupMembership(Base):
 
     __tablename__ = "user_group_memberships"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
     user_account_id = Column(
         GUID(), ForeignKey("user_accounts.id", ondelete="CASCADE"), nullable=False
     )
@@ -96,7 +99,7 @@ class UpdateExecutionLog(Base):
 
     __tablename__ = "update_execution_log"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
     package_name = Column(String(255), nullable=False, index=True)
     from_version = Column(String(100), nullable=False)
     to_version = Column(String(100), nullable=False)
@@ -229,7 +232,7 @@ class ScriptExecutionLog(Base):
     __tablename__ = "script_execution_log"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     execution_id = Column(String(36), nullable=False, unique=True, index=True)  # UUID
-    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
     saved_script_id = Column(
         GUID(), ForeignKey("saved_scripts.id", ondelete="SET NULL"), nullable=True
     )
@@ -270,7 +273,7 @@ class DiagnosticReport(Base):
     __tablename__ = "diagnostic_report"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     collection_id = Column(String(36), nullable=False, unique=True, index=True)  # UUID
-    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
     requested_by = Column(String(255), nullable=False)
     collection_status = Column(
         String(20), nullable=False, default="pending"
@@ -333,7 +336,7 @@ class HostTag(Base):
 
     __tablename__ = "host_tags"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
     tag_id = Column(GUID(), ForeignKey("tags.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime, nullable=False)
 

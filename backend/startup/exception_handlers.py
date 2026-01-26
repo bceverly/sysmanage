@@ -13,6 +13,9 @@ from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.startup.exceptions")
 
+# Log message format constant for request debugging
+LOG_MSG_REQUEST_METHOD_HEADERS = "Request method: %s, Headers: %s"
+
 
 def register_exception_handlers(app: FastAPI, origins: list):
     """
@@ -34,7 +37,7 @@ def register_exception_handlers(app: FastAPI, origins: list):
             request.url.path,
         )
         logger.warning(
-            "Request method: %s, Headers: %s", request.method, dict(request.headers)
+            LOG_MSG_REQUEST_METHOD_HEADERS, request.method, dict(request.headers)
         )
 
         response = JSONResponse(
@@ -68,7 +71,7 @@ def register_exception_handlers(app: FastAPI, origins: list):
             exc_info=True,
         )
         logger.error(
-            "Request method: %s, Headers: %s", request.method, dict(request.headers)
+            LOG_MSG_REQUEST_METHOD_HEADERS, request.method, dict(request.headers)
         )
         logger.error("Exception type: %s", type(exc).__name__)
         logger.error("Exception args: %s", exc.args)
@@ -105,7 +108,7 @@ def register_exception_handlers(app: FastAPI, origins: list):
             exc_info=True,
         )
         logger.error(
-            "Request method: %s, Headers: %s", request.method, dict(request.headers)
+            LOG_MSG_REQUEST_METHOD_HEADERS, request.method, dict(request.headers)
         )
         logger.error("Exception type: %s", type(exc).__name__)
         logger.error("Exception args: %s", exc.args)

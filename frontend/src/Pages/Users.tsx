@@ -277,7 +277,7 @@ const Users = () => {
         setEditImageLoading(true);
         try {
             const imageBlob = await doGetUserImage(userId);
-            const imageUrl = window.URL.createObjectURL(imageBlob);
+            const imageUrl = globalThis.URL.createObjectURL(imageBlob);
             setEditUserImageUrl(imageUrl);
         } catch {
             console.debug('No profile image available for user or error fetching image');
@@ -319,7 +319,7 @@ const Users = () => {
         setEditLastName('');
         // Clean up image URL
         if (editUserImageUrl) {
-            window.URL.revokeObjectURL(editUserImageUrl);
+            globalThis.URL.revokeObjectURL(editUserImageUrl);
         }
         setEditUserImageUrl(null);
         setEditImageLoading(false);
@@ -345,7 +345,7 @@ const Users = () => {
             await doDeleteUserImage(editUser.id);
             // Clear the current image
             if (editUserImageUrl) {
-                window.URL.revokeObjectURL(editUserImageUrl);
+                globalThis.URL.revokeObjectURL(editUserImageUrl);
             }
             setEditUserImageUrl(null);
         } catch (error) {
@@ -441,8 +441,10 @@ const Users = () => {
                     localeText={{
                         MuiTablePagination: {
                             labelRowsPerPage: t('common.rowsPerPage'),
-                            labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) =>
-                                `${from}–${to} ${t('common.of')} ${count !== -1 ? count : `${t('common.of')} ${to}`}`,
+                            labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) => {
+                                const countDisplay = count !== -1 ? count : t('common.of') + ' ' + to;
+                                return from + '–' + to + ' ' + t('common.of') + ' ' + countDisplay;
+                            },
                         },
                         noRowsLabel: t('users.noRows'),
                         noResultsOverlayLabel: t('users.noResults'),
@@ -497,9 +499,10 @@ const Users = () => {
             <Dialog
                 open={addDialogOpen}
                 onClose={handleClose}
-                PaperProps={{
-                    component: 'form',
-                    onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+                slotProps={{
+                    paper: {
+                        component: 'form',
+                        onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
                         event.preventDefault();
                         const formData = new FormData(event.currentTarget);
                         const formJson = Object.fromEntries(formData.entries());
@@ -534,6 +537,7 @@ const Users = () => {
                                 setDupeError(true);
                             }
                         });
+                        },
                     },
                 }}
             >
@@ -558,13 +562,15 @@ const Users = () => {
                         variant="standard"
                         error={dupeError}
                         helperText={dupeError ? t('users.emailUnique', { defaultValue: 'Email address must be unique' }) : ""}
-                        InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                <AccountCircle />
-                              </InputAdornment>
-                            ),
-                          }}
+                        slotProps={{
+                            input: {
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <AccountCircle />
+                                    </InputAdornment>
+                                ),
+                            },
+                        }}
                     />
                     <TextField
                         fullWidth
@@ -596,34 +602,36 @@ const Users = () => {
                 onClose={handleEditClose}
                 maxWidth="sm"
                 fullWidth
-                PaperProps={{
-                    component: 'form',
-                    onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-                        event.preventDefault();
-                        if (!editUser) return;
-                        
-                        doUpdateUser(editUser.id, true, editEmail, editPassword, editFirstName, editLastName)
-                        .then(() => {
-                            // Update the tableData with the edited user
-                            setTableData(prevData => 
-                                prevData.map(user => 
-                                    user.id === editUser.id ? {
-                                        ...user,
-                                        userid: editEmail,
-                                        password: editPassword
-                                    } : user
-                                )
-                            );
-                            setDupeError(false);
-                            handleEditClose();
-                            setSelection([]);
-                        })
-                        .catch((error) => {
-                            console.log('TheError: ' + error);
-                            if (error === 'AxiosError: Request failed with status code 409') {
-                                setDupeError(true);
-                            }
-                        });
+                slotProps={{
+                    paper: {
+                        component: 'form',
+                        onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+                            event.preventDefault();
+                            if (!editUser) return;
+
+                            doUpdateUser(editUser.id, true, editEmail, editPassword, editFirstName, editLastName)
+                            .then(() => {
+                                // Update the tableData with the edited user
+                                setTableData(prevData =>
+                                    prevData.map(user =>
+                                        user.id === editUser.id ? {
+                                            ...user,
+                                            userid: editEmail,
+                                            password: editPassword
+                                        } : user
+                                    )
+                                );
+                                setDupeError(false);
+                                handleEditClose();
+                                setSelection([]);
+                            })
+                            .catch((error) => {
+                                console.log('TheError: ' + error);
+                                if (error === 'AxiosError: Request failed with status code 409') {
+                                    setDupeError(true);
+                                }
+                            });
+                        },
                     },
                 }}
             >
@@ -693,13 +701,15 @@ const Users = () => {
                         onChange={(e) => setEditEmail(e.target.value)}
                         error={dupeError}
                         helperText={dupeError ? t('users.emailUnique', { defaultValue: 'Email address must be unique' }) : ""}
-                        InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                <AccountCircle />
-                              </InputAdornment>
-                            ),
-                          }}
+                        slotProps={{
+                            input: {
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <AccountCircle />
+                                    </InputAdornment>
+                                ),
+                            },
+                        }}
                     />
                     <TextField
                         fullWidth

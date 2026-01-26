@@ -25,7 +25,7 @@ export const setSecureCookie = (
 ): void => {
   const defaults: CookieOptions = {
     path: '/',
-    secure: window.location.protocol === 'https:',
+    secure: globalThis.location.protocol === 'https:',
     sameSite: 'strict',
     maxAge: 30 * 24 * 60 * 60 // 30 days in seconds
   };
@@ -133,7 +133,7 @@ export const saveRememberedEmail = (email: string): void => {
 
   setSecureCookie(REMEMBER_ME_COOKIE_NAME, email, {
     maxAge: REMEMBER_ME_EXPIRY_DAYS * 24 * 60 * 60,
-    secure: window.location.protocol === 'https:',
+    secure: globalThis.location.protocol === 'https:',
     sameSite: 'strict'
   });
 };

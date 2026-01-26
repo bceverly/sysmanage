@@ -66,7 +66,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ theme = 'dark' }) =
       
       // If no language detected yet or it's a generic code, try to detect from browser
       if (!detectedLang || detectedLang === 'en' || detectedLang.length === 0) {
-        const browserLangs = window.navigator.languages || [window.navigator.language];
+        const browserLangs = globalThis.navigator.languages || [globalThis.navigator.language];
         for (const browserLang of browserLangs) {
           const mappedLang = mapBrowserLanguage(browserLang);
           if (mappedLang && mappedLang !== 'en') {

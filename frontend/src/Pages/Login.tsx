@@ -65,7 +65,7 @@ const Login = () => {
           }
 
           navigate("/");
-          window.location.reload();
+          globalThis.location.reload();
           return response.data;
         })
         .catch(() => {
@@ -125,12 +125,14 @@ const Login = () => {
             autoComplete="email"
             autoFocus
             onChange={handleInput}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <AccountCircle />
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <AccountCircle />
+                  </InputAdornment>
+                ),
+              },
             }}
           />
           <TextField

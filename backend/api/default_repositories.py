@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, validator
 from sqlalchemy.orm import Session, sessionmaker
 
+from backend.api.error_constants import ERROR_USER_NOT_FOUND
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -31,7 +32,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-async def apply_repository_to_host(
+def apply_repository_to_host(
     db_session: Session, host: models.Host, repository_url: str, action: str = "add"
 ):
     """
@@ -327,7 +328,7 @@ async def get_default_repositories_by_os(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.VIEW_DEFAULT_REPOSITORIES):
@@ -371,7 +372,7 @@ async def get_default_repositories(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.VIEW_DEFAULT_REPOSITORIES):
@@ -419,7 +420,7 @@ async def create_default_repository(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.ADD_DEFAULT_REPOSITORY):
@@ -506,7 +507,7 @@ async def delete_default_repository(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.REMOVE_DEFAULT_REPOSITORY):

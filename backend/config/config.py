@@ -38,90 +38,90 @@ try:
             )
             print("Please configure the file with valid YAML settings")
             sys.exit(1)
-        if not "host" in config["api"].keys():
+        if "host" not in config["api"]:
             config["api"]["host"] = "localhost"
-        if not "port" in config["api"].keys():
+        if "port" not in config["api"]:
             config["api"]["port"] = 8443
-        if not "host" in config["webui"].keys():
+        if "host" not in config["webui"]:
             config["webui"]["host"] = "localhost"
-        if not "port" in config["webui"].keys():
+        if "port" not in config["webui"]:
             config["webui"]["port"] = 8080
-        if not "monitoring" in config.keys():
+        if "monitoring" not in config:
             config["monitoring"] = {}
-        if not "heartbeat_timeout" in config["monitoring"].keys():
+        if "heartbeat_timeout" not in config["monitoring"]:
             config["monitoring"]["heartbeat_timeout"] = 5
         # Security settings for account locking
-        if not "max_failed_logins" in config["security"].keys():
+        if "max_failed_logins" not in config["security"]:
             config["security"]["max_failed_logins"] = 5
-        if not "account_lockout_duration" in config["security"].keys():
+        if "account_lockout_duration" not in config["security"]:
             config["security"]["account_lockout_duration"] = 15
         # Logging settings
-        if not "logging" in config.keys():
+        if "logging" not in config:
             config["logging"] = {}
-        if not "level" in config["logging"].keys():
+        if "level" not in config["logging"]:
             config["logging"]["level"] = "INFO|WARNING|ERROR|CRITICAL"
-        if not "format" in config["logging"].keys():
+        if "format" not in config["logging"]:
             config["logging"][
                 "format"
             ] = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         # Message queue settings
-        if not "message_queue" in config.keys():
+        if "message_queue" not in config:
             config["message_queue"] = {}
-        if not "expiration_timeout_minutes" in config["message_queue"].keys():
+        if "expiration_timeout_minutes" not in config["message_queue"]:
             config["message_queue"]["expiration_timeout_minutes"] = 60
-        if not "cleanup_interval_minutes" in config["message_queue"].keys():
+        if "cleanup_interval_minutes" not in config["message_queue"]:
             config["message_queue"]["cleanup_interval_minutes"] = 30
 
         # Vault (OpenBAO) settings
-        if not "vault" in config.keys():
+        if "vault" not in config:
             config["vault"] = {}
-        if not "enabled" in config["vault"].keys():
+        if "enabled" not in config["vault"]:
             config["vault"]["enabled"] = False
-        if not "url" in config["vault"].keys():
+        if "url" not in config["vault"]:
             config["vault"]["url"] = "http://localhost:8200"
-        if not "token" in config["vault"].keys():
+        if "token" not in config["vault"]:
             config["vault"][
                 "token"
             ] = ""  # nosec B105 - empty default, not a hardcoded token
-        if not "mount_path" in config["vault"].keys():
+        if "mount_path" not in config["vault"]:
             config["vault"]["mount_path"] = "secret"
-        if not "timeout" in config["vault"].keys():
+        if "timeout" not in config["vault"]:
             config["vault"]["timeout"] = 30
-        if not "verify_ssl" in config["vault"].keys():
+        if "verify_ssl" not in config["vault"]:
             config["vault"]["verify_ssl"] = True
-        if not "dev_mode" in config["vault"].keys():
+        if "dev_mode" not in config["vault"]:
             config["vault"]["dev_mode"] = False
 
         # Email settings
-        if not "email" in config.keys():
+        if "email" not in config:
             config["email"] = {}
-        if not "enabled" in config["email"].keys():
+        if "enabled" not in config["email"]:
             config["email"]["enabled"] = False
-        if not "smtp" in config["email"].keys():
+        if "smtp" not in config["email"]:
             config["email"]["smtp"] = {}
-        if not "host" in config["email"]["smtp"].keys():
+        if "host" not in config["email"]["smtp"]:
             config["email"]["smtp"]["host"] = "localhost"
-        if not "port" in config["email"]["smtp"].keys():
+        if "port" not in config["email"]["smtp"]:
             config["email"]["smtp"]["port"] = 587
-        if not "use_tls" in config["email"]["smtp"].keys():
+        if "use_tls" not in config["email"]["smtp"]:
             config["email"]["smtp"]["use_tls"] = True
-        if not "use_ssl" in config["email"]["smtp"].keys():
+        if "use_ssl" not in config["email"]["smtp"]:
             config["email"]["smtp"]["use_ssl"] = False
-        if not "username" in config["email"]["smtp"].keys():
+        if "username" not in config["email"]["smtp"]:
             config["email"]["smtp"]["username"] = ""
-        if not "password" in config["email"]["smtp"].keys():
+        if "password" not in config["email"]["smtp"]:
             config["email"]["smtp"][
                 "password"
             ] = ""  # nosec B105 - empty default, not a hardcoded password
-        if not "timeout" in config["email"]["smtp"].keys():
+        if "timeout" not in config["email"]["smtp"]:
             config["email"]["smtp"]["timeout"] = 30
-        if not "from_address" in config["email"].keys():
+        if "from_address" not in config["email"]:
             config["email"]["from_address"] = "noreply@localhost"
-        if not "from_name" in config["email"].keys():
+        if "from_name" not in config["email"]:
             config["email"]["from_name"] = "SysManage System"
-        if not "templates" in config["email"].keys():
+        if "templates" not in config["email"]:
             config["email"]["templates"] = {}
-        if not "subject_prefix" in config["email"]["templates"].keys():
+        if "subject_prefix" not in config["email"]["templates"]:
             config["email"]["templates"]["subject_prefix"] = "[SysManage]"
 except yaml.YAMLError as exc:
     if hasattr(exc, "problem_mark"):

@@ -39,7 +39,9 @@ __all__ = [
 ]
 
 
-async def handle_command_result(connection, message_data: dict):
+async def handle_command_result(
+    connection, message_data: dict
+):  # NOSONAR - complex business logic
     """Handle command execution result from agent."""
     logger.info(
         "Command result from %s: %s",
@@ -261,7 +263,9 @@ async def handle_command_result(connection, message_data: dict):
     }
 
 
-async def handle_config_acknowledgment(connection, message_data: dict):
+async def handle_config_acknowledgment(
+    connection, message_data: dict
+):  # NOSONAR - async handler
     """Handle configuration acknowledgment from agent."""
     logger.info(
         "Configuration acknowledged by %s: %s",
@@ -337,7 +341,9 @@ async def handle_diagnostic_result(db: Session, connection, message_data: dict):
         }
 
 
-async def handle_command_acknowledgment(db: Session, connection, message_data: dict):
+async def handle_command_acknowledgment(
+    db: Session, connection, message_data: dict
+):  # NOSONAR - async handler
     """
     Handle command acknowledgment from agent.
 
@@ -439,7 +445,9 @@ async def handle_command_acknowledgment(db: Session, connection, message_data: d
     }
 
 
-async def handle_installation_status(db: Session, connection, message_data: dict):
+async def handle_installation_status(
+    db: Session, connection, message_data: dict
+):  # NOSONAR - complex business logic
     """Handle package installation status update from agent."""
     from backend.utils.host_validation import validate_host_id
 

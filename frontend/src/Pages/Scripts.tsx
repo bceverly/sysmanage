@@ -53,10 +53,12 @@ import { hasPermission, SecurityRoles } from '../Services/permissions';
 import './css/Scripts.css';
 
 interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
+  readonly children?: React.ReactNode;
+  readonly index: number;
+  readonly value: number;
 }
+
+type ChipColor = 'success' | 'error' | 'warning' | 'info' | 'default';
 
 function TabPanel({ children, value, index, ...other }: TabPanelProps) {
   return (
@@ -173,41 +175,51 @@ const Scripts: React.FC = () => {
     return allShells.filter(shell => shell.platforms.includes(platform));
   };
 
+  // Helper function to normalize platform names to standard values
+  const normalizePlatform = (platform: string): string => {
+    const lowerPlatform = platform.toLowerCase();
+    if (lowerPlatform.startsWith('win')) {
+      return 'windows';
+    }
+    if (lowerPlatform === 'darwin') {
+      return 'darwin';
+    }
+    if (lowerPlatform.includes('bsd')) {
+      return lowerPlatform;
+    }
+    return 'linux'; // Default to linux for other Unix-like systems
+  };
+
+  // Helper function to check if platforms match
+  const doPlatformsMatch = (scriptPlatform: string | undefined, hostPlatform: string | undefined): boolean => {
+    if (!scriptPlatform || !hostPlatform) {
+      return true; // If either is undefined, consider it a match
+    }
+    return scriptPlatform.toLowerCase() === normalizePlatform(hostPlatform);
+  };
+
+  // Helper function to check if host has the required shell enabled
+  const hostHasShellEnabled = (host: Host, shellType: string): boolean => {
+    if (!host.enabled_shells) {
+      return false;
+    }
+    try {
+      const hostShells = JSON.parse(host.enabled_shells) as string[];
+      return hostShells.some(shell => shell.toLowerCase() === shellType.toLowerCase());
+    } catch {
+      return false;
+    }
+  };
+
   // Helper function to check if host is compatible with selected script
   const isHostCompatibleWithScript = (host: Host, script: Script) => {
-    // Check if host has script execution enabled
     if (!host.script_execution_enabled) {
       return false;
     }
-
-    // Check if host platform matches script platform (case-insensitive)
-    if (script.platform && host.platform) {
-      const scriptPlatform = script.platform.toLowerCase();
-      const hostPlatform = host.platform.toLowerCase();
-      
-      // Map common platform names to normalized values
-      const normalizedHostPlatform = hostPlatform.startsWith('win') ? 'windows' : 
-                                      hostPlatform === 'darwin' ? 'darwin' :
-                                      hostPlatform.includes('bsd') ? hostPlatform :
-                                      'linux'; // Default to linux for other Unix-like systems
-      
-      if (scriptPlatform !== normalizedHostPlatform) {
-        return false;
-      }
+    if (!doPlatformsMatch(script.platform, host.platform)) {
+      return false;
     }
-
-    // Check if host has the required shell enabled
-    if (host.enabled_shells) {
-      try {
-        const hostShells = JSON.parse(host.enabled_shells) as string[];
-        // Also make shell comparison case-insensitive
-        return hostShells.some(shell => shell.toLowerCase() === script.shell_type.toLowerCase());
-      } catch {
-        return false;
-      }
-    }
-
-    return false;
+    return hostHasShellEnabled(host, script.shell_type);
   };
 
   // Get compatible hosts for the selected script
@@ -285,10 +297,10 @@ const Scripts: React.FC = () => {
 
   // Update filtered data when scripts change or search is cleared
   React.useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredScripts(scripts);
-    } else {
+    if (searchTerm.trim()) {
       performSearch();
+    } else {
+      setFilteredScripts(scripts);
     }
   }, [scripts, searchTerm, searchColumn, performSearch]);
 
@@ -356,11 +368,11 @@ const Scripts: React.FC = () => {
   useEffect(() => {
     if (tabValue !== 2) return;
 
-    const interval = window.setInterval(() => {
+    const interval = globalThis.setInterval(() => {
       loadExecutions();
     }, 30000);
 
-    return () => window.clearInterval(interval);
+    return () => globalThis.clearInterval(interval);
   }, [tabValue, loadExecutions]);
 
   // Poll for execution results with adaptive polling
@@ -408,19 +420,19 @@ const Scripts: React.FC = () => {
       const elapsed = Date.now() - startTime;
       const interval = elapsed < 120000 ? 3000 : 15000; // 2 minutes threshold
       
-      const timeoutId = window.setTimeout(() => {
+      const timeoutId = globalThis.setTimeout(() => {
         if (isExecuting && currentExecutionId) {
           fetchExecutionResult();
           scheduleNextPoll();
         }
       }, interval);
-      
+
       return timeoutId;
     };
 
     const timeoutId = scheduleNextPoll();
 
-    return () => window.clearTimeout(timeoutId);
+    return () => globalThis.clearTimeout(timeoutId);
   }, [isExecuting, currentExecutionId, t, loadExecutions]);
 
   const showNotification = (message: string, severity: 'success' | 'error' | 'info' | 'warning' = 'info') => {
@@ -541,7 +553,7 @@ const Scripts: React.FC = () => {
     const selectedHostData = hosts.find(h => h.id === selectedHost);
     if (selectedHostData && !isHostConnected(selectedHostData)) {
       const confirmMessage = t('scripts.hostAppearsOffline') + '\n\n' + t('scripts.continueExecution');
-      if (!window.confirm(confirmMessage)) {
+      if (!globalThis.confirm(confirmMessage)) {
         return;
       }
     }
@@ -594,7 +606,7 @@ const Scripts: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string): ChipColor => {
     switch (status) {
       case 'pending':
         return 'default';
@@ -713,16 +725,14 @@ const Scripts: React.FC = () => {
       // Switch to the first available shell for this platform
       const defaultShell = availableShells[0].value;
       setSelectedShell(defaultShell);
-      
+
       // Update script content if user hasn't edited it
       if (!hasUserEditedContent) {
         setScriptContent(getShellHeader(defaultShell, newPlatform));
       }
-    } else {
+    } else if (!hasUserEditedContent) {
       // Current shell is still available, but platform changed so update shebang path
-      if (!hasUserEditedContent) {
-        setScriptContent(getShellHeader(selectedShell, newPlatform));
-      }
+      setScriptContent(getShellHeader(selectedShell, newPlatform));
     }
   };
 
@@ -856,9 +866,9 @@ const Scripts: React.FC = () => {
       headerName: t('common.status'),
       width: 120,
       renderCell: (params) => (
-        <Chip 
-          label={t(`scripts.status.${params.value}`)} 
-          color={getStatusColor(params.value) as 'success' | 'error' | 'warning' | 'info' | 'default'}
+        <Chip
+          label={t(`scripts.status.${params.value}`)}
+          color={getStatusColor(params.value)}
           size="small"
         />
       ),
@@ -965,7 +975,7 @@ const Scripts: React.FC = () => {
       ? t('scripts.delete') + '?' 
       : t('scripts.deleteSelected') + ` (${selectedScripts.length})?`;
     
-    if (!window.confirm(confirmMessage)) {
+    if (!globalThis.confirm(confirmMessage)) {
       return;
     }
 
@@ -975,9 +985,9 @@ const Scripts: React.FC = () => {
         await scriptsService.deleteScript(scriptId as string);
       }
       showNotification(
-        selectedScripts.length === 1 
-          ? t('scripts.deleteSuccess') 
-          : t('scripts.deleteSuccess'), 
+        selectedScripts.length === 1
+          ? t('scripts.deleteSuccess')
+          : t('scripts.deleteMultipleSuccess'),
         'success'
       );
       setSelectedScripts([]);
@@ -1150,15 +1160,20 @@ const Scripts: React.FC = () => {
               localeText={{
                 MuiTablePagination: {
                   labelRowsPerPage: t('common.rowsPerPage'),
-                  labelDisplayedRows: ({ from, to, count }: { from: number, to, count: number }) =>
-                    `${from}–${to} ${t('common.of')} ${count !== -1 ? count : `${t('common.of')} ${to}`}`,
+                  labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) => {
+                    const ofLabel = t('common.of');
+                    const countDisplay = count === -1 ? ofLabel + ' ' + to : count;
+                    return from + '-' + to + ' ' + ofLabel + ' ' + countDisplay;
+                  },
                 },
                 noRowsLabel: t('scripts.noScripts'),
                 noResultsOverlayLabel: t('scripts.noScripts'),
-                footerRowSelected: (count: number) =>
-                  count !== 1
-                    ? `${count.toLocaleString()} ${t('common.rowsSelected')}`
-                    : `${count.toLocaleString()} ${t('common.rowSelected')}`,
+                footerRowSelected: (count: number) => {
+                  const countStr = count.toLocaleString();
+                  return count === 1
+                    ? countStr + ' ' + t('common.rowSelected')
+                    : countStr + ' ' + t('common.rowsSelected');
+                },
               }}
             />
           </Box>
@@ -1383,7 +1398,7 @@ const Scripts: React.FC = () => {
                       <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
                         <Chip 
                           label={t(`scripts.status.${executionResult.status}`)} 
-                          color={getStatusColor(executionResult.status) as 'success' | 'error' | 'warning' | 'info' | 'default'}
+                          color={getStatusColor(executionResult.status) }
                           size="small"
                         />
                         {executionResult.exit_code !== undefined && (
@@ -1486,15 +1501,20 @@ const Scripts: React.FC = () => {
               localeText={{
                 MuiTablePagination: {
                   labelRowsPerPage: t('common.rowsPerPage'),
-                  labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) =>
-                    `${from}–${to} ${t('common.of')} ${count !== -1 ? count : `${t('common.of')} ${to}`}`,
+                  labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) => {
+                    const ofLabel = t('common.of');
+                    const countDisplay = count === -1 ? ofLabel + ' ' + to : count;
+                    return from + '-' + to + ' ' + ofLabel + ' ' + countDisplay;
+                  },
                 },
                 noRowsLabel: t('scripts.noExecutions'),
                 noResultsOverlayLabel: t('scripts.noExecutions'),
-                footerRowSelected: (count: number) =>
-                  count !== 1
-                    ? `${count.toLocaleString()} ${t('common.rowsSelected')}`
-                    : `${count.toLocaleString()} ${t('common.rowSelected')}`,
+                footerRowSelected: (count: number) => {
+                  const countStr = count.toLocaleString();
+                  return count === 1
+                    ? countStr + ' ' + t('common.rowSelected')
+                    : countStr + ' ' + t('common.rowsSelected');
+                },
               }}
             />
           </Box>
@@ -1637,7 +1657,7 @@ const Scripts: React.FC = () => {
                       </Typography>
                       <Chip
                         label={t(`scripts.status.${viewingExecution.status}`)}
-                        color={getStatusColor(viewingExecution.status) as 'success' | 'error' | 'warning' | 'info' | 'default'}
+                        color={getStatusColor(viewingExecution.status) }
                         size="small"
                       />
                     </Box>

@@ -11,7 +11,7 @@ export const handlers = [
     console.log(`${logPrefix} Handling GET ${path}`);
 
     // Host data - using pattern matching for UUID
-    if (path.match(/^\/api\/hosts?\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/) || path === '/api/host/550e8400-e29b-41d4-a716-446655440000' || path === '/api/hosts/550e8400-e29b-41d4-a716-446655440000') {
+    if (/^\/api\/hosts?\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(path) || path === '/api/host/550e8400-e29b-41d4-a716-446655440000' || path === '/api/hosts/550e8400-e29b-41d4-a716-446655440000') {
       return HttpResponse.json({
         id: '550e8400-e29b-41d4-a716-446655440000',
         fqdn: 'test-host.example.com',
@@ -54,7 +54,7 @@ export const handlers = [
     }
 
     // Software packages - using pattern matching for UUID
-    if (path.match(/^\/api\/hosts?\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/software$/) || path === '/api/host/550e8400-e29b-41d4-a716-446655440000/software' || path === '/api/hosts/550e8400-e29b-41d4-a716-446655440000/software') {
+    if (/^\/api\/hosts?\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/software$/.test(path) || path === '/api/host/550e8400-e29b-41d4-a716-446655440000/software' || path === '/api/hosts/550e8400-e29b-41d4-a716-446655440000/software') {
       return HttpResponse.json([
         {
           id: '550e8400-e29b-41d4-a716-446655440002',
@@ -158,7 +158,7 @@ export const handlers = [
     return HttpResponse.json({
       success: true,
       message: 'Package installation has been queued',
-      installation_ids: body.package_names.map(() => `uuid-${Math.random().toString(36).substr(2, 9)}`)
+      installation_ids: body.package_names.map(() => `uuid-${Math.random().toString(36).slice(2, 11)}`)
     });
   }),
 
@@ -167,7 +167,7 @@ export const handlers = [
     return HttpResponse.json({
       success: true,
       message: 'Package uninstallation has been queued',
-      uninstallation_id: `uuid-${Math.random().toString(36).substr(2, 9)}`
+      uninstallation_id: `uuid-${Math.random().toString(36).slice(2, 11)}`
     });
   }),
 

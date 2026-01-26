@@ -10,6 +10,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, sessionmaker
 
+from backend.api.error_constants import (
+    ERROR_AGENT_PRIVILEGED_REQUIRED,
+    ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE,
+    ERROR_USER_NOT_FOUND,
+)
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db as db_module
@@ -113,14 +118,14 @@ def _list_third_party_repositories_sync(host_id: str):
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=_("Host not found or not active"),
+                detail=ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE(),
             )
 
         # Check if host has privileged mode enabled
         if not host.is_agent_privileged:
             raise HTTPException(
                 status_code=403,
-                detail=_("Repository management requires privileged agent mode"),
+                detail=ERROR_AGENT_PRIVILEGED_REQUIRED(),
             )
 
         # Queue message to request fresh repository data from agent
@@ -226,7 +231,7 @@ async def add_third_party_repository(
                 .first()
             )
             if not user:
-                raise HTTPException(status_code=401, detail=_("User not found"))
+                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
             if user._role_cache is None:
                 user.load_role_cache(session)
@@ -253,14 +258,14 @@ async def add_third_party_repository(
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=_("Host not found or not active"),
+                detail=ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE(),
             )
 
         # Check if host has privileged mode enabled
         if not host.is_agent_privileged:
             raise HTTPException(
                 status_code=403,
-                detail=_("Repository management requires privileged agent mode"),
+                detail=ERROR_AGENT_PRIVILEGED_REQUIRED(),
             )
 
         # Validate repository identifier
@@ -338,7 +343,7 @@ async def add_third_party_repository(
 @router.delete(
     "/hosts/{host_id}/third-party-repos", response_model=DeleteRepositoriesResponse
 )
-async def delete_third_party_repositories(
+async def delete_third_party_repositories(  # NOSONAR - complex business logic
     host_id: str,
     request: DeleteRepositoriesRequest,
     db: Session = Depends(get_db),
@@ -362,7 +367,7 @@ async def delete_third_party_repositories(
                 .first()
             )
             if not user:
-                raise HTTPException(status_code=401, detail=_("User not found"))
+                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
             if user._role_cache is None:
                 user.load_role_cache(session)
@@ -389,14 +394,14 @@ async def delete_third_party_repositories(
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=_("Host not found or not active"),
+                detail=ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE(),
             )
 
         # Check if host has privileged mode enabled
         if not host.is_agent_privileged:
             raise HTTPException(
                 status_code=403,
-                detail=_("Repository management requires privileged agent mode"),
+                detail=ERROR_AGENT_PRIVILEGED_REQUIRED(),
             )
 
         # Validate repositories list
@@ -412,7 +417,6 @@ async def delete_third_party_repositories(
         )
 
         # Delete repositories from the database immediately for responsive UI
-        deleted_count = 0
         for repo in request.repositories:
             repo_name = repo.get("name")
             repo_file_path = repo.get("file_path")
@@ -431,8 +435,7 @@ async def delete_third_party_repositories(
             else:
                 continue
 
-            deleted = query.delete(synchronize_session=False)
-            deleted_count += deleted
+            query.delete(synchronize_session=False)
 
         # Create command message to delete repositories on the agent
         command_message = create_command_message(
@@ -525,7 +528,7 @@ async def enable_third_party_repositories(
                 .first()
             )
             if not user:
-                raise HTTPException(status_code=401, detail=_("User not found"))
+                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
             if user._role_cache is None:
                 user.load_role_cache(session)
@@ -552,14 +555,14 @@ async def enable_third_party_repositories(
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=_("Host not found or not active"),
+                detail=ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE(),
             )
 
         # Check if host has privileged mode enabled
         if not host.is_agent_privileged:
             raise HTTPException(
                 status_code=403,
-                detail=_("Repository management requires privileged agent mode"),
+                detail=ERROR_AGENT_PRIVILEGED_REQUIRED(),
             )
 
         # Validate repositories list
@@ -661,7 +664,7 @@ async def disable_third_party_repositories(
                 .first()
             )
             if not user:
-                raise HTTPException(status_code=401, detail=_("User not found"))
+                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
             if user._role_cache is None:
                 user.load_role_cache(session)
@@ -688,14 +691,14 @@ async def disable_third_party_repositories(
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=_("Host not found or not active"),
+                detail=ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE(),
             )
 
         # Check if host has privileged mode enabled
         if not host.is_agent_privileged:
             raise HTTPException(
                 status_code=403,
-                detail=_("Repository management requires privileged agent mode"),
+                detail=ERROR_AGENT_PRIVILEGED_REQUIRED(),
             )
 
         # Validate repositories list

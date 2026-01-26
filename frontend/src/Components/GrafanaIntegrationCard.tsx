@@ -370,8 +370,10 @@ const GrafanaIntegrationCard: React.FC = () => {
                     value={settings.manual_url || ''}
                     onChange={handleManualUrlChange}
                     placeholder="https://grafana.example.com"
-                    InputProps={{
-                      startAdornment: <LinkIcon sx={{ mr: 1, color: 'action.active' }} />
+                    slotProps={{
+                      input: {
+                        startAdornment: <LinkIcon sx={{ mr: 1, color: 'action.active' }} />,
+                      },
                     }}
                     helperText={t('grafana.manualUrl.help', 'Enter the full URL to your Grafana instance')}
                   />

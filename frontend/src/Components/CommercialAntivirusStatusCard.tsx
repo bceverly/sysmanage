@@ -16,6 +16,38 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { useTranslation } from 'react-i18next';
 import { CommercialAntivirusStatus, getCommercialAntivirusStatus } from '../Services/commercialAntivirusService';
 
+interface BooleanStatusProps {
+  value: boolean | null;
+  label: string;
+}
+
+const BooleanStatus: React.FC<BooleanStatusProps> = ({ value, label }) => {
+  const { t } = useTranslation();
+
+  if (value === null || value === undefined) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+        <WarningIcon sx={{ mr: 1, fontSize: '1rem', color: 'grey.500' }} />
+        <Typography variant="body2">
+          {label}: {t('common.unknown', 'Unknown')}
+        </Typography>
+      </Box>
+    );
+  }
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+      {value ? (
+        <CheckCircleIcon sx={{ mr: 1, fontSize: '1rem', color: 'success.main' }} />
+      ) : (
+        <CancelIcon sx={{ mr: 1, fontSize: '1rem', color: 'error.main' }} />
+      )}
+      <Typography variant="body2">
+        {label}: {value ? t('common.enabled', 'Enabled') : t('common.disabled', 'Disabled')}
+      </Typography>
+    </Box>
+  );
+};
+
 interface CommercialAntivirusStatusCardProps {
   hostId: string;
   refreshTrigger?: number;
@@ -91,31 +123,6 @@ const CommercialAntivirusStatusCard: React.FC<CommercialAntivirusStatusCardProps
     if (days === 0) return t('security.today', 'Today');
     if (days === 1) return t('security.yesterday', 'Yesterday');
     return t('security.daysAgo', '{{days}} days ago', { days });
-  };
-
-  const BooleanStatus: React.FC<{ value: boolean | null; label: string }> = ({ value, label }) => {
-    if (value === null || value === undefined) {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <WarningIcon sx={{ mr: 1, fontSize: '1rem', color: 'grey.500' }} />
-          <Typography variant="body2">
-            {label}: {t('common.unknown', 'Unknown')}
-          </Typography>
-        </Box>
-      );
-    }
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-        {value ? (
-          <CheckCircleIcon sx={{ mr: 1, fontSize: '1rem', color: 'success.main' }} />
-        ) : (
-          <CancelIcon sx={{ mr: 1, fontSize: '1rem', color: 'error.main' }} />
-        )}
-        <Typography variant="body2">
-          {label}: {value ? t('common.enabled', 'Enabled') : t('common.disabled', 'Disabled')}
-        </Typography>
-      </Box>
-    );
   };
 
   if (loading) {

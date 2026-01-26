@@ -1049,6 +1049,7 @@
     "deleteSelected": "حذف المحدد",
     "deleteSelectedExecutions": "حذف التنفيذات المحددة",
     "deleteSuccess": "تم حذف السكريبت بنجاح",
+    "deleteMultipleSuccess": "تم حذف السكريبتات بنجاح",
     "description": "الوصف",
     "duplicate": "نسخ",
     "edit": "تحرير",

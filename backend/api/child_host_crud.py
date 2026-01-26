@@ -26,6 +26,7 @@ from backend.api.child_host_utils import (
     get_user_with_role_check,
     verify_host_active,
 )
+from backend.api.error_constants import ERROR_DISTRIBUTION_NOT_FOUND
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.config.config import get_config
 from backend.i18n import _
@@ -96,7 +97,7 @@ async def list_child_hosts(
     "/host/{host_id}/children",
     dependencies=[Depends(JWTBearer())],
 )
-async def create_child_host(
+async def create_child_host(  # NOSONAR - complex business logic
     host_id: str,
     request: CreateChildHostRequest,
     current_user: str = Depends(get_current_user),
@@ -124,7 +125,7 @@ async def create_child_host(
             .first()
         )
         if not distribution:
-            raise HTTPException(status_code=404, detail=_("Distribution not found"))
+            raise HTTPException(status_code=404, detail=ERROR_DISTRIBUTION_NOT_FOUND())
 
         if not distribution.is_active:
             raise HTTPException(status_code=400, detail=_("Distribution is not active"))
@@ -327,7 +328,7 @@ async def get_child_host(
     "/host/{host_id}/children/{child_id}",
     dependencies=[Depends(JWTBearer())],
 )
-async def delete_child_host(
+async def delete_child_host(  # NOSONAR - complex business logic
     host_id: str,
     child_id: str,
     current_user: str = Depends(get_current_user),
@@ -727,7 +728,7 @@ async def get_distribution(
         )
 
         if not dist:
-            raise HTTPException(status_code=404, detail=_("Distribution not found"))
+            raise HTTPException(status_code=404, detail=ERROR_DISTRIBUTION_NOT_FOUND())
 
         return DistributionDetailResponse(
             id=str(dist.id),
@@ -857,7 +858,7 @@ async def update_distribution(
         )
 
         if not dist:
-            raise HTTPException(status_code=404, detail=_("Distribution not found"))
+            raise HTTPException(status_code=404, detail=ERROR_DISTRIBUTION_NOT_FOUND())
 
         # Update only provided fields
         if request.child_type is not None:
@@ -933,7 +934,7 @@ async def delete_distribution(
         )
 
         if not dist:
-            raise HTTPException(status_code=404, detail=_("Distribution not found"))
+            raise HTTPException(status_code=404, detail=ERROR_DISTRIBUTION_NOT_FOUND())
 
         session.delete(dist)
         session.commit()

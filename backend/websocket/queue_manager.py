@@ -7,7 +7,7 @@ to specialized components for operations, maintenance, and statistics.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 from sqlalchemy.orm import Session
 
@@ -47,9 +47,9 @@ class ServerMessageQueueManager:
         self,
         message_type: str,
         message_data: Dict[str, Any],
-        direction: Union[str, QueueDirection],
+        direction: str | QueueDirection,
         host_id: str = None,
-        priority: Union[str, Priority] = Priority.NORMAL,
+        priority: str | Priority = Priority.NORMAL,
         message_id: str = None,
         scheduled_at: datetime = None,
         max_retries: int = 3,
@@ -93,7 +93,7 @@ class ServerMessageQueueManager:
     def dequeue_messages_for_host(  # pylint: disable=too-many-positional-arguments
         self,
         host_id: str,
-        direction: Union[str, QueueDirection] = QueueDirection.OUTBOUND,
+        direction: str | QueueDirection = QueueDirection.OUTBOUND,
         limit: int = 10,
         priority_order: bool = True,
         db: Session = None,
@@ -121,7 +121,7 @@ class ServerMessageQueueManager:
 
     def dequeue_broadcast_messages(
         self,
-        direction: Union[str, QueueDirection] = QueueDirection.OUTBOUND,
+        direction: str | QueueDirection = QueueDirection.OUTBOUND,
         limit: int = 10,
         db: Session = None,
     ) -> List[MessageQueue]:
@@ -326,7 +326,7 @@ class ServerMessageQueueManager:
     def get_queue_stats(
         self,
         host_id: str = None,
-        direction: Union[str, QueueDirection] = None,
+        direction: str | QueueDirection = None,
         db: Session = None,
     ) -> Dict[str, Any]:
         """

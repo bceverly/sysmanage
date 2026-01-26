@@ -222,11 +222,11 @@ const doAddHost = async (active: boolean, fqdn: string, ipv4: string, ipv6: stri
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(response);
+        return response;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -238,11 +238,11 @@ const doDeleteHost = async (id: string) => {
     .then((response) => {
         // No error - process response
         successResponse = response.data;
-        return Promise.resolve(successResponse);
+        return successResponse;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return successResponse;
 };
@@ -258,7 +258,7 @@ const doGetHostByID = async (id: string) => {
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -270,11 +270,11 @@ const doGetHosts = async (): Promise<SysManageHost[]> => {
     .then((response) => {
         // No error - process response
         results = response.data;
-        return Promise.resolve(response);
+        return response;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return results;
 };
@@ -286,11 +286,11 @@ const doGetHostByFQDN = async (fqdn: string) => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(result);
+        return result;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -306,11 +306,11 @@ const doUpdateHost = async (id: string, active: boolean, fqdn: string, ipv4: str
     .then((response) => {
         // No error - process response
         successResponse = response.data;
-        return Promise.resolve(successResponse);
+        return successResponse;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return successResponse;
 };
@@ -322,11 +322,11 @@ const doApproveHost = async (id: string) => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(response);
+        return response;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -338,11 +338,11 @@ const doRejectHost = async (id: string) => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(response);
+        return response;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -354,11 +354,11 @@ const doRefreshHostData = async (id: string) => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(response);
+        return response;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -370,11 +370,11 @@ const doRefreshHardwareData = async (id: string) => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(response);
+        return response;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -386,11 +386,11 @@ const doRefreshUpdatesCheck = async (id: string) => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(response);
+        return response;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -415,11 +415,11 @@ const doGetHostStorage = async (id: string): Promise<StorageDevice[]> => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(response);
+        return response;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -431,11 +431,11 @@ const doGetHostNetwork = async (id: string): Promise<NetworkInterface[]> => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(response);
+        return response;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -447,11 +447,11 @@ const doGetHostUsers = async (id: string): Promise<UserAccount[]> => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(response);
+        return response;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -463,11 +463,11 @@ const doGetHostGroups = async (id: string): Promise<UserGroup[]> => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(response);
+        return response;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -479,11 +479,11 @@ const doRefreshUserAccessData = async (id: string) => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(response);
+        return response;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -495,11 +495,11 @@ const doRequestSystemInfo = async (id: string) => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(response);
+        return response;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -528,7 +528,7 @@ const doGetHostSoftware = async (
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -542,7 +542,7 @@ const doRefreshSoftwareData = async (id: string) => {
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -558,7 +558,7 @@ const doGetHostDiagnostics = async (id: string) => {
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -572,7 +572,7 @@ const doRequestHostDiagnostics = async (id: string) => {
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -586,7 +586,7 @@ const doGetDiagnosticDetail = async (diagnosticId: string) => {
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -600,7 +600,7 @@ const doDeleteDiagnostic = async (diagnosticId: string) => {
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -614,7 +614,7 @@ const doRebootHost = async (hostId: string) => {
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -628,7 +628,7 @@ const doShutdownHost = async (hostId: string) => {
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -642,7 +642,7 @@ const doRequestPackages = async (hostId: string) => {
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -656,7 +656,7 @@ const doGetHostUbuntuPro = async (hostId: string) => {
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -672,7 +672,7 @@ const doAttachUbuntuPro = async (hostId: string, token: string) => {
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -686,7 +686,7 @@ const doDetachUbuntuPro = async (hostId: string) => {
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -702,7 +702,7 @@ const doEnableUbuntuProService = async (hostId: string, service: string) => {
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -718,7 +718,7 @@ const doDisableUbuntuProService = async (hostId: string, service: string) => {
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };

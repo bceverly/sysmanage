@@ -22,7 +22,7 @@ logger = get_logger("backend.startup.lifecycle")
 
 
 @asynccontextmanager
-async def lifespan(_fastapi_app: FastAPI):
+async def lifespan(_fastapi_app: FastAPI):  # NOSONAR - cognitive complexity
     """
     Application lifespan manager to handle startup and shutdown events.
     """
@@ -144,6 +144,7 @@ async def lifespan(_fastapi_app: FastAPI):
                 await message_processor_task
             except asyncio.CancelledError:
                 logger.info("Message processor task cancelled successfully")
+                raise
         logger.info("Message processor service stopped")
     except Exception as e:
         logger.error("Error stopping message processor: %s", e)
@@ -157,6 +158,7 @@ async def lifespan(_fastapi_app: FastAPI):
                 await graylog_health_task
             except asyncio.CancelledError:
                 logger.info("Graylog health monitor task cancelled successfully")
+                raise
         logger.info("Graylog health monitor service stopped")
     except Exception as e:
         logger.error("Error stopping Graylog health monitor: %s", e)
@@ -170,6 +172,7 @@ async def lifespan(_fastapi_app: FastAPI):
                 await heartbeat_task
             except asyncio.CancelledError:
                 logger.info("Heartbeat monitor task cancelled successfully")
+                raise
         logger.info("Heartbeat monitor service stopped")
     except Exception as e:
         logger.error("Error stopping heartbeat monitor: %s", e)

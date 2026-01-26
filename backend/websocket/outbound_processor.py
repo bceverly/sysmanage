@@ -20,7 +20,9 @@ from backend.websocket.queue_manager import (
 logger = get_logger(__name__)
 
 
-async def process_outbound_messages(db: Session) -> None:
+async def process_outbound_messages(
+    db: Session,
+) -> None:  # NOSONAR - cognitive complexity
     """
     Process outbound messages from the server to agents.
 

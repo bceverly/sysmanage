@@ -300,7 +300,7 @@ const GraylogIntegrationCard: React.FC = () => {
                 </Typography>
                 {healthStatus?.has_gelf_tcp && (
                   <Chip
-                    label={`GELF TCP${healthStatus.gelf_tcp_port ? `:${healthStatus.gelf_tcp_port}` : ''}`}
+                    label={'GELF TCP' + (healthStatus.gelf_tcp_port ? ':' + healthStatus.gelf_tcp_port : '')}
                     size="small"
                     color="primary"
                     variant="outlined"
@@ -308,7 +308,7 @@ const GraylogIntegrationCard: React.FC = () => {
                 )}
                 {healthStatus?.has_syslog_tcp && (
                   <Chip
-                    label={`Syslog TCP${healthStatus.syslog_tcp_port ? `:${healthStatus.syslog_tcp_port}` : ''}`}
+                    label={'Syslog TCP' + (healthStatus.syslog_tcp_port ? ':' + healthStatus.syslog_tcp_port : '')}
                     size="small"
                     color="primary"
                     variant="outlined"
@@ -316,7 +316,7 @@ const GraylogIntegrationCard: React.FC = () => {
                 )}
                 {healthStatus?.has_syslog_udp && (
                   <Chip
-                    label={`Syslog UDP${healthStatus.syslog_udp_port ? `:${healthStatus.syslog_udp_port}` : ''}`}
+                    label={'Syslog UDP' + (healthStatus.syslog_udp_port ? ':' + healthStatus.syslog_udp_port : '')}
                     size="small"
                     color="primary"
                     variant="outlined"
@@ -324,7 +324,7 @@ const GraylogIntegrationCard: React.FC = () => {
                 )}
                 {healthStatus?.has_windows_sidecar && (
                   <Chip
-                    label={`Windows Sidecar${healthStatus.windows_sidecar_port ? `:${healthStatus.windows_sidecar_port}` : ''}`}
+                    label={'Windows Sidecar' + (healthStatus.windows_sidecar_port ? ':' + healthStatus.windows_sidecar_port : '')}
                     size="small"
                     color="primary"
                     variant="outlined"
@@ -414,8 +414,10 @@ const GraylogIntegrationCard: React.FC = () => {
                     value={settings.manual_url || ''}
                     onChange={handleManualUrlChange}
                     placeholder="https://graylog.example.com:9000"
-                    InputProps={{
-                      startAdornment: <LinkIcon sx={{ mr: 1, color: 'action.active' }} />
+                    slotProps={{
+                      input: {
+                        startAdornment: <LinkIcon sx={{ mr: 1, color: 'action.active' }} />,
+                      },
                     }}
                     helperText={t('graylog.manualUrl.help', 'Enter the full URL to your Graylog instance')}
                   />

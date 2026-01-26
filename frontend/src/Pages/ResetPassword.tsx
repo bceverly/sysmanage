@@ -9,14 +9,15 @@ import {
     Button,
     Alert,
     CircularProgress,
-    Paper
+    Paper,
+    IconButton,
+    InputAdornment
 } from '@mui/material';
 import {
     LockReset as LockResetIcon,
     Visibility,
     VisibilityOff
 } from '@mui/icons-material';
-import { IconButton, InputAdornment } from '@mui/material';
 import axiosInstance from '../Services/api';
 import LanguageSelector from '../Components/LanguageSelector';
 
@@ -44,7 +45,7 @@ const ResetPassword: React.FC = () => {
     const { t } = useTranslation();
 
     // Extract token from URL parameters
-    const searchParams = new window.URLSearchParams(location.search);
+    const searchParams = new globalThis.URLSearchParams(location.search);
     const token = searchParams.get('token');
 
     useEffect(() => {
@@ -315,18 +316,20 @@ const ResetPassword: React.FC = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             disabled={loading}
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            aria-label="toggle password visibility"
-                                            onClick={togglePasswordVisibility}
-                                            edge="end"
-                                        >
-                                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
+                            slotProps={{
+                                input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={togglePasswordVisibility}
+                                                edge="end"
+                                            >
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                },
                             }}
                         />
 
@@ -341,18 +344,20 @@ const ResetPassword: React.FC = () => {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             disabled={loading}
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            aria-label="toggle confirm password visibility"
-                                            onClick={toggleConfirmPasswordVisibility}
-                                            edge="end"
-                                        >
-                                            {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
+                            slotProps={{
+                                input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle confirm password visibility"
+                                                onClick={toggleConfirmPasswordVisibility}
+                                                edge="end"
+                                            >
+                                                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                },
                             }}
                         />
 

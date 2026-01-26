@@ -3,7 +3,7 @@ Queue Statistics and Monitoring for SysManage.
 Provides statistics and reporting for message queue management.
 """
 
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
@@ -23,7 +23,7 @@ class QueueStats:
     def get_queue_stats(
         self,
         host_id: str = None,
-        direction: Union[str, QueueDirection] = None,
+        direction: str | QueueDirection = None,
         db: Session = None,
     ) -> Dict[str, Any]:
         """

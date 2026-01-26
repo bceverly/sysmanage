@@ -67,7 +67,7 @@ const UserProfileDropdown: React.FC = () => {
             });
 
             const imageBlob = response.data;
-            const imageUrl = window.URL.createObjectURL(imageBlob);
+            const imageUrl = globalThis.URL.createObjectURL(imageBlob);
             setProfileImageUrl(imageUrl);
         } catch {
             // Silently handle the case where profile image is not available
@@ -84,7 +84,7 @@ const UserProfileDropdown: React.FC = () => {
     useEffect(() => {
         return () => {
             if (profileImageUrl) {
-                window.URL.revokeObjectURL(profileImageUrl);
+                globalThis.URL.revokeObjectURL(profileImageUrl);
             }
         };
     }, [profileImageUrl]);
@@ -96,9 +96,9 @@ const UserProfileDropdown: React.FC = () => {
 
     // Expose refresh function globally for other components to use
     useEffect(() => {
-        window.refreshUserProfileImage = refreshProfileImage;
+        globalThis.refreshUserProfileImage = refreshProfileImage;
         return () => {
-            delete window.refreshUserProfileImage;
+            delete globalThis.refreshUserProfileImage;
         };
     }, [refreshProfileImage]);
 
@@ -157,14 +157,16 @@ const UserProfileDropdown: React.FC = () => {
                 onClick={handleClose}
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                PaperProps={{
-                    elevation: 3,
-                    sx: {
-                        mt: 1,
-                        minWidth: 200,
-                        '& .MuiMenuItem-root': {
-                            px: 2,
-                            py: 1,
+                slotProps={{
+                    paper: {
+                        elevation: 3,
+                        sx: {
+                            mt: 1,
+                            minWidth: 200,
+                            '& .MuiMenuItem-root': {
+                                px: 2,
+                                py: 1,
+                            }
                         }
                     }
                 }}

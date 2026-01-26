@@ -204,12 +204,13 @@ class LoginSecurityValidator:
 
     def reset_failed_login_attempts(self, user: User, db_session) -> None:
         """Reset failed login attempts on successful login."""
+        was_locked = user.is_locked
         if user.failed_login_attempts > 0 or user.is_locked:
             user.failed_login_attempts = 0
             user.is_locked = False
             user.locked_at = None
             db_session.commit()
-            if user.is_locked:
+            if was_locked:
                 logger.info(
                     "User account '%s' unlocked after successful login", user.userid
                 )

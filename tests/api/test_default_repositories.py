@@ -196,8 +196,7 @@ class TestOSPackageManagersResponse:
 class TestApplyRepositoryToHost:
     """Test cases for apply_repository_to_host function."""
 
-    @pytest.mark.asyncio
-    async def test_apply_add_action_queues_message(self):
+    def test_apply_add_action_queues_message(self):
         """Test that add action queues correct message."""
         mock_session = MagicMock()
         mock_host = MagicMock()
@@ -207,7 +206,7 @@ class TestApplyRepositoryToHost:
         with patch(
             "backend.api.default_repositories.server_queue_manager"
         ) as mock_queue:
-            await apply_repository_to_host(
+            apply_repository_to_host(
                 mock_session, mock_host, "ppa:test/ppa", action="add"
             )
 
@@ -216,8 +215,7 @@ class TestApplyRepositoryToHost:
             assert call_args[1]["message_type"] == "command"
             assert call_args[1]["host_id"] == str(mock_host.id)
 
-    @pytest.mark.asyncio
-    async def test_apply_delete_action_queues_message(self):
+    def test_apply_delete_action_queues_message(self):
         """Test that delete action queues correct message."""
         mock_session = MagicMock()
         mock_host = MagicMock()
@@ -227,14 +225,13 @@ class TestApplyRepositoryToHost:
         with patch(
             "backend.api.default_repositories.server_queue_manager"
         ) as mock_queue:
-            await apply_repository_to_host(
+            apply_repository_to_host(
                 mock_session, mock_host, "ppa:test/ppa", action="delete"
             )
 
             mock_queue.enqueue_message.assert_called_once()
 
-    @pytest.mark.asyncio
-    async def test_apply_invalid_action_does_nothing(self):
+    def test_apply_invalid_action_does_nothing(self):
         """Test that invalid action does not queue message."""
         mock_session = MagicMock()
         mock_host = MagicMock()
@@ -244,14 +241,13 @@ class TestApplyRepositoryToHost:
         with patch(
             "backend.api.default_repositories.server_queue_manager"
         ) as mock_queue:
-            await apply_repository_to_host(
+            apply_repository_to_host(
                 mock_session, mock_host, "ppa:test/ppa", action="invalid"
             )
 
             mock_queue.enqueue_message.assert_not_called()
 
-    @pytest.mark.asyncio
-    async def test_apply_handles_exception_gracefully(self):
+    def test_apply_handles_exception_gracefully(self):
         """Test that exceptions are handled without raising."""
         mock_session = MagicMock()
         mock_host = MagicMock()
@@ -264,7 +260,7 @@ class TestApplyRepositoryToHost:
             mock_queue.enqueue_message.side_effect = Exception("Queue error")
 
             # Should not raise
-            await apply_repository_to_host(
+            apply_repository_to_host(
                 mock_session, mock_host, "ppa:test/ppa", action="add"
             )
 

@@ -14,7 +14,7 @@ from backend.persistence.models import Host
 logger = logging.getLogger(__name__)
 
 
-async def check_host_heartbeats():
+async def check_host_heartbeats():  # NOSONAR: async method required for database operations
     """
     Check for hosts that haven't sent heartbeats within the timeout period
     and mark them as down.

@@ -28,7 +28,7 @@ class JWTBearer(HTTPBearer):
         """
         credentials: HTTPAuthorizationCredentials = await super().__call__(request)
         if credentials:
-            if not credentials.scheme == "Bearer":
+            if credentials.scheme != "Bearer":
                 raise HTTPException(
                     status_code=403, detail=_("Invalid authentication scheme.")
                 )
@@ -55,7 +55,9 @@ class JWTBearer(HTTPBearer):
         return is_token_valid
 
 
-async def get_current_user(token: str = Depends(JWTBearer())) -> str:
+async def get_current_user(
+    token: str = Depends(JWTBearer()),
+) -> str:  # NOSONAR - async for FastAPI
     """
     Extract the current user's userid from the JWT token.
     """

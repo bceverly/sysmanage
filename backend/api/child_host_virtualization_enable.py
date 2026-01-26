@@ -13,6 +13,7 @@ from backend.api.child_host_utils import (
     get_user_with_role_check,
     verify_host_active,
 )
+from backend.api.error_constants import ERROR_KVM_LINUX_ONLY
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db
@@ -274,7 +275,7 @@ async def initialize_kvm(
         if not host.platform or "Linux" not in host.platform:
             raise HTTPException(
                 status_code=400,
-                detail=_("KVM is only supported on Linux hosts"),
+                detail=ERROR_KVM_LINUX_ONLY(),
             )
 
         # Verify the agent is privileged (needed to install/start libvirtd)
@@ -499,7 +500,7 @@ async def enable_kvm_modules(
         if not host.platform or "Linux" not in host.platform:
             raise HTTPException(
                 status_code=400,
-                detail=_("KVM is only supported on Linux hosts"),
+                detail=ERROR_KVM_LINUX_ONLY(),
             )
 
         # Verify the agent is privileged (needed to run modprobe)
@@ -574,7 +575,7 @@ async def disable_kvm_modules(
         if not host.platform or "Linux" not in host.platform:
             raise HTTPException(
                 status_code=400,
-                detail=_("KVM is only supported on Linux hosts"),
+                detail=ERROR_KVM_LINUX_ONLY(),
             )
 
         # Verify the agent is privileged (needed to run modprobe)

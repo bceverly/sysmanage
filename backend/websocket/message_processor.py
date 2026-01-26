@@ -84,6 +84,7 @@ class MessageProcessor:
                 await asyncio.sleep(self.process_interval)
         except asyncio.CancelledError:
             logger.info(_("Message processor cancelled"))
+            raise
         finally:
             self.running = False
             logger.info(_("Message processor stopped"))

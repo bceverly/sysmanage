@@ -114,7 +114,7 @@ export const scriptsService = {
 
   async deleteScriptExecutionsBulk(executionIds: (string | number)[]): Promise<void> {
     // Convert all IDs to strings to match backend expectation
-    const stringIds = executionIds.map(id => String(id));
+    const stringIds = executionIds.map(String);
     console.log('Sending bulk delete request for execution IDs:', stringIds);
     await axiosInstance.request({
       method: 'DELETE',

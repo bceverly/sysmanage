@@ -23,6 +23,47 @@ argon2_hasher = PasswordHasher()
 router = APIRouter()
 
 
+def _is_secure_cookie_enabled(the_config):
+    """Determine if secure cookies should be used based on config."""
+    cert_file = the_config.get("api", {}).get("certFile")
+    return cert_file is not None and len(cert_file) > 0
+
+
+def _set_refresh_cookie(response, refresh_token, jwt_refresh_timeout, is_secure):
+    """Set the refresh token cookie on the response."""
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=datetime.now(timezone.utc) + timedelta(seconds=jwt_refresh_timeout),
+        path="/",
+        domain="sysmanage.org",
+        secure=is_secure,
+        httponly=True,
+        samesite="strict" if is_secure else "lax",
+    )
+
+
+def _log_login_attempt(
+    session, user_id, username, success, client_ip, user_agent, error_msg=None
+):
+    """Log a login attempt to the audit log."""
+    AuditService.log(
+        db=session,
+        user_id=user_id,
+        username=username,
+        action_type=ActionType.LOGIN,
+        entity_type=EntityType.USER,
+        entity_id=str(user_id) if user_id else None,
+        entity_name=username,
+        description=f"{'Successful' if success else 'Failed'} login attempt for user {username}"
+        + (f" - {error_msg}" if error_msg and not success else ""),
+        result=Result.SUCCESS if success else Result.FAILURE,
+        error_message=error_msg if not success else None,
+        ip_address=client_ip,
+        user_agent=user_agent,
+    )
+
+
 class UserLogin(BaseModel):
     """
     This class represents the JSON payload to the /login POST request.
@@ -33,7 +74,7 @@ class UserLogin(BaseModel):
 
 
 @router.post("/login")
-async def login(login_data: UserLogin, request: Request, response: Response):
+async def login(login_data: UserLogin, request: Request, response: Response):  # NOSONAR
     """
     This function provides login ability to the SysManage server with enhanced security.
     """
@@ -50,87 +91,33 @@ async def login(login_data: UserLogin, request: Request, response: Response):
             str(login_data.userid), client_ip, user_agent
         )
         raise HTTPException(status_code=429, detail=_(reason))
-    # Get the /etc/sysmanage.yaml configuration
+
     the_config = config.get_config()
-
     db.get_db()
-    success = False
-
-    # Check YAML admin credentials only if they are configured
-    admin_userid = the_config.get("security", {}).get("admin_userid")
-    admin_password = the_config.get("security", {}).get("admin_password")
-
-    if admin_userid and admin_password and login_data.userid == admin_userid:
-        if login_data.password == admin_password:
-            success = True
-
-            # Record successful login
-            login_security.record_successful_login(
-                str(login_data.userid), client_ip, user_agent
-            )
-
-            # Audit log successful admin login
-            with session_local() as audit_session:
-                AuditService.log(
-                    db=audit_session,
-                    action_type=ActionType.LOGIN,
-                    entity_type=EntityType.USER,
-                    entity_name=str(login_data.userid),
-                    description=f"Admin user {login_data.userid} logged in successfully",
-                    result=Result.SUCCESS,
-                    ip_address=client_ip,
-                    user_agent=user_agent,
-                )
-
-            refresh_token = sign_refresh_token(login_data.userid)
-            jwt_refresh_timout = int(the_config["security"]["jwt_refresh_timeout"])
-
-            # Determine if we should use secure cookies based on config
-            is_secure = (
-                the_config.get("api", {}).get("certFile") is not None
-                and len(the_config.get("api", {}).get("certFile", "")) > 0
-            )
-
-            response.set_cookie(
-                key="refresh_token",
-                value=refresh_token,
-                expires=datetime.now(timezone.utc)
-                + timedelta(seconds=jwt_refresh_timout),
-                path="/",
-                domain="sysmanage.org",
-                secure=is_secure,
-                httponly=True,
-                samesite="strict" if is_secure else "lax",
-            )
-            return {"Authorization": sign_jwt(login_data.userid)}
-
-        # Record failed admin login attempt
-        if not success:
-            login_security.record_failed_login(
-                str(login_data.userid), client_ip, user_agent
-            )
-            # Audit log failed admin login
-            with session_local() as audit_session:
-                AuditService.log(
-                    db=audit_session,
-                    action_type=ActionType.LOGIN,
-                    entity_type=EntityType.USER,
-                    entity_name=str(login_data.userid),
-                    description=f"Failed login attempt for admin user {login_data.userid}",
-                    result=Result.FAILURE,
-                    error_message="Invalid password",
-                    ip_address=client_ip,
-                    user_agent=user_agent,
-                )
+    jwt_refresh_timeout = int(the_config["security"]["jwt_refresh_timeout"])
+    is_secure = _is_secure_cookie_enabled(the_config)
 
     # Get the SQLAlchemy session
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
 
-    # Check if this is a valid user
+    # Try admin credentials first
+    admin_result = _try_admin_login(
+        login_data,
+        the_config,
+        session_local,
+        client_ip,
+        user_agent,
+        response,
+        jwt_refresh_timeout,
+        is_secure,
+    )
+    if admin_result:
+        return admin_result
+
+    # Try database user authentication
     with session_local() as session:
-        # Query for the specific user
         user = (
             session.query(models.User)
             .filter(models.User.userid == login_data.userid)
@@ -138,111 +125,141 @@ async def login(login_data: UserLogin, request: Request, response: Response):
         )
 
         if user:
-            # Check if user account is locked
-            if login_security.is_user_account_locked(user):
-                login_security.record_failed_login(
-                    str(login_data.userid), client_ip, user_agent
-                )
-                raise HTTPException(
-                    status_code=423,
-                    detail=_("Account is locked due to too many failed login attempts"),
-                )
-
-            # Verify password using argon2-cffi
-            try:
-                argon2_hasher.verify(user.hashed_password, login_data.password)
-                success = True
-
-                # Record successful login and reset failed attempts
-                login_security.record_successful_login(
-                    str(login_data.userid), client_ip, user_agent
-                )
-                login_security.reset_failed_login_attempts(user, session)
-
-                # Update the last access datetime
-                user.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
-                session.commit()
-
-                # Audit log successful user login
-                AuditService.log(
-                    db=session,
-                    user_id=user.id,
-                    username=str(login_data.userid),
-                    action_type=ActionType.LOGIN,
-                    entity_type=EntityType.USER,
-                    entity_id=str(user.id),
-                    entity_name=str(login_data.userid),
-                    description=f"User {login_data.userid} logged in successfully",
-                    result=Result.SUCCESS,
-                    ip_address=client_ip,
-                    user_agent=user_agent,
-                )
-
-                # Add the refresh token to an http-only cookie
-                auth_token = sign_jwt(login_data.userid)
-                refresh_token = sign_refresh_token(login_data.userid)
-                jwt_refresh_timout = int(the_config["security"]["jwt_refresh_timeout"])
-
-                # Determine if we should use secure cookies based on config
-                is_secure = (
-                    the_config.get("api", {}).get("certFile") is not None
-                    and len(the_config.get("api", {}).get("certFile", "")) > 0
-                )
-
-                response.set_cookie(
-                    key="refresh_token",
-                    value=refresh_token,
-                    expires=datetime.now(timezone.utc)
-                    + timedelta(seconds=jwt_refresh_timout),
-                    path="/",
-                    domain="sysmanage.org",
-                    secure=is_secure,
-                    httponly=True,
-                    samesite="strict" if is_secure else "lax",
-                )
-
-                # Return success
-                return {"Authorization": auth_token}
-            except Exception:  # nosec B110
-                # Wrong password - record failed attempt and potentially lock account
-                pass
-
-            # Wrong password - record failed attempt and potentially lock account
-            login_security.record_failed_login(
-                str(login_data.userid), client_ip, user_agent
-            )
-            account_locked = login_security.record_failed_login_for_user(user, session)
-
-            # Audit log failed login
-            AuditService.log(
-                db=session,
-                user_id=user.id,
-                username=str(login_data.userid),
-                action_type=ActionType.LOGIN,
-                entity_type=EntityType.USER,
-                entity_id=str(user.id),
-                entity_name=str(login_data.userid),
-                description=f"Failed login attempt for user {login_data.userid}"
-                + (" - account locked" if account_locked else ""),
-                result=Result.FAILURE,
-                error_message="Invalid password"
-                + (" - account locked" if account_locked else ""),
-                ip_address=client_ip,
-                user_agent=user_agent,
+            return _authenticate_db_user(
+                user,
+                login_data,
+                session,
+                the_config,
+                client_ip,
+                user_agent,
+                response,
+                jwt_refresh_timeout,
+                is_secure,
             )
 
-            if account_locked:
-                raise HTTPException(
-                    status_code=423,
-                    detail=_("Account locked due to too many failed login attempts"),
-                )
-        else:
-            # User not found - still record failed attempt for security
-            login_security.record_failed_login(
-                str(login_data.userid), client_ip, user_agent
-            )
+        # User not found - still record failed attempt for security
+        login_security.record_failed_login(
+            str(login_data.userid), client_ip, user_agent
+        )
 
-    # If we got here, then there was no match
+    raise HTTPException(status_code=401, detail=_("Invalid username or password"))
+
+
+def _try_admin_login(
+    login_data,
+    the_config,
+    session_local,
+    client_ip,
+    user_agent,
+    response,
+    jwt_refresh_timeout,
+    is_secure,
+):
+    """Try to authenticate using admin credentials from config file."""
+    admin_userid = the_config.get("security", {}).get("admin_userid")
+    admin_password = the_config.get("security", {}).get("admin_password")
+
+    if not (admin_userid and admin_password and login_data.userid == admin_userid):
+        return None
+
+    if login_data.password != admin_password:
+        login_security.record_failed_login(
+            str(login_data.userid), client_ip, user_agent
+        )
+        with session_local() as audit_session:
+            _log_login_attempt(
+                audit_session,
+                None,
+                str(login_data.userid),
+                False,
+                client_ip,
+                user_agent,
+                "Invalid password",
+            )
+        return None
+
+    # Successful admin login
+    login_security.record_successful_login(
+        str(login_data.userid), client_ip, user_agent
+    )
+    with session_local() as audit_session:
+        _log_login_attempt(
+            audit_session, None, str(login_data.userid), True, client_ip, user_agent
+        )
+
+    refresh_token = sign_refresh_token(login_data.userid)
+    _set_refresh_cookie(response, refresh_token, jwt_refresh_timeout, is_secure)
+    return {"Authorization": sign_jwt(login_data.userid)}
+
+
+def _authenticate_db_user(
+    user,
+    login_data,
+    session,
+    the_config,
+    client_ip,
+    user_agent,
+    response,
+    jwt_refresh_timeout,
+    is_secure,
+):
+    """Authenticate a user from the database."""
+    # Check if user account is locked
+    if login_security.is_user_account_locked(user):
+        login_security.record_failed_login(
+            str(login_data.userid), client_ip, user_agent
+        )
+        raise HTTPException(
+            status_code=423,
+            detail=_("Account is locked due to too many failed login attempts"),
+        )
+
+    # Verify password
+    try:
+        argon2_hasher.verify(user.hashed_password, login_data.password)
+    except Exception:  # nosec B110 - catches argon2 verification failures
+        return _handle_failed_password(user, login_data, session, client_ip, user_agent)
+
+    # Successful login
+    login_security.record_successful_login(
+        str(login_data.userid), client_ip, user_agent
+    )
+    login_security.reset_failed_login_attempts(user, session)
+    user.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
+    session.commit()
+
+    _log_login_attempt(
+        session, user.id, str(login_data.userid), True, client_ip, user_agent
+    )
+
+    auth_token = sign_jwt(login_data.userid)
+    refresh_token = sign_refresh_token(login_data.userid)
+    _set_refresh_cookie(response, refresh_token, jwt_refresh_timeout, is_secure)
+    return {"Authorization": auth_token}
+
+
+def _handle_failed_password(user, login_data, session, client_ip, user_agent):
+    """Handle failed password verification."""
+    login_security.record_failed_login(str(login_data.userid), client_ip, user_agent)
+    account_locked = login_security.record_failed_login_for_user(user, session)
+
+    error_suffix = " - account locked" if account_locked else ""
+    _log_login_attempt(
+        session,
+        user.id,
+        str(login_data.userid),
+        False,
+        client_ip,
+        user_agent,
+        f"Invalid password{error_suffix}",
+    )
+
+    if account_locked:
+        raise HTTPException(
+            status_code=423,
+            detail=_("Account locked due to too many failed login attempts"),
+        )
+
     raise HTTPException(status_code=401, detail=_("Invalid username or password"))
 
 
@@ -255,14 +272,13 @@ async def refresh(request: Request):
     then a 403 - Forbidden error will be returned, forcing the client to
     re-authenticate via a user-managed login.
     """
-    if len(request.cookies) > 0:
-        if "refresh_token" in request.cookies:
-            refresh_token = request.cookies["refresh_token"]
-            token_dict = decode_jwt(refresh_token)
-            if token_dict:
-                the_userid = token_dict["user_id"]
-                new_token = sign_jwt(the_userid)
-                return {"Authorization": new_token}
+    if request.cookies and "refresh_token" in request.cookies:
+        refresh_token = request.cookies["refresh_token"]
+        token_dict = decode_jwt(refresh_token)
+        if token_dict:
+            the_userid = token_dict["user_id"]
+            new_token = sign_jwt(the_userid)
+            return {"Authorization": new_token}
 
     raise HTTPException(status_code=403, detail="Invalid or missing refresh token")
 

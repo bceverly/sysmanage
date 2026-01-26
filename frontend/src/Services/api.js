@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 // Dynamically determine the backend URL based on current host
 const getBackendBaseURL = () => {
-  const currentHost = window.location.hostname;
+  const currentHost = globalThis.location.hostname;
   // Use environment variable if available, otherwise default to 8080
   const backendPort = import.meta.env.VITE_BACKEND_PORT || 8080;
   return `http://${currentHost}:${backendPort}`;
@@ -26,7 +26,7 @@ axiosInstance.interceptors.request.use(
         return config;
     },
     (error) => {
-      return Promise.reject(error);
+      throw error;
     }
 );
 
@@ -44,7 +44,7 @@ axiosInstance.interceptors.response.use(
 
       // This is an attempt to log in with an expired refresh token
       if (err.response.status === 403) {
-        window.location.href = '/login';
+        globalThis.location.href = '/login';
       }
 
       // This is the "normal" case of an expired auth token where
@@ -53,35 +53,31 @@ axiosInstance.interceptors.response.use(
       if (err.response.status === 401 && !originalConfig._retry) {
         originalConfig._retry = true;
 
-        try {
-          console.log("Calling /refresh to get a new auth token...");
-          await axiosInstance.post("/refresh", {
-          })
-          .then((response) => {
-            console.log('Received response: ' + response);
-            localStorage.setItem("bearer_token", response.data.Authorization);
-            return axiosInstance(originalConfig);
-          })
-          .catch((error) => {
-            // Error situation - clear out storage
-            console.log(error);
-            localStorage.removeItem("userid");
-            localStorage.removeItem("bearer_token");
-
-            const navigate = useNavigate();
-
-            navigate("/login")
-            return Promise.reject(error);
-          });
-
+        console.log("Calling /refresh to get a new auth token...");
+        await axiosInstance.post("/refresh", {
+        })
+        .then((response) => {
+          console.log('Received response:', response);
+          localStorage.setItem("bearer_token", response.data.Authorization);
           return axiosInstance(originalConfig);
-        } catch (_error) {
-          return Promise.reject(_error);
-        }
+        })
+        .catch((error) => {
+          // Error situation - clear out storage
+          console.log(error);
+          localStorage.removeItem("userid");
+          localStorage.removeItem("bearer_token");
+
+          const navigate = useNavigate();
+
+          navigate("/login")
+          throw error;
+        });
+
+        return axiosInstance(originalConfig);
       }
     }
 
-    return Promise.reject(err);
+    throw err;
   }
 );
 

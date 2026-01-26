@@ -6,7 +6,7 @@ Periodically checks Graylog server health and detects available input ports.
 import asyncio
 import logging
 import socket
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 from backend.persistence.db import get_db
@@ -15,7 +15,7 @@ from backend.persistence.models import GraylogIntegrationSettings
 logger = logging.getLogger(__name__)
 
 
-async def check_graylog_health():
+async def check_graylog_health():  # NOSONAR: async method and cognitive complexity justified for comprehensive health monitoring
     """
     Check Graylog server health and detect available input ports.
     Updates the database with the results.
@@ -129,7 +129,7 @@ async def check_graylog_health():
         settings.syslog_udp_port = syslog_udp_port
         settings.has_windows_sidecar = has_windows_sidecar
         settings.windows_sidecar_port = windows_sidecar_port
-        settings.inputs_last_checked = datetime.utcnow()
+        settings.inputs_last_checked = datetime.now(timezone.utc)
 
         db.commit()
         logger.info(

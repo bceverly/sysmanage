@@ -5,6 +5,7 @@ Host system operations endpoints (reboot, shutdown, software refresh).
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import sessionmaker
 
+from backend.api.error_constants import ERROR_HOST_NOT_FOUND, ERROR_USER_NOT_FOUND
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -37,12 +38,12 @@ async def refresh_host_software(
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
         # Find the host first to ensure it exists
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=_("Host not found"))
+            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
         # Create command message for software inventory update
         command_message = create_command_message(
@@ -102,7 +103,7 @@ async def reboot_host(host_id: str, current_user: str = Depends(get_current_user
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
         # Load role cache if not already loaded
         if user._role_cache is None:
@@ -118,7 +119,7 @@ async def reboot_host(host_id: str, current_user: str = Depends(get_current_user
         # Find the host first to ensure it exists
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=_("Host not found"))
+            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
         # Create command message for system reboot
         command_message = create_command_message(
@@ -178,7 +179,7 @@ async def shutdown_host(host_id: str, current_user: str = Depends(get_current_us
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
         # Load role cache if not already loaded
         if user._role_cache is None:
@@ -194,7 +195,7 @@ async def shutdown_host(host_id: str, current_user: str = Depends(get_current_us
         # Find the host first to ensure it exists
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=_("Host not found"))
+            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
         # Create command message for system shutdown
         command_message = create_command_message(
@@ -254,12 +255,12 @@ async def request_packages(host_id: str, current_user: str = Depends(get_current
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
         # Find the host first to ensure it exists
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=_("Host not found"))
+            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
         # Create command message for package collection
         command_message = create_command_message(

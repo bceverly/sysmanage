@@ -345,7 +345,7 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
     }
 
     // Sort by port number
-    return merged.sort((a, b) => parseInt(a.port) - parseInt(b.port));
+    return merged.sort((a, b) => Number.parseInt(a.port, 10) - Number.parseInt(b.port, 10));
   };
 
   const actualIpv4Ports = parsePortsWithProtocols(firewallStatus?.ipv4_ports || null);
@@ -518,9 +518,9 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
                     {t('security.ipv4OpenPorts', 'IPv4 Open Ports')}
                   </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {ipv4Ports.map((portInfo, idx) => (
+                    {ipv4Ports.map((portInfo) => (
                       <Chip
-                        key={idx}
+                        key={`${portInfo.port}-${portInfo.protocols.join('-')}`}
                         label={`${portInfo.port} (${portInfo.protocols.join('/')})`}
                         size="small"
                         variant="outlined"
@@ -536,9 +536,9 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
                     {t('security.ipv6OpenPorts', 'IPv6 Open Ports')}
                   </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {ipv6Ports.map((portInfo, idx) => (
+                    {ipv6Ports.map((portInfo) => (
                       <Chip
-                        key={idx}
+                        key={`${portInfo.port}-${portInfo.protocols.join('-')}`}
                         label={`${portInfo.port} (${portInfo.protocols.join('/')})`}
                         size="small"
                         variant="outlined"

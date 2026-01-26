@@ -59,11 +59,11 @@ const doAddUser = async (active: boolean, userid: string, password: string, firs
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(result);
+        return result;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -75,11 +75,11 @@ const doDeleteUser = async (id: string) => {
     .then((response) => {
         // No error - process response
         successResponse = response.data;
-        return Promise.resolve(successResponse);
+        return successResponse;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return successResponse;
 };
@@ -90,11 +90,11 @@ const doGetMe = async (): Promise<SysManageUser> => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(result);
+        return result;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -106,11 +106,11 @@ const doGetUserByID = async (id: string) => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(result);
+        return result;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -122,11 +122,11 @@ const doGetUsers = async (): Promise<SysManageUser[]> => {
     .then((response) => {
         // No error - process response
         results = response.data;
-        return Promise.resolve(response);
+        return response;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return results;
 };
@@ -138,11 +138,11 @@ const doGetUserByUserid = async (userid: string) => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(result);
+        return result;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -160,11 +160,11 @@ const doUpdateUser = async (id: string, active: boolean, userid: string, passwor
     .then((response) => {
         // No error - process response
         successResponse = response.data;
-        return Promise.resolve(successResponse);
+        return successResponse;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return successResponse;
 };
@@ -176,11 +176,11 @@ const doUnlockUser = async (id: string) => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(result);
+        return result;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -192,11 +192,11 @@ const doLockUser = async (id: string) => {
     .then((response) => {
         // No error - process response
         result = response.data;
-        return Promise.resolve(result);
+        return result;
     })
     .catch((error) => {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     });
     return result;
 };
@@ -214,7 +214,7 @@ const doUploadUserImage = async (userId: string, file: globalThis.File) => {
         return response.data;
     } catch (error) {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     }
 };
 
@@ -226,7 +226,7 @@ const doGetUserImage = async (userId: string): Promise<globalThis.Blob> => {
         return response.data;
     } catch (error) {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     }
 };
 
@@ -236,7 +236,7 @@ const doDeleteUserImage = async (userId: string) => {
         return response.data;
     } catch (error) {
         processError(error);
-        return Promise.reject(error);
+        throw error;
     }
 };
 

@@ -85,9 +85,9 @@ const SecurityWarningBanner: React.FC = () => {
 
     checkSecurityStatus();
     // Check every 30 seconds in case status changes
-    const interval = window.setInterval(checkSecurityStatus, 30000);
-    
-    return () => window.clearInterval(interval);
+    const interval = globalThis.setInterval(checkSecurityStatus, 30000);
+
+    return () => globalThis.clearInterval(interval);
   }, []);
 
   if (!securityStatus || (!securityStatus.hasDefaultCredentials && securityStatus.securityWarnings.length === 0)) {
@@ -226,17 +226,19 @@ const SecurityWarningBanner: React.FC = () => {
             
             {/* Other security warnings */}
             {securityStatus.securityWarnings.map((warning, index) => (
-              <Box key={index} sx={{ mb: index < securityStatus.securityWarnings.length - 1 ? 2.5 : 0 }}>
-                {securityStatus.securityWarnings.length === 1 && !hasCredentialsWarning && (
-                  <AlertTitle sx={{ mb: 1.5, fontWeight: 'bold', fontSize: '18px' }}>
-                    {warning.severity === 'critical'
-                      ? t('security.criticalWarning', 'CRITICAL SECURITY WARNING')
-                      : warning.type === 'email_integration_required'
-                        ? t('security.emailConfigurationWarning', 'Email Configuration Required')
-                        : t('security.securityWarning', 'Security Warning')
-                    }
-                  </AlertTitle>
-                )}
+              <Box key={warning.type} sx={{ mb: index < securityStatus.securityWarnings.length - 1 ? 2.5 : 0 }}>
+                {securityStatus.securityWarnings.length === 1 && !hasCredentialsWarning && (() => {
+                  const alertTitleText = warning.severity === 'critical'
+                    ? t('security.criticalWarning', 'CRITICAL SECURITY WARNING')
+                    : warning.type === 'email_integration_required'
+                      ? t('security.emailConfigurationWarning', 'Email Configuration Required')
+                      : t('security.securityWarning', 'Security Warning');
+                  return (
+                    <AlertTitle sx={{ mb: 1.5, fontWeight: 'bold', fontSize: '18px' }}>
+                      {alertTitleText}
+                    </AlertTitle>
+                  );
+                })()}
                 <Box sx={{ fontSize: hasCredentialsWarning ? '15px' : '16px', lineHeight: 1.5 }}>
                   {warning.message}
                   {warning.details && (

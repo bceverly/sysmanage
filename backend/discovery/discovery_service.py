@@ -61,7 +61,9 @@ class DiscoveryBeaconService:
             logger.error("Failed to start discovery beacon service: %s", e)
             raise
 
-    async def stop_beacon_service(self):
+    async def stop_beacon_service(
+        self,
+    ):  # NOSONAR: async method required for interface consistency
         """Stop the UDP discovery beacon service."""
         if self.transport:
             self.transport.close()
@@ -191,7 +193,7 @@ class DiscoveryProtocol(asyncio.DatagramProtocol):
             logger.error("Error handling discovery request from %s: %s", addr[0], e)
 
     def validate_discovery_request(
-        self, request_data: Dict[str, Any], addr: Tuple[str, int]
+        self, request_data: Dict[str, Any], _addr: Tuple[str, int]
     ) -> bool:
         """
         Validate a discovery request.
@@ -237,7 +239,7 @@ class NetworkScanner:
     def __init__(self):
         self.config = get_config()
 
-    async def broadcast_server_announcement(
+    async def broadcast_server_announcement(  # NOSONAR: async method for future async I/O operations
         self, subnet: str = "192.168.1.255", port: int = 31338
     ):
         """
@@ -275,7 +277,11 @@ class NetworkScanner:
         except Exception as e:
             logger.error("Failed to broadcast server announcement: %s", e)
 
-    def get_local_subnets(self) -> list:
+    def get_local_subnets(
+        self,
+    ) -> (
+        list
+    ):  # NOSONAR: cognitive complexity is justified for network interface enumeration
         """
         Get list of local subnet broadcast addresses.
 

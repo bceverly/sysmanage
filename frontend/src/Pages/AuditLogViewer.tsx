@@ -105,7 +105,7 @@ const AuditLogViewer: React.FC = () => {
   };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+    setRowsPerPage(Number.parseInt(event.target.value, 10));
     setPage(0);
   };
 
@@ -139,14 +139,14 @@ const AuditLogViewer: React.FC = () => {
       });
 
       const blob = new Blob([response.data], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
+      const url = globalThis.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `audit_log_${new Date().toISOString().slice(0, 10)}.csv`;
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      link.remove();
+      globalThis.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error exporting audit log:', error);
     }
@@ -216,12 +216,14 @@ const AuditLogViewer: React.FC = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 size="small"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  },
                 }}
               />
             </Grid>
@@ -302,8 +304,8 @@ const AuditLogViewer: React.FC = () => {
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 size="small"
-                InputLabelProps={{
-                  shrink: true,
+                slotProps={{
+                  inputLabel: { shrink: true },
                 }}
               />
             </Grid>
@@ -315,8 +317,8 @@ const AuditLogViewer: React.FC = () => {
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 size="small"
-                InputLabelProps={{
-                  shrink: true,
+                slotProps={{
+                  inputLabel: { shrink: true },
                 }}
               />
             </Grid>

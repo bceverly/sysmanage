@@ -33,7 +33,7 @@ const doLogin = async (requestData: DoLoginRequest) => {
       console.log('Unknown error: ' + error);
     }
 
-    return Promise.reject(error);
+    throw error;
   });
 };
 

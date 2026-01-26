@@ -383,7 +383,7 @@ const Secrets: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (pendingDeleteAction) {
-      await pendingDeleteAction();
+      pendingDeleteAction();
     }
     setShowDeleteConfirm(false);
     setPendingDeleteAction(null);
@@ -555,15 +555,17 @@ const Secrets: React.FC = () => {
               localeText={{
                 MuiTablePagination: {
                   labelRowsPerPage: t('common.rowsPerPage', 'Rows per page:'),
-                  labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) =>
-                    `${from}–${to} ${t('common.of', 'of')} ${count !== -1 ? count : `${t('common.of', 'of')} ${to}`}`,
+                  labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) => {
+                    const countDisplay = count === -1 ? t('common.of', 'of') + ' ' + to : count;
+                    return from + '–' + to + ' ' + t('common.of', 'of') + ' ' + countDisplay;
+                  },
                 },
                 noRowsLabel: t('secrets.noSecrets', 'No secrets found'),
                 noResultsOverlayLabel: t('secrets.noSecrets', 'No secrets found'),
                 footerRowSelected: (count: number) =>
-                  count !== 1
-                    ? `${count.toLocaleString()} ${t('common.rowsSelected', 'rows selected')}`
-                    : `${count.toLocaleString()} ${t('common.rowSelected', 'row selected')}`,
+                  count === 1
+                    ? `${count.toLocaleString()} ${t('common.rowSelected', 'row selected')}`
+                    : `${count.toLocaleString()} ${t('common.rowsSelected', 'rows selected')}`,
               }}
             />
           </Box>
@@ -698,7 +700,7 @@ const Secrets: React.FC = () => {
             onClick={handleSaveSecret}
             disabled={loading}
           >
-            {isEditMode ? t('common.save', 'Save') : t('common.save', 'Save')}
+            {isEditMode ? t('common.update', 'Update') : t('common.save', 'Save')}
           </Button>
         </DialogActions>
       </Dialog>

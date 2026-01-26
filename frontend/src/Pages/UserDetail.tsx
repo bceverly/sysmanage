@@ -289,7 +289,7 @@ const UserDetail = () => {
         }
     };
 
-    const hasUnsavedChanges = JSON.stringify(selectedRoles.sort()) !== JSON.stringify(originalRoles.sort());
+    const hasUnsavedChanges = JSON.stringify(selectedRoles.toSorted((a, b) => a - b)) !== JSON.stringify(originalRoles.toSorted((a, b) => a - b));
 
     if (loading) {
         return (

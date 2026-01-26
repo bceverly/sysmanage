@@ -12,6 +12,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, validator
 from sqlalchemy.orm import Session, sessionmaker
 
+from backend.api.error_constants import (
+    ERROR_HOST_NOT_FOUND,
+    ERROR_INVALID_HOST_ID,
+    ERROR_PERMISSION_DENIED,
+    ERROR_USER_NOT_FOUND,
+)
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db as persistence_db
@@ -76,7 +82,7 @@ async def get_antivirus_status(
         except ValueError as e:
             raise HTTPException(
                 status_code=400,
-                detail=_("Invalid host ID format"),
+                detail=ERROR_INVALID_HOST_ID(),
             ) from e
 
         # Check if host exists
@@ -84,7 +90,7 @@ async def get_antivirus_status(
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=_("Host not found"),
+                detail=ERROR_HOST_NOT_FOUND(),
             )
 
         # Get antivirus status
@@ -142,7 +148,7 @@ async def deploy_antivirus(
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
         if user._role_cache is None:
             user.load_role_cache(session)
@@ -316,18 +322,18 @@ async def enable_antivirus(
     # Check permission
     user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not user:
-        raise HTTPException(status_code=401, detail=_("User not found"))
+        raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
     if user._role_cache is None:
         user.load_role_cache(db)
 
     if not user.has_role(SecurityRoles.ENABLE_ANTIVIRUS):
-        raise HTTPException(status_code=403, detail=_("Permission denied"))
+        raise HTTPException(status_code=403, detail=ERROR_PERMISSION_DENIED())
 
     # Get host
     host = db.query(models.Host).filter(models.Host.id == host_id).first()
     if not host:
-        raise HTTPException(status_code=404, detail=_("Host not found"))
+        raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
     # Queue enable command for agent (will be delivered when agent is available)
     message = Message(
@@ -380,18 +386,18 @@ async def disable_antivirus(
     # Check permission
     user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not user:
-        raise HTTPException(status_code=401, detail=_("User not found"))
+        raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
     if user._role_cache is None:
         user.load_role_cache(db)
 
     if not user.has_role(SecurityRoles.DISABLE_ANTIVIRUS):
-        raise HTTPException(status_code=403, detail=_("Permission denied"))
+        raise HTTPException(status_code=403, detail=ERROR_PERMISSION_DENIED())
 
     # Get host
     host = db.query(models.Host).filter(models.Host.id == host_id).first()
     if not host:
-        raise HTTPException(status_code=404, detail=_("Host not found"))
+        raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
     # Queue disable command for agent (will be delivered when agent is available)
     message = Message(
@@ -449,20 +455,20 @@ async def remove_antivirus(
         user = db.query(models.User).filter(models.User.userid == current_user).first()
         if not user:
             logger.error("User not found: %s", current_user)
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
         if user._role_cache is None:
             user.load_role_cache(db)
 
         if not user.has_role(SecurityRoles.REMOVE_ANTIVIRUS):
             logger.error("User %s lacks REMOVE_ANTIVIRUS role", current_user)
-            raise HTTPException(status_code=403, detail=_("Permission denied"))
+            raise HTTPException(status_code=403, detail=ERROR_PERMISSION_DENIED())
 
         # Get host
         host = db.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
             logger.error("Host not found: %s", host_id)
-            raise HTTPException(status_code=404, detail=_("Host not found"))
+            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
         # Queue remove command for agent (will be delivered when agent is available)
         message = Message(

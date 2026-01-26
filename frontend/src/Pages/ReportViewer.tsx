@@ -67,13 +67,13 @@ const ReportViewer: React.FC = () => {
 
       // Create blob and download
       const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
+      const url = globalThis.URL.createObjectURL(blob);
 
       // Open in new tab instead of downloading
-      window.open(url, '_blank');
+      globalThis.open(url, '_blank');
 
       // Clean up the URL object
-      timeoutRef.current = setTimeout(() => window.URL.revokeObjectURL(url), 100);
+      timeoutRef.current = setTimeout(() => globalThis.URL.revokeObjectURL(url), 100);
 
     } catch (error: unknown) {
       console.error('Error generating PDF:', error);

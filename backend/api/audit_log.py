@@ -18,6 +18,7 @@ from pydantic import BaseModel, validator
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, sessionmaker
 
+from backend.api.error_constants import ERROR_USER_NOT_FOUND
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -70,7 +71,7 @@ class AuditLogListResponse(BaseModel):
 
 
 @router.get("/list", response_model=AuditLogListResponse)
-async def list_audit_logs(
+async def list_audit_logs(  # NOSONAR - complex filtering logic
     user_id: Optional[str] = Query(None, description=_("Filter by user ID")),
     action_type: Optional[str] = Query(None, description=_("Filter by action type")),
     entity_type: Optional[str] = Query(None, description=_("Filter by entity type")),
@@ -110,7 +111,7 @@ async def list_audit_logs(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
@@ -229,7 +230,7 @@ async def get_audit_log_entry(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
@@ -274,7 +275,7 @@ async def get_audit_log_entry(
 
 
 @router.get("/export", response_class=StreamingResponse)
-async def export_audit_logs_csv(
+async def export_audit_logs_csv(  # NOSONAR - complex filtering logic
     user_id: Optional[str] = Query(None, description=_("Filter by user ID")),
     action_type: Optional[str] = Query(None, description=_("Filter by action type")),
     entity_type: Optional[str] = Query(None, description=_("Filter by entity type")),
@@ -311,7 +312,7 @@ async def export_audit_logs_csv(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
@@ -426,7 +427,7 @@ async def export_audit_logs_csv(
             )
 
         # Create filename with timestamp
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         filename = f"audit_log_{timestamp}.csv"
 
         logger.info(

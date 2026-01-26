@@ -93,12 +93,83 @@ const Profile: React.FC = () => {
         return {isValid: true, message: ''};
     };
     
+    // Helper function to check if password contains a special character
+    const hasSpecialCharacter = (password: string, allowedSpecialChars: string): boolean => {
+        for (const char of password) {
+            if (allowedSpecialChars.includes(char)) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    // Helper function to validate password length
+    const validatePasswordLength = (
+        password: string,
+        minLength: number,
+        maxLength: number,
+        errors: string[]
+    ): void => {
+        if (password.length < minLength) {
+            errors.push(t('userProfile.passwordTooShort', `Password must be at least ${minLength} characters long`));
+        }
+        if (password.length > maxLength) {
+            errors.push(t('userProfile.passwordTooLong', `Password must be no more than ${maxLength} characters long`));
+        }
+    };
+
+    // Helper function to validate character types in password
+    const validateCharacterTypes = (
+        password: string,
+        config: { require_uppercase: boolean; require_lowercase: boolean; require_numbers: boolean; require_special_chars: boolean; special_chars: string; min_character_types: number },
+        errors: string[]
+    ): void => {
+        let charTypes = 0;
+        const defaultSpecialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+        const allowedSpecialChars = config.special_chars || defaultSpecialChars;
+
+        if (config.require_uppercase) {
+            if (/[A-Z]/.test(password)) {
+                charTypes++;
+            } else {
+                errors.push(t('userProfile.passwordNeedsUppercase', 'Password must contain at least one uppercase letter'));
+            }
+        }
+
+        if (config.require_lowercase) {
+            if (/[a-z]/.test(password)) {
+                charTypes++;
+            } else {
+                errors.push(t('userProfile.passwordNeedsLowercase', 'Password must contain at least one lowercase letter'));
+            }
+        }
+
+        if (config.require_numbers) {
+            if (/\d/.test(password)) {
+                charTypes++;
+            } else {
+                errors.push(t('userProfile.passwordNeedsNumber', 'Password must contain at least one number'));
+            }
+        }
+
+        if (config.require_special_chars) {
+            if (hasSpecialCharacter(password, allowedSpecialChars)) {
+                charTypes++;
+            } else {
+                errors.push(t('userProfile.passwordNeedsSpecial', 'Password must contain at least one special character'));
+            }
+        }
+
+        if (charTypes < config.min_character_types) {
+            errors.push(t('userProfile.passwordNeedsCharTypes', `Password must contain at least ${config.min_character_types} different character types`));
+        }
+    };
+
     const validatePasswordComplexity = (password: string, userid: string = ''): {isValid: boolean, message: string} => {
         if (!password) return {isValid: true, message: ''};
-        
+
         const errors: string[] = [];
-        
-        // Get password policy from profileData if available
+
         const config = {
             min_length: 8,
             max_length: 128,
@@ -110,59 +181,14 @@ const Profile: React.FC = () => {
             allow_username_in_password: false,
             min_character_types: 3
         };
-        
-        // Length validation
-        if (password.length < config.min_length) {
-            errors.push(t('userProfile.passwordTooShort', `Password must be at least ${config.min_length} characters long`));
-        }
-        if (password.length > config.max_length) {
-            errors.push(t('userProfile.passwordTooLong', `Password must be no more than ${config.max_length} characters long`));
-        }
-        
-        // Character type validation
-        let charTypes = 0;
-        if (config.require_uppercase && /[A-Z]/.test(password)) charTypes++;
-        else if (config.require_uppercase && !/[A-Z]/.test(password)) {
-            errors.push(t('userProfile.passwordNeedsUppercase', 'Password must contain at least one uppercase letter'));
-        }
-        
-        if (config.require_lowercase && /[a-z]/.test(password)) charTypes++;
-        else if (config.require_lowercase && !/[a-z]/.test(password)) {
-            errors.push(t('userProfile.passwordNeedsLowercase', 'Password must contain at least one lowercase letter'));
-        }
-        
-        if (config.require_numbers && /[0-9]/.test(password)) charTypes++;
-        else if (config.require_numbers && !/[0-9]/.test(password)) {
-            errors.push(t('userProfile.passwordNeedsNumber', 'Password must contain at least one number'));
-        }
-        
-        // Use a predefined safe set of special characters instead of dynamic regex
-        const defaultSpecialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-        const allowedSpecialChars = config.special_chars || defaultSpecialChars;
-        let hasSpecialChar = false;
 
-        // Check each character manually to avoid regex injection
-        for (const char of password) {
-            if (allowedSpecialChars.includes(char)) {
-                hasSpecialChar = true;
-                break;
-            }
-        }
+        validatePasswordLength(password, config.min_length, config.max_length, errors);
+        validateCharacterTypes(password, config, errors);
 
-        if (config.require_special_chars && hasSpecialChar) charTypes++;
-        else if (config.require_special_chars && !hasSpecialChar) {
-            errors.push(t('userProfile.passwordNeedsSpecial', 'Password must contain at least one special character'));
-        }
-        
-        if (charTypes < config.min_character_types) {
-            errors.push(t('userProfile.passwordNeedsCharTypes', `Password must contain at least ${config.min_character_types} different character types`));
-        }
-        
-        // Username validation
         if (!config.allow_username_in_password && userid && password.toLowerCase().includes(userid.toLowerCase())) {
             errors.push(t('userProfile.passwordContainsUsername', 'Password cannot contain your username or email'));
         }
-        
+
         return {
             isValid: errors.length === 0,
             message: errors.join('; ')
@@ -190,7 +216,7 @@ const Profile: React.FC = () => {
             });
 
             const imageBlob = response.data;
-            const imageUrl = window.URL.createObjectURL(imageBlob);
+            const imageUrl = globalThis.URL.createObjectURL(imageBlob);
             setProfileImageUrl(imageUrl);
         } catch {
             console.debug('No profile image available or error fetching image');
@@ -228,7 +254,7 @@ const Profile: React.FC = () => {
     useEffect(() => {
         return () => {
             if (profileImageUrl) {
-                window.URL.revokeObjectURL(profileImageUrl);
+                globalThis.URL.revokeObjectURL(profileImageUrl);
             }
         };
     }, [profileImageUrl]);
@@ -384,10 +410,10 @@ const Profile: React.FC = () => {
             await fetchProfileImage();
 
             // Refresh the user menu profile image
-            if (window.refreshUserProfileImage) {
-                window.refreshUserProfileImage();
+            if (globalThis.refreshUserProfileImage) {
+                globalThis.refreshUserProfileImage();
             }
-            
+
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             setImageError(errorMessage || t('userProfile.imageUploadError', 'Failed to upload image. Please try again.'));
@@ -408,15 +434,15 @@ const Profile: React.FC = () => {
 
             // Clear the current image
             if (profileImageUrl) {
-                window.URL.revokeObjectURL(profileImageUrl);
+                globalThis.URL.revokeObjectURL(profileImageUrl);
             }
             setProfileImageUrl(null);
 
             setImageSuccess(t('userProfile.imageDeleteSuccess', 'Profile image deleted successfully'));
 
             // Refresh the user menu profile image
-            if (window.refreshUserProfileImage) {
-                window.refreshUserProfileImage();
+            if (globalThis.refreshUserProfileImage) {
+                globalThis.refreshUserProfileImage();
             }
             
         } catch (error: unknown) {

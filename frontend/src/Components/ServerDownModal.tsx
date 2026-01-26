@@ -106,10 +106,12 @@ const ServerDownModal: React.FC<ServerDownModalProps> = ({ open }) => {
       fullWidth
       disableEscapeKeyDown
       aria-labelledby="server-down-dialog-title"
-      PaperProps={{
-        sx: {
-          borderRadius: 2,
-          minHeight: 400,
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: 2,
+            minHeight: 400,
+          },
         },
       }}
     >

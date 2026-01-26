@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
+from backend.api.error_constants import ERROR_HOST_NOT_REGISTERED, TIMEZONE_UTC_SUFFIX
 from backend.i18n import _
 from backend.persistence.models import Host, HostCertificate, HostRole
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
@@ -16,7 +17,9 @@ from backend.services.audit_service import ActionType, AuditService, EntityType,
 debug_logger = logging.getLogger("debug_logger")
 
 
-async def handle_script_execution_result(db: Session, connection, message_data: dict):
+async def handle_script_execution_result(
+    db: Session, connection, message_data: dict
+):  # NOSONAR - complex business logic
     """Handle script execution result from agent."""
     from backend.utils.host_validation import validate_host_id
 
@@ -26,7 +29,7 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": _("Host not registered"),
+            "message": ERROR_HOST_NOT_REGISTERED(),
             "data": {},
         }
 
@@ -216,7 +219,9 @@ async def handle_script_execution_result(db: Session, connection, message_data: 
         }
 
 
-async def handle_reboot_status_update(db: Session, connection, message_data: dict):
+async def handle_reboot_status_update(
+    db: Session, connection, message_data: dict
+):  # NOSONAR - complex business logic
     """Handle reboot status update from an agent."""
     from backend.utils.host_validation import validate_host_id
 
@@ -226,7 +231,7 @@ async def handle_reboot_status_update(db: Session, connection, message_data: dic
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": _("Host not registered"),
+            "message": ERROR_HOST_NOT_REGISTERED(),
             "data": {},
         }
 
@@ -327,7 +332,9 @@ async def handle_reboot_status_update(db: Session, connection, message_data: dic
         }
 
 
-async def handle_host_certificates_update(db: Session, connection, message_data: dict):
+async def handle_host_certificates_update(
+    db: Session, connection, message_data: dict
+):  # NOSONAR - complex business logic
     """Handle host certificates update message from agent."""
     from backend.utils.host_validation import validate_host_id
 
@@ -338,7 +345,7 @@ async def handle_host_certificates_update(db: Session, connection, message_data:
             return {
                 "message_type": "error",
                 "error_type": "host_not_registered",
-                "message": _("Host not registered"),
+                "message": ERROR_HOST_NOT_REGISTERED(),
                 "data": {},
             }
 
@@ -386,17 +393,17 @@ async def handle_host_certificates_update(db: Session, connection, message_data:
 
                 if cert_data.get("not_before"):
                     not_before = datetime.fromisoformat(
-                        cert_data["not_before"].replace("Z", "+00:00")
+                        cert_data["not_before"].replace("Z", TIMEZONE_UTC_SUFFIX)
                     )
                 if cert_data.get("not_after"):
                     not_after = datetime.fromisoformat(
-                        cert_data["not_after"].replace("Z", "+00:00")
+                        cert_data["not_after"].replace("Z", TIMEZONE_UTC_SUFFIX)
                     )
 
                 collected_at_dt = None
                 if collected_at:
                     collected_at_dt = datetime.fromisoformat(
-                        collected_at.replace("Z", "+00:00")
+                        collected_at.replace("Z", TIMEZONE_UTC_SUFFIX)
                     )
 
                 # Create certificate record
@@ -470,7 +477,7 @@ async def handle_host_role_data_update(db: Session, connection, message_data: di
             return {
                 "message_type": "error",
                 "error_type": "host_not_registered",
-                "message": _("Host not registered"),
+                "message": ERROR_HOST_NOT_REGISTERED(),
                 "data": {},
             }
 
@@ -515,7 +522,7 @@ async def handle_host_role_data_update(db: Session, connection, message_data: di
                 detected_at = None
                 if collection_timestamp:
                     detected_at = datetime.fromisoformat(
-                        collection_timestamp.replace("Z", "+00:00")
+                        collection_timestamp.replace("Z", TIMEZONE_UTC_SUFFIX)
                     )
 
                 # Create role record

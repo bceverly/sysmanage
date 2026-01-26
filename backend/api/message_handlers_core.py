@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from sqlalchemy import update
 from sqlalchemy.orm import Session
 
+from backend.api.error_constants import ERROR_HOST_NOT_REGISTERED
 from backend.i18n import _
 from backend.persistence.models import Host
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
@@ -93,7 +94,9 @@ async def validate_host_authentication(
     return False, None
 
 
-async def handle_system_info(db: Session, connection, message_data: dict):
+async def handle_system_info(
+    db: Session, connection, message_data: dict
+):  # NOSONAR - complex business logic
     """Handle system info message from agent."""
     from backend.api.host_utils import update_or_create_host
     from backend.persistence.models import HostChild
@@ -110,7 +113,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": _("Host not registered"),
+            "message": ERROR_HOST_NOT_REGISTERED(),
             "data": {},
         }
     ipv4 = message_data.get("ipv4")
@@ -341,7 +344,9 @@ async def handle_system_info(db: Session, connection, message_data: dict):
     return None
 
 
-async def handle_heartbeat(db: Session, connection, message_data: dict):
+async def handle_heartbeat(
+    db: Session, connection, message_data: dict
+):  # NOSONAR - complex business logic
     """Handle heartbeat message from agent."""
     from backend.utils.host_validation import validate_host_id
 
@@ -367,7 +372,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": _("Host not registered"),
+            "message": ERROR_HOST_NOT_REGISTERED(),
             "data": {},
         }
 
@@ -510,6 +515,6 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):
     return {
         "message_type": "error",
         "error_type": "host_not_registered",
-        "message": _("Host not registered"),
+        "message": ERROR_HOST_NOT_REGISTERED(),
         "data": {},
     }

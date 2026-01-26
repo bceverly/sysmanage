@@ -9,7 +9,9 @@ from backend.api.reports.html.common import escape as _escape
 from backend.i18n import _
 
 
-def generate_hosts_html(hosts, report_type: str, report_title: str) -> str:
+def generate_hosts_html(
+    hosts, report_type: str, report_title: str
+) -> str:  # NOSONAR - complex business logic
     """Generate HTML content for host reports"""
 
     html_content = f"""
@@ -208,7 +210,9 @@ def generate_hosts_html(hosts, report_type: str, report_title: str) -> str:
     return html_content
 
 
-def generate_firewall_status_html(hosts, report_title: str) -> str:
+def generate_firewall_status_html(
+    hosts, report_title: str
+) -> str:  # NOSONAR - complex business logic
     """Generate HTML content for firewall status report"""
 
     html_content = f"""
@@ -398,7 +402,9 @@ def generate_firewall_status_html(hosts, report_title: str) -> str:
     return html_content
 
 
-def generate_antivirus_opensource_html(hosts, report_title: str) -> str:
+def generate_antivirus_opensource_html(
+    hosts, report_title: str
+) -> str:  # NOSONAR - complex business logic
     """Generate HTML content for open-source antivirus report"""
 
     html_content = f"""
@@ -569,7 +575,9 @@ def generate_antivirus_opensource_html(hosts, report_title: str) -> str:
     return html_content
 
 
-def generate_antivirus_commercial_html(hosts, report_title: str) -> str:
+def generate_antivirus_commercial_html(
+    hosts, report_title: str
+) -> str:  # NOSONAR - complex business logic
     """Generate HTML content for commercial antivirus report"""
 
     html_content = f"""

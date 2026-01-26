@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_
 from sqlalchemy.orm import sessionmaker
 
+from backend.api.error_constants import ERROR_INTERNAL_SERVER
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -80,14 +81,14 @@ async def get_os_upgrades(
             return {
                 "os_upgrades": results,
                 "total_count": len(results),
-                "hosts_with_upgrades": len(set(update.host_id for update in updates)),
+                "hosts_with_upgrades": len({update.host_id for update in updates}),
             }
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error("Error fetching OS upgrades: %s", e)
-        raise HTTPException(status_code=500, detail=_("Internal server error")) from e
+        raise HTTPException(status_code=500, detail=ERROR_INTERNAL_SERVER()) from e
 
 
 @router.get("/os-upgrades/summary")
@@ -143,7 +144,7 @@ async def get_os_upgrades_summary(dependencies=Depends(JWTBearer())):
                 "os_upgrades_summary": summary,
                 "total_os_upgrades": len(all_upgrades),
                 "hosts_with_os_upgrades": len(
-                    set(update.host_id for update in all_upgrades)
+                    {update.host_id for update in all_upgrades}
                 ),
                 "total_hosts": total_hosts,
                 "os_upgrades_by_type": {
@@ -154,11 +155,11 @@ async def get_os_upgrades_summary(dependencies=Depends(JWTBearer())):
 
     except Exception as e:
         logger.error("Error fetching OS upgrades summary: %s", e)
-        raise HTTPException(status_code=500, detail=_("Internal server error")) from e
+        raise HTTPException(status_code=500, detail=ERROR_INTERNAL_SERVER()) from e
 
 
 @router.post("/execute-os-upgrades")
-async def execute_os_upgrades(
+async def execute_os_upgrades(  # NOSONAR - complex business logic
     request: UpdateExecutionRequest,
     dependencies=Depends(JWTBearer()),
     current_user: str = Depends(get_current_user),
@@ -297,9 +298,8 @@ async def execute_os_upgrades(
                 )
 
                 if success:
-                    # Mark updates as in progress (status column removed)
+                    # Mark updates as in progress
                     for update in available_upgrades:
-                        # update.status = "updating"  # status column removed
                         update.updated_at = datetime.now(timezone.utc).replace(
                             tzinfo=None
                         )
@@ -367,4 +367,4 @@ async def execute_os_upgrades(
         raise
     except Exception as e:
         logger.error("Error executing OS upgrades: %s", e)
-        raise HTTPException(status_code=500, detail=_("Internal server error")) from e
+        raise HTTPException(status_code=500, detail=ERROR_INTERNAL_SERVER()) from e

@@ -230,10 +230,10 @@ const HostDefaultsSettings: React.FC = () => {
   }, [canViewPM, loadEnabledPMs]);
 
   // Get available package managers for selected OS
-  const availablePackageManagers = selectedOS ? (packageManagerOptions[selectedOS] || []) : [];
+  const availablePackageManagers = packageManagerOptions[selectedOS] ?? [];
 
   // Get available optional package managers for selected PM OS
-  const availableOptionalPMs = selectedPMOS ? (pmOptionalManagers[selectedPMOS] || []) : [];
+  const availableOptionalPMs = pmOptionalManagers[selectedPMOS] ?? [];
 
   // Reset optional PM selection when PM OS changes
   useEffect(() => {
@@ -264,53 +264,72 @@ const HostDefaultsSettings: React.FC = () => {
     setConstructedRepo('');
   }, [selectedOS]);
 
+  // Helper to check if OS matches any of the given patterns
+  const osMatches = (os: string, ...patterns: string[]): boolean => {
+    return patterns.some(pattern => os.includes(pattern));
+  };
+
+  // Helper to build repository string for Ubuntu/Debian (PPA)
+  const buildPpaRepo = useCallback((): string => {
+    return (ppaOwner && ppaName) ? `ppa:${ppaOwner}/${ppaName}` : '';
+  }, [ppaOwner, ppaName]);
+
+  // Helper to build repository string for Fedora/RHEL/CentOS (COPR)
+  const buildCoprRepo = useCallback((): string => {
+    return (coprOwner && coprProject) ? `${coprOwner}/${coprProject}` : '';
+  }, [coprOwner, coprProject]);
+
+  // Helper to build repository string for SUSE/openSUSE (OBS)
+  const buildObsRepo = useCallback((): string => {
+    if (obsUrl && obsProjectPath && obsDistroVersion && obsRepoName) {
+      const cleanUrl = obsUrl.endsWith('/') ? obsUrl : obsUrl + '/';
+      return `${cleanUrl}${obsProjectPath}/${obsDistroVersion}/${obsRepoName}`;
+    }
+    return '';
+  }, [obsUrl, obsProjectPath, obsDistroVersion, obsRepoName]);
+
+  // Helper to build repository string for macOS (Homebrew tap)
+  const buildHomebrewTapRepo = useCallback((): string => {
+    return (tapUser && tapRepo) ? `${tapUser}/${tapRepo}` : '';
+  }, [tapUser, tapRepo]);
+
+  // Helper to build repository string for FreeBSD (pkg)
+  const buildFreeBsdRepo = useCallback((): string => {
+    return (pkgRepoName && pkgRepoUrl) ? pkgRepoName : '';
+  }, [pkgRepoName, pkgRepoUrl]);
+
+  // Helper to build repository string for NetBSD (pkgsrc)
+  const buildNetBsdRepo = useCallback((): string => {
+    return (pkgsrcName && pkgsrcUrl) ? pkgsrcName : '';
+  }, [pkgsrcName, pkgsrcUrl]);
+
+  // Helper to build repository string for Windows
+  const buildWindowsRepo = useCallback((): string => {
+    return (windowsRepoName && windowsRepoUrl) ? windowsRepoName : '';
+  }, [windowsRepoName, windowsRepoUrl]);
+
   // Build constructed repository string based on OS
   useEffect(() => {
-    if (selectedOS.includes('Ubuntu') || selectedOS.includes('Debian')) {
-      if (ppaOwner && ppaName) {
-        setConstructedRepo(`ppa:${ppaOwner}/${ppaName}`);
-      } else {
-        setConstructedRepo('');
-      }
-    } else if (selectedOS.includes('Fedora') || selectedOS.includes('RHEL') || selectedOS.includes('CentOS')) {
-      if (coprOwner && coprProject) {
-        setConstructedRepo(`${coprOwner}/${coprProject}`);
-      } else {
-        setConstructedRepo('');
-      }
-    } else if (selectedOS.includes('SUSE') || selectedOS.includes('openSUSE')) {
-      if (obsUrl && obsProjectPath && obsDistroVersion && obsRepoName) {
-        const cleanUrl = obsUrl.endsWith('/') ? obsUrl : obsUrl + '/';
-        setConstructedRepo(`${cleanUrl}${obsProjectPath}/${obsDistroVersion}/${obsRepoName}`);
-      } else {
-        setConstructedRepo('');
-      }
-    } else if (selectedOS.includes('macOS') || selectedOS.includes('Darwin')) {
-      if (tapUser && tapRepo) {
-        setConstructedRepo(`${tapUser}/${tapRepo}`);
-      } else {
-        setConstructedRepo('');
-      }
-    } else if (selectedOS.includes('FreeBSD')) {
-      if (pkgRepoName && pkgRepoUrl) {
-        setConstructedRepo(pkgRepoName);
-      } else {
-        setConstructedRepo('');
-      }
-    } else if (selectedOS.includes('NetBSD')) {
-      if (pkgsrcName && pkgsrcUrl) {
-        setConstructedRepo(pkgsrcName);
-      } else {
-        setConstructedRepo('');
-      }
-    } else if (selectedOS.includes('Windows')) {
-      if (windowsRepoName && windowsRepoUrl) {
-        setConstructedRepo(windowsRepoName);
-      } else {
-        setConstructedRepo('');
-      }
+    let repoString = '';
+
+    if (osMatches(selectedOS, 'Ubuntu', 'Debian')) {
+      repoString = buildPpaRepo();
+    } else if (osMatches(selectedOS, 'Fedora', 'RHEL', 'CentOS')) {
+      repoString = buildCoprRepo();
+    } else if (osMatches(selectedOS, 'SUSE', 'openSUSE')) {
+      repoString = buildObsRepo();
+    } else if (osMatches(selectedOS, 'macOS', 'Darwin')) {
+      repoString = buildHomebrewTapRepo();
+    } else if (osMatches(selectedOS, 'FreeBSD')) {
+      repoString = buildFreeBsdRepo();
+    } else if (osMatches(selectedOS, 'NetBSD')) {
+      repoString = buildNetBsdRepo();
+    } else if (osMatches(selectedOS, 'Windows')) {
+      repoString = buildWindowsRepo();
     }
-  }, [selectedOS, ppaOwner, ppaName, coprOwner, coprProject, obsUrl, obsProjectPath, obsDistroVersion, obsRepoName, tapUser, tapRepo, pkgRepoName, pkgRepoUrl, pkgsrcName, pkgsrcUrl, windowsRepoName, windowsRepoUrl]);
+
+    setConstructedRepo(repoString);
+  }, [selectedOS, buildPpaRepo, buildCoprRepo, buildObsRepo, buildHomebrewTapRepo, buildFreeBsdRepo, buildNetBsdRepo, buildWindowsRepo]);
 
   // Check if form is valid - use constructedRepo if available, otherwise fall back to repositoryUrl
   const finalRepoUrl = constructedRepo || repositoryUrl.trim();

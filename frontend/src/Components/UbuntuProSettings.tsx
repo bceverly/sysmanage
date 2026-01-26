@@ -215,18 +215,20 @@ const UbuntuProSettings: React.FC = () => {
               helperText={t('ubuntuPro.fields.masterKeyHelp',
                 'Contract-based Ubuntu Pro key starting with "C". Leave empty to remove.')}
               error={!validateMasterKey(masterKey)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowMasterKey(!showMasterKey)}
-                      edge="end"
-                      aria-label={t('common.togglePasswordVisibility', 'Toggle password visibility')}
-                    >
-                      {showMasterKey ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowMasterKey(!showMasterKey)}
+                        edge="end"
+                        aria-label={t('common.togglePasswordVisibility', 'Toggle password visibility')}
+                      >
+                        {showMasterKey ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
               }}
             />
 

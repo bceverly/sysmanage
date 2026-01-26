@@ -13,7 +13,8 @@ const NotificationBell: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const isMountedRef = useRef(true);
-  const dropdownRef = useRef<React.ElementRef<'div'>>(null);
+  // eslint-disable-next-line no-undef
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const { registerRefresh, unregisterRefresh } = useNotificationRefresh();
 
   const fetchUpdateStats = useCallback(async () => {
@@ -64,21 +65,21 @@ const NotificationBell: React.FC = () => {
     registerRefresh(fetchUpdateStats);
 
     // Start with frequent polling (every 10 seconds) for the first 2 minutes to catch initial data
-    let interval = window.setInterval(fetchUpdateStats, 10 * 1000);
+    let interval = globalThis.setInterval(fetchUpdateStats, 10 * 1000);
 
     // After 2 minutes, switch to less frequent polling (every 30 seconds)
-    const slowDownTimeout = window.setTimeout(() => {
+    const slowDownTimeout = globalThis.setTimeout(() => {
       if (isMountedRef.current) {
-        window.clearInterval(interval);
-        interval = window.setInterval(fetchUpdateStats, 30 * 1000);
+        globalThis.clearInterval(interval);
+        interval = globalThis.setInterval(fetchUpdateStats, 30 * 1000);
       }
     }, 2 * 60 * 1000);
 
     return () => {
       isMountedRef.current = false;
       unregisterRefresh();
-      window.clearInterval(interval);
-      window.clearTimeout(slowDownTimeout);
+      globalThis.clearInterval(interval);
+      globalThis.clearTimeout(slowDownTimeout);
     };
   }, [fetchUpdateStats, registerRefresh, unregisterRefresh]);
 
@@ -122,6 +123,94 @@ const NotificationBell: React.FC = () => {
     return null;
   }
 
+  // Extract nested ternary for dropdown content
+  const renderDropdownContent = () => {
+    if (isLoading) {
+      return (
+        <div className="notification-bell__loading">
+          {t('notifications.loading', 'Loading updates...')}
+        </div>
+      );
+    }
+
+    if (updateStats && hasUpdates) {
+      return (
+        <div className="notification-bell__stats">
+          <div className="notification-bell__stat">
+            <span className="notification-bell__stat-number">
+              {updateStats.total_updates}
+            </span>
+            <span className="notification-bell__stat-label">
+              {t('notifications.totalUpdates', 'Total Updates')}
+            </span>
+          </div>
+
+          {updateStats.security_updates > 0 && (
+            <div className="notification-bell__stat security">
+              <span className="notification-bell__stat-number">
+                {updateStats.security_updates}
+              </span>
+              <span className="notification-bell__stat-label">
+                {t('notifications.securityUpdates', 'Security Updates')}
+              </span>
+            </div>
+          )}
+
+          {updateStats.system_updates > 0 && (
+            <div className="notification-bell__stat">
+              <span className="notification-bell__stat-number">
+                {updateStats.system_updates}
+              </span>
+              <span className="notification-bell__stat-label">
+                {t('notifications.systemUpdates', 'System Updates')}
+              </span>
+            </div>
+          )}
+
+          {updateStats.application_updates > 0 && (
+            <div className="notification-bell__stat">
+              <span className="notification-bell__stat-number">
+                {updateStats.application_updates}
+              </span>
+              <span className="notification-bell__stat-label">
+                {t('notifications.applicationUpdates', 'Application Updates')}
+              </span>
+            </div>
+          )}
+
+          {updateStats.os_upgrades > 0 && (
+            <div className="notification-bell__stat">
+              <span className="notification-bell__stat-number">
+                {updateStats.os_upgrades}
+              </span>
+              <span className="notification-bell__stat-label">
+                {t('notifications.osUpgrades', 'OS Upgrades')}
+              </span>
+            </div>
+          )}
+
+          <div className="notification-bell__hosts">
+            <span className="notification-bell__hosts-text">
+              {t('notifications.hostsAffected',
+                '{{count}} of {{total}} hosts have updates',
+                {
+                  count: updateStats.hosts_with_updates,
+                  total: updateStats.total_hosts
+                }
+              )}
+            </span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="notification-bell__no-updates">
+        {t('notifications.noUpdates', 'All systems are up to date')}
+      </div>
+    );
+  };
+
   return (
     <div className="notification-bell" ref={dropdownRef}>
       <button
@@ -150,82 +239,7 @@ const NotificationBell: React.FC = () => {
             </div>
             
             <div className="notification-bell__content">
-              {isLoading ? (
-                <div className="notification-bell__loading">
-                  {t('notifications.loading', 'Loading updates...')}
-                </div>
-              ) : updateStats && hasUpdates ? (
-                <div className="notification-bell__stats">
-                  <div className="notification-bell__stat">
-                    <span className="notification-bell__stat-number">
-                      {updateStats.total_updates}
-                    </span>
-                    <span className="notification-bell__stat-label">
-                      {t('notifications.totalUpdates', 'Total Updates')}
-                    </span>
-                  </div>
-                  
-                  {updateStats.security_updates > 0 && (
-                    <div className="notification-bell__stat security">
-                      <span className="notification-bell__stat-number">
-                        {updateStats.security_updates}
-                      </span>
-                      <span className="notification-bell__stat-label">
-                        {t('notifications.securityUpdates', 'Security Updates')}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {updateStats.system_updates > 0 && (
-                    <div className="notification-bell__stat">
-                      <span className="notification-bell__stat-number">
-                        {updateStats.system_updates}
-                      </span>
-                      <span className="notification-bell__stat-label">
-                        {t('notifications.systemUpdates', 'System Updates')}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {updateStats.application_updates > 0 && (
-                    <div className="notification-bell__stat">
-                      <span className="notification-bell__stat-number">
-                        {updateStats.application_updates}
-                      </span>
-                      <span className="notification-bell__stat-label">
-                        {t('notifications.applicationUpdates', 'Application Updates')}
-                      </span>
-                    </div>
-                  )}
-
-                  {updateStats.os_upgrades > 0 && (
-                    <div className="notification-bell__stat">
-                      <span className="notification-bell__stat-number">
-                        {updateStats.os_upgrades}
-                      </span>
-                      <span className="notification-bell__stat-label">
-                        {t('notifications.osUpgrades', 'OS Upgrades')}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="notification-bell__hosts">
-                    <span className="notification-bell__hosts-text">
-                      {t('notifications.hostsAffected', 
-                        '{{count}} of {{total}} hosts have updates', 
-                        { 
-                          count: updateStats.hosts_with_updates, 
-                          total: updateStats.total_hosts 
-                        }
-                      )}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="notification-bell__no-updates">
-                  {t('notifications.noUpdates', 'All systems are up to date')}
-                </div>
-              )}
+              {renderDropdownContent()}
             </div>
             
             {hasUpdates && (

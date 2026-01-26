@@ -69,7 +69,7 @@ const AddHostGroupModal: React.FC<AddHostGroupModalProps> = ({
         }
 
         // GID validation if provided (Unix only)
-        if (!isWindows && gid && (isNaN(Number(gid)) || Number(gid) < 1000)) {
+        if (!isWindows && gid && (Number.isNaN(Number(gid)) || Number(gid) < 1000)) {
             setError(t('hostGroup.invalidGid', 'GID must be a number >= 1000'));
             return false;
         }
@@ -176,8 +176,8 @@ const AddHostGroupModal: React.FC<AddHostGroupModalProps> = ({
                             onChange={(e) => setGid(e.target.value)}
                             fullWidth
                             disabled={submitting}
-                            error={gid !== '' && (isNaN(Number(gid)) || Number(gid) < 1000)}
-                            helperText={gid !== '' && (isNaN(Number(gid)) || Number(gid) < 1000)
+                            error={gid !== '' && (Number.isNaN(Number(gid)) || Number(gid) < 1000)}
+                            helperText={gid !== '' && (Number.isNaN(Number(gid)) || Number(gid) < 1000)
                                 ? t('hostGroup.invalidGid', 'GID must be a number >= 1000')
                                 : t('hostGroup.gidHelp', 'Leave empty to auto-assign. Must be >= 1000 if specified.')}
                         />
@@ -192,7 +192,7 @@ const AddHostGroupModal: React.FC<AddHostGroupModalProps> = ({
                     onClick={handleSubmit}
                     variant="contained"
                     color="primary"
-                    disabled={submitting || !groupName.trim() || (!isWindows && gid !== '' && (isNaN(Number(gid)) || Number(gid) < 1000))}
+                    disabled={submitting || !groupName.trim() || (!isWindows && gid !== '' && (Number.isNaN(Number(gid)) || Number(gid) < 1000))}
                 >
                     {submitting ? (
                         <CircularProgress size={20} color="inherit" />

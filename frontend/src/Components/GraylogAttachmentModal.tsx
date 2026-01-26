@@ -47,6 +47,69 @@ const GraylogAttachmentModal: React.FC<GraylogAttachmentModalProps> = ({
     const [selectedMechanism, setSelectedMechanism] = useState<string>('');
     const [mechanisms, setMechanisms] = useState<MechanismOption[]>([]);
 
+    // Helper to extract server address from Graylog settings
+    const extractServerAddress = (settings: { use_managed_server?: boolean; host?: { ipv4?: string; fqdn?: string }; manual_url?: string }): string => {
+        if (settings.use_managed_server && settings.host) {
+            return settings.host.ipv4 || settings.host.fqdn || '';
+        }
+        if (settings.manual_url) {
+            const urlMatch = settings.manual_url.match(/\/\/([^:/]+)/);
+            return urlMatch ? urlMatch[1] : '';
+        }
+        return '';
+    };
+
+    // Helper to build Windows mechanism options
+    const buildWindowsMechanisms = useCallback((health: GraylogHealthResponse): MechanismOption[] => {
+        const options: MechanismOption[] = [];
+        if (health.has_windows_sidecar) {
+            options.push({
+                value: 'windows_sidecar',
+                label: t('graylog.mechanism.windowsSidecar', 'Windows Sidecar'),
+                port: health.windows_sidecar_port || 9000,
+                available: true,
+            });
+        }
+        return options;
+    }, [t]);
+
+    // Helper to build Unix mechanism options
+    const buildUnixMechanisms = useCallback((health: GraylogHealthResponse): MechanismOption[] => {
+        const options: MechanismOption[] = [];
+        if (health.has_syslog_tcp) {
+            options.push({
+                value: 'syslog_tcp',
+                label: t('graylog.mechanism.syslogTcp', 'Syslog TCP'),
+                port: health.syslog_tcp_port || 514,
+                available: true,
+            });
+        }
+        if (health.has_syslog_udp) {
+            options.push({
+                value: 'syslog_udp',
+                label: t('graylog.mechanism.syslogUdp', 'Syslog UDP'),
+                port: health.syslog_udp_port || 514,
+                available: true,
+            });
+        }
+        if (health.has_gelf_tcp) {
+            options.push({
+                value: 'gelf_tcp',
+                label: t('graylog.mechanism.gelfTcp', 'GELF TCP'),
+                port: health.gelf_tcp_port || 12201,
+                available: true,
+            });
+        }
+        return options;
+    }, [t]);
+
+    // Helper to build mechanism options based on platform
+    const buildMechanismOptions = useCallback((health: GraylogHealthResponse, platform: string): MechanismOption[] => {
+        return platform === 'Windows'
+            ? buildWindowsMechanisms(health)
+            : buildUnixMechanisms(health);
+    }, [buildWindowsMechanisms, buildUnixMechanisms]);
+
     const loadGraylogSettings = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -59,70 +122,14 @@ const GraylogAttachmentModal: React.FC<GraylogAttachmentModalProps> = ({
                 return;
             }
 
-            // Extract server from health check or use settings
-            // For now, we'll need to get this from the integration settings
-            // Let's make another call to get the integration settings
             const settingsResponse = await axiosInstance.get('/api/graylog/settings');
             const settings = settingsResponse.data;
 
-            // Determine Graylog server address
-            let serverAddress = '';
-            if (settings.use_managed_server && settings.host) {
-                serverAddress = settings.host.ipv4 || settings.host.fqdn;
-            } else if (settings.manual_url) {
-                // Extract hostname/IP from URL
-                const urlMatch = settings.manual_url.match(/\/\/([^:/]+)/);
-                if (urlMatch) {
-                    serverAddress = urlMatch[1];
-                }
-            }
+            setGraylogServer(extractServerAddress(settings));
 
-            setGraylogServer(serverAddress);
-
-            // Build mechanism options based on platform and available inputs
-            const options: MechanismOption[] = [];
-
-            if (hostPlatform === 'Windows') {
-                // Windows only supports Sidecar
-                if (health.has_windows_sidecar) {
-                    options.push({
-                        value: 'windows_sidecar',
-                        label: t('graylog.mechanism.windowsSidecar', 'Windows Sidecar'),
-                        port: health.windows_sidecar_port || 9000,
-                        available: true,
-                    });
-                }
-            } else {
-                // Unix-like systems support syslog mechanisms
-                if (health.has_syslog_tcp) {
-                    options.push({
-                        value: 'syslog_tcp',
-                        label: t('graylog.mechanism.syslogTcp', 'Syslog TCP'),
-                        port: health.syslog_tcp_port || 514,
-                        available: true,
-                    });
-                }
-                if (health.has_syslog_udp) {
-                    options.push({
-                        value: 'syslog_udp',
-                        label: t('graylog.mechanism.syslogUdp', 'Syslog UDP'),
-                        port: health.syslog_udp_port || 514,
-                        available: true,
-                    });
-                }
-                if (health.has_gelf_tcp) {
-                    options.push({
-                        value: 'gelf_tcp',
-                        label: t('graylog.mechanism.gelfTcp', 'GELF TCP'),
-                        port: health.gelf_tcp_port || 12201,
-                        available: true,
-                    });
-                }
-            }
-
+            const options = buildMechanismOptions(health, hostPlatform);
             setMechanisms(options);
 
-            // Auto-select first available option
             if (options.length > 0) {
                 setSelectedMechanism(options[0].value);
             } else {
@@ -139,7 +146,7 @@ const GraylogAttachmentModal: React.FC<GraylogAttachmentModalProps> = ({
         } finally {
             setLoading(false);
         }
-    }, [t, hostPlatform]);
+    }, [t, hostPlatform, buildMechanismOptions]);
 
     useEffect(() => {
         if (open) {

@@ -54,7 +54,7 @@ router.include_router(enable_router)
     "/host/{host_id}/virtualization/create-child",
     dependencies=[Depends(JWTBearer())],
 )
-async def create_child_host_request(
+async def create_child_host_request(  # NOSONAR - complex business logic
     host_id: str,
     request: CreateWslChildHostRequest,
     current_user: str = Depends(get_current_user),
@@ -232,18 +232,8 @@ async def create_child_host_request(
         # - Debian/Ubuntu: SHA-512 crypt ($6$...) for preseed/cloud-init
         # - Alpine/OpenBSD: bcrypt ($2b$...)
         # - WSL: bcrypt (default)
-        if request.child_type == "vmm":
-            # VMM uses OS-specific hash format
-            password_hash = hash_password_for_os(
-                request.password, request.distribution or ""
-            )
-        elif request.child_type == "kvm":
-            # KVM cloud-init uses SHA-512 crypt format for most Linux distros
-            password_hash = hash_password_for_os(
-                request.password, request.distribution or ""
-            )
-        elif request.child_type == "bhyve":
-            # bhyve uses OS-specific hash format (similar to KVM)
+        if request.child_type in ("vmm", "kvm", "bhyve"):
+            # VMM/KVM/bhyve use OS-specific hash format
             password_hash = hash_password_for_os(
                 request.password, request.distribution or ""
             )

@@ -1,31 +1,129 @@
 import { useNavigate } from "react-router-dom";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Stack from '@mui/material/Stack';
 import { Gauge, gaugeClasses } from '@mui/x-charts/Gauge';
 import Box from '@mui/material/Box';
 import { useTranslation } from 'react-i18next';
 import { Typography, Grid, Skeleton, CircularProgress, IconButton } from "@mui/material";
 import { Settings as SettingsIcon } from '@mui/icons-material';
+import { AxiosResponse } from 'axios';
 
-import { doGetHosts } from '../Services/hosts'
-import { updatesService } from '../Services/updates';
+import { doGetHosts, SysManageHost } from '../Services/hosts'
+import { updatesService, UpdateStatsSummary } from '../Services/updates';
 import axiosInstance from '../Services/api';
 import DashboardSettingsDialog from '../Components/DashboardSettingsDialog';
 
+interface DashboardCardProps {
+    title: string;
+    value: number;
+    maxValue: number;
+    color: string;
+    onClick: () => void;
+    loading?: boolean;
+}
+
+// Color constants
+const COLOR_GREEN = '#52b202';
+const COLOR_YELLOW = '#ff9800';
+const COLOR_RED = '#ff1744';
+
+// Helper function to determine host status color based on approved hosts
+const getHostStatusColor = (hosts: SysManageHost[]): string => {
+    const approvedHosts = hosts.filter(host => host.approval_status === 'approved');
+    if (approvedHosts.length === 0) {
+        return COLOR_GREEN;
+    }
+
+    const approvedHostsUp = approvedHosts.filter(host => host.status === 'up').length;
+    const approvedHostsDown = approvedHosts.filter(host => host.status === 'down').length;
+
+    if (approvedHostsDown === approvedHosts.length) {
+        return COLOR_RED; // All approved hosts are down
+    }
+    if (approvedHostsUp > 0 && approvedHostsDown > 0) {
+        return COLOR_YELLOW; // Mixed up/down
+    }
+    return COLOR_GREEN; // All approved hosts are up
+};
+
+// Helper function to determine color based on coverage percentage thresholds
+const getCoverageColor = (coveragePercentage: number): string => {
+    if (coveragePercentage >= 80) {
+        return COLOR_GREEN;
+    }
+    if (coveragePercentage >= 50) {
+        return COLOR_YELLOW;
+    }
+    return COLOR_RED;
+};
+
+const DashboardCard: React.FC<DashboardCardProps> = ({
+    title,
+    value,
+    maxValue,
+    color,
+    onClick,
+    loading = false,
+}) => (
+    <Box
+        height={250}
+        width={250}
+        onClick={loading ? undefined : onClick}
+        sx={{
+            border: '1px solid white',
+            borderRadius: 3,
+            cursor: loading ? 'default' : 'pointer',
+            '&:hover': loading ? {} : {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                borderColor: '#90caf9',
+            },
+            transition: 'background-color 0.2s, border-color 0.2s',
+            padding: 2
+        }}
+    >
+        <Typography align="center" variant="h5" sx={{ mb: 1 }}>
+            {loading ? <Skeleton width="80%" /> : title}
+        </Typography>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 1, md: 3 }} alignItems="center">
+            {loading ? (
+                <Box display="flex" justifyContent="center" alignItems="center" width={200} height={180}>
+                    <CircularProgress size={60} />
+                </Box>
+            ) : (
+                <Gauge
+                    width={200}
+                    height={180}
+                    value={value}
+                    valueMin={0}
+                    valueMax={maxValue}
+                    sx={(_theme) => ({
+                        [`& .${gaugeClasses.valueText}`]: {
+                            fontSize: 40,
+                        },
+                        [`& .${gaugeClasses.valueArc}`]: {
+                            fill: color,
+                        },
+                    })}
+                />
+            )}
+        </Stack>
+    </Box>
+);
+
 const Dashboard = () => {
     const [hostsTotal, setHostsTotal] = useState<number>(0);
-    const [hostStatusColor, setHostStatusColor] = useState<string>('#52b202'); // Default green
+    const [hostStatusColor, setHostStatusColor] = useState<string>(COLOR_GREEN);
     const [hostsWithUpdates, setHostsWithUpdates] = useState<number>(0);
     const [updatesTotal, setUpdatesTotal] = useState<number>(0);
-    const [updatesColor, setUpdatesColor] = useState<string>('#52b202'); // Default green
+    const [updatesColor, setUpdatesColor] = useState<string>(COLOR_GREEN);
     const [securityUpdates, setSecurityUpdates] = useState<number>(0);
-    const [securityColor, setSecurityColor] = useState<string>('#52b202'); // Default green
+    const [securityColor, setSecurityColor] = useState<string>(COLOR_GREEN);
     const [rebootRequired, setRebootRequired] = useState<number>(0);
-    const [rebootColor, setRebootColor] = useState<string>('#52b202'); // Default green
+    const [rebootColor, setRebootColor] = useState<string>(COLOR_GREEN);
     const [antivirusCoverage, setAntivirusCoverage] = useState<number>(0);
-    const [antivirusColor, setAntivirusColor] = useState<string>('#52b202'); // Default green
+    const [antivirusColor, setAntivirusColor] = useState<string>(COLOR_GREEN);
     const [otelCoverage, setOtelCoverage] = useState<number>(0);
-    const [otelColor, setOtelColor] = useState<string>('#52b202'); // Default green
+    const [otelColor, setOtelColor] = useState<string>(COLOR_GREEN);
     const [loading, setLoading] = useState<boolean>(true);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [cardVisibility, setCardVisibility] = useState<Record<string, boolean>>({
@@ -39,14 +137,59 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
 
-    const fetchData = async (isInitialLoad = false) => {
-        // Only show loading state on initial load, not on refresh
+    const processHostsResponse = (hostsResponse: PromiseSettledResult<SysManageHost[]>) => {
+        if (hostsResponse.status !== 'fulfilled') {
+            return;
+        }
+
+        const hosts = hostsResponse.value;
+        setHostsTotal(hosts.length);
+        setHostStatusColor(getHostStatusColor(hosts));
+
+        // Calculate reboot required statistics
+        const hostsRequiringReboot = hosts.filter(
+            (host: SysManageHost) => host.approval_status === 'approved' && host.reboot_required
+        ).length;
+        setRebootRequired(hostsRequiringReboot);
+        setRebootColor(hostsRequiringReboot > 0 ? COLOR_RED : COLOR_GREEN);
+    };
+
+    const processUpdatesResponse = (updatesResponse: PromiseSettledResult<UpdateStatsSummary>) => {
+        if (updatesResponse.status !== 'fulfilled') {
+            console.error('Failed to fetch updates summary:', (updatesResponse as PromiseRejectedResult).reason);
+            return;
+        }
+
+        const summary = updatesResponse.value;
+        setHostsWithUpdates(summary.hosts_with_updates);
+        setUpdatesTotal(summary.total_updates);
+        setSecurityUpdates(summary.security_updates);
+        setUpdatesColor(summary.hosts_with_updates > 0 ? COLOR_RED : COLOR_GREEN);
+        setSecurityColor(summary.security_updates > 0 ? COLOR_RED : COLOR_GREEN);
+    };
+
+    const processCoverageResponse = (
+        response: PromiseSettledResult<AxiosResponse<{ coverage_percentage: number }>>,
+        setCoverage: (value: number) => void,
+        setColor: (value: string) => void,
+        errorMessage: string
+    ) => {
+        if (response.status !== 'fulfilled') {
+            console.error(errorMessage, (response as PromiseRejectedResult).reason);
+            return;
+        }
+
+        const coveragePercentage = response.value.data.coverage_percentage;
+        setCoverage(Math.round(coveragePercentage));
+        setColor(getCoverageColor(coveragePercentage));
+    };
+
+    const fetchData = useCallback(async (isInitialLoad = false) => {
         if (isInitialLoad) {
             setLoading(true);
         }
 
         try {
-            // Fetch hosts, updates, antivirus coverage, and OpenTelemetry coverage data in parallel
             const [hostsResponse, updatesResponse, antivirusResponse, otelResponse] = await Promise.allSettled([
                 doGetHosts(),
                 updatesService.getUpdatesSummary(),
@@ -54,86 +197,10 @@ const Dashboard = () => {
                 axiosInstance.get('/api/opentelemetry/opentelemetry-coverage')
             ]);
 
-            // Process hosts data
-            if (hostsResponse.status === 'fulfilled') {
-                const hosts = hostsResponse.value;
-                setHostsTotal(hosts.length);
-
-                // Determine color based on host status - only consider approved hosts
-                const approvedHosts = hosts.filter(host => host.approval_status === 'approved');
-                const approvedHostsUp = approvedHosts.filter(host => host.status === 'up').length;
-                const approvedHostsDown = approvedHosts.filter(host => host.status === 'down').length;
-
-                if (approvedHosts.length === 0) {
-                    setHostStatusColor('#52b202'); // Green if no approved hosts
-                } else if (approvedHostsDown === approvedHosts.length) {
-                    setHostStatusColor('#ff1744'); // Red - all approved hosts are down
-                } else if (approvedHostsUp > 0 && approvedHostsDown > 0) {
-                    setHostStatusColor('#ff9800'); // Yellow - mixed up/down
-                } else {
-                    setHostStatusColor('#52b202'); // Green - all approved hosts are up
-                }
-
-                // Calculate reboot required statistics
-                const hostsRequiringReboot = hosts.filter(host =>
-                    host.approval_status === 'approved' && host.reboot_required
-                ).length;
-                setRebootRequired(hostsRequiringReboot);
-                setRebootColor(hostsRequiringReboot > 0 ? '#ff1744' : '#52b202'); // Red if any, green if none
-            }
-
-            // Process updates data
-            if (updatesResponse.status === 'fulfilled') {
-                const summary = updatesResponse.value;
-                setHostsWithUpdates(summary.hosts_with_updates);
-                setUpdatesTotal(summary.total_updates);
-                setSecurityUpdates(summary.security_updates);
-
-                // Set colors based on counts
-                setUpdatesColor(summary.hosts_with_updates > 0 ? '#ff1744' : '#52b202');
-                setSecurityColor(summary.security_updates > 0 ? '#ff1744' : '#52b202');
-            } else {
-                console.error('Failed to fetch updates summary:', updatesResponse.reason);
-                // Keep defaults (0) on error
-            }
-
-            // Process antivirus coverage data
-            if (antivirusResponse.status === 'fulfilled') {
-                const coverage = antivirusResponse.value.data;
-                const coveragePercentage = coverage.coverage_percentage;
-                setAntivirusCoverage(Math.round(coveragePercentage));
-
-                // Set color based on coverage: green >= 80%, yellow >= 50%, red < 50%
-                if (coveragePercentage >= 80) {
-                    setAntivirusColor('#52b202');
-                } else if (coveragePercentage >= 50) {
-                    setAntivirusColor('#ff9800');
-                } else {
-                    setAntivirusColor('#ff1744');
-                }
-            } else {
-                console.error('Failed to fetch antivirus coverage:', antivirusResponse.reason);
-                // Keep defaults (0) on error
-            }
-
-            // Process OpenTelemetry coverage data
-            if (otelResponse.status === 'fulfilled') {
-                const coverage = otelResponse.value.data;
-                const coveragePercentage = coverage.coverage_percentage;
-                setOtelCoverage(Math.round(coveragePercentage));
-
-                // Set color based on coverage: green >= 80%, yellow >= 50%, red < 50%
-                if (coveragePercentage >= 80) {
-                    setOtelColor('#52b202');
-                } else if (coveragePercentage >= 50) {
-                    setOtelColor('#ff9800');
-                } else {
-                    setOtelColor('#ff1744');
-                }
-            } else {
-                console.error('Failed to fetch OpenTelemetry coverage:', otelResponse.reason);
-                // Keep defaults (0) on error
-            }
+            processHostsResponse(hostsResponse);
+            processUpdatesResponse(updatesResponse);
+            processCoverageResponse(antivirusResponse, setAntivirusCoverage, setAntivirusColor, 'Failed to fetch antivirus coverage:');
+            processCoverageResponse(otelResponse, setOtelCoverage, setOtelColor, 'Failed to fetch OpenTelemetry coverage:');
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
         } finally {
@@ -141,7 +208,7 @@ const Dashboard = () => {
                 setLoading(false);
             }
         }
-    };
+    }, []);
 
     const loadCardPreferences = async () => {
         try {
@@ -191,7 +258,7 @@ const Dashboard = () => {
         return () => {
             clearInterval(refreshInterval);
         };
-    }, [navigate]);
+    }, [navigate, fetchData]);
 
     const handleHostsClick = () => {
         navigate('/hosts');
@@ -228,59 +295,6 @@ const Dashboard = () => {
         });
         setCardVisibility(visibilityMap);
     };
-
-    const DashboardCard = ({ title, value, maxValue, color, onClick, loading }: {
-        title: string;
-        value: number;
-        maxValue: number;
-        color: string;
-        onClick: () => void;
-        loading?: boolean;
-    }) => (
-        <Box
-            height={250}
-            width={250}
-            onClick={loading ? undefined : onClick}
-            sx={{
-                border: '1px solid white',
-                borderRadius: 3,
-                cursor: loading ? 'default' : 'pointer',
-                '&:hover': loading ? {} : {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    borderColor: '#90caf9',
-                },
-                transition: 'background-color 0.2s, border-color 0.2s',
-                padding: 2
-            }}
-        >
-            <Typography align="center" variant="h5" sx={{ mb: 1 }}>
-                {loading ? <Skeleton width="80%" /> : title}
-            </Typography>
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 1, md: 3 }} alignItems="center">
-                {loading ? (
-                    <Box display="flex" justifyContent="center" alignItems="center" width={200} height={180}>
-                        <CircularProgress size={60} />
-                    </Box>
-                ) : (
-                    <Gauge
-                        width={200}
-                        height={180}
-                        value={value}
-                        valueMin={0}
-                        valueMax={maxValue}
-                        sx={(_theme) => ({
-                            [`& .${gaugeClasses.valueText}`]: {
-                                fontSize: 40,
-                            },
-                            [`& .${gaugeClasses.valueArc}`]: {
-                                fill: color,
-                            },
-                        })}
-                    />
-                )}
-            </Stack>
-        </Box>
-    );
 
     return (
         <Box>

@@ -232,56 +232,101 @@ const OpenBAOStatusCard: React.FC = () => {
   }, [status, config]);
 
 
-  // Memoize action buttons to prevent unnecessary re-renders
-  const actionButtons = useMemo(() => (
-    <Box mt={2} display="flex" gap={1} flexWrap="wrap">
-      {status?.running ? (
+  // Helper function to render start/stop button
+  const renderStartStopButton = useCallback(() => {
+    const isRunning = status?.running;
+    const isDisabled = operationLoading || !config?.enabled;
+    const loadingIcon = <CircularProgress size={16} />;
+
+    if (isRunning) {
+      return (
         <Button
           variant="outlined"
           color="error"
           onClick={handleStop}
-          disabled={operationLoading || !config?.enabled}
-          startIcon={operationLoading ? <CircularProgress size={16} /> : <StopIcon />}
+          disabled={isDisabled}
+          startIcon={operationLoading ? loadingIcon : <StopIcon />}
         >
           {operationLoading ? t('openbao.stopping', 'Stopping...') : t('openbao.stop', 'Stop')}
         </Button>
-      ) : (
+      );
+    }
+
+    return (
+      <Button
+        variant="contained"
+        color="success"
+        onClick={handleStart}
+        disabled={isDisabled}
+        startIcon={operationLoading ? loadingIcon : <PlayIcon />}
+      >
+        {operationLoading ? t('openbao.starting', 'Starting...') : t('openbao.start', 'Start')}
+      </Button>
+    );
+  }, [status?.running, config?.enabled, operationLoading, handleStart, handleStop, t]);
+
+  // Helper function to render seal/unseal button
+  const renderSealButton = useCallback(() => {
+    const isRunning = status?.running;
+    const sealedStatus = status?.sealed;
+
+    if (!isRunning || sealedStatus === null) {
+      return null;
+    }
+
+    const loadingIcon = <CircularProgress size={16} />;
+
+    if (sealedStatus) {
+      return (
         <Button
-          variant="contained"
-          color="success"
-          onClick={handleStart}
-          disabled={operationLoading || !config?.enabled}
-          startIcon={operationLoading ? <CircularProgress size={16} /> : <PlayIcon />}
+          variant="outlined"
+          color="warning"
+          onClick={handleUnseal}
+          disabled={operationLoading || !config?.enabled || !config?.dev_mode}
+          startIcon={operationLoading ? loadingIcon : <LockOpenIcon />}
         >
-          {operationLoading ? t('openbao.starting', 'Starting...') : t('openbao.start', 'Start')}
+          {operationLoading ? t('openbao.unsealing', 'Unsealing...') : t('openbao.unseal', 'Unseal')}
         </Button>
-      )}
+      );
+    }
 
-      {/* Seal/Unseal button - only show when running */}
-      {status?.running && status.sealed !== null && (
-        status.sealed ? (
-          <Button
-            variant="outlined"
-            color="warning"
-            onClick={handleUnseal}
-            disabled={operationLoading || !config?.enabled || !config?.dev_mode}
-            startIcon={operationLoading ? <CircularProgress size={16} /> : <LockOpenIcon />}
-          >
-            {operationLoading ? t('openbao.unsealing', 'Unsealing...') : t('openbao.unseal', 'Unseal')}
-          </Button>
-        ) : (
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={handleSeal}
-            disabled={operationLoading || !config?.enabled}
-            startIcon={operationLoading ? <CircularProgress size={16} /> : <LockIcon />}
-          >
-            {operationLoading ? t('openbao.sealing', 'Sealing...') : t('openbao.seal', 'Seal')}
-          </Button>
-        )
-      )}
+    return (
+      <Button
+        variant="outlined"
+        color="error"
+        onClick={handleSeal}
+        disabled={operationLoading || !config?.enabled}
+        startIcon={operationLoading ? loadingIcon : <LockIcon />}
+      >
+        {operationLoading ? t('openbao.sealing', 'Sealing...') : t('openbao.seal', 'Seal')}
+      </Button>
+    );
+  }, [status?.running, status?.sealed, config?.enabled, config?.dev_mode, operationLoading, handleSeal, handleUnseal, t]);
 
+  // Helper function to render logs toggle button
+  const renderLogsButton = useCallback(() => {
+    const hasLogs = status?.recent_logs && status.recent_logs.length > 0;
+
+    if (!hasLogs) {
+      return null;
+    }
+
+    return (
+      <Button
+        variant="outlined"
+        onClick={() => setShowLogs(!showLogs)}
+        startIcon={showLogs ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+      >
+        {showLogs ? t('openbao.hideLogs', 'Hide Logs') : t('openbao.showLogs', 'Show Logs')}
+      </Button>
+    );
+  }, [status?.recent_logs, showLogs, t]);
+
+  // Memoize action buttons to prevent unnecessary re-renders
+  const actionButtons = useMemo(() => (
+    <Box mt={2} display="flex" gap={1} flexWrap="wrap">
+      {renderStartStopButton()}
+      {renderSealButton()}
       <Button
         variant="outlined"
         onClick={handleRefresh}
@@ -290,18 +335,9 @@ const OpenBAOStatusCard: React.FC = () => {
       >
         {t('common.refresh', 'Refresh')}
       </Button>
-
-      {status?.recent_logs && status.recent_logs.length > 0 && (
-        <Button
-          variant="outlined"
-          onClick={() => setShowLogs(!showLogs)}
-          startIcon={showLogs ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        >
-          {showLogs ? t('openbao.hideLogs', 'Hide Logs') : t('openbao.showLogs', 'Show Logs')}
-        </Button>
-      )}
+      {renderLogsButton()}
     </Box>
-  ), [status?.running, status?.recent_logs, status?.sealed, config?.enabled, config?.dev_mode, operationLoading, showLogs, handleStart, handleStop, handleSeal, handleUnseal, handleRefresh, t]);
+  ), [renderStartStopButton, renderSealButton, renderLogsButton, operationLoading, handleRefresh, t]);
 
   if (loading) {
     return (
@@ -488,14 +524,17 @@ const OpenBAOStatusCard: React.FC = () => {
                   >
                     {status.recent_logs && status.recent_logs.length > 0 ? (
                       <List dense>
+                        {/* Using index in key because log entries may have duplicate content */}
                         {status.recent_logs.map((log, index) => (
-                          <ListItem key={index} disablePadding>
+                          <ListItem key={`log-${index}-${log.slice(0, 20)}`} disablePadding>
                             <ListItemText
                               primary={log}
-                              primaryTypographyProps={{
-                                fontSize: '0.75rem',
-                                fontFamily: 'monospace',
-                                color: '#ffffff'
+                              slotProps={{
+                                primary: {
+                                  fontSize: '0.75rem',
+                                  fontFamily: 'monospace',
+                                  color: '#ffffff'
+                                }
                               }}
                             />
                           </ListItem>

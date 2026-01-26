@@ -25,7 +25,7 @@ queue_ops = QueueOperations()
 
 
 @router.post("/execute")
-async def execute_updates(
+async def execute_updates(  # NOSONAR - complex business logic
     request: UpdateExecutionRequest,
     dependencies=Depends(JWTBearer()),
     current_user: str = Depends(get_current_user),

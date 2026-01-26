@@ -1028,6 +1028,7 @@
     "deleteSelected": "चयनित हटाएं",
     "deleteSelectedExecutions": "चयनित एक्सीक्यूशन डिलीट करें",
     "deleteSuccess": "स्क्रिप्ट सफलतापूर्वक डिलीट हुई",
+    "deleteMultipleSuccess": "स्क्रिप्ट सफलतापूर्वक डिलीट हुईं",
     "description": "विवरण",
     "duplicate": "डुप्लिकेट",
     "edit": "संपादित करें",

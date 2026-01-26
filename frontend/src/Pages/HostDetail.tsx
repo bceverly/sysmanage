@@ -5,12 +5,12 @@ import CommercialAntivirusStatusCard from '../Components/CommercialAntivirusStat
 import FirewallStatusCard from '../Components/FirewallStatusCard';
 import HypervisorStatusCard from '../Components/HypervisorStatusCard';
 import GraylogAttachmentModal from '../Components/GraylogAttachmentModal';
-import { 
-    Box, 
-    Card, 
-    CardContent, 
-    Typography, 
-    Grid, 
+import {
+    Box,
+    Card,
+    CardContent,
+    Typography,
+    Grid,
     Chip,
     Button,
     CircularProgress,
@@ -25,7 +25,29 @@ import {
     Checkbox,
     FormControlLabel,
     IconButton,
-    Alert
+    Alert,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
+    Table,
+    TableBody,
+    TableRow,
+    TableCell,
+    ToggleButton,
+    ToggleButtonGroup,
+    Snackbar,
+    TextField,
+    List,
+    ListItem,
+    ListItemText,
+    Divider,
+    TableContainer,
+    TableHead,
+    InputAdornment,
+    Pagination,
+    FormHelperText
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ComputerIcon from '@mui/icons-material/Computer';
@@ -61,7 +83,6 @@ import SourceIcon from '@mui/icons-material/Source';
 import ShieldIcon from '@mui/icons-material/Shield';
 import WarningIcon from '@mui/icons-material/Warning';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Table, TableBody, TableRow, TableCell, ToggleButton, ToggleButtonGroup, Snackbar, TextField, List, ListItem, ListItemText, Divider, TableContainer, TableHead, InputAdornment, Pagination, FormHelperText } from '@mui/material';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
@@ -130,6 +151,7 @@ interface ChildHost {
     installed_at: string | null;
 }
 
+// NOSONAR - Large page component that coordinates host details, hardware info, software, virtualization, and multiple interactive features
 const HostDetail = () => {
     const { hostId } = useParams<{ hostId: string }>();
     const [host, setHost] = useState<SysManageHost | null>(null);
@@ -214,11 +236,11 @@ const HostDetail = () => {
 
     // Initialize tab from URL hash
     const getInitialTab = useCallback(() => {
-        const hash = window.location.hash.slice(1);
+        const hash = globalThis.location.hash.slice(1);
         if (!hash) return 0;
         const tabs = getTabNames();
         const tabIndex = tabs.indexOf(hash);
-        return tabIndex >= 0 ? tabIndex : 0;
+        return Math.max(tabIndex, 0);
     }, [getTabNames]);
 
     const [currentTab, setCurrentTab] = useState<number>(getInitialTab);
@@ -326,7 +348,7 @@ const HostDetail = () => {
 
     // Compute FQDN from hostname - appends server domain if not already an FQDN
     const getServerDomain = useCallback(() => {
-        const hostname = window.location.hostname;
+        const hostname = globalThis.location.hostname;
         // Extract domain from hostname (e.g., "t14.theeverlys.com" -> "theeverlys.com")
         const parts = hostname.split('.');
         if (parts.length >= 2) {
@@ -570,7 +592,9 @@ const HostDetail = () => {
     const safePageSizeOptions = useMemo(() => {
         const currentPageSize = certificatePaginationModel.pageSize;
         if (!pageSizeOptions.includes(currentPageSize)) {
-            return [...pageSizeOptions, currentPageSize].sort((a, b) => a - b);
+            const combinedOptions = [...pageSizeOptions, currentPageSize];
+            combinedOptions.sort((a, b) => a - b);
+            return combinedOptions;
         }
         return pageSizeOptions;
     }, [pageSizeOptions, certificatePaginationModel.pageSize]);
@@ -1110,6 +1134,7 @@ const HostDetail = () => {
     }, [fetchDistributions]);
 
     // Create child host
+    // NOSONAR - Complex form validation and conditional request building for multiple child host types (WSL, LXD, VMM, KVM, bhyve)
     const handleCreateChildHost = useCallback(async () => {
         if (!hostId) return;
 
@@ -1303,21 +1328,21 @@ const HostDetail = () => {
     }, [hostId]);
 
     // Service control handlers
-    const handleRoleSelection = (roleId: string, checked: boolean) => {
-        if (checked) {
-            setSelectedRoles(prev => [...prev, roleId]);
-        } else {
-            setSelectedRoles(prev => prev.filter(id => id !== roleId));
-        }
+    const addRoleToSelection = (roleId: string) => {
+        setSelectedRoles(prev => [...prev, roleId]);
     };
 
-    const handleSelectAllRoles = (checked: boolean) => {
-        if (checked) {
-            const selectableRoles = roles.filter(role => role.service_name && role.service_name.trim() !== '').map(role => role.id);
-            setSelectedRoles(selectableRoles);
-        } else {
-            setSelectedRoles([]);
-        }
+    const removeRoleFromSelection = (roleId: string) => {
+        setSelectedRoles(prev => prev.filter(id => id !== roleId));
+    };
+
+    const selectAllRoles = () => {
+        const selectableRoles = roles.filter(role => role.service_name && role.service_name.trim() !== '').map(role => role.id);
+        setSelectedRoles(selectableRoles);
+    };
+
+    const deselectAllRoles = () => {
+        setSelectedRoles([]);
     };
 
     const handleServiceControl = async (action: 'start' | 'stop' | 'restart') => {
@@ -1326,7 +1351,7 @@ const HostDetail = () => {
         try {
             setServiceControlLoading(true);
             const selectedRoleData = roles.filter(role => selectedRoles.includes(role.id));
-            const serviceNames = selectedRoleData.map(role => role.service_name).filter(name => name);
+            const serviceNames = selectedRoleData.map(role => role.service_name).filter(Boolean);
 
             if (serviceNames.length === 0) {
                 setSnackbarMessage(t('hostDetail.noServicesSelected', 'No services selected for control'));
@@ -1486,7 +1511,7 @@ const HostDetail = () => {
 
     // Auto-refresh functionality
     useEffect(() => {
-        if (currentTab === getServerRolesTabIndex() && host && host.active) {
+        if (currentTab === getServerRolesTabIndex() && host?.active) {
             // Start auto-refresh every 30 seconds (without loading indicator)
             const interval = setInterval(() => {
                 fetchRoles(false);
@@ -1498,12 +1523,10 @@ const HostDetail = () => {
                     clearInterval(interval);
                 }
             };
-        } else {
+        } else if (rolesRefreshInterval.current) {
             // Clear interval when tab is not active or host is not active
-            if (rolesRefreshInterval.current) {
-                clearInterval(rolesRefreshInterval.current);
-                rolesRefreshInterval.current = null;
-            }
+            clearInterval(rolesRefreshInterval.current);
+            rolesRefreshInterval.current = null;
         }
     }, [currentTab, host?.active, host?.id, fetchRoles, getServerRolesTabIndex, host]);
 
@@ -1518,14 +1541,14 @@ const HostDetail = () => {
 
     // Fetch OpenTelemetry status when Info tab is active
     useEffect(() => {
-        if (currentTab === 0 && host && host.active) {
+        if (currentTab === 0 && host?.active) {
             fetchOpenTelemetryStatus();
         }
     }, [currentTab, host?.active, host, fetchOpenTelemetryStatus]);
 
     // Auto-refresh OpenTelemetry status every 30 seconds when on Info tab
     useEffect(() => {
-        if (currentTab === 0 && host && host.active) {
+        if (currentTab === 0 && host?.active) {
             // Start auto-refresh every 30 seconds
             const interval = setInterval(() => {
                 fetchOpenTelemetryStatus();
@@ -1537,25 +1560,23 @@ const HostDetail = () => {
                     clearInterval(interval);
                 }
             };
-        } else {
+        } else if (openTelemetryRefreshInterval.current) {
             // Clear interval when tab is not active or host is not active
-            if (openTelemetryRefreshInterval.current) {
-                clearInterval(openTelemetryRefreshInterval.current);
-                openTelemetryRefreshInterval.current = null;
-            }
+            clearInterval(openTelemetryRefreshInterval.current);
+            openTelemetryRefreshInterval.current = null;
         }
     }, [currentTab, host?.active, host?.id, fetchOpenTelemetryStatus, host]);
 
     // Fetch Graylog attachment status when Info tab is active
     useEffect(() => {
-        if (currentTab === 0 && host && host.active) {
+        if (currentTab === 0 && host?.active) {
             fetchGraylogAttachment();
         }
     }, [currentTab, host?.active, host, fetchGraylogAttachment]);
 
     // Auto-refresh Graylog status every 30 seconds when on Info tab
     useEffect(() => {
-        if (currentTab === 0 && host && host.active) {
+        if (currentTab === 0 && host?.active) {
             // Start auto-refresh every 30 seconds
             const interval = setInterval(() => {
                 fetchGraylogAttachment();
@@ -1567,12 +1588,10 @@ const HostDetail = () => {
                     clearInterval(interval);
                 }
             };
-        } else {
+        } else if (graylogRefreshInterval.current) {
             // Clear interval when tab is not active or host is not active
-            if (graylogRefreshInterval.current) {
-                clearInterval(graylogRefreshInterval.current);
-                graylogRefreshInterval.current = null;
-            }
+            clearInterval(graylogRefreshInterval.current);
+            graylogRefreshInterval.current = null;
         }
     }, [currentTab, host?.active, host?.id, fetchGraylogAttachment, host]);
 
@@ -1595,7 +1614,7 @@ const HostDetail = () => {
     // Also trigger an agent refresh when first opening the tab (to get live status from WSL)
     // Pause auto-refresh when Create Child Host modal is open to prevent interference
     useEffect(() => {
-        if (currentTab === getChildHostsTabIndex() && host && host.active && supportsChildHosts() && !createChildHostOpen) {
+        if (currentTab === getChildHostsTabIndex() && host?.active && supportsChildHosts() && !createChildHostOpen) {
             // When tab is first opened, request fresh status from agent
             // Only do this once every 30 seconds to avoid spamming
             const now = Date.now();
@@ -1617,12 +1636,10 @@ const HostDetail = () => {
                     clearInterval(interval);
                 }
             };
-        } else {
+        } else if (childHostsRefreshInterval.current) {
             // Clear interval when tab is not active, host is not active, or modal is open
-            if (childHostsRefreshInterval.current) {
-                clearInterval(childHostsRefreshInterval.current);
-                childHostsRefreshInterval.current = null;
-            }
+            clearInterval(childHostsRefreshInterval.current);
+            childHostsRefreshInterval.current = null;
         }
     }, [currentTab, host?.active, host?.id, fetchChildHosts, fetchVirtualizationStatus, getChildHostsTabIndex, supportsChildHosts, host, requestChildHostsRefresh, createChildHostOpen]);
 
@@ -1679,6 +1696,7 @@ const HostDetail = () => {
         checkPermissions();
     }, []);
 
+    // NOSONAR - Main initialization effect that loads host data, storage, network, users, certificates, and optional subsystems with proper error handling
     useEffect(() => {
         if (!localStorage.getItem('bearer_token')) {
             navigate("/login");
@@ -1715,7 +1733,7 @@ const HostDetail = () => {
 
                         // Extract OS name without version (e.g., "Ubuntu 25.04" -> "Ubuntu")
                         // Match common patterns: "Ubuntu X.Y", "FreeBSD X.Y-RELEASE", "NetBSD X.Y", etc.
-                        const match = osName.match(/^([A-Za-z]+)/);
+                        const match = /^([A-Za-z]+)/.exec(osName);
                         if (match) {
                             osName = match[1];
                         }
@@ -1723,7 +1741,7 @@ const HostDetail = () => {
 
                     if (osName) {
                         const response = await axiosInstance.get(`/api/antivirus-defaults/${osName}`);
-                        setHasAntivirusOsDefault(response.data && response.data.antivirus_package !== null);
+                        setHasAntivirusOsDefault(response.data?.antivirus_package !== null);
                     } else {
                         setHasAntivirusOsDefault(false);
                     }
@@ -1749,8 +1767,8 @@ const HostDetail = () => {
                         try {
                             const legacyStorageData = JSON.parse(hostData.storage_details);
                             setStorageDevices(legacyStorageData);
-                        } catch (parseErr) {
-                            console.warn('Failed to parse legacy storage data:', parseErr);
+                        } catch (_error) {
+                            console.warn('Failed to parse legacy storage data:', _error);
                         }
                     } else {
                         setStorageDevices(storageData);
@@ -1760,8 +1778,8 @@ const HostDetail = () => {
                         try {
                             const legacyNetworkData = JSON.parse(hostData.network_details);
                             setNetworkInterfaces(legacyNetworkData);
-                        } catch (parseErr) {
-                            console.warn('Failed to parse legacy network data:', parseErr);
+                        } catch (_error) {
+                            console.warn('Failed to parse legacy network data:', _error);
                         }
                     } else {
                         setNetworkInterfaces(networkData);
@@ -1816,9 +1834,9 @@ const HostDetail = () => {
                             console.log('Child hosts data not available or failed to load:', error);
                         }
                     }
-                } catch (hardwareErr) {
+                } catch (_error) {
                     // Log but don't fail the whole request - hardware/software/diagnostics data is optional
-                    console.warn('Failed to fetch hardware/software/diagnostics data:', hardwareErr);
+                    console.warn('Failed to fetch hardware/software/diagnostics data:', _error);
                 }
                 
                 setError(null);
@@ -1981,9 +1999,9 @@ const HostDetail = () => {
 
     // Auto-refresh installation history every 30 seconds when on Software Changes tab
     useEffect(() => {
-        let interval: ReturnType<typeof window.setInterval> | null = null;
+        let interval: ReturnType<typeof globalThis.setInterval> | null = null;
         if (hostId && currentTab === getSoftwareInstallsTabIndex()) {
-            interval = window.setInterval(async () => {
+            interval = globalThis.setInterval(async () => {
                 try {
                     await fetchInstallationHistory();
                 } catch (error) {
@@ -1993,17 +2011,17 @@ const HostDetail = () => {
         }
         return () => {
             if (interval) {
-                window.clearInterval(interval);
+                globalThis.clearInterval(interval);
             }
         };
     }, [hostId, currentTab, fetchInstallationHistory]);
 
     // Auto-refresh Ubuntu Pro information every 30 seconds
     useEffect(() => {
-        let interval: ReturnType<typeof window.setInterval> | null = null;
+        let interval: ReturnType<typeof globalThis.setInterval> | null = null;
 
         if (hostId && isUbuntu() && ubuntuProInfo?.available) {
-            interval = window.setInterval(async () => {
+            interval = globalThis.setInterval(async () => {
                 try {
                     const ubuntuProData = await doGetHostUbuntuPro(hostId);
                     setUbuntuProInfo(ubuntuProData);
@@ -2019,17 +2037,17 @@ const HostDetail = () => {
 
         return () => {
             if (interval) {
-                window.clearInterval(interval);
+                globalThis.clearInterval(interval);
             }
         };
     }, [hostId, isUbuntu, ubuntuProInfo?.available, servicesMessage]);
 
     // Auto-refresh user accounts and groups every 60 seconds
     useEffect(() => {
-        let interval: ReturnType<typeof window.setInterval> | null = null;
+        let interval: ReturnType<typeof globalThis.setInterval> | null = null;
 
         if (hostId) {
-            interval = window.setInterval(async () => {
+            interval = globalThis.setInterval(async () => {
                 try {
                     const [usersData, groupsData] = await Promise.all([
                         doGetHostUsers(hostId),
@@ -2045,7 +2063,7 @@ const HostDetail = () => {
 
         return () => {
             if (interval) {
-                window.clearInterval(interval);
+                globalThis.clearInterval(interval);
             }
         };
     }, [hostId]);
@@ -2053,7 +2071,7 @@ const HostDetail = () => {
     // Listen for hash changes (browser back/forward)
     useEffect(() => {
         const handleHashChange = () => {
-            const hash = window.location.hash.slice(1);
+            const hash = globalThis.location.hash.slice(1);
             if (!hash) return;
             const tabs = getTabNames();
             const tabIndex = tabs.indexOf(hash);
@@ -2062,13 +2080,13 @@ const HostDetail = () => {
             }
         };
 
-        window.addEventListener('hashchange', handleHashChange);
-        return () => window.removeEventListener('hashchange', handleHashChange);
+        globalThis.addEventListener('hashchange', handleHashChange);
+        return () => globalThis.removeEventListener('hashchange', handleHashChange);
     }, [getTabNames]);
 
     // Recalculate current tab when host or ubuntuProInfo changes (handles dynamic tabs)
     useEffect(() => {
-        const hash = window.location.hash.slice(1);
+        const hash = globalThis.location.hash.slice(1);
         if (!hash) return;
         const tabs = getTabNames();
         const tabIndex = tabs.indexOf(hash);
@@ -2090,7 +2108,7 @@ const HostDetail = () => {
     const formatTimestamp = (timestamp: string | null | undefined) => {
         if (!timestamp) return t('hosts.never', 'never');
         const date = new Date(timestamp);
-        if (isNaN(date.getTime())) return t('hosts.invalidDate', 'invalid');
+        if (Number.isNaN(date.getTime())) return t('hosts.invalidDate', 'invalid');
         
         const now = new Date();
         const diffMinutes = Math.floor((now.getTime() - date.getTime()) / 60000);
@@ -2141,6 +2159,31 @@ const HostDetail = () => {
         return `${mhz} MHz`;
     };
 
+    // Helper function to get user ID label and value (extracts nested ternary for SonarQube compliance)
+    const getUserIdDisplay = (user: UserAccount): string => {
+        const isWindows = host?.platform?.toLowerCase().includes('windows');
+        const label = isWindows ? 'SID' : 'UID';
+        let value: string;
+        if (isWindows) {
+            value = user.security_id || t('common.notAvailable');
+        } else {
+            value = user.uid !== undefined ? String(user.uid) : t('common.notAvailable');
+        }
+        return `${label}: ${value}`;
+    };
+
+    // Helper function to get group ID label and value (extracts nested ternary for SonarQube compliance)
+    const getGroupIdDisplay = (group: UserGroup): string => {
+        const isWindows = host?.platform?.toLowerCase().includes('windows');
+        const label = isWindows ? 'SID' : 'GID';
+        let value: string;
+        if (isWindows) {
+            value = group.security_id || t('common.notAvailable');
+        } else {
+            value = (group.gid !== undefined && group.gid !== null) ? String(group.gid) : t('common.notAvailable');
+        }
+        return `${label}: ${value}`;
+    };
 
     const handleShowDialog = (title: string, content: string) => {
         setDialogTitle(title);
@@ -2263,7 +2306,7 @@ const HostDetail = () => {
         } else {
             const filtered = availableSSHKeys.filter((key) =>
                 key.name.toLowerCase().includes(searchTerm) ||
-                (key.filename && key.filename.toLowerCase().includes(searchTerm))
+                (key.filename?.toLowerCase().includes(searchTerm))
             );
             setFilteredSSHKeys(filtered);
         }
@@ -2836,7 +2879,7 @@ const HostDetail = () => {
     };
 
     const handleRebootConfirm = async () => {
-        if (!host || !host.id) return;
+        if (!host?.id) return;
         
         try {
             await doRebootHost(host.id);
@@ -2855,7 +2898,7 @@ const HostDetail = () => {
     };
 
     const handleRequestPackagesConfirm = async () => {
-        if (!host || !host.id) return;
+        if (!host?.id) return;
         setRequestPackagesConfirmOpen(false);
 
         try {
@@ -2870,7 +2913,7 @@ const HostDetail = () => {
     };
 
     const handleDeployAntivirus = async () => {
-        if (!host || !host.id) return;
+        if (!host?.id) return;
 
         try {
             // Call backend API to deploy antivirus to this specific host
@@ -2878,7 +2921,7 @@ const HostDetail = () => {
                 host_ids: [host.id]
             });
 
-            if (response.data.failed_hosts && response.data.failed_hosts.length > 0) {
+            if (response.data.failed_hosts?.length > 0) {
                 const failedHost = response.data.failed_hosts[0];
                 setSnackbarMessage(t('hostDetail.antivirusDeployFailed', 'Failed to deploy antivirus: {reason}', { reason: failedHost.reason }));
                 setSnackbarSeverity('error');
@@ -2898,7 +2941,7 @@ const HostDetail = () => {
     };
 
     const handleEnableAntivirus = async () => {
-        if (!host || !host.id) return;
+        if (!host?.id) return;
 
         try {
             await axiosInstance.post(`/api/hosts/${host.id}/antivirus/enable`);
@@ -2916,7 +2959,7 @@ const HostDetail = () => {
     };
 
     const handleDisableAntivirus = async () => {
-        if (!host || !host.id) return;
+        if (!host?.id) return;
 
         try {
             await axiosInstance.post(`/api/hosts/${host.id}/antivirus/disable`);
@@ -2934,7 +2977,7 @@ const HostDetail = () => {
     };
 
     const handleRemoveAntivirus = async () => {
-        if (!host || !host.id) return;
+        if (!host?.id) return;
 
         try {
             await axiosInstance.post(`/api/hosts/${host.id}/antivirus/remove`);
@@ -2952,7 +2995,7 @@ const HostDetail = () => {
     };
 
     const handleShutdownConfirm = async () => {
-        if (!host || !host.id) return;
+        if (!host?.id) return;
 
         try {
             await doShutdownHost(host.id);
@@ -3014,9 +3057,9 @@ const HostDetail = () => {
 
     const handleAddTag = async () => {
         if (!hostId || !selectedTagToAdd) return;
-        
+
         try {
-            const response = await window.fetch(`/api/hosts/${hostId}/tags/${selectedTagToAdd}`, {
+            const response = await globalThis.fetch(`/api/hosts/${hostId}/tags/${selectedTagToAdd}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
@@ -3045,9 +3088,9 @@ const HostDetail = () => {
 
     const handleRemoveTag = async (tagId: string) => {
         if (!hostId) return;
-        
+
         try {
-            const response = await window.fetch(`/api/hosts/${hostId}/tags/${tagId}`, {
+            const response = await globalThis.fetch(`/api/hosts/${hostId}/tags/${tagId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
@@ -3112,7 +3155,7 @@ const HostDetail = () => {
         const tabs = getTabNames();
         // Safely access array element with bounds check
         if (newValue >= 0 && newValue < tabs.length) {
-            window.location.hash = tabs[newValue]; // nosemgrep: detect-object-injection
+            globalThis.location.hash = tabs[newValue]; // nosemgrep: detect-object-injection
         }
     };
 
@@ -3384,6 +3427,82 @@ const HostDetail = () => {
             translated;
     };
 
+    // Get OpenTelemetry service status label (extracted for SonarQube compliance)
+    const getOpenTelemetryServiceLabel = (serviceStatus: string): string => {
+        if (serviceStatus === 'running') {
+            return t('hostDetail.opentelemetryServiceRunning', 'Running');
+        } else if (serviceStatus === 'stopped') {
+            return t('hostDetail.opentelemetryServiceStopped', 'Stopped');
+        } else {
+            return t('hostDetail.opentelemetryServiceUnknown', 'Unknown');
+        }
+    };
+
+    // Get OpenTelemetry service status color (extracted for SonarQube compliance)
+    const getOpenTelemetryServiceColor = (serviceStatus: string): 'success' | 'error' | 'default' => {
+        if (serviceStatus === 'running') {
+            return 'success';
+        } else if (serviceStatus === 'stopped') {
+            return 'error';
+        } else {
+            return 'default';
+        }
+    };
+
+    // Get role service status label (extracted for SonarQube compliance)
+    const getRoleServiceStatusLabel = (serviceStatus: string | null | undefined): string => {
+        if (serviceStatus === 'running') {
+            return t('hostDetail.running', 'Running');
+        } else if (serviceStatus === 'stopped') {
+            return t('hostDetail.stopped', 'Stopped');
+        } else if (serviceStatus === 'installed') {
+            return t('hostDetail.installed', 'Installed');
+        } else {
+            return serviceStatus || t('common.unknown', 'Unknown');
+        }
+    };
+
+    // Get role service status color (extracted for SonarQube compliance)
+    const getRoleServiceStatusColor = (serviceStatus: string | null | undefined): 'success' | 'error' | 'info' | 'default' => {
+        if (serviceStatus === 'running') {
+            return 'success';
+        } else if (serviceStatus === 'stopped') {
+            return 'error';
+        } else if (serviceStatus === 'installed') {
+            return 'info';
+        } else {
+            return 'default';
+        }
+    };
+
+    // Get service status label for Ubuntu Pro services (extracted for SonarQube compliance)
+    const getServiceStatusLabel = (status: string): string => {
+        if (status === 'n/a') {
+            return 'N/A';
+        } else if (status === 'enabled') {
+            return t('hostDetail.enabled', 'Enabled');
+        } else {
+            return t('hostDetail.disabled', 'Disabled');
+        }
+    };
+
+    // Get service status color for Ubuntu Pro services (extracted for SonarQube compliance)
+    const getServiceStatusColor = (status: string): 'success' | 'default' | 'warning' => {
+        if (status === 'enabled') {
+            return 'success';
+        } else if (status === 'n/a') {
+            return 'default';
+        } else {
+            return 'warning';
+        }
+    };
+
+    // Get edited service label (extracted for SonarQube compliance)
+    const getEditedServiceLabel = (serviceName: string, serviceStatus: string): string => {
+        const isEnabled = editedServices[serviceName] ?? (serviceStatus === 'enabled');
+        return isEnabled ? t('hostDetail.enabled', 'Enabled') : t('hostDetail.disabled', 'Disabled');
+    };
+
     // Ubuntu Pro service management handlers
     const handleServicesEditToggle = () => {
         if (servicesEditMode) {
@@ -3547,13 +3666,21 @@ const HostDetail = () => {
                 const isExpired = params.row.is_expired;
                 const daysUntilExpiry = params.row.days_until_expiry;
 
+                let expiryColor: string;
+                if (isExpired) {
+                    expiryColor = 'error.main';
+                } else if (daysUntilExpiry !== null && daysUntilExpiry <= 30) {
+                    expiryColor = 'warning.main';
+                } else {
+                    expiryColor = 'text.primary';
+                }
+
                 return (
                     <Box>
                         <Typography
                             variant="body2"
                             sx={{
-                                color: isExpired ? 'error.main' :
-                                       (daysUntilExpiry !== null && daysUntilExpiry <= 30) ? 'warning.main' : 'text.primary'
+                                color: expiryColor
                             }}
                         >
                             {expiryDate.toLocaleDateString()}
@@ -3612,6 +3739,66 @@ const HostDetail = () => {
             ),
         },
     ];
+
+    // Helper function to get empty state message for Windows hosts (WSL)
+    const getWslEmptyMessage = (): string => {
+        if (virtualizationStatus?.capabilities?.wsl?.enabled) {
+            return t('hostDetail.childHostsEmptyWslEnabled', 'Click "Create Child Host" to create a new WSL instance.');
+        }
+        if (virtualizationStatus?.capabilities?.wsl?.needs_enable) {
+            return t('hostDetail.childHostsEmptyWslNotEnabled', 'Enable WSL to create virtual machines on this host.');
+        }
+        return t('hostDetail.childHostsEmptyDescription', 'WSL instances and other virtual machines on this Windows host will appear here.');
+    };
+
+    // Helper function to get empty state message for Linux hosts (LXD)
+    const getLxdEmptyMessage = (): string => {
+        if (virtualizationStatus?.capabilities?.lxd?.installed && virtualizationStatus?.capabilities?.lxd?.initialized) {
+            return t('hostDetail.childHostsEmptyLxdReady', 'Click "Create Child Host" to create a new LXD container.');
+        }
+        if (virtualizationStatus?.capabilities?.lxd?.available) {
+            return t('hostDetail.childHostsEmptyLxdNotReady', 'Enable LXD to create containers on this host.');
+        }
+        return t('hostDetail.childHostsEmptyLxdNotAvailable', 'LXD is not available on this host. Ubuntu 22.04 or newer is required.');
+    };
+
+    // Helper function to get empty state message for OpenBSD hosts (VMM)
+    const getVmmEmptyMessage = (): string => {
+        if (virtualizationStatus?.capabilities?.vmm?.enabled && virtualizationStatus?.capabilities?.vmm?.running) {
+            return t('hostDetail.childHostsEmptyVmmReady', 'Click "Create Child Host" to create a new VMM virtual machine.');
+        }
+        if (virtualizationStatus?.capabilities?.vmm?.available) {
+            return t('hostDetail.childHostsEmptyVmmNotReady', 'Enable VMM to create virtual machines on this host.');
+        }
+        return t('hostDetail.childHostsEmptyVmmNotAvailable', 'VMM is not available on this host.');
+    };
+
+    // Helper function to get empty state message for FreeBSD hosts (bhyve)
+    const getBhyveEmptyMessage = (): string => {
+        if (virtualizationStatus?.capabilities?.bhyve?.enabled && virtualizationStatus?.capabilities?.bhyve?.running) {
+            return t('hostDetail.childHostsEmptyBhyveReady', 'Click "Create Child Host" to create a new bhyve virtual machine.');
+        }
+        if (virtualizationStatus?.capabilities?.bhyve?.available) {
+            return t('hostDetail.childHostsEmptyBhyveNotReady', 'Enable bhyve to create virtual machines on this host.');
+        }
+        return t('hostDetail.childHostsEmptyBhyveNotAvailable', 'bhyve is not available on this host.');
+    };
+
+    // Helper function to get the create child host dialog title
+    const getCreateChildHostTitle = (): string => {
+        switch (childHostFormData.childType) {
+            case 'lxd':
+                return t('hostDetail.createLxdContainerTitle', 'Create LXD Container');
+            case 'vmm':
+                return t('hostDetail.createVmmVmTitle', 'Create VMM Virtual Machine');
+            case 'kvm':
+                return t('hostDetail.createKvmVmTitle', 'Create KVM Virtual Machine');
+            case 'bhyve':
+                return t('hostDetail.createBhyveVmTitle', 'Create bhyve Virtual Machine');
+            default:
+                return t('hostDetail.createChildHostTitle', 'Create WSL Instance');
+        }
+    };
 
     return (
         <Box sx={{
@@ -4005,20 +4192,8 @@ const HostDetail = () => {
                                                     {t('hostDetail.opentelemetryServiceStatus', 'Service Status')}
                                                 </Typography>
                                                 <Chip
-                                                    label={
-                                                        openTelemetryStatus.service_status === 'running'
-                                                            ? t('hostDetail.opentelemetryServiceRunning', 'Running')
-                                                            : openTelemetryStatus.service_status === 'stopped'
-                                                            ? t('hostDetail.opentelemetryServiceStopped', 'Stopped')
-                                                            : t('hostDetail.opentelemetryServiceUnknown', 'Unknown')
-                                                    }
-                                                    color={
-                                                        openTelemetryStatus.service_status === 'running'
-                                                            ? 'success'
-                                                            : openTelemetryStatus.service_status === 'stopped'
-                                                            ? 'error'
-                                                            : 'default'
-                                                    }
+                                                    label={getOpenTelemetryServiceLabel(openTelemetryStatus.service_status)}
+                                                    color={getOpenTelemetryServiceColor(openTelemetryStatus.service_status)}
                                                     size="small"
                                                 />
                                             </Grid>
@@ -4634,12 +4809,14 @@ const HostDetail = () => {
                                             setSoftwareSearchTerm(e.target.value);
                                             setSoftwarePagination(prev => ({ ...prev, page: 1 })); // Reset to page 1 on search
                                         }}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <SearchIcon />
-                                                </InputAdornment>
-                                            ),
+                                        slotProps={{
+                                            input: {
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <SearchIcon />
+                                                    </InputAdornment>
+                                                ),
+                                            },
                                         }}
                                         size="small"
                                     />
@@ -4858,7 +5035,7 @@ const HostDetail = () => {
                                                             </Box>
                                                         </Box>
                                                         <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                                                            {host?.platform?.toLowerCase().includes('windows') ? 'SID' : 'UID'}: {host?.platform?.toLowerCase().includes('windows') ? (user.security_id || t('common.notAvailable')) : (user.uid !== undefined ? user.uid : t('common.notAvailable'))}
+                                                            {getUserIdDisplay(user)}
                                                         </Typography>
                                                         {user.home_directory && (
                                                             <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5, wordBreak: 'break-all' }}>
@@ -4883,9 +5060,9 @@ const HostDetail = () => {
                                                                     {t('hostDetail.memberOfGroups', 'Groups')}:
                                                                 </Typography>
                                                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxHeight: expandedUserGroups.has(user.id) ? 'none' : '60px', overflow: 'auto' }}>
-                                                                    {(expandedUserGroups.has(user.id) ? user.groups : user.groups.slice(0, 6)).map((groupName: string, groupIndex: number) => (
-                                                                        <Chip 
-                                                                            key={groupIndex}
+                                                                    {(expandedUserGroups.has(user.id) ? user.groups : user.groups.slice(0, 6)).map((groupName: string) => (
+                                                                        <Chip
+                                                                            key={groupName}
                                                                             label={groupName}
                                                                             size="small"
                                                                             variant="outlined"
@@ -5025,7 +5202,7 @@ const HostDetail = () => {
                                                             )}
                                                         </Box>
                                                         <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                                                            {host?.platform?.toLowerCase().includes('windows') ? 'SID' : 'GID'}: {host?.platform?.toLowerCase().includes('windows') ? (group.security_id || t('common.notAvailable')) : (group.gid !== undefined && group.gid !== null ? group.gid : t('common.notAvailable'))}
+                                                            {getGroupIdDisplay(group)}
                                                         </Typography>
                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, mb: 1 }}>
                                                             <Chip
@@ -5040,9 +5217,9 @@ const HostDetail = () => {
                                                                     {t('hostDetail.groupMembers', 'Members')}:
                                                                 </Typography>
                                                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxHeight: expandedGroupUsers.has(group.id) ? 'none' : '60px', overflow: 'auto' }}>
-                                                                    {(expandedGroupUsers.has(group.id) ? group.users : group.users.slice(0, 6)).map((userName: string, userIndex: number) => (
-                                                                        <Chip 
-                                                                            key={userIndex}
+                                                                    {(expandedGroupUsers.has(group.id) ? group.users : group.users.slice(0, 6)).map((userName: string) => (
+                                                                        <Chip
+                                                                            key={userName}
                                                                             label={userName}
                                                                             size="small"
                                                                             variant="outlined"
@@ -5164,12 +5341,14 @@ const HostDetail = () => {
                                                 setCertificateSearchTerm(e.target.value);
                                                 setCertificatePaginationModel({ page: 0, pageSize: certificatePaginationModel.pageSize });
                                             }}
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <SearchIcon />
-                                                    </InputAdornment>
-                                                ),
+                                            slotProps={{
+                                                input: {
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <SearchIcon />
+                                                        </InputAdornment>
+                                                    ),
+                                                },
                                             }}
                                             sx={{ width: 350 }}
                                         />
@@ -5245,53 +5424,54 @@ const HostDetail = () => {
                                                 onReset={resetCertificatesPreferences}
                                             />
                                         </Box>
-                                        <DataGrid
-                                            rows={certificates.filter(cert => {
-                                                // Apply search filter first
-                                                if (certificateSearchTerm) {
-                                                    const searchLower = certificateSearchTerm.toLowerCase();
-                                                    const nameMatch = cert.certificate_name?.toLowerCase().includes(searchLower);
-                                                    const subjectMatch = cert.subject?.toLowerCase().includes(searchLower);
-                                                    const issuerMatch = cert.issuer?.toLowerCase().includes(searchLower);
-                                                    if (!nameMatch && !subjectMatch && !issuerMatch) {
-                                                        return false;
+                                        <Box sx={{ height: 500 }}>
+                                            <DataGrid
+                                                rows={certificates.filter(cert => {
+                                                    // Apply search filter first
+                                                    if (certificateSearchTerm) {
+                                                        const searchLower = certificateSearchTerm.toLowerCase();
+                                                        const nameMatch = cert.certificate_name?.toLowerCase().includes(searchLower);
+                                                        const subjectMatch = cert.subject?.toLowerCase().includes(searchLower);
+                                                        const issuerMatch = cert.issuer?.toLowerCase().includes(searchLower);
+                                                        if (!nameMatch && !subjectMatch && !issuerMatch) {
+                                                            return false;
+                                                        }
                                                     }
-                                                }
 
-                                                // Apply type filter
-                                                if (certificateFilter === 'all') return true;
-                                                if (certificateFilter === 'ca') {
-                                                    return cert.is_ca || cert.key_usage === 'CA';
-                                                }
-                                                if (certificateFilter === 'server') {
-                                                    return cert.key_usage === 'Server';
-                                                }
-                                                if (certificateFilter === 'client') {
-                                                    return cert.key_usage === 'Client';
-                                                }
-                                                return true;
-                                            })}
-                                            columns={certificateColumns}
-                                            loading={certificatesLoading}
-                                            initialState={{
-                                                sorting: {
-                                                    sortModel: [{ field: 'days_until_expiry', sort: 'asc' }],
-                                                },
-                                            }}
-                                            columnVisibilityModel={getCertificatesColumnVisibilityModel()}
-                                            paginationModel={certificatePaginationModel}
-                                            onPaginationModelChange={setCertificatePaginationModel}
-                                            pageSizeOptions={safePageSizeOptions}
-                                            disableRowSelectionOnClick
-                                            autoHeight
-                                            sx={{
-                                                '& .MuiDataGrid-row': {
-                                                    '&:hover': {
-                                                        backgroundColor: 'action.hover',
+                                                    // Apply type filter
+                                                    if (certificateFilter === 'all') return true;
+                                                    if (certificateFilter === 'ca') {
+                                                        return cert.is_ca || cert.key_usage === 'CA';
+                                                    }
+                                                    if (certificateFilter === 'server') {
+                                                        return cert.key_usage === 'Server';
+                                                    }
+                                                    if (certificateFilter === 'client') {
+                                                        return cert.key_usage === 'Client';
+                                                    }
+                                                    return true;
+                                                })}
+                                                columns={certificateColumns}
+                                                loading={certificatesLoading}
+                                                initialState={{
+                                                    sorting: {
+                                                        sortModel: [{ field: 'days_until_expiry', sort: 'asc' }],
                                                     },
-                                                },
-                                            }}
-                                        />
+                                                }}
+                                                columnVisibilityModel={getCertificatesColumnVisibilityModel()}
+                                                paginationModel={certificatePaginationModel}
+                                                onPaginationModelChange={setCertificatePaginationModel}
+                                                pageSizeOptions={safePageSizeOptions}
+                                                disableRowSelectionOnClick
+                                                sx={{
+                                                    '& .MuiDataGrid-row': {
+                                                        '&:hover': {
+                                                            backgroundColor: 'action.hover',
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        </Box>
                                     </>
                                 )}
                             </CardContent>
@@ -5427,12 +5607,17 @@ const HostDetail = () => {
                                             <TableHead>
                                                 <TableRow>
                                                     <TableCell padding="checkbox">
-                                                        <Checkbox
-                                                            indeterminate={selectedRoles.length > 0 && selectedRoles.length < roles.filter(role => role.service_name && role.service_name.trim() !== '').length}
-                                                            checked={roles.filter(role => role.service_name && role.service_name.trim() !== '').length > 0 && selectedRoles.length === roles.filter(role => role.service_name && role.service_name.trim() !== '').length}
-                                                            onChange={(e) => handleSelectAllRoles(e.target.checked)}
-                                                            disabled={!host.is_agent_privileged || roles.filter(role => role.service_name && role.service_name.trim() !== '').length === 0}
-                                                        />
+                                                        {(() => {
+                                                            const rolesWithServiceCount = roles.filter(role => role.service_name && role.service_name.trim() !== '').length;
+                                                            return (
+                                                                <Checkbox
+                                                                    indeterminate={selectedRoles.length > 0 && selectedRoles.length < rolesWithServiceCount}
+                                                                    checked={rolesWithServiceCount > 0 && selectedRoles.length === rolesWithServiceCount}
+                                                                    onChange={(e) => e.target.checked ? selectAllRoles() : deselectAllRoles()}
+                                                                    disabled={!host.is_agent_privileged || rolesWithServiceCount === 0}
+                                                                />
+                                                            );
+                                                        })()}
                                                     </TableCell>
                                                     <TableCell>{t('hostDetail.role', 'Role')}</TableCell>
                                                     <TableCell>{t('hostDetail.package', 'Package')}</TableCell>
@@ -5457,7 +5642,7 @@ const HostDetail = () => {
                                                             <TableCell padding="checkbox">
                                                                 <Checkbox
                                                                     checked={selectedRoles.includes(role.id)}
-                                                                    onChange={(e) => handleRoleSelection(role.id, e.target.checked)}
+                                                                    onChange={(e) => e.target.checked ? addRoleToSelection(role.id) : removeRoleFromSelection(role.id)}
                                                                     disabled={!host.is_agent_privileged || !role.service_name || role.service_name.trim() === ''}
                                                                 />
                                                             </TableCell>
@@ -5483,24 +5668,8 @@ const HostDetail = () => {
                                                             </TableCell>
                                                             <TableCell>
                                                                 <Chip
-                                                                    label={
-                                                                        role.service_status === 'running'
-                                                                            ? t('hostDetail.running', 'Running')
-                                                                            : role.service_status === 'stopped'
-                                                                            ? t('hostDetail.stopped', 'Stopped')
-                                                                            : role.service_status === 'installed'
-                                                                            ? t('hostDetail.installed', 'Installed')
-                                                                            : role.service_status || t('common.unknown', 'Unknown')
-                                                                    }
-                                                                    color={
-                                                                        role.service_status === 'running'
-                                                                            ? 'success'
-                                                                            : role.service_status === 'stopped'
-                                                                            ? 'error'
-                                                                            : role.service_status === 'installed'
-                                                                            ? 'info'
-                                                                            : 'default'
-                                                                    }
+                                                                    label={getRoleServiceStatusLabel(role.service_status)}
+                                                                    color={getRoleServiceStatusColor(role.service_status)}
                                                                     size="small"
                                                                 />
                                                             </TableCell>
@@ -5518,7 +5687,7 @@ const HostDetail = () => {
                                 )}
 
                                 {/* Service Control Buttons */}
-                                {!rolesLoading && roles.length > 0 && roles.some(role => role.service_name && role.service_name.trim() !== '') && (canStartService || canStopService || canRestartService) && (
+                                {!rolesLoading && roles.some(role => role.service_name && role.service_name.trim() !== '') && (canStartService || canStopService || canRestartService) && (
                                     <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex', gap: 2, alignItems: 'center' }}>
                                         <Typography variant="body2" sx={{ color: 'textSecondary', mr: 2 }}>
                                             {t('hostDetail.serviceControlActions', 'Service Control Actions')}:
@@ -5578,6 +5747,7 @@ const HostDetail = () => {
             )}
 
             {/* Child Hosts Tab */}
+            {/* NOSONAR: Cognitive complexity is acceptable here as this is a cohesive JSX block rendering virtualization capabilities for multiple hypervisor types (WSL, LXD, VMM, KVM, bhyve) with consistent structure */}
             {currentTab === getChildHostsTabIndex() && supportsChildHosts() && (
                 <Grid container spacing={3}>
                     {/* Virtualization Capabilities - Card-based layout */}
@@ -5730,37 +5900,13 @@ const HostDetail = () => {
                                         </Typography>
                                         <Typography variant="body2" color="textSecondary">
                                             {/* Windows hosts - WSL messages */}
-                                            {host?.platform?.includes('Windows') && (
-                                                virtualizationStatus?.capabilities?.wsl?.enabled
-                                                    ? t('hostDetail.childHostsEmptyWslEnabled', 'Click "Create Child Host" to create a new WSL instance.')
-                                                    : virtualizationStatus?.capabilities?.wsl?.needs_enable
-                                                        ? t('hostDetail.childHostsEmptyWslNotEnabled', 'Enable WSL to create virtual machines on this host.')
-                                                        : t('hostDetail.childHostsEmptyDescription', 'WSL instances and other virtual machines on this Windows host will appear here.')
-                                            )}
+                                            {host?.platform?.includes('Windows') && getWslEmptyMessage()}
                                             {/* Linux hosts - LXD messages */}
-                                            {host?.platform?.includes('Linux') && (
-                                                virtualizationStatus?.capabilities?.lxd?.installed && virtualizationStatus?.capabilities?.lxd?.initialized
-                                                    ? t('hostDetail.childHostsEmptyLxdReady', 'Click "Create Child Host" to create a new LXD container.')
-                                                    : virtualizationStatus?.capabilities?.lxd?.available
-                                                        ? t('hostDetail.childHostsEmptyLxdNotReady', 'Enable LXD to create containers on this host.')
-                                                        : t('hostDetail.childHostsEmptyLxdNotAvailable', 'LXD is not available on this host. Ubuntu 22.04 or newer is required.')
-                                            )}
+                                            {host?.platform?.includes('Linux') && getLxdEmptyMessage()}
                                             {/* OpenBSD hosts - VMM messages */}
-                                            {host?.platform?.includes('OpenBSD') && (
-                                                virtualizationStatus?.capabilities?.vmm?.enabled && virtualizationStatus?.capabilities?.vmm?.running
-                                                    ? t('hostDetail.childHostsEmptyVmmReady', 'Click "Create Child Host" to create a new VMM virtual machine.')
-                                                    : virtualizationStatus?.capabilities?.vmm?.available
-                                                        ? t('hostDetail.childHostsEmptyVmmNotReady', 'Enable VMM to create virtual machines on this host.')
-                                                        : t('hostDetail.childHostsEmptyVmmNotAvailable', 'VMM is not available on this host.')
-                                            )}
+                                            {host?.platform?.includes('OpenBSD') && getVmmEmptyMessage()}
                                             {/* FreeBSD hosts - bhyve messages */}
-                                            {host?.platform?.includes('FreeBSD') && (
-                                                virtualizationStatus?.capabilities?.bhyve?.enabled && virtualizationStatus?.capabilities?.bhyve?.running
-                                                    ? t('hostDetail.childHostsEmptyBhyveReady', 'Click "Create Child Host" to create a new bhyve virtual machine.')
-                                                    : virtualizationStatus?.capabilities?.bhyve?.available
-                                                        ? t('hostDetail.childHostsEmptyBhyveNotReady', 'Enable bhyve to create virtual machines on this host.')
-                                                        : t('hostDetail.childHostsEmptyBhyveNotAvailable', 'bhyve is not available on this host.')
-                                            )}
+                                            {host?.platform?.includes('FreeBSD') && getBhyveEmptyMessage()}
                                         </Typography>
                                     </Box>
                                 )}
@@ -6089,14 +6235,14 @@ const HostDetail = () => {
                                                 )}
                                                 {ubuntuProInfo.services.length > 0 ? (
                                                     <Grid container spacing={1}>
-                                                        {ubuntuProInfo.services
-                                                            .sort((a, b) => {
+                                                        {(() => {
+                                                            const sortedServices = [...ubuntuProInfo.services].sort((a, b) => {
                                                                 // Sort: enabled first, then disabled, then n/a
                                                                 const statusOrder = { 'enabled': 0, 'disabled': 1, 'n/a': 2 };
                                                                 return statusOrder[a.status as keyof typeof statusOrder] - statusOrder[b.status as keyof typeof statusOrder];
-                                                            })
-                                                            .map((service, index) => (
-                                                            <Grid size={{ xs: 12 }} key={index}>
+                                                            });
+                                                            return sortedServices.map((service) => (
+                                                            <Grid size={{ xs: 12 }} key={service.name}>
                                                                 <Card variant="outlined" sx={{ p: 1 }}>
                                                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                                         <Box sx={{ flex: 1 }}>
@@ -6119,12 +6265,12 @@ const HostDetail = () => {
                                                                                             size="small"
                                                                                         />
                                                                                     }
-                                                                                    label={editedServices[service.name] ?? (service.status === 'enabled') ? t('hostDetail.enabled', 'Enabled') : t('hostDetail.disabled', 'Disabled')}
+                                                                                    label={getEditedServiceLabel(service.name, service.status)}
                                                                                 />
                                                                             ) : (
                                                                                 <Chip
-                                                                                    label={service.status === 'n/a' ? 'N/A' : (service.status === 'enabled' ? t('hostDetail.enabled', 'Enabled') : t('hostDetail.disabled', 'Disabled'))}
-                                                                                    color={service.status === 'enabled' ? 'success' : service.status === 'n/a' ? 'default' : 'warning'}
+                                                                                    label={getServiceStatusLabel(service.status)}
+                                                                                    color={getServiceStatusColor(service.status)}
                                                                                     size="small"
                                                                                 />
                                                                             )}
@@ -6139,7 +6285,8 @@ const HostDetail = () => {
                                                                     </Box>
                                                                 </Card>
                                                             </Grid>
-                                                        ))}
+                                                        ));
+                                                        })()}
                                                     </Grid>
                                                 ) : (
                                                     <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
@@ -6345,8 +6492,8 @@ const HostDetail = () => {
                 onClose={handleCloseDialog}
                 maxWidth="md"
                 fullWidth
-                PaperProps={{
-                    sx: { backgroundColor: 'grey.900' }
+                slotProps={{
+                    paper: { sx: { backgroundColor: 'grey.900' } }
                 }}
             >
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -6426,8 +6573,8 @@ const HostDetail = () => {
                 onClose={handleCancelDelete}
                 maxWidth="sm"
                 fullWidth
-                PaperProps={{
-                    sx: { backgroundColor: 'grey.900' }
+                slotProps={{
+                    paper: { sx: { backgroundColor: 'grey.900' } }
                 }}
             >
                 <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
@@ -6454,8 +6601,8 @@ const HostDetail = () => {
                 onClose={handleChildHostDeleteCancel}
                 maxWidth="sm"
                 fullWidth
-                PaperProps={{
-                    sx: { backgroundColor: 'grey.900' }
+                slotProps={{
+                    paper: { sx: { backgroundColor: 'grey.900' } }
                 }}
             >
                 <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -6470,7 +6617,7 @@ const HostDetail = () => {
                             <Alert severity="warning" sx={{ mb: 2 }}>
                                 {t('hostDetail.cancelChildHostWarning', 'This will cancel the child host creation.')}
                             </Alert>
-                            <Typography variant="body1" paragraph>
+                            <Typography variant="body1" sx={{ mb: 2 }}>
                                 {t('hostDetail.cancelChildHostMessage', 'Are you sure you want to cancel the creation of "{{name}}"?', { name: childHostToDelete?.child_name })}
                             </Typography>
                             <Typography variant="body2" color="textSecondary">
@@ -6482,7 +6629,7 @@ const HostDetail = () => {
                             <Alert severity="error" sx={{ mb: 2 }}>
                                 {t('hostDetail.deleteChildHostWarning', 'This action is irreversible!')}
                             </Alert>
-                            <Typography variant="body1" paragraph>
+                            <Typography variant="body1" sx={{ mb: 2 }}>
                                 {t('hostDetail.deleteChildHostMessage', 'Are you sure you want to delete the child host "{{name}}"?', { name: childHostToDelete?.child_name })}
                             </Typography>
                             <Typography variant="body2" color="textSecondary">
@@ -6580,7 +6727,7 @@ const HostDetail = () => {
                                     {Object.entries(selectedDiagnostic.diagnostic_data).map(([key, value]) => {
                                         if (!value || (typeof value === 'object' && Object.keys(value).length === 0)) return null;
                                         
-                                        const sectionTitle = t(`hostDetail.${key}`, key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+                                        const sectionTitle = t(`hostDetail.${key}`, key.replaceAll('_', ' ').replace(/\b\w/g, l => l.toUpperCase()));
                                         
                                         return (
                                             <Card key={key} sx={{ mb: 2, backgroundColor: 'grey.700' }}>
@@ -6702,8 +6849,8 @@ const HostDetail = () => {
                 onClose={handleClosePackageDialog}
                 maxWidth="md"
                 fullWidth
-                PaperProps={{
-                    sx: { backgroundColor: 'grey.900', minHeight: '500px' }
+                slotProps={{
+                    paper: { sx: { backgroundColor: 'grey.900', minHeight: '500px' } }
                 }}
             >
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold', fontSize: '1.25rem' }}>
@@ -7084,14 +7231,16 @@ const HostDetail = () => {
                             value={sshKeySearchTerm}
                             onChange={(e) => setSshKeySearchTerm(e.target.value)}
                             size="small"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon />
-                                    </InputAdornment>
-                                ),
+                            slotProps={{
+                                input: {
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchIcon />
+                                        </InputAdornment>
+                                    ),
+                                },
                             }}
-                            onKeyPress={(e) => {
+                            onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                     handleSSHKeySearch();
                                 }
@@ -7173,14 +7322,16 @@ const HostDetail = () => {
                             value={certificateDialogSearchTerm}
                             onChange={(e) => setCertificateDialogSearchTerm(e.target.value)}
                             size="small"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon />
-                                    </InputAdornment>
-                                ),
+                            slotProps={{
+                                input: {
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchIcon />
+                                        </InputAdornment>
+                                    ),
+                                },
                             }}
-                            onKeyPress={(e) => {
+                            onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                     handleCertificateSearch();
                                 }
@@ -7207,31 +7358,31 @@ const HostDetail = () => {
                             <Typography variant="body2" sx={{ mb: 1 }}>
                                 {t('hostDetail.certificateCount', 'Found {count} certificates').replace('{count}', String(filteredCertificates.length))}
                             </Typography>
-                            <DataGrid
-                                rows={filteredCertificates}
-                                columns={vaultCertificateColumns}
-                                initialState={{
-                                    pagination: {
-                                        paginationModel: { pageSize: 10, page: 0 },
-                                    },
-                                }}
-                                pageSizeOptions={[5, 10, 25]}
-                                checkboxSelection
-                                disableRowSelectionOnClick
-                                autoHeight
-                                sx={{
-                                    maxHeight: 400,
-                                    '& .MuiDataGrid-row': {
-                                        '&:hover': {
-                                            backgroundColor: 'action.hover',
+                            <Box sx={{ height: 400 }}>
+                                <DataGrid
+                                    rows={filteredCertificates}
+                                    columns={vaultCertificateColumns}
+                                    initialState={{
+                                        pagination: {
+                                            paginationModel: { pageSize: 10, page: 0 },
                                         },
-                                    },
-                                }}
-                                onRowSelectionModelChange={(newSelectionModel) => {
-                                    setSelectedCertificates(newSelectionModel as string[]);
-                                }}
-                                rowSelectionModel={selectedCertificates}
-                            />
+                                    }}
+                                    pageSizeOptions={[5, 10, 25]}
+                                    checkboxSelection
+                                    disableRowSelectionOnClick
+                                    sx={{
+                                        '& .MuiDataGrid-row': {
+                                            '&:hover': {
+                                                backgroundColor: 'action.hover',
+                                            },
+                                        },
+                                    }}
+                                    onRowSelectionModelChange={(newSelectionModel) => {
+                                        setSelectedCertificates(newSelectionModel as string[]);
+                                    }}
+                                    rowSelectionModel={selectedCertificates}
+                                />
+                            </Box>
                         </>
                     )}
                 </DialogContent>
@@ -7373,15 +7524,7 @@ const HostDetail = () => {
                 fullWidth
             >
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    {childHostFormData.childType === 'lxd'
-                        ? t('hostDetail.createLxdContainerTitle', 'Create LXD Container')
-                        : childHostFormData.childType === 'vmm'
-                        ? t('hostDetail.createVmmVmTitle', 'Create VMM Virtual Machine')
-                        : childHostFormData.childType === 'kvm'
-                        ? t('hostDetail.createKvmVmTitle', 'Create KVM Virtual Machine')
-                        : childHostFormData.childType === 'bhyve'
-                        ? t('hostDetail.createBhyveVmTitle', 'Create bhyve Virtual Machine')
-                        : t('hostDetail.createChildHostTitle', 'Create WSL Instance')}
+                    {getCreateChildHostTitle()}
                     <IconButton
                         onClick={() => {
                             setChildHostFormValidated(false);
@@ -7440,7 +7583,7 @@ const HostDetail = () => {
                                 value={childHostFormData.containerName}
                                 onChange={(e) => setChildHostFormData({
                                     ...childHostFormData,
-                                    containerName: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+                                    containerName: e.target.value.toLowerCase().replaceAll(/[^a-z0-9-]/g, '')
                                 })}
                                 disabled={createChildHostLoading}
                                 sx={{ mb: 2 }}
@@ -7455,7 +7598,7 @@ const HostDetail = () => {
                             onChange={(e) => {
                                 const newHostname = e.target.value;
                                 // For VMM, KVM, and bhyve, auto-compute vmName from short hostname
-                                const shortName = newHostname.split('.')[0].toLowerCase().replace(/[^a-z0-9-]/g, '');
+                                const shortName = newHostname.split('.')[0].toLowerCase().replaceAll(/[^a-z0-9-]/g, '');
                                 setChildHostFormData({
                                     ...childHostFormData,
                                     hostname: newHostname,
@@ -7473,8 +7616,10 @@ const HostDetail = () => {
                             value={computedFqdn}
                             disabled
                             sx={{ mb: 2 }}
-                            InputProps={{
-                                readOnly: true,
+                            slotProps={{
+                                input: {
+                                    readOnly: true,
+                                },
                             }}
                             helperText={childHostFormData.childType === 'lxd'
                                 ? t('hostDetail.childHostFqdnHelpLxd', 'This FQDN will be used for the LXD container')
@@ -7495,8 +7640,10 @@ const HostDetail = () => {
                                 value={childHostFormData.vmName}
                                 disabled
                                 sx={{ mb: 2 }}
-                                InputProps={{
-                                    readOnly: true,
+                                slotProps={{
+                                    input: {
+                                        readOnly: true,
+                                    },
                                 }}
                                 helperText={t('hostDetail.childHostVmNameHelpReadonly', 'VM name is derived from the hostname')}
                             />

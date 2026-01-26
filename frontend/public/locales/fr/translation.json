@@ -1050,6 +1050,7 @@
     "deleteSelected": "Supprimer la Sélection",
     "deleteSelectedExecutions": "Supprimer les Exécutions Sélectionnées",
     "deleteSuccess": "Script supprimé avec succès",
+    "deleteMultipleSuccess": "Scripts supprimés avec succès",
     "description": "Description",
     "duplicate": "Dupliquer",
     "edit": "Modifier",

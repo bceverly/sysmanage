@@ -138,9 +138,9 @@ const Settings: React.FC = () => {
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
-    const hash = window.location.hash.slice(1); // Remove # prefix
+    const hash = globalThis.location.hash.slice(1); // Remove # prefix
     const tabIndex = tabNames.indexOf(hash);
-    return tabIndex >= 0 ? tabIndex : 0;
+    return Math.max(tabIndex, 0);
   };
 
   // Tab state
@@ -151,7 +151,7 @@ const Settings: React.FC = () => {
     setActiveTab(newValue);
     // Safely access array element with bounds check
     if (newValue >= 0 && newValue < tabNames.length) {
-      window.location.hash = tabNames[newValue]; // nosemgrep: detect-object-injection
+      globalThis.location.hash = tabNames[newValue]; // nosemgrep: detect-object-injection
     }
 
     // Load queue messages when switching to queue tab
@@ -164,33 +164,31 @@ const Settings: React.FC = () => {
       loadPackageSummary();
       // Start 30-second auto-refresh timer for package cards
       if (packageRefreshInterval) {
-        window.clearInterval(packageRefreshInterval);
+        globalThis.clearInterval(packageRefreshInterval);
       }
-      const interval = window.setInterval(() => {
+      const interval = globalThis.setInterval(() => {
         loadPackageSummary();
       }, 30000);
       setPackageRefreshInterval(interval);
-    } else {
+    } else if (packageRefreshInterval) {
       // Clear interval when leaving Available Packages tab
-      if (packageRefreshInterval) {
-        window.clearInterval(packageRefreshInterval);
-        setPackageRefreshInterval(null);
-      }
+      globalThis.clearInterval(packageRefreshInterval);
+      setPackageRefreshInterval(null);
     }
   };
 
   // Listen for hash changes (browser back/forward)
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.slice(1);
+      const hash = globalThis.location.hash.slice(1);
       const tabIndex = tabNames.indexOf(hash);
       if (tabIndex >= 0) {
         setActiveTab(tabIndex);
       }
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    globalThis.addEventListener('hashchange', handleHashChange);
+    return () => globalThis.removeEventListener('hashchange', handleHashChange);
   }, [tabNames]);
   
   // Queue management state
@@ -311,10 +309,10 @@ const Settings: React.FC = () => {
 
   // Update filtered data when tags change or search is cleared
   useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredTags(tags);
-    } else {
+    if (searchTerm.trim()) {
       performSearch();
+    } else {
+      setFilteredTags(tags);
     }
   }, [tags, searchTerm, searchColumn, performSearch]);
 
@@ -326,7 +324,7 @@ const Settings: React.FC = () => {
   useEffect(() => {
     return () => {
       if (packageRefreshInterval) {
-        window.clearInterval(packageRefreshInterval);
+        globalThis.clearInterval(packageRefreshInterval);
       }
     };
   }, [packageRefreshInterval]);
@@ -924,13 +922,15 @@ const Settings: React.FC = () => {
               label={t('availablePackages.searchTerm', 'Package name')}
               value={packageSearchTerm}
               onChange={(e) => setPackageSearchTerm(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && searchPackages(0, 25)}
-              InputProps={{
-                endAdornment: (
-                  <IconButton onClick={() => searchPackages(0, 25)}>
-                    <SearchIcon />
-                  </IconButton>
-                )
+              onKeyDown={(e) => e.key === 'Enter' && searchPackages(0, 25)}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <IconButton onClick={() => searchPackages(0, 25)}>
+                      <SearchIcon />
+                    </IconButton>
+                  ),
+                },
               }}
             />
           </Grid>

@@ -20,6 +20,9 @@ from cryptography.x509.oid import NameOID
 
 from backend.config.config import get_config
 
+# Constants for certificate attributes
+LOCATION_SAN_FRANCISCO = "San Francisco"
+
 
 class CertificateManager:
     """Manages X.509 certificates for mTLS authentication."""
@@ -81,7 +84,7 @@ class CertificateManager:
             [
                 x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
                 x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "CA"),
-                x509.NameAttribute(NameOID.LOCALITY_NAME, "San Francisco"),
+                x509.NameAttribute(NameOID.LOCALITY_NAME, LOCATION_SAN_FRANCISCO),
                 x509.NameAttribute(NameOID.ORGANIZATION_NAME, "SysManage"),
                 x509.NameAttribute(NameOID.COMMON_NAME, "SysManage CA"),
             ]
@@ -163,7 +166,7 @@ class CertificateManager:
             [
                 x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
                 x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "CA"),
-                x509.NameAttribute(NameOID.LOCALITY_NAME, "San Francisco"),
+                x509.NameAttribute(NameOID.LOCALITY_NAME, LOCATION_SAN_FRANCISCO),
                 x509.NameAttribute(NameOID.ORGANIZATION_NAME, "SysManage"),
                 x509.NameAttribute(NameOID.COMMON_NAME, "SysManage Server"),
             ]
@@ -258,7 +261,7 @@ class CertificateManager:
             [
                 x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
                 x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "CA"),
-                x509.NameAttribute(NameOID.LOCALITY_NAME, "San Francisco"),
+                x509.NameAttribute(NameOID.LOCALITY_NAME, LOCATION_SAN_FRANCISCO),
                 x509.NameAttribute(NameOID.ORGANIZATION_NAME, "SysManage Agent"),
                 x509.NameAttribute(NameOID.COMMON_NAME, hostname),
                 x509.NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, str(host_id)),

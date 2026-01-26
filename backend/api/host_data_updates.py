@@ -16,6 +16,7 @@ from backend.api.host_utils import (
     get_host_users_with_groups,
     validate_host_approval_status,
 )
+from backend.api.error_constants import ERROR_HOST_NOT_FOUND
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import db, models
@@ -28,7 +29,9 @@ queue_ops = QueueOperations()
 
 
 @router.post("/host/{host_id}/update-hardware", dependencies=[Depends(JWTBearer())])
-async def update_host_hardware(host_id: str, hardware_data: dict):
+async def update_host_hardware(
+    host_id: str, hardware_data: dict
+):  # NOSONAR - complex business logic
     """
     Update hardware information for a specific host.
     This endpoint receives hardware data from the agent and stores it in the database.
@@ -43,7 +46,7 @@ async def update_host_hardware(host_id: str, hardware_data: dict):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail=_("Host not found"))
+            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
         # Update hardware fields
         if "cpu_vendor" in hardware_data:
@@ -160,7 +163,7 @@ async def request_hardware_update(host_id: str):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail=_("Host not found"))
+            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
         validate_host_approval_status(host)
 
@@ -280,7 +283,7 @@ async def request_user_access_update(host_id: str):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail=_("Host not found"))
+            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
         validate_host_approval_status(host)
 
@@ -322,7 +325,7 @@ async def request_system_info(host_id: str):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail=_("Host not found"))
+            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
 
         validate_host_approval_status(host)
 

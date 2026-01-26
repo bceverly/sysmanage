@@ -911,8 +911,8 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                                     onChange={(e) => setWindowsRepoType(e.target.value)}
                                     sx={{ mb: 2 }}
                                     helperText={t('thirdPartyRepos.windowsTypeHelp', 'Choose Chocolatey or winget')}
-                                    SelectProps={{
-                                        native: true,
+                                    slotProps={{
+                                        select: { native: true },
                                     }}
                                 >
                                     <option value="chocolatey">Chocolatey</option>

@@ -241,7 +241,7 @@ async def _process_websocket_message(data, connection, db, connection_id):
             await _handle_message_by_type(message, connection, db)
         else:
             # Queue all other messages for background processing
-            await _enqueue_inbound_message(message, connection, db)
+            _enqueue_inbound_message(message, connection, db)
 
     except json.JSONDecodeError:
         # Invalid JSON - send error
@@ -258,7 +258,7 @@ async def _process_websocket_message(data, connection, db, connection_id):
             logger.error("Failed to send error message: %s", send_exc)
 
 
-async def _enqueue_inbound_message(message, connection, db):
+def _enqueue_inbound_message(message, connection, db):
     """
     Enqueue an inbound message for background processing.
     WebSocket thread should ONLY queue messages, not process them.
@@ -401,149 +401,187 @@ async def _handle_diagnostic_result_msg(message, connection, db):
         await connection.send_message(error_msg.to_dict())
 
 
-async def _validate_and_get_host(message_data, connection, db):
+def _extract_host_identifier(message_data, connection, db):
+    """Extract hostname and host_id from message data or connection."""
+    hostname = message_data.get("hostname")
+    host_id = message_data.get("host_id")
+
+    # Fall back to connection hostname
+    if not hostname and not host_id and connection and connection.hostname:
+        hostname = connection.hostname
+        logger.debug("Using connection hostname for validation: %s", hostname)
+
+    # Try to look up by IP address
+    if not hostname and not host_id and connection:
+        hostname = _lookup_host_by_ip(connection, db)
+
+    return hostname, host_id
+
+
+def _lookup_host_by_ip(connection, db):
+    """Look up host by IP address and return hostname if found."""
+    from backend.persistence.models import Host
+
+    if connection.ipv4:
+        logger.debug("Attempting host lookup by IPv4: %s", connection.ipv4)
+        host_by_ip = db.query(Host).filter(Host.ipv4 == connection.ipv4).first()
+        if host_by_ip:
+            logger.debug("Found host by IPv4 address: %s", host_by_ip.fqdn)
+            return host_by_ip.fqdn
+
+    if connection.ipv6:
+        logger.debug("Attempting host lookup by IPv6: %s", connection.ipv6)
+        host_by_ip = db.query(Host).filter(Host.ipv6 == connection.ipv6).first()
+        if host_by_ip:
+            logger.debug("Found host by IPv6 address: %s", host_by_ip.fqdn)
+            return host_by_ip.fqdn
+
+    return None
+
+
+def _get_connection_info(connection):
+    """Gather connection info for audit logging."""
+    connection_info = {}
+    if not connection:
+        return connection_info
+
+    attrs = ["hostname", "ipv4", "ipv6", "platform", "agent_id"]
+    for attr in attrs:
+        value = getattr(connection, attr, None)
+        if value:
+            key = f"connection_{attr}" if attr != "agent_id" else attr
+            connection_info[key] = value
+    return connection_info
+
+
+def _validate_hostname_match(hostname, host):
+    """Validate that hostname matches the host record."""
+    if not hostname:
+        return True
+
+    hostname_lower = hostname.lower()
+    fqdn_lower = host.fqdn.lower()
+    short_name = fqdn_lower.split(".")[0]
+
+    return hostname_lower in {fqdn_lower, short_name}
+
+
+def _log_missing_host_info(db, message_data, connection):
+    """Log audit entry for missing host info."""
+    connection_info = _get_connection_info(connection)
+    AuditService.log(
+        db=db,
+        action_type=ActionType.AGENT_MESSAGE,
+        entity_type=EntityType.AGENT,
+        entity_id=None,
+        entity_name="unknown",
+        description=_("Agent message validation failed: missing hostname and host_id"),
+        result=Result.FAILURE,
+        details={
+            "message_data_keys": list(message_data.keys()) if message_data else [],
+            **connection_info,
+        },
+        error_message="Message missing both hostname and host_id",
+    )
+
+
+def _log_unregistered_host(db, hostname, host_id):
+    """Log audit entry for unregistered host."""
+    host_name = hostname or f"host_id:{host_id}"
+    AuditService.log(
+        db=db,
+        action_type=ActionType.AGENT_MESSAGE,
+        entity_type=EntityType.AGENT,
+        entity_id=None,
+        entity_name=host_name,
+        description=_("Agent message from unregistered host: {hostname}").format(
+            hostname=host_name
+        ),
+        result=Result.FAILURE,
+        details={"hostname": hostname, "host_id": str(host_id) if host_id else None},
+        error_message="Host not registered",
+    )
+
+
+def _log_unapproved_host(db, host, hostname):
+    """Log audit entry for unapproved host."""
+    AuditService.log(
+        db=db,
+        action_type=ActionType.AGENT_MESSAGE,
+        entity_type=EntityType.HOST,
+        entity_id=str(host.id),
+        entity_name=hostname,
+        description=_("Agent message from unapproved host: {hostname}").format(
+            hostname=hostname
+        ),
+        result=Result.FAILURE,
+        details={"hostname": hostname, "approval_status": host.approval_status},
+        error_message="Host not approved",
+    )
+
+
+async def _validate_and_get_host(message_data, connection, db):  # NOSONAR
     """
     Validate host registration and approval status for inventory messages.
 
     Returns:
         tuple: (host_object, error_message) - host_object is None if validation fails
     """
+    from backend.persistence.models import Host
+    from sqlalchemy import func
+
     logger.debug(
         "Validating host with message data keys: %s",
         list(message_data.keys()) if message_data else [],
     )
-    hostname = message_data.get("hostname")
-    host_id = message_data.get("host_id")
 
-    # Fall back to connection hostname if message doesn't include it
-    if not hostname and not host_id and connection and connection.hostname:
-        hostname = connection.hostname
-        logger.debug(
-            "Using connection hostname for validation: %s",
-            hostname,
-        )
-
-    # If still no hostname/host_id, try to look up by IP address
-    if not hostname and not host_id and connection:
-        from backend.persistence.models import Host
-
-        host_by_ip = None
-        if connection.ipv4:
-            logger.debug("Attempting host lookup by IPv4: %s", connection.ipv4)
-            host_by_ip = db.query(Host).filter(Host.ipv4 == connection.ipv4).first()
-
-        if not host_by_ip and connection.ipv6:
-            logger.debug("Attempting host lookup by IPv6: %s", connection.ipv6)
-            host_by_ip = db.query(Host).filter(Host.ipv6 == connection.ipv6).first()
-
-        if host_by_ip:
-            hostname = host_by_ip.fqdn
-            logger.debug(
-                "Found host by IP address: %s",
-                hostname,
-            )
-
-    logger.debug(
-        "Extracted hostname=%s, host_id=%s for validation",
-        hostname,
-        host_id,
-    )
+    hostname, host_id = _extract_host_identifier(message_data, connection, db)
+    logger.debug("Extracted hostname=%s, host_id=%s for validation", hostname, host_id)
 
     # Must have either hostname or host_id
     if not hostname and not host_id:
         logger.error("Message missing both hostname and host_id - cannot validate host")
-
-        # Gather connection info for audit log
-        connection_info = {}
-        if connection:
-            if connection.hostname:
-                connection_info["connection_hostname"] = connection.hostname
-            if connection.ipv4:
-                connection_info["connection_ipv4"] = connection.ipv4
-            if connection.ipv6:
-                connection_info["connection_ipv6"] = connection.ipv6
-            if connection.platform:
-                connection_info["connection_platform"] = connection.platform
-            if connection.agent_id:
-                connection_info["agent_id"] = connection.agent_id
-
-        # Log validation failure
-        AuditService.log(
-            db=db,
-            action_type=ActionType.AGENT_MESSAGE,
-            entity_type=EntityType.AGENT,
-            entity_id=None,
-            entity_name="unknown",
-            description=_(
-                "Agent message validation failed: missing hostname and host_id"
-            ),
-            result=Result.FAILURE,
-            details={
-                "message_data_keys": list(message_data.keys()) if message_data else [],
-                **connection_info,
-            },
-            error_message="Message missing both hostname and host_id",
-        )
-
-        error_msg = ErrorMessage(
+        _log_missing_host_info(db, message_data, connection)
+        return None, ErrorMessage(
             "missing_host_info",
             _("Message must include hostname or host_id for host validation"),
         )
-        return None, error_msg
 
-    # Look up host in database
-    from backend.persistence.models import Host
-
-    # Refresh the database session to ensure we see the latest data
-    logger.debug("Refreshing database session for host validation")
+    # Refresh database session
     db.expire_all()
     db.flush()
 
-    # If host_id is provided, validate it first
+    # Look up host
+    host = None
     if host_id is not None:
         logger.debug("Validating message with host_id: %s", host_id)
         host = db.query(Host).filter(Host.id == host_id).first()
-        logger.debug("Host lookup result: %s", host.fqdn if host else "Not found")
 
         if not host:
             logger.warning(
                 "Host ID %s not found - sending stale host_id error", host_id
             )
-            error_msg = ErrorMessage(
-                "host_not_registered",
-                _("Host ID no longer valid - please re-register"),
+            return None, ErrorMessage(
+                "host_not_registered", _("Host ID no longer valid - please re-register")
             )
-            return None, error_msg
 
-        # Verify that the host_id matches the hostname (case-insensitive) if hostname is provided
-        # Allow both short hostname and FQDN to match
-        if hostname:
-            hostname_lower = hostname.lower()
-            fqdn_lower = host.fqdn.lower()
-            short_name = fqdn_lower.split(".")[0]  # Extract short name from FQDN
-
-            if hostname_lower not in {fqdn_lower, short_name}:
-                logger.warning(
-                    "Host ID %s hostname mismatch (expected: %s or %s, got: %s) - sending error",
-                    host_id,
-                    host.fqdn,
-                    short_name,
-                    hostname,
-                )
-                error_msg = ErrorMessage(
-                    "host_not_registered",
-                    _("Host ID and hostname mismatch - please re-register"),
-                )
-                return None, error_msg
+        if not _validate_hostname_match(hostname, host):
+            logger.warning(
+                "Host ID %s hostname mismatch (expected: %s, got: %s)",
+                host_id,
+                host.fqdn,
+                hostname,
+            )
+            return None, ErrorMessage(
+                "host_not_registered",
+                _("Host ID and hostname mismatch - please re-register"),
+            )
 
         logger.info(
             "Host ID validation successful for host %s (ID: %s)", host.fqdn, host_id
         )
     else:
-        # No host_id provided, fall back to hostname lookup (case-insensitive)
         logger.info("No host_id provided, validating by hostname: %s", hostname)
-        from sqlalchemy import func
-
         host = db.query(Host).filter(func.lower(Host.fqdn) == hostname.lower()).first()
 
     if not host:
@@ -551,30 +589,10 @@ async def _validate_and_get_host(message_data, connection, db):
         logger.warning(
             "Host %s not registered - sending registration required error", host_name
         )
-
-        # Log host not registered
-        AuditService.log(
-            db=db,
-            action_type=ActionType.AGENT_MESSAGE,
-            entity_type=EntityType.AGENT,
-            entity_id=None,
-            entity_name=host_name,
-            description=_("Agent message from unregistered host: {hostname}").format(
-                hostname=host_name
-            ),
-            result=Result.FAILURE,
-            details={
-                "hostname": hostname,
-                "host_id": str(host_id) if host_id else None,
-            },
-            error_message="Host not registered",
+        _log_unregistered_host(db, hostname, host_id)
+        return None, ErrorMessage(
+            "host_not_registered", _("Host must register before sending inventory data")
         )
-
-        error_msg = ErrorMessage(
-            "host_not_registered",
-            _("Host must register before sending inventory data"),
-        )
-        return None, error_msg
 
     if host.approval_status != "approved":
         logger.warning(
@@ -582,26 +600,10 @@ async def _validate_and_get_host(message_data, connection, db):
             host.fqdn,
             host.approval_status,
         )
-
-        # Log unapproved host attempt
-        AuditService.log(
-            db=db,
-            action_type=ActionType.AGENT_MESSAGE,
-            entity_type=EntityType.HOST,
-            entity_id=str(host.id),
-            entity_name=hostname,
-            description=_("Agent message from unapproved host: {hostname}").format(
-                hostname=hostname
-            ),
-            result=Result.FAILURE,
-            details={"hostname": hostname, "approval_status": host.approval_status},
-            error_message="Host not approved",
-        )
-
-        error_msg = ErrorMessage(
+        _log_unapproved_host(db, host, hostname)
+        return None, ErrorMessage(
             "host_not_approved", _("Host registration pending approval")
         )
-        return None, error_msg
 
     return host, None
 

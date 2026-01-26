@@ -30,9 +30,9 @@ import {
 } from '@mui/icons-material';
 
 interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
+  readonly children?: React.ReactNode;
+  readonly index: number;
+  readonly value: number;
 }
 
 function TabPanel(props: TabPanelProps) {
@@ -51,7 +51,7 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-interface ReportCard {
+interface ReportCardData {
   id: string;
   name: string;
   description: string;
@@ -59,6 +59,111 @@ interface ReportCard {
   screenshot: string;
   tags: string[];
 }
+
+interface ReportCardComponentProps {
+  report: ReportCardData;
+  onView: (reportId: string) => void;
+  onGenerate: (reportId: string) => void;
+  canViewReport: boolean;
+  canGeneratePdfReport: boolean;
+}
+
+const ReportCard: React.FC<ReportCardComponentProps> = ({
+  report,
+  onView,
+  onGenerate,
+  canViewReport,
+  canGeneratePdfReport,
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+      <Card
+        sx={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'transform 0.2s, box-shadow 0.2s',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: 4,
+          }
+        }}
+      >
+        <CardMedia
+          component="img"
+          height="200"
+          image={report.screenshot}
+          alt={report.name}
+          sx={{
+            objectFit: 'cover',
+            backgroundColor: 'rgba(0,0,0,0.1)',
+            border: '1px solid rgba(255,255,255,0.1)'
+          }}
+          onError={(e) => {
+            // Fallback to placeholder if screenshot doesn't exist
+            (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjMzc0MTUxIi8+CjxyZWN0IHg9IjIwIiB5PSIyMCIgd2lkdGg9IjI2MCIgaGVpZ2h0PSIxNjAiIGZpbGw9IiM0QTU1NjgiLz4KPHN2ZyB4PSI5NSIgeT0iNjAiIHdpZHRoPSIxMTAiIGhlaWdodD0iODAiIGZpbGw9IiM2Qjc0ODQiPgo8cGF0aCBkPSJNMTAgMTBINTBWNDBIMTBWMTBaIi8+CjxwYXRoIGQ9Ik02MCAyMEgxMDBWNDBINjBWMjBaIi8+CjxwYXRoIGQ9Ik0xMCA2MEg3MFY3MEgxMFY2MFoiLz4KPHN2ZyB4PSIxMzAiIHk9IjEyMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjOUNBM0FGIIB2aWV3Qm94PSIwIDAgMjQgMjQiPgo8cGF0aCBkPSJNMTQgMlY2SDE2TDE0IDhMMTEgNUwxNCAyWk02IDJWMjBMMTggMjBWOEwxMiAySDZaTTggNEgxMFY2SDhWNFpNOCA4SDEwVjEwSDhWOFpNOCAxMkgxNlYxNEg4VjEyWk04IDE2SDE2VjE4SDhWMTZaIi8+Cjwvc3ZnPgo8L3N2Zz4=';
+          }}
+        />
+        <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+          <Typography gutterBottom variant="h6" component="div" sx={{ fontWeight: 600 }}>
+            {report.name}
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              flexGrow: 1,
+              mb: 2,
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+            }}
+          >
+            {report.description}
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            {report.tags.map((tag) => (
+              <Chip
+                key={tag}
+                label={tag}
+                size="small"
+                variant="outlined"
+                sx={{ fontSize: '0.7rem' }}
+              />
+            ))}
+          </Box>
+        </CardContent>
+        <Box sx={{ p: 2, pt: 0, display: 'flex', gap: 1 }}>
+          {canViewReport && (
+            <Button
+              variant="outlined"
+              startIcon={<ViewIcon />}
+              fullWidth
+              size="small"
+              onClick={() => onView(report.id)}
+            >
+              {t('reports.viewReport', 'View Report')}
+            </Button>
+          )}
+          {canGeneratePdfReport && (
+            <Button
+              variant="contained"
+              startIcon={<DownloadIcon />}
+              fullWidth
+              size="small"
+              onClick={() => onGenerate(report.id)}
+            >
+              {t('reports.generatePdf', 'Generate PDF')}
+            </Button>
+          )}
+        </Box>
+      </Card>
+    </Grid>
+  );
+};
 
 const Reports: React.FC = () => {
   const { t } = useTranslation();
@@ -69,9 +174,9 @@ const Reports: React.FC = () => {
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
-    const hash = window.location.hash.slice(1);
+    const hash = globalThis.location.hash.slice(1);
     const tabIndex = tabNames.indexOf(hash);
-    return tabIndex >= 0 ? tabIndex : 0;
+    return Math.max(tabIndex, 0);
   };
 
   const [tabValue, setTabValue] = useState(getInitialTab);
@@ -82,22 +187,22 @@ const Reports: React.FC = () => {
     setSearchTerm(''); // Clear search when switching tabs
     // Safely access array element with bounds check
     if (newValue >= 0 && newValue < tabNames.length) {
-      window.location.hash = tabNames[newValue]; // nosemgrep: detect-object-injection
+      globalThis.location.hash = tabNames[newValue]; // nosemgrep: detect-object-injection
     }
   };
 
   // Listen for hash changes (browser back/forward)
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.slice(1);
+      const hash = globalThis.location.hash.slice(1);
       const tabIndex = tabNames.indexOf(hash);
       if (tabIndex >= 0) {
         setTabValue(tabIndex);
       }
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    globalThis.addEventListener('hashchange', handleHashChange);
+    return () => globalThis.removeEventListener('hashchange', handleHashChange);
   }, [tabNames]);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchField, setSearchField] = useState<'name' | 'description'>('name');
@@ -125,7 +230,7 @@ const Reports: React.FC = () => {
   const filteredReports = useMemo(() => {
     // Get the backend base URL for screenshots
     const getBackendBaseURL = () => {
-      const currentHost = window.location.hostname;
+      const currentHost = globalThis.location.hostname;
       const backendPort = 8080; // This should match your config file
       return `http://${currentHost}:${backendPort}`;
     };
@@ -133,7 +238,7 @@ const Reports: React.FC = () => {
     const baseURL = getBackendBaseURL();
 
     // Mock data for reports - in real implementation, this would come from API
-    const availableReports: ReportCard[] = [
+    const availableReports: ReportCardData[] = [
       {
         id: 'registered-hosts',
         name: 'Registered Hosts',
@@ -200,7 +305,13 @@ const Reports: React.FC = () => {
       }
     ];
 
-    const categoryFilter = tabValue === 0 ? 'hosts' : tabValue === 1 ? 'users' : 'security';
+    // Determine category based on tab value
+    const getCategoryFromTab = (tab: number): 'hosts' | 'users' | 'security' => {
+      if (tab === 0) return 'hosts';
+      if (tab === 1) return 'users';
+      return 'security';
+    };
+    const categoryFilter = getCategoryFromTab(tabValue);
     return availableReports
       .filter(report => report.category === categoryFilter)
       .filter(report => {
@@ -235,19 +346,19 @@ const Reports: React.FC = () => {
       // Get the filename from the Content-Disposition header
       const contentDisposition = response.headers['content-disposition'];
       const filename = contentDisposition
-        ? contentDisposition.split('filename=')[1]?.replace(/"/g, '')
+        ? contentDisposition.split('filename=')[1]?.replaceAll('"', '')
         : `${reportId}_${new Date().toISOString().slice(0, 10)}.pdf`;
 
       // Create blob and download
       const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
+      const url = globalThis.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      link.remove();
+      globalThis.URL.revokeObjectURL(url);
 
     } catch (error) {
       console.error('Error generating report:', error);
@@ -255,93 +366,6 @@ const Reports: React.FC = () => {
       alert(`Error generating report: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
-
-  const ReportCard: React.FC<{ report: ReportCard }> = ({ report }) => (
-    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-      <Card
-        sx={{
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          transition: 'transform 0.2s, box-shadow 0.2s',
-          '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: 4,
-          }
-        }}
-      >
-        <CardMedia
-          component="img"
-          height="200"
-          image={report.screenshot}
-          alt={report.name}
-          sx={{
-            objectFit: 'cover',
-            backgroundColor: 'rgba(0,0,0,0.1)',
-            border: '1px solid rgba(255,255,255,0.1)'
-          }}
-          onError={(e) => {
-            // Fallback to placeholder if screenshot doesn't exist
-            (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjMzc0MTUxIi8+CjxyZWN0IHg9IjIwIiB5PSIyMCIgd2lkdGg9IjI2MCIgaGVpZ2h0PSIxNjAiIGZpbGw9IiM0QTU1NjgiLz4KPHN2ZyB4PSI5NSIgeT0iNjAiIHdpZHRoPSIxMTAiIGhlaWdodD0iODAiIGZpbGw9IiM2Qjc0ODQiPgo8cGF0aCBkPSJNMTAgMTBINTBWNDBIMTBWMTBaIi8+CjxwYXRoIGQ9Ik02MCAyMEgxMDBWNDBINjBWMjBaIi8+CjxwYXRoIGQ9Ik0xMCA2MEg3MFY3MEgxMFY2MFoiLz4KPHN2ZyB4PSIxMzAiIHk9IjEyMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjOUNBM0FGIIB2aWV3Qm94PSIwIDAgMjQgMjQiPgo8cGF0aCBkPSJNMTQgMlY2SDE2TDE0IDhMMTEgNUwxNCAyWk02IDJWMjBMMTggMjBWOEwxMiAySDZaTTggNEgxMFY2SDhWNFpNOCA4SDEwVjEwSDhWOFpNOCAxMkgxNlYxNEg4VjEyWk04IDE2SDE2VjE4SDhWMTZaIi8+Cjwvc3ZnPgo8L3N2Zz4=';
-          }}
-        />
-        <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-          <Typography gutterBottom variant="h6" component="div" sx={{ fontWeight: 600 }}>
-            {report.name}
-          </Typography>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              flexGrow: 1,
-              mb: 2,
-              overflow: 'hidden',
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-            }}
-          >
-            {report.description}
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {report.tags.map((tag) => (
-              <Chip
-                key={tag}
-                label={tag}
-                size="small"
-                variant="outlined"
-                sx={{ fontSize: '0.7rem' }}
-              />
-            ))}
-          </Box>
-        </CardContent>
-        <Box sx={{ p: 2, pt: 0, display: 'flex', gap: 1 }}>
-          {canViewReport && (
-            <Button
-              variant="outlined"
-              startIcon={<ViewIcon />}
-              fullWidth
-              size="small"
-              onClick={() => handleViewReport(report.id)}
-            >
-              {t('reports.viewReport', 'View Report')}
-            </Button>
-          )}
-          {canGeneratePdfReport && (
-            <Button
-              variant="contained"
-              startIcon={<DownloadIcon />}
-              fullWidth
-              size="small"
-              onClick={() => handleGenerateReport(report.id)}
-            >
-              {t('reports.generatePdf', 'Generate PDF')}
-            </Button>
-          )}
-        </Box>
-      </Card>
-    </Grid>
-  );
 
   return (
     <div className="container">
@@ -373,12 +397,14 @@ const Reports: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               size="small"
               sx={{ minWidth: 300 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                },
               }}
             />
             <FormControl size="small" sx={{ minWidth: 140 }}>
@@ -396,7 +422,14 @@ const Reports: React.FC = () => {
 
           <Grid container spacing={3}>
             {filteredReports.map((report) => (
-              <ReportCard key={report.id} report={report} />
+              <ReportCard
+                key={report.id}
+                report={report}
+                onView={handleViewReport}
+                onGenerate={handleGenerateReport}
+                canViewReport={canViewReport}
+                canGeneratePdfReport={canGeneratePdfReport}
+              />
             ))}
           </Grid>
 
@@ -418,12 +451,14 @@ const Reports: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               size="small"
               sx={{ minWidth: 300 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                },
               }}
             />
             <FormControl size="small" sx={{ minWidth: 140 }}>
@@ -441,7 +476,14 @@ const Reports: React.FC = () => {
 
           <Grid container spacing={3}>
             {filteredReports.map((report) => (
-              <ReportCard key={report.id} report={report} />
+              <ReportCard
+                key={report.id}
+                report={report}
+                onView={handleViewReport}
+                onGenerate={handleGenerateReport}
+                canViewReport={canViewReport}
+                canGeneratePdfReport={canGeneratePdfReport}
+              />
             ))}
           </Grid>
 
@@ -463,12 +505,14 @@ const Reports: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               size="small"
               sx={{ minWidth: 300 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                },
               }}
             />
             <FormControl size="small" sx={{ minWidth: 140 }}>
@@ -486,7 +530,14 @@ const Reports: React.FC = () => {
 
           <Grid container spacing={3}>
             {filteredReports.map((report) => (
-              <ReportCard key={report.id} report={report} />
+              <ReportCard
+                key={report.id}
+                report={report}
+                onView={handleViewReport}
+                onGenerate={handleGenerateReport}
+                canViewReport={canViewReport}
+                canGeneratePdfReport={canGeneratePdfReport}
+              />
             ))}
           </Grid>
 

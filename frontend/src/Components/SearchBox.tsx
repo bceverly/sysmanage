@@ -44,12 +44,14 @@ const SearchBox: React.FC<SearchBoxProps> = ({
         label={placeholder || t('search.searchTerm', 'Search')}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon />
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          },
         }}
         sx={{ minWidth: 250, flexGrow: 1 }}
       />

@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from sqlalchemy import delete, update
 from sqlalchemy.orm import Session
 
+from backend.api.error_constants import ERROR_HOST_NOT_REGISTERED
 from backend.i18n import _
 from backend.persistence.models import (
     AvailablePackage,
@@ -29,7 +30,7 @@ debug_logger = logging.getLogger("debug_logger")
 queue_ops = QueueOperations()
 
 
-async def is_new_os_version_combination(
+async def is_new_os_version_combination(  # NOSONAR - async for interface consistency
     db: Session, os_name: str, os_version: str
 ) -> bool:
     """
@@ -54,7 +55,9 @@ async def is_new_os_version_combination(
     return existing_packages is None
 
 
-async def handle_os_version_update(db: Session, connection, message_data: dict):
+async def handle_os_version_update(
+    db: Session, connection, message_data: dict
+):  # NOSONAR - complex business logic
     """Handle OS version update message from agent."""
     from backend.utils.host_validation import validate_host_id
 
@@ -64,7 +67,7 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": _("Host not registered"),
+            "message": ERROR_HOST_NOT_REGISTERED(),
             "data": {},
         }
 
@@ -98,7 +101,7 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
                 return {
                     "message_type": "error",
                     "error_type": "host_not_registered",
-                    "message": _("Host not registered"),
+                    "message": ERROR_HOST_NOT_REGISTERED(),
                     "data": {},
                 }
         # If no hostname, try IP lookup via websocket client
@@ -112,14 +115,14 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
                 return {
                     "message_type": "error",
                     "error_type": "host_not_registered",
-                    "message": _("Host not registered"),
+                    "message": ERROR_HOST_NOT_REGISTERED(),
                     "data": {},
                 }
         else:
             return {
                 "message_type": "error",
                 "error_type": "host_not_registered",
-                "message": _("Host not registered"),
+                "message": ERROR_HOST_NOT_REGISTERED(),
                 "data": {},
             }
 
@@ -259,7 +262,9 @@ async def handle_os_version_update(db: Session, connection, message_data: dict):
         }
 
 
-async def handle_hardware_update(db: Session, connection, message_data: dict):
+async def handle_hardware_update(
+    db: Session, connection, message_data: dict
+):  # NOSONAR - complex business logic
     """Handle hardware information update message from agent."""
     from backend.utils.host_validation import validate_host_id
 
@@ -269,7 +274,7 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": _("Host not registered"),
+            "message": ERROR_HOST_NOT_REGISTERED(),
             "data": {},
         }
 
@@ -277,7 +282,7 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": _("Host not registered"),
+            "message": ERROR_HOST_NOT_REGISTERED(),
             "data": {},
         }
 
@@ -447,8 +452,8 @@ async def handle_hardware_update(db: Session, connection, message_data: dict):
         }
 
 
-async def handle_ubuntu_pro_update(
-    db: Session, connection, message_data: dict, host: Host
+async def handle_ubuntu_pro_update(  # NOSONAR - async handler
+    db: Session, _connection, message_data: dict, host: Host
 ):
     """Handle Ubuntu Pro information update from agent OS version message."""
     try:

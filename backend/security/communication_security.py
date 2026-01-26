@@ -18,6 +18,9 @@ from backend.i18n import _
 
 logger = logging.getLogger(__name__)
 
+# Constants for log message formats
+LOG_MSG_FROM_CONNECTION = "%s from connection %s"
+
 
 class WebSocketSecurityManager:
     """Manages security for WebSocket communications between agents and server."""
@@ -170,7 +173,7 @@ class WebSocketSecurityManager:
                     f"Missing required field '{field}' in {message_type} message"
                 )
                 logger.warning(
-                    "%s from connection %s",
+                    LOG_MSG_FROM_CONNECTION,
                     error_msg,
                     connection_id,
                 )
@@ -191,7 +194,7 @@ class WebSocketSecurityManager:
                 ):  # 30 minutes (increased tolerance for inventory messages after host approval)
                     error_msg = f"Message timestamp too old ({int(time_diff)}s) in {message_type} message"
                     logger.warning(
-                        "%s from connection %s",
+                        LOG_MSG_FROM_CONNECTION,
                         error_msg,
                         connection_id,
                     )
@@ -199,7 +202,7 @@ class WebSocketSecurityManager:
             except (ValueError, AttributeError):
                 error_msg = f"Invalid timestamp format in {message_type} message"
                 logger.warning(
-                    "%s from connection %s",
+                    LOG_MSG_FROM_CONNECTION,
                     error_msg,
                     connection_id,
                 )
@@ -212,7 +215,7 @@ class WebSocketSecurityManager:
             if len(message_id) < 20 or not message_id.replace("-", "").isalnum():
                 error_msg = f"Invalid message_id format '{message_id[:20]}...' in {message_type} message"
                 logger.warning(
-                    "%s from connection %s",
+                    LOG_MSG_FROM_CONNECTION,
                     error_msg,
                     connection_id,
                 )
@@ -284,7 +287,7 @@ class WebSocketSecurityManager:
 
         # Also clean up old connection attempts
         cutoff_time = current_time - 3600  # 1 hour
-        for client_ip in list(self.connection_attempts.keys()):
+        for client_ip in list(self.connection_attempts):
             self.connection_attempts[client_ip] = [
                 timestamp
                 for timestamp in self.connection_attempts[client_ip]
@@ -397,8 +400,8 @@ class MessageEncryption:
             data = json.loads(data_json)
             return True, data, "Decryption successful"
 
-        except (json.JSONDecodeError, KeyError, ValueError) as e:
-            return False, None, _("Decryption failed: %s") % str(e)
+        except (json.JSONDecodeError, KeyError, ValueError):
+            return False, None, _("Decryption failed")
 
 
 # Global instances

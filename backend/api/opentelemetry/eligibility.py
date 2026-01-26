@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
     dependencies=[Depends(JWTBearer())],
     response_model=OpenTelemetryEligibilityResponse,
 )
-async def check_opentelemetry_eligibility(
+async def check_opentelemetry_eligibility(  # NOSONAR - complex business logic
     host_id: str,
     current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db),

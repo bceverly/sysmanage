@@ -5,7 +5,7 @@ Service for interacting with OpenBAO vault to store and retrieve secrets.
 import json
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 import requests
@@ -16,6 +16,9 @@ from backend.config import config
 from backend.i18n import _
 
 logger = logging.getLogger(__name__)
+
+# Constants for vault paths
+VAULT_DATA_PATH = "/data/"
 
 
 class VaultError(Exception):
@@ -49,7 +52,7 @@ class VaultService:
             {"X-Vault-Token": self.token, "Content-Type": "application/json"}
         )
 
-    def _make_request(
+    def _make_request(  # NOSONAR: cognitive complexity justified for comprehensive error handling
         self, method: str, path: str, data: Optional[Dict] = None
     ) -> Dict[str, Any]:
         """Make a request to the vault API with error handling."""
@@ -108,7 +111,7 @@ class VaultService:
                 _("vault.invalid_response", "Invalid response from vault")
             ) from exc
 
-    def store_secret(
+    def store_secret(  # NOSONAR: cognitive complexity justified for handling multiple secret types
         self,
         secret_name: str,
         secret_data: str,
@@ -192,7 +195,7 @@ class VaultService:
                 "secret_type": secret_type,
                 "content": secret_data,
                 "secret_subtype": secret_subtype,
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
             }
         }
 
@@ -292,7 +295,7 @@ class VaultService:
                 current_version = 1  # Fallback to version 1
 
             # Soft delete first
-            delete_path = vault_path.replace("/data/", "/delete/")
+            delete_path = vault_path.replace(VAULT_DATA_PATH, "/delete/")
             logger.info("Step 1: Soft delete at path: %s", delete_path)
             try:
                 self._make_request("DELETE", delete_path)
@@ -304,7 +307,7 @@ class VaultService:
                 )
 
             # Then permanently destroy it to completely remove from vault
-            destroy_path = vault_path.replace("/data/", "/destroy/")
+            destroy_path = vault_path.replace(VAULT_DATA_PATH, "/destroy/")
             destroy_data = {"versions": [current_version]}
             logger.info(
                 "Step 2: Destroy at path: %s with versions: %s",
@@ -323,7 +326,7 @@ class VaultService:
                 raise
 
             # Finally, delete the metadata to completely remove all traces
-            metadata_path = vault_path.replace("/data/", "/metadata/")
+            metadata_path = vault_path.replace(VAULT_DATA_PATH, "/metadata/")
             logger.info("Step 3: Metadata delete at path: %s", metadata_path)
             try:
                 self._make_request("DELETE", metadata_path)

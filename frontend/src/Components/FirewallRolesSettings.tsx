@@ -169,6 +169,17 @@ const FirewallRolesSettings: React.FC = () => {
     setSnackbarOpen(true);
   };
 
+  // Helper to extract error message from API response
+  const extractApiErrorMessage = (err: unknown, defaultMessage: string): string => {
+    const detail = (err as { response?: { data?: { detail?: string | Array<{ msg?: string }> } } })?.response?.data?.detail;
+    if (!detail) return defaultMessage;
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail) && detail.length > 0) {
+      return detail[0]?.msg || defaultMessage;
+    }
+    return defaultMessage;
+  };
+
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
   };
@@ -224,64 +235,83 @@ const FirewallRolesSettings: React.FC = () => {
     setEndPort('');
   };
 
+  // Helper to create a port entry with current protocol and IP version settings
+  const createPortEntry = (portNumber: number, isIpv4: boolean, isIpv6: boolean): PortEntry => ({
+    port_number: portNumber,
+    tcp: portProtocol === 'tcp' || portProtocol === 'both',
+    udp: portProtocol === 'udp' || portProtocol === 'both',
+    ipv4: isIpv4,
+    ipv6: isIpv6,
+  });
+
+  // Helper to validate and parse a port range
+  const parsePortRange = (): { start: number; end: number } | null => {
+    const start = Number.parseInt(startPort, 10);
+    const end = Number.parseInt(endPort, 10);
+    if (Number.isNaN(start) || Number.isNaN(end) || start < 1 || end > 65535 || start > end) {
+      return null;
+    }
+    return { start, end };
+  };
+
+  // Helper to validate and parse a custom port number
+  const parseCustomPort = (portString: string): number | null => {
+    const portNum = Number.parseInt(portString, 10);
+    if (Number.isNaN(portNum) || portNum < 1 || portNum > 65535) {
+      return null;
+    }
+    return portNum;
+  };
+
+  // Helper to merge new ports with existing ports
+  const mergePortsWithExisting = (portsToAdd: PortEntry[], existingPorts: PortEntry[]): PortEntry[] => {
+    const updatedPorts = [...existingPorts];
+    for (const newPort of portsToAdd) {
+      const existingIndex = updatedPorts.findIndex(
+        p => p.port_number === newPort.port_number && p.tcp === newPort.tcp && p.udp === newPort.udp
+      );
+
+      if (existingIndex >= 0) {
+        updatedPorts[existingIndex] = {
+          ...updatedPorts[existingIndex],
+          ipv4: updatedPorts[existingIndex].ipv4 || newPort.ipv4,
+          ipv6: updatedPorts[existingIndex].ipv6 || newPort.ipv6,
+        };
+      } else {
+        updatedPorts.push(newPort);
+      }
+    }
+    return updatedPorts;
+  };
+
   // Handle adding a port to the current form
   const handleAddPort = () => {
-    let portsToAdd: PortEntry[] = [];
-
+    const portsToAdd: PortEntry[] = [];
     const isIpv4 = ipVersion === 'ipv4' || ipVersion === 'both';
     const isIpv6 = ipVersion === 'ipv6' || ipVersion === 'both';
 
     if (selectedPort === 'range') {
-      // Port range
-      const start = parseInt(startPort, 10);
-      const end = parseInt(endPort, 10);
-      if (isNaN(start) || isNaN(end) || start < 1 || end > 65535 || start > end) {
+      const range = parsePortRange();
+      if (!range) {
         showSnackbar(t('firewallRoles.invalidPortNumber'), 'error');
         return;
       }
-      for (let p = start; p <= end; p++) {
-        portsToAdd.push({
-          port_number: p,
-          tcp: portProtocol === 'tcp' || portProtocol === 'both',
-          udp: portProtocol === 'udp' || portProtocol === 'both',
-          ipv4: isIpv4,
-          ipv6: isIpv6,
-        });
+      for (let p = range.start; p <= range.end; p++) {
+        portsToAdd.push(createPortEntry(p, isIpv4, isIpv6));
       }
     } else if (selectedPort === 'custom') {
-      // Custom port
-      const portNum = parseInt(customPort, 10);
-      if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
+      const portNum = parseCustomPort(customPort);
+      if (portNum === null) {
         showSnackbar(t('firewallRoles.invalidPortNumber'), 'error');
         return;
       }
-      portsToAdd.push({
-        port_number: portNum,
-        tcp: portProtocol === 'tcp' || portProtocol === 'both',
-        udp: portProtocol === 'udp' || portProtocol === 'both',
-        ipv4: isIpv4,
-        ipv6: isIpv6,
-      });
+      portsToAdd.push(createPortEntry(portNum, isIpv4, isIpv6));
     } else if (selectedPort === 'any') {
-      // Any port (0 represents any)
-      portsToAdd.push({
-        port_number: 0,
-        tcp: portProtocol === 'tcp' || portProtocol === 'both',
-        udp: portProtocol === 'udp' || portProtocol === 'both',
-        ipv4: isIpv4,
-        ipv6: isIpv6,
-      });
+      portsToAdd.push(createPortEntry(0, isIpv4, isIpv6));
     } else if (selectedPort) {
-      // Common port
-      const portNum = parseInt(selectedPort, 10);
-      if (!isNaN(portNum)) {
-        portsToAdd.push({
-          port_number: portNum,
-          tcp: portProtocol === 'tcp' || portProtocol === 'both',
-          udp: portProtocol === 'udp' || portProtocol === 'both',
-          ipv4: isIpv4,
-          ipv6: isIpv6,
-        });
+      const portNum = parseCustomPort(selectedPort);
+      if (portNum !== null) {
+        portsToAdd.push(createPortEntry(portNum, isIpv4, isIpv6));
       }
     }
 
@@ -290,28 +320,7 @@ const FirewallRolesSettings: React.FC = () => {
       return;
     }
 
-    // Merge with existing ports - update existing entries or add new ones
-    const updatedPorts = [...openPorts];
-    for (const newPort of portsToAdd) {
-      // Find existing port with same port_number and protocol combination
-      const existingIndex = updatedPorts.findIndex(
-        p => p.port_number === newPort.port_number && p.tcp === newPort.tcp && p.udp === newPort.udp
-      );
-
-      if (existingIndex >= 0) {
-        // Update existing port's IP version flags (merge them)
-        updatedPorts[existingIndex] = {
-          ...updatedPorts[existingIndex],
-          ipv4: updatedPorts[existingIndex].ipv4 || newPort.ipv4,
-          ipv6: updatedPorts[existingIndex].ipv6 || newPort.ipv6,
-        };
-      } else {
-        // Add new port
-        updatedPorts.push(newPort);
-      }
-    }
-    setOpenPorts(updatedPorts);
-
+    setOpenPorts(mergePortsWithExisting(portsToAdd, openPorts));
     resetPortForm();
   };
 
@@ -371,19 +380,8 @@ const FirewallRolesSettings: React.FC = () => {
       loadRoles();
     } catch (err: unknown) {
       console.error('Error saving firewall role:', err);
-      let errorMessage = editingRole ? t('firewallRoles.errorUpdating') : t('firewallRoles.errorCreating');
-
-      // Handle Pydantic validation errors (array of objects) or simple string errors
-      const detail = (err as { response?: { data?: { detail?: string | Array<{ msg?: string }> } } })?.response?.data?.detail;
-      if (detail) {
-        if (typeof detail === 'string') {
-          errorMessage = detail;
-        } else if (Array.isArray(detail) && detail.length > 0) {
-          // Pydantic validation error - extract the message from the first error
-          errorMessage = detail[0]?.msg || errorMessage;
-        }
-      }
-      showSnackbar(errorMessage, 'error');
+      const defaultMessage = editingRole ? t('firewallRoles.errorUpdating') : t('firewallRoles.errorCreating');
+      showSnackbar(extractApiErrorMessage(err, defaultMessage), 'error');
     } finally {
       setSaving(false);
     }
@@ -435,9 +433,9 @@ const FirewallRolesSettings: React.FC = () => {
                 {t('firewallRoles.noIPv4Ports')}
               </Typography>
             ) : (
-              ipv4Ports.slice(0, 4).map((port, idx) => (
+              ipv4Ports.slice(0, 4).map((port) => (
                 <Chip
-                  key={idx}
+                  key={`${port.port_number}-${port.tcp ? 'tcp' : ''}${port.udp ? 'udp' : ''}`}
                   label={formatPort(port)}
                   size="small"
                   color="success"
@@ -471,9 +469,9 @@ const FirewallRolesSettings: React.FC = () => {
                 {t('firewallRoles.noIPv6Ports')}
               </Typography>
             ) : (
-              ipv6Ports.slice(0, 4).map((port, idx) => (
+              ipv6Ports.slice(0, 4).map((port) => (
                 <Chip
-                  key={idx}
+                  key={`${port.port_number}-${port.tcp ? 'tcp' : ''}${port.udp ? 'udp' : ''}`}
                   label={formatPort(port)}
                   size="small"
                   color="info"
@@ -545,16 +543,7 @@ const FirewallRolesSettings: React.FC = () => {
       loadRoles();
     } catch (err: unknown) {
       console.error('Error deleting firewall roles:', err);
-      let errorMessage = t('firewallRoles.errorDeleting');
-      const detail = (err as { response?: { data?: { detail?: string | Array<{ msg?: string }> } } })?.response?.data?.detail;
-      if (detail) {
-        if (typeof detail === 'string') {
-          errorMessage = detail;
-        } else if (Array.isArray(detail) && detail.length > 0) {
-          errorMessage = detail[0]?.msg || errorMessage;
-        }
-      }
-      showSnackbar(errorMessage, 'error');
+      showSnackbar(extractApiErrorMessage(err, t('firewallRoles.errorDeleting')), 'error');
     }
   };
 
@@ -578,37 +567,38 @@ const FirewallRolesSettings: React.FC = () => {
           ) : roles.length === 0 ? (
             <Alert severity="info">{t('firewallRoles.noRoles')}</Alert>
           ) : (
-            <DataGrid
-              rows={roles}
-              columns={columns}
-              initialState={{
-                pagination: { paginationModel: { pageSize: 10 } },
-              }}
-              pageSizeOptions={[5, 10, 25]}
-              checkboxSelection
-              disableRowSelectionOnClick
-              onRowSelectionModelChange={(newSelection) => {
-                setSelectedRows(newSelection as string[]);
-              }}
-              rowSelectionModel={selectedRows}
-              getRowHeight={() => 'auto'}
-              sx={{
-                '& .MuiDataGrid-cell': {
-                  display: 'flex',
-                  alignItems: 'center',
-                  py: 1,
-                },
-                '& .MuiDataGrid-cell--withRenderer': {
-                  display: 'flex',
-                  alignItems: 'center',
-                },
-                '& .MuiDataGrid-cellCheckbox': {
-                  display: 'flex',
-                  alignItems: 'center',
-                },
-              }}
-              autoHeight
-            />
+            <Box sx={{ height: 500 }}>
+              <DataGrid
+                rows={roles}
+                columns={columns}
+                initialState={{
+                  pagination: { paginationModel: { pageSize: 10 } },
+                }}
+                pageSizeOptions={[5, 10, 25]}
+                checkboxSelection
+                disableRowSelectionOnClick
+                onRowSelectionModelChange={(newSelection) => {
+                  setSelectedRows(newSelection as string[]);
+                }}
+                rowSelectionModel={selectedRows}
+                getRowHeight={() => 'auto'}
+                sx={{
+                  '& .MuiDataGrid-cell': {
+                    display: 'flex',
+                    alignItems: 'center',
+                    py: 1,
+                  },
+                  '& .MuiDataGrid-cell--withRenderer': {
+                    display: 'flex',
+                    alignItems: 'center',
+                  },
+                  '& .MuiDataGrid-cellCheckbox': {
+                    display: 'flex',
+                    alignItems: 'center',
+                  },
+                }}
+              />
+            </Box>
           )}
           <Stack direction="row" spacing={2} sx={{ mt: 2 }} justifyContent="flex-start">
             {canAdd && (
@@ -681,7 +671,7 @@ const FirewallRolesSettings: React.FC = () => {
                     value={customPort}
                     onChange={(e) => setCustomPort(e.target.value)}
                     type="number"
-                    inputProps={{ min: 1, max: 65535 }}
+                    slotProps={{ htmlInput: { min: 1, max: 65535 } }}
                     sx={{ width: 120 }}
                   />
                 )}
@@ -693,7 +683,7 @@ const FirewallRolesSettings: React.FC = () => {
                       value={startPort}
                       onChange={(e) => setStartPort(e.target.value)}
                       type="number"
-                      inputProps={{ min: 1, max: 65535 }}
+                      slotProps={{ htmlInput: { min: 1, max: 65535 } }}
                       sx={{ width: 120 }}
                     />
                     <TextField
@@ -701,7 +691,7 @@ const FirewallRolesSettings: React.FC = () => {
                       value={endPort}
                       onChange={(e) => setEndPort(e.target.value)}
                       type="number"
-                      inputProps={{ min: 1, max: 65535 }}
+                      slotProps={{ htmlInput: { min: 1, max: 65535 } }}
                       sx={{ width: 120 }}
                     />
                   </>

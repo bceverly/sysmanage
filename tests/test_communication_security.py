@@ -524,7 +524,7 @@ class TestMessageEncryption:
 
         assert success is False
         assert data is None
-        assert "Decryption failed:" in message
+        assert "Decryption failed" in message
 
     def test_decrypt_sensitive_data_invalid_json(self):
         """Test decryption with invalid encrypted data."""
@@ -538,7 +538,7 @@ class TestMessageEncryption:
 
         assert success is False
         assert data is None
-        assert "Decryption failed:" in message
+        assert "Decryption failed" in message
 
     def test_encrypt_empty_data(self):
         """Test encryption of empty data."""

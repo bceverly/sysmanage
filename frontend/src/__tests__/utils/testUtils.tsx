@@ -38,14 +38,16 @@ export const mockLocalStorage = {
 };
 
 export const setupLocalStorageMock = () => {
-  Object.defineProperty(window, 'localStorage', {
+  Object.defineProperty(globalThis, 'localStorage', {
     value: mockLocalStorage,
     writable: true
   });
 };
 
+// This is a well-known example JWT from jwt.io used only for unit testing.
+// It contains no real secrets (signed with "your-256-bit-secret").
 // nosemgrep: generic.secrets.security.detected-jwt-token
-export const mockAuthToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+export const mockAuthToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'; // NOSONAR - test data, not a real credential
 
 export const createMockApiResponse = (data: any, status = 200) => ({
   data,

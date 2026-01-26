@@ -90,7 +90,7 @@ class PasswordPolicy:
 
         return requirements
 
-    def validate_password(
+    def validate_password(  # NOSONAR - cognitive complexity
         self, password: str, username: str = None
     ) -> Tuple[bool, List[str]]:
         """
@@ -131,7 +131,7 @@ class PasswordPolicy:
                 char_types_found += 1
 
         if self.policy.get("require_numbers", False):
-            if not re.search(r"[0-9]", password):
+            if not re.search(r"\d", password):
                 errors.append("Password must contain at least one number")
             else:
                 char_types_found += 1

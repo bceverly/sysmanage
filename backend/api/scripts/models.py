@@ -7,6 +7,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, validator
 
+from backend.api.error_constants import ERROR_UNSUPPORTED_SHELL_TYPE
 from backend.i18n import _
 
 
@@ -32,7 +33,7 @@ class SavedScriptCreate(BaseModel):
     def validate_shell_type(cls, value):  # pylint: disable=no-self-argument
         allowed_shells = ["bash", "sh", "zsh", "powershell", "cmd", "ksh"]
         if value not in allowed_shells:
-            raise ValueError(_("Unsupported shell type: {}").format(value))
+            raise ValueError(ERROR_UNSUPPORTED_SHELL_TYPE().format(value))
         return value
 
     @validator("content")
@@ -66,7 +67,7 @@ class SavedScriptUpdate(BaseModel):
         if value is not None:
             allowed_shells = ["bash", "sh", "zsh", "powershell", "cmd", "ksh"]
             if value not in allowed_shells:
-                raise ValueError(_("Unsupported shell type: {}").format(value))
+                raise ValueError(ERROR_UNSUPPORTED_SHELL_TYPE().format(value))
         return value
 
     @validator("content", pre=True)
@@ -114,7 +115,7 @@ class ScriptExecutionRequest(BaseModel):
         if value:
             allowed_shells = ["bash", "sh", "zsh", "powershell", "cmd", "ksh"]
             if value not in allowed_shells:
-                raise ValueError(_("Unsupported shell type: {}").format(value))
+                raise ValueError(ERROR_UNSUPPORTED_SHELL_TYPE().format(value))
         return value
 
 

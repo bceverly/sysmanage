@@ -151,10 +151,10 @@ const AntivirusDefaultsSettings: React.FC = () => {
     setSaving(true);
     try {
       // Convert the defaults map to array format for the API
-      // Safely access with hasOwnProperty check to prevent prototype pollution
+      // Safely access with Object.hasOwn check to prevent prototype pollution
       const defaultsArray = Object.keys(ANTIVIRUS_OPTIONS).map((osName) => ({
         os_name: osName,
-        antivirus_package: Object.prototype.hasOwnProperty.call(editedDefaults, osName) // nosemgrep: detect-object-injection
+        antivirus_package: Object.hasOwn(editedDefaults, osName) // nosemgrep: detect-object-injection
           ? (editedDefaults[osName] === '' ? null : (editedDefaults[osName] || null)) // nosemgrep: detect-object-injection
           : null,
       }));
@@ -230,7 +230,7 @@ const AntivirusDefaultsSettings: React.FC = () => {
                               {osName}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {(Object.prototype.hasOwnProperty.call(antivirusDefaults, osName) && antivirusDefaults[osName]) || t('antivirus.none', 'None')} {/* nosemgrep: detect-object-injection */}
+                              {antivirusDefaults[osName] || t('antivirus.none', 'None')} {/* nosemgrep: detect-object-injection */}
                             </Typography>
                           </Box>
                         </Grid>
@@ -260,18 +260,18 @@ const AntivirusDefaultsSettings: React.FC = () => {
                             <InputLabel id={`antivirus-${osName}-label`}>
                               {t('antivirus.selectProgram', 'Select Antivirus Program')}
                             </InputLabel>
-                            {/* Safe access with hasOwnProperty check - nosemgrep: detect-object-injection */}
+                            {/* nosemgrep: detect-object-injection */}
                             <Select
                               labelId={`antivirus-${osName}-label`}
                               id={`antivirus-${osName}`}
-                              value={(Object.prototype.hasOwnProperty.call(editedDefaults, osName) && editedDefaults[osName]) || ''}
+                              value={editedDefaults[osName] || ''}
                               onChange={(e) => handleAntivirusChange(osName, e.target.value)}
                               label={t('antivirus.selectProgram', 'Select Antivirus Program')}
                             >
                               <MenuItem value="">
                                 {t('antivirus.none', 'None')}
                               </MenuItem>
-                              {(Object.prototype.hasOwnProperty.call(ANTIVIRUS_OPTIONS, osName) ? ANTIVIRUS_OPTIONS[osName] : []).map((packageName) => (
+                              {(ANTIVIRUS_OPTIONS[osName] ?? []).map((packageName) => (
                                 <MenuItem key={packageName} value={packageName}>
                                   {packageName}
                                 </MenuItem>

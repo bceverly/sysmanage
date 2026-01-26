@@ -36,22 +36,24 @@ def find_hosts_for_os(db: Session, os_name: str, os_version: str) -> List[Host]:
         Host.approval_status == "approved",
     )
 
-    if os_name == "Ubuntu":
-        # For Ubuntu hosts, platform is "Linux" and platform_release contains "Ubuntu X.Y"
-        hosts = base_query.filter(
-            Host.platform == "Linux",
-            Host.platform_release.like(f"{os_name} {os_version}%"),
-        ).all()
+    # Linux distributions: platform is "Linux", platform_release contains "DistroName Version"
+    linux_distros = [
+        "Ubuntu",
+        "CentOS Stream",
+        "Fedora",
+        "RHEL",
+        "Rocky",
+        "AlmaLinux",
+        "openSUSE Leap",
+        "openSUSE Tumbleweed",
+        "SLES",
+    ]
 
-    elif os_name in ["CentOS Stream", "Fedora", "RHEL", "Rocky", "AlmaLinux"]:
-        # RHEL-based distributions: platform is "Linux", check platform_release
-        hosts = base_query.filter(
-            Host.platform == "Linux",
-            Host.platform_release.like(f"{os_name} {os_version}%"),
-        ).all()
+    # BSD variants: platform matches os_name, platform_release contains version only
+    bsd_variants = ["FreeBSD", "NetBSD", "OpenBSD"]
 
-    elif os_name in ["openSUSE Leap", "openSUSE Tumbleweed", "SLES"]:
-        # SUSE distributions: platform is "Linux", check platform_release
+    if os_name in linux_distros:
+        # Linux distributions: platform is "Linux", platform_release is "DistroName Version"
         hosts = base_query.filter(
             Host.platform == "Linux",
             Host.platform_release.like(f"{os_name} {os_version}%"),
@@ -63,31 +65,10 @@ def find_hosts_for_os(db: Session, os_name: str, os_version: str) -> List[Host]:
             Host.platform == "macOS",
         ).all()
 
-    elif os_name == "FreeBSD":
-        # FreeBSD: platform matches, platform_release contains version (e.g., "14.3")
+    elif os_name in bsd_variants or os_name == "Windows":
+        # BSD and Windows: platform matches os_name, platform_release contains version
         hosts = base_query.filter(
-            Host.platform == os_name,
-            Host.platform_release.like(f"{os_version}%"),
-        ).all()
-
-    elif os_name == "NetBSD":
-        # NetBSD: platform matches, platform_release contains version
-        hosts = base_query.filter(
-            Host.platform == os_name,
-            Host.platform_release.like(f"{os_version}%"),
-        ).all()
-
-    elif os_name == "OpenBSD":
-        # OpenBSD: platform matches, platform_release contains version
-        hosts = base_query.filter(
-            Host.platform == os_name,
-            Host.platform_release.like(f"{os_version}%"),
-        ).all()
-
-    elif os_name == "Windows":
-        # Windows: platform matches, check platform_release for version
-        hosts = base_query.filter(
-            Host.platform == "Windows",
+            Host.platform == os_name if os_name in bsd_variants else "Windows",
             Host.platform_release.like(f"{os_version}%"),
         ).all()
 

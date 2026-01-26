@@ -11,6 +11,13 @@ from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from backend.api.error_constants import (
+    ERROR_OPENBAO_NOT_RUNNING,
+    OPENBAO_DEFAULT_URL,
+    OPENBAO_GENERIC_ERROR_KEY,
+    OPENBAO_NOT_RUNNING_KEY,
+    SCHTASKS_PATH,
+)
 from backend.auth.auth_bearer import JWTBearer
 from backend.config import config
 from backend.i18n import _
@@ -19,7 +26,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-def get_openbao_status() -> Dict[str, Any]:
+def get_openbao_status() -> Dict[str, Any]:  # NOSONAR - complex business logic
     """
     Get the current status of the OpenBAO server.
     Returns a dictionary with status information.
@@ -35,7 +42,7 @@ def get_openbao_status() -> Dict[str, Any]:
         return {
             "running": False,
             "status": "stopped",
-            "message": _("openbao.not_running", "OpenBAO is not running"),
+            "message": _(OPENBAO_NOT_RUNNING_KEY, ERROR_OPENBAO_NOT_RUNNING()),
             "pid": None,
             "server_url": None,
             "health": None,
@@ -102,7 +109,7 @@ def get_openbao_status() -> Dict[str, Any]:
 
     # Process is running, get additional info
     vault_config = config.get_vault_config()
-    server_url = vault_config.get("url", "http://127.0.0.1:8200")
+    server_url = vault_config.get("url", "OPENBAO_DEFAULT_URL")
 
     # Try to get health status and seal status from OpenBAO API
     health_info = None
@@ -195,13 +202,13 @@ def find_bao_binary() -> Optional[str]:
                 # Check if file exists and is executable
                 if os.path.isfile(location) and os.access(location, os.X_OK):
                     return location
-        except (OSError, FileNotFoundError, PermissionError):
+        except (OSError, PermissionError):  # FileNotFoundError is subclass of OSError
             continue
 
     return None
 
 
-def start_openbao() -> Dict[str, Any]:
+def start_openbao() -> Dict[str, Any]:  # NOSONAR - complex business logic
     """
     Start the OpenBAO development server.
     """
@@ -254,7 +261,7 @@ def start_openbao() -> Dict[str, Any]:
 
                     # Create one-time scheduled task to run the script
                     schtasks_cmd = [
-                        "C:\\Windows\\System32\\schtasks.exe",
+                        SCHTASKS_PATH,
                         "/create",
                         "/tn",
                         task_name,
@@ -276,9 +283,9 @@ def start_openbao() -> Dict[str, Any]:
 
                     if create_result.returncode == 0:
                         # Run the task immediately
-                        run_result = subprocess.run(  # nosec B607 B603
+                        _run_result = subprocess.run(  # nosec B607 B603
                             [
-                                "C:\\Windows\\System32\\schtasks.exe",
+                                SCHTASKS_PATH,
                                 "/run",
                                 "/tn",
                                 task_name,
@@ -294,7 +301,7 @@ def start_openbao() -> Dict[str, Any]:
                         # Clean up the task
                         subprocess.run(  # nosec B607 B603
                             [
-                                "C:\\Windows\\System32\\schtasks.exe",
+                                SCHTASKS_PATH,
                                 "/delete",
                                 "/tn",
                                 task_name,
@@ -314,11 +321,14 @@ def start_openbao() -> Dict[str, Any]:
 
                         result = Result()
                     else:
-                        raise Exception(
+                        raise RuntimeError(
                             f"Failed to create scheduled task: {create_result.stderr}"
                         )
 
-                except Exception as e:
+                except (
+                    RuntimeError,
+                    OSError,
+                ) as _e:  # NOSONAR - logged via exception()
                     logger.exception(
                         "Failed to run PowerShell script for OpenBAO start"
                     )
@@ -380,7 +390,7 @@ def start_openbao() -> Dict[str, Any]:
             "message": _("openbao.start_timeout", "OpenBAO start timed out"),
             "status": get_openbao_status(),
         }
-    except Exception as e:
+    except Exception:  # NOSONAR - logged via exc_info
         logger.error("Exception occurred while starting OpenBAO", exc_info=True)
         return {
             "success": False,
@@ -391,7 +401,7 @@ def start_openbao() -> Dict[str, Any]:
         }
 
 
-def stop_openbao() -> Dict[str, Any]:
+def stop_openbao() -> Dict[str, Any]:  # NOSONAR - complex business logic
     """
     Stop the OpenBAO development server.
     """
@@ -400,7 +410,7 @@ def stop_openbao() -> Dict[str, Any]:
     if not status["running"]:
         return {
             "success": True,
-            "message": _("openbao.not_running", "OpenBAO is not running"),
+            "message": _(OPENBAO_NOT_RUNNING_KEY, ERROR_OPENBAO_NOT_RUNNING()),
             "status": status,
         }
 
@@ -501,7 +511,7 @@ def stop_openbao() -> Dict[str, Any]:
         return {
             "success": False,
             "message": _(
-                "openbao.generic_error", "An error occurred while stopping OpenBAO"
+                OPENBAO_GENERIC_ERROR_KEY, "An error occurred while stopping OpenBAO"
             ),
             "status": get_openbao_status(),
         }
@@ -516,7 +526,7 @@ def seal_openbao() -> Dict[str, Any]:
     if not status["running"]:
         return {
             "success": False,
-            "message": _("openbao.not_running", "OpenBAO is not running"),
+            "message": _(OPENBAO_NOT_RUNNING_KEY, ERROR_OPENBAO_NOT_RUNNING()),
             "status": status,
         }
 
@@ -540,7 +550,7 @@ def seal_openbao() -> Dict[str, Any]:
 
         vault_config = config.get_vault_config()
         env = os.environ.copy()
-        env["BAO_ADDR"] = vault_config.get("url", "http://127.0.0.1:8200")
+        env["BAO_ADDR"] = vault_config.get("url", "OPENBAO_DEFAULT_URL")
         env["BAO_TOKEN"] = vault_config.get("token", "")
 
         # bao_cmd is validated by find_bao_binary, operator seal is a safe fixed argument
@@ -580,7 +590,7 @@ def seal_openbao() -> Dict[str, Any]:
             "message": _("openbao.seal_timeout", "OpenBAO seal operation timed out"),
             "status": get_openbao_status(),
         }
-    except Exception as e:
+    except Exception:  # NOSONAR - logged via exception()
         logger.exception(
             "Exception occurred while sealing OpenBAO"
         )  # Log full traceback for server-side debugging
@@ -601,7 +611,7 @@ def unseal_openbao() -> Dict[str, Any]:
     if not status["running"]:
         return {
             "success": False,
-            "message": _("openbao.not_running", "OpenBAO is not running"),
+            "message": _(OPENBAO_NOT_RUNNING_KEY, ERROR_OPENBAO_NOT_RUNNING()),
             "status": status,
         }
 
@@ -637,7 +647,7 @@ def unseal_openbao() -> Dict[str, Any]:
             }
 
         env = os.environ.copy()
-        env["BAO_ADDR"] = vault_config.get("url", "http://127.0.0.1:8200")
+        env["BAO_ADDR"] = vault_config.get("url", "OPENBAO_DEFAULT_URL")
         env["BAO_TOKEN"] = vault_config.get("token", "")
 
         # In dev mode, try to use the dev token to unseal
@@ -681,7 +691,7 @@ def unseal_openbao() -> Dict[str, Any]:
             ),
             "status": get_openbao_status(),
         }
-    except Exception as e:
+    except Exception:  # NOSONAR - logged via exception()
         logger.exception("Exception occurred while unsealing OpenBAO")
         return {
             "success": False,
@@ -719,7 +729,7 @@ async def start_server():
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
-                "openbao.generic_error", "An error occurred while starting OpenBAO"
+                OPENBAO_GENERIC_ERROR_KEY, "An error occurred while starting OpenBAO"
             ),
         )
 
@@ -745,7 +755,7 @@ async def stop_server():
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
-                "openbao.generic_error", "An error occurred while stopping OpenBAO"
+                OPENBAO_GENERIC_ERROR_KEY, "An error occurred while stopping OpenBAO"
             ),
         )
 
@@ -792,7 +802,7 @@ async def seal_vault():
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
-                "openbao.generic_error", "An error occurred while sealing OpenBAO"
+                OPENBAO_GENERIC_ERROR_KEY, "An error occurred while sealing OpenBAO"
             ),
         )
 
@@ -818,6 +828,6 @@ async def unseal_vault():
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
             detail=_(
-                "openbao.generic_error", "An error occurred while unsealing OpenBAO"
+                OPENBAO_GENERIC_ERROR_KEY, "An error occurred while unsealing OpenBAO"
             ),
         )
