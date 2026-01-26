@@ -97,8 +97,8 @@ def ERROR_KVM_LINUX_ONLY():
 GRAFANA_API_KEY = "Grafana API Key"
 GRAFANA_API_KEY_LABEL = "API Key"
 MONITORING_SERVER = "Monitoring Server"
-GRAYLOG_API_TOKEN = "Graylog API Token"
-GRAYLOG_API_TOKEN_LABEL = "API Token"
+GRAYLOG_API_TOKEN = "Graylog API Token"  # nosec B105 - UI label, not a password
+GRAYLOG_API_TOKEN_LABEL = "API Token"  # nosec B105 - UI label, not a password
 LOG_AGGREGATION_SERVER = "Log Aggregation Server"
 
 # Config management descriptions

@@ -142,7 +142,7 @@ async def get_graylog_integration_settings():  # NOSONAR - complex business logi
                 "use_managed_server": True,
                 "host_id": None,
                 "manual_url": None,
-                "api_token": None,
+                "api_token": None,  # nosec B105 - dict key, not a password
             }
 
         return settings.to_dict()
