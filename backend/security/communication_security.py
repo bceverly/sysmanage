@@ -139,7 +139,7 @@ class WebSocketSecurityManager:
 
             return True, connection_id, "Token valid"
 
-        except (json.JSONDecodeError, KeyError, ValueError):
+        except (KeyError, ValueError):  # ValueError catches JSONDecodeError (subclass)
             logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
                 "Malformed token from IP ", extra={"client_ip": client_ip}
             )
@@ -287,7 +287,7 @@ class WebSocketSecurityManager:
 
         # Also clean up old connection attempts
         cutoff_time = current_time - 3600  # 1 hour
-        for client_ip in list(self.connection_attempts):
+        for client_ip in list(self.connection_attempts):  # noqa: FURB152  # NOSONAR
             self.connection_attempts[client_ip] = [
                 timestamp
                 for timestamp in self.connection_attempts[client_ip]
@@ -400,7 +400,7 @@ class MessageEncryption:
             data = json.loads(data_json)
             return True, data, "Decryption successful"
 
-        except (json.JSONDecodeError, KeyError, ValueError):
+        except (KeyError, ValueError):  # ValueError catches JSONDecodeError (subclass)
             return False, None, _("Decryption failed")
 
 

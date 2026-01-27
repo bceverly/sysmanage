@@ -11,8 +11,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from backend.api.error_constants import (
-    ERROR_INVALID_SECRET_ID,
-    ERROR_SECRET_NOT_FOUND,
+    error_invalid_secret_id,
+    error_secret_not_found,
     SECRETS_INVALID_ID_KEY,
     SECRETS_NOT_FOUND_KEY,
 )
@@ -77,13 +77,13 @@ async def get_secret_metadata(
         if not secret:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=_(SECRETS_NOT_FOUND_KEY, ERROR_SECRET_NOT_FOUND()),
+                detail=_(SECRETS_NOT_FOUND_KEY, error_secret_not_found()),
             )
         return SecretResponse(**secret.to_dict())
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=_(SECRETS_INVALID_ID_KEY, ERROR_INVALID_SECRET_ID()),
+            detail=_(SECRETS_INVALID_ID_KEY, error_invalid_secret_id()),
         ) from exc
     except HTTPException:
         raise
@@ -110,7 +110,7 @@ async def get_secret_content(
         if not secret:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=_(SECRETS_NOT_FOUND_KEY, ERROR_SECRET_NOT_FOUND()),
+                detail=_(SECRETS_NOT_FOUND_KEY, error_secret_not_found()),
             )
 
         # Retrieve content from vault
@@ -137,7 +137,7 @@ async def get_secret_content(
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=_(SECRETS_INVALID_ID_KEY, ERROR_INVALID_SECRET_ID()),
+            detail=_(SECRETS_INVALID_ID_KEY, error_invalid_secret_id()),
         ) from exc
     except HTTPException:
         raise
@@ -235,7 +235,7 @@ async def create_secret(
     response_model=SecretResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def update_secret(  # NOSONAR - complex business logic
+async def update_secret(  # NOSONAR
     secret_id: str,
     secret_data: SecretUpdate,
     db: Session = Depends(get_db),
@@ -250,7 +250,7 @@ async def update_secret(  # NOSONAR - complex business logic
         if not secret:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=_(SECRETS_NOT_FOUND_KEY, ERROR_SECRET_NOT_FOUND()),
+                detail=_(SECRETS_NOT_FOUND_KEY, error_secret_not_found()),
             )
 
         # Check if new name conflicts with existing secrets
@@ -334,7 +334,7 @@ async def update_secret(  # NOSONAR - complex business logic
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=_(SECRETS_INVALID_ID_KEY, ERROR_INVALID_SECRET_ID()),
+            detail=_(SECRETS_INVALID_ID_KEY, error_invalid_secret_id()),
         ) from exc
     except HTTPException:
         raise
@@ -361,7 +361,7 @@ async def delete_secret(
         if not secret:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=_(SECRETS_NOT_FOUND_KEY, ERROR_SECRET_NOT_FOUND()),
+                detail=_(SECRETS_NOT_FOUND_KEY, error_secret_not_found()),
             )
 
         # Delete from vault
@@ -403,7 +403,7 @@ async def delete_secret(
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=_(SECRETS_INVALID_ID_KEY, ERROR_INVALID_SECRET_ID()),
+            detail=_(SECRETS_INVALID_ID_KEY, error_invalid_secret_id()),
         ) from exc
     except HTTPException:
         raise
@@ -441,7 +441,7 @@ async def delete_multiple_secrets(
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=_(
-                        SECRETS_INVALID_ID_KEY, ERROR_INVALID_SECRET_ID() + ": {id}"
+                        SECRETS_INVALID_ID_KEY, error_invalid_secret_id() + ": {id}"
                     ).format(id=secret_id),
                 ) from exc
 

@@ -52,7 +52,7 @@ class VaultService:
             {"X-Vault-Token": self.token, "Content-Type": "application/json"}
         )
 
-    def _make_request(  # NOSONAR: cognitive complexity justified for comprehensive error handling
+    def _make_request(  # NOSONAR
         self, method: str, path: str, data: Optional[Dict] = None
     ) -> Dict[str, Any]:
         """Make a request to the vault API with error handling."""
@@ -111,7 +111,7 @@ class VaultService:
                 _("vault.invalid_response", "Invalid response from vault")
             ) from exc
 
-    def store_secret(  # NOSONAR: cognitive complexity justified for handling multiple secret types
+    def store_secret(  # NOSONAR
         self,
         secret_name: str,
         secret_data: str,

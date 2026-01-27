@@ -50,7 +50,7 @@ def process_user_groups(db: Session, host_id: str, groups_data: list):
             db.add(user_group)
 
 
-def process_user_group_memberships(  # NOSONAR - cognitive complexity
+def process_user_group_memberships(  # NOSONAR
     db: Session, host_id: str, users_data: list, user_id_map: dict, group_id_map: dict
 ):
     """Process user-group memberships for a host."""

@@ -899,7 +899,7 @@ const Scripts: React.FC = () => {
       width: 100,
       renderCell: (params) => (
         <Typography variant="body2">
-          {params.value !== undefined ? params.value : '-'}
+          {params.value ?? '-'}
         </Typography>
       ),
     },
@@ -1238,11 +1238,11 @@ const Scripts: React.FC = () => {
                 
                 <FormControl fullWidth margin="normal">
                   <InputLabel>{t('scripts.selectScript')}</InputLabel>
-                  <Select
+                  <Select<number | ''>
                     value={savedScriptId}
                     label={t('scripts.selectScript')}
                     onChange={(e) => {
-                      const scriptId = e.target.value as number;
+                      const scriptId = e.target.value;
                       setSavedScriptId(scriptId);
                       // Clear host selection and execution result when script changes
                       setSelectedHost('');
@@ -1264,11 +1264,11 @@ const Scripts: React.FC = () => {
 
                 <FormControl fullWidth margin="normal">
                   <InputLabel>{t('scripts.selectHost')}</InputLabel>
-                  <Select
+                  <Select<number | ''>
                     value={selectedHost}
                     label={t('scripts.selectHost')}
                     onChange={(e) => {
-                      setSelectedHost(e.target.value as number);
+                      setSelectedHost(e.target.value);
                       // Clear execution result when host changes
                       setExecutionResult(null);
                       setCurrentExecutionId(null);

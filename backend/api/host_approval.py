@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import sessionmaker
 
 from backend.api.host_utils import validate_host_approval_status
-from backend.api.error_constants import ERROR_HOST_NOT_FOUND, ERROR_USER_NOT_FOUND
+from backend.api.error_constants import error_host_not_found, error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -31,7 +31,7 @@ queue_ops = QueueOperations()
 
 
 @router.put("/host/{host_id}/approve", dependencies=[Depends(JWTBearer())])
-async def approve_host(  # NOSONAR - complex business logic
+async def approve_host(  # NOSONAR
     host_id: str, current_user: str = Depends(get_current_user)
 ):  # pylint: disable=duplicate-code
     """
@@ -50,7 +50,7 @@ async def approve_host(  # NOSONAR - complex business logic
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         # Load role cache if not already loaded
         if user._role_cache is None:
@@ -66,7 +66,7 @@ async def approve_host(  # NOSONAR - complex business logic
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         if host.approval_status != "pending":
             raise HTTPException(
@@ -334,12 +334,12 @@ async def reject_host(
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         if host.approval_status != "pending":
             raise HTTPException(
@@ -391,7 +391,7 @@ async def request_os_version_update(host_id: str):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         validate_host_approval_status(host)
 
@@ -432,7 +432,7 @@ async def request_updates_check(host_id: str):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         validate_host_approval_status(host)
 

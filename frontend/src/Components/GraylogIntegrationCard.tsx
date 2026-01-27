@@ -30,6 +30,7 @@ import {
   Link as LinkIcon
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
+import axios from 'axios';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 
@@ -98,9 +99,9 @@ const GraylogIntegrationCard: React.FC = () => {
       setSettings(settingsData.data);
     } catch (err: unknown) {
       console.error('Error loading Graylog data:', err);
-      const errorMessage = err && typeof err === 'object' && 'response' in err ?
-        (err as {response?: {data?: {detail?: string}}}).response?.data?.detail || 'Failed to load Graylog configuration' :
-        'Failed to load Graylog configuration';
+      const errorMessage = axios.isAxiosError(err)
+        ? err.response?.data?.detail || 'Failed to load Graylog configuration'
+        : 'Failed to load Graylog configuration';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -117,9 +118,8 @@ const GraylogIntegrationCard: React.FC = () => {
       setHealthStatus(response.data);
     } catch (err: unknown) {
       // Only log non-400 errors to reduce console spam
-      const errorResponse = err && typeof err === 'object' && 'response' in err ?
-        (err as {response?: {status?: number; data?: {detail?: string}}}).response : undefined;
-      if (!errorResponse || errorResponse.status !== 400) {
+      const errorResponse = axios.isAxiosError(err) ? err.response : undefined;
+      if (errorResponse?.status !== 400) {
         console.error('Error checking Graylog health:', err);
       }
       setHealthStatus({
@@ -147,9 +147,9 @@ const GraylogIntegrationCard: React.FC = () => {
       }
     } catch (err: unknown) {
       console.error('Error saving Graylog settings:', err);
-      const errorMessage = err && typeof err === 'object' && 'response' in err ?
-        (err as {response?: {data?: {detail?: string}}}).response?.data?.detail || 'Failed to save settings' :
-        'Failed to save settings';
+      const errorMessage = axios.isAxiosError(err)
+        ? err.response?.data?.detail || 'Failed to save settings'
+        : 'Failed to save settings';
       setError(errorMessage);
     } finally {
       setSaving(false);

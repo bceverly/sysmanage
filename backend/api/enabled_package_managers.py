@@ -15,7 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, validator
 from sqlalchemy.orm import Session, sessionmaker
 
-from backend.api.error_constants import ERROR_USER_NOT_FOUND
+from backend.api.error_constants import error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -239,7 +239,7 @@ async def get_enabled_package_managers(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.VIEW_ENABLED_PACKAGE_MANAGERS):
@@ -289,7 +289,7 @@ async def create_enabled_package_manager(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.ADD_ENABLED_PACKAGE_MANAGER):
@@ -409,7 +409,7 @@ async def delete_enabled_package_manager(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.REMOVE_ENABLED_PACKAGE_MANAGER):

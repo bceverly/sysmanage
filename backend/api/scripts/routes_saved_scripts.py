@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import sessionmaker
 
-from backend.api.error_constants import ERROR_SCRIPT_NOT_FOUND, ERROR_USER_NOT_FOUND
+from backend.api.error_constants import error_script_not_found, error_user_not_found
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -106,7 +106,7 @@ async def create_saved_script(
                 .first()
             )
             if not auth_user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if auth_user._role_cache is None:
                 auth_user.load_role_cache(db_session)
@@ -206,7 +206,7 @@ async def get_saved_script(
             )
 
             if not script:
-                raise HTTPException(status_code=404, detail=ERROR_SCRIPT_NOT_FOUND())
+                raise HTTPException(status_code=404, detail=error_script_not_found())
 
             return SavedScriptResponse(
                 id=str(script.id),
@@ -248,7 +248,7 @@ async def update_saved_script(
                 .first()
             )
             if not auth_user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if auth_user._role_cache is None:
                 auth_user.load_role_cache(db_session)
@@ -266,7 +266,7 @@ async def update_saved_script(
             )
 
             if not script:
-                raise HTTPException(status_code=404, detail=ERROR_SCRIPT_NOT_FOUND())
+                raise HTTPException(status_code=404, detail=error_script_not_found())
 
             # Check for duplicate name if name is being changed
             if script_data.name and script_data.name != script.name:
@@ -355,7 +355,7 @@ async def delete_saved_script(
                 .first()
             )
             if not auth_user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if auth_user._role_cache is None:
                 auth_user.load_role_cache(db_session)
@@ -373,7 +373,7 @@ async def delete_saved_script(
             )
 
             if not script:
-                raise HTTPException(status_code=404, detail=ERROR_SCRIPT_NOT_FOUND())
+                raise HTTPException(status_code=404, detail=error_script_not_found())
 
             # Check if script is being used in any pending/running executions
             active_executions = (

@@ -61,9 +61,7 @@ def _b64_encode_24bit(b1: int, b2: int, b3: int, n: int) -> str:
     return result
 
 
-def _sha512_crypt_impl(
-    password: str, salt: str, rounds: int = 5000
-) -> str:  # NOSONAR - cognitive complexity
+def _sha512_crypt_impl(password: str, salt: str, rounds: int = 5000) -> str:  # NOSONAR
     """
     Implement SHA-512 crypt algorithm as specified by glibc.
 

@@ -118,7 +118,7 @@ async def get_graylog_servers():
 
 
 @router.get("/settings", dependencies=[Depends(JWTBearer())])
-async def get_graylog_integration_settings():  # NOSONAR - complex business logic
+async def get_graylog_integration_settings():  # NOSONAR
     """
     Get current Graylog integration settings.
     """
@@ -149,7 +149,7 @@ async def get_graylog_integration_settings():  # NOSONAR - complex business logi
 
 
 @router.post("/settings", dependencies=[Depends(JWTBearer())])
-async def update_graylog_integration_settings(  # NOSONAR - complex business logic
+async def update_graylog_integration_settings(  # NOSONAR
     request: GraylogIntegrationRequest,
     req: Request,
     current_user=Depends(get_current_user),
@@ -303,7 +303,7 @@ async def update_graylog_integration_settings(  # NOSONAR - complex business log
 
 
 @router.get("/health", dependencies=[Depends(JWTBearer())])
-async def check_graylog_health():
+async def check_graylog_health():  # NOSONAR
     """
     Check the health status of the configured Graylog server.
     """

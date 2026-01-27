@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
-from backend.api.error_constants import ERROR_HOST_NOT_REGISTERED, TIMEZONE_UTC_SUFFIX
+from backend.api.error_constants import error_host_not_registered, TIMEZONE_UTC_SUFFIX
 from backend.i18n import _
 from backend.persistence.models import Host, HostCertificate, HostRole
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
@@ -17,9 +17,9 @@ from backend.services.audit_service import ActionType, AuditService, EntityType,
 debug_logger = logging.getLogger("debug_logger")
 
 
-async def handle_script_execution_result(
+async def handle_script_execution_result(  # NOSONAR
     db: Session, connection, message_data: dict
-):  # NOSONAR - complex business logic
+):
     """Handle script execution result from agent."""
     from backend.utils.host_validation import validate_host_id
 
@@ -29,7 +29,7 @@ async def handle_script_execution_result(
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -219,9 +219,9 @@ async def handle_script_execution_result(
         }
 
 
-async def handle_reboot_status_update(
+async def handle_reboot_status_update(  # NOSONAR
     db: Session, connection, message_data: dict
-):  # NOSONAR - complex business logic
+):
     """Handle reboot status update from an agent."""
     from backend.utils.host_validation import validate_host_id
 
@@ -231,7 +231,7 @@ async def handle_reboot_status_update(
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -332,9 +332,9 @@ async def handle_reboot_status_update(
         }
 
 
-async def handle_host_certificates_update(
+async def handle_host_certificates_update(  # NOSONAR
     db: Session, connection, message_data: dict
-):  # NOSONAR - complex business logic
+):
     """Handle host certificates update message from agent."""
     from backend.utils.host_validation import validate_host_id
 
@@ -345,7 +345,7 @@ async def handle_host_certificates_update(
             return {
                 "message_type": "error",
                 "error_type": "host_not_registered",
-                "message": ERROR_HOST_NOT_REGISTERED(),
+                "message": error_host_not_registered(),
                 "data": {},
             }
 
@@ -477,7 +477,7 @@ async def handle_host_role_data_update(db: Session, connection, message_data: di
             return {
                 "message_type": "error",
                 "error_type": "host_not_registered",
-                "message": ERROR_HOST_NOT_REGISTERED(),
+                "message": error_host_not_registered(),
                 "data": {},
             }
 

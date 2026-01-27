@@ -10,9 +10,9 @@ from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
 from backend.api.error_constants import (
-    ERROR_HOST_NOT_ACTIVE,
-    ERROR_HOST_NOT_FOUND,
-    ERROR_USER_NOT_FOUND,
+    error_host_not_active,
+    error_host_not_found,
+    error_user_not_found,
 )
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
@@ -53,7 +53,7 @@ class CreateHostGroupRequest(BaseModel):
 
 
 @router.post("/host/{host_id}/accounts", dependencies=[Depends(JWTBearer())])
-async def create_host_user(  # NOSONAR - complex business logic
+async def create_host_user(  # NOSONAR
     host_id: str,
     request: CreateHostUserRequest,
     current_user: str = Depends(get_current_user),
@@ -75,7 +75,7 @@ async def create_host_user(  # NOSONAR - complex business logic
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         # Load role cache if not already loaded
         if user._role_cache is None:
@@ -91,13 +91,13 @@ async def create_host_user(  # NOSONAR - complex business logic
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         # Verify host is active
         if not host.active:
             raise HTTPException(
                 status_code=400,
-                detail=ERROR_HOST_NOT_ACTIVE(),
+                detail=error_host_not_active(),
             )
 
         # Verify agent is running in privileged mode
@@ -207,7 +207,7 @@ async def create_host_group(
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         # Load role cache if not already loaded
         if user._role_cache is None:
@@ -223,13 +223,13 @@ async def create_host_group(
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         # Verify host is active
         if not host.active:
             raise HTTPException(
                 status_code=400,
-                detail=ERROR_HOST_NOT_ACTIVE(),
+                detail=error_host_not_active(),
             )
 
         # Verify agent is running in privileged mode
@@ -324,7 +324,7 @@ async def delete_host_user(
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         # Load role cache if not already loaded
         if user._role_cache is None:
@@ -340,13 +340,13 @@ async def delete_host_user(
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         # Verify host is active
         if not host.active:
             raise HTTPException(
                 status_code=400,
-                detail=ERROR_HOST_NOT_ACTIVE(),
+                detail=error_host_not_active(),
             )
 
         # Verify agent is running in privileged mode
@@ -437,7 +437,7 @@ async def delete_host_group(
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         # Load role cache if not already loaded
         if user._role_cache is None:
@@ -453,13 +453,13 @@ async def delete_host_group(
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         # Verify host is active
         if not host.active:
             raise HTTPException(
                 status_code=400,
-                detail=ERROR_HOST_NOT_ACTIVE(),
+                detail=error_host_not_active(),
             )
 
         # Verify agent is running in privileged mode

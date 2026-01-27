@@ -49,7 +49,7 @@ from backend.websocket.messages import MessageType
 logger = get_logger(__name__)
 
 
-async def route_inbound_message(  # NOSONAR - cognitive complexity
+async def route_inbound_message(  # NOSONAR
     message_type: str, db: Session, mock_connection: Any, message_data: Dict[str, Any]
 ) -> bool:
     """

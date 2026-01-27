@@ -28,7 +28,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-async def configure_prometheus_datasource(  # NOSONAR - complex business logic
+async def configure_prometheus_datasource(  # NOSONAR
     settings: "models.GrafanaIntegrationSettings", session
 ) -> None:
     """
@@ -259,7 +259,7 @@ async def get_grafana_servers():
 
 
 @router.get("/settings", dependencies=[Depends(JWTBearer())])
-async def get_grafana_integration_settings():  # NOSONAR - complex business logic
+async def get_grafana_integration_settings():  # NOSONAR
     """
     Get current Grafana integration settings.
     """
@@ -290,7 +290,7 @@ async def get_grafana_integration_settings():  # NOSONAR - complex business logi
 
 
 @router.post("/settings", dependencies=[Depends(JWTBearer())])
-async def update_grafana_integration_settings(  # NOSONAR - complex business logic
+async def update_grafana_integration_settings(  # NOSONAR
     request: GrafanaIntegrationRequest,
     req: Request,
     current_user=Depends(get_current_user),
@@ -456,7 +456,7 @@ async def update_grafana_integration_settings(  # NOSONAR - complex business log
 
 
 @router.get("/health", dependencies=[Depends(JWTBearer())])
-async def check_grafana_health():
+async def check_grafana_health():  # NOSONAR
     """
     Check the health status of the configured Grafana server.
     """
@@ -534,9 +534,7 @@ async def check_grafana_health():
                 health_response = await client.get(f"{grafana_url}/api/health")
 
                 if health_response.status_code == 200:
-                    _health_data = (
-                        health_response.json()
-                    )  # NOSONAR - parsed for validation
+                    _health_data = health_response.json()  # NOSONAR
 
                     # Try to get version info
                     version_info = None

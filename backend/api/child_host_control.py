@@ -96,7 +96,7 @@ async def restart_child_host(
     )
 
 
-async def _child_host_control(  # NOSONAR - async for interface consistency with callers
+async def _child_host_control(  # NOSONAR
     host_id: str,
     child_id: str,
     current_user: str,

@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_
 from sqlalchemy.orm import sessionmaker
 
-from backend.api.error_constants import ERROR_INTERNAL_SERVER
+from backend.api.error_constants import error_internal_server
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -88,7 +88,7 @@ async def get_os_upgrades(
         raise
     except Exception as e:
         logger.error("Error fetching OS upgrades: %s", e)
-        raise HTTPException(status_code=500, detail=ERROR_INTERNAL_SERVER()) from e
+        raise HTTPException(status_code=500, detail=error_internal_server()) from e
 
 
 @router.get("/os-upgrades/summary")
@@ -155,11 +155,11 @@ async def get_os_upgrades_summary(dependencies=Depends(JWTBearer())):
 
     except Exception as e:
         logger.error("Error fetching OS upgrades summary: %s", e)
-        raise HTTPException(status_code=500, detail=ERROR_INTERNAL_SERVER()) from e
+        raise HTTPException(status_code=500, detail=error_internal_server()) from e
 
 
 @router.post("/execute-os-upgrades")
-async def execute_os_upgrades(  # NOSONAR - complex business logic
+async def execute_os_upgrades(  # NOSONAR
     request: UpdateExecutionRequest,
     dependencies=Depends(JWTBearer()),
     current_user: str = Depends(get_current_user),
@@ -367,4 +367,4 @@ async def execute_os_upgrades(  # NOSONAR - complex business logic
         raise
     except Exception as e:
         logger.error("Error executing OS upgrades: %s", e)
-        raise HTTPException(status_code=500, detail=ERROR_INTERNAL_SERVER()) from e
+        raise HTTPException(status_code=500, detail=error_internal_server()) from e

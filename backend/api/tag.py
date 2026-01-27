@@ -13,10 +13,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 
 from backend.api.error_constants import (
-    ERROR_EDIT_TAGS_REQUIRED,
-    ERROR_TAG_ALREADY_EXISTS,
-    ERROR_TAG_NOT_FOUND,
-    ERROR_USER_NOT_FOUND,
+    error_edit_tags_required,
+    error_tag_already_exists,
+    error_tag_not_found,
+    error_user_not_found,
 )
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
@@ -155,7 +155,7 @@ async def create_tag(
                 .first()
             )
             if not user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if user._role_cache is None:
                 user.load_role_cache(session)
@@ -163,7 +163,7 @@ async def create_tag(
             if not user.has_role(SecurityRoles.EDIT_TAGS):
                 raise HTTPException(
                     status_code=403,
-                    detail=ERROR_EDIT_TAGS_REQUIRED(),
+                    detail=error_edit_tags_required(),
                 )
 
         # Check if tag with same name already exists
@@ -171,7 +171,7 @@ async def create_tag(
         if existing_tag:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=ERROR_TAG_ALREADY_EXISTS(),
+                detail=error_tag_already_exists(),
             )
 
         # Create new tag
@@ -249,7 +249,7 @@ async def update_tag(
                 .first()
             )
             if not user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if user._role_cache is None:
                 user.load_role_cache(session)
@@ -257,14 +257,14 @@ async def update_tag(
             if not user.has_role(SecurityRoles.EDIT_TAGS):
                 raise HTTPException(
                     status_code=403,
-                    detail=ERROR_EDIT_TAGS_REQUIRED(),
+                    detail=error_edit_tags_required(),
                 )
 
         # Find the tag
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
         if not tag:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=ERROR_TAG_NOT_FOUND()
+                status_code=status.HTTP_404_NOT_FOUND, detail=error_tag_not_found()
             )
 
         # Check if new name conflicts with existing tag
@@ -273,7 +273,7 @@ async def update_tag(
             if existing_tag:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=ERROR_TAG_ALREADY_EXISTS(),
+                    detail=error_tag_already_exists(),
                 )
             tag.name = tag_data.name
 
@@ -347,7 +347,7 @@ async def delete_tag(
                 .first()
             )
             if not user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if user._role_cache is None:
                 user.load_role_cache(session)
@@ -355,14 +355,14 @@ async def delete_tag(
             if not user.has_role(SecurityRoles.EDIT_TAGS):
                 raise HTTPException(
                     status_code=403,
-                    detail=ERROR_EDIT_TAGS_REQUIRED(),
+                    detail=error_edit_tags_required(),
                 )
 
         # Find the tag
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
         if not tag:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=ERROR_TAG_NOT_FOUND()
+                status_code=status.HTTP_404_NOT_FOUND, detail=error_tag_not_found()
             )
 
         # Use SQL directly to avoid ORM relationship issues
@@ -429,7 +429,7 @@ def _get_tag_hosts_sync(tag_id: str):
             ).first()
             if not tag_result:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail=ERROR_TAG_NOT_FOUND()
+                    status_code=status.HTTP_404_NOT_FOUND, detail=error_tag_not_found()
                 )
 
             # Get associated hosts using raw SQL to avoid ORM issues
@@ -508,7 +508,7 @@ async def add_tag_to_host(
                 .first()
             )
             if not user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if user._role_cache is None:
                 user.load_role_cache(session)
@@ -516,7 +516,7 @@ async def add_tag_to_host(
             if not user.has_role(SecurityRoles.EDIT_TAGS):
                 raise HTTPException(
                     status_code=403,
-                    detail=ERROR_EDIT_TAGS_REQUIRED(),
+                    detail=error_edit_tags_required(),
                 )
 
         from sqlalchemy import text
@@ -536,7 +536,7 @@ async def add_tag_to_host(
         ).first()
         if not tag_result:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=ERROR_TAG_NOT_FOUND()
+                status_code=status.HTTP_404_NOT_FOUND, detail=error_tag_not_found()
             )
 
         # Check if association already exists using raw SQL
@@ -620,7 +620,7 @@ async def remove_tag_from_host(
                 .first()
             )
             if not user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if user._role_cache is None:
                 user.load_role_cache(session)
@@ -628,7 +628,7 @@ async def remove_tag_from_host(
             if not user.has_role(SecurityRoles.EDIT_TAGS):
                 raise HTTPException(
                     status_code=403,
-                    detail=ERROR_EDIT_TAGS_REQUIRED(),
+                    detail=error_edit_tags_required(),
                 )
 
         # Find the association

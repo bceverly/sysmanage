@@ -151,12 +151,18 @@ const AntivirusDefaultsSettings: React.FC = () => {
     setSaving(true);
     try {
       // Convert the defaults map to array format for the API
+      // Helper to get antivirus package value, handling empty strings
+      const getAntivirusPackage = (osName: string): string | null => {
+        if (!Object.hasOwn(editedDefaults, osName)) return null; // nosemgrep: detect-object-injection
+        const value = editedDefaults[osName]; // nosemgrep: detect-object-injection
+        if (value === '') return null;
+        return value || null;
+      };
+
       // Safely access with Object.hasOwn check to prevent prototype pollution
       const defaultsArray = Object.keys(ANTIVIRUS_OPTIONS).map((osName) => ({
         os_name: osName,
-        antivirus_package: Object.hasOwn(editedDefaults, osName) // nosemgrep: detect-object-injection
-          ? (editedDefaults[osName] === '' ? null : (editedDefaults[osName] || null)) // nosemgrep: detect-object-injection
-          : null,
+        antivirus_package: getAntivirusPackage(osName),
       }));
 
       await axiosInstance.put('/api/antivirus-defaults/', {

@@ -20,9 +20,9 @@ from backend.websocket.queue_manager import (
 logger = get_logger(__name__)
 
 
-async def process_pending_messages(
+async def process_pending_messages(  # NOSONAR
     db: Session,
-) -> None:  # NOSONAR - cognitive complexity
+) -> None:
     """
     Process all pending messages in the queue.
 

@@ -157,6 +157,12 @@ const Users = () => {
         }
     }
 
+    const updateUserInTable = (updatedUser: SysManageUser) => {
+        setTableData(prevData =>
+            prevData.map(user => user.id === updatedUser.id ? updatedUser : user)
+        );
+    };
+
     const handleUnlock = async () => {
         // Call the API to unlock the selected rows
         const promises = selection.map(async (selectedItem) => {
@@ -166,12 +172,7 @@ const Users = () => {
             let theID = selectedItem.toString();
             try {
                 const updatedUser = await doUnlockUser(theID);
-                // Update the tableData with the new status
-                setTableData(prevData =>
-                    prevData.map(user =>
-                        user.id === updatedUser.id ? updatedUser : user
-                    )
-                );
+                updateUserInTable(updatedUser);
             } catch (error) {
                 console.error('Error unlocking user:', error);
             }
@@ -191,12 +192,7 @@ const Users = () => {
             let theID = selectedItem.toString();
             try {
                 const updatedUser = await doLockUser(theID);
-                // Update the tableData with the new status
-                setTableData(prevData =>
-                    prevData.map(user =>
-                        user.id === updatedUser.id ? updatedUser : user
-                    )
-                );
+                updateUserInTable(updatedUser);
             } catch (error) {
                 console.error('Error locking user:', error);
             }
@@ -241,10 +237,10 @@ const Users = () => {
 
     // Update filtered data when table data changes or search is cleared
     React.useEffect(() => {
-        if (!searchTerm.trim()) {
-            setFilteredData(tableData);
-        } else {
+        if (searchTerm.trim()) {
             performSearch();
+        } else {
+            setFilteredData(tableData);
         }
     }, [tableData, searchTerm, searchColumn, performSearch]);
 
@@ -442,16 +438,16 @@ const Users = () => {
                         MuiTablePagination: {
                             labelRowsPerPage: t('common.rowsPerPage'),
                             labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) => {
-                                const countDisplay = count !== -1 ? count : t('common.of') + ' ' + to;
+                                const countDisplay = count === -1 ? t('common.of') + ' ' + to : count;
                                 return from + '–' + to + ' ' + t('common.of') + ' ' + countDisplay;
                             },
                         },
                         noRowsLabel: t('users.noRows'),
                         noResultsOverlayLabel: t('users.noResults'),
                         footerRowSelected: (count: number) =>
-                            count !== 1
-                                ? `${count.toLocaleString()} ${t('common.rowsSelected')}`
-                                : `${count.toLocaleString()} ${t('common.rowSelected')}`,
+                            count === 1
+                                ? `${count.toLocaleString()} ${t('common.rowSelected')}`
+                                : `${count.toLocaleString()} ${t('common.rowsSelected')}`,
                     }}
                 />
             </Box>
@@ -611,16 +607,11 @@ const Users = () => {
 
                             doUpdateUser(editUser.id, true, editEmail, editPassword, editFirstName, editLastName)
                             .then(() => {
-                                // Update the tableData with the edited user
-                                setTableData(prevData =>
-                                    prevData.map(user =>
-                                        user.id === editUser.id ? {
-                                            ...user,
-                                            userid: editEmail,
-                                            password: editPassword
-                                        } : user
-                                    )
-                                );
+                                updateUserInTable({
+                                    ...editUser,
+                                    userid: editEmail,
+                                    password: editPassword
+                                });
                                 setDupeError(false);
                                 handleEditClose();
                                 setSelection([]);

@@ -12,7 +12,7 @@ from typing import Any, Dict
 
 from sqlalchemy.orm import Session
 
-from backend.api.error_constants import ERROR_UNKNOWN, ERROR_WSL_PENDING
+from backend.api.error_constants import error_unknown, error_wsl_pending
 from backend.i18n import _
 from backend.persistence.models import Host
 
@@ -31,7 +31,7 @@ from .virtualization_helpers import (
 logger = logging.getLogger(__name__)
 
 
-async def handle_virtualization_support_update(  # NOSONAR - async handler
+async def handle_virtualization_support_update(  # NOSONAR
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
@@ -53,7 +53,7 @@ async def handle_virtualization_support_update(  # NOSONAR - async handler
         logger.error(
             "Virtualization support check failed for host %s: %s", host_id, error_msg
         )
-        return make_error_response("operation_failed", error_msg or ERROR_UNKNOWN())
+        return make_error_response("operation_failed", error_msg or error_unknown())
 
     supported_types = result_data.get("supported_types", [])
     capabilities = result_data.get("capabilities", {})
@@ -86,7 +86,7 @@ async def handle_virtualization_support_update(  # NOSONAR - async handler
             if (
                 wsl_enabled
                 and host.reboot_required
-                and host.reboot_required_reason == ERROR_WSL_PENDING()
+                and host.reboot_required_reason == error_wsl_pending()
             ):
                 host.reboot_required = False
                 host.reboot_required_reason = None
@@ -98,7 +98,7 @@ async def handle_virtualization_support_update(  # NOSONAR - async handler
             # If WSL needs enablement and reboot is required, set reboot flag
             elif reboot_required and "wsl" in supported_types and wsl_needs_enable:
                 host.reboot_required = True
-                host.reboot_required_reason = ERROR_WSL_PENDING()
+                host.reboot_required_reason = error_wsl_pending()
 
             db.commit()
 
@@ -125,7 +125,7 @@ async def handle_virtualization_support_update(  # NOSONAR - async handler
         return make_error_response("operation_failed", str(e))
 
 
-async def handle_wsl_enable_result(  # NOSONAR - async handler
+async def handle_wsl_enable_result(  # NOSONAR
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
@@ -145,7 +145,7 @@ async def handle_wsl_enable_result(  # NOSONAR - async handler
 
     if not success:
         logger.error("WSL enable failed for host %s: %s", host_id, error_msg)
-        return make_error_response("operation_failed", error_msg or ERROR_UNKNOWN())
+        return make_error_response("operation_failed", error_msg or error_unknown())
 
     logger.info(
         "WSL enable result for host %s: success=%s, reboot_required=%s",
@@ -162,7 +162,7 @@ async def handle_wsl_enable_result(  # NOSONAR - async handler
         if reboot_required:
             # Set reboot required with specific reason
             host.reboot_required = True
-            host.reboot_required_reason = ERROR_WSL_PENDING()
+            host.reboot_required_reason = error_wsl_pending()
             db.commit()
 
             log_audit_success(
@@ -218,7 +218,7 @@ async def handle_lxd_initialize_result(
     )
 
 
-async def handle_vmm_initialize_result(  # NOSONAR - async handler
+async def handle_vmm_initialize_result(  # NOSONAR
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
@@ -236,7 +236,7 @@ async def handle_vmm_initialize_result(  # NOSONAR - async handler
 
     if not success:
         logger.error("VMM initialization failed for host %s: %s", host_id, error_msg)
-        return make_error_response("operation_failed", error_msg or ERROR_UNKNOWN())
+        return make_error_response("operation_failed", error_msg or error_unknown())
 
     needs_reboot = result_data.get("needs_reboot", False)
     already_enabled = result_data.get("already_enabled", False)

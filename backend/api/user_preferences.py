@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, validator
 from sqlalchemy.orm import Session
 
-from backend.api.error_constants import ERROR_USER_NOT_FOUND
+from backend.api.error_constants import error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import models
@@ -78,7 +78,7 @@ async def get_column_preferences(
         # Get user
         user = db.query(models.User).filter(models.User.userid == current_user).first()
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         # Get preferences
         preference = (
@@ -124,7 +124,7 @@ async def update_column_preferences(
         # Get user
         user = db.query(models.User).filter(models.User.userid == current_user).first()
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         # Check if preference already exists
         preference = (
@@ -209,7 +209,7 @@ async def delete_column_preferences(
         # Get user
         user = db.query(models.User).filter(models.User.userid == current_user).first()
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         # Delete preference
         preference = (
@@ -289,7 +289,7 @@ async def get_dashboard_card_preferences(
         # Get user
         user = db.query(models.User).filter(models.User.userid == current_user).first()
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         # Get all preferences for this user
         preferences = (
@@ -330,7 +330,7 @@ async def update_dashboard_card_preferences(
         # Get user
         user = db.query(models.User).filter(models.User.userid == current_user).first()
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         now = datetime.now(timezone.utc).replace(tzinfo=None)
 

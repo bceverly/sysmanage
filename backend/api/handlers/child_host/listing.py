@@ -104,7 +104,7 @@ def _try_link_child_to_approved_host(
     return None
 
 
-async def handle_child_hosts_list_update(  # NOSONAR - async handler
+async def handle_child_hosts_list_update(  # NOSONAR
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
     """

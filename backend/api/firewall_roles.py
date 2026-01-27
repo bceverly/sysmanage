@@ -13,11 +13,11 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session, sessionmaker
 
 from backend.api.error_constants import (
-    ERROR_FIREWALL_ROLE_NOT_FOUND,
-    ERROR_HOST_NOT_FOUND,
-    ERROR_INVALID_FIREWALL_ROLE_ID,
-    ERROR_USER_NOT_FOUND,
-    ERROR_VIEW_FIREWALL_ROLES_REQUIRED,
+    error_firewall_role_not_found,
+    error_host_not_found,
+    error_invalid_firewall_role_id,
+    error_user_not_found,
+    error_view_firewall_roles_required,
 )
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
@@ -79,13 +79,13 @@ async def get_firewall_roles(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.VIEW_FIREWALL_ROLES):
             raise HTTPException(
                 status_code=403,
-                detail=ERROR_VIEW_FIREWALL_ROLES_REQUIRED(),
+                detail=error_view_firewall_roles_required(),
             )
 
     try:
@@ -124,13 +124,13 @@ async def get_firewall_role(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.VIEW_FIREWALL_ROLES):
             raise HTTPException(
                 status_code=403,
-                detail=ERROR_VIEW_FIREWALL_ROLES_REQUIRED(),
+                detail=error_view_firewall_roles_required(),
             )
 
     try:
@@ -138,7 +138,7 @@ async def get_firewall_role(
     except ValueError as err:
         raise HTTPException(
             status_code=400,
-            detail=ERROR_INVALID_FIREWALL_ROLE_ID(),
+            detail=error_invalid_firewall_role_id(),
         ) from err
 
     try:
@@ -151,7 +151,7 @@ async def get_firewall_role(
         if not role:
             raise HTTPException(
                 status_code=404,
-                detail=ERROR_FIREWALL_ROLE_NOT_FOUND(),
+                detail=error_firewall_role_not_found(),
             )
 
         return role_to_response_dict(role)
@@ -167,7 +167,7 @@ async def get_firewall_role(
 
 
 @router.post("/", response_model=FirewallRoleResponse, status_code=201)
-async def create_firewall_role(  # NOSONAR - complex business logic
+async def create_firewall_role(  # NOSONAR
     role_data: FirewallRoleCreate,
     request: Request,
     db_session: Session = Depends(get_db),
@@ -186,7 +186,7 @@ async def create_firewall_role(  # NOSONAR - complex business logic
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.ADD_FIREWALL_ROLE):
@@ -267,7 +267,7 @@ async def create_firewall_role(  # NOSONAR - complex business logic
 
 
 @router.put("/{role_id}", response_model=FirewallRoleResponse)
-async def update_firewall_role(
+async def update_firewall_role(  # NOSONAR
     role_id: str,
     role_data: FirewallRoleUpdate,
     request: Request,
@@ -287,7 +287,7 @@ async def update_firewall_role(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.EDIT_FIREWALL_ROLE):
@@ -302,7 +302,7 @@ async def update_firewall_role(
     except ValueError as err:
         raise HTTPException(
             status_code=400,
-            detail=ERROR_INVALID_FIREWALL_ROLE_ID(),
+            detail=error_invalid_firewall_role_id(),
         ) from err
 
     try:
@@ -315,7 +315,7 @@ async def update_firewall_role(
         if not role:
             raise HTTPException(
                 status_code=404,
-                detail=ERROR_FIREWALL_ROLE_NOT_FOUND(),
+                detail=error_firewall_role_not_found(),
             )
 
         # Check if name is being changed and already exists
@@ -413,7 +413,7 @@ async def delete_firewall_role(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.DELETE_FIREWALL_ROLE):
@@ -428,7 +428,7 @@ async def delete_firewall_role(
     except ValueError as err:
         raise HTTPException(
             status_code=400,
-            detail=ERROR_INVALID_FIREWALL_ROLE_ID(),
+            detail=error_invalid_firewall_role_id(),
         ) from err
 
     try:
@@ -441,7 +441,7 @@ async def delete_firewall_role(
         if not role:
             raise HTTPException(
                 status_code=404,
-                detail=ERROR_FIREWALL_ROLE_NOT_FOUND(),
+                detail=error_firewall_role_not_found(),
             )
 
         role_name = role.name
@@ -482,7 +482,7 @@ async def delete_firewall_role(
 
 
 @router.get("/host/{host_id}/roles", response_model=List[HostFirewallRoleResponse])
-async def get_host_firewall_roles(  # NOSONAR - complex business logic
+async def get_host_firewall_roles(  # NOSONAR
     host_id: str,
     db_session: Session = Depends(get_db),
     dependencies=Depends(JWTBearer()),
@@ -500,13 +500,13 @@ async def get_host_firewall_roles(  # NOSONAR - complex business logic
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.VIEW_FIREWALL_ROLES):
             raise HTTPException(
                 status_code=403,
-                detail=ERROR_VIEW_FIREWALL_ROLES_REQUIRED(),
+                detail=error_view_firewall_roles_required(),
             )
 
     try:
@@ -523,7 +523,7 @@ async def get_host_firewall_roles(  # NOSONAR - complex business logic
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=ERROR_HOST_NOT_FOUND(),
+                detail=error_host_not_found(),
             )
 
         # Get all firewall role assignments for this host
@@ -557,7 +557,7 @@ async def get_host_firewall_roles(  # NOSONAR - complex business logic
 
 
 @router.get("/host/{host_id}/expected-ports")
-async def get_host_expected_ports(
+async def get_host_expected_ports(  # NOSONAR
     host_id: str,
     db_session: Session = Depends(get_db),
     dependencies=Depends(JWTBearer()),
@@ -580,13 +580,13 @@ async def get_host_expected_ports(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.VIEW_FIREWALL_ROLES):
             raise HTTPException(
                 status_code=403,
-                detail=ERROR_VIEW_FIREWALL_ROLES_REQUIRED(),
+                detail=error_view_firewall_roles_required(),
             )
 
     try:
@@ -603,7 +603,7 @@ async def get_host_expected_ports(
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=ERROR_HOST_NOT_FOUND(),
+                detail=error_host_not_found(),
             )
 
         # Get the expected ports from all assigned firewall roles
@@ -678,7 +678,7 @@ async def assign_firewall_role_to_host(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.ASSIGN_HOST_FIREWALL_ROLES):
@@ -703,7 +703,7 @@ async def assign_firewall_role_to_host(
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=ERROR_HOST_NOT_FOUND(),
+                detail=error_host_not_found(),
             )
 
         # Check if firewall role exists
@@ -715,7 +715,7 @@ async def assign_firewall_role_to_host(
         if not firewall_role:
             raise HTTPException(
                 status_code=404,
-                detail=ERROR_FIREWALL_ROLE_NOT_FOUND(),
+                detail=error_firewall_role_not_found(),
             )
 
         # Check if assignment already exists
@@ -813,7 +813,7 @@ async def remove_firewall_role_from_host(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.ASSIGN_HOST_FIREWALL_ROLES):

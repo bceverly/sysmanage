@@ -11,9 +11,9 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session, sessionmaker
 
 from backend.api.error_constants import (
-    ERROR_AGENT_PRIVILEGED_REQUIRED,
-    ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE,
-    ERROR_USER_NOT_FOUND,
+    error_agent_privileged_required,
+    error_host_not_found_or_not_active,
+    error_user_not_found,
 )
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
@@ -118,14 +118,14 @@ def _list_third_party_repositories_sync(host_id: str):
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE(),
+                detail=error_host_not_found_or_not_active(),
             )
 
         # Check if host has privileged mode enabled
         if not host.is_agent_privileged:
             raise HTTPException(
                 status_code=403,
-                detail=ERROR_AGENT_PRIVILEGED_REQUIRED(),
+                detail=error_agent_privileged_required(),
             )
 
         # Queue message to request fresh repository data from agent
@@ -231,7 +231,7 @@ async def add_third_party_repository(
                 .first()
             )
             if not user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if user._role_cache is None:
                 user.load_role_cache(session)
@@ -258,14 +258,14 @@ async def add_third_party_repository(
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE(),
+                detail=error_host_not_found_or_not_active(),
             )
 
         # Check if host has privileged mode enabled
         if not host.is_agent_privileged:
             raise HTTPException(
                 status_code=403,
-                detail=ERROR_AGENT_PRIVILEGED_REQUIRED(),
+                detail=error_agent_privileged_required(),
             )
 
         # Validate repository identifier
@@ -343,7 +343,7 @@ async def add_third_party_repository(
 @router.delete(
     "/hosts/{host_id}/third-party-repos", response_model=DeleteRepositoriesResponse
 )
-async def delete_third_party_repositories(  # NOSONAR - complex business logic
+async def delete_third_party_repositories(  # NOSONAR
     host_id: str,
     request: DeleteRepositoriesRequest,
     db: Session = Depends(get_db),
@@ -367,7 +367,7 @@ async def delete_third_party_repositories(  # NOSONAR - complex business logic
                 .first()
             )
             if not user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if user._role_cache is None:
                 user.load_role_cache(session)
@@ -394,14 +394,14 @@ async def delete_third_party_repositories(  # NOSONAR - complex business logic
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE(),
+                detail=error_host_not_found_or_not_active(),
             )
 
         # Check if host has privileged mode enabled
         if not host.is_agent_privileged:
             raise HTTPException(
                 status_code=403,
-                detail=ERROR_AGENT_PRIVILEGED_REQUIRED(),
+                detail=error_agent_privileged_required(),
             )
 
         # Validate repositories list
@@ -528,7 +528,7 @@ async def enable_third_party_repositories(
                 .first()
             )
             if not user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if user._role_cache is None:
                 user.load_role_cache(session)
@@ -555,14 +555,14 @@ async def enable_third_party_repositories(
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE(),
+                detail=error_host_not_found_or_not_active(),
             )
 
         # Check if host has privileged mode enabled
         if not host.is_agent_privileged:
             raise HTTPException(
                 status_code=403,
-                detail=ERROR_AGENT_PRIVILEGED_REQUIRED(),
+                detail=error_agent_privileged_required(),
             )
 
         # Validate repositories list
@@ -664,7 +664,7 @@ async def disable_third_party_repositories(
                 .first()
             )
             if not user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if user._role_cache is None:
                 user.load_role_cache(session)
@@ -691,14 +691,14 @@ async def disable_third_party_repositories(
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE(),
+                detail=error_host_not_found_or_not_active(),
             )
 
         # Check if host has privileged mode enabled
         if not host.is_agent_privileged:
             raise HTTPException(
                 status_code=403,
-                detail=ERROR_AGENT_PRIVILEGED_REQUIRED(),
+                detail=error_agent_privileged_required(),
             )
 
         # Validate repositories list

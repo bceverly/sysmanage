@@ -53,7 +53,7 @@ const GraylogAttachmentModal: React.FC<GraylogAttachmentModalProps> = ({
             return settings.host.ipv4 || settings.host.fqdn || '';
         }
         if (settings.manual_url) {
-            const urlMatch = settings.manual_url.match(/\/\/([^:/]+)/);
+            const urlMatch = /\/\/([^:/]+)/.exec(settings.manual_url);
             return urlMatch ? urlMatch[1] : '';
         }
         return '';
@@ -198,76 +198,88 @@ const GraylogAttachmentModal: React.FC<GraylogAttachmentModalProps> = ({
         }
     };
 
+    const renderDialogContent = () => {
+        if (loading) {
+            return (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                    <CircularProgress />
+                </Box>
+            );
+        }
+
+        if (error) {
+            return (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {error}
+                </Alert>
+            );
+        }
+
+        return (
+            <>
+                <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                    {t('graylog.selectMechanismPrompt', 'Select the log forwarding mechanism to use:')}
+                </Typography>
+
+                {graylogServer && (
+                    <Box sx={{ mb: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+                        <Typography variant="body2" color="textSecondary">
+                            {t('graylog.server', 'Graylog Server')}
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                            {graylogServer}
+                        </Typography>
+                    </Box>
+                )}
+
+                <FormControl component="fieldset" fullWidth>
+                    <FormLabel component="legend">
+                        {t('graylog.mechanism', 'Mechanism')}
+                    </FormLabel>
+                    <RadioGroup
+                        value={selectedMechanism}
+                        onChange={(e) => setSelectedMechanism(e.target.value)}
+                    >
+                        {mechanisms.map((mechanism) => (
+                            <FormControlLabel
+                                key={mechanism.value}
+                                value={mechanism.value}
+                                control={<Radio />}
+                                label={
+                                    <Box>
+                                        <Typography variant="body1">
+                                            {mechanism.label}
+                                        </Typography>
+                                        <Typography variant="caption" color="textSecondary">
+                                            {t('graylog.port', 'Port')}: {mechanism.port}
+                                        </Typography>
+                                    </Box>
+                                }
+                                disabled={!mechanism.available}
+                            />
+                        ))}
+                    </RadioGroup>
+                </FormControl>
+
+                {mechanisms.length === 0 && (
+                    <Alert severity="warning" sx={{ mt: 2 }}>
+                        {t(
+                            'graylog.noMechanisms',
+                            'No log forwarding mechanisms are enabled in the Graylog configuration'
+                        )}
+                    </Alert>
+                )}
+            </>
+        );
+    };
+
     return (
         <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
             <DialogTitle>
                 {t('graylog.attachToGraylog', 'Attach to Graylog')}
             </DialogTitle>
             <DialogContent>
-                {loading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                        <CircularProgress />
-                    </Box>
-                ) : error ? (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        {error}
-                    </Alert>
-                ) : (
-                    <>
-                        <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                            {t('graylog.selectMechanismPrompt', 'Select the log forwarding mechanism to use:')}
-                        </Typography>
-
-                        {graylogServer && (
-                            <Box sx={{ mb: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
-                                <Typography variant="body2" color="textSecondary">
-                                    {t('graylog.server', 'Graylog Server')}
-                                </Typography>
-                                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                                    {graylogServer}
-                                </Typography>
-                            </Box>
-                        )}
-
-                        <FormControl component="fieldset" fullWidth>
-                            <FormLabel component="legend">
-                                {t('graylog.mechanism', 'Mechanism')}
-                            </FormLabel>
-                            <RadioGroup
-                                value={selectedMechanism}
-                                onChange={(e) => setSelectedMechanism(e.target.value)}
-                            >
-                                {mechanisms.map((mechanism) => (
-                                    <FormControlLabel
-                                        key={mechanism.value}
-                                        value={mechanism.value}
-                                        control={<Radio />}
-                                        label={
-                                            <Box>
-                                                <Typography variant="body1">
-                                                    {mechanism.label}
-                                                </Typography>
-                                                <Typography variant="caption" color="textSecondary">
-                                                    {t('graylog.port', 'Port')}: {mechanism.port}
-                                                </Typography>
-                                            </Box>
-                                        }
-                                        disabled={!mechanism.available}
-                                    />
-                                ))}
-                            </RadioGroup>
-                        </FormControl>
-
-                        {mechanisms.length === 0 && !error && (
-                            <Alert severity="warning" sx={{ mt: 2 }}>
-                                {t(
-                                    'graylog.noMechanisms',
-                                    'No log forwarding mechanisms are enabled in the Graylog configuration'
-                                )}
-                            </Alert>
-                        )}
-                    </>
-                )}
+                {renderDialogContent()}
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose} disabled={submitting}>

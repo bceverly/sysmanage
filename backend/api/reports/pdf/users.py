@@ -17,9 +17,9 @@ from backend.persistence.models import SecurityRole, SecurityRoleGroup, User
 class UsersReportGenerator(ReportGenerator):
     """Generator for user-related reports"""
 
-    def generate_users_list_report(
+    def generate_users_list_report(  # NOSONAR
         self,
-    ) -> io.BytesIO:  # NOSONAR - complex business logic
+    ) -> io.BytesIO:
         """Generate SysManage users list report"""
         users = self.db.query(User).order_by(User.userid).all()
 
@@ -122,9 +122,9 @@ class UsersReportGenerator(ReportGenerator):
 
         return self.create_pdf_buffer(_("SysManage Users"), content)
 
-    def generate_user_rbac_report(
+    def generate_user_rbac_report(  # NOSONAR
         self,
-    ) -> io.BytesIO:  # NOSONAR - complex business logic
+    ) -> io.BytesIO:
         """Generate User RBAC report showing security roles grouped by role groups"""
         users = self.db.query(User).order_by(User.userid).all()
 

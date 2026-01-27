@@ -13,7 +13,7 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 
-from backend.api.error_constants import ERROR_USER_NOT_FOUND
+from backend.api.error_constants import error_user_not_found
 from backend.api.profile import validate_and_process_image
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.auth.auth_handler import decode_jwt
@@ -68,7 +68,7 @@ async def delete_user(user_id: str, current_user: str = Depends(get_current_user
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
@@ -84,7 +84,7 @@ async def delete_user(user_id: str, current_user: str = Depends(get_current_user
 
         # Check for failure
         if len(users) != 1:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         deleted_user = users[0]
         # Extract values before deletion to avoid ObjectDeletedError
@@ -126,7 +126,7 @@ async def get_user_permissions(current_user: str = Depends(get_current_user)):
         )
 
         if not user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         # Load role cache
         user.load_role_cache(session)
@@ -179,7 +179,7 @@ async def get_logged_in_user(request: Request):
 
         # Check for failure
         if len(users) != 1:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         ret_user = models.User(
             id=users[0].id,
@@ -211,7 +211,7 @@ async def get_user(user_id: str):
 
         # Check for failure
         if len(users) != 1:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         ret_user = models.User(
             id=users[0].id,
@@ -243,7 +243,7 @@ async def get_user_by_userid(userid: str):
 
         # Check for failure
         if len(users) != 1:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         ret_user = models.User(
             id=users[0].id,
@@ -322,7 +322,7 @@ async def add_user(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
@@ -423,7 +423,7 @@ async def update_user(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
@@ -438,7 +438,7 @@ async def update_user(
 
         # Check for failure
         if len(users) != 1:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         # No need to check for userid duplicates explicitly - the database unique constraint will handle this
 
@@ -511,7 +511,7 @@ async def unlock_user(user_id: str, current_user: str = Depends(get_current_user
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
@@ -527,7 +527,7 @@ async def unlock_user(user_id: str, current_user: str = Depends(get_current_user
 
         # Check for failure
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         # Unlock the account
         login_security.unlock_user_account(user, session)
@@ -562,7 +562,7 @@ async def lock_user(user_id: str, current_user: str = Depends(get_current_user))
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
@@ -577,7 +577,7 @@ async def lock_user(user_id: str, current_user: str = Depends(get_current_user))
 
         # Check for failure
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         # Lock the account
         login_security.lock_user_account(user, session)
@@ -632,7 +632,7 @@ async def upload_user_profile_image(user_id: str, file: UploadFile = File(...)):
         user = session.query(models.User).filter(models.User.id == user_id).first()
 
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         # Update user's profile image
         user.profile_image = processed_image_bytes
@@ -663,7 +663,7 @@ async def get_user_profile_image(user_id: str):
         user = session.query(models.User).filter(models.User.id == user_id).first()
 
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         if not user.profile_image:
             raise HTTPException(status_code=404, detail=_("No profile image found"))
@@ -704,7 +704,7 @@ async def delete_user_profile_image(user_id: str):
         user = session.query(models.User).filter(models.User.id == user_id).first()
 
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         if not user.profile_image:
             raise HTTPException(status_code=404, detail=_("No profile image to delete"))

@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 @router.post("/secrets/deploy-ssh-keys", dependencies=[Depends(JWTBearer())])
-async def deploy_ssh_keys(  # NOSONAR - complex business logic
+async def deploy_ssh_keys(  # NOSONAR
     deploy_request: SSHKeyDeployRequest,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),

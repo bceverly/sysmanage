@@ -51,7 +51,7 @@ interface AxiosError {
     };
 }
 
-const UserDetail = () => {
+const UserDetail = () => { // NOSONAR
     const { userId } = useParams<{ userId: string }>();
     const [user, setUser] = useState<SysManageUser | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -148,13 +148,10 @@ const UserDetail = () => {
                     doGetUserRoles(userId)
                 ]);
 
-                // Sort groups alphabetically by name
-                const sortedGroups = [...groups].sort((a, b) => a.name.localeCompare(b.name));
-
-                // Sort roles within each group alphabetically by name
-                sortedGroups.forEach(group => {
-                    group.roles.sort((a, b) => a.name.localeCompare(b.name));
-                });
+                // Sort groups alphabetically by name, with roles sorted within each group
+                const sortedGroups = [...groups]
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map(group => ({ ...group, roles: [...group.roles].sort((a, b) => a.name.localeCompare(b.name)) }));
 
                 setRoleGroups(sortedGroups);
                 setSelectedRoles(userRoles.role_ids);
@@ -534,72 +531,80 @@ const UserDetail = () => {
                                 )}
                             </Box>
 
-                            {rolesLoading ? (
-                                <Box display="flex" justifyContent="center" py={3}>
-                                    <CircularProgress />
-                                </Box>
-                            ) : rolesError ? (
-                                <Alert severity="error" sx={{ mb: 2 }}>
-                                    {rolesError}
-                                </Alert>
-                            ) : (
-                                <>
-                                    {roleGroups.map((group, index) => (
-                                        <Box key={group.id}>
-                                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, textDecoration: 'underline' }}>
-                                                {group.name}
-                                            </Typography>
-                                            <FormGroup>
-                                                <Grid container spacing={1}>
-                                                    {group.roles.map((role) => (
-                                                        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={role.id}>
-                                                            <FormControlLabel
-                                                                control={
-                                                                    <Checkbox
-                                                                        checked={selectedRoles.includes(role.id)}
-                                                                        onChange={() => handleRoleToggle(role.id)}
-                                                                        disabled={!rolesEditMode || rolesSaving}
-                                                                    />
-                                                                }
-                                                                label={role.name}
-                                                            />
-                                                        </Grid>
-                                                    ))}
-                                                </Grid>
-                                            </FormGroup>
-                                            {index < roleGroups.length - 1 && (
-                                                <Divider sx={{ my: 3 }} />
-                                            )}
+                            {(() => {
+                                if (rolesLoading) {
+                                    return (
+                                        <Box display="flex" justifyContent="center" py={3}>
+                                            <CircularProgress />
                                         </Box>
-                                    ))}
-
-                                    {rolesSuccess && (
-                                        <Alert severity="success" sx={{ mb: 2 }}>
-                                            {rolesSuccess}
+                                    );
+                                }
+                                if (rolesError) {
+                                    return (
+                                        <Alert severity="error" sx={{ mb: 2 }}>
+                                            {rolesError}
                                         </Alert>
-                                    )}
+                                    );
+                                }
+                                return (
+                                    <>
+                                        {roleGroups.map((group, index) => (
+                                            <Box key={group.id}>
+                                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, textDecoration: 'underline' }}>
+                                                    {group.name}
+                                                </Typography>
+                                                <FormGroup>
+                                                    <Grid container spacing={1}>
+                                                        {group.roles.map((role) => (
+                                                            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={role.id}>
+                                                                <FormControlLabel
+                                                                    control={
+                                                                        <Checkbox
+                                                                            checked={selectedRoles.includes(role.id)}
+                                                                            onChange={() => handleRoleToggle(role.id)}
+                                                                            disabled={!rolesEditMode || rolesSaving}
+                                                                        />
+                                                                    }
+                                                                    label={role.name}
+                                                                />
+                                                            </Grid>
+                                                        ))}
+                                                    </Grid>
+                                                </FormGroup>
+                                                {index < roleGroups.length - 1 && (
+                                                    <Divider sx={{ my: 3 }} />
+                                                )}
+                                            </Box>
+                                        ))}
 
-                                    {rolesEditMode && canEditUserSecurityRoles && (
-                                        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                onClick={handleSaveRoles}
-                                                disabled={!hasUnsavedChanges || rolesSaving}
-                                            >
-                                                {rolesSaving ? t('common.saving', 'Saving...') : t('common.save', 'Save')}
-                                            </Button>
-                                            <Button
-                                                variant="outlined"
-                                                onClick={handleCancelRoles}
-                                                disabled={!hasUnsavedChanges || rolesSaving}
-                                            >
-                                                {t('common.cancel', 'Cancel')}
-                                            </Button>
-                                        </Box>
-                                    )}
-                                </>
-                            )}
+                                        {rolesSuccess && (
+                                            <Alert severity="success" sx={{ mb: 2 }}>
+                                                {rolesSuccess}
+                                            </Alert>
+                                        )}
+
+                                        {rolesEditMode && canEditUserSecurityRoles && (
+                                            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    onClick={handleSaveRoles}
+                                                    disabled={!hasUnsavedChanges || rolesSaving}
+                                                >
+                                                    {rolesSaving ? t('common.saving', 'Saving...') : t('common.save', 'Save')}
+                                                </Button>
+                                                <Button
+                                                    variant="outlined"
+                                                    onClick={handleCancelRoles}
+                                                    disabled={!hasUnsavedChanges || rolesSaving}
+                                                >
+                                                    {t('common.cancel', 'Cancel')}
+                                                </Button>
+                                            </Box>
+                                        )}
+                                    </>
+                                );
+                            })()}
                         </CardContent>
                     </Card>
                 </Grid>

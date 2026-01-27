@@ -8,6 +8,10 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from backend.api.error_constants import (
+    CONFIG_PUSH_ALL_DESC,
+    CONFIG_SPECIFIC_HOSTNAME_DESC,
+)
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.config.config_push import config_push_manager
 from backend.i18n import _
@@ -22,12 +26,12 @@ class ConfigUpdateRequest(BaseModel):
 
     config_data: Dict[str, Any] = Field(..., description="Configuration data to push")
     target_hostname: Optional[str] = Field(
-        None, description="Specific hostname to target"
+        None, description=CONFIG_SPECIFIC_HOSTNAME_DESC
     )
     target_platform: Optional[str] = Field(
         None, description="Platform to target (Linux, Windows, etc.)"
     )
-    push_to_all: bool = Field(False, description="Push to all connected agents")
+    push_to_all: bool = Field(False, description=CONFIG_PUSH_ALL_DESC)
 
 
 class LoggingConfigRequest(BaseModel):
@@ -38,9 +42,9 @@ class LoggingConfigRequest(BaseModel):
     )
     log_file: Optional[str] = Field(None, description="Log file path")
     target_hostname: Optional[str] = Field(
-        None, description="Specific hostname to target"
+        None, description=CONFIG_SPECIFIC_HOSTNAME_DESC
     )
-    push_to_all: bool = Field(False, description="Push to all connected agents")
+    push_to_all: bool = Field(False, description=CONFIG_PUSH_ALL_DESC)
 
 
 class WebSocketConfigRequest(BaseModel):
@@ -49,9 +53,9 @@ class WebSocketConfigRequest(BaseModel):
     ping_interval: int = Field(30, description="Heartbeat interval in seconds")
     reconnect_interval: int = Field(5, description="Reconnection interval in seconds")
     target_hostname: Optional[str] = Field(
-        None, description="Specific hostname to target"
+        None, description=CONFIG_SPECIFIC_HOSTNAME_DESC
     )
-    push_to_all: bool = Field(False, description="Push to all connected agents")
+    push_to_all: bool = Field(False, description=CONFIG_PUSH_ALL_DESC)
 
 
 class ServerConfigRequest(BaseModel):
@@ -61,9 +65,9 @@ class ServerConfigRequest(BaseModel):
     port: int = Field(8000, description="Server port")
     use_https: bool = Field(False, description="Use HTTPS")
     target_hostname: Optional[str] = Field(
-        None, description="Specific hostname to target"
+        None, description=CONFIG_SPECIFIC_HOSTNAME_DESC
     )
-    push_to_all: bool = Field(False, description="Push to all connected agents")
+    push_to_all: bool = Field(False, description=CONFIG_PUSH_ALL_DESC)
 
 
 @router.post("/config/push", dependencies=[Depends(JWTBearer())])

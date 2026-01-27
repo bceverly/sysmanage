@@ -63,7 +63,7 @@ interface GroupedRepositories {
   };
 }
 
-const HostDefaultsSettings: React.FC = () => {
+const HostDefaultsSettings: React.FC = () => { // NOSONAR
   const { t } = useTranslation();
 
   // Data state
@@ -481,6 +481,40 @@ const HostDefaultsSettings: React.FC = () => {
   // Sort OS names using localeCompare for proper alphabetical ordering
   const sortedOSNames = Object.keys(groupedRepositories).sort((a, b) => a.localeCompare(b));
 
+  // Render repository items for a given OS and package manager
+  const renderRepositoryItems = (osName: string, packageManager: string) => (
+    groupedRepositories[osName][packageManager].map((repo) => (
+      <Box
+        key={repo.id}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          py: 1,
+          px: 2,
+          ml: 2,
+          bgcolor: 'action.hover',
+          borderRadius: 1,
+          mb: 1,
+        }}
+      >
+        <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
+          {repo.repository_url}
+        </Typography>
+        {canRemove && (
+          <IconButton
+            size="small"
+            color="error"
+            onClick={() => handleDeleteRepository(repo.id)}
+            title={t('common.delete', 'Delete')}
+          >
+            <DeleteIcon />
+          </IconButton>
+        )}
+      </Box>
+    ))
+  );
+
   // Group enabled package managers by OS
   const groupedEnabledPMs: Record<string, EnabledPackageManager[]> = enabledPMs.reduce((acc, pm) => {
     if (!acc[pm.os_name]) {
@@ -735,7 +769,7 @@ const HostDefaultsSettings: React.FC = () => {
                 )}
 
                 {/* Fallback: Manual repository URL entry for unsupported OS */}
-                {selectedPackageManager && !selectedOS.match(/Ubuntu|Debian|Fedora|RHEL|CentOS|SUSE|openSUSE|macOS|Darwin|FreeBSD|NetBSD|Windows/) && (
+                {selectedPackageManager && !/Ubuntu|Debian|Fedora|RHEL|CentOS|SUSE|openSUSE|macOS|Darwin|FreeBSD|NetBSD|Windows/.test(selectedOS) && (
                   <TextField
                     fullWidth
                     label={t('hostDefaults.repositoryUrl', 'Repository URL / PPA')}
@@ -765,62 +799,41 @@ const HostDefaultsSettings: React.FC = () => {
             {t('hostDefaults.configuredRepositories', 'Configured Default Repositories')}
           </Typography>
 
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-              <CircularProgress />
-            </Box>
-          ) : repositories.length === 0 ? (
-            <Alert severity="info">
-              {t('hostDefaults.noRepositories', 'No default repositories configured. Add repositories above to have them automatically applied to new hosts.')}
-            </Alert>
-          ) : (
-            <Box>
-              {sortedOSNames.map((osName) => (
-                <Box key={osName} sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>
-                    {osName}
-                  </Typography>
-                  {Object.keys(groupedRepositories[osName]).sort((a, b) => a.localeCompare(b)).map((packageManager) => (
-                    <Box key={`${osName}-${packageManager}`} sx={{ ml: 2, mb: 2 }}>
-                      <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
-                        {packageManager}
-                      </Typography>
-                      {groupedRepositories[osName][packageManager].map((repo) => (
-                        <Box
-                          key={repo.id}
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            py: 1,
-                            px: 2,
-                            ml: 2,
-                            bgcolor: 'action.hover',
-                            borderRadius: 1,
-                            mb: 1,
-                          }}
-                        >
-                          <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                            {repo.repository_url}
-                          </Typography>
-                          {canRemove && (
-                            <IconButton
-                              size="small"
-                              color="error"
-                              onClick={() => handleDeleteRepository(repo.id)}
-                              title={t('common.delete', 'Delete')}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          )}
-                        </Box>
-                      ))}
-                    </Box>
-                  ))}
+          {(() => {
+            if (loading) {
+              return (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                  <CircularProgress />
                 </Box>
-              ))}
-            </Box>
-          )}
+              );
+            }
+            if (repositories.length === 0) {
+              return (
+                <Alert severity="info">
+                  {t('hostDefaults.noRepositories', 'No default repositories configured. Add repositories above to have them automatically applied to new hosts.')}
+                </Alert>
+              );
+            }
+            return (
+              <Box>
+                {sortedOSNames.map((osName) => (
+                  <Box key={osName} sx={{ mb: 3 }}>
+                    <Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>
+                      {osName}
+                    </Typography>
+                    {Object.keys(groupedRepositories[osName]).sort((a, b) => a.localeCompare(b)).map((packageManager) => (
+                      <Box key={`${osName}-${packageManager}`} sx={{ ml: 2, mb: 2 }}>
+                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                          {packageManager}
+                        </Typography>
+                        {renderRepositoryItems(osName, packageManager)}
+                      </Box>
+                    ))}
+                  </Box>
+                ))}
+              </Box>
+            );
+          })()}
         </CardContent>
       </Card>
 
@@ -915,61 +928,69 @@ const HostDefaultsSettings: React.FC = () => {
               {t('hostDefaults.configuredPackageManagers', 'Configured Package Managers')}
             </Typography>
 
-            {pmLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                <CircularProgress />
-              </Box>
-            ) : enabledPMs.length === 0 ? (
-              <Alert severity="info">
-                {t('hostDefaults.noPackageManagers', 'No additional package managers enabled. Each operating system uses its default package manager. Add optional package managers above to enable them.')}
-              </Alert>
-            ) : (
-              <Box>
-                {sortedPMOSNames.map((osName) => (
-                  <Box key={osName} sx={{ mb: 3 }}>
-                    <Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>
-                      {osName}
-                    </Typography>
-                    <Box sx={{ ml: 2 }}>
-                      {pmDefaultManagers[osName] && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                          {t('hostDefaults.defaultLabel', 'Default')}: {pmDefaultManagers[osName]}
-                        </Typography>
-                      )}
-                      {groupedEnabledPMs[osName].map((pm) => (
-                        <Box
-                          key={pm.id}
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            py: 1,
-                            px: 2,
-                            bgcolor: 'action.hover',
-                            borderRadius: 1,
-                            mb: 1,
-                          }}
-                        >
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            {pm.package_manager}
-                          </Typography>
-                          {canRemovePM && (
-                            <IconButton
-                              size="small"
-                              color="error"
-                              onClick={() => handleDeleteEnabledPM(pm.id)}
-                              title={t('common.delete', 'Delete')}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          )}
-                        </Box>
-                      ))}
-                    </Box>
+            {(() => {
+              if (pmLoading) {
+                return (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                    <CircularProgress />
                   </Box>
-                ))}
-              </Box>
-            )}
+                );
+              }
+              if (enabledPMs.length === 0) {
+                return (
+                  <Alert severity="info">
+                    {t('hostDefaults.noPackageManagers', 'No additional package managers enabled. Each operating system uses its default package manager. Add optional package managers above to enable them.')}
+                  </Alert>
+                );
+              }
+              return (
+                <Box>
+                  {sortedPMOSNames.map((osName) => (
+                    <Box key={osName} sx={{ mb: 3 }}>
+                      <Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>
+                        {osName}
+                      </Typography>
+                      <Box sx={{ ml: 2 }}>
+                        {pmDefaultManagers[osName] && (
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                            {t('hostDefaults.defaultLabel', 'Default')}: {pmDefaultManagers[osName]}
+                          </Typography>
+                        )}
+                        {groupedEnabledPMs[osName].map((pm) => (
+                          <Box
+                            key={pm.id}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              py: 1,
+                              px: 2,
+                              bgcolor: 'action.hover',
+                              borderRadius: 1,
+                              mb: 1,
+                            }}
+                          >
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                              {pm.package_manager}
+                            </Typography>
+                            {canRemovePM && (
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => handleDeleteEnabledPM(pm.id)}
+                                title={t('common.delete', 'Delete')}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            )}
+                          </Box>
+                        ))}
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+              );
+            })()}
           </CardContent>
         </Card>
       )}

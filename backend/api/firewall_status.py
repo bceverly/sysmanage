@@ -12,10 +12,10 @@ from pydantic import BaseModel, validator
 from sqlalchemy.orm import Session
 
 from backend.api.error_constants import (
-    ERROR_HOST_NOT_FOUND,
-    ERROR_INVALID_HOST_ID,
-    ERROR_PERMISSION_DENIED,
-    ERROR_USER_NOT_FOUND,
+    error_host_not_found,
+    error_invalid_host_id,
+    error_permission_denied,
+    error_user_not_found,
 )
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
@@ -82,7 +82,7 @@ async def get_firewall_status(
         except ValueError as e:
             raise HTTPException(
                 status_code=400,
-                detail=ERROR_INVALID_HOST_ID(),
+                detail=error_invalid_host_id(),
             ) from e
 
         # Check if host exists
@@ -90,7 +90,7 @@ async def get_firewall_status(
         if not host:
             raise HTTPException(
                 status_code=404,
-                detail=ERROR_HOST_NOT_FOUND(),
+                detail=error_host_not_found(),
             )
 
         # Get firewall status
@@ -128,18 +128,18 @@ async def enable_firewall(
     # Check permission
     user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not user:
-        raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+        raise HTTPException(status_code=401, detail=error_user_not_found())
 
     if user._role_cache is None:
         user.load_role_cache(db)
 
     if not user.has_role(SecurityRoles.ENABLE_FIREWALL):
-        raise HTTPException(status_code=403, detail=ERROR_PERMISSION_DENIED())
+        raise HTTPException(status_code=403, detail=error_permission_denied())
 
     # Get host
     host = db.query(models.Host).filter(models.Host.id == host_id).first()
     if not host:
-        raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+        raise HTTPException(status_code=404, detail=error_host_not_found())
 
     # Queue enable command for agent (will be delivered when agent is available)
     message = Message(
@@ -192,18 +192,18 @@ async def disable_firewall(
     # Check permission
     user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not user:
-        raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+        raise HTTPException(status_code=401, detail=error_user_not_found())
 
     if user._role_cache is None:
         user.load_role_cache(db)
 
     if not user.has_role(SecurityRoles.DISABLE_FIREWALL):
-        raise HTTPException(status_code=403, detail=ERROR_PERMISSION_DENIED())
+        raise HTTPException(status_code=403, detail=error_permission_denied())
 
     # Get host
     host = db.query(models.Host).filter(models.Host.id == host_id).first()
     if not host:
-        raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+        raise HTTPException(status_code=404, detail=error_host_not_found())
 
     # Queue disable command for agent (will be delivered when agent is available)
     message = Message(
@@ -255,18 +255,18 @@ async def restart_firewall(
     # Check permission
     user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not user:
-        raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+        raise HTTPException(status_code=401, detail=error_user_not_found())
 
     if user._role_cache is None:
         user.load_role_cache(db)
 
     if not user.has_role(SecurityRoles.RESTART_FIREWALL):
-        raise HTTPException(status_code=403, detail=ERROR_PERMISSION_DENIED())
+        raise HTTPException(status_code=403, detail=error_permission_denied())
 
     # Get host
     host = db.query(models.Host).filter(models.Host.id == host_id).first()
     if not host:
-        raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+        raise HTTPException(status_code=404, detail=error_host_not_found())
 
     # Queue restart command for agent (will be delivered when agent is available)
     message = Message(
@@ -324,12 +324,12 @@ async def deploy_firewall(
         user.load_role_cache(db)
 
     if not user.has_role(SecurityRoles.DEPLOY_FIREWALL):
-        raise HTTPException(status_code=403, detail=ERROR_PERMISSION_DENIED())
+        raise HTTPException(status_code=403, detail=error_permission_denied())
 
     # Get host
     host = db.query(models.Host).filter(models.Host.id == host_id).first()
     if not host:
-        raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+        raise HTTPException(status_code=404, detail=error_host_not_found())
 
     # Queue deploy command for agent (will be delivered when agent is available)
     message = Message(

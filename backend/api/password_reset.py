@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import sessionmaker
 
-from backend.api.error_constants import ERROR_USER_NOT_FOUND
+from backend.api.error_constants import error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.config import config
 from backend.i18n import _
@@ -196,7 +196,7 @@ SysManage System""",
 def send_initial_setup_email(
     user_email: str,
     setup_token: str,
-    _request: Request,  # NOSONAR - kept for API compat
+    _request: Request,  # NOSONAR
 ) -> bool:
     """Send initial password setup email to new user."""
     if not email_service.is_enabled():
@@ -357,7 +357,7 @@ async def reset_password(request_data: ResetPasswordRequest) -> PasswordResetRes
         # Get the user
         user = session.query(models.User).get(reset_token.user_id)
         if not user:
-            raise HTTPException(status_code=400, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=400, detail=error_user_not_found())
 
         # Hash the new password
         hashed_password = argon2_hasher.hash(request_data.password)
@@ -420,7 +420,7 @@ async def admin_reset_user_password(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
@@ -434,7 +434,7 @@ async def admin_reset_user_password(
         # Get the user
         user = session.query(models.User).get(user_id)
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         # Create reset token
         reset_token = create_password_reset_token(user.id, session)

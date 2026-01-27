@@ -211,7 +211,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
     }, [hostId, privilegedMode, t]);
 
     // Build constructed repository string based on OS
-    useEffect(() => {
+    useEffect(() => { // NOSONAR
         if (osName.includes('Ubuntu') || osName.includes('Debian')) {
             if (ppaOwner && ppaName) {
                 setConstructedRepo(`ppa:${ppaOwner}/${ppaName}`);

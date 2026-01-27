@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, validator
 from sqlalchemy.orm import Session, sessionmaker
 
-from backend.api.error_constants import ERROR_USER_NOT_FOUND
+from backend.api.error_constants import error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -328,7 +328,7 @@ async def get_default_repositories_by_os(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.VIEW_DEFAULT_REPOSITORIES):
@@ -372,7 +372,7 @@ async def get_default_repositories(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.VIEW_DEFAULT_REPOSITORIES):
@@ -420,7 +420,7 @@ async def create_default_repository(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.ADD_DEFAULT_REPOSITORY):
@@ -507,7 +507,7 @@ async def delete_default_repository(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
         if not auth_user.has_role(SecurityRoles.REMOVE_DEFAULT_REPOSITORY):

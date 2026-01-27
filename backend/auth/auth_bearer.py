@@ -55,9 +55,9 @@ class JWTBearer(HTTPBearer):
         return is_token_valid
 
 
-async def get_current_user(
+async def get_current_user(  # NOSONAR
     token: str = Depends(JWTBearer()),
-) -> str:  # NOSONAR - async for FastAPI
+) -> str:
     """
     Extract the current user's userid from the JWT token.
     """

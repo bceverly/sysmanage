@@ -18,7 +18,7 @@ from backend.services.audit_service import ActionType, AuditService, EntityType,
 logger = logging.getLogger(__name__)
 
 
-async def handle_child_host_creation_progress(  # NOSONAR - async handler
+async def handle_child_host_creation_progress(  # NOSONAR
     _db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
@@ -69,7 +69,7 @@ async def handle_child_host_creation_progress(  # NOSONAR - async handler
     }
 
 
-async def handle_child_host_created(  # NOSONAR - async handler
+async def handle_child_host_created(  # NOSONAR
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
     """

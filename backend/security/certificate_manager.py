@@ -52,7 +52,7 @@ class CertificateManager:
         # Try to create the system directory, fall back to local directory if permission/filesystem errors
         try:
             self.cert_dir.mkdir(parents=True, exist_ok=True)
-        except (PermissionError, OSError) as e:
+        except OSError as e:  # Catches PermissionError (subclass of OSError)
             # Fall back to local directory in the project
             project_dir = Path(__file__).parent.parent.parent  # Go up to sysmanage root
             fallback_dir = project_dir / ".sysmanage-certs"

@@ -13,7 +13,7 @@ from PIL import Image
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import sessionmaker
 
-from backend.api.error_constants import ERROR_USER_NOT_FOUND
+from backend.api.error_constants import error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -78,7 +78,7 @@ async def get_profile(current_user: str = Depends(get_current_user)):
         )
 
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         return ProfileResponse(
             userid=user.userid,
@@ -112,7 +112,7 @@ async def update_profile(
         )
 
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         # Update the fields if explicitly provided (including None values)
         # Using model_dump to check which fields were actually provided in the request
@@ -173,7 +173,7 @@ async def change_password(
         )
 
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         # Verify current password using argon2-cffi
         try:
@@ -310,7 +310,7 @@ async def upload_profile_image(
         )
 
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         # Update user's profile image
         user.profile_image = processed_image_bytes
@@ -346,7 +346,7 @@ async def get_profile_image(current_user: str = Depends(get_current_user)):
         )
 
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         if not user.profile_image:
             raise HTTPException(status_code=404, detail=_("No profile image found"))
@@ -387,7 +387,7 @@ async def delete_profile_image(current_user: str = Depends(get_current_user)):
         )
 
         if not user:
-            raise HTTPException(status_code=404, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_user_not_found())
 
         if not user.profile_image:
             raise HTTPException(status_code=404, detail=_("No profile image to delete"))

@@ -90,7 +90,7 @@ class PasswordPolicy:
 
         return requirements
 
-    def validate_password(  # NOSONAR - cognitive complexity
+    def validate_password(  # NOSONAR
         self, password: str, username: str = None
     ) -> Tuple[bool, List[str]]:
         """

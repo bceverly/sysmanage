@@ -440,7 +440,7 @@ class ScriptExecutionResultMessage(Message):
 class DiagnosticCollectionResultMessage(Message):
     """Message sent from agent to server with diagnostic collection results."""
 
-    def __init__(  # pylint: disable=too-many-positional-arguments  # NOSONAR - too many parameters
+    def __init__(  # pylint: disable=too-many-positional-arguments  # NOSONAR
         self,
         collection_id: str = None,
         success: bool = True,
@@ -481,9 +481,9 @@ class DiagnosticCollectionResultMessage(Message):
 
 
 # Message factory for creating messages from raw data
-def create_message(
+def create_message(  # NOSONAR
     raw_data: Dict[str, Any],
-) -> Message:  # NOSONAR - cognitive complexity
+) -> Message:
     """Create appropriate message object from raw dictionary data."""
     message_type = raw_data.get("message_type")
 

@@ -18,7 +18,7 @@ from pydantic import BaseModel, validator
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, sessionmaker
 
-from backend.api.error_constants import ERROR_USER_NOT_FOUND
+from backend.api.error_constants import error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -71,7 +71,7 @@ class AuditLogListResponse(BaseModel):
 
 
 @router.get("/list", response_model=AuditLogListResponse)
-async def list_audit_logs(  # NOSONAR - complex filtering logic
+async def list_audit_logs(  # NOSONAR
     user_id: Optional[str] = Query(None, description=_("Filter by user ID")),
     action_type: Optional[str] = Query(None, description=_("Filter by action type")),
     entity_type: Optional[str] = Query(None, description=_("Filter by entity type")),
@@ -111,7 +111,7 @@ async def list_audit_logs(  # NOSONAR - complex filtering logic
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
@@ -230,7 +230,7 @@ async def get_audit_log_entry(
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)
@@ -275,7 +275,7 @@ async def get_audit_log_entry(
 
 
 @router.get("/export", response_class=StreamingResponse)
-async def export_audit_logs_csv(  # NOSONAR - complex filtering logic
+async def export_audit_logs_csv(  # NOSONAR
     user_id: Optional[str] = Query(None, description=_("Filter by user ID")),
     action_type: Optional[str] = Query(None, description=_("Filter by action type")),
     entity_type: Optional[str] = Query(None, description=_("Filter by entity type")),
@@ -312,7 +312,7 @@ async def export_audit_logs_csv(  # NOSONAR - complex filtering logic
             .first()
         )
         if not auth_user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         if auth_user._role_cache is None:
             auth_user.load_role_cache(session)

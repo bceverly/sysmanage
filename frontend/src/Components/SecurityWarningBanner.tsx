@@ -228,11 +228,14 @@ const SecurityWarningBanner: React.FC = () => {
             {securityStatus.securityWarnings.map((warning, index) => (
               <Box key={warning.type} sx={{ mb: index < securityStatus.securityWarnings.length - 1 ? 2.5 : 0 }}>
                 {securityStatus.securityWarnings.length === 1 && !hasCredentialsWarning && (() => {
-                  const alertTitleText = warning.severity === 'critical'
-                    ? t('security.criticalWarning', 'CRITICAL SECURITY WARNING')
-                    : warning.type === 'email_integration_required'
-                      ? t('security.emailConfigurationWarning', 'Email Configuration Required')
-                      : t('security.securityWarning', 'Security Warning');
+                  let alertTitleText: string;
+                  if (warning.severity === 'critical') {
+                    alertTitleText = t('security.criticalWarning', 'CRITICAL SECURITY WARNING');
+                  } else if (warning.type === 'email_integration_required') {
+                    alertTitleText = t('security.emailConfigurationWarning', 'Email Configuration Required');
+                  } else {
+                    alertTitleText = t('security.securityWarning', 'Security Warning');
+                  }
                   return (
                     <AlertTitle sx={{ mb: 1.5, fontWeight: 'bold', fontSize: '18px' }}>
                       {alertTitleText}

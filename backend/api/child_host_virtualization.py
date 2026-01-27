@@ -54,7 +54,7 @@ router.include_router(enable_router)
     "/host/{host_id}/virtualization/create-child",
     dependencies=[Depends(JWTBearer())],
 )
-async def create_child_host_request(  # NOSONAR - complex business logic
+async def create_child_host_request(  # NOSONAR
     host_id: str,
     request: CreateWslChildHostRequest,
     current_user: str = Depends(get_current_user),

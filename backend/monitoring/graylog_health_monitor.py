@@ -15,7 +15,7 @@ from backend.persistence.models import GraylogIntegrationSettings
 logger = logging.getLogger(__name__)
 
 
-async def check_graylog_health():  # NOSONAR: async method and cognitive complexity justified for comprehensive health monitoring
+async def check_graylog_health():  # NOSONAR
     """
     Check Graylog server health and detect available input ports.
     Updates the database with the results.

@@ -25,7 +25,7 @@ class MockConnection:
         self.hostname = None  # Will be populated by handlers if needed
         self.is_mock_connection = True  # Flag to prevent last_access updates
 
-    async def send_message(self, message: Dict[str, Any]):  # NOSONAR - async function
+    async def send_message(self, message: Dict[str, Any]):  # NOSONAR
         """
         Mock send_message method - messages are not sent back during queue processing.
 

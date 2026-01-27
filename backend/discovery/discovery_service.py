@@ -61,9 +61,7 @@ class DiscoveryBeaconService:
             logger.error("Failed to start discovery beacon service: %s", e)
             raise
 
-    async def stop_beacon_service(
-        self,
-    ):  # NOSONAR: async method required for interface consistency
+    async def stop_beacon_service(self):  # NOSONAR
         """Stop the UDP discovery beacon service."""
         if self.transport:
             self.transport.close()
@@ -239,7 +237,7 @@ class NetworkScanner:
     def __init__(self):
         self.config = get_config()
 
-    async def broadcast_server_announcement(  # NOSONAR: async method for future async I/O operations
+    async def broadcast_server_announcement(  # NOSONAR
         self, subnet: str = "192.168.1.255", port: int = 31338
     ):
         """
@@ -277,11 +275,7 @@ class NetworkScanner:
         except Exception as e:
             logger.error("Failed to broadcast server announcement: %s", e)
 
-    def get_local_subnets(
-        self,
-    ) -> (
-        list
-    ):  # NOSONAR: cognitive complexity is justified for network interface enumeration
+    def get_local_subnets(self) -> list:  # NOSONAR
         """
         Get list of local subnet broadcast addresses.
 

@@ -393,9 +393,7 @@ class TestHandlePackageCollection:
         }
 
         with patch("backend.utils.host_validation.validate_host_id"):
-            result = await handle_package_collection(
-                session, mock_connection, message_data
-            )
+            result = handle_package_collection(session, mock_connection, message_data)
 
         assert result["message_type"] == "package_collection_result_ack"
         assert result["status"] in ["processed", "no_data"]
@@ -412,9 +410,7 @@ class TestHandlePackageCollection:
         }
 
         with patch("backend.utils.host_validation.validate_host_id"):
-            result = await handle_package_collection(
-                session, mock_connection, message_data
-            )
+            result = handle_package_collection(session, mock_connection, message_data)
 
         assert result["message_type"] == "package_collection_result_ack"
         assert result["status"] == "no_data"
@@ -427,7 +423,7 @@ class TestHandlePackageCollection:
         message_data = {"packages": {}}
 
         # This handler doesn't check host_id, it processes regardless
-        result = await handle_package_collection(session, connection, message_data)
+        result = handle_package_collection(session, connection, message_data)
 
         assert result["message_type"] == "package_collection_result_ack"
 

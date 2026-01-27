@@ -221,7 +221,7 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
           {t('security.antivirusOpenSource', 'Antivirus - Open Source')}
         </Typography>
 
-        {!antivirusStatus || !antivirusStatus.software_name ? (
+        {!antivirusStatus?.software_name ? (
           <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
             <WarningIcon sx={{ mr: 1, color: 'warning.main' }} />
             <Typography variant="body2" color="text.secondary">

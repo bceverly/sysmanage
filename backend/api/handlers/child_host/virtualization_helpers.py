@@ -138,7 +138,7 @@ def make_ack_response(
     return response
 
 
-async def handle_simple_init_result(  # NOSONAR - async handler
+async def handle_simple_init_result(  # NOSONAR
     db: Session,
     connection: Any,
     message_data: Dict[str, Any],

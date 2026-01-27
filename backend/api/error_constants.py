@@ -13,82 +13,82 @@ from backend.i18n import _
 
 
 # Authentication and Authorization
-def ERROR_USER_NOT_FOUND():
+def error_user_not_found():
     """User not found error message."""
     return _("User not found")
 
 
-def ERROR_PERMISSION_DENIED():
+def error_permission_denied():
     """Generic permission denied error message."""
     return _("Permission denied")
 
 
 # Host-related errors
-def ERROR_HOST_NOT_FOUND():
+def error_host_not_found():
     """Host not found error message."""
     return _("Host not found")
 
 
-def ERROR_HOST_NOT_REGISTERED():
+def error_host_not_registered():
     """Host not registered error message."""
     return _("Host not registered")
 
 
-def ERROR_HOST_NOT_ACTIVE():
+def error_host_not_active():
     """Host is not active error message."""
     return _("Host is not active")
 
 
-def ERROR_INVALID_HOST_ID():
+def error_invalid_host_id():
     """Invalid host ID format error message."""
     return _("Invalid host ID format")
 
 
 # Distribution-related errors
-def ERROR_DISTRIBUTION_NOT_FOUND():
+def error_distribution_not_found():
     """Distribution not found error message."""
     return _("Distribution not found")
 
 
 # Firewall-related errors
-def ERROR_INVALID_FIREWALL_ROLE_ID():
+def error_invalid_firewall_role_id():
     """Invalid firewall role ID format error message."""
     return _("Invalid firewall role ID format")
 
 
-def ERROR_FIREWALL_ROLE_NOT_FOUND():
+def error_firewall_role_not_found():
     """Firewall role not found error message."""
     return _("Firewall role not found")
 
 
-def ERROR_VIEW_FIREWALL_ROLES_REQUIRED():
+def error_view_firewall_roles_required():
     """Permission denied for firewall roles viewing."""
     return _("Permission denied: VIEW_FIREWALL_ROLES role required")
 
 
 # Diagnostic-related errors
-def ERROR_INVALID_DIAGNOSTIC_ID():
+def error_invalid_diagnostic_id():
     """Invalid diagnostic ID format error message."""
     return _("Invalid diagnostic ID format")
 
 
-def ERROR_DIAGNOSTIC_NOT_FOUND():
+def error_diagnostic_not_found():
     """Diagnostic report not found error message."""
     return _("Diagnostic report not found")
 
 
 # Virtualization-related errors
-def ERROR_UNKNOWN():
+def error_unknown():
     """Unknown error message."""
     return _("Unknown error")
 
 
-def ERROR_WSL_PENDING():
+def error_wsl_pending():
     """WSL feature enablement pending error message."""
     return _("WSL feature enablement pending")
 
 
-def ERROR_KVM_LINUX_ONLY():
+def error_kvm_linux_only():
     """KVM Linux-only error message."""
     return _("KVM is only supported on Linux hosts")
 
@@ -110,40 +110,40 @@ TIMEZONE_UTC_SUFFIX = "+00:00"
 
 
 # Host status errors
-def ERROR_HOST_NOT_FOUND_OR_NOT_ACTIVE():
+def error_host_not_found_or_not_active():
     """Host not found or not active error message."""
     return _("Host not found or not active")
 
 
-def ERROR_AGENT_PRIVILEGED_REQUIRED():
+def error_agent_privileged_required():
     """Repository management requires privileged agent mode."""
     return _("Repository management requires privileged agent mode")
 
 
 # Current user errors
-def ERROR_CURRENT_USER_NOT_FOUND():
+def error_current_user_not_found():
     """Current user not found error message."""
     return _("Current user not found")
 
 
 # Tag-related errors
-def ERROR_TAG_NOT_FOUND():
+def error_tag_not_found():
     """Tag not found error message."""
     return _("Tag not found")
 
 
-def ERROR_TAG_ALREADY_EXISTS():
+def error_tag_already_exists():
     """Tag already exists error message."""
     return _("Tag with this name already exists")
 
 
-def ERROR_EDIT_TAGS_REQUIRED():
+def error_edit_tags_required():
     """Permission denied for editing tags."""
     return _("Permission denied: EDIT_TAGS role required")
 
 
 # Script-related errors
-def ERROR_SCRIPT_NOT_FOUND():
+def error_script_not_found():
     """Script not found error message."""
     return _("Script not found")
 
@@ -151,18 +151,18 @@ def ERROR_SCRIPT_NOT_FOUND():
 AD_HOC_SCRIPT = "ad-hoc script"
 
 
-def ERROR_UNSUPPORTED_SHELL_TYPE():
+def error_unsupported_shell_type():
     """Unsupported shell type error message."""
     return _("Unsupported shell type: {}")
 
 
 # Secrets-related errors
-def ERROR_SECRET_NOT_FOUND():
+def error_secret_not_found():
     """Secret not found error message."""
     return _("Secret not found")
 
 
-def ERROR_INVALID_SECRET_ID():
+def error_invalid_secret_id():
     """Invalid secret ID error message."""
     return _("Invalid secret ID")
 
@@ -172,7 +172,7 @@ SECRETS_INVALID_ID_KEY = "secrets.invalid_id"
 
 
 # OpenBAO-related errors and constants
-def ERROR_OPENBAO_NOT_RUNNING():
+def error_openbao_not_running():
     """OpenBAO is not running error message."""
     return _("OpenBAO is not running")
 
@@ -184,7 +184,7 @@ SCHTASKS_PATH = "C:\\Windows\\System32\\schtasks.exe"
 
 
 # Server errors
-def ERROR_INTERNAL_SERVER():
+def error_internal_server():
     """Internal server error message."""
     return _("Internal server error")
 

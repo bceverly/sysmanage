@@ -126,9 +126,15 @@ const Navbar = () => {
               </NavLink>
             </li>
           </ul>
-          <div className="nav__close" id="nav-close" onClick={toggleMenu}>
+          <button
+              className="nav__close"
+              id="nav-close"
+              onClick={toggleMenu}
+              aria-label="Close menu"
+              type="button"
+          >
               <IoClose />
-          </div>
+          </button>
         </div>
 
         {/* Language selector, connection status, and notifications at toolbar level */}
@@ -147,9 +153,15 @@ const Navbar = () => {
           <LanguageSelector />
         </div>
 
-        <div className="nav__toggle" id="nav-toggle" onClick={toggleMenu}>
+        <button
+            className="nav__toggle"
+            id="nav-toggle"
+            onClick={toggleMenu}
+            aria-label="Toggle menu"
+            type="button"
+        >
           <IoMenu />
-        </div>
+        </button>
       </nav>
     </header>
   );

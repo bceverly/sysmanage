@@ -378,8 +378,7 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
   };
 
   const handleRemoveFirewall = async () => {
-    // TODO: Implement remove firewall functionality
-    console.log('Remove firewall clicked');
+    setError(t('security.firewallRemoveNotImplemented', 'Firewall removal is not yet supported'));
   };
 
   const handleEnableFirewall = async () => {
@@ -447,7 +446,7 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
             {t('security.firewall', 'Firewall')}
           </Typography>
 
-          {!firewallStatus || !firewallStatus.firewall_name ? (
+          {!firewallStatus?.firewall_name ? (
             <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
               <WarningIcon sx={{ mr: 1, color: 'warning.main' }} />
               <Typography variant="body2" color="text.secondary">
@@ -635,7 +634,7 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
           )}
 
           {/* Deploy button when no firewall is detected */}
-          {(!firewallStatus || !firewallStatus.firewall_name) && canDeployFirewall && (
+          {!firewallStatus?.firewall_name && canDeployFirewall && (
             <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
               <Button
                 variant="contained"

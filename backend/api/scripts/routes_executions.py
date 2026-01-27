@@ -11,7 +11,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy import desc
 from sqlalchemy.orm import sessionmaker
 
-from backend.api.error_constants import AD_HOC_SCRIPT, ERROR_USER_NOT_FOUND
+from backend.api.error_constants import AD_HOC_SCRIPT, error_user_not_found
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -36,7 +36,7 @@ router = APIRouter()
 
 
 @router.post("/execute", response_model=ScriptExecutionResponse)
-async def execute_script(  # NOSONAR - complex business logic
+async def execute_script(  # NOSONAR
     execution_request: ScriptExecutionRequest,
     current_user=Depends(get_current_user),
 ):
@@ -51,7 +51,7 @@ async def execute_script(  # NOSONAR - complex business logic
                 .first()
             )
             if not auth_user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if auth_user._role_cache is None:
                 auth_user.load_role_cache(db_session)
@@ -331,7 +331,7 @@ async def delete_script_execution(
                 .first()
             )
             if not auth_user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if auth_user._role_cache is None:
                 auth_user.load_role_cache(db_session)
@@ -405,7 +405,7 @@ async def delete_script_executions_bulk(
                 .first()
             )
             if not auth_user:
-                raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+                raise HTTPException(status_code=401, detail=error_user_not_found())
 
             if auth_user._role_cache is None:
                 auth_user.load_role_cache(db_session)

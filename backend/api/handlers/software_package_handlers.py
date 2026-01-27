@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from sqlalchemy import delete, update
 from sqlalchemy.orm import Session
 
-from backend.api.error_constants import ERROR_HOST_NOT_REGISTERED
+from backend.api.error_constants import error_host_not_registered
 from backend.i18n import _
 from backend.persistence.models import (
     AntivirusStatus,
@@ -37,7 +37,7 @@ async def handle_software_update(db: Session, connection, message_data: dict):
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -45,7 +45,7 @@ async def handle_software_update(db: Session, connection, message_data: dict):
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -110,9 +110,9 @@ async def handle_software_update(db: Session, connection, message_data: dict):
         }
 
 
-async def handle_package_updates_update(
+async def handle_package_updates_update(  # NOSONAR
     db: Session, connection, message_data: dict
-):  # NOSONAR - complex business logic
+):
     """Handle package updates information from agent."""
     from backend.utils.host_validation import validate_host_id
 
@@ -122,7 +122,7 @@ async def handle_package_updates_update(
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -130,7 +130,7 @@ async def handle_package_updates_update(
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -288,7 +288,7 @@ async def handle_package_updates_update(
         }
 
 
-async def handle_package_collection(db: Session, connection, message_data: dict):
+def handle_package_collection(db: Session, connection, message_data: dict):
     """Handle package collection result from agent."""
     debug_logger.info(
         "Processing package collection result from %s",
@@ -415,7 +415,7 @@ async def handle_third_party_repository_update(
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -423,7 +423,7 @@ async def handle_third_party_repository_update(
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -508,7 +508,7 @@ async def handle_antivirus_status_update(db: Session, connection, message_data: 
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -516,7 +516,7 @@ async def handle_antivirus_status_update(db: Session, connection, message_data: 
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -592,7 +592,7 @@ async def handle_commercial_antivirus_status_update(
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -600,7 +600,7 @@ async def handle_commercial_antivirus_status_update(
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -722,7 +722,7 @@ async def handle_firewall_status_update(db: Session, connection, message_data: d
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -730,7 +730,7 @@ async def handle_firewall_status_update(db: Session, connection, message_data: d
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -823,7 +823,7 @@ async def handle_graylog_status_update(db: Session, connection, message_data: di
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -831,7 +831,7 @@ async def handle_graylog_status_update(db: Session, connection, message_data: di
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 

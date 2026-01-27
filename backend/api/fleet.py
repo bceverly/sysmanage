@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from backend.api.error_constants import ERROR_HOST_NOT_FOUND
+from backend.api.error_constants import error_host_not_found
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import models
@@ -103,7 +103,7 @@ async def send_command_to_agent(
     # Look up host by hostname
     host = db.query(models.Host).filter(models.Host.fqdn == hostname).first()
     if not host:
-        raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+        raise HTTPException(status_code=404, detail=error_host_not_found())
 
     # Create and send command
     cmd_message = CommandMessage(
@@ -140,7 +140,7 @@ async def execute_shell_command(
     # Look up host by hostname
     host = db.query(models.Host).filter(models.Host.fqdn == hostname).first()
     if not host:
-        raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+        raise HTTPException(status_code=404, detail=error_host_not_found())
 
     parameters = {
         "command": shell_request.command,
@@ -180,7 +180,7 @@ async def install_package(
     # Look up host by hostname
     host = db.query(models.Host).filter(models.Host.fqdn == hostname).first()
     if not host:
-        raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+        raise HTTPException(status_code=404, detail=error_host_not_found())
 
     parameters = {
         "package_name": package_request.package_name,
@@ -222,7 +222,7 @@ async def restart_service(
     # Look up host by hostname
     host = db.query(models.Host).filter(models.Host.fqdn == hostname).first()
     if not host:
-        raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+        raise HTTPException(status_code=404, detail=error_host_not_found())
 
     parameters = {"service_name": service_request.service_name}
 
@@ -258,7 +258,7 @@ async def update_system(
     # Look up host by hostname
     host = db.query(models.Host).filter(models.Host.fqdn == hostname).first()
     if not host:
-        raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+        raise HTTPException(status_code=404, detail=error_host_not_found())
 
     cmd_message = CommandMessage(
         CommandType.UPDATE_SYSTEM, {}, 1800
@@ -291,7 +291,7 @@ async def reboot_system(
     # Look up host by hostname
     host = db.query(models.Host).filter(models.Host.fqdn == hostname).first()
     if not host:
-        raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+        raise HTTPException(status_code=404, detail=error_host_not_found())
 
     cmd_message = CommandMessage(
         CommandType.REBOOT_SYSTEM, {}, 60

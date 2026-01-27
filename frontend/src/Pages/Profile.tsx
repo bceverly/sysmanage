@@ -123,7 +123,7 @@ const Profile: React.FC = () => {
         password: string,
         config: { require_uppercase: boolean; require_lowercase: boolean; require_numbers: boolean; require_special_chars: boolean; special_chars: string; min_character_types: number },
         errors: string[]
-    ): void => {
+    ): void => { // NOSONAR
         let charTypes = 0;
         const defaultSpecialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
         const allowedSpecialChars = config.special_chars || defaultSpecialChars;

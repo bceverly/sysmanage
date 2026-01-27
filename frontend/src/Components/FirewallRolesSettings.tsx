@@ -560,46 +560,52 @@ const FirewallRolesSettings: React.FC = () => {
           subheader={t('firewallRoles.subtitle')}
         />
         <CardContent>
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-              <CircularProgress />
-            </Box>
-          ) : roles.length === 0 ? (
-            <Alert severity="info">{t('firewallRoles.noRoles')}</Alert>
-          ) : (
-            <Box sx={{ height: 500 }}>
-              <DataGrid
-                rows={roles}
-                columns={columns}
-                initialState={{
-                  pagination: { paginationModel: { pageSize: 10 } },
-                }}
-                pageSizeOptions={[5, 10, 25]}
-                checkboxSelection
-                disableRowSelectionOnClick
-                onRowSelectionModelChange={(newSelection) => {
-                  setSelectedRows(newSelection as string[]);
-                }}
-                rowSelectionModel={selectedRows}
-                getRowHeight={() => 'auto'}
-                sx={{
-                  '& .MuiDataGrid-cell': {
-                    display: 'flex',
-                    alignItems: 'center',
-                    py: 1,
-                  },
-                  '& .MuiDataGrid-cell--withRenderer': {
-                    display: 'flex',
-                    alignItems: 'center',
-                  },
-                  '& .MuiDataGrid-cellCheckbox': {
-                    display: 'flex',
-                    alignItems: 'center',
-                  },
-                }}
-              />
-            </Box>
-          )}
+          {(() => {
+            if (loading) {
+              return (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                  <CircularProgress />
+                </Box>
+              );
+            }
+            if (roles.length === 0) {
+              return <Alert severity="info">{t('firewallRoles.noRoles')}</Alert>;
+            }
+            return (
+              <Box sx={{ height: 500 }}>
+                <DataGrid
+                  rows={roles}
+                  columns={columns}
+                  initialState={{
+                    pagination: { paginationModel: { pageSize: 10 } },
+                  }}
+                  pageSizeOptions={[5, 10, 25]}
+                  checkboxSelection
+                  disableRowSelectionOnClick
+                  onRowSelectionModelChange={(newSelection) => {
+                    setSelectedRows(newSelection as string[]);
+                  }}
+                  rowSelectionModel={selectedRows}
+                  getRowHeight={() => 'auto'}
+                  sx={{
+                    '& .MuiDataGrid-cell': {
+                      display: 'flex',
+                      alignItems: 'center',
+                      py: 1,
+                    },
+                    '& .MuiDataGrid-cell--withRenderer': {
+                      display: 'flex',
+                      alignItems: 'center',
+                    },
+                    '& .MuiDataGrid-cellCheckbox': {
+                      display: 'flex',
+                      alignItems: 'center',
+                    },
+                  }}
+                />
+              </Box>
+            );
+          })()}
           <Stack direction="row" spacing={2} sx={{ mt: 2 }} justifyContent="flex-start">
             {canAdd && (
               <Button
@@ -699,10 +705,10 @@ const FirewallRolesSettings: React.FC = () => {
 
                 <FormControl sx={{ minWidth: 120 }}>
                   <InputLabel>{t('firewallRoles.protocol')}</InputLabel>
-                  <Select
+                  <Select<'tcp' | 'udp' | 'both'>
                     value={portProtocol}
                     label={t('firewallRoles.protocol')}
-                    onChange={(e) => setPortProtocol(e.target.value as 'tcp' | 'udp' | 'both')}
+                    onChange={(e) => setPortProtocol(e.target.value)}
                   >
                     <MenuItem value="tcp">{t('firewallRoles.tcp')}</MenuItem>
                     <MenuItem value="udp">{t('firewallRoles.udp')}</MenuItem>
@@ -712,10 +718,10 @@ const FirewallRolesSettings: React.FC = () => {
 
                 <FormControl sx={{ minWidth: 140 }}>
                   <InputLabel>{t('firewallRoles.ipVersion')}</InputLabel>
-                  <Select
+                  <Select<'ipv4' | 'ipv6' | 'both'>
                     value={ipVersion}
                     label={t('firewallRoles.ipVersion')}
-                    onChange={(e) => setIpVersion(e.target.value as 'ipv4' | 'ipv6' | 'both')}
+                    onChange={(e) => setIpVersion(e.target.value)}
                   >
                     <MenuItem value="ipv4">{t('firewallRoles.ipv4Only')}</MenuItem>
                     <MenuItem value="ipv6">{t('firewallRoles.ipv6Only')}</MenuItem>
@@ -749,7 +755,7 @@ const FirewallRolesSettings: React.FC = () => {
                     if (!port.ipv4) return null;
                     return (
                       <Chip
-                        key={`ipv4-${idx}`}
+                        key={`ipv4-${port.port_number}-${port.tcp ? 'tcp' : ''}${port.udp ? 'udp' : ''}`}
                         label={formatPort(port)}
                         color="success"
                         variant="outlined"
@@ -776,7 +782,7 @@ const FirewallRolesSettings: React.FC = () => {
                     if (!port.ipv6) return null;
                     return (
                       <Chip
-                        key={`ipv6-${idx}`}
+                        key={`ipv6-${port.port_number}-${port.tcp ? 'tcp' : ''}${port.udp ? 'udp' : ''}`}
                         label={formatPort(port)}
                         color="info"
                         variant="outlined"

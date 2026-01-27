@@ -192,11 +192,11 @@ def _try_admin_login(
     return {"Authorization": sign_jwt(login_data.userid)}
 
 
-def _authenticate_db_user(
+def _authenticate_db_user(  # NOSONAR
     user,
     login_data,
     session,
-    the_config,
+    _the_config,  # noqa: ARG001 - kept for API consistency with _try_admin_login
     client_ip,
     user_agent,
     response,

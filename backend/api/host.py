@@ -24,7 +24,7 @@ from backend.api import (
     host_ubuntu_pro,
 )
 from backend.api.host_utils import validate_host_approval_status
-from backend.api.error_constants import ERROR_HOST_NOT_FOUND, ERROR_USER_NOT_FOUND
+from backend.api.error_constants import error_host_not_found, error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
@@ -126,7 +126,7 @@ async def delete_host(host_id: str, current_user: str = Depends(get_current_user
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         # Load role cache if not already loaded
         if user._role_cache is None:
@@ -144,7 +144,7 @@ async def delete_host(host_id: str, current_user: str = Depends(get_current_user
 
         # Check for failure
         if len(hosts) != 1:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         deleted_host = hosts[0]
         # Extract values before deletion to avoid ObjectDeletedError
@@ -185,7 +185,7 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
 
         # Load role cache if not already loaded
         if user._role_cache is None:
@@ -200,7 +200,7 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
 
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         # Get tags using the dynamic relationship
         host_tags = host.tags.all()
@@ -281,7 +281,7 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
     with session_local() as session:
         host = session.query(models.Host).filter(models.Host.fqdn == fqdn).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         # Get tags using the dynamic relationship
         host_tags = host.tags.all()
@@ -464,7 +464,7 @@ async def add_host(new_host: Host, current_user: str = Depends(get_current_user)
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         # See if we are trying to add a duplicate host
         check_duplicate = (
             session.query(models.Host).filter(models.Host.fqdn == new_host.fqdn).all()
@@ -616,13 +616,13 @@ async def update_host(
             .first()
         )
         if not user:
-            raise HTTPException(status_code=401, detail=ERROR_USER_NOT_FOUND())
+            raise HTTPException(status_code=401, detail=error_user_not_found())
         # See if we were passed a valid id
         hosts = session.query(models.Host).filter(models.Host.id == host_id).all()
 
         # Check for failure
         if len(hosts) != 1:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         # Update the values
         session.query(models.Host).filter(models.Host.id == host_id).update(

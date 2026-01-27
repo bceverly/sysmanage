@@ -163,7 +163,7 @@ const CommercialAntivirusStatusCard: React.FC<CommercialAntivirusStatusCardProps
           {t('security.commercialAntivirus', 'Antivirus - Commercial')}
         </Typography>
 
-        {!status || !status.product_name ? (
+        {!status?.product_name ? (
           <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
             <WarningIcon sx={{ mr: 1, color: 'warning.main' }} />
             <Typography variant="body2" color="textSecondary">

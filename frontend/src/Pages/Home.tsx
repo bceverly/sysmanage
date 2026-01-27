@@ -155,8 +155,8 @@ const Dashboard = () => {
     };
 
     const processUpdatesResponse = (updatesResponse: PromiseSettledResult<UpdateStatsSummary>) => {
-        if (updatesResponse.status !== 'fulfilled') {
-            console.error('Failed to fetch updates summary:', (updatesResponse as PromiseRejectedResult).reason);
+        if (updatesResponse.status === 'rejected') {
+            console.error('Failed to fetch updates summary:', updatesResponse.reason);
             return;
         }
 
@@ -174,8 +174,8 @@ const Dashboard = () => {
         setColor: (value: string) => void,
         errorMessage: string
     ) => {
-        if (response.status !== 'fulfilled') {
-            console.error(errorMessage, (response as PromiseRejectedResult).reason);
+        if (response.status === 'rejected') {
+            console.error(errorMessage, response.reason);
             return;
         }
 

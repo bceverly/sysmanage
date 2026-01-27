@@ -151,8 +151,8 @@ interface ChildHost {
     installed_at: string | null;
 }
 
-// NOSONAR - Large page component that coordinates host details, hardware info, software, virtualization, and multiple interactive features
-const HostDetail = () => {
+// Large page component that coordinates host details, hardware info, software, virtualization, and multiple interactive features
+const HostDetail = () => { // NOSONAR
     const { hostId } = useParams<{ hostId: string }>();
     const [host, setHost] = useState<SysManageHost | null>(null);
     const [storageDevices, setStorageDevices] = useState<StorageDeviceType[]>([]);
@@ -1134,8 +1134,8 @@ const HostDetail = () => {
     }, [fetchDistributions]);
 
     // Create child host
-    // NOSONAR - Complex form validation and conditional request building for multiple child host types (WSL, LXD, VMM, KVM, bhyve)
-    const handleCreateChildHost = useCallback(async () => {
+    // Complex form validation and conditional request building for multiple child host types (WSL, LXD, VMM, KVM, bhyve)
+    const handleCreateChildHost = useCallback(async () => { // NOSONAR
         if (!hostId) return;
 
         // Mark form as validated to show inline errors
@@ -1696,8 +1696,8 @@ const HostDetail = () => {
         checkPermissions();
     }, []);
 
-    // NOSONAR - Main initialization effect that loads host data, storage, network, users, certificates, and optional subsystems with proper error handling
-    useEffect(() => {
+    // Main initialization effect that loads host data, storage, network, users, certificates, and optional subsystems with proper error handling
+    useEffect(() => { // NOSONAR
         if (!localStorage.getItem('bearer_token')) {
             navigate("/login");
             return;
@@ -1709,7 +1709,7 @@ const HostDetail = () => {
             return;
         }
 
-        const fetchHost = async () => {
+        const fetchHost = async () => { // NOSONAR
             try {
                 setLoading(true);
                 const hostData = await doGetHostByID(hostId);
@@ -2167,7 +2167,7 @@ const HostDetail = () => {
         if (isWindows) {
             value = user.security_id || t('common.notAvailable');
         } else {
-            value = user.uid !== undefined ? String(user.uid) : t('common.notAvailable');
+            value = user.uid === undefined ? t('common.notAvailable') : String(user.uid);
         }
         return `${label}: ${value}`;
     };
@@ -2328,7 +2328,7 @@ const HostDetail = () => {
         } else {
             const filtered = availableCertificates.filter((cert) =>
                 cert.name.toLowerCase().includes(searchTerm) ||
-                (cert.filename && cert.filename.toLowerCase().includes(searchTerm))
+                cert.filename?.toLowerCase().includes(searchTerm)
             );
             setFilteredCertificates(filtered);
         }
@@ -2579,7 +2579,7 @@ const HostDetail = () => {
             } else {
                 // Multiple devices with same name, prioritize by mount point
                 // Priority: root (/), then system volumes, then others
-                const prioritized = deviceGroup.sort((a, b) => {
+                const prioritized = deviceGroup.toSorted((a, b) => {
                     const aMountPriority = getMountPointPriority(a.mount_point || '');
                     const bMountPriority = getMountPointPriority(b.mount_point || '');
                     return aMountPriority - bMountPriority;
@@ -2819,8 +2819,11 @@ const HostDetail = () => {
                             const currentHost = await doGetHostByID(hostId);
                             setHost(currentHost);
                             
-                            // If status changed from pending, also refresh diagnostics data and virtualization status
-                            if (currentHost?.diagnostics_request_status !== 'pending') {
+                            // If status is still pending, continue polling; otherwise refresh diagnostics data and virtualization status
+                            if (currentHost?.diagnostics_request_status === 'pending') {
+                                // Continue polling
+                                pollForCompletion(attempts + 1, maxAttempts);
+                            } else {
                                 const updatedDiagnostics = await doGetHostDiagnostics(hostId);
                                 setDiagnosticsData(updatedDiagnostics);
                                 // Also refresh virtualization status if this host supports child hosts
@@ -2828,9 +2831,6 @@ const HostDetail = () => {
                                     await fetchVirtualizationStatus();
                                 }
                                 console.log('Diagnostics request completed');
-                            } else {
-                                // Continue polling
-                                pollForCompletion(attempts + 1, maxAttempts);
                             }
                         } catch (err) {
                             console.warn('Failed to refresh host data:', err);
@@ -3165,7 +3165,7 @@ const HostDetail = () => {
         try {
             const response = await axiosInstance.get('/api/ubuntu-pro/');
             const masterKey = response.data.master_key;
-            if (masterKey && masterKey.trim()) {
+            if (masterKey?.trim()) {
                 setUbuntuProToken(masterKey);
             }
         } catch (error) {
@@ -3423,7 +3423,7 @@ const HostDetail = () => {
         const translated = t(translationKey);
         // If translation not found, return capitalized status
         return translated === translationKey ?
-            status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ') :
+            status.charAt(0).toUpperCase() + status.slice(1).replaceAll('_', ' ') :
             translated;
     };
 
@@ -4158,122 +4158,130 @@ const HostDetail = () => {
                                 <MedicalServicesIcon sx={{ mr: 1 }} />
                                 {t('hostDetail.opentelemetryStatus', 'OpenTelemetry Status')}
                             </Typography>
-                            {openTelemetryLoading ? (
-                                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                                    <CircularProgress size={24} />
-                                </Box>
-                            ) : openTelemetryStatus ? (
-                                <Grid container spacing={2}>
-                                    <Grid size={{ xs: 12 }}>
-                                        <Typography variant="body2" color="textSecondary">
-                                            {t('hostDetail.opentelemetryDeployed', 'Deployed')}
-                                        </Typography>
-                                        <Typography variant="body1">
-                                            {openTelemetryStatus.deployed ? t('common.yes', 'Yes') : t('common.no', 'No')}
-                                        </Typography>
-                                    </Grid>
-                                    {!openTelemetryStatus.deployed && hasPermission(SecurityRoles.DEPLOY_OPENTELEMETRY) && host?.is_agent_privileged && (
-                                        <Grid size={{ xs: 12 }}>
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                size="small"
-                                                onClick={handleDeployOpenTelemetry}
-                                                disabled={openTelemetryDeploying || openTelemetryLoading}
-                                            >
-                                                {openTelemetryDeploying ? t('hostDetail.deploying', 'Deploying...') : t('hostDetail.deployOpenTelemetry', 'Deploy OpenTelemetry')}
-                                            </Button>
-                                        </Grid>
-                                    )}
-                                    {openTelemetryStatus.deployed && (
-                                        <>
+                            {(() => {
+                                if (openTelemetryLoading) {
+                                    return (
+                                        <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                                            <CircularProgress size={24} />
+                                        </Box>
+                                    );
+                                }
+                                if (openTelemetryStatus) {
+                                    return (
+                                        <Grid container spacing={2}>
                                             <Grid size={{ xs: 12 }}>
                                                 <Typography variant="body2" color="textSecondary">
-                                                    {t('hostDetail.opentelemetryServiceStatus', 'Service Status')}
-                                                </Typography>
-                                                <Chip
-                                                    label={getOpenTelemetryServiceLabel(openTelemetryStatus.service_status)}
-                                                    color={getOpenTelemetryServiceColor(openTelemetryStatus.service_status)}
-                                                    size="small"
-                                                />
-                                            </Grid>
-                                            <Grid size={{ xs: 12 }}>
-                                                <Typography variant="body2" color="textSecondary">
-                                                    {t('hostDetail.opentelemetryGrafanaServer', 'Grafana Server')}
+                                                    {t('hostDetail.opentelemetryDeployed', 'Deployed')}
                                                 </Typography>
                                                 <Typography variant="body1">
-                                                    {openTelemetryStatus.grafana_url || t('hostDetail.opentelemetryNotConnected', 'Not Connected')}
+                                                    {openTelemetryStatus.deployed ? t('common.yes', 'Yes') : t('common.no', 'No')}
                                                 </Typography>
                                             </Grid>
-                                            {host.is_agent_privileged && (
+                                            {!openTelemetryStatus.deployed && hasPermission(SecurityRoles.DEPLOY_OPENTELEMETRY) && host?.is_agent_privileged && (
                                                 <Grid size={{ xs: 12 }}>
-                                                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                                                        <Button
-                                                            variant="outlined"
-                                                            size="small"
-                                                            startIcon={<PlayArrowIcon />}
-                                                            onClick={handleOpenTelemetryStart}
-                                                            disabled={openTelemetryLoading}
-                                                        >
-                                                            {t('hostDetail.opentelemetryStart', 'Start')}
-                                                        </Button>
-                                                        <Button
-                                                            variant="outlined"
-                                                            size="small"
-                                                            startIcon={<StopIcon />}
-                                                            onClick={handleOpenTelemetryStop}
-                                                            disabled={openTelemetryLoading}
-                                                        >
-                                                            {t('hostDetail.opentelemetryStop', 'Stop')}
-                                                        </Button>
-                                                        <Button
-                                                            variant="outlined"
-                                                            size="small"
-                                                            startIcon={<RestartAltIcon />}
-                                                            onClick={handleOpenTelemetryRestart}
-                                                            disabled={openTelemetryLoading}
-                                                        >
-                                                            {t('hostDetail.opentelemetryRestart', 'Restart')}
-                                                        </Button>
-                                                        {openTelemetryStatus.grafana_configured && !openTelemetryStatus.grafana_url && (
-                                                            <Button
-                                                                variant="outlined"
-                                                                size="small"
-                                                                onClick={handleOpenTelemetryConnect}
-                                                                disabled={openTelemetryLoading}
-                                                            >
-                                                                {t('hostDetail.opentelemetryConnect', 'Connect to Grafana')}
-                                                            </Button>
-                                                        )}
-                                                        <Button
-                                                            variant="outlined"
-                                                            size="small"
-                                                            onClick={handleRemoveOpenTelemetry}
-                                                            disabled={openTelemetryLoading}
-                                                        >
-                                                            {t('hostDetail.opentelemetryRemove', 'Remove OpenTelemetry')}
-                                                        </Button>
-                                                        {openTelemetryStatus.grafana_url && (
-                                                            <Button
-                                                                variant="outlined"
-                                                                size="small"
-                                                                onClick={handleOpenTelemetryDisconnect}
-                                                                disabled={openTelemetryLoading}
-                                                            >
-                                                                {t('hostDetail.opentelemetryDisconnect', 'Disconnect from Grafana')}
-                                                            </Button>
-                                                        )}
-                                                    </Box>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        size="small"
+                                                        onClick={handleDeployOpenTelemetry}
+                                                        disabled={openTelemetryDeploying || openTelemetryLoading}
+                                                    >
+                                                        {openTelemetryDeploying ? t('hostDetail.deploying', 'Deploying...') : t('hostDetail.deployOpenTelemetry', 'Deploy OpenTelemetry')}
+                                                    </Button>
                                                 </Grid>
                                             )}
-                                        </>
-                                    )}
-                                </Grid>
-                            ) : (
-                                <Typography variant="body2" color="textSecondary">
-                                    {t('common.notAvailable', 'Not Available')}
-                                </Typography>
-                            )}
+                                            {openTelemetryStatus.deployed && (
+                                                <>
+                                                    <Grid size={{ xs: 12 }}>
+                                                        <Typography variant="body2" color="textSecondary">
+                                                            {t('hostDetail.opentelemetryServiceStatus', 'Service Status')}
+                                                        </Typography>
+                                                        <Chip
+                                                            label={getOpenTelemetryServiceLabel(openTelemetryStatus.service_status)}
+                                                            color={getOpenTelemetryServiceColor(openTelemetryStatus.service_status)}
+                                                            size="small"
+                                                        />
+                                                    </Grid>
+                                                    <Grid size={{ xs: 12 }}>
+                                                        <Typography variant="body2" color="textSecondary">
+                                                            {t('hostDetail.opentelemetryGrafanaServer', 'Grafana Server')}
+                                                        </Typography>
+                                                        <Typography variant="body1">
+                                                            {openTelemetryStatus.grafana_url || t('hostDetail.opentelemetryNotConnected', 'Not Connected')}
+                                                        </Typography>
+                                                    </Grid>
+                                                    {host.is_agent_privileged && (
+                                                        <Grid size={{ xs: 12 }}>
+                                                            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    startIcon={<PlayArrowIcon />}
+                                                                    onClick={handleOpenTelemetryStart}
+                                                                    disabled={openTelemetryLoading}
+                                                                >
+                                                                    {t('hostDetail.opentelemetryStart', 'Start')}
+                                                                </Button>
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    startIcon={<StopIcon />}
+                                                                    onClick={handleOpenTelemetryStop}
+                                                                    disabled={openTelemetryLoading}
+                                                                >
+                                                                    {t('hostDetail.opentelemetryStop', 'Stop')}
+                                                                </Button>
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    startIcon={<RestartAltIcon />}
+                                                                    onClick={handleOpenTelemetryRestart}
+                                                                    disabled={openTelemetryLoading}
+                                                                >
+                                                                    {t('hostDetail.opentelemetryRestart', 'Restart')}
+                                                                </Button>
+                                                                {openTelemetryStatus.grafana_configured && !openTelemetryStatus.grafana_url && (
+                                                                    <Button
+                                                                        variant="outlined"
+                                                                        size="small"
+                                                                        onClick={handleOpenTelemetryConnect}
+                                                                        disabled={openTelemetryLoading}
+                                                                    >
+                                                                        {t('hostDetail.opentelemetryConnect', 'Connect to Grafana')}
+                                                                    </Button>
+                                                                )}
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    onClick={handleRemoveOpenTelemetry}
+                                                                    disabled={openTelemetryLoading}
+                                                                >
+                                                                    {t('hostDetail.opentelemetryRemove', 'Remove OpenTelemetry')}
+                                                                </Button>
+                                                                {openTelemetryStatus.grafana_url && (
+                                                                    <Button
+                                                                        variant="outlined"
+                                                                        size="small"
+                                                                        onClick={handleOpenTelemetryDisconnect}
+                                                                        disabled={openTelemetryLoading}
+                                                                    >
+                                                                        {t('hostDetail.opentelemetryDisconnect', 'Disconnect from Grafana')}
+                                                                    </Button>
+                                                                )}
+                                                            </Box>
+                                                        </Grid>
+                                                    )}
+                                                </>
+                                            )}
+                                        </Grid>
+                                    );
+                                }
+                                return (
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('common.notAvailable', 'Not Available')}
+                                    </Typography>
+                                );
+                            })()}
                         </CardContent>
                     </Card>
                 </Grid>
@@ -4821,111 +4829,119 @@ const HostDetail = () => {
                                         size="small"
                                     />
                                 </Box>
-                                {loadingSoftware ? (
-                                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
-                                        <CircularProgress />
-                                        <Typography variant="body2" color="textSecondary" sx={{ ml: 2 }}>
-                                            {t('hostDetail.loadingSoftware', 'Loading software packages...')}
-                                        </Typography>
-                                    </Box>
-                                ) : softwarePackages.length === 0 ? (
-                                    <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 2 }}>
-                                        {t('hostDetail.noSoftwareFound', 'No software packages found')}
-                                    </Typography>
-                                ) : (
-                                    <>
-                                        <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                                            {t('hostDetail.showingPackages', 'Showing {{start}}-{{end}} of {{total}} packages', {
-                                                start: ((softwarePagination.page - 1) * softwarePagination.page_size + 1).toLocaleString(i18n.language),
-                                                end: Math.min(softwarePagination.page * softwarePagination.page_size, softwarePagination.total_items).toLocaleString(i18n.language),
-                                                total: softwarePagination.total_items.toLocaleString(i18n.language)
-                                            })}
-                                        </Typography>
-                                        <Grid container spacing={2}>
-                                            {softwarePackages.map((pkg: SoftwarePackage, index: number) => (
-                                            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={pkg.id || index}>
-                                                <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
-                                                    <CardContent sx={{ p: 2 }}>
-                                                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1, wordBreak: 'break-word' }}>
-                                                            {pkg.package_name || t('common.unknown', 'Unknown')}
-                                                        </Typography>
-                                                        {pkg.version && (
-                                                            <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                                                                {t('hostDetail.version', 'Version')}: {pkg.version}
+                                {(() => {
+                                    if (loadingSoftware) {
+                                        return (
+                                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+                                                <CircularProgress />
+                                                <Typography variant="body2" color="textSecondary" sx={{ ml: 2 }}>
+                                                    {t('hostDetail.loadingSoftware', 'Loading software packages...')}
+                                                </Typography>
+                                            </Box>
+                                        );
+                                    }
+                                    if (softwarePackages.length === 0) {
+                                        return (
+                                            <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', textAlign: 'center', py: 2 }}>
+                                                {t('hostDetail.noSoftwareFound', 'No software packages found')}
+                                            </Typography>
+                                        );
+                                    }
+                                    return (
+                                        <>
+                                            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                                                {t('hostDetail.showingPackages', 'Showing {{start}}-{{end}} of {{total}} packages', {
+                                                    start: ((softwarePagination.page - 1) * softwarePagination.page_size + 1).toLocaleString(i18n.language),
+                                                    end: Math.min(softwarePagination.page * softwarePagination.page_size, softwarePagination.total_items).toLocaleString(i18n.language),
+                                                    total: softwarePagination.total_items.toLocaleString(i18n.language)
+                                                })}
+                                            </Typography>
+                                            <Grid container spacing={2}>
+                                                {softwarePackages.map((pkg: SoftwarePackage, index: number) => (
+                                                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={pkg.id || index}>
+                                                    <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
+                                                        <CardContent sx={{ p: 2 }}>
+                                                            <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1, wordBreak: 'break-word' }}>
+                                                                {pkg.package_name || t('common.unknown', 'Unknown')}
                                                             </Typography>
-                                                        )}
-                                                        {pkg.package_manager && (
-                                                            <Chip 
-                                                                label={pkg.package_manager}
-                                                                color="primary"
-                                                                size="small"
-                                                                sx={{ mb: 1 }}
-                                                            />
-                                                        )}
-                                                        {pkg.description && (
-                                                            <Typography variant="body2" color="textSecondary" sx={{ 
-                                                                fontSize: '0.75rem', 
-                                                                mt: 1,
-                                                                overflow: 'hidden',
-                                                                textOverflow: 'ellipsis',
-                                                                display: '-webkit-box',
-                                                                WebkitLineClamp: 3,
-                                                                WebkitBoxOrient: 'vertical'
-                                                            }}>
-                                                                {pkg.description}
-                                                            </Typography>
-                                                        )}
-                                                        {(pkg.size_bytes || pkg.install_date || pkg.vendor) && (
-                                                            <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid', borderColor: 'grey.700' }}>
-                                                                {pkg.size_bytes && (
-                                                                    <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
-                                                                        {t('hostDetail.size', 'Size')}: {formatBytesWithCommas(pkg.size_bytes)}
-                                                                    </Typography>
-                                                                )}
-                                                                {pkg.install_date && (
-                                                                    <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
-                                                                        {t('hostDetail.installed', 'Installed')}: {formatDate(pkg.install_date)}
-                                                                    </Typography>
-                                                                )}
-                                                                {pkg.vendor && (
-                                                                    <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
-                                                                        {t('hostDetail.vendor', 'Vendor')}: {pkg.vendor}
-                                                                    </Typography>
-                                                                )}
+                                                            {pkg.version && (
+                                                                <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
+                                                                    {t('hostDetail.version', 'Version')}: {pkg.version}
+                                                                </Typography>
+                                                            )}
+                                                            {pkg.package_manager && (
+                                                                <Chip
+                                                                    label={pkg.package_manager}
+                                                                    color="primary"
+                                                                    size="small"
+                                                                    sx={{ mb: 1 }}
+                                                                />
+                                                            )}
+                                                            {pkg.description && (
+                                                                <Typography variant="body2" color="textSecondary" sx={{
+                                                                    fontSize: '0.75rem',
+                                                                    mt: 1,
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    display: '-webkit-box',
+                                                                    WebkitLineClamp: 3,
+                                                                    WebkitBoxOrient: 'vertical'
+                                                                }}>
+                                                                    {pkg.description}
+                                                                </Typography>
+                                                            )}
+                                                            {(pkg.size_bytes || pkg.install_date || pkg.vendor) && (
+                                                                <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid', borderColor: 'grey.700' }}>
+                                                                    {pkg.size_bytes && (
+                                                                        <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
+                                                                            {t('hostDetail.size', 'Size')}: {formatBytesWithCommas(pkg.size_bytes)}
+                                                                        </Typography>
+                                                                    )}
+                                                                    {pkg.install_date && (
+                                                                        <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
+                                                                            {t('hostDetail.installed', 'Installed')}: {formatDate(pkg.install_date)}
+                                                                        </Typography>
+                                                                    )}
+                                                                    {pkg.vendor && (
+                                                                        <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
+                                                                            {t('hostDetail.vendor', 'Vendor')}: {pkg.vendor}
+                                                                        </Typography>
+                                                                    )}
+                                                                </Box>
+                                                            )}
+                                                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                                                                <Button
+                                                                    variant="contained"
+                                                                    color="error"
+                                                                    size="small"
+                                                                    disabled={!host?.active || !host?.is_agent_privileged}
+                                                                    onClick={() => handleUninstallPackage(pkg)}
+                                                                    sx={{ minWidth: 'auto' }}
+                                                                >
+                                                                    {t('hostDetail.uninstall', 'Uninstall')}
+                                                                </Button>
                                                             </Box>
-                                                        )}
-                                                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                                                            <Button
-                                                                variant="contained"
-                                                                color="error"
-                                                                size="small"
-                                                                disabled={!host?.active || !host?.is_agent_privileged}
-                                                                onClick={() => handleUninstallPackage(pkg)}
-                                                                sx={{ minWidth: 'auto' }}
-                                                            >
-                                                                {t('hostDetail.uninstall', 'Uninstall')}
-                                                            </Button>
-                                                        </Box>
-                                                    </CardContent>
-                                                </Card>
-                                            </Grid>
-                                        ))}
-                                    </Grid>
-                                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                                        <Pagination
-                                            count={softwarePagination.total_pages}
-                                            page={softwarePagination.page}
-                                            onChange={(_, page) => {
-                                                setSoftwarePagination(prev => ({ ...prev, page }));
-                                            }}
-                                            color="primary"
-                                            size="large"
-                                            showFirstButton
-                                            showLastButton
-                                        />
-                                    </Box>
-                                </>
-                                )}
+                                                        </CardContent>
+                                                    </Card>
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+                                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                                            <Pagination
+                                                count={softwarePagination.total_pages}
+                                                page={softwarePagination.page}
+                                                onChange={(_, page) => {
+                                                    setSoftwarePagination(prev => ({ ...prev, page }));
+                                                }}
+                                                color="primary"
+                                                size="large"
+                                                showFirstButton
+                                                showLastButton
+                                            />
+                                        </Box>
+                                    </>
+                                    );
+                                })()}
                             </CardContent>
                         </Card>
                     </Grid>
@@ -5493,77 +5509,85 @@ const HostDetail = () => {
                                     </Typography>
                                 </Box>
 
-                                {installationHistoryLoading ? (
-                                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                                        <CircularProgress />
-                                    </Box>
-                                ) : installationHistory.length === 0 ? (
-                                    <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'center', py: 4 }}>
-                                        {t('hostDetail.noInstallationHistory', 'No software installation history found for this host.')}
-                                    </Typography>
-                                ) : (
-                                    <TableContainer>
-                                        <Table>
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>{t('hostDetail.packageNames', 'Package Names')}</TableCell>
-                                                    <TableCell>{t('hostDetail.operation', 'Operation')}</TableCell>
-                                                    <TableCell>{t('hostDetail.requestedBy', 'Requested By')}</TableCell>
-                                                    <TableCell>{t('hostDetail.requestedAt', 'Requested At')}</TableCell>
-                                                    <TableCell>{t('hostDetail.status', 'Status')}</TableCell>
-                                                    <TableCell>{t('hostDetail.completedAt', 'Completed At')}</TableCell>
-                                                    <TableCell>{t('hostDetail.actions', 'Actions')}</TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {installationHistory.map((installation) => (
-                                                    <TableRow key={installation.request_id}>
-                                                        <TableCell>{installation.package_names}</TableCell>
-                                                        <TableCell>
-                                                            <Chip
-                                                                label={(installation.operation_type || 'install') === 'install' ? t('hostDetail.install', 'Install') : t('hostDetail.uninstall', 'Uninstall')}
-                                                                color={(installation.operation_type || 'install') === 'install' ? 'primary' : 'error'}
-                                                                size="small"
-                                                                variant="outlined"
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell>{installation.requested_by}</TableCell>
-                                                        <TableCell>{formatDateTime(installation.requested_at)}</TableCell>
-                                                        <TableCell>
-                                                            <Chip
-                                                                label={getTranslatedStatus(installation.status)}
-                                                                color={getInstallationStatusColor(installation.status)}
-                                                                size="small"
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            {installation.completed_at ? formatDateTime(installation.completed_at) : '-'}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <IconButton
-                                                                size="small"
-                                                                onClick={() => handleViewInstallationLog(installation)}
-                                                                disabled={installation.status === 'pending' || installation.status === 'queued' || installation.status === 'in_progress' || installation.status === 'installing'}
-                                                                title={t('hostDetail.viewInstallationLog', 'View Installation Log')}
-                                                                sx={{ mr: 1 }}
-                                                            >
-                                                                <VisibilityIcon />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                size="small"
-                                                                onClick={() => handleDeleteInstallation(installation)}
-                                                                title={t('hostDetail.deleteInstallation', 'Delete Installation Record')}
-                                                                color="error"
-                                                            >
-                                                                <DeleteIcon />
-                                                            </IconButton>
-                                                        </TableCell>
+                                {(() => {
+                                    if (installationHistoryLoading) {
+                                        return (
+                                            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                                                <CircularProgress />
+                                            </Box>
+                                        );
+                                    }
+                                    if (installationHistory.length === 0) {
+                                        return (
+                                            <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'center', py: 4 }}>
+                                                {t('hostDetail.noInstallationHistory', 'No software installation history found for this host.')}
+                                            </Typography>
+                                        );
+                                    }
+                                    return (
+                                        <TableContainer>
+                                            <Table>
+                                                <TableHead>
+                                                    <TableRow>
+                                                        <TableCell>{t('hostDetail.packageNames', 'Package Names')}</TableCell>
+                                                        <TableCell>{t('hostDetail.operation', 'Operation')}</TableCell>
+                                                        <TableCell>{t('hostDetail.requestedBy', 'Requested By')}</TableCell>
+                                                        <TableCell>{t('hostDetail.requestedAt', 'Requested At')}</TableCell>
+                                                        <TableCell>{t('hostDetail.status', 'Status')}</TableCell>
+                                                        <TableCell>{t('hostDetail.completedAt', 'Completed At')}</TableCell>
+                                                        <TableCell>{t('hostDetail.actions', 'Actions')}</TableCell>
                                                     </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                                )}
+                                                </TableHead>
+                                                <TableBody>
+                                                    {installationHistory.map((installation) => (
+                                                        <TableRow key={installation.request_id}>
+                                                            <TableCell>{installation.package_names}</TableCell>
+                                                            <TableCell>
+                                                                <Chip
+                                                                    label={(installation.operation_type || 'install') === 'install' ? t('hostDetail.install', 'Install') : t('hostDetail.uninstall', 'Uninstall')}
+                                                                    color={(installation.operation_type || 'install') === 'install' ? 'primary' : 'error'}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>{installation.requested_by}</TableCell>
+                                                            <TableCell>{formatDateTime(installation.requested_at)}</TableCell>
+                                                            <TableCell>
+                                                                <Chip
+                                                                    label={getTranslatedStatus(installation.status)}
+                                                                    color={getInstallationStatusColor(installation.status)}
+                                                                    size="small"
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {installation.completed_at ? formatDateTime(installation.completed_at) : '-'}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={() => handleViewInstallationLog(installation)}
+                                                                    disabled={installation.status === 'pending' || installation.status === 'queued' || installation.status === 'in_progress' || installation.status === 'installing'}
+                                                                    title={t('hostDetail.viewInstallationLog', 'View Installation Log')}
+                                                                    sx={{ mr: 1 }}
+                                                                >
+                                                                    <VisibilityIcon />
+                                                                </IconButton>
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={() => handleDeleteInstallation(installation)}
+                                                                    title={t('hostDetail.deleteInstallation', 'Delete Installation Record')}
+                                                                    color="error"
+                                                                >
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </TableContainer>
+                                    );
+                                })()}
                             </CardContent>
                         </Card>
                     </Grid>
@@ -5953,24 +5977,42 @@ const HostDetail = () => {
                                                         </TableCell>
                                                         <TableCell>
                                                             <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
-                                                                <Chip
-                                                                    icon={child.status === 'creating' ? <CircularProgress size={12} color="inherit" /> : undefined}
-                                                                    label={
-                                                                        child.status === 'creating' ? t('hostDetail.childHostCreating', 'Creating...') :
-                                                                        child.status === 'running' ? t('hostDetail.childHostRunning', 'Running') :
-                                                                        child.status === 'stopped' ? t('hostDetail.childHostStopped', 'Stopped') :
-                                                                        child.status === 'error' ? t('hostDetail.childHostError', 'Error') :
-                                                                        child.status
+                                                                {(() => {
+                                                                    let statusLabel: string;
+                                                                    if (child.status === 'creating') {
+                                                                        statusLabel = t('hostDetail.childHostCreating', 'Creating...');
+                                                                    } else if (child.status === 'running') {
+                                                                        statusLabel = t('hostDetail.childHostRunning', 'Running');
+                                                                    } else if (child.status === 'stopped') {
+                                                                        statusLabel = t('hostDetail.childHostStopped', 'Stopped');
+                                                                    } else if (child.status === 'error') {
+                                                                        statusLabel = t('hostDetail.childHostError', 'Error');
+                                                                    } else {
+                                                                        statusLabel = child.status;
                                                                     }
-                                                                    size="small"
-                                                                    color={
-                                                                        child.status === 'running' ? 'success' :
-                                                                        child.status === 'stopped' ? 'default' :
-                                                                        child.status === 'error' ? 'error' :
-                                                                        child.status === 'creating' ? 'info' :
-                                                                        'warning'
+
+                                                                    let statusColor: 'success' | 'default' | 'error' | 'info' | 'warning';
+                                                                    if (child.status === 'running') {
+                                                                        statusColor = 'success';
+                                                                    } else if (child.status === 'stopped') {
+                                                                        statusColor = 'default';
+                                                                    } else if (child.status === 'error') {
+                                                                        statusColor = 'error';
+                                                                    } else if (child.status === 'creating') {
+                                                                        statusColor = 'info';
+                                                                    } else {
+                                                                        statusColor = 'warning';
                                                                     }
-                                                                />
+
+                                                                    return (
+                                                                        <Chip
+                                                                            icon={child.status === 'creating' ? <CircularProgress size={12} color="inherit" /> : undefined}
+                                                                            label={statusLabel}
+                                                                            size="small"
+                                                                            color={statusColor}
+                                                                        />
+                                                                    );
+                                                                })()}
                                                                 {/* Show error message if status is error */}
                                                                 {child.status === 'error' && child.error_message && (
                                                                     <Typography variant="caption" color="error" sx={{ maxWidth: 200 }}>
@@ -6673,92 +6715,100 @@ const HostDetail = () => {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent sx={{ p: 3 }}>
-                    {diagnosticDetailLoading ? (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                            <CircularProgress />
-                        </Box>
-                    ) : selectedDiagnostic ? (
-                        <Box>
-                            {/* Diagnostic Report Metadata */}
-                            <Card sx={{ mb: 3, backgroundColor: 'grey.800' }}>
-                                <CardContent>
-                                    <Grid container spacing={2}>
-                                        <Grid size={{ xs: 12, sm: 6 }}>
-                                            <Typography variant="body2" color="textSecondary">
-                                                {t('hostDetail.collectionId', 'Collection ID')}
-                                            </Typography>
-                                            <Typography variant="body1" sx={{ fontFamily: 'monospace' }}>
-                                                {selectedDiagnostic.collection_id}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid size={{ xs: 12, sm: 6 }}>
-                                            <Typography variant="body2" color="textSecondary">
-                                                {t('hostDetail.collectionStatus', 'Status')}
-                                            </Typography>
-                                            <Chip
-                                                label={selectedDiagnostic.status}
-                                                color={selectedDiagnostic.status === 'completed' ? 'success' : 'warning'}
-                                                size="small"
-                                            />
-                                        </Grid>
-                                        <Grid size={{ xs: 12, sm: 6 }}>
-                                            <Typography variant="body2" color="textSecondary">
-                                                {t('hostDetail.requestedAt', 'Requested At')}
-                                            </Typography>
-                                            <Typography variant="body1">
-                                                {formatDate(selectedDiagnostic.requested_at)}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid size={{ xs: 12, sm: 6 }}>
-                                            <Typography variant="body2" color="textSecondary">
-                                                {t('hostDetail.completedAt', 'Completed At')}
-                                            </Typography>
-                                            <Typography variant="body1">
-                                                {formatDate(selectedDiagnostic.completed_at)}
-                                            </Typography>
-                                        </Grid>
-                                    </Grid>
-                                </CardContent>
-                            </Card>
-
-                            {/* Diagnostic Data Sections */}
-                            {selectedDiagnostic.diagnostic_data && (
+                    {(() => {
+                        if (diagnosticDetailLoading) {
+                            return (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                                    <CircularProgress />
+                                </Box>
+                            );
+                        }
+                        if (selectedDiagnostic) {
+                            return (
                                 <Box>
-                                    {Object.entries(selectedDiagnostic.diagnostic_data).map(([key, value]) => {
-                                        if (!value || (typeof value === 'object' && Object.keys(value).length === 0)) return null;
-                                        
-                                        const sectionTitle = t(`hostDetail.${key}`, key.replaceAll('_', ' ').replace(/\b\w/g, l => l.toUpperCase()));
-                                        
-                                        return (
-                                            <Card key={key} sx={{ mb: 2, backgroundColor: 'grey.700' }}>
-                                                <CardContent>
-                                                    <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold', fontSize: '1.1rem' }}>
-                                                        {sectionTitle}
+                                    {/* Diagnostic Report Metadata */}
+                                    <Card sx={{ mb: 3, backgroundColor: 'grey.800' }}>
+                                        <CardContent>
+                                            <Grid container spacing={2}>
+                                                <Grid size={{ xs: 12, sm: 6 }}>
+                                                    <Typography variant="body2" color="textSecondary">
+                                                        {t('hostDetail.collectionId', 'Collection ID')}
                                                     </Typography>
-                                                    <Paper sx={{ p: 2, backgroundColor: 'grey.900', color: 'white', maxHeight: 300, overflow: 'auto' }}>
-                                                        <Typography variant="body2" sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
-                                                            {typeof value === 'string' 
-                                                                ? value 
-                                                                : JSON.stringify(value, null, 2)
-                                                            }
-                                                        </Typography>
-                                                    </Paper>
-                                                </CardContent>
-                                            </Card>
-                                        );
-                                    })}
-                                </Box>
-                            )}
+                                                    <Typography variant="body1" sx={{ fontFamily: 'monospace' }}>
+                                                        {selectedDiagnostic.collection_id}
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid size={{ xs: 12, sm: 6 }}>
+                                                    <Typography variant="body2" color="textSecondary">
+                                                        {t('hostDetail.collectionStatus', 'Status')}
+                                                    </Typography>
+                                                    <Chip
+                                                        label={selectedDiagnostic.status}
+                                                        color={selectedDiagnostic.status === 'completed' ? 'success' : 'warning'}
+                                                        size="small"
+                                                    />
+                                                </Grid>
+                                                <Grid size={{ xs: 12, sm: 6 }}>
+                                                    <Typography variant="body2" color="textSecondary">
+                                                        {t('hostDetail.requestedAt', 'Requested At')}
+                                                    </Typography>
+                                                    <Typography variant="body1">
+                                                        {formatDate(selectedDiagnostic.requested_at)}
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid size={{ xs: 12, sm: 6 }}>
+                                                    <Typography variant="body2" color="textSecondary">
+                                                        {t('hostDetail.completedAt', 'Completed At')}
+                                                    </Typography>
+                                                    <Typography variant="body1">
+                                                        {formatDate(selectedDiagnostic.completed_at)}
+                                                    </Typography>
+                                                </Grid>
+                                            </Grid>
+                                        </CardContent>
+                                    </Card>
 
-                            {(!selectedDiagnostic.diagnostic_data || Object.keys(selectedDiagnostic.diagnostic_data).length === 0) && (
-                                <Box sx={{ textAlign: 'center', py: 4 }}>
-                                    <Typography variant="body1" color="textSecondary">
-                                        {t('hostDetail.noDataAvailable', 'No data available')}
-                                    </Typography>
+                                    {/* Diagnostic Data Sections */}
+                                    {selectedDiagnostic.diagnostic_data && (
+                                        <Box>
+                                            {Object.entries(selectedDiagnostic.diagnostic_data).map(([key, value]) => {
+                                                if (!value || (typeof value === 'object' && Object.keys(value).length === 0)) return null;
+
+                                                const sectionTitle = t(`hostDetail.${key}`, key.replaceAll('_', ' ').replaceAll(/\b\w/g, l => l.toUpperCase()));
+
+                                                return (
+                                                    <Card key={key} sx={{ mb: 2, backgroundColor: 'grey.700' }}>
+                                                        <CardContent>
+                                                            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                                                {sectionTitle}
+                                                            </Typography>
+                                                            <Paper sx={{ p: 2, backgroundColor: 'grey.900', color: 'white', maxHeight: 300, overflow: 'auto' }}>
+                                                                <Typography variant="body2" sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
+                                                                    {typeof value === 'string'
+                                                                        ? value
+                                                                        : JSON.stringify(value, null, 2)
+                                                                    }
+                                                                </Typography>
+                                                            </Paper>
+                                                        </CardContent>
+                                                    </Card>
+                                                );
+                                            })}
+                                        </Box>
+                                    )}
+
+                                    {(!selectedDiagnostic.diagnostic_data || Object.keys(selectedDiagnostic.diagnostic_data).length === 0) && (
+                                        <Box sx={{ textAlign: 'center', py: 4 }}>
+                                            <Typography variant="body1" color="textSecondary">
+                                                {t('hostDetail.noDataAvailable', 'No data available')}
+                                            </Typography>
+                                        </Box>
+                                    )}
                                 </Box>
-                            )}
-                        </Box>
-                    ) : null}
+                            );
+                        }
+                        return null;
+                    })()}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setDiagnosticDetailOpen(false)}>
@@ -7621,15 +7671,21 @@ const HostDetail = () => {
                                     readOnly: true,
                                 },
                             }}
-                            helperText={childHostFormData.childType === 'lxd'
-                                ? t('hostDetail.childHostFqdnHelpLxd', 'This FQDN will be used for the LXD container')
-                                : childHostFormData.childType === 'vmm'
-                                ? t('hostDetail.childHostFqdnHelpVmm', 'This FQDN will be used for the VMM virtual machine')
-                                : childHostFormData.childType === 'kvm'
-                                ? t('hostDetail.childHostFqdnHelpKvm', 'This FQDN will be used for the KVM virtual machine')
-                                : childHostFormData.childType === 'bhyve'
-                                ? t('hostDetail.childHostFqdnHelpBhyve', 'This FQDN will be used for the bhyve virtual machine')
-                                : t('hostDetail.childHostFqdnHelp', 'This FQDN will be used for the WSL instance')}
+                            helperText={(() => {
+                                if (childHostFormData.childType === 'lxd') {
+                                    return t('hostDetail.childHostFqdnHelpLxd', 'This FQDN will be used for the LXD container');
+                                }
+                                if (childHostFormData.childType === 'vmm') {
+                                    return t('hostDetail.childHostFqdnHelpVmm', 'This FQDN will be used for the VMM virtual machine');
+                                }
+                                if (childHostFormData.childType === 'kvm') {
+                                    return t('hostDetail.childHostFqdnHelpKvm', 'This FQDN will be used for the KVM virtual machine');
+                                }
+                                if (childHostFormData.childType === 'bhyve') {
+                                    return t('hostDetail.childHostFqdnHelpBhyve', 'This FQDN will be used for the bhyve virtual machine');
+                                }
+                                return t('hostDetail.childHostFqdnHelp', 'This FQDN will be used for the WSL instance');
+                            })()}
                         />
 
                         {/* VM name field for VMM, KVM, and bhyve - read-only, derived from hostname */}

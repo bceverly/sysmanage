@@ -18,7 +18,7 @@ from backend.persistence.models import Host
 class HostsReportGenerator(ReportGenerator):
     """Generator for host-related reports"""
 
-    def generate_hosts_report(self) -> io.BytesIO:  # NOSONAR - complex business logic
+    def generate_hosts_report(self) -> io.BytesIO:  # NOSONAR
         """Generate registered hosts report with basic and OS information"""
         hosts = self.db.query(Host).order_by(Host.fqdn).all()
 
@@ -139,9 +139,9 @@ class HostsReportGenerator(ReportGenerator):
 
         return self.create_pdf_buffer(_("Registered Hosts"), content)
 
-    def generate_hosts_with_tags_report(
+    def generate_hosts_with_tags_report(  # NOSONAR
         self,
-    ) -> io.BytesIO:  # NOSONAR - complex business logic
+    ) -> io.BytesIO:
         """Generate hosts with tags report"""
         hosts = self.db.query(Host).order_by(Host.fqdn).all()
 
@@ -231,9 +231,9 @@ class HostsReportGenerator(ReportGenerator):
 
         return self.create_pdf_buffer(_("Hosts with Tags"), content)
 
-    def generate_firewall_status_report(
+    def generate_firewall_status_report(  # NOSONAR
         self,
-    ) -> io.BytesIO:  # NOSONAR - complex business logic
+    ) -> io.BytesIO:
         """Generate firewall status report for all hosts"""
         hosts = self.db.query(Host).order_by(Host.fqdn).all()
 
@@ -380,9 +380,9 @@ class HostsReportGenerator(ReportGenerator):
 
         return self.create_pdf_buffer(_("Host Firewall Status"), content)
 
-    def generate_antivirus_opensource_report(
+    def generate_antivirus_opensource_report(  # NOSONAR
         self,
-    ) -> io.BytesIO:  # NOSONAR - complex business logic
+    ) -> io.BytesIO:
         """Generate open-source antivirus status report for all hosts"""
         hosts = self.db.query(Host).order_by(Host.fqdn).all()
 
@@ -515,9 +515,9 @@ class HostsReportGenerator(ReportGenerator):
 
         return self.create_pdf_buffer(_("Open-Source Antivirus Status"), content)
 
-    def generate_antivirus_commercial_report(
+    def generate_antivirus_commercial_report(  # NOSONAR
         self,
-    ) -> io.BytesIO:  # NOSONAR - complex business logic
+    ) -> io.BytesIO:
         """Generate commercial antivirus status report for all hosts"""
         hosts = self.db.query(Host).order_by(Host.fqdn).all()
 

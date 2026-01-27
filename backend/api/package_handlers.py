@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
-from backend.api.error_constants import ERROR_HOST_NOT_REGISTERED
+from backend.api.error_constants import error_host_not_registered
 from backend.i18n import _
 from backend.persistence.models import AvailablePackage, Host
 
@@ -34,7 +34,7 @@ async def handle_packages_batch_start(db: Session, connection, message_data: dic
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -42,7 +42,7 @@ async def handle_packages_batch_start(db: Session, connection, message_data: dic
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -144,9 +144,7 @@ async def handle_packages_batch_start(db: Session, connection, message_data: dic
         }
 
 
-async def handle_packages_batch(
-    db: Session, connection, message_data: dict
-):  # NOSONAR - complex business logic
+async def handle_packages_batch(db: Session, connection, message_data: dict):  # NOSONAR
     """Handle a batch of available packages data."""
     from backend.utils.host_validation import validate_host_id
 
@@ -156,7 +154,7 @@ async def handle_packages_batch(
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -164,7 +162,7 @@ async def handle_packages_batch(
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -280,7 +278,7 @@ async def handle_packages_batch_end(db: Session, connection, message_data: dict)
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 
@@ -288,7 +286,7 @@ async def handle_packages_batch_end(db: Session, connection, message_data: dict)
         return {
             "message_type": "error",
             "error_type": "host_not_registered",
-            "message": ERROR_HOST_NOT_REGISTERED(),
+            "message": error_host_not_registered(),
             "data": {},
         }
 

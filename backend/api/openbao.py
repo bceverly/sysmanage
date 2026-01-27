@@ -12,7 +12,7 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.api.error_constants import (
-    ERROR_OPENBAO_NOT_RUNNING,
+    error_openbao_not_running,
     OPENBAO_DEFAULT_URL,
     OPENBAO_GENERIC_ERROR_KEY,
     OPENBAO_NOT_RUNNING_KEY,
@@ -26,7 +26,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-def get_openbao_status() -> Dict[str, Any]:  # NOSONAR - complex business logic
+def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
     """
     Get the current status of the OpenBAO server.
     Returns a dictionary with status information.
@@ -42,7 +42,7 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR - complex business logic
         return {
             "running": False,
             "status": "stopped",
-            "message": _(OPENBAO_NOT_RUNNING_KEY, ERROR_OPENBAO_NOT_RUNNING()),
+            "message": _(OPENBAO_NOT_RUNNING_KEY, error_openbao_not_running()),
             "pid": None,
             "server_url": None,
             "health": None,
@@ -153,7 +153,7 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR - complex business logic
                 # If we can't get status due to sealed vault, try to determine seal status
                 if "sealed" in result.stderr.lower():
                     seal_status = True
-    except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
+    except (subprocess.SubprocessError, FileNotFoundError):
         health_info = {"error": "Unable to connect to OpenBAO server"}
 
     # Get recent log entries
@@ -202,13 +202,13 @@ def find_bao_binary() -> Optional[str]:
                 # Check if file exists and is executable
                 if os.path.isfile(location) and os.access(location, os.X_OK):
                     return location
-        except (OSError, PermissionError):  # FileNotFoundError is subclass of OSError
+        except OSError:  # Catches FileNotFoundError, PermissionError (both subclasses)
             continue
 
     return None
 
 
-def start_openbao() -> Dict[str, Any]:  # NOSONAR - complex business logic
+def start_openbao() -> Dict[str, Any]:  # NOSONAR
     """
     Start the OpenBAO development server.
     """
@@ -328,7 +328,7 @@ def start_openbao() -> Dict[str, Any]:  # NOSONAR - complex business logic
                 except (
                     RuntimeError,
                     OSError,
-                ) as _e:  # NOSONAR - logged via exception()
+                ) as _e:  # NOSONAR
                     logger.exception(
                         "Failed to run PowerShell script for OpenBAO start"
                     )
@@ -390,7 +390,7 @@ def start_openbao() -> Dict[str, Any]:  # NOSONAR - complex business logic
             "message": _("openbao.start_timeout", "OpenBAO start timed out"),
             "status": get_openbao_status(),
         }
-    except Exception:  # NOSONAR - logged via exc_info
+    except Exception:  # NOSONAR
         logger.error("Exception occurred while starting OpenBAO", exc_info=True)
         return {
             "success": False,
@@ -401,7 +401,7 @@ def start_openbao() -> Dict[str, Any]:  # NOSONAR - complex business logic
         }
 
 
-def stop_openbao() -> Dict[str, Any]:  # NOSONAR - complex business logic
+def stop_openbao() -> Dict[str, Any]:  # NOSONAR
     """
     Stop the OpenBAO development server.
     """
@@ -410,7 +410,7 @@ def stop_openbao() -> Dict[str, Any]:  # NOSONAR - complex business logic
     if not status["running"]:
         return {
             "success": True,
-            "message": _(OPENBAO_NOT_RUNNING_KEY, ERROR_OPENBAO_NOT_RUNNING()),
+            "message": _(OPENBAO_NOT_RUNNING_KEY, error_openbao_not_running()),
             "status": status,
         }
 
@@ -526,7 +526,7 @@ def seal_openbao() -> Dict[str, Any]:
     if not status["running"]:
         return {
             "success": False,
-            "message": _(OPENBAO_NOT_RUNNING_KEY, ERROR_OPENBAO_NOT_RUNNING()),
+            "message": _(OPENBAO_NOT_RUNNING_KEY, error_openbao_not_running()),
             "status": status,
         }
 
@@ -590,7 +590,7 @@ def seal_openbao() -> Dict[str, Any]:
             "message": _("openbao.seal_timeout", "OpenBAO seal operation timed out"),
             "status": get_openbao_status(),
         }
-    except Exception:  # NOSONAR - logged via exception()
+    except Exception:  # NOSONAR
         logger.exception(
             "Exception occurred while sealing OpenBAO"
         )  # Log full traceback for server-side debugging
@@ -611,7 +611,7 @@ def unseal_openbao() -> Dict[str, Any]:
     if not status["running"]:
         return {
             "success": False,
-            "message": _(OPENBAO_NOT_RUNNING_KEY, ERROR_OPENBAO_NOT_RUNNING()),
+            "message": _(OPENBAO_NOT_RUNNING_KEY, error_openbao_not_running()),
             "status": status,
         }
 
@@ -691,7 +691,7 @@ def unseal_openbao() -> Dict[str, Any]:
             ),
             "status": get_openbao_status(),
         }
-    except Exception:  # NOSONAR - logged via exception()
+    except Exception:  # NOSONAR
         logger.exception("Exception occurred while unsealing OpenBAO")
         return {
             "success": False,

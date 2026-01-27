@@ -206,9 +206,7 @@ class HostFirewallRoleCreate(BaseModel):
 # ============================================================================
 
 
-def get_host_firewall_ports(
-    db_session: Session, host_id
-) -> dict:  # NOSONAR - complex business logic
+def get_host_firewall_ports(db_session: Session, host_id) -> dict:  # NOSONAR
     """
     Get all open ports for a host from all assigned firewall roles.
 
@@ -359,7 +357,7 @@ def queue_remove_firewall_ports(
     )
 
 
-def update_firewall_status_remove_ports(  # NOSONAR - complex business logic
+def update_firewall_status_remove_ports(  # NOSONAR
     db_session: Session, host_id, ports_to_remove: dict
 ) -> None:
     """

@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import HTTPException
 from sqlalchemy.orm import sessionmaker
 
-from backend.api.error_constants import ERROR_HOST_NOT_FOUND
+from backend.api.error_constants import error_host_not_found
 from backend.i18n import _
 from backend.persistence import db, models
 
@@ -23,7 +23,7 @@ def get_host_by_id(host_id: str) -> Optional[models.Host]:
     with session_local() as session:
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
         return host
 
 
@@ -36,7 +36,7 @@ def get_host_by_fqdn(fqdn: str) -> Optional[models.Host]:
     with session_local() as session:
         host = session.query(models.Host).filter(models.Host.fqdn == fqdn).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
         return host
 
 
@@ -46,9 +46,9 @@ def validate_host_approval_status(host: models.Host) -> None:
         raise HTTPException(status_code=400, detail=_("Host is not approved"))
 
 
-def get_host_storage_devices(
+def get_host_storage_devices(  # NOSONAR
     host_id: str,
-) -> List[Dict[str, Any]]:  # NOSONAR - complex business logic
+) -> List[Dict[str, Any]]:
     """Get storage devices for a host."""
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
@@ -58,7 +58,7 @@ def get_host_storage_devices(
         # Verify host exists
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         # Get storage devices
         storage_devices = (
@@ -181,7 +181,7 @@ def get_host_network_interfaces(host_id: str) -> List[Dict[str, Any]]:
         # Verify host exists
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         # Get network interfaces
         interfaces = (
@@ -223,7 +223,7 @@ def get_host_user_accounts(host_id: str) -> List[Dict[str, Any]]:
         # Verify host exists
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         # Get user accounts
         users = (
@@ -263,7 +263,7 @@ def get_host_users_with_groups(host_id: str) -> List[Dict[str, Any]]:
         # Verify host exists
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         # Get user accounts
         user_accounts = (
@@ -343,7 +343,7 @@ def get_host_user_groups(host_id: str) -> List[Dict[str, Any]]:
         # Verify host exists
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         # Get user groups
         user_groups = (
@@ -405,7 +405,7 @@ def get_host_software_packages(
         # Verify host exists
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         # Build base query
         query = session.query(models.SoftwarePackage).filter(
@@ -487,7 +487,7 @@ def update_host_timestamp(host_id: str, field_name: str) -> None:
             session.commit()
 
 
-async def update_or_create_host(  # NOSONAR - async for API compatibility
+async def update_or_create_host(  # NOSONAR
     db_session,
     hostname: str,
     ipv4: str = None,
@@ -576,7 +576,7 @@ def get_host_ubuntu_pro_info(host_id: str) -> Dict[str, Any]:
         # First check if the host exists
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            raise HTTPException(status_code=404, detail=ERROR_HOST_NOT_FOUND())
+            raise HTTPException(status_code=404, detail=error_host_not_found())
 
         # Get Ubuntu Pro info with services
         ubuntu_pro_info = (

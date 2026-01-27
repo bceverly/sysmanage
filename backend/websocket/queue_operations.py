@@ -22,7 +22,7 @@ logger = get_logger(__name__)
 class QueueOperations:
     """Core operations for message queue management."""
 
-    def enqueue_message(  # pylint: disable=too-many-positional-arguments  # NOSONAR - cognitive complexity
+    def enqueue_message(  # pylint: disable=too-many-positional-arguments  # NOSONAR
         self,
         message_type: str,
         message_data: Dict[str, Any],
@@ -616,7 +616,7 @@ class QueueOperations:
             if not session_provided:
                 db.close()
 
-    def retry_unacknowledged_messages(  # NOSONAR - cognitive complexity
+    def retry_unacknowledged_messages(  # NOSONAR
         self, timeout_seconds: int = 60, db: Session = None
     ) -> int:
         """

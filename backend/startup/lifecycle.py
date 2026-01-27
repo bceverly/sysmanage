@@ -22,7 +22,7 @@ logger = get_logger("backend.startup.lifecycle")
 
 
 @asynccontextmanager
-async def lifespan(_fastapi_app: FastAPI):  # NOSONAR - cognitive complexity
+async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     """
     Application lifespan manager to handle startup and shutdown events.
     """

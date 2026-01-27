@@ -409,10 +409,10 @@ const Reports: React.FC = () => {
             />
             <FormControl size="small" sx={{ minWidth: 140 }}>
               <InputLabel>{t('reports.search.searchBy', 'Search by')}</InputLabel>
-              <Select
+              <Select<'name' | 'description'>
                 value={searchField}
                 label={t('reports.search.searchBy', 'Search by')}
-                onChange={(e) => setSearchField(e.target.value as 'name' | 'description')}
+                onChange={(e) => setSearchField(e.target.value)}
               >
                 <MenuItem value="name">{t('reports.search.name', 'Name')}</MenuItem>
                 <MenuItem value="description">{t('reports.search.description', 'Description')}</MenuItem>
@@ -463,10 +463,10 @@ const Reports: React.FC = () => {
             />
             <FormControl size="small" sx={{ minWidth: 140 }}>
               <InputLabel>{t('reports.search.searchBy', 'Search by')}</InputLabel>
-              <Select
+              <Select<'name' | 'description'>
                 value={searchField}
                 label={t('reports.search.searchBy', 'Search by')}
-                onChange={(e) => setSearchField(e.target.value as 'name' | 'description')}
+                onChange={(e) => setSearchField(e.target.value)}
               >
                 <MenuItem value="name">{t('reports.search.name', 'Name')}</MenuItem>
                 <MenuItem value="description">{t('reports.search.description', 'Description')}</MenuItem>
@@ -517,10 +517,10 @@ const Reports: React.FC = () => {
             />
             <FormControl size="small" sx={{ minWidth: 140 }}>
               <InputLabel>{t('reports.search.searchBy', 'Search by')}</InputLabel>
-              <Select
+              <Select<'name' | 'description'>
                 value={searchField}
                 label={t('reports.search.searchBy', 'Search by')}
-                onChange={(e) => setSearchField(e.target.value as 'name' | 'description')}
+                onChange={(e) => setSearchField(e.target.value)}
               >
                 <MenuItem value="name">{t('reports.search.name', 'Name')}</MenuItem>
                 <MenuItem value="description">{t('reports.search.description', 'Description')}</MenuItem>

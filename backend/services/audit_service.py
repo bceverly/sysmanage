@@ -71,7 +71,7 @@ class AuditService:
     """
 
     @staticmethod
-    def log(  # NOSONAR: 15 parameters required for comprehensive audit logging
+    def log(  # NOSONAR
         db: Session,
         action_type: ActionType,
         entity_type: EntityType,
