@@ -10,6 +10,7 @@ from reportlab.lib import colors
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph, Spacer, Table, TableStyle
 
+from backend.api.error_constants import REPORT_IP_ADDRESS, REPORT_OS_VERSION
 from backend.api.reports.pdf.base import ReportGenerator
 from backend.i18n import _
 from backend.persistence.models import Host
@@ -273,9 +274,9 @@ class HostsReportGenerator(ReportGenerator):
             table_data = [
                 [
                     _("Hostname"),
-                    _("IP Address"),
+                    _(REPORT_IP_ADDRESS),
                     _("OS"),
-                    _("OS Version"),
+                    _(REPORT_OS_VERSION),
                     _("Firewall Software"),
                     _("IPv4 Ports"),
                     _("IPv6 Ports"),
@@ -422,9 +423,9 @@ class HostsReportGenerator(ReportGenerator):
             table_data = [
                 [
                     _("Hostname"),
-                    _("IP Address"),
+                    _(REPORT_IP_ADDRESS),
                     _("OS"),
-                    _("OS Version"),
+                    _(REPORT_OS_VERSION),
                     _("Antivirus Software"),
                     _("Version"),
                     _("Install Path"),
@@ -557,9 +558,9 @@ class HostsReportGenerator(ReportGenerator):
             table_data = [
                 [
                     _("Hostname"),
-                    _("IP Address"),
+                    _(REPORT_IP_ADDRESS),
                     _("OS"),
-                    _("OS Version"),
+                    _(REPORT_OS_VERSION),
                     _("Product Name"),
                     _("Product Version"),
                     _("Signature Version"),

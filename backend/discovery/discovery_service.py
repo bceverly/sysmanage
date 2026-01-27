@@ -238,7 +238,9 @@ class NetworkScanner:
         self.config = get_config()
 
     async def broadcast_server_announcement(  # NOSONAR
-        self, subnet: str = "192.168.1.255", port: int = 31338
+        self,
+        subnet: str = "192.168.1.255",  # NOSONAR
+        port: int = 31338,
     ):
         """
         Broadcast server announcement to help agents discover the server.
@@ -321,10 +323,10 @@ class NetworkScanner:
         # Fallback to common broadcast addresses if none found
         if not broadcast_addresses:
             broadcast_addresses = [
-                "192.168.1.255",
-                "192.168.0.255",
-                "10.0.0.255",
-                "172.16.255.255",
+                "192.168.1.255",  # NOSONAR - common broadcast address fallback for agent discovery
+                "192.168.0.255",  # NOSONAR - common broadcast address fallback
+                "10.0.0.255",  # NOSONAR - common broadcast address fallback
+                "172.16.255.255",  # NOSONAR - common broadcast address fallback
             ]
 
         return broadcast_addresses

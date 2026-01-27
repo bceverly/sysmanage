@@ -440,18 +440,10 @@ class ScriptExecutionResultMessage(Message):
 class DiagnosticCollectionResultMessage(Message):
     """Message sent from agent to server with diagnostic collection results."""
 
-    def __init__(  # pylint: disable=too-many-positional-arguments  # NOSONAR
+    def __init__(
         self,
         collection_id: str = None,
         success: bool = True,
-        system_logs: dict = None,
-        configuration_files: dict = None,
-        network_info: dict = None,
-        process_info: dict = None,
-        disk_usage: dict = None,
-        environment_variables: dict = None,
-        agent_logs: dict = None,
-        error_logs: dict = None,
         collection_size_bytes: int = None,
         files_collected: int = None,
         error: str = None,
@@ -459,24 +451,28 @@ class DiagnosticCollectionResultMessage(Message):
         hostname: str = None,
         **kwargs
     ):
+        _diagnostic_fields = [
+            "system_logs",
+            "configuration_files",
+            "network_info",
+            "process_info",
+            "disk_usage",
+            "environment_variables",
+            "agent_logs",
+            "error_logs",
+        ]
         data = {
             "collection_id": collection_id,
             "success": success,
-            "system_logs": system_logs,
-            "configuration_files": configuration_files,
-            "network_info": network_info,
-            "process_info": process_info,
-            "disk_usage": disk_usage,
-            "environment_variables": environment_variables,
-            "agent_logs": agent_logs,
-            "error_logs": error_logs,
             "collection_size_bytes": collection_size_bytes,
             "files_collected": files_collected,
             "error": error,
             "collection_time": collection_time,
             "hostname": hostname,
-            **kwargs,
         }
+        for field in _diagnostic_fields:
+            data[field] = kwargs.pop(field, None)
+        data.update(kwargs)
         super().__init__(MessageType.DIAGNOSTIC_COLLECTION_RESULT, data)
 
 

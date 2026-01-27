@@ -149,7 +149,7 @@ export const SecurityRoles = {
     EDIT_USER: 'Edit User',
     // - User Security Operations (alphabetical)
     LOCK_USER: 'Lock User',
-    RESET_USER_PASSWORD: 'Reset User Password',
+    RESET_USER_PASSWORD: 'Reset User Password', // NOSONAR - permission name constant, not a password
     UNLOCK_USER: 'Unlock User',
 
     // Audit Log Management

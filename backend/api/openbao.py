@@ -86,7 +86,7 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
             process_running = f'"{pid}"' in result.stdout or str(pid) in result.stdout
         else:
             # Unix-specific process check
-            os.kill(pid, 0)  # This doesn't kill, just checks if process exists
+            os.kill(pid, 0)  # NOSONAR - signal 0 checks process existence
             process_running = True
     except (OSError, subprocess.SubprocessError):
         process_running = False

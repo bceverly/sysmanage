@@ -221,14 +221,7 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
           {t('security.antivirusOpenSource', 'Antivirus - Open Source')}
         </Typography>
 
-        {!antivirusStatus?.software_name ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
-            <WarningIcon sx={{ mr: 1, color: 'warning.main' }} />
-            <Typography variant="body2" color="text.secondary">
-              {t('security.noAntivirusDetected', 'No antivirus software detected')}
-            </Typography>
-          </Box>
-        ) : (
+        {antivirusStatus?.software_name ? (
           <Stack spacing={2}>
             <Box>
               <Typography variant="body2" color="text.secondary" gutterBottom>
@@ -279,6 +272,13 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
               </Box>
             )}
           </Stack>
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+            <WarningIcon sx={{ mr: 1, color: 'warning.main' }} />
+            <Typography variant="body2" color="text.secondary">
+              {t('security.noAntivirusDetected', 'No antivirus software detected')}
+            </Typography>
+          </Box>
         )}
 
         {/* Antivirus Action Buttons */}

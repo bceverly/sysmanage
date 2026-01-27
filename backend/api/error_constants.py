@@ -199,10 +199,10 @@ FILTER_BY_OS_VERSION = "Filter by OS version"
 # HTML report constants
 HTML_BODY_CLOSE = """
     </body>
-</html>
-"""
+    </html>
+    """
 
 HTML_TABLE_CLOSE = """
-        </tbody>
-    </table>
-"""
+            </tbody>
+        </table>
+        """

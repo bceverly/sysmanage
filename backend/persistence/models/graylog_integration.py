@@ -95,7 +95,7 @@ class GraylogIntegrationSettings(Base):
         """Get the effective Graylog URL based on configuration."""
         if self.use_managed_server and self.host:
             # Construct URL from managed host (assuming standard Graylog port 9000)
-            return f"http://{self.host.fqdn}:9000"
+            return f"http://{self.host.fqdn}:9000"  # NOSONAR - Graylog default URL, configurable via manual_url
         elif not self.use_managed_server and self.manual_url:
             return self.manual_url
         return None

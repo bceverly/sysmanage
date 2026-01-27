@@ -23,7 +23,7 @@ i18n
           login: {
             title: 'Login to SysManage',
             username: 'Email Address',
-            password: 'Password',
+            password: 'Password', // NOSONAR - i18n translation key for UI label, not a password
             submit: 'Login',
             error: 'Invalid username or password'
           },

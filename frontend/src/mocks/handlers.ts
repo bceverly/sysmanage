@@ -15,7 +15,7 @@ export const handlers = [
       return HttpResponse.json({
         id: '550e8400-e29b-41d4-a716-446655440000',
         fqdn: 'test-host.example.com',
-        ipv4: '192.168.1.100',
+        ipv4: '192.168.1.100', // NOSONAR - test mock data
         ipv6: '::1',
         active: true,
         status: 'up',
@@ -158,7 +158,7 @@ export const handlers = [
     return HttpResponse.json({
       success: true,
       message: 'Package installation has been queued',
-      installation_ids: body.package_names.map(() => `uuid-${Math.random().toString(36).slice(2, 11)}`)
+      installation_ids: body.package_names.map(() => `uuid-${Math.random().toString(36).slice(2, 11)}`) // NOSONAR - test mock data, not used for security
     });
   }),
 
@@ -167,7 +167,7 @@ export const handlers = [
     return HttpResponse.json({
       success: true,
       message: 'Package uninstallation has been queued',
-      uninstallation_id: `uuid-${Math.random().toString(36).slice(2, 11)}`
+      uninstallation_id: `uuid-${Math.random().toString(36).slice(2, 11)}` // NOSONAR - test mock data, not used for security
     });
   }),
 

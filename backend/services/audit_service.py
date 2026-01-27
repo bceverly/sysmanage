@@ -71,7 +71,7 @@ class AuditService:
     """
 
     @staticmethod
-    def log(  # NOSONAR
+    def log(
         db: Session,
         action_type: ActionType,
         entity_type: EntityType,
@@ -85,8 +85,7 @@ class AuditService:
         ip_address: Optional[str] = None,
         user_agent: Optional[str] = None,
         error_message: Optional[str] = None,
-        category: Optional[str] = None,
-        entry_type: Optional[str] = None,
+        **kwargs,
     ) -> AuditLog:
         """
         Create an audit log entry.
@@ -102,11 +101,10 @@ class AuditService:
             entity_id: ID of the affected entity (optional)
             entity_name: Name of the affected entity for display (optional)
             details: Additional structured data about the action (optional)
-            category: Category of the log entry (Security, Packages, Hosts, etc.)
-            entry_type: Type of entry (Edit, Delete, Request Update, etc.)
             ip_address: IP address of the client (optional)
             user_agent: Browser/client user agent string (optional)
             error_message: Error details if action failed (optional)
+            **kwargs: Additional fields (category, entry_type)
 
         Returns:
             The created AuditLog entry
@@ -126,8 +124,8 @@ class AuditService:
             user_agent=user_agent,
             result=result.value,
             error_message=error_message,
-            category=category,
-            entry_type=entry_type,
+            category=kwargs.get("category"),
+            entry_type=kwargs.get("entry_type"),
         )
 
         db.add(audit_entry)

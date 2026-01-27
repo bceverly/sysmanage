@@ -5,6 +5,7 @@ HTML report generators for host-related reports
 import json
 from datetime import datetime, timezone
 
+from backend.api.error_constants import HTML_BODY_CLOSE, HTML_TABLE_CLOSE
 from backend.api.reports.html.common import escape as _escape
 from backend.i18n import _
 
@@ -200,10 +201,7 @@ def generate_hosts_html(hosts, report_type: str, report_title: str) -> str:  # N
             </table>
         """
 
-    html_content += """
-    </body>
-    </html>
-    """
+    html_content += HTML_BODY_CLOSE
 
     return html_content
 
@@ -385,15 +383,9 @@ def generate_firewall_status_html(hosts, report_title: str) -> str:  # NOSONAR
                 </tr>
             """
 
-        html_content += """
-            </tbody>
-        </table>
-        """
+        html_content += HTML_TABLE_CLOSE
 
-    html_content += """
-    </body>
-    </html>
-    """
+    html_content += HTML_BODY_CLOSE
 
     return html_content
 
@@ -556,15 +548,9 @@ def generate_antivirus_opensource_html(hosts, report_title: str) -> str:  # NOSO
                 </tr>
             """
 
-        html_content += """
-            </tbody>
-        </table>
-        """
+        html_content += HTML_TABLE_CLOSE
 
-    html_content += """
-    </body>
-    </html>
-    """
+    html_content += HTML_BODY_CLOSE
 
     return html_content
 
@@ -746,14 +732,8 @@ def generate_antivirus_commercial_html(hosts, report_title: str) -> str:  # NOSO
                 </tr>
             """
 
-        html_content += """
-            </tbody>
-        </table>
-        """
+        html_content += HTML_TABLE_CLOSE
 
-    html_content += """
-    </body>
-    </html>
-    """
+    html_content += HTML_BODY_CLOSE
 
     return html_content

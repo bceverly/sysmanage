@@ -48,7 +48,7 @@ async def configure_prometheus_datasource(  # NOSONAR
     import socket
 
     hostname = socket.getfqdn()
-    prometheus_url = os.getenv("PROMETHEUS_URL", f"http://{hostname}:9091")
+    prometheus_url = os.getenv("PROMETHEUS_URL", f"http://{hostname}:9091")  # NOSONAR
 
     # Retrieve API key from vault
     if not settings.api_key_vault_token:

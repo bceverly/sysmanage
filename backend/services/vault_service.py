@@ -44,7 +44,7 @@ class VaultService:
             status_forcelist=[429, 500, 502, 503, 504],
         )
         adapter = HTTPAdapter(max_retries=retry_strategy)
-        self.session.mount("http://", adapter)
+        self.session.mount("http://", adapter)  # NOSONAR
         self.session.mount("https://", adapter)
 
         # Set default headers

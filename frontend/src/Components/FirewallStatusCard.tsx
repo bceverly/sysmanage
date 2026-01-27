@@ -446,14 +446,7 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
             {t('security.firewall', 'Firewall')}
           </Typography>
 
-          {!firewallStatus?.firewall_name ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
-              <WarningIcon sx={{ mr: 1, color: 'warning.main' }} />
-              <Typography variant="body2" color="text.secondary">
-                {t('security.noFirewallDetected', 'No firewall detected')}
-              </Typography>
-            </Box>
-          ) : (
+          {firewallStatus?.firewall_name ? (
             <Stack spacing={2}>
               <Box>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
@@ -631,6 +624,13 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
                 </Box>
               )}
             </Stack>
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+              <WarningIcon sx={{ mr: 1, color: 'warning.main' }} />
+              <Typography variant="body2" color="text.secondary">
+                {t('security.noFirewallDetected', 'No firewall detected')}
+              </Typography>
+            </Box>
           )}
 
           {/* Deploy button when no firewall is detected */}

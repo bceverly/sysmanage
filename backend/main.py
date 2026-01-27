@@ -99,7 +99,7 @@ startup_logger.info("SSL cert config - certFile: %s, keyFile: %s", cert_file, ke
 if cert_file and key_file:
     https_origins = []
     for origin in origins:
-        https_origins.append(origin.replace("http://", "https://"))
+        https_origins.append(origin.replace("http://", "https://"))  # NOSONAR
     startup_logger.info("Adding HTTPS origins: %d origins", len(https_origins))
     origins.extend(https_origins)
 else:

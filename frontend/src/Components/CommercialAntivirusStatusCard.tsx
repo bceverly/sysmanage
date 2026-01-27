@@ -163,14 +163,7 @@ const CommercialAntivirusStatusCard: React.FC<CommercialAntivirusStatusCardProps
           {t('security.commercialAntivirus', 'Antivirus - Commercial')}
         </Typography>
 
-        {!status?.product_name ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
-            <WarningIcon sx={{ mr: 1, color: 'warning.main' }} />
-            <Typography variant="body2" color="textSecondary">
-              {t('security.noCommercialAntivirusDetected', 'No commercial antivirus detected')}
-            </Typography>
-          </Box>
-        ) : (
+        {status?.product_name ? (
           <>
             {/* Product Information */}
             <Box sx={{ mb: 2 }}>
@@ -270,6 +263,13 @@ const CommercialAntivirusStatusCard: React.FC<CommercialAntivirusStatusCardProps
               </Typography>
             </Box>
           </>
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+            <WarningIcon sx={{ mr: 1, color: 'warning.main' }} />
+            <Typography variant="body2" color="textSecondary">
+              {t('security.noCommercialAntivirusDetected', 'No commercial antivirus detected')}
+            </Typography>
+          </Box>
         )}
       </CardContent>
     </Card>

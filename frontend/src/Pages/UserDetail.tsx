@@ -51,6 +51,8 @@ interface AxiosError {
     };
 }
 
+const compareByName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name);
+
 const UserDetail = () => { // NOSONAR
     const { userId } = useParams<{ userId: string }>();
     const [user, setUser] = useState<SysManageUser | null>(null);
@@ -150,8 +152,8 @@ const UserDetail = () => { // NOSONAR
 
                 // Sort groups alphabetically by name, with roles sorted within each group
                 const sortedGroups = [...groups]
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map(group => ({ ...group, roles: [...group.roles].sort((a, b) => a.name.localeCompare(b.name)) }));
+                    .sort(compareByName)
+                    .map(group => ({ ...group, roles: [...group.roles].sort(compareByName) }));
 
                 setRoleGroups(sortedGroups);
                 setSelectedRoles(userRoles.role_ids);
@@ -315,10 +317,25 @@ const UserDetail = () => { // NOSONAR
         );
     }
 
+    const renderRoleCheckbox = (role: { id: number; name: string }) => (
+        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={role.id}>
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        checked={selectedRoles.includes(role.id)}
+                        onChange={() => handleRoleToggle(role.id)}
+                        disabled={!rolesEditMode || rolesSaving}
+                    />
+                }
+                label={role.name}
+            />
+        </Grid>
+    );
+
     return (
         <Box>
-            <Button 
-                startIcon={<ArrowBackIcon />} 
+            <Button
+                startIcon={<ArrowBackIcon />}
                 onClick={() => navigate('/users')}
                 sx={{ mb: 2 }}
             >
@@ -555,20 +572,7 @@ const UserDetail = () => { // NOSONAR
                                                 </Typography>
                                                 <FormGroup>
                                                     <Grid container spacing={1}>
-                                                        {group.roles.map((role) => (
-                                                            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={role.id}>
-                                                                <FormControlLabel
-                                                                    control={
-                                                                        <Checkbox
-                                                                            checked={selectedRoles.includes(role.id)}
-                                                                            onChange={() => handleRoleToggle(role.id)}
-                                                                            disabled={!rolesEditMode || rolesSaving}
-                                                                        />
-                                                                    }
-                                                                    label={role.name}
-                                                                />
-                                                            </Grid>
-                                                        ))}
+                                                        {group.roles.map(renderRoleCheckbox)}
                                                     </Grid>
                                                 </FormGroup>
                                                 {index < roleGroups.length - 1 && (

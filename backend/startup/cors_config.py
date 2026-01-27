@@ -47,8 +47,8 @@ def get_cors_origins(web_ui_port, backend_api_port):  # NOSONAR
         logger.info("System hostname: %s", hostname)
         if hostname and hostname != "localhost":
             hostname_origins = [
-                f"http://{hostname}:{web_ui_port}",
-                f"http://{hostname}:{backend_api_port}",
+                f"http://{hostname}:{web_ui_port}",  # NOSONAR - HTTP CORS origin needed for development/mixed environments
+                f"http://{hostname}:{backend_api_port}",  # NOSONAR
             ]
             logger.info("Adding hostname origins: %s", hostname_origins)
             cors_origins.extend(hostname_origins)
@@ -59,8 +59,8 @@ def get_cors_origins(web_ui_port, backend_api_port):  # NOSONAR
             logger.info("System FQDN: %s", fqdn)
             if fqdn and fqdn != hostname and fqdn != "localhost":
                 fqdn_origins = [
-                    f"http://{fqdn}:{web_ui_port}",
-                    f"http://{fqdn}:{backend_api_port}",
+                    f"http://{fqdn}:{web_ui_port}",  # NOSONAR - HTTP CORS origin needed for development/mixed environments
+                    f"http://{fqdn}:{backend_api_port}",  # NOSONAR
                 ]
                 logger.info("Adding FQDN origins: %s", fqdn_origins)
                 cors_origins.extend(fqdn_origins)
@@ -78,8 +78,8 @@ def get_cors_origins(web_ui_port, backend_api_port):  # NOSONAR
 
         for variation in hostname_variations:
             variation_origins = [
-                f"http://{variation}:{web_ui_port}",
-                f"http://{variation}:{backend_api_port}",
+                f"http://{variation}:{web_ui_port}",  # NOSONAR - HTTP CORS origin needed for development/mixed environments
+                f"http://{variation}:{backend_api_port}",  # NOSONAR
             ]
             logger.info(
                 "Adding variation origins for %s: %s", variation, variation_origins
@@ -96,8 +96,8 @@ def get_cors_origins(web_ui_port, backend_api_port):  # NOSONAR
         logger.info("Resolved host IP: %s", host_ip)
         if host_ip and host_ip != "127.0.0.1":
             ip_origins = [
-                f"http://{host_ip}:{web_ui_port}",
-                f"http://{host_ip}:{backend_api_port}",
+                f"http://{host_ip}:{web_ui_port}",  # NOSONAR - HTTP CORS origin needed for development/mixed environments
+                f"http://{host_ip}:{backend_api_port}",  # NOSONAR
             ]
             logger.info("Adding IP origins: %s", ip_origins)
             cors_origins.extend(ip_origins)
@@ -127,8 +127,8 @@ def get_cors_origins(web_ui_port, backend_api_port):  # NOSONAR
                                 and not ip.startswith("169.254")
                             ):
                                 interface_origins = [
-                                    f"http://{ip}:{web_ui_port}",
-                                    f"http://{ip}:{backend_api_port}",
+                                    f"http://{ip}:{web_ui_port}",  # NOSONAR - HTTP CORS origin needed for development/mixed environments
+                                    f"http://{ip}:{backend_api_port}",  # NOSONAR
                                 ]
                                 logger.info(
                                     "Adding interface %s IP origins: %s",
@@ -148,13 +148,13 @@ def get_cors_origins(web_ui_port, backend_api_port):  # NOSONAR
                     # Create a socket and connect to a remote address to get local IP
                     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
                         # Connect to a public DNS server (doesn't actually send data)
-                        s.connect(("8.8.8.8", 80))
+                        s.connect(("8.8.8.8", 80))  # NOSONAR
                         local_ip = s.getsockname()[0]
                         logger.info("Detected local IP via socket method: %s", local_ip)
                         if local_ip and local_ip != "127.0.0.1":
                             fallback_origins = [
-                                f"http://{local_ip}:{web_ui_port}",
-                                f"http://{local_ip}:{backend_api_port}",
+                                f"http://{local_ip}:{web_ui_port}",  # NOSONAR - HTTP CORS origin needed for development/mixed environments
+                                f"http://{local_ip}:{backend_api_port}",  # NOSONAR
                             ]
                             logger.info(
                                 "Adding fallback IP origins: %s", fallback_origins

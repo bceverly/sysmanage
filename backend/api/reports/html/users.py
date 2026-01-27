@@ -5,6 +5,7 @@ HTML report generators for user-related reports
 import json
 from datetime import datetime, timezone
 
+from backend.api.error_constants import HTML_BODY_CLOSE
 from backend.api.reports.html.common import escape as _escape
 from backend.i18n import _
 
@@ -142,10 +143,7 @@ def generate_users_html(users, report_title: str) -> str:  # NOSONAR
         </table>
         """
 
-    html_content += """
-    </body>
-    </html>
-    """
+    html_content += HTML_BODY_CLOSE
 
     return html_content
 
@@ -308,10 +306,7 @@ def generate_user_rbac_html(db, users, report_title: str) -> str:  # NOSONAR
             </div>
             """
 
-    html_content += """
-    </body>
-    </html>
-    """
+    html_content += HTML_BODY_CLOSE
 
     return html_content
 
@@ -463,9 +458,6 @@ def generate_audit_log_html(audit_entries, report_title: str) -> str:  # NOSONAR
         </table>
         """
 
-    html_content += """
-    </body>
-    </html>
-    """
+    html_content += HTML_BODY_CLOSE
 
     return html_content

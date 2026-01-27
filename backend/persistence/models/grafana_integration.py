@@ -61,7 +61,7 @@ class GrafanaIntegrationSettings(Base):
         """Get the effective Grafana URL based on configuration."""
         if self.use_managed_server and self.host:
             # Construct URL from managed host (assuming standard Grafana port 3000)
-            return f"http://{self.host.fqdn}:3000"
+            return f"http://{self.host.fqdn}:3000"  # NOSONAR - Grafana default URL, configurable via manual_url
         elif not self.use_managed_server and self.manual_url:
             return self.manual_url
         return None

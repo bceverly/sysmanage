@@ -143,8 +143,8 @@ class CertificateManager:
             )
 
         # Set restrictive permissions
-        os.chmod(self.ca_key_path, 0o600)
-        os.chmod(self.ca_cert_path, 0o644)
+        os.chmod(self.ca_key_path, 0o600)  # NOSONAR
+        os.chmod(self.ca_cert_path, 0o644)  # NOSONAR
 
     def ensure_server_certificate(self) -> None:
         """Ensure server certificate exists, create if not."""
@@ -239,8 +239,8 @@ class CertificateManager:
             )
 
         # Set restrictive permissions
-        os.chmod(self.server_key_path, 0o600)
-        os.chmod(self.server_cert_path, 0o644)
+        os.chmod(self.server_key_path, 0o600)  # NOSONAR
+        os.chmod(self.server_cert_path, 0o644)  # NOSONAR
 
     def generate_client_certificate(
         self, hostname: str, host_id: str

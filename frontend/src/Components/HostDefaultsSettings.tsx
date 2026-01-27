@@ -535,6 +535,36 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
     );
   }
 
+  const renderEnabledPMItem = (pm: EnabledPackageManager) => (
+    <Box
+      key={pm.id}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        py: 1,
+        px: 2,
+        bgcolor: 'action.hover',
+        borderRadius: 1,
+        mb: 1,
+      }}
+    >
+      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+        {pm.package_manager}
+      </Typography>
+      {canRemovePM && (
+        <IconButton
+          size="small"
+          color="error"
+          onClick={() => handleDeleteEnabledPM(pm.id)}
+          title={t('common.delete', 'Delete')}
+        >
+          <DeleteIcon />
+        </IconButton>
+      )}
+    </Box>
+  );
+
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
       <Card sx={{ flex: '1 1 400px', maxWidth: { xs: '100%', lg: '49%' } }}>
@@ -956,35 +986,7 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
                             {t('hostDefaults.defaultLabel', 'Default')}: {pmDefaultManagers[osName]}
                           </Typography>
                         )}
-                        {groupedEnabledPMs[osName].map((pm) => (
-                          <Box
-                            key={pm.id}
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              py: 1,
-                              px: 2,
-                              bgcolor: 'action.hover',
-                              borderRadius: 1,
-                              mb: 1,
-                            }}
-                          >
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                              {pm.package_manager}
-                            </Typography>
-                            {canRemovePM && (
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => handleDeleteEnabledPM(pm.id)}
-                                title={t('common.delete', 'Delete')}
-                              >
-                                <DeleteIcon />
-                              </IconButton>
-                            )}
-                          </Box>
-                        ))}
+                        {groupedEnabledPMs[osName].map(renderEnabledPMItem)}
                       </Box>
                     </Box>
                   ))}

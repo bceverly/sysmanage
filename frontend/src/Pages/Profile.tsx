@@ -71,7 +71,7 @@ const Profile: React.FC = () => {
     const validateEmail = (email: string): {isValid: boolean, message: string} => {
         if (!email) return {isValid: true, message: ''};
         
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // NOSONAR - linear backtracking only, not vulnerable to ReDoS
         if (!emailRegex.test(email)) {
             return {
                 isValid: false,
