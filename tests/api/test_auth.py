@@ -5,7 +5,6 @@ Tests /login and /refresh endpoints with various scenarios.
 
 from unittest.mock import Mock, patch
 
-import pytest
 from argon2 import PasswordHasher
 
 argon2_hasher = PasswordHasher()

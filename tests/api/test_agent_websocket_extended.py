@@ -4,15 +4,14 @@ Tests additional functions and edge cases in agent.py with correct mocking.
 """
 
 import json
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 import pytest
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import WebSocket
 
 from backend.api.agent import (
     _handle_update_result_message,
     agent_connect,
 )
-from backend.websocket.messages import MessageType, ErrorMessage
 
 
 class TestUpdateResultHandling:

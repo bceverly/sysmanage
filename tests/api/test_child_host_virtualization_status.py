@@ -6,8 +6,6 @@ This module tests the virtualization status endpoint.
 
 import uuid
 
-import pytest
-
 
 class TestVirtualizationStatusEndpoint:
     """Test cases for the virtualization_status endpoint."""

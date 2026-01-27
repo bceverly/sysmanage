@@ -43,7 +43,6 @@ from sqlalchemy.orm import sessionmaker
 
 argon2_hasher = PasswordHasher()
 
-from backend.auth.auth_handler import sign_jwt
 from backend.main import app
 from backend.persistence import models
 from backend.persistence.db import get_engine

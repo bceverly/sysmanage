@@ -6,8 +6,6 @@ This module tests the firewall status endpoints.
 
 import uuid
 
-import pytest
-
 
 class TestFirewallStatusEndpoint:
     """Test cases for the firewall status endpoint."""

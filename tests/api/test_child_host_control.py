@@ -7,8 +7,6 @@ API endpoints with focus on authentication and basic endpoint behavior.
 
 import uuid
 
-import pytest
-
 
 class TestStartChildHostEndpoint:
     """Test cases for the start_child_host endpoint."""

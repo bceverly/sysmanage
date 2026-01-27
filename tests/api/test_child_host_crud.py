@@ -8,8 +8,6 @@ API endpoints with focus on authentication and basic endpoint behavior.
 import uuid
 from unittest.mock import patch
 
-import pytest
-
 
 class TestListChildHostsEndpoint:
     """Test cases for the list_child_hosts endpoint."""

@@ -6,8 +6,6 @@ This module tests the audit log endpoints.
 
 import uuid
 
-import pytest
-
 
 class TestAuditLogListEndpoint:
     """Test cases for the audit log list endpoint."""

@@ -5,8 +5,6 @@ Tests for certificate management API endpoints.
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from backend.persistence.models import Host
 
 

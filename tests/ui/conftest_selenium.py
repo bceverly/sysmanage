@@ -327,13 +327,6 @@ def _create_firefox_driver():
                 pass
 
 
-# Legacy Chrome-only fixture for backward compatibility
-@pytest.fixture(scope="session")
-def chrome_driver():
-    """Chrome WebDriver instance for Selenium tests (legacy)"""
-    return _create_chrome_driver()
-
-
 @pytest.fixture(scope="session")
 def start_server(ui_config):
     """Ensure SysManage server is running for UI testing"""
@@ -501,36 +494,6 @@ def start_server(ui_config):
             print(f"[WARNING] Error stopping server: {e}")
     else:
         print("[OK] UI tests completed - leaving pre-existing server running")
-
-
-@pytest.fixture(scope="session")
-def vite_warmup(start_server, browser_driver, ui_config):
-    """
-    Warm up Vite's module cache by pre-loading the Hosts page once.
-
-    On OpenBSD, Vite's first compilation/load of modules is significantly slower,
-    causing the first test that loads content-heavy pages (like /hosts with DataGrid)
-    to fail due to incomplete module loading.  By pre-loading /hosts once at the
-    session start, we ensure Vite has compiled and cached all necessary modules
-    before the actual tests run.
-    """
-    import time
-
-    print("[INFO] Warming up Vite module cache by pre-loading /hosts page...")
-    try:
-        # Navigate to /hosts to trigger Vite compilation and caching
-        browser_driver.get(f"{ui_config.base_url}/hosts")
-
-        # Wait for Vite to compile and serve modules
-        # This is critical on OpenBSD where I/O is slower
-        time.sleep(10)
-
-        print("[OK] Vite module cache warmed up successfully")
-    except Exception as e:
-        print(f"[WARNING] Failed to warm up Vite cache: {e}")
-        # Don't fail the test session if warmup fails, just log it
-
-    return True
 
 
 @pytest.fixture(scope="session")

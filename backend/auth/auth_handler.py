@@ -38,8 +38,6 @@ def sign_jwt(user_id: str):
     # Encode the token
     the_token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
-    # Return the encoded token
-    #    return token_response(the_token)
     return the_token
 
 
@@ -56,8 +54,6 @@ def sign_refresh_token(user_id: str):
     # Encode the token
     the_token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
-    # Return the encoded token
-    #    return token_response(the_token)
     return the_token
 
 

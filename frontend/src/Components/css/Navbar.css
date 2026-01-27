@@ -176,24 +176,6 @@
     right: 0;
   }
 
-  .nav__listt {
-    display: flex;
-    flex-direction: row;
-    column-gap: 2.5rem;
-  }
-  
-  .nav__menu_mobile {
-    position: fixed;
-    top: 0;
-    right: -100%;
-    background-color: hsl(0deg 0% 6% / 20%);
-    backdrop-filter: blur(16px);
-    width: 80%;
-    height: 100%;
-    padding: 6rem 3rem 0;
-    transition: right 0.4s;
-  }
-
   @media screen and (width >= 1150px) {
     .nav {
       height: calc(var(--header-height) + 1rem);

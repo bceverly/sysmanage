@@ -5,8 +5,6 @@ Tests fleet status, agent management, and command sending endpoints.
 
 from unittest.mock import AsyncMock, Mock, patch
 
-import pytest
-
 from backend.websocket.messages import CommandType, MessageType
 
 

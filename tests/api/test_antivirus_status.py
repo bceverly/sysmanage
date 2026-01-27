@@ -6,8 +6,6 @@ This module tests the antivirus status endpoints.
 
 import uuid
 
-import pytest
-
 
 class TestAntivirusStatusEndpoint:
     """Test cases for the antivirus status endpoint."""

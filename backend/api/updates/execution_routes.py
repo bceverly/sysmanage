@@ -198,9 +198,6 @@ async def execute_updates(  # NOSONAR
 
                 except (ConnectionError, ValueError, RuntimeError) as e:
                     # Rollback execution status on WebSocket failure
-                    # Note: status column was removed in new schema
-                    # for update in updates:
-                    #     update.status = "available"
                     for log in execution_logs:
                         log.status = "failed"
                         log.error_message = _("Failed to send command: %s") % str(e)

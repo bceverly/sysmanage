@@ -6,8 +6,6 @@ This module tests the system diagnostics endpoints.
 
 import uuid
 
-import pytest
-
 
 class TestDiagnosticsEndpoint:
     """Test cases for the diagnostics endpoint."""

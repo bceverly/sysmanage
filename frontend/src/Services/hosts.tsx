@@ -210,27 +210,6 @@ function processError(error: AxiosError) {
     }
 }
 
-const doAddHost = async (active: boolean, fqdn: string, ipv4: string, ipv6: string) => {
-    let result = {} as SysManageHost;
-
-    await api.post("/api/host", {
-        'active': active,
-        'fqdn': fqdn,
-        'ipv4': ipv4,
-        'ipv6': ipv6,
-      })
-    .then((response) => {
-        // No error - process response
-        result = response.data;
-        return response;
-    })
-    .catch((error) => {
-        processError(error);
-        throw error;
-    });
-    return result;
-};
-
 const doDeleteHost = async (id: string) => {
     let successResponse = {} as SuccessResponse;
 
@@ -279,62 +258,10 @@ const doGetHosts = async (): Promise<SysManageHost[]> => {
     return results;
 };
 
-const doGetHostByFQDN = async (fqdn: string) => {
-    let result = {} as SysManageHost;
-
-    await api.get<SysManageHost>("/api/host/by_fqdn/" + fqdn)
-    .then((response) => {
-        // No error - process response
-        result = response.data;
-        return result;
-    })
-    .catch((error) => {
-        processError(error);
-        throw error;
-    });
-    return result;
-};
-
-const doUpdateHost = async (id: string, active: boolean, fqdn: string, ipv4: string, ipv6: string) => {
-    let successResponse = {} as SuccessResponse;
-    await api.put<SuccessResponse>("/api/host/" + id, {
-        'active': active,
-        'fqdn': fqdn,
-        'ipv4': ipv4,
-        'ipv6': ipv6,
-      })
-    .then((response) => {
-        // No error - process response
-        successResponse = response.data;
-        return successResponse;
-    })
-    .catch((error) => {
-        processError(error);
-        throw error;
-    });
-    return successResponse;
-};
-
 const doApproveHost = async (id: string) => {
     let result = {} as SysManageHost;
 
     await api.put<SysManageHost>("/api/host/" + id + "/approve")
-    .then((response) => {
-        // No error - process response
-        result = response.data;
-        return response;
-    })
-    .catch((error) => {
-        processError(error);
-        throw error;
-    });
-    return result;
-};
-
-const doRejectHost = async (id: string) => {
-    let result = {} as SysManageHost;
-
-    await api.put<SysManageHost>("/api/host/" + id + "/reject")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -743,4 +670,4 @@ type UbuntuProInfo = {
 }
 
 export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage, PaginatedSoftwareResponse, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, UbuntuProService };
-export { doAddHost, doDeleteHost, doGetHostByID, doGetHostByFQDN, doGetHosts, doUpdateHost, doApproveHost, doRejectHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doRequestSystemInfo, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService };
+export { doDeleteHost, doGetHostByID, doGetHosts, doApproveHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doRequestSystemInfo, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService };
