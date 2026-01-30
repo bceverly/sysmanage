@@ -630,6 +630,11 @@
     "hardwareInfo": "ハードウェア情報",
     "hardwareTab": "ハードウェア",
     "hardwareUpdated": "ハードウェア情報が更新されました",
+    "hostname": "ホスト名",
+    "hostnameChangeFailed": "ホスト名の変更に失敗しました",
+    "hostnameChangeRequested": "ホスト名の変更をリクエストしました",
+    "hostnameHelp": "短いホスト名または完全修飾ドメイン名（FQDN）を入力してください",
+    "editHostname": "ホスト名を編集",
     "hasCertificate": "クライアント証明書あり",
     "homeDir": "ホーム",
     "hostId": "ホストID",
@@ -1302,4 +1307,4 @@
     "editFirewallRoles": "ファイアウォールロールを編集",
     "addRole": "ロールを追加",
     "selectRole": "ロールを選択",
-    "assignedRoles": "割り当てられ�
+    "assignedRoles": "割り当てられ�

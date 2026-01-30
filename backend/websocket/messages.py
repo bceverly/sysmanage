@@ -40,6 +40,7 @@ class MessageType(str, Enum):
     COMMERCIAL_ANTIVIRUS_STATUS_UPDATE = "commercial_antivirus_status_update"
     FIREWALL_STATUS_UPDATE = "firewall_status_update"
     GRAYLOG_STATUS_UPDATE = "graylog_status_update"
+    HOSTNAME_CHANGED = "hostname_changed"
 
     # Child Host / Virtualization responses
     VIRTUALIZATION_SUPPORT_UPDATE = "virtualization_support_update"
@@ -106,6 +107,7 @@ class CommandType(str, Enum):
     DELETE_HOST_USER = "delete_host_user"
     DELETE_HOST_GROUP = "delete_host_group"
     REFRESH_USER_ACCESS = "refresh_user_access"
+    CHANGE_HOSTNAME = "change_hostname"
 
     # Child Host / Virtualization Commands
     CHECK_VIRTUALIZATION_SUPPORT = "check_virtualization_support"

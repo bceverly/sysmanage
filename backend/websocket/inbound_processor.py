@@ -188,20 +188,31 @@ async def process_pending_messages(  # NOSONAR
                 connection_info = message_data.get("_connection_info", {})
                 hostname = connection_info.get("hostname")
 
-            if not hostname:
+            # Get host_id from message data (agents send this)
+            host_id = message_data.get("host_id")
+            if not host_id:
+                connection_info = message_data.get("_connection_info", {})
+                host_id = connection_info.get("host_id")
+
+            if not hostname and not host_id:
                 logger.warning(
-                    _("Message %s missing hostname, deleting"),
+                    _("Message %s missing hostname and host_id, deleting"),
                     message.message_id,
                 )
                 server_queue_manager.mark_failed(
                     message.message_id,
-                    "Missing hostname in message data",
+                    "Missing hostname and host_id in message data",
                     db=db,
                 )
                 continue
 
-            # Look up host by hostname
-            host = db.query(Host).filter(Host.fqdn == hostname).first()
+            # Look up host by host_id first (more reliable, especially for hostname_changed),
+            # then fall back to hostname lookup
+            host = None
+            if host_id:
+                host = db.query(Host).filter(Host.id == host_id).first()
+            if not host and hostname:
+                host = db.query(Host).filter(Host.fqdn == hostname).first()
 
             if not host:
                 logger.warning(

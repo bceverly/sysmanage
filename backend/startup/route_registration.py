@@ -27,6 +27,7 @@ from backend.api import (
     grafana_integration,
     graylog_integration,
     host,
+    host_hostname,
     openbao,
     opentelemetry,
     packages,
@@ -185,6 +186,12 @@ def register_routes(app: FastAPI):
         host.auth_router, prefix="/api", tags=["hosts"]
     )  # /api/host/* (with auth)
     logger.info("Host auth router added")
+
+    logger.info("Adding host hostname router with /api prefix")
+    app.include_router(
+        host_hostname.router, prefix="/api", tags=["hosts"]
+    )  # /api/host/{host_id}/change-hostname (with auth)
+    logger.info("Host hostname router added")
 
     logger.info("Adding security router with /api prefix")
     app.include_router(

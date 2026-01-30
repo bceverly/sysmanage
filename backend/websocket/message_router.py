@@ -19,6 +19,7 @@ from backend.api.handlers import (
     handle_hardware_update,
     handle_host_certificates_update,
     handle_host_role_data_update,
+    handle_hostname_changed,
     handle_kvm_initialize_result,
     handle_kvm_modules_disable_result,
     handle_kvm_modules_enable_result,
@@ -174,6 +175,12 @@ async def route_inbound_message(  # NOSONAR
             await handle_graylog_status_update(db, mock_connection, message_data)
             success = True
             print("Successfully processed Graylog status update", flush=True)
+
+        elif message_type == MessageType.HOSTNAME_CHANGED:
+            print("About to call handle_hostname_changed", flush=True)
+            await handle_hostname_changed(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed hostname changed", flush=True)
 
         elif message_type == MessageType.VIRTUALIZATION_SUPPORT_UPDATE:
             print("About to call handle_virtualization_support_update", flush=True)

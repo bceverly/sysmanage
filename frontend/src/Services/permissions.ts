@@ -59,6 +59,7 @@ export const SecurityRoles = {
     // - General Host Operations (alphabetical)
     APPROVE_HOST_REGISTRATION: 'Approve Host Registration',
     DELETE_HOST: 'Delete Host',
+    EDIT_HOST_HOSTNAME: 'Edit Host Hostname',
     EDIT_TAGS: 'Edit Tags',
     VIEW_HOST_DETAILS: 'View Host Details',
     // - Host Power Operations (alphabetical)

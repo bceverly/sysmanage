@@ -94,7 +94,7 @@ import axiosInstance from '../Services/api';
 import { distributionService } from '../Services/childHostDistributions';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 
-import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck, doRequestSystemInfo } from '../Services/hosts';
+import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck, doRequestSystemInfo, doChangeHostname } from '../Services/hosts';
 import { SysManageUser, doGetMe } from '../Services/users';
 import { SecretResponse } from '../Services/secrets';
 import { doCheckOpenTelemetryEligibility, doDeployOpenTelemetry, doGetOpenTelemetryStatus, doStartOpenTelemetry, doStopOpenTelemetry, doRestartOpenTelemetry, doConnectOpenTelemetryToGrafana, doDisconnectOpenTelemetryFromGrafana, doRemoveOpenTelemetry } from '../Services/opentelemetry';
@@ -492,6 +492,7 @@ const HostDetail = () => { // NOSONAR
 
     // Permission states
     const [canEditTags, setCanEditTags] = useState<boolean>(false);
+    const [canEditHostname, setCanEditHostname] = useState<boolean>(false);
     const [canStopService, setCanStopService] = useState<boolean>(false);
     const [canStartService, setCanStartService] = useState<boolean>(false);
     const [canRestartService, setCanRestartService] = useState<boolean>(false);
@@ -537,6 +538,11 @@ const HostDetail = () => { // NOSONAR
     const [canEnableKvm, setCanEnableKvm] = useState<boolean>(false);
     const [canEnableVmm, setCanEnableVmm] = useState<boolean>(false);
     const [canEnableBhyve, setCanEnableBhyve] = useState<boolean>(false);
+
+    // Hostname editing state
+    const [hostnameEditOpen, setHostnameEditOpen] = useState<boolean>(false);
+    const [newHostname, setNewHostname] = useState<string>('');
+    const [hostnameEditLoading, setHostnameEditLoading] = useState<boolean>(false);
 
     // Installation history state
     interface InstallationHistoryItem {
@@ -1646,8 +1652,9 @@ const HostDetail = () => { // NOSONAR
     // Check permissions
     useEffect(() => {
         const checkPermissions = async () => {
-            const [editTags, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro, deployAntivirus, enableAntivirus, disableAntivirus, removeAntivirus, addHostAccount, addHostGroup, deleteHostAccount, deleteHostGroup, enableWsl, enableLxd, enableKvm, enableVmm, enableBhyve] = await Promise.all([
+            const [editTags, editHostname, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro, deployAntivirus, enableAntivirus, disableAntivirus, removeAntivirus, addHostAccount, addHostGroup, deleteHostAccount, deleteHostGroup, enableWsl, enableLxd, enableKvm, enableVmm, enableBhyve] = await Promise.all([
                 hasPermission(SecurityRoles.EDIT_TAGS),
+                hasPermission(SecurityRoles.EDIT_HOST_HOSTNAME),
                 hasPermission(SecurityRoles.STOP_HOST_SERVICE),
                 hasPermission(SecurityRoles.START_HOST_SERVICE),
                 hasPermission(SecurityRoles.RESTART_HOST_SERVICE),
@@ -1671,6 +1678,7 @@ const HostDetail = () => { // NOSONAR
                 hasPermission(SecurityRoles.ENABLE_BHYVE)
             ]);
             setCanEditTags(editTags);
+            setCanEditHostname(editHostname);
             setCanStopService(stopService);
             setCanStartService(startService);
             setCanRestartService(restartService);
@@ -2880,7 +2888,7 @@ const HostDetail = () => { // NOSONAR
 
     const handleRebootConfirm = async () => {
         if (!host?.id) return;
-        
+
         try {
             await doRebootHost(host.id);
             setSnackbarMessage(t('hosts.rebootRequested', 'Reboot requested successfully'));
@@ -2890,6 +2898,33 @@ const HostDetail = () => { // NOSONAR
             console.error('Failed to request reboot:', error);
             setSnackbarMessage(t('hosts.rebootFailed', 'Failed to request reboot'));
             setSnackbarOpen(true);
+        }
+    };
+
+    const handleHostnameEditClick = () => {
+        if (host) {
+            setNewHostname(host.fqdn);
+            setHostnameEditOpen(true);
+        }
+    };
+
+    const handleHostnameChange = async () => {
+        if (!host?.id || !newHostname.trim()) return;
+
+        setHostnameEditLoading(true);
+        try {
+            await doChangeHostname(host.id, newHostname.trim());
+            setSnackbarMessage(t('hostDetail.hostnameChangeRequested', 'Hostname change requested'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            setHostnameEditOpen(false);
+        } catch (error) {
+            console.error('Failed to change hostname:', error);
+            setSnackbarMessage(t('hostDetail.hostnameChangeFailed', 'Failed to change hostname'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setHostnameEditLoading(false);
         }
     };
 
@@ -3821,6 +3856,16 @@ const HostDetail = () => { // NOSONAR
                     <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center' }}>
                         <ComputerIcon sx={{ mr: 2, fontSize: '2rem' }} />
                         {host.fqdn}
+                        {canEditHostname && host.active && host.is_agent_privileged && (
+                            <IconButton
+                                size="small"
+                                onClick={handleHostnameEditClick}
+                                sx={{ ml: 1 }}
+                                title={t('hostDetail.editHostname', 'Edit Hostname')}
+                            >
+                                <EditIcon fontSize="small" />
+                            </IconButton>
+                        )}
                     </Typography>
                     {host.parent_host_id && (
                         <Button
@@ -6605,6 +6650,47 @@ const HostDetail = () => { // NOSONAR
                     </Button>
                     <Button onClick={handleShutdownConfirm} color="error" variant="contained">
                         {t('hosts.shutdown', 'Shutdown')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Edit Hostname Dialog */}
+            <Dialog
+                open={hostnameEditOpen}
+                onClose={() => setHostnameEditOpen(false)}
+                aria-labelledby="hostname-edit-dialog-title"
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle id="hostname-edit-dialog-title">
+                    {t('hostDetail.editHostname', 'Edit Hostname')}
+                </DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="hostname"
+                        label={t('hostDetail.hostname', 'Hostname')}
+                        type="text"
+                        fullWidth
+                        variant="outlined"
+                        value={newHostname}
+                        onChange={(e) => setNewHostname(e.target.value)}
+                        helperText={t('hostDetail.hostnameHelp', 'Enter a short hostname or fully qualified domain name (FQDN)')}
+                        disabled={hostnameEditLoading}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setHostnameEditOpen(false)} disabled={hostnameEditLoading}>
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button
+                        onClick={handleHostnameChange}
+                        color="primary"
+                        variant="contained"
+                        disabled={hostnameEditLoading || !newHostname.trim()}
+                    >
+                        {hostnameEditLoading ? <CircularProgress size={24} /> : t('common.save', 'Save')}
                     </Button>
                 </DialogActions>
             </Dialog>

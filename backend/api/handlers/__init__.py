@@ -8,6 +8,7 @@ organized into logical modules:
 - software_package_handlers: Software inventory, package updates, and repositories
 - infrastructure_handlers: Script execution, reboot status, certificates, and roles
 - child_host_handlers: Child host (VM, container, WSL) management
+- hostname_handler: Hostname change handling
 
 All handlers are re-exported here for backwards compatibility.
 """
@@ -61,6 +62,11 @@ from backend.api.handlers.user_access_handlers import (
     handle_user_access_update,
 )
 
+# Import from hostname_handler
+from backend.api.handlers.hostname_handler import (
+    handle_hostname_changed,
+)
+
 __all__ = [
     # OS and Hardware handlers
     "is_new_os_version_combination",
@@ -96,4 +102,6 @@ __all__ = [
     "handle_bhyve_initialize_result",
     "handle_kvm_modules_enable_result",
     "handle_kvm_modules_disable_result",
+    # Hostname handler
+    "handle_hostname_changed",
 ]
