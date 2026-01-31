@@ -15,7 +15,11 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 
 def login_helper(selenium_page, test_user):
-    """Helper function to log in before running tests"""
+    """Helper function to log in before running tests.
+
+    Waits for actual login success indicators rather than fixed timeouts.
+    Raises AssertionError if login fails.
+    """
     selenium_page.goto("/login")
 
     # Wait for page to load and React to render
@@ -81,7 +85,52 @@ def login_helper(selenium_page, test_user):
         By.CSS_SELECTOR, 'button[type="submit"]'
     )
     login_button.click()
-    time.sleep(3)  # Wait for navigation
+
+    # Wait for login success - verify by checking for navigation menu visibility
+    # The nav menu (#nav-menu) only becomes visible after successful authentication
+    max_wait_seconds = 15
+    login_succeeded = False
+
+    for attempt in range(max_wait_seconds):
+        time.sleep(1)
+
+        # Check if we're no longer on login page
+        current_url = selenium_page.driver.current_url
+        if "/login" not in current_url:
+            login_succeeded = True
+            print(f"  [LOGIN] Redirected to {current_url} after {attempt + 1}s")
+            break
+
+        # Also check if nav menu became visible (backup check)
+        try:
+            nav_menu = selenium_page.driver.find_element(By.CSS_SELECTOR, "#nav-menu")
+            visibility = selenium_page.driver.execute_script(
+                "return getComputedStyle(arguments[0]).visibility", nav_menu
+            )
+            if visibility == "visible":
+                login_succeeded = True
+                print(f"  [LOGIN] Nav menu visible after {attempt + 1}s")
+                break
+        except Exception:
+            pass  # Nav menu not found yet
+
+    if not login_succeeded:
+        # Capture error state for debugging
+        error_msg = f"Login failed after {max_wait_seconds}s. URL: {selenium_page.driver.current_url}"
+        try:
+            error_elements = selenium_page.driver.find_elements(
+                By.CSS_SELECTOR, '[class*="error"], [class*="alert"]'
+            )
+            if error_elements:
+                errors = [el.text for el in error_elements if el.text]
+                if errors:
+                    error_msg += f" Errors on page: {errors}"
+        except Exception:
+            pass
+        raise AssertionError(error_msg)
+
+    # Brief wait for page to stabilize after login
+    time.sleep(1)
 
 
 def test_hosts_page_loads(selenium_page, test_user, ui_config, start_server):

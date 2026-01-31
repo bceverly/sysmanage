@@ -25,17 +25,59 @@ if platform.system() == "Darwin":
 
 
 async def login_helper(page: Page, test_user: dict, ui_config):
-    """Helper function to log in before running tests"""
+    """Helper function to log in before running tests.
+
+    Waits for actual login success indicators rather than fixed timeouts.
+    Raises AssertionError if login fails.
+    """
     await page.goto(f"{ui_config.base_url}/login")
     await page.wait_for_load_state("domcontentloaded")
-    await page.wait_for_timeout(2000)
+    await page.wait_for_timeout(1000)
 
     # Fill login form using specific selectors for MUI TextField components
     # The userid field has id="userid" and password field has id="password"
     await page.fill("#userid", test_user["username"])
     await page.fill("#password", test_user["password"])
     await page.click('button[type="submit"]')
-    await page.wait_for_timeout(3000)
+
+    # Wait for login success - verify by checking for navigation menu visibility
+    # The nav menu (#nav-menu) only becomes visible after successful authentication
+    max_wait_seconds = 15
+    login_succeeded = False
+
+    for attempt in range(max_wait_seconds):
+        await page.wait_for_timeout(1000)
+
+        # Check if we're no longer on login page
+        current_url = page.url
+        if "/login" not in current_url:
+            login_succeeded = True
+            print(f"  [LOGIN] Redirected to {current_url} after {attempt + 1}s")
+            break
+
+        # Also check if nav menu became visible (backup check)
+        nav_menu = page.locator("#nav-menu")
+        if await nav_menu.count() > 0:
+            visibility = await nav_menu.evaluate(
+                "el => getComputedStyle(el).visibility"
+            )
+            if visibility == "visible":
+                login_succeeded = True
+                print(f"  [LOGIN] Nav menu visible after {attempt + 1}s")
+                break
+
+    if not login_succeeded:
+        # Capture error state for debugging
+        error_elements = await page.locator(
+            '[class*="error"], [class*="alert"]'
+        ).all_text_contents()
+        error_msg = f"Login failed after {max_wait_seconds}s. URL: {page.url}"
+        if error_elements:
+            error_msg += f" Errors on page: {error_elements}"
+        raise AssertionError(error_msg)
+
+    # Brief wait for page to stabilize after login
+    await page.wait_for_timeout(1000)
 
 
 @pytest.mark.parametrize("browser_context", browsers, indirect=True)

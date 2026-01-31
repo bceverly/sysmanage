@@ -186,7 +186,7 @@ class TestHandleCommandResult:
 
         with patch(
             "backend.api.handlers.handle_package_collection",
-            new_callable=AsyncMock,
+            new_callable=MagicMock,
         ) as mock_handler:
             with patch("backend.persistence.db.get_db") as mock_get_db:
                 mock_session = MagicMock()
