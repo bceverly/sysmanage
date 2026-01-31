@@ -134,6 +134,7 @@ async def handle_os_version_update(  # NOSONAR
             "platform_version": message_data.get("platform_version"),
             "machine_architecture": message_data.get("machine_architecture"),
             "processor": message_data.get("processor"),
+            "timezone": message_data.get("timezone"),
         }
 
         # Remove None values

@@ -4176,6 +4176,12 @@ const HostDetail = () => { // NOSONAR
                                     </Typography>
                                     <Typography variant="body1">{host.processor || t('common.notAvailable')}</Typography>
                                 </Grid>
+                                <Grid size={{ xs: 12, sm: 6 }}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('hostDetail.timezone', 'Timezone')}
+                                    </Typography>
+                                    <Typography variant="body1">{host.timezone || t('common.notAvailable')}</Typography>
+                                </Grid>
                                 {host.os_details && (
                                     <Grid size={{ xs: 12 }}>
                                         <Typography variant="body2" color="textSecondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

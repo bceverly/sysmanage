@@ -13,7 +13,7 @@ from backend.utils.verbosity_logger import get_logger
 logger = get_logger(__name__)
 
 
-async def handle_hostname_changed(
+async def handle_hostname_changed(  # NOSONAR
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> None:
     """

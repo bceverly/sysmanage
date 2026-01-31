@@ -121,6 +121,7 @@ class Host(Base):
     platform_version = Column(Text, nullable=True)
     machine_architecture = Column(String(50), nullable=True)
     processor = Column(String(100), nullable=True)
+    timezone = Column(String(100), nullable=True)
     os_details = Column(Text, nullable=True)
     os_version_updated_at = Column(DateTime, nullable=True)
 
