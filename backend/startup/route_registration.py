@@ -17,6 +17,7 @@ from backend.api import (
     child_host,
     commercial_antivirus_status,
     config_management,
+    cve_refresh_settings,
     default_repositories,
     diagnostics,
     email,
@@ -305,6 +306,14 @@ def register_routes(app: FastAPI):
         tags=["health-analysis", "pro-plus"],
     )  # /api/license/*, /api/host/{host_id}/health-analysis/* (with auth, Pro+)
     logger.info("Health Analysis router added")
+
+    logger.info("Adding CVE Refresh Settings router with /api/cve-refresh prefix")
+    app.include_router(
+        cve_refresh_settings.router,
+        prefix="/api/cve-refresh",
+        tags=["cve-refresh", "pro-plus"],
+    )  # /api/cve-refresh/* (with auth)
+    logger.info("CVE Refresh Settings router added")
 
     logger.info("=== ALL ROUTES REGISTERED ===")
 

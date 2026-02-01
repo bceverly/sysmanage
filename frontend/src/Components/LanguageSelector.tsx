@@ -8,7 +8,8 @@ interface LanguageSelectorProps {
 
 const LanguageSelector: React.FC<LanguageSelectorProps> = ({ theme = 'dark' }) => {
   const { i18n } = useTranslation();
-  const [currentLanguage, setCurrentLanguage] = useState('');
+  // Initialize with 'en' to prevent empty state rendering issues
+  const [currentLanguage, setCurrentLanguage] = useState('en');
 
   const handleLanguageChange = (event: SelectChangeEvent<string>) => {
     const language = event.target.value;
@@ -148,7 +149,6 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ theme = 'dark' }) =
       <Select
         value={currentLanguage}
         onChange={handleLanguageChange}
-        displayEmpty
         sx={getStyles()}
       >
         {languages.map((lang) => (

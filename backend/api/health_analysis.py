@@ -22,6 +22,10 @@ from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 from backend.utils.verbosity_logger import get_logger
+from backend.vulnerability.vulnerability_service import (
+    VulnerabilityServiceError,
+    vulnerability_service,
+)
 
 logger = get_logger("backend.api.health_analysis")
 
@@ -74,6 +78,108 @@ class HealthHistoryResponse(BaseModel):
     """Schema for health analysis history response."""
 
     analyses: List[HealthAnalysisResponse]
+    total: int
+
+
+# Vulnerability scanning schemas
+class VulnerabilityFindingResponse(BaseModel):
+    """Schema for a single vulnerability finding."""
+
+    cve_id: str = Field(..., description="CVE identifier")
+    package_name: str = Field(..., description="Name of the vulnerable package")
+    installed_version: str = Field(..., description="Currently installed version")
+    fixed_version: Optional[str] = Field(
+        None, description="Version that fixes the vulnerability"
+    )
+    severity: str = Field(..., description="Severity: CRITICAL, HIGH, MEDIUM, LOW")
+    cvss_score: Optional[str] = Field(None, description="CVSS score")
+    remediation: Optional[str] = Field(None, description="Suggested remediation action")
+    description: Optional[str] = Field(None, description="Vulnerability description")
+
+
+class VulnerabilityScanResponse(BaseModel):
+    """Schema for vulnerability scan response."""
+
+    id: str
+    host_id: str
+    scanned_at: str
+    total_packages: int = Field(..., description="Number of packages scanned")
+    vulnerable_packages: int = Field(
+        ..., description="Number of packages with vulnerabilities"
+    )
+    total_vulnerabilities: int = Field(..., description="Total vulnerability count")
+    critical_count: int = Field(0, description="Number of critical vulnerabilities")
+    high_count: int = Field(0, description="Number of high severity vulnerabilities")
+    medium_count: int = Field(
+        0, description="Number of medium severity vulnerabilities"
+    )
+    low_count: int = Field(0, description="Number of low severity vulnerabilities")
+    risk_score: int = Field(..., ge=0, le=100, description="Risk score from 0 to 100")
+    risk_level: str = Field(
+        ..., description="Risk level: CRITICAL, HIGH, MEDIUM, LOW, NONE"
+    )
+    summary: Optional[str] = Field(None, description="Summary of findings")
+    recommendations: Optional[List[str]] = Field(
+        None, description="List of recommendations"
+    )
+    vulnerabilities: Optional[List[dict]] = Field(
+        None, description="List of vulnerability findings"
+    )
+
+    class Config:
+        from_attributes = True
+
+
+class VulnerabilityScanHistoryResponse(BaseModel):
+    """Schema for vulnerability scan history response."""
+
+    scans: List[VulnerabilityScanResponse]
+    total: int
+
+
+class EnterpriseSummaryResponse(BaseModel):
+    """Schema for enterprise-wide vulnerability summary."""
+
+    total_hosts: int = Field(..., description="Total number of hosts scanned")
+    hosts_by_risk: dict = Field(..., description="Host counts by risk level")
+    total_vulnerabilities: dict = Field(
+        ..., description="Vulnerability counts by severity"
+    )
+    unique_cves: Optional[int] = Field(None, description="Number of unique CVEs")
+    top_cves: Optional[List[dict]] = Field(None, description="Most common CVEs")
+    top_vulnerable_packages: Optional[List[dict]] = Field(
+        None, description="Most vulnerable packages"
+    )
+    enterprise_risk_score: int = Field(
+        ..., ge=0, le=100, description="Enterprise risk score"
+    )
+    enterprise_risk_level: str = Field(..., description="Enterprise risk level")
+
+
+class HostVulnerabilitySummaryResponse(BaseModel):
+    """Schema for a host's vulnerability summary."""
+
+    host_id: str = Field(..., description="Host ID")
+    hostname: str = Field(..., description="Hostname")
+    fqdn: str = Field(..., description="Fully qualified domain name")
+    critical_count: int = Field(0, description="Number of critical vulnerabilities")
+    high_count: int = Field(0, description="Number of high severity vulnerabilities")
+    medium_count: int = Field(
+        0, description="Number of medium severity vulnerabilities"
+    )
+    low_count: int = Field(0, description="Number of low severity vulnerabilities")
+    total_vulnerabilities: int = Field(0, description="Total vulnerability count")
+    risk_score: int = Field(0, ge=0, le=100, description="Risk score from 0 to 100")
+    risk_level: str = Field(
+        "NONE", description="Risk level: CRITICAL, HIGH, MEDIUM, LOW, NONE"
+    )
+    last_scanned_at: Optional[str] = Field(None, description="Last scan timestamp")
+
+
+class HostVulnerabilityListResponse(BaseModel):
+    """Schema for list of hosts with vulnerability summaries."""
+
+    hosts: List[HostVulnerabilitySummaryResponse]
     total: int
 
 
@@ -363,4 +469,248 @@ async def get_host_health_history(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=_("Failed to retrieve health history"),
+        ) from e
+
+
+# Vulnerability scanning endpoints
+@router.get(
+    "/host/{host_id}/vulnerability-scan", response_model=VulnerabilityScanResponse
+)
+@requires_feature(FeatureCode.VULNERABILITY_SCANNING)
+async def get_host_vulnerability_scan(
+    host_id: str,
+    refresh: bool = False,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Get vulnerability scan results for a host.
+
+    Requires Pro+ license with vulnerability_scanning feature.
+
+    Args:
+        host_id: The host ID to scan
+        refresh: If True, run a new scan instead of returning cached results
+
+    Returns:
+        Vulnerability scan results with findings and risk assessment
+    """
+    from backend.licensing.module_loader import module_loader
+
+    # Verify host exists
+    host = db.query(models.Host).filter(models.Host.id == host_id).first()
+    if not host:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=_(ERROR_HOST_NOT_FOUND),
+        )
+
+    try:
+        if refresh:
+            # Run new scan - requires module to be loaded
+            if not module_loader.is_module_loaded("vuln_engine"):
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail={
+                        "error": "module_not_available",
+                        "message": _(
+                            "The vulnerability engine module is not currently available. Please try again later."
+                        ),
+                        "module": "vuln_engine",
+                    },
+                )
+            result = vulnerability_service.scan_host(host_id)
+        else:
+            # Get cached result first
+            result = vulnerability_service.get_latest_scan(host_id)
+            if result is None:
+                # No cached result - need to run scan
+                if not module_loader.is_module_loaded("vuln_engine"):
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail={
+                            "error": "module_not_available",
+                            "message": _(
+                                "The vulnerability engine module is not currently available. No cached scan exists for this host."
+                            ),
+                            "module": "vuln_engine",
+                        },
+                    )
+                result = vulnerability_service.scan_host(host_id)
+
+        return VulnerabilityScanResponse(**result)
+
+    except VulnerabilityServiceError as e:
+        logger.error("Vulnerability scan failed for host %s: %s", host_id, e)
+        error_msg = str(e)
+        if "not loaded" in error_msg or "not available" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "error": "module_not_available",
+                    "message": error_msg,
+                    "module": "vuln_engine",
+                },
+            ) from e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        ) from e
+
+
+@router.post(
+    "/host/{host_id}/vulnerability-scan", response_model=VulnerabilityScanResponse
+)
+@requires_module(ModuleCode.VULN_ENGINE)
+async def run_host_vulnerability_scan(
+    host_id: str,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Run a new vulnerability scan for a host.
+
+    Requires Pro+ license with security_scanner module.
+
+    Args:
+        host_id: The host ID to scan
+
+    Returns:
+        New vulnerability scan results
+    """
+    # Verify host exists
+    host = db.query(models.Host).filter(models.Host.id == host_id).first()
+    if not host:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=_(ERROR_HOST_NOT_FOUND),
+        )
+
+    try:
+        result = vulnerability_service.scan_host(host_id)
+        return VulnerabilityScanResponse(**result)
+
+    except VulnerabilityServiceError as e:
+        logger.error("Vulnerability scan failed for host %s: %s", host_id, e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        ) from e
+
+
+@router.get(
+    "/host/{host_id}/vulnerability-scan/history",
+    response_model=VulnerabilityScanHistoryResponse,
+)
+@requires_feature(FeatureCode.VULNERABILITY_SCANNING)
+async def get_host_vulnerability_history(
+    host_id: str,
+    limit: int = 10,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Get vulnerability scan history for a host.
+
+    Requires Pro+ license with vulnerability_scanning feature.
+
+    Args:
+        host_id: The host ID
+        limit: Maximum number of records to return (default 10, max 100)
+
+    Returns:
+        List of historical vulnerability scans
+    """
+    # Verify host exists
+    host = db.query(models.Host).filter(models.Host.id == host_id).first()
+    if not host:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=_(ERROR_HOST_NOT_FOUND),
+        )
+
+    # Clamp limit
+    limit = min(max(1, limit), 100)
+
+    try:
+        scans = vulnerability_service.get_scan_history(host_id, limit)
+        return VulnerabilityScanHistoryResponse(
+            scans=[VulnerabilityScanResponse(**s) for s in scans],
+            total=len(scans),
+        )
+
+    except Exception as e:
+        logger.error("Failed to get vulnerability history for host %s: %s", host_id, e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=_("Failed to retrieve vulnerability history"),
+        ) from e
+
+
+@router.get("/vulnerabilities/summary", response_model=EnterpriseSummaryResponse)
+@requires_feature(FeatureCode.VULNERABILITY_SCANNING)
+async def get_enterprise_vulnerability_summary(
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Get enterprise-wide vulnerability summary.
+
+    Requires Pro+ license with vulnerability_scanning feature.
+
+    Returns:
+        Enterprise-wide vulnerability metrics and statistics
+    """
+    try:
+        result = vulnerability_service.get_enterprise_summary()
+        return EnterpriseSummaryResponse(**result)
+
+    except VulnerabilityServiceError as e:
+        logger.error("Enterprise vulnerability summary failed: %s", e)
+        error_msg = str(e)
+        if "not loaded" in error_msg or "not available" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "error": "module_not_available",
+                    "message": error_msg,
+                    "module": "vuln_engine",
+                },
+            ) from e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        ) from e
+
+
+@router.get("/vulnerabilities/hosts", response_model=HostVulnerabilityListResponse)
+@requires_feature(FeatureCode.VULNERABILITY_SCANNING)
+async def get_vulnerability_hosts_list(
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Get list of all hosts with their vulnerability summaries.
+
+    Requires Pro+ license with vulnerability_scanning feature.
+
+    Returns:
+        List of hosts with vulnerability counts by severity
+    """
+    try:
+        hosts = vulnerability_service.get_hosts_with_vulnerabilities()
+        return HostVulnerabilityListResponse(
+            hosts=[HostVulnerabilitySummaryResponse(**h) for h in hosts],
+            total=len(hosts),
+        )
+
+    except VulnerabilityServiceError as e:
+        logger.error("Get vulnerability hosts list failed: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        ) from e
+    except Exception as e:
+        logger.exception("Unexpected error in get_vulnerability_hosts_list: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while fetching vulnerability hosts",
         ) from e

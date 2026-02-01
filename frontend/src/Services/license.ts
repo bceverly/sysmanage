@@ -91,3 +91,221 @@ export const getHostHealthHistory = async (hostId: string, limit = 10): Promise<
     });
     return response.data;
 };
+
+// Vulnerability Scanning Types and Functions
+
+export interface VulnerabilityFinding {
+    id?: string;  // Unique finding ID from backend
+    cve_id: string;
+    package_name: string;
+    installed_version: string;
+    fixed_version?: string;
+    severity: string;
+    cvss_score?: string;
+    remediation?: string;
+    description?: string;
+}
+
+export interface VulnerabilityScan {
+    id: string;
+    host_id: string;
+    scanned_at: string;
+    total_packages: number;
+    vulnerable_packages: number;
+    total_vulnerabilities: number;
+    critical_count: number;
+    high_count: number;
+    medium_count: number;
+    low_count: number;
+    risk_score: number;
+    risk_level: string;
+    summary?: string;
+    recommendations?: string[];
+    vulnerabilities?: VulnerabilityFinding[];
+}
+
+export interface VulnerabilityScanHistory {
+    scans: VulnerabilityScan[];
+    total: number;
+}
+
+export interface HostVulnerabilitySummary {
+    host_id: string;
+    hostname: string;
+    fqdn: string;
+    critical_count: number;
+    high_count: number;
+    medium_count: number;
+    low_count: number;
+    total_vulnerabilities: number;
+    risk_score: number;
+    risk_level: string;
+    last_scanned_at?: string;
+}
+
+export interface HostVulnerabilityListResponse {
+    hosts: HostVulnerabilitySummary[];
+    total: number;
+}
+
+/**
+ * Get vulnerability scan results for a host.
+ */
+export const getHostVulnerabilityScan = async (hostId: string, refresh = false): Promise<VulnerabilityScan> => {
+    const response = await axiosInstance.get(`/api/host/${hostId}/vulnerability-scan`, {
+        params: { refresh }
+    });
+    return response.data;
+};
+
+/**
+ * Run a new vulnerability scan for a host.
+ */
+export const runHostVulnerabilityScan = async (hostId: string): Promise<VulnerabilityScan> => {
+    const response = await axiosInstance.post(`/api/host/${hostId}/vulnerability-scan`);
+    return response.data;
+};
+
+/**
+ * Get vulnerability scan history for a host.
+ */
+export const getHostVulnerabilityHistory = async (hostId: string, limit = 10): Promise<VulnerabilityScanHistory> => {
+    const response = await axiosInstance.get(`/api/host/${hostId}/vulnerability-scan/history`, {
+        params: { limit }
+    });
+    return response.data;
+};
+
+// CVE Refresh Settings Types and Functions
+
+export interface CveSourceInfo {
+    name: string;
+    description: string;
+    enabled_by_default: boolean;
+}
+
+export interface CveRefreshSettings {
+    id: string;
+    enabled: boolean;
+    refresh_interval_hours: number;
+    enabled_sources: string[];
+    has_nvd_api_key: boolean;
+    last_refresh_at?: string;
+    next_refresh_at?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CveRefreshSettingsUpdate {
+    enabled?: boolean;
+    refresh_interval_hours?: number;
+    enabled_sources?: string[];
+    nvd_api_key?: string;
+}
+
+export interface CveDatabaseStats {
+    total_cves: number;
+    total_package_mappings: number;
+    severity_counts: {
+        critical: number;
+        high: number;
+        medium: number;
+        low: number;
+        none: number;
+    };
+    last_refresh_at?: string;
+    next_refresh_at?: string;
+    last_successful_ingestion?: {
+        source: string;
+        completed_at: string;
+        vulnerabilities_processed: number;
+    };
+}
+
+export interface CveIngestionLog {
+    id: string;
+    source: string;
+    started_at: string;
+    completed_at?: string;
+    status: string;
+    vulnerabilities_processed?: number;
+    packages_processed?: number;
+    error_message?: string;
+}
+
+export interface CveRefreshResult {
+    started_at: string;
+    completed_at?: string;
+    sources: Record<string, { status: string; vulnerabilities_processed?: number; packages_processed?: number; error?: string }>;
+    total_vulnerabilities: number;
+    total_packages: number;
+    errors: string[];
+}
+
+/**
+ * Get available CVE data sources.
+ */
+export const getCveSources = async (): Promise<Record<string, CveSourceInfo>> => {
+    const response = await axiosInstance.get('/api/cve-refresh/sources');
+    return response.data;
+};
+
+/**
+ * Get CVE refresh settings.
+ */
+export const getCveRefreshSettings = async (): Promise<CveRefreshSettings> => {
+    const response = await axiosInstance.get('/api/cve-refresh/settings');
+    return response.data;
+};
+
+/**
+ * Update CVE refresh settings.
+ */
+export const updateCveRefreshSettings = async (settings: CveRefreshSettingsUpdate): Promise<CveRefreshSettings> => {
+    const response = await axiosInstance.put('/api/cve-refresh/settings', settings);
+    return response.data;
+};
+
+/**
+ * Get CVE database statistics.
+ */
+export const getCveDatabaseStats = async (): Promise<CveDatabaseStats> => {
+    const response = await axiosInstance.get('/api/cve-refresh/stats');
+    return response.data;
+};
+
+/**
+ * Get CVE ingestion history.
+ */
+export const getCveIngestionHistory = async (limit = 10): Promise<CveIngestionLog[]> => {
+    const response = await axiosInstance.get('/api/cve-refresh/history', {
+        params: { limit }
+    });
+    return response.data;
+};
+
+/**
+ * Trigger CVE database refresh.
+ */
+export const triggerCveRefresh = async (source?: string): Promise<CveRefreshResult> => {
+    const response = await axiosInstance.post('/api/cve-refresh/refresh', null, {
+        params: source ? { source } : {}
+    });
+    return response.data;
+};
+
+/**
+ * Clear NVD API key.
+ */
+export const clearNvdApiKey = async (): Promise<{ message: string }> => {
+    const response = await axiosInstance.delete('/api/cve-refresh/nvd-api-key');
+    return response.data;
+};
+
+/**
+ * Get list of all hosts with their vulnerability summaries.
+ */
+export const getVulnerabilityHosts = async (): Promise<HostVulnerabilityListResponse> => {
+    const response = await axiosInstance.get('/api/vulnerabilities/hosts');
+    return response.data;
+};

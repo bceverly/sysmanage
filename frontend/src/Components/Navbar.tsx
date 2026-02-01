@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { IoClose, IoMenu, IoSettingsOutline } from "react-icons/io5";
 import { useTranslation } from 'react-i18next';
@@ -9,11 +9,32 @@ import LanguageSelector from "./LanguageSelector";
 import ConnectionStatusIndicator from "./ConnectionStatusIndicator";
 import UserProfileDropdown from "./UserProfileDropdown";
 import NotificationBell from "./NotificationBell";
+import { getLicenseInfo } from "../Services/license";
 
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
+  const [isVulnFeatureActive, setIsVulnFeatureActive] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  // Check if vulnerability scanning feature is active (Pro+ with vuln feature)
+  useEffect(() => {
+    const checkVulnFeature = async () => {
+      try {
+        const licenseInfo = await getLicenseInfo();
+        // Check if license is active and has vulnerability scanning feature
+        const hasVulnFeature = licenseInfo.active && licenseInfo.features?.includes('vuln');
+        setIsVulnFeatureActive(hasVulnFeature);
+      } catch {
+        setIsVulnFeatureActive(false);
+      }
+    };
+
+    // Only check when logged in
+    if (localStorage.getItem('bearer_token')) {
+      checkVulnFeature();
+    }
+  }, []);
 
   const toggleMenu = () => {
     setShowMenu(!showMenu);
@@ -98,6 +119,17 @@ const Navbar = () => {
                 {t('nav.osUpgrades')}
               </NavLink>
             </li>
+            {isVulnFeatureActive && (
+              <li className="nav__item">
+                <NavLink
+                  to="/vulnerabilities"
+                  className="nav__link"
+                  onClick={closeMenuOnMobile}
+                >
+                  {t('nav.vulnerabilities')}
+                </NavLink>
+              </li>
+            )}
             <li className="nav__item">
               <NavLink
                 to="/secrets"
@@ -137,21 +169,23 @@ const Navbar = () => {
           </button>
         </div>
 
-        {/* Language selector, connection status, and notifications at toolbar level */}
-        <div className="nav__language-toolbar" style={{visibility: menuVisible}}>
-          <ConnectionStatusIndicator />
-          <NotificationBell />
-          <IconButton 
-            onClick={handleSettingsClick}
-            size="small"
-            title={t('nav.settings', 'Settings')}
-            sx={{ color: 'inherit', mr: 1 }}
-          >
-            <IoSettingsOutline />
-          </IconButton>
-          <UserProfileDropdown />
-          <LanguageSelector />
-        </div>
+        {/* Language selector, connection status, and notifications at toolbar level - only render when logged in */}
+        {menuVisible === "visible" && (
+          <div className="nav__language-toolbar">
+            <ConnectionStatusIndicator />
+            <NotificationBell />
+            <IconButton
+              onClick={handleSettingsClick}
+              size="small"
+              title={t('nav.settings', 'Settings')}
+              sx={{ color: 'inherit', mr: 1 }}
+            >
+              <IoSettingsOutline />
+            </IconButton>
+            <UserProfileDropdown />
+            <LanguageSelector />
+          </div>
+        )}
 
         <button
             className="nav__toggle"

@@ -60,7 +60,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 )
                 # Load licensed modules
                 logger.info("=== PRO+ MODULE LOADING ===")
-                await module_loader.initialize()
+                module_loader.initialize()
                 if license_service.cached_license:
                     for module_code in license_service.cached_license.modules:
                         logger.info("Loading Pro+ module: %s", module_code)

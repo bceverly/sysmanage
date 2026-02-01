@@ -94,4 +94,11 @@ __all__ = [
     "ProPlusLicenseValidationLog",
     "ProPlusModuleCache",
     "HostHealthAnalysis",
+    # Vulnerability tracking models
+    "Vulnerability",
+    "PackageVulnerability",
+    "HostVulnerabilityScan",
+    "HostVulnerabilityFinding",
+    "VulnerabilityIngestionLog",
+    "CveRefreshSettings",
 ]

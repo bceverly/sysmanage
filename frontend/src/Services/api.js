@@ -43,8 +43,14 @@ axiosInstance.interceptors.response.use(
       console.debug('retry = ' + originalConfig._retry);
 
       // This is an attempt to log in with an expired refresh token
+      // But don't redirect if it's a Pro+ license check (pro_plus_required error)
       if (err.response.status === 403) {
-        globalThis.location.href = '/login';
+        const errorData = err.response.data;
+        const isProPlusError = errorData?.error === 'pro_plus_required' ||
+                               errorData?.detail?.error === 'pro_plus_required';
+        if (!isProPlusError) {
+          globalThis.location.href = '/login';
+        }
       }
 
       // This is the "normal" case of an expired auth token where

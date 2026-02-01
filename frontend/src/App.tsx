@@ -32,6 +32,8 @@ import Scripts from './Pages/Scripts';
 import Reports from './Pages/Reports';
 import ReportViewer from './Pages/ReportViewer';
 import AuditLogViewer from './Pages/AuditLogViewer';
+import VulnerabilitiesPage from './Pages/VulnerabilitiesPage';
+import VulnerabilityHostDetail from './Pages/VulnerabilityHostDetail';
 import Profile from './Pages/Profile';
 import Settings from './Pages/Settings';
 import Logout from './Pages/Logout';
@@ -105,6 +107,8 @@ function App() {
                     <Route path="/users/:userId" element={<UserDetail />} />
                     <Route path="/updates" element={<Updates />} />
                     <Route path="/os-upgrades" element={<OSUpgrades />} />
+                    <Route path="/vulnerabilities" element={<VulnerabilitiesPage />} />
+                    <Route path="/vulnerabilities/:hostId" element={<VulnerabilityHostDetail />} />
                     <Route path="/secrets" element={<Secrets />} />
                     <Route path="/scripts" element={<Scripts />} />
                     <Route path="/reports" element={<Reports />} />

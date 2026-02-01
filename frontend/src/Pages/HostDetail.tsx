@@ -103,8 +103,10 @@ import ThirdPartyRepositories from './ThirdPartyRepositories';
 import AddHostAccountModal from '../Components/AddHostAccountModal';
 import AddHostGroupModal from '../Components/AddHostGroupModal';
 import HealthAnalysisCard from '../Components/HealthAnalysisCard';
+import VulnerabilitiesCard from '../Components/VulnerabilitiesCard';
 import { getLicenseInfo } from '../Services/license';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
+import BugReportIcon from '@mui/icons-material/BugReport';
 
 // Certificate interface
 interface Certificate {
@@ -180,6 +182,7 @@ const HostDetail = () => { // NOSONAR
     const [error, setError] = useState<string | null>(null);
     const [hasAntivirusOsDefault, setHasAntivirusOsDefault] = useState<boolean>(false);
     const [isProPlusActive, setIsProPlusActive] = useState<boolean>(false);
+    const [licenseModules, setLicenseModules] = useState<string[]>([]);
 
     // Check if OS supports third-party repositories
     const supportsThirdPartyRepos = useCallback(() => {
@@ -606,9 +609,11 @@ const HostDetail = () => { // NOSONAR
             try {
                 const licenseInfo = await getLicenseInfo();
                 setIsProPlusActive(licenseInfo.active);
+                setLicenseModules(licenseInfo.modules || []);
             } catch (error) {
                 console.log('Pro+ license check failed:', error);
                 setIsProPlusActive(false);
+                setLicenseModules([]);
             }
         };
         checkProPlusStatus();
@@ -626,7 +631,8 @@ const HostDetail = () => { // NOSONAR
     }, [pageSizeOptions, certificatePaginationModel.pageSize]);
 
     // Helper functions to calculate dynamic tab indices
-    // Tab order: Info, [Health if Pro+], Hardware, Software, Software Changes, [Third-Party Repos], Access, Security, Certificates, Server Roles, [Child Hosts], [Ubuntu Pro], Diagnostics
+    // Tab order: Info, [Health if Pro+], Hardware, Software, Software Changes, [Third-Party Repos], Access, Security, [Vulnerabilities if vuln_engine], Certificates, Server Roles, [Child Hosts], [Ubuntu Pro], Diagnostics
+    const hasVulnEngineModule = useCallback(() => licenseModules.includes('vuln_engine'), [licenseModules]);
     const getHealthTabIndex = useCallback(() => isProPlusActive ? 1 : -1, [isProPlusActive]);
     const getHardwareTabIndex = useCallback(() => isProPlusActive ? 2 : 1, [isProPlusActive]);
     const getSoftwareTabIndex = useCallback(() => isProPlusActive ? 3 : 2, [isProPlusActive]);
@@ -643,29 +649,39 @@ const HostDetail = () => { // NOSONAR
         const proPlusOffset = isProPlusActive ? 1 : 0;
         return supportsThirdPartyRepos() ? 6 + proPlusOffset : 5 + proPlusOffset;
     };
-    const getCertificatesTabIndex = () => {
+    const getVulnerabilitiesTabIndex = useCallback(() => {
+        if (!hasVulnEngineModule()) return -1;
         const proPlusOffset = isProPlusActive ? 1 : 0;
         return supportsThirdPartyRepos() ? 7 + proPlusOffset : 6 + proPlusOffset;
+    }, [hasVulnEngineModule, isProPlusActive, supportsThirdPartyRepos]);
+    const getCertificatesTabIndex = () => {
+        const proPlusOffset = isProPlusActive ? 1 : 0;
+        const vulnOffset = hasVulnEngineModule() ? 1 : 0;
+        return supportsThirdPartyRepos() ? 7 + proPlusOffset + vulnOffset : 6 + proPlusOffset + vulnOffset;
     };
     const getServerRolesTabIndex = useCallback(() => {
         const proPlusOffset = isProPlusActive ? 1 : 0;
-        return supportsThirdPartyRepos() ? 8 + proPlusOffset : 7 + proPlusOffset;
-    }, [supportsThirdPartyRepos, isProPlusActive]);
+        const vulnOffset = hasVulnEngineModule() ? 1 : 0;
+        return supportsThirdPartyRepos() ? 8 + proPlusOffset + vulnOffset : 7 + proPlusOffset + vulnOffset;
+    }, [supportsThirdPartyRepos, isProPlusActive, hasVulnEngineModule]);
     const getChildHostsTabIndex = useCallback(() => {
         if (!supportsChildHosts()) return -1;
         const proPlusOffset = isProPlusActive ? 1 : 0;
-        return supportsThirdPartyRepos() ? 9 + proPlusOffset : 8 + proPlusOffset;
-    }, [supportsThirdPartyRepos, supportsChildHosts, isProPlusActive]);
+        const vulnOffset = hasVulnEngineModule() ? 1 : 0;
+        return supportsThirdPartyRepos() ? 9 + proPlusOffset + vulnOffset : 8 + proPlusOffset + vulnOffset;
+    }, [supportsThirdPartyRepos, supportsChildHosts, isProPlusActive, hasVulnEngineModule]);
     const getUbuntuProTabIndex = () => {
         if (!isUbuntu() || !ubuntuProInfo?.available) return -1;
         const proPlusOffset = isProPlusActive ? 1 : 0;
-        let baseIndex = supportsThirdPartyRepos() ? 9 + proPlusOffset : 8 + proPlusOffset;
+        const vulnOffset = hasVulnEngineModule() ? 1 : 0;
+        let baseIndex = supportsThirdPartyRepos() ? 9 + proPlusOffset + vulnOffset : 8 + proPlusOffset + vulnOffset;
         if (supportsChildHosts()) baseIndex += 1;
         return baseIndex;
     };
     const getDiagnosticsTabIndex = () => {
         const proPlusOffset = isProPlusActive ? 1 : 0;
-        let baseIndex = supportsThirdPartyRepos() ? 9 + proPlusOffset : 8 + proPlusOffset;
+        const vulnOffset = hasVulnEngineModule() ? 1 : 0;
+        let baseIndex = supportsThirdPartyRepos() ? 9 + proPlusOffset + vulnOffset : 8 + proPlusOffset + vulnOffset;
         if (supportsChildHosts()) baseIndex += 1;
         return (isUbuntu() && ubuntuProInfo?.available) ? baseIndex + 1 : baseIndex;
     };
@@ -4016,6 +4032,14 @@ const HostDetail = () => { // NOSONAR
                         iconPosition="start"
                         sx={{ textTransform: 'none' }}
                     />
+                    {hasVulnEngineModule() && (
+                        <Tab
+                            icon={<BugReportIcon />}
+                            label={t('hostDetail.vulnerabilitiesTab', 'Vulnerabilities')}
+                            iconPosition="start"
+                            sx={{ textTransform: 'none' }}
+                        />
+                    )}
                     <Tab
                         icon={<CertificateIcon />}
                         label={t('hostDetail.certificatesTab', 'Certificates')}
@@ -5443,6 +5467,13 @@ const HostDetail = () => { // NOSONAR
                         />
                     </Grid>
                 </Grid>
+            )}
+
+            {/* Vulnerabilities Tab */}
+            {hasVulnEngineModule() && currentTab === getVulnerabilitiesTabIndex() && hostId && (
+                <Box sx={{ p: 2 }}>
+                    <VulnerabilitiesCard hostId={hostId} />
+                </Box>
             )}
 
             {/* Certificates Tab */}

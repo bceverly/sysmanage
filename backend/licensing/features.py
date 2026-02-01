@@ -17,8 +17,8 @@ class FeatureCode(str, Enum):
     # Health Analysis Features
     HEALTH_ANALYSIS = "health"  # Matches license server feature code
     HEALTH_HISTORY = "health_history"
-    HEALTH_ALERTS = "health_alerts"
-    HEALTH_REPORTS = "health_reports"
+    HEALTH_ALERTS = "alerts"  # Matches license server feature code
+    HEALTH_REPORTS = "reports"  # Matches license server feature code
 
     # Advanced Monitoring Features
     ADVANCED_MONITORING = "advanced_monitoring"
@@ -26,8 +26,8 @@ class FeatureCode(str, Enum):
     PREDICTIVE_MAINTENANCE = "predictive_maintenance"
 
     # Security Features
-    VULNERABILITY_SCANNING = "vulnerability_scanning"
-    COMPLIANCE_REPORTS = "compliance_reports"
+    VULNERABILITY_SCANNING = "vuln"  # Matches license server feature code
+    COMPLIANCE_REPORTS = "compliance"  # Matches license server feature code
     SECURITY_HARDENING = "security_hardening"
 
     # Automation Features
@@ -37,7 +37,7 @@ class FeatureCode(str, Enum):
 
     # Integration Features
     SIEM_INTEGRATION = "siem_integration"
-    API_EXTENDED = "api_extended"
+    API_EXTENDED = "api"  # Matches license server feature code
     WEBHOOK_ADVANCED = "webhook_advanced"
 
     # Reporting Features
@@ -62,7 +62,8 @@ class ModuleCode(str, Enum):
 
     # Core Analysis Modules
     HEALTH_ENGINE = "health_engine"
-    SECURITY_SCANNER = "security_scanner"
+    SECURITY_SCANNER = "security_scanner"  # Legacy alias
+    VULN_ENGINE = "vuln_engine"  # Renamed from security_scanner
     PERFORMANCE_ANALYZER = "performance_analyzer"
 
     # AI/ML Modules
@@ -98,6 +99,7 @@ TIER_FEATURES = {
     LicenseTier.PROFESSIONAL: {
         FeatureCode.HEALTH_ANALYSIS,
         FeatureCode.HEALTH_HISTORY,
+        FeatureCode.VULNERABILITY_SCANNING,
         FeatureCode.ADVANCED_MONITORING,
         FeatureCode.CUSTOM_REPORTS,
     },
@@ -130,10 +132,13 @@ TIER_MODULES = {
     LicenseTier.COMMUNITY: set(),
     LicenseTier.PROFESSIONAL: {
         ModuleCode.HEALTH_ENGINE,
+        ModuleCode.SECURITY_SCANNER,
+        ModuleCode.VULN_ENGINE,
     },
     LicenseTier.ENTERPRISE: {
         ModuleCode.HEALTH_ENGINE,
         ModuleCode.SECURITY_SCANNER,
+        ModuleCode.VULN_ENGINE,
         ModuleCode.PERFORMANCE_ANALYZER,
         ModuleCode.ANOMALY_DETECTOR,
         ModuleCode.PREDICTION_ENGINE,

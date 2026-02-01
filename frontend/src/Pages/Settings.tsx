@@ -50,6 +50,7 @@ import HostDefaultsSettings from '../Components/HostDefaultsSettings';
 import FirewallRolesSettings from '../Components/FirewallRolesSettings';
 import DistributionsSettings from '../Components/DistributionsSettings';
 import ProPlusSettings from '../Components/ProPlusSettings';
+import CveRefreshSettings from '../Components/CveRefreshSettings';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import { getLicenseInfo } from '../Services/license';
@@ -143,6 +144,7 @@ const Settings: React.FC = () => {
     const tabs = ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages', 'host-defaults', 'firewall-roles', 'distributions'];
     if (isProPlusActive) {
       tabs.push('professional-plus');
+      tabs.push('cve-refresh');
     }
     return tabs;
   }, [isProPlusActive]);
@@ -1110,6 +1112,9 @@ const Settings: React.FC = () => {
           {isProPlusActive && (
             <Tab label={t('proPlus.title', 'Professional+')} />
           )}
+          {isProPlusActive && (
+            <Tab label={t('cveRefresh.tabTitle', 'CVE Database')} />
+          )}
         </Tabs>
       </Box>
 
@@ -1133,6 +1138,17 @@ const Settings: React.FC = () => {
               {t('proPlus.description', 'View your Sysmanage Professional+ license details and provisioned features.')}
             </Typography>
             <ProPlusSettings />
+          </Box>
+        )}
+        {isProPlusActive && activeTab === 10 && (
+          <Box>
+            <Typography variant="h5" sx={{ mb: 2 }}>
+              {t('cveRefresh.tabTitle', 'CVE Database')}
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 3 }}>
+              {t('cveRefresh.description', 'Configure automatic CVE database updates from multiple security data sources.')}
+            </Typography>
+            <CveRefreshSettings />
           </Box>
         )}
       </Box>
