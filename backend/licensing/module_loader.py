@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+import aiofiles
 import aiohttp
 from sqlalchemy.orm import sessionmaker
 
@@ -95,7 +96,7 @@ class ModuleLoader:
                 sha512.update(chunk)
         return sha512.hexdigest()
 
-    async def initialize(self) -> None:
+    def initialize(self) -> None:
         """Initialize the module loader and ensure modules directory exists."""
         if self._initialized:
             return
@@ -123,7 +124,7 @@ class ModuleLoader:
             True if module is available, False otherwise
         """
         if not self._initialized:
-            await self.initialize()
+            self.initialize()
 
         # Check if already loaded
         if module_code in self._loaded_modules:
@@ -224,9 +225,9 @@ class ModuleLoader:
                     )
 
                     # Download to temp file
-                    with open(temp_path, "wb") as f:
+                    async with aiofiles.open(temp_path, "wb") as f:
                         async for chunk in response.content.iter_chunked(8192):
-                            f.write(chunk)
+                            await f.write(chunk)
 
             # Verify hash if provided
             if expected_hash:

@@ -111,7 +111,7 @@ def parse_license_key(license_key: str) -> Tuple[dict, dict, bytes]:
         payload = json.loads(payload_json)
 
         return header, payload, signature
-    except (json.JSONDecodeError, ValueError) as e:
+    except ValueError as e:
         raise ValueError(f"Invalid license key encoding: {e}") from e
 
 

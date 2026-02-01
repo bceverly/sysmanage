@@ -136,7 +136,7 @@ class LicenseService:
             logger.warning("License warning: %s", result.warning)
 
         # Save to database
-        await self._save_license_to_db(license_key)
+        self._save_license_to_db()
 
         # Log successful validation
         self._log_validation("local", "success")
@@ -161,10 +161,10 @@ class LicenseService:
             try:
                 await self._phone_home_task
             except asyncio.CancelledError:
-                pass
+                pass  # Expected when cancelling the task
         logger.info("License service shut down")
 
-    async def _save_license_to_db(self, license_key: str) -> None:
+    def _save_license_to_db(self) -> None:
         """Save validated license to database."""
         if not self._cached_license:
             return
@@ -263,8 +263,6 @@ class LicenseService:
         while True:
             try:
                 await self._phone_home()
-            except asyncio.CancelledError:
-                break
             except Exception as e:
                 logger.error("Phone-home error: %s", e)
 
@@ -299,7 +297,7 @@ class LicenseService:
                     if response.status == 200:
                         data = await response.json()
                         if data.get("valid"):
-                            await self._update_phone_home_timestamp()
+                            self._update_phone_home_timestamp()
                             self._log_validation("phone_home", "success")
                             logger.info("Phone-home validation successful")
                             return True
@@ -312,7 +310,7 @@ class LicenseService:
                                 "failure",
                                 f"License revoked: {revocation_reason}",
                             )
-                            await self._deactivate_license()
+                            self._deactivate_license()
                             return False
                     else:
                         logger.warning("Phone-home returned status %d", response.status)
@@ -332,7 +330,7 @@ class LicenseService:
             self._log_validation("phone_home", "error", str(e))
             return self._check_offline_grace()
 
-    async def _update_phone_home_timestamp(self) -> None:
+    def _update_phone_home_timestamp(self) -> None:
         """Update the last phone-home timestamp in database."""
         if not self._cached_license:
             return
@@ -406,7 +404,7 @@ class LicenseService:
                 logger.error("Error checking offline grace: %s", e)
                 return True  # Fail open during errors
 
-    async def _deactivate_license(self) -> None:
+    def _deactivate_license(self) -> None:
         """Deactivate the current license."""
         if not self._cached_license:
             return
@@ -513,7 +511,7 @@ class LicenseService:
         self._license_key_hash = hash_license_key(license_key)
 
         # Save to database
-        await self._save_license_to_db(license_key)
+        self._save_license_to_db()
 
         # Log successful installation
         self._log_validation("install", "success")

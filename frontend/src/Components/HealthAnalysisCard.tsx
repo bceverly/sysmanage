@@ -295,7 +295,7 @@ const HealthAnalysisCard: React.FC<HealthAnalysisCardProps> = ({ hostId }) => {
                     <AccordionDetails>
                         <List dense>
                             {analysis.issues.map((issue, index) => (
-                                <React.Fragment key={index}>
+                                <React.Fragment key={`${issue.severity}-${issue.category}-${issue.message}`}>
                                     <ListItem alignItems="flex-start">
                                         <ListItemIcon sx={{ mt: 0.5 }}>
                                             {getSeverityIcon(issue.severity)}
@@ -344,7 +344,7 @@ const HealthAnalysisCard: React.FC<HealthAnalysisCardProps> = ({ hostId }) => {
                     <AccordionDetails>
                         <List dense>
                             {analysis.recommendations.map((rec, index) => (
-                                <React.Fragment key={index}>
+                                <React.Fragment key={`${rec.priority}-${rec.category}-${rec.message}`}>
                                     <ListItem alignItems="flex-start">
                                         <ListItemIcon sx={{ mt: 0.5 }}>
                                             <CheckCircleIcon sx={{ color: 'success.main' }} />

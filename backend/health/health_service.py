@@ -167,7 +167,7 @@ class HealthService:
 
         return metrics
 
-    async def analyze_host(self, host_id: str) -> Dict[str, Any]:
+    def analyze_host(self, host_id: str) -> Dict[str, Any]:
         """
         Perform health analysis on a host.
 
@@ -248,7 +248,7 @@ class HealthService:
                 "analysis_version": analysis_version,
             }
 
-    async def get_latest_analysis(self, host_id: str) -> Optional[Dict[str, Any]]:
+    def get_latest_analysis(self, host_id: str) -> Optional[Dict[str, Any]]:
         """
         Get the most recent health analysis for a host.
 
@@ -284,7 +284,7 @@ class HealthService:
                 "analysis_version": analysis.analysis_version,
             }
 
-    async def get_analysis_history(
+    def get_analysis_history(
         self, host_id: str, limit: int = 10
     ) -> List[Dict[str, Any]]:
         """

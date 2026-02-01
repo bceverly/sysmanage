@@ -4,8 +4,9 @@ Feature and module gating decorators for Pro+ licensing.
 Provides decorators to restrict access to Pro+ features and modules.
 """
 
+import asyncio
 import functools
-from typing import Callable, Optional, Union
+from typing import Callable, Optional
 
 from fastapi import HTTPException, status
 
@@ -27,7 +28,7 @@ class LicenseRequiredError(Exception):
         self.module = module
 
 
-def requires_feature(feature: Union[FeatureCode, str]) -> Callable:
+def requires_feature(feature: FeatureCode | str) -> Callable:
     """
     Decorator to require a specific Pro+ feature.
 
@@ -93,7 +94,67 @@ def requires_feature(feature: Union[FeatureCode, str]) -> Callable:
     return decorator
 
 
-def requires_module(module: Union[ModuleCode, str]) -> Callable:
+def _check_module_licensed_http(module_code: ModuleCode) -> None:
+    """Check if module is licensed, raising HTTPException if not."""
+    if not license_service.has_module(module_code):
+        logger.warning(
+            "Access denied to module '%s' - Pro+ license required",
+            module_code.value,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "error": "pro_plus_required",
+                "message": f"This feature requires a Pro+ license with '{module_code.value}' module",
+                "module": module_code.value,
+            },
+        )
+
+
+def _check_module_loaded_http(module_code: ModuleCode) -> None:
+    """Check if module is loaded, raising HTTPException if not."""
+    from backend.licensing.module_loader import module_loader
+
+    if not module_loader.is_module_loaded(module_code.value):
+        logger.warning(
+            "Module '%s' is licensed but not loaded",
+            module_code.value,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "module_not_available",
+                "message": f"The '{module_code.value}' module is not currently available",
+                "module": module_code.value,
+            },
+        )
+
+
+def _check_module_licensed_sync(module_code: ModuleCode) -> None:
+    """Check if module is licensed, raising LicenseRequiredError if not."""
+    if not license_service.has_module(module_code):
+        logger.warning(
+            "Access denied to module '%s' - Pro+ license required",
+            module_code.value,
+        )
+        raise LicenseRequiredError(
+            f"This feature requires a Pro+ license with '{module_code.value}' module",
+            module=module_code.value,
+        )
+
+
+def _check_module_loaded_sync(module_code: ModuleCode) -> None:
+    """Check if module is loaded, raising LicenseRequiredError if not."""
+    from backend.licensing.module_loader import module_loader
+
+    if not module_loader.is_module_loaded(module_code.value):
+        raise LicenseRequiredError(
+            f"The '{module_code.value}' module is not currently available",
+            module=module_code.value,
+        )
+
+
+def requires_module(module: ModuleCode | str) -> Callable:
     """
     Decorator to require a specific Pro+ module.
 
@@ -127,60 +188,14 @@ def requires_module(module: Union[ModuleCode, str]) -> Callable:
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         async def async_wrapper(*args, **kwargs):
-            # First check if module is licensed
-            if not license_service.has_module(module_code):
-                logger.warning(
-                    "Access denied to module '%s' - Pro+ license required",
-                    module_code.value,
-                )
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail={
-                        "error": "pro_plus_required",
-                        "message": f"This feature requires a Pro+ license with '{module_code.value}' module",
-                        "module": module_code.value,
-                    },
-                )
-
-            # Check if module is loaded
-            from backend.licensing.module_loader import module_loader
-
-            if not module_loader.is_module_loaded(module_code.value):
-                logger.warning(
-                    "Module '%s' is licensed but not loaded",
-                    module_code.value,
-                )
-                raise HTTPException(
-                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                    detail={
-                        "error": "module_not_available",
-                        "message": f"The '{module_code.value}' module is not currently available",
-                        "module": module_code.value,
-                    },
-                )
-
+            _check_module_licensed_http(module_code)
+            _check_module_loaded_http(module_code)
             return await func(*args, **kwargs)
 
         @functools.wraps(func)
         def sync_wrapper(*args, **kwargs):
-            if not license_service.has_module(module_code):
-                logger.warning(
-                    "Access denied to module '%s' - Pro+ license required",
-                    module_code.value,
-                )
-                raise LicenseRequiredError(
-                    f"This feature requires a Pro+ license with '{module_code.value}' module",
-                    module=module_code.value,
-                )
-
-            from backend.licensing.module_loader import module_loader
-
-            if not module_loader.is_module_loaded(module_code.value):
-                raise LicenseRequiredError(
-                    f"The '{module_code.value}' module is not currently available",
-                    module=module_code.value,
-                )
-
+            _check_module_licensed_sync(module_code)
+            _check_module_loaded_sync(module_code)
             return func(*args, **kwargs)
 
         if asyncio.iscoroutinefunction(func):
@@ -235,7 +250,3 @@ def requires_pro_plus() -> Callable:
         return sync_wrapper
 
     return decorator
-
-
-# Import asyncio for coroutine checking
-import asyncio

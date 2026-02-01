@@ -63,7 +63,7 @@ const ProPlusSettings: React.FC = () => {
         );
     }
 
-    if (!licenseInfo || !licenseInfo.active) {
+    if (!licenseInfo?.active) {
         return (
             <Alert severity="info">
                 {t('proPlus.notActive', 'Sysmanage Professional+ is not active. Contact sales for licensing information.')}

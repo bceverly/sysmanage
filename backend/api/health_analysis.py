@@ -27,6 +27,9 @@ logger = get_logger("backend.api.health_analysis")
 
 router = APIRouter()
 
+# Error message constants
+ERROR_HOST_NOT_FOUND = "Host not found"
+
 
 # Pydantic schemas
 class IssueResponse(BaseModel):
@@ -220,7 +223,7 @@ async def get_host_health_analysis(
     if not host:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=_("Host not found"),
+            detail=_(ERROR_HOST_NOT_FOUND),
         )
 
     try:
@@ -237,10 +240,10 @@ async def get_host_health_analysis(
                         "module": "health_engine",
                     },
                 )
-            result = await health_service.analyze_host(host_id)
+            result = health_service.analyze_host(host_id)
         else:
             # Get cached result first
-            result = await health_service.get_latest_analysis(host_id)
+            result = health_service.get_latest_analysis(host_id)
             if result is None:
                 # No cached result - need to run analysis
                 if not module_loader.is_module_loaded("health_engine"):
@@ -254,7 +257,7 @@ async def get_host_health_analysis(
                             "module": "health_engine",
                         },
                     )
-                result = await health_service.analyze_host(host_id)
+                result = health_service.analyze_host(host_id)
 
         return HealthAnalysisResponse(**result)
 
@@ -300,11 +303,11 @@ async def run_host_health_analysis(
     if not host:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=_("Host not found"),
+            detail=_(ERROR_HOST_NOT_FOUND),
         )
 
     try:
-        result = await health_service.analyze_host(host_id)
+        result = health_service.analyze_host(host_id)
         return HealthAnalysisResponse(**result)
 
     except HealthAnalysisError as e:
@@ -342,14 +345,14 @@ async def get_host_health_history(
     if not host:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=_("Host not found"),
+            detail=_(ERROR_HOST_NOT_FOUND),
         )
 
     # Clamp limit
     limit = min(max(1, limit), 100)
 
     try:
-        analyses = await health_service.get_analysis_history(host_id, limit)
+        analyses = health_service.get_analysis_history(host_id, limit)
         return HealthHistoryResponse(
             analyses=[HealthAnalysisResponse(**a) for a in analyses],
             total=len(analyses),
