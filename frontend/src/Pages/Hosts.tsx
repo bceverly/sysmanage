@@ -415,7 +415,7 @@ const Hosts = () => {
                         label={grade}
                         size="small"
                         color={getGradeColor()}
-                        title={score !== undefined ? t('hosts.healthScore', 'Health Score: {{score}}', { score }) : undefined}
+                        title={score === undefined ? undefined : t('hosts.healthScore', 'Health Score: {{score}}', { score })}
                     />
                 );
             }

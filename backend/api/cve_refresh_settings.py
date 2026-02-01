@@ -390,7 +390,8 @@ async def clear_nvd_api_key(
         return {"message": _("NVD API key cleared successfully")}
 
     except Exception as e:
-        logger.error("Error clearing NVD API key: %s", e)
+        # Log error without exception details to avoid potential credential leakage
+        logger.error("Error clearing NVD API key", exc_info=True)
         raise HTTPException(
-            status_code=500, detail=_("Failed to clear NVD API key: %s") % str(e)
+            status_code=500, detail=_("Failed to clear NVD API key")
         ) from e

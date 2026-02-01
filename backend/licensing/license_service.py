@@ -158,10 +158,9 @@ class LicenseService:
         """Shutdown the license service and cancel background tasks."""
         if self._phone_home_task:
             self._phone_home_task.cancel()
-            try:
-                await self._phone_home_task
-            except asyncio.CancelledError:
-                pass  # Expected when cancelling the task
+            # Use gather with return_exceptions to handle CancelledError without
+            # swallowing unexpected cancellations of shutdown() itself
+            await asyncio.gather(self._phone_home_task, return_exceptions=True)
         logger.info("License service shut down")
 
     def _save_license_to_db(self) -> None:
