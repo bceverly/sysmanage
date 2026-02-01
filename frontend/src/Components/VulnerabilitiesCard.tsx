@@ -342,7 +342,6 @@ const VulnerabilitiesCard: React.FC<VulnerabilitiesCardProps> = ({ hostId }) => 
                                                     )}
                                                 </Box>
                                             }
-                                            primaryTypographyProps={{ component: 'div' }}
                                             secondary={
                                                 <Box component="span" sx={{ display: 'block', mt: 0.5 }}>
                                                     <Typography variant="body2" component="span" sx={{ display: 'block' }} color="text.primary">
@@ -365,7 +364,7 @@ const VulnerabilitiesCard: React.FC<VulnerabilitiesCardProps> = ({ hostId }) => 
                                                     )}
                                                 </Box>
                                             }
-                                            secondaryTypographyProps={{ component: 'div' }}
+                                            slotProps={{ primary: { component: 'div' }, secondary: { component: 'div' } }}
                                         />
                                     </ListItem>
                                     {index < scan.vulnerabilities!.length - 1 && <Divider variant="inset" component="li" />}
@@ -389,15 +388,15 @@ const VulnerabilitiesCard: React.FC<VulnerabilitiesCardProps> = ({ hostId }) => 
                     </AccordionSummary>
                     <AccordionDetails>
                         <List dense>
-                            {scan.recommendations.map((rec: string, index: number) => (
-                                <React.Fragment key={`rec-${index}`}>
+                            {scan.recommendations.map((rec: string, recIndex: number) => (
+                                <React.Fragment key={`rec-${rec.slice(0, 50)}`}>
                                     <ListItem>
                                         <ListItemIcon>
                                             <CheckCircleIcon sx={{ color: 'success.main' }} />
                                         </ListItemIcon>
                                         <ListItemText primary={rec} />
                                     </ListItem>
-                                    {index < scan.recommendations!.length - 1 && <Divider variant="inset" component="li" />}
+                                    {recIndex < scan.recommendations!.length - 1 && <Divider variant="inset" component="li" />}
                                 </React.Fragment>
                             ))}
                         </List>
@@ -406,7 +405,7 @@ const VulnerabilitiesCard: React.FC<VulnerabilitiesCardProps> = ({ hostId }) => 
             )}
 
             {/* No vulnerabilities message */}
-            {scan && scan.total_vulnerabilities === 0 && (
+            {scan?.total_vulnerabilities === 0 && (
                 <Alert severity="success" icon={<CheckCircleIcon />}>
                     {t('vulnerabilities.noVulnerabilities', 'No vulnerabilities found')}
                 </Alert>

@@ -26,6 +26,10 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+# Error message constants
+ERROR_USER_NOT_FOUND = "User not found"
+ERROR_ADMIN_REQUIRED = "Permission denied: Administrator role required"
+
 
 # Response Models
 
@@ -188,13 +192,13 @@ async def update_cve_refresh_settings(
     # Check user permissions
     auth_user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not auth_user:
-        raise HTTPException(status_code=401, detail=_("User not found"))
+        raise HTTPException(status_code=401, detail=_(ERROR_USER_NOT_FOUND))
 
     # Require admin role for CVE settings
     if not auth_user.is_admin:
         raise HTTPException(
             status_code=403,
-            detail=_("Permission denied: Administrator role required"),
+            detail=_(ERROR_ADMIN_REQUIRED),
         )
 
     try:
@@ -311,12 +315,12 @@ async def trigger_cve_refresh(
     # Check user permissions - require admin for CVE refresh
     auth_user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not auth_user:
-        raise HTTPException(status_code=401, detail=_("User not found"))
+        raise HTTPException(status_code=401, detail=_(ERROR_USER_NOT_FOUND))
 
     if not auth_user.is_admin:
         raise HTTPException(
             status_code=403,
-            detail=_("Permission denied: Administrator role required"),
+            detail=_(ERROR_ADMIN_REQUIRED),
         )
 
     if source and source not in CVE_SOURCES:
@@ -364,12 +368,12 @@ async def clear_nvd_api_key(
     # Check user permissions - require admin
     auth_user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not auth_user:
-        raise HTTPException(status_code=401, detail=_("User not found"))
+        raise HTTPException(status_code=401, detail=_(ERROR_USER_NOT_FOUND))
 
     if not auth_user.is_admin:
         raise HTTPException(
             status_code=403,
-            detail=_("Permission denied: Administrator role required"),
+            detail=_(ERROR_ADMIN_REQUIRED),
         )
 
     try:

@@ -33,6 +33,8 @@ router = APIRouter()
 
 # Error message constants
 ERROR_HOST_NOT_FOUND = "Host not found"
+ERROR_MODULE_NOT_LOADED = "not loaded"
+ERROR_MODULE_NOT_AVAILABLE = "not available"
 
 
 # Pydantic schemas
@@ -371,7 +373,10 @@ async def get_host_health_analysis(
         logger.error("Health analysis failed for host %s: %s", host_id, e)
         # Check if it's a module loading issue
         error_msg = str(e)
-        if "not loaded" in error_msg or "not available" in error_msg:
+        if (
+            ERROR_MODULE_NOT_LOADED in error_msg
+            or ERROR_MODULE_NOT_AVAILABLE in error_msg
+        ):
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail={
@@ -543,7 +548,10 @@ async def get_host_vulnerability_scan(
     except VulnerabilityServiceError as e:
         logger.error("Vulnerability scan failed for host %s: %s", host_id, e)
         error_msg = str(e)
-        if "not loaded" in error_msg or "not available" in error_msg:
+        if (
+            ERROR_MODULE_NOT_LOADED in error_msg
+            or ERROR_MODULE_NOT_AVAILABLE in error_msg
+        ):
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail={
@@ -667,7 +675,10 @@ async def get_enterprise_vulnerability_summary(
     except VulnerabilityServiceError as e:
         logger.error("Enterprise vulnerability summary failed: %s", e)
         error_msg = str(e)
-        if "not loaded" in error_msg or "not available" in error_msg:
+        if (
+            ERROR_MODULE_NOT_LOADED in error_msg
+            or ERROR_MODULE_NOT_AVAILABLE in error_msg
+        ):
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail={

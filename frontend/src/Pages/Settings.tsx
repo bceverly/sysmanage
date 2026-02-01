@@ -141,12 +141,8 @@ const Settings: React.FC = () => {
 
   // Tab names for URL hash (dynamic based on Pro+ status)
   const tabNames = useMemo(() => {
-    const tabs = ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages', 'host-defaults', 'firewall-roles', 'distributions'];
-    if (isProPlusActive) {
-      tabs.push('professional-plus');
-      tabs.push('cve-refresh');
-    }
-    return tabs;
+    const baseTabs = ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages', 'host-defaults', 'firewall-roles', 'distributions'];
+    return isProPlusActive ? [...baseTabs, 'professional-plus', 'cve-refresh'] : baseTabs;
   }, [isProPlusActive]);
 
   // Initialize tab from URL hash

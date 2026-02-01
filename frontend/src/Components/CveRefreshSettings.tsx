@@ -16,7 +16,6 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    ListItemSecondaryAction,
     Checkbox,
     IconButton,
     Tooltip,
@@ -197,6 +196,17 @@ const CveRefreshSettingsComponent: React.FC = () => {
                 return 'info';
             default:
                 return 'warning';
+        }
+    };
+
+    const getStatusIcon = (status: string) => {
+        switch (status) {
+            case 'success':
+                return <CheckCircleIcon />;
+            case 'failed':
+                return <ErrorIcon />;
+            default:
+                return undefined;
         }
     };
 
@@ -382,27 +392,29 @@ const CveRefreshSettingsComponent: React.FC = () => {
                                 placeholder={settings?.has_nvd_api_key ? t('cveRefresh.apiKeyConfigured', 'API key configured') : t('cveRefresh.enterApiKey', 'Enter NVD API key')}
                                 value={nvdApiKey}
                                 onChange={(e) => setNvdApiKey(e.target.value)}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <KeyIcon />
-                                        </InputAdornment>
-                                    ),
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                onClick={() => setShowApiKey(!showApiKey)}
-                                                edge="end"
-                                            >
-                                                {showApiKey ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                                            </IconButton>
-                                            {settings?.has_nvd_api_key && (
-                                                <IconButton onClick={handleClearApiKey} edge="end">
-                                                    <DeleteIcon />
+                                slotProps={{
+                                    input: {
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <KeyIcon />
+                                            </InputAdornment>
+                                        ),
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    onClick={() => setShowApiKey(!showApiKey)}
+                                                    edge="end"
+                                                >
+                                                    {showApiKey ? <VisibilityOffIcon /> : <VisibilityIcon />}
                                                 </IconButton>
-                                            )}
-                                        </InputAdornment>
-                                    ),
+                                                {settings?.has_nvd_api_key && (
+                                                    <IconButton onClick={handleClearApiKey} edge="end">
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                )}
+                                            </InputAdornment>
+                                        ),
+                                    },
                                 }}
                             />
                         </Grid>
@@ -432,7 +444,21 @@ const CveRefreshSettingsComponent: React.FC = () => {
 
                     <List>
                         {Object.entries(sources).map(([sourceId, sourceInfo]) => (
-                            <ListItem key={sourceId} divider>
+                            <ListItem
+                                key={sourceId}
+                                divider
+                                secondaryAction={
+                                    <Tooltip title={t('cveRefresh.refreshSource', 'Refresh from this source')}>
+                                        <IconButton
+                                            edge="end"
+                                            onClick={() => handleRefresh(sourceId)}
+                                            disabled={refreshing}
+                                        >
+                                            <RefreshIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                }
+                            >
                                 <ListItemIcon>
                                     <Checkbox
                                         edge="start"
@@ -444,17 +470,6 @@ const CveRefreshSettingsComponent: React.FC = () => {
                                     primary={sourceInfo.name}
                                     secondary={sourceInfo.description}
                                 />
-                                <ListItemSecondaryAction>
-                                    <Tooltip title={t('cveRefresh.refreshSource', 'Refresh from this source')}>
-                                        <IconButton
-                                            edge="end"
-                                            onClick={() => handleRefresh(sourceId)}
-                                            disabled={refreshing}
-                                        >
-                                            <RefreshIcon />
-                                        </IconButton>
-                                    </Tooltip>
-                                </ListItemSecondaryAction>
                             </ListItem>
                         ))}
                     </List>
@@ -491,7 +506,7 @@ const CveRefreshSettingsComponent: React.FC = () => {
                                         </TableCell>
                                         <TableCell>
                                             <Chip
-                                                icon={log.status === 'success' ? <CheckCircleIcon /> : log.status === 'failed' ? <ErrorIcon /> : undefined}
+                                                icon={getStatusIcon(log.status)}
                                                 label={log.status}
                                                 color={getStatusColor(log.status)}
                                                 size="small"
