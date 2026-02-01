@@ -26,6 +26,7 @@ from backend.api import (
     fleet,
     grafana_integration,
     graylog_integration,
+    health_analysis,
     host,
     host_hostname,
     openbao,
@@ -296,6 +297,14 @@ def register_routes(app: FastAPI):
         tags=["child-hosts"],
     )  # /api/host/{host_id}/children/*, /api/child-host-distributions/* (with auth)
     logger.info("Child Host router added")
+
+    logger.info("Adding Health Analysis router with /api prefix")
+    app.include_router(
+        health_analysis.router,
+        prefix="/api",
+        tags=["health-analysis", "pro-plus"],
+    )  # /api/license/*, /api/host/{host_id}/health-analysis/* (with auth, Pro+)
+    logger.info("Health Analysis router added")
 
     logger.info("=== ALL ROUTES REGISTERED ===")
 

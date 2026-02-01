@@ -102,6 +102,9 @@ import { doCheckGraylogHealth, doGetGraylogAttachment } from '../Services/graylo
 import ThirdPartyRepositories from './ThirdPartyRepositories';
 import AddHostAccountModal from '../Components/AddHostAccountModal';
 import AddHostGroupModal from '../Components/AddHostGroupModal';
+import HealthAnalysisCard from '../Components/HealthAnalysisCard';
+import { getLicenseInfo } from '../Services/license';
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 
 // Certificate interface
 interface Certificate {
@@ -176,6 +179,7 @@ const HostDetail = () => { // NOSONAR
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [hasAntivirusOsDefault, setHasAntivirusOsDefault] = useState<boolean>(false);
+    const [isProPlusActive, setIsProPlusActive] = useState<boolean>(false);
 
     // Check if OS supports third-party repositories
     const supportsThirdPartyRepos = useCallback(() => {
@@ -225,14 +229,16 @@ const HostDetail = () => { // NOSONAR
 
     // Tab names for URL hash (static tabs only - dynamic tabs handled separately)
     const getTabNames = useCallback(() => {
-        const tabs = ['info', 'hardware', 'software', 'software-changes'];
+        const tabs = ['info'];
+        if (isProPlusActive) tabs.push('health');
+        tabs.push('hardware', 'software', 'software-changes');
         if (supportsThirdPartyRepos()) tabs.push('third-party-repos');
         tabs.push('access', 'security', 'certificates', 'server-roles');
         if (supportsChildHosts()) tabs.push('child-hosts');
         if (isUbuntu() && ubuntuProInfo?.available) tabs.push('ubuntu-pro');
         tabs.push('diagnostics');
         return tabs;
-    }, [ubuntuProInfo, supportsThirdPartyRepos, supportsChildHosts, isUbuntu]);
+    }, [ubuntuProInfo, supportsThirdPartyRepos, supportsChildHosts, isUbuntu, isProPlusActive]);
 
     // Initialize tab from URL hash
     const getInitialTab = useCallback(() => {
@@ -594,6 +600,20 @@ const HostDetail = () => { // NOSONAR
         setCertificatePaginationModel(prev => ({ ...prev, pageSize }));
     }, [pageSize]);
 
+    // Check Pro+ license status
+    useEffect(() => {
+        const checkProPlusStatus = async () => {
+            try {
+                const licenseInfo = await getLicenseInfo();
+                setIsProPlusActive(licenseInfo.active);
+            } catch (error) {
+                console.log('Pro+ license check failed:', error);
+                setIsProPlusActive(false);
+            }
+        };
+        checkProPlusStatus();
+    }, []);
+
     // Ensure current page size is always in options to avoid MUI warning
     const safePageSizeOptions = useMemo(() => {
         const currentPageSize = certificatePaginationModel.pageSize;
@@ -606,24 +626,46 @@ const HostDetail = () => { // NOSONAR
     }, [pageSizeOptions, certificatePaginationModel.pageSize]);
 
     // Helper functions to calculate dynamic tab indices
-    const getSoftwareInstallsTabIndex = () => 3;
-    const getThirdPartyReposTabIndex = () => supportsThirdPartyRepos() ? 4 : -1;
-    const getAccessTabIndex = () => supportsThirdPartyRepos() ? 5 : 4;
-    const getSecurityTabIndex = () => supportsThirdPartyRepos() ? 6 : 5;
-    const getCertificatesTabIndex = () => supportsThirdPartyRepos() ? 7 : 6;
-    const getServerRolesTabIndex = useCallback(() => supportsThirdPartyRepos() ? 8 : 7, [supportsThirdPartyRepos]);
+    // Tab order: Info, [Health if Pro+], Hardware, Software, Software Changes, [Third-Party Repos], Access, Security, Certificates, Server Roles, [Child Hosts], [Ubuntu Pro], Diagnostics
+    const getHealthTabIndex = useCallback(() => isProPlusActive ? 1 : -1, [isProPlusActive]);
+    const getHardwareTabIndex = useCallback(() => isProPlusActive ? 2 : 1, [isProPlusActive]);
+    const getSoftwareTabIndex = useCallback(() => isProPlusActive ? 3 : 2, [isProPlusActive]);
+    const getSoftwareInstallsTabIndex = useCallback(() => isProPlusActive ? 4 : 3, [isProPlusActive]);
+    const getThirdPartyReposTabIndex = () => {
+        if (!supportsThirdPartyRepos()) return -1;
+        return isProPlusActive ? 5 : 4;
+    };
+    const getAccessTabIndex = () => {
+        const proPlusOffset = isProPlusActive ? 1 : 0;
+        return supportsThirdPartyRepos() ? 5 + proPlusOffset : 4 + proPlusOffset;
+    };
+    const getSecurityTabIndex = () => {
+        const proPlusOffset = isProPlusActive ? 1 : 0;
+        return supportsThirdPartyRepos() ? 6 + proPlusOffset : 5 + proPlusOffset;
+    };
+    const getCertificatesTabIndex = () => {
+        const proPlusOffset = isProPlusActive ? 1 : 0;
+        return supportsThirdPartyRepos() ? 7 + proPlusOffset : 6 + proPlusOffset;
+    };
+    const getServerRolesTabIndex = useCallback(() => {
+        const proPlusOffset = isProPlusActive ? 1 : 0;
+        return supportsThirdPartyRepos() ? 8 + proPlusOffset : 7 + proPlusOffset;
+    }, [supportsThirdPartyRepos, isProPlusActive]);
     const getChildHostsTabIndex = useCallback(() => {
         if (!supportsChildHosts()) return -1;
-        return supportsThirdPartyRepos() ? 9 : 8;
-    }, [supportsThirdPartyRepos, supportsChildHosts]);
+        const proPlusOffset = isProPlusActive ? 1 : 0;
+        return supportsThirdPartyRepos() ? 9 + proPlusOffset : 8 + proPlusOffset;
+    }, [supportsThirdPartyRepos, supportsChildHosts, isProPlusActive]);
     const getUbuntuProTabIndex = () => {
         if (!isUbuntu() || !ubuntuProInfo?.available) return -1;
-        let baseIndex = supportsThirdPartyRepos() ? 9 : 8;
+        const proPlusOffset = isProPlusActive ? 1 : 0;
+        let baseIndex = supportsThirdPartyRepos() ? 9 + proPlusOffset : 8 + proPlusOffset;
         if (supportsChildHosts()) baseIndex += 1;
         return baseIndex;
     };
     const getDiagnosticsTabIndex = () => {
-        let baseIndex = supportsThirdPartyRepos() ? 9 : 8;
+        const proPlusOffset = isProPlusActive ? 1 : 0;
+        let baseIndex = supportsThirdPartyRepos() ? 9 + proPlusOffset : 8 + proPlusOffset;
         if (supportsChildHosts()) baseIndex += 1;
         return (isUbuntu() && ubuntuProInfo?.available) ? baseIndex + 1 : baseIndex;
     };
@@ -1974,10 +2016,10 @@ const HostDetail = () => { // NOSONAR
         loadAvailableTags();
     }, [hostTags, loadAvailableTags]);
 
-    // Load software packages lazily when Software tab is selected (tab 2) or pagination changes
+    // Load software packages lazily when Software tab is selected or pagination changes
     useEffect(() => {
         const loadSoftwarePackages = async () => {
-            if (currentTab === 2 && hostId) {
+            if (currentTab === getSoftwareTabIndex() && hostId) {
                 try {
                     setLoadingSoftware(true);
                     const response = await doGetHostSoftware(
@@ -1996,14 +2038,14 @@ const HostDetail = () => { // NOSONAR
             }
         };
         loadSoftwarePackages();
-    }, [currentTab, hostId, softwarePagination.page, softwarePagination.page_size, softwareSearchTerm]);
+    }, [currentTab, hostId, softwarePagination.page, softwarePagination.page_size, softwareSearchTerm, getSoftwareTabIndex]);
 
     // Load installation history when Software Changes tab is selected
     useEffect(() => {
         if (currentTab === getSoftwareInstallsTabIndex()) {
             fetchInstallationHistory();
         }
-    }, [currentTab, hostId, fetchInstallationHistory]);
+    }, [currentTab, hostId, fetchInstallationHistory, getSoftwareInstallsTabIndex]);
 
     // Auto-refresh installation history every 30 seconds when on Software Changes tab
     useEffect(() => {
@@ -2022,7 +2064,7 @@ const HostDetail = () => { // NOSONAR
                 globalThis.clearInterval(interval);
             }
         };
-    }, [hostId, currentTab, fetchInstallationHistory]);
+    }, [hostId, currentTab, fetchInstallationHistory, getSoftwareInstallsTabIndex]);
 
     // Auto-refresh Ubuntu Pro information every 30 seconds
     useEffect(() => {
@@ -3922,15 +3964,23 @@ const HostDetail = () => { // NOSONAR
             {/* Tabs */}
             <Box sx={{ borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
                 <Tabs value={currentTab} onChange={handleTabChange} aria-label="host detail tabs">
-                    <Tab 
-                        icon={<InfoIcon />} 
-                        label={t('hostDetail.infoTab', 'Info')} 
+                    <Tab
+                        icon={<InfoIcon />}
+                        label={t('hostDetail.infoTab', 'Info')}
                         iconPosition="start"
                         sx={{ textTransform: 'none' }}
                     />
-                    <Tab 
-                        icon={<MemoryIcon />} 
-                        label={t('hostDetail.hardwareTab', 'Hardware')} 
+                    {isProPlusActive && (
+                        <Tab
+                            icon={<HealthAndSafetyIcon />}
+                            label={t('hostDetail.healthTab', 'Health')}
+                            iconPosition="start"
+                            sx={{ textTransform: 'none' }}
+                        />
+                    )}
+                    <Tab
+                        icon={<MemoryIcon />}
+                        label={t('hostDetail.hardwareTab', 'Hardware')}
                         iconPosition="start"
                         sx={{ textTransform: 'none' }}
                     />
@@ -4476,8 +4526,15 @@ const HostDetail = () => { // NOSONAR
                 </Grid>
             )}
 
+            {/* Health Tab (Pro+ only) */}
+            {isProPlusActive && currentTab === getHealthTabIndex() && hostId && (
+                <Box sx={{ p: 2 }}>
+                    <HealthAnalysisCard hostId={hostId} />
+                </Box>
+            )}
+
             {/* Hardware Tab */}
-            {currentTab === 1 && (
+            {currentTab === getHardwareTabIndex() && (
                 <Grid container spacing={3}>
                 {/* Hardware Information */}
                 <Grid size={{ xs: 12 }}>
@@ -4793,7 +4850,7 @@ const HostDetail = () => { // NOSONAR
             )}
 
             {/* Software Tab */}
-            {currentTab === 2 && (
+            {currentTab === getSoftwareTabIndex() && (
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12 }}>
                         <Card>

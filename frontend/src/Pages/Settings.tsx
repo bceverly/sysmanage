@@ -49,8 +49,10 @@ import AntivirusDefaultsSettings from '../Components/AntivirusDefaultsSettings';
 import HostDefaultsSettings from '../Components/HostDefaultsSettings';
 import FirewallRolesSettings from '../Components/FirewallRolesSettings';
 import DistributionsSettings from '../Components/DistributionsSettings';
+import ProPlusSettings from '../Components/ProPlusSettings';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import { getLicenseInfo } from '../Services/license';
 
 interface Tag {
   id: string;
@@ -133,8 +135,17 @@ const Settings: React.FC = () => {
   const [viewHostsDialogOpen, setViewHostsDialogOpen] = useState(false);
   const [viewingTag, setViewingTag] = useState<TagWithHosts | null>(null);
   
-  // Tab names for URL hash
-  const tabNames = useMemo(() => ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages', 'host-defaults', 'firewall-roles', 'distributions'], []);
+  // Pro+ license state
+  const [isProPlusActive, setIsProPlusActive] = useState<boolean>(false);
+
+  // Tab names for URL hash (dynamic based on Pro+ status)
+  const tabNames = useMemo(() => {
+    const tabs = ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages', 'host-defaults', 'firewall-roles', 'distributions'];
+    if (isProPlusActive) {
+      tabs.push('professional-plus');
+    }
+    return tabs;
+  }, [isProPlusActive]);
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -268,6 +279,20 @@ const Settings: React.FC = () => {
       setCanDeleteQueueMessage(deleteQueueMessage);
     };
     checkPermission();
+  }, []);
+
+  // Check Pro+ license status
+  useEffect(() => {
+    const checkProPlusStatus = async () => {
+      try {
+        const licenseInfo = await getLicenseInfo();
+        setIsProPlusActive(licenseInfo.active);
+      } catch (error) {
+        console.log('Pro+ license check failed:', error);
+        setIsProPlusActive(false);
+      }
+    };
+    checkProPlusStatus();
   }, []);
 
   // Search columns configuration
@@ -1082,6 +1107,9 @@ const Settings: React.FC = () => {
           <Tab label={t('hostDefaults.title', 'Host Defaults')} />
           <Tab label={t('firewallRoles.title', 'Firewall Roles')} />
           <Tab label={t('distributions.title', 'Distributions')} />
+          {isProPlusActive && (
+            <Tab label={t('proPlus.title', 'Professional+')} />
+          )}
         </Tabs>
       </Box>
 
@@ -1096,6 +1124,17 @@ const Settings: React.FC = () => {
         {activeTab === 6 && <HostDefaultsSettings />}
         {activeTab === 7 && <FirewallRolesSettings />}
         {activeTab === 8 && <DistributionsSettings />}
+        {isProPlusActive && activeTab === 9 && (
+          <Box>
+            <Typography variant="h5" sx={{ mb: 2 }}>
+              {t('proPlus.title', 'Professional+')}
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 3 }}>
+              {t('proPlus.description', 'View your Sysmanage Professional+ license details and provisioned features.')}
+            </Typography>
+            <ProPlusSettings />
+          </Box>
+        )}
       </Box>
 
       {/* Add Tag Dialog */}

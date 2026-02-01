@@ -12,6 +12,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from backend.discovery.discovery_service import discovery_beacon
+from backend.licensing.license_service import license_service
+from backend.licensing.module_loader import module_loader
 from backend.monitoring.graylog_health_monitor import graylog_health_monitor_service
 from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
 from backend.security.certificate_manager import certificate_manager
@@ -46,6 +48,33 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         logger.info(
             "certificate_manager.ensure_server_certificate() completed successfully"
         )
+
+        # Startup: Initialize Pro+ license service
+        logger.info("=== LICENSE SERVICE INITIALIZATION ===")
+        logger.info("About to initialize license service")
+        try:
+            await license_service.initialize()
+            if license_service.is_pro_plus_active:
+                logger.info(
+                    "Pro+ license active: tier=%s", license_service.license_tier
+                )
+                # Load licensed modules
+                logger.info("=== PRO+ MODULE LOADING ===")
+                await module_loader.initialize()
+                if license_service.cached_license:
+                    for module_code in license_service.cached_license.modules:
+                        logger.info("Loading Pro+ module: %s", module_code)
+                        try:
+                            await module_loader.ensure_module_available(module_code)
+                        except Exception as mod_e:
+                            logger.warning(
+                                "Failed to load module %s: %s", module_code, mod_e
+                            )
+            else:
+                logger.info("Running as Community Edition (no Pro+ license)")
+        except Exception as lic_e:
+            logger.warning("License service initialization failed: %s", lic_e)
+            logger.info("Continuing as Community Edition")
 
         # Startup: Start the heartbeat monitor service
         logger.info("=== HEARTBEAT MONITOR STARTUP ===")
@@ -125,6 +154,14 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         logger.error("Exception type: %s", type(e).__name__)
         logger.error("Exception args: %s", e.args)
         raise
+
+    # Shutdown: Stop the license service
+    logger.info("Stopping license service")
+    try:
+        await license_service.shutdown()
+        logger.info("License service stopped")
+    except Exception as e:
+        logger.error("Error stopping license service: %s", e)
 
     # Shutdown: Stop the discovery beacon service
     logger.info("Stopping discovery beacon service")

@@ -26,6 +26,8 @@ import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import { getLicenseInfo } from '../Services/license';
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 
 const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
@@ -56,6 +58,7 @@ const Hosts = () => {
     const [canRebootHost, setCanRebootHost] = useState<boolean>(false);
     const [canShutdownHost, setCanShutdownHost] = useState<boolean>(false);
     const [canDeployAntivirus, setCanDeployAntivirus] = useState<boolean>(false);
+    const [isProPlusActive, setIsProPlusActive] = useState<boolean>(false);
     const { triggerRefresh } = useNotificationRefresh();
 
     // Dynamic table page sizing based on window height
@@ -372,6 +375,51 @@ const Hosts = () => {
                 );
             }
         },
+        ...(isProPlusActive ? [{
+            field: 'health_grade',
+            headerName: t('hosts.healthGrade', 'Health'),
+            width: 90,
+            renderCell: (params: { row: { health_grade?: string; health_score?: number } }) => {
+                const grade = params.row.health_grade;
+                const score = params.row.health_score;
+                if (!grade) {
+                    return (
+                        <Chip
+                            icon={<HealthAndSafetyIcon sx={{ fontSize: 16 }} />}
+                            label="-"
+                            size="small"
+                            variant="outlined"
+                            sx={{ color: 'text.secondary' }}
+                        />
+                    );
+                }
+                const getGradeColor = () => {
+                    switch (grade) {
+                        case 'A+':
+                        case 'A':
+                            return 'success';
+                        case 'B':
+                            return 'info';
+                        case 'C':
+                            return 'warning';
+                        case 'D':
+                        case 'F':
+                            return 'error';
+                        default:
+                            return 'default';
+                    }
+                };
+                return (
+                    <Chip
+                        icon={<HealthAndSafetyIcon sx={{ fontSize: 16 }} />}
+                        label={grade}
+                        size="small"
+                        color={getGradeColor()}
+                        title={score !== undefined ? t('hosts.healthScore', 'Health Score: {{score}}', { score }) : undefined}
+                    />
+                );
+            }
+        }] : []),
         {
             field: 'actions',
             headerName: t('common.actions'),
@@ -391,7 +439,7 @@ const Hosts = () => {
                 ) : null
             )
         }
-    ], [t, navigate, canViewHostDetails, tableData]);
+    ], [t, navigate, canViewHostDetails, tableData, isProPlusActive]);
 
     // Search columns configuration (excluding irrelevant columns)
     const searchColumns = [
@@ -683,6 +731,20 @@ const Hosts = () => {
             setCanDeployAntivirus(deployAntivirus);
         };
         checkPermissions();
+    }, []);
+
+    // Check Pro+ license status
+    useEffect(() => {
+        const checkProPlusStatus = async () => {
+            try {
+                const licenseInfo = await getLicenseInfo();
+                setIsProPlusActive(licenseInfo.active);
+            } catch (error) {
+                console.log('Pro+ license check failed:', error);
+                setIsProPlusActive(false);
+            }
+        };
+        checkProPlusStatus();
     }, []);
 
 

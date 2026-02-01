@@ -32,3 +32,15 @@ webui:
 logging:
   level: "INFO|WARNING|ERROR|CRITICAL"
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Pro+ License Configuration (optional)
+# Obtain a license key from https://sysmanage.io/pro-plus
+license:
+  # Pro+ license key (leave empty for Community Edition)
+  key: ""
+  # License server URL for phone-home validation
+  phone_home_url: "https://license.sysmanage.io"
+  # How often to validate license with server (hours)
+  phone_home_interval_hours: 24
+  # Directory for storing downloaded Pro+ modules
+  modules_path: "/var/lib/sysmanage/modules"

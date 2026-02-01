@@ -123,6 +123,18 @@ try:
             config["email"]["templates"] = {}
         if "subject_prefix" not in config["email"]["templates"]:
             config["email"]["templates"]["subject_prefix"] = "[SysManage]"
+
+        # License (Pro+) settings
+        if "license" not in config:
+            config["license"] = {}
+        if "key" not in config["license"]:
+            config["license"]["key"] = ""  # No license by default (Community Edition)
+        if "phone_home_url" not in config["license"]:
+            config["license"]["phone_home_url"] = "https://license.sysmanage.io"
+        if "phone_home_interval_hours" not in config["license"]:
+            config["license"]["phone_home_interval_hours"] = 24
+        if "modules_path" not in config["license"]:
+            config["license"]["modules_path"] = "/var/lib/sysmanage/modules"
 except yaml.YAMLError as exc:
     if hasattr(exc, "problem_mark"):
         mark = exc.problem_mark
@@ -256,3 +268,45 @@ def is_vault_dev_mode():
     Check if vault is running in development mode.
     """
     return config["vault"]["dev_mode"]
+
+
+def get_license_config():
+    """
+    Get the complete license configuration.
+    """
+    return config["license"]
+
+
+def get_license_key():
+    """
+    Get the Pro+ license key.
+    """
+    return config["license"]["key"]
+
+
+def is_license_configured():
+    """
+    Check if a license key is configured.
+    """
+    return bool(config["license"]["key"])
+
+
+def get_license_phone_home_url():
+    """
+    Get the license phone-home URL.
+    """
+    return config["license"]["phone_home_url"]
+
+
+def get_license_phone_home_interval():
+    """
+    Get the license phone-home interval in hours.
+    """
+    return config["license"]["phone_home_interval_hours"]
+
+
+def get_license_modules_path():
+    """
+    Get the path for storing downloaded Pro+ modules.
+    """
+    return config["license"]["modules_path"]

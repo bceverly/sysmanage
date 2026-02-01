@@ -15,6 +15,7 @@ from .hardware import *
 from .host_certificate import *
 from .host_role import *
 from .operations import *
+from .proplus import *
 from .secret import *
 from .software import *
 
@@ -88,4 +89,9 @@ __all__ = [
     # Child host models
     "HostChild",
     "ChildHostDistribution",
+    # Pro+ models
+    "ProPlusLicense",
+    "ProPlusLicenseValidationLog",
+    "ProPlusModuleCache",
+    "HostHealthAnalysis",
 ]
