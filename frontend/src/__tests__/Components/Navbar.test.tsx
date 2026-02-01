@@ -1,6 +1,6 @@
 import { render, screen, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { vi } from 'vitest';
+import { vi, beforeEach, afterEach } from 'vitest';
 import Navbar from '../../Components/Navbar';
 
 // Mock the updates service for NotificationBell component
@@ -17,6 +17,14 @@ vi.mock('../../Services/updates', () => ({
   }
 }));
 
+// Mock the license service for Pro+ feature check
+vi.mock('../../Services/license', () => ({
+  getLicenseInfo: vi.fn(() => Promise.resolve({
+    active: false,
+    features: []
+  }))
+}));
+
 const NavbarWithRouter = () => (
   <BrowserRouter future={{
     v7_startTransition: true,
@@ -27,6 +35,15 @@ const NavbarWithRouter = () => (
 );
 
 describe('Navbar Component', () => {
+  // Set up authentication before each test - navbar shows user menu only when logged in
+  beforeEach(() => {
+    localStorage.setItem('bearer_token', 'test-token-for-navbar-tests');
+  });
+
+  afterEach(() => {
+    localStorage.removeItem('bearer_token');
+  });
+
   test('renders navigation links', async () => {
     await act(async () => {
       render(<NavbarWithRouter />);
