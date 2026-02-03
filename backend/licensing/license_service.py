@@ -7,6 +7,7 @@ Handles:
 - Caching validated license in database
 - Background task for periodic re-validation
 - Offline grace period management
+- Module update checking
 """
 
 import asyncio
@@ -18,6 +19,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from backend.config.config import get_config
 from backend.licensing.features import FeatureCode, ModuleCode
+from backend.licensing.module_loader import module_loader
 from backend.licensing.public_key import fetch_public_key, get_public_key_pem
 from backend.licensing.validator import (
     LicensePayload,
@@ -34,6 +36,9 @@ logger = get_logger("backend.licensing.license_service")
 # Default phone-home interval in hours
 DEFAULT_PHONE_HOME_INTERVAL = 24
 
+# Default module update check interval in hours
+DEFAULT_MODULE_UPDATE_INTERVAL = 6
+
 # Default modules path
 DEFAULT_MODULES_PATH = "/var/lib/sysmanage/modules"
 
@@ -47,6 +52,7 @@ class LicenseService:
         self._cached_license: Optional[LicensePayload] = None
         self._license_key_hash: Optional[str] = None
         self._phone_home_task: Optional[asyncio.Task] = None
+        self._module_update_task: Optional[asyncio.Task] = None
         self._initialized = False
 
     @property
@@ -87,6 +93,13 @@ class LicenseService:
         """Get the path for storing downloaded modules."""
         license_config = self._get_license_config()
         return license_config.get("modules_path", DEFAULT_MODULES_PATH)
+
+    def _get_module_update_interval(self) -> int:
+        """Get the module update check interval in hours."""
+        license_config = self._get_license_config()
+        return license_config.get(
+            "module_update_interval_hours", DEFAULT_MODULE_UPDATE_INTERVAL
+        )
 
     async def initialize(self) -> None:
         """
@@ -148,19 +161,33 @@ class LicenseService:
             result.payload.expires_at.isoformat(),
         )
 
+        # Check for module updates on startup
+        await module_loader.check_and_update_on_startup()
+
         # Start phone-home background task
         if self._get_phone_home_url():
             self._phone_home_task = asyncio.create_task(self._phone_home_loop())
+
+        # Start module update check background task
+        if self._get_phone_home_url():
+            self._module_update_task = asyncio.create_task(self._module_update_loop())
 
         self._initialized = True
 
     async def shutdown(self) -> None:
         """Shutdown the license service and cancel background tasks."""
+        tasks_to_cancel = []
         if self._phone_home_task:
             self._phone_home_task.cancel()
+            tasks_to_cancel.append(self._phone_home_task)
+        if self._module_update_task:
+            self._module_update_task.cancel()
+            tasks_to_cancel.append(self._module_update_task)
+
+        if tasks_to_cancel:
             # Use gather with return_exceptions to handle CancelledError without
             # swallowing unexpected cancellations of shutdown() itself
-            await asyncio.gather(self._phone_home_task, return_exceptions=True)
+            await asyncio.gather(*tasks_to_cancel, return_exceptions=True)
         logger.info("License service shut down")
 
     def _save_license_to_db(self) -> None:
@@ -264,6 +291,23 @@ class LicenseService:
                 await self._phone_home()
             except Exception as e:
                 logger.error("Phone-home error: %s", e)
+
+            await asyncio.sleep(interval_seconds)
+
+    async def _module_update_loop(self) -> None:
+        """Background task for periodic module update checks."""
+        interval_hours = self._get_module_update_interval()
+        interval_seconds = interval_hours * 3600
+
+        # Initial delay before first check (30 minutes, since startup already checked)
+        await asyncio.sleep(1800)
+
+        while True:
+            try:
+                logger.debug("Running periodic module update check")
+                await module_loader.check_and_update_on_startup()
+            except Exception as e:
+                logger.error("Module update check error: %s", e)
 
             await asyncio.sleep(interval_seconds)
 

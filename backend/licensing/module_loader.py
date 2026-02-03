@@ -12,7 +12,7 @@ import platform
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import aiofiles
 import aiohttp
@@ -31,6 +31,9 @@ DEFAULT_MODULES_PATH = "/var/lib/sysmanage/modules"
 
 # Module download timeout in seconds
 DOWNLOAD_TIMEOUT = 300
+
+# Version check timeout in seconds
+VERSION_CHECK_TIMEOUT = 30
 
 
 class ModuleLoader:
@@ -63,6 +66,15 @@ class ModuleLoader:
         phone_home_url = license_config.get("phone_home_url")
         if phone_home_url:
             return f"{phone_home_url.rstrip('/')}/api/v1/modules/download"
+        return None
+
+    def _get_versions_url(self) -> Optional[str]:
+        """Get the URL for querying module versions."""
+        config = get_config()
+        license_config = config.get("license", {})
+        phone_home_url = license_config.get("phone_home_url")
+        if phone_home_url:
+            return f"{phone_home_url.rstrip('/')}/api/v1/modules/versions"
         return None
 
     def _get_platform_info(self) -> Dict[str, str]:
@@ -400,6 +412,230 @@ class ModuleLoader:
                 "file": getattr(module, "__file__", "unknown"),
             }
         return result
+
+    def _get_cached_module_version(self, module_code: str) -> Optional[str]:
+        """Get the cached version of a module from the database."""
+        platform_info = self._get_platform_info()
+
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+
+        with session_local() as session:
+            try:
+                cache_entry = (
+                    session.query(ProPlusModuleCache)
+                    .filter(
+                        ProPlusModuleCache.module_code == module_code,
+                        ProPlusModuleCache.platform == platform_info["platform"],
+                        ProPlusModuleCache.architecture
+                        == platform_info["architecture"],
+                        ProPlusModuleCache.python_version
+                        == platform_info["python_version"],
+                    )
+                    .order_by(ProPlusModuleCache.downloaded_at.desc())
+                    .first()
+                )
+                if cache_entry:
+                    return cache_entry.version
+                return None
+            except Exception as e:
+                logger.error("Error querying cached module version: %s", e)
+                return None
+
+    async def query_server_versions(self) -> Dict[str, Dict[str, str]]:
+        """
+        Query the license server for latest module versions.
+
+        Returns:
+            Dictionary mapping module_code to {"version": str, "file_hash": str}
+        """
+        versions_url = self._get_versions_url()
+        if not versions_url:
+            logger.debug("No versions URL configured")
+            return {}
+
+        # Get license key for authentication
+        config = get_config()
+        license_config = config.get("license", {})
+        license_key = license_config.get("key")
+        if not license_key:
+            logger.debug("No license key configured")
+            return {}
+
+        platform_info = self._get_platform_info()
+
+        url = (
+            f"{versions_url}/"
+            f"{platform_info['platform']}/{platform_info['architecture']}/"
+            f"{platform_info['python_version']}?license_key={license_key}"
+        )
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    url, timeout=aiohttp.ClientTimeout(total=VERSION_CHECK_TIMEOUT)
+                ) as response:
+                    if response.status != 200:
+                        logger.warning(
+                            "Version check failed: %s returned %d",
+                            url,
+                            response.status,
+                        )
+                        return {}
+
+                    data = await response.json()
+                    modules = data.get("modules", [])
+
+                    result = {}
+                    for mod in modules:
+                        result[mod["code"]] = {
+                            "version": mod["latest_version"],
+                            "file_hash": mod["file_hash"],
+                        }
+                    return result
+
+        except aiohttp.ClientError as e:
+            logger.warning("Version check network error: %s", e)
+            return {}
+        except Exception as e:
+            logger.error("Version check error: %s", e)
+            return {}
+
+    async def check_for_updates(self) -> List[str]:
+        """
+        Check for module updates from the license server.
+
+        Returns:
+            List of module codes that have updates available
+        """
+        server_versions = await self.query_server_versions()
+        if not server_versions:
+            return []
+
+        updates_available = []
+
+        for module_code, server_info in server_versions.items():
+            server_version = server_info["version"]
+            local_version = self._get_cached_module_version(module_code)
+
+            if local_version is None:
+                # Module not downloaded yet
+                logger.debug("Module %s not yet downloaded", module_code)
+                updates_available.append(module_code)
+            elif local_version != server_version:
+                logger.info(
+                    "Module %s has update: %s -> %s",
+                    module_code,
+                    local_version,
+                    server_version,
+                )
+                updates_available.append(module_code)
+            else:
+                logger.debug("Module %s is up to date (%s)", module_code, local_version)
+
+        return updates_available
+
+    async def update_modules(self) -> Dict[str, bool]:
+        """
+        Check for and download any module updates.
+
+        Returns:
+            Dictionary mapping module_code to success status
+        """
+        updates_needed = await self.check_for_updates()
+        if not updates_needed:
+            logger.info("All modules are up to date")
+            return {}
+
+        results = {}
+        for module_code in updates_needed:
+            # Unload the module if it's currently loaded
+            was_loaded = self.unload_module(module_code)
+
+            # Remove the old cached file
+            self._remove_cached_module(module_code)
+
+            # Download the new version
+            success = await self._download_and_cache_module(module_code)
+            results[module_code] = success
+
+            if success:
+                logger.info("Module %s updated successfully", module_code)
+            else:
+                logger.error("Failed to update module %s", module_code)
+                # If it was loaded before, try to reload the old version
+                if was_loaded:
+                    cached_path = self._get_cached_module_path(module_code)
+                    if cached_path and os.path.exists(cached_path):
+                        self._load_module_from_path(module_code, cached_path)
+
+        return results
+
+    def _remove_cached_module(self, module_code: str) -> None:
+        """Remove a module from the local cache (file and database record)."""
+        platform_info = self._get_platform_info()
+
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+
+        with session_local() as session:
+            try:
+                cache_entries = (
+                    session.query(ProPlusModuleCache)
+                    .filter(
+                        ProPlusModuleCache.module_code == module_code,
+                        ProPlusModuleCache.platform == platform_info["platform"],
+                        ProPlusModuleCache.architecture
+                        == platform_info["architecture"],
+                        ProPlusModuleCache.python_version
+                        == platform_info["python_version"],
+                    )
+                    .all()
+                )
+
+                for entry in cache_entries:
+                    # Remove the file
+                    if entry.file_path and os.path.exists(entry.file_path):
+                        try:
+                            os.remove(entry.file_path)
+                            logger.debug("Removed cached file: %s", entry.file_path)
+                        except OSError as e:
+                            logger.warning(
+                                "Failed to remove file %s: %s", entry.file_path, e
+                            )
+
+                    # Remove the database record
+                    session.delete(entry)
+
+                session.commit()
+                logger.debug("Removed cache entries for module %s", module_code)
+
+            except Exception as e:
+                logger.error("Failed to remove cached module %s: %s", module_code, e)
+                session.rollback()
+
+    async def check_and_update_on_startup(self) -> None:
+        """
+        Check for module updates on startup and download if available.
+
+        This should be called during application startup after license validation.
+        """
+        logger.info("Checking for module updates...")
+        try:
+            results = await self.update_modules()
+            if results:
+                updated = [k for k, v in results.items() if v]
+                failed = [k for k, v in results.items() if not v]
+                if updated:
+                    logger.info("Updated modules: %s", ", ".join(updated))
+                if failed:
+                    logger.warning("Failed to update modules: %s", ", ".join(failed))
+            else:
+                logger.info("All modules are up to date")
+        except Exception as e:
+            logger.error("Module update check failed: %s", e)
 
 
 # Global module loader instance
