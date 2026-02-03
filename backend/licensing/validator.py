@@ -3,6 +3,10 @@ Local license signature validation for Pro+ licenses.
 
 Validates license keys using the embedded ECDSA P-521 public key.
 License keys are JWT-like tokens with a header, payload, and signature.
+
+Note: This file contains the full validation logic because it must work
+BEFORE any Cython modules are downloaded. The license must be validated
+first to determine which modules the user is entitled to download.
 """
 
 import base64
@@ -268,7 +272,8 @@ def check_expiration(expires_at: datetime) -> Tuple[bool, Optional[str]]:
     if days_expired <= EXPIRATION_GRACE_DAYS:
         return (
             True,
-            f"License expired {days_expired} days ago (grace period ends in {EXPIRATION_GRACE_DAYS - days_expired} days)",
+            f"License expired {days_expired} days ago "
+            f"(grace period ends in {EXPIRATION_GRACE_DAYS - days_expired} days)",
         )
 
     return False, None
