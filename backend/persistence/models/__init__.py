@@ -101,4 +101,7 @@ __all__ = [
     "HostVulnerabilityFinding",
     "VulnerabilityIngestionLog",
     "CveRefreshSettings",
+    # Compliance models
+    "ComplianceProfile",
+    "HostComplianceScan",
 ]

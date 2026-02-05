@@ -14,6 +14,7 @@ import { getLicenseInfo } from "../Services/license";
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [isVulnFeatureActive, setIsVulnFeatureActive] = useState(false);
+  const [isComplianceFeatureActive, setIsComplianceFeatureActive] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -25,8 +26,11 @@ const Navbar = () => {
         // Check if license is active and has vulnerability scanning feature
         const hasVulnFeature = licenseInfo.active && licenseInfo.features?.includes('vuln');
         setIsVulnFeatureActive(hasVulnFeature);
+        const hasComplianceFeature = licenseInfo.active && licenseInfo.features?.includes('compliance');
+        setIsComplianceFeatureActive(hasComplianceFeature);
       } catch {
         setIsVulnFeatureActive(false);
+        setIsComplianceFeatureActive(false);
       }
     };
 
@@ -127,6 +131,17 @@ const Navbar = () => {
                   onClick={closeMenuOnMobile}
                 >
                   {t('nav.vulnerabilities')}
+                </NavLink>
+              </li>
+            )}
+            {isComplianceFeatureActive && (
+              <li className="nav__item">
+                <NavLink
+                  to="/compliance"
+                  className="nav__link"
+                  onClick={closeMenuOnMobile}
+                >
+                  {t('nav.compliance')}
                 </NavLink>
               </li>
             )}

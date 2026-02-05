@@ -199,6 +199,18 @@ const Settings: React.FC = () => {
     globalThis.addEventListener('hashchange', handleHashChange);
     return () => globalThis.removeEventListener('hashchange', handleHashChange);
   }, [tabNames]);
+
+  // Re-check URL hash when tabNames changes (e.g., when Pro+ license loads)
+  // This fixes the race condition where the hash is checked before Pro+ tabs are available
+  useEffect(() => {
+    const hash = globalThis.location.hash.slice(1);
+    if (hash) {
+      const tabIndex = tabNames.indexOf(hash);
+      if (tabIndex >= 0) {
+        setActiveTab(tabIndex);
+      }
+    }
+  }, [tabNames]);
   
   // Queue management state
   const [queueMessages, setQueueMessages] = useState<QueueMessage[]>([]);

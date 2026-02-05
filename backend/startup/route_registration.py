@@ -35,7 +35,6 @@ from backend.api import (
     packages,
     password_reset,
     profile,
-    proplus_routes,
     queue,
     reports,
     scripts,
@@ -308,14 +307,9 @@ def register_routes(app: FastAPI):
     )  # /api/license/*, /api/host/{host_id}/health-analysis/* (with auth, Pro+)
     logger.info("Health Analysis router added")
 
-    # Mount Pro+ module routes if available (thick module architecture)
-    # These provide enhanced routes from compiled Cython modules
-    logger.info("Checking for Pro+ module routes to mount")
-    proplus_results = proplus_routes.mount_proplus_routes(app)
-    if any(proplus_results.values()):
-        logger.info("Pro+ module routes mounted: %s", proplus_results)
-    else:
-        logger.info("No Pro+ module routes available (using fallback routes)")
+    # Note: Pro+ module routes are mounted in lifecycle.py after modules are loaded
+    # This ensures the compiled Cython modules are available before route mounting
+    logger.info("Pro+ module routes will be mounted after modules load in lifespan")
 
     logger.info("Adding CVE Refresh Settings router with /api/cve-refresh prefix")
     app.include_router(

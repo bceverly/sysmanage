@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from backend.api.proplus_routes import mount_proplus_routes
 from backend.discovery.discovery_service import discovery_beacon
 from backend.licensing.license_service import license_service
 from backend.licensing.module_loader import module_loader
@@ -70,6 +71,15 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             logger.warning(
                                 "Failed to load module %s: %s", module_code, mod_e
                             )
+                # Mount Pro+ routes now that modules are loaded
+                logger.info("=== MOUNTING PRO+ MODULE ROUTES ===")
+                proplus_results = mount_proplus_routes(_fastapi_app)
+                if any(proplus_results.values()):
+                    logger.info("Pro+ module routes mounted: %s", proplus_results)
+                else:
+                    logger.warning(
+                        "No Pro+ module routes were mounted despite modules being loaded"
+                    )
             else:
                 logger.info("Running as Community Edition (no Pro+ license)")
         except Exception as lic_e:

@@ -50,6 +50,7 @@ class LicenseService:
 
     def __init__(self):
         self._cached_license: Optional[LicensePayload] = None
+        self._license_key: Optional[str] = None
         self._license_key_hash: Optional[str] = None
         self._phone_home_task: Optional[asyncio.Task] = None
         self._module_update_task: Optional[asyncio.Task] = None
@@ -142,6 +143,7 @@ class LicenseService:
 
         # Store the validated license
         self._cached_license = result.payload
+        self._license_key = license_key
         self._license_key_hash = hash_license_key(license_key)
 
         # Log any warnings
@@ -318,7 +320,7 @@ class LicenseService:
         Returns:
             True if validation succeeded, False otherwise
         """
-        if not self._cached_license:
+        if not self._cached_license or not self._license_key:
             return False
 
         phone_home_url = self._get_phone_home_url()
@@ -332,8 +334,7 @@ class LicenseService:
                 async with session.post(
                     check_url,
                     json={
-                        "license_id": self._cached_license.license_id,
-                        "license_hash": self._license_key_hash,
+                        "license_key": self._license_key,
                     },
                     timeout=aiohttp.ClientTimeout(total=30),
                 ) as response:
@@ -476,6 +477,7 @@ class LicenseService:
                 session.rollback()
 
         self._cached_license = None
+        self._license_key = None
         logger.warning("License deactivated")
 
     def has_feature(self, feature: FeatureCode) -> bool:
@@ -551,6 +553,7 @@ class LicenseService:
 
         # Store the validated license
         self._cached_license = result.payload
+        self._license_key = license_key
         self._license_key_hash = hash_license_key(license_key)
 
         # Save to database

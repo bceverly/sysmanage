@@ -108,6 +108,50 @@ def mount_health_routes(app: FastAPI) -> bool:
         return False
 
 
+def mount_compliance_routes(app: FastAPI) -> bool:
+    """
+    Mount compliance routes from the compliance_engine module if available.
+
+    Args:
+        app: The FastAPI application instance
+
+    Returns:
+        True if routes were mounted, False otherwise
+    """
+    compliance_engine = module_loader.get_module("compliance_engine")
+    if compliance_engine is None:
+        logger.debug("compliance_engine module not loaded, skipping compliance routes")
+        return False
+
+    # Check if module provides routes
+    module_info = compliance_engine.get_module_info()
+    if not module_info.get("provides_routes", False):
+        logger.debug("compliance_engine module does not provide routes")
+        return False
+
+    try:
+        router = compliance_engine.get_compliance_router(
+            db_dependency=Depends(get_db),
+            auth_dependency=Depends(get_current_user),
+            feature_gate=requires_feature,
+            module_gate=requires_module,
+            models=models,
+            http_exception=HTTPException,
+            status_codes=status,
+            logger=logger,
+        )
+        app.include_router(router, prefix="/api")
+        logger.info(
+            "Mounted compliance routes from compliance_engine v%s",
+            module_info.get("version", "unknown"),
+        )
+        return True
+
+    except Exception as e:
+        logger.error("Failed to mount compliance routes: %s", e)
+        return False
+
+
 def mount_proplus_routes(app: FastAPI) -> dict:
     """
     Mount all Pro+ module routes if modules are available.
@@ -124,6 +168,7 @@ def mount_proplus_routes(app: FastAPI) -> dict:
     results = {
         "vuln_engine": mount_vulnerability_routes(app),
         "health_engine": mount_health_routes(app),
+        "compliance_engine": mount_compliance_routes(app),
     }
 
     mounted_count = sum(1 for v in results.values() if v)

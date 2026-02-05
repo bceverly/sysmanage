@@ -309,3 +309,108 @@ export const getVulnerabilityHosts = async (): Promise<HostVulnerabilityListResp
     const response = await axiosInstance.get('/api/vulnerabilities/hosts');
     return response.data;
 };
+
+// Compliance Engine Types and Functions
+
+export interface ComplianceRuleResult {
+    rule_id: string;
+    rule_name: string;
+    category: string;
+    benchmark: string;
+    severity: string;
+    status: string;
+    description: string;
+    remediation: string;
+    actual_value?: string;
+    expected_value?: string;
+}
+
+export interface ComplianceScan {
+    id: string;
+    host_id: string;
+    scanned_at: string;
+    profile_id: string;
+    profile_name: string;
+    total_rules: number;
+    passed_rules: number;
+    failed_rules: number;
+    error_rules: number;
+    not_applicable_rules: number;
+    compliance_score: number;
+    compliance_grade: string;
+    critical_failures: number;
+    high_failures: number;
+    medium_failures: number;
+    low_failures: number;
+    summary?: string;
+    results?: ComplianceRuleResult[];
+}
+
+export interface ComplianceScanHistory {
+    scans: ComplianceScan[];
+    total: number;
+}
+
+export interface HostComplianceSummary {
+    host_id: string;
+    hostname: string;
+    fqdn: string;
+    compliance_score: number;
+    compliance_grade: string;
+    passed_rules: number;
+    failed_rules: number;
+    critical_failures: number;
+    high_failures: number;
+    last_scanned_at?: string;
+}
+
+export interface HostComplianceListResponse {
+    hosts: HostComplianceSummary[];
+    total: number;
+}
+
+/**
+ * Get compliance scan results for a host.
+ */
+export const getHostComplianceScan = async (
+    hostId: string, refresh = false
+): Promise<ComplianceScan> => {
+    const response = await axiosInstance.get(
+        `/api/host/${hostId}/compliance-scan`,
+        { params: { refresh } }
+    );
+    return response.data;
+};
+
+/**
+ * Run a new compliance scan for a host.
+ */
+export const runHostComplianceScan = async (
+    hostId: string
+): Promise<ComplianceScan> => {
+    const response = await axiosInstance.post(
+        `/api/host/${hostId}/compliance-scan`
+    );
+    return response.data;
+};
+
+/**
+ * Get compliance scan history for a host.
+ */
+export const getHostComplianceHistory = async (
+    hostId: string, limit = 10
+): Promise<ComplianceScanHistory> => {
+    const response = await axiosInstance.get(
+        `/api/host/${hostId}/compliance-scan/history`,
+        { params: { limit } }
+    );
+    return response.data;
+};
+
+/**
+ * Get list of all hosts with their compliance summaries.
+ */
+export const getComplianceHosts = async (): Promise<HostComplianceListResponse> => {
+    const response = await axiosInstance.get('/api/compliance/hosts');
+    return response.data;
+};

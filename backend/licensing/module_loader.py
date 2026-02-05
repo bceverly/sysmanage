@@ -443,6 +443,36 @@ class ModuleLoader:
                 logger.error("Error querying cached module version: %s", e)
                 return None
 
+    def _get_cached_module_hash(self, module_code: str) -> Optional[str]:
+        """Get the cached file hash of a module from the database."""
+        platform_info = self._get_platform_info()
+
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+
+        with session_local() as session:
+            try:
+                cache_entry = (
+                    session.query(ProPlusModuleCache)
+                    .filter(
+                        ProPlusModuleCache.module_code == module_code,
+                        ProPlusModuleCache.platform == platform_info["platform"],
+                        ProPlusModuleCache.architecture
+                        == platform_info["architecture"],
+                        ProPlusModuleCache.python_version
+                        == platform_info["python_version"],
+                    )
+                    .order_by(ProPlusModuleCache.downloaded_at.desc())
+                    .first()
+                )
+                if cache_entry:
+                    return cache_entry.file_hash
+                return None
+            except Exception as e:
+                logger.error("Error querying cached module hash: %s", e)
+                return None
+
     async def query_server_versions(self) -> Dict[str, Dict[str, str]]:
         """
         Query the license server for latest module versions.
@@ -506,6 +536,10 @@ class ModuleLoader:
         """
         Check for module updates from the license server.
 
+        Compares both version strings and file hashes so that
+        rebuilt modules with the same version number are still
+        detected as needing an update.
+
         Returns:
             List of module codes that have updates available
         """
@@ -517,6 +551,7 @@ class ModuleLoader:
 
         for module_code, server_info in server_versions.items():
             server_version = server_info["version"]
+            server_hash = server_info.get("file_hash", "")
             local_version = self._get_cached_module_version(module_code)
 
             if local_version is None:
@@ -531,8 +566,28 @@ class ModuleLoader:
                     server_version,
                 )
                 updates_available.append(module_code)
+            elif server_hash:
+                # Same version - compare file hashes to detect rebuilds
+                local_hash = self._get_cached_module_hash(module_code)
+                if local_hash and local_hash.lower() != server_hash.lower():
+                    logger.info(
+                        "Module %s v%s has been rebuilt (hash mismatch)",
+                        module_code,
+                        local_version,
+                    )
+                    updates_available.append(module_code)
+                else:
+                    logger.debug(
+                        "Module %s is up to date (%s)",
+                        module_code,
+                        local_version,
+                    )
             else:
-                logger.debug("Module %s is up to date (%s)", module_code, local_version)
+                logger.debug(
+                    "Module %s is up to date (%s)",
+                    module_code,
+                    local_version,
+                )
 
         return updates_available
 

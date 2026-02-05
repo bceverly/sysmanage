@@ -64,6 +64,7 @@ class ModuleCode(str, Enum):
     HEALTH_ENGINE = "health_engine"
     SECURITY_SCANNER = "security_scanner"  # Legacy alias
     VULN_ENGINE = "vuln_engine"  # Renamed from security_scanner
+    COMPLIANCE_ENGINE = "compliance_engine"
     PERFORMANCE_ANALYZER = "performance_analyzer"
 
     # AI/ML Modules
@@ -134,11 +135,13 @@ TIER_MODULES = {
         ModuleCode.HEALTH_ENGINE,
         ModuleCode.SECURITY_SCANNER,
         ModuleCode.VULN_ENGINE,
+        ModuleCode.COMPLIANCE_ENGINE,
     },
     LicenseTier.ENTERPRISE: {
         ModuleCode.HEALTH_ENGINE,
         ModuleCode.SECURITY_SCANNER,
         ModuleCode.VULN_ENGINE,
+        ModuleCode.COMPLIANCE_ENGINE,
         ModuleCode.PERFORMANCE_ANALYZER,
         ModuleCode.ANOMALY_DETECTOR,
         ModuleCode.PREDICTION_ENGINE,

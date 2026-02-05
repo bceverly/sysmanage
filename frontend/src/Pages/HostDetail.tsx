@@ -104,6 +104,7 @@ import AddHostAccountModal from '../Components/AddHostAccountModal';
 import AddHostGroupModal from '../Components/AddHostGroupModal';
 import HealthAnalysisCard from '../Components/HealthAnalysisCard';
 import VulnerabilitiesCard from '../Components/VulnerabilitiesCard';
+import ComplianceCard from '../Components/ComplianceCard';
 import { getLicenseInfo } from '../Services/license';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import BugReportIcon from '@mui/icons-material/BugReport';
@@ -633,6 +634,7 @@ const HostDetail = () => { // NOSONAR
     // Helper functions to calculate dynamic tab indices
     // Tab order: Info, [Health if Pro+], Hardware, Software, Software Changes, [Third-Party Repos], Access, Security, [Vulnerabilities if vuln_engine], Certificates, Server Roles, [Child Hosts], [Ubuntu Pro], Diagnostics
     const hasVulnEngineModule = useCallback(() => licenseModules.includes('vuln_engine'), [licenseModules]);
+    const hasComplianceEngineModule = useCallback(() => licenseModules.includes('compliance_engine'), [licenseModules]);
     const getHealthTabIndex = useCallback(() => isProPlusActive ? 1 : -1, [isProPlusActive]);
     const getHardwareTabIndex = useCallback(() => isProPlusActive ? 2 : 1, [isProPlusActive]);
     const getSoftwareTabIndex = useCallback(() => isProPlusActive ? 3 : 2, [isProPlusActive]);
@@ -654,34 +656,45 @@ const HostDetail = () => { // NOSONAR
         const proPlusOffset = isProPlusActive ? 1 : 0;
         return supportsThirdPartyRepos() ? 7 + proPlusOffset : 6 + proPlusOffset;
     }, [hasVulnEngineModule, isProPlusActive, supportsThirdPartyRepos]);
-    const getCertificatesTabIndex = () => {
+    const getComplianceTabIndex = useCallback(() => {
+        if (!hasComplianceEngineModule()) return -1;
         const proPlusOffset = isProPlusActive ? 1 : 0;
         const vulnOffset = hasVulnEngineModule() ? 1 : 0;
         return supportsThirdPartyRepos() ? 7 + proPlusOffset + vulnOffset : 6 + proPlusOffset + vulnOffset;
+    }, [hasComplianceEngineModule, hasVulnEngineModule, isProPlusActive, supportsThirdPartyRepos]);
+    const getCertificatesTabIndex = () => {
+        const proPlusOffset = isProPlusActive ? 1 : 0;
+        const vulnOffset = hasVulnEngineModule() ? 1 : 0;
+        const complianceOffset = hasComplianceEngineModule() ? 1 : 0;
+        return supportsThirdPartyRepos() ? 7 + proPlusOffset + vulnOffset + complianceOffset : 6 + proPlusOffset + vulnOffset + complianceOffset;
     };
     const getServerRolesTabIndex = useCallback(() => {
         const proPlusOffset = isProPlusActive ? 1 : 0;
         const vulnOffset = hasVulnEngineModule() ? 1 : 0;
-        return supportsThirdPartyRepos() ? 8 + proPlusOffset + vulnOffset : 7 + proPlusOffset + vulnOffset;
-    }, [supportsThirdPartyRepos, isProPlusActive, hasVulnEngineModule]);
+        const complianceOffset = hasComplianceEngineModule() ? 1 : 0;
+        return supportsThirdPartyRepos() ? 8 + proPlusOffset + vulnOffset + complianceOffset : 7 + proPlusOffset + vulnOffset + complianceOffset;
+    }, [supportsThirdPartyRepos, isProPlusActive, hasVulnEngineModule, hasComplianceEngineModule]);
     const getChildHostsTabIndex = useCallback(() => {
         if (!supportsChildHosts()) return -1;
         const proPlusOffset = isProPlusActive ? 1 : 0;
         const vulnOffset = hasVulnEngineModule() ? 1 : 0;
-        return supportsThirdPartyRepos() ? 9 + proPlusOffset + vulnOffset : 8 + proPlusOffset + vulnOffset;
-    }, [supportsThirdPartyRepos, supportsChildHosts, isProPlusActive, hasVulnEngineModule]);
+        const complianceOffset = hasComplianceEngineModule() ? 1 : 0;
+        return supportsThirdPartyRepos() ? 9 + proPlusOffset + vulnOffset + complianceOffset : 8 + proPlusOffset + vulnOffset + complianceOffset;
+    }, [supportsThirdPartyRepos, supportsChildHosts, isProPlusActive, hasVulnEngineModule, hasComplianceEngineModule]);
     const getUbuntuProTabIndex = () => {
         if (!isUbuntu() || !ubuntuProInfo?.available) return -1;
         const proPlusOffset = isProPlusActive ? 1 : 0;
         const vulnOffset = hasVulnEngineModule() ? 1 : 0;
-        let baseIndex = supportsThirdPartyRepos() ? 9 + proPlusOffset + vulnOffset : 8 + proPlusOffset + vulnOffset;
+        const complianceOffset = hasComplianceEngineModule() ? 1 : 0;
+        let baseIndex = supportsThirdPartyRepos() ? 9 + proPlusOffset + vulnOffset + complianceOffset : 8 + proPlusOffset + vulnOffset + complianceOffset;
         if (supportsChildHosts()) baseIndex += 1;
         return baseIndex;
     };
     const getDiagnosticsTabIndex = () => {
         const proPlusOffset = isProPlusActive ? 1 : 0;
         const vulnOffset = hasVulnEngineModule() ? 1 : 0;
-        let baseIndex = supportsThirdPartyRepos() ? 9 + proPlusOffset + vulnOffset : 8 + proPlusOffset + vulnOffset;
+        const complianceOffset = hasComplianceEngineModule() ? 1 : 0;
+        let baseIndex = supportsThirdPartyRepos() ? 9 + proPlusOffset + vulnOffset + complianceOffset : 8 + proPlusOffset + vulnOffset + complianceOffset;
         if (supportsChildHosts()) baseIndex += 1;
         return (isUbuntu() && ubuntuProInfo?.available) ? baseIndex + 1 : baseIndex;
     };
@@ -4040,6 +4053,14 @@ const HostDetail = () => { // NOSONAR
                             sx={{ textTransform: 'none' }}
                         />
                     )}
+                    {hasComplianceEngineModule() && (
+                        <Tab
+                            icon={<VerifiedUserIcon />}
+                            label={t('hostDetail.complianceTab', 'Compliance')}
+                            iconPosition="start"
+                            sx={{ textTransform: 'none' }}
+                        />
+                    )}
                     <Tab
                         icon={<CertificateIcon />}
                         label={t('hostDetail.certificatesTab', 'Certificates')}
@@ -5473,6 +5494,13 @@ const HostDetail = () => { // NOSONAR
             {hasVulnEngineModule() && currentTab === getVulnerabilitiesTabIndex() && hostId && (
                 <Box sx={{ p: 2 }}>
                     <VulnerabilitiesCard hostId={hostId} />
+                </Box>
+            )}
+
+            {/* Compliance Tab */}
+            {hasComplianceEngineModule() && currentTab === getComplianceTabIndex() && hostId && (
+                <Box sx={{ p: 2 }}>
+                    <ComplianceCard hostId={hostId} />
                 </Box>
             )}
 
