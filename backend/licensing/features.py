@@ -71,6 +71,12 @@ class ModuleCode(str, Enum):
     ANOMALY_DETECTOR = "anomaly_detector"
     PREDICTION_ENGINE = "prediction_engine"
 
+    # Plugin-only Modules (no Cython)
+    PROPLUS_CORE = "proplus_core"
+
+    # Alerting Modules
+    ALERTING_ENGINE = "alerting_engine"
+
     # Data Processing Modules
     LOG_ANALYZER = "log_analyzer"
     METRICS_AGGREGATOR = "metrics_aggregator"
@@ -136,12 +142,16 @@ TIER_MODULES = {
         ModuleCode.SECURITY_SCANNER,
         ModuleCode.VULN_ENGINE,
         ModuleCode.COMPLIANCE_ENGINE,
+        ModuleCode.ALERTING_ENGINE,
+        ModuleCode.PROPLUS_CORE,
     },
     LicenseTier.ENTERPRISE: {
         ModuleCode.HEALTH_ENGINE,
         ModuleCode.SECURITY_SCANNER,
         ModuleCode.VULN_ENGINE,
         ModuleCode.COMPLIANCE_ENGINE,
+        ModuleCode.ALERTING_ENGINE,
+        ModuleCode.PROPLUS_CORE,
         ModuleCode.PERFORMANCE_ANALYZER,
         ModuleCode.ANOMALY_DETECTOR,
         ModuleCode.PREDICTION_ENGINE,

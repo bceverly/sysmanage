@@ -1,4 +1,5 @@
 import './App.css';
+import './plugins/SharedDependencies';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,13 +33,43 @@ import Scripts from './Pages/Scripts';
 import Reports from './Pages/Reports';
 import ReportViewer from './Pages/ReportViewer';
 import AuditLogViewer from './Pages/AuditLogViewer';
-import VulnerabilitiesPage from './Pages/VulnerabilitiesPage';
-import VulnerabilityHostDetail from './Pages/VulnerabilityHostDetail';
-import CompliancePage from './Pages/CompliancePage';
-import ComplianceHostDetail from './Pages/ComplianceHostDetail';
 import Profile from './Pages/Profile';
 import Settings from './Pages/Settings';
 import Logout from './Pages/Logout';
+import { PluginProvider, usePlugins } from './plugins';
+
+function AppRoutes() {
+  const { routes } = usePlugins();
+
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/hosts" element={<Hosts />} />
+      <Route path="/hosts/:hostId" element={<HostDetail />} />
+      <Route path="/users" element={<Users />} />
+      <Route path="/users/:userId" element={<UserDetail />} />
+      <Route path="/updates" element={<Updates />} />
+      <Route path="/os-upgrades" element={<OSUpgrades />} />
+      <Route path="/secrets" element={<Secrets />} />
+      <Route path="/scripts" element={<Scripts />} />
+      <Route path="/reports" element={<Reports />} />
+      <Route path="/reports/audit-log" element={<AuditLogViewer />} />
+      <Route path="/reports/:reportId" element={<ReportViewer />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/settings" element={<Settings />} />
+      <Route path="/logout" element={<Logout />} />
+      {routes.map(route => (
+        <Route
+          key={route.path}
+          path={route.path}
+          element={<route.component />}
+        />
+      ))}
+    </Routes>
+  );
+}
 
 function App() {
   const { i18n } = useTranslation();
@@ -92,38 +123,18 @@ function App() {
         <ThemeProvider theme={darkTheme}>
           <CssBaseline enableColorScheme/>
           <ConnectionProvider>
-            <Router future={{
-              v7_startTransition: true,
-              v7_relativeSplatPath: true
-            }}>
-              <Navbar />
-              <SecurityWarningBanner />
-                <main className="main-content">
-                  <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
-                    <Route path="/" element={<Home />} />
-                    <Route path="/hosts" element={<Hosts />} />
-                    <Route path="/hosts/:hostId" element={<HostDetail />} />
-                    <Route path="/users" element={<Users />} />
-                    <Route path="/users/:userId" element={<UserDetail />} />
-                    <Route path="/updates" element={<Updates />} />
-                    <Route path="/os-upgrades" element={<OSUpgrades />} />
-                    <Route path="/vulnerabilities" element={<VulnerabilitiesPage />} />
-                    <Route path="/vulnerabilities/:hostId" element={<VulnerabilityHostDetail />} />
-                    <Route path="/compliance" element={<CompliancePage />} />
-                    <Route path="/compliance/:hostId" element={<ComplianceHostDetail />} />
-                    <Route path="/secrets" element={<Secrets />} />
-                    <Route path="/scripts" element={<Scripts />} />
-                    <Route path="/reports" element={<Reports />} />
-                    <Route path="/reports/audit-log" element={<AuditLogViewer />} />
-                    <Route path="/reports/:reportId" element={<ReportViewer />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/logout" element={<Logout />} />
-                  </Routes>
-                </main>
-            </Router>
+            <PluginProvider>
+              <Router future={{
+                v7_startTransition: true,
+                v7_relativeSplatPath: true
+              }}>
+                <Navbar />
+                <SecurityWarningBanner />
+                  <main className="main-content">
+                    <AppRoutes />
+                  </main>
+              </Router>
+            </PluginProvider>
           </ConnectionProvider>
         </ThemeProvider>
       </CacheProvider>

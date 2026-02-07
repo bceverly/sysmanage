@@ -26,7 +26,6 @@ import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
-import { getLicenseInfo } from '../Services/license';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 
 const Hosts = () => {
@@ -58,7 +57,7 @@ const Hosts = () => {
     const [canRebootHost, setCanRebootHost] = useState<boolean>(false);
     const [canShutdownHost, setCanShutdownHost] = useState<boolean>(false);
     const [canDeployAntivirus, setCanDeployAntivirus] = useState<boolean>(false);
-    const [isProPlusActive, setIsProPlusActive] = useState<boolean>(false);
+    const [hasHealthData, setHasHealthData] = useState<boolean>(false);
     const { triggerRefresh } = useNotificationRefresh();
 
     // Dynamic table page sizing based on window height
@@ -375,7 +374,7 @@ const Hosts = () => {
                 );
             }
         },
-        ...(isProPlusActive ? [{
+        ...(hasHealthData ? [{
             field: 'health_grade',
             headerName: t('hosts.healthGrade', 'Health'),
             width: 90,
@@ -439,7 +438,7 @@ const Hosts = () => {
                 ) : null
             )
         }
-    ], [t, navigate, canViewHostDetails, tableData, isProPlusActive]);
+    ], [t, navigate, canViewHostDetails, tableData, hasHealthData]);
 
     // Search columns configuration (excluding irrelevant columns)
     const searchColumns = [
@@ -733,19 +732,15 @@ const Hosts = () => {
         checkPermissions();
     }, []);
 
-    // Check Pro+ license status
+    // Check if any host has health data (from Pro+ health analysis)
     useEffect(() => {
-        const checkProPlusStatus = async () => {
-            try {
-                const licenseInfo = await getLicenseInfo();
-                setIsProPlusActive(licenseInfo.active);
-            } catch (error) {
-                console.log('Pro+ license check failed:', error);
-                setIsProPlusActive(false);
-            }
-        };
-        checkProPlusStatus();
-    }, []);
+        if (tableData.length > 0) {
+            const anyHealthData = tableData.some(
+                (h: SysManageHost) => (h as Record<string, unknown>).health_grade
+            );
+            setHasHealthData(anyHealthData);
+        }
+    }, [tableData]);
 
 
     // Check if any selected hosts need approval - memoized

@@ -15,6 +15,7 @@ from backend.licensing.feature_gate import requires_feature, requires_module
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.services.email_service import email_service
 from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.api.proplus_routes")
@@ -152,6 +153,51 @@ def mount_compliance_routes(app: FastAPI) -> bool:
         return False
 
 
+def mount_alerting_routes(app: FastAPI) -> bool:
+    """
+    Mount alerting routes from the alerting_engine module if available.
+
+    Args:
+        app: The FastAPI application instance
+
+    Returns:
+        True if routes were mounted, False otherwise
+    """
+    alerting_engine = module_loader.get_module("alerting_engine")
+    if alerting_engine is None:
+        logger.debug("alerting_engine module not loaded, skipping alerting routes")
+        return False
+
+    # Check if module provides routes
+    module_info = alerting_engine.get_module_info()
+    if not module_info.get("provides_routes", False):
+        logger.debug("alerting_engine module does not provide routes")
+        return False
+
+    try:
+        router = alerting_engine.get_alerting_router(
+            db_dependency=Depends(get_db),
+            auth_dependency=Depends(get_current_user),
+            feature_gate=requires_feature,
+            module_gate=requires_module,
+            models=models,
+            http_exception=HTTPException,
+            status_codes=status,
+            logger=logger,
+            email_service=email_service,
+        )
+        app.include_router(router, prefix="/api")
+        logger.info(
+            "Mounted alerting routes from alerting_engine v%s",
+            module_info.get("version", "unknown"),
+        )
+        return True
+
+    except Exception as e:
+        logger.error("Failed to mount alerting routes: %s", e)
+        return False
+
+
 def mount_proplus_routes(app: FastAPI) -> dict:
     """
     Mount all Pro+ module routes if modules are available.
@@ -169,6 +215,7 @@ def mount_proplus_routes(app: FastAPI) -> dict:
         "vuln_engine": mount_vulnerability_routes(app),
         "health_engine": mount_health_routes(app),
         "compliance_engine": mount_compliance_routes(app),
+        "alerting_engine": mount_alerting_routes(app),
     }
 
     mounted_count = sum(1 for v in results.values() if v)

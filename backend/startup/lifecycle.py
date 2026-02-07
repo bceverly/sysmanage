@@ -17,7 +17,9 @@ from backend.licensing.license_service import license_service
 from backend.licensing.module_loader import module_loader
 from backend.monitoring.graylog_health_monitor import graylog_health_monitor_service
 from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
+from backend.persistence.db import get_db
 from backend.security.certificate_manager import certificate_manager
+from backend.services.email_service import email_service
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.message_processor import message_processor
 
@@ -36,6 +38,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     heartbeat_task = None
     graylog_health_task = None
     message_processor_task = None
+    alerting_task = None
 
     try:
         # Startup: Ensure server certificates are generated
@@ -80,6 +83,27 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                     logger.warning(
                         "No Pro+ module routes were mounted despite modules being loaded"
                     )
+
+                # Start alerting background task if module is available
+                alerting_engine = module_loader.get_module("alerting_engine")
+                if alerting_engine:
+                    alerting_info = alerting_engine.get_module_info()
+                    if alerting_info.get("provides_background_task", False):
+                        logger.info("=== ALERTING ENGINE BACKGROUND TASK STARTUP ===")
+                        try:
+                            alerting_task = asyncio.create_task(
+                                alerting_engine.start_alert_evaluator(
+                                    db_maker=get_db,
+                                    email_service=email_service,
+                                    logger=logger,
+                                )
+                            )
+                            logger.info("Alerting engine background task started")
+                        except Exception as alert_e:
+                            logger.warning(
+                                "Failed to start alerting background task: %s",
+                                alert_e,
+                            )
             else:
                 logger.info("Running as Community Edition (no Pro+ license)")
         except Exception as lic_e:
@@ -209,6 +233,20 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         logger.info("Graylog health monitor service stopped")
     except Exception as e:
         logger.error("Error stopping Graylog health monitor: %s", e)
+
+    # Shutdown: Cancel the alerting engine background task
+    if alerting_task:
+        logger.info("Stopping alerting engine background task")
+        try:
+            alerting_task.cancel()
+            try:
+                await alerting_task
+            except asyncio.CancelledError:
+                logger.info("Alerting engine task cancelled successfully")
+                raise
+            logger.info("Alerting engine background task stopped")
+        except Exception as e:
+            logger.error("Error stopping alerting engine task: %s", e)
 
     # Shutdown: Cancel the heartbeat monitor service
     logger.info("Stopping heartbeat monitor service")

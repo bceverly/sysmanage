@@ -102,12 +102,8 @@ import { doCheckGraylogHealth, doGetGraylogAttachment } from '../Services/graylo
 import ThirdPartyRepositories from './ThirdPartyRepositories';
 import AddHostAccountModal from '../Components/AddHostAccountModal';
 import AddHostGroupModal from '../Components/AddHostGroupModal';
-import HealthAnalysisCard from '../Components/HealthAnalysisCard';
-import VulnerabilitiesCard from '../Components/VulnerabilitiesCard';
-import ComplianceCard from '../Components/ComplianceCard';
 import { getLicenseInfo } from '../Services/license';
-import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
-import BugReportIcon from '@mui/icons-material/BugReport';
+import { usePlugins } from '../plugins';
 
 // Certificate interface
 interface Certificate {
@@ -182,7 +178,6 @@ const HostDetail = () => { // NOSONAR
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [hasAntivirusOsDefault, setHasAntivirusOsDefault] = useState<boolean>(false);
-    const [isProPlusActive, setIsProPlusActive] = useState<boolean>(false);
     const [licenseModules, setLicenseModules] = useState<string[]>([]);
 
     // Check if OS supports third-party repositories
@@ -231,29 +226,10 @@ const HostDetail = () => { // NOSONAR
         return platform.includes('ubuntu') || platformRelease.includes('ubuntu');
     }, [host]);
 
-    // Tab names for URL hash (static tabs only - dynamic tabs handled separately)
-    const getTabNames = useCallback(() => {
-        const tabs = ['info'];
-        if (isProPlusActive) tabs.push('health');
-        tabs.push('hardware', 'software', 'software-changes');
-        if (supportsThirdPartyRepos()) tabs.push('third-party-repos');
-        tabs.push('access', 'security', 'certificates', 'server-roles');
-        if (supportsChildHosts()) tabs.push('child-hosts');
-        if (isUbuntu() && ubuntuProInfo?.available) tabs.push('ubuntu-pro');
-        tabs.push('diagnostics');
-        return tabs;
-    }, [ubuntuProInfo, supportsThirdPartyRepos, supportsChildHosts, isUbuntu, isProPlusActive]);
+    // Store the initial URL hash for tab resolution after tabDefinitions is ready
+    const initialTabHash = useRef(globalThis.location.hash.slice(1));
 
-    // Initialize tab from URL hash
-    const getInitialTab = useCallback(() => {
-        const hash = globalThis.location.hash.slice(1);
-        if (!hash) return 0;
-        const tabs = getTabNames();
-        const tabIndex = tabs.indexOf(hash);
-        return Math.max(tabIndex, 0);
-    }, [getTabNames]);
-
-    const [currentTab, setCurrentTab] = useState<number>(getInitialTab);
+    const [currentTab, setCurrentTab] = useState<number>(0);
     const [diagnosticsLoading, setDiagnosticsLoading] = useState<boolean>(false);
     const [certificatesLoading, setCertificatesLoading] = useState<boolean>(false);
     const [roles, setRoles] = useState<HostRole[]>([]);
@@ -604,20 +580,18 @@ const HostDetail = () => { // NOSONAR
         setCertificatePaginationModel(prev => ({ ...prev, pageSize }));
     }, [pageSize]);
 
-    // Check Pro+ license status
+    // Check Pro+ license modules for plugin tab filtering
     useEffect(() => {
-        const checkProPlusStatus = async () => {
+        const checkLicenseModules = async () => {
             try {
                 const licenseInfo = await getLicenseInfo();
-                setIsProPlusActive(licenseInfo.active);
                 setLicenseModules(licenseInfo.modules || []);
             } catch (error) {
-                console.log('Pro+ license check failed:', error);
-                setIsProPlusActive(false);
+                console.log('License check failed:', error);
                 setLicenseModules([]);
             }
         };
-        checkProPlusStatus();
+        checkLicenseModules();
     }, []);
 
     // Ensure current page size is always in options to avoid MUI warning
@@ -631,73 +605,81 @@ const HostDetail = () => { // NOSONAR
         return pageSizeOptions;
     }, [pageSizeOptions, certificatePaginationModel.pageSize]);
 
-    // Helper functions to calculate dynamic tab indices
-    // Tab order: Info, [Health if Pro+], Hardware, Software, Software Changes, [Third-Party Repos], Access, Security, [Vulnerabilities if vuln_engine], Certificates, Server Roles, [Child Hosts], [Ubuntu Pro], Diagnostics
-    const hasVulnEngineModule = useCallback(() => licenseModules.includes('vuln_engine'), [licenseModules]);
-    const hasComplianceEngineModule = useCallback(() => licenseModules.includes('compliance_engine'), [licenseModules]);
-    const getHealthTabIndex = useCallback(() => isProPlusActive ? 1 : -1, [isProPlusActive]);
-    const getHardwareTabIndex = useCallback(() => isProPlusActive ? 2 : 1, [isProPlusActive]);
-    const getSoftwareTabIndex = useCallback(() => isProPlusActive ? 3 : 2, [isProPlusActive]);
-    const getSoftwareInstallsTabIndex = useCallback(() => isProPlusActive ? 4 : 3, [isProPlusActive]);
-    const getThirdPartyReposTabIndex = () => {
-        if (!supportsThirdPartyRepos()) return -1;
-        return isProPlusActive ? 5 : 4;
-    };
-    const getAccessTabIndex = () => {
-        const proPlusOffset = isProPlusActive ? 1 : 0;
-        return supportsThirdPartyRepos() ? 5 + proPlusOffset : 4 + proPlusOffset;
-    };
-    const getSecurityTabIndex = () => {
-        const proPlusOffset = isProPlusActive ? 1 : 0;
-        return supportsThirdPartyRepos() ? 6 + proPlusOffset : 5 + proPlusOffset;
-    };
-    const getVulnerabilitiesTabIndex = useCallback(() => {
-        if (!hasVulnEngineModule()) return -1;
-        const proPlusOffset = isProPlusActive ? 1 : 0;
-        return supportsThirdPartyRepos() ? 7 + proPlusOffset : 6 + proPlusOffset;
-    }, [hasVulnEngineModule, isProPlusActive, supportsThirdPartyRepos]);
-    const getComplianceTabIndex = useCallback(() => {
-        if (!hasComplianceEngineModule()) return -1;
-        const proPlusOffset = isProPlusActive ? 1 : 0;
-        const vulnOffset = hasVulnEngineModule() ? 1 : 0;
-        return supportsThirdPartyRepos() ? 7 + proPlusOffset + vulnOffset : 6 + proPlusOffset + vulnOffset;
-    }, [hasComplianceEngineModule, hasVulnEngineModule, isProPlusActive, supportsThirdPartyRepos]);
-    const getCertificatesTabIndex = () => {
-        const proPlusOffset = isProPlusActive ? 1 : 0;
-        const vulnOffset = hasVulnEngineModule() ? 1 : 0;
-        const complianceOffset = hasComplianceEngineModule() ? 1 : 0;
-        return supportsThirdPartyRepos() ? 7 + proPlusOffset + vulnOffset + complianceOffset : 6 + proPlusOffset + vulnOffset + complianceOffset;
-    };
-    const getServerRolesTabIndex = useCallback(() => {
-        const proPlusOffset = isProPlusActive ? 1 : 0;
-        const vulnOffset = hasVulnEngineModule() ? 1 : 0;
-        const complianceOffset = hasComplianceEngineModule() ? 1 : 0;
-        return supportsThirdPartyRepos() ? 8 + proPlusOffset + vulnOffset + complianceOffset : 7 + proPlusOffset + vulnOffset + complianceOffset;
-    }, [supportsThirdPartyRepos, isProPlusActive, hasVulnEngineModule, hasComplianceEngineModule]);
-    const getChildHostsTabIndex = useCallback(() => {
-        if (!supportsChildHosts()) return -1;
-        const proPlusOffset = isProPlusActive ? 1 : 0;
-        const vulnOffset = hasVulnEngineModule() ? 1 : 0;
-        const complianceOffset = hasComplianceEngineModule() ? 1 : 0;
-        return supportsThirdPartyRepos() ? 9 + proPlusOffset + vulnOffset + complianceOffset : 8 + proPlusOffset + vulnOffset + complianceOffset;
-    }, [supportsThirdPartyRepos, supportsChildHosts, isProPlusActive, hasVulnEngineModule, hasComplianceEngineModule]);
-    const getUbuntuProTabIndex = () => {
-        if (!isUbuntu() || !ubuntuProInfo?.available) return -1;
-        const proPlusOffset = isProPlusActive ? 1 : 0;
-        const vulnOffset = hasVulnEngineModule() ? 1 : 0;
-        const complianceOffset = hasComplianceEngineModule() ? 1 : 0;
-        let baseIndex = supportsThirdPartyRepos() ? 9 + proPlusOffset + vulnOffset + complianceOffset : 8 + proPlusOffset + vulnOffset + complianceOffset;
-        if (supportsChildHosts()) baseIndex += 1;
-        return baseIndex;
-    };
-    const getDiagnosticsTabIndex = () => {
-        const proPlusOffset = isProPlusActive ? 1 : 0;
-        const vulnOffset = hasVulnEngineModule() ? 1 : 0;
-        const complianceOffset = hasComplianceEngineModule() ? 1 : 0;
-        let baseIndex = supportsThirdPartyRepos() ? 9 + proPlusOffset + vulnOffset + complianceOffset : 8 + proPlusOffset + vulnOffset + complianceOffset;
-        if (supportsChildHosts()) baseIndex += 1;
-        return (isUbuntu() && ubuntuProInfo?.available) ? baseIndex + 1 : baseIndex;
-    };
+    // Plugin system: get registered host detail tabs
+    const { hostDetailTabs: pluginTabs } = usePlugins();
+
+    // Filter plugin tabs based on required license modules
+    const visiblePluginTabs = useMemo(() => {
+        return pluginTabs.filter(pt => {
+            if (pt.moduleRequired) {
+                return licenseModules.includes(pt.moduleRequired);
+            }
+            return true;
+        });
+    }, [pluginTabs, licenseModules]);
+
+    // Build ordered tab definitions array
+    const tabDefinitions = useMemo(() => {
+        const tabs: Array<{ id: string; icon: React.ReactElement; label: string }> = [];
+
+        tabs.push({ id: 'info', icon: <InfoIcon />, label: t('hostDetail.infoTab', 'Info') });
+
+        for (const pt of visiblePluginTabs.filter(p => p.position === 'after-info')) {
+            tabs.push({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) });
+        }
+
+        tabs.push({ id: 'hardware', icon: <MemoryIcon />, label: t('hostDetail.hardwareTab', 'Hardware') });
+        tabs.push({ id: 'software', icon: <AppsIcon />, label: t('hostDetail.softwareTab', 'Software') });
+        tabs.push({ id: 'software-changes', icon: <HistoryIcon />, label: t('hostDetail.softwareChangesTab', 'Software Changes') });
+
+        if (supportsThirdPartyRepos()) {
+            tabs.push({ id: 'third-party-repos', icon: <SourceIcon />, label: t('hostDetail.thirdPartyReposTab', 'Third-Party Repositories') });
+        }
+
+        tabs.push({ id: 'access', icon: <SecurityIcon />, label: t('hostDetail.accessTab', 'Access') });
+        tabs.push({ id: 'security', icon: <ShieldIcon />, label: t('hostDetail.securityTab', 'Security') });
+
+        for (const pt of visiblePluginTabs.filter(p => p.position === 'after-security')) {
+            tabs.push({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) });
+        }
+
+        tabs.push({ id: 'certificates', icon: <CertificateIcon />, label: t('hostDetail.certificatesTab', 'Certificates') });
+        tabs.push({ id: 'server-roles', icon: <AssignmentIcon />, label: t('hostDetail.serverRolesTab', 'Server Roles') });
+
+        for (const pt of visiblePluginTabs.filter(p => p.position === 'before-diagnostics')) {
+            tabs.push({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) });
+        }
+
+        if (supportsChildHosts()) {
+            tabs.push({ id: 'child-hosts', icon: <ComputerIcon />, label: t('hostDetail.childHostsTab', 'Child Hosts') });
+        }
+        if (isUbuntu() && ubuntuProInfo?.available) {
+            tabs.push({ id: 'ubuntu-pro', icon: <VerifiedUserIcon />, label: t('hostDetail.ubuntuProTab', 'Ubuntu Pro') });
+        }
+        tabs.push({ id: 'diagnostics', icon: <MedicalServicesIcon />, label: t('hostDetail.diagnosticsTab', 'Diagnostics') });
+
+        return tabs;
+    }, [visiblePluginTabs, supportsThirdPartyRepos, supportsChildHosts, isUbuntu, ubuntuProInfo, t]);
+
+    // Get tab ID for current numeric index
+    const currentTabId = tabDefinitions[currentTab]?.id || 'info';
+
+    // Tab names for URL hash - derived from tabDefinitions
+    const getTabNames = useCallback(() => {
+        return tabDefinitions.map(td => td.id);
+    }, [tabDefinitions]);
+
+    // Resolve initial tab from URL hash once tabDefinitions is ready
+    useEffect(() => {
+        if (initialTabHash.current) {
+            const hash = initialTabHash.current;
+            initialTabHash.current = ''; // Only resolve once
+            const idx = tabDefinitions.findIndex(td => td.id === hash);
+            if (idx > 0) {
+                setCurrentTab(idx);
+            }
+        }
+    }, [tabDefinitions]);
 
     // Certificate-related functions
     const fetchCertificates = useCallback(async () => {
@@ -1588,7 +1570,7 @@ const HostDetail = () => { // NOSONAR
 
     // Auto-refresh functionality
     useEffect(() => {
-        if (currentTab === getServerRolesTabIndex() && host?.active) {
+        if (currentTabId === 'server-roles' && host?.active) {
             // Start auto-refresh every 30 seconds (without loading indicator)
             const interval = setInterval(() => {
                 fetchRoles(false);
@@ -1605,7 +1587,7 @@ const HostDetail = () => { // NOSONAR
             clearInterval(rolesRefreshInterval.current);
             rolesRefreshInterval.current = null;
         }
-    }, [currentTab, host?.active, host?.id, fetchRoles, getServerRolesTabIndex, host]);
+    }, [currentTabId, host?.active, host?.id, fetchRoles, host]);
 
     // Cleanup interval on unmount
     useEffect(() => {
@@ -1618,14 +1600,14 @@ const HostDetail = () => { // NOSONAR
 
     // Fetch OpenTelemetry status when Info tab is active
     useEffect(() => {
-        if (currentTab === 0 && host?.active) {
+        if (currentTabId === 'info' && host?.active) {
             fetchOpenTelemetryStatus();
         }
-    }, [currentTab, host?.active, host, fetchOpenTelemetryStatus]);
+    }, [currentTabId, host?.active, host, fetchOpenTelemetryStatus]);
 
     // Auto-refresh OpenTelemetry status every 30 seconds when on Info tab
     useEffect(() => {
-        if (currentTab === 0 && host?.active) {
+        if (currentTabId === 'info' && host?.active) {
             // Start auto-refresh every 30 seconds
             const interval = setInterval(() => {
                 fetchOpenTelemetryStatus();
@@ -1642,18 +1624,18 @@ const HostDetail = () => { // NOSONAR
             clearInterval(openTelemetryRefreshInterval.current);
             openTelemetryRefreshInterval.current = null;
         }
-    }, [currentTab, host?.active, host?.id, fetchOpenTelemetryStatus, host]);
+    }, [currentTabId, host?.active, host?.id, fetchOpenTelemetryStatus, host]);
 
     // Fetch Graylog attachment status when Info tab is active
     useEffect(() => {
-        if (currentTab === 0 && host?.active) {
+        if (currentTabId === 'info' && host?.active) {
             fetchGraylogAttachment();
         }
-    }, [currentTab, host?.active, host, fetchGraylogAttachment]);
+    }, [currentTabId, host?.active, host, fetchGraylogAttachment]);
 
     // Auto-refresh Graylog status every 30 seconds when on Info tab
     useEffect(() => {
-        if (currentTab === 0 && host?.active) {
+        if (currentTabId === 'info' && host?.active) {
             // Start auto-refresh every 30 seconds
             const interval = setInterval(() => {
                 fetchGraylogAttachment();
@@ -1670,7 +1652,7 @@ const HostDetail = () => { // NOSONAR
             clearInterval(graylogRefreshInterval.current);
             graylogRefreshInterval.current = null;
         }
-    }, [currentTab, host?.active, host?.id, fetchGraylogAttachment, host]);
+    }, [currentTabId, host?.active, host?.id, fetchGraylogAttachment, host]);
 
     // Cleanup intervals on unmount
     useEffect(() => {
@@ -1691,7 +1673,7 @@ const HostDetail = () => { // NOSONAR
     // Also trigger an agent refresh when first opening the tab (to get live status from WSL)
     // Pause auto-refresh when Create Child Host modal is open to prevent interference
     useEffect(() => {
-        if (currentTab === getChildHostsTabIndex() && host?.active && supportsChildHosts() && !createChildHostOpen) {
+        if (currentTabId === 'child-hosts' && host?.active && supportsChildHosts() && !createChildHostOpen) {
             // When tab is first opened, request fresh status from agent
             // Only do this once every 30 seconds to avoid spamming
             const now = Date.now();
@@ -1718,7 +1700,7 @@ const HostDetail = () => { // NOSONAR
             clearInterval(childHostsRefreshInterval.current);
             childHostsRefreshInterval.current = null;
         }
-    }, [currentTab, host?.active, host?.id, fetchChildHosts, fetchVirtualizationStatus, getChildHostsTabIndex, supportsChildHosts, host, requestChildHostsRefresh, createChildHostOpen]);
+    }, [currentTabId, host?.active, host?.id, fetchChildHosts, fetchVirtualizationStatus, supportsChildHosts, host, requestChildHostsRefresh, createChildHostOpen]);
 
     // Check permissions
     useEffect(() => {
@@ -2048,7 +2030,7 @@ const HostDetail = () => { // NOSONAR
     // Load software packages lazily when Software tab is selected or pagination changes
     useEffect(() => {
         const loadSoftwarePackages = async () => {
-            if (currentTab === getSoftwareTabIndex() && hostId) {
+            if (currentTabId === 'software' && hostId) {
                 try {
                     setLoadingSoftware(true);
                     const response = await doGetHostSoftware(
@@ -2067,19 +2049,19 @@ const HostDetail = () => { // NOSONAR
             }
         };
         loadSoftwarePackages();
-    }, [currentTab, hostId, softwarePagination.page, softwarePagination.page_size, softwareSearchTerm, getSoftwareTabIndex]);
+    }, [currentTabId, hostId, softwarePagination.page, softwarePagination.page_size, softwareSearchTerm]);
 
     // Load installation history when Software Changes tab is selected
     useEffect(() => {
-        if (currentTab === getSoftwareInstallsTabIndex()) {
+        if (currentTabId === 'software-changes') {
             fetchInstallationHistory();
         }
-    }, [currentTab, hostId, fetchInstallationHistory, getSoftwareInstallsTabIndex]);
+    }, [currentTabId, hostId, fetchInstallationHistory]);
 
     // Auto-refresh installation history every 30 seconds when on Software Changes tab
     useEffect(() => {
         let interval: ReturnType<typeof globalThis.setInterval> | null = null;
-        if (hostId && currentTab === getSoftwareInstallsTabIndex()) {
+        if (hostId && currentTabId === 'software-changes') {
             interval = globalThis.setInterval(async () => {
                 try {
                     await fetchInstallationHistory();
@@ -2093,7 +2075,7 @@ const HostDetail = () => { // NOSONAR
                 globalThis.clearInterval(interval);
             }
         };
-    }, [hostId, currentTab, fetchInstallationHistory, getSoftwareInstallsTabIndex]);
+    }, [hostId, currentTabId, fetchInstallationHistory]);
 
     // Auto-refresh Ubuntu Pro information every 30 seconds
     useEffect(() => {
@@ -3386,7 +3368,8 @@ const HostDetail = () => { // NOSONAR
                 setSelectedPackages(new Set());
 
                 // Navigate to Software Changes tab to show progress
-                setCurrentTab(getSoftwareInstallsTabIndex());
+                const swChangesIdx = tabDefinitions.findIndex(td => td.id === 'software-changes');
+                if (swChangesIdx >= 0) setCurrentTab(swChangesIdx);
 
                 // Show success message
                 setSnackbarMessage(response.data.message || t('hostDetail.packagesInstallQueued', 'Package installation has been queued'));
@@ -3435,7 +3418,8 @@ const HostDetail = () => { // NOSONAR
                 setPackageToUninstall(null);
 
                 // Navigate to Software Changes tab to show progress
-                setCurrentTab(getSoftwareInstallsTabIndex());
+                const swChangesIdx = tabDefinitions.findIndex(td => td.id === 'software-changes');
+                if (swChangesIdx >= 0) setCurrentTab(swChangesIdx);
 
                 // Show success message
                 setSnackbarMessage(response.data.message || t('hostDetail.packageUninstallQueued', 'Package uninstallation has been queued'));
@@ -3993,114 +3977,21 @@ const HostDetail = () => { // NOSONAR
             {/* Tabs */}
             <Box sx={{ borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
                 <Tabs value={currentTab} onChange={handleTabChange} aria-label="host detail tabs">
-                    <Tab
-                        icon={<InfoIcon />}
-                        label={t('hostDetail.infoTab', 'Info')}
-                        iconPosition="start"
-                        sx={{ textTransform: 'none' }}
-                    />
-                    {isProPlusActive && (
+                    {tabDefinitions.map(tabDef => (
                         <Tab
-                            icon={<HealthAndSafetyIcon />}
-                            label={t('hostDetail.healthTab', 'Health')}
+                            key={tabDef.id}
+                            icon={tabDef.icon}
+                            label={tabDef.label}
                             iconPosition="start"
                             sx={{ textTransform: 'none' }}
                         />
-                    )}
-                    <Tab
-                        icon={<MemoryIcon />}
-                        label={t('hostDetail.hardwareTab', 'Hardware')}
-                        iconPosition="start"
-                        sx={{ textTransform: 'none' }}
-                    />
-                    <Tab
-                        icon={<AppsIcon />}
-                        label={t('hostDetail.softwareTab', 'Software')}
-                        iconPosition="start"
-                        sx={{ textTransform: 'none' }}
-                    />
-                    <Tab
-                        icon={<HistoryIcon />}
-                        label={t('hostDetail.softwareChangesTab', 'Software Changes')}
-                        iconPosition="start"
-                        sx={{ textTransform: 'none' }}
-                    />
-                    {supportsThirdPartyRepos() && (
-                        <Tab
-                            icon={<SourceIcon />}
-                            label={t('hostDetail.thirdPartyReposTab', 'Third-Party Repositories')}
-                            iconPosition="start"
-                            sx={{ textTransform: 'none' }}
-                        />
-                    )}
-                    <Tab
-                        icon={<SecurityIcon />}
-                        label={t('hostDetail.accessTab', 'Access')}
-                        iconPosition="start"
-                        sx={{ textTransform: 'none' }}
-                    />
-                    <Tab
-                        icon={<ShieldIcon />}
-                        label={t('hostDetail.securityTab', 'Security')}
-                        iconPosition="start"
-                        sx={{ textTransform: 'none' }}
-                    />
-                    {hasVulnEngineModule() && (
-                        <Tab
-                            icon={<BugReportIcon />}
-                            label={t('hostDetail.vulnerabilitiesTab', 'Vulnerabilities')}
-                            iconPosition="start"
-                            sx={{ textTransform: 'none' }}
-                        />
-                    )}
-                    {hasComplianceEngineModule() && (
-                        <Tab
-                            icon={<VerifiedUserIcon />}
-                            label={t('hostDetail.complianceTab', 'Compliance')}
-                            iconPosition="start"
-                            sx={{ textTransform: 'none' }}
-                        />
-                    )}
-                    <Tab
-                        icon={<CertificateIcon />}
-                        label={t('hostDetail.certificatesTab', 'Certificates')}
-                        iconPosition="start"
-                        sx={{ textTransform: 'none' }}
-                    />
-                    <Tab
-                        icon={<AssignmentIcon />}
-                        label={t('hostDetail.serverRolesTab', 'Server Roles')}
-                        iconPosition="start"
-                        sx={{ textTransform: 'none' }}
-                    />
-                    {supportsChildHosts() && (
-                        <Tab
-                            icon={<ComputerIcon />}
-                            label={t('hostDetail.childHostsTab', 'Child Hosts')}
-                            iconPosition="start"
-                            sx={{ textTransform: 'none' }}
-                        />
-                    )}
-                    {isUbuntu() && ubuntuProInfo?.available && (
-                        <Tab
-                            icon={<VerifiedUserIcon />}
-                            label={t('hostDetail.ubuntuProTab', 'Ubuntu Pro')}
-                            iconPosition="start"
-                            sx={{ textTransform: 'none' }}
-                        />
-                    )}
-                    <Tab
-                        icon={<MedicalServicesIcon />}
-                        label={t('hostDetail.diagnosticsTab', 'Diagnostics')}
-                        iconPosition="start"
-                        sx={{ textTransform: 'none' }}
-                    />
+                    ))}
                 </Tabs>
             </Box>
 
             {/* Tab Content - flexGrow to fill available space */}
             <Box sx={{ flexGrow: 1, overflow: 'auto', minHeight: 0 }}>
-            {currentTab === 0 && (
+            {currentTabId === 'info' && (
                 <Grid container spacing={3}>
                 {/* Basic Information */}
                 <Grid size={{ xs: 12, md: 6 }}>
@@ -4571,15 +4462,8 @@ const HostDetail = () => { // NOSONAR
                 </Grid>
             )}
 
-            {/* Health Tab (Pro+ only) */}
-            {isProPlusActive && currentTab === getHealthTabIndex() && hostId && (
-                <Box sx={{ p: 2 }}>
-                    <HealthAnalysisCard hostId={hostId} />
-                </Box>
-            )}
-
             {/* Hardware Tab */}
-            {currentTab === getHardwareTabIndex() && (
+            {currentTabId === 'hardware' && (
                 <Grid container spacing={3}>
                 {/* Hardware Information */}
                 <Grid size={{ xs: 12 }}>
@@ -4895,7 +4779,7 @@ const HostDetail = () => { // NOSONAR
             )}
 
             {/* Software Tab */}
-            {currentTab === getSoftwareTabIndex() && (
+            {currentTabId === 'software' && (
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12 }}>
                         <Card>
@@ -5102,7 +4986,7 @@ const HostDetail = () => { // NOSONAR
             )}
 
             {/* Third-Party Repositories Tab */}
-            {currentTab === getThirdPartyReposTabIndex() && host && (
+            {currentTabId === 'third-party-repos' && host && (
                 <ThirdPartyRepositories
                     hostId={hostId || ''}
                     privilegedMode={host.is_agent_privileged || false}
@@ -5111,7 +4995,7 @@ const HostDetail = () => { // NOSONAR
             )}
 
             {/* Access Tab */}
-            {currentTab === getAccessTabIndex() && (
+            {currentTabId === 'access' && (
                 <Grid container spacing={3}>
                     {/* User Accounts */}
                     <Grid size={{ xs: 12 }}>
@@ -5454,7 +5338,7 @@ const HostDetail = () => { // NOSONAR
             )}
 
             {/* Security Tab */}
-            {currentTab === getSecurityTabIndex() && hostId && (
+            {currentTabId === 'security' && hostId && (
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12, md: 6 }} sx={{ display: 'flex' }}>
                         <AntivirusStatusCard
@@ -5490,22 +5374,17 @@ const HostDetail = () => { // NOSONAR
                 </Grid>
             )}
 
-            {/* Vulnerabilities Tab */}
-            {hasVulnEngineModule() && currentTab === getVulnerabilitiesTabIndex() && hostId && (
-                <Box sx={{ p: 2 }}>
-                    <VulnerabilitiesCard hostId={hostId} />
-                </Box>
-            )}
-
-            {/* Compliance Tab */}
-            {hasComplianceEngineModule() && currentTab === getComplianceTabIndex() && hostId && (
-                <Box sx={{ p: 2 }}>
-                    <ComplianceCard hostId={hostId} />
-                </Box>
-            )}
+            {/* Plugin tabs content */}
+            {visiblePluginTabs.map(pt => (
+                currentTabId === pt.id && hostId && (
+                    <Box key={pt.id} sx={{ p: 2 }}>
+                        <pt.component hostId={hostId} />
+                    </Box>
+                )
+            ))}
 
             {/* Certificates Tab */}
-            {currentTab === getCertificatesTabIndex() && (
+            {currentTabId === 'certificates' && (
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12 }}>
                         <Card>
@@ -5664,7 +5543,7 @@ const HostDetail = () => { // NOSONAR
             )}
 
             {/* Software Changes Tab */}
-            {currentTab === getSoftwareInstallsTabIndex() && (
+            {currentTabId === 'software-changes' && (
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12 }}>
                         <Card>
@@ -5762,7 +5641,7 @@ const HostDetail = () => { // NOSONAR
             )}
 
             {/* Server Roles Tab */}
-            {currentTab === getServerRolesTabIndex() && (
+            {currentTabId === 'server-roles' && (
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12 }}>
                         <Card>
@@ -5939,7 +5818,7 @@ const HostDetail = () => { // NOSONAR
 
             {/* Child Hosts Tab */}
             {/* NOSONAR: Cognitive complexity is acceptable here as this is a cohesive JSX block rendering virtualization capabilities for multiple hypervisor types (WSL, LXD, VMM, KVM, bhyve) with consistent structure */}
-            {currentTab === getChildHostsTabIndex() && supportsChildHosts() && (
+            {currentTabId === 'child-hosts' && supportsChildHosts() && (
                 <Grid container spacing={3}>
                     {/* Virtualization Capabilities - Card-based layout */}
                     <Grid size={{ xs: 12 }}>
@@ -6264,7 +6143,7 @@ const HostDetail = () => { // NOSONAR
             )}
 
             {/* Ubuntu Pro Tab */}
-            {currentTab === getUbuntuProTabIndex() && isUbuntu() && ubuntuProInfo?.available && (
+            {currentTabId === 'ubuntu-pro' && isUbuntu() && ubuntuProInfo?.available && (
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12 }}>
                         <Card>
@@ -6513,7 +6392,7 @@ const HostDetail = () => { // NOSONAR
             )}
 
             {/* Diagnostics Tab */}
-            {currentTab === getDiagnosticsTabIndex() && (
+            {currentTabId === 'diagnostics' && (
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12 }}>
                         <Card>

@@ -10,33 +10,30 @@ import ConnectionStatusIndicator from "./ConnectionStatusIndicator";
 import UserProfileDropdown from "./UserProfileDropdown";
 import NotificationBell from "./NotificationBell";
 import { getLicenseInfo } from "../Services/license";
+import { usePlugins } from "../plugins";
 
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
-  const [isVulnFeatureActive, setIsVulnFeatureActive] = useState(false);
-  const [isComplianceFeatureActive, setIsComplianceFeatureActive] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { navItems } = usePlugins();
+  const [activeLicenseFeatures, setActiveLicenseFeatures] = useState<string[]>([]);
 
-  // Check if vulnerability scanning feature is active (Pro+ with vuln feature)
+  // Check license features for plugin nav item visibility
   useEffect(() => {
-    const checkVulnFeature = async () => {
+    const checkLicenseFeatures = async () => {
       try {
         const licenseInfo = await getLicenseInfo();
-        // Check if license is active and has vulnerability scanning feature
-        const hasVulnFeature = licenseInfo.active && licenseInfo.features?.includes('vuln');
-        setIsVulnFeatureActive(hasVulnFeature);
-        const hasComplianceFeature = licenseInfo.active && licenseInfo.features?.includes('compliance');
-        setIsComplianceFeatureActive(hasComplianceFeature);
+        if (licenseInfo.active && licenseInfo.features) {
+          setActiveLicenseFeatures(licenseInfo.features);
+        }
       } catch {
-        setIsVulnFeatureActive(false);
-        setIsComplianceFeatureActive(false);
+        setActiveLicenseFeatures([]);
       }
     };
 
-    // Only check when logged in
     if (localStorage.getItem('bearer_token')) {
-      checkVulnFeature();
+      checkLicenseFeatures();
     }
   }, []);
 
@@ -64,6 +61,12 @@ const Navbar = () => {
     navigate('/settings');
   };
 
+  // Filter plugin nav items by their feature flag
+  const visiblePluginNavItems = navItems.filter(item => {
+    if (!item.featureFlag) return true;
+    return activeLicenseFeatures.includes(item.featureFlag);
+  });
+
   return (
     <header className="header">
       <nav className="nav container">
@@ -78,9 +81,9 @@ const Navbar = () => {
         >
           <ul className="nav__list">
             <li className="nav__item">
-              <NavLink 
-                to="/" 
-                className="nav__link" 
+              <NavLink
+                to="/"
+                className="nav__link"
                 onClick={closeMenuOnMobile}
                 end
               >
@@ -123,28 +126,17 @@ const Navbar = () => {
                 {t('nav.osUpgrades')}
               </NavLink>
             </li>
-            {isVulnFeatureActive && (
-              <li className="nav__item">
+            {visiblePluginNavItems.map(item => (
+              <li key={item.path} className="nav__item">
                 <NavLink
-                  to="/vulnerabilities"
+                  to={item.path}
                   className="nav__link"
                   onClick={closeMenuOnMobile}
                 >
-                  {t('nav.vulnerabilities')}
+                  {t(item.labelKey)}
                 </NavLink>
               </li>
-            )}
-            {isComplianceFeatureActive && (
-              <li className="nav__item">
-                <NavLink
-                  to="/compliance"
-                  className="nav__link"
-                  onClick={closeMenuOnMobile}
-                >
-                  {t('nav.compliance')}
-                </NavLink>
-              </li>
-            )}
+            ))}
             <li className="nav__item">
               <NavLink
                 to="/secrets"

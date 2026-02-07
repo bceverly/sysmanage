@@ -20,6 +20,7 @@ from sqlalchemy.orm import sessionmaker
 
 from backend.config.config import get_config
 from backend.licensing.features import ModuleCode
+from backend.licensing.plugin_bundle_loader import PluginBundleLoader
 from backend.persistence import db as db_module
 from backend.persistence.models import ProPlusModuleCache
 from backend.utils.verbosity_logger import get_logger
@@ -47,6 +48,7 @@ class ModuleLoader:
     def __init__(self):
         self._loaded_modules: Dict[str, Any] = {}
         self._initialized = False
+        self._plugin_loader = PluginBundleLoader()
 
     @property
     def loaded_modules(self) -> Dict[str, Any]:
@@ -120,6 +122,7 @@ class ModuleLoader:
         except Exception as e:
             logger.error("Failed to create modules directory: %s", e)
 
+        self._plugin_loader.initialize()
         self._initialized = True
 
     async def ensure_module_available(
@@ -127,6 +130,7 @@ class ModuleLoader:
     ) -> bool:
         """
         Ensure a module is downloaded and available for loading.
+        Also ensures the corresponding plugin bundle is downloaded.
 
         Args:
             module_code: The module code (e.g., "health_engine")
@@ -138,17 +142,27 @@ class ModuleLoader:
         if not self._initialized:
             self.initialize()
 
-        # Check if already loaded
-        if module_code in self._loaded_modules:
+        module_ok = True
+
+        # For plugin-only modules (proplus_core), skip Cython loading
+        if module_code == "proplus_core":
+            await self.ensure_plugin_available(module_code)
             return True
 
-        # Check cache first
-        cached_path = self._get_cached_module_path(module_code, version)
-        if cached_path and os.path.exists(cached_path):
-            return self._load_module_from_path(module_code, cached_path)
+        # Check if already loaded
+        if module_code not in self._loaded_modules:
+            # Check cache first
+            cached_path = self._get_cached_module_path(module_code, version)
+            if cached_path and os.path.exists(cached_path):
+                module_ok = self._load_module_from_path(module_code, cached_path)
+            else:
+                # Download if not cached
+                module_ok = await self._download_and_cache_module(module_code, version)
 
-        # Download if not cached
-        return await self._download_and_cache_module(module_code, version)
+        # Also ensure the plugin bundle is available
+        await self.ensure_plugin_available(module_code)
+
+        return module_ok
 
     def _get_cached_module_path(
         self, module_code: str, version: Optional[str] = None
@@ -203,11 +217,11 @@ class ModuleLoader:
         platform_info = self._get_platform_info()
         version_str = version or "latest"
 
-        # Build download URL with license_key query parameter
+        # Build download URL (license key sent via header)
         url = (
             f"{download_url}/{module_code}/{version_str}/"
             f"{platform_info['platform']}/{platform_info['architecture']}/"
-            f"{platform_info['python_version']}?license_key={license_key}"
+            f"{platform_info['python_version']}"
         )
 
         modules_path = self._get_modules_path()
@@ -220,7 +234,9 @@ class ModuleLoader:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    url, timeout=aiohttp.ClientTimeout(total=DOWNLOAD_TIMEOUT)
+                    url,
+                    headers={"X-License-Key": license_key},
+                    timeout=aiohttp.ClientTimeout(total=DOWNLOAD_TIMEOUT),
                 ) as response:
                     if response.status != 200:
                         logger.error(
@@ -473,12 +489,13 @@ class ModuleLoader:
                 logger.error("Error querying cached module hash: %s", e)
                 return None
 
-    async def query_server_versions(self) -> Dict[str, Dict[str, str]]:
+    async def query_server_versions(self) -> Dict[str, Any]:
         """
-        Query the license server for latest module versions.
+        Query the license server for latest module and plugin versions.
 
         Returns:
-            Dictionary mapping module_code to {"version": str, "file_hash": str}
+            Dictionary with "modules" and "plugins" keys, each mapping
+            module_code to {"version": str, "file_hash": str}
         """
         versions_url = self._get_versions_url()
         if not versions_url:
@@ -498,13 +515,15 @@ class ModuleLoader:
         url = (
             f"{versions_url}/"
             f"{platform_info['platform']}/{platform_info['architecture']}/"
-            f"{platform_info['python_version']}?license_key={license_key}"
+            f"{platform_info['python_version']}"
         )
 
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    url, timeout=aiohttp.ClientTimeout(total=VERSION_CHECK_TIMEOUT)
+                    url,
+                    headers={"X-License-Key": license_key},
+                    timeout=aiohttp.ClientTimeout(total=VERSION_CHECK_TIMEOUT),
                 ) as response:
                     if response.status != 200:
                         logger.warning(
@@ -515,15 +534,27 @@ class ModuleLoader:
                         return {}
 
                     data = await response.json()
-                    modules = data.get("modules", [])
 
-                    result = {}
-                    for mod in modules:
-                        result[mod["code"]] = {
+                    # Parse modules
+                    modules_result: Dict[str, Dict[str, str]] = {}
+                    for mod in data.get("modules", []):
+                        modules_result[mod["code"]] = {
                             "version": mod["latest_version"],
                             "file_hash": mod["file_hash"],
                         }
-                    return result
+
+                    # Parse plugins
+                    plugins_result: Dict[str, Dict[str, str]] = {}
+                    for plugin in data.get("plugins", []):
+                        plugins_result[plugin["code"]] = {
+                            "version": plugin["latest_version"],
+                            "file_hash": plugin["file_hash"],
+                        }
+
+                    return {
+                        "modules": modules_result,
+                        "plugins": plugins_result,
+                    }
 
         except aiohttp.ClientError as e:
             logger.warning("Version check network error: %s", e)
@@ -543,8 +574,13 @@ class ModuleLoader:
         Returns:
             List of module codes that have updates available
         """
-        server_versions = await self.query_server_versions()
-        if not server_versions:
+        server_data = await self.query_server_versions()
+        if not server_data:
+            return []
+
+        # Handle both old format (flat dict) and new format (nested with modules/plugins)
+        server_versions = server_data.get("modules", server_data)
+        if not isinstance(server_versions, dict):
             return []
 
         updates_available = []
@@ -593,7 +629,7 @@ class ModuleLoader:
 
     async def update_modules(self) -> Dict[str, bool]:
         """
-        Check for and download any module updates.
+        Check for and download any module and plugin updates.
 
         Returns:
             Dictionary mapping module_code to success status
@@ -601,7 +637,8 @@ class ModuleLoader:
         updates_needed = await self.check_for_updates()
         if not updates_needed:
             logger.info("All modules are up to date")
-            return {}
+        else:
+            pass  # Will process below
 
         results = {}
         for module_code in updates_needed:
@@ -624,6 +661,11 @@ class ModuleLoader:
                     cached_path = self._get_cached_module_path(module_code)
                     if cached_path and os.path.exists(cached_path):
                         self._load_module_from_path(module_code, cached_path)
+
+        # Also update plugin bundles
+        server_versions = await self.query_server_versions()
+        plugin_results = await self._plugin_loader.update_plugins(server_versions)
+        results.update({f"{k}_plugin": v for k, v in plugin_results.items()})
 
         return results
 
@@ -670,6 +712,40 @@ class ModuleLoader:
             except Exception as e:
                 logger.error("Failed to remove cached module %s: %s", module_code, e)
                 session.rollback()
+
+    # --- Plugin bundle methods (delegated to PluginBundleLoader) ---
+
+    async def ensure_plugin_available(self, module_code: str) -> bool:
+        """
+        Ensure a plugin bundle is downloaded and available.
+
+        Args:
+            module_code: The module code (e.g., "health_engine")
+
+        Returns:
+            True if plugin is available, False otherwise
+        """
+        return await self._plugin_loader.ensure_plugin_available(module_code)
+
+    async def check_for_plugin_updates(self) -> List[str]:
+        """
+        Check for plugin bundle updates from the license server.
+
+        Returns:
+            List of module codes that have plugin updates available
+        """
+        server_versions = await self.query_server_versions()
+        return await self._plugin_loader.check_for_plugin_updates(server_versions)
+
+    async def update_plugins(self) -> Dict[str, bool]:
+        """
+        Check for and download any plugin bundle updates.
+
+        Returns:
+            Dictionary mapping module_code to success status
+        """
+        server_versions = await self.query_server_versions()
+        return await self._plugin_loader.update_plugins(server_versions)
 
     async def check_and_update_on_startup(self) -> None:
         """

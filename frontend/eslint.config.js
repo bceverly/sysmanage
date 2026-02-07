@@ -42,7 +42,8 @@ export default [
         AbortController: 'readonly',
         Blob: 'readonly',
         URL: 'readonly',
-        console: 'readonly'
+        console: 'readonly',
+        fetch: 'readonly'
       }
     },
     plugins: {

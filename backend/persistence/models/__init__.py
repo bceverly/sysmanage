@@ -93,6 +93,7 @@ __all__ = [
     "ProPlusLicense",
     "ProPlusLicenseValidationLog",
     "ProPlusModuleCache",
+    "ProPlusPluginCache",
     "HostHealthAnalysis",
     # Vulnerability tracking models
     "Vulnerability",
@@ -104,4 +105,9 @@ __all__ = [
     # Compliance models
     "ComplianceProfile",
     "HostComplianceScan",
+    # Alerting models
+    "NotificationChannel",
+    "AlertRule",
+    "AlertRuleNotificationChannel",
+    "Alert",
 ]

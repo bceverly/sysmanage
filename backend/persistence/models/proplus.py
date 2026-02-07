@@ -423,6 +423,181 @@ class ComplianceProfile(Base):
         return f"<ComplianceProfile(name='{self.name}', benchmark_type='{self.benchmark_type}')>"
 
 
+class ProPlusPluginCache(Base):
+    """
+    Cache of downloaded Pro+ JavaScript plugin bundles.
+    Tracks downloaded plugin bundles with their versions and file hashes.
+    """
+
+    __tablename__ = "proplus_plugin_cache"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    module_code = Column(String(100), nullable=False, index=True)
+    version = Column(String(50), nullable=False)
+    file_path = Column(String(500), nullable=False)
+    file_hash = Column(String(128), nullable=False)  # SHA-512 hash
+    downloaded_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+
+    def __repr__(self):
+        return f"<ProPlusPluginCache(module_code='{self.module_code}', version='{self.version}')>"
+
+
+class NotificationChannel(Base):
+    """
+    Notification channel configuration for the alerting engine.
+    Stores connection details for email, webhook, Slack, and Teams channels.
+    """
+
+    __tablename__ = "notification_channel"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String(255), nullable=False)
+    channel_type = Column(
+        String(50), nullable=False
+    )  # "email", "webhook", "slack", "teams"
+    config = Column(JSON, nullable=False)  # Channel-specific configuration
+    enabled = Column(Boolean, nullable=False, default=True)
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        onupdate=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+
+    def __repr__(self):
+        return f"<NotificationChannel(name='{self.name}', type='{self.channel_type}', enabled={self.enabled})>"
+
+
+class AlertRule(Base):
+    """
+    Alert rule definition for the alerting engine.
+    Defines conditions that trigger alerts and their severity.
+    """
+
+    __tablename__ = "alert_rule"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    condition_type = Column(
+        String(50), nullable=False
+    )  # "host_down", "reboot_required", "updates_available", "disk_usage", "cve_severity", "custom_metric"
+    condition_params = Column(JSON, nullable=False)  # Condition-specific parameters
+    severity = Column(
+        String(20), nullable=False
+    )  # "critical", "high", "medium", "low", "info"
+    enabled = Column(Boolean, nullable=False, default=True)
+    cooldown_minutes = Column(
+        Integer, nullable=False, default=60
+    )  # Min time between re-alerts for same host+rule
+    host_filter = Column(
+        JSON, nullable=True
+    )  # Optional tag-based filter e.g. {"tags": ["production"]}
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        onupdate=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+
+    # Relationship to notification channels via junction table
+    notification_channels = relationship(
+        "AlertRuleNotificationChannel",
+        back_populates="rule",
+        cascade="all, delete-orphan",
+    )
+
+    def __repr__(self):
+        return f"<AlertRule(name='{self.name}', condition='{self.condition_type}', severity='{self.severity}')>"
+
+
+class AlertRuleNotificationChannel(Base):
+    """
+    Junction table linking alert rules to notification channels (M:N).
+    """
+
+    __tablename__ = "alert_rule_notification_channel"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    rule_id = Column(
+        GUID(),
+        ForeignKey("alert_rule.id", ondelete=CASCADE_DELETE),
+        nullable=False,
+        index=True,
+    )
+    channel_id = Column(
+        GUID(),
+        ForeignKey("notification_channel.id", ondelete=CASCADE_DELETE),
+        nullable=False,
+        index=True,
+    )
+
+    # Relationships
+    rule = relationship("AlertRule", back_populates="notification_channels")
+    channel = relationship("NotificationChannel")
+
+    def __repr__(self):
+        return f"<AlertRuleNotificationChannel(rule_id={self.rule_id}, channel_id={self.channel_id})>"
+
+
+class Alert(Base):
+    """
+    Fired alert instance from the alerting engine.
+    Records when a condition was triggered for a specific host.
+    """
+
+    __tablename__ = "alert"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    rule_id = Column(
+        GUID(),
+        ForeignKey("alert_rule.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    host_id = Column(
+        GUID(),
+        ForeignKey(HOST_ID_FK, ondelete=CASCADE_DELETE),
+        nullable=False,
+        index=True,
+    )
+    severity = Column(String(20), nullable=False)
+    title = Column(String(500), nullable=False)
+    message = Column(Text, nullable=False)
+    details = Column(JSON, nullable=True)  # Condition-specific data snapshot
+    triggered_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        index=True,
+    )
+    acknowledged_at = Column(DateTime, nullable=True)
+    acknowledged_by = Column(String(255), nullable=True)  # Username
+    resolved_at = Column(DateTime, nullable=True)
+    notification_sent = Column(Boolean, nullable=False, default=False)
+
+    # Relationships
+    rule = relationship("AlertRule")
+    host = relationship("Host", backref="alerts")
+
+    def __repr__(self):
+        return f"<Alert(title='{self.title}', severity='{self.severity}', host_id={self.host_id})>"
+
+
 class HostComplianceScan(Base):
     """
     Stores compliance scan results for hosts.

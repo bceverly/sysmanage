@@ -34,6 +34,7 @@ from backend.api import (
     opentelemetry,
     packages,
     password_reset,
+    plugin_bundle,
     profile,
     queue,
     reports,
@@ -310,6 +311,14 @@ def register_routes(app: FastAPI):
     # Note: Pro+ module routes are mounted in lifecycle.py after modules are loaded
     # This ensures the compiled Cython modules are available before route mounting
     logger.info("Pro+ module routes will be mounted after modules load in lifespan")
+
+    logger.info("Adding Plugin Bundle router with /api prefix")
+    app.include_router(
+        plugin_bundle.router,
+        prefix="/api",
+        tags=["plugins"],
+    )  # /api/plugins/* (with auth)
+    logger.info("Plugin Bundle router added")
 
     logger.info("Adding CVE Refresh Settings router with /api/cve-refresh prefix")
     app.include_router(

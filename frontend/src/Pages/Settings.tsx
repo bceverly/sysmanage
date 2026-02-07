@@ -49,11 +49,9 @@ import AntivirusDefaultsSettings from '../Components/AntivirusDefaultsSettings';
 import HostDefaultsSettings from '../Components/HostDefaultsSettings';
 import FirewallRolesSettings from '../Components/FirewallRolesSettings';
 import DistributionsSettings from '../Components/DistributionsSettings';
-import ProPlusSettings from '../Components/ProPlusSettings';
-import CveRefreshSettings from '../Components/CveRefreshSettings';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
-import { getLicenseInfo } from '../Services/license';
+import { usePlugins } from '../plugins';
 
 interface Tag {
   id: string;
@@ -136,14 +134,15 @@ const Settings: React.FC = () => {
   const [viewHostsDialogOpen, setViewHostsDialogOpen] = useState(false);
   const [viewingTag, setViewingTag] = useState<TagWithHosts | null>(null);
   
-  // Pro+ license state
-  const [isProPlusActive, setIsProPlusActive] = useState<boolean>(false);
+  // Plugin system for dynamic settings tabs
+  const { settingsTabs: pluginSettingsTabs } = usePlugins();
 
-  // Tab names for URL hash (dynamic based on Pro+ status)
+  // Tab names for URL hash (dynamic based on plugin tabs)
   const tabNames = useMemo(() => {
     const baseTabs = ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages', 'host-defaults', 'firewall-roles', 'distributions'];
-    return isProPlusActive ? [...baseTabs, 'professional-plus', 'cve-refresh'] : baseTabs;
-  }, [isProPlusActive]);
+    const pluginTabIds = pluginSettingsTabs.map(pt => pt.id);
+    return [...baseTabs, ...pluginTabIds];
+  }, [pluginSettingsTabs]);
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -291,19 +290,7 @@ const Settings: React.FC = () => {
     checkPermission();
   }, []);
 
-  // Check Pro+ license status
-  useEffect(() => {
-    const checkProPlusStatus = async () => {
-      try {
-        const licenseInfo = await getLicenseInfo();
-        setIsProPlusActive(licenseInfo.active);
-      } catch (error) {
-        console.log('Pro+ license check failed:', error);
-        setIsProPlusActive(false);
-      }
-    };
-    checkProPlusStatus();
-  }, []);
+  // Note: Pro+ settings tabs are now provided by plugins via usePlugins()
 
   // Search columns configuration
   const searchColumns = [
@@ -1117,12 +1104,9 @@ const Settings: React.FC = () => {
           <Tab label={t('hostDefaults.title', 'Host Defaults')} />
           <Tab label={t('firewallRoles.title', 'Firewall Roles')} />
           <Tab label={t('distributions.title', 'Distributions')} />
-          {isProPlusActive && (
-            <Tab label={t('proPlus.title', 'Professional+')} />
-          )}
-          {isProPlusActive && (
-            <Tab label={t('cveRefresh.tabTitle', 'CVE Database')} />
-          )}
+          {pluginSettingsTabs.map(pt => (
+            <Tab key={pt.id} label={t(pt.labelKey)} />
+          ))}
         </Tabs>
       </Box>
 
@@ -1137,28 +1121,13 @@ const Settings: React.FC = () => {
         {activeTab === 6 && <HostDefaultsSettings />}
         {activeTab === 7 && <FirewallRolesSettings />}
         {activeTab === 8 && <DistributionsSettings />}
-        {isProPlusActive && activeTab === 9 && (
-          <Box>
-            <Typography variant="h5" sx={{ mb: 2 }}>
-              {t('proPlus.title', 'Professional+')}
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 3 }}>
-              {t('proPlus.description', 'View your Sysmanage Professional+ license details and provisioned features.')}
-            </Typography>
-            <ProPlusSettings />
-          </Box>
-        )}
-        {isProPlusActive && activeTab === 10 && (
-          <Box>
-            <Typography variant="h5" sx={{ mb: 2 }}>
-              {t('cveRefresh.tabTitle', 'CVE Database')}
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 3 }}>
-              {t('cveRefresh.description', 'Configure automatic CVE database updates from multiple security data sources.')}
-            </Typography>
-            <CveRefreshSettings />
-          </Box>
-        )}
+        {pluginSettingsTabs.map((pt, index) => (
+          activeTab === 9 + index && (
+            <Box key={pt.id}>
+              <pt.component />
+            </Box>
+          )
+        ))}
       </Box>
 
       {/* Add Tag Dialog */}
