@@ -49,9 +49,9 @@ class SecretResponse(BaseModel):
 
     id: str
     name: str
-    filename: Optional[str]
+    filename: Optional[str] = None
     secret_type: str
-    secret_subtype: Optional[str]
+    secret_subtype: Optional[str] = None
     created_at: str
     updated_at: str
     created_by: str

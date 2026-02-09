@@ -23,6 +23,7 @@ from backend.persistence.models.core import GUID
 # Constants
 HOST_ID_FK = "host.id"
 CASCADE_DELETE = "CASCADE"
+CASCADE_ALL_DELETE_ORPHAN = "all, delete-orphan"
 
 
 class ProPlusLicense(Base):
@@ -189,7 +190,7 @@ class Vulnerability(Base):
     package_vulnerabilities = relationship(
         "PackageVulnerability",
         back_populates="vulnerability",
-        cascade="all, delete-orphan",
+        cascade=CASCADE_ALL_DELETE_ORPHAN,
     )
 
     def __repr__(self):
@@ -287,7 +288,9 @@ class HostVulnerabilityScan(Base):
 
     # Relationship to individual findings
     findings = relationship(
-        "HostVulnerabilityFinding", back_populates="scan", cascade="all, delete-orphan"
+        "HostVulnerabilityFinding",
+        back_populates="scan",
+        cascade=CASCADE_ALL_DELETE_ORPHAN,
     )
 
     def __repr__(self):
@@ -518,7 +521,7 @@ class AlertRule(Base):
     notification_channels = relationship(
         "AlertRuleNotificationChannel",
         back_populates="rule",
-        cascade="all, delete-orphan",
+        cascade=CASCADE_ALL_DELETE_ORPHAN,
     )
 
     def __repr__(self):

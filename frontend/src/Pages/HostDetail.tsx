@@ -620,43 +620,23 @@ const HostDetail = () => { // NOSONAR
 
     // Build ordered tab definitions array
     const tabDefinitions = useMemo(() => {
-        const tabs: Array<{ id: string; icon: React.ReactElement; label: string }> = [];
-
-        tabs.push({ id: 'info', icon: <InfoIcon />, label: t('hostDetail.infoTab', 'Info') });
-
-        for (const pt of visiblePluginTabs.filter(p => p.position === 'after-info')) {
-            tabs.push({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) });
-        }
-
-        tabs.push({ id: 'hardware', icon: <MemoryIcon />, label: t('hostDetail.hardwareTab', 'Hardware') });
-        tabs.push({ id: 'software', icon: <AppsIcon />, label: t('hostDetail.softwareTab', 'Software') });
-        tabs.push({ id: 'software-changes', icon: <HistoryIcon />, label: t('hostDetail.softwareChangesTab', 'Software Changes') });
-
-        if (supportsThirdPartyRepos()) {
-            tabs.push({ id: 'third-party-repos', icon: <SourceIcon />, label: t('hostDetail.thirdPartyReposTab', 'Third-Party Repositories') });
-        }
-
-        tabs.push({ id: 'access', icon: <SecurityIcon />, label: t('hostDetail.accessTab', 'Access') });
-        tabs.push({ id: 'security', icon: <ShieldIcon />, label: t('hostDetail.securityTab', 'Security') });
-
-        for (const pt of visiblePluginTabs.filter(p => p.position === 'after-security')) {
-            tabs.push({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) });
-        }
-
-        tabs.push({ id: 'certificates', icon: <CertificateIcon />, label: t('hostDetail.certificatesTab', 'Certificates') });
-        tabs.push({ id: 'server-roles', icon: <AssignmentIcon />, label: t('hostDetail.serverRolesTab', 'Server Roles') });
-
-        for (const pt of visiblePluginTabs.filter(p => p.position === 'before-diagnostics')) {
-            tabs.push({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) });
-        }
-
-        if (supportsChildHosts()) {
-            tabs.push({ id: 'child-hosts', icon: <ComputerIcon />, label: t('hostDetail.childHostsTab', 'Child Hosts') });
-        }
-        if (isUbuntu() && ubuntuProInfo?.available) {
-            tabs.push({ id: 'ubuntu-pro', icon: <VerifiedUserIcon />, label: t('hostDetail.ubuntuProTab', 'Ubuntu Pro') });
-        }
-        tabs.push({ id: 'diagnostics', icon: <MedicalServicesIcon />, label: t('hostDetail.diagnosticsTab', 'Diagnostics') });
+        const tabs: Array<{ id: string; icon: React.ReactElement; label: string }> = [
+            { id: 'info', icon: <InfoIcon />, label: t('hostDetail.infoTab', 'Info') },
+            ...visiblePluginTabs.filter(p => p.position === 'after-info').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
+            { id: 'hardware', icon: <MemoryIcon />, label: t('hostDetail.hardwareTab', 'Hardware') },
+            { id: 'software', icon: <AppsIcon />, label: t('hostDetail.softwareTab', 'Software') },
+            { id: 'software-changes', icon: <HistoryIcon />, label: t('hostDetail.softwareChangesTab', 'Software Changes') },
+            ...(supportsThirdPartyRepos() ? [{ id: 'third-party-repos', icon: <SourceIcon />, label: t('hostDetail.thirdPartyReposTab', 'Third-Party Repositories') }] : []),
+            { id: 'access', icon: <SecurityIcon />, label: t('hostDetail.accessTab', 'Access') },
+            { id: 'security', icon: <ShieldIcon />, label: t('hostDetail.securityTab', 'Security') },
+            ...visiblePluginTabs.filter(p => p.position === 'after-security').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
+            { id: 'certificates', icon: <CertificateIcon />, label: t('hostDetail.certificatesTab', 'Certificates') },
+            { id: 'server-roles', icon: <AssignmentIcon />, label: t('hostDetail.serverRolesTab', 'Server Roles') },
+            ...visiblePluginTabs.filter(p => p.position === 'before-diagnostics').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
+            ...(supportsChildHosts() ? [{ id: 'child-hosts', icon: <ComputerIcon />, label: t('hostDetail.childHostsTab', 'Child Hosts') }] : []),
+            ...((isUbuntu() && ubuntuProInfo?.available) ? [{ id: 'ubuntu-pro', icon: <VerifiedUserIcon />, label: t('hostDetail.ubuntuProTab', 'Ubuntu Pro') }] : []),
+            { id: 'diagnostics', icon: <MedicalServicesIcon />, label: t('hostDetail.diagnosticsTab', 'Diagnostics') },
+        ];
 
         return tabs;
     }, [visiblePluginTabs, supportsThirdPartyRepos, supportsChildHosts, isUbuntu, ubuntuProInfo, t]);

@@ -52,11 +52,11 @@ class DiagnosticResponse(BaseModel):
     requested_by: str
     status: str
     requested_at: datetime
-    started_at: Optional[datetime]
-    completed_at: Optional[datetime]
-    collection_size_bytes: Optional[int]
-    files_collected: Optional[int]
-    error_message: Optional[str]
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    collection_size_bytes: Optional[int] = None
+    files_collected: Optional[int] = None
+    error_message: Optional[str] = None
 
 
 @router.post("/host/{host_id}/collect-diagnostics", dependencies=[Depends(JWTBearer())])

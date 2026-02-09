@@ -303,7 +303,7 @@ class PluginBundleLoader:
 
         return await self._download_plugin_bundle(module_code)
 
-    async def check_for_plugin_updates(self, server_versions: Dict) -> List[str]:
+    def check_for_plugin_updates(self, server_versions: Dict) -> List[str]:
         """
         Check for plugin bundle updates given server version data.
 
@@ -359,7 +359,7 @@ class PluginBundleLoader:
         Returns:
             Dictionary mapping module_code to success status
         """
-        updates_needed = await self.check_for_plugin_updates(server_versions)
+        updates_needed = self.check_for_plugin_updates(server_versions)
         if not updates_needed:
             logger.info("All plugin bundles are up to date")
             return {}

@@ -5,7 +5,7 @@
  * components re-render when plugins are registered.
  */
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { pluginManager } from './PluginManager';
 import type {
     PluginNavItem,
@@ -84,7 +84,7 @@ export const PluginProvider: React.FC<PluginProviderProps> = ({ children }) => {
                         const scriptEl = document.createElement('script');
                         scriptEl.textContent = scriptText;
                         document.head.appendChild(scriptEl);
-                        document.head.removeChild(scriptEl);
+                        scriptEl.remove();
                     }
                 } catch (err) {
                     console.warn('Failed to load plugin bundle:', bundleUrl, err);
@@ -101,16 +101,18 @@ export const PluginProvider: React.FC<PluginProviderProps> = ({ children }) => {
         loadPlugins();
     }, [loadPlugins]);
 
-    // Rebuild context value when plugins change
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _revision = revision; // used to trigger re-render
-    const value: PluginContextValue = {
-        navItems: pluginManager.getNavItems(),
-        routes: pluginManager.getRoutes(),
-        hostDetailTabs: pluginManager.getHostDetailTabs(),
-        settingsTabs: pluginManager.getSettingsTabs(),
-        pluginsLoaded,
-    };
+    // Rebuild context value when plugins change (revision triggers re-computation)
+    const value: PluginContextValue = useMemo(
+        () => ({
+            navItems: pluginManager.getNavItems(),
+            routes: pluginManager.getRoutes(),
+            hostDetailTabs: pluginManager.getHostDetailTabs(),
+            settingsTabs: pluginManager.getSettingsTabs(),
+            pluginsLoaded,
+        }),
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- revision is intentionally used to trigger re-computation when plugins change
+        [revision, pluginsLoaded]
+    );
 
     return (
         <PluginContext.Provider value={value}>

@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall
+.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades sonarqube-scan install-sonar-scanner clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall
 
 # Default target
 help:
@@ -22,6 +22,8 @@ help:
 	@echo "  make security-frontend - Run frontend security scanning (ESLint)"
 	@echo "  make security-secrets - Run secrets detection"
 	@echo "  make security-upgrades - Check for security package upgrades"
+	@echo "  make sonarqube-scan - Run SonarQube/SonarCloud analysis"
+	@echo "  make install-sonar-scanner - Install SonarQube scanner locally"
 	@echo "  make setup         - Install development dependencies"
 	@echo "  make clean         - Clean test artifacts and cache"
 	@echo "  make build         - Build frontend for production"
@@ -646,6 +648,21 @@ else
 	fi
 endif
 	@echo "[OK] Development dependencies installation completed"
+	@echo ""
+	@echo "=== Optional: SonarQube/SonarCloud Setup ==="
+	@echo "For code quality scanning with 'make sonarqube-scan', choose one option:"
+	@echo ""
+	@echo "  1. SonarCloud (recommended for CI/CD):"
+	@echo "     - Sign up at https://sonarcloud.io and import this project"
+	@echo "     - Generate a token and add to your environment:"
+	@echo "       export SONAR_TOKEN=your_token_here"
+	@echo ""
+	@echo "  2. Local SonarQube (Docker auto-start):"
+	@echo "     - Just run 'make sonarqube-scan' with Docker installed"
+	@echo "     - A temporary SonarQube container will start automatically"
+	@echo ""
+	@echo "  3. Install scanner locally: make install-sonar-scanner"
+	@echo ""
 	@echo "Development environment setup complete!"
 
 # Database migration target
@@ -771,6 +788,97 @@ else
 	@grep -r -i --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=__pycache__ --exclude-dir=build --exclude="*.pyc" -E "(AKIA[0-9A-Z]{16}|aws_secret_access_key)" . || echo "No AWS credentials found"
 endif
 	@echo "[OK] Basic secrets detection completed"
+
+# SonarQube/SonarCloud scan
+sonarqube-scan: $(VENV_ACTIVATE)
+	@echo "=== SonarQube/SonarCloud Scan ==="
+	@if ! command -v sonar-scanner >/dev/null 2>&1; then \
+		echo "ERROR: sonar-scanner not found. Install with: make install-sonar-scanner"; \
+		echo "Or download from: https://docs.sonarqube.org/latest/analyzing-source-code/scanners/sonarscanner/"; \
+		exit 1; \
+	fi
+	@if [ ! -f sonar-project.properties ]; then \
+		echo "ERROR: sonar-project.properties not found"; \
+		exit 1; \
+	fi
+	@echo "Running SonarQube scanner..."
+	@if [ -n "$$SONAR_TOKEN" ]; then \
+		echo "Using SonarCloud with SONAR_TOKEN..."; \
+		sonar-scanner -Dsonar.host.url=https://sonarcloud.io -Dsonar.token=$$SONAR_TOKEN; \
+	elif [ -n "$$SONAR_HOST_URL" ]; then \
+		echo "Using custom SonarQube server at $$SONAR_HOST_URL..."; \
+		sonar-scanner -Dsonar.host.url=$$SONAR_HOST_URL; \
+	elif curl -s --connect-timeout 2 http://localhost:9000/api/system/status >/dev/null 2>&1; then \
+		echo "Found local SonarQube server at localhost:9000..."; \
+		sonar-scanner -Dsonar.host.url=http://localhost:9000; \
+	elif command -v docker >/dev/null 2>&1; then \
+		echo "No SonarQube server found. Starting temporary Docker container..."; \
+		docker run -d --name sonarqube-temp -p 9000:9000 sonarqube:lts-community || true; \
+		echo "Waiting for SonarQube to start (this may take 1-2 minutes)..."; \
+		for i in $$(seq 1 60); do \
+			if curl -s --connect-timeout 2 http://localhost:9000/api/system/status 2>/dev/null | grep -q '"status":"UP"'; then \
+				echo "SonarQube is ready!"; \
+				break; \
+			fi; \
+			if [ $$i -eq 60 ]; then \
+				echo "ERROR: SonarQube failed to start. Check: docker logs sonarqube-temp"; \
+				exit 1; \
+			fi; \
+			sleep 2; \
+		done; \
+		sonar-scanner -Dsonar.host.url=http://localhost:9000; \
+		echo "Note: SonarQube container 'sonarqube-temp' is still running."; \
+		echo "Stop with: docker stop sonarqube-temp && docker rm sonarqube-temp"; \
+	else \
+		echo ""; \
+		echo "ERROR: No SonarQube server available."; \
+		echo ""; \
+		echo "Options:"; \
+		echo "  1. Use SonarCloud (recommended):"; \
+		echo "     - Sign up at https://sonarcloud.io"; \
+		echo "     - Import this project"; \
+		echo "     - Generate a token and run: export SONAR_TOKEN=your_token"; \
+		echo ""; \
+		echo "  2. Start local SonarQube with Docker:"; \
+		echo "     docker run -d --name sonarqube -p 9000:9000 sonarqube:lts-community"; \
+		echo ""; \
+		echo "  3. Install Docker to enable automatic local scanning"; \
+		echo ""; \
+		exit 1; \
+	fi
+	@echo "[OK] SonarQube scan completed"
+
+# Install SonarQube scanner (helper target)
+install-sonar-scanner:
+	@echo "=== Installing SonarQube Scanner ==="
+	@case "$$(uname -s)" in \
+		Linux) \
+			if command -v apt-get >/dev/null 2>&1; then \
+				echo "Installing via apt..."; \
+				sudo apt-get update && sudo apt-get install -y unzip; \
+			fi; \
+			echo "Downloading SonarScanner..."; \
+			curl -sSL -o /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip; \
+			unzip -o /tmp/sonar-scanner.zip -d /tmp/; \
+			sudo mv /tmp/sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner; \
+			sudo ln -sf /opt/sonar-scanner/bin/sonar-scanner /usr/local/bin/sonar-scanner; \
+			rm /tmp/sonar-scanner.zip; \
+			;; \
+		Darwin) \
+			if command -v brew >/dev/null 2>&1; then \
+				brew install sonar-scanner; \
+			else \
+				echo "Install Homebrew first, then run: brew install sonar-scanner"; \
+				exit 1; \
+			fi; \
+			;; \
+		*) \
+			echo "Please install sonar-scanner manually from:"; \
+			echo "https://docs.sonarqube.org/latest/analyzing-source-code/scanners/sonarscanner/"; \
+			exit 1; \
+			;; \
+	esac
+	@echo "[OK] SonarScanner installed"
 
 # Format Python code (helper target)
 format-python: $(VENV_ACTIVATE) clean-whitespace

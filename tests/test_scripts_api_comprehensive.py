@@ -644,11 +644,11 @@ fi
         with pytest.raises(ValidationError):
             SavedScriptUpdate(is_active="not_a_boolean")
 
-        # Test with wrong type for id in SavedScriptResponse
+        # Test with missing required field in SavedScriptResponse
         now = datetime.now(timezone.utc)
         with pytest.raises(ValidationError):
             SavedScriptResponse(
-                id="not_an_integer",
+                id=None,  # None not allowed for required str field
                 name="Test",
                 content="test",
                 shell_type="bash",

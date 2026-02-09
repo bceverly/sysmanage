@@ -735,7 +735,7 @@ class ModuleLoader:
             List of module codes that have plugin updates available
         """
         server_versions = await self.query_server_versions()
-        return await self._plugin_loader.check_for_plugin_updates(server_versions)
+        return self._plugin_loader.check_for_plugin_updates(server_versions)
 
     async def update_plugins(self) -> Dict[str, bool]:
         """

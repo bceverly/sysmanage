@@ -48,7 +48,7 @@ class TagResponse(BaseModel):
 
     id: str
     name: str
-    description: Optional[str]
+    description: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     host_count: int = 0
@@ -62,7 +62,7 @@ class TagWithHostsResponse(BaseModel):
 
     id: str
     name: str
-    description: Optional[str]
+    description: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     hosts: List[dict]

@@ -7,7 +7,7 @@ Uses default-deny policy, so only open ports need to be specified.
 import logging
 import uuid
 from datetime import datetime, timezone
-from typing import List
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session, sessionmaker
@@ -53,9 +53,13 @@ router = APIRouter()
 # ============================================================================
 
 
-@router.get("/common-ports", response_model=CommonPortsResponse)
+@router.get(
+    "/common-ports",
+    response_model=CommonPortsResponse,
+    responses={401: {"description": "Authentication required"}},
+)
 async def get_common_ports(
-    dependencies=Depends(JWTBearer()),
+    dependencies: Annotated[dict, Depends(JWTBearer())],
 ):
     """Get list of common ports for the dropdown."""
     return CommonPortsResponse(ports=COMMON_PORTS)

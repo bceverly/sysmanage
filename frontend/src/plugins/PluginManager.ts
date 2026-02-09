@@ -16,8 +16,8 @@ import type {
 type Listener = () => void;
 
 class PluginManager {
-    private plugins: Map<string, PluginRegistration> = new Map();
-    private listeners: Set<Listener> = new Set();
+    private readonly plugins: Map<string, PluginRegistration> = new Map();
+    private readonly listeners: Set<Listener> = new Set();
 
     registerPlugin = (plugin: PluginRegistration): void => {
         if (this.plugins.has(plugin.id)) {

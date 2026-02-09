@@ -29,7 +29,7 @@ class SecurityRoleResponse(BaseModel):
 
     id: UUID
     name: str
-    description: str | None
+    description: str | None = None
     group_id: UUID
     group_name: str
 
@@ -42,7 +42,7 @@ class SecurityRoleGroupResponse(BaseModel):
 
     id: UUID
     name: str
-    description: str | None
+    description: str | None = None
     roles: List[SecurityRoleResponse]
 
     class Config:

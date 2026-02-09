@@ -97,8 +97,8 @@ import { getLicenseInfo } from '../Services/license';
 import i18n from '../i18n/i18n';
 import { pluginManager } from './PluginManager';
 
-// Expose shared dependencies on window for plugin consumption
-window.__SYSMANAGE_SHARED__ = {
+// Expose shared dependencies on globalThis for plugin consumption
+(globalThis as unknown as { __SYSMANAGE_SHARED__: unknown }).__SYSMANAGE_SHARED__ = {
     React,
     ReactRouterDOM,
     ReactI18next,

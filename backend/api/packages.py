@@ -317,9 +317,7 @@ async def uninstall_packages(
     return await uninstall_packages_operation(host_id, request, db, current_user)
 
 
-@router.get(
-    "/installation-history/{host_id}", response_model=InstallationHistoryResponse
-)
+@router.get("/installation-history/{host_id}")
 async def get_installation_history(
     host_id: str,
     db: Session = Depends(get_db),

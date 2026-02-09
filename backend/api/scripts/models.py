@@ -124,11 +124,11 @@ class SavedScriptResponse(BaseModel):
 
     id: str
     name: str
-    description: Optional[str]
+    description: Optional[str] = None
     content: str
     shell_type: str
-    platform: Optional[str]
-    run_as_user: Optional[str]
+    platform: Optional[str] = None
+    run_as_user: Optional[str] = None
     is_active: bool
     created_by: str
     created_at: datetime
@@ -154,20 +154,20 @@ class ScriptExecutionLogResponse(BaseModel):
 
     id: str
     host_id: str
-    host_fqdn: Optional[str]
-    saved_script_id: Optional[str]
-    script_name: Optional[str]
+    host_fqdn: Optional[str] = None
+    saved_script_id: Optional[str] = None
+    script_name: Optional[str] = None
     shell_type: str
-    run_as_user: Optional[str]
+    run_as_user: Optional[str] = None
     requested_by: str
     execution_id: str
     status: str
-    started_at: Optional[datetime]
-    completed_at: Optional[datetime]
-    exit_code: Optional[int]
-    stdout_output: Optional[str]
-    stderr_output: Optional[str]
-    error_message: Optional[str]
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    exit_code: Optional[int] = None
+    stdout_output: Optional[str] = None
+    stderr_output: Optional[str] = None
+    error_message: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 

@@ -21,6 +21,9 @@ logger = get_logger("backend.api.plugin_bundle")
 
 router = APIRouter()
 
+# Error message constants
+_INVALID_BUNDLE_FILENAME_MSG = "Invalid bundle filename"
+
 # Default directory where plugin bundles are stored
 DEFAULT_MODULES_PATH = "/var/lib/sysmanage/modules"
 
@@ -79,14 +82,14 @@ async def get_plugin_bundle(
     if not filename.endswith(".js") or "/" in filename or "\\" in filename:
         return JSONResponse(
             status_code=400,
-            content={"error": "Invalid bundle filename"},
+            content={"error": _INVALID_BUNDLE_FILENAME_MSG},
         )
 
     # Additional check: reject any path traversal attempts
     if ".." in filename:
         return JSONResponse(
             status_code=400,
-            content={"error": "Invalid bundle filename"},
+            content={"error": _INVALID_BUNDLE_FILENAME_MSG},
         )
 
     modules_path = _get_modules_path()
@@ -105,7 +108,7 @@ async def get_plugin_bundle(
         )
         return JSONResponse(
             status_code=400,
-            content={"error": "Invalid bundle filename"},
+            content={"error": _INVALID_BUNDLE_FILENAME_MSG},
         )
 
     if not os.path.isfile(bundle_path):
