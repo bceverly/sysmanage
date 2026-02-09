@@ -376,7 +376,9 @@ class TestHtmlHostReports:
         assert "<!DOCTYPE html>" in html
         assert '<html lang="en">' in html
         assert "Registered Hosts" in html
-        assert "test-host.example.com" in html
+        assert (
+            "test-host.example.com" in html
+        )  # lgtm[py/incomplete-url-substring-sanitization]
         assert "192.168.1.100" in html
 
     def test_generate_hosts_html_empty(self):
@@ -396,7 +398,9 @@ class TestHtmlHostReports:
 
         assert "production" in html
         assert "webserver" in html
-        assert "tagged-host.example.com" in html
+        assert (
+            "tagged-host.example.com" in html
+        )  # lgtm[py/incomplete-url-substring-sanitization]
 
     def test_generate_hosts_html_with_minimal_host(self, mock_host_minimal):
         """Test generating hosts HTML report with minimal host data."""
@@ -1152,7 +1156,9 @@ class TestReportErrorHandling:
         # Should not raise exception
         html = generate_hosts_html([host], "registered-hosts", "Test")
         assert html is not None
-        assert "test.example.com" in html
+        assert (
+            "test.example.com" in html
+        )  # lgtm[py/incomplete-url-substring-sanitization]
 
     def test_generate_hosts_html_handles_missing_fqdn(self):
         """Test that hosts HTML generation handles missing FQDN."""
@@ -1290,7 +1296,9 @@ class TestReportIntegration:
             # Check all expected elements
             assert "<!DOCTYPE html>" in body
             assert "Registered Hosts" in body
-            assert "test-host.example.com" in body
+            assert (
+                "test-host.example.com" in body
+            )  # lgtm[py/incomplete-url-substring-sanitization]
             assert "192.168.1.100" in body
             assert "Generated" in body
             assert "Total Hosts" in body
