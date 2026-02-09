@@ -10,17 +10,17 @@ This document provides a detailed roadmap for realizing all features in both ope
 2. [Release Philosophy](#release-philosophy)
 3. [Roadmap Overview](#roadmap-overview)
 4. [Phase 0: Current State (Already Implemented)](#phase-0-current-state-already-implemented)
-5. [Phase 1: Stabilization Alpha](#phase-1-stabilization-alpha)
+5. [Phase 1: Stabilization](#phase-1-stabilization)
 6. [Phase 2: Foundation Features](#phase-2-foundation-features)
-7. [Phase 3: Stabilization Beta](#phase-3-stabilization-beta)
-8. [Phase 4: Pro+ Module Migration - Part 1](#phase-4-pro-module-migration---part-1)
-9. [Phase 5: Virtualization Completion](#phase-5-virtualization-completion)
+7. [Phase 3: Stabilization](#phase-3-stabilization)
+8. [Phase 4: Pro+ Professional Tier](#phase-4-pro-professional-tier)
+9. [Phase 5: Stabilization](#phase-5-stabilization)
 10. [Phase 6: Stabilization RC1](#phase-6-stabilization-rc1)
-11. [Phase 7: Pro+ Module Migration - Part 2](#phase-7-pro-module-migration---part-2)
-12. [Phase 8: Platform Enhancements](#phase-8-platform-enhancements)
+11. [Phase 7: Pro+ Enterprise Tier - Part 1](#phase-7-pro-enterprise-tier---part-1)
+12. [Phase 8: Pro+ Enterprise Tier - Part 2](#phase-8-pro-enterprise-tier---part-2)
 13. [Phase 9: Stabilization RC2](#phase-9-stabilization-rc2)
-14. [Phase 10: Enterprise Features](#phase-10-enterprise-features)
-15. [Phase 11: Polish and GA](#phase-11-polish-and-ga)
+14. [Phase 10: Pro+ Enterprise Tier - Part 3](#phase-10-pro-enterprise-tier---part-3)
+15. [Phase 11: Enterprise GA (v3.0.0.0)](#phase-11-enterprise-ga-v3000)
 16. [Release Schedule Summary](#release-schedule-summary)
 17. [Module Migration Plan](#module-migration-plan)
 
@@ -58,12 +58,24 @@ This document provides a detailed roadmap for realizing all features in both ope
 - [x] User account listing
 - [x] Ubuntu Pro integration
 
-#### Child Host Management (Partial)
-- [x] LXD container support (Ubuntu)
-- [x] WSL instance support (Windows)
-- [x] VMM/vmd support (OpenBSD) - ~70% complete
-- [ ] KVM/QEMU support (Linux) - not started
-- [ ] bhyve support (FreeBSD) - not started
+#### Child Host Management (Open Source - Read Only)
+- [x] VM/container listing and status (read-only for all hypervisors)
+- [x] Virtualization capability detection
+
+#### Child Host Management (Implemented - Moving to Pro+)
+
+The following virtualization features are implemented and will be migrated to Pro+:
+
+**Professional Tier (~2,000 lines):**
+- [x] LXD container management (Ubuntu) - complete
+- [x] WSL instance management (Windows) - complete
+
+**Enterprise Tier (~13,000 lines):**
+- [x] KVM/QEMU VM management (Linux) - ~90% complete (~4,500 lines)
+- [x] bhyve VM management (FreeBSD) - ~90% complete (~4,600 lines)
+- [x] VMM/vmd VM management (OpenBSD) - ~70% complete
+- [x] Cloud-init provisioning (all hypervisors)
+- [x] Multi-hypervisor networking configuration
 
 ### Already Implemented - Pro+ (sysmanage-professional-plus)
 
@@ -91,7 +103,7 @@ This document provides a detailed roadmap for realizing all features in both ope
 
 Between major feature development phases, we insert **stabilization phases** focused on:
 
-1. **Unit Test Coverage** - Increase Python test coverage toward 80%+
+1. **Unit Test Coverage** - Increase test coverage by 5% each stabilization phase
 2. **Playwright E2E Tests** - Ensure UI flows work correctly
 3. **SonarQube Cleanup** - Resolve all code quality issues
 4. **Dependabot Updates** - Apply security patches and dependency updates
@@ -101,10 +113,16 @@ Between major feature development phases, we insert **stabilization phases** foc
 
 ### Release Versioning
 
-- **Alpha (0.x.0-alpha.N)** - Feature incomplete, internal testing only
-- **Beta (0.x.0-beta.N)** - Feature complete, external testing welcome
-- **RC (0.x.0-rc.N)** - Release candidate, production-ready pending final validation
-- **GA (1.0.0+)** - General availability, production-ready
+**Current Version:** v1.1.0.0
+
+We use four-part versioning: `major.minor.patch.build`
+
+- **v1.x.0.0** - Open source feature releases (Foundation features)
+- **v2.0.0.0** - First Pro+ commercial release (Professional tier modules)
+- **v2.x.0.0** - Pro+ feature releases (Enterprise tier modules, Platform)
+- **v3.0.0.0** - Major enterprise GA release with full feature set
+
+Each stabilization phase produces a release. Feature phases may produce one or more releases depending on scope.
 
 ---
 
@@ -115,40 +133,41 @@ Between major feature development phases, we insert **stabilization phases** foc
 │                              SYSMANAGE ROADMAP                                  │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
-│  Phase 0: Current State                                                         │
-│     └── [DONE] Core platform, LXD, WSL, VMM (partial), Pro+ base modules        │
+│  Phase 0: Current State                                             v1.1.0.0   │
+│     └── [DONE] Core platform + virtualization code (moving to Pro+)            │
+│                Pro+ modules: proplus_core, health, compliance, vuln, alerting  │
 │                                                                                 │
-│  Phase 1: Stabilization Alpha                                          v0.9.0  │
+│  Phase 1: Stabilization                                             v1.2.0.0   │
 │     └── Unit tests, Playwright, SonarQube, Dependabot, Security audit          │
 │                                                                                 │
-│  Phase 2: Foundation Features (Open Source)                                     │
+│  Phase 2: Foundation Features (Open Source)                         v1.3.0.0   │
 │     └── Access Groups, Scheduled Updates, Package Compliance, Audit, Broadcast │
 │                                                                                 │
-│  Phase 3: Stabilization Beta                                           v0.10.0 │
+│  Phase 3: Stabilization                                             v1.4.0.0   │
 │     └── Test coverage push, full i18n audit, performance baseline              │
 │                                                                                 │
-│  Phase 4: Pro+ Migration Part 1 (Professional Tier)                            │
-│     └── reporting_engine, audit_engine, secrets_engine                         │
+│  Phase 4: Pro+ Professional Tier                                    v2.0.0.0   │
+│     └── reporting, audit, secrets + container_engine (LXD, WSL)                │
 │                                                                                 │
-│  Phase 5: Virtualization Completion                                             │
-│     └── KVM/QEMU (Linux), bhyve (FreeBSD), VMM completion (OpenBSD)            │
+│  Phase 5: Stabilization                                             v2.1.0.0   │
+│     └── Pro+ integration testing, license gating verification                  │
 │                                                                                 │
-│  Phase 6: Stabilization RC1                                            v0.11.0 │
+│  Phase 6: Stabilization                                             v2.2.0.0   │
 │     └── Integration testing, load testing, security penetration test           │
 │                                                                                 │
-│  Phase 7: Pro+ Migration Part 2 (Enterprise Tier)                              │
-│     └── observability_engine, automation_engine, fleet_engine                  │
+│  Phase 7: Pro+ Enterprise Tier - Part 1                             v2.3.0.0   │
+│     └── av_management_engine, firewall_orchestration_engine (security first)   │
 │                                                                                 │
-│  Phase 8: Platform Enhancements (Open Source)                                   │
-│     └── Infrastructure Deployment, Firewall Recommendations, Child Profiles    │
+│  Phase 8: Pro+ Enterprise Tier - Part 2                             v2.4.0.0   │
+│     └── automation_engine, fleet_engine                                        │
 │                                                                                 │
-│  Phase 9: Stabilization RC2                                            v0.12.0 │
+│  Phase 9: Stabilization                                             v2.5.0.0   │
 │     └── Final polish, documentation completion, i18n verification              │
 │                                                                                 │
-│  Phase 10: Enterprise Features (Pro+)                                          │
-│     └── av_management_engine, firewall_orchestration_engine, MFA               │
+│  Phase 10: Pro+ Enterprise Tier - Part 3                            v2.6.0.0   │
+│     └── virtualization_engine, observability_engine, MFA (largest/most complex)│
 │                                                                                 │
-│  Phase 11: Polish and GA                                               v1.0.0  │
+│  Phase 11: Major Enterprise GA                                      v3.0.0.0   │
 │     └── Multi-tenancy, API completeness, platform-native logging, GA release   │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -164,17 +183,17 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 ---
 
-## Phase 1: Stabilization Alpha
+## Phase 1: Stabilization
 
-**Target Release:** v0.9.0-alpha.1
+**Target Release:** v1.2.0.0
 **Focus:** Code quality and test coverage
 
 ### Goals
 
 1. **Unit Test Coverage**
-   - [ ] sysmanage backend: Achieve 70% coverage (currently ~56%)
-   - [ ] sysmanage-agent: Maintain 90%+ coverage
-   - [ ] Pro+ modules: Achieve 80% coverage per module
+   - [ ] sysmanage backend: Achieve 65% coverage (currently ~56%)
+   - [ ] sysmanage-agent: Achieve 65% coverage (currently ~59%)
+   - [ ] Pro+ modules: Achieve 70% coverage (currently ~66%)
 
 2. **Playwright E2E Tests**
    - [ ] Host list and detail page flows
@@ -210,8 +229,9 @@ This represents the current baseline. All items listed in [Current State Assessm
 ### Exit Criteria
 
 - SonarQube: 0 critical issues, <10 major issues
-- Backend test coverage: ≥70%
-- Agent test coverage: ≥90%
+- Backend test coverage: ≥65%
+- Agent test coverage: ≥65%
+- Pro+ test coverage: ≥70%
 - All Dependabot security alerts resolved
 
 ---
@@ -293,14 +313,15 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 ## Phase 3: Stabilization Beta
 
-**Target Release:** v0.10.0-beta.1
+**Target Release:** v1.4.0.0
 **Focus:** Test coverage push, i18n audit, performance baseline
 
 ### Goals
 
-1. **Test Coverage Push**
-   - [ ] Backend coverage: Target 75%
-   - [ ] Agent coverage: Maintain 90%+
+1. **Test Coverage Push** (+5% from Phase 1)
+   - [ ] Backend coverage: Target 70%
+   - [ ] Agent coverage: Target 70%
+   - [ ] Pro+ coverage: Target 75%
    - [ ] Add integration tests for new Foundation features
    - [ ] Playwright tests for Foundation feature UI flows
 
@@ -323,7 +344,9 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 ### Exit Criteria
 
-- Backend test coverage: ≥75%
+- Backend test coverage: ≥70%
+- Agent test coverage: ≥70%
+- Pro+ test coverage: ≥75%
 - All translations verified complete
 - Performance baselines documented
 - No critical bugs in Foundation features
@@ -423,161 +446,118 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 **Estimated Size:** ~2,500 lines
 
+#### 4.4 container_engine (Professional)
+
+**Source Files:**
+- `sysmanage_agent/operations/child_host_lxd.py`
+- `sysmanage_agent/operations/child_host_lxd_container_creator.py`
+- `sysmanage_agent/operations/child_host_wsl.py`
+- `sysmanage_agent/operations/child_host_wsl_setup.py`
+- `sysmanage_agent/operations/child_host_wsl_control.py`
+- `sysmanage_agent/operations/child_host_listing_wsl.py`
+
+**Features:**
+- [ ] LXD container creation and lifecycle (Ubuntu)
+- [ ] LXD container networking
+- [ ] WSL instance creation and lifecycle (Windows)
+- [ ] WSL distribution management
+- [ ] Container/instance status monitoring
+
+**Keep in Open Source:**
+- Read-only container/instance listing
+
+**Migration Steps:**
+1. [ ] Create `module-source/container_engine/` structure
+2. [ ] Create `container_engine.pyx` Cython module
+3. [ ] Migrate LXD and WSL management code
+4. [ ] Create frontend plugin bundle
+5. [ ] Update open source to read-only listing
+6. [ ] Update documentation
+7. [ ] i18n/l10n for all 14 languages
+
+**Estimated Size:** ~2,000 lines
+
 ### Deliverables
 
-- [ ] 3 new Pro+ modules (reporting, audit, secrets)
+- [ ] 4 new Pro+ modules (reporting, audit, secrets, container)
 - [ ] Open source code updated with license checks
 - [ ] Documentation for Professional tier features
 - [ ] Migration guide for existing users
 
 ---
 
-## Phase 5: Virtualization Completion
+## Phase 5: Stabilization
 
-**Focus:** Complete all hypervisor support
+**Target Release:** v2.1.0.0
+**Focus:** Pro+ integration testing and license gating verification
 
-### 5.1 VMM/vmd Completion (OpenBSD)
+### Goals
 
-**Current Status:** ~70% complete
+1. **Pro+ Module Testing**
+   - [ ] Verify all Professional tier modules work correctly
+   - [ ] License gating verification for each module
+   - [ ] Plugin loading and registration testing
+   - [ ] Cross-module integration tests
 
-**Remaining Work:**
-- [ ] Phase 3: Networking configuration (pf NAT rules)
-- [ ] Phase 7: Documentation and i18n for all 14 languages
-- [ ] Testing on OpenBSD 7.6+
-- [ ] Autoinstall support for guest OS
+2. **Container Engine Testing**
+   - [ ] LXD container lifecycle testing on Ubuntu
+   - [ ] WSL instance lifecycle testing on Windows
+   - [ ] Verify read-only mode for unlicensed users
 
-**Reference:** See VMM-VMD.md for detailed implementation plan.
+3. **Documentation**
+   - [ ] Professional tier feature documentation
+   - [ ] Upgrade guide from open source to Professional
 
-### 5.2 KVM/QEMU Implementation (Linux)
+### Exit Criteria
 
-**Current Status:** Not started
-
-**Implementation Phases:**
-
-1. [ ] **Detection and Role Support**
-   - [ ] `check_kvm_support()` in virtualization_checks.py
-   - [ ] KVM_HOST role detection
-   - [ ] Multi-hypervisor UI for Linux hosts
-
-2. [ ] **Setup/Initialization**
-   - [ ] `KvmOperations` class
-   - [ ] libvirt package installation by distro
-   - [ ] libvirtd service management
-
-3. [ ] **Networking Configuration**
-   - [ ] NAT mode (virbr0 default)
-   - [ ] Bridged mode support
-   - [ ] Network XML templates
-
-4. [ ] **Distribution Management**
-   - [ ] Database migration for KVM distributions
-   - [ ] Ubuntu, Debian, Fedora, Alpine, RHEL support
-   - [ ] Cloud image support
-
-5. [ ] **VM Creation**
-   - [ ] `KvmVmConfig` dataclass
-   - [ ] qemu-img disk creation
-   - [ ] Cloud-init ISO generation
-   - [ ] libvirt domain XML generation
-   - [ ] SSH-based agent installation
-
-6. [ ] **Lifecycle Control**
-   - [ ] start/stop/restart/delete via virsh
-   - [ ] VM status reporting
-   - [ ] Autostart configuration
-
-7. [ ] **Documentation and i18n**
-   - [ ] All 14 languages
-
-**Reference:** See KVM-QEMU.md for detailed implementation plan.
-
-### 5.3 bhyve Implementation (FreeBSD)
-
-**Current Status:** Not started
-
-**Implementation Phases:**
-
-1. [ ] **Detection and Role Support**
-   - [ ] `check_bhyve_support()` in virtualization_checks.py
-   - [ ] BHYVE_HOST role detection
-   - [ ] vmm.ko kernel module detection
-
-2. [ ] **Setup/Initialization**
-   - [ ] `BhyveOperations` class
-   - [ ] vmm.ko loading and /boot/loader.conf persistence
-   - [ ] UEFI firmware detection (bhyve-firmware package)
-
-3. [ ] **Networking Configuration**
-   - [ ] Bridge mode (tap + bridge interfaces)
-   - [ ] NAT mode (pf rules)
-   - [ ] Host-only mode
-
-4. [ ] **Distribution Management**
-   - [ ] Database migration for bhyve distributions
-   - [ ] FreeBSD, Ubuntu, Debian, Alpine, Windows Server support
-   - [ ] Cloud image support
-
-5. [ ] **VM Creation**
-   - [ ] `BhyveVmConfig` dataclass
-   - [ ] ZFS zvol or file-based disk creation
-   - [ ] Cloud-init support with UEFI
-   - [ ] bhyve command generation
-   - [ ] SSH-based agent installation
-
-6. [ ] **Lifecycle Control**
-   - [ ] start/stop/restart/delete via bhyvectl
-   - [ ] VM device management (/dev/vmm/*)
-   - [ ] Process management (daemon)
-
-7. [ ] **Documentation and i18n**
-   - [ ] All 14 languages
-
-**Reference:** See BHYVE.md for detailed implementation plan.
-
-### Deliverables
-
-- [ ] Complete VMM/vmd support for OpenBSD
-- [ ] Full KVM/QEMU support for Linux
-- [ ] Full bhyve support for FreeBSD
-- [ ] Multi-hypervisor UI for Linux hosts
-- [ ] Documentation for all hypervisors
+- All Professional tier modules functional
+- License gating working correctly
+- No critical bugs in Pro+ modules
 
 ---
 
 ## Phase 6: Stabilization RC1
 
-**Target Release:** v0.11.0-rc.1
+**Target Release:** v2.2.0.0
 **Focus:** Integration testing, load testing, security penetration test
 
 ### Goals
 
-1. **Integration Testing**
-   - [ ] End-to-end tests for all virtualization platforms
+1. **Test Coverage Push** (+5% from Phase 3)
+   - [ ] Backend coverage: Target 75%
+   - [ ] Agent coverage: Target 75%
+   - [ ] Pro+ coverage: Target 80%
+
+2. **Integration Testing**
+   - [ ] End-to-end tests for container_engine (LXD, WSL)
    - [ ] Cross-platform agent testing
    - [ ] Pro+ module integration tests
    - [ ] WebSocket reliability under load
 
-2. **Load Testing**
+3. **Load Testing**
    - [ ] 100 concurrent agents
    - [ ] 500 concurrent agents
    - [ ] 1000 concurrent agents
    - [ ] Database query performance under load
    - [ ] WebSocket message throughput
 
-3. **Security Penetration Test**
+4. **Security Penetration Test**
    - [ ] External penetration test (if budget allows)
    - [ ] Internal security review
    - [ ] Authentication bypass attempts
    - [ ] Privilege escalation attempts
    - [ ] WebSocket security review
 
-4. **Bug Fixes**
+5. **Bug Fixes**
    - [ ] Resolve all critical bugs
    - [ ] Resolve all high-priority bugs
    - [ ] Triage and document remaining bugs
 
 ### Exit Criteria
 
+- Backend test coverage: ≥75%
+- Agent test coverage: ≥75%
+- Pro+ test coverage: ≥80%
 - All integration tests passing
 - Load test targets met
 - Security review complete with no critical findings
@@ -585,182 +565,14 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 ---
 
-## Phase 7: Pro+ Module Migration - Part 2
+## Phase 7: Pro+ Enterprise Tier - Part 1
 
-**Focus:** Migrate Enterprise-tier features from open source to Pro+
-
-### Modules to Migrate
-
-#### 7.1 observability_engine (Enterprise)
-
-**Source Files:**
-- Graylog: `backend/api/graylog_integration.py`, `backend/services/graylog_integration.py`, agent operations
-- Grafana: `backend/api/grafana_integration.py`, `backend/services/grafana_integration.py`
-- OpenTelemetry: `backend/api/opentelemetry/*`, agent operations
-
-**Features:**
-- [ ] Graylog server configuration and health monitoring
-- [ ] GELF TCP/UDP input configuration
-- [ ] Syslog forwarding setup
-- [ ] Windows Sidecar deployment
-- [ ] Grafana server integration
-- [ ] Dashboard and panel provisioning
-- [ ] DataSource configuration
-- [ ] OTEL Collector deployment and management
-- [ ] Prometheus metrics export
-- [ ] Distributed tracing setup
-
-**Estimated Size:** ~4,000 lines
-
-#### 7.2 automation_engine (Enterprise)
-
-**Source Files:**
-- `backend/api/scripts/routes_saved_scripts.py`
-- `backend/api/scripts/routes_executions.py`
-- `backend/api/scripts/models.py`
-- `backend/persistence/models/scripts.py`
-- `sysmanage_agent/operations/script_operations.py`
-
-**Features:**
-- [ ] Saved script library with versioning
-- [ ] Script execution across multiple hosts
-- [ ] Execution logging with stdout/stderr capture
-- [ ] Multi-shell support
-- [ ] Scheduled script execution
-- [ ] Approval workflows for privileged scripts
-- [ ] Script parameterization
-
-**Estimated Size:** ~2,000 lines
-
-#### 7.3 fleet_engine (Enterprise)
-
-**Source Files:**
-- `backend/api/fleet.py`
-- Bulk operation endpoints
-
-**Features:**
-- [ ] Bulk host operations
-- [ ] Advanced host grouping
-- [ ] Scheduled fleet-wide operations
-- [ ] Rolling deployments
-- [ ] Fleet-wide configuration deployment
-- [ ] Host selection queries
-- [ ] Operation progress tracking
-
-**Estimated Size:** ~1,500 lines
-
-### Deliverables
-
-- [ ] 3 new Pro+ modules (observability, automation, fleet)
-- [ ] Open source code updated with stubs/license checks
-- [ ] Documentation for Enterprise tier features
-
----
-
-## Phase 8: Platform Enhancements
-
-**Focus:** Open-source platform features (FEATURES-TODO.md items #21-24)
-
-### Features
-
-#### 8.1 Infrastructure Deployment
-
-**Priority:** Medium
-**Effort:** High
-
-- [ ] DeploymentTemplate model
-- [ ] Pre-built templates (Graylog, Grafana, PostgreSQL, MySQL)
-- [ ] Deployment tracking and status
-- [ ] Docker compose and package-based options
-- [ ] i18n/l10n for all 14 languages
-
-#### 8.2 Firewall Recommendations
-
-**Priority:** Medium
-**Effort:** Medium
-
-- [ ] Server role detection integration
-- [ ] FirewallRuleTemplate model
-- [ ] Role-to-rule mapping
-- [ ] Recommendation preview and apply
-- [ ] i18n/l10n for all 14 languages
-
-#### 8.3 Child Host Profiles
-
-**Priority:** Medium
-**Effort:** Medium
-
-- [ ] ChildHostProfile model
-- [ ] Default configurations per virtualization type
-- [ ] Post-install script support
-- [ ] Profile assignment via tags
-- [ ] i18n/l10n for all 14 languages
-
-#### 8.4 Enhanced Snap Management
-
-**Priority:** Low
-**Effort:** Low
-
-- [ ] Snap install/remove from UI
-- [ ] Snap update management
-- [ ] Auto-update pause/resume
-- [ ] Channel and confinement display
-- [ ] i18n/l10n for all 14 languages
-
-### Deliverables
-
-- [ ] All Platform Enhancement features implemented
-- [ ] Documentation updated
-
----
-
-## Phase 9: Stabilization RC2
-
-**Target Release:** v0.12.0-rc.1
-**Focus:** Final polish, documentation completion, i18n verification
-
-### Goals
-
-1. **Documentation Completion**
-   - [ ] All features documented
-   - [ ] API reference 100% complete
-   - [ ] Deployment guides for all platforms
-   - [ ] Troubleshooting guides
-   - [ ] Migration guides
-
-2. **i18n Verification**
-   - [ ] All 14 languages complete
-   - [ ] Professional review of translations (if budget allows)
-   - [ ] UI screenshot verification per language
-
-3. **UI/UX Polish**
-   - [ ] Consistent styling across all pages
-   - [ ] Accessibility audit (WCAG 2.1 AA)
-   - [ ] Mobile responsiveness verification
-   - [ ] Loading state improvements
-
-4. **Performance Optimization**
-   - [ ] Database query optimization
-   - [ ] Frontend bundle optimization
-   - [ ] API response time optimization
-   - [ ] WebSocket efficiency improvements
-
-### Exit Criteria
-
-- All documentation complete
-- All translations verified
-- Accessibility audit passed
-- Performance targets met
-
----
-
-## Phase 10: Enterprise Features
-
-**Focus:** Final Pro+ Enterprise-tier modules
+**Target Release:** v2.3.0.0
+**Focus:** Security engines for Enterprise tier (AV and firewall management)
 
 ### Modules to Migrate
 
-#### 10.1 av_management_engine (Enterprise)
+#### 7.1 av_management_engine (Enterprise)
 
 **Source Files:**
 - `sysmanage_agent/operations/antivirus_*.py` (12 files)
@@ -779,9 +591,18 @@ This represents the current baseline. All items listed in [Current State Assessm
 **Keep in Open Source:**
 - Basic AV status detection (is AV installed and running)
 
+**Migration Steps:**
+1. [ ] Create `module-source/av_management_engine/` structure
+2. [ ] Create `av_management_engine.pyx` Cython module
+3. [ ] Migrate AV management code
+4. [ ] Create frontend plugin bundle
+5. [ ] Update open source to read-only status
+6. [ ] Update documentation
+7. [ ] i18n/l10n for all 14 languages
+
 **Estimated Size:** ~3,000 lines
 
-#### 10.2 firewall_orchestration_engine (Enterprise)
+#### 7.2 firewall_orchestration_engine (Enterprise)
 
 **Source Files:**
 - `backend/api/firewall_roles*.py`
@@ -798,6 +619,190 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 **Keep in Open Source:**
 - Basic firewall status reporting (read-only)
+
+**Migration Steps:**
+1. [ ] Create `module-source/firewall_orchestration_engine/` structure
+2. [ ] Create `firewall_orchestration_engine.pyx` Cython module
+3. [ ] Migrate firewall management code
+4. [ ] Create frontend plugin bundle
+5. [ ] Update open source to read-only status
+6. [ ] Update documentation
+7. [ ] i18n/l10n for all 14 languages
+
+**Estimated Size:** ~4,000 lines
+
+### Deliverables
+
+- [ ] 2 new Pro+ modules (AV management, firewall orchestration)
+- [ ] Open source code updated with stubs/license checks
+- [ ] Documentation for Enterprise tier features
+
+---
+
+## Phase 8: Pro+ Enterprise Tier - Part 2
+
+**Target Release:** v2.4.0.0
+**Focus:** Automation and fleet management for Enterprise tier
+
+### Modules to Migrate
+
+#### 8.1 automation_engine (Enterprise)
+
+**Source Files:**
+- `backend/api/scripts/routes_saved_scripts.py`
+- `backend/api/scripts/routes_executions.py`
+- `backend/api/scripts/models.py`
+- `backend/persistence/models/scripts.py`
+- `sysmanage_agent/operations/script_operations.py`
+
+**Features:**
+- [ ] Saved script library with versioning
+- [ ] Script execution across multiple hosts
+- [ ] Execution logging with stdout/stderr capture
+- [ ] Multi-shell support (bash, zsh, PowerShell, cmd, ksh)
+- [ ] Scheduled script execution
+- [ ] Approval workflows for privileged scripts
+- [ ] Script parameterization
+
+**Estimated Size:** ~2,000 lines
+
+#### 8.2 fleet_engine (Enterprise)
+
+**Source Files:**
+- `backend/api/fleet.py`
+- Bulk operation endpoints
+
+**Features:**
+- [ ] Bulk host operations
+- [ ] Advanced host grouping
+- [ ] Scheduled fleet-wide operations
+- [ ] Rolling deployments
+- [ ] Fleet-wide configuration deployment
+- [ ] Host selection queries
+- [ ] Operation progress tracking
+
+**Estimated Size:** ~1,500 lines
+
+### Deliverables
+
+- [ ] 2 new Pro+ modules (automation, fleet)
+- [ ] Documentation for Enterprise tier features
+
+---
+
+## Phase 9: Stabilization RC2
+
+**Target Release:** v2.5.0.0
+**Focus:** Final polish, documentation completion, i18n verification
+
+### Goals
+
+1. **Test Coverage Push** (+5% from Phase 6)
+   - [ ] Backend coverage: Target 80%
+   - [ ] Agent coverage: Target 80%
+   - [ ] Pro+ coverage: Target 85%
+
+2. **Documentation Completion**
+   - [ ] All features documented
+   - [ ] API reference 100% complete
+   - [ ] Deployment guides for all platforms
+   - [ ] Troubleshooting guides
+   - [ ] Migration guides
+
+3. **i18n Verification**
+   - [ ] All 14 languages complete
+   - [ ] Professional review of translations (if budget allows)
+   - [ ] UI screenshot verification per language
+
+4. **UI/UX Polish**
+   - [ ] Consistent styling across all pages
+   - [ ] Accessibility audit (WCAG 2.1 AA)
+   - [ ] Mobile responsiveness verification
+   - [ ] Loading state improvements
+
+5. **Performance Optimization**
+   - [ ] Database query optimization
+   - [ ] Frontend bundle optimization
+   - [ ] API response time optimization
+   - [ ] WebSocket efficiency improvements
+
+### Exit Criteria
+
+- Backend test coverage: ≥80%
+- Agent test coverage: ≥80%
+- Pro+ test coverage: ≥85%
+- All documentation complete
+- All translations verified
+- Accessibility audit passed
+- Performance targets met
+
+---
+
+## Phase 10: Enterprise Features
+
+**Target Release:** v2.6.0.0
+**Focus:** Final Pro+ Enterprise-tier modules (largest/most complex)
+
+### Modules to Migrate
+
+#### 10.1 virtualization_engine (Enterprise)
+
+**Source Files:**
+- KVM/QEMU: `sysmanage_agent/operations/child_host_kvm*.py` (8 files, ~4,500 lines)
+- bhyve: `sysmanage_agent/operations/child_host_bhyve*.py` (10 files, ~4,600 lines)
+- VMM/vmd: `sysmanage_agent/operations/child_host_vmm*.py` (17 files)
+- Guest provisioning: `sysmanage_agent/operations/child_host_ubuntu*.py`, `child_host_debian*.py`, `child_host_alpine*.py`
+- Backend: `backend/api/child_host_virtualization*.py`, `backend/api/handlers/child_host/*.py`
+
+**Features:**
+- [ ] KVM/QEMU VM management (Linux)
+  - [ ] VM creation with cloud-init
+  - [ ] VM lifecycle (start, stop, restart, delete)
+  - [ ] Network configuration (NAT, bridge)
+  - [ ] Multi-distro support (Ubuntu, Debian, Fedora, Alpine, FreeBSD)
+- [ ] bhyve VM management (FreeBSD)
+  - [ ] UEFI and bhyveload boot support
+  - [ ] ZFS zvol or file-based storage
+  - [ ] NAT networking with pf
+- [ ] VMM/vmd VM management (OpenBSD)
+  - [ ] vm.conf generation
+  - [ ] Autoinstall support
+- [ ] Cloud-init provisioning (all hypervisors)
+- [ ] Multi-hypervisor networking
+- [ ] Guest OS autoinstall (Ubuntu, Debian, Alpine, FreeBSD)
+
+**Keep in Open Source:**
+- Read-only VM/container listing and status
+
+**Migration Steps:**
+1. [ ] Create `module-source/virtualization_engine/` structure
+2. [ ] Create `virtualization_engine.pyx` Cython module
+3. [ ] Migrate all hypervisor management code
+4. [ ] Create frontend plugin bundle
+5. [ ] Update open source to read-only listing
+6. [ ] Update documentation
+7. [ ] i18n/l10n for all 14 languages
+
+**Estimated Size:** ~13,000 lines
+
+#### 10.2 observability_engine (Enterprise)
+
+**Source Files:**
+- Graylog: `backend/api/graylog_integration.py`, `backend/services/graylog_integration.py`, agent operations
+- Grafana: `backend/api/grafana_integration.py`, `backend/services/grafana_integration.py`
+- OpenTelemetry: `backend/api/opentelemetry/*`, agent operations
+
+**Features:**
+- [ ] Graylog server configuration and health monitoring
+- [ ] GELF TCP/UDP input configuration
+- [ ] Syslog forwarding setup
+- [ ] Windows Sidecar deployment
+- [ ] Grafana server integration
+- [ ] Dashboard and panel provisioning
+- [ ] DataSource configuration
+- [ ] OTEL Collector deployment and management
+- [ ] Prometheus metrics export
+- [ ] Distributed tracing setup
 
 **Estimated Size:** ~4,000 lines
 
@@ -832,17 +837,17 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 ### Deliverables
 
-- [ ] av_management_engine module
-- [ ] firewall_orchestration_engine module
+- [ ] virtualization_engine module
+- [ ] observability_engine module
 - [ ] MFA implementation
 - [ ] Repository mirroring
 - [ ] External IdP support
 
 ---
 
-## Phase 11: Polish and GA
+## Phase 11: Enterprise GA (v3.0.0.0)
 
-**Target Release:** v1.0.0
+**Target Release:** v3.0.0.0
 **Focus:** Multi-tenancy, API completeness, GA release
 
 ### Features
@@ -890,18 +895,18 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 | Phase | Version | Focus | Key Deliverables |
 |-------|---------|-------|------------------|
-| 0 | Current | Baseline | Core platform operational |
-| 1 | v0.9.0-alpha | Stabilization | Test coverage, SonarQube cleanup |
-| 2 | - | Foundation | Access groups, update profiles, compliance |
-| 3 | v0.10.0-beta | Stabilization | Performance baseline, i18n audit |
-| 4 | - | Pro+ Part 1 | reporting, audit, secrets engines |
-| 5 | - | Virtualization | KVM, bhyve, VMM completion |
-| 6 | v0.11.0-rc | Stabilization | Integration tests, load tests, security |
-| 7 | - | Pro+ Part 2 | observability, automation, fleet engines |
-| 8 | - | Platform | Infrastructure deployment, firewall recs |
-| 9 | v0.12.0-rc | Stabilization | Final polish, docs complete |
-| 10 | - | Enterprise | AV management, firewall orchestration, MFA |
-| 11 | **v1.0.0** | GA | Multi-tenancy, API complete, launch |
+| 0 | v1.1.0.0 | Current | Core platform + virtualization code (moving to Pro+) |
+| 1 | v1.2.0.0 | Stabilization | Test coverage, SonarQube cleanup |
+| 2 | v1.3.0.0 | Foundation | Access groups, update profiles, compliance |
+| 3 | v1.4.0.0 | Stabilization | Performance baseline, i18n audit |
+| 4 | **v2.0.0.0** | Pro+ Professional | reporting, audit, secrets, container (LXD/WSL) |
+| 5 | v2.1.0.0 | Stabilization | Pro+ integration testing, license verification |
+| 6 | v2.2.0.0 | Stabilization | Integration tests, load tests, security |
+| 7 | v2.3.0.0 | Pro+ Enterprise 1 | AV management, firewall orchestration (security) |
+| 8 | v2.4.0.0 | Pro+ Enterprise 2 | automation, fleet engines |
+| 9 | v2.5.0.0 | Stabilization | Final polish, docs complete |
+| 10 | v2.6.0.0 | Pro+ Enterprise 3 | virtualization, observability, MFA (largest) |
+| 11 | **v3.0.0.0** | Enterprise GA | Multi-tenancy, API complete, full feature set |
 
 ---
 
@@ -940,23 +945,35 @@ When migrating code from open source to Pro+:
 | reporting_engine | Professional | 4 | ~1,500 | High |
 | audit_engine | Professional | 4 | ~2,000 | High |
 | secrets_engine | Professional | 4 | ~2,500 | High |
-| observability_engine | Enterprise | 7 | ~4,000 | Medium |
-| automation_engine | Enterprise | 7 | ~2,000 | Medium |
-| fleet_engine | Enterprise | 7 | ~1,500 | Medium |
-| av_management_engine | Enterprise | 10 | ~3,000 | Low |
-| firewall_orchestration_engine | Enterprise | 10 | ~4,000 | Low |
-| virtualization_engine | Enterprise | 5* | ~15,000 | High |
+| container_engine (LXD, WSL) | Professional | 4 | ~2,000 | High |
+| av_management_engine | Enterprise | 7 | ~3,000 | High |
+| firewall_orchestration_engine | Enterprise | 7 | ~4,000 | High |
+| automation_engine | Enterprise | 8 | ~2,000 | Medium |
+| fleet_engine | Enterprise | 8 | ~1,500 | Medium |
+| virtualization_engine (KVM, bhyve, VMM) | Enterprise | 10 | ~13,000 | Medium |
+| observability_engine | Enterprise | 10 | ~4,000 | Medium |
 
-*Note: virtualization_engine is developed in Pro+ from the start as part of Phase 5, not migrated from open source.
+### Virtualization Tiering
+
+| Feature | Tier | Description |
+|---------|------|-------------|
+| VM/container listing (read-only) | Open Source | View existing VMs and status |
+| LXD container management | Professional | Create/manage LXD containers (Ubuntu) |
+| WSL instance management | Professional | Create/manage WSL instances (Windows) |
+| KVM/QEMU VM management | Enterprise | Full VM lifecycle on Linux |
+| bhyve VM management | Enterprise | Full VM lifecycle on FreeBSD |
+| VMM/vmd VM management | Enterprise | Full VM lifecycle on OpenBSD |
+| Cloud-init provisioning | Enterprise | Automated guest OS setup |
+| Multi-hypervisor networking | Enterprise | NAT, bridge, host-only modes |
 
 ### Total Migration Estimate
 
-- **Professional Tier:** ~6,000 lines (Phase 4)
-- **Enterprise Tier - Part 1:** ~7,500 lines (Phase 7)
-- **Enterprise Tier - Part 2:** ~7,000 lines (Phase 10)
-- **New Development:** ~15,000 lines (virtualization)
+- **Professional Tier:** ~8,000 lines (Phase 4: reporting + audit + secrets + container)
+- **Enterprise Tier - Part 1:** ~7,000 lines (Phase 7: AV + firewall)
+- **Enterprise Tier - Part 2:** ~3,500 lines (Phase 8: automation + fleet)
+- **Enterprise Tier - Part 3:** ~17,000 lines (Phase 10: virtualization + observability)
 
-**Grand Total:** ~35,500 lines to migrate/develop for Pro+
+**Grand Total:** ~35,500 lines to migrate for Pro+
 
 ---
 
@@ -992,9 +1009,9 @@ When migrating code from open source to Pro+:
 
 ## Success Metrics
 
-### Quality Metrics
+### Quality Metrics (Final Targets by v3.0.0.0)
 
-- **Test Coverage:** Backend ≥75%, Agent ≥90%, Pro+ ≥80%
+- **Test Coverage:** Backend ≥80%, Agent ≥80%, Pro+ ≥85%
 - **SonarQube:** 0 critical issues, <10 major issues
 - **Security:** 0 critical vulnerabilities
 - **Documentation:** 100% feature coverage
@@ -1014,6 +1031,7 @@ When migrating code from open source to Pro+:
 
 ---
 
-*Document Version: 1.0*
+*Document Version: 1.1*
 *Last Updated: February 2026*
+*Current Product Version: v1.1.0.0*
 *Based on: FEATURES-TODO.md, FEATURE-TIERING-ANALYSIS.md, VMM-VMD.md, BHYVE.md, KVM-QEMU.md*
