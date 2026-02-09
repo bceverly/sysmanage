@@ -75,15 +75,38 @@ async def get_plugin_bundle(
 
     Only serves files with a .js extension from the modules directory.
     """
-    # Security: only allow .js files, no path traversal
+    # Security: only allow .js files, no path traversal characters
     if not filename.endswith(".js") or "/" in filename or "\\" in filename:
         return JSONResponse(
             status_code=400,
             content={"error": "Invalid bundle filename"},
         )
 
+    # Additional check: reject any path traversal attempts
+    if ".." in filename:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Invalid bundle filename"},
+        )
+
     modules_path = _get_modules_path()
-    bundle_path = os.path.join(modules_path, filename)
+
+    # Resolve the real paths to prevent path traversal attacks
+    # This handles symlinks and normalizes the path
+    real_modules_path = os.path.realpath(modules_path)
+    bundle_path = os.path.realpath(os.path.join(modules_path, filename))
+
+    # Security: ensure the resolved path is within the modules directory
+    if not bundle_path.startswith(real_modules_path + os.sep):
+        logger.warning(
+            "Path traversal attempt detected: %s resolved to %s",
+            filename,
+            bundle_path,
+        )
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Invalid bundle filename"},
+        )
 
     if not os.path.isfile(bundle_path):
         return JSONResponse(
