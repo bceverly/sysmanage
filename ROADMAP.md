@@ -1034,4 +1034,4 @@ When migrating code from open source to Pro+:
 *Document Version: 1.1*
 *Last Updated: February 2026*
 *Current Product Version: v1.1.0.0*
-*Based on: FEATURES-TODO.md, FEATURE-TIERING-ANALYSIS.md, VMM-VMD.md, BHYVE.md, KVM-QEMU.md*
+*Based on: docs/planning/FEATURES-TODO.md, docs/planning/FEATURE-TIERING-ANALYSIS.md, docs/planning/VMM-VMD.md, docs/planning/BHYVE.md, docs/planning/KVM-QEMU.md*
