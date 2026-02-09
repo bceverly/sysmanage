@@ -42,7 +42,7 @@ pycparser==2.23
 pydantic>=2.9.0,<2.13.0
 pydantic-extra-types==2.11.0
 pydantic-settings==2.12.0
-PyJWT==2.10.1
+PyJWT==2.11.0
 pylint>=3.0.0
 pytest>=7.0.0
 pytest-asyncio>=0.21.0
@@ -65,7 +65,7 @@ watchfiles==1.1.0
 websockets==16.0
 zope.event==6.1
 zope.interface==8.2
-Babel==2.16.0
+Babel==2.18.0
 reportlab==4.4.4
 safety==3.7.0
 safety-schemas==0.0.16
@@ -74,7 +74,7 @@ semgrep>=1.95.0
 # Note: On OpenBSD 7.7, coverage.py C tracer requires gcc and py3-cffi
 # Install with: doas pkg_add gcc py3-cffi
 # The install-dev target will automatically handle C tracer setup
-playwright==1.57.0  # Cross-browser UI testing (preferred for Linux/macOS/Windows)
+playwright==1.58.0  # Cross-browser UI testing (preferred for Linux/macOS/Windows)
 selenium>=4.0.0  # Web automation framework (fallback for OpenBSD/FreeBSD where Playwright unavailable)
 webdriver-manager>=4.0.0
 requests>=2.32.0  # For UI test health checks

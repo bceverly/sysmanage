@@ -60,12 +60,7 @@ def upgrade() -> None:
                 sa.PrimaryKeyConstraint("id"),
             )
 
-        op.create_index(
-            op.f("ix_notification_channel_id"),
-            "notification_channel",
-            ["id"],
-            unique=False,
-        )
+        # Note: Primary keys already have implicit indexes, no need to create explicit index on id
 
     # --- alert_rule ---
     if "alert_rule" not in tables:
@@ -116,12 +111,7 @@ def upgrade() -> None:
                 sa.PrimaryKeyConstraint("id"),
             )
 
-        op.create_index(
-            op.f("ix_alert_rule_id"),
-            "alert_rule",
-            ["id"],
-            unique=False,
-        )
+        # Note: Primary keys already have implicit indexes, no need to create explicit index on id
 
     # --- alert_rule_notification_channel ---
     if "alert_rule_notification_channel" not in tables:
@@ -158,12 +148,7 @@ def upgrade() -> None:
                 ),
             )
 
-        op.create_index(
-            op.f("ix_alert_rule_notification_channel_id"),
-            "alert_rule_notification_channel",
-            ["id"],
-            unique=False,
-        )
+        # Note: Primary keys already have implicit indexes, no need to create explicit index on id
         op.create_index(
             op.f("ix_alert_rule_notification_channel_rule_id"),
             "alert_rule_notification_channel",
@@ -240,12 +225,7 @@ def upgrade() -> None:
                 ),
             )
 
-        op.create_index(
-            op.f("ix_alert_id"),
-            "alert",
-            ["id"],
-            unique=False,
-        )
+        # Note: Primary keys already have implicit indexes, no need to create explicit index on id
         op.create_index(
             op.f("ix_alert_rule_id_fk"),
             "alert",
@@ -275,7 +255,6 @@ def downgrade() -> None:
         op.drop_index(op.f("ix_alert_triggered_at"), table_name="alert")
         op.drop_index(op.f("ix_alert_host_id"), table_name="alert")
         op.drop_index(op.f("ix_alert_rule_id_fk"), table_name="alert")
-        op.drop_index(op.f("ix_alert_id"), table_name="alert")
         op.drop_table("alert")
 
     if "alert_rule_notification_channel" in tables:
@@ -287,19 +266,10 @@ def downgrade() -> None:
             op.f("ix_alert_rule_notification_channel_rule_id"),
             table_name="alert_rule_notification_channel",
         )
-        op.drop_index(
-            op.f("ix_alert_rule_notification_channel_id"),
-            table_name="alert_rule_notification_channel",
-        )
         op.drop_table("alert_rule_notification_channel")
 
     if "alert_rule" in tables:
-        op.drop_index(op.f("ix_alert_rule_id"), table_name="alert_rule")
         op.drop_table("alert_rule")
 
     if "notification_channel" in tables:
-        op.drop_index(
-            op.f("ix_notification_channel_id"),
-            table_name="notification_channel",
-        )
         op.drop_table("notification_channel")

@@ -454,7 +454,7 @@ class NotificationChannel(Base):
 
     __tablename__ = "notification_channel"
 
-    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     name = Column(String(255), nullable=False)
     channel_type = Column(
         String(50), nullable=False
@@ -485,7 +485,7 @@ class AlertRule(Base):
 
     __tablename__ = "alert_rule"
 
-    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     condition_type = Column(
@@ -532,7 +532,7 @@ class AlertRuleNotificationChannel(Base):
 
     __tablename__ = "alert_rule_notification_channel"
 
-    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     rule_id = Column(
         GUID(),
         ForeignKey("alert_rule.id", ondelete=CASCADE_DELETE),
@@ -562,7 +562,7 @@ class Alert(Base):
 
     __tablename__ = "alert"
 
-    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     rule_id = Column(
         GUID(),
         ForeignKey("alert_rule.id", ondelete="SET NULL"),
