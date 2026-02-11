@@ -65,7 +65,7 @@ class TestRequiresFeature:
         async def test_func():
             return "success"
 
-        result = asyncio.get_event_loop().run_until_complete(test_func())
+        result = asyncio.run(test_func())
         assert result == "success"
         mock_service.has_feature.assert_called_once_with(FeatureCode.HEALTH_ANALYSIS)
 
@@ -79,7 +79,7 @@ class TestRequiresFeature:
             return "success"
 
         with pytest.raises(HTTPException) as exc_info:
-            asyncio.get_event_loop().run_until_complete(test_func())
+            asyncio.run(test_func())
 
         assert exc_info.value.status_code == 403
         assert exc_info.value.detail["error"] == "pro_plus_required"
@@ -238,7 +238,7 @@ class TestRequiresModule:
         async def test_func():
             return "success"
 
-        result = asyncio.get_event_loop().run_until_complete(test_func())
+        result = asyncio.run(test_func())
         assert result == "success"
 
     @patch("backend.licensing.feature_gate.license_service")
@@ -251,7 +251,7 @@ class TestRequiresModule:
             return "success"
 
         with pytest.raises(HTTPException) as exc_info:
-            asyncio.get_event_loop().run_until_complete(test_func())
+            asyncio.run(test_func())
 
         assert exc_info.value.status_code == 403
 
@@ -267,7 +267,7 @@ class TestRequiresModule:
             return "success"
 
         with pytest.raises(HTTPException) as exc_info:
-            asyncio.get_event_loop().run_until_complete(test_func())
+            asyncio.run(test_func())
 
         assert exc_info.value.status_code == 503
 
@@ -348,7 +348,7 @@ class TestRequiresProPlus:
         async def test_func():
             return "success"
 
-        result = asyncio.get_event_loop().run_until_complete(test_func())
+        result = asyncio.run(test_func())
         assert result == "success"
 
     @patch("backend.licensing.feature_gate.license_service")
@@ -361,7 +361,7 @@ class TestRequiresProPlus:
             return "success"
 
         with pytest.raises(HTTPException) as exc_info:
-            asyncio.get_event_loop().run_until_complete(test_func())
+            asyncio.run(test_func())
 
         assert exc_info.value.status_code == 403
         assert exc_info.value.detail["error"] == "pro_plus_required"
