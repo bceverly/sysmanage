@@ -3,12 +3,17 @@ Tests for backend/health/health_service.py module.
 Tests the HealthService wrapper for Pro+ health analysis.
 """
 
-import backend.health.health_service as health_service_module
+import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from backend.health.health_service import HealthAnalysisError, HealthService
+
+# Get the actual module object (not the instance) to use with patch.object
+# This is needed because backend.health.__init__.py exports health_service instance
+# which causes `import backend.health.health_service` to resolve to the instance
+health_service_module = sys.modules["backend.health.health_service"]
 
 
 class TestHealthAnalysisError:

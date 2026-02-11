@@ -737,7 +737,7 @@ jobs:
           echo "🐧 Linux detected - testing Chrome and Firefox"
         fi
 
-        if PLAYWRIGHT_BASE_URL=http://localhost:3000 TEST_USERNAME=admin@sysmanage.org TEST_PASSWORD=TEST_AdminPass123! npx playwright test --reporter=list; then
+        if npx playwright test --reporter=list; then
           echo "status=passing" >> $GITHUB_OUTPUT
           echo "color=brightgreen" >> $GITHUB_OUTPUT
           echo "✅ All E2E tests passed"
@@ -749,6 +749,9 @@ jobs:
         fi
       env:
         CI: true
+        PLAYWRIGHT_BASE_URL: http://localhost:3000
+        TEST_USERNAME: admin@sysmanage.org
+        TEST_PASSWORD: TEST_AdminPass123!
 
     - name: Upload UI test artifacts on failure
       uses: actions/upload-artifact@v6
@@ -989,9 +992,12 @@ jobs:
       working-directory: frontend
       run: |
         echo "🎭 Running Playwright E2E tests..."
-        PLAYWRIGHT_BASE_URL=http://localhost:5173 TEST_USERNAME=admin@sysmanage.org TEST_PASSWORD=TEST_AdminPass123! npx playwright test --reporter=html,list
+        npx playwright test --reporter=html,list
       env:
         CI: true
+        PLAYWRIGHT_BASE_URL: http://localhost:5173
+        TEST_USERNAME: admin@sysmanage.org
+        TEST_PASSWORD: TEST_AdminPass123!
 
     - name: Upload Playwright report
       uses: actions/upload-artifact@v6

@@ -8,6 +8,7 @@ Tests cover:
 - Database session management
 """
 
+import sys
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, Mock, patch, PropertyMock
 
@@ -16,11 +17,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-# Import the module explicitly to avoid naming collision with fixture
-import backend.health.health_service as health_service_module
 from backend.health.health_service import HealthAnalysisError, HealthService
 from backend.licensing.features import ModuleCode
 from backend.persistence import models
+
+# Get the actual module object (not the instance) to use with patch.object
+# This is needed because backend.health.__init__.py exports health_service instance
+# which causes `import backend.health.health_service` to resolve to the instance
+health_service_module = sys.modules["backend.health.health_service"]
 
 # =============================================================================
 # FIXTURES
