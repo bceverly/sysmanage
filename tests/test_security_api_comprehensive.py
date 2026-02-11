@@ -141,7 +141,7 @@ class TestCheckSecurityConfiguration:
             "security": {
                 "admin_userid": None,
                 "admin_password": None,
-                "jwt_secret": "custom_jwt_secret",
+                "jwt_secret": "custom_jwt_secret_key_for_testing_purposes_32bytes",
                 "password_salt": "custom_password_salt",
             },
             "email": {
@@ -176,7 +176,7 @@ class TestCheckSecurityConfiguration:
             "security": {
                 "admin_userid": "admin@example.com",
                 "admin_password": "password123",
-                "jwt_secret": "custom_jwt_secret",
+                "jwt_secret": "custom_jwt_secret_key_for_testing_purposes_32bytes",
                 "password_salt": "custom_password_salt",
             },
             "email": {
@@ -254,7 +254,7 @@ class TestCheckSecurityConfiguration:
             "security": {
                 "admin_userid": None,
                 "admin_password": None,
-                "jwt_secret": "custom_jwt_secret",
+                "jwt_secret": "custom_jwt_secret_key_for_testing_purposes_32bytes",
                 "password_salt": default_salt,
             },
             "email": {
@@ -294,7 +294,7 @@ class TestCheckSecurityConfiguration:
             "security": {
                 "admin_userid": None,
                 "admin_password": None,
-                "jwt_secret": "custom_jwt_secret",
+                "jwt_secret": "custom_jwt_secret_key_for_testing_purposes_32bytes",
                 "password_salt": default_salt,
             },
             "email": {
@@ -377,7 +377,7 @@ class TestCheckSecurityConfiguration:
             "security": {
                 "admin_userid": None,
                 "admin_password": None,
-                "jwt_secret": "custom_jwt",
+                "jwt_secret": "custom_jwt_secret_key_for_testing_32bytes",
                 "password_salt": default_salt,
             },
             "email": {

@@ -17,6 +17,10 @@ type DiagnosticReport = {
     collection_size_bytes: number | null;
     files_collected: number | null;
     error_message: string | null;
+    system_logs?: string | object;
+    configuration_files?: string | object;
+    process_list?: string | object;
+    system_information?: string | object;
 }
 
 type DiagnosticDetailResponse = {
@@ -103,6 +107,8 @@ type SysManageHost = {
     // Virtualization support (for hosts that can be parents)
     virtualization_types?: string;  // JSON string like '["wsl"]' or '["lxd"]'
     virtualization_capabilities?: string;  // JSON string with detailed capabilities
+    // Timezone
+    timezone?: string;
 }
 
 type StorageDevice = {

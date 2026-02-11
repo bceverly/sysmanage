@@ -35,7 +35,7 @@ class PluginManager {
 
     getNavItems(): PluginNavItem[] {
         const items: PluginNavItem[] = [];
-        for (const plugin of this.plugins.values()) {
+        for (const plugin of Array.from(this.plugins.values())) {
             if (plugin.navItems) {
                 items.push(...plugin.navItems);
             }
@@ -45,7 +45,7 @@ class PluginManager {
 
     getRoutes(): PluginRoute[] {
         const routes: PluginRoute[] = [];
-        for (const plugin of this.plugins.values()) {
+        for (const plugin of Array.from(this.plugins.values())) {
             if (plugin.routes) {
                 routes.push(...plugin.routes);
             }
@@ -55,7 +55,7 @@ class PluginManager {
 
     getHostDetailTabs(): PluginHostDetailTab[] {
         const tabs: PluginHostDetailTab[] = [];
-        for (const plugin of this.plugins.values()) {
+        for (const plugin of Array.from(this.plugins.values())) {
             if (plugin.hostDetailTabs) {
                 tabs.push(...plugin.hostDetailTabs);
             }
@@ -65,7 +65,7 @@ class PluginManager {
 
     getSettingsTabs(): PluginSettingsTab[] {
         const tabs: PluginSettingsTab[] = [];
-        for (const plugin of this.plugins.values()) {
+        for (const plugin of Array.from(this.plugins.values())) {
             if (plugin.settingsTabs) {
                 tabs.push(...plugin.settingsTabs);
             }
@@ -81,7 +81,7 @@ class PluginManager {
     }
 
     private notify(): void {
-        for (const listener of this.listeners) {
+        for (const listener of Array.from(this.listeners)) {
             listener();
         }
     }

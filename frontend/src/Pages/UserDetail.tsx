@@ -35,6 +35,7 @@ import { useTranslation } from 'react-i18next';
 
 import { SysManageUser, doGetUsers, doLockUser, doUnlockUser } from '../Services/users';
 import {
+    SecurityRole,
     SecurityRoleGroup,
     doGetAllRoleGroups,
     doGetUserRoles,
@@ -65,8 +66,8 @@ const UserDetail = () => { // NOSONAR
 
     // Security roles state
     const [roleGroups, setRoleGroups] = useState<SecurityRoleGroup[]>([]);
-    const [selectedRoles, setSelectedRoles] = useState<number[]>([]);
-    const [originalRoles, setOriginalRoles] = useState<number[]>([]);
+    const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+    const [originalRoles, setOriginalRoles] = useState<string[]>([]);
     const [rolesLoading, setRolesLoading] = useState<boolean>(false);
     const [rolesSaving, setRolesSaving] = useState<boolean>(false);
     const [rolesSuccess, setRolesSuccess] = useState<string | null>(null);
@@ -213,7 +214,7 @@ const UserDetail = () => { // NOSONAR
         setConfirmDialogOpen(false);
     };
 
-    const handleRoleToggle = (roleId: number) => {
+    const handleRoleToggle = (roleId: string) => {
         setSelectedRoles(prev =>
             prev.includes(roleId)
                 ? prev.filter(id => id !== roleId)
@@ -288,7 +289,7 @@ const UserDetail = () => { // NOSONAR
         }
     };
 
-    const hasUnsavedChanges = JSON.stringify(selectedRoles.toSorted((a, b) => a - b)) !== JSON.stringify(originalRoles.toSorted((a, b) => a - b));
+    const hasUnsavedChanges = JSON.stringify(selectedRoles.toSorted((a, b) => a.localeCompare(b))) !== JSON.stringify(originalRoles.toSorted((a, b) => a.localeCompare(b)));
 
     if (loading) {
         return (
@@ -317,7 +318,7 @@ const UserDetail = () => { // NOSONAR
         );
     }
 
-    const renderRoleCheckbox = (role: { id: number; name: string }) => (
+    const renderRoleCheckbox = (role: SecurityRole) => (
         <Grid size={{ xs: 12, sm: 6, md: 4 }} key={role.id}>
             <FormControlLabel
                 control={

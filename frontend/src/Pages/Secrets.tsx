@@ -722,20 +722,20 @@ const Secrets: React.FC = () => {
             <DialogContent>
               <Box sx={{ mb: 2 }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" gutterBottom>
                       <strong>{t('secrets.secretType', 'Secret Type')}:</strong> {t(`secrets.type.${viewingSecret.secret_type}`, viewingSecret.secret_type)}
                     </Typography>
                   </Grid>
                   {viewingSecret.filename && (
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                       <Typography variant="body2" gutterBottom>
                         <strong>{t('secrets.secretFilename', 'Filename')}:</strong> {viewingSecret.filename}
                       </Typography>
                     </Grid>
                   )}
                   {viewingSecret.secret_subtype && (
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                       <Typography variant="body2" gutterBottom>
                         <strong>
                           {t(secretTypes.find(t => t.value === viewingSecret.secret_type)?.visibility_label || 'secrets.keyVisibility')}:
@@ -755,12 +755,12 @@ const Secrets: React.FC = () => {
                       </Typography>
                     </Grid>
                   )}
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" gutterBottom>
                       <strong>{t('secrets.createdAt', 'Created At')}:</strong> {formatTimestamp(viewingSecret.created_at)}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" gutterBottom>
                       <strong>{t('secrets.updatedAt', 'Updated At')}:</strong> {formatTimestamp(viewingSecret.updated_at)}
                     </Typography>

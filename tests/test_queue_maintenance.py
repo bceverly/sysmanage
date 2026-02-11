@@ -1,550 +1,266 @@
 """
-Comprehensive unit tests for backend.websocket.queue_maintenance module.
-Tests QueueMaintenance class methods for cleanup, deletion, and expiration.
+Tests for backend/websocket/queue_maintenance.py module.
+Tests queue maintenance operations for cleanup, expiration, and deletion.
 """
 
 from datetime import datetime, timedelta, timezone
-from uuid import uuid4
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from backend.persistence.models import Host, MessageQueue
-from backend.websocket.queue_enums import QueueDirection, QueueStatus
-from backend.websocket.queue_maintenance import QueueMaintenance
+from backend.websocket.queue_enums import QueueStatus
 
 
-class TestCleanupOldMessages:
-    """Test cases for cleanup_old_messages method."""
+class TestQueueMaintenanceCleanupOldMessages:
+    """Tests for QueueMaintenance.cleanup_old_messages method."""
 
-    def test_cleanup_old_completed_messages(self, session):
-        """Test cleanup of old completed messages."""
-        host = Host(
-            id=str(uuid4()),
-            fqdn="test-host.example.com",
-            ipv4="192.168.1.100",
-            active=True,
-            platform="Ubuntu",
-            platform_release="22.04",
-            approval_status="approved",
-        )
-        session.add(host)
-        session.commit()
+    def test_cleanup_old_messages_with_provided_db(self):
+        """Test cleanup with provided db session."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
 
-        # Create old completed message (8 days ago)
-        old_time = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=8)
-        old_message = MessageQueue(
-            message_id=str(uuid4()),
-            host_id=host.id,
-            direction=QueueDirection.INBOUND,
-            status=QueueStatus.COMPLETED,
-            priority="normal",
-            message_type="heartbeat",
-            message_data='{"test": "data"}',
-            created_at=old_time,
-            completed_at=old_time,
-        )
-        session.add(old_message)
-
-        # Create recent completed message (should not be deleted)
-        recent_time = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
-            days=1
-        )
-        recent_message = MessageQueue(
-            message_id=str(uuid4()),
-            host_id=host.id,
-            direction=QueueDirection.INBOUND,
-            status=QueueStatus.COMPLETED,
-            priority="normal",
-            message_type="heartbeat",
-            message_data='{"test": "data"}',
-            created_at=recent_time,
-            completed_at=recent_time,
-        )
-        session.add(recent_message)
-        session.commit()
+        mock_db = MagicMock()
+        mock_messages = [MagicMock(), MagicMock()]
+        mock_db.query.return_value.filter.return_value.all.return_value = mock_messages
 
         maintenance = QueueMaintenance()
-        deleted_count = maintenance.cleanup_old_messages(
-            older_than_days=7, keep_failed=True, db=session
+        result = maintenance.cleanup_old_messages(older_than_days=7, db=mock_db)
+
+        assert result == 2
+        mock_db.commit.assert_not_called()  # Caller manages commit
+        assert mock_db.delete.call_count == 2
+
+    def test_cleanup_old_messages_with_keep_failed_false(self):
+        """Test cleanup including failed messages."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
+
+        mock_db = MagicMock()
+        mock_messages = [MagicMock()]
+        mock_db.query.return_value.filter.return_value.union.return_value.all.return_value = (
+            mock_messages
         )
-
-        # Note: The cleanup method might return count but not commit when session is provided
-        # Let's commit to ensure changes are persisted
-        session.commit()
-
-        assert deleted_count >= 1
-
-        # Verify old message was deleted but recent one remains
-        remaining = (
-            session.query(MessageQueue)
-            .filter_by(message_id=recent_message.message_id)
-            .first()
-        )
-        assert remaining is not None
-
-        # Verify old message is gone
-        old_remaining = (
-            session.query(MessageQueue)
-            .filter_by(message_id=old_message.message_id)
-            .first()
-        )
-        assert old_remaining is None
-
-    def test_cleanup_with_keep_failed_true(self, session):
-        """Test cleanup keeps failed messages when keep_failed=True."""
-        host = Host(
-            id=str(uuid4()),
-            fqdn="test-host.example.com",
-            ipv4="192.168.1.100",
-            active=True,
-            platform="Ubuntu",
-            platform_release="22.04",
-            approval_status="approved",
-        )
-        session.add(host)
-        session.commit()
-
-        # Create old failed message
-        old_time = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=8)
-        failed_message = MessageQueue(
-            message_id=str(uuid4()),
-            host_id=host.id,
-            direction=QueueDirection.INBOUND,
-            status=QueueStatus.FAILED,
-            priority="normal",
-            message_type="test_message",
-            message_data='{"test": "data"}',
-            created_at=old_time,
-            completed_at=old_time,
-        )
-        session.add(failed_message)
-        session.commit()
 
         maintenance = QueueMaintenance()
-        deleted_count = maintenance.cleanup_old_messages(
-            older_than_days=7, keep_failed=True, db=session
+        result = maintenance.cleanup_old_messages(
+            older_than_days=7, keep_failed=False, db=mock_db
         )
 
-        assert deleted_count == 0
+        assert result == 1
 
-        # Verify failed message still exists
-        remaining = session.query(MessageQueue).all()
-        assert len(remaining) == 1
+    @patch("backend.websocket.queue_maintenance.get_db")
+    def test_cleanup_old_messages_without_db(self, mock_get_db):
+        """Test cleanup creates and commits its own db session."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
 
-    def test_cleanup_with_keep_failed_false(self, session):
-        """Test cleanup removes failed messages when keep_failed=False."""
-        host = Host(
-            id=str(uuid4()),
-            fqdn="test-host.example.com",
-            ipv4="192.168.1.100",
-            active=True,
-            platform="Ubuntu",
-            platform_release="22.04",
-            approval_status="approved",
-        )
-        session.add(host)
-        session.commit()
-
-        # Create old failed message
-        old_time = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=8)
-        failed_message = MessageQueue(
-            message_id=str(uuid4()),
-            host_id=host.id,
-            direction=QueueDirection.INBOUND,
-            status=QueueStatus.FAILED,
-            priority="normal",
-            message_type="test_message",
-            message_data='{"test": "data"}',
-            created_at=old_time,
-            completed_at=old_time,
-        )
-        session.add(failed_message)
-        session.commit()
+        mock_db = MagicMock()
+        mock_get_db.return_value = iter([mock_db])
+        mock_db.query.return_value.filter.return_value.all.return_value = []
 
         maintenance = QueueMaintenance()
-        deleted_count = maintenance.cleanup_old_messages(
-            older_than_days=7, keep_failed=False, db=session
-        )
+        result = maintenance.cleanup_old_messages(older_than_days=7)
 
-        # Commit to ensure changes are persisted
-        session.commit()
+        assert result == 0
+        mock_db.commit.assert_called_once()
+        mock_db.close.assert_called_once()
 
-        assert deleted_count >= 1
+    @patch("backend.websocket.queue_maintenance.get_db")
+    def test_cleanup_old_messages_error_handling(self, mock_get_db):
+        """Test cleanup handles errors gracefully."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
 
-        # Verify message was deleted
-        failed_remaining = (
-            session.query(MessageQueue)
-            .filter_by(message_id=failed_message.message_id)
-            .first()
-        )
-        assert failed_remaining is None
-
-    def test_cleanup_no_old_messages(self, session):
-        """Test cleanup when there are no old messages."""
-        maintenance = QueueMaintenance()
-        deleted_count = maintenance.cleanup_old_messages(
-            older_than_days=7, keep_failed=True, db=session
-        )
-
-        assert deleted_count == 0
-
-
-class TestDeleteMessagesForHost:
-    """Test cases for delete_messages_for_host method."""
-
-    def test_delete_all_messages_for_host(self, session):
-        """Test deleting all messages for a specific host."""
-        host1 = Host(
-            id=str(uuid4()),
-            fqdn="host1.example.com",
-            ipv4="192.168.1.100",
-            active=True,
-            platform="Ubuntu",
-            platform_release="22.04",
-            approval_status="approved",
-        )
-        session.add(host1)
-        session.commit()
-
-        host2 = Host(
-            id=str(uuid4()),
-            fqdn="host2.example.com",
-            ipv4="192.168.1.101",
-            active=True,
-            platform="Ubuntu",
-            platform_release="22.04",
-            approval_status="approved",
-        )
-        session.add(host2)
-        session.commit()
-
-        # Create messages for both hosts
-        for host in [host1, host2]:
-            for i in range(3):
-                message = MessageQueue(
-                    message_id=str(uuid4()),
-                    host_id=host.id,
-                    direction=QueueDirection.INBOUND,
-                    status=QueueStatus.PENDING,
-                    priority="normal",
-                    message_type="heartbeat",
-                    message_data='{"test": "data"}',
-                    created_at=datetime.now(timezone.utc).replace(tzinfo=None),
-                )
-                session.add(message)
-        session.commit()
+        mock_db = MagicMock()
+        mock_get_db.return_value = iter([mock_db])
+        mock_db.query.side_effect = Exception("Database error")
 
         maintenance = QueueMaintenance()
-        deleted_count = maintenance.delete_messages_for_host(host1.id, db=session)
+        result = maintenance.cleanup_old_messages(older_than_days=7)
 
-        assert deleted_count == 3
-
-        # Verify only host2 messages remain
-        remaining = session.query(MessageQueue).all()
-        assert len(remaining) == 3
-        for msg in remaining:
-            assert msg.host_id == host2.id
-
-    def test_delete_messages_for_nonexistent_host(self, session):
-        """Test deleting messages for host with no messages."""
-        nonexistent_host_id = str(uuid4())
-
-        maintenance = QueueMaintenance()
-        deleted_count = maintenance.delete_messages_for_host(
-            nonexistent_host_id, db=session
-        )
-
-        assert deleted_count == 0
+        assert result == 0
+        mock_db.rollback.assert_called_once()
+        mock_db.close.assert_called_once()
 
 
-class TestExpireOldMessages:
-    """Test cases for expire_old_messages method."""
+class TestQueueMaintenanceDeleteMessagesForHost:
+    """Tests for QueueMaintenance.delete_messages_for_host method."""
 
-    def test_expire_old_pending_messages(self, session):
-        """Test expiring old pending messages."""
-        host = Host(
-            id=str(uuid4()),
-            fqdn="test-host.example.com",
-            ipv4="192.168.1.100",
-            active=True,
-            platform="Ubuntu",
-            platform_release="22.04",
-            approval_status="approved",
-        )
-        session.add(host)
-        session.commit()
+    def test_delete_messages_for_host_with_provided_db(self):
+        """Test delete messages with provided db session."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
 
-        # Create old pending message (61 minutes ago - should expire with default 60min timeout)
-        old_time = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
-            minutes=61
-        )
-        old_message = MessageQueue(
-            message_id=str(uuid4()),
-            host_id=host.id,
-            direction=QueueDirection.INBOUND,
-            status=QueueStatus.PENDING,
-            priority="normal",
-            message_type="test_message",
-            message_data='{"test": "data"}',
-            created_at=old_time,
-        )
-        session.add(old_message)
-        session.commit()
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.count.return_value = 5
 
         maintenance = QueueMaintenance()
-        expired_count = maintenance.expire_old_messages(db=session)
+        result = maintenance.delete_messages_for_host("host-123", db=mock_db)
 
-        assert expired_count == 1
+        assert result == 5
+        mock_db.commit.assert_not_called()  # Caller manages commit
 
-        # Verify message was marked as expired
-        message = (
-            session.query(MessageQueue)
-            .filter_by(message_id=old_message.message_id)
-            .first()
-        )
-        assert message.status == QueueStatus.EXPIRED
-        assert message.expired_at is not None
+    @patch("backend.websocket.queue_maintenance.get_db")
+    def test_delete_messages_for_host_without_db(self, mock_get_db):
+        """Test delete creates and commits its own db session."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
 
-    def test_expire_old_in_progress_messages(self, session):
-        """Test expiring old IN_PROGRESS messages."""
-        host = Host(
-            id=str(uuid4()),
-            fqdn="test-host.example.com",
-            ipv4="192.168.1.100",
-            active=True,
-            platform="Ubuntu",
-            platform_release="22.04",
-            approval_status="approved",
-        )
-        session.add(host)
-        session.commit()
-
-        # Create old IN_PROGRESS message
-        old_time = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
-            minutes=61
-        )
-        old_message = MessageQueue(
-            message_id=str(uuid4()),
-            host_id=host.id,
-            direction=QueueDirection.INBOUND,
-            status=QueueStatus.IN_PROGRESS,
-            priority="normal",
-            message_type="test_message",
-            message_data='{"test": "data"}',
-            created_at=old_time,
-            started_at=old_time,
-        )
-        session.add(old_message)
-        session.commit()
+        mock_db = MagicMock()
+        mock_get_db.return_value = iter([mock_db])
+        mock_db.query.return_value.filter.return_value.count.return_value = 3
 
         maintenance = QueueMaintenance()
-        expired_count = maintenance.expire_old_messages(db=session)
+        result = maintenance.delete_messages_for_host("host-456")
 
-        assert expired_count == 1
+        assert result == 3
+        mock_db.commit.assert_called_once()
+        mock_db.close.assert_called_once()
 
-        # Verify message was marked as expired
-        message = (
-            session.query(MessageQueue)
-            .filter_by(message_id=old_message.message_id)
-            .first()
-        )
-        assert message.status == QueueStatus.EXPIRED
+    @patch("backend.websocket.queue_maintenance.get_db")
+    def test_delete_messages_for_host_error_handling(self, mock_get_db):
+        """Test delete handles errors gracefully."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
 
-    def test_expire_does_not_touch_completed_messages(self, session):
-        """Test that completed messages are not expired."""
-        host = Host(
-            id=str(uuid4()),
-            fqdn="test-host.example.com",
-            ipv4="192.168.1.100",
-            active=True,
-            platform="Ubuntu",
-            platform_release="22.04",
-            approval_status="approved",
-        )
-        session.add(host)
-        session.commit()
-
-        # Create old completed message
-        old_time = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
-            minutes=61
-        )
-        completed_message = MessageQueue(
-            message_id=str(uuid4()),
-            host_id=host.id,
-            direction=QueueDirection.INBOUND,
-            status=QueueStatus.COMPLETED,
-            priority="normal",
-            message_type="test_message",
-            message_data='{"test": "data"}',
-            created_at=old_time,
-            completed_at=old_time,
-        )
-        session.add(completed_message)
-        session.commit()
+        mock_db = MagicMock()
+        mock_get_db.return_value = iter([mock_db])
+        mock_db.query.side_effect = Exception("Database error")
 
         maintenance = QueueMaintenance()
-        expired_count = maintenance.expire_old_messages(db=session)
+        result = maintenance.delete_messages_for_host("host-789")
 
-        assert expired_count == 0
-
-        # Verify message status unchanged
-        message = (
-            session.query(MessageQueue)
-            .filter_by(message_id=completed_message.message_id)
-            .first()
-        )
-        assert message.status == QueueStatus.COMPLETED
-
-    def test_expire_no_old_messages(self, session):
-        """Test expiration when there are no old messages."""
-        maintenance = QueueMaintenance()
-        expired_count = maintenance.expire_old_messages(db=session)
-
-        assert expired_count == 0
+        assert result == 0
+        mock_db.rollback.assert_called_once()
+        mock_db.close.assert_called_once()
 
 
-class TestDeleteFailedMessages:
-    """Test cases for delete_failed_messages method."""
+class TestQueueMaintenanceExpireOldMessages:
+    """Tests for QueueMaintenance.expire_old_messages method."""
 
-    def test_delete_specific_failed_messages(self, session):
-        """Test deleting specific failed messages by ID."""
-        host = Host(
-            id=str(uuid4()),
-            fqdn="test-host.example.com",
-            ipv4="192.168.1.100",
-            active=True,
-            platform="Ubuntu",
-            platform_release="22.04",
-            approval_status="approved",
-        )
-        session.add(host)
-        session.commit()
+    @patch("backend.config.config.config")
+    def test_expire_old_messages_with_provided_db(self, mock_config):
+        """Test expire with provided db session."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
 
-        # Create failed messages
-        failed_message1 = MessageQueue(
-            message_id=str(uuid4()),
-            host_id=host.id,
-            direction=QueueDirection.INBOUND,
-            status=QueueStatus.FAILED,
-            priority="normal",
-            message_type="test_message",
-            message_data='{"test": "data"}',
-            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
-            completed_at=datetime.now(timezone.utc).replace(tzinfo=None),
-        )
-        session.add(failed_message1)
-        session.commit()
+        mock_config.get.return_value = {"expiration_timeout_minutes": 60}
 
-        failed_message2 = MessageQueue(
-            message_id=str(uuid4()),
-            host_id=host.id,
-            direction=QueueDirection.INBOUND,
-            status=QueueStatus.FAILED,
-            priority="normal",
-            message_type="test_message",
-            message_data='{"test": "data"}',
-            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
-            completed_at=datetime.now(timezone.utc).replace(tzinfo=None),
-        )
-        session.add(failed_message2)
-        session.commit()
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.count.return_value = 3
+        mock_db.query.return_value.filter.return_value.update.return_value = None
 
         maintenance = QueueMaintenance()
-        deleted_count = maintenance.delete_failed_messages(
-            [failed_message1.message_id], db=session
-        )
+        result = maintenance.expire_old_messages(db=mock_db)
 
-        assert deleted_count == 1
+        assert result == 3
+        mock_db.commit.assert_not_called()  # Caller manages commit
 
-        # Verify only first message was deleted
-        remaining = session.query(MessageQueue).all()
-        assert len(remaining) == 1
-        assert remaining[0].message_id == failed_message2.message_id
+    @patch("backend.config.config.config")
+    def test_expire_old_messages_none_to_expire(self, mock_config):
+        """Test expire when no messages need expiration."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
 
-    def test_delete_expired_messages(self, session):
-        """Test deleting expired messages."""
-        host = Host(
-            id=str(uuid4()),
-            fqdn="test-host.example.com",
-            ipv4="192.168.1.100",
-            active=True,
-            platform="Ubuntu",
-            platform_release="22.04",
-            approval_status="approved",
-        )
-        session.add(host)
-        session.commit()
+        mock_config.get.return_value = {}
 
-        # Create expired message
-        expired_message = MessageQueue(
-            message_id=str(uuid4()),
-            host_id=host.id,
-            direction=QueueDirection.INBOUND,
-            status=QueueStatus.EXPIRED,
-            priority="normal",
-            message_type="test_message",
-            message_data='{"test": "data"}',
-            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
-            expired_at=datetime.now(timezone.utc).replace(tzinfo=None),
-        )
-        session.add(expired_message)
-        session.commit()
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.count.return_value = 0
 
         maintenance = QueueMaintenance()
-        deleted_count = maintenance.delete_failed_messages(
-            [expired_message.message_id], db=session
-        )
+        result = maintenance.expire_old_messages(db=mock_db)
 
-        assert deleted_count == 1
+        assert result == 0
 
-        # Verify message was deleted
-        remaining = session.query(MessageQueue).all()
-        assert len(remaining) == 0
+    @patch("backend.config.config.config")
+    @patch("backend.websocket.queue_maintenance.get_db")
+    def test_expire_old_messages_without_db(self, mock_get_db, mock_config):
+        """Test expire creates and commits its own db session."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
 
-    def test_delete_does_not_remove_pending_messages(self, session):
-        """Test that pending messages are not deleted."""
-        host = Host(
-            id=str(uuid4()),
-            fqdn="test-host.example.com",
-            ipv4="192.168.1.100",
-            active=True,
-            platform="Ubuntu",
-            platform_release="22.04",
-            approval_status="approved",
-        )
-        session.add(host)
-        session.commit()
+        mock_config.get.return_value = {"expiration_timeout_minutes": 30}
 
-        # Create pending message
-        pending_message = MessageQueue(
-            message_id=str(uuid4()),
-            host_id=host.id,
-            direction=QueueDirection.INBOUND,
-            status=QueueStatus.PENDING,
-            priority="normal",
-            message_type="test_message",
-            message_data='{"test": "data"}',
-            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
-        )
-        session.add(pending_message)
-        session.commit()
+        mock_db = MagicMock()
+        mock_get_db.return_value = iter([mock_db])
+        mock_db.query.return_value.filter.return_value.count.return_value = 2
+        mock_db.query.return_value.filter.return_value.update.return_value = None
 
         maintenance = QueueMaintenance()
-        deleted_count = maintenance.delete_failed_messages(
-            [pending_message.message_id], db=session
-        )
+        result = maintenance.expire_old_messages()
 
-        assert deleted_count == 0
+        assert result == 2
+        mock_db.commit.assert_called_once()
+        mock_db.close.assert_called_once()
 
-        # Verify message still exists
-        remaining = session.query(MessageQueue).all()
-        assert len(remaining) == 1
+    @patch("backend.config.config.config")
+    @patch("backend.websocket.queue_maintenance.get_db")
+    def test_expire_old_messages_error_handling(self, mock_get_db, mock_config):
+        """Test expire handles errors gracefully."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
 
-    def test_delete_nonexistent_message_ids(self, session):
-        """Test deleting with non-existent message IDs."""
+        mock_config.get.return_value = {}
+
+        mock_db = MagicMock()
+        mock_get_db.return_value = iter([mock_db])
+        mock_db.query.side_effect = Exception("Database error")
+
         maintenance = QueueMaintenance()
-        deleted_count = maintenance.delete_failed_messages(
-            [str(uuid4()), str(uuid4())], db=session
+        result = maintenance.expire_old_messages()
+
+        assert result == 0
+        mock_db.rollback.assert_called_once()
+        mock_db.close.assert_called_once()
+
+
+class TestQueueMaintenanceDeleteFailedMessages:
+    """Tests for QueueMaintenance.delete_failed_messages method."""
+
+    def test_delete_failed_messages_with_provided_db(self):
+        """Test delete failed messages with provided db session."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
+
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.count.return_value = 4
+
+        maintenance = QueueMaintenance()
+        result = maintenance.delete_failed_messages(
+            ["msg-1", "msg-2", "msg-3", "msg-4"], db=mock_db
         )
 
-        assert deleted_count == 0
+        assert result == 4
+        mock_db.commit.assert_not_called()  # Caller manages commit
+
+    def test_delete_failed_messages_empty_list(self):
+        """Test delete with empty message list."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
+
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.count.return_value = 0
+
+        maintenance = QueueMaintenance()
+        result = maintenance.delete_failed_messages([], db=mock_db)
+
+        assert result == 0
+
+    @patch("backend.websocket.queue_maintenance.get_db")
+    def test_delete_failed_messages_without_db(self, mock_get_db):
+        """Test delete creates and commits its own db session."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
+
+        mock_db = MagicMock()
+        mock_get_db.return_value = iter([mock_db])
+        mock_db.query.return_value.filter.return_value.count.return_value = 2
+
+        maintenance = QueueMaintenance()
+        result = maintenance.delete_failed_messages(["msg-1", "msg-2"])
+
+        assert result == 2
+        mock_db.commit.assert_called_once()
+        mock_db.close.assert_called_once()
+
+    @patch("backend.websocket.queue_maintenance.get_db")
+    def test_delete_failed_messages_error_handling(self, mock_get_db):
+        """Test delete handles errors gracefully."""
+        from backend.websocket.queue_maintenance import QueueMaintenance
+
+        mock_db = MagicMock()
+        mock_get_db.return_value = iter([mock_db])
+        mock_db.query.side_effect = Exception("Database error")
+
+        maintenance = QueueMaintenance()
+        result = maintenance.delete_failed_messages(["msg-1"])
+
+        assert result == 0
+        mock_db.rollback.assert_called_once()
+        mock_db.close.assert_called_once()

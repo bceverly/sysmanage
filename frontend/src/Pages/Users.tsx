@@ -498,9 +498,9 @@ const Users = () => {
                 slotProps={{
                     paper: {
                         component: 'form',
-                        onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+                        onSubmit: (event: React.BaseSyntheticEvent) => {
                         event.preventDefault();
-                        const formData = new FormData(event.currentTarget);
+                        const formData = new FormData(event.currentTarget as HTMLFormElement);
                         const formJson = Object.fromEntries(formData.entries());
                         doAddUser(
                             true,
@@ -601,7 +601,7 @@ const Users = () => {
                 slotProps={{
                     paper: {
                         component: 'form',
-                        onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+                        onSubmit: (event: React.BaseSyntheticEvent) => {
                             event.preventDefault();
                             if (!editUser) return;
 

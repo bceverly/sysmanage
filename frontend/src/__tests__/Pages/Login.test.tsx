@@ -11,10 +11,7 @@ vi.mock('../../Services/api.js', () => ({
 }));
 
 const LoginWithRouter = () => (
-  <BrowserRouter future={{
-    v7_startTransition: true,
-    v7_relativeSplatPath: true
-  }}>
+  <BrowserRouter>
     <Login />
   </BrowserRouter>
 );

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { vi } from 'vitest';
+import { vi, type Mock } from 'vitest';
 import Reports from '../../Pages/Reports';
 
 /* eslint-disable no-undef, no-unused-vars */
@@ -93,14 +93,11 @@ vi.mock('react-router-dom', async () => {
 import api from '../../Services/api';
 import { clearPermissionsCache } from '../../Services/permissions';
 
-// Type the mock properly
-const mockApi = vi.mocked(api);
+// Type the mock properly - cast to Mock for proper method access
+const mockApiGet = api.get as Mock;
 
 const ReportsWithRouter = () => (
-  <BrowserRouter future={{
-    v7_startTransition: true,
-    v7_relativeSplatPath: true
-  }}>
+  <BrowserRouter>
     <Reports />
   </BrowserRouter>
 );
@@ -112,7 +109,7 @@ describe('Reports Page', () => {
     window.location.hash = ''; // Reset URL hash to default (hosts tab)
 
     // Mock the permissions API endpoint - set default implementation
-    mockApi.get.mockImplementation((url: string) => {
+    mockApiGet.mockImplementation((url: string) => {
       if (url === '/api/user/permissions') {
         return Promise.resolve({
           data: {
@@ -148,7 +145,7 @@ describe('Reports Page', () => {
 
     // Wait for permissions to load
     await waitFor(() => {
-      expect(mockApi.get).toHaveBeenCalledWith('/api/user/permissions');
+      expect(mockApiGet).toHaveBeenCalledWith('/api/user/permissions');
     });
 
     expect(screen.getByText('Reports')).toBeInTheDocument();
@@ -224,9 +221,9 @@ describe('Reports Page', () => {
     };
 
     // Reset and set up mock implementation for this test
-    mockApi.get.mockReset();
+    mockApiGet.mockReset();
     let callCount = 0;
-    mockApi.get.mockImplementation((url: string) => {
+    mockApiGet.mockImplementation((url: string) => {
       callCount++;
       if (url === '/api/user/permissions' || callCount === 1) {
         return Promise.resolve({
@@ -264,7 +261,7 @@ describe('Reports Page', () => {
     });
 
     await waitFor(() => {
-      expect(mockApi.get).toHaveBeenCalledWith(
+      expect(mockApiGet).toHaveBeenCalledWith(
         '/api/reports/generate/registered-hosts',
         expect.objectContaining({
           responseType: 'blob',
@@ -278,9 +275,9 @@ describe('Reports Page', () => {
 
   test('views HTML report when View Report button is clicked', async () => {
     // Reset and set up mock implementation for this test
-    mockApi.get.mockReset();
+    mockApiGet.mockReset();
     let callCount = 0;
-    mockApi.get.mockImplementation((url: string) => {
+    mockApiGet.mockImplementation((url: string) => {
       callCount++;
       if (url === '/api/user/permissions' || callCount === 1) {
         return Promise.resolve({
@@ -321,9 +318,9 @@ describe('Reports Page', () => {
 
   test('handles PDF generation error gracefully', async () => {
     // Reset and set up mock implementation for this test
-    mockApi.get.mockReset();
+    mockApiGet.mockReset();
     let callCount = 0;
-    mockApi.get.mockImplementation((url: string) => {
+    mockApiGet.mockImplementation((url: string) => {
       callCount++;
       if (url === '/api/user/permissions' || callCount === 1) {
         return Promise.resolve({
@@ -456,8 +453,8 @@ describe('Reports Page', () => {
     const mockBlob = new Blob(['mock-pdf'], { type: 'application/pdf' });
 
     // Reset and setup fresh mock - need to handle permissions call first
-    mockApi.get.mockReset();
-    mockApi.get.mockImplementation((url: string) => {
+    mockApiGet.mockReset();
+    mockApiGet.mockImplementation((url: string) => {
       if (url === '/api/user/permissions') {
         return Promise.resolve({
           data: {
@@ -489,7 +486,7 @@ describe('Reports Page', () => {
     });
 
     await waitFor(() => {
-      expect(mockApi.get).toHaveBeenCalledWith(
+      expect(mockApiGet).toHaveBeenCalledWith(
         '/api/reports/generate/registered-hosts',
         expect.objectContaining({
           responseType: 'blob',
@@ -507,9 +504,9 @@ describe('Reports Page', () => {
 
   test('navigation to report viewer includes correct report ID', async () => {
     // Reset and set up mock implementation for this test
-    mockApi.get.mockReset();
+    mockApiGet.mockReset();
     let callCount = 0;
-    mockApi.get.mockImplementation((url: string) => {
+    mockApiGet.mockImplementation((url: string) => {
       callCount++;
       if (url === '/api/user/permissions' || callCount === 1) {
         return Promise.resolve({

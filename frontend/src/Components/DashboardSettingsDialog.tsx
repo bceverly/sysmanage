@@ -57,7 +57,7 @@ const DashboardSettingsDialog: React.FC<DashboardSettingsDialogProps> = ({
       const response = await axiosInstance.get('/api/user-preferences/dashboard-cards');
 
       // Create a map of saved preferences
-      const savedPrefs = new Map(
+      const savedPrefs = new Map<string, boolean>(
         response.data.preferences.map((pref: { card_identifier: string; visible: boolean }) => [pref.card_identifier, pref.visible])
       );
 

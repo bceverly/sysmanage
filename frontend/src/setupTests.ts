@@ -5,6 +5,9 @@
 import '@testing-library/jest-dom';
 import './__tests__/setup';
 
+// Declare process.env for TypeScript
+declare const process: { env: { CI?: string } } | undefined;
+
 // Setup MSW for all tests
 import { beforeAll, afterEach, afterAll } from 'vitest';
 import { server } from './mocks/node';
@@ -12,14 +15,14 @@ import { server } from './mocks/node';
 // Start MSW server before all tests
 beforeAll(() => {
   // Enable MSW request logging in CI
-  const isCI = process.env.CI === 'true';
+  const isCI = process !== undefined && process.env?.CI === 'true';
 
   server.listen({
     onUnhandledRequest: 'warn', // Warn about unhandled requests
   });
 
   if (isCI) {
-    console.log('🚀 MSW server started for CI environment');
+    console.log('MSW server started for CI environment');
   }
 });
 
@@ -30,10 +33,10 @@ afterEach(() => {
 
 // Clean up after all tests are done
 afterAll(() => {
-  const isCI = process.env.CI === 'true';
+  const isCI = process !== undefined && process.env?.CI === 'true';
 
   if (isCI) {
-    console.log('🔚 MSW server stopped - CI test run completed');
+    console.log('MSW server stopped - CI test run completed');
   }
 
   server.close();
@@ -41,10 +44,8 @@ afterAll(() => {
 
 // Fix for React 19 compatibility in JSDOM environment
 declare global {
+  // eslint-disable-next-line no-var
   var IS_REACT_ACT_ENVIRONMENT: boolean;
-  function beforeAll(fn: () => void | Promise<void>): void;
-  function afterEach(fn: () => void | Promise<void>): void;
-  function afterAll(fn: () => void | Promise<void>): void;
 }
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 

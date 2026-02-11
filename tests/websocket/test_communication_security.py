@@ -29,7 +29,9 @@ class TestWebSocketSecurityManager:
         """Create a fresh security manager for each test."""
         with patch("backend.security.communication_security.get_config") as mock_config:
             mock_config.return_value = {
-                "security": {"jwt_secret": "test-secret-key-12345"}
+                "security": {
+                    "jwt_secret": "test-secret-key-for-websocket-testing-32bytes"
+                }
             }
             return WebSocketSecurityManager()
 
@@ -126,7 +128,9 @@ class TestWebSocketSecurityManager:
         """Test token validation fails with expired token."""
         with patch("backend.security.communication_security.get_config") as mock_config:
             mock_config.return_value = {
-                "security": {"jwt_secret": "test-secret-key-12345"}
+                "security": {
+                    "jwt_secret": "test-secret-key-for-websocket-testing-32bytes"
+                }
             }
             manager = WebSocketSecurityManager()
 
@@ -139,7 +143,7 @@ class TestWebSocketSecurityManager:
                 "expires": int(time.time()) - 3600,  # Expired 1 hour ago
             }
             payload_json = json.dumps(payload, sort_keys=True)
-            secret_key = "test-secret-key-12345"
+            secret_key = "test-secret-key-for-websocket-testing-32bytes"
             signature = hmac.new(
                 secret_key.encode(), payload_json.encode(), hashlib.sha256
             ).hexdigest()
@@ -417,7 +421,9 @@ class TestMessageEncryption:
         """Create a fresh encryption manager for each test."""
         with patch("backend.security.communication_security.get_config") as mock_config:
             mock_config.return_value = {
-                "security": {"jwt_secret": "test-secret-key-12345"}
+                "security": {
+                    "jwt_secret": "test-secret-key-for-websocket-testing-32bytes"
+                }
             }
             return MessageEncryption()
 
@@ -462,10 +468,12 @@ class TestMessageEncryption:
 
         with patch("backend.security.communication_security.get_config") as mock_config:
             mock_config.return_value = {
-                "security": {"jwt_secret": "test-secret-key-12345"}
+                "security": {
+                    "jwt_secret": "test-secret-key-for-websocket-testing-32bytes"
+                }
             }
             enc = MessageEncryption()
-            secret_key = "test-secret-key-12345"
+            secret_key = "test-secret-key-for-websocket-testing-32bytes"
 
             signature = hmac.new(
                 secret_key.encode(), data_json.encode(), hashlib.sha256

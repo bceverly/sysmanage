@@ -146,14 +146,17 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
           createLabel: t('hostDetail.hypervisor.wsl.createLabel', 'Create Instance'),
           enableLabel: t('hostDetail.hypervisor.wsl.enableLabel', 'Enable WSL'),
         };
-      default:
+      default: {
+        // Handle any future hypervisor types not yet in the union
+        const unknownType: string = type as string;
         return {
-          name: type.toUpperCase(),
+          name: unknownType.toUpperCase(),
           description: '',
           icon: <ComputerIcon />,
           createLabel: t('hostDetail.hypervisor.createLabel', 'Create'),
           enableLabel: t('hostDetail.hypervisor.enableLabel', 'Enable'),
         };
+      }
     }
   };
 

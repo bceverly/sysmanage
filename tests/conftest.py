@@ -41,7 +41,7 @@ TEST_CONFIG = {
         "password_salt": "test_salt",
         "admin_userid": "admin@test.com",
         "admin_password": "testpass",
-        "jwt_secret": "test_secret",
+        "jwt_secret": "test_jwt_secret_key_for_testing_purposes_32bytes",
         "jwt_algorithm": "HS256",
         "jwt_auth_timeout": 3600,
         "jwt_refresh_timeout": 86400,

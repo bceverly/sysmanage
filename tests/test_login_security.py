@@ -413,7 +413,9 @@ class TestSessionSecurityManager:
     @patch("backend.security.login_security.get_config")
     def test_init(self, mock_config):
         """Test session manager initialization."""
-        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+        mock_config.return_value = {
+            "security": {"jwt_secret": "test_jwt_secret_key_for_login_testing_32bytes"}
+        }
 
         manager = SessionSecurityManager()
         assert manager.config is not None
@@ -423,7 +425,9 @@ class TestSessionSecurityManager:
     def test_create_secure_session_token(self, mock_time, mock_config):
         """Test creating secure session token."""
         mock_time.return_value = 1234567890
-        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+        mock_config.return_value = {
+            "security": {"jwt_secret": "test_jwt_secret_key_for_login_testing_32bytes"}
+        }
 
         manager = SessionSecurityManager()
         token = manager.create_secure_session_token("user123", "192.168.1.1")
@@ -441,7 +445,9 @@ class TestSessionSecurityManager:
     def test_validate_session_token_valid(self, mock_time, mock_config):
         """Test validating valid session token."""
         mock_time.return_value = 1234567890
-        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+        mock_config.return_value = {
+            "security": {"jwt_secret": "test_jwt_secret_key_for_login_testing_32bytes"}
+        }
 
         manager = SessionSecurityManager()
 
@@ -458,7 +464,9 @@ class TestSessionSecurityManager:
     @patch("backend.security.login_security.get_config")
     def test_validate_session_token_malformed(self, mock_config):
         """Test validating malformed token."""
-        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+        mock_config.return_value = {
+            "security": {"jwt_secret": "test_jwt_secret_key_for_login_testing_32bytes"}
+        }
 
         manager = SessionSecurityManager()
         is_valid, user_id = manager.validate_session_token(
@@ -473,7 +481,9 @@ class TestSessionSecurityManager:
     def test_validate_session_token_expired(self, mock_time, mock_config):
         """Test validating expired token."""
         mock_time.return_value = 1234567890
-        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+        mock_config.return_value = {
+            "security": {"jwt_secret": "test_jwt_secret_key_for_login_testing_32bytes"}
+        }
 
         manager = SessionSecurityManager()
         token = manager.create_secure_session_token("user123", "192.168.1.1")
@@ -490,7 +500,9 @@ class TestSessionSecurityManager:
     def test_validate_session_token_ip_mismatch(self, mock_time, mock_config):
         """Test validating token with IP mismatch."""
         mock_time.return_value = 1234567890
-        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+        mock_config.return_value = {
+            "security": {"jwt_secret": "test_jwt_secret_key_for_login_testing_32bytes"}
+        }
 
         manager = SessionSecurityManager()
         token = manager.create_secure_session_token("user123", "192.168.1.1")
@@ -507,7 +519,9 @@ class TestSessionSecurityManager:
     def test_validate_session_token_invalid_signature(self, mock_time, mock_config):
         """Test validating token with invalid signature."""
         mock_time.return_value = 1234567890
-        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+        mock_config.return_value = {
+            "security": {"jwt_secret": "test_jwt_secret_key_for_login_testing_32bytes"}
+        }
 
         manager = SessionSecurityManager()
 
@@ -515,7 +529,9 @@ class TestSessionSecurityManager:
         token = manager.create_secure_session_token("user123", "192.168.1.1")
 
         # Try to validate with different secret
-        mock_config.return_value = {"security": {"jwt_secret": "different_secret"}}
+        mock_config.return_value = {
+            "security": {"jwt_secret": "different_jwt_secret_key_for_testing_32bytes"}
+        }
         manager.config = mock_config.return_value
 
         mock_time.return_value = 1234567890 + 3600
@@ -617,7 +633,9 @@ class TestLoginSecurityIntegration:
     def test_session_token_lifecycle(self, mock_time, mock_config):
         """Test complete session token lifecycle."""
         mock_time.return_value = 1234567890
-        mock_config.return_value = {"security": {"jwt_secret": "test_secret"}}
+        mock_config.return_value = {
+            "security": {"jwt_secret": "test_jwt_secret_key_for_login_testing_32bytes"}
+        }
 
         manager = SessionSecurityManager()
 

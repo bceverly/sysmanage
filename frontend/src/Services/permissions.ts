@@ -30,13 +30,26 @@ export const getUserPermissions = async (): Promise<UserPermissions> => {
 };
 
 /**
- * Check if user has a specific permission
+ * Check if user has a specific permission (async - fetches if not cached)
  */
 export const hasPermission = async (permissionName: string): Promise<boolean> => {
     const permissions = await getUserPermissions();
     // Use hasOwnProperty to prevent prototype pollution attacks
     return Object.hasOwn(permissions.permissions, permissionName)
         && permissions.permissions[permissionName] === true; // nosemgrep: detect-object-injection
+};
+
+/**
+ * Check if user has a specific permission (sync - uses cache only)
+ * Returns false if permissions not yet cached. Use in JSX where sync check is needed.
+ */
+export const hasPermissionSync = (permissionName: string): boolean => {
+    if (!permissionsCache) {
+        return false;
+    }
+    // Use hasOwnProperty to prevent prototype pollution attacks
+    return Object.hasOwn(permissionsCache.permissions, permissionName)
+        && permissionsCache.permissions[permissionName] === true; // nosemgrep: detect-object-injection
 };
 
 /**

@@ -258,7 +258,7 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 {t('security.status', 'Status')}
               </Typography>
-              {getStatusChip(antivirusStatus.enabled)}
+              {getStatusChip(antivirusStatus.enabled ?? undefined)}
             </Box>
 
             {antivirusStatus.last_updated && (

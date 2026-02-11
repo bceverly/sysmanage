@@ -1306,7 +1306,7 @@ def mock_config(test_db):
             "password_salt": "test_salt",
             "admin_userid": "admin@sysmanage.org",
             "admin_password": "admin_pass",
-            "jwt_secret": "test_secret_key_123",
+            "jwt_secret": "test_jwt_secret_key_for_testing_purposes_32bytes",
             "jwt_algorithm": "HS256",
             "jwt_auth_timeout": 3600,
             "jwt_refresh_timeout": 86400,

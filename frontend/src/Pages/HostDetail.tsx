@@ -1,3 +1,4 @@
+/* global Event */
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import AntivirusStatusCard from '../Components/AntivirusStatusCard';
@@ -92,7 +93,7 @@ import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axios from 'axios';
 import axiosInstance from '../Services/api';
 import { distributionService } from '../Services/childHostDistributions';
-import { hasPermission, SecurityRoles } from '../Services/permissions';
+import { hasPermission, hasPermissionSync, SecurityRoles } from '../Services/permissions';
 
 import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck, doRequestSystemInfo, doChangeHostname } from '../Services/hosts';
 import { SysManageUser, doGetMe } from '../Services/users';
@@ -291,6 +292,14 @@ const HostDetail = () => { // NOSONAR
                 running: boolean;
                 initialized: boolean;
                 needs_install: boolean;
+                needs_enable: boolean;
+            };
+            bhyve?: {
+                available: boolean;
+                enabled: boolean;
+                running: boolean;
+                initialized: boolean;
+                kernel_supported: boolean;
                 needs_enable: boolean;
             };
             [key: string]: unknown;
@@ -540,6 +549,9 @@ const HostDetail = () => { // NOSONAR
         completed_at?: string;
         result_log?: string;
         package_names: string;  // Comma-separated list of package names
+        installed_version?: string;
+        error_message?: string;
+        installation_log?: string;
     }
     const [installationHistory, setInstallationHistory] = useState<InstallationHistoryItem[]>([]);
     const [installationHistoryLoading, setInstallationHistoryLoading] = useState<boolean>(false);
@@ -2136,7 +2148,7 @@ const HostDetail = () => { // NOSONAR
         }
     }, [host, ubuntuProInfo, getTabNames, currentTab]);
 
-    const formatDate = (dateString: string | undefined) => {
+    const formatDate = (dateString: string | null | undefined) => {
         if (!dateString) return t('common.notAvailable', 'N/A');
         try {
             const date = new Date(dateString);
@@ -2443,7 +2455,7 @@ const HostDetail = () => { // NOSONAR
             width: 150,
             renderCell: (params) => (
                 <Typography variant="body2">
-                    {t(`secrets.cert_type.${params.value}`, params.value)}
+                    {String(t(`secrets.cert_type.${String(params.value)}`, String(params.value)))}
                 </Typography>
             ),
         },
@@ -2479,7 +2491,7 @@ const HostDetail = () => { // NOSONAR
             width: 150,
             renderCell: (params) => (
                 <Typography variant="body2">
-                    {t(`secrets.key_type.${params.value}`, params.value)}
+                    {String(t(`secrets.key_type.${String(params.value)}`, String(params.value)))}
                 </Typography>
             ),
         },
@@ -2792,7 +2804,7 @@ const HostDetail = () => { // NOSONAR
             setTimeout(async () => {
                 try {
                     const softwareData = await doGetHostSoftware(hostId);
-                    setSoftwarePackages(softwareData);
+                    setSoftwarePackages(softwareData.items);
 
                     // Re-check eligibility
                     const eligibility = await doCheckOpenTelemetryEligibility(hostId);
@@ -2819,7 +2831,7 @@ const HostDetail = () => { // NOSONAR
             setDiagnosticsLoading(true);
 
             // Build list of requests to make
-            const requests = [
+            const requests: Promise<unknown>[] = [
                 doRequestHostDiagnostics(hostId),
                 doRequestSystemInfo(hostId),
                 doRefreshUserAccessData(hostId),
@@ -3184,7 +3196,7 @@ const HostDetail = () => { // NOSONAR
         }
     };
 
-    const handleCloseSnackbar = (_event?: React.SyntheticEvent, reason?: string) => {
+    const handleCloseSnackbar = (_event: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') {
             return;
         }
@@ -4194,7 +4206,7 @@ const HostDetail = () => { // NOSONAR
                                                     {openTelemetryStatus.deployed ? t('common.yes', 'Yes') : t('common.no', 'No')}
                                                 </Typography>
                                             </Grid>
-                                            {!openTelemetryStatus.deployed && hasPermission(SecurityRoles.DEPLOY_OPENTELEMETRY) && host?.is_agent_privileged && (
+                                            {!openTelemetryStatus.deployed && hasPermissionSync(SecurityRoles.DEPLOY_OPENTELEMETRY) && host?.is_agent_privileged && (
                                                 <Grid size={{ xs: 12 }}>
                                                     <Button
                                                         variant="contained"
@@ -5120,7 +5132,7 @@ const HostDetail = () => { // NOSONAR
                                                                                 cursor: 'pointer'
                                                                             }}
                                                                             onClick={() => {
-                                                                                setExpandedUserGroups(prev => new Set(Array.from(prev).concat([user.id || 0])));
+                                                                                setExpandedUserGroups(prev => new Set([...Array.from(prev), user.id]));
                                                                             }}
                                                                         />
                                                                     )}
@@ -5277,7 +5289,7 @@ const HostDetail = () => { // NOSONAR
                                                                                 cursor: 'pointer'
                                                                             }}
                                                                             onClick={() => {
-                                                                                setExpandedGroupUsers(prev => new Set(Array.from(prev).concat([group.id || 0])));
+                                                                                setExpandedGroupUsers(prev => new Set([...Array.from(prev), group.id]));
                                                                             }}
                                                                         />
                                                                     )}
@@ -5827,7 +5839,7 @@ const HostDetail = () => { // NOSONAR
                                                 onEnable={handleEnableWsl}
                                                 onCreate={() => openCreateDialogWithType('wsl')}
                                                 canEnable={canEnableWsl}
-                                                canCreate={hasPermission(SecurityRoles.CREATE_CHILD_HOST)}
+                                                canCreate={hasPermissionSync(SecurityRoles.CREATE_CHILD_HOST)}
                                                 isLoading={virtualizationLoading}
                                                 isEnableLoading={enableWslLoading}
                                                 isAgentPrivileged={host?.is_agent_privileged || false}
@@ -5845,7 +5857,7 @@ const HostDetail = () => { // NOSONAR
                                                 onEnable={handleInitializeLxd}
                                                 onCreate={() => openCreateDialogWithType('lxd')}
                                                 canEnable={canEnableLxd}
-                                                canCreate={hasPermission(SecurityRoles.CREATE_CHILD_HOST)}
+                                                canCreate={hasPermissionSync(SecurityRoles.CREATE_CHILD_HOST)}
                                                 isLoading={virtualizationLoading}
                                                 isEnableLoading={initializeLxdLoading}
                                                 isAgentPrivileged={host?.is_agent_privileged || false}
@@ -5864,7 +5876,7 @@ const HostDetail = () => { // NOSONAR
                                                 onEnableModules={handleEnableKvmModules}
                                                 onDisableModules={handleDisableKvmModules}
                                                 canEnable={canEnableKvm}
-                                                canCreate={hasPermission(SecurityRoles.CREATE_CHILD_HOST)}
+                                                canCreate={hasPermissionSync(SecurityRoles.CREATE_CHILD_HOST)}
                                                 isLoading={virtualizationLoading}
                                                 isEnableLoading={initializeKvmLoading}
                                                 isModulesLoading={kvmModulesLoading}
@@ -5882,7 +5894,7 @@ const HostDetail = () => { // NOSONAR
                                                 onEnable={handleInitializeVmm}
                                                 onCreate={() => openCreateDialogWithType('vmm')}
                                                 canEnable={canEnableVmm}
-                                                canCreate={hasPermission(SecurityRoles.CREATE_CHILD_HOST)}
+                                                canCreate={hasPermissionSync(SecurityRoles.CREATE_CHILD_HOST)}
                                                 isLoading={virtualizationLoading}
                                                 isEnableLoading={initializeVmmLoading}
                                                 isAgentPrivileged={host?.is_agent_privileged || false}
@@ -5900,7 +5912,7 @@ const HostDetail = () => { // NOSONAR
                                                 onDisable={handleDisableBhyve}
                                                 onCreate={() => openCreateDialogWithType('bhyve')}
                                                 canEnable={canEnableBhyve}
-                                                canCreate={hasPermission(SecurityRoles.CREATE_CHILD_HOST)}
+                                                canCreate={hasPermissionSync(SecurityRoles.CREATE_CHILD_HOST)}
                                                 isLoading={virtualizationLoading}
                                                 isEnableLoading={initializeBhyveLoading}
                                                 isDisableLoading={disableBhyveLoading}
@@ -5926,7 +5938,7 @@ const HostDetail = () => { // NOSONAR
                                             variant="outlined"
                                             size="small"
                                             startIcon={childHostsRefreshRequested ? <CircularProgress size={16} /> : <RefreshIcon />}
-                                            onClick={requestChildHostsRefresh}
+                                            onClick={() => requestChildHostsRefresh()}
                                             disabled={childHostsRefreshRequested || childHostsLoading}
                                         >
                                             {t('hostDetail.refreshChildHosts', 'Refresh')}
@@ -7105,7 +7117,7 @@ const HostDetail = () => { // NOSONAR
                 fullWidth
             >
                 <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    {t('hostDetail.installationLogTitle', 'Installation Log')} - {selectedInstallationLog?.package_name}
+                    {t('hostDetail.installationLogTitle', 'Installation Log')} - {selectedInstallationLog?.package_names}
                     <IconButton
                         edge="end"
                         color="inherit"
@@ -7521,7 +7533,7 @@ const HostDetail = () => { // NOSONAR
                 open={graylogAttachModalOpen}
                 onClose={handleGraylogAttachModalClose}
                 hostId={hostId || ''}
-                hostPlatform={host?.os || ''}
+                hostPlatform={host?.platform || ''}
             />
 
             {/* Add Host Account Modal */}

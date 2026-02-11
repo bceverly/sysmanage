@@ -570,7 +570,7 @@ const Settings: React.FC = () => {
           const activeHosts = hostsResponse.data.filter((host: Host) => host.active && host.approval_status === 'approved');
 
           // Create unique OS/version combinations
-          const osVersionCombinations = new Set();
+          const osVersionCombinations = new Set<string>();
           activeHosts.forEach((host: Host) => {
             if (host.platform && host.platform_version) {
               osVersionCombinations.add(`${host.platform}|${host.platform_version}`);
@@ -578,8 +578,8 @@ const Settings: React.FC = () => {
           });
 
           // Trigger package collection for each unique OS/version combination
-          for (const combination of osVersionCombinations) {
-            const [osName, osVersion] = (combination as string).split('|');
+          for (const combination of Array.from(osVersionCombinations)) {
+            const [osName, osVersion] = combination.split('|');
             try {
               await axiosInstance.post(`/api/packages/refresh/${encodeURIComponent(osName)}/${encodeURIComponent(osVersion)}`);
             } catch (error) {

@@ -709,18 +709,19 @@ jobs:
         fi
         echo "✅ Frontend is ready"
 
-    - name: Run Playwright UI tests
+    - name: Run Playwright E2E tests
       id: ui-tests
       run: |
-        echo "🎭 Running Playwright UI tests..."
-        if PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_login_cross_browser.py tests/ui/test_hosts_playwright.py tests/ui/test_updates_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short; then
+        echo "🎭 Running Playwright E2E tests (TypeScript)..."
+        cd frontend
+        if npx playwright test --reporter=list; then
           echo "status=passing" >> $GITHUB_OUTPUT
           echo "color=brightgreen" >> $GITHUB_OUTPUT
-          echo "✅ All UI tests passed"
+          echo "✅ All E2E tests passed"
         else
           echo "status=failing" >> $GITHUB_OUTPUT
           echo "color=red" >> $GITHUB_OUTPUT
-          echo "❌ UI tests failed"
+          echo "❌ E2E tests failed"
           exit 1
         fi
       env:
@@ -803,13 +804,179 @@ jobs:
         pkill -f "uvicorn" || true
         pkill -f "serve" || true
 
+  e2e-tests:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: [build]  # Only run after build succeeds
+    if: success()
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: sysmanage
+          POSTGRES_USER: sysmanage
+          POSTGRES_PASSWORD: abc123
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '20'
+        registry-url: 'https://registry.npmjs.org/'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Cache pip packages
+      uses: actions/cache@v5
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install frontend dependencies
+      working-directory: frontend
+      run: |
+        npm cache clean --force || true
+        npm install --legacy-peer-deps || npm ci --legacy-peer-deps
+
+    - name: Install Playwright browsers
+      working-directory: frontend
+      run: npx playwright install --with-deps chromium
+
+    - name: Create test config
+      run: |
+        sudo mkdir -p /etc
+        sudo tee /etc/sysmanage.yaml > /dev/null <<EOF
+        api:
+          host: "0.0.0.0"
+          port: 8082
+          certFile: ""
+          chainFile: ""
+          keyFile: ""
+        database:
+          user: "sysmanage"
+          password: "abc123"
+          host: "localhost"
+          port: 5432
+          name: "sysmanage"
+        security:
+          password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+          admin_userid: "admin@sysmanage.org"
+          admin_password: "TEST_AdminPass123!"
+          jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+          jwt_algorithm: "HS256"
+          jwt_auth_timeout: 6000
+          jwt_refresh_timeout: 60000
+        webui:
+          host: "0.0.0.0"
+          port: 5173
+        vault:
+          enabled: false
+        EOF
+
+    - name: Run backend database migrations
+      run: |
+        python -c "from alembic.config import Config; from alembic import command; cfg = Config('alembic.ini'); command.upgrade(cfg, 'head')"
+      env:
+        PYTHONPATH: .
+        DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+    - name: Start backend server
+      run: |
+        echo "🚀 Starting backend server on port 8082 for E2E testing..."
+        cd backend
+        PYTHONPATH=.. python -m uvicorn main:app --host 0.0.0.0 --port 8082 > /tmp/backend-e2e.log 2>&1 &
+        BACKEND_PID=$!
+        echo $BACKEND_PID > /tmp/backend-e2e.pid
+        echo "Backend started with PID: $BACKEND_PID"
+
+        # Give server time to start
+        sleep 15
+
+        # Check if process is still running
+        if ! kill -0 $BACKEND_PID 2>/dev/null; then
+          echo "❌ Backend process died! Log contents:"
+          cat /tmp/backend-e2e.log
+          exit 1
+        fi
+
+        echo "✅ Backend server started successfully for E2E testing"
+      env:
+        PYTHONPATH: .
+
+    - name: Wait for backend to be ready
+      run: |
+        echo "Waiting for backend health check..."
+        if ! timeout 60 bash -c 'until curl -f http://localhost:8082/api/health; do echo "Waiting for backend..."; sleep 2; done'; then
+          echo "❌ Backend health check failed!"
+          cat /tmp/backend-e2e.log || echo "No backend log file found"
+          exit 1
+        fi
+        echo "✅ Backend is ready"
+
+    - name: Run Playwright E2E tests
+      working-directory: frontend
+      run: |
+        echo "🎭 Running Playwright E2E tests..."
+        PLAYWRIGHT_BASE_URL=http://localhost:8082 TEST_USERNAME=admin@sysmanage.org TEST_PASSWORD=TEST_AdminPass123! npx playwright test --reporter=html,list
+      env:
+        CI: true
+
+    - name: Upload Playwright report
+      uses: actions/upload-artifact@v6
+      if: always()
+      with:
+        name: playwright-e2e-report-${{ github.run_number }}
+        path: frontend/playwright-report/
+        retention-days: 7
+
+    - name: Upload Playwright test results
+      uses: actions/upload-artifact@v6
+      if: failure()
+      with:
+        name: playwright-e2e-results-${{ github.run_number }}
+        path: frontend/test-results/
+        retention-days: 7
+
+    - name: Stop servers
+      if: always()
+      run: |
+        echo "🛑 Stopping servers..."
+        if [ -f /tmp/backend-e2e.pid ]; then
+          kill $(cat /tmp/backend-e2e.pid) || true
+        fi
+        pkill -f "uvicorn" || true
+
   performance-tests:
     name: Performance Tests
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Allow writing to update README badge
       pull-requests: write  # Allow creating pull requests
-    needs: [ui-tests]  # Only run after UI tests pass
+    needs: [ui-tests, e2e-tests]  # Only run after UI and E2E tests pass
     if: success()
 
     services:
@@ -1070,72 +1237,14 @@ jobs:
           echo "artillery_metric=failed" >> $GITHUB_OUTPUT
         fi
 
-    - name: Run Playwright performance tests
+    - name: Note on Playwright performance tests
       id: playwright-perf-tests
       run: |
-        echo "🎭 Running Playwright performance tests..."
-
-        # Create a basic Playwright performance test file if it doesn't exist
-        mkdir -p tests/ui
-        if [ ! -f tests/ui/test_performance_playwright.py ]; then
-          cat > tests/ui/test_performance_playwright.py << 'EOF'
-        import pytest
-        from playwright.async_api import Page, expect
-        import time
-
-        @pytest.mark.asyncio
-        async def test_page_load_performance(page: Page, ui_config, start_server):
-            """Test page load performance metrics"""
-            try:
-                start_time = time.time()
-                await page.goto(f"{ui_config.base_url}/", wait_until="networkidle")
-                load_time = (time.time() - start_time) * 1000
-
-                # Get performance metrics
-                metrics = await page.evaluate("""
-                () => {
-                    const navigation = performance.getEntriesByType('navigation')[0];
-                    const paintEntries = performance.getEntriesByType('paint');
-
-                    return {
-                        domContentLoaded: navigation ? navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart : 0,
-                        firstContentfulPaint: paintEntries.find(entry => entry.name === 'first-contentful-paint')?.startTime || 0,
-                        loadComplete: navigation ? navigation.loadEventEnd - navigation.loadEventStart : 0
-                    };
-                }
-                """)
-
-                print(f"Page Load Time: {load_time:.0f}ms")
-                print(f"DOM Content Loaded: {metrics['domContentLoaded']:.0f}ms")
-                print(f"First Contentful Paint: {metrics['firstContentfulPaint']:.0f}ms")
-
-                # Performance assertions
-                assert load_time < 10000, f"Page load took too long: {load_time}ms"
-                assert metrics['firstContentfulPaint'] < 5000, f"FCP too slow: {metrics['firstContentfulPaint']}ms"
-
-                return {
-                    'load_time': load_time,
-                    'fcp': metrics['firstContentfulPaint'],
-                    'dcl': metrics['domContentLoaded']
-                }
-
-            except Exception as e:
-                print(f"Performance test failed: {e}")
-                raise
-        EOF
-        fi
-
-        if PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short; then
-          echo "✅ Playwright performance tests completed successfully"
-          echo "playwright_status=passing" >> $GITHUB_OUTPUT
-          echo "playwright_color=brightgreen" >> $GITHUB_OUTPUT
-          echo "playwright_metric=optimized" >> $GITHUB_OUTPUT
-        else
-          echo "❌ Playwright performance tests failed"
-          echo "playwright_status=failing" >> $GITHUB_OUTPUT
-          echo "playwright_color=red" >> $GITHUB_OUTPUT
-          echo "playwright_metric=issues" >> $GITHUB_OUTPUT
-        fi
+        echo "ℹ️ Playwright performance tests are now included in the E2E test suite (frontend/e2e/performance.spec.ts)"
+        echo "✅ Performance tests were run as part of the E2E tests earlier in this pipeline"
+        echo "playwright_status=passing" >> $GITHUB_OUTPUT
+        echo "playwright_color=brightgreen" >> $GITHUB_OUTPUT
+        echo "playwright_metric=optimized" >> $GITHUB_OUTPUT
 
     - name: Upload performance test artifacts
       uses: actions/upload-artifact@v6

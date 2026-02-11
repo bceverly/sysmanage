@@ -22,10 +22,7 @@ vi.mock('react-i18next', () => ({
 // Helper function to render component with Router
 const renderWithRouter = (component: React.ReactElement) => {
     return render(
-        <MemoryRouter future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true
-        }}>
+        <MemoryRouter>
             {component}
         </MemoryRouter>
     );

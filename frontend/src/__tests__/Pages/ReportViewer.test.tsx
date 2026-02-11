@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { vi } from 'vitest';
+import { vi, type Mock } from 'vitest';
 import ReportViewer from '../../Pages/ReportViewer';
 
 /* eslint-disable no-undef, no-unused-vars */
@@ -81,13 +81,7 @@ vi.mock('react-router-dom', async () => {
 });
 
 const ReportViewerWithRouter = ({ reportId = 'hosts' }) => (
-  <MemoryRouter
-    initialEntries={[`/reports/${reportId}`]}
-    future={{
-      v7_startTransition: true,
-      v7_relativeSplatPath: true
-    }}
-  >
+  <MemoryRouter initialEntries={[`/reports/${reportId}`]}>
     <ReportViewer />
   </MemoryRouter>
 );
@@ -96,9 +90,9 @@ const ReportViewerWithRouter = ({ reportId = 'hosts' }) => (
 import api from '../../Services/api';
 import { useParams } from 'react-router-dom';
 
-// Type the mock properly
-const mockApi = vi.mocked(api);
-const mockUseParams = vi.mocked(useParams);
+// Type the mock properly - cast to Mock for proper method access
+const mockApiGet = api.get as Mock;
+const mockUseParams = useParams as Mock;
 
 describe('ReportViewer Page', () => {
   beforeEach(() => {
@@ -106,7 +100,7 @@ describe('ReportViewer Page', () => {
   });
 
   test('renders without crashing', async () => {
-    mockApi.get.mockResolvedValueOnce({
+    mockApiGet.mockResolvedValueOnce({
       data: '<html><body>Mock HTML Report</body></html>',
     });
 
@@ -120,7 +114,7 @@ describe('ReportViewer Page', () => {
   });
 
   test('displays loading state initially', async () => {
-    mockApi.get.mockImplementationOnce(
+    mockApiGet.mockImplementationOnce(
       () => new Promise(resolve => setTimeout(() => resolve({
         data: '<html><body>Mock HTML Report</body></html>',
       }), 100))
@@ -135,7 +129,7 @@ describe('ReportViewer Page', () => {
   test('fetches and displays HTML report content', async () => {
     const mockHtmlContent = '<html><body><h1>Test Report</h1><p>Report content here</p></body></html>';
 
-    mockApi.get.mockResolvedValueOnce({
+    mockApiGet.mockResolvedValueOnce({
       data: mockHtmlContent,
     });
 
@@ -144,7 +138,7 @@ describe('ReportViewer Page', () => {
     });
 
     await waitFor(() => {
-      expect(mockApi.get).toHaveBeenCalledWith(
+      expect(mockApiGet).toHaveBeenCalledWith(
         '/api/reports/view/hosts',
         expect.objectContaining({
           responseType: 'text',
@@ -160,7 +154,7 @@ describe('ReportViewer Page', () => {
   });
 
   test('displays Back button', async () => {
-    mockApi.get.mockResolvedValueOnce({
+    mockApiGet.mockResolvedValueOnce({
       data: '<html><body>Mock HTML Report</body></html>',
     });
 
@@ -175,7 +169,7 @@ describe('ReportViewer Page', () => {
   });
 
   test('navigates back to reports when Back button is clicked', async () => {
-    mockApi.get.mockResolvedValueOnce({
+    mockApiGet.mockResolvedValueOnce({
       data: '<html><body>Mock HTML Report</body></html>',
     });
 
@@ -199,7 +193,7 @@ describe('ReportViewer Page', () => {
   });
 
   test('displays Generate PDF button', async () => {
-    mockApi.get.mockResolvedValueOnce({
+    mockApiGet.mockResolvedValueOnce({
       data: '<html><body>Mock HTML Report</body></html>',
     });
 
@@ -215,7 +209,7 @@ describe('ReportViewer Page', () => {
 
   test('generates PDF when Generate PDF button is clicked', async () => {
     // Mock HTML fetch
-    mockApi.get.mockResolvedValueOnce({
+    mockApiGet.mockResolvedValueOnce({
       data: '<html><body>Mock HTML Report</body></html>',
     });
 
@@ -228,7 +222,7 @@ describe('ReportViewer Page', () => {
     });
 
     // Mock PDF fetch
-    mockApi.get.mockResolvedValueOnce({
+    mockApiGet.mockResolvedValueOnce({
       data: new Blob(['mock-pdf'], { type: 'application/pdf' }),
     });
 
@@ -239,7 +233,7 @@ describe('ReportViewer Page', () => {
     });
 
     await waitFor(() => {
-      expect(mockApi.get).toHaveBeenCalledWith(
+      expect(mockApiGet).toHaveBeenCalledWith(
         '/api/reports/generate/hosts',
         expect.objectContaining({
           responseType: 'blob',
@@ -249,7 +243,7 @@ describe('ReportViewer Page', () => {
   });
 
   test('handles error when fetching HTML report', async () => {
-    mockApi.get.mockRejectedValueOnce(new Error('Network error'));
+    mockApiGet.mockRejectedValueOnce(new Error('Network error'));
 
     // Mock console.error to suppress error output in tests
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -267,7 +261,7 @@ describe('ReportViewer Page', () => {
 
   test('handles error when generating PDF', async () => {
     // Mock HTML fetch to succeed
-    mockApi.get.mockResolvedValueOnce({
+    mockApiGet.mockResolvedValueOnce({
       data: '<html><body>Mock HTML Report</body></html>',
     });
 
@@ -280,7 +274,7 @@ describe('ReportViewer Page', () => {
     });
 
     // Mock PDF fetch to fail
-    mockApi.get.mockRejectedValueOnce(new Error('PDF generation error'));
+    mockApiGet.mockRejectedValueOnce(new Error('PDF generation error'));
 
     // Mock console.error to suppress error output in tests
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -306,7 +300,7 @@ describe('ReportViewer Page', () => {
     // Mock console.error to suppress error output
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    mockApi.get.mockResolvedValueOnce({
+    mockApiGet.mockResolvedValueOnce({
       data: '<html><body>Users Report</body></html>',
     });
 
@@ -318,7 +312,7 @@ describe('ReportViewer Page', () => {
     });
 
     await waitFor(() => {
-      expect(mockApi.get).toHaveBeenCalledWith(
+      expect(mockApiGet).toHaveBeenCalledWith(
         '/api/reports/view/users',
         expect.objectContaining({
           responseType: 'text',
@@ -330,7 +324,7 @@ describe('ReportViewer Page', () => {
   });
 
   test('iframe has correct styling and attributes', async () => {
-    mockApi.get.mockResolvedValueOnce({
+    mockApiGet.mockResolvedValueOnce({
       data: '<html><body>Mock HTML Report</body></html>',
     });
 
@@ -346,7 +340,7 @@ describe('ReportViewer Page', () => {
   });
 
   test('proper cleanup on unmount', async () => {
-    mockApi.get.mockResolvedValueOnce({
+    mockApiGet.mockResolvedValueOnce({
       data: '<html><body>Mock HTML Report</body></html>',
     });
 
@@ -377,7 +371,7 @@ describe('ReportViewer Page', () => {
     const mockBlob = new Blob(['mock-pdf'], { type: 'application/pdf' });
 
     // Mock HTML fetch
-    mockApi.get.mockResolvedValueOnce({
+    mockApiGet.mockResolvedValueOnce({
       data: '<html><body>Mock HTML Report</body></html>',
     });
 
@@ -390,7 +384,7 @@ describe('ReportViewer Page', () => {
     });
 
     // Mock PDF fetch
-    mockApi.get.mockResolvedValueOnce({
+    mockApiGet.mockResolvedValueOnce({
       data: mockBlob,
     });
 

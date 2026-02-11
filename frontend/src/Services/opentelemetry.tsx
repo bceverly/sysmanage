@@ -7,6 +7,7 @@ type OpenTelemetryEligibilityResponse = {
     grafana_enabled: boolean;
     opentelemetry_installed: boolean;
     agent_privileged: boolean;
+    has_permission?: boolean;
     error_message?: string;
 }
 
@@ -39,7 +40,7 @@ export const doCheckOpenTelemetryEligibility = async (
         const axiosError = error as AxiosError
         if (axiosError.response) {
             throw new Error(
-                axiosError.response.data?.detail ||
+                (axiosError.response.data as { detail?: string })?.detail ||
                 'Failed to check OpenTelemetry eligibility'
             )
         }
@@ -64,7 +65,7 @@ export const doDeployOpenTelemetry = async (
         const axiosError = error as AxiosError
         if (axiosError.response) {
             throw new Error(
-                axiosError.response.data?.detail ||
+                (axiosError.response.data as { detail?: string })?.detail ||
                 'Failed to deploy OpenTelemetry'
             )
         }
@@ -89,7 +90,7 @@ export const doGetOpenTelemetryStatus = async (
         const axiosError = error as AxiosError
         if (axiosError.response) {
             throw new Error(
-                axiosError.response.data?.detail ||
+                (axiosError.response.data as { detail?: string })?.detail ||
                 'Failed to get OpenTelemetry status'
             )
         }
@@ -114,7 +115,7 @@ export const doStartOpenTelemetry = async (
         const axiosError = error as AxiosError
         if (axiosError.response) {
             throw new Error(
-                axiosError.response.data?.detail ||
+                (axiosError.response.data as { detail?: string })?.detail ||
                 'Failed to start OpenTelemetry'
             )
         }
@@ -139,7 +140,7 @@ export const doStopOpenTelemetry = async (
         const axiosError = error as AxiosError
         if (axiosError.response) {
             throw new Error(
-                axiosError.response.data?.detail ||
+                (axiosError.response.data as { detail?: string })?.detail ||
                 'Failed to stop OpenTelemetry'
             )
         }
@@ -164,7 +165,7 @@ export const doRestartOpenTelemetry = async (
         const axiosError = error as AxiosError
         if (axiosError.response) {
             throw new Error(
-                axiosError.response.data?.detail ||
+                (axiosError.response.data as { detail?: string })?.detail ||
                 'Failed to restart OpenTelemetry'
             )
         }
@@ -189,7 +190,7 @@ export const doConnectOpenTelemetryToGrafana = async (
         const axiosError = error as AxiosError
         if (axiosError.response) {
             throw new Error(
-                axiosError.response.data?.detail ||
+                (axiosError.response.data as { detail?: string })?.detail ||
                 'Failed to connect OpenTelemetry to Grafana'
             )
         }
@@ -214,7 +215,7 @@ export const doDisconnectOpenTelemetryFromGrafana = async (
         const axiosError = error as AxiosError
         if (axiosError.response) {
             throw new Error(
-                axiosError.response.data?.detail ||
+                (axiosError.response.data as { detail?: string })?.detail ||
                 'Failed to disconnect OpenTelemetry from Grafana'
             )
         }
@@ -239,7 +240,7 @@ export const doRemoveOpenTelemetry = async (
         const axiosError = error as AxiosError
         if (axiosError.response) {
             throw new Error(
-                axiosError.response.data?.detail ||
+                (axiosError.response.data as { detail?: string })?.detail ||
                 'Failed to remove OpenTelemetry'
             )
         }

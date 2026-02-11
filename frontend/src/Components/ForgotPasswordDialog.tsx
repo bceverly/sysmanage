@@ -44,7 +44,7 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({ open, onClo
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.BaseSyntheticEvent) => {
         e.preventDefault();
 
         if (!email) {

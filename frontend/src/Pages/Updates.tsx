@@ -25,13 +25,13 @@ import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
 import './css/Updates.css';
 
 interface SelectedUpdate {
-  hostId: number;
+  hostId: string;
   packageName: string;
   packageManager: string;
 }
 
 interface HostWithUpdates {
-  hostId: number;
+  hostId: string;
   hostname: string;
   updateCount: number;
 }
@@ -116,7 +116,7 @@ const Updates: React.FC = () => {
       );
 
       // Extract unique hosts from updates
-      const hostMap = new Map<number, { hostname: string; count: number }>();
+      const hostMap = new Map<string, { hostname: string; count: number }>();
       (response.updates || []).forEach(update => {
         const existing = hostMap.get(update.host_id);
         if (existing) {
@@ -381,7 +381,7 @@ const Updates: React.FC = () => {
   const executeSelectedUpdates = async () => {
     if (selectedUpdates.size === 0) return;
 
-    const updatesByHost = new Map<number, SelectedUpdate[]>();
+    const updatesByHost = new Map<string, SelectedUpdate[]>();
     
     updates.forEach(update => {
       const key = `${update.host_id}-${update.package_name}-${update.package_manager}`;

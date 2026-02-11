@@ -76,7 +76,7 @@ const ResetPassword: React.FC = () => {
         validateToken();
     }, [token, t]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.BaseSyntheticEvent) => {
         e.preventDefault();
 
         if (!password || !confirmPassword) {

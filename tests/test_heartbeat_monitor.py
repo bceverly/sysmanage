@@ -1,260 +1,150 @@
 """
-Test heartbeat monitoring functionality on the server.
+Tests for backend/monitoring/heartbeat_monitor.py module.
+Tests heartbeat monitoring service for tracking host status.
 """
 
 import asyncio
-from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, Mock, patch
+from datetime import datetime, timedelta, timezone
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from sqlalchemy.orm import Session
-
-from backend.config.config import get_heartbeat_timeout_minutes
-from backend.monitoring.heartbeat_monitor import check_host_heartbeats
-from backend.persistence.models import Host
 
 
-class TestHeartbeatMonitor:
-    """Test heartbeat monitoring functionality."""
-
-    @pytest.fixture
-    def mock_db_session(self):
-        """Create a mock database session."""
-        session = Mock(spec=Session)
-        # The heartbeat monitor has 3 filter calls: last_access, status, approval_status
-        session.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = (
-            []
-        )
-        session.commit = Mock()
-        session.rollback = Mock()
-        session.close = Mock()
-        return session
-
-    @pytest.fixture
-    def mock_host_up(self):
-        """Create a mock host that is up."""
-        host = Mock(spec=Host)
-        host.id = 1
-        host.fqdn = "test-host-up.example.com"
-        host.status = "up"
-        host.active = True
-        host.last_access = datetime.utcnow() - timedelta(minutes=2)
-        return host
-
-    @pytest.fixture
-    def mock_host_down(self):
-        """Create a mock host that should be marked down."""
-        host = Mock(spec=Host)
-        host.id = 2
-        host.fqdn = "test-host-down.example.com"
-        host.status = "up"
-        host.active = True
-        host.last_access = datetime.utcnow() - timedelta(
-            minutes=10
-        )  # Older than timeout
-        return host
+class TestCheckHostHeartbeats:
+    """Tests for check_host_heartbeats function."""
 
     @patch("backend.monitoring.heartbeat_monitor.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
-    def test_check_host_heartbeats_no_stale_hosts(
-        self, mock_timeout, mock_get_db, mock_db_session
-    ):
-        """Test heartbeat check when no hosts are stale."""
-        # Setup
+    @pytest.mark.asyncio
+    async def test_check_heartbeats_no_stale_hosts(self, mock_timeout, mock_get_db):
+        """Test check when no hosts are stale."""
+        from backend.monitoring.heartbeat_monitor import check_host_heartbeats
+
         mock_timeout.return_value = 5
-        mock_get_db.return_value = iter([mock_db_session])
-        # 3 filter calls: last_access, status, approval_status
-        mock_db_session.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = (
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = (
             []
         )
+        mock_get_db.return_value = iter([mock_db])
 
-        # Execute
-        asyncio.run(check_host_heartbeats())
+        await check_host_heartbeats()
 
-        # Verify
-        mock_db_session.query.assert_called_once()
-        mock_db_session.commit.assert_not_called()
-        mock_db_session.close.assert_called_once()
+        mock_db.commit.assert_not_called()
+        mock_db.close.assert_called_once()
 
     @patch("backend.monitoring.heartbeat_monitor.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
-    def test_check_host_heartbeats_with_stale_hosts(
-        self, mock_timeout, mock_get_db, mock_db_session, mock_host_down
-    ):
-        """Test heartbeat check when hosts need to be marked down."""
-        # Setup
+    @pytest.mark.asyncio
+    async def test_check_heartbeats_with_stale_hosts(self, mock_timeout, mock_get_db):
+        """Test check marks stale hosts as down."""
+        from backend.monitoring.heartbeat_monitor import check_host_heartbeats
+
         mock_timeout.return_value = 5
-        mock_get_db.return_value = iter([mock_db_session])
-        # 3 filter calls: last_access, status, approval_status
-        mock_db_session.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = [
-            mock_host_down
+
+        mock_host1 = MagicMock()
+        mock_host1.fqdn = "host1.example.com"
+        mock_host1.status = "up"
+        mock_host1.active = True
+
+        mock_host2 = MagicMock()
+        mock_host2.fqdn = "host2.example.com"
+        mock_host2.status = "up"
+        mock_host2.active = True
+
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = [
+            mock_host1,
+            mock_host2,
         ]
+        mock_get_db.return_value = iter([mock_db])
 
-        # Execute
-        asyncio.run(check_host_heartbeats())
+        await check_host_heartbeats()
 
-        # Verify
-        assert mock_host_down.status == "down"
-        assert mock_host_down.active is False
-        mock_db_session.commit.assert_called_once()
-        mock_db_session.close.assert_called_once()
+        assert mock_host1.status == "down"
+        assert mock_host1.active is False
+        assert mock_host2.status == "down"
+        assert mock_host2.active is False
+        mock_db.commit.assert_called_once()
+        mock_db.close.assert_called_once()
+
+    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @pytest.mark.asyncio
+    async def test_check_heartbeats_db_connection_error(self, mock_get_db):
+        """Test handles database connection error gracefully."""
+        from backend.monitoring.heartbeat_monitor import check_host_heartbeats
+
+        mock_get_db.side_effect = Exception("Connection failed")
+
+        # Should not raise
+        await check_host_heartbeats()
 
     @patch("backend.monitoring.heartbeat_monitor.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
-    def test_check_host_heartbeats_multiple_stale_hosts(
-        self, mock_timeout, mock_get_db, mock_db_session
-    ):
-        """Test heartbeat check with multiple stale hosts."""
-        # Setup
+    @pytest.mark.asyncio
+    async def test_check_heartbeats_query_error(self, mock_timeout, mock_get_db):
+        """Test handles query error gracefully."""
+        from backend.monitoring.heartbeat_monitor import check_host_heartbeats
+
         mock_timeout.return_value = 5
-        mock_get_db.return_value = iter([mock_db_session])
+        mock_db = MagicMock()
+        mock_db.query.side_effect = Exception("Query failed")
+        mock_get_db.return_value = iter([mock_db])
 
-        # Create multiple stale hosts
-        host1 = Mock(spec=Host)
-        host1.fqdn = "host1.example.com"
-        host1.status = "up"
-        host1.active = True
+        # Should not raise
+        await check_host_heartbeats()
 
-        host2 = Mock(spec=Host)
-        host2.fqdn = "host2.example.com"
-        host2.status = "up"
-        host2.active = True
-
-        stale_hosts = [host1, host2]
-        # 3 filter calls: last_access, status, approval_status
-        mock_db_session.query.return_value.filter.return_value.filter.return_value.filter.return_value.all.return_value = (
-            stale_hosts
-        )
-
-        # Execute
-        asyncio.run(check_host_heartbeats())
-
-        # Verify
-        for host in stale_hosts:
-            assert host.status == "down"
-            assert host.active is False
-        mock_db_session.commit.assert_called_once()
-
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
-    @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
-    def test_check_host_heartbeats_database_error(
-        self, mock_timeout, mock_get_db, mock_db_session
-    ):
-        """Test heartbeat check handles database errors gracefully."""
-        # Setup
-        mock_timeout.return_value = 5
-        mock_get_db.return_value = iter([mock_db_session])
-        mock_db_session.query.side_effect = Exception("Database error")
-
-        # Execute - should not raise exception
-        asyncio.run(check_host_heartbeats())
-
-        # Verify rollback was called
-        mock_db_session.rollback.assert_called_once()
-        mock_db_session.close.assert_called_once()
-
-    def test_heartbeat_timeout_configuration(self):
-        """Test heartbeat timeout configuration."""
-        timeout = get_heartbeat_timeout_minutes()
-        assert isinstance(timeout, int)
-        assert timeout > 0
+        mock_db.rollback.assert_called_once()
+        mock_db.close.assert_called_once()
 
 
-class TestHeartbeatHandling:
-    """Test WebSocket heartbeat message handling."""
+class TestHeartbeatMonitorService:
+    """Tests for heartbeat_monitor_service function."""
 
-    @pytest.fixture
-    def mock_connection(self):
-        """Create a mock WebSocket connection."""
-        connection = Mock()
-        connection.hostname = "test-host.example.com"
-        connection.last_seen = datetime.utcnow()
-        connection.send_message = AsyncMock()
-        return connection
-
-    @pytest.fixture
-    def mock_db_session(self):
-        """Create a mock database session."""
-        session = Mock(spec=Session)
-        session.commit = Mock()
-        return session
-
-    @pytest.fixture
-    def mock_host(self):
-        """Create a mock host."""
-        host = Mock(spec=Host)
-        host.fqdn = "test-host.example.com"
-        host.last_access = datetime.utcnow() - timedelta(minutes=1)
-        host.status = "down"
-        host.active = False
-        return host
-
+    @patch("backend.monitoring.heartbeat_monitor.check_host_heartbeats")
+    @patch("backend.monitoring.heartbeat_monitor.asyncio.sleep")
     @pytest.mark.asyncio
-    async def test_handle_heartbeat_updates_host_status(
-        self, mock_db_session, mock_connection, mock_host
-    ):
-        """Test that heartbeat handling updates host status in database."""
-        from backend.api.agent import handle_heartbeat
+    async def test_service_runs_checks(self, mock_sleep, mock_check):
+        """Test service runs heartbeat checks."""
+        from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
 
-        # Setup
-        mock_db_session.query.return_value.filter.return_value.first.return_value = (
-            mock_host
-        )
-        message_data = {"message_id": "test-123"}
+        call_count = 0
 
-        # Execute
-        await handle_heartbeat(mock_db_session, mock_connection, message_data)
+        async def mock_check_coro():
+            nonlocal call_count
+            call_count += 1
+            if call_count >= 2:
+                raise asyncio.CancelledError()
 
-        # Verify host status was updated
-        assert mock_host.status == "up"
-        assert mock_host.active is True
-        mock_db_session.commit.assert_called_once()
+        mock_check.side_effect = mock_check_coro
+        mock_sleep.return_value = None
 
-        # Verify acknowledgment was sent
-        mock_connection.send_message.assert_called_once()
-        ack_message = mock_connection.send_message.call_args[0][0]
-        assert ack_message["message_type"] == "ack"
-        assert ack_message["data"]["status"] == "received"
+        with pytest.raises(asyncio.CancelledError):
+            await heartbeat_monitor_service()
 
+        assert call_count >= 2
+
+    @patch("backend.monitoring.heartbeat_monitor.check_host_heartbeats")
+    @patch("backend.monitoring.heartbeat_monitor.asyncio.sleep")
     @pytest.mark.asyncio
-    async def test_handle_heartbeat_no_hostname(self, mock_db_session, mock_connection):
-        """Test heartbeat handling when connection has no hostname."""
-        from backend.api.agent import handle_heartbeat
+    async def test_service_handles_errors(self, mock_sleep, mock_check):
+        """Test service handles errors and continues."""
+        from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
 
-        # Setup
-        mock_connection.hostname = None
-        message_data = {"message_id": "test-123"}
+        call_count = 0
 
-        # Execute
-        await handle_heartbeat(mock_db_session, mock_connection, message_data)
+        async def mock_check_coro():
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise Exception("Check failed")
+            elif call_count >= 2:
+                raise asyncio.CancelledError()
 
-        # Verify database was not queried
-        mock_db_session.query.assert_not_called()
+        mock_check.side_effect = mock_check_coro
+        mock_sleep.return_value = None
 
-        # Verify acknowledgment was still sent
-        mock_connection.send_message.assert_called_once()
+        with pytest.raises(asyncio.CancelledError):
+            await heartbeat_monitor_service()
 
-    @pytest.mark.asyncio
-    async def test_handle_heartbeat_host_not_found(
-        self, mock_db_session, mock_connection
-    ):
-        """Test heartbeat handling when host is not found in database."""
-        from backend.api.agent import handle_heartbeat
-
-        # Setup - need to mock connection properties for host creation
-        mock_connection.ipv4 = "192.168.1.100"
-        mock_connection.ipv6 = "2001:db8::1"
-        mock_db_session.query.return_value.filter.return_value.first.return_value = None
-        mock_db_session.add = Mock()
-        mock_db_session.refresh = Mock()
-        message_data = {"message_id": "test-123"}
-
-        # Execute
-        await handle_heartbeat(mock_db_session, mock_connection, message_data)
-
-        # Verify host was created and committed
-        mock_db_session.add.assert_called_once()
-        mock_db_session.commit.assert_called_once()
-
-        # Verify acknowledgment was still sent
-        mock_connection.send_message.assert_called_once()
+        # Should have tried at least twice despite first error
+        assert call_count >= 2

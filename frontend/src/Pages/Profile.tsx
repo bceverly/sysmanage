@@ -13,8 +13,7 @@ import {
     CircularProgress,
     Tabs,
     Tab,
-    Avatar,
-    Input
+    Avatar
 } from '@mui/material';
 import {
     PhotoCamera as PhotoCameraIcon,
@@ -410,8 +409,9 @@ const Profile: React.FC = () => {
             await fetchProfileImage();
 
             // Refresh the user menu profile image
-            if (globalThis.refreshUserProfileImage) {
-                globalThis.refreshUserProfileImage();
+            const globalWithRefresh = globalThis as typeof globalThis & { refreshUserProfileImage?: () => void };
+            if (globalWithRefresh.refreshUserProfileImage) {
+                globalWithRefresh.refreshUserProfileImage();
             }
 
         } catch (error: unknown) {
@@ -441,8 +441,9 @@ const Profile: React.FC = () => {
             setImageSuccess(t('userProfile.imageDeleteSuccess', 'Profile image deleted successfully'));
 
             // Refresh the user menu profile image
-            if (globalThis.refreshUserProfileImage) {
-                globalThis.refreshUserProfileImage();
+            const globalWithRefresh = globalThis as typeof globalThis & { refreshUserProfileImage?: () => void };
+            if (globalWithRefresh.refreshUserProfileImage) {
+                globalWithRefresh.refreshUserProfileImage();
             }
             
         } catch (error: unknown) {
@@ -801,12 +802,12 @@ const Profile: React.FC = () => {
 
                     {/* Upload section */}
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                        <Input
+                        <input
                             type="file"
                             id="image-upload"
                             accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
                             onChange={handleImageUpload}
-                            sx={{ display: 'none' }}
+                            style={{ display: 'none' }}
                         />
                         <label htmlFor="image-upload">
                             <Button

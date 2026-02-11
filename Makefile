@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-playwright test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades sonarqube-scan install-sonar-scanner clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall
+.PHONY: test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades sonarqube-scan install-sonar-scanner clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall
 
 # Default target
 help:
@@ -11,8 +11,9 @@ help:
 	@echo "  make test          - Run all tests (Python + TypeScript + UI integration + Performance)"
 	@echo "  make test-python   - Run Python backend tests only"
 	@echo "  make test-vite     - Run Vite/TypeScript frontend tests only"
-	@echo "  make test-playwright - Run Playwright UI tests only"
-	@echo "  make test-performance - Run Artillery load tests and Playwright performance tests"
+	@echo "  make test-ui       - Run Selenium UI tests (BSD fallback only)"
+	@echo "  make test-e2e      - Run frontend E2E tests (Playwright TypeScript)"
+	@echo "  make test-performance - Run Artillery load tests"
 	@echo "  make lint          - Run all linters (Python + TypeScript)"
 	@echo "  make lint-python   - Run Python linting only"
 	@echo "  make lint-typescript - Run TypeScript linting only"
@@ -681,9 +682,9 @@ lint-python: format-python
 	@echo "=== Python Linting ==="
 	@echo "Running pylint..."
 ifeq ($(OS),Windows_NT)
-	-@$(PYTHON) -m pylint backend/ --rcfile=.pylintrc
+	@$(PYTHON) -m pylint backend/ --rcfile=.pylintrc
 else
-	@$(PYTHON) -m pylint backend/ --rcfile=.pylintrc || true
+	@$(PYTHON) -m pylint backend/ --rcfile=.pylintrc
 endif
 	@echo "[OK] Python linting completed"
 
@@ -911,37 +912,30 @@ test-typescript:
 	@cd frontend && npm run test:coverage
 	@echo "[OK] TypeScript tests completed"
 
-# UI integration tests
+# UI integration tests (Selenium fallback for BSD systems where Playwright isn't available)
+# On non-BSD systems, use 'make test-e2e' instead for the TypeScript Playwright tests
 test-ui: $(VENV_ACTIVATE)
 ifeq ($(OS),Windows_NT)
-	@echo "=== Running UI Integration Tests (Playwright) ==="
-	@echo "[INFO] Windows detected - testing Chrome and Firefox"
-	@cmd /c "set OTEL_ENABLED=false && set PYTHONPATH=tests/ui && $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py tests/ui/test_hosts_playwright.py tests/ui/test_updates_playwright.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short" || (exit /b 0)
-	@echo "[OK] Playwright UI integration tests completed"
+	@echo "[SKIP] Use 'make test-e2e' for Playwright E2E tests on Windows"
 else
-	@if [ "$(shell uname -s)" != "OpenBSD" ] && [ "$(shell uname -s)" != "FreeBSD" ] && [ "$(shell uname -s)" != "NetBSD" ]; then \
-		echo "=== Running UI Integration Tests (Playwright) ==="; \
-		if [ "$(shell uname -s)" = "Darwin" ]; then \
-			echo "[INFO] macOS detected - testing Chrome, Firefox, and WebKit/Safari"; \
-		else \
-			echo "[INFO] Linux detected - testing Chrome and Firefox"; \
-		fi; \
-		OTEL_ENABLED=false PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_cross_browser.py tests/ui/test_hosts_playwright.py tests/ui/test_updates_playwright.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short || true; \
-		echo "[OK] Playwright UI integration tests completed"; \
-	else \
+	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ] || [ "$(shell uname -s)" = "NetBSD" ]; then \
 		echo "=== Running UI Integration Tests (Selenium) ==="; \
 		echo "[INFO] Using Selenium fallback on BSD systems (OpenBSD/FreeBSD/NetBSD)"; \
 		OTEL_ENABLED=false PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_selenium.py tests/ui/test_hosts_selenium.py tests/ui/test_updates_selenium.py --confcutdir=tests/ui -p tests.ui.conftest_selenium -v --tb=short; \
 		echo "[OK] Selenium UI integration tests completed"; \
+	else \
+		echo "[SKIP] Use 'make test-e2e' for Playwright E2E tests on $(shell uname -s)"; \
 	fi
 endif
 
-# Playwright tests only (alias for test-ui)
-test-playwright: test-ui
+# Playwright tests only (deprecated - use test-e2e instead)
+test-playwright:
+	@echo "[DEPRECATED] 'make test-playwright' is deprecated. Use 'make test-e2e' instead."
+	@$(MAKE) test-e2e
 
-# Performance testing with Artillery and enhanced Playwright
+# Performance testing with Artillery (browser performance tests are now in test-e2e via performance.spec.ts)
 test-performance: $(VENV_ACTIVATE)
-	@echo "=== Running Performance Tests ==="
+	@echo "=== Running Performance Tests (Artillery) ==="
 ifeq ($(OS),Windows_NT)
 	@echo "[INFO] Running Artillery load tests for backend API..."
 	@where artillery >nul 2>nul || ( \
@@ -950,18 +944,16 @@ ifeq ($(OS),Windows_NT)
 	)
 	@echo "[INFO] Running Artillery load tests against http://localhost:8001..."
 	@echo "[NOTE] Ensure the SysManage server is running on port 8001"
-	@artillery run artillery.yml --output artillery-report.json || echo "[WARNING] Artillery tests failed - continuing with Playwright performance tests"
+	@artillery run artillery.yml --output artillery-report.json
 	@if exist artillery-report.json ( \
 		artillery report artillery-report.json --output artillery-report.html && \
 		echo "[INFO] Artillery report generated: artillery-report.html" \
 	)
-	@echo "[INFO] Running Playwright performance tests..."
-	@cmd /c "set OTEL_ENABLED=false && set PYTHONPATH=tests/ui;%PYTHONPATH% && $(PYTHON) -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short" || echo "[WARNING] Playwright performance tests failed"
 	@echo "[INFO] Running performance regression analysis..."
-	@$(PYTHON) scripts/performance_regression_check.py || echo "[WARNING] Performance regressions detected"
+	@$(PYTHON) scripts/performance_regression_check.py
 else
 	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ] || [ "$(shell uname -s)" = "NetBSD" ]; then \
-		echo "[SKIP] Artillery and Playwright not supported on $(shell uname -s) - performance tests skipped"; \
+		echo "[SKIP] Artillery not supported on $(shell uname -s) - performance tests skipped"; \
 	else \
 		echo "[INFO] Running Artillery load tests for backend API..."; \
 		command -v artillery >/dev/null 2>&1 || { \
@@ -975,23 +967,114 @@ else
 		}; \
 		echo "[INFO] Running Artillery load tests against http://localhost:8001..."; \
 		echo "[NOTE] Ensure the SysManage server is running on port 8001"; \
-		artillery run artillery.yml --output artillery-report.json || { \
-			echo "[WARNING] Artillery tests failed - continuing with Playwright performance tests"; \
-		}; \
+		artillery run artillery.yml --output artillery-report.json; \
 		if [ -f artillery-report.json ]; then \
 			artillery report artillery-report.json --output artillery-report.html; \
 			echo "[INFO] Artillery report generated: artillery-report.html"; \
 		fi; \
-		echo "[INFO] Running Playwright performance tests..."; \
-		OTEL_ENABLED=false PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p conftest_playwright -v --tb=short || echo "[WARNING] Playwright performance tests failed"; \
 		echo "[INFO] Running performance regression analysis..."; \
-		$(PYTHON) scripts/performance_regression_check.py || echo "[WARNING] Performance regressions detected"; \
+		$(PYTHON) scripts/performance_regression_check.py; \
 	fi
 endif
 	@echo "[OK] Performance testing completed"
+	@echo "[INFO] Browser performance tests are included in 'make test-e2e' (performance.spec.ts)"
 
 # Vite tests only (alias for test-typescript)
 test-vite: test-typescript
+
+# Frontend E2E tests (Playwright TypeScript tests in frontend/e2e/)
+# Automatically starts backend + frontend on port 5173, runs tests, then stops everything
+test-e2e: $(VENV_ACTIVATE)
+	@echo "=== Running Frontend E2E Tests (Playwright) ==="
+ifeq ($(OS),Windows_NT)
+	@echo "[INFO] Starting backend API server..."
+	@start /B $(PYTHON) -m backend.main > logs\backend-e2e.log 2>&1
+	@echo "[INFO] Waiting for backend to be ready..."
+	@powershell -Command "Start-Sleep -Seconds 5"
+	@echo "[INFO] Starting frontend dev server on port 5173..."
+	@cd frontend && set VITE_PORT=5173 && set FORCE_HTTP=true && start /B npm start > ..\logs\frontend-e2e.log 2>&1
+	@echo "[INFO] Waiting for frontend to be ready..."
+	@powershell -Command "for ($$i=1; $$i -le 20; $$i++) { try { Invoke-WebRequest -Uri http://localhost:5173 -TimeoutSec 2 -UseBasicParsing | Out-Null; Write-Host '[INFO] Frontend ready!'; break } catch { Write-Host '[INFO] Waiting...'; Start-Sleep -Seconds 2 } }"
+	@echo "[INFO] Running E2E tests..."
+	@cd frontend && npm run test:e2e & set E2E_EXIT=%%ERRORLEVEL%%
+	@echo "[INFO] Stopping servers..."
+	@taskkill /F /FI "WINDOWTITLE eq *vite*" 2>nul || echo.
+	@taskkill /F /FI "WINDOWTITLE eq *python*" 2>nul || echo.
+	@if %%E2E_EXIT%% neq 0 exit /b %%E2E_EXIT%%
+else
+	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ] || [ "$(shell uname -s)" = "NetBSD" ]; then \
+		echo "[SKIP] Playwright E2E tests not supported on $(shell uname -s)"; \
+	else \
+		mkdir -p logs; \
+		echo "[INFO] Creating E2E test user..."; \
+		. $(VENV_ACTIVATE) && $(PYTHON) scripts/e2e_test_user.py create; \
+		echo "[INFO] Checking for port conflicts..."; \
+		if lsof -ti:8080 >/dev/null 2>&1; then \
+			echo "[INFO] Killing process on port 8080..."; \
+			lsof -ti:8080 | xargs kill -9 2>/dev/null || true; \
+			sleep 1; \
+		fi; \
+		if lsof -ti:3000 >/dev/null 2>&1; then \
+			echo "[INFO] Killing process on port 3000..."; \
+			lsof -ti:3000 | xargs kill -9 2>/dev/null || true; \
+			sleep 1; \
+		fi; \
+		echo "[INFO] Starting backend API server..."; \
+		. $(VENV_ACTIVATE) && nohup $(PYTHON) -m backend.main > logs/backend-e2e.log 2>&1 & \
+		BACKEND_PID=$$!; \
+		echo "[INFO] Backend PID: $$BACKEND_PID"; \
+		echo "$$BACKEND_PID" > logs/backend-e2e.pid; \
+		echo "[INFO] Waiting for backend to be ready on port 8080 (may take up to 2 minutes)..."; \
+		BACKEND_READY=0; \
+		for i in $$(seq 1 45); do \
+			if curl -s http://localhost:8080/api/health > /dev/null 2>&1; then \
+				echo "[INFO] Backend is ready!"; \
+				BACKEND_READY=1; \
+				break; \
+			fi; \
+			echo "[INFO] Waiting for backend... ($$i/45)"; \
+			sleep 2; \
+		done; \
+		if [ $$BACKEND_READY -eq 0 ]; then \
+			echo "[ERROR] Backend failed to start within 90 seconds"; \
+			kill $$BACKEND_PID 2>/dev/null || true; \
+			exit 1; \
+		fi; \
+		echo "[INFO] Starting frontend dev server on port 3000..."; \
+		cd frontend && FORCE_HTTP=true npm start > ../logs/frontend-e2e.log 2>&1 & \
+		VITE_PID=$$!; \
+		echo "[INFO] Frontend dev server PID: $$VITE_PID"; \
+		echo "$$VITE_PID" > logs/frontend-e2e.pid; \
+		echo "[INFO] Waiting for frontend to be ready on port 3000..."; \
+		for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do \
+			if curl -s http://localhost:3000 > /dev/null 2>&1; then \
+				echo "[INFO] Frontend is ready!"; \
+				break; \
+			fi; \
+			echo "[INFO] Waiting for frontend... ($$i/20)"; \
+			sleep 2; \
+		done; \
+		echo "[INFO] Running E2E tests..."; \
+		E2E_EXIT=0; \
+		(cd frontend && PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:e2e) || E2E_EXIT=$$?; \
+		echo "[INFO] Stopping frontend dev server (PID: $$VITE_PID)..."; \
+		kill $$VITE_PID 2>/dev/null || true; \
+		if [ -f logs/frontend-e2e.pid ]; then kill $$(cat logs/frontend-e2e.pid) 2>/dev/null || true; fi; \
+		lsof -ti:3000 | xargs kill -9 2>/dev/null || true; \
+		echo "[INFO] Stopping backend server (PID: $$BACKEND_PID)..."; \
+		kill $$BACKEND_PID 2>/dev/null || true; \
+		if [ -f logs/backend-e2e.pid ]; then kill $$(cat logs/backend-e2e.pid) 2>/dev/null || true; fi; \
+		lsof -ti:8080 | xargs kill -9 2>/dev/null || true; \
+		rm -f logs/backend-e2e.pid logs/frontend-e2e.pid; \
+		echo "[INFO] Cleaning up E2E test user..."; \
+		. $(VENV_ACTIVATE) && $(PYTHON) scripts/e2e_test_user.py delete || true; \
+		if [ $$E2E_EXIT -ne 0 ]; then \
+			echo "[ERROR] E2E tests failed with exit code $$E2E_EXIT"; \
+			exit $$E2E_EXIT; \
+		fi; \
+	fi
+endif
+	@echo "[OK] Frontend E2E tests completed"
 
 # Model synchronization check
 check-test-models:
@@ -999,7 +1082,8 @@ check-test-models:
 	@$(PYTHON) scripts/check_test_models.py
 
 # Combined testing
-test: test-python test-typescript test-ui test-performance
+# Note: test-ui only runs on BSD systems (Selenium fallback). On other platforms, test-e2e handles UI tests.
+test: test-python test-typescript test-e2e test-performance
 	@echo "[OK] All tests completed successfully!"
 
 # Build frontend for production

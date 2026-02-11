@@ -95,10 +95,10 @@ const Scripts: React.FC = () => {
   const [selectedShell, setSelectedShell] = useState('bash');
   const [selectedPlatform, setSelectedPlatform] = useState('linux');
   const [hasUserEditedContent, setHasUserEditedContent] = useState(false);
-  const [selectedHost, setSelectedHost] = useState<number | ''>('');
-  const [savedScriptId, setSavedScriptId] = useState<number | ''>('');
+  const [selectedHost, setSelectedHost] = useState<string>('');
+  const [savedScriptId, setSavedScriptId] = useState<string>('');
   const [isEditMode, setIsEditMode] = useState(false);
-  const [editingScriptId, setEditingScriptId] = useState<number | null>(null);
+  const [editingScriptId, setEditingScriptId] = useState<string | null>(null);
   
   // Execution state
   const [isExecuting, setIsExecuting] = useState(false);
@@ -117,7 +117,7 @@ const Scripts: React.FC = () => {
   const [viewingExecution, setViewingExecution] = useState<ScriptExecution | null>(null);
   const [showExecutionDialog, setShowExecutionDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [scriptToDelete, setScriptToDelete] = useState<number | null>(null);
+  const [scriptToDelete, setScriptToDelete] = useState<string | null>(null);
 
   // Table pagination
   const { pageSize, pageSizeOptions } = useTablePageSize();
@@ -491,7 +491,8 @@ const Scripts: React.FC = () => {
         description: scriptDescription,
         content: scriptContent,
         shell_type: selectedShell,
-        platform: selectedPlatform
+        platform: selectedPlatform,
+        is_active: true
       };
 
       if (isEditMode && editingScriptId) {
@@ -512,7 +513,7 @@ const Scripts: React.FC = () => {
   };
 
 
-  const handleDeleteScript = (scriptId: number) => {
+  const handleDeleteScript = (scriptId: string) => {
     setScriptToDelete(scriptId);
     setShowDeleteDialog(true);
   };
@@ -559,11 +560,11 @@ const Scripts: React.FC = () => {
     }
 
     const executeRequest: ExecuteScriptRequest = {
-      host_id: selectedHost as string
+      host_id: selectedHost
     };
 
     if (savedScriptId) {
-      executeRequest.saved_script_id = savedScriptId as string;
+      executeRequest.saved_script_id = savedScriptId;
     } else {
       if (!scriptContent.trim()) {
         showNotification(t('scripts.scriptContentRequired'), 'error');
@@ -596,7 +597,7 @@ const Scripts: React.FC = () => {
     }
   };
 
-  const handleSavedScriptSelect = (scriptId: number) => {
+  const handleSavedScriptSelect = (scriptId: string) => {
     const script = scripts.find(s => s.id === scriptId);
     if (script) {
       setScriptContent(script.content);
@@ -1004,11 +1005,11 @@ const Scripts: React.FC = () => {
 
     setExecutionsLoading(true);
     try {
-      // Map DataGrid selection IDs (database IDs) to execution_ids
+      // Map DataGrid selection IDs (database IDs) to execution IDs
       for (const databaseId of selectedExecutions) {
         const execution = executions.find(exec => exec.id === databaseId);
         if (execution) {
-          await scriptsService.deleteScriptExecution(execution.execution_id);
+          await scriptsService.deleteScriptExecution(execution.id);
         }
       }
       showNotification(
@@ -1062,7 +1063,8 @@ const Scripts: React.FC = () => {
         description: scriptDescription,
         content: scriptContent,
         shell_type: selectedShell,
-        platform: selectedPlatform
+        platform: selectedPlatform,
+        is_active: true
       };
 
       await scriptsService.createScript(scriptData);
@@ -1238,7 +1240,7 @@ const Scripts: React.FC = () => {
                 
                 <FormControl fullWidth margin="normal">
                   <InputLabel>{t('scripts.selectScript')}</InputLabel>
-                  <Select<number | ''>
+                  <Select<string>
                     value={savedScriptId}
                     label={t('scripts.selectScript')}
                     onChange={(e) => {
@@ -1264,7 +1266,7 @@ const Scripts: React.FC = () => {
 
                 <FormControl fullWidth margin="normal">
                   <InputLabel>{t('scripts.selectHost')}</InputLabel>
-                  <Select<number | ''>
+                  <Select<string>
                     value={selectedHost}
                     label={t('scripts.selectHost')}
                     onChange={(e) => {

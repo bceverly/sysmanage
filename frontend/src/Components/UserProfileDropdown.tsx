@@ -96,9 +96,9 @@ const UserProfileDropdown: React.FC = () => {
 
     // Expose refresh function globally for other components to use
     useEffect(() => {
-        globalThis.refreshUserProfileImage = refreshProfileImage;
+        (globalThis as typeof globalThis & { refreshUserProfileImage?: () => void }).refreshUserProfileImage = refreshProfileImage;
         return () => {
-            delete globalThis.refreshUserProfileImage;
+            delete (globalThis as typeof globalThis & { refreshUserProfileImage?: () => void }).refreshUserProfileImage;
         };
     }, [refreshProfileImage]);
 

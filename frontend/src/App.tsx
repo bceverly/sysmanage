@@ -124,10 +124,7 @@ function App() {
           <CssBaseline enableColorScheme/>
           <ConnectionProvider>
             <PluginProvider>
-              <Router future={{
-                v7_startTransition: true,
-                v7_relativeSplatPath: true
-              }}>
+              <Router>
                 <Navbar />
                 <SecurityWarningBanner />
                   <main className="main-content">

@@ -9,10 +9,7 @@ interface AllTheProvidersProps {
 
 const AllTheProviders: React.FC<AllTheProvidersProps> = ({ children }) => {
   return (
-    <BrowserRouter future={{
-      v7_startTransition: true,
-      v7_relativeSplatPath: true
-    }}>
+    <BrowserRouter>
       {children}
     </BrowserRouter>
   );

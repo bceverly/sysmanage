@@ -213,7 +213,7 @@ const doUploadUserImage = async (userId: string, file: globalThis.File) => {
         });
         return response.data;
     } catch (error) {
-        processError(error);
+        processError(error as AxiosError);
         throw error;
     }
 };
@@ -225,7 +225,7 @@ const doGetUserImage = async (userId: string): Promise<globalThis.Blob> => {
         });
         return response.data;
     } catch (error) {
-        processError(error);
+        processError(error as AxiosError);
         throw error;
     }
 };
@@ -235,7 +235,7 @@ const doDeleteUserImage = async (userId: string) => {
         const response = await api.delete(`/api/user/${userId}/image`);
         return response.data;
     } catch (error) {
-        processError(error);
+        processError(error as AxiosError);
         throw error;
     }
 };

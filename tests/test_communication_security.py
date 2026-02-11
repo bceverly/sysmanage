@@ -24,14 +24,20 @@ class TestWebSocketSecurityManager:
         """Set up test fixtures."""
         with patch("backend.security.communication_security.get_config") as mock_config:
             mock_config.return_value = {
-                "security": {"jwt_secret": "test_secret_key_123"}
+                "security": {
+                    "jwt_secret": "test_secret_key_for_communication_testing_32bytes"
+                }
             }
             self.security_manager = WebSocketSecurityManager()
 
     def test_init_success(self):
         """Test successful WebSocketSecurityManager initialization."""
         with patch("backend.security.communication_security.get_config") as mock_config:
-            mock_config.return_value = {"security": {"jwt_secret": "test_key"}}
+            mock_config.return_value = {
+                "security": {
+                    "jwt_secret": "test_key_for_jwt_communication_testing_32bytes"
+                }
+            }
             manager = WebSocketSecurityManager()
 
             assert manager.config is not None
@@ -176,7 +182,7 @@ class TestWebSocketSecurityManager:
         }
 
         # Create valid signature for expired token
-        secret_key = "test_secret_key_123"
+        secret_key = "test_secret_key_for_communication_testing_32bytes"
         payload_json = json.dumps(payload, sort_keys=True)
         import hashlib
         import hmac
@@ -467,14 +473,20 @@ class TestMessageEncryption:
         """Set up test fixtures."""
         with patch("backend.security.communication_security.get_config") as mock_config:
             mock_config.return_value = {
-                "security": {"jwt_secret": "test_encryption_key_123"}
+                "security": {
+                    "jwt_secret": "test_encryption_key_for_testing_purposes_32bytes"
+                }
             }
             self.encryption = MessageEncryption()
 
     def test_init_success(self):
         """Test successful MessageEncryption initialization."""
         with patch("backend.security.communication_security.get_config") as mock_config:
-            mock_config.return_value = {"security": {"jwt_secret": "test_key"}}
+            mock_config.return_value = {
+                "security": {
+                    "jwt_secret": "test_key_for_jwt_communication_testing_32bytes"
+                }
+            }
             encryption = MessageEncryption()
 
             assert encryption.config is not None
@@ -587,7 +599,9 @@ class TestWebSocketSecurityManagerMissingCoverage:
         """Set up test fixtures."""
         with patch("backend.security.communication_security.get_config") as mock_config:
             mock_config.return_value = {
-                "security": {"jwt_secret": "test_secret_key_123"}
+                "security": {
+                    "jwt_secret": "test_secret_key_for_communication_testing_32bytes"
+                }
             }
             self.security_manager = WebSocketSecurityManager()
 

@@ -130,7 +130,7 @@ const OSUpgrades: React.FC = () => {
   const executeSelectedUpgrades = async () => {
     if (selectedUpgrades.size === 0) return;
 
-    const upgradesByHost = new Map<number, string[]>();
+    const upgradesByHost = new Map<string, string[]>();
 
     osUpgrades.forEach(upgrade => {
       const key = `${upgrade.host_id}-${upgrade.package_manager}`;

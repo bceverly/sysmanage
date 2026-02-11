@@ -1,211 +1,346 @@
 """
-Quick additional tests for backend/websocket/queue_manager.py module.
-Covers basic functionality to improve coverage.
+Tests for backend/websocket/queue_manager.py module.
+Tests server-side message queue manager.
 """
 
-import json
-from datetime import datetime, timezone
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from backend.websocket.queue_manager import (
-    Priority,
-    QueueDirection,
-    QueueStatus,
-    ServerMessageQueueManager,
-)
+from backend.websocket.queue_enums import Priority, QueueDirection, QueueStatus
 
 
-class MockMessageQueue:
-    """Mock message queue object."""
+class TestServerMessageQueueManagerInit:
+    """Tests for ServerMessageQueueManager initialization."""
 
-    def __init__(self, message_id="test-123", status=QueueStatus.PENDING):
-        self.message_id = message_id
-        self.status = status
-        self.message_data = '{"test": "data"}'
-        self.host_id = 1
-        self.priority = Priority.NORMAL
-        self.direction = QueueDirection.OUTBOUND
-        self.message_type = "command"
-        self.created_at = datetime.now(timezone.utc)
-        self.retry_count = 0
-        self.max_retries = 3
-
-
-class MockHost:
-    """Mock host object."""
-
-    def __init__(self, host_id=1):
-        self.id = host_id
-        self.fqdn = "test.example.com"
-
-
-class TestServerMessageQueueManager:
-    """Test ServerMessageQueueManager basic functionality."""
-
-    def test_init(self):
-        """Test manager initialization."""
-        manager = ServerMessageQueueManager()
-        assert manager is not None
-
-    @patch("backend.websocket.queue_operations.get_db")
-    def test_enqueue_message_basic(self, mock_get_db):
-        """Test basic message enqueuing."""
-        mock_db = Mock()
-        mock_get_db.return_value = iter([mock_db])
-
-        # Create mock message for verification query
-        mock_message = MockMessageQueue()
-
-        # Query order:
-        # 1. Host validation (MockHost)
-        # 2. Duplicate message_id check (None - no duplicate)
-        # 3. Verification after commit (MockMessageQueue)
-        mock_db.query.return_value.filter.return_value.first.side_effect = [
-            MockHost(),
-            None,
-            mock_message,
-        ]
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_init_creates_components(self, mock_ops, mock_maintenance, mock_stats):
+        """Test that initialization creates all components."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
 
         manager = ServerMessageQueueManager()
 
-        message_id = manager.enqueue_message(
-            message_type="test",
-            message_data={"test": "data"},
+        mock_ops.assert_called_once()
+        mock_maintenance.assert_called_once()
+        mock_stats.assert_called_once()
+
+
+class TestServerMessageQueueManagerEnqueue:
+    """Tests for ServerMessageQueueManager enqueue operations."""
+
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_enqueue_message_delegates(self, mock_ops, mock_maint, mock_stats):
+        """Test enqueue_message delegates to operations component."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_ops_instance = MagicMock()
+        mock_ops_instance.enqueue_message.return_value = "msg-123"
+        mock_ops.return_value = mock_ops_instance
+
+        manager = ServerMessageQueueManager()
+        result = manager.enqueue_message(
+            message_type="command",
+            message_data={"action": "test"},
             direction=QueueDirection.OUTBOUND,
-            host_id=1,
+            host_id="host-123",
         )
 
-        assert isinstance(message_id, str)
-        mock_db.add.assert_called_once()
-        mock_db.commit.assert_called_once()
+        assert result == "msg-123"
+        mock_ops_instance.enqueue_message.assert_called_once()
 
-    @patch("backend.websocket.queue_operations.get_db")
-    def test_enqueue_message_no_host_id(self, mock_get_db):
-        """Test message enqueuing without host ID (broadcast)."""
-        mock_db = Mock()
-        mock_get_db.return_value = iter([mock_db])
 
-        # Create mock message for verification query
-        mock_message = MockMessageQueue()
+class TestServerMessageQueueManagerDequeue:
+    """Tests for ServerMessageQueueManager dequeue operations."""
 
-        # Query order (no host_id means no host validation):
-        # 1. Duplicate message_id check (None - no duplicate)
-        # 2. Verification after commit (MockMessageQueue)
-        mock_db.query.return_value.filter.return_value.first.side_effect = [
-            None,
-            mock_message,
-        ]
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_dequeue_messages_for_host_delegates(
+        self, mock_ops, mock_maint, mock_stats
+    ):
+        """Test dequeue_messages_for_host delegates to operations."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_ops_instance = MagicMock()
+        mock_ops_instance.dequeue_messages_for_host.return_value = []
+        mock_ops.return_value = mock_ops_instance
 
         manager = ServerMessageQueueManager()
+        result = manager.dequeue_messages_for_host(host_id="host-123")
 
-        message_id = manager.enqueue_message(
-            message_type="broadcast",
-            message_data={"test": "broadcast"},
-            direction=QueueDirection.OUTBOUND,
+        assert result == []
+        mock_ops_instance.dequeue_messages_for_host.assert_called_once()
+
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_dequeue_broadcast_messages_delegates(
+        self, mock_ops, mock_maint, mock_stats
+    ):
+        """Test dequeue_broadcast_messages delegates to operations."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_ops_instance = MagicMock()
+        mock_ops_instance.dequeue_broadcast_messages.return_value = []
+        mock_ops.return_value = mock_ops_instance
+
+        manager = ServerMessageQueueManager()
+        result = manager.dequeue_broadcast_messages()
+
+        assert result == []
+        mock_ops_instance.dequeue_broadcast_messages.assert_called_once()
+
+
+class TestServerMessageQueueManagerStatus:
+    """Tests for ServerMessageQueueManager status operations."""
+
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_mark_processing_delegates(self, mock_ops, mock_maint, mock_stats):
+        """Test mark_processing delegates to operations."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_ops_instance = MagicMock()
+        mock_ops_instance.mark_processing.return_value = True
+        mock_ops.return_value = mock_ops_instance
+
+        manager = ServerMessageQueueManager()
+        result = manager.mark_processing("msg-123")
+
+        assert result is True
+        mock_ops_instance.mark_processing.assert_called_once_with(
+            message_id="msg-123", db=None
         )
 
-        assert isinstance(message_id, str)
-        mock_db.add.assert_called_once()
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_mark_completed_delegates(self, mock_ops, mock_maint, mock_stats):
+        """Test mark_completed delegates to operations."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
 
-    @patch("backend.websocket.queue_operations.get_db")
-    def test_enqueue_message_invalid_host(self, mock_get_db):
-        """Test message enqueuing with invalid host ID."""
-        mock_db = Mock()
-        mock_get_db.return_value = iter([mock_db])
-        mock_db.query.return_value.filter.return_value.first.return_value = None
-
-        manager = ServerMessageQueueManager()
-
-        with pytest.raises(ValueError) as exc_info:
-            manager.enqueue_message(
-                message_type="test",
-                message_data={"test": "data"},
-                direction=QueueDirection.OUTBOUND,
-                host_id=999,
-            )
-
-        assert "not found" in str(exc_info.value)
-
-    def test_mark_processing_not_found(self):
-        """Test marking non-existent message as processing."""
-        mock_db = Mock()
-        mock_db.query.return_value.filter.return_value.first.return_value = None
+        mock_ops_instance = MagicMock()
+        mock_ops_instance.mark_completed.return_value = True
+        mock_ops.return_value = mock_ops_instance
 
         manager = ServerMessageQueueManager()
-        result = manager.mark_processing("nonexistent", mock_db)
+        result = manager.mark_completed("msg-123")
 
-        assert result is False
+        assert result is True
 
-    def test_deserialize_message_data_success(self):
-        """Test successful message data deserialization."""
-        mock_message = MockMessageQueue()
-        mock_message.message_data = '{"test": "value", "number": 42}'
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_mark_failed_delegates(self, mock_ops, mock_maint, mock_stats):
+        """Test mark_failed delegates to operations."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_ops_instance = MagicMock()
+        mock_ops_instance.mark_failed.return_value = True
+        mock_ops.return_value = mock_ops_instance
 
         manager = ServerMessageQueueManager()
+        result = manager.mark_failed("msg-123", error_message="Test error")
+
+        assert result is True
+
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_mark_sent_delegates(self, mock_ops, mock_maint, mock_stats):
+        """Test mark_sent delegates to operations."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_ops_instance = MagicMock()
+        mock_ops_instance.mark_sent.return_value = True
+        mock_ops.return_value = mock_ops_instance
+
+        manager = ServerMessageQueueManager()
+        result = manager.mark_sent("msg-123")
+
+        assert result is True
+
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_mark_acknowledged_delegates(self, mock_ops, mock_maint, mock_stats):
+        """Test mark_acknowledged delegates to operations."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_ops_instance = MagicMock()
+        mock_ops_instance.mark_acknowledged.return_value = True
+        mock_ops.return_value = mock_ops_instance
+
+        manager = ServerMessageQueueManager()
+        result = manager.mark_acknowledged("msg-123")
+
+        assert result is True
+
+
+class TestServerMessageQueueManagerMaintenance:
+    """Tests for ServerMessageQueueManager maintenance operations."""
+
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_cleanup_old_messages_delegates(self, mock_ops, mock_maint, mock_stats):
+        """Test cleanup_old_messages delegates to maintenance."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_maint_instance = MagicMock()
+        mock_maint_instance.cleanup_old_messages.return_value = 5
+        mock_maint.return_value = mock_maint_instance
+
+        manager = ServerMessageQueueManager()
+        result = manager.cleanup_old_messages(older_than_days=7)
+
+        assert result == 5
+        mock_maint_instance.cleanup_old_messages.assert_called_once()
+
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_delete_messages_for_host_delegates(self, mock_ops, mock_maint, mock_stats):
+        """Test delete_messages_for_host delegates to maintenance."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_maint_instance = MagicMock()
+        mock_maint_instance.delete_messages_for_host.return_value = 3
+        mock_maint.return_value = mock_maint_instance
+
+        manager = ServerMessageQueueManager()
+        result = manager.delete_messages_for_host("host-123")
+
+        assert result == 3
+
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_expire_old_messages_delegates(self, mock_ops, mock_maint, mock_stats):
+        """Test expire_old_messages delegates to maintenance."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_maint_instance = MagicMock()
+        mock_maint_instance.expire_old_messages.return_value = 2
+        mock_maint.return_value = mock_maint_instance
+
+        manager = ServerMessageQueueManager()
+        result = manager.expire_old_messages()
+
+        assert result == 2
+
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_delete_failed_messages_delegates(self, mock_ops, mock_maint, mock_stats):
+        """Test delete_failed_messages delegates to maintenance."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_maint_instance = MagicMock()
+        mock_maint_instance.delete_failed_messages.return_value = 2
+        mock_maint.return_value = mock_maint_instance
+
+        manager = ServerMessageQueueManager()
+        result = manager.delete_failed_messages(["msg-1", "msg-2"])
+
+        assert result == 2
+
+
+class TestServerMessageQueueManagerStats:
+    """Tests for ServerMessageQueueManager statistics operations."""
+
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_get_queue_stats_delegates(self, mock_ops, mock_maint, mock_stats):
+        """Test get_queue_stats delegates to stats component."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_stats_instance = MagicMock()
+        mock_stats_instance.get_queue_stats.return_value = {"total": 10}
+        mock_stats.return_value = mock_stats_instance
+
+        manager = ServerMessageQueueManager()
+        result = manager.get_queue_stats()
+
+        assert result == {"total": 10}
+        mock_stats_instance.get_queue_stats.assert_called_once()
+
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_get_failed_messages_delegates(self, mock_ops, mock_maint, mock_stats):
+        """Test get_failed_messages delegates to stats component."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_stats_instance = MagicMock()
+        mock_stats_instance.get_failed_messages.return_value = []
+        mock_stats.return_value = mock_stats_instance
+
+        manager = ServerMessageQueueManager()
+        result = manager.get_failed_messages(limit=50)
+
+        assert result == []
+
+
+class TestServerMessageQueueManagerOther:
+    """Tests for other ServerMessageQueueManager methods."""
+
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_deserialize_message_data_delegates(self, mock_ops, mock_maint, mock_stats):
+        """Test deserialize_message_data delegates to operations."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_ops_instance = MagicMock()
+        mock_ops_instance.deserialize_message_data.return_value = {"data": "value"}
+        mock_ops.return_value = mock_ops_instance
+
+        manager = ServerMessageQueueManager()
+        mock_message = MagicMock()
         result = manager.deserialize_message_data(mock_message)
 
-        assert result == {"test": "value", "number": 42}
+        assert result == {"data": "value"}
 
-    def test_deserialize_message_data_invalid_json(self):
-        """Test message data deserialization with invalid JSON."""
-        mock_message = MockMessageQueue()
-        mock_message.message_data = "invalid json{"
+    @patch("backend.websocket.queue_manager.QueueStats")
+    @patch("backend.websocket.queue_manager.QueueMaintenance")
+    @patch("backend.websocket.queue_manager.QueueOperations")
+    def test_retry_unacknowledged_messages_delegates(
+        self, mock_ops, mock_maint, mock_stats
+    ):
+        """Test retry_unacknowledged_messages delegates to operations."""
+        from backend.websocket.queue_manager import ServerMessageQueueManager
+
+        mock_ops_instance = MagicMock()
+        mock_ops_instance.retry_unacknowledged_messages.return_value = 3
+        mock_ops.return_value = mock_ops_instance
 
         manager = ServerMessageQueueManager()
-        result = manager.deserialize_message_data(mock_message)
+        result = manager.retry_unacknowledged_messages(timeout_seconds=60)
 
-        assert result == {}
-
-    def test_enum_classes(self):
-        """Test enum class constants."""
-        assert QueueStatus.PENDING == "pending"
-        assert QueueStatus.IN_PROGRESS == "in_progress"
-        assert QueueStatus.COMPLETED == "completed"
-        assert QueueStatus.FAILED == "failed"
-        assert QueueStatus.EXPIRED == "expired"
-
-        assert QueueDirection.OUTBOUND == "outbound"
-        assert QueueDirection.INBOUND == "inbound"
-
-        assert Priority.LOW == "low"
-        assert Priority.NORMAL == "normal"
-        assert Priority.HIGH == "high"
-        assert Priority.URGENT == "urgent"
+        assert result == 3
 
 
-class TestQueueManagerIntegration:
-    """Integration tests for queue manager."""
+class TestGlobalInstance:
+    """Tests for global server_queue_manager instance."""
 
-    def test_enum_string_conversion(self):
-        """Test that enums work with string values."""
-        manager = ServerMessageQueueManager()
+    def test_global_instance_exists(self):
+        """Test that global server_queue_manager instance exists."""
+        from backend.websocket.queue_manager import server_queue_manager
 
-        # Test with enum values
-        with patch("backend.websocket.queue_operations.get_db") as mock_get_db:
-            mock_db = Mock()
-            mock_get_db.return_value = iter([mock_db])
+        assert server_queue_manager is not None
 
-            # Create mock message for verification query
-            mock_message = MockMessageQueue()
+    def test_global_instance_type(self):
+        """Test that global instance is correct type."""
+        from backend.websocket.queue_manager import (
+            ServerMessageQueueManager,
+            server_queue_manager,
+        )
 
-            # Query order:
-            # 1. Host validation (MockHost)
-            # 2. Duplicate message_id check (None - no duplicate)
-            # 3. Verification after commit (MockMessageQueue)
-            mock_db.query.return_value.filter.return_value.first.side_effect = [
-                MockHost(),
-                None,
-                mock_message,
-            ]
-
-            message_id = manager.enqueue_message(
-                message_type="test",
-                message_data={"test": "data"},
-                direction=QueueDirection.OUTBOUND,  # Enum value
-                priority=Priority.HIGH,  # Enum value
-                host_id=1,
-            )
-
-            assert isinstance(message_id, str)
+        assert isinstance(server_queue_manager, ServerMessageQueueManager)

@@ -5,6 +5,16 @@
  * components re-render when plugins are registered.
  */
 
+// Declare Vite's import.meta.env types
+declare global {
+    interface ImportMeta {
+        env: {
+            VITE_BACKEND_PORT?: string;
+            [key: string]: string | undefined;
+        };
+    }
+}
+
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { pluginManager } from './PluginManager';
 import type {

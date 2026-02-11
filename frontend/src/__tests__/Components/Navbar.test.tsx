@@ -26,10 +26,7 @@ vi.mock('../../Services/license', () => ({
 }));
 
 const NavbarWithRouter = () => (
-  <BrowserRouter future={{
-    v7_startTransition: true,
-    v7_relativeSplatPath: true
-  }}>
+  <BrowserRouter>
     <Navbar />
   </BrowserRouter>
 );

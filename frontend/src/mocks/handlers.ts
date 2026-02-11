@@ -1,5 +1,8 @@
 import { http, HttpResponse } from 'msw';
 
+// Declare process.env for TypeScript
+declare const process: { env: { CI?: string } } | undefined;
+
 // Simplified approach - use broad patterns and check URLs in the handler
 export const handlers = [
   // Catch all /api/ requests and handle them dynamically
@@ -7,7 +10,7 @@ export const handlers = [
     const url = new globalThis.URL(request.url);
     const path = url.pathname;
 
-    const logPrefix = process.env.CI === 'true' ? '🔄 MSW-CI:' : 'MSW:';
+    const logPrefix = (process !== undefined && process.env?.CI === 'true') ? 'MSW-CI:' : 'MSW:';
     console.log(`${logPrefix} Handling GET ${path}`);
 
     // Host data - using pattern matching for UUID

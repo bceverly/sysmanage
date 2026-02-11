@@ -518,7 +518,7 @@ const Hosts = () => {
 
             // Call the API to reboot the selected active hosts with privileged agents
             const rebootPromises = activePrivilegedSelections.map(id => {
-                return doRebootHost(Number(id));
+                return doRebootHost(String(id));
             });
             
             await Promise.all(rebootPromises);
@@ -548,7 +548,7 @@ const Hosts = () => {
 
             // Call the API to shutdown the selected active hosts with privileged agents
             const shutdownPromises = activePrivilegedSelections.map(id => {
-                return doShutdownHost(Number(id));
+                return doShutdownHost(String(id));
             });
             
             await Promise.all(shutdownPromises);
@@ -639,7 +639,7 @@ const Hosts = () => {
             // Deploy to all selected hosts that are active and in privileged mode
             const eligibleHosts = selection.filter(hostId => {
                 const host = tableData.find(h => h.id === hostId);
-                return host && host.active && host.privileged_mode;
+                return host && host.active && host.is_agent_privileged;
             });
 
             if (eligibleHosts.length === 0) {

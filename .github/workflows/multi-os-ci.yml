@@ -579,28 +579,20 @@ jobs:
         PYTHONPATH: .
         DATABASE_URL: sqlite:///test.db
 
-    - name: Run UI tests with performance metrics
+    - name: Run E2E tests with Playwright (TypeScript)
       run: |
-        echo "🎭 Running UI tests with performance metrics collection..."
+        echo "🎭 Running Playwright E2E tests (TypeScript)..."
         if [ "${{ runner.os }}" == "macOS" ]; then
           echo "🍎 macOS detected - testing Chrome, Firefox, and WebKit/Safari"
         else
           echo "🐧 ${{ runner.os }} detected - testing Chrome and Firefox"
         fi
 
-        PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_login_cross_browser.py tests/ui/test_hosts_playwright.py tests/ui/test_updates_playwright.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short --timeout=120
+        cd frontend
+        npx playwright test --reporter=list
       shell: bash
       env:
-        PYTHONPATH: .
-
-    - name: Run dedicated performance tests (Skip Artillery on Windows due to complexity)
-      if: runner.os != 'Windows'
-      run: |
-        echo "🚀 Running performance tests..."
-        PYTHONPATH=tests/ui:$PYTHONPATH python -m pytest tests/ui/test_performance_playwright.py --confcutdir=tests/ui -p tests.ui.conftest_playwright -v --tb=short --timeout=180
-      shell: bash
-      env:
-        PYTHONPATH: .
+        CI: true
 
     - name: Stop SysManage servers after UI tests
       if: always()

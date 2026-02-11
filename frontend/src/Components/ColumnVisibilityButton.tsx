@@ -1,3 +1,4 @@
+/* global HTMLButtonElement */
 import React, { useState } from 'react';
 import {
   IconButton,
@@ -27,9 +28,9 @@ const ColumnVisibilityButton: React.FC<ColumnVisibilityButtonProps> = ({
   onReset,
 }) => {
   const { t } = useTranslation();
-  const [anchorEl, setAnchorEl] = useState<React.HTMLButtonElement | null>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
-  const handleClick = (event: React.MouseEvent<React.HTMLButtonElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
