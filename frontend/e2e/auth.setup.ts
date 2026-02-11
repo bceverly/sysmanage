@@ -1,6 +1,10 @@
 import { test as setup, expect } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
 
-const authFile = 'playwright/.auth/user.json';
+// Use absolute path to avoid macOS path resolution issues
+const authDir = path.join(__dirname, '..', 'playwright', '.auth');
+const authFile = path.join(authDir, 'user.json');
 
 /**
  * Authentication Setup
@@ -8,6 +12,11 @@ const authFile = 'playwright/.auth/user.json';
  * The storage state is saved and reused by all subsequent tests.
  */
 setup('authenticate', async ({ page }) => {
+  // Ensure auth directory exists (critical for macOS)
+  if (!fs.existsSync(authDir)) {
+    fs.mkdirSync(authDir, { recursive: true });
+  }
+
   // Navigate to login page
   await page.goto('/login');
   await page.waitForLoadState('domcontentloaded');
@@ -58,4 +67,7 @@ setup('authenticate', async ({ page }) => {
 
   // Save authentication state for reuse
   await page.context().storageState({ path: authFile });
+
+  // Small delay to ensure file is fully written (helps with macOS file system)
+  await page.waitForTimeout(500);
 });

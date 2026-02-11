@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as path from 'path';
+
+// Use absolute path for storage state to avoid macOS path resolution issues
+const authFile = path.join(__dirname, 'playwright', '.auth', 'user.json');
 
 /**
  * SysManage E2E Test Configuration
@@ -46,7 +50,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         /* Use authenticated state from setup */
-        storageState: 'playwright/.auth/user.json',
+        storageState: authFile,
       },
       dependencies: ['setup'],
     },
@@ -55,7 +59,7 @@ export default defineConfig({
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
-        storageState: 'playwright/.auth/user.json',
+        storageState: authFile,
       },
       dependencies: ['setup'],
     },
@@ -63,7 +67,7 @@ export default defineConfig({
       name: 'webkit',
       use: {
         ...devices['Desktop Safari'],
-        storageState: 'playwright/.auth/user.json',
+        storageState: authFile,
       },
       dependencies: ['setup'],
     },
