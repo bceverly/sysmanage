@@ -285,6 +285,7 @@ async def create_child_host_request(  # NOSONAR
                 command_params["cloud_image_url"] = distribution.cloud_image_url
             elif distribution and distribution.install_identifier:
                 # Fallback: use install_identifier if it's a URL
+                # NOSONAR - not making HTTP connection, just checking URL format for test/dev environments
                 if distribution.install_identifier.startswith(("http://", "https://")):
                     command_params["cloud_image_url"] = distribution.install_identifier
 
@@ -299,6 +300,7 @@ async def create_child_host_request(  # NOSONAR
                 command_params["cloud_image_url"] = distribution.cloud_image_url
             elif distribution and distribution.install_identifier:
                 # Fallback: use install_identifier if it's a URL
+                # NOSONAR - not making HTTP connection, just checking URL format for test/dev environments
                 if distribution.install_identifier.startswith(("http://", "https://")):
                     command_params["cloud_image_url"] = distribution.install_identifier
 

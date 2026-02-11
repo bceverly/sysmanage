@@ -222,6 +222,7 @@ def delete_test_user():
         for table in related_tables:
             try:
                 # Table names are from hardcoded list above, not user input
+                # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
                 session.execute(
                     text(f'DELETE FROM "{table}" WHERE user_id = :user_id'),  # nosec B608
                     {"user_id": user_id},

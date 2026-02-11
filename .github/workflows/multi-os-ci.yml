@@ -593,6 +593,9 @@ jobs:
       shell: bash
       env:
         CI: true
+        PLAYWRIGHT_BASE_URL: http://localhost:7443
+        TEST_USERNAME: admin@sysmanage.org
+        TEST_PASSWORD: TEST_AdminPass123!
 
     - name: Stop SysManage servers after UI tests
       if: always()

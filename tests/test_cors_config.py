@@ -70,8 +70,10 @@ class TestGetCorsOrigins:
 
         # These assertions check list membership (result is a list of allowed origins)
         # not URL substring validation - false positive for CodeQL url-substring check
-        assert "http://myserver.example.com:8080" in result  # noqa: S105
-        assert "http://myserver.example.com:6443" in result  # noqa: S105
+        # lgtm[py/incomplete-url-substring-sanitization]
+        assert "http://myserver.example.com:8080" in result
+        # lgtm[py/incomplete-url-substring-sanitization]
+        assert "http://myserver.example.com:6443" in result
 
     @patch.dict(os.environ, {"SYSMANAGE_CI_MODE": ""})
     @patch("backend.startup.cors_config.socket")
@@ -87,8 +89,10 @@ class TestGetCorsOrigins:
 
         # These assertions check list membership (result is a list of allowed origins)
         # not URL substring validation - false positive for CodeQL url-substring check
-        assert "http://myserver.local:8080" in result  # noqa: S105
-        assert "http://myserver.lan:8080" in result  # noqa: S105
+        # lgtm[py/incomplete-url-substring-sanitization]
+        assert "http://myserver.local:8080" in result
+        # lgtm[py/incomplete-url-substring-sanitization]
+        assert "http://myserver.lan:8080" in result
 
     @patch.dict(os.environ, {"SYSMANAGE_CI_MODE": ""})
     @patch("backend.startup.cors_config.socket")
