@@ -259,7 +259,8 @@ class TestHostModel:
         repr_str = repr(host)
 
         assert "Host" in repr_str
-        assert "server.example.com" in repr_str
+        # Checking repr output format, not URL validation - false positive for CodeQL
+        assert "server.example.com" in repr_str  # noqa: S105
         assert "True" in repr_str
 
 

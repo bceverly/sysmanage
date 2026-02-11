@@ -285,7 +285,7 @@ async def create_child_host_request(  # NOSONAR
                 command_params["cloud_image_url"] = distribution.cloud_image_url
             elif distribution and distribution.install_identifier:
                 # Fallback: use install_identifier if it's a URL
-                if distribution.install_identifier.startswith("http"):
+                if distribution.install_identifier.startswith(("http://", "https://")):
                     command_params["cloud_image_url"] = distribution.install_identifier
 
         # For bhyve, include vm_name, cloud_image_url, memory, disk_size, cpus
@@ -299,7 +299,7 @@ async def create_child_host_request(  # NOSONAR
                 command_params["cloud_image_url"] = distribution.cloud_image_url
             elif distribution and distribution.install_identifier:
                 # Fallback: use install_identifier if it's a URL
-                if distribution.install_identifier.startswith("http"):
+                if distribution.install_identifier.startswith(("http://", "https://")):
                     command_params["cloud_image_url"] = distribution.install_identifier
 
         # Include auto_approve_token if set

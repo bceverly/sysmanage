@@ -711,12 +711,33 @@ jobs:
         fi
         echo "✅ Frontend is ready"
 
+    - name: Verify servers before tests
+      run: |
+        echo "🔍 Verifying servers are still running..."
+        echo "Backend check:"
+        curl -f http://localhost:8080/api/health || echo "Backend not responding!"
+        echo ""
+        echo "Frontend check:"
+        curl -f http://localhost:3000/ || echo "Frontend not responding!"
+        echo ""
+        echo "Process list:"
+        ps aux | grep -E "(serve|uvicorn)" | grep -v grep || echo "No server processes found"
+        echo ""
+        echo "Port status:"
+        netstat -tulpn 2>/dev/null | grep -E ":(3000|8080)" || ss -tulpn | grep -E ":(3000|8080)" || echo "Could not check ports"
+
     - name: Run Playwright E2E tests
       id: ui-tests
+      working-directory: frontend
       run: |
         echo "🎭 Running Playwright E2E tests (TypeScript)..."
-        cd frontend
-        if npx playwright test --reporter=list; then
+        if [ "${{ runner.os }}" == "macOS" ]; then
+          echo "🍎 macOS detected - testing Chrome, Firefox, and WebKit/Safari"
+        else
+          echo "🐧 Linux detected - testing Chrome and Firefox"
+        fi
+
+        if PLAYWRIGHT_BASE_URL=http://localhost:3000 TEST_USERNAME=admin@sysmanage.org TEST_PASSWORD=TEST_AdminPass123! npx playwright test --reporter=list; then
           echo "status=passing" >> $GITHUB_OUTPUT
           echo "color=brightgreen" >> $GITHUB_OUTPUT
           echo "✅ All E2E tests passed"

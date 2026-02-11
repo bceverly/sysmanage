@@ -130,7 +130,7 @@ def create_test_user():
         )
         session.commit()
         print(f"Created test user: {TEST_USER_EMAIL}")
-        print(f"Password: {TEST_USER_PASSWORD}")
+        print("Password: (see TEST_USER_PASSWORD constant)")  # nosec: don't log actual password
 
         # Assign all security roles to the test user
         assign_all_security_roles(session, user_id)
@@ -221,8 +221,9 @@ def delete_test_user():
 
         for table in related_tables:
             try:
+                # Table names are from hardcoded list above, not user input
                 session.execute(
-                    text(f'DELETE FROM "{table}" WHERE user_id = :user_id'),
+                    text(f'DELETE FROM "{table}" WHERE user_id = :user_id'),  # nosec B608
                     {"user_id": user_id},
                 )
             except Exception:

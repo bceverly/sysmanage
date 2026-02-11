@@ -637,7 +637,8 @@ class TestDefaultRepositoryModel:
         assert "DefaultRepository" in repr_str
         assert "Fedora" in repr_str
         assert "dnf" in repr_str
-        assert "docker.com" in repr_str
+        # Checking repr output format, not URL validation - false positive for CodeQL
+        assert "docker.com" in repr_str  # noqa: S105
 
 
 class TestEnabledPackageManagerModel:

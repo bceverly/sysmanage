@@ -16,6 +16,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+# Import the module explicitly to avoid naming collision with fixture
+import backend.health.health_service as health_service_module
 from backend.health.health_service import HealthAnalysisError, HealthService
 from backend.licensing.features import ModuleCode
 from backend.persistence import models
@@ -115,8 +117,8 @@ class TestHealthServiceGetModule:
 
     def test_get_module_no_license(self, health_service):
         """Test _get_module raises error when no Pro+ license."""
-        with patch(
-            "backend.health.health_service.license_service"
+        with patch.object(
+            health_service_module, "license_service"
         ) as mock_license_service:
             mock_license_service.has_module.return_value = False
 
@@ -131,10 +133,10 @@ class TestHealthServiceGetModule:
 
     def test_get_module_license_but_not_loaded(self, health_service):
         """Test _get_module raises error when module not loaded."""
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
         ) as mock_module_loader:
             mock_license_service.has_module.return_value = True
             mock_module_loader.get_module.return_value = None
@@ -147,10 +149,10 @@ class TestHealthServiceGetModule:
 
     def test_get_module_success(self, health_service, mock_health_engine):
         """Test _get_module returns module when available."""
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
         ) as mock_module_loader:
             mock_license_service.has_module.return_value = True
             mock_module_loader.get_module.return_value = mock_health_engine
@@ -174,7 +176,7 @@ class TestHealthServiceGetDbSession:
 
     def test_get_db_session_returns_session(self, health_service, mock_engine):
         """Test _get_db_session returns a valid database session."""
-        with patch("backend.health.health_service.db_module") as mock_db_module, patch(
+        with patch.object(health_service_module, "db_module") as mock_db_module, patch(
             "sqlalchemy.orm.sessionmaker"
         ) as mock_sessionmaker:
             mock_db_module.get_engine.return_value = mock_engine
@@ -188,7 +190,7 @@ class TestHealthServiceGetDbSession:
 
     def test_get_db_session_uses_correct_settings(self, health_service, mock_engine):
         """Test _get_db_session creates session with correct settings."""
-        with patch("backend.health.health_service.db_module") as mock_db_module, patch(
+        with patch.object(health_service_module, "db_module") as mock_db_module, patch(
             "sqlalchemy.orm.sessionmaker"
         ) as mock_sessionmaker:
             mock_db_module.get_engine.return_value = mock_engine
@@ -214,8 +216,8 @@ class TestHealthServiceAnalyzeHost:
 
     def test_analyze_host_no_license(self, health_service):
         """Test analyze_host raises error without Pro+ license."""
-        with patch(
-            "backend.health.health_service.license_service"
+        with patch.object(
+            health_service_module, "license_service"
         ) as mock_license_service:
             mock_license_service.has_module.return_value = False
 
@@ -238,10 +240,10 @@ class TestHealthServiceAnalyzeHost:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
         ) as mock_module_loader, patch.object(
             health_service, "_get_db_session", return_value=mock_session
         ):
@@ -264,10 +266,10 @@ class TestHealthServiceAnalyzeHost:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
         ) as mock_module_loader, patch.object(
             health_service, "_get_db_session", return_value=mock_session
         ):
@@ -296,8 +298,8 @@ class TestHealthServiceGetLatestAnalysis:
 
     def test_get_latest_analysis_no_license(self, health_service):
         """Test get_latest_analysis raises error without Pro+ license."""
-        with patch(
-            "backend.health.health_service.license_service"
+        with patch.object(
+            health_service_module, "license_service"
         ) as mock_license_service:
             mock_license_service.has_module.return_value = False
 
@@ -317,10 +319,10 @@ class TestHealthServiceGetLatestAnalysis:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
         ) as mock_module_loader, patch.object(
             health_service, "_get_db_session", return_value=mock_session
         ):
@@ -344,10 +346,10 @@ class TestHealthServiceGetLatestAnalysis:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
         ) as mock_module_loader, patch.object(
             health_service, "_get_db_session", return_value=mock_session
         ):
@@ -372,8 +374,8 @@ class TestHealthServiceGetAnalysisHistory:
 
     def test_get_analysis_history_no_license(self, health_service):
         """Test get_analysis_history raises error without Pro+ license."""
-        with patch(
-            "backend.health.health_service.license_service"
+        with patch.object(
+            health_service_module, "license_service"
         ) as mock_license_service:
             mock_license_service.has_module.return_value = False
 
@@ -392,10 +394,10 @@ class TestHealthServiceGetAnalysisHistory:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
         ) as mock_module_loader, patch.object(
             health_service, "_get_db_session", return_value=mock_session
         ):
@@ -418,10 +420,10 @@ class TestHealthServiceGetAnalysisHistory:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
         ) as mock_module_loader, patch.object(
             health_service, "_get_db_session", return_value=mock_session
         ):
@@ -446,10 +448,10 @@ class TestHealthServiceGetAnalysisHistory:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
         ) as mock_module_loader, patch.object(
             health_service, "_get_db_session", return_value=mock_session
         ):
@@ -473,10 +475,10 @@ class TestHealthServiceGetAnalysisHistory:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
         ) as mock_module_loader, patch.object(
             health_service, "_get_db_session", return_value=mock_session
         ):
@@ -574,10 +576,10 @@ class TestHealthServiceIntegration:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
         ) as mock_module_loader, patch(
             "sqlalchemy.orm.sessionmaker"
         ) as mock_sessionmaker:
@@ -619,10 +621,10 @@ class TestHealthServiceIntegration:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
         ) as mock_module_loader, patch(
             "sqlalchemy.orm.sessionmaker"
         ) as mock_sessionmaker:
@@ -685,10 +687,10 @@ class TestHealthServiceIntegration:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
         ) as mock_module_loader, patch(
             "sqlalchemy.orm.sessionmaker"
         ) as mock_sessionmaker:
@@ -729,10 +731,10 @@ class TestHealthServiceErrorHandling:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
         ) as mock_module_loader, patch.object(
             health_service, "_get_db_session", return_value=mock_session
         ):
@@ -751,12 +753,12 @@ class TestHealthServiceErrorHandling:
 
     def test_db_connection_failure(self, health_service):
         """Test handling when database connection fails."""
-        with patch(
-            "backend.health.health_service.license_service"
-        ) as mock_license_service, patch(
-            "backend.health.health_service.module_loader"
-        ) as mock_module_loader, patch(
-            "backend.health.health_service.db_module"
+        with patch.object(
+            health_service_module, "license_service"
+        ) as mock_license_service, patch.object(
+            health_service_module, "module_loader"
+        ) as mock_module_loader, patch.object(
+            health_service_module, "db_module"
         ) as mock_db_module:
             mock_license_service.has_module.return_value = True
             mock_module_loader.get_module.return_value = MagicMock()

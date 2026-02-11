@@ -68,8 +68,10 @@ class TestGetCorsOrigins:
 
         result = get_cors_origins(8080, 6443)
 
-        assert "http://myserver.example.com:8080" in result
-        assert "http://myserver.example.com:6443" in result
+        # These assertions check list membership (result is a list of allowed origins)
+        # not URL substring validation - false positive for CodeQL url-substring check
+        assert "http://myserver.example.com:8080" in result  # noqa: S105
+        assert "http://myserver.example.com:6443" in result  # noqa: S105
 
     @patch.dict(os.environ, {"SYSMANAGE_CI_MODE": ""})
     @patch("backend.startup.cors_config.socket")
@@ -83,8 +85,10 @@ class TestGetCorsOrigins:
 
         result = get_cors_origins(8080, 6443)
 
-        assert "http://myserver.local:8080" in result
-        assert "http://myserver.lan:8080" in result
+        # These assertions check list membership (result is a list of allowed origins)
+        # not URL substring validation - false positive for CodeQL url-substring check
+        assert "http://myserver.local:8080" in result  # noqa: S105
+        assert "http://myserver.lan:8080" in result  # noqa: S105
 
     @patch.dict(os.environ, {"SYSMANAGE_CI_MODE": ""})
     @patch("backend.startup.cors_config.socket")
