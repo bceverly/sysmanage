@@ -25,12 +25,12 @@ This document provides a detailed roadmap for realizing all features in both ope
 14. [Phase 0: Current State (Already Implemented)](#phase-0-current-state-already-implemented)
 15. [Phase 1: Stabilization](#phase-1-stabilization)
 16. [Phase 2: Pro+ Professional Tier](#phase-2-pro-professional-tier)
-17. [Phase 3: Stabilization](#phase-3-stabilization)
-18. [Phase 4: Foundation Features](#phase-4-foundation-features)
-19. [Phase 5: Stabilization](#phase-5-stabilization)
-20. [Phase 6: Stabilization RC1](#phase-6-stabilization-rc1)
-21. [Phase 7: Pro+ Enterprise Tier - Part 1](#phase-7-pro-enterprise-tier---part-1)
-22. [Phase 8: Pro+ Enterprise Tier - Part 2](#phase-8-pro-enterprise-tier---part-2)
+17. [Phase 3: Pro+ Enterprise Tier - Part 1](#phase-3-pro-enterprise-tier---part-1)
+18. [Phase 4: Stabilization](#phase-4-stabilization)
+19. [Phase 5: Pro+ Enterprise Tier - Part 2](#phase-5-pro-enterprise-tier---part-2)
+20. [Phase 6: Stabilization](#phase-6-stabilization)
+21. [Phase 7: Stabilization RC1](#phase-7-stabilization-rc1)
+22. [Phase 8: Foundation Features](#phase-8-foundation-features)
 23. [Phase 9: Stabilization RC2](#phase-9-stabilization-rc2)
 24. [Phase 10: Pro+ Enterprise Tier - Part 3](#phase-10-pro-enterprise-tier---part-3)
 25. [Phase 11: Enterprise GA (v3.0.0.0)](#phase-11-enterprise-ga-v3000)
@@ -455,28 +455,28 @@ Each stabilization phase produces a release. Feature phases may produce one or m
 │  Phase 2: Pro+ Professional Tier                                    v1.3.0.0   │
 │     └── reporting, audit, secrets + container_engine (LXD, WSL)                │
 │                                                                                 │
-│  Phase 3: Stabilization                                             v1.4.0.0   │
-│     └── Pro+ integration testing, license gating verification                  │
-│                                                                                 │
-│  Phase 4: Foundation Features (Open Source)                         v2.0.0.0   │
-│     └── Access Groups, Scheduled Updates, Package Compliance, Audit, Broadcast │
-│                                                                                 │
-│  Phase 5: Stabilization                                             v2.1.0.0   │
-│     └── Test coverage push, full i18n audit, performance baseline              │
-│                                                                                 │
-│  Phase 6: Stabilization                                             v2.2.0.0   │
-│     └── Integration testing, load testing, security penetration test           │
-│                                                                                 │
-│  Phase 7: Pro+ Enterprise Tier - Part 1                             v2.3.0.0   │
+│  Phase 3: Pro+ Enterprise Tier - Part 1                             v1.4.0.0   │
 │     └── av_management_engine, firewall_orchestration_engine (security first)   │
 │                                                                                 │
-│  Phase 8: Pro+ Enterprise Tier - Part 2                             v2.4.0.0   │
+│  Phase 4: Stabilization                                             v1.5.0.0   │
+│     └── Pro+ integration testing, license gating verification                  │
+│                                                                                 │
+│  Phase 5: Pro+ Enterprise Tier - Part 2                             v1.6.0.0   │
 │     └── automation_engine, fleet_engine                                        │
 │                                                                                 │
-│  Phase 9: Stabilization                                             v2.5.0.0   │
+│  Phase 6: Stabilization                                             v1.7.0.0   │
+│     └── Test coverage push, full i18n audit, performance baseline              │
+│                                                                                 │
+│  Phase 7: Stabilization RC1                                         v1.8.0.0   │
+│     └── Integration testing, load testing, security penetration test           │
+│                                                                                 │
+│  Phase 8: Foundation Features (Open Source)                         v2.0.0.0   │
+│     └── Access Groups, Scheduled Updates, Package Compliance, Audit, Broadcast │
+│                                                                                 │
+│  Phase 9: Stabilization RC2                                         v2.1.0.0   │
 │     └── Final polish, documentation completion, i18n verification              │
 │                                                                                 │
-│  Phase 10: Pro+ Enterprise Tier - Part 3                            v2.6.0.0   │
+│  Phase 10: Pro+ Enterprise Tier - Part 3                            v2.2.0.0   │
 │     └── virtualization_engine, observability_engine, MFA (largest/most complex)│
 │                                                                                 │
 │  Phase 11: Major Enterprise GA                                      v3.0.0.0   │
@@ -683,211 +683,14 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 ---
 
-## Phase 3: Stabilization
+## Phase 3: Pro+ Enterprise Tier - Part 1
 
 **Target Release:** v1.4.0.0
-**Focus:** Pro+ integration testing and license gating verification
-
-### Goals
-
-1. **Pro+ Module Testing**
-   - [ ] Verify all Professional tier modules work correctly
-   - [ ] License gating verification for each module
-   - [ ] Plugin loading and registration testing
-   - [ ] Cross-module integration tests
-
-2. **Container Engine Testing**
-   - [ ] LXD container lifecycle testing on Ubuntu
-   - [ ] WSL instance lifecycle testing on Windows
-   - [ ] Verify read-only mode for unlicensed users
-
-3. **Documentation**
-   - [ ] Professional tier feature documentation
-   - [ ] Upgrade guide from open source to Professional
-
-### Exit Criteria
-
-- All Professional tier modules functional
-- License gating working correctly
-- No critical bugs in Pro+ modules
-
----
-
-## Phase 4: Foundation Features
-
-**Target Release:** v2.0.0.0
-**Focus:** Open-source feature completion (FEATURES-TODO.md items #2-6)
-
-### Features
-
-#### 4.1 Access Groups and Registration Keys
-
-**Priority:** High
-**Effort:** Medium
-
-- [ ] AccessGroup model with hierarchy (parent/child)
-- [ ] RegistrationKey model with access group association
-- [ ] Registration key auto-approval workflow
-- [ ] RBAC scoping by access group
-- [ ] Frontend: Access group management in Settings
-- [ ] i18n/l10n for all 14 languages
-
-#### 4.2 Scheduled Update Profiles
-
-**Priority:** High
-**Effort:** Medium
-
-- [ ] UpgradeProfile model with cron scheduling
-- [ ] Security-only update option
-- [ ] Profile-tag associations
-- [ ] Staggered rollout windows
-- [ ] APScheduler integration
-- [ ] Frontend: Automation tab with profile management
-- [ ] i18n/l10n for all 14 languages
-
-#### 4.3 Package Compliance Profiles
-
-**Priority:** Medium
-**Effort:** Medium
-
-- [ ] PackageProfile and PackageProfileConstraint models
-- [ ] Required/blocked package definitions
-- [ ] Version constraint support
-- [ ] Agent-side compliance checking
-- [ ] HostComplianceStatus storage
-- [ ] Frontend: Compliance tab in HostDetail
-- [ ] i18n/l10n for all 14 languages
-
-#### 4.4 Activity Audit Log Enhancement
-
-**Priority:** High
-**Effort:** Low
-
-- [ ] EXECUTE action type for script executions
-- [ ] Script output storage in details JSON
-- [ ] Enhanced filtering (date range, entity type, user, result)
-- [ ] Export to CSV/PDF
-- [ ] Audit all API endpoints
-- [ ] i18n/l10n for all 14 languages
-
-#### 4.5 Broadcast Messaging
-
-**Priority:** Medium
-**Effort:** Medium
-
-- [ ] BROADCAST message type
-- [ ] Efficient broadcast channel implementation
-- [ ] Agent broadcast message handler
-- [ ] Frontend: "Broadcast Refresh" button
-- [ ] i18n/l10n for all 14 languages
-
-### Deliverables
-
-- [ ] All Foundation features implemented and tested
-- [ ] API documentation updated
-- [ ] User documentation updated
-
----
-
-## Phase 5: Stabilization
-
-**Target Release:** v2.1.0.0
-**Focus:** Test coverage push, i18n audit, performance baseline
-
-### Goals
-
-1. **Test Coverage Push** (+5% from Phase 1)
-   - [ ] Backend coverage: Target 70%
-   - [ ] Agent coverage: Target 70%
-   - [ ] Pro+ coverage: Target 75%
-   - [ ] Add integration tests for new Foundation features
-   - [ ] Playwright tests for Foundation feature UI flows
-
-2. **i18n Audit**
-   - [ ] Verify all strings externalized
-   - [ ] Translation completeness check for all 14 languages
-   - [ ] RTL layout verification (Arabic)
-   - [ ] Character encoding verification (CJK languages)
-
-3. **Performance Baseline**
-   - [ ] Establish response time benchmarks
-   - [ ] WebSocket connection scalability test (100, 500, 1000 agents)
-   - [ ] Database query optimization review
-   - [ ] Frontend bundle size audit
-
-4. **Documentation**
-   - [ ] Update all feature documentation
-   - [ ] API reference complete
-   - [ ] Deployment guide updated
-
-### Exit Criteria
-
-- Backend test coverage: ≥70%
-- Agent test coverage: ≥70%
-- Pro+ test coverage: ≥75%
-- All translations verified complete
-- Performance baselines documented
-- No critical bugs in Foundation features
-
----
-
-## Phase 6: Stabilization RC1
-
-**Target Release:** v2.2.0.0
-**Focus:** Integration testing, load testing, security penetration test
-
-### Goals
-
-1. **Test Coverage Push** (+5% from Phase 3)
-   - [ ] Backend coverage: Target 75%
-   - [ ] Agent coverage: Target 75%
-   - [ ] Pro+ coverage: Target 80%
-
-2. **Integration Testing**
-   - [ ] End-to-end tests for container_engine (LXD, WSL)
-   - [ ] Cross-platform agent testing
-   - [ ] Pro+ module integration tests
-   - [ ] WebSocket reliability under load
-
-3. **Load Testing**
-   - [ ] 100 concurrent agents
-   - [ ] 500 concurrent agents
-   - [ ] 1000 concurrent agents
-   - [ ] Database query performance under load
-   - [ ] WebSocket message throughput
-
-4. **Security Penetration Test**
-   - [ ] External penetration test (if budget allows)
-   - [ ] Internal security review
-   - [ ] Authentication bypass attempts
-   - [ ] Privilege escalation attempts
-   - [ ] WebSocket security review
-
-5. **Bug Fixes**
-   - [ ] Resolve all critical bugs
-   - [ ] Resolve all high-priority bugs
-   - [ ] Triage and document remaining bugs
-
-### Exit Criteria
-
-- Backend test coverage: ≥75%
-- Agent test coverage: ≥75%
-- Pro+ test coverage: ≥80%
-- All integration tests passing
-- Load test targets met
-- Security review complete with no critical findings
-- No critical bugs remaining
-
----
-
-## Phase 7: Pro+ Enterprise Tier - Part 1
-
-**Target Release:** v2.3.0.0
 **Focus:** Security engines for Enterprise tier (AV and firewall management)
 
 ### Modules to Migrate
 
-#### 7.1 av_management_engine (Enterprise)
+#### 3.1 av_management_engine (Enterprise)
 
 **Source Files:**
 - `sysmanage_agent/operations/antivirus_*.py` (12 files)
@@ -917,7 +720,7 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 **Estimated Size:** ~3,000 lines
 
-#### 7.2 firewall_orchestration_engine (Enterprise)
+#### 3.2 firewall_orchestration_engine (Enterprise)
 
 **Source Files:**
 - `backend/api/firewall_roles*.py`
@@ -954,14 +757,50 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 ---
 
-## Phase 8: Pro+ Enterprise Tier - Part 2
+## Phase 4: Stabilization
 
-**Target Release:** v2.4.0.0
+**Target Release:** v1.5.0.0
+**Focus:** Pro+ integration testing and license gating verification
+
+### Goals
+
+1. **Pro+ Module Testing**
+   - [ ] Verify all Professional and Enterprise Part 1 modules work correctly
+   - [ ] License gating verification for each module
+   - [ ] Plugin loading and registration testing
+   - [ ] Cross-module integration tests
+
+2. **Container Engine Testing**
+   - [ ] LXD container lifecycle testing on Ubuntu
+   - [ ] WSL instance lifecycle testing on Windows
+   - [ ] Verify read-only mode for unlicensed users
+
+3. **Security Engine Testing**
+   - [ ] AV management engine testing across platforms
+   - [ ] Firewall orchestration engine testing across platforms
+   - [ ] Verify read-only mode for unlicensed users
+
+4. **Documentation**
+   - [ ] Professional tier feature documentation
+   - [ ] Enterprise Part 1 feature documentation
+   - [ ] Upgrade guide from open source to Professional/Enterprise
+
+### Exit Criteria
+
+- All Professional and Enterprise Part 1 modules functional
+- License gating working correctly
+- No critical bugs in Pro+ modules
+
+---
+
+## Phase 5: Pro+ Enterprise Tier - Part 2
+
+**Target Release:** v1.6.0.0
 **Focus:** Automation and fleet management for Enterprise tier
 
 ### Modules to Migrate
 
-#### 8.1 automation_engine (Enterprise)
+#### 5.1 automation_engine (Enterprise)
 
 **Source Files:**
 - `backend/api/scripts/routes_saved_scripts.py`
@@ -981,7 +820,7 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 **Estimated Size:** ~2,000 lines
 
-#### 8.2 fleet_engine (Enterprise)
+#### 5.2 fleet_engine (Enterprise)
 
 **Source Files:**
 - `backend/api/fleet.py`
@@ -1005,14 +844,184 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 ---
 
-## Phase 9: Stabilization RC2
+## Phase 6: Stabilization
 
-**Target Release:** v2.5.0.0
-**Focus:** Final polish, documentation completion, i18n verification
+**Target Release:** v1.7.0.0
+**Focus:** Test coverage push, i18n audit, performance baseline
+
+### Goals
+
+1. **Test Coverage Push** (+5% from Phase 1)
+   - [ ] Backend coverage: Target 70%
+   - [ ] Agent coverage: Target 70%
+   - [ ] Pro+ coverage: Target 75%
+   - [ ] Add integration tests for new Pro+ features
+   - [ ] Playwright tests for Pro+ feature UI flows
+
+2. **i18n Audit**
+   - [ ] Verify all strings externalized
+   - [ ] Translation completeness check for all 14 languages
+   - [ ] RTL layout verification (Arabic)
+   - [ ] Character encoding verification (CJK languages)
+
+3. **Performance Baseline**
+   - [ ] Establish response time benchmarks
+   - [ ] WebSocket connection scalability test (100, 500, 1000 agents)
+   - [ ] Database query optimization review
+   - [ ] Frontend bundle size audit
+
+4. **Documentation**
+   - [ ] Update all feature documentation
+   - [ ] API reference complete
+   - [ ] Deployment guide updated
+
+### Exit Criteria
+
+- Backend test coverage: ≥70%
+- Agent test coverage: ≥70%
+- Pro+ test coverage: ≥75%
+- All translations verified complete
+- Performance baselines documented
+- No critical bugs in Pro+ features
+
+---
+
+## Phase 7: Stabilization RC1
+
+**Target Release:** v1.8.0.0
+**Focus:** Integration testing, load testing, security penetration test
 
 ### Goals
 
 1. **Test Coverage Push** (+5% from Phase 6)
+   - [ ] Backend coverage: Target 75%
+   - [ ] Agent coverage: Target 75%
+   - [ ] Pro+ coverage: Target 80%
+
+2. **Integration Testing**
+   - [ ] End-to-end tests for container_engine (LXD, WSL)
+   - [ ] End-to-end tests for av_management_engine
+   - [ ] End-to-end tests for firewall_orchestration_engine
+   - [ ] End-to-end tests for automation_engine and fleet_engine
+   - [ ] Cross-platform agent testing
+   - [ ] Pro+ module integration tests
+   - [ ] WebSocket reliability under load
+
+3. **Load Testing**
+   - [ ] 100 concurrent agents
+   - [ ] 500 concurrent agents
+   - [ ] 1000 concurrent agents
+   - [ ] Database query performance under load
+   - [ ] WebSocket message throughput
+
+4. **Security Penetration Test**
+   - [ ] External penetration test (if budget allows)
+   - [ ] Internal security review
+   - [ ] Authentication bypass attempts
+   - [ ] Privilege escalation attempts
+   - [ ] WebSocket security review
+
+5. **Bug Fixes**
+   - [ ] Resolve all critical bugs
+   - [ ] Resolve all high-priority bugs
+   - [ ] Triage and document remaining bugs
+
+### Exit Criteria
+
+- Backend test coverage: ≥75%
+- Agent test coverage: ≥75%
+- Pro+ test coverage: ≥80%
+- All integration tests passing
+- Load test targets met
+- Security review complete with no critical findings
+- No critical bugs remaining
+
+---
+
+## Phase 8: Foundation Features
+
+**Target Release:** v2.0.0.0
+**Focus:** Open-source feature completion (FEATURES-TODO.md items #2-6)
+
+### Features
+
+#### 8.1 Access Groups and Registration Keys
+
+**Priority:** High
+**Effort:** Medium
+
+- [ ] AccessGroup model with hierarchy (parent/child)
+- [ ] RegistrationKey model with access group association
+- [ ] Registration key auto-approval workflow
+- [ ] RBAC scoping by access group
+- [ ] Frontend: Access group management in Settings
+- [ ] i18n/l10n for all 14 languages
+
+#### 8.2 Scheduled Update Profiles
+
+**Priority:** High
+**Effort:** Medium
+
+- [ ] UpgradeProfile model with cron scheduling
+- [ ] Security-only update option
+- [ ] Profile-tag associations
+- [ ] Staggered rollout windows
+- [ ] APScheduler integration
+- [ ] Frontend: Automation tab with profile management
+- [ ] i18n/l10n for all 14 languages
+
+#### 8.3 Package Compliance Profiles
+
+**Priority:** Medium
+**Effort:** Medium
+
+- [ ] PackageProfile and PackageProfileConstraint models
+- [ ] Required/blocked package definitions
+- [ ] Version constraint support
+- [ ] Agent-side compliance checking
+- [ ] HostComplianceStatus storage
+- [ ] Frontend: Compliance tab in HostDetail
+- [ ] i18n/l10n for all 14 languages
+
+#### 8.4 Activity Audit Log Enhancement
+
+**Priority:** High
+**Effort:** Low
+
+- [ ] EXECUTE action type for script executions
+- [ ] Script output storage in details JSON
+- [ ] Enhanced filtering (date range, entity type, user, result)
+- [ ] Export to CSV/PDF
+- [ ] Audit all API endpoints
+- [ ] i18n/l10n for all 14 languages
+
+#### 8.5 Broadcast Messaging
+
+**Priority:** Medium
+**Effort:** Medium
+
+- [ ] BROADCAST message type
+- [ ] Efficient broadcast channel implementation
+- [ ] Agent broadcast message handler
+- [ ] Frontend: "Broadcast Refresh" button
+- [ ] i18n/l10n for all 14 languages
+
+### Deliverables
+
+- [ ] All Foundation features implemented and tested
+- [ ] API documentation updated
+- [ ] User documentation updated
+
+---
+
+## Phase 9: Stabilization RC2
+
+**Target Release:** v2.1.0.0
+**Focus:** Final polish, documentation completion, i18n verification
+
+### Goals
+
+1. **Test Coverage Push** (+5% from Phase 7)
    - [ ] Backend coverage: Target 80%
    - [ ] Agent coverage: Target 80%
    - [ ] Pro+ coverage: Target 85%
@@ -1053,9 +1062,9 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 ---
 
-## Phase 10: Enterprise Features
+## Phase 10: Pro+ Enterprise Tier - Part 3
 
-**Target Release:** v2.6.0.0
+**Target Release:** v2.2.0.0
 **Focus:** Final Pro+ Enterprise-tier modules (largest/most complex)
 
 ### Modules to Migrate
@@ -1213,14 +1222,14 @@ This represents the current baseline. All items listed in [Current State Assessm
 | 0 | v1.1.0.0 | Current | Core platform + virtualization code (moving to Pro+) |
 | 1 | v1.2.0.0 | Stabilization | Test coverage, SonarQube cleanup |
 | 2 | v1.3.0.0 | Pro+ Professional | reporting, audit, secrets, container (LXD/WSL) |
-| 3 | v1.4.0.0 | Stabilization | Pro+ integration testing, license verification |
-| 4 | **v2.0.0.0** | Foundation | Access groups, update profiles, compliance |
-| 5 | v2.1.0.0 | Stabilization | Performance baseline, i18n audit |
-| 6 | v2.2.0.0 | Stabilization | Integration tests, load tests, security |
-| 7 | v2.3.0.0 | Pro+ Enterprise 1 | AV management, firewall orchestration (security) |
-| 8 | v2.4.0.0 | Pro+ Enterprise 2 | automation, fleet engines |
-| 9 | v2.5.0.0 | Stabilization | Final polish, docs complete |
-| 10 | v2.6.0.0 | Pro+ Enterprise 3 | virtualization, observability, MFA (largest) |
+| 3 | v1.4.0.0 | Pro+ Enterprise 1 | AV management, firewall orchestration (security) |
+| 4 | v1.5.0.0 | Stabilization | Pro+ integration testing, license verification |
+| 5 | v1.6.0.0 | Pro+ Enterprise 2 | automation, fleet engines |
+| 6 | v1.7.0.0 | Stabilization | Performance baseline, i18n audit |
+| 7 | v1.8.0.0 | Stabilization RC1 | Integration tests, load tests, security |
+| 8 | **v2.0.0.0** | Foundation | Access groups, update profiles, compliance |
+| 9 | v2.1.0.0 | Stabilization RC2 | Final polish, docs complete |
+| 10 | v2.2.0.0 | Pro+ Enterprise 3 | virtualization, observability, MFA (largest) |
 | 11 | **v3.0.0.0** | Enterprise GA | Multi-tenancy, API complete, full feature set |
 
 ---
@@ -1261,10 +1270,10 @@ When migrating code from open source to Pro+:
 | audit_engine | Professional | 2 | ~2,000 | High |
 | secrets_engine | Professional | 2 | ~2,500 | High |
 | container_engine (LXD, WSL) | Professional | 2 | ~2,000 | High |
-| av_management_engine | Enterprise | 7 | ~3,000 | High |
-| firewall_orchestration_engine | Enterprise | 7 | ~4,000 | High |
-| automation_engine | Enterprise | 8 | ~2,000 | Medium |
-| fleet_engine | Enterprise | 8 | ~1,500 | Medium |
+| av_management_engine | Enterprise | 3 | ~3,000 | High |
+| firewall_orchestration_engine | Enterprise | 3 | ~4,000 | High |
+| automation_engine | Enterprise | 5 | ~2,000 | High |
+| fleet_engine | Enterprise | 5 | ~1,500 | High |
 | virtualization_engine (KVM, bhyve, VMM) | Enterprise | 10 | ~13,000 | Medium |
 | observability_engine | Enterprise | 10 | ~4,000 | Medium |
 
@@ -1284,8 +1293,8 @@ When migrating code from open source to Pro+:
 ### Total Migration Estimate
 
 - **Professional Tier:** ~8,000 lines (Phase 2: reporting + audit + secrets + container)
-- **Enterprise Tier - Part 1:** ~7,000 lines (Phase 7: AV + firewall)
-- **Enterprise Tier - Part 2:** ~3,500 lines (Phase 8: automation + fleet)
+- **Enterprise Tier - Part 1:** ~7,000 lines (Phase 3: AV + firewall)
+- **Enterprise Tier - Part 2:** ~3,500 lines (Phase 5: automation + fleet)
 - **Enterprise Tier - Part 3:** ~17,000 lines (Phase 10: virtualization + observability)
 
 **Grand Total:** ~35,500 lines to migrate for Pro+
