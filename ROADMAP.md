@@ -24,9 +24,9 @@ This document provides a detailed roadmap for realizing all features in both ope
 13. [Roadmap Overview](#roadmap-overview)
 14. [Phase 0: Current State (Already Implemented)](#phase-0-current-state-already-implemented)
 15. [Phase 1: Stabilization](#phase-1-stabilization)
-16. [Phase 2: Foundation Features](#phase-2-foundation-features)
+16. [Phase 2: Pro+ Professional Tier](#phase-2-pro-professional-tier)
 17. [Phase 3: Stabilization](#phase-3-stabilization)
-18. [Phase 4: Pro+ Professional Tier](#phase-4-pro-professional-tier)
+18. [Phase 4: Foundation Features](#phase-4-foundation-features)
 19. [Phase 5: Stabilization](#phase-5-stabilization)
 20. [Phase 6: Stabilization RC1](#phase-6-stabilization-rc1)
 21. [Phase 7: Pro+ Enterprise Tier - Part 1](#phase-7-pro-enterprise-tier---part-1)
@@ -452,17 +452,17 @@ Each stabilization phase produces a release. Feature phases may produce one or m
 │  Phase 1: Stabilization                                             v1.2.0.0   │
 │     └── Unit tests, Playwright, SonarQube, Dependabot, Security audit          │
 │                                                                                 │
-│  Phase 2: Foundation Features (Open Source)                         v1.3.0.0   │
-│     └── Access Groups, Scheduled Updates, Package Compliance, Audit, Broadcast │
-│                                                                                 │
-│  Phase 3: Stabilization                                             v1.4.0.0   │
-│     └── Test coverage push, full i18n audit, performance baseline              │
-│                                                                                 │
-│  Phase 4: Pro+ Professional Tier                                    v2.0.0.0   │
+│  Phase 2: Pro+ Professional Tier                                    v1.3.0.0   │
 │     └── reporting, audit, secrets + container_engine (LXD, WSL)                │
 │                                                                                 │
-│  Phase 5: Stabilization                                             v2.1.0.0   │
+│  Phase 3: Stabilization                                             v1.4.0.0   │
 │     └── Pro+ integration testing, license gating verification                  │
+│                                                                                 │
+│  Phase 4: Foundation Features (Open Source)                         v2.0.0.0   │
+│     └── Access Groups, Scheduled Updates, Package Compliance, Audit, Broadcast │
+│                                                                                 │
+│  Phase 5: Stabilization                                             v2.1.0.0   │
+│     └── Test coverage push, full i18n audit, performance baseline              │
 │                                                                                 │
 │  Phase 6: Stabilization                                             v2.2.0.0   │
 │     └── Integration testing, load testing, security penetration test           │
@@ -549,130 +549,14 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 ---
 
-## Phase 2: Foundation Features
+## Phase 2: Pro+ Professional Tier
 
-**Focus:** Open-source feature completion (FEATURES-TODO.md items #2-6)
-
-### Features
-
-#### 2.1 Access Groups and Registration Keys
-
-**Priority:** High
-**Effort:** Medium
-
-- [ ] AccessGroup model with hierarchy (parent/child)
-- [ ] RegistrationKey model with access group association
-- [ ] Registration key auto-approval workflow
-- [ ] RBAC scoping by access group
-- [ ] Frontend: Access group management in Settings
-- [ ] i18n/l10n for all 14 languages
-
-#### 2.2 Scheduled Update Profiles
-
-**Priority:** High
-**Effort:** Medium
-
-- [ ] UpgradeProfile model with cron scheduling
-- [ ] Security-only update option
-- [ ] Profile-tag associations
-- [ ] Staggered rollout windows
-- [ ] APScheduler integration
-- [ ] Frontend: Automation tab with profile management
-- [ ] i18n/l10n for all 14 languages
-
-#### 2.3 Package Compliance Profiles
-
-**Priority:** Medium
-**Effort:** Medium
-
-- [ ] PackageProfile and PackageProfileConstraint models
-- [ ] Required/blocked package definitions
-- [ ] Version constraint support
-- [ ] Agent-side compliance checking
-- [ ] HostComplianceStatus storage
-- [ ] Frontend: Compliance tab in HostDetail
-- [ ] i18n/l10n for all 14 languages
-
-#### 2.4 Activity Audit Log Enhancement
-
-**Priority:** High
-**Effort:** Low
-
-- [ ] EXECUTE action type for script executions
-- [ ] Script output storage in details JSON
-- [ ] Enhanced filtering (date range, entity type, user, result)
-- [ ] Export to CSV/PDF
-- [ ] Audit all API endpoints
-- [ ] i18n/l10n for all 14 languages
-
-#### 2.5 Broadcast Messaging
-
-**Priority:** Medium
-**Effort:** Medium
-
-- [ ] BROADCAST message type
-- [ ] Efficient broadcast channel implementation
-- [ ] Agent broadcast message handler
-- [ ] Frontend: "Broadcast Refresh" button
-- [ ] i18n/l10n for all 14 languages
-
-### Deliverables
-
-- [ ] All Foundation features implemented and tested
-- [ ] API documentation updated
-- [ ] User documentation updated
-
----
-
-## Phase 3: Stabilization Beta
-
-**Target Release:** v1.4.0.0
-**Focus:** Test coverage push, i18n audit, performance baseline
-
-### Goals
-
-1. **Test Coverage Push** (+5% from Phase 1)
-   - [ ] Backend coverage: Target 70%
-   - [ ] Agent coverage: Target 70%
-   - [ ] Pro+ coverage: Target 75%
-   - [ ] Add integration tests for new Foundation features
-   - [ ] Playwright tests for Foundation feature UI flows
-
-2. **i18n Audit**
-   - [ ] Verify all strings externalized
-   - [ ] Translation completeness check for all 14 languages
-   - [ ] RTL layout verification (Arabic)
-   - [ ] Character encoding verification (CJK languages)
-
-3. **Performance Baseline**
-   - [ ] Establish response time benchmarks
-   - [ ] WebSocket connection scalability test (100, 500, 1000 agents)
-   - [ ] Database query optimization review
-   - [ ] Frontend bundle size audit
-
-4. **Documentation**
-   - [ ] Update all feature documentation
-   - [ ] API reference complete
-   - [ ] Deployment guide updated
-
-### Exit Criteria
-
-- Backend test coverage: ≥70%
-- Agent test coverage: ≥70%
-- Pro+ test coverage: ≥75%
-- All translations verified complete
-- Performance baselines documented
-- No critical bugs in Foundation features
-
----
-
-## Phase 4: Pro+ Module Migration - Part 1
-
+**Target Release:** v1.3.0.0
 **Focus:** Migrate Professional-tier features from open source to Pro+
 
 ### Modules to Migrate
 
-#### 4.1 reporting_engine (Professional)
+#### 2.1 reporting_engine (Professional)
 
 **Source Files:**
 - `backend/api/reports/endpoints.py`
@@ -700,7 +584,7 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 **Estimated Size:** ~1,500 lines
 
-#### 4.2 audit_engine (Professional)
+#### 2.2 audit_engine (Professional)
 
 **Source Files:**
 - `backend/api/audit_log.py`
@@ -730,7 +614,7 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 **Estimated Size:** ~2,000 lines
 
-#### 4.3 secrets_engine (Professional)
+#### 2.3 secrets_engine (Professional)
 
 **Source Files:**
 - `backend/api/secrets/crud.py`
@@ -759,7 +643,7 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 **Estimated Size:** ~2,500 lines
 
-#### 4.4 container_engine (Professional)
+#### 2.4 container_engine (Professional)
 
 **Source Files:**
 - `sysmanage_agent/operations/child_host_lxd.py`
@@ -799,9 +683,9 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 ---
 
-## Phase 5: Stabilization
+## Phase 3: Stabilization
 
-**Target Release:** v2.1.0.0
+**Target Release:** v1.4.0.0
 **Focus:** Pro+ integration testing and license gating verification
 
 ### Goals
@@ -826,6 +710,124 @@ This represents the current baseline. All items listed in [Current State Assessm
 - All Professional tier modules functional
 - License gating working correctly
 - No critical bugs in Pro+ modules
+
+---
+
+## Phase 4: Foundation Features
+
+**Target Release:** v2.0.0.0
+**Focus:** Open-source feature completion (FEATURES-TODO.md items #2-6)
+
+### Features
+
+#### 4.1 Access Groups and Registration Keys
+
+**Priority:** High
+**Effort:** Medium
+
+- [ ] AccessGroup model with hierarchy (parent/child)
+- [ ] RegistrationKey model with access group association
+- [ ] Registration key auto-approval workflow
+- [ ] RBAC scoping by access group
+- [ ] Frontend: Access group management in Settings
+- [ ] i18n/l10n for all 14 languages
+
+#### 4.2 Scheduled Update Profiles
+
+**Priority:** High
+**Effort:** Medium
+
+- [ ] UpgradeProfile model with cron scheduling
+- [ ] Security-only update option
+- [ ] Profile-tag associations
+- [ ] Staggered rollout windows
+- [ ] APScheduler integration
+- [ ] Frontend: Automation tab with profile management
+- [ ] i18n/l10n for all 14 languages
+
+#### 4.3 Package Compliance Profiles
+
+**Priority:** Medium
+**Effort:** Medium
+
+- [ ] PackageProfile and PackageProfileConstraint models
+- [ ] Required/blocked package definitions
+- [ ] Version constraint support
+- [ ] Agent-side compliance checking
+- [ ] HostComplianceStatus storage
+- [ ] Frontend: Compliance tab in HostDetail
+- [ ] i18n/l10n for all 14 languages
+
+#### 4.4 Activity Audit Log Enhancement
+
+**Priority:** High
+**Effort:** Low
+
+- [ ] EXECUTE action type for script executions
+- [ ] Script output storage in details JSON
+- [ ] Enhanced filtering (date range, entity type, user, result)
+- [ ] Export to CSV/PDF
+- [ ] Audit all API endpoints
+- [ ] i18n/l10n for all 14 languages
+
+#### 4.5 Broadcast Messaging
+
+**Priority:** Medium
+**Effort:** Medium
+
+- [ ] BROADCAST message type
+- [ ] Efficient broadcast channel implementation
+- [ ] Agent broadcast message handler
+- [ ] Frontend: "Broadcast Refresh" button
+- [ ] i18n/l10n for all 14 languages
+
+### Deliverables
+
+- [ ] All Foundation features implemented and tested
+- [ ] API documentation updated
+- [ ] User documentation updated
+
+---
+
+## Phase 5: Stabilization
+
+**Target Release:** v2.1.0.0
+**Focus:** Test coverage push, i18n audit, performance baseline
+
+### Goals
+
+1. **Test Coverage Push** (+5% from Phase 1)
+   - [ ] Backend coverage: Target 70%
+   - [ ] Agent coverage: Target 70%
+   - [ ] Pro+ coverage: Target 75%
+   - [ ] Add integration tests for new Foundation features
+   - [ ] Playwright tests for Foundation feature UI flows
+
+2. **i18n Audit**
+   - [ ] Verify all strings externalized
+   - [ ] Translation completeness check for all 14 languages
+   - [ ] RTL layout verification (Arabic)
+   - [ ] Character encoding verification (CJK languages)
+
+3. **Performance Baseline**
+   - [ ] Establish response time benchmarks
+   - [ ] WebSocket connection scalability test (100, 500, 1000 agents)
+   - [ ] Database query optimization review
+   - [ ] Frontend bundle size audit
+
+4. **Documentation**
+   - [ ] Update all feature documentation
+   - [ ] API reference complete
+   - [ ] Deployment guide updated
+
+### Exit Criteria
+
+- Backend test coverage: ≥70%
+- Agent test coverage: ≥70%
+- Pro+ test coverage: ≥75%
+- All translations verified complete
+- Performance baselines documented
+- No critical bugs in Foundation features
 
 ---
 
@@ -1210,10 +1212,10 @@ This represents the current baseline. All items listed in [Current State Assessm
 |-------|---------|-------|------------------|
 | 0 | v1.1.0.0 | Current | Core platform + virtualization code (moving to Pro+) |
 | 1 | v1.2.0.0 | Stabilization | Test coverage, SonarQube cleanup |
-| 2 | v1.3.0.0 | Foundation | Access groups, update profiles, compliance |
-| 3 | v1.4.0.0 | Stabilization | Performance baseline, i18n audit |
-| 4 | **v2.0.0.0** | Pro+ Professional | reporting, audit, secrets, container (LXD/WSL) |
-| 5 | v2.1.0.0 | Stabilization | Pro+ integration testing, license verification |
+| 2 | v1.3.0.0 | Pro+ Professional | reporting, audit, secrets, container (LXD/WSL) |
+| 3 | v1.4.0.0 | Stabilization | Pro+ integration testing, license verification |
+| 4 | **v2.0.0.0** | Foundation | Access groups, update profiles, compliance |
+| 5 | v2.1.0.0 | Stabilization | Performance baseline, i18n audit |
 | 6 | v2.2.0.0 | Stabilization | Integration tests, load tests, security |
 | 7 | v2.3.0.0 | Pro+ Enterprise 1 | AV management, firewall orchestration (security) |
 | 8 | v2.4.0.0 | Pro+ Enterprise 2 | automation, fleet engines |
@@ -1255,10 +1257,10 @@ When migrating code from open source to Pro+:
 
 | Module | Tier | Phase | Est. Lines | Priority |
 |--------|------|-------|------------|----------|
-| reporting_engine | Professional | 4 | ~1,500 | High |
-| audit_engine | Professional | 4 | ~2,000 | High |
-| secrets_engine | Professional | 4 | ~2,500 | High |
-| container_engine (LXD, WSL) | Professional | 4 | ~2,000 | High |
+| reporting_engine | Professional | 2 | ~1,500 | High |
+| audit_engine | Professional | 2 | ~2,000 | High |
+| secrets_engine | Professional | 2 | ~2,500 | High |
+| container_engine (LXD, WSL) | Professional | 2 | ~2,000 | High |
 | av_management_engine | Enterprise | 7 | ~3,000 | High |
 | firewall_orchestration_engine | Enterprise | 7 | ~4,000 | High |
 | automation_engine | Enterprise | 8 | ~2,000 | Medium |
@@ -1281,7 +1283,7 @@ When migrating code from open source to Pro+:
 
 ### Total Migration Estimate
 
-- **Professional Tier:** ~8,000 lines (Phase 4: reporting + audit + secrets + container)
+- **Professional Tier:** ~8,000 lines (Phase 2: reporting + audit + secrets + container)
 - **Enterprise Tier - Part 1:** ~7,000 lines (Phase 7: AV + firewall)
 - **Enterprise Tier - Part 2:** ~3,500 lines (Phase 8: automation + fleet)
 - **Enterprise Tier - Part 3:** ~17,000 lines (Phase 10: virtualization + observability)
