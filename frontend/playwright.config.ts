@@ -1,8 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
-import * as path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 // Use absolute path for storage state to avoid macOS path resolution issues
-const authFile = path.join(__dirname, 'playwright', '.auth', 'user.json');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const authFile = join(__dirname, 'playwright', '.auth', 'user.json');
 
 /**
  * SysManage E2E Test Configuration

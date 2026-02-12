@@ -1,10 +1,13 @@
 import { test as setup, expect } from '@playwright/test';
-import * as fs from 'fs';
-import * as path from 'path';
+import { existsSync, mkdirSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-// Use absolute path to avoid macOS path resolution issues
-const authDir = path.join(__dirname, '..', 'playwright', '.auth');
-const authFile = path.join(authDir, 'user.json');
+// Use absolute path to avoid macOS path resolution issues (ES module compatible)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const authDir = join(__dirname, '..', 'playwright', '.auth');
+const authFile = join(authDir, 'user.json');
 
 /**
  * Authentication Setup
@@ -13,8 +16,8 @@ const authFile = path.join(authDir, 'user.json');
  */
 setup('authenticate', async ({ page }) => {
   // Ensure auth directory exists (critical for macOS)
-  if (!fs.existsSync(authDir)) {
-    fs.mkdirSync(authDir, { recursive: true });
+  if (!existsSync(authDir)) {
+    mkdirSync(authDir, { recursive: true });
   }
 
   // Navigate to login page
