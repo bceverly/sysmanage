@@ -46,24 +46,29 @@ try {
     Write-Host "Server URL: http://127.0.0.1:8200" -ForegroundColor Cyan
 
     # Try to get server status if bao command is available
+    # OPENBAO_BIN environment variable takes priority if set
     $BaoCmd = $null
 
-    # Check for bao in PATH
-    try {
-        $BaoCmdPath = Get-Command "bao" -ErrorAction Stop
-        $BaoCmd = "bao"
-    } catch {
-        # Check for bao.exe in common locations
-        $CommonPaths = @(
-            "$env:USERPROFILE\AppData\Local\bin\bao.exe",
-            "$env:PROGRAMFILES\OpenBAO\bao.exe",
-            "${env:PROGRAMFILES(X86)}\OpenBAO\bao.exe"
-        )
+    if ($env:OPENBAO_BIN -and (Test-Path $env:OPENBAO_BIN)) {
+        $BaoCmd = $env:OPENBAO_BIN
+    } else {
+        # Check for bao in PATH
+        try {
+            $BaoCmdPath = Get-Command "bao" -ErrorAction Stop
+            $BaoCmd = "bao"
+        } catch {
+            # Check for bao.exe in common locations
+            $CommonPaths = @(
+                "$env:USERPROFILE\AppData\Local\bin\bao.exe",
+                "$env:PROGRAMFILES\OpenBAO\bao.exe",
+                "${env:PROGRAMFILES(X86)}\OpenBAO\bao.exe"
+            )
 
-        foreach ($Path in $CommonPaths) {
-            if (Test-Path $Path) {
-                $BaoCmd = $Path
-                break
+            foreach ($Path in $CommonPaths) {
+                if (Test-Path $Path) {
+                    $BaoCmd = $Path
+                    break
+                }
             }
         }
     }

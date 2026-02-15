@@ -39,44 +39,55 @@ if (Test-Path $PidFile) {
 }
 
 # Find OpenBAO or Vault binary
+# OPENBAO_BIN environment variable takes priority if set
 $BaoCmd = $null
 $BaoCmdPath = $null
 
-# Check for bao in PATH
-try {
-    $BaoCmdPath = Get-Command "bao" -ErrorAction Stop
-    $BaoCmd = "bao"
-    Write-Host "Found OpenBAO in PATH: $($BaoCmdPath.Source)" -ForegroundColor Green
-} catch {
-    # Check for bao.exe in common locations
-    $CommonPaths = @(
-        "$env:USERPROFILE\AppData\Local\bin\bao.exe",
-        "$env:PROGRAMFILES\OpenBAO\bao.exe",
-        "${env:PROGRAMFILES(X86)}\OpenBAO\bao.exe"
-    )
-
-    foreach ($Path in $CommonPaths) {
-        if (Test-Path $Path) {
-            $BaoCmd = $Path
-            Write-Host "Found OpenBAO at: $BaoCmd" -ForegroundColor Green
-            break
-        }
+if ($env:OPENBAO_BIN) {
+    if (Test-Path $env:OPENBAO_BIN) {
+        $BaoCmd = $env:OPENBAO_BIN
+        Write-Host "Using OPENBAO_BIN override: $BaoCmd" -ForegroundColor Green
+    } else {
+        Write-Host "Warning: OPENBAO_BIN is set to '$env:OPENBAO_BIN' but the file does not exist" -ForegroundColor Red
+        exit 1
     }
+} else {
+    # Check for bao in PATH
+    try {
+        $BaoCmdPath = Get-Command "bao" -ErrorAction Stop
+        $BaoCmd = "bao"
+        Write-Host "Found OpenBAO in PATH: $($BaoCmdPath.Source)" -ForegroundColor Green
+    } catch {
+        # Check for bao.exe in common locations
+        $CommonPaths = @(
+            "$env:USERPROFILE\AppData\Local\bin\bao.exe",
+            "$env:PROGRAMFILES\OpenBAO\bao.exe",
+            "${env:PROGRAMFILES(X86)}\OpenBAO\bao.exe"
+        )
 
-    if (-not $BaoCmd) {
-        # Try vault as fallback
-        try {
-            $VaultCmdPath = Get-Command "vault" -ErrorAction Stop
-            $BaoCmd = "vault"
-            Write-Host "Note: Using 'vault' as fallback (OpenBAO not found)" -ForegroundColor Yellow
-            Write-Host "Found Vault in PATH: $($VaultCmdPath.Source)" -ForegroundColor Yellow
-        } catch {
-            Write-Host "Warning: OpenBAO/Vault not found in PATH or common locations" -ForegroundColor Red
-            Write-Host "SysManage will run with vault.enabled=false in config" -ForegroundColor Yellow
-            Write-Host "To install OpenBAO, run: make install-dev" -ForegroundColor Yellow
-            Write-Host ""
-            Write-Host "Continuing without OpenBAO/Vault..." -ForegroundColor Yellow
-            exit 0  # Exit gracefully so make start continues
+        foreach ($Path in $CommonPaths) {
+            if (Test-Path $Path) {
+                $BaoCmd = $Path
+                Write-Host "Found OpenBAO at: $BaoCmd" -ForegroundColor Green
+                break
+            }
+        }
+
+        if (-not $BaoCmd) {
+            # Try vault as fallback
+            try {
+                $VaultCmdPath = Get-Command "vault" -ErrorAction Stop
+                $BaoCmd = "vault"
+                Write-Host "Note: Using 'vault' as fallback (OpenBAO not found)" -ForegroundColor Yellow
+                Write-Host "Found Vault in PATH: $($VaultCmdPath.Source)" -ForegroundColor Yellow
+            } catch {
+                Write-Host "Warning: OpenBAO/Vault not found in PATH or common locations" -ForegroundColor Red
+                Write-Host "SysManage will run with vault.enabled=false in config" -ForegroundColor Yellow
+                Write-Host "To install OpenBAO, run: make install-dev" -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "Continuing without OpenBAO/Vault..." -ForegroundColor Yellow
+                exit 0  # Exit gracefully so make start continues
+            }
         }
     }
 }

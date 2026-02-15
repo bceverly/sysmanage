@@ -179,7 +179,22 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
 
 
 def find_bao_binary() -> Optional[str]:
-    """Find the OpenBAO binary in the system."""
+    """Find the OpenBAO binary in the system.
+
+    If the OPENBAO_BIN environment variable is set and points to an
+    executable file, it is used unconditionally.  Otherwise the usual
+    search locations are checked.
+    """
+    # OPENBAO_BIN environment variable takes priority
+    openbao_bin = os.environ.get("OPENBAO_BIN")
+    if openbao_bin:
+        if os.path.isfile(openbao_bin) and os.access(openbao_bin, os.X_OK):
+            return openbao_bin
+        logger.warning(
+            "OPENBAO_BIN is set to '%s' but it is not an executable file",
+            openbao_bin,
+        )
+
     # Check common locations
     locations = [
         "bao",  # In PATH

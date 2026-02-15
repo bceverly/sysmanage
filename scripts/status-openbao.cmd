@@ -32,7 +32,15 @@ if !errorlevel! equ 0 (
     echo Server URL: http://127.0.0.1:8200
 
     REM Try to get server status if bao command is available
+    REM OPENBAO_BIN environment variable takes priority if set
     set "BAO_CMD="
+
+    if defined OPENBAO_BIN (
+        if exist "%OPENBAO_BIN%" (
+            set "BAO_CMD=%OPENBAO_BIN%"
+            goto :check_status
+        )
+    )
 
     REM Check for bao in PATH
     where bao >nul 2>&1

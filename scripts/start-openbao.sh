@@ -27,8 +27,17 @@ if [ -f "$PID_FILE" ]; then
 fi
 
 # Find OpenBAO or Vault binary
+# OPENBAO_BIN environment variable takes priority if set
 BAO_CMD=""
-if command -v bao >/dev/null 2>&1; then
+if [ -n "$OPENBAO_BIN" ]; then
+    if [ -x "$OPENBAO_BIN" ]; then
+        BAO_CMD="$OPENBAO_BIN"
+        echo "Using OPENBAO_BIN override: $BAO_CMD"
+    else
+        echo "Warning: OPENBAO_BIN is set to '$OPENBAO_BIN' but it is not executable"
+        exit 1
+    fi
+elif command -v bao >/dev/null 2>&1; then
     BAO_CMD="bao"
 elif [ -f "$HOME/.local/bin/bao" ]; then
     BAO_CMD="$HOME/.local/bin/bao"

@@ -30,7 +30,19 @@ if exist "%PID_FILE%" (
 )
 
 REM Find OpenBAO or Vault binary
+REM OPENBAO_BIN environment variable takes priority if set
 set "BAO_CMD="
+
+if defined OPENBAO_BIN (
+    if exist "%OPENBAO_BIN%" (
+        set "BAO_CMD=%OPENBAO_BIN%"
+        echo Using OPENBAO_BIN override: %OPENBAO_BIN%
+        goto :start_server
+    ) else (
+        echo Warning: OPENBAO_BIN is set to "%OPENBAO_BIN%" but the file does not exist
+        exit /b 1
+    )
+)
 
 REM Check for bao in PATH
 where bao >nul 2>&1

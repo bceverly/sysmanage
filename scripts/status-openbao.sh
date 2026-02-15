@@ -29,8 +29,11 @@ if kill -0 "$PID" 2>/dev/null; then
     echo "Server URL: http://127.0.0.1:8200"
 
     # Try to get server status if bao command is available
+    # OPENBAO_BIN environment variable takes priority if set
     BAO_CMD=""
-    if command -v bao >/dev/null 2>&1; then
+    if [ -n "$OPENBAO_BIN" ] && [ -x "$OPENBAO_BIN" ]; then
+        BAO_CMD="$OPENBAO_BIN"
+    elif command -v bao >/dev/null 2>&1; then
         BAO_CMD="bao"
     elif [ -f "$HOME/.local/bin/bao" ]; then
         BAO_CMD="$HOME/.local/bin/bao"
