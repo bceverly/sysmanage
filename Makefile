@@ -224,7 +224,11 @@ else
 	fi
 endif
 	@echo "Installing OpenBAO for secrets management..."
+ifdef OPENBAO_BIN
+	@echo "[OK] OPENBAO_BIN is set to $(OPENBAO_BIN), skipping install-openbao.py"
+else
 	@$(PYTHON) scripts/install-openbao.py
+endif
 ifeq ($(OS),Windows_NT)
 	@echo "Installing telemetry stack (OpenTelemetry + Prometheus)..."
 	@$(PYTHON) scripts/install-telemetry.py || echo "[WARNING] Telemetry installation failed - continuing without telemetry"
