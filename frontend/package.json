@@ -87,7 +87,7 @@
     "eslint-plugin-security": "^3.0.1",
     "identity-obj-proxy": "^3.0.0",
     "jsdom": "^27.4.0",
-    "msw": "^2.12.9",
+    "msw": "^2.12.10",
     "strip-literal": "^3.1.0",
     "stylelint": "^16.26.1",
     "stylelint-config-standard": "^39.0.1",
