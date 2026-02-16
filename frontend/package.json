@@ -89,7 +89,7 @@
     "jsdom": "^27.4.0",
     "msw": "^2.12.10",
     "strip-literal": "^3.1.0",
-    "stylelint": "^16.26.1",
+    "stylelint": "^17.3.0",
     "stylelint-config-standard": "^39.0.1",
     "tldts": "^7.0.21",
     "vite": "^7.3.1",
