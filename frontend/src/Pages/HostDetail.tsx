@@ -95,9 +95,10 @@ import axiosInstance from '../Services/api';
 import { distributionService } from '../Services/childHostDistributions';
 import { hasPermission, hasPermissionSync, SecurityRoles } from '../Services/permissions';
 
-import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck, doRequestSystemInfo, doChangeHostname } from '../Services/hosts';
+import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, RebootPreCheckResponse, RebootOrchestrationStatus, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck, doRequestSystemInfo, doChangeHostname, doRebootPreCheck, doOrchestratedReboot, getRebootOrchestrationStatus } from '../Services/hosts';
 import { SysManageUser, doGetMe } from '../Services/users';
 import { SecretResponse } from '../Services/secrets';
+import { parseUTCTimestamp, formatUTCTimestamp, formatUTCDate } from '../utils/dateUtils';
 import { doCheckOpenTelemetryEligibility, doDeployOpenTelemetry, doGetOpenTelemetryStatus, doStartOpenTelemetry, doStopOpenTelemetry, doRestartOpenTelemetry, doConnectOpenTelemetryToGrafana, doDisconnectOpenTelemetryFromGrafana, doRemoveOpenTelemetry } from '../Services/opentelemetry';
 import { doCheckGraylogHealth, doGetGraylogAttachment } from '../Services/graylog';
 import ThirdPartyRepositories from './ThirdPartyRepositories';
@@ -439,6 +440,10 @@ const HostDetail = () => { // NOSONAR
     const [snackbarMessage, setSnackbarMessage] = useState<string>('');
     const [rebootConfirmOpen, setRebootConfirmOpen] = useState<boolean>(false);
     const [shutdownConfirmOpen, setShutdownConfirmOpen] = useState<boolean>(false);
+    const [rebootPreCheckData, setRebootPreCheckData] = useState<RebootPreCheckResponse | null>(null);
+    const [rebootPreCheckLoading, setRebootPreCheckLoading] = useState<boolean>(false);
+    const [rebootOrchestrationId, setRebootOrchestrationId] = useState<string | null>(null);
+    const [rebootOrchestrationStatus, setRebootOrchestrationStatus] = useState<RebootOrchestrationStatus | null>(null);
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'warning'>('success');
     const [diagnosticDetailOpen, setDiagnosticDetailOpen] = useState<boolean>(false);
     const [selectedDiagnostic, setSelectedDiagnostic] = useState<DiagnosticDetailResponse | null>(null);
@@ -598,8 +603,8 @@ const HostDetail = () => { // NOSONAR
             try {
                 const licenseInfo = await getLicenseInfo();
                 setLicenseModules(licenseInfo.modules || []);
-            } catch (error) {
-                console.log('License check failed:', error);
+            } catch {
+                // License check unavailable — proceed without Pro+ features
                 setLicenseModules([]);
             }
         };
@@ -1694,6 +1699,40 @@ const HostDetail = () => { // NOSONAR
         }
     }, [currentTabId, host?.active, host?.id, fetchChildHosts, fetchVirtualizationStatus, supportsChildHosts, host, requestChildHostsRefresh, createChildHostOpen]);
 
+    // Poll reboot orchestration status every 5 seconds when active
+    useEffect(() => {
+        if (!rebootOrchestrationId || !host?.id) return;
+
+        const pollStatus = async () => {
+            try {
+                const status = await getRebootOrchestrationStatus(host.id, rebootOrchestrationId);
+                setRebootOrchestrationStatus(status);
+
+                if (status.status === 'completed' || status.status === 'failed') {
+                    setRebootOrchestrationId(null);
+                    if (status.status === 'completed') {
+                        setSnackbarMessage(
+                            status.error_message
+                                ? t('hosts.rebootOrchestration.completedWithErrors', 'Orchestrated reboot completed: {{error}}', { error: status.error_message })
+                                : t('hosts.rebootOrchestration.completed', 'Orchestrated reboot completed successfully')
+                        );
+                        setSnackbarSeverity(status.error_message ? 'warning' : 'success');
+                    } else {
+                        setSnackbarMessage(t('hosts.rebootOrchestration.failed', 'Orchestrated reboot failed: {{error}}', { error: status.error_message || 'Unknown error' }));
+                        setSnackbarSeverity('error');
+                    }
+                    setSnackbarOpen(true);
+                }
+            } catch (error) {
+                console.error('Failed to poll orchestration status:', error);
+            }
+        };
+
+        pollStatus();
+        const interval = setInterval(pollStatus, 5000);
+        return () => clearInterval(interval);
+    }, [rebootOrchestrationId, host?.id, t]);
+
     // Check permissions
     useEffect(() => {
         const checkPermissions = async () => {
@@ -1949,8 +1988,8 @@ const HostDetail = () => { // NOSONAR
 
                 // Check if agent is running in privileged mode
                 setGraylogEligible(host.is_agent_privileged || false);
-            } catch (error) {
-                console.log('Failed to check Graylog eligibility:', error);
+            } catch {
+                // Graylog not configured or unavailable — not an error condition
                 setCanAttachGraylog(false);
                 setGraylogEligible(false);
             }
@@ -2148,21 +2187,15 @@ const HostDetail = () => { // NOSONAR
         }
     }, [host, ubuntuProInfo, getTabNames, currentTab]);
 
-    const formatDate = (dateString: string | null | undefined) => {
-        if (!dateString) return t('common.notAvailable', 'N/A');
-        try {
-            const date = new Date(dateString);
-            return date.toLocaleString();
-        } catch {
-            return t('common.invalidDate', 'Invalid date');
-        }
+    const formatDate = (dateString: string | null | undefined): string => {
+        return formatUTCTimestamp(dateString, t('common.notAvailable', 'N/A'));
     };
 
     const formatTimestamp = (timestamp: string | null | undefined) => {
         if (!timestamp) return t('hosts.never', 'never');
-        const date = new Date(timestamp);
-        if (Number.isNaN(date.getTime())) return t('hosts.invalidDate', 'invalid');
-        
+        const date = parseUTCTimestamp(timestamp);
+        if (!date) return t('hosts.invalidDate', 'invalid');
+
         const now = new Date();
         const diffMinutes = Math.floor((now.getTime() - date.getTime()) / 60000);
         if (diffMinutes < 2) return t('hosts.justNow', 'just now');
@@ -2179,10 +2212,11 @@ const HostDetail = () => { // NOSONAR
         if (!host.last_access) return 'down';
         
         // Same logic as host list: consider host "up" if last access was within 5 minutes
-        const lastAccess = new Date(host.last_access);
+        const lastAccess = parseUTCTimestamp(host.last_access);
+        if (!lastAccess) return 'down';
         const now = new Date();
         const diffMinutes = Math.floor((now.getTime() - lastAccess.getTime()) / 60000);
-        
+
         return diffMinutes <= 5 ? 'up' : 'down';
     };
 
@@ -2465,7 +2499,7 @@ const HostDetail = () => { // NOSONAR
             width: 180,
             renderCell: (params) => (
                 <Typography variant="body2">
-                    {new Date(params.value).toLocaleString()}
+                    {formatUTCTimestamp(params.value)}
                 </Typography>
             ),
         },
@@ -2501,7 +2535,7 @@ const HostDetail = () => { // NOSONAR
             width: 180,
             renderCell: (params) => (
                 <Typography variant="body2">
-                    {new Date(params.value).toLocaleString()}
+                    {formatUTCTimestamp(params.value)}
                 </Typography>
             ),
         },
@@ -2923,7 +2957,21 @@ const HostDetail = () => { // NOSONAR
         }
     };
 
-    const handleRebootClick = () => {
+    const handleRebootClick = async () => {
+        if (supportsChildHosts() && host?.id) {
+            setRebootPreCheckLoading(true);
+            try {
+                const preCheck = await doRebootPreCheck(host.id);
+                setRebootPreCheckData(preCheck);
+            } catch (error) {
+                console.error('Failed to pre-check reboot:', error);
+                setRebootPreCheckData(null);
+            } finally {
+                setRebootPreCheckLoading(false);
+            }
+        } else {
+            setRebootPreCheckData(null);
+        }
         setRebootConfirmOpen(true);
     };
 
@@ -2935,13 +2983,25 @@ const HostDetail = () => { // NOSONAR
         if (!host?.id) return;
 
         try {
-            await doRebootHost(host.id);
-            setSnackbarMessage(t('hosts.rebootRequested', 'Reboot requested successfully'));
+            if (rebootPreCheckData?.has_running_children && rebootPreCheckData?.has_container_engine) {
+                // Pro+: Use orchestrated reboot
+                const result = await doOrchestratedReboot(host.id);
+                setRebootOrchestrationId(result.orchestration_id);
+                setSnackbarMessage(t('hosts.rebootOrchestration.initiated', 'Orchestrated reboot initiated — stopping {{count}} child host(s)', { count: result.child_count }));
+                setSnackbarSeverity('success');
+            } else {
+                // Standard reboot (no children or no Pro+)
+                await doRebootHost(host.id);
+                setSnackbarMessage(t('hosts.rebootRequested', 'Reboot requested successfully'));
+                setSnackbarSeverity('success');
+            }
             setSnackbarOpen(true);
             setRebootConfirmOpen(false);
+            setRebootPreCheckData(null);
         } catch (error) {
             console.error('Failed to request reboot:', error);
             setSnackbarMessage(t('hosts.rebootFailed', 'Failed to request reboot'));
+            setSnackbarSeverity('error');
             setSnackbarOpen(true);
         }
     };
@@ -3479,7 +3539,7 @@ const HostDetail = () => { // NOSONAR
 
     // Format datetime for display
     const formatDateTime = (dateString: string) => {
-        return new Date(dateString).toLocaleString();
+        return formatUTCTimestamp(dateString);
     };
 
     // Get installation status color
@@ -3744,7 +3804,7 @@ const HostDetail = () => { // NOSONAR
             renderCell: (params) => {
                 if (!params.value) return t('common.unknown', 'Unknown');
 
-                const expiryDate = new Date(params.value);
+                const expiryDate = parseUTCTimestamp(params.value);
                 const isExpired = params.row.is_expired;
                 const daysUntilExpiry = params.row.days_until_expiry;
 
@@ -3765,7 +3825,7 @@ const HostDetail = () => { // NOSONAR
                                 color: expiryColor
                             }}
                         >
-                            {expiryDate.toLocaleDateString()}
+                            {expiryDate ? expiryDate.toLocaleDateString() : t('common.unknown', 'Unknown')}
                         </Typography>
                         {daysUntilExpiry !== null && (
                             <Typography variant="caption" sx={{ display: 'block', lineHeight: 1 }}>
@@ -3968,7 +4028,7 @@ const HostDetail = () => { // NOSONAR
 
             {/* Tabs */}
             <Box sx={{ borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
-                <Tabs value={currentTab} onChange={handleTabChange} aria-label="host detail tabs">
+                <Tabs value={currentTab} onChange={handleTabChange} aria-label="host detail tabs" variant="scrollable" scrollButtons="auto">
                     {tabDefinitions.map(tabDef => (
                         <Tab
                             key={tabDef.id}
@@ -5737,7 +5797,7 @@ const HostDetail = () => { // NOSONAR
                                                             </TableCell>
                                                             <TableCell>
                                                                 <Typography variant="body2" sx={{ color: 'textSecondary' }}>
-                                                                    {new Date(role.detected_at).toLocaleDateString()}
+                                                                    {formatUTCDate(role.detected_at)}
                                                                 </Typography>
                                                             </TableCell>
                                                         </TableRow>
@@ -6232,7 +6292,7 @@ const HostDetail = () => { // NOSONAR
                                                                 <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
                                                                     {t('hostDetail.expires', 'Expires')}
                                                                 </TableCell>
-                                                                <TableCell>{new Date(ubuntuProInfo.expires).toLocaleDateString()}</TableCell>
+                                                                <TableCell>{formatUTCDate(ubuntuProInfo.expires)}</TableCell>
                                                             </TableRow>
                                                         )}
                                                         {ubuntuProInfo.account_name && (
@@ -6600,25 +6660,79 @@ const HostDetail = () => { // NOSONAR
             {/* Reboot Confirmation Dialog */}
             <Dialog
                 open={rebootConfirmOpen}
-                onClose={() => setRebootConfirmOpen(false)}
+                onClose={() => { setRebootConfirmOpen(false); setRebootPreCheckData(null); }}
                 aria-labelledby="reboot-dialog-title"
                 aria-describedby="reboot-dialog-description"
+                maxWidth="sm"
+                fullWidth
             >
                 <DialogTitle id="reboot-dialog-title">
                     {t('hosts.confirmReboot', 'Confirm System Reboot')}
                 </DialogTitle>
                 <DialogContent>
-                    <Typography id="reboot-dialog-description">
-                        {t('hosts.confirmRebootMessage', 'Are you sure you want to reboot {{hostname}}? The system will be unavailable for a few minutes.', { hostname: host?.fqdn })}
-                    </Typography>
+                    {rebootPreCheckLoading ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                            <CircularProgress size={24} />
+                        </Box>
+                    ) : rebootPreCheckData?.has_running_children ? (
+                        <>
+                            {rebootPreCheckData.has_container_engine ? (
+                                <Alert severity="info" sx={{ mb: 2 }}>
+                                    {t('hosts.rebootOrchestration.orchestratedInfo', 'This host has {{count}} running child host(s). SysManage will safely stop them before rebooting and automatically restart them afterward.', { count: rebootPreCheckData.running_count })}
+                                </Alert>
+                            ) : (
+                                <Alert severity="warning" sx={{ mb: 2 }}>
+                                    {t('hosts.rebootOrchestration.ungracefulWarning', 'This host has {{count}} running child host(s) that will be ungracefully terminated during reboot. Upgrade to SysManage Professional+ for orchestrated safe reboot.', { count: rebootPreCheckData.running_count })}
+                                </Alert>
+                            )}
+                            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                                {t('hosts.rebootOrchestration.runningChildren', 'Running child hosts:')}
+                            </Typography>
+                            <Table size="small" sx={{ mb: 2 }}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>{t('hosts.rebootOrchestration.childName', 'Name')}</TableCell>
+                                        <TableCell>{t('hosts.rebootOrchestration.childType', 'Type')}</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {rebootPreCheckData.running_children.map((child) => (
+                                        <TableRow key={child.id}>
+                                            <TableCell>{child.child_name}</TableCell>
+                                            <TableCell>
+                                                <Chip label={child.child_type.toUpperCase()} size="small" />
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                            <Typography id="reboot-dialog-description" variant="body2" color="text.secondary">
+                                {rebootPreCheckData.has_container_engine
+                                    ? t('hosts.rebootOrchestration.proceedOrchestrated', 'Click "Orchestrated Reboot" to safely reboot {{hostname}}.', { hostname: host?.fqdn })
+                                    : t('hosts.rebootOrchestration.proceedAnyway', 'Click "Reboot Anyway" to reboot {{hostname}} without stopping child hosts first.', { hostname: host?.fqdn })
+                                }
+                            </Typography>
+                        </>
+                    ) : (
+                        <Typography id="reboot-dialog-description">
+                            {t('hosts.confirmRebootMessage', 'Are you sure you want to reboot {{hostname}}? The system will be unavailable for a few minutes.', { hostname: host?.fqdn })}
+                        </Typography>
+                    )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setRebootConfirmOpen(false)}>
+                    <Button onClick={() => { setRebootConfirmOpen(false); setRebootPreCheckData(null); }}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button onClick={handleRebootConfirm} color="warning" variant="contained">
-                        {t('hosts.reboot', 'Reboot')}
-                    </Button>
+                    {!rebootPreCheckLoading && (
+                        <Button onClick={handleRebootConfirm} color="warning" variant="contained">
+                            {rebootPreCheckData?.has_running_children
+                                ? (rebootPreCheckData.has_container_engine
+                                    ? t('hosts.rebootOrchestration.orchestratedRebootButton', 'Orchestrated Reboot')
+                                    : t('hosts.rebootOrchestration.rebootAnywayButton', 'Reboot Anyway'))
+                                : t('hosts.reboot', 'Reboot')
+                            }
+                        </Button>
+                    )}
                 </DialogActions>
             </Dialog>
 
@@ -7324,6 +7438,27 @@ const HostDetail = () => { // NOSONAR
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Reboot Orchestration Progress Banner */}
+            {rebootOrchestrationStatus && rebootOrchestrationId && (
+                <Snackbar
+                    open={true}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                >
+                    <Alert severity="info" sx={{ minWidth: 350 }}>
+                        <Typography variant="subtitle2">
+                            {t('hosts.rebootOrchestration.inProgress', 'Orchestrated Reboot in Progress')}
+                        </Typography>
+                        <Typography variant="body2">
+                            {rebootOrchestrationStatus.status === 'shutting_down' && t('hosts.rebootOrchestration.statusShuttingDown', 'Stopping child hosts...')}
+                            {rebootOrchestrationStatus.status === 'rebooting' && t('hosts.rebootOrchestration.statusRebooting', 'Rebooting host, waiting for reconnect...')}
+                            {rebootOrchestrationStatus.status === 'pending_restart' && t('hosts.rebootOrchestration.statusPendingRestart', 'Host reconnected, preparing to restart children...')}
+                            {rebootOrchestrationStatus.status === 'restarting' && t('hosts.rebootOrchestration.statusRestarting', 'Restarting child hosts...')}
+                        </Typography>
+                        <LinearProgress sx={{ mt: 1 }} />
+                    </Alert>
+                </Snackbar>
+            )}
 
             {/* Success/Error Snackbar */}
             <Snackbar

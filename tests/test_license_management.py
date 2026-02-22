@@ -1,5 +1,5 @@
 """
-Tests for backend/api/health_analysis.py module.
+Tests for backend/api/license_management.py module.
 Tests Pro+ license management API endpoints.
 """
 
@@ -15,7 +15,7 @@ class TestLicenseInfoResponse:
 
     def test_inactive_license(self):
         """Test inactive license response."""
-        from backend.api.health_analysis import LicenseInfoResponse
+        from backend.api.license_management import LicenseInfoResponse
 
         response = LicenseInfoResponse(active=False)
         assert response.active is False
@@ -24,7 +24,7 @@ class TestLicenseInfoResponse:
 
     def test_active_license(self):
         """Test active license response."""
-        from backend.api.health_analysis import LicenseInfoResponse
+        from backend.api.license_management import LicenseInfoResponse
 
         response = LicenseInfoResponse(
             active=True,
@@ -52,7 +52,7 @@ class TestLicenseInstallRequest:
 
     def test_valid_request(self):
         """Test valid license install request."""
-        from backend.api.health_analysis import LicenseInstallRequest
+        from backend.api.license_management import LicenseInstallRequest
 
         request = LicenseInstallRequest(license_key="ABC123XYZ")
         assert request.license_key == "ABC123XYZ"
@@ -63,7 +63,7 @@ class TestLicenseInstallResponse:
 
     def test_success_response(self):
         """Test successful install response."""
-        from backend.api.health_analysis import (
+        from backend.api.license_management import (
             LicenseInfoResponse,
             LicenseInstallResponse,
         )
@@ -80,7 +80,7 @@ class TestLicenseInstallResponse:
 
     def test_failure_response(self):
         """Test failed install response."""
-        from backend.api.health_analysis import LicenseInstallResponse
+        from backend.api.license_management import LicenseInstallResponse
 
         response = LicenseInstallResponse(
             success=False,
@@ -95,10 +95,10 @@ class TestLicenseInstallResponse:
 class TestGetLicenseInfo:
     """Tests for get_license_info endpoint."""
 
-    @patch("backend.api.health_analysis.license_service")
+    @patch("backend.api.license_management.license_service")
     def test_get_license_inactive(self, mock_license_service):
         """Test getting license info when Pro+ is inactive."""
-        from backend.api.health_analysis import router
+        from backend.api.license_management import router
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
@@ -115,10 +115,10 @@ class TestGetLicenseInfo:
         data = response.json()
         assert data["active"] is False
 
-    @patch("backend.api.health_analysis.license_service")
+    @patch("backend.api.license_management.license_service")
     def test_get_license_active(self, mock_license_service):
         """Test getting license info when Pro+ is active."""
-        from backend.api.health_analysis import router
+        from backend.api.license_management import router
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
@@ -152,14 +152,14 @@ class TestGetLicenseInfo:
 class TestInstallLicense:
     """Tests for install_license endpoint."""
 
-    @patch("backend.api.health_analysis.license_service")
-    @patch("backend.api.health_analysis.db_module")
-    @patch("backend.api.health_analysis.sessionmaker")
+    @patch("backend.api.license_management.license_service")
+    @patch("backend.api.license_management.db_module")
+    @patch("backend.api.license_management.sessionmaker")
     def test_install_license_success(
         self, mock_sessionmaker, mock_db_module, mock_license_service
     ):
         """Test successful license installation."""
-        from backend.api.health_analysis import router
+        from backend.api.license_management import router
         from backend.auth.auth_bearer import get_current_user
         from backend.persistence.db import get_db
 
@@ -212,11 +212,11 @@ class TestInstallLicense:
         assert data["success"] is True
         assert data["license_info"]["tier"] == "professional"
 
-    @patch("backend.api.health_analysis.db_module")
-    @patch("backend.api.health_analysis.sessionmaker")
+    @patch("backend.api.license_management.db_module")
+    @patch("backend.api.license_management.sessionmaker")
     def test_install_license_user_not_found(self, mock_sessionmaker, mock_db_module):
         """Test license installation when user not found."""
-        from backend.api.health_analysis import router
+        from backend.api.license_management import router
         from backend.auth.auth_bearer import get_current_user
         from backend.persistence.db import get_db
 
@@ -244,11 +244,11 @@ class TestInstallLicense:
 
         assert response.status_code == 401
 
-    @patch("backend.api.health_analysis.db_module")
-    @patch("backend.api.health_analysis.sessionmaker")
+    @patch("backend.api.license_management.db_module")
+    @patch("backend.api.license_management.sessionmaker")
     def test_install_license_not_admin(self, mock_sessionmaker, mock_db_module):
         """Test license installation when user is not admin."""
-        from backend.api.health_analysis import router
+        from backend.api.license_management import router
         from backend.auth.auth_bearer import get_current_user
         from backend.persistence.db import get_db
 
@@ -282,14 +282,14 @@ class TestInstallLicense:
 
         assert response.status_code == 403
 
-    @patch("backend.api.health_analysis.license_service")
-    @patch("backend.api.health_analysis.db_module")
-    @patch("backend.api.health_analysis.sessionmaker")
+    @patch("backend.api.license_management.license_service")
+    @patch("backend.api.license_management.db_module")
+    @patch("backend.api.license_management.sessionmaker")
     def test_install_license_invalid_key(
         self, mock_sessionmaker, mock_db_module, mock_license_service
     ):
         """Test license installation with invalid key."""
-        from backend.api.health_analysis import router
+        from backend.api.license_management import router
         from backend.auth.auth_bearer import get_current_user
         from backend.persistence.db import get_db
 
@@ -331,14 +331,14 @@ class TestInstallLicense:
         assert data["success"] is False
         assert "Invalid license format" in data["message"]
 
-    @patch("backend.api.health_analysis.license_service")
-    @patch("backend.api.health_analysis.db_module")
-    @patch("backend.api.health_analysis.sessionmaker")
+    @patch("backend.api.license_management.license_service")
+    @patch("backend.api.license_management.db_module")
+    @patch("backend.api.license_management.sessionmaker")
     def test_install_license_exception(
         self, mock_sessionmaker, mock_db_module, mock_license_service
     ):
         """Test license installation with exception."""
-        from backend.api.health_analysis import router
+        from backend.api.license_management import router
         from backend.auth.auth_bearer import get_current_user
         from backend.persistence.db import get_db
 
@@ -382,6 +382,6 @@ class TestRouterConfiguration:
 
     def test_router_exists(self):
         """Test router is created."""
-        from backend.api.health_analysis import router
+        from backend.api.license_management import router
 
         assert router is not None

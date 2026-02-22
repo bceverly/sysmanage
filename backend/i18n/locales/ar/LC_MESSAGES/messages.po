@@ -701,6 +701,51 @@ msgstr "أدوار أمان المستخدم (RBAC)"
 msgid "No security roles assigned"
 msgstr "لم يتم تعيين أدوار أمان"
 
+msgid "IP Address"
+msgstr "عنوان IP"
+
+msgid "OS Version"
+msgstr "إصدار نظام التشغيل"
+
+msgid "IPv4 Ports"
+msgstr "منافذ IPv4"
+
+msgid "IPv6 Ports"
+msgstr "منافذ IPv6"
+
+msgid "Audit Log"
+msgstr "سجل التدقيق"
+
+msgid "Total Entries"
+msgstr "إجمالي الإدخالات"
+
+msgid "No audit log entries found."
+msgstr "لم يتم العثور على إدخالات في سجل التدقيق."
+
+msgid "Timestamp"
+msgstr "الطابع الزمني"
+
+msgid "Entity Type"
+msgstr "نوع الكيان"
+
+msgid "Entity Name"
+msgstr "اسم الكيان"
+
+msgid "Result"
+msgstr "النتيجة"
+
+msgid "Description"
+msgstr "الوصف"
+
+msgid "System"
+msgstr "النظام"
+
+msgid "Action"
+msgstr "الإجراء"
+
+msgid "User"
+msgstr "المستخدم"
+
 msgid "User not found"
 msgstr "المستخدم غير موجود"
 
@@ -829,22 +874,317 @@ msgstr "تم تهيئة KVM/libvirt بنجاح"
 # KVM Networking Configuration strings
 
 msgid "KVM networking is only supported on Linux hosts"
-msgstr "KVM networking is only supported on Linux hosts"
+msgstr "شبكات KVM مدعومة فقط على مضيفات Linux"
 
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr "Agent must be running with root privileges to configure KVM networking"
+msgstr "يجب أن يعمل الوكيل بصلاحيات الجذر لتكوين شبكات KVM"
 
 msgid "Bridge interface name is required for bridged networking mode"
-msgstr "Bridge interface name is required for bridged networking mode"
+msgstr "اسم واجهة الجسر مطلوب لوضع الشبكة الجسرية"
 
 msgid "KVM networking configuration requested: %s mode"
-msgstr "KVM networking configuration requested: %s mode"
+msgstr "تم طلب تكوين شبكة KVM: الوضع %s"
 
 msgid "KVM networking configuration requested. The agent will configure the %s network."
-msgstr "KVM networking configuration requested. The agent will configure the %s network."
+msgstr "تم طلب تكوين شبكة KVM. سيقوم الوكيل بتكوين شبكة %s."
 
 msgid "KVM networks are only available on Linux hosts"
-msgstr "KVM networks are only available on Linux hosts"
+msgstr "شبكات KVM متاحة فقط على مضيفات Linux"
 
 msgid "KVM network list requested. Results will be returned shortly."
-msgstr "KVM network list requested. Results will be returned shortly."
+msgstr "تم طلب قائمة شبكات KVM. ستُعرض النتائج قريبًا."
+
+# Pro+ feature gate messages
+msgid "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "تتطلب إدارة الحاويات/الأجهزة الافتراضية ترخيص SysManage Professional+. يرجى الترقية للوصول إلى هذه الميزة."
+
+msgid "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "تتطلب إدارة دورة حياة الحاويات ترخيص SysManage Professional+. يرجى الترقية للوصول إلى هذه الميزة."
+
+msgid "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "تتطلب إدارة الأسرار ترخيص SysManage Professional+. يرجى الترقية للوصول إلى هذه الميزة."
+
+msgid "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "يتطلب نشر الأسرار ترخيص SysManage Professional+. يرجى الترقية للوصول إلى هذه الميزة."
+
+msgid "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "يتطلب إنشاء التقارير ترخيص SysManage Professional+. يرجى الترقية للوصول إلى هذه الميزة."
+
+msgid "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
+msgstr "يتطلب تصدير سجل التدقيق ترخيص SysManage Professional+. يرجى الترقية للوصول إلى تنسيقات التصدير CSV وJSON وCEF وLEEF."
+
+msgid "Use /api/v1/audit/export with Pro+ license"
+msgstr "استخدم /api/v1/audit/export مع ترخيص Pro+"
+
+msgid "Child host not found"
+msgstr "لم يتم العثور على المضيف الفرعي"
+
+msgid "Child host refresh requested"
+msgstr "تم طلب تحديث المضيف الفرعي"
+
+msgid "Report"
+msgstr "تقرير"
+
+# Pro+ redirect messages
+msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"
+msgstr "استخدم /api/v1/reports/view/{report_type} مع ترخيص Pro+"
+
+msgid "Use /api/v1/reports/generate/{report_type} with Pro+ license"
+msgstr "استخدم /api/v1/reports/generate/{report_type} مع ترخيص Pro+"
+
+msgid "Use /api/v1/secrets with Pro+ license"
+msgstr "استخدم /api/v1/secrets مع ترخيص Pro+"
+
+msgid "Use /api/v1/secrets/{secret_id} with Pro+ license"
+msgstr "استخدم /api/v1/secrets/{secret_id} مع ترخيص Pro+"
+
+msgid "Use /api/v1/secrets/{secret_id}/content with Pro+ license"
+msgstr "استخدم /api/v1/secrets/{secret_id}/content مع ترخيص Pro+"
+
+msgid "Use /api/v1/secrets/ssh-keys with Pro+ license"
+msgstr "استخدم /api/v1/secrets/ssh-keys مع ترخيص Pro+"
+
+msgid "Use /api/v1/secrets/types with Pro+ license"
+msgstr "استخدم /api/v1/secrets/types مع ترخيص Pro+"
+
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr "استخدم /api/v1/secrets/deploy-ssh-keys مع ترخيص Pro+"
+
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr "استخدم /api/v1/secrets/deploy-certificates مع ترخيص Pro+"
+
+# Scheduled report delivery messages
+msgid "Scheduled report created successfully"
+msgstr "تم إنشاء التقرير المجدول بنجاح"
+
+msgid "Scheduled report updated successfully"
+msgstr "تم تحديث التقرير المجدول بنجاح"
+
+msgid "Scheduled report deleted successfully"
+msgstr "تم حذف التقرير المجدول بنجاح"
+
+msgid "Scheduled report not found"
+msgstr "التقرير المجدول غير موجود"
+
+msgid "Scheduled report executed successfully"
+msgstr "تم تنفيذ التقرير المجدول بنجاح"
+
+msgid "Invalid schedule type"
+msgstr "نوع الجدولة غير صالح"
+
+msgid "Invalid output format"
+msgstr "تنسيق الإخراج غير صالح"
+
+# Audit retention policy messages
+msgid "Retention policy created successfully"
+msgstr "تم إنشاء سياسة الاحتفاظ بنجاح"
+
+msgid "Retention policy updated successfully"
+msgstr "تم تحديث سياسة الاحتفاظ بنجاح"
+
+msgid "Retention policy deleted successfully"
+msgstr "تم حذف سياسة الاحتفاظ بنجاح"
+
+msgid "Retention policy not found"
+msgstr "سياسة الاحتفاظ غير موجودة"
+
+msgid "Retention policy executed successfully"
+msgstr "تم تنفيذ سياسة الاحتفاظ بنجاح"
+
+msgid "Retention days must be between 1 and 3650"
+msgstr "يجب أن تكون أيام الاحتفاظ بين 1 و 3650"
+
+msgid "Invalid retention action"
+msgstr "إجراء الاحتفاظ غير صالح"
+
+# Audit archival messages
+msgid "Audit entries archived successfully"
+msgstr "تم أرشفة إدخالات التدقيق بنجاح"
+
+msgid "Audit entries deleted by retention policy"
+msgstr "تم حذف إدخالات التدقيق بواسطة سياسة الاحتفاظ"
+
+msgid "No audit entries matched the retention criteria"
+msgstr "لم تتطابق أي إدخالات تدقيق مع معايير الاحتفاظ"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/reports/schedules with Pro+ license"
+msgstr "استخدم /api/v1/reports/schedules مع ترخيص Pro+"
+
+msgid "Use /api/v1/audit/retention-policies with Pro+ license"
+msgstr "استخدم /api/v1/audit/retention-policies مع ترخيص Pro+"
+
+msgid "Use /api/v1/audit/archive with Pro+ license"
+msgstr "استخدم /api/v1/audit/archive مع ترخيص Pro+"
+
+# Scheduled report delivery messages (new)
+msgid "Scheduled report delivered successfully"
+msgstr "تم تسليم التقرير المجدول بنجاح"
+
+msgid "Failed to deliver scheduled report"
+msgstr "فشل في تسليم التقرير المجدول"
+
+msgid "Report dispatch to channel failed"
+msgstr "فشل إرسال التقرير إلى القناة"
+
+# Secret deployment messages
+msgid "SSH keys deployed successfully"
+msgstr "تم نشر مفاتيح SSH بنجاح"
+
+msgid "Failed to deploy SSH keys"
+msgstr "فشل في نشر مفاتيح SSH"
+
+msgid "Certificates deployed successfully"
+msgstr "تم نشر الشهادات بنجاح"
+
+msgid "Failed to deploy certificates"
+msgstr "فشل في نشر الشهادات"
+
+msgid "Secret deployment queued"
+msgstr "تم وضع نشر السر في قائمة الانتظار"
+
+# Rotation schedule messages
+msgid "Rotation schedule created"
+msgstr "تم إنشاء جدول التدوير"
+
+msgid "Rotation schedule updated"
+msgstr "تم تحديث جدول التدوير"
+
+msgid "Rotation schedule deleted"
+msgstr "تم حذف جدول التدوير"
+
+msgid "Rotation schedule not found"
+msgstr "جدول التدوير غير موجود"
+
+msgid "Rotation executed successfully"
+msgstr "تم تنفيذ التدوير بنجاح"
+
+msgid "Failed to execute rotation"
+msgstr "فشل في تنفيذ التدوير"
+
+# Container action messages
+msgid "Container action queued"
+msgstr "تم وضع إجراء الحاوية في قائمة الانتظار"
+
+msgid "Container not found"
+msgstr "الحاوية غير موجودة"
+
+msgid "Container creation queued"
+msgstr "تم وضع إنشاء الحاوية في قائمة الانتظار"
+
+msgid "Parent host not found"
+msgstr "المضيف الأصلي غير موجود"
+
+msgid "Network configuration queued"
+msgstr "تم وضع تكوين الشبكة في قائمة الانتظار"
+
+msgid "Container started"
+msgstr "تم تشغيل الحاوية"
+
+msgid "Container stopped"
+msgstr "تم إيقاف الحاوية"
+
+msgid "Container restarted"
+msgstr "تم إعادة تشغيل الحاوية"
+
+msgid "Container deleted"
+msgstr "تم حذف الحاوية"
+
+# Integrity verification messages
+msgid "Integrity verification passed"
+msgstr "نجح التحقق من السلامة"
+
+msgid "Integrity verification failed"
+msgstr "فشل التحقق من السلامة"
+
+msgid "Integrity hash mismatch detected"
+msgstr "تم اكتشاف عدم تطابق في تجزئة السلامة"
+
+# Secret versioning messages
+msgid "Secret version created"
+msgstr "تم إنشاء إصدار السر"
+
+msgid "Secret not found"
+msgstr "السر غير موجود"
+
+msgid "Secret deleted successfully"
+msgstr "تم حذف السر بنجاح"
+
+msgid "Failed to retrieve secret content from vault"
+msgstr "فشل في استرداد محتوى السر من الخزنة"
+
+msgid "Failed to store secret in vault"
+msgstr "فشل في تخزين السر في الخزنة"
+
+msgid "Failed to update secret in vault"
+msgstr "فشل في تحديث السر في الخزنة"
+
+msgid "Deleted {count} secrets"
+msgstr "تم حذف {count} أسرار"
+
+# Pro+ redirect messages for new features (additional)
+msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
+msgstr "استخدم /api/v1/secrets/rotation-schedules مع ترخيص Pro+"
+
+msgid "Use /api/v1/containers/create with Pro+ license"
+msgstr "استخدم /api/v1/containers/create مع ترخيص Pro+"
+
+msgid "Use /api/v1/containers/{id}/action with Pro+ license"
+msgstr "استخدم /api/v1/containers/{id}/action مع ترخيص Pro+"
+
+msgid "Use /api/v1/containers/{id}/network with Pro+ license"
+msgstr "استخدم /api/v1/containers/{id}/network مع ترخيص Pro+"
+
+# Child host lifecycle control messages
+msgid "Child host start requested: %s"
+msgstr "تم طلب بدء تشغيل المضيف الفرعي: %s"
+
+msgid "Child host start requested"
+msgstr "تم طلب بدء تشغيل المضيف الفرعي"
+
+msgid "Child host stop requested: %s"
+msgstr "تم طلب إيقاف المضيف الفرعي: %s"
+
+msgid "Child host stop requested"
+msgstr "تم طلب إيقاف المضيف الفرعي"
+
+msgid "Child host restart requested: %s"
+msgstr "تم طلب إعادة تشغيل المضيف الفرعي: %s"
+
+msgid "Child host restart requested"
+msgstr "تم طلب إعادة تشغيل المضيف الفرعي"
+
+msgid "Child host deletion requested: %s"
+msgstr "تم طلب حذف المضيف الفرعي: %s"
+
+msgid "Child host deletion requested"
+msgstr "تم طلب حذف المضيف الفرعي"
+
+msgid "Distribution '%s %s' already exists for type '%s'"
+msgstr "التوزيعة '%s %s' موجودة بالفعل للنوع '%s'"
+
+msgid "Distribution deleted"
+msgstr "تم حذف التوزيعة"
+
+msgid "Source %s failed: %s"
+msgstr "فشل المصدر %s: %s"
+
+# Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
+#, python-format
+msgid "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "تتطلب إعادة التشغيل المنسقة ترخيص SysManage Professional+. يرجى الترقية للوصول إلى هذه الميزة."
+
+#, python-format
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgstr "لم يتم العثور على مضيفين فرعيين قيد التشغيل. استخدم نقطة نهاية إعادة التشغيل القياسية بدلاً من ذلك."
+
+#, python-format
+msgid "Orchestrated reboot initiated with %d running child host(s)"
+msgstr "تم بدء إعادة التشغيل المنسقة مع %d مضيف(مضيفين) فرعي(ين) قيد التشغيل"
+
+msgid "Reboot orchestration not found"
+msgstr "لم يتم العثور على تنسيق إعادة التشغيل"
+
+#, python-format
+msgid "%d of %d child host(s) failed to restart"
+msgstr "فشل %d من %d مضيف(مضيفين) فرعي(ين) في إعادة التشغيل"

@@ -712,6 +712,51 @@ msgstr "Роли безопасности пользователя (RBAC)"
 msgid "No security roles assigned"
 msgstr "Роли безопасности не назначены"
 
+msgid "IP Address"
+msgstr "IP-адрес"
+
+msgid "OS Version"
+msgstr "Версия ОС"
+
+msgid "IPv4 Ports"
+msgstr "Порты IPv4"
+
+msgid "IPv6 Ports"
+msgstr "Порты IPv6"
+
+msgid "Audit Log"
+msgstr "Журнал аудита"
+
+msgid "Total Entries"
+msgstr "Всего записей"
+
+msgid "No audit log entries found."
+msgstr "Записи журнала аудита не найдены."
+
+msgid "Timestamp"
+msgstr "Метка времени"
+
+msgid "Entity Type"
+msgstr "Тип сущности"
+
+msgid "Entity Name"
+msgstr "Имя сущности"
+
+msgid "Result"
+msgstr "Результат"
+
+msgid "Description"
+msgstr "Описание"
+
+msgid "System"
+msgstr "Система"
+
+msgid "Action"
+msgstr "Действие"
+
+msgid "User"
+msgstr "Пользователь"
+
 msgid "User not found"
 msgstr "Пользователь не найден"
 
@@ -840,22 +885,316 @@ msgstr "KVM/libvirt успешно инициализирован"
 # KVM Networking Configuration strings
 
 msgid "KVM networking is only supported on Linux hosts"
-msgstr "KVM networking is only supported on Linux hosts"
+msgstr "Сеть KVM поддерживается только на хостах Linux"
 
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr "Agent must be running with root privileges to configure KVM networking"
+msgstr "Агент должен быть запущен с правами root для настройки сети KVM"
 
 msgid "Bridge interface name is required for bridged networking mode"
-msgstr "Bridge interface name is required for bridged networking mode"
+msgstr "Имя интерфейса моста необходимо для режима мостовой сети"
 
 msgid "KVM networking configuration requested: %s mode"
-msgstr "KVM networking configuration requested: %s mode"
+msgstr "Запрошена настройка сети KVM: режим %s"
 
 msgid "KVM networking configuration requested. The agent will configure the %s network."
-msgstr "KVM networking configuration requested. The agent will configure the %s network."
+msgstr "Запрошена настройка сети KVM. Агент настроит сеть %s."
 
 msgid "KVM networks are only available on Linux hosts"
-msgstr "KVM networks are only available on Linux hosts"
+msgstr "Сети KVM доступны только на хостах Linux"
 
 msgid "KVM network list requested. Results will be returned shortly."
-msgstr "KVM network list requested. Results will be returned shortly."
+msgstr "Запрошен список сетей KVM. Результаты будут отображены в ближайшее время."
+
+# Pro+ feature gate messages
+msgid "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Управление контейнерами/ВМ требует лицензии SysManage Professional+. Обновите для доступа к этой функции."
+
+msgid "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Управление жизненным циклом контейнеров требует лицензии SysManage Professional+. Обновите для доступа к этой функции."
+
+msgid "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Управление секретами требует лицензии SysManage Professional+. Обновите для доступа к этой функции."
+
+msgid "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Развёртывание секретов требует лицензии SysManage Professional+. Обновите для доступа к этой функции."
+
+msgid "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Генерация отчётов требует лицензии SysManage Professional+. Обновите для доступа к этой функции."
+
+msgid "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
+msgstr "Экспорт журнала аудита требует лицензии SysManage Professional+. Обновите для доступа к форматам экспорта CSV, JSON, CEF и LEEF."
+
+msgid "Use /api/v1/audit/export with Pro+ license"
+msgstr "Используйте /api/v1/audit/export с лицензией Pro+"
+
+msgid "Child host not found"
+msgstr "Дочерний хост не найден"
+
+msgid "Child host refresh requested"
+msgstr "Запрошено обновление дочернего хоста"
+
+msgid "Report"
+msgstr "Отчёт"
+
+# Pro+ redirect messages
+msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"
+msgstr "Используйте /api/v1/reports/view/{report_type} с лицензией Pro+"
+
+msgid "Use /api/v1/reports/generate/{report_type} with Pro+ license"
+msgstr "Используйте /api/v1/reports/generate/{report_type} с лицензией Pro+"
+
+msgid "Use /api/v1/secrets with Pro+ license"
+msgstr "Используйте /api/v1/secrets с лицензией Pro+"
+
+msgid "Use /api/v1/secrets/{secret_id} with Pro+ license"
+msgstr "Используйте /api/v1/secrets/{secret_id} с лицензией Pro+"
+
+msgid "Use /api/v1/secrets/{secret_id}/content with Pro+ license"
+msgstr "Используйте /api/v1/secrets/{secret_id}/content с лицензией Pro+"
+
+msgid "Use /api/v1/secrets/ssh-keys with Pro+ license"
+msgstr "Используйте /api/v1/secrets/ssh-keys с лицензией Pro+"
+
+msgid "Use /api/v1/secrets/types with Pro+ license"
+msgstr "Используйте /api/v1/secrets/types с лицензией Pro+"
+
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr "Используйте /api/v1/secrets/deploy-ssh-keys с лицензией Pro+"
+
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr "Используйте /api/v1/secrets/deploy-certificates с лицензией Pro+"
+
+# Scheduled report delivery messages
+msgid "Scheduled report created successfully"
+msgstr "Запланированный отчёт успешно создан"
+
+msgid "Scheduled report updated successfully"
+msgstr "Запланированный отчёт успешно обновлён"
+
+msgid "Scheduled report deleted successfully"
+msgstr "Запланированный отчёт успешно удалён"
+
+msgid "Scheduled report not found"
+msgstr "Запланированный отчёт не найден"
+
+msgid "Scheduled report executed successfully"
+msgstr "Запланированный отчёт успешно выполнен"
+
+msgid "Invalid schedule type"
+msgstr "Недопустимый тип расписания"
+
+msgid "Invalid output format"
+msgstr "Недопустимый формат вывода"
+
+# Audit retention policy messages
+msgid "Retention policy created successfully"
+msgstr "Политика хранения успешно создана"
+
+msgid "Retention policy updated successfully"
+msgstr "Политика хранения успешно обновлена"
+
+msgid "Retention policy deleted successfully"
+msgstr "Политика хранения успешно удалена"
+
+msgid "Retention policy not found"
+msgstr "Политика хранения не найдена"
+
+msgid "Retention policy executed successfully"
+msgstr "Политика хранения успешно выполнена"
+
+msgid "Retention days must be between 1 and 3650"
+msgstr "Количество дней хранения должно быть от 1 до 3650"
+
+msgid "Invalid retention action"
+msgstr "Недопустимое действие хранения"
+
+# Audit archival messages
+msgid "Audit entries archived successfully"
+msgstr "Записи аудита успешно архивированы"
+
+msgid "Audit entries deleted by retention policy"
+msgstr "Записи аудита удалены политикой хранения"
+
+msgid "No audit entries matched the retention criteria"
+msgstr "Записи аудита, соответствующие критериям хранения, не найдены"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/reports/schedules with Pro+ license"
+msgstr "Используйте /api/v1/reports/schedules с лицензией Pro+"
+
+msgid "Use /api/v1/audit/retention-policies with Pro+ license"
+msgstr "Используйте /api/v1/audit/retention-policies с лицензией Pro+"
+
+msgid "Use /api/v1/audit/archive with Pro+ license"
+msgstr "Используйте /api/v1/audit/archive с лицензией Pro+"
+
+# Scheduled report delivery messages
+msgid "Scheduled report delivered successfully"
+msgstr "Запланированный отчёт успешно доставлен"
+
+msgid "Failed to deliver scheduled report"
+msgstr "Не удалось доставить запланированный отчёт"
+
+msgid "Report dispatch to channel failed"
+msgstr "Не удалось отправить отчёт в канал"
+
+# Secret deployment messages
+msgid "SSH keys deployed successfully"
+msgstr "SSH-ключи успешно развёрнуты"
+
+msgid "Failed to deploy SSH keys"
+msgstr "Не удалось развернуть SSH-ключи"
+
+msgid "Certificates deployed successfully"
+msgstr "Сертификаты успешно развёрнуты"
+
+msgid "Failed to deploy certificates"
+msgstr "Не удалось развернуть сертификаты"
+
+msgid "Secret deployment queued"
+msgstr "Развёртывание секрета поставлено в очередь"
+
+# Rotation schedule messages
+msgid "Rotation schedule created"
+msgstr "Расписание ротации создано"
+
+msgid "Rotation schedule updated"
+msgstr "Расписание ротации обновлено"
+
+msgid "Rotation schedule deleted"
+msgstr "Расписание ротации удалено"
+
+msgid "Rotation schedule not found"
+msgstr "Расписание ротации не найдено"
+
+msgid "Rotation executed successfully"
+msgstr "Ротация успешно выполнена"
+
+msgid "Failed to execute rotation"
+msgstr "Не удалось выполнить ротацию"
+
+# Container action messages
+msgid "Container action queued"
+msgstr "Действие контейнера поставлено в очередь"
+
+msgid "Container not found"
+msgstr "Контейнер не найден"
+
+msgid "Container creation queued"
+msgstr "Создание контейнера поставлено в очередь"
+
+msgid "Parent host not found"
+msgstr "Родительский хост не найден"
+
+msgid "Network configuration queued"
+msgstr "Настройка сети поставлена в очередь"
+
+msgid "Container started"
+msgstr "Контейнер запущен"
+
+msgid "Container stopped"
+msgstr "Контейнер остановлен"
+
+msgid "Container restarted"
+msgstr "Контейнер перезапущен"
+
+msgid "Container deleted"
+msgstr "Контейнер удалён"
+
+# Integrity verification messages
+msgid "Integrity verification passed"
+msgstr "Проверка целостности пройдена"
+
+msgid "Integrity verification failed"
+msgstr "Проверка целостности не пройдена"
+
+msgid "Integrity hash mismatch detected"
+msgstr "Обнаружено несоответствие хеша целостности"
+
+# Secret versioning messages
+msgid "Secret version created"
+msgstr "Версия секрета создана"
+
+msgid "Secret not found"
+msgstr "Секрет не найден"
+
+msgid "Secret deleted successfully"
+msgstr "Секрет успешно удалён"
+
+msgid "Failed to retrieve secret content from vault"
+msgstr "Не удалось получить содержимое секрета из хранилища"
+
+msgid "Failed to store secret in vault"
+msgstr "Не удалось сохранить секрет в хранилище"
+
+msgid "Failed to update secret in vault"
+msgstr "Не удалось обновить секрет в хранилище"
+
+msgid "Deleted {count} secrets"
+msgstr "Удалено секретов: {count}"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
+msgstr "Используйте /api/v1/secrets/rotation-schedules с лицензией Pro+"
+
+msgid "Use /api/v1/containers/create with Pro+ license"
+msgstr "Используйте /api/v1/containers/create с лицензией Pro+"
+
+msgid "Use /api/v1/containers/{id}/action with Pro+ license"
+msgstr "Используйте /api/v1/containers/{id}/action с лицензией Pro+"
+
+msgid "Use /api/v1/containers/{id}/network with Pro+ license"
+msgstr "Используйте /api/v1/containers/{id}/network с лицензией Pro+"
+
+# Child host lifecycle control messages
+msgid "Child host start requested: %s"
+msgstr "Запрошен запуск дочернего хоста: %s"
+
+msgid "Child host start requested"
+msgstr "Запрошен запуск дочернего хоста"
+
+msgid "Child host stop requested: %s"
+msgstr "Запрошена остановка дочернего хоста: %s"
+
+msgid "Child host stop requested"
+msgstr "Запрошена остановка дочернего хоста"
+
+msgid "Child host restart requested: %s"
+msgstr "Запрошен перезапуск дочернего хоста: %s"
+
+msgid "Child host restart requested"
+msgstr "Запрошен перезапуск дочернего хоста"
+
+msgid "Child host deletion requested: %s"
+msgstr "Запрошено удаление дочернего хоста: %s"
+
+msgid "Child host deletion requested"
+msgstr "Запрошено удаление дочернего хоста"
+
+msgid "Distribution '%s %s' already exists for type '%s'"
+msgstr "Дистрибутив '%s %s' уже существует для типа '%s'"
+
+msgid "Distribution deleted"
+msgstr "Дистрибутив удалён"
+
+msgid "Source %s failed: %s"
+msgstr "Источник %s не удался: %s"
+
+# Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
+#, python-format
+msgid "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Оркестрированная перезагрузка требует лицензии SysManage Professional+. Обновите для доступа к этой функции."
+
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgstr "Запущенные дочерние хосты не найдены. Используйте стандартную конечную точку перезагрузки."
+
+#, python-format
+msgid "Orchestrated reboot initiated with %d running child host(s)"
+msgstr "Оркестрированная перезагрузка инициирована с %d запущенным(и) дочерним(и) хостом(ами)"
+
+msgid "Reboot orchestration not found"
+msgstr "Оркестрация перезагрузки не найдена"
+
+#, python-format
+msgid "%d of %d child host(s) failed to restart"
+msgstr "%d из %d дочерних хостов не удалось перезапустить"

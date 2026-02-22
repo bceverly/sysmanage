@@ -702,6 +702,51 @@ msgstr "Benutzersicherheitsrollen (RBAC)"
 msgid "No security roles assigned"
 msgstr "Keine Sicherheitsrollen zugewiesen"
 
+msgid "IP Address"
+msgstr "IP-Adresse"
+
+msgid "OS Version"
+msgstr "BS-Version"
+
+msgid "IPv4 Ports"
+msgstr "IPv4-Ports"
+
+msgid "IPv6 Ports"
+msgstr "IPv6-Ports"
+
+msgid "Audit Log"
+msgstr "Auditprotokoll"
+
+msgid "Total Entries"
+msgstr "Einträge gesamt"
+
+msgid "No audit log entries found."
+msgstr "Keine Auditprotokolleinträge gefunden."
+
+msgid "Timestamp"
+msgstr "Zeitstempel"
+
+msgid "Entity Type"
+msgstr "Entitätstyp"
+
+msgid "Entity Name"
+msgstr "Entitätsname"
+
+msgid "Result"
+msgstr "Ergebnis"
+
+msgid "Description"
+msgstr "Beschreibung"
+
+msgid "System"
+msgstr "System"
+
+msgid "Action"
+msgstr "Aktion"
+
+msgid "User"
+msgstr "Benutzer"
+
 msgid "User not found"
 msgstr "Benutzer nicht gefunden"
 
@@ -830,22 +875,322 @@ msgstr "KVM/libvirt erfolgreich initialisiert"
 # KVM Networking Configuration strings
 
 msgid "KVM networking is only supported on Linux hosts"
-msgstr "KVM networking is only supported on Linux hosts"
+msgstr "KVM-Netzwerk wird nur auf Linux-Hosts unterstützt"
 
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr "Agent must be running with root privileges to configure KVM networking"
+msgstr "Der Agent muss mit Root-Rechten ausgeführt werden, um KVM-Netzwerk zu konfigurieren"
 
 msgid "Bridge interface name is required for bridged networking mode"
-msgstr "Bridge interface name is required for bridged networking mode"
+msgstr "Der Name der Bridge-Schnittstelle ist für den Bridge-Netzwerkmodus erforderlich"
 
 msgid "KVM networking configuration requested: %s mode"
-msgstr "KVM networking configuration requested: %s mode"
+msgstr "KVM-Netzwerkkonfiguration angefordert: %s-Modus"
 
 msgid "KVM networking configuration requested. The agent will configure the %s network."
-msgstr "KVM networking configuration requested. The agent will configure the %s network."
+msgstr "KVM-Netzwerkkonfiguration angefordert. Der Agent wird das %s-Netzwerk konfigurieren."
 
 msgid "KVM networks are only available on Linux hosts"
-msgstr "KVM networks are only available on Linux hosts"
+msgstr "KVM-Netzwerke sind nur auf Linux-Hosts verfügbar"
 
 msgid "KVM network list requested. Results will be returned shortly."
-msgstr "KVM network list requested. Results will be returned shortly."
+msgstr "KVM-Netzwerkliste angefordert. Die Ergebnisse werden in Kürze angezeigt."
+
+# Pro+ feature gate messages
+msgid "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Container/VM-Verwaltung erfordert eine SysManage Professional+-Lizenz. Bitte upgraden Sie, um auf diese Funktion zuzugreifen."
+
+msgid "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Container-Lebenszyklusverwaltung erfordert eine SysManage Professional+-Lizenz. Bitte upgraden Sie, um auf diese Funktion zuzugreifen."
+
+msgid "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Geheimnisverwaltung erfordert eine SysManage Professional+-Lizenz. Bitte upgraden Sie, um auf diese Funktion zuzugreifen."
+
+msgid "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Geheimnisbereitstellung erfordert eine SysManage Professional+-Lizenz. Bitte upgraden Sie, um auf diese Funktion zuzugreifen."
+
+msgid "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Berichtsgenerierung erfordert eine SysManage Professional+-Lizenz. Bitte upgraden Sie, um auf diese Funktion zuzugreifen."
+
+msgid "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
+msgstr "Der Export des Audit-Protokolls erfordert eine SysManage Professional+-Lizenz. Bitte upgraden Sie, um auf die Exportformate CSV, JSON, CEF und LEEF zuzugreifen."
+
+msgid "Use /api/v1/audit/export with Pro+ license"
+msgstr "Verwenden Sie /api/v1/audit/export mit Pro+-Lizenz"
+
+msgid "Child host not found"
+msgstr "Kind-Host nicht gefunden"
+
+msgid "Child host refresh requested"
+msgstr "Aktualisierung des Kind-Hosts angefordert"
+
+msgid "Report"
+msgstr "Bericht"
+
+# Pro+ redirect messages
+msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"
+msgstr "Verwenden Sie /api/v1/reports/view/{report_type} mit Pro+-Lizenz"
+
+msgid "Use /api/v1/reports/generate/{report_type} with Pro+ license"
+msgstr "Verwenden Sie /api/v1/reports/generate/{report_type} mit Pro+-Lizenz"
+
+msgid "Use /api/v1/secrets with Pro+ license"
+msgstr "Verwenden Sie /api/v1/secrets mit Pro+-Lizenz"
+
+msgid "Use /api/v1/secrets/{secret_id} with Pro+ license"
+msgstr "Verwenden Sie /api/v1/secrets/{secret_id} mit Pro+-Lizenz"
+
+msgid "Use /api/v1/secrets/{secret_id}/content with Pro+ license"
+msgstr "Verwenden Sie /api/v1/secrets/{secret_id}/content mit Pro+-Lizenz"
+
+msgid "Use /api/v1/secrets/ssh-keys with Pro+ license"
+msgstr "Verwenden Sie /api/v1/secrets/ssh-keys mit Pro+-Lizenz"
+
+msgid "Use /api/v1/secrets/types with Pro+ license"
+msgstr "Verwenden Sie /api/v1/secrets/types mit Pro+-Lizenz"
+
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr "Verwenden Sie /api/v1/secrets/deploy-ssh-keys mit Pro+-Lizenz"
+
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr "Verwenden Sie /api/v1/secrets/deploy-certificates mit Pro+-Lizenz"
+
+# Scheduled report delivery messages
+msgid "Scheduled report created successfully"
+msgstr "Geplanter Bericht erfolgreich erstellt"
+
+msgid "Scheduled report updated successfully"
+msgstr "Geplanter Bericht erfolgreich aktualisiert"
+
+msgid "Scheduled report deleted successfully"
+msgstr "Geplanter Bericht erfolgreich gelöscht"
+
+msgid "Scheduled report not found"
+msgstr "Geplanter Bericht nicht gefunden"
+
+msgid "Scheduled report executed successfully"
+msgstr "Geplanter Bericht erfolgreich ausgeführt"
+
+msgid "Invalid schedule type"
+msgstr "Ungültiger Planungstyp"
+
+msgid "Invalid output format"
+msgstr "Ungültiges Ausgabeformat"
+
+# Audit retention policy messages
+msgid "Retention policy created successfully"
+msgstr "Aufbewahrungsrichtlinie erfolgreich erstellt"
+
+msgid "Retention policy updated successfully"
+msgstr "Aufbewahrungsrichtlinie erfolgreich aktualisiert"
+
+msgid "Retention policy deleted successfully"
+msgstr "Aufbewahrungsrichtlinie erfolgreich gelöscht"
+
+msgid "Retention policy not found"
+msgstr "Aufbewahrungsrichtlinie nicht gefunden"
+
+msgid "Retention policy executed successfully"
+msgstr "Aufbewahrungsrichtlinie erfolgreich ausgeführt"
+
+msgid "Retention days must be between 1 and 3650"
+msgstr "Die Aufbewahrungstage müssen zwischen 1 und 3650 liegen"
+
+msgid "Invalid retention action"
+msgstr "Ungültige Aufbewahrungsaktion"
+
+# Audit archival messages
+msgid "Audit entries archived successfully"
+msgstr "Audit-Einträge erfolgreich archiviert"
+
+msgid "Audit entries deleted by retention policy"
+msgstr "Audit-Einträge durch Aufbewahrungsrichtlinie gelöscht"
+
+msgid "No audit entries matched the retention criteria"
+msgstr "Keine Audit-Einträge entsprachen den Aufbewahrungskriterien"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/reports/schedules with Pro+ license"
+msgstr "Verwenden Sie /api/v1/reports/schedules mit Pro+-Lizenz"
+
+msgid "Use /api/v1/audit/retention-policies with Pro+ license"
+msgstr "Verwenden Sie /api/v1/audit/retention-policies mit Pro+-Lizenz"
+
+msgid "Use /api/v1/audit/archive with Pro+ license"
+msgstr "Verwenden Sie /api/v1/audit/archive mit Pro+-Lizenz"
+
+# Scheduled report delivery messages
+msgid "Scheduled report delivered successfully"
+msgstr "Geplanter Bericht erfolgreich zugestellt"
+
+msgid "Failed to deliver scheduled report"
+msgstr "Zustellung des geplanten Berichts fehlgeschlagen"
+
+msgid "Report dispatch to channel failed"
+msgstr "Berichtsversand an den Kanal fehlgeschlagen"
+
+# Secret deployment messages
+msgid "SSH keys deployed successfully"
+msgstr "SSH-Schlüssel erfolgreich bereitgestellt"
+
+msgid "Failed to deploy SSH keys"
+msgstr "Bereitstellung der SSH-Schlüssel fehlgeschlagen"
+
+msgid "Certificates deployed successfully"
+msgstr "Zertifikate erfolgreich bereitgestellt"
+
+msgid "Failed to deploy certificates"
+msgstr "Bereitstellung der Zertifikate fehlgeschlagen"
+
+msgid "Secret deployment queued"
+msgstr "Geheimnisbereitstellung in Warteschlange eingereiht"
+
+# Rotation schedule messages
+msgid "Rotation schedule created"
+msgstr "Rotationsplan erstellt"
+
+msgid "Rotation schedule updated"
+msgstr "Rotationsplan aktualisiert"
+
+msgid "Rotation schedule deleted"
+msgstr "Rotationsplan gelöscht"
+
+msgid "Rotation schedule not found"
+msgstr "Rotationsplan nicht gefunden"
+
+msgid "Rotation executed successfully"
+msgstr "Rotation erfolgreich ausgeführt"
+
+msgid "Failed to execute rotation"
+msgstr "Ausführung der Rotation fehlgeschlagen"
+
+# Container action messages
+msgid "Container action queued"
+msgstr "Container-Aktion in Warteschlange eingereiht"
+
+msgid "Container not found"
+msgstr "Container nicht gefunden"
+
+msgid "Container creation queued"
+msgstr "Container-Erstellung in Warteschlange eingereiht"
+
+msgid "Parent host not found"
+msgstr "Übergeordneter Host nicht gefunden"
+
+msgid "Network configuration queued"
+msgstr "Netzwerkkonfiguration in Warteschlange eingereiht"
+
+msgid "Container started"
+msgstr "Container gestartet"
+
+msgid "Container stopped"
+msgstr "Container gestoppt"
+
+msgid "Container restarted"
+msgstr "Container neu gestartet"
+
+msgid "Container deleted"
+msgstr "Container gelöscht"
+
+# Integrity verification messages
+msgid "Integrity verification passed"
+msgstr "Integritätsprüfung bestanden"
+
+msgid "Integrity verification failed"
+msgstr "Integritätsprüfung fehlgeschlagen"
+
+msgid "Integrity hash mismatch detected"
+msgstr "Abweichung beim Integritäts-Hash erkannt"
+
+# Secret versioning messages
+msgid "Secret version created"
+msgstr "Geheimnisversion erstellt"
+
+msgid "Secret not found"
+msgstr "Geheimnis nicht gefunden"
+
+msgid "Secret deleted successfully"
+msgstr "Geheimnis erfolgreich gelöscht"
+
+msgid "Failed to retrieve secret content from vault"
+msgstr "Fehler beim Abrufen des Geheimnissinhalts aus dem Tresor"
+
+msgid "Failed to store secret in vault"
+msgstr "Fehler beim Speichern des Geheimnisses im Tresor"
+
+msgid "Failed to update secret in vault"
+msgstr "Fehler beim Aktualisieren des Geheimnisses im Tresor"
+
+msgid "Deleted {count} secrets"
+msgstr "{count} Geheimnisse gelöscht"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr "Verwenden Sie /api/v1/secrets/deploy-ssh-keys mit Pro+-Lizenz"
+
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr "Verwenden Sie /api/v1/secrets/deploy-certificates mit Pro+-Lizenz"
+
+msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
+msgstr "Verwenden Sie /api/v1/secrets/rotation-schedules mit Pro+-Lizenz"
+
+msgid "Use /api/v1/containers/create with Pro+ license"
+msgstr "Verwenden Sie /api/v1/containers/create mit Pro+-Lizenz"
+
+msgid "Use /api/v1/containers/{id}/action with Pro+ license"
+msgstr "Verwenden Sie /api/v1/containers/{id}/action mit Pro+-Lizenz"
+
+msgid "Use /api/v1/containers/{id}/network with Pro+ license"
+msgstr "Verwenden Sie /api/v1/containers/{id}/network mit Pro+-Lizenz"
+
+# Child host lifecycle control messages
+msgid "Child host start requested: %s"
+msgstr "Start des Kind-Hosts angefordert: %s"
+
+msgid "Child host start requested"
+msgstr "Start des Kind-Hosts angefordert"
+
+msgid "Child host stop requested: %s"
+msgstr "Stopp des Kind-Hosts angefordert: %s"
+
+msgid "Child host stop requested"
+msgstr "Stopp des Kind-Hosts angefordert"
+
+msgid "Child host restart requested: %s"
+msgstr "Neustart des Kind-Hosts angefordert: %s"
+
+msgid "Child host restart requested"
+msgstr "Neustart des Kind-Hosts angefordert"
+
+msgid "Child host deletion requested: %s"
+msgstr "Löschung des Kind-Hosts angefordert: %s"
+
+msgid "Child host deletion requested"
+msgstr "Löschung des Kind-Hosts angefordert"
+
+msgid "Distribution '%s %s' already exists for type '%s'"
+msgstr "Distribution '%s %s' existiert bereits für den Typ '%s'"
+
+msgid "Distribution deleted"
+msgstr "Distribution gelöscht"
+
+msgid "Source %s failed: %s"
+msgstr "Quelle %s fehlgeschlagen: %s"
+
+# Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
+#, python-format
+msgid "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Der orchestrierte Neustart erfordert eine SysManage Professional+-Lizenz. Bitte führen Sie ein Upgrade durch, um auf diese Funktion zuzugreifen."
+
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgstr "Keine laufenden Kind-Hosts gefunden. Verwenden Sie stattdessen den Standard-Neustart-Endpunkt."
+
+#, python-format
+msgid "Orchestrated reboot initiated with %d running child host(s)"
+msgstr "Orchestrierter Neustart eingeleitet mit %d laufenden Kind-Host(s)"
+
+msgid "Reboot orchestration not found"
+msgstr "Neustart-Orchestrierung nicht gefunden"
+
+#, python-format
+msgid "%d of %d child host(s) failed to restart"
+msgstr "%d von %d Kind-Host(s) konnten nicht neu gestartet werden"

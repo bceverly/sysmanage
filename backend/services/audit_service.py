@@ -5,6 +5,7 @@ This service provides functionality to log all user actions and system changes
 for compliance, security, and troubleshooting purposes.
 """
 
+import hashlib
 import uuid
 from datetime import datetime, timezone
 from enum import Enum
@@ -107,9 +108,25 @@ class AuditService:
         Returns:
             The created AuditLog entry
         """
+        entry_id = uuid.uuid4()
+        entry_timestamp = datetime.now(timezone.utc).replace(tzinfo=None)
+
+        # Compute integrity hash for tamper-evident logging
+        hash_parts = [
+            str(entry_id),
+            str(entry_timestamp),
+            str(user_id),
+            str(action_type.value),
+            str(entity_type.value),
+            str(entity_id),
+            str(description),
+            str(result.value),
+        ]
+        integrity_hash = hashlib.sha256("|".join(hash_parts).encode()).hexdigest()
+
         audit_entry = AuditLog(
-            id=uuid.uuid4(),
-            timestamp=datetime.now(timezone.utc).replace(tzinfo=None),
+            id=entry_id,
+            timestamp=entry_timestamp,
             user_id=user_id,
             username=username,
             action_type=action_type.value,
@@ -124,6 +141,7 @@ class AuditService:
             error_message=error_message,
             category=kwargs.get("category"),
             entry_type=kwargs.get("entry_type"),
+            integrity_hash=integrity_hash,
         )
 
         db.add(audit_entry)

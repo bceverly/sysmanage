@@ -43,13 +43,13 @@ export type UpdateSecretRequest = CreateSecretRequest;
 
 export const secretsService = {
   // Get all secrets
-  async getSecrets(): Promise<SecretResponse[]> {
+  async getSecrets(): Promise<SecretResponse[] | { licensed: false; secrets: never[] }> {
     const response = await axiosInstance.get('/api/secrets');
     return response.data;
   },
 
   // Get secret types
-  async getSecretTypes(): Promise<SecretTypesResponse> {
+  async getSecretTypes(): Promise<SecretTypesResponse | { licensed: false; types: never[] }> {
     const response = await axiosInstance.get('/api/secrets/types');
     return response.data;
   },

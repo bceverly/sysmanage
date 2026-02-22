@@ -77,6 +77,18 @@ class ModuleCode(str, Enum):
     # Alerting Modules
     ALERTING_ENGINE = "alerting_engine"
 
+    # Reporting Modules
+    REPORTING_ENGINE = "reporting_engine"
+
+    # Audit Modules
+    AUDIT_ENGINE = "audit_engine"
+
+    # Secrets Modules
+    SECRETS_ENGINE = "secrets_engine"
+
+    # Container Modules
+    CONTAINER_ENGINE = "container_engine"
+
     # Data Processing Modules
     LOG_ANALYZER = "log_analyzer"
     METRICS_AGGREGATOR = "metrics_aggregator"
@@ -143,6 +155,10 @@ TIER_MODULES = {
         ModuleCode.VULN_ENGINE,
         ModuleCode.COMPLIANCE_ENGINE,
         ModuleCode.ALERTING_ENGINE,
+        ModuleCode.REPORTING_ENGINE,
+        ModuleCode.AUDIT_ENGINE,
+        ModuleCode.SECRETS_ENGINE,
+        ModuleCode.CONTAINER_ENGINE,
         ModuleCode.PROPLUS_CORE,
     },
     LicenseTier.ENTERPRISE: {
@@ -151,6 +167,10 @@ TIER_MODULES = {
         ModuleCode.VULN_ENGINE,
         ModuleCode.COMPLIANCE_ENGINE,
         ModuleCode.ALERTING_ENGINE,
+        ModuleCode.REPORTING_ENGINE,
+        ModuleCode.AUDIT_ENGINE,
+        ModuleCode.SECRETS_ENGINE,
+        ModuleCode.CONTAINER_ENGINE,
         ModuleCode.PROPLUS_CORE,
         ModuleCode.PERFORMANCE_ANALYZER,
         ModuleCode.ANOMALY_DETECTOR,

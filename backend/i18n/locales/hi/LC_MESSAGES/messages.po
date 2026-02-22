@@ -708,6 +708,51 @@ msgstr "उपयोगकर्ता सुरक्षा भूमिका�
 msgid "No security roles assigned"
 msgstr "कोई सुरक्षा भूमिका नहीं सौंपी गई"
 
+msgid "IP Address"
+msgstr "IP पता"
+
+msgid "OS Version"
+msgstr "OS संस्करण"
+
+msgid "IPv4 Ports"
+msgstr "IPv4 पोर्ट"
+
+msgid "IPv6 Ports"
+msgstr "IPv6 पोर्ट"
+
+msgid "Audit Log"
+msgstr "ऑडिट लॉग"
+
+msgid "Total Entries"
+msgstr "कुल प्रविष्टियाँ"
+
+msgid "No audit log entries found."
+msgstr "कोई ऑडिट लॉग प्रविष्टियाँ नहीं मिलीं।"
+
+msgid "Timestamp"
+msgstr "टाइमस्टैम्प"
+
+msgid "Entity Type"
+msgstr "इकाई प्रकार"
+
+msgid "Entity Name"
+msgstr "इकाई नाम"
+
+msgid "Result"
+msgstr "परिणाम"
+
+msgid "Description"
+msgstr "विवरण"
+
+msgid "System"
+msgstr "सिस्टम"
+
+msgid "Action"
+msgstr "कार्रवाई"
+
+msgid "User"
+msgstr "उपयोगकर्ता"
+
 msgid "User not found"
 msgstr "उपयोगकर्ता नहीं मिला"
 
@@ -836,22 +881,317 @@ msgstr "KVM/libvirt सफलतापूर्वक इनिशियला�
 # KVM Networking Configuration strings
 
 msgid "KVM networking is only supported on Linux hosts"
-msgstr "KVM networking is only supported on Linux hosts"
+msgstr "KVM नेटवर्किंग केवल Linux होस्ट पर समर्थित है"
 
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr "Agent must be running with root privileges to configure KVM networking"
+msgstr "KVM नेटवर्किंग कॉन्फ़िगर करने के लिए एजेंट को रूट विशेषाधिकारों के साथ चलना चाहिए"
 
 msgid "Bridge interface name is required for bridged networking mode"
-msgstr "Bridge interface name is required for bridged networking mode"
+msgstr "ब्रिज नेटवर्किंग मोड के लिए ब्रिज इंटरफ़ेस नाम आवश्यक है"
 
 msgid "KVM networking configuration requested: %s mode"
-msgstr "KVM networking configuration requested: %s mode"
+msgstr "KVM नेटवर्क कॉन्फ़िगरेशन का अनुरोध किया गया: %s मोड"
 
 msgid "KVM networking configuration requested. The agent will configure the %s network."
-msgstr "KVM networking configuration requested. The agent will configure the %s network."
+msgstr "KVM नेटवर्क कॉन्फ़िगरेशन का अनुरोध किया गया। एजेंट %s नेटवर्क को कॉन्फ़िगर करेगा।"
 
 msgid "KVM networks are only available on Linux hosts"
-msgstr "KVM networks are only available on Linux hosts"
+msgstr "KVM नेटवर्क केवल Linux होस्ट पर उपलब्ध हैं"
 
 msgid "KVM network list requested. Results will be returned shortly."
-msgstr "KVM network list requested. Results will be returned shortly."
+msgstr "KVM नेटवर्क सूची का अनुरोध किया गया। परिणाम शीघ्र ही प्रदर्शित होंगे।"
+
+# Pro+ feature gate messages
+msgid "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "कंटेनर/VM प्रबंधन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा तक पहुँचने के लिए कृपया अपग्रेड करें।"
+
+msgid "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "कंटेनर जीवनचक्र प्रबंधन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा तक पहुँचने के लिए कृपया अपग्रेड करें।"
+
+msgid "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "सीक्रेट प्रबंधन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा तक पहुँचने के लिए कृपया अपग्रेड करें।"
+
+msgid "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "सीक्रेट डिप्लॉयमेंट के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा तक पहुँचने के लिए कृपया अपग्रेड करें।"
+
+msgid "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "रिपोर्ट जनरेशन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा तक पहुँचने के लिए कृपया अपग्रेड करें।"
+
+msgid "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
+msgstr "ऑडिट लॉग निर्यात के लिए SysManage Professional+ लाइसेंस आवश्यक है। CSV, JSON, CEF और LEEF निर्यात प्रारूपों तक पहुँचने के लिए कृपया अपग्रेड करें।"
+
+msgid "Use /api/v1/audit/export with Pro+ license"
+msgstr "/api/v1/audit/export का उपयोग Pro+ लाइसेंस के साथ करें"
+
+msgid "Child host not found"
+msgstr "चाइल्ड होस्ट नहीं मिला"
+
+msgid "Child host refresh requested"
+msgstr "चाइल्ड होस्ट रिफ्रेश का अनुरोध किया गया"
+
+msgid "Report"
+msgstr "रिपोर्ट"
+
+# Pro+ redirect messages
+msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/reports/view/{report_type} का उपयोग करें"
+
+msgid "Use /api/v1/reports/generate/{report_type} with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/reports/generate/{report_type} का उपयोग करें"
+
+msgid "Use /api/v1/secrets with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/secrets का उपयोग करें"
+
+msgid "Use /api/v1/secrets/{secret_id} with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/secrets/{secret_id} का उपयोग करें"
+
+msgid "Use /api/v1/secrets/{secret_id}/content with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/secrets/{secret_id}/content का उपयोग करें"
+
+msgid "Use /api/v1/secrets/ssh-keys with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/secrets/ssh-keys का उपयोग करें"
+
+msgid "Use /api/v1/secrets/types with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/secrets/types का उपयोग करें"
+
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/secrets/deploy-ssh-keys का उपयोग करें"
+
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/secrets/deploy-certificates का उपयोग करें"
+
+# Scheduled report delivery messages
+msgid "Scheduled report created successfully"
+msgstr "शेड्यूल की गई रिपोर्ट सफलतापूर्वक बनाई गई"
+
+msgid "Scheduled report updated successfully"
+msgstr "शेड्यूल की गई रिपोर्ट सफलतापूर्वक अपडेट की गई"
+
+msgid "Scheduled report deleted successfully"
+msgstr "शेड्यूल की गई रिपोर्ट सफलतापूर्वक हटाई गई"
+
+msgid "Scheduled report not found"
+msgstr "शेड्यूल की गई रिपोर्ट नहीं मिली"
+
+msgid "Scheduled report executed successfully"
+msgstr "शेड्यूल की गई रिपोर्ट सफलतापूर्वक निष्पादित की गई"
+
+msgid "Invalid schedule type"
+msgstr "अमान्य शेड्यूल प्रकार"
+
+msgid "Invalid output format"
+msgstr "अमान्य आउटपुट प्रारूप"
+
+# Audit retention policy messages
+msgid "Retention policy created successfully"
+msgstr "प्रतिधारण नीति सफलतापूर्वक बनाई गई"
+
+msgid "Retention policy updated successfully"
+msgstr "प्रतिधारण नीति सफलतापूर्वक अपडेट की गई"
+
+msgid "Retention policy deleted successfully"
+msgstr "प्रतिधारण नीति सफलतापूर्वक हटाई गई"
+
+msgid "Retention policy not found"
+msgstr "प्रतिधारण नीति नहीं मिली"
+
+msgid "Retention policy executed successfully"
+msgstr "प्रतिधारण नीति सफलतापूर्वक निष्पादित की गई"
+
+msgid "Retention days must be between 1 and 3650"
+msgstr "प्रतिधारण दिन 1 और 3650 के बीच होने चाहिए"
+
+msgid "Invalid retention action"
+msgstr "अमान्य प्रतिधारण कार्रवाई"
+
+# Audit archival messages
+msgid "Audit entries archived successfully"
+msgstr "ऑडिट प्रविष्टियाँ सफलतापूर्वक संग्रहीत की गईं"
+
+msgid "Audit entries deleted by retention policy"
+msgstr "प्रतिधारण नीति द्वारा ऑडिट प्रविष्टियाँ हटाई गईं"
+
+msgid "No audit entries matched the retention criteria"
+msgstr "कोई भी ऑडिट प्रविष्टि प्रतिधारण मानदंडों से मेल नहीं खाई"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/reports/schedules with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/reports/schedules का उपयोग करें"
+
+msgid "Use /api/v1/audit/retention-policies with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/audit/retention-policies का उपयोग करें"
+
+msgid "Use /api/v1/audit/archive with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/audit/archive का उपयोग करें"
+
+# Scheduled report delivery messages (new)
+msgid "Scheduled report delivered successfully"
+msgstr "शेड्यूल की गई रिपोर्ट सफलतापूर्वक वितरित की गई"
+
+msgid "Failed to deliver scheduled report"
+msgstr "शेड्यूल की गई रिपोर्ट वितरित करने में विफल"
+
+msgid "Report dispatch to channel failed"
+msgstr "चैनल को रिपोर्ट भेजने में विफल"
+
+# Secret deployment messages
+msgid "SSH keys deployed successfully"
+msgstr "SSH कुंजियाँ सफलतापूर्वक तैनात की गईं"
+
+msgid "Failed to deploy SSH keys"
+msgstr "SSH कुंजियाँ तैनात करने में विफल"
+
+msgid "Certificates deployed successfully"
+msgstr "प्रमाणपत्र सफलतापूर्वक तैनात किए गए"
+
+msgid "Failed to deploy certificates"
+msgstr "प्रमाणपत्र तैनात करने में विफल"
+
+msgid "Secret deployment queued"
+msgstr "सीक्रेट डिप्लॉयमेंट कतार में है"
+
+# Rotation schedule messages
+msgid "Rotation schedule created"
+msgstr "रोटेशन शेड्यूल बनाया गया"
+
+msgid "Rotation schedule updated"
+msgstr "रोटेशन शेड्यूल अपडेट किया गया"
+
+msgid "Rotation schedule deleted"
+msgstr "रोटेशन शेड्यूल हटाया गया"
+
+msgid "Rotation schedule not found"
+msgstr "रोटेशन शेड्यूल नहीं मिला"
+
+msgid "Rotation executed successfully"
+msgstr "रोटेशन सफलतापूर्वक निष्पादित किया गया"
+
+msgid "Failed to execute rotation"
+msgstr "रोटेशन निष्पादित करने में विफल"
+
+# Container action messages
+msgid "Container action queued"
+msgstr "कंटेनर कार्रवाई कतार में है"
+
+msgid "Container not found"
+msgstr "कंटेनर नहीं मिला"
+
+msgid "Container creation queued"
+msgstr "कंटेनर निर्माण कतार में है"
+
+msgid "Parent host not found"
+msgstr "पैरेंट होस्ट नहीं मिला"
+
+msgid "Network configuration queued"
+msgstr "नेटवर्क कॉन्फ़िगरेशन कतार में है"
+
+msgid "Container started"
+msgstr "कंटेनर शुरू हुआ"
+
+msgid "Container stopped"
+msgstr "कंटेनर रुका"
+
+msgid "Container restarted"
+msgstr "कंटेनर पुनः आरंभ हुआ"
+
+msgid "Container deleted"
+msgstr "कंटेनर हटाया गया"
+
+# Integrity verification messages
+msgid "Integrity verification passed"
+msgstr "अखंडता सत्यापन सफल"
+
+msgid "Integrity verification failed"
+msgstr "अखंडता सत्यापन विफल"
+
+msgid "Integrity hash mismatch detected"
+msgstr "अखंडता हैश बेमेल पाया गया"
+
+# Secret versioning messages
+msgid "Secret version created"
+msgstr "सीक्रेट संस्करण बनाया गया"
+
+msgid "Secret not found"
+msgstr "सीक्रेट नहीं मिला"
+
+msgid "Secret deleted successfully"
+msgstr "गोपनीय सफलतापूर्वक हटा दिया गया"
+
+msgid "Failed to retrieve secret content from vault"
+msgstr "वॉल्ट से गोपनीय सामग्री प्राप्त करने में विफल"
+
+msgid "Failed to store secret in vault"
+msgstr "वॉल्ट में गोपनीय संग्रहित करने में विफल"
+
+msgid "Failed to update secret in vault"
+msgstr "वॉल्ट में गोपनीय अपडेट करने में विफल"
+
+msgid "Deleted {count} secrets"
+msgstr "{count} गोपनीय हटाए गए"
+
+# Pro+ redirect messages for new features (additional)
+msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/secrets/rotation-schedules का उपयोग करें"
+
+msgid "Use /api/v1/containers/create with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/containers/create का उपयोग करें"
+
+msgid "Use /api/v1/containers/{id}/action with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/containers/{id}/action का उपयोग करें"
+
+msgid "Use /api/v1/containers/{id}/network with Pro+ license"
+msgstr "Pro+ लाइसेंस के साथ /api/v1/containers/{id}/network का उपयोग करें"
+
+# Child host lifecycle control messages
+msgid "Child host start requested: %s"
+msgstr "चाइल्ड होस्ट शुरू करने का अनुरोध किया गया: %s"
+
+msgid "Child host start requested"
+msgstr "चाइल्ड होस्ट शुरू करने का अनुरोध किया गया"
+
+msgid "Child host stop requested: %s"
+msgstr "चाइल्ड होस्ट रोकने का अनुरोध किया गया: %s"
+
+msgid "Child host stop requested"
+msgstr "चाइल्ड होस्ट रोकने का अनुरोध किया गया"
+
+msgid "Child host restart requested: %s"
+msgstr "चाइल्ड होस्ट पुनः आरंभ करने का अनुरोध किया गया: %s"
+
+msgid "Child host restart requested"
+msgstr "चाइल्ड होस्ट पुनः आरंभ करने का अनुरोध किया गया"
+
+msgid "Child host deletion requested: %s"
+msgstr "चाइल्ड होस्ट हटाने का अनुरोध किया गया: %s"
+
+msgid "Child host deletion requested"
+msgstr "चाइल्ड होस्ट हटाने का अनुरोध किया गया"
+
+msgid "Distribution '%s %s' already exists for type '%s'"
+msgstr "वितरण '%s %s' प्रकार '%s' के लिए पहले से मौजूद है"
+
+msgid "Distribution deleted"
+msgstr "वितरण हटाया गया"
+
+msgid "Source %s failed: %s"
+msgstr "स्रोत %s विफल: %s"
+
+# Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
+#, python-format
+msgid "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "ऑर्केस्ट्रेटेड रीबूट के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा तक पहुँचने के लिए कृपया अपग्रेड करें।"
+
+#, python-format
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgstr "कोई चल रहे चाइल्ड होस्ट नहीं मिले। इसके बजाय मानक रीबूट एंडपॉइंट का उपयोग करें।"
+
+#, python-format
+msgid "Orchestrated reboot initiated with %d running child host(s)"
+msgstr "%d चल रहे चाइल्ड होस्ट(ओं) के साथ ऑर्केस्ट्रेटेड रीबूट शुरू किया गया"
+
+msgid "Reboot orchestration not found"
+msgstr "रीबूट ऑर्केस्ट्रेशन नहीं मिला"
+
+#, python-format
+msgid "%d of %d child host(s) failed to restart"
+msgstr "%d में से %d चाइल्ड होस्ट(ओं) को पुनः आरंभ करने में विफल"

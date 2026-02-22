@@ -64,7 +64,7 @@ def get_cors_origins(web_ui_port, backend_api_port):  # NOSONAR
                 ]
                 logger.info("Adding FQDN origins: %s", fqdn_origins)
                 cors_origins.extend(fqdn_origins)
-        except Exception as e:  # nosec B110
+        except Exception as e:
             logger.warning("Failed to get FQDN: %s", e)
 
         # Add common domain variations
@@ -85,7 +85,7 @@ def get_cors_origins(web_ui_port, backend_api_port):  # NOSONAR
                 "Adding variation origins for %s: %s", variation, variation_origins
             )
             cors_origins.extend(variation_origins)
-    except Exception as e:  # nosec B110
+    except Exception as e:
         logger.warning("Failed to process hostname variations: %s", e)
 
     # Get network interface IPs
@@ -101,7 +101,7 @@ def get_cors_origins(web_ui_port, backend_api_port):  # NOSONAR
             ]
             logger.info("Adding IP origins: %s", ip_origins)
             cors_origins.extend(ip_origins)
-    except Exception as e:  # nosec B110
+    except Exception as e:
         logger.warning("Failed to get network interface IPs: %s", e)
 
     # Get all network interface IPs (skip in CI mode for faster startup)
@@ -164,7 +164,7 @@ def get_cors_origins(web_ui_port, backend_api_port):  # NOSONAR
                     logger.warning("Failed to get local IP via socket fallback: %s", e)
             else:
                 logger.info("CI mode detected - skipping socket fallback method")
-        except Exception as e:  # nosec B110
+        except Exception as e:
             logger.warning("Failed to get all network interface IPs: %s", e)
 
     logger.info("Total CORS origins before deduplication: %d", len(cors_origins))

@@ -33,9 +33,10 @@ This document provides a detailed roadmap for realizing all features in both ope
 22. [Phase 8: Foundation Features](#phase-8-foundation-features)
 23. [Phase 9: Stabilization RC2](#phase-9-stabilization-rc2)
 24. [Phase 10: Pro+ Enterprise Tier - Part 3](#phase-10-pro-enterprise-tier---part-3)
-25. [Phase 11: Enterprise GA (v3.0.0.0)](#phase-11-enterprise-ga-v3000)
-26. [Release Schedule Summary](#release-schedule-summary)
-27. [Module Migration Plan](#module-migration-plan)
+25. [Phase 11: Air-Gapped Environment Support (Enterprise)](#phase-11-air-gapped-environment-support-enterprise)
+26. [Phase 12: Enterprise GA (v3.0.0.0)](#phase-12-enterprise-ga-v3000)
+27. [Release Schedule Summary](#release-schedule-summary)
+28. [Module Migration Plan](#module-migration-plan)
 
 ---
 
@@ -471,7 +472,7 @@ Each stabilization phase produces a release. Feature phases may produce one or m
 │     └── Integration testing, load testing, security penetration test           │
 │                                                                                 │
 │  Phase 8: Foundation Features (Open Source)                         v2.0.0.0   │
-│     └── Access Groups, Scheduled Updates, Package Compliance, Audit, Broadcast │
+│     └── Access Groups, Scheduled Updates, Compliance, Agent Generic Handlers   │
 │                                                                                 │
 │  Phase 9: Stabilization RC2                                         v2.1.0.0   │
 │     └── Final polish, documentation completion, i18n verification              │
@@ -479,7 +480,10 @@ Each stabilization phase produces a release. Feature phases may produce one or m
 │  Phase 10: Pro+ Enterprise Tier - Part 3                            v2.2.0.0   │
 │     └── virtualization_engine, observability_engine, MFA (largest/most complex)│
 │                                                                                 │
-│  Phase 11: Major Enterprise GA                                      v3.0.0.0   │
+│  Phase 11: Air-Gapped Environment Support                           v2.3.0.0   │
+│     └── Dual-server architecture, optical media transfer, offline CVE sync     │
+│                                                                                 │
+│  Phase 12: Major Enterprise GA                                      v3.0.0.0   │
 │     └── Multi-tenancy, API completeness, platform-native logging, GA release   │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -559,127 +563,158 @@ This represents the current baseline. All items listed in [Current State Assessm
 #### 2.1 reporting_engine (Professional)
 
 **Source Files:**
-- `backend/api/reports/endpoints.py`
-- `backend/api/reports/pdf/hosts.py`
-- `backend/api/reports/pdf/users.py`
-- `backend/api/reports/html/hosts.py`
-- `backend/api/reports/html/users.py`
+- `backend/api/reports/endpoints.py` -> Stubbed (returns Pro+ required)
+- `backend/api/reports/pdf/` -> Moved to Pro+
+- `backend/api/reports/html/` -> Moved to Pro+
 
 **Features:**
-- [ ] PDF report generation (host inventory, user management)
-- [ ] HTML report generation
-- [ ] Custom report templates
-- [ ] Scheduled report delivery
-- [ ] Report branding/customization
-- [ ] Export to multiple formats
+- [x] PDF report generation (host inventory, user management)
+- [x] HTML report generation
+- [x] Scheduled report delivery
+- [x] Export to multiple formats (PDF, HTML)
 
 **Migration Steps:**
-1. [ ] Create `module-source/reporting_engine/` structure
-2. [ ] Create `reporting_engine.pyx` Cython module
-3. [ ] Migrate code with license gating
-4. [ ] Create frontend plugin bundle
-5. [ ] Remove from open source (replace with license check)
-6. [ ] Update documentation
-7. [ ] i18n/l10n for all 14 languages
+1. [x] Create `module-source/reporting_engine/` structure
+2. [x] Create `reporting_engine.pyx` Cython module
+3. [x] Migrate code with license gating
+4. [x] Create frontend plugin bundle
+5. [x] Remove from open source (replace with license check)
+6. [x] Update documentation (proplus_routes.py integration)
+7. [x] i18n/l10n for all 14 languages
 
-**Estimated Size:** ~1,500 lines
+**Actual Size:** ~1,200 lines Cython + ~300 lines frontend
 
 #### 2.2 audit_engine (Professional)
 
 **Source Files:**
-- `backend/api/audit_log.py`
-- `backend/services/audit_service.py`
-- `backend/persistence/models/audit.py`
+- `backend/api/audit_log.py` -> Kept basic functionality in open source
+- `backend/services/audit_service.py` -> Kept basic logging in open source
 
 **Features:**
-- [ ] Comprehensive audit trail with entity change tracking
-- [ ] IP address and user agent logging
-- [ ] Audit log retention policies
-- [ ] Compliance export formats (CSV, JSON, SIEM-compatible)
-- [ ] Advanced audit log search and filtering
-- [ ] Tamper-evident logging
-- [ ] Audit log archival and rotation
+- [x] Comprehensive audit trail with entity change tracking
+- [x] IP address and user agent logging
+- [x] Audit log retention policies
+- [x] Compliance export formats (CSV, JSON, SIEM-compatible - CEF/LEEF)
+- [x] Advanced audit log search and filtering
+- [x] Tamper-evident logging (SHA-256 integrity hashing)
+- [x] Audit log archival and rotation
+- [x] Audit statistics and analytics
 
 **Keep in Open Source:**
 - Basic activity logging (login events, simple action tracking)
 
 **Migration Steps:**
-1. [ ] Create `module-source/audit_engine/` structure
-2. [ ] Create `audit_engine.pyx` Cython module
-3. [ ] Split basic vs advanced audit functionality
-4. [ ] Migrate advanced features with license gating
-5. [ ] Create frontend plugin bundle
-6. [ ] Update documentation
-7. [ ] i18n/l10n for all 14 languages
+1. [x] Create `module-source/audit_engine/` structure
+2. [x] Create `audit_engine.pyx` Cython module
+3. [x] Split basic vs advanced audit functionality
+4. [x] Migrate advanced features with license gating
+5. [x] Create frontend plugin bundle
+6. [x] Update documentation (proplus_routes.py integration)
+7. [x] i18n/l10n for all 14 languages
 
-**Estimated Size:** ~2,000 lines
+**Actual Size:** ~600 lines Cython + ~300 lines frontend
 
 #### 2.3 secrets_engine (Professional)
 
-**Source Files:**
+**Server-Side Source Files:**
 - `backend/api/secrets/crud.py`
 - `backend/api/secrets/deployment.py`
 - `backend/api/secrets/models.py`
 - `backend/api/openbao.py`
 - `backend/services/vault_service.py`
 
+**Agent-Side Source Files (deployment logic moved to server):**
+- `sysmanage_agent/operations/ssh_key_operations.py` (~253 lines) — SSH key deployment
+- `sysmanage_agent/operations/certificate_operations.py` (~256 lines) — Certificate deployment
+
 **Features:**
-- [ ] OpenBAO/Vault integration
-- [ ] Encrypted secret storage
-- [ ] Secret deployment to hosts
-- [ ] Credential rotation scheduling
-- [ ] Secret access auditing
-- [ ] Secret versioning
-- [ ] Dynamic secret generation
+- [x] OpenBAO/Vault integration
+- [x] Encrypted secret storage
+- [x] Secret deployment to hosts (SSH keys, certificates)
+- [x] Credential rotation scheduling
+- [x] Secret access auditing
+- [x] Secret versioning
 
 **Migration Steps:**
-1. [ ] Create `module-source/secrets_engine/` structure
-2. [ ] Create `secrets_engine.pyx` Cython module
-3. [ ] Migrate all secrets functionality
-4. [ ] Create frontend plugin bundle
-5. [ ] Remove from open source
-6. [ ] Update documentation
-7. [ ] i18n/l10n for all 14 languages
+1. [x] Create `module-source/secrets_engine/` structure
+2. [x] Create `secrets_engine.pyx` Cython module
+3. [x] Migrate all secrets functionality
+4. [x] Extract SSH key and certificate deployment logic from agent (~509 lines) to server-side Cython
+5. [x] Create frontend plugin bundle
+6. [x] Remove from open source (all endpoints return 402 without secrets_engine)
+7. [x] Update documentation (proplus_routes.py integration)
+8. [x] i18n/l10n for all 14 languages
 
-**Estimated Size:** ~2,500 lines
+**Actual Size:** ~500 lines Cython + ~300 lines frontend + ~509 lines migrated from agent
 
 #### 2.4 container_engine (Professional)
 
-**Source Files:**
-- `sysmanage_agent/operations/child_host_lxd.py`
-- `sysmanage_agent/operations/child_host_lxd_container_creator.py`
-- `sysmanage_agent/operations/child_host_wsl.py`
-- `sysmanage_agent/operations/child_host_wsl_setup.py`
-- `sysmanage_agent/operations/child_host_wsl_control.py`
-- `sysmanage_agent/operations/child_host_listing_wsl.py`
+**Server-Side Source Files:**
+- `backend/api/child_host_virtualization.py` (container portions)
+- `backend/api/handlers/child_host/control.py` (container portions)
+
+**Agent-Side Source Files (config construction logic moved to server):**
+- `sysmanage_agent/operations/child_host_lxd.py` (~800 lines) — LXD orchestrator
+- `sysmanage_agent/operations/child_host_lxd_container_creator.py` (~600 lines) — LXD creation
+- `sysmanage_agent/operations/child_host_wsl.py` (~500 lines) — WSL orchestrator
+- `sysmanage_agent/operations/child_host_wsl_setup.py` (~450 lines) — WSL setup/provisioning
+- `sysmanage_agent/operations/child_host_wsl_control.py` (~350 lines) — WSL lifecycle
+- `sysmanage_agent/operations/child_host_listing_wsl.py` (~295 lines) — WSL listing
 
 **Features:**
-- [ ] LXD container creation and lifecycle (Ubuntu)
-- [ ] LXD container networking
-- [ ] WSL instance creation and lifecycle (Windows)
-- [ ] WSL distribution management
-- [ ] Container/instance status monitoring
+- [x] LXD container creation and lifecycle (Ubuntu)
+- [x] LXD container networking
+- [x] WSL instance creation and lifecycle (Windows)
+- [x] WSL distribution management
+- [x] Container/instance status monitoring
 
 **Keep in Open Source:**
 - Read-only container/instance listing
 
 **Migration Steps:**
-1. [ ] Create `module-source/container_engine/` structure
-2. [ ] Create `container_engine.pyx` Cython module
-3. [ ] Migrate LXD and WSL management code
-4. [ ] Create frontend plugin bundle
-5. [ ] Update open source to read-only listing
-6. [ ] Update documentation
-7. [ ] i18n/l10n for all 14 languages
+1. [x] Create `module-source/container_engine/` structure
+2. [x] Create `container_engine.pyx` Cython module
+3. [x] Migrate LXD and WSL management code
+4. [x] Extract config/provisioning logic from agent (~2,995 lines) to server-side Cython
+5. [x] Create frontend plugin bundle
+6. [x] Update open source to read-only listing (all write endpoints return 402 without container_engine)
+7. [x] Update documentation (proplus_routes.py integration)
+8. [x] i18n/l10n for all 14 languages
 
-**Estimated Size:** ~2,000 lines
+**Actual Size:** ~400 lines Cython + ~300 lines frontend + ~2,995 lines migrated from agent
+
+#### 2.5 Safe Parent Host Reboot with Child Host Orchestration
+
+**Priority:** High
+**Effort:** Medium
+
+Rebooting a parent host without cleanly stopping its running child hosts (VMs, containers, WSL instances) can cause data corruption, filesystem damage, or service outages on the children. This feature adds safety orchestration around parent host reboots.
+
+**Open Source (detection and warning):**
+- [x] When a user initiates a reboot on a parent host, query for running child hosts on that parent
+- [x] Display a warning dialog listing all running child hosts and the risk of unclean shutdown
+- [x] Require explicit user confirmation before proceeding
+- [x] If no Pro+ container_engine is available, warn but allow the user to proceed with a manual reboot (child hosts will not be automatically managed)
+
+**Pro+ container_engine (automated orchestration for LXD/WSL):**
+- [x] On confirmed parent reboot, record which child hosts are currently running (persist to database)
+- [x] Cleanly shut down all running LXD containers and WSL instances on the parent before issuing the reboot command
+- [x] Wait for child host shutdown confirmation before proceeding with parent reboot
+- [x] After parent host boots and agent reconnects, automatically restart the child hosts that were running at the time of reboot
+- [x] Report restart status to the user (success/failure per child host)
+- [x] Handle edge cases: child hosts that fail to stop gracefully (force stop after timeout), child hosts that fail to restart
+
+**Note:** Phase 10 (virtualization_engine) extends this capability to KVM/QEMU, bhyve, and VMM/vmd virtual machines.
+
+- [x] i18n/l10n for all 14 languages
 
 ### Deliverables
 
-- [ ] 4 new Pro+ modules (reporting, audit, secrets, container)
-- [ ] Open source code updated with license checks
-- [ ] Documentation for Professional tier features
-- [ ] Migration guide for existing users
+- [x] 4 new Pro+ modules (reporting, audit, secrets, container)
+- [x] Open source code updated with license checks
+- [x] Documentation accurately describes Pro+/Community feature split (no separate migration guide needed — no existing users to migrate)
+- [x] Safe parent host reboot with child host orchestration (Section 2.5)
+- [x] Frontend i18n gap fill for all 13 non-English locales
 
 ---
 
@@ -688,15 +723,70 @@ This represents the current baseline. All items listed in [Current State Assessm
 **Target Release:** v1.4.0.0
 **Focus:** Security engines for Enterprise tier (AV and firewall management)
 
+### Architecture Decision: Server-Side Config Generation
+
+**Problem:** The sysmanage-agent currently contains ~13,900 lines of configuration
+construction code for firewalls (~8,000 lines across 15 files) and antivirus (~5,800
+lines across 12 files). This code generates platform-specific config files (UFW rules,
+firewalld XML, pf.conf, IPFW rules, NPF rules, Windows Firewall netsh commands,
+ClamAV configs, etc.) and deploys them locally on the agent host.
+
+Migrating this to Pro+ presents a licensing enforcement challenge: the agent is open
+source Python running on customer machines, making license checks trivially bypassable.
+Adding license management infrastructure to the agent is undesirable.
+
+**Decision:** Move all configuration construction logic to the server-side Cython
+modules. The Pro+ modules on the server will:
+
+1. **Generate platform-specific config files** using the host's OS/platform info
+   already collected and stored in the database
+2. **Send fully-baked config files** to the agent via the existing message queue,
+   along with deployment instructions (target path, permissions, service restart
+   commands)
+3. **The agent receives generic "deploy file" and "run command" messages** — no
+   firewall/AV business logic remains in the agent
+
+**Benefits:**
+- **License enforcement is airtight** — the Cython-compiled server module is the
+  only place config generation happens
+- **Agent stays simple** — it deploys files and runs commands, a pattern it already
+  supports for secrets deployment and script execution
+- **Centralized logic** — config generation is testable on the server without
+  platform-specific agent environments
+- **No agent license infrastructure needed** — avoids adding license validation,
+  key management, and module loading to the agent codebase
+
+**Agent changes:**
+- Firewall/AV *collection* code stays in the agent and open source (read-only
+  status detection)
+- Firewall/AV *deployment* operations are replaced with generic file deployment
+  and service control handlers (or reuse existing ones)
+- ~13,900 lines of config construction code removed from the agent
+
 ### Modules to Migrate
 
 #### 3.1 av_management_engine (Enterprise)
 
-**Source Files:**
-- `sysmanage_agent/operations/antivirus_*.py` (12 files)
+**Server-Side Source Files (to migrate to Cython):**
+- `backend/api/antivirus_*.py`
+
+**Agent-Side Source Files (config construction logic to move to server):**
+- `sysmanage_agent/operations/antivirus_operations.py` (618 lines) — orchestrator
+- `sysmanage_agent/operations/antivirus_base.py` (961 lines) — base class, config templates
+- `sysmanage_agent/operations/antivirus_deploy_linux.py` (243 lines) — Debian/Ubuntu, RHEL/CentOS, openSUSE
+- `sysmanage_agent/operations/antivirus_deploy_windows.py` (113 lines) — ClamWin via Chocolatey
+- `sysmanage_agent/operations/antivirus_deploy_bsd.py` (660 lines) — macOS, FreeBSD, OpenBSD, NetBSD
+- `sysmanage_agent/operations/antivirus_remove_linux.py` (151 lines)
+- `sysmanage_agent/operations/antivirus_remove_windows.py` (74 lines)
+- `sysmanage_agent/operations/antivirus_remove_bsd.py` (292 lines)
+- `sysmanage_agent/operations/antivirus_deployment_helpers.py` (830 lines)
+- `sysmanage_agent/operations/antivirus_removal_helpers.py` (455 lines)
+- `sysmanage_agent/operations/antivirus_service_manager.py` (530 lines)
+- `sysmanage_agent/operations/antivirus_utils.py` (25 lines)
+
+**Agent-Side Collection (stays in agent, open source):**
 - `sysmanage_agent/collection/antivirus_collection.py`
 - `sysmanage_agent/collection/commercial_antivirus_collection.py`
-- `backend/api/antivirus_*.py`
 
 **Features:**
 - [ ] ClamAV/ClamWin deployment and configuration
@@ -708,52 +798,96 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 **Keep in Open Source:**
 - Basic AV status detection (is AV installed and running)
+- Agent-side collection of AV status and commercial AV detection
 
 **Migration Steps:**
 1. [ ] Create `module-source/av_management_engine/` structure
 2. [ ] Create `av_management_engine.pyx` Cython module
-3. [ ] Migrate AV management code
-4. [ ] Create frontend plugin bundle
-5. [ ] Update open source to read-only status
-6. [ ] Update documentation
-7. [ ] i18n/l10n for all 14 languages
+3. [ ] Extract config generation logic from agent operations into server-side Cython module
+4. [ ] Implement platform-specific config builders (Linux/Windows/BSD/macOS) on server
+5. [ ] Define message protocol for "deploy AV config" commands (file content, target path, service commands)
+6. [ ] Update agent to handle generic file deployment + service control messages
+7. [ ] Remove config construction code from agent (~5,800 lines)
+8. [ ] Create frontend plugin bundle
+9. [ ] Update open source server to return 402 without av_management_engine
+10. [ ] Update documentation
+11. [ ] i18n/l10n for all 14 languages
 
-**Estimated Size:** ~3,000 lines
+**Estimated Size:** ~6,500 lines (server-side Cython: ~5,800 from agent + ~700 server API)
 
 #### 3.2 firewall_orchestration_engine (Enterprise)
 
-**Source Files:**
+**Server-Side Source Files (to migrate to Cython):**
 - `backend/api/firewall_roles*.py`
 - `backend/persistence/models/firewall.py`
-- `sysmanage_agent/operations/firewall_*.py` (13 files)
+
+**Agent-Side Source Files (config construction logic to move to server):**
+- `sysmanage_agent/operations/firewall_operations.py` (272 lines) — orchestrator
+- `sysmanage_agent/operations/firewall_base.py` (161 lines) — base class
+- `sysmanage_agent/operations/firewall_linux.py` (231 lines) — Linux dispatcher
+- `sysmanage_agent/operations/firewall_linux_ufw.py` (707 lines) — UFW rule generation
+- `sysmanage_agent/operations/firewall_linux_firewalld.py` (509 lines) — firewalld config
+- `sysmanage_agent/operations/firewall_linux_parsers.py` (353 lines) — rule parsing
+- `sysmanage_agent/operations/firewall_bsd.py` (496 lines) — BSD dispatcher
+- `sysmanage_agent/operations/firewall_bsd_pf.py` (278 lines) — pf.conf generation
+- `sysmanage_agent/operations/firewall_bsd_ipfw.py` (298 lines) — IPFW rule generation
+- `sysmanage_agent/operations/firewall_bsd_npf.py` (303 lines) — NPF rule generation
+- `sysmanage_agent/operations/firewall_bsd_parsers.py` (449 lines) — BSD rule parsing
+- `sysmanage_agent/operations/firewall_windows.py` (592 lines) — Windows Firewall/netsh
+- `sysmanage_agent/operations/firewall_macos.py` (315 lines) — macOS socketfilterfw
+- `sysmanage_agent/operations/firewall_port_helpers.py` (499 lines) — port helpers
+- `sysmanage_agent/operations/firewall_collector.py` (483 lines) — status collection
+
+**Agent-Side Collection (stays in agent, open source):**
+- `sysmanage_agent/operations/firewall_collector.py` — firewall status collection
+- `sysmanage_agent/collection/` firewall-related collection modules
 
 **Features:**
 - [ ] Firewall role definitions with port rules
 - [ ] Role assignment to hosts
 - [ ] Policy deployment across fleets
-- [ ] Multi-platform firewall management (UFW, firewalld, pf, ipfw, etc.)
+- [ ] Multi-platform firewall config generation (UFW, firewalld, pf, ipfw, npf, Windows Firewall, macOS)
 - [ ] Firewall compliance checking
 - [ ] Rule conflict detection
 
 **Keep in Open Source:**
 - Basic firewall status reporting (read-only)
+- Agent-side firewall status collection
 
 **Migration Steps:**
 1. [ ] Create `module-source/firewall_orchestration_engine/` structure
 2. [ ] Create `firewall_orchestration_engine.pyx` Cython module
-3. [ ] Migrate firewall management code
-4. [ ] Create frontend plugin bundle
-5. [ ] Update open source to read-only status
-6. [ ] Update documentation
-7. [ ] i18n/l10n for all 14 languages
+3. [ ] Extract config generation logic from agent operations into server-side Cython module
+4. [ ] Implement platform-specific firewall config builders on server:
+   - UFW rules (Ubuntu/Debian)
+   - firewalld XML zones/services (RHEL/CentOS/Fedora)
+   - pf.conf rules (OpenBSD/FreeBSD)
+   - IPFW rules (FreeBSD)
+   - NPF rules (NetBSD)
+   - Windows Firewall netsh commands
+   - macOS socketfilterfw commands
+5. [ ] Define message protocol for "deploy firewall config" commands
+6. [ ] Update agent to handle generic file deployment + command execution messages
+7. [ ] Remove config construction code from agent (~8,000 lines)
+8. [ ] Create frontend plugin bundle
+9. [ ] Update open source server to return 402 without firewall_orchestration_engine
+10. [ ] Update documentation
+11. [ ] i18n/l10n for all 14 languages
 
-**Estimated Size:** ~4,000 lines
+**Estimated Size:** ~9,500 lines (server-side Cython: ~8,000 from agent + ~1,500 server API/models)
 
 ### Deliverables
 
 - [ ] 2 new Pro+ modules (AV management, firewall orchestration)
+- [ ] Server-side config generation for all supported platforms
+- [ ] Agent generic deployment handlers operational (from Phase 8, or implemented early as dependency)
+- [ ] ~13,800 lines of config construction code removed from agent
 - [ ] Open source code updated with stubs/license checks
 - [ ] Documentation for Enterprise tier features
+
+**Note:** Phase 3 depends on the agent generic deployment handlers (Section 8.6). These
+handlers must be implemented before Phase 3 modules can function. If Phase 8 has not yet
+shipped, the generic handlers should be implemented early as a Phase 3 prerequisite.
 
 ---
 
@@ -802,12 +936,14 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 #### 5.1 automation_engine (Enterprise)
 
-**Source Files:**
+**Server-Side Source Files:**
 - `backend/api/scripts/routes_saved_scripts.py`
 - `backend/api/scripts/routes_executions.py`
 - `backend/api/scripts/models.py`
 - `backend/persistence/models/scripts.py`
-- `sysmanage_agent/operations/script_operations.py`
+
+**Agent-Side Source Files (execution logic moved to server orchestration):**
+- `sysmanage_agent/operations/script_operations.py` (~328 lines) — script execution engine
 
 **Features:**
 - [ ] Saved script library with versioning
@@ -818,7 +954,7 @@ This represents the current baseline. All items listed in [Current State Assessm
 - [ ] Approval workflows for privileged scripts
 - [ ] Script parameterization
 
-**Estimated Size:** ~2,000 lines
+**Estimated Size:** ~2,300 lines (server-side Cython: ~2,000 server + ~300 from agent orchestration logic)
 
 #### 5.2 fleet_engine (Enterprise)
 
@@ -1006,9 +1142,48 @@ This represents the current baseline. All items listed in [Current State Assessm
 - [ ] Frontend: "Broadcast Refresh" button
 - [ ] i18n/l10n for all 14 languages
 
+#### 8.6 Agent Generic Deployment Handlers (Open Source)
+
+**Priority:** High (prerequisite for Phase 3, 5, 10 Pro+ modules)
+**Effort:** Medium
+
+The server-side config generation architecture (decided in Phase 3) requires the open-source
+agent to support generic file deployment and command execution messages. These handlers enable
+all Pro+ modules to send fully-baked config files and deployment instructions to the agent
+without any module-specific logic in the agent itself.
+
+**Agent-Side Changes (~1,500 estimated lines):**
+- [ ] Generic file deployment handler — receive file content, target path, ownership, and permissions from server; write file to disk atomically (write to temp, rename)
+- [ ] Generic command execution handler — receive a command list from server; execute sequentially with stdout/stderr capture and exit code reporting
+- [ ] Generic service control handler — receive service name + action (start/stop/restart/enable/disable); use platform-appropriate service manager (systemd, rc.d, services.msc, launchctl)
+- [ ] Deployment receipt/acknowledgment messages — report success/failure back to server for each deployment step
+- [ ] File integrity verification — optional SHA-256 checksum verification before writing deployed files
+- [ ] Rollback support — backup existing config files before overwriting; restore on deployment failure
+- [ ] Message protocol documentation for "deploy file", "execute command", and "control service" message types
+
+**Note:** These handlers are open source because they are generic infrastructure — they deploy
+files and run commands without any knowledge of what the files contain. The Pro+ value is in
+the server-side Cython modules that *generate* the config files (firewall rules, AV configs,
+VM definitions, OTEL configs, etc.).
+
+- [ ] i18n/l10n for all 14 languages
+- [ ] Unit tests for all new handlers
+
+#### 8.7 Pro+ Professional Tier Enhancements
+
+**Priority:** Medium
+**Effort:** Medium
+
+- [ ] Custom report templates (reporting_engine) — allow admins to define custom report layouts and field selections beyond the built-in reports
+- [ ] Report branding/customization (reporting_engine) — add organization logo, company name, and color scheme to generated PDF/HTML reports
+- [ ] Dynamic secret generation (secrets_engine) — generate short-lived, on-demand credentials via OpenBAO/Vault that automatically expire
+- [ ] i18n/l10n for all 14 languages
+
 ### Deliverables
 
 - [ ] All Foundation features implemented and tested
+- [ ] Agent generic deployment handlers implemented and tested (prerequisite for Phase 3/5/10 Pro+)
+- [ ] Pro+ Professional tier enhancements implemented
 - [ ] API documentation updated
 - [ ] User documentation updated
 
@@ -1071,12 +1246,44 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 #### 10.1 virtualization_engine (Enterprise)
 
-**Source Files:**
-- KVM/QEMU: `sysmanage_agent/operations/child_host_kvm*.py` (8 files, ~4,500 lines)
-- bhyve: `sysmanage_agent/operations/child_host_bhyve*.py` (10 files, ~4,600 lines)
-- VMM/vmd: `sysmanage_agent/operations/child_host_vmm*.py` (17 files)
-- Guest provisioning: `sysmanage_agent/operations/child_host_ubuntu*.py`, `child_host_debian*.py`, `child_host_alpine*.py`
-- Backend: `backend/api/child_host_virtualization*.py`, `backend/api/handlers/child_host/*.py`
+**Server-Side Source Files (to migrate to Cython):**
+- `backend/api/child_host_virtualization.py`
+- `backend/api/child_host_virtualization_enable.py`
+- `backend/api/handlers/child_host/control.py`
+- `backend/api/child_host_control.py`
+- `backend/api/child_host_crud.py`
+
+**Agent-Side Source Files (VM management logic to move to server):**
+- KVM/QEMU (~4,500 lines across 8 files):
+  - `sysmanage_agent/operations/child_host_kvm.py` — KVM orchestrator
+  - `sysmanage_agent/operations/child_host_kvm_create.py` — VM creation
+  - `sysmanage_agent/operations/child_host_kvm_network.py` — NAT/bridge networking
+  - `sysmanage_agent/operations/child_host_kvm_storage.py` — disk/image management
+  - `sysmanage_agent/operations/child_host_kvm_cloudinit.py` — cloud-init ISO generation
+  - `sysmanage_agent/operations/child_host_kvm_control.py` — lifecycle control
+  - `sysmanage_agent/operations/child_host_kvm_listing.py` — VM listing
+  - `sysmanage_agent/operations/child_host_kvm_delete.py` — VM deletion
+- bhyve (~4,600 lines across 10 files):
+  - `sysmanage_agent/operations/child_host_bhyve.py` — bhyve orchestrator
+  - `sysmanage_agent/operations/child_host_bhyve_create.py` — VM creation
+  - `sysmanage_agent/operations/child_host_bhyve_network.py` — NAT with pf
+  - `sysmanage_agent/operations/child_host_bhyve_storage.py` — ZFS zvol management
+  - `sysmanage_agent/operations/child_host_bhyve_uefi.py` — UEFI boot
+  - `sysmanage_agent/operations/child_host_bhyve_control.py` — lifecycle control
+  - `sysmanage_agent/operations/child_host_bhyve_listing.py` — VM listing
+  - `sysmanage_agent/operations/child_host_bhyve_delete.py` — VM deletion
+  - `sysmanage_agent/operations/child_host_bhyve_cloudinit.py` — cloud-init
+  - `sysmanage_agent/operations/child_host_bhyve_freebsd.py` — FreeBSD guest
+- VMM/vmd (~6,800 lines across 17 files):
+  - `sysmanage_agent/operations/child_host_vmm*.py` — OpenBSD VMM management
+- Guest provisioning (~6,253 lines):
+  - `sysmanage_agent/operations/child_host_ubuntu*.py` — Ubuntu autoinstall
+  - `sysmanage_agent/operations/child_host_debian*.py` — Debian preseed
+  - `sysmanage_agent/operations/child_host_alpine*.py` — Alpine setup
+  - `sysmanage_agent/operations/child_host_freebsd*.py` — FreeBSD install
+
+**Agent-Side Collection (stays in agent, open source):**
+- `sysmanage_agent/operations/child_host_listing_*.py` — read-only VM/container listing
 
 **Features:**
 - [ ] KVM/QEMU VM management (Linux)
@@ -1094,6 +1301,7 @@ This represents the current baseline. All items listed in [Current State Assessm
 - [ ] Cloud-init provisioning (all hypervisors)
 - [ ] Multi-hypervisor networking
 - [ ] Guest OS autoinstall (Ubuntu, Debian, Alpine, FreeBSD)
+- [ ] **Safe Parent Host Reboot (VM extension):** Extend the safe parent host reboot orchestration (introduced in Phase 2 for LXD/WSL) to KVM/QEMU, bhyve, and VMM/vmd virtual machines — cleanly shut down running VMs before parent reboot, track which VMs were running, and automatically restart them after the parent boots back up
 
 **Keep in Open Source:**
 - Read-only VM/container listing and status
@@ -1101,20 +1309,35 @@ This represents the current baseline. All items listed in [Current State Assessm
 **Migration Steps:**
 1. [ ] Create `module-source/virtualization_engine/` structure
 2. [ ] Create `virtualization_engine.pyx` Cython module
-3. [ ] Migrate all hypervisor management code
-4. [ ] Create frontend plugin bundle
-5. [ ] Update open source to read-only listing
-6. [ ] Update documentation
-7. [ ] i18n/l10n for all 14 languages
+3. [ ] Extract VM creation/provisioning logic from agent into server-side Cython module
+4. [ ] Implement platform-specific VM config builders on server (KVM XML, bhyve config, vm.conf)
+5. [ ] Extract cloud-init/autoinstall generation from agent to server
+6. [ ] Extract network configuration generation from agent to server
+7. [ ] Define message protocol for "deploy VM config" commands
+8. [ ] Remove VM management code from agent (~22,153 lines)
+9. [ ] Create frontend plugin bundle
+10. [ ] Update open source to read-only listing
+11. [ ] Update documentation
+12. [ ] i18n/l10n for all 14 languages
 
-**Estimated Size:** ~13,000 lines
+**Estimated Size:** ~24,000 lines (server-side Cython: ~22,153 from agent + ~1,850 server API)
 
 #### 10.2 observability_engine (Enterprise)
 
-**Source Files:**
-- Graylog: `backend/api/graylog_integration.py`, `backend/services/graylog_integration.py`, agent operations
-- Grafana: `backend/api/grafana_integration.py`, `backend/services/grafana_integration.py`
-- OpenTelemetry: `backend/api/opentelemetry/*`, agent operations
+**Server-Side Source Files (to migrate to Cython):**
+- `backend/api/graylog_integration.py`
+- `backend/services/graylog_integration.py`
+- `backend/api/grafana_integration.py`
+- `backend/services/grafana_integration.py`
+- `backend/api/opentelemetry/*`
+
+**Agent-Side Source Files (deployment logic to move to server):**
+- `sysmanage_agent/operations/graylog_operations.py` (~662 lines) — Graylog sidecar/forwarder deployment
+- `sysmanage_agent/operations/opentelemetry_operations.py` (~900 lines) — OTEL collector deployment
+- `sysmanage_agent/operations/opentelemetry_config.py` (~774 lines) — OTEL config generation
+
+**Agent-Side Collection (stays in agent, open source):**
+- Prometheus metrics endpoint (if applicable)
 
 **Features:**
 - [ ] Graylog server configuration and health monitoring
@@ -1128,7 +1351,19 @@ This represents the current baseline. All items listed in [Current State Assessm
 - [ ] Prometheus metrics export
 - [ ] Distributed tracing setup
 
-**Estimated Size:** ~4,000 lines
+**Migration Steps:**
+1. [ ] Create `module-source/observability_engine/` structure
+2. [ ] Create `observability_engine.pyx` Cython module
+3. [ ] Extract Graylog deployment/config logic from agent (~662 lines) to server-side Cython
+4. [ ] Extract OpenTelemetry deployment/config logic from agent (~1,674 lines) to server-side Cython
+5. [ ] Implement server-side config generation for OTEL collector, Graylog sidecar, Grafana datasources
+6. [ ] Define message protocol for "deploy observability config" commands
+7. [ ] Remove deployment code from agent (~2,336 lines)
+8. [ ] Create frontend plugin bundle
+9. [ ] Update documentation
+10. [ ] i18n/l10n for all 14 languages
+
+**Estimated Size:** ~6,300 lines (server-side Cython: ~2,336 from agent + ~4,000 server API/services)
 
 #### 10.3 Multi-Factor Authentication
 
@@ -1161,29 +1396,133 @@ This represents the current baseline. All items listed in [Current State Assessm
 
 ### Deliverables
 
-- [ ] virtualization_engine module
-- [ ] observability_engine module
+- [ ] virtualization_engine module (~24,000 lines, largest single module)
+- [ ] observability_engine module (~6,300 lines)
+- [ ] ~24,489 lines of agent code migrated to server-side Cython
 - [ ] MFA implementation
 - [ ] Repository mirroring
 - [ ] External IdP support
 
 ---
 
-## Phase 11: Enterprise GA (v3.0.0.0)
+## Phase 11: Air-Gapped Environment Support (Enterprise)
+
+**Target Release:** v2.3.0.0
+**Focus:** Dual-server architecture for managing hosts on isolated, air-gapped networks
+
+### Overview
+
+Many enterprise and government environments operate air-gapped networks that have no connection to the public internet. This phase introduces a dual-server architecture that enables full SysManage management capabilities across the air gap, including OS patching, vulnerability assessment, and compliance reporting with appropriate context for the isolated environment.
+
+### Architecture
+
+**Public-Side SysManage Server ("Collector")**
+- Connected to the public internet
+- Configured with a list of target operating systems and versions to track
+- Periodically captures all available OS updates (packages, patches, security fixes)
+- Captures current CVE/vulnerability data from public databases (NVD, vendor advisories)
+- Captures compliance framework updates (CIS benchmarks, STIG updates)
+- Burns collected data to optical media (CD/DVD/Blu-ray) for physical transfer
+- Generates manifest and integrity checksums for each media set
+
+**Private-Side SysManage Server ("Repository")**
+- Connected only to the air-gapped network
+- Reads optical media produced by the public-side server
+- Imports updates into a local package repository
+- Acts as the authoritative update source for all managed hosts on the private network
+- Hosts see the private repository as their normal OS update mirror
+- Imports CVE data to enable vulnerability scanning with point-in-time context
+- Reports compliance based on what is available in the private repository
+
+### Modules
+
+#### 11.1 airgap_collector_engine (Enterprise)
+
+**Features:**
+- [ ] Configurable OS/version tracking list (Ubuntu, Debian, RHEL, FreeBSD, etc.)
+- [ ] Automated package mirror capture (APT, DNF/YUM, pkg, etc.)
+- [ ] CVE/NVD data snapshot capture at time of collection
+- [ ] Compliance framework data capture (CIS, DISA STIG baselines)
+- [ ] Optical media ISO image generation with integrity checksums (SHA-256)
+- [ ] Multi-disc spanning for large update sets
+- [ ] Disc burning integration (cdrecord/growisofs/xorriso)
+- [ ] Collection scheduling (daily, weekly, on-demand)
+- [ ] Manifest generation with package counts, CVE counts, and timestamps
+- [ ] Delta collection mode (only new packages since last burn)
+- [ ] i18n/l10n for all 14 languages
+
+**Estimated Size:** ~4,000 lines
+
+#### 11.2 airgap_repository_engine (Enterprise)
+
+**Features:**
+- [ ] Optical media ingestion with integrity verification
+- [ ] Local APT/DNF/YUM/pkg repository hosting
+- [ ] Repository metadata generation (Packages.gz, repodata, etc.)
+- [ ] Automatic agent repository configuration (point hosts to private mirror)
+- [ ] CVE data import and synchronization with point-in-time context
+- [ ] Compliance assessment relative to available updates (not public state)
+- [ ] Gap analysis reporting (what patches exist publicly but are not yet transferred)
+- [ ] Transfer history and audit trail
+- [ ] Multi-OS repository support (serve updates for multiple OS families)
+- [ ] Repository statistics and dashboard
+- [ ] i18n/l10n for all 14 languages
+
+**Estimated Size:** ~5,000 lines
+
+#### 11.3 Air-Gapped Compliance Context
+
+**Features:**
+- [ ] Point-in-time vulnerability context (CVE data as of last media transfer)
+- [ ] Compliance scoring relative to available private-side patches
+- [ ] Reporting that distinguishes between "patch available but not applied" vs "patch not yet transferred"
+- [ ] Transfer freshness indicators (how old is the latest media import)
+- [ ] Risk assessment that accounts for the air-gap transfer cadence
+- [ ] Integration with existing compliance_engine and vuln_engine modules
+
+### Migration Steps
+
+1. [ ] Create `module-source/airgap_collector_engine/` structure
+2. [ ] Create `airgap_collector_engine.pyx` Cython module
+3. [ ] Create `module-source/airgap_repository_engine/` structure
+4. [ ] Create `airgap_repository_engine.pyx` Cython module
+5. [ ] Create frontend plugin bundles for both modules
+6. [ ] Update documentation with air-gapped deployment guide
+7. [ ] i18n/l10n for all 14 languages
+
+### Deliverables
+
+- [ ] 2 new Pro+ modules (airgap_collector_engine, airgap_repository_engine)
+- [ ] Air-gapped deployment guide
+- [ ] Optical media transfer procedures documentation
+- [ ] Integration tests for collection and ingestion workflows
+
+### Exit Criteria
+
+- Public-side collection captures all configured OS updates and CVE data
+- Optical media generation and integrity verification working
+- Private-side ingestion creates functional package repositories
+- Managed hosts can install updates from private repository
+- Vulnerability scanning works with point-in-time CVE context
+- Compliance reporting accounts for air-gap transfer state
+
+---
+
+## Phase 12: Enterprise GA (v3.0.0.0)
 
 **Target Release:** v3.0.0.0
 **Focus:** Multi-tenancy, API completeness, GA release
 
 ### Features
 
-#### 11.1 Multi-Tenancy (Enterprise)
+#### 12.1 Multi-Tenancy (Enterprise)
 
 - [ ] Account model with isolation
 - [ ] Account switching for users with multiple accounts
 - [ ] Per-account settings and limits
 - [ ] Data isolation verification
 
-#### 11.2 API Completeness
+#### 12.2 API Completeness
 
 - [ ] Audit all features for missing endpoints
 - [ ] API versioning (/api/v1/, /api/v2/)
@@ -1191,7 +1530,7 @@ This represents the current baseline. All items listed in [Current State Assessm
 - [ ] Rate limiting middleware
 - [ ] Complete OpenAPI documentation
 
-#### 11.3 Additional Polish Items
+#### 12.3 Additional Polish Items
 
 - [ ] GPG Key Management
 - [ ] Administrator Invitations
@@ -1221,16 +1560,17 @@ This represents the current baseline. All items listed in [Current State Assessm
 |-------|---------|-------|------------------|
 | 0 | v1.1.0.0 | Current | Core platform + virtualization code (moving to Pro+) |
 | 1 | v1.2.0.0 | Stabilization | Test coverage, SonarQube cleanup |
-| 2 | v1.3.0.0 | Pro+ Professional | reporting, audit, secrets, container (LXD/WSL) |
-| 3 | v1.4.0.0 | Pro+ Enterprise 1 | AV management, firewall orchestration (security) |
+| 2 | v1.3.0.0 | Pro+ Professional | reporting, audit, secrets, container (LXD/WSL) + ~3,504 lines agent migration |
+| 3 | v1.4.0.0 | Pro+ Enterprise 1 | AV management, firewall orchestration + ~13,800 lines agent migration |
 | 4 | v1.5.0.0 | Stabilization | Pro+ integration testing, license verification |
-| 5 | v1.6.0.0 | Pro+ Enterprise 2 | automation, fleet engines |
+| 5 | v1.6.0.0 | Pro+ Enterprise 2 | automation, fleet engines + ~328 lines agent migration |
 | 6 | v1.7.0.0 | Stabilization | Performance baseline, i18n audit |
 | 7 | v1.8.0.0 | Stabilization RC1 | Integration tests, load tests, security |
-| 8 | **v2.0.0.0** | Foundation | Access groups, update profiles, compliance |
+| 8 | **v2.0.0.0** | Foundation | Access groups, update profiles, compliance, agent generic handlers |
 | 9 | v2.1.0.0 | Stabilization RC2 | Final polish, docs complete |
-| 10 | v2.2.0.0 | Pro+ Enterprise 3 | virtualization, observability, MFA (largest) |
-| 11 | **v3.0.0.0** | Enterprise GA | Multi-tenancy, API complete, full feature set |
+| 10 | v2.2.0.0 | Pro+ Enterprise 3 | virtualization, observability, MFA + ~24,489 lines agent migration |
+| 11 | v2.3.0.0 | Air-Gapped Support | Dual-server architecture, optical media transfer, offline CVE |
+| 12 | **v3.0.0.0** | Enterprise GA | Multi-tenancy, API complete, full feature set |
 
 ---
 
@@ -1264,18 +1604,21 @@ When migrating code from open source to Pro+:
 
 ### Timeline by Module
 
-| Module | Tier | Phase | Est. Lines | Priority |
-|--------|------|-------|------------|----------|
-| reporting_engine | Professional | 2 | ~1,500 | High |
-| audit_engine | Professional | 2 | ~2,000 | High |
-| secrets_engine | Professional | 2 | ~2,500 | High |
-| container_engine (LXD, WSL) | Professional | 2 | ~2,000 | High |
-| av_management_engine | Enterprise | 3 | ~3,000 | High |
-| firewall_orchestration_engine | Enterprise | 3 | ~4,000 | High |
-| automation_engine | Enterprise | 5 | ~2,000 | High |
-| fleet_engine | Enterprise | 5 | ~1,500 | High |
-| virtualization_engine (KVM, bhyve, VMM) | Enterprise | 10 | ~13,000 | Medium |
-| observability_engine | Enterprise | 10 | ~4,000 | Medium |
+| Module | Tier | Phase | Server Lines | Agent Migration | Total Est. | Priority |
+|--------|------|-------|-------------|-----------------|------------|----------|
+| reporting_engine | Professional | 2 | ~1,500 | — | ~1,500 | High |
+| audit_engine | Professional | 2 | ~2,000 | — | ~2,000 | High |
+| secrets_engine | Professional | 2 | ~800 | ~509 | ~1,300 | High |
+| container_engine (LXD, WSL) | Professional | 2 | ~700 | ~2,995 | ~3,700 | High |
+| av_management_engine | Enterprise | 3 | ~700 | ~5,800 | ~6,500 | High |
+| firewall_orchestration_engine | Enterprise | 3 | ~1,500 | ~8,000 | ~9,500 | High |
+| automation_engine | Enterprise | 5 | ~2,000 | ~328 | ~2,300 | High |
+| fleet_engine | Enterprise | 5 | ~1,500 | — | ~1,500 | High |
+| virtualization_engine (KVM, bhyve, VMM) | Enterprise | 10 | ~1,850 | ~22,153 | ~24,000 | Medium |
+| observability_engine | Enterprise | 10 | ~4,000 | ~2,336 | ~6,300 | Medium |
+| airgap_collector_engine | Enterprise | 11 | ~4,000 | — | ~4,000 | Medium |
+| airgap_repository_engine | Enterprise | 11 | ~5,000 | — | ~5,000 | Medium |
+| Agent generic handlers | Open Source | 8 | — | ~1,500 (new) | ~1,500 | High |
 
 ### Virtualization Tiering
 
@@ -1292,12 +1635,20 @@ When migrating code from open source to Pro+:
 
 ### Total Migration Estimate
 
-- **Professional Tier:** ~8,000 lines (Phase 2: reporting + audit + secrets + container)
-- **Enterprise Tier - Part 1:** ~7,000 lines (Phase 3: AV + firewall)
-- **Enterprise Tier - Part 2:** ~3,500 lines (Phase 5: automation + fleet)
-- **Enterprise Tier - Part 3:** ~17,000 lines (Phase 10: virtualization + observability)
+- **Professional Tier:** ~8,500 lines (Phase 2: reporting + audit + secrets + container, includes ~3,504 from agent)
+- **Enterprise Tier - Part 1:** ~16,000 lines (Phase 3: AV + firewall, includes ~13,800 from agent)
+- **Enterprise Tier - Part 2:** ~3,800 lines (Phase 5: automation + fleet, includes ~328 from agent)
+- **Enterprise Tier - Part 3:** ~30,300 lines (Phase 10: virtualization + observability, includes ~24,489 from agent)
+- **Air-Gapped Support:** ~9,000 lines (Phase 11: collector + repository)
+- **Open Source Agent Handlers:** ~1,500 lines (Phase 8: generic deployment infrastructure)
 
-**Grand Total:** ~35,500 lines to migrate for Pro+
+**Grand Total:** ~69,100 lines of Pro+ code + ~1,500 lines open source agent infrastructure
+
+**Agent Code Migration Summary:** ~42,121 lines of config construction, VM management,
+deployment, and provisioning code will be migrated from the agent to server-side Cython
+modules. The agent retains ~6,231 lines of open source operations (package management,
+updates, user management, system control, repositories, Ubuntu Pro) plus gains ~1,500 lines
+of new generic deployment handlers.
 
 ---
 

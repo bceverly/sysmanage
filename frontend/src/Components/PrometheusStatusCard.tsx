@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { formatUTCTimestamp } from '../utils/dateUtils';
 import {
   Card,
   CardContent,
@@ -211,7 +212,7 @@ const PrometheusStatusCard: React.FC = () => {
                   <Box>
                     <Typography variant="body2" color="text.secondary">
                       {t('telemetry.prometheus.lastScrape', 'Last Scrape')}:{' '}
-                      {new Date(status.last_scrape).toLocaleString()}
+                      {formatUTCTimestamp(status.last_scrape)}
                     </Typography>
                   </Box>
                 </>

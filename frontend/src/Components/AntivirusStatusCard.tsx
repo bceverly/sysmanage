@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { formatUTCTimestamp } from '../utils/dateUtils';
 import {
   Card,
   CardContent,
@@ -209,8 +210,7 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
   }
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString();
+    return formatUTCTimestamp(dateString);
   };
 
   return (

@@ -142,7 +142,7 @@ async def get_graylog_integration_settings():  # NOSONAR
                 "use_managed_server": True,
                 "host_id": None,
                 "manual_url": None,
-                "api_token": None,  # nosec B105 - dict key, not a password
+                "api_token": None,  # nosec B105  # dict key, not a password
             }
 
         return settings.to_dict()
@@ -218,16 +218,16 @@ async def update_graylog_integration_settings(  # NOSONAR
         if (
             request.api_token
             and request.api_token.strip()
-            and request.api_token != "***"  # nosec B105 - placeholder not password
+            and request.api_token != "***"  # nosec B105  # placeholder, not a password
         ):
             try:
                 vault_service = VaultService()
 
                 # Store API token in vault (trimmed to remove any leading/trailing whitespace)
                 vault_result = vault_service.store_secret(
-                    secret_name=GRAYLOG_API_TOKEN,  # nosec B106 - name not password
+                    secret_name=GRAYLOG_API_TOKEN,  # nosec B106  # name, not a password
                     secret_data=request.api_token.strip(),
-                    secret_type=GRAYLOG_API_TOKEN_LABEL,  # nosec B106 - type label not password
+                    secret_type=GRAYLOG_API_TOKEN_LABEL,  # nosec B106  # type label, not a password
                     secret_subtype="graylog",
                 )
 
@@ -235,8 +235,8 @@ async def update_graylog_integration_settings(  # NOSONAR
 
                 # Create database entry for the secret (will show up in secrets screen)
                 secret_entry = models.Secret(
-                    name=GRAYLOG_API_TOKEN,  # nosec B106 - name not password
-                    secret_type=GRAYLOG_API_TOKEN_LABEL,  # nosec B106 - type label not password
+                    name=GRAYLOG_API_TOKEN,  # nosec B106  # name, not a password
+                    secret_type=GRAYLOG_API_TOKEN_LABEL,  # nosec B106  # type label, not a password
                     secret_subtype="graylog",
                     vault_token=vault_token,
                     vault_path=vault_result["vault_path"],
@@ -250,7 +250,7 @@ async def update_graylog_integration_settings(  # NOSONAR
                     .filter(
                         models.Secret.name == GRAYLOG_API_TOKEN,
                         models.Secret.secret_type
-                        == GRAYLOG_API_TOKEN_LABEL,  # nosec B105 - type label not password
+                        == GRAYLOG_API_TOKEN_LABEL,  # nosec B105  # type label, not a password
                     )
                     .first()
                 )
@@ -321,14 +321,13 @@ async def check_graylog_health():  # NOSONAR
         )
 
         if not settings:
-            raise HTTPException(
-                status_code=400, detail=_("Graylog integration has not been configured")
-            )
+            return {
+                "healthy": False,
+                "error": _("Graylog integration has not been configured"),
+            }
 
         if not settings.enabled:
-            raise HTTPException(
-                status_code=400, detail=_("Graylog integration is not enabled")
-            )
+            return {"healthy": False, "error": _("Graylog integration is not enabled")}
 
         try:
             graylog_url = settings.graylog_url
@@ -339,9 +338,7 @@ async def check_graylog_health():  # NOSONAR
             ) from e
 
         if not graylog_url:
-            raise HTTPException(
-                status_code=400, detail=_("Graylog URL is not configured")
-            )
+            return {"healthy": False, "error": _("Graylog URL is not configured")}
 
         # Extract hostname from graylog_url for port detection
         import socket
@@ -362,7 +359,7 @@ async def check_graylog_health():  # NOSONAR
                         .filter(
                             models.Secret.name == GRAYLOG_API_TOKEN,
                             models.Secret.secret_type
-                            == GRAYLOG_API_TOKEN_LABEL,  # nosec B105 - type label not password
+                            == GRAYLOG_API_TOKEN_LABEL,  # nosec B105  # type label, not a password
                             models.Secret.vault_token == settings.api_token_vault_token,
                         )
                         .first()
@@ -457,7 +454,7 @@ async def check_graylog_health():  # NOSONAR
                         if result == 0:
                             has_gelf_tcp = True
                             gelf_tcp_port = 12201
-                    except Exception:  # nosec B110 - Port scan failure expected
+                    except Exception:  # nosec B110  # port scan failure expected
                         pass
 
                     # Check Syslog TCP (1514, then 514)
@@ -471,7 +468,7 @@ async def check_graylog_health():  # NOSONAR
                                 has_syslog_tcp = True
                                 syslog_tcp_port = port
                                 break
-                        except Exception:  # nosec B110 - Port scan failure expected
+                        except Exception:  # nosec B110  # port scan failure expected
                             pass
 
                     # Check Syslog UDP (1514, then 514)
@@ -487,7 +484,7 @@ async def check_graylog_health():  # NOSONAR
                             sock.close()
                             if has_syslog_udp:
                                 break
-                        except Exception:  # nosec B110 - Port scan failure expected
+                        except Exception:  # nosec B110  # port scan failure expected
                             pass
 
                     # Check Windows Sidecar / Beats (5044)
@@ -499,7 +496,7 @@ async def check_graylog_health():  # NOSONAR
                         if result == 0:
                             has_windows_sidecar = True
                             windows_sidecar_port = 5044
-                    except Exception:  # nosec B110 - Port scan failure expected
+                    except Exception:  # nosec B110  # port scan failure expected
                         pass
 
                     # Update the database with detected ports

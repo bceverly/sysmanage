@@ -130,7 +130,7 @@ def create_test_user():
         )
         session.commit()
         print(f"Created test user: {TEST_USER_EMAIL}")
-        print("Password: (see TEST_USER_PASSWORD constant)")  # nosec: don't log actual password
+        print("Password: (see TEST_USER_PASSWORD constant)")  # nosec  # don't log actual password
 
         # Assign all security roles to the test user
         assign_all_security_roles(session, user_id)
@@ -189,65 +189,77 @@ def assign_all_security_roles(session, user_id):
         print(f"Error assigning security roles: {e}")
 
 
+def _delete_user_by_id(session, user_id, email):
+    """Delete a single user and their related records by user ID."""
+    related_tables = [
+        "user_security_roles",
+        "user_dashboard_card_preference",
+        "user_data_grid_column_preference",
+    ]
+
+    for table in related_tables:
+        try:
+            # Use a savepoint (context manager) so that a failure here
+            # does not abort the outer transaction. PostgreSQL aborts
+            # the whole transaction on error unless you use savepoints.
+            # Table names are from hardcoded list above, not user input
+            # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+            with session.begin_nested():
+                session.execute(
+                    text(f'DELETE FROM "{table}" WHERE user_id = :user_id'),  # nosec B608
+                    {"user_id": user_id},
+                )
+        except Exception:
+            # Table might not exist or have different name, ignore
+            pass
+
+    session.execute(
+        text('DELETE FROM "user" WHERE id = :user_id'),
+        {"user_id": user_id},
+    )
+    print(f"  Deleted: {email}")
+
+
 def delete_test_user():
-    """Delete the test user after E2E tests."""
+    """Delete the test user and any dynamically created e2e test users."""
     db_url = get_database_url()
-    print(f"Connecting to database...")
+    print("Connecting to database...")
 
     engine = create_engine(db_url)
     Session = sessionmaker(bind=engine)
     session = Session()
 
     try:
-        # Get the user ID first
+        # Find the primary test user, e2e-test-*@example.com, and uitest_* users
         result = session.execute(
-            text('SELECT id FROM "user" WHERE userid = :email'),
-            {"email": TEST_USER_EMAIL},
+            text(
+                'SELECT id, userid FROM "user" '
+                "WHERE userid = :email OR userid LIKE :pattern1 "
+                "OR userid LIKE :pattern2"
+            ),
+            {
+                "email": TEST_USER_EMAIL,
+                "pattern1": "e2e-test-%@example.com",
+                "pattern2": "uitest_%@example.com",
+            },
         )
-        row = result.fetchone()
+        rows = result.fetchall()
 
-        if not row:
-            print(f"Test user {TEST_USER_EMAIL} not found (already deleted?)")
+        if not rows:
+            print("No e2e test users found (already deleted?)")
             return True
 
-        user_id = row[0]
+        print(f"Found {len(rows)} e2e test user(s) to delete:")
+        for user_id, email in rows:
+            _delete_user_by_id(session, user_id, email)
 
-        # Try to delete related records (ignore errors if tables don't exist)
-        related_tables = [
-            "user_security_roles",
-            "user_dashboard_card_preference",
-            "user_data_grid_column_preference",
-        ]
-
-        for table in related_tables:
-            try:
-                # Table names are from hardcoded list above, not user input
-                # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
-                session.execute(
-                    text(f'DELETE FROM "{table}" WHERE user_id = :user_id'),  # nosec B608
-                    {"user_id": user_id},
-                )
-            except Exception:
-                # Table might not exist or have different name, ignore
-                session.rollback()
-                pass
-
-        # Delete the test user
-        result = session.execute(
-            text('DELETE FROM "user" WHERE userid = :email'),
-            {"email": TEST_USER_EMAIL},
-        )
         session.commit()
-
-        if result.rowcount > 0:
-            print(f"Deleted test user: {TEST_USER_EMAIL}")
-        else:
-            print(f"Test user {TEST_USER_EMAIL} not found (already deleted?)")
+        print(f"Deleted {len(rows)} e2e test user(s)")
         return True
 
     except Exception as e:
         session.rollback()
-        print(f"Error deleting test user: {e}")
+        print(f"Error deleting test users: {e}")
         return False
     finally:
         session.close()

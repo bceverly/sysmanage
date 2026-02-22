@@ -31,6 +31,7 @@ from backend.api.child_host_virtualization_status import (
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.config.config import get_config
 from backend.i18n import _
+from backend.licensing.module_loader import module_loader
 from backend.persistence import db, models
 from backend.persistence.models import ChildHostDistribution
 from backend.security.roles import SecurityRoles
@@ -50,6 +51,44 @@ router.include_router(status_router)
 router.include_router(enable_router)
 
 
+def _check_container_module():
+    """Check if container_engine Pro+ module is available."""
+    container_engine = module_loader.get_module("container_engine")
+    if container_engine is None:
+        raise HTTPException(
+            status_code=402,
+            detail=_(
+                "Container/VM management requires a SysManage Professional+ license. "
+                "Please upgrade to access this feature."
+            ),
+        )
+
+
+def _parse_agent_install_commands(distribution):
+    """Parse agent_install_commands from a distribution record."""
+    if not distribution or not distribution.agent_install_commands:
+        return []
+    if isinstance(distribution.agent_install_commands, str):
+        try:
+            return json.loads(distribution.agent_install_commands)
+        except json.JSONDecodeError:
+            return []
+    if isinstance(distribution.agent_install_commands, list):
+        return distribution.agent_install_commands
+    return []
+
+
+def _get_cloud_image_url(distribution):
+    """Get cloud image URL from a distribution record, with HTTPS fallback."""
+    if distribution and distribution.cloud_image_url:
+        return distribution.cloud_image_url
+    if distribution and distribution.install_identifier:
+        # Fallback: use install_identifier if it's an HTTPS URL
+        if distribution.install_identifier.startswith("https://"):
+            return distribution.install_identifier
+    return None
+
+
 @router.post(
     "/host/{host_id}/virtualization/create-child",
     dependencies=[Depends(JWTBearer())],
@@ -63,6 +102,8 @@ async def create_child_host_request(  # NOSONAR
     Request creation of a new child host (WSL instance).
     Requires CREATE_CHILD_HOST permission.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -163,18 +204,7 @@ async def create_child_host_request(  # NOSONAR
             .first()
         )
 
-        # Parse agent_install_commands if it's a JSON string
-        agent_install_commands = []
-        if distribution and distribution.agent_install_commands:
-            if isinstance(distribution.agent_install_commands, str):
-                try:
-                    agent_install_commands = json.loads(
-                        distribution.agent_install_commands
-                    )
-                except json.JSONDecodeError:
-                    agent_install_commands = []
-            elif isinstance(distribution.agent_install_commands, list):
-                agent_install_commands = distribution.agent_install_commands
+        agent_install_commands = _parse_agent_install_commands(distribution)
 
         # Get server URL from config for agent configuration
         config = get_config()
@@ -191,7 +221,7 @@ async def create_child_host_request(  # NOSONAR
             "0.0.0.0",
             "localhost",
             "127.0.0.1",
-        ):  # nosec B104 - string comparison, not binding
+        ):  # nosec B104  # string comparison, not binding
             import socket
 
             try:
@@ -280,14 +310,9 @@ async def create_child_host_request(  # NOSONAR
             command_params["memory"] = request.memory or "2G"
             command_params["disk_size"] = request.disk_size or "20G"
             command_params["cpus"] = request.cpus or 2
-            # Get cloud_image_url from the distribution record
-            if distribution and distribution.cloud_image_url:
-                command_params["cloud_image_url"] = distribution.cloud_image_url
-            elif distribution and distribution.install_identifier:
-                # Fallback: use install_identifier if it's a URL
-                # NOSONAR - not making HTTP connection, just checking URL format for test/dev environments
-                if distribution.install_identifier.startswith(("http://", "https://")):
-                    command_params["cloud_image_url"] = distribution.install_identifier
+            cloud_image_url = _get_cloud_image_url(distribution)
+            if cloud_image_url:
+                command_params["cloud_image_url"] = cloud_image_url
 
         # For bhyve, include vm_name, cloud_image_url, memory, disk_size, cpus
         if request.child_type == "bhyve":
@@ -295,14 +320,9 @@ async def create_child_host_request(  # NOSONAR
             command_params["memory"] = request.memory or "1G"
             command_params["disk_size"] = request.disk_size or "20G"
             command_params["cpus"] = request.cpus or 1
-            # Get cloud_image_url from the distribution record
-            if distribution and distribution.cloud_image_url:
-                command_params["cloud_image_url"] = distribution.cloud_image_url
-            elif distribution and distribution.install_identifier:
-                # Fallback: use install_identifier if it's a URL
-                # NOSONAR - not making HTTP connection, just checking URL format for test/dev environments
-                if distribution.install_identifier.startswith(("http://", "https://")):
-                    command_params["cloud_image_url"] = distribution.install_identifier
+            cloud_image_url = _get_cloud_image_url(distribution)
+            if cloud_image_url:
+                command_params["cloud_image_url"] = cloud_image_url
 
         # Include auto_approve_token if set
         if auto_approve_token:

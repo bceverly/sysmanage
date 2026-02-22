@@ -34,6 +34,7 @@ import { useColumnVisibility } from '../Hooks/useColumnVisibility';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import { secretsService, SecretResponse, SecretWithContent, SecretType } from '../Services/secrets';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import { formatUTCTimestamp } from '../utils/dateUtils';
 import './css/Secrets.css';
 
 const Secrets: React.FC = () => {
@@ -132,9 +133,12 @@ const Secrets: React.FC = () => {
     try {
       setLoading(true);
       const data = await secretsService.getSecrets();
-      setSecrets(data);
-    } catch (error) {
-      console.error('Failed to load secrets:', error);
+      if ('licensed' in data && data.licensed === false) {
+        setSecrets([]);
+      } else {
+        setSecrets(data as SecretResponse[]);
+      }
+    } catch {
       showNotification(t('secrets.loadError', 'Failed to load secrets'), 'error');
     } finally {
       setLoading(false);
@@ -144,9 +148,11 @@ const Secrets: React.FC = () => {
   const loadSecretTypes = useCallback(async () => {
     try {
       const data = await secretsService.getSecretTypes();
-      setSecretTypes(data.types || []);
-    } catch (error) {
-      console.error('Failed to load secret types:', error);
+      if (!data.types || data.types.length === 0) {
+        throw new Error('No types available');
+      }
+      setSecretTypes(data.types);
+    } catch {
       // Fallback to default types
       setSecretTypes([
         {
@@ -206,7 +212,7 @@ const Secrets: React.FC = () => {
   }, [loadSecrets, loadSecretTypes]);
 
   const formatTimestamp = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString();
+    return formatUTCTimestamp(timestamp);
   };
 
   const getSelectedSecretType = (): SecretType | undefined => {

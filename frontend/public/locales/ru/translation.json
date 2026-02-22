@@ -1,6 +1,9 @@
 {
   "Agent WebSocket authentication failed from %s": "Ошибка аутентификации WebSocket агента с %s",
   "Agent WebSocket connection attempted without token from %s": "Попытка подключения WebSocket агента без токена с %s",
+  "auditLog": {
+    "exportRequiresLicense": "Экспорт журнала аудита требует лицензии SysManage Professional+."
+  },
   "availablePackages": {
     "addPackage": "Добавить Пакет",
     "confirmUninstallMessage": "Вы уверены, что хотите удалить этот пакет? Это действие удалит пакет из системы.",
@@ -39,7 +42,11 @@
     "title": "Доступные Пакеты",
     "totalPackages": "Всего Пакетов",
     "uninstall": "Удалить",
-    "version": "Версия"
+    "version": "Версия",
+    "added": "Добавлено",
+    "noPackagesSelected": "Пакеты для установки не выбраны",
+    "operation": "Операция",
+    "packagesToInstall": "Пакеты для установки"
   },
   "common": {
     "actions": "Действия",
@@ -460,9 +467,9 @@
     "createLxdContainerTitle": "Создать контейнер LXD",
     "childHostImageLabel": "Образ",
     "childHostContainerNameLabel": "Имя контейнера",
-    "childHostContainerNameHelp": "Name for the LXD container (lowercase, alphanumeric, hyphens)",
-    "childHostVmNameLabel": "VM Name",
-    "childHostVmNameHelp": "Name for the VMM virtual machine (lowercase, alphanumeric, hyphens)",
+    "childHostContainerNameHelp": "Имя контейнера LXD (строчные буквы, цифры, дефисы)",
+    "childHostVmNameLabel": "Имя ВМ",
+    "childHostVmNameHelp": "Имя виртуальной машины VMM (строчные буквы, цифры, дефисы)",
     "childHostVmNameHelpReadonly": "Имя ВМ получено из имени хоста",
     "childHostVmNameRequired": "Пожалуйста, введите имя ВМ",
     "childHostRootPassword": "Пароль root",
@@ -575,17 +582,17 @@
       "biosVirtualizationMessage": "Включите виртуализацию в настройках BIOS/UEFI"
     },
     "createVmmVmTitle": "Создать виртуальную машину VMM",
-    "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
-    "createKvmVmTitle": "Create KVM Virtual Machine",
-    "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
+    "childHostFqdnHelpVmm": "Этот FQDN будет использоваться для виртуальной машины VMM",
+    "createKvmVmTitle": "Создать виртуальную машину KVM",
+    "childHostFqdnHelpKvm": "Этот FQDN будет использоваться для виртуальной машины KVM",
     "createBhyveVmTitle": "Создать виртуальную машину bhyve",
     "childHostFqdnHelpBhyve": "Этот FQDN будет использоваться для виртуальной машины bhyve",
-    "cancelChildHost": "Cancel",
-    "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
-    "cancelChildHostWarning": "This will cancel the child host creation.",
-    "cancelChildHostMessage": "Are you sure you want to cancel the creation of \"{{name}}\"?",
-    "cancelChildHostNote": "The creation record will be removed from the database. If the agent is currently creating this child host, the partial installation may need to be cleaned up manually.",
-    "cancelChildHostConfirmButton": "Cancel Creation",
+    "cancelChildHost": "Отменить",
+    "cancelChildHostConfirmTitle": "Отменить создание дочернего хоста",
+    "cancelChildHostWarning": "Это отменит создание дочернего хоста.",
+    "cancelChildHostMessage": "Вы уверены, что хотите отменить создание \"{{name}}\"?",
+    "cancelChildHostNote": "Запись о создании будет удалена из базы данных. Если агент в данный момент создает этот дочерний хост, частичную установку может потребоваться очистить вручную.",
+    "cancelChildHostConfirmButton": "Отменить создание",
     "clickRequestData": "Нажмите \"Запросить Данные Хоста\" для сбора диагностической информации с агента.",
     "collectCertificates": "Собрать",
     "collectRoles": "Собрать",
@@ -775,7 +782,58 @@
     "graylogNotConfigured": "Интеграция Graylog не настроена или не работает",
     "graylogRequiresPrivileged": "Требуется агент в привилегированном режиме",
     "graylogStatus": "Статус Graylog",
-    "graylogTarget": "Цель"
+    "graylogTarget": "Цель",
+    "added": "Добавлено",
+    "antivirusDeployFailed": "Не удалось развернуть антивирус",
+    "antivirusDeploySuccess": "Развёртывание антивируса успешно инициировано",
+    "confirmUninstallMessage": "Вы уверены, что хотите удалить этот пакет? Это действие удалит пакет из системы.",
+    "confirmUninstallPackage": "Удалить пакет",
+    "deployAntivirus": "Развернуть антивирус",
+    "deployOpenTelemetry": "Развернуть OpenTelemetry",
+    "install": "Установить",
+    "loadingSoftware": "Загрузка программных пакетов...",
+    "noPackagesSelected": "Пакеты для установки не выбраны",
+    "noServicesSelected": "Службы для управления не выбраны",
+    "noSoftwareFound": "Программные пакеты не найдены",
+    "opentelemetryDeployFailed": "Не удалось развернуть OpenTelemetry",
+    "opentelemetryDeploySuccess": "Развёртывание OpenTelemetry успешно поставлено в очередь",
+    "operation": "Операция",
+    "packageUninstallError": "Ошибка постановки удаления пакета в очередь",
+    "packageUninstallQueued": "Удаление пакета поставлено в очередь",
+    "packagesToInstall": "Пакеты для установки",
+    "privilegedModeRequired": "Для управления службами требуется привилегированный режим",
+    "restart": "Перезапустить",
+    "searchSoftware": "Поиск по имени пакета или описанию...",
+    "selectedServices": "служб(а) выбрано",
+    "serviceControlActions": "Действия по управлению службами",
+    "serviceRestartError": "Ошибка перезапуска служб",
+    "serviceRestartSuccess": "Запрос на перезапуск служб успешно отправлен",
+    "serviceStartError": "Ошибка запуска служб",
+    "serviceStartSuccess": "Запрос на запуск служб успешно отправлен",
+    "serviceStopError": "Ошибка остановки служб",
+    "serviceStopSuccess": "Запрос на остановку служб успешно отправлен",
+    "showingPackages": "Показано {{start}}-{{end}} из {{total}} пакетов",
+    "softwareTab": "Программное обеспечение",
+    "start": "Запустить",
+    "stop": "Остановить",
+    "thirdPartyReposTab": "Сторонние репозитории",
+    "ubuntuProAttach": "Подключить",
+    "ubuntuProAttachConfirm": "Подключить",
+    "ubuntuProAttachDescription": "Введите токен Ubuntu Pro для подключения этой системы к вашей подписке.",
+    "ubuntuProAttachError": "Не удалось подключить Ubuntu Pro",
+    "ubuntuProAttachSuccess": "Ubuntu Pro успешно подключён",
+    "ubuntuProAttachTitle": "Подключить Ubuntu Pro",
+    "ubuntuProAttaching": "Подключение...",
+    "ubuntuProDetach": "Отключить",
+    "ubuntuProDetachConfirm": "Отключить",
+    "ubuntuProDetachConfirmMessage": "Вы уверены, что хотите отключить Ubuntu Pro от этой системы? Это приведёт к удалению всех преимуществ и служб Ubuntu Pro для данного хоста.",
+    "ubuntuProDetachConfirmTitle": "Подтвердите отключение Ubuntu Pro",
+    "ubuntuProDetachError": "Не удалось отключить Ubuntu Pro",
+    "ubuntuProDetachSuccess": "Ubuntu Pro успешно отключён",
+    "ubuntuProDetaching": "Отключение...",
+    "ubuntuProMasterTokenPreFilled": "Главный токен Ubuntu Pro был автоматически заполнен из настроек.",
+    "ubuntuProToken": "Токен Ubuntu Pro",
+    "uninstall": "Удалить"
   },
   "hosts": {
     "actions": "Действия",
@@ -847,7 +905,42 @@
     "childHostsOnly": "Только дочерние хосты",
     "childrenOnly": "Только дочерние",
     "childHostOf": "Дочерний хост {{parent}}",
-    "viewParent": "Просмотр родительского хоста"
+    "viewParent": "Просмотр родительского хоста",
+    "antivirusDeployFailed": "Не удалось развернуть антивирус. Пожалуйста, попробуйте снова.",
+    "antivirusDeploySuccess": "Развёртывание антивируса поставлено в очередь для {{count}} хост(ов)",
+    "dataLastUpdated": "Данные обновлены",
+    "deployAntivirus": "Развернуть антивирус",
+    "deployOpenTelemetry": "Развернуть OpenTelemetry",
+    "getDiagnostics": "Получить диагностику",
+    "noEligibleHostsForAntivirus": "Подходящие хосты не выбраны. Для развёртывания антивируса хосты должны быть активными и в привилегированном режиме.",
+    "noEligibleHostsForOpenTelemetry": "Не выбраны подходящие хосты для развёртывания OpenTelemetry",
+    "opentelemetryDeployFailed": "Не удалось развернуть OpenTelemetry. Пожалуйста, попробуйте снова.",
+    "opentelemetryDeploySuccess": "Развёртывание OpenTelemetry поставлено в очередь для {{count}} хост(ов)",
+    "osUpdated": "ОС обновлена",
+    "rebootOrchestration": {
+      "childName": "Имя",
+      "childType": "Тип",
+      "completed": "Оркестрированная перезагрузка успешно завершена",
+      "completedWithErrors": "Оркестрированная перезагрузка завершена: {{error}}",
+      "failed": "Оркестрированная перезагрузка не удалась: {{error}}",
+      "inProgress": "Выполняется оркестрированная перезагрузка",
+      "initiated": "Оркестрированная перезагрузка инициирована — остановка {{count}} дочерних хост(ов)",
+      "orchestratedInfo": "У этого хоста {{count}} работающих дочерних хост(ов). SysManage безопасно остановит их перед перезагрузкой и автоматически перезапустит после.",
+      "orchestratedRebootButton": "Оркестрированная перезагрузка",
+      "proceedAnyway": "Нажмите «Перезагрузить в любом случае», чтобы перезагрузить {{hostname}} без предварительной остановки дочерних хостов.",
+      "proceedOrchestrated": "Нажмите «Оркестрированная перезагрузка» для безопасной перезагрузки {{hostname}}.",
+      "rebootAnywayButton": "Перезагрузить в любом случае",
+      "runningChildren": "Работающие дочерние хосты:",
+      "statusPendingRestart": "Хост переподключён, подготовка к перезапуску дочерних хостов...",
+      "statusRebooting": "Перезагрузка хоста, ожидание переподключения...",
+      "statusRestarting": "Перезапуск дочерних хостов...",
+      "statusShuttingDown": "Остановка дочерних хостов...",
+      "ungracefulWarning": "У этого хоста {{count}} работающих дочерних хост(ов), которые будут принудительно завершены при перезагрузке. Обновитесь до SysManage Professional+ для безопасной оркестрированной перезагрузки."
+    },
+    "scriptsDisabledTooltip": "Выполнение скриптов отключено на этом хосте",
+    "scriptsEnabled": "Скрипты включены",
+    "scriptsEnabledTooltip": "Выполнение скриптов включено на этом хосте",
+    "softwareUpdated": "ПО обновлено"
   },
   "login": {
     "error": "Неверное имя пользователя или пароль",
@@ -916,7 +1009,8 @@
       "openbsd": "OpenBSD",
       "opensuse": "openSUSE",
       "ubuntu": "Ubuntu/Debian",
-      "windows": "Windows"
+      "windows": "Windows",
+      "netbsd": "NetBSD"
     },
     "loading": "Загрузка обновлений ОС...",
     "noMatchingUpgrades": "Ни одно обновление ОС не соответствует текущему фильтру",
@@ -943,7 +1037,8 @@
       "openbsd": "Обновление системы OpenBSD",
       "opensuse": "Обновление дистрибутива openSUSE",
       "ubuntu": "Обновление релиза Ubuntu",
-      "windows": "Обновление функций Windows"
+      "windows": "Обновление функций Windows",
+      "netbsd": "Обновление системы NetBSD"
     }
   },
   "reports": {
@@ -1118,7 +1213,10 @@
       "failed": "Ошибка",
       "pending": "Ожидание",
       "running": "Выполняется",
-      "timeout": "Таймаут"
+      "timeout": "Таймаут",
+      "in_progress": "Выполняется",
+      "installing": "Установка",
+      "queued": "В очереди"
     },
     "stderrOutput": "Стандартная ошибка",
     "stdoutOutput": "Стандартный вывод",
@@ -1137,7 +1235,11 @@
       "unsupportedShellType": "Неподдерживаемый тип оболочки: {type}"
     },
     "viewScript": "Посмотреть скрипт",
-    "waitingForResults": "Ожидание результатов..."
+    "waitingForResults": "Ожидание результатов...",
+    "deleteMultipleSuccess": "Скрипты успешно удалены",
+    "runScript": "Выполнить скрипт",
+    "scriptLibrary": "Библиотека скриптов",
+    "selectScriptAndHost": "Выберите скрипт и хост, затем нажмите «Выполнить сейчас», чтобы увидеть результат здесь"
   },
   "search": {
     "search": "Поиск",
@@ -1362,6 +1464,35 @@
       "logging": "Журналирование",
       "requests": "Запросы",
       "sqlalchemy": "SQLAlchemy"
+    },
+    "opentelemetry": {
+      "collectorUrl": "URL коллектора",
+      "configuration": "Конфигурация",
+      "disabledMessage": "Инструментирование OpenTelemetry в настоящее время отключено. Удалите OTEL_ENABLED=false или установите OTEL_ENABLED=true для включения распределённой трассировки и сбора метрик.",
+      "enableHint": "OpenTelemetry включён по умолчанию. Для отключения установите переменную окружения OTEL_ENABLED=false и перезапустите сервер.",
+      "instrumentation": "Инструментирование",
+      "metricsCount": "Метрики",
+      "prometheusPort": "Порт Prometheus",
+      "statistics": "Статистика",
+      "status": "Статус",
+      "title": "Статус OpenTelemetry",
+      "tracesCount": "Трассировки"
+    },
+    "prometheus": {
+      "information": "Информация",
+      "lastScrape": "Последний сбор",
+      "manageHint": "Prometheus управляется стеком телеметрии. Используйте \"make start-telemetry\" для запуска или \"make stop-telemetry\" для остановки.",
+      "metricsCount": "Метрики",
+      "notRunningMessage": "Prometheus не запущен. Запустите стек телеметрии с помощью \"make start-telemetry\" или \"make start\".",
+      "retentionTime": "Время хранения",
+      "scrapeInterval": "Интервал сбора",
+      "statistics": "Статистика",
+      "status": "Статус",
+      "storageSize": "Размер хранилища",
+      "targets": "Цели",
+      "title": "Статус Prometheus",
+      "url": "URL",
+      "version": "Версия"
     }
   },
   "thirdPartyRepos": {
@@ -1505,7 +1636,12 @@
       "security": "Безопасность",
       "system": "Система"
     },
-    "unknown": "Неизвестно"
+    "unknown": "Неизвестно",
+    "status": {
+      "failed": "Обновление не удалось",
+      "pending": "Обновление запрошено",
+      "success": "Успешно обновлено"
+    }
   },
   "userDetail": {
     "active": "Активный",
@@ -1523,7 +1659,10 @@
     "resetPassword": "Сбросить пароль",
     "resettingPassword": "Отправка email для сброса...",
     "securityInfo": "Информация безопасности",
-    "userId": "ID пользователя"
+    "userId": "ID пользователя",
+    "confirmResetMessage": "Вы уверены, что хотите отправить письмо для сброса пароля на {{email}}? Это позволит пользователю установить новый пароль.",
+    "confirmResetTitle": "Подтвердите сброс пароля",
+    "sendResetEmail": "Отправить письмо для сброса"
   },
   "userProfile": {
     "accountInfo": "Информация об аккаунте",
@@ -1612,7 +1751,9 @@
     "unlock": "Разблокировать",
     "unlockSelected": "Разблокировать Выбранных Пользователей",
     "unlocked": "Разблокирован",
-    "username": "Имя пользователя"
+    "username": "Имя пользователя",
+    "firstName": "Имя",
+    "lastName": "Фамилия"
   },
   "hostAccount": {
     "add": "Добавить",
@@ -1673,5 +1814,159 @@
     "confirmDelete": "Вы уверены, что хотите удалить группу \"{{groupName}}\"? Это действие нельзя отменить.",
     "deleteSuccess": "Запрос на удаление группы отправлен. Список групп обновится автоматически.",
     "deleteFailed": "Не удалось удалить группу"
+  },
+  "antivirus": {
+    "description": "Настройка антивирусного программного обеспечения по умолчанию для каждой операционной системы",
+    "errors": {
+      "loadFailed": "Не удалось загрузить настройки антивируса по умолчанию",
+      "permissionDenied": "У вас нет прав для управления настройками антивируса по умолчанию",
+      "saveFailed": "Не удалось сохранить настройки антивируса по умолчанию"
+    },
+    "none": "Нет",
+    "permissionWarning": "У вас нет прав для изменения настроек антивируса по умолчанию. Обратитесь к администратору для получения роли MANAGE_ANTIVIRUS_DEFAULTS.",
+    "save": "Сохранить",
+    "saveSuccess": "Настройки антивируса по умолчанию успешно сохранены",
+    "selectProgram": "Выберите антивирусную программу",
+    "title": "Антивирус"
+  },
+  "queues": {
+    "created": "Дата создания",
+    "description": "Просмотр и управление просроченными/неудачными сообщениями из очереди сообщений.",
+    "direction": "Направление",
+    "expired": "Дата истечения",
+    "hostId": "ID хоста",
+    "messageContent": "Содержимое сообщения",
+    "messageDetails": "Подробности сообщения",
+    "messageId": "ID сообщения",
+    "messageType": "Тип сообщения",
+    "placeholder": "Интерфейс управления очередями будет реализован здесь.",
+    "priority": "Приоритет",
+    "title": "Управление очередями",
+    "viewDetails": "Подробнее"
+  },
+  "ui_testing": {
+    "bestPractices": {
+      "codeReview": "Код-ревью тестов",
+      "debugging": "Стратегии отладки",
+      "documentation": "Документация тестов",
+      "maintainability": "Поддерживаемость тестов",
+      "performance": "Производительность тестов",
+      "reliability": "Надёжность тестов",
+      "title": "Лучшие практики тестирования"
+    },
+    "cicd": {
+      "description": "Рабочие процессы тестирования для непрерывной интеграции и развёртывания",
+      "features": {
+        "artifactStorage": "Хранение артефактов тестирования",
+        "environmentManagement": "Управление средами",
+        "notificationIntegration": "Интеграция уведомлений",
+        "parallelJobs": "Параллельное выполнение задач",
+        "testReports": "Генерация отчётов о тестировании"
+      },
+      "platforms": {
+        "azure": "Azure DevOps",
+        "circleci": "CircleCI",
+        "githubActions": "GitHub Actions",
+        "gitlab": "GitLab CI",
+        "jenkins": "Jenkins",
+        "travis": "Travis CI"
+      },
+      "title": "Интеграция CI/CD"
+    },
+    "configuration": {
+      "configFiles": "Файлы конфигурации",
+      "environment": "Настройка среды",
+      "pageObjects": "Паттерн Page Object",
+      "reporting": "Отчёты о тестировании",
+      "testData": "Управление тестовыми данными",
+      "title": "Конфигурация тестирования",
+      "utilities": "Утилиты тестирования"
+    },
+    "makefile": {
+      "commands": {
+        "test": "make test",
+        "testAccessibility": "make test-a11y",
+        "testCoverage": "make test-coverage",
+        "testE2e": "make test-e2e",
+        "testVisual": "make test-visual",
+        "testWatch": "make test-watch"
+      },
+      "description": "Основные команды тестирования, доступные через Makefile",
+      "title": "Команды Makefile"
+    },
+    "overview": {
+      "automation": "Автоматизация и CI/CD",
+      "description": "Комплексная настройка UI-тестирования с использованием современных кроссплатформенных фреймворков",
+      "frameworks": "Фреймворки тестирования",
+      "platforms": "Кроссплатформенная поддержка",
+      "title": "Обзор фреймворка тестирования"
+    },
+    "playwright": {
+      "browsers": {
+        "chromium": "Chromium",
+        "edge": "Microsoft Edge",
+        "firefox": "Firefox",
+        "safari": "Safari",
+        "webkit": "WebKit"
+      },
+      "commands": {
+        "codegen": "Генерация кода",
+        "debug": "Отладка тестов",
+        "install": "Установить Playwright",
+        "report": "Отчёт о тестировании",
+        "test": "Запустить тесты",
+        "trace": "Просмотр трассировки"
+      },
+      "description": "Современный кроссплатформенный фреймворк тестирования с надёжным автоматическим ожиданием элементов",
+      "features": {
+        "autoWait": "Автоматическое ожидание элементов",
+        "crossBrowser": "Кроссбраузерное тестирование",
+        "parallel": "Параллельное выполнение",
+        "screenshots": "Тестирование скриншотами",
+        "tracing": "Трассировка тестов",
+        "video": "Запись видео"
+      },
+      "title": "Тестирование с Playwright"
+    },
+    "selenium": {
+      "description": "Стандартная отраслевая автоматизация WebDriver для поддержки устаревших браузеров",
+      "drivers": {
+        "chrome": "ChromeDriver",
+        "edge": "EdgeDriver",
+        "firefox": "GeckoDriver",
+        "ie": "IEDriver",
+        "safari": "SafariDriver"
+      },
+      "features": {
+        "crossPlatform": "Кроссплатформенное тестирование",
+        "gridSupport": "Поддержка Selenium Grid",
+        "mobileTesting": "Мобильное тестирование",
+        "multiLanguage": "Многоязычная поддержка",
+        "remoteExecution": "Удалённое выполнение",
+        "webdriver": "Протокол WebDriver"
+      },
+      "title": "Тестирование с Selenium"
+    },
+    "testTypes": {
+      "accessibility": "Тесты доступности",
+      "api": "API-тесты",
+      "e2e": "Сквозные тесты",
+      "integration": "Интеграционные тесты",
+      "mobile": "Мобильные тесты",
+      "performance": "Тесты производительности",
+      "title": "Типы тестов",
+      "unit": "Модульные тесты",
+      "visual": "Тесты визуальной регрессии"
+    },
+    "title": "Документация по UI-тестированию",
+    "tools": {
+      "accessibilityTools": "Инструменты тестирования доступности",
+      "assertionLibraries": "Библиотеки утверждений",
+      "dataGenerators": "Генераторы тестовых данных",
+      "mockingFrameworks": "Фреймворки мокирования",
+      "testRunners": "Средства запуска тестов",
+      "title": "Инструменты и утилиты тестирования",
+      "visualTools": "Инструменты визуального тестирования"
+    }
   }
 }

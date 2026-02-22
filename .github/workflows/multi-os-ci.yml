@@ -34,15 +34,15 @@ jobs:
           - 5432:5432
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
     - name: Set up Python 3.12
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
       with:
         python-version: '3.12'
 
     - name: Cache pip packages
-      uses: actions/cache@v5
+      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
       with:
         path: ~/.cache/pip
         key: ubuntu-latest-pip-${{ hashFiles('**/requirements.txt') }}
@@ -99,7 +99,7 @@ jobs:
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
 
     - name: Upload coverage reports
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
       with:
         files: ./coverage.xml
         flags: backend-linux-postgres
@@ -120,15 +120,15 @@ jobs:
         python-version: ['3.12']
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Cache pip packages
-      uses: actions/cache@v5
+      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
       with:
         path: |
           ~/.cache/pip
@@ -263,7 +263,7 @@ jobs:
         DATABASE_URL: sqlite:///test_${{ runner.os }}.db
 
     - name: Upload coverage reports
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
       with:
         files: ./coverage.xml
         flags: backend-${{ matrix.os }}
@@ -281,10 +281,10 @@ jobs:
         node-version: ['20']
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
     - name: Set up Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
@@ -326,7 +326,7 @@ jobs:
       working-directory: frontend
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
       with:
         name: frontend-build-${{ matrix.os }}
         path: frontend/dist/
@@ -346,15 +346,15 @@ jobs:
         node-version: ['20']
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Set up Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
@@ -398,7 +398,7 @@ jobs:
           libdrm2 libxkbcommon0 libgtk-3-0 libgdk-pixbuf2.0-0
 
     - name: Download frontend build
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
       with:
         name: frontend-build-${{ matrix.os }}
         path: frontend/dist/
@@ -649,7 +649,7 @@ jobs:
         PYTHONPATH: .
 
     - name: Upload performance results
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
       with:
         name: performance-results-${{ matrix.os }}
         path: |
@@ -659,7 +659,7 @@ jobs:
 
     - name: Upload UI test artifacts
       if: always()
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
       with:
         name: ui-test-artifacts-${{ matrix.os }}-${{ github.run_number }}
         path: |
@@ -675,10 +675,10 @@ jobs:
     if: always()
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
     - name: Download all performance results
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
       with:
         pattern: performance-results-*
         merge-multiple: true
@@ -719,7 +719,7 @@ jobs:
       shell: bash
 
     - name: Upload performance summary
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
       with:
         name: performance-summary
         path: |

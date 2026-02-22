@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { parseUTCTimestamp } from '../utils/dateUtils';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -162,10 +163,9 @@ const Hosts = () => {
             display: 'flex',
             renderCell: (params) => {
                 const row = params.row;
-                // Server sends naive UTC timestamps as ISO strings with Z suffix
-                const lastAccess = new Date(row.last_access);
+                const lastAccess = parseUTCTimestamp(row.last_access);
                 const now = new Date();
-                const diffMinutes = Math.floor((now.getTime() - lastAccess.getTime()) / 60000);
+                const diffMinutes = lastAccess ? Math.floor((now.getTime() - lastAccess.getTime()) / 60000) : Infinity;
                 
                 // Consider host "up" if last access was within 5 minutes
                 const isRecentlyActive = diffMinutes <= 5;
@@ -288,8 +288,8 @@ const Hosts = () => {
             headerName: t('hosts.lastCheckin'),
             width: 200,
             renderCell: (params) => {
-                // Server sends naive UTC timestamps as ISO strings with Z suffix
-                const date = new Date(params.value);
+                // Backend stores naive UTC; parseUTCTimestamp appends "Z" if needed
+                const date = parseUTCTimestamp(params.value) || new Date(NaN);
                 const now = new Date();
 
                 // Check if date is valid

@@ -1,16 +1,16 @@
 """
 Child host CRUD (Create, Read, Update, Delete) API endpoints.
+
+NOTE: Container/VM creation and deletion are Pro+ features. The actual implementation
+is provided by the container_engine module. This file provides stub endpoints
+for write operations that return license-required errors for community users.
+Read-only listing operations remain open source.
 """
 
-import json
-import uuid
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
-
-from datetime import datetime, timezone
 
 from backend.api.child_host_models import (
     ChildHostResponse,
@@ -28,9 +28,9 @@ from backend.api.child_host_utils import (
 )
 from backend.api.error_constants import error_distribution_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
-from backend.config.config import get_config
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.licensing.module_loader import module_loader
+from backend.persistence import db
 from backend.persistence.models import ChildHostDistribution, HostChild
 from backend.security.roles import SecurityRoles
 from backend.websocket.messages import create_command_message
@@ -38,7 +38,19 @@ from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
 
 router = APIRouter()
-queue_ops = QueueOperations()
+
+
+def _check_container_module():
+    """Check if container_engine Pro+ module is available."""
+    container_engine = module_loader.get_module("container_engine")
+    if container_engine is None:
+        raise HTTPException(
+            status_code=402,
+            detail=_(
+                "Container/VM management requires a SysManage Professional+ license. "
+                "Please upgrade to access this feature."
+            ),
+        )
 
 
 @router.get(
@@ -97,7 +109,7 @@ async def list_child_hosts(
     "/host/{host_id}/children",
     dependencies=[Depends(JWTBearer())],
 )
-async def create_child_host(  # NOSONAR
+async def create_child_host(
     host_id: str,
     request: CreateChildHostRequest,
     current_user: str = Depends(get_current_user),
@@ -105,172 +117,10 @@ async def create_child_host(  # NOSONAR
     """
     Create a new child host (VM, container, or WSL instance).
     Requires CREATE_CHILD_HOST permission.
+
+    This is a Pro+ feature. Requires container_engine module.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
-
-    with session_local() as session:
-        user = get_user_with_role_check(
-            session, current_user, SecurityRoles.CREATE_CHILD_HOST
-        )
-
-        host = get_host_or_404(session, host_id)
-        verify_host_active(host)
-
-        # Get the distribution info
-        distribution = (
-            session.query(ChildHostDistribution)
-            .filter(ChildHostDistribution.id == request.distribution_id)
-            .first()
-        )
-        if not distribution:
-            raise HTTPException(status_code=404, detail=error_distribution_not_found())
-
-        if not distribution.is_active:
-            raise HTTPException(status_code=400, detail=_("Distribution is not active"))
-
-        # Check if a child host with this name already exists
-        existing = (
-            session.query(HostChild)
-            .filter(
-                HostChild.parent_host_id == host.id,
-                HostChild.child_name == request.hostname,
-                HostChild.child_type == request.child_type,
-            )
-            .first()
-        )
-        if existing:
-            raise HTTPException(
-                status_code=400,
-                detail=_("A child host with this name already exists"),
-            )
-
-        # Generate auto-approve token if requested
-        auto_approve_token = None
-        if request.auto_approve:
-            auto_approve_token = str(uuid.uuid4())
-
-        # Create the host_child record
-        child_host = HostChild(
-            parent_host_id=host.id,
-            child_name=request.hostname,
-            child_type=request.child_type,
-            distribution=distribution.distribution_name,
-            distribution_version=distribution.distribution_version,
-            hostname=request.hostname,
-            default_username=request.username,
-            install_path=request.install_path,
-            status="pending",
-            auto_approve_token=auto_approve_token,
-        )
-        session.add(child_host)
-        session.flush()  # Get the ID
-
-        # Parse agent_install_commands if it's a JSON string
-        agent_install_commands = []
-        if distribution.agent_install_commands:
-            if isinstance(distribution.agent_install_commands, str):
-                try:
-                    agent_install_commands = json.loads(
-                        distribution.agent_install_commands
-                    )
-                except json.JSONDecodeError:
-                    # If parsing fails, treat as empty
-                    agent_install_commands = []
-            elif isinstance(distribution.agent_install_commands, list):
-                agent_install_commands = distribution.agent_install_commands
-
-        # Get server URL from config for agent configuration
-        config = get_config()
-        api_host = config["api"].get("host", "localhost")
-        api_port = config["api"].get("port", 8443)
-        # Use the host's FQDN as the server URL since the agent needs to reach it
-        # If api_host is 0.0.0.0, use the server's actual FQDN
-        if api_host in (
-            "0.0.0.0",
-            "localhost",
-            "127.0.0.1",
-        ):  # nosec B104 - string comparison, not binding
-            # Use the parent host's FQDN as the server URL
-            # The agent will connect back to the same server
-            import socket
-
-            try:
-                server_url = socket.getfqdn()
-            except Exception:
-                server_url = "localhost"
-        else:
-            server_url = api_host
-
-        # Build parameters for the command
-        parameters = {
-            "child_host_id": str(child_host.id),
-            "child_type": request.child_type,
-            "distribution": distribution.distribution_name,
-            "distribution_version": distribution.distribution_version,
-            "install_identifier": distribution.install_identifier,
-            "executable_name": distribution.executable_name,
-            "hostname": request.hostname,
-            "username": request.username,
-            "password": request.password,
-            "agent_install_method": distribution.agent_install_method,
-            "agent_install_commands": agent_install_commands,
-            "server_url": server_url,
-            "server_port": api_port,
-        }
-        if request.install_path:
-            parameters["install_path"] = request.install_path
-        if auto_approve_token:
-            parameters["auto_approve_token"] = auto_approve_token
-
-        # Create command message
-        command_message = create_command_message(
-            command_type="create_child_host", parameters=parameters
-        )
-
-        # Queue the message for delivery to the agent
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
-
-        # Audit log
-        audit_log(
-            session,
-            user,
-            current_user,
-            "CREATE",
-            host_id,
-            host.fqdn,
-            f"Requested child host creation '{request.hostname}' "
-            f"({request.child_type}) on host {host.fqdn}",
-        )
-
-        session.commit()
-
-        # Build response message based on auto-approve setting
-        if auto_approve_token:
-            response_message = _(
-                "Child host creation started. "
-                "The host will be automatically approved when it connects."
-            )
-        else:
-            response_message = _(
-                "Child host creation started. "
-                "After installation completes, you must approve the new host "
-                "in the Hosts list."
-            )
-
-        return {
-            "result": True,
-            "child_host_id": str(child_host.id),
-            "auto_approve": bool(auto_approve_token),
-            "message": response_message,
-        }
+    _check_container_module()
 
 
 @router.get(
@@ -328,7 +178,7 @@ async def get_child_host(
     "/host/{host_id}/children/{child_id}",
     dependencies=[Depends(JWTBearer())],
 )
-async def delete_child_host(  # NOSONAR
+async def delete_child_host(
     host_id: str,
     child_id: str,
     current_user: str = Depends(get_current_user),
@@ -336,7 +186,11 @@ async def delete_child_host(  # NOSONAR
     """
     Delete a child host.
     Requires DELETE_CHILD_HOST permission.
+
+    This is a Pro+ feature. Requires container_engine module.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -360,171 +214,22 @@ async def delete_child_host(  # NOSONAR
         if not child:
             raise HTTPException(status_code=404, detail=_("Child host not found"))
 
-        child_name = child.child_name
-        child_type = child.child_type
-        child_status = child.status
-
-        # If status is "creating", "pending", or "failed", just delete the DB record
-        # No need to send a command to the agent since nothing was created yet
-        # or the creation failed before the child host was fully set up
-        if child_status in ("creating", "pending", "failed"):
-            # Store child info before deleting
-            child_host_id = child.child_host_id
-            child_hostname = child.hostname
-
-            session.delete(child)
-
-            # Also delete any registered host record for this child
-            deleted_host_info = None
-            if child_host_id:
-                linked_host = (
-                    session.query(models.Host)
-                    .filter(models.Host.id == child_host_id)
-                    .first()
-                )
-                if linked_host:
-                    deleted_host_info = linked_host.fqdn
-                    session.delete(linked_host)
-            elif child_hostname:
-                # Try to find host by fqdn matching the child hostname
-                # Extract short hostname (first part before any dot)
-                child_short_hostname = child_hostname.split(".")[0]
-
-                matching_host = (
-                    session.query(models.Host)
-                    .filter(func.lower(models.Host.fqdn) == func.lower(child_hostname))
-                    .first()
-                )
-                # Also try prefix match (hostname without domain)
-                if not matching_host:
-                    matching_host = (
-                        session.query(models.Host)
-                        .filter(
-                            func.lower(models.Host.fqdn).like(
-                                func.lower(child_hostname + ".%")
-                            )
-                        )
-                        .first()
-                    )
-                # Try reverse prefix match (Host.fqdn is short, child_hostname is FQDN)
-                if not matching_host:
-                    matching_host = (
-                        session.query(models.Host)
-                        .filter(
-                            func.lower(child_hostname).like(
-                                func.lower(models.Host.fqdn) + ".%"
-                            )
-                        )
-                        .first()
-                    )
-                # Try matching just the short hostname
-                if not matching_host:
-                    matching_host = (
-                        session.query(models.Host)
-                        .filter(
-                            func.lower(models.Host.fqdn)
-                            == func.lower(child_short_hostname)
-                        )
-                        .first()
-                    )
-                # Try matching short hostname as prefix of Host.fqdn
-                if not matching_host:
-                    matching_host = (
-                        session.query(models.Host)
-                        .filter(
-                            func.lower(models.Host.fqdn).like(
-                                func.lower(child_short_hostname + ".%")
-                            )
-                        )
-                        .first()
-                    )
-                if matching_host:
-                    deleted_host_info = matching_host.fqdn
-                    session.delete(matching_host)
-            else:
-                # Final fallback: try matching by child_name
-                # This handles cases where hostname was NULL (e.g., bhyve VMs
-                # created before metadata storage was implemented)
-                # Try child_name as exact FQDN match
-                matching_host = (
-                    session.query(models.Host)
-                    .filter(func.lower(models.Host.fqdn) == func.lower(child_name))
-                    .first()
-                )
-                # Try child_name as prefix of Host.fqdn
-                if not matching_host:
-                    matching_host = (
-                        session.query(models.Host)
-                        .filter(
-                            func.lower(models.Host.fqdn).like(
-                                func.lower(child_name + ".%")
-                            )
-                        )
-                        .first()
-                    )
-                if matching_host:
-                    deleted_host_info = matching_host.fqdn
-                    session.delete(matching_host)
-
-            # Audit log - use appropriate message based on status
-            if child_status == "failed":
-                description = (
-                    f"Removed failed child host '{child_name}' "
-                    f"({child_type}) from host {host.fqdn}"
-                )
-            else:
-                description = (
-                    f"Cancelled child host creation '{child_name}' "
-                    f"({child_type}) on host {host.fqdn}"
-                )
-            if deleted_host_info:
-                description += f" (also deleted host record: {deleted_host_info})"
-
-            audit_log(
-                session,
-                user,
-                current_user,
-                "DELETE",
-                host_id,
-                host.fqdn,
-                description,
-            )
-
-            session.commit()
-
-            # Return appropriate message based on original status
-            if child_status == "failed":
-                return {
-                    "result": True,
-                    "message": _("Failed child host record removed."),
-                }
-            return {
-                "result": True,
-                "message": _("Child host creation cancelled and record removed."),
-            }
-
-        # For existing child hosts, send delete command to the agent
-        # Update status to uninstalling
-        child.status = "uninstalling"
-        session.flush()
-
-        # Build parameters for the command
         parameters = {
-            "child_host_id": str(child.id),
-            "child_type": child.child_type,
             "child_name": child.child_name,
+            "child_type": child.child_type,
         }
 
-        # Include wsl_guid for WSL instances to prevent stale delete commands
+        # For WSL type, include the wsl_guid so the agent can target the right instance
         if child.child_type == "wsl" and child.wsl_guid:
             parameters["wsl_guid"] = child.wsl_guid
 
-        # Create command message
+        queue_ops = QueueOperations()
+
         command_message = create_command_message(
-            command_type="delete_child_host", parameters=parameters
+            command_type="delete_child_host",
+            parameters=parameters,
         )
 
-        # Queue the message for delivery to the agent
         queue_ops.enqueue_message(
             message_type="command",
             message_data=command_message,
@@ -533,26 +238,24 @@ async def delete_child_host(  # NOSONAR
             db=session,
         )
 
-        # Audit log
+        # Mark child as deleting
+        child.status = "deleting"
+
         audit_log(
             session,
             user,
             current_user,
             "DELETE",
-            host_id,
+            str(host.id),
             host.fqdn,
-            f"Requested child host deletion '{child.child_name}' "
-            f"({child.child_type}) on host {host.fqdn}",
+            _("Child host deletion requested: %s") % child.child_name,
         )
 
         session.commit()
 
         return {
             "result": True,
-            "message": _(
-                "Child host deletion requested. "
-                "This will permanently remove the child host and all its data."
-            ),
+            "message": _("Child host deletion requested"),
         }
 
 
@@ -577,7 +280,15 @@ async def refresh_child_hosts(
         get_user_with_role_check(session, current_user, SecurityRoles.VIEW_CHILD_HOST)
 
         host = get_host_or_404(session, host_id)
+
+        from backend.api.child_host_utils import verify_host_active
+        from backend.websocket.messages import create_command_message
+        from backend.websocket.queue_enums import QueueDirection
+        from backend.websocket.queue_operations import QueueOperations
+
         verify_host_active(host)
+
+        queue_ops = QueueOperations()
 
         # Create command message to list child hosts
         command_message = create_command_message(
@@ -760,7 +471,11 @@ async def create_distribution(
     """
     Create a new distribution.
     Requires CONFIGURE_CHILD_HOST permission.
+
+    This is a Pro+ feature. Requires container_engine module.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -781,17 +496,23 @@ async def create_distribution(
             )
             .first()
         )
-
         if existing:
             raise HTTPException(
-                status_code=400,
-                detail=_(
-                    "A distribution with this type, name, and version already exists"
+                status_code=409,
+                detail=_("Distribution '%s %s' already exists for type '%s'")
+                % (
+                    request.distribution_name,
+                    request.distribution_version,
+                    request.child_type,
                 ),
             )
 
+        import uuid
+        from datetime import datetime, timezone
+
         now = datetime.now(timezone.utc).replace(tzinfo=None)
         dist = ChildHostDistribution(
+            id=uuid.uuid4(),
             child_type=request.child_type,
             distribution_name=request.distribution_name,
             distribution_version=request.distribution_version,
@@ -841,7 +562,11 @@ async def update_distribution(
     """
     Update an existing distribution.
     Requires CONFIGURE_CHILD_HOST permission.
+
+    This is a Pro+ feature. Requires container_engine module.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -856,35 +581,16 @@ async def update_distribution(
             .filter(ChildHostDistribution.id == distribution_id)
             .first()
         )
-
         if not dist:
             raise HTTPException(status_code=404, detail=error_distribution_not_found())
 
-        # Update only provided fields
-        if request.child_type is not None:
-            dist.child_type = request.child_type
-        if request.distribution_name is not None:
-            dist.distribution_name = request.distribution_name
-        if request.distribution_version is not None:
-            dist.distribution_version = request.distribution_version
-        if request.display_name is not None:
-            dist.display_name = request.display_name
-        if request.install_identifier is not None:
-            dist.install_identifier = request.install_identifier
-        if request.executable_name is not None:
-            dist.executable_name = request.executable_name
-        if request.agent_install_method is not None:
-            dist.agent_install_method = request.agent_install_method
-        if request.agent_install_commands is not None:
-            dist.agent_install_commands = request.agent_install_commands
-        if request.is_active is not None:
-            dist.is_active = request.is_active
-        if request.min_agent_version is not None:
-            dist.min_agent_version = request.min_agent_version
-        if request.notes is not None:
-            dist.notes = request.notes
+        from datetime import datetime, timezone
 
+        update_data = request.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(dist, field, value)
         dist.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
         session.commit()
         session.refresh(dist)
 
@@ -917,7 +623,11 @@ async def delete_distribution(
     """
     Delete a distribution.
     Requires CONFIGURE_CHILD_HOST permission.
+
+    This is a Pro+ feature. Requires container_engine module.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -932,11 +642,13 @@ async def delete_distribution(
             .filter(ChildHostDistribution.id == distribution_id)
             .first()
         )
-
         if not dist:
             raise HTTPException(status_code=404, detail=error_distribution_not_found())
 
         session.delete(dist)
         session.commit()
 
-        return {"result": True, "message": _("Distribution deleted successfully")}
+        return {
+            "result": True,
+            "message": _("Distribution deleted"),
+        }

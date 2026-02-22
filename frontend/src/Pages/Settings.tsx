@@ -50,6 +50,7 @@ import HostDefaultsSettings from '../Components/HostDefaultsSettings';
 import FirewallRolesSettings from '../Components/FirewallRolesSettings';
 import DistributionsSettings from '../Components/DistributionsSettings';
 import axiosInstance from '../Services/api';
+import { formatUTCTimestamp, formatUTCDate } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import { usePlugins } from '../plugins';
 
@@ -617,7 +618,7 @@ const Settings: React.FC = () => {
       field: 'updated_at',
       headerName: t('tags.lastUpdated', 'Last Updated'),
       width: 180,
-      renderCell: (params) => new Date(params.value).toLocaleDateString()
+      renderCell: (params) => formatUTCDate(params.value)
     },
     {
       field: 'actions',
@@ -653,13 +654,13 @@ const Settings: React.FC = () => {
       field: 'timestamp',
       headerName: t('queues.expired', 'Expired At'),
       width: 180,
-      renderCell: (params) => params.value ? new Date(params.value).toLocaleString() : '-'
+      renderCell: (params) => formatUTCTimestamp(params.value)
     },
     {
       field: 'created_at',
       headerName: t('queues.created', 'Created At'),
       width: 180,
-      renderCell: (params) => params.value ? new Date(params.value).toLocaleString() : '-'
+      renderCell: (params) => formatUTCTimestamp(params.value)
     },
     { field: 'host_id', headerName: t('queues.hostId', 'Host ID'), width: 100 },
     { field: 'priority', headerName: t('queues.priority', 'Priority'), width: 100 },
@@ -1243,10 +1244,10 @@ const Settings: React.FC = () => {
                 <strong>{t('queues.hostId', 'Host ID')}:</strong> {selectedMessage.host_id || 'N/A'}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.created', 'Created At')}:</strong> {selectedMessage.created_at ? new Date(selectedMessage.created_at).toLocaleString() : 'N/A'}
+                <strong>{t('queues.created', 'Created At')}:</strong> {formatUTCTimestamp(selectedMessage.created_at, 'N/A')}
               </Typography>
               <Typography variant="body2" sx={{ mb: 2 }}>
-                <strong>{t('queues.expired', 'Expired At')}:</strong> {selectedMessage.timestamp ? new Date(selectedMessage.timestamp).toLocaleString() : 'N/A'}
+                <strong>{t('queues.expired', 'Expired At')}:</strong> {formatUTCTimestamp(selectedMessage.timestamp, 'N/A')}
               </Typography>
               
               <Typography variant="h6" sx={{ mb: 1 }}>

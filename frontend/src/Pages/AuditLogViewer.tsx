@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { formatUTCTimestamp } from '../utils/dateUtils';
 import {
   Box,
   Button,
@@ -147,8 +148,13 @@ const AuditLogViewer: React.FC = () => {
       link.click();
       link.remove();
       globalThis.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error exporting audit log:', error);
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { status?: number; data?: { detail?: string } } };
+      if (axiosError.response?.status === 402) {
+        alert(t('auditLog.exportRequiresLicense', 'Audit log export requires a SysManage Professional+ license.'));
+      } else {
+        console.error('Error exporting audit log:', error);
+      }
     }
   };
 
@@ -359,7 +365,7 @@ const AuditLogViewer: React.FC = () => {
                     {entries.map((entry) => (
                       <TableRow key={entry.id} hover>
                         <TableCell>
-                          {new Date(entry.timestamp).toLocaleString()}
+                          {formatUTCTimestamp(entry.timestamp)}
                         </TableCell>
                         <TableCell>{entry.username}</TableCell>
                         <TableCell>

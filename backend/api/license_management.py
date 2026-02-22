@@ -20,7 +20,7 @@ from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.utils.verbosity_logger import get_logger
 
-logger = get_logger("backend.api.health_analysis")
+logger = get_logger("backend.api.license_management")
 
 router = APIRouter()
 

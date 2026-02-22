@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState } from 'react';
+import { formatUTCTimestamp } from '../utils/dateUtils';
 import {
     Box,
     Card,
@@ -173,8 +174,7 @@ const UserDetail = () => { // NOSONAR
     const formatDate = (dateString: string | null | undefined) => {
         if (!dateString) return t('common.notAvailable', 'N/A');
         try {
-            const date = new Date(dateString);
-            return date.toLocaleString();
+            return formatUTCTimestamp(dateString, t('common.notAvailable', 'N/A'));
         } catch {
             return t('common.invalidDate', 'Invalid date');
         }

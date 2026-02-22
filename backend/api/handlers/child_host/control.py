@@ -493,6 +493,27 @@ async def _handle_child_host_control_result(  # NOSONAR
             child.error_message = None  # Clear any previous error
             db.commit()
 
+            # Check reboot orchestration progress (Pro+ safe reboot)
+            try:
+                from backend.licensing.module_loader import module_loader
+
+                if module_loader.get_module("container_engine") is not None:
+                    from backend.services.reboot_orchestration_service import (
+                        check_restart_progress,
+                        check_shutdown_progress,
+                    )
+
+                    if action == "stop":
+                        check_shutdown_progress(db, host_id)
+                    elif action == "start":
+                        check_restart_progress(db, host_id)
+            except Exception as orch_err:
+                logger.warning(
+                    "Error checking reboot orchestration for host %s: %s",
+                    host_id,
+                    orch_err,
+                )
+
             AuditService.log(
                 db=db,
                 action_type=ActionType.AGENT_MESSAGE,

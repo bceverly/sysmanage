@@ -27,7 +27,7 @@ def process_user_accounts(db: Session, host_id: str, users_data: list):
                 username=user_data.get("username"),
                 uid=user_data.get("uid"),
                 home_directory=user_data.get("home_directory"),
-                shell=user_data.get("shell"),  # nosec B604
+                shell=user_data.get("shell"),
                 is_system_user=user_data.get("is_system_user", False),
                 created_at=datetime.now(timezone.utc).replace(tzinfo=None),
                 updated_at=datetime.now(timezone.utc).replace(tzinfo=None),

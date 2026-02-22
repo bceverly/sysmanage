@@ -17,9 +17,14 @@ from sqlalchemy.orm import sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer
 from backend.main import app
+from backend.api.proplus_routes import mount_proplus_stub_routes
 from backend.persistence.db import Base, get_db
 from backend.persistence.models import *  # Import all models explicitly
 from backend.websocket.connection_manager import ConnectionManager
+
+# Register stub routes for Pro+ modules (no modules loaded in test environment)
+# This ensures /api/v1/* endpoints return {"licensed": false} instead of 404
+mount_proplus_stub_routes(app, {})
 
 # Use secure temporary file for test database
 _test_db_fd, _test_db_file = tempfile.mkstemp(suffix=f"_{int(time.time())}.db")
@@ -347,13 +352,10 @@ def client(engine, db_session, mock_config):
         app.dependency_overrides[get_db] = override_get_db
         app.dependency_overrides[get_current_user] = override_get_current_user
 
-        with patch("backend.auth.auth_bearer.JWTBearer.__call__") as mock_jwt:
+        async def mock_jwt_call(self, request=None):
+            return "test_token"
 
-            async def mock_jwt_call(*args, **kwargs):
-                return "test_token"
-
-            mock_jwt.side_effect = mock_jwt_call
-
+        with patch("backend.auth.auth_bearer.JWTBearer.__call__", new=mock_jwt_call):
             with TestClient(app) as test_client:
                 yield test_client
 
@@ -545,10 +547,6 @@ def authenticated_client(db_session, mock_config):
         finally:
             pass
 
-    async def mock_jwt_call(self, request):
-        """Mock JWT bearer call that always returns authenticated user."""
-        return "mocked_user_id"
-
     # Mock the FastAPI app lifespan to prevent service startup during tests
     from contextlib import asynccontextmanager
 
@@ -583,9 +581,10 @@ def authenticated_client(db_session, mock_config):
         app.dependency_overrides[jwt_bearer_instance] = override_jwt_bearer
 
         # Patch JWTBearer to always succeed
-        with patch("backend.auth.auth_bearer.JWTBearer.__call__") as mock_jwt:
-            mock_jwt.return_value = "test_token"
+        async def mock_jwt_auth(self, request=None):
+            return "test_token"
 
+        with patch("backend.auth.auth_bearer.JWTBearer.__call__", new=mock_jwt_auth):
             with TestClient(app) as test_client:
                 yield test_client
 

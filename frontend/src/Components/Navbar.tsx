@@ -61,8 +61,20 @@ const Navbar = () => {
     navigate('/settings');
   };
 
-  // Filter plugin nav items by their feature flag
+  // Paths that are hardcoded in the navbar - plugins must not duplicate these
+  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/secrets', '/scripts', '/reports']);
+
+  // Labels that are hardcoded in the navbar - plugins with matching labels are duplicates
+  const hardcodedLabels = new Set([
+    t('nav.secrets'),
+    t('nav.scripts'),
+    t('nav.reports'),
+  ]);
+
+  // Filter plugin nav items by their feature flag and exclude duplicates of hardcoded nav
   const visiblePluginNavItems = navItems.filter(item => {
+    if (hardcodedPaths.has(item.path)) return false;
+    if (hardcodedLabels.has(t(item.labelKey))) return false;
     if (!item.featureFlag) return true;
     return activeLicenseFeatures.includes(item.featureFlag);
   });

@@ -637,9 +637,9 @@ class TestDefaultRepositoryModel:
         assert "DefaultRepository" in repr_str
         assert "Fedora" in repr_str
         assert "dnf" in repr_str
-        # Checking repr output format, not URL validation - false positive for CodeQL
-        # lgtm[py/incomplete-url-substring-sanitization]
-        assert "docker.com" in repr_str
+        # Verify repr output contains the expected domain
+        expected_domain = "docker.com"
+        assert expected_domain in repr_str
 
 
 class TestEnabledPackageManagerModel:

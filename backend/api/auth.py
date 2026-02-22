@@ -217,7 +217,7 @@ def _authenticate_db_user(  # NOSONAR
     # Verify password
     try:
         argon2_hasher.verify(user.hashed_password, login_data.password)
-    except Exception:  # nosec B110 - catches argon2 verification failures
+    except Exception:  # catches argon2 verification failures
         return _handle_failed_password(user, login_data, session, client_ip, user_agent)
 
     # Successful login

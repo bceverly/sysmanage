@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatUTCTimestamp } from '../utils/dateUtils';
 import {
   IoCode,
   IoPlay,
@@ -755,7 +756,7 @@ const Scripts: React.FC = () => {
 
   const formatTimestamp = (timestamp: string | undefined) => {
     if (!timestamp) return t('common.notAvailable');
-    return new Date(timestamp).toLocaleString();
+    return formatUTCTimestamp(timestamp, t('common.notAvailable'));
   };
 
   const isHostConnected = (host: Host): boolean => {

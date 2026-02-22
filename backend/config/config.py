@@ -82,7 +82,7 @@ try:
         if "token" not in config["vault"]:
             config["vault"][
                 "token"
-            ] = ""  # nosec B105 - empty default, not a hardcoded token
+            ] = ""
         if "mount_path" not in config["vault"]:
             config["vault"]["mount_path"] = "secret"
         if "timeout" not in config["vault"]:
@@ -112,7 +112,7 @@ try:
         if "password" not in config["email"]["smtp"]:
             config["email"]["smtp"][
                 "password"
-            ] = ""  # nosec B105 - empty default, not a hardcoded password
+            ] = ""
         if "timeout" not in config["email"]["smtp"]:
             config["email"]["smtp"]["timeout"] = 30
         if "from_address" not in config["email"]:

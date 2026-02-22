@@ -9,7 +9,7 @@
     "@emotion/styled": "^11.11.5",
     "@fontsource/roboto": "^5.2.8",
     "@monaco-editor/react": "^4.7.0",
-    "@mui/icons-material": "^7.3.4",
+    "@mui/icons-material": "^7.3.8",
     "@mui/material": "^7.3.6",
     "@mui/system": "^7.3.5",
     "@mui/x-charts": "^8.25.0",
@@ -23,8 +23,8 @@
     "@types/react-dom": "^19.1.10",
     "axios": "^1.13.2",
     "esbuild": "^0.27.3",
-    "i18next": "^25.7.4",
-    "i18next-browser-languagedetector": "^8.2.0",
+    "i18next": "^25.8.9",
+    "i18next-browser-languagedetector": "^8.2.1",
     "i18next-http-backend": "^3.0.2",
     "localStorage": "^1.0.4",
     "monaco-editor": "^0.55.1",
@@ -68,10 +68,10 @@
   },
   "devDependencies": {
     "@asamuzakjp/css-color": "^4.0.5",
-    "@asamuzakjp/dom-selector": "^6.7.4",
+    "@asamuzakjp/dom-selector": "^6.8.1",
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@eslint/js": "^9.39.2",
-    "@mswjs/interceptors": "^0.40.0",
+    "@mswjs/interceptors": "^0.41.3",
     "@playwright/test": "^1.58.2",
     "@types/node": "^25.0.3",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
@@ -79,7 +79,7 @@
     "@vitejs/plugin-react": "^5.1.0",
     "@vitest/coverage-v8": "^4.0.17",
     "@vitest/ui": "^4.0.17",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "eslint-plugin-css-modules": "^2.12.0",
     "eslint-plugin-no-unsanitized": "^4.1.4",
     "eslint-plugin-react": "^7.37.5",
@@ -125,7 +125,9 @@
     "@mui/styled-engine": "^7.3.6",
     "ast-v8-to-istanbul": "^0.3.8",
     "js-yaml": "^4.1.1",
-    "lodash": "^4.17.23"
+    "lodash": "^4.17.23",
+    "minimatch": "^10.2.1",
+    "ajv": "^8.18.0"
   },
   "msw": {
     "workerDirectory": [

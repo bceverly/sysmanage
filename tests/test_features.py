@@ -212,6 +212,10 @@ class TestModuleCode:
             "PREDICTION_ENGINE",
             "PROPLUS_CORE",
             "ALERTING_ENGINE",
+            "REPORTING_ENGINE",
+            "AUDIT_ENGINE",
+            "SECRETS_ENGINE",
+            "CONTAINER_ENGINE",
             "LOG_ANALYZER",
             "METRICS_AGGREGATOR",
         ]
@@ -340,6 +344,10 @@ class TestTierModules:
             ModuleCode.VULN_ENGINE,
             ModuleCode.COMPLIANCE_ENGINE,
             ModuleCode.ALERTING_ENGINE,
+            ModuleCode.REPORTING_ENGINE,
+            ModuleCode.AUDIT_ENGINE,
+            ModuleCode.SECRETS_ENGINE,
+            ModuleCode.CONTAINER_ENGINE,
             ModuleCode.PROPLUS_CORE,
         }
         assert pro_modules == expected

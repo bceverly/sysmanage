@@ -1,5 +1,5 @@
 """
-Comprehensive unit tests for the health analysis API endpoints.
+Comprehensive unit tests for the license management API endpoints.
 
 Tests cover:
 - License info endpoint
@@ -58,7 +58,7 @@ class TestLicenseInfoResponse:
 
     def test_license_info_inactive(self):
         """Test LicenseInfoResponse for inactive license."""
-        from backend.api.health_analysis import LicenseInfoResponse
+        from backend.api.license_management import LicenseInfoResponse
 
         response = LicenseInfoResponse(active=False)
         assert response.active is False
@@ -67,7 +67,7 @@ class TestLicenseInfoResponse:
 
     def test_license_info_active(self):
         """Test LicenseInfoResponse for active license."""
-        from backend.api.health_analysis import LicenseInfoResponse
+        from backend.api.license_management import LicenseInfoResponse
 
         response = LicenseInfoResponse(
             active=True,
@@ -99,14 +99,14 @@ class TestLicenseInstallRequest:
 
     def test_install_request_valid(self):
         """Test LicenseInstallRequest with valid key."""
-        from backend.api.health_analysis import LicenseInstallRequest
+        from backend.api.license_management import LicenseInstallRequest
 
         request = LicenseInstallRequest(license_key="VALID-LICENSE-KEY-123")
         assert request.license_key == "VALID-LICENSE-KEY-123"
 
     def test_install_request_required_field(self):
         """Test LicenseInstallRequest requires license_key."""
-        from backend.api.health_analysis import LicenseInstallRequest
+        from backend.api.license_management import LicenseInstallRequest
 
         with pytest.raises(Exception):  # Pydantic validation error
             LicenseInstallRequest()
@@ -122,7 +122,7 @@ class TestLicenseInstallResponse:
 
     def test_install_response_success(self):
         """Test LicenseInstallResponse for successful installation."""
-        from backend.api.health_analysis import (
+        from backend.api.license_management import (
             LicenseInfoResponse,
             LicenseInstallResponse,
         )
@@ -142,7 +142,7 @@ class TestLicenseInstallResponse:
 
     def test_install_response_failure(self):
         """Test LicenseInstallResponse for failed installation."""
-        from backend.api.health_analysis import LicenseInstallResponse
+        from backend.api.license_management import LicenseInstallResponse
 
         response = LicenseInstallResponse(
             success=False,
@@ -164,10 +164,10 @@ class TestGetLicenseInfoEndpoint:
     @pytest.mark.asyncio
     async def test_get_license_info_no_proplus(self):
         """Test get_license_info when Pro+ is not active."""
-        from backend.api.health_analysis import get_license_info
+        from backend.api.license_management import get_license_info
 
         with patch(
-            "backend.api.health_analysis.license_service"
+            "backend.api.license_management.license_service"
         ) as mock_license_service:
             mock_license_service.is_pro_plus_active = False
 
@@ -179,7 +179,7 @@ class TestGetLicenseInfoEndpoint:
     @pytest.mark.asyncio
     async def test_get_license_info_with_proplus(self):
         """Test get_license_info when Pro+ is active."""
-        from backend.api.health_analysis import get_license_info
+        from backend.api.license_management import get_license_info
 
         mock_info = {
             "tier": "enterprise",
@@ -193,7 +193,7 @@ class TestGetLicenseInfoEndpoint:
         }
 
         with patch(
-            "backend.api.health_analysis.license_service"
+            "backend.api.license_management.license_service"
         ) as mock_license_service:
             mock_license_service.is_pro_plus_active = True
             mock_license_service.get_license_info.return_value = mock_info
@@ -209,7 +209,7 @@ class TestGetLicenseInfoEndpoint:
     @pytest.mark.asyncio
     async def test_get_license_info_partial_info(self):
         """Test get_license_info with partial license info."""
-        from backend.api.health_analysis import get_license_info
+        from backend.api.license_management import get_license_info
 
         mock_info = {
             "tier": "professional",
@@ -218,7 +218,7 @@ class TestGetLicenseInfoEndpoint:
         }
 
         with patch(
-            "backend.api.health_analysis.license_service"
+            "backend.api.license_management.license_service"
         ) as mock_license_service:
             mock_license_service.is_pro_plus_active = True
             mock_license_service.get_license_info.return_value = mock_info
@@ -242,7 +242,7 @@ class TestInstallLicenseEndpoint:
     @pytest.mark.asyncio
     async def test_install_license_user_not_found(self, mock_db):
         """Test install_license when user is not found."""
-        from backend.api.health_analysis import (
+        from backend.api.license_management import (
             LicenseInstallRequest,
             install_license,
         )
@@ -255,8 +255,8 @@ class TestInstallLicenseEndpoint:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch("backend.api.health_analysis.db_module") as mock_db_module, patch(
-            "backend.api.health_analysis.sessionmaker"
+        with patch("backend.api.license_management.db_module") as mock_db_module, patch(
+            "backend.api.license_management.sessionmaker"
         ) as mock_sessionmaker:
             mock_db_module.get_engine.return_value = mock_engine
             mock_sessionmaker.return_value.return_value = mock_session
@@ -273,7 +273,7 @@ class TestInstallLicenseEndpoint:
     @pytest.mark.asyncio
     async def test_install_license_not_admin(self, mock_db, mock_regular_user):
         """Test install_license when user is not admin."""
-        from backend.api.health_analysis import (
+        from backend.api.license_management import (
             LicenseInstallRequest,
             install_license,
         )
@@ -288,8 +288,8 @@ class TestInstallLicenseEndpoint:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch("backend.api.health_analysis.db_module") as mock_db_module, patch(
-            "backend.api.health_analysis.sessionmaker"
+        with patch("backend.api.license_management.db_module") as mock_db_module, patch(
+            "backend.api.license_management.sessionmaker"
         ) as mock_sessionmaker:
             mock_db_module.get_engine.return_value = mock_engine
             mock_sessionmaker.return_value.return_value = mock_session
@@ -306,7 +306,7 @@ class TestInstallLicenseEndpoint:
     @pytest.mark.asyncio
     async def test_install_license_success(self, mock_db, mock_admin_user):
         """Test successful license installation."""
-        from backend.api.health_analysis import (
+        from backend.api.license_management import (
             LicenseInstallRequest,
             install_license,
         )
@@ -335,10 +335,10 @@ class TestInstallLicenseEndpoint:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch("backend.api.health_analysis.db_module") as mock_db_module, patch(
-            "backend.api.health_analysis.sessionmaker"
+        with patch("backend.api.license_management.db_module") as mock_db_module, patch(
+            "backend.api.license_management.sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.health_analysis.license_service"
+            "backend.api.license_management.license_service"
         ) as mock_license_service:
             mock_db_module.get_engine.return_value = mock_engine
             mock_sessionmaker.return_value.return_value = mock_session
@@ -358,7 +358,7 @@ class TestInstallLicenseEndpoint:
     @pytest.mark.asyncio
     async def test_install_license_validation_failed(self, mock_db, mock_admin_user):
         """Test license installation with validation failure."""
-        from backend.api.health_analysis import (
+        from backend.api.license_management import (
             LicenseInstallRequest,
             install_license,
         )
@@ -377,10 +377,10 @@ class TestInstallLicenseEndpoint:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch("backend.api.health_analysis.db_module") as mock_db_module, patch(
-            "backend.api.health_analysis.sessionmaker"
+        with patch("backend.api.license_management.db_module") as mock_db_module, patch(
+            "backend.api.license_management.sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.health_analysis.license_service"
+            "backend.api.license_management.license_service"
         ) as mock_license_service:
             mock_db_module.get_engine.return_value = mock_engine
             mock_sessionmaker.return_value.return_value = mock_session
@@ -398,7 +398,7 @@ class TestInstallLicenseEndpoint:
     @pytest.mark.asyncio
     async def test_install_license_exception(self, mock_db, mock_admin_user):
         """Test license installation with exception."""
-        from backend.api.health_analysis import (
+        from backend.api.license_management import (
             LicenseInstallRequest,
             install_license,
         )
@@ -413,10 +413,10 @@ class TestInstallLicenseEndpoint:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
 
-        with patch("backend.api.health_analysis.db_module") as mock_db_module, patch(
-            "backend.api.health_analysis.sessionmaker"
+        with patch("backend.api.license_management.db_module") as mock_db_module, patch(
+            "backend.api.license_management.sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.health_analysis.license_service"
+            "backend.api.license_management.license_service"
         ) as mock_license_service:
             mock_db_module.get_engine.return_value = mock_engine
             mock_sessionmaker.return_value.return_value = mock_session
@@ -440,18 +440,18 @@ class TestInstallLicenseEndpoint:
 # =============================================================================
 
 
-class TestHealthAnalysisRouter:
-    """Test cases for the health analysis router configuration."""
+class TestLicenseManagementRouter:
+    """Test cases for the license management router configuration."""
 
     def test_router_exists(self):
         """Test that router is defined."""
-        from backend.api.health_analysis import router
+        from backend.api.license_management import router
 
         assert router is not None
 
     def test_router_routes(self):
         """Test that expected routes are registered."""
-        from backend.api.health_analysis import router
+        from backend.api.license_management import router
 
         routes = [route.path for route in router.routes]
         assert "/license" in routes
@@ -462,17 +462,17 @@ class TestHealthAnalysisRouter:
 # =============================================================================
 
 
-class TestHealthAnalysisIntegration:
-    """Integration-style tests for health analysis API."""
+class TestLicenseManagementIntegration:
+    """Integration-style tests for license management API."""
 
     @pytest.mark.asyncio
     async def test_full_license_check_flow(self):
         """Test complete license check flow."""
-        from backend.api.health_analysis import get_license_info
+        from backend.api.license_management import get_license_info
 
         # Simulate Pro+ license check flow
         with patch(
-            "backend.api.health_analysis.license_service"
+            "backend.api.license_management.license_service"
         ) as mock_license_service:
             # First check - no license
             mock_license_service.is_pro_plus_active = False
@@ -492,13 +492,13 @@ class TestHealthAnalysisIntegration:
     @pytest.mark.asyncio
     async def test_license_tier_values(self):
         """Test various license tier values."""
-        from backend.api.health_analysis import get_license_info
+        from backend.api.license_management import get_license_info
 
         tiers = ["professional", "enterprise"]
 
         for tier in tiers:
             with patch(
-                "backend.api.health_analysis.license_service"
+                "backend.api.license_management.license_service"
             ) as mock_license_service:
                 mock_license_service.is_pro_plus_active = True
                 mock_license_service.get_license_info.return_value = {
@@ -513,7 +513,7 @@ class TestHealthAnalysisIntegration:
     @pytest.mark.asyncio
     async def test_license_features_list(self):
         """Test license with various feature combinations."""
-        from backend.api.health_analysis import get_license_info
+        from backend.api.license_management import get_license_info
 
         feature_sets = [
             ["health"],
@@ -523,7 +523,7 @@ class TestHealthAnalysisIntegration:
 
         for features in feature_sets:
             with patch(
-                "backend.api.health_analysis.license_service"
+                "backend.api.license_management.license_service"
             ) as mock_license_service:
                 mock_license_service.is_pro_plus_active = True
                 mock_license_service.get_license_info.return_value = {

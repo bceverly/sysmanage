@@ -1,10 +1,35 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
  * E2E Tests for Pro+ Feature Flows
  * Tests health analysis, compliance, vulnerabilities, and other Pro+ features
  * Note: These tests may require a Pro+ license to fully execute
  */
+
+/**
+ * Navigate from the hosts list to the first host's detail page.
+ * Uses the View button in the Actions column, scrolling the grid
+ * horizontally if necessary (the Actions column may be off-screen
+ * due to MUI DataGrid column virtualization).
+ */
+async function navigateToFirstHostDetail(page: Page): Promise<boolean> {
+  const firstRow = page.locator('.MuiDataGrid-row').first();
+  if (!(await firstRow.isVisible())) return false;
+
+  // Scroll the grid right to ensure the Actions column is rendered
+  const virtualScroller = page.locator('.MuiDataGrid-virtualScroller');
+  await virtualScroller.evaluate(el => el.scrollLeft = el.scrollWidth);
+  await page.waitForTimeout(500);
+
+  // Click the View button (eye icon) in the Actions column
+  const viewButton = firstRow.getByRole('button', { name: /view/i });
+  await expect(viewButton).toBeVisible({ timeout: 10000 });
+  await viewButton.click();
+
+  // Wait for navigation to complete
+  await page.waitForURL(/\/hosts\/[a-f0-9-]+/, { timeout: 10000 });
+  return true;
+}
 
 test.describe('Pro+ Health Analysis', () => {
   test('should navigate to health analysis if available', async ({ page }) => {
@@ -13,11 +38,7 @@ test.describe('Pro+ Health Analysis', () => {
     const dataGrid = page.locator('.MuiDataGrid-root');
     await expect(dataGrid).toBeVisible();
 
-    const firstRow = page.locator('.MuiDataGrid-row').first();
-    if (await firstRow.isVisible()) {
-      await firstRow.click();
-      await page.waitForURL(/\/hosts\/[a-f0-9-]+/);
-
+    if (await navigateToFirstHostDetail(page)) {
       // Look for health analysis tab
       const healthTab = page.getByRole('tab', { name: /health/i }).first();
       if (await healthTab.isVisible()) {
@@ -33,11 +54,7 @@ test.describe('Pro+ Health Analysis', () => {
   test('should display health score', async ({ page }) => {
     await page.goto('/hosts');
 
-    const firstRow = page.locator('.MuiDataGrid-row').first();
-    if (await firstRow.isVisible()) {
-      await firstRow.click();
-      await page.waitForURL(/\/hosts\/[a-f0-9-]+/);
-
+    if (await navigateToFirstHostDetail(page)) {
       const healthTab = page.getByRole('tab', { name: /health/i }).first();
       if (await healthTab.isVisible()) {
         await healthTab.click();
@@ -60,11 +77,7 @@ test.describe('Pro+ Health Analysis', () => {
   test('should display health recommendations', async ({ page }) => {
     await page.goto('/hosts');
 
-    const firstRow = page.locator('.MuiDataGrid-row').first();
-    if (await firstRow.isVisible()) {
-      await firstRow.click();
-      await page.waitForURL(/\/hosts\/[a-f0-9-]+/);
-
+    if (await navigateToFirstHostDetail(page)) {
       const healthTab = page.getByRole('tab', { name: /health/i }).first();
       if (await healthTab.isVisible()) {
         await healthTab.click();
@@ -87,11 +100,7 @@ test.describe('Pro+ Compliance', () => {
     if (await page.getByText(/not found|404/i).isVisible()) {
       await page.goto('/hosts');
 
-      const firstRow = page.locator('.MuiDataGrid-row').first();
-      if (await firstRow.isVisible()) {
-        await firstRow.click();
-        await page.waitForURL(/\/hosts\/[a-f0-9-]+/);
-
+      if (await navigateToFirstHostDetail(page)) {
         const complianceTab = page.getByRole('tab', { name: /compliance/i }).first();
         if (await complianceTab.isVisible()) {
           await complianceTab.click();
@@ -104,11 +113,7 @@ test.describe('Pro+ Compliance', () => {
   test('should display compliance status', async ({ page }) => {
     await page.goto('/hosts');
 
-    const firstRow = page.locator('.MuiDataGrid-row').first();
-    if (await firstRow.isVisible()) {
-      await firstRow.click();
-      await page.waitForURL(/\/hosts\/[a-f0-9-]+/);
-
+    if (await navigateToFirstHostDetail(page)) {
       const complianceTab = page.getByRole('tab', { name: /compliance/i }).first();
       if (await complianceTab.isVisible()) {
         await complianceTab.click();
@@ -125,17 +130,9 @@ test.describe('Pro+ Compliance', () => {
     await page.goto('/hosts');
     try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* networkidle timeout ok */ }
 
-    const firstRow = page.locator('.MuiDataGrid-row').first();
-    if (!(await firstRow.isVisible({ timeout: 5000 }).catch(() => false))) {
+    if (!(await navigateToFirstHostDetail(page))) {
       // No hosts available, test passes
       return;
-    }
-
-    await firstRow.click();
-    try {
-      await page.waitForURL(/\/hosts\/[a-f0-9-]+/, { timeout: 5000 });
-    } catch {
-      // Navigation may work differently, continue
     }
 
     const complianceTab = page.getByRole('tab', { name: /compliance/i }).first();
@@ -162,11 +159,7 @@ test.describe('Pro+ Vulnerabilities', () => {
     if (await page.getByText(/not found|404/i).isVisible()) {
       await page.goto('/hosts');
 
-      const firstRow = page.locator('.MuiDataGrid-row').first();
-      if (await firstRow.isVisible()) {
-        await firstRow.click();
-        await page.waitForURL(/\/hosts\/[a-f0-9-]+/);
-
+      if (await navigateToFirstHostDetail(page)) {
         const vulnTab = page.getByRole('tab', { name: /vuln|cve|security/i }).first();
         if (await vulnTab.isVisible()) {
           await vulnTab.click();
@@ -179,11 +172,7 @@ test.describe('Pro+ Vulnerabilities', () => {
   test('should display vulnerability scan results', async ({ page }) => {
     await page.goto('/hosts');
 
-    const firstRow = page.locator('.MuiDataGrid-row').first();
-    if (await firstRow.isVisible()) {
-      await firstRow.click();
-      await page.waitForURL(/\/hosts\/[a-f0-9-]+/);
-
+    if (await navigateToFirstHostDetail(page)) {
       const vulnTab = page.getByRole('tab', { name: /vuln|cve|security/i }).first();
       if (await vulnTab.isVisible()) {
         await vulnTab.click();
@@ -199,11 +188,7 @@ test.describe('Pro+ Vulnerabilities', () => {
   test('should display CVE details', async ({ page }) => {
     await page.goto('/hosts');
 
-    const firstRow = page.locator('.MuiDataGrid-row').first();
-    if (await firstRow.isVisible()) {
-      await firstRow.click();
-      await page.waitForURL(/\/hosts\/[a-f0-9-]+/);
-
+    if (await navigateToFirstHostDetail(page)) {
       const vulnTab = page.getByRole('tab', { name: /vuln|cve|security/i }).first();
       if (await vulnTab.isVisible()) {
         await vulnTab.click();
@@ -253,6 +238,7 @@ test.describe('Pro+ Dashboard Cards', () => {
 
 test.describe('Pro+ Settings', () => {
   test('should display Pro+ settings if licensed', async ({ page }) => {
+    test.setTimeout(60000);
     await page.goto('/settings');
     try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
 

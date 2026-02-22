@@ -265,165 +265,60 @@ class TestChildHostUtils:
 
 
 # =============================================================================
-# CHILD HOST CONTROL ENDPOINT TESTS
+# CHILD HOST CONTROL STUB TESTS
 # =============================================================================
 
 
 class TestChildHostControlEndpoints:
-    """Tests for child host control (start/stop/restart) endpoints."""
+    """Tests for child host control (start/stop/restart) Pro+ stub behavior."""
 
     @pytest.mark.asyncio
-    async def test_start_child_host_success(
-        self, mock_db_session, mock_user, mock_host, mock_child_host, mock_queue_ops
-    ):
-        """Test successful child host start."""
-        mock_child_host.status = "stopped"
-        mock_child_host.parent_host_id = mock_host.id
-
-        with patch(
-            "backend.api.child_host_control.sessionmaker"
-        ) as mock_sessionmaker, patch(
-            "backend.api.child_host_control.db"
-        ) as mock_db, patch(
-            "backend.api.child_host_control.get_user_with_role_check"
-        ) as mock_role_check, patch(
-            "backend.api.child_host_control.get_host_or_404"
-        ) as mock_get_host, patch(
-            "backend.api.child_host_control.verify_host_active"
-        ), patch(
-            "backend.api.child_host_control.queue_ops"
-        ) as mock_q, patch(
-            "backend.api.child_host_control.create_command_message"
-        ) as mock_create_msg, patch(
-            "backend.api.child_host_control.audit_log"
-        ):
-
-            mock_sessionmaker.return_value.return_value = mock_db_session
-            mock_role_check.return_value = mock_user
-            mock_get_host.return_value = mock_host
-            mock_db_session.query.return_value.filter.return_value.first.return_value = (
-                mock_child_host
-            )
-            mock_create_msg.return_value = {
-                "type": "command",
-                "command": "start_child_host",
-            }
-
-            from backend.api.child_host_control import start_child_host
-
-            result = await start_child_host(
-                str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
-            )
-
-            assert result["result"] is True
-            mock_q.enqueue_message.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_stop_child_host_success(
-        self, mock_db_session, mock_user, mock_host, mock_child_host
-    ):
-        """Test successful child host stop."""
-        mock_child_host.parent_host_id = mock_host.id
-
-        with patch(
-            "backend.api.child_host_control.sessionmaker"
-        ) as mock_sessionmaker, patch("backend.api.child_host_control.db"), patch(
-            "backend.api.child_host_control.get_user_with_role_check"
-        ) as mock_role_check, patch(
-            "backend.api.child_host_control.get_host_or_404"
-        ) as mock_get_host, patch(
-            "backend.api.child_host_control.verify_host_active"
-        ), patch(
-            "backend.api.child_host_control.queue_ops"
-        ) as mock_q, patch(
-            "backend.api.child_host_control.create_command_message"
-        ), patch(
-            "backend.api.child_host_control.audit_log"
-        ):
-
-            mock_sessionmaker.return_value.return_value = mock_db_session
-            mock_role_check.return_value = mock_user
-            mock_get_host.return_value = mock_host
-            mock_db_session.query.return_value.filter.return_value.first.return_value = (
-                mock_child_host
-            )
-
-            from backend.api.child_host_control import stop_child_host
-
-            result = await stop_child_host(
-                str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
-            )
-
-            assert result["result"] is True
-
-    @pytest.mark.asyncio
-    async def test_restart_child_host_success(
-        self, mock_db_session, mock_user, mock_host, mock_child_host
-    ):
-        """Test successful child host restart."""
-        mock_child_host.parent_host_id = mock_host.id
-
-        with patch(
-            "backend.api.child_host_control.sessionmaker"
-        ) as mock_sessionmaker, patch("backend.api.child_host_control.db"), patch(
-            "backend.api.child_host_control.get_user_with_role_check"
-        ) as mock_role_check, patch(
-            "backend.api.child_host_control.get_host_or_404"
-        ) as mock_get_host, patch(
-            "backend.api.child_host_control.verify_host_active"
-        ), patch(
-            "backend.api.child_host_control.queue_ops"
-        ) as mock_q, patch(
-            "backend.api.child_host_control.create_command_message"
-        ), patch(
-            "backend.api.child_host_control.audit_log"
-        ):
-
-            mock_sessionmaker.return_value.return_value = mock_db_session
-            mock_role_check.return_value = mock_user
-            mock_get_host.return_value = mock_host
-            mock_db_session.query.return_value.filter.return_value.first.return_value = (
-                mock_child_host
-            )
-
-            from backend.api.child_host_control import restart_child_host
-
-            result = await restart_child_host(
-                str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
-            )
-
-            assert result["result"] is True
-
-    @pytest.mark.asyncio
-    async def test_control_child_not_found(self, mock_db_session, mock_user, mock_host):
-        """Test control operation when child host not found."""
+    async def test_start_child_host_returns_402_stub(self):
+        """Test that start_child_host returns 402 (Pro+ stub)."""
         from fastapi import HTTPException
 
         with patch(
-            "backend.api.child_host_control.sessionmaker"
-        ) as mock_sessionmaker, patch("backend.api.child_host_control.db"), patch(
-            "backend.api.child_host_control.get_user_with_role_check"
-        ) as mock_role_check, patch(
-            "backend.api.child_host_control.get_host_or_404"
-        ) as mock_get_host, patch(
-            "backend.api.child_host_control.verify_host_active"
+            "backend.licensing.module_loader.module_loader.get_module",
+            return_value=None,
         ):
-
-            mock_sessionmaker.return_value.return_value = mock_db_session
-            mock_role_check.return_value = mock_user
-            mock_get_host.return_value = mock_host
-            mock_db_session.query.return_value.filter.return_value.first.return_value = (
-                None
-            )
-
             from backend.api.child_host_control import start_child_host
 
             with pytest.raises(HTTPException) as exc_info:
-                await start_child_host(
-                    str(mock_host.id), str(uuid.uuid4()), "admin@sysmanage.org"
-                )
+                await start_child_host("host-id", "child-id", "user@test.com")
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 402
+
+    @pytest.mark.asyncio
+    async def test_stop_child_host_returns_402_stub(self):
+        """Test that stop_child_host returns 402 (Pro+ stub)."""
+        from fastapi import HTTPException
+
+        with patch(
+            "backend.licensing.module_loader.module_loader.get_module",
+            return_value=None,
+        ):
+            from backend.api.child_host_control import stop_child_host
+
+            with pytest.raises(HTTPException) as exc_info:
+                await stop_child_host("host-id", "child-id", "user@test.com")
+
+            assert exc_info.value.status_code == 402
+
+    @pytest.mark.asyncio
+    async def test_restart_child_host_returns_402_stub(self):
+        """Test that restart_child_host returns 402 (Pro+ stub)."""
+        from fastapi import HTTPException
+
+        with patch(
+            "backend.licensing.module_loader.module_loader.get_module",
+            return_value=None,
+        ):
+            from backend.api.child_host_control import restart_child_host
+
+            with pytest.raises(HTTPException) as exc_info:
+                await restart_child_host("host-id", "child-id", "user@test.com")
+
+            assert exc_info.value.status_code == 402
 
 
 # =============================================================================
@@ -559,16 +454,18 @@ class TestChildHostCrudEndpoints:
         ) as mock_role_check, patch(
             "backend.api.child_host_crud.get_host_or_404"
         ) as mock_get_host, patch(
-            "backend.api.child_host_crud.verify_host_active"
+            "backend.api.child_host_utils.verify_host_active"
         ), patch(
-            "backend.api.child_host_crud.queue_ops"
-        ) as mock_q, patch(
-            "backend.api.child_host_crud.create_command_message"
+            "backend.websocket.queue_operations.QueueOperations"
+        ) as mock_queue_cls, patch(
+            "backend.websocket.messages.create_command_message"
         ):
 
             mock_sessionmaker.return_value.return_value = mock_db_session
             mock_role_check.return_value = mock_user
             mock_get_host.return_value = mock_host
+            mock_q = MagicMock()
+            mock_queue_cls.return_value = mock_q
 
             from backend.api.child_host_crud import refresh_child_hosts
 
@@ -579,128 +476,28 @@ class TestChildHostCrudEndpoints:
 
 
 # =============================================================================
-# CHILD HOST DELETE ENDPOINT TESTS
+# CHILD HOST DELETE STUB TESTS
 # =============================================================================
 
 
 class TestChildHostDeleteEndpoints:
-    """Tests for child host delete operations."""
+    """Tests for child host delete Pro+ stub behavior."""
 
     @pytest.mark.asyncio
-    async def test_delete_pending_child_host(
-        self, mock_db_session, mock_user, mock_host, mock_child_host
-    ):
-        """Test deleting a pending child host (no command sent to agent)."""
-        mock_child_host.parent_host_id = mock_host.id
-        mock_child_host.status = "pending"
-        mock_child_host.child_host_id = None
-        mock_child_host.hostname = None
+    async def test_delete_child_host_returns_402_stub(self):
+        """Test that delete_child_host returns 402 (Pro+ stub)."""
+        from fastapi import HTTPException
 
         with patch(
-            "backend.api.child_host_crud.sessionmaker"
-        ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
-            "backend.api.child_host_crud.get_user_with_role_check"
-        ) as mock_role_check, patch(
-            "backend.api.child_host_crud.get_host_or_404"
-        ) as mock_get_host, patch(
-            "backend.api.child_host_crud.verify_host_active"
-        ), patch(
-            "backend.api.child_host_crud.audit_log"
+            "backend.licensing.module_loader.module_loader.get_module",
+            return_value=None,
         ):
-
-            mock_sessionmaker.return_value.return_value = mock_db_session
-            mock_role_check.return_value = mock_user
-            mock_get_host.return_value = mock_host
-            mock_db_session.query.return_value.filter.return_value.first.return_value = (
-                mock_child_host
-            )
-
             from backend.api.child_host_crud import delete_child_host
 
-            result = await delete_child_host(
-                str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
-            )
+            with pytest.raises(HTTPException) as exc_info:
+                await delete_child_host("host-id", "child-id", "user@test.com")
 
-            assert result["result"] is True
-            mock_db_session.delete.assert_called()
-
-    @pytest.mark.asyncio
-    async def test_delete_running_child_host(
-        self, mock_db_session, mock_user, mock_host, mock_child_host
-    ):
-        """Test deleting a running child host (sends command to agent)."""
-        mock_child_host.parent_host_id = mock_host.id
-        mock_child_host.status = "running"
-
-        with patch(
-            "backend.api.child_host_crud.sessionmaker"
-        ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
-            "backend.api.child_host_crud.get_user_with_role_check"
-        ) as mock_role_check, patch(
-            "backend.api.child_host_crud.get_host_or_404"
-        ) as mock_get_host, patch(
-            "backend.api.child_host_crud.verify_host_active"
-        ), patch(
-            "backend.api.child_host_crud.queue_ops"
-        ) as mock_q, patch(
-            "backend.api.child_host_crud.create_command_message"
-        ), patch(
-            "backend.api.child_host_crud.audit_log"
-        ):
-
-            mock_sessionmaker.return_value.return_value = mock_db_session
-            mock_role_check.return_value = mock_user
-            mock_get_host.return_value = mock_host
-            mock_db_session.query.return_value.filter.return_value.first.return_value = (
-                mock_child_host
-            )
-
-            from backend.api.child_host_crud import delete_child_host
-
-            result = await delete_child_host(
-                str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
-            )
-
-            assert result["result"] is True
-            assert mock_child_host.status == "uninstalling"
-            mock_q.enqueue_message.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_delete_failed_child_host(
-        self, mock_db_session, mock_user, mock_host, mock_child_host
-    ):
-        """Test deleting a failed child host (direct DB delete)."""
-        mock_child_host.parent_host_id = mock_host.id
-        mock_child_host.status = "failed"
-        mock_child_host.child_host_id = None
-        mock_child_host.hostname = None
-
-        with patch(
-            "backend.api.child_host_crud.sessionmaker"
-        ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
-            "backend.api.child_host_crud.get_user_with_role_check"
-        ) as mock_role_check, patch(
-            "backend.api.child_host_crud.get_host_or_404"
-        ) as mock_get_host, patch(
-            "backend.api.child_host_crud.verify_host_active"
-        ), patch(
-            "backend.api.child_host_crud.audit_log"
-        ):
-
-            mock_sessionmaker.return_value.return_value = mock_db_session
-            mock_role_check.return_value = mock_user
-            mock_get_host.return_value = mock_host
-            mock_db_session.query.return_value.filter.return_value.first.return_value = (
-                mock_child_host
-            )
-
-            from backend.api.child_host_crud import delete_child_host
-
-            result = await delete_child_host(
-                str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
-            )
-
-            assert result["result"] is True
+            assert exc_info.value.status_code == 402
 
 
 # =============================================================================
@@ -871,6 +668,8 @@ class TestVirtualizationEnableEndpoints:
     ):
         """Test enabling WSL on Windows host."""
         with patch(
+            "backend.api.child_host_virtualization_enable._check_container_module"
+        ), patch(
             "backend.api.child_host_virtualization_enable.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_virtualization_enable.db"
@@ -907,6 +706,8 @@ class TestVirtualizationEnableEndpoints:
         from fastapi import HTTPException
 
         with patch(
+            "backend.api.child_host_virtualization_enable._check_container_module"
+        ), patch(
             "backend.api.child_host_virtualization_enable.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_virtualization_enable.db"
@@ -933,6 +734,8 @@ class TestVirtualizationEnableEndpoints:
     async def test_initialize_lxd_success(self, mock_db_session, mock_user, mock_host):
         """Test initializing LXD on Linux host."""
         with patch(
+            "backend.api.child_host_virtualization_enable._check_container_module"
+        ), patch(
             "backend.api.child_host_virtualization_enable.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_virtualization_enable.db"
@@ -966,6 +769,8 @@ class TestVirtualizationEnableEndpoints:
     ):
         """Test initializing VMM on OpenBSD host."""
         with patch(
+            "backend.api.child_host_virtualization_enable._check_container_module"
+        ), patch(
             "backend.api.child_host_virtualization_enable.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_virtualization_enable.db"
@@ -999,6 +804,8 @@ class TestVirtualizationEnableEndpoints:
     async def test_initialize_kvm_success(self, mock_db_session, mock_user, mock_host):
         """Test initializing KVM on Linux host."""
         with patch(
+            "backend.api.child_host_virtualization_enable._check_container_module"
+        ), patch(
             "backend.api.child_host_virtualization_enable.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_virtualization_enable.db"
@@ -1032,6 +839,8 @@ class TestVirtualizationEnableEndpoints:
     ):
         """Test initializing bhyve on FreeBSD host."""
         with patch(
+            "backend.api.child_host_virtualization_enable._check_container_module"
+        ), patch(
             "backend.api.child_host_virtualization_enable.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_virtualization_enable.db"
@@ -1071,6 +880,8 @@ class TestVirtualizationEnableEndpoints:
         mock_host.is_agent_privileged = False
 
         with patch(
+            "backend.api.child_host_virtualization_enable._check_container_module"
+        ), patch(
             "backend.api.child_host_virtualization_enable.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_virtualization_enable.db"
@@ -1213,6 +1024,8 @@ class TestKvmNetworkingEndpoints:
         request = ConfigureKvmNetworkingRequest(mode="nat", network_name="default")
 
         with patch(
+            "backend.api.child_host_virtualization_enable._check_container_module"
+        ), patch(
             "backend.api.child_host_virtualization_enable.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_virtualization_enable.db"
@@ -1254,6 +1067,8 @@ class TestKvmNetworkingEndpoints:
         request = ConfigureKvmNetworkingRequest(mode="bridged", bridge="br0")
 
         with patch(
+            "backend.api.child_host_virtualization_enable._check_container_module"
+        ), patch(
             "backend.api.child_host_virtualization_enable.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_virtualization_enable.db"
@@ -1296,6 +1111,8 @@ class TestKvmNetworkingEndpoints:
         request = ConfigureKvmNetworkingRequest(mode="bridged")  # No bridge specified
 
         with patch(
+            "backend.api.child_host_virtualization_enable._check_container_module"
+        ), patch(
             "backend.api.child_host_virtualization_enable.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_virtualization_enable.db"
@@ -1335,6 +1152,8 @@ class TestKvmModuleEndpoints:
     async def test_enable_kvm_modules(self, mock_db_session, mock_user, mock_host):
         """Test enabling KVM kernel modules."""
         with patch(
+            "backend.api.child_host_virtualization_enable._check_container_module"
+        ), patch(
             "backend.api.child_host_virtualization_enable.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_virtualization_enable.db"
@@ -1366,6 +1185,8 @@ class TestKvmModuleEndpoints:
     async def test_disable_kvm_modules(self, mock_db_session, mock_user, mock_host):
         """Test disabling KVM kernel modules."""
         with patch(
+            "backend.api.child_host_virtualization_enable._check_container_module"
+        ), patch(
             "backend.api.child_host_virtualization_enable.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_virtualization_enable.db"
@@ -1406,6 +1227,8 @@ class TestBhyveEndpoints:
     async def test_disable_bhyve(self, mock_db_session, mock_user, mock_freebsd_host):
         """Test disabling bhyve on FreeBSD host."""
         with patch(
+            "backend.api.child_host_virtualization_enable._check_container_module"
+        ), patch(
             "backend.api.child_host_virtualization_enable.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_virtualization_enable.db"
@@ -1443,6 +1266,8 @@ class TestBhyveEndpoints:
         from fastapi import HTTPException
 
         with patch(
+            "backend.api.child_host_virtualization_enable._check_container_module"
+        ), patch(
             "backend.api.child_host_virtualization_enable.sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_virtualization_enable.db"
@@ -1464,3 +1289,519 @@ class TestBhyveEndpoints:
                 await disable_bhyve(str(mock_host.id), "admin@sysmanage.org")
 
             assert exc_info.value.status_code == 400
+
+
+# =============================================================================
+# CHILD HOST CONTROL WITH MODULE TESTS
+# =============================================================================
+
+
+class TestChildHostControlWithModule:
+    """Tests for child host control endpoints when container_engine module is present."""
+
+    @pytest.mark.asyncio
+    async def test_start_child_host_success(
+        self, mock_db_session, mock_user, mock_host, mock_child_host
+    ):
+        """Test starting a child host with module present."""
+        mock_child_host.parent_host_id = mock_host.id
+
+        with patch("backend.api.child_host_control._check_container_module"), patch(
+            "backend.api.child_host_control.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.child_host_control.db"), patch(
+            "backend.api.child_host_control.get_user_with_role_check"
+        ) as mock_role_check, patch(
+            "backend.api.child_host_control.get_host_or_404"
+        ) as mock_get_host, patch(
+            "backend.api.child_host_control.verify_host_active"
+        ), patch(
+            "backend.api.child_host_control.QueueOperations"
+        ) as mock_queue_cls, patch(
+            "backend.api.child_host_control.create_command_message"
+        ), patch(
+            "backend.api.child_host_control.audit_log"
+        ):
+            mock_sessionmaker.return_value.return_value = mock_db_session
+            mock_role_check.return_value = mock_user
+            mock_get_host.return_value = mock_host
+            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+                mock_child_host
+            )
+            mock_q = MagicMock()
+            mock_queue_cls.return_value = mock_q
+
+            from backend.api.child_host_control import start_child_host
+
+            result = await start_child_host(
+                str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
+            )
+
+            assert result["result"] is True
+            assert "start" in result["message"].lower()
+            mock_q.enqueue_message.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_stop_child_host_success(
+        self, mock_db_session, mock_user, mock_host, mock_child_host
+    ):
+        """Test stopping a child host with module present."""
+        mock_child_host.parent_host_id = mock_host.id
+
+        with patch("backend.api.child_host_control._check_container_module"), patch(
+            "backend.api.child_host_control.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.child_host_control.db"), patch(
+            "backend.api.child_host_control.get_user_with_role_check"
+        ) as mock_role_check, patch(
+            "backend.api.child_host_control.get_host_or_404"
+        ) as mock_get_host, patch(
+            "backend.api.child_host_control.verify_host_active"
+        ), patch(
+            "backend.api.child_host_control.QueueOperations"
+        ) as mock_queue_cls, patch(
+            "backend.api.child_host_control.create_command_message"
+        ), patch(
+            "backend.api.child_host_control.audit_log"
+        ):
+            mock_sessionmaker.return_value.return_value = mock_db_session
+            mock_role_check.return_value = mock_user
+            mock_get_host.return_value = mock_host
+            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+                mock_child_host
+            )
+            mock_q = MagicMock()
+            mock_queue_cls.return_value = mock_q
+
+            from backend.api.child_host_control import stop_child_host
+
+            result = await stop_child_host(
+                str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
+            )
+
+            assert result["result"] is True
+            assert "stop" in result["message"].lower()
+            mock_q.enqueue_message.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_restart_child_host_success(
+        self, mock_db_session, mock_user, mock_host, mock_child_host
+    ):
+        """Test restarting a child host with module present."""
+        mock_child_host.parent_host_id = mock_host.id
+
+        with patch("backend.api.child_host_control._check_container_module"), patch(
+            "backend.api.child_host_control.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.child_host_control.db"), patch(
+            "backend.api.child_host_control.get_user_with_role_check"
+        ) as mock_role_check, patch(
+            "backend.api.child_host_control.get_host_or_404"
+        ) as mock_get_host, patch(
+            "backend.api.child_host_control.verify_host_active"
+        ), patch(
+            "backend.api.child_host_control.QueueOperations"
+        ) as mock_queue_cls, patch(
+            "backend.api.child_host_control.create_command_message"
+        ), patch(
+            "backend.api.child_host_control.audit_log"
+        ):
+            mock_sessionmaker.return_value.return_value = mock_db_session
+            mock_role_check.return_value = mock_user
+            mock_get_host.return_value = mock_host
+            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+                mock_child_host
+            )
+            mock_q = MagicMock()
+            mock_queue_cls.return_value = mock_q
+
+            from backend.api.child_host_control import restart_child_host
+
+            result = await restart_child_host(
+                str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
+            )
+
+            assert result["result"] is True
+            assert "restart" in result["message"].lower()
+            mock_q.enqueue_message.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_start_child_host_not_found(
+        self, mock_db_session, mock_user, mock_host
+    ):
+        """Test starting a non-existent child host."""
+        from fastapi import HTTPException
+
+        with patch("backend.api.child_host_control._check_container_module"), patch(
+            "backend.api.child_host_control.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.child_host_control.db"), patch(
+            "backend.api.child_host_control.get_user_with_role_check"
+        ) as mock_role_check, patch(
+            "backend.api.child_host_control.get_host_or_404"
+        ) as mock_get_host, patch(
+            "backend.api.child_host_control.verify_host_active"
+        ):
+            mock_sessionmaker.return_value.return_value = mock_db_session
+            mock_role_check.return_value = mock_user
+            mock_get_host.return_value = mock_host
+            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+                None
+            )
+
+            from backend.api.child_host_control import start_child_host
+
+            with pytest.raises(HTTPException) as exc_info:
+                await start_child_host(
+                    str(mock_host.id), str(uuid.uuid4()), "admin@sysmanage.org"
+                )
+
+            assert exc_info.value.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_start_child_host_inactive(
+        self, mock_db_session, mock_user, mock_host
+    ):
+        """Test starting a child host on an inactive parent."""
+        from fastapi import HTTPException
+
+        mock_host.active = False
+
+        with patch("backend.api.child_host_control._check_container_module"), patch(
+            "backend.api.child_host_control.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.child_host_control.db"), patch(
+            "backend.api.child_host_control.get_user_with_role_check"
+        ) as mock_role_check, patch(
+            "backend.api.child_host_control.get_host_or_404"
+        ) as mock_get_host, patch(
+            "backend.api.child_host_control.verify_host_active",
+            side_effect=HTTPException(status_code=400, detail="Host is not active"),
+        ):
+            mock_sessionmaker.return_value.return_value = mock_db_session
+            mock_role_check.return_value = mock_user
+            mock_get_host.return_value = mock_host
+
+            from backend.api.child_host_control import start_child_host
+
+            with pytest.raises(HTTPException) as exc_info:
+                await start_child_host(
+                    str(mock_host.id), str(uuid.uuid4()), "admin@sysmanage.org"
+                )
+
+            assert exc_info.value.status_code == 400
+
+
+# =============================================================================
+# CHILD HOST DELETE WITH MODULE TESTS
+# =============================================================================
+
+
+class TestChildHostDeleteWithModule:
+    """Tests for child host delete endpoint when container_engine module is present."""
+
+    @pytest.mark.asyncio
+    async def test_delete_child_host_success(
+        self, mock_db_session, mock_user, mock_host, mock_child_host
+    ):
+        """Test deleting a child host with module present."""
+        mock_child_host.parent_host_id = mock_host.id
+
+        with patch("backend.api.child_host_crud._check_container_module"), patch(
+            "backend.api.child_host_crud.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
+            "backend.api.child_host_crud.get_user_with_role_check"
+        ) as mock_role_check, patch(
+            "backend.api.child_host_crud.get_host_or_404"
+        ) as mock_get_host, patch(
+            "backend.api.child_host_crud.verify_host_active"
+        ), patch(
+            "backend.api.child_host_crud.QueueOperations"
+        ) as mock_queue_cls, patch(
+            "backend.api.child_host_crud.create_command_message"
+        ), patch(
+            "backend.api.child_host_crud.audit_log"
+        ):
+            mock_sessionmaker.return_value.return_value = mock_db_session
+            mock_role_check.return_value = mock_user
+            mock_get_host.return_value = mock_host
+            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+                mock_child_host
+            )
+            mock_q = MagicMock()
+            mock_queue_cls.return_value = mock_q
+
+            from backend.api.child_host_crud import delete_child_host
+
+            result = await delete_child_host(
+                str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
+            )
+
+            assert result["result"] is True
+            assert mock_child_host.status == "deleting"
+            mock_q.enqueue_message.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_delete_child_host_not_found(
+        self, mock_db_session, mock_user, mock_host
+    ):
+        """Test deleting a non-existent child host."""
+        from fastapi import HTTPException
+
+        with patch("backend.api.child_host_crud._check_container_module"), patch(
+            "backend.api.child_host_crud.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
+            "backend.api.child_host_crud.get_user_with_role_check"
+        ) as mock_role_check, patch(
+            "backend.api.child_host_crud.get_host_or_404"
+        ) as mock_get_host, patch(
+            "backend.api.child_host_crud.verify_host_active"
+        ):
+            mock_sessionmaker.return_value.return_value = mock_db_session
+            mock_role_check.return_value = mock_user
+            mock_get_host.return_value = mock_host
+            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+                None
+            )
+
+            from backend.api.child_host_crud import delete_child_host
+
+            with pytest.raises(HTTPException) as exc_info:
+                await delete_child_host(
+                    str(mock_host.id), str(uuid.uuid4()), "admin@sysmanage.org"
+                )
+
+            assert exc_info.value.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_delete_wsl_child_includes_guid(
+        self, mock_db_session, mock_user, mock_host, mock_child_host
+    ):
+        """Test that deleting a WSL child host includes the wsl_guid in parameters."""
+        mock_child_host.parent_host_id = mock_host.id
+        mock_child_host.child_type = "wsl"
+        mock_child_host.wsl_guid = "12345-abcde-67890"
+
+        with patch("backend.api.child_host_crud._check_container_module"), patch(
+            "backend.api.child_host_crud.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
+            "backend.api.child_host_crud.get_user_with_role_check"
+        ) as mock_role_check, patch(
+            "backend.api.child_host_crud.get_host_or_404"
+        ) as mock_get_host, patch(
+            "backend.api.child_host_crud.verify_host_active"
+        ), patch(
+            "backend.api.child_host_crud.QueueOperations"
+        ) as mock_queue_cls, patch(
+            "backend.api.child_host_crud.create_command_message"
+        ) as mock_create_msg, patch(
+            "backend.api.child_host_crud.audit_log"
+        ):
+            mock_sessionmaker.return_value.return_value = mock_db_session
+            mock_role_check.return_value = mock_user
+            mock_get_host.return_value = mock_host
+            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+                mock_child_host
+            )
+            mock_q = MagicMock()
+            mock_queue_cls.return_value = mock_q
+
+            from backend.api.child_host_crud import delete_child_host
+
+            result = await delete_child_host(
+                str(mock_host.id), str(mock_child_host.id), "admin@sysmanage.org"
+            )
+
+            assert result["result"] is True
+            # Verify wsl_guid was included in the command parameters
+            call_kwargs = mock_create_msg.call_args
+            assert call_kwargs[1]["parameters"]["wsl_guid"] == "12345-abcde-67890"
+
+
+# =============================================================================
+# DISTRIBUTION CRUD WITH MODULE TESTS
+# =============================================================================
+
+
+class TestDistributionCrudWithModule:
+    """Tests for distribution CRUD endpoints when container_engine module is present."""
+
+    @pytest.mark.asyncio
+    async def test_create_distribution_success(self, mock_db_session, mock_user):
+        """Test creating a new distribution."""
+        from backend.api.child_host_models import CreateDistributionRequest
+
+        request = CreateDistributionRequest(
+            child_type="lxd",
+            distribution_name="Ubuntu",
+            distribution_version="24.04",
+            display_name="Ubuntu 24.04 LTS",
+            is_active=True,
+        )
+
+        with patch("backend.api.child_host_crud._check_container_module"), patch(
+            "backend.api.child_host_crud.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
+            "backend.api.child_host_crud.get_user_with_role_check"
+        ) as mock_role_check:
+            mock_sessionmaker.return_value.return_value = mock_db_session
+            mock_role_check.return_value = mock_user
+
+            # No duplicate found
+            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+                None
+            )
+
+            # Mock session.add, session.commit, session.refresh
+            def mock_refresh(obj):
+                obj.id = uuid.uuid4()
+                from datetime import datetime, timezone
+
+                obj.created_at = datetime.now(timezone.utc).replace(tzinfo=None)
+                obj.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+            mock_db_session.refresh = mock_refresh
+
+            from backend.api.child_host_crud import create_distribution
+
+            result = await create_distribution(request, "admin@sysmanage.org")
+
+            assert result.distribution_name == "Ubuntu"
+            assert result.distribution_version == "24.04"
+            assert result.child_type == "lxd"
+            mock_db_session.add.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_create_distribution_duplicate(
+        self, mock_db_session, mock_user, mock_distribution
+    ):
+        """Test creating a duplicate distribution."""
+        from fastapi import HTTPException
+        from backend.api.child_host_models import CreateDistributionRequest
+
+        request = CreateDistributionRequest(
+            child_type="lxd",
+            distribution_name="Ubuntu",
+            distribution_version="22.04",
+            display_name="Ubuntu 22.04 LTS",
+        )
+
+        with patch("backend.api.child_host_crud._check_container_module"), patch(
+            "backend.api.child_host_crud.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
+            "backend.api.child_host_crud.get_user_with_role_check"
+        ) as mock_role_check:
+            mock_sessionmaker.return_value.return_value = mock_db_session
+            mock_role_check.return_value = mock_user
+
+            # Duplicate found
+            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+                mock_distribution
+            )
+
+            from backend.api.child_host_crud import create_distribution
+
+            with pytest.raises(HTTPException) as exc_info:
+                await create_distribution(request, "admin@sysmanage.org")
+
+            assert exc_info.value.status_code == 409
+
+    @pytest.mark.asyncio
+    async def test_update_distribution_success(
+        self, mock_db_session, mock_user, mock_distribution
+    ):
+        """Test updating a distribution."""
+        from backend.api.child_host_models import UpdateDistributionRequest
+
+        request = UpdateDistributionRequest(display_name="Ubuntu 22.04 Updated")
+
+        with patch("backend.api.child_host_crud._check_container_module"), patch(
+            "backend.api.child_host_crud.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
+            "backend.api.child_host_crud.get_user_with_role_check"
+        ) as mock_role_check:
+            mock_sessionmaker.return_value.return_value = mock_db_session
+            mock_role_check.return_value = mock_user
+            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+                mock_distribution
+            )
+
+            from backend.api.child_host_crud import update_distribution
+
+            result = await update_distribution(
+                str(mock_distribution.id), request, "admin@sysmanage.org"
+            )
+
+            assert result.distribution_name == "Ubuntu"
+            mock_db_session.commit.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_update_distribution_not_found(self, mock_db_session, mock_user):
+        """Test updating a non-existent distribution."""
+        from fastapi import HTTPException
+        from backend.api.child_host_models import UpdateDistributionRequest
+
+        request = UpdateDistributionRequest(display_name="Updated")
+
+        with patch("backend.api.child_host_crud._check_container_module"), patch(
+            "backend.api.child_host_crud.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
+            "backend.api.child_host_crud.get_user_with_role_check"
+        ) as mock_role_check:
+            mock_sessionmaker.return_value.return_value = mock_db_session
+            mock_role_check.return_value = mock_user
+            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+                None
+            )
+
+            from backend.api.child_host_crud import update_distribution
+
+            with pytest.raises(HTTPException) as exc_info:
+                await update_distribution(
+                    str(uuid.uuid4()), request, "admin@sysmanage.org"
+                )
+
+            assert exc_info.value.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_delete_distribution_success(
+        self, mock_db_session, mock_user, mock_distribution
+    ):
+        """Test deleting a distribution."""
+        with patch("backend.api.child_host_crud._check_container_module"), patch(
+            "backend.api.child_host_crud.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
+            "backend.api.child_host_crud.get_user_with_role_check"
+        ) as mock_role_check:
+            mock_sessionmaker.return_value.return_value = mock_db_session
+            mock_role_check.return_value = mock_user
+            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+                mock_distribution
+            )
+
+            from backend.api.child_host_crud import delete_distribution
+
+            result = await delete_distribution(
+                str(mock_distribution.id), "admin@sysmanage.org"
+            )
+
+            assert result["result"] is True
+            mock_db_session.delete.assert_called_once_with(mock_distribution)
+
+    @pytest.mark.asyncio
+    async def test_delete_distribution_not_found(self, mock_db_session, mock_user):
+        """Test deleting a non-existent distribution."""
+        from fastapi import HTTPException
+
+        with patch("backend.api.child_host_crud._check_container_module"), patch(
+            "backend.api.child_host_crud.sessionmaker"
+        ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
+            "backend.api.child_host_crud.get_user_with_role_check"
+        ) as mock_role_check:
+            mock_sessionmaker.return_value.return_value = mock_db_session
+            mock_role_check.return_value = mock_user
+            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+                None
+            )
+
+            from backend.api.child_host_crud import delete_distribution
+
+            with pytest.raises(HTTPException) as exc_info:
+                await delete_distribution(str(uuid.uuid4()), "admin@sysmanage.org")
+
+            assert exc_info.value.status_code == 404

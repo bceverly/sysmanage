@@ -24,6 +24,7 @@ from backend.persistence.models.core import GUID
 HOST_ID_FK = "host.id"
 CASCADE_DELETE = "CASCADE"
 CASCADE_ALL_DELETE_ORPHAN = "all, delete-orphan"
+SET_NULL = "SET NULL"
 
 
 class ProPlusLicense(Base):
@@ -568,7 +569,7 @@ class Alert(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     rule_id = Column(
         GUID(),
-        ForeignKey("alert_rule.id", ondelete="SET NULL"),
+        ForeignKey("alert_rule.id", ondelete=SET_NULL),
         nullable=True,
         index=True,
     )
@@ -601,6 +602,226 @@ class Alert(Base):
         return f"<Alert(title='{self.title}', severity='{self.severity}', host_id={self.host_id})>"
 
 
+class ScheduledReport(Base):
+    """
+    Scheduled report configuration.
+    Defines a report to be generated on a recurring schedule
+    and delivered via notification channels.
+    """
+
+    __tablename__ = "scheduled_report"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String(255), nullable=False)
+    report_type = Column(String(50), nullable=False)  # matches ReportTypeEnum values
+    schedule_type = Column(String(20), nullable=False)  # "daily", "weekly", "monthly"
+    schedule_config = Column(
+        JSON, nullable=False
+    )  # e.g. {"day_of_week": "monday", "hour": 8}
+    output_format = Column(String(10), nullable=False, default="pdf")  # "pdf" or "html"
+    enabled = Column(Boolean, nullable=False, default=True)
+    last_run_at = Column(DateTime, nullable=True)
+    next_run_at = Column(DateTime, nullable=True)
+    created_by = Column(String(255), nullable=False)
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        onupdate=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+
+    # Relationship to notification channels via junction table
+    channels = relationship(
+        "ScheduledReportChannel",
+        back_populates="scheduled_report",
+        cascade=CASCADE_ALL_DELETE_ORPHAN,
+    )
+
+    def __repr__(self):
+        return f"<ScheduledReport(name='{self.name}', type='{self.report_type}', schedule='{self.schedule_type}')>"
+
+
+class ScheduledReportChannel(Base):
+    """
+    Junction table linking scheduled reports to notification channels (M:N).
+    """
+
+    __tablename__ = "scheduled_report_channel"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    scheduled_report_id = Column(
+        GUID(),
+        ForeignKey("scheduled_report.id", ondelete=CASCADE_DELETE),
+        nullable=False,
+        index=True,
+    )
+    channel_id = Column(
+        GUID(),
+        ForeignKey("notification_channel.id", ondelete=CASCADE_DELETE),
+        nullable=False,
+        index=True,
+    )
+
+    # Relationships
+    scheduled_report = relationship("ScheduledReport", back_populates="channels")
+    channel = relationship("NotificationChannel")
+
+    def __repr__(self):
+        return f"<ScheduledReportChannel(report_id={self.scheduled_report_id}, channel_id={self.channel_id})>"
+
+
+class AuditRetentionPolicy(Base):
+    """
+    Audit log retention policy.
+    Defines rules for automatic deletion or archival of old audit entries.
+    """
+
+    __tablename__ = "audit_retention_policy"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String(255), nullable=False)
+    retention_days = Column(Integer, nullable=False)  # 1-3650
+    action = Column(String(20), nullable=False)  # "delete" or "archive"
+    entity_types = Column(JSON, nullable=True)  # filter by entity type
+    action_types = Column(JSON, nullable=True)  # filter by action type
+    enabled = Column(Boolean, nullable=False, default=True)
+    last_run_at = Column(DateTime, nullable=True)
+    next_run_at = Column(DateTime, nullable=True)
+    entries_processed = Column(Integer, nullable=False, default=0)
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        onupdate=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+
+    def __repr__(self):
+        return f"<AuditRetentionPolicy(name='{self.name}', days={self.retention_days}, action='{self.action}')>"
+
+
+class AuditLogArchive(Base):
+    """
+    Archived audit log entries.
+    Stores audit entries that have been moved from the main audit_log table
+    by a retention policy with action='archive'.
+    """
+
+    __tablename__ = "audit_log_archive"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    timestamp = Column(DateTime, nullable=False, index=True)
+    user_id = Column(GUID(), nullable=True, index=True)
+    username = Column(String(255), nullable=True)
+    action_type = Column(String(50), nullable=False, index=True)
+    entity_type = Column(String(100), nullable=False, index=True)
+    entity_id = Column(String(255), nullable=True)
+    entity_name = Column(String(255), nullable=True)
+    description = Column(Text, nullable=False)
+    details = Column(JSON, nullable=True)
+    ip_address = Column(String(45), nullable=True)
+    user_agent = Column(String(500), nullable=True)
+    result = Column(String(20), nullable=False)
+    error_message = Column(Text, nullable=True)
+    category = Column(String(50), nullable=True, index=True)
+    entry_type = Column(String(50), nullable=True, index=True)
+    archived_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    archived_by_policy_id = Column(
+        GUID(),
+        ForeignKey("audit_retention_policy.id", ondelete=SET_NULL),
+        nullable=True,
+    )
+
+    # Relationship to retention policy
+    archived_by_policy = relationship("AuditRetentionPolicy")
+
+    def __repr__(self):
+        return f"<AuditLogArchive(id={self.id}, user='{self.username}', action='{self.action_type}')>"
+
+
+class SecretVersion(Base):
+    """
+    Secret version history.
+    Tracks each version of a secret with a content fingerprint (no actual content stored).
+    """
+
+    __tablename__ = "secret_version"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    secret_id = Column(
+        GUID(),
+        ForeignKey("secrets.id", ondelete=CASCADE_DELETE),
+        nullable=False,
+        index=True,
+    )
+    version_number = Column(Integer, nullable=False)
+    content_hash = Column(String(64), nullable=True)  # SHA-256 fingerprint
+    created_at = Column(
+        DateTime,
+        nullable=True,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    created_by = Column(String(255), nullable=True)
+    change_description = Column(String(500), nullable=True)
+
+    __table_args__ = ({"sqlite_autoincrement": True},)
+
+    def __repr__(self):
+        return f"<SecretVersion(secret_id={self.secret_id}, version={self.version_number})>"
+
+
+class RotationSchedule(Base):
+    """
+    Credential rotation schedule.
+    Defines automatic rotation policies for secrets.
+    """
+
+    __tablename__ = "rotation_schedule"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    secret_id = Column(
+        GUID(),
+        ForeignKey("secrets.id", ondelete=CASCADE_DELETE),
+        nullable=False,
+        index=True,
+    )
+    frequency = Column(
+        String(20), nullable=False
+    )  # daily, weekly, monthly, quarterly, yearly
+    notify_days_before = Column(Integer, nullable=False, default=7)
+    auto_rotate = Column(Boolean, nullable=False, default=False)
+    enabled = Column(Boolean, nullable=False, default=True)
+    next_rotation = Column(DateTime, nullable=True)
+    last_rotation = Column(DateTime, nullable=True)
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        onupdate=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+
+    def __repr__(self):
+        return f"<RotationSchedule(secret_id={self.secret_id}, frequency='{self.frequency}')>"
+
+
 class HostComplianceScan(Base):
     """
     Stores compliance scan results for hosts.
@@ -618,7 +839,7 @@ class HostComplianceScan(Base):
     )
     profile_id = Column(
         GUID(),
-        ForeignKey("compliance_profile.id", ondelete="SET NULL"),
+        ForeignKey("compliance_profile.id", ondelete=SET_NULL),
         nullable=True,
         index=True,
     )

@@ -1,6 +1,9 @@
 {
   "Agent WebSocket authentication failed from %s": "Agent WebSocket authentication failed from %s",
   "Agent WebSocket connection attempted without token from %s": "Agent WebSocket connection attempted without token from %s",
+  "auditLog": {
+    "exportRequiresLicense": "Audit log export requires a SysManage Professional+ license."
+  },
   "antivirus": {
     "description": "Configure default antivirus software for each operating system",
     "errors": {
@@ -885,6 +888,26 @@
     "privileged": "Privileged",
     "reboot": "Reboot",
     "rebootFailed": "Failed to request reboot",
+    "rebootOrchestration": {
+      "initiated": "Orchestrated reboot initiated — stopping {{count}} child host(s)",
+      "completed": "Orchestrated reboot completed successfully",
+      "completedWithErrors": "Orchestrated reboot completed: {{error}}",
+      "failed": "Orchestrated reboot failed: {{error}}",
+      "inProgress": "Orchestrated Reboot in Progress",
+      "statusShuttingDown": "Stopping child hosts...",
+      "statusRebooting": "Rebooting host, waiting for reconnect...",
+      "statusPendingRestart": "Host reconnected, preparing to restart children...",
+      "statusRestarting": "Restarting child hosts...",
+      "orchestratedInfo": "This host has {{count}} running child host(s). SysManage will safely stop them before rebooting and automatically restart them afterward.",
+      "ungracefulWarning": "This host has {{count}} running child host(s) that will be ungracefully terminated during reboot. Upgrade to SysManage Professional+ for orchestrated safe reboot.",
+      "runningChildren": "Running child hosts:",
+      "childName": "Name",
+      "childType": "Type",
+      "proceedOrchestrated": "Click \"Orchestrated Reboot\" to safely reboot {{hostname}}.",
+      "proceedAnyway": "Click \"Reboot Anyway\" to reboot {{hostname}} without stopping child hosts first.",
+      "orchestratedRebootButton": "Orchestrated Reboot",
+      "rebootAnywayButton": "Reboot Anyway"
+    },
     "rebootRequested": "Reboot requested successfully",
     "rebootRequired": "Reboot Needed",
     "rebootSelected": "Reboot Selected",

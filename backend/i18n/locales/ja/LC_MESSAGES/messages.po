@@ -712,6 +712,51 @@ msgstr "ユーザーセキュリティロール (RBAC)"
 msgid "No security roles assigned"
 msgstr "セキュリティロールが割り当てられていません"
 
+msgid "IP Address"
+msgstr "IPアドレス"
+
+msgid "OS Version"
+msgstr "OSバージョン"
+
+msgid "IPv4 Ports"
+msgstr "IPv4ポート"
+
+msgid "IPv6 Ports"
+msgstr "IPv6ポート"
+
+msgid "Audit Log"
+msgstr "監査ログ"
+
+msgid "Total Entries"
+msgstr "合計エントリ数"
+
+msgid "No audit log entries found."
+msgstr "監査ログエントリが見つかりません。"
+
+msgid "Timestamp"
+msgstr "タイムスタンプ"
+
+msgid "Entity Type"
+msgstr "エンティティタイプ"
+
+msgid "Entity Name"
+msgstr "エンティティ名"
+
+msgid "Result"
+msgstr "結果"
+
+msgid "Description"
+msgstr "説明"
+
+msgid "System"
+msgstr "システム"
+
+msgid "Action"
+msgstr "アクション"
+
+msgid "User"
+msgstr "ユーザー"
+
 msgid "User not found"
 msgstr "ユーザーが見つかりません"
 
@@ -840,22 +885,316 @@ msgstr "KVM/libvirtが正常に初期化されました"
 # KVM Networking Configuration strings
 
 msgid "KVM networking is only supported on Linux hosts"
-msgstr "KVM networking is only supported on Linux hosts"
+msgstr "KVMネットワークはLinuxホストでのみサポートされています"
 
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr "Agent must be running with root privileges to configure KVM networking"
+msgstr "KVMネットワークを設定するには、エージェントをroot権限で実行する必要があります"
 
 msgid "Bridge interface name is required for bridged networking mode"
-msgstr "Bridge interface name is required for bridged networking mode"
+msgstr "ブリッジネットワークモードにはブリッジインターフェース名が必要です"
 
 msgid "KVM networking configuration requested: %s mode"
-msgstr "KVM networking configuration requested: %s mode"
+msgstr "KVMネットワーク設定がリクエストされました: %sモード"
 
 msgid "KVM networking configuration requested. The agent will configure the %s network."
-msgstr "KVM networking configuration requested. The agent will configure the %s network."
+msgstr "KVMネットワーク設定がリクエストされました。エージェントが%sネットワークを設定します。"
 
 msgid "KVM networks are only available on Linux hosts"
-msgstr "KVM networks are only available on Linux hosts"
+msgstr "KVMネットワークはLinuxホストでのみ利用可能です"
 
 msgid "KVM network list requested. Results will be returned shortly."
-msgstr "KVM network list requested. Results will be returned shortly."
+msgstr "KVMネットワーク一覧がリクエストされました。まもなく結果が表示されます。"
+
+# Pro+ feature gate messages
+msgid "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "コンテナ/VM管理にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
+
+msgid "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "コンテナライフサイクル管理にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
+
+msgid "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "シークレット管理にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
+
+msgid "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "シークレットのデプロイにはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
+
+msgid "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "レポート生成にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
+
+msgid "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
+msgstr "監査ログのエクスポートにはSysManage Professional+ライセンスが必要です。CSV、JSON、CEF、LEEFエクスポート形式にアクセスするにはアップグレードしてください。"
+
+msgid "Use /api/v1/audit/export with Pro+ license"
+msgstr "Pro+ライセンスで/api/v1/audit/exportを使用してください"
+
+msgid "Child host not found"
+msgstr "子ホストが見つかりません"
+
+msgid "Child host refresh requested"
+msgstr "子ホストの更新がリクエストされました"
+
+msgid "Report"
+msgstr "レポート"
+
+# Pro+ redirect messages
+msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/reports/view/{report_type} を使用してください"
+
+msgid "Use /api/v1/reports/generate/{report_type} with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/reports/generate/{report_type} を使用してください"
+
+msgid "Use /api/v1/secrets with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/secrets を使用してください"
+
+msgid "Use /api/v1/secrets/{secret_id} with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/secrets/{secret_id} を使用してください"
+
+msgid "Use /api/v1/secrets/{secret_id}/content with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/secrets/{secret_id}/content を使用してください"
+
+msgid "Use /api/v1/secrets/ssh-keys with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/secrets/ssh-keys を使用してください"
+
+msgid "Use /api/v1/secrets/types with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/secrets/types を使用してください"
+
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/secrets/deploy-ssh-keys を使用してください"
+
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/secrets/deploy-certificates を使用してください"
+
+# Scheduled report delivery messages
+msgid "Scheduled report created successfully"
+msgstr "スケジュールレポートが正常に作成されました"
+
+msgid "Scheduled report updated successfully"
+msgstr "スケジュールレポートが正常に更新されました"
+
+msgid "Scheduled report deleted successfully"
+msgstr "スケジュールレポートが正常に削除されました"
+
+msgid "Scheduled report not found"
+msgstr "スケジュールレポートが見つかりません"
+
+msgid "Scheduled report executed successfully"
+msgstr "スケジュールレポートが正常に実行されました"
+
+msgid "Invalid schedule type"
+msgstr "無効なスケジュールタイプ"
+
+msgid "Invalid output format"
+msgstr "無効な出力形式"
+
+# Audit retention policy messages
+msgid "Retention policy created successfully"
+msgstr "保持ポリシーが正常に作成されました"
+
+msgid "Retention policy updated successfully"
+msgstr "保持ポリシーが正常に更新されました"
+
+msgid "Retention policy deleted successfully"
+msgstr "保持ポリシーが正常に削除されました"
+
+msgid "Retention policy not found"
+msgstr "保持ポリシーが見つかりません"
+
+msgid "Retention policy executed successfully"
+msgstr "保持ポリシーが正常に実行されました"
+
+msgid "Retention days must be between 1 and 3650"
+msgstr "保持日数は1から3650の間でなければなりません"
+
+msgid "Invalid retention action"
+msgstr "無効な保持アクション"
+
+# Audit archival messages
+msgid "Audit entries archived successfully"
+msgstr "監査エントリが正常にアーカイブされました"
+
+msgid "Audit entries deleted by retention policy"
+msgstr "保持ポリシーにより監査エントリが削除されました"
+
+msgid "No audit entries matched the retention criteria"
+msgstr "保持基準に一致する監査エントリはありませんでした"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/reports/schedules with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/reports/schedules を使用してください"
+
+msgid "Use /api/v1/audit/retention-policies with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/audit/retention-policies を使用してください"
+
+msgid "Use /api/v1/audit/archive with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/audit/archive を使用してください"
+
+# Scheduled report delivery messages
+msgid "Scheduled report delivered successfully"
+msgstr "スケジュールレポートが正常に配信されました"
+
+msgid "Failed to deliver scheduled report"
+msgstr "スケジュールレポートの配信に失敗しました"
+
+msgid "Report dispatch to channel failed"
+msgstr "チャンネルへのレポート配信に失敗しました"
+
+# Secret deployment messages
+msgid "SSH keys deployed successfully"
+msgstr "SSH鍵が正常にデプロイされました"
+
+msgid "Failed to deploy SSH keys"
+msgstr "SSH鍵のデプロイに失敗しました"
+
+msgid "Certificates deployed successfully"
+msgstr "証明書が正常にデプロイされました"
+
+msgid "Failed to deploy certificates"
+msgstr "証明書のデプロイに失敗しました"
+
+msgid "Secret deployment queued"
+msgstr "シークレットのデプロイがキューに追加されました"
+
+# Rotation schedule messages
+msgid "Rotation schedule created"
+msgstr "ローテーションスケジュールが作成されました"
+
+msgid "Rotation schedule updated"
+msgstr "ローテーションスケジュールが更新されました"
+
+msgid "Rotation schedule deleted"
+msgstr "ローテーションスケジュールが削除されました"
+
+msgid "Rotation schedule not found"
+msgstr "ローテーションスケジュールが見つかりません"
+
+msgid "Rotation executed successfully"
+msgstr "ローテーションが正常に実行されました"
+
+msgid "Failed to execute rotation"
+msgstr "ローテーションの実行に失敗しました"
+
+# Container action messages
+msgid "Container action queued"
+msgstr "コンテナアクションがキューに追加されました"
+
+msgid "Container not found"
+msgstr "コンテナが見つかりません"
+
+msgid "Container creation queued"
+msgstr "コンテナ作成がキューに追加されました"
+
+msgid "Parent host not found"
+msgstr "親ホストが見つかりません"
+
+msgid "Network configuration queued"
+msgstr "ネットワーク設定がキューに追加されました"
+
+msgid "Container started"
+msgstr "コンテナが起動しました"
+
+msgid "Container stopped"
+msgstr "コンテナが停止しました"
+
+msgid "Container restarted"
+msgstr "コンテナが再起動しました"
+
+msgid "Container deleted"
+msgstr "コンテナが削除されました"
+
+# Integrity verification messages
+msgid "Integrity verification passed"
+msgstr "整合性検証に合格しました"
+
+msgid "Integrity verification failed"
+msgstr "整合性検証に失敗しました"
+
+msgid "Integrity hash mismatch detected"
+msgstr "整合性ハッシュの不一致が検出されました"
+
+# Secret versioning messages
+msgid "Secret version created"
+msgstr "シークレットバージョンが作成されました"
+
+msgid "Secret not found"
+msgstr "シークレットが見つかりません"
+
+msgid "Secret deleted successfully"
+msgstr "シークレットが正常に削除されました"
+
+msgid "Failed to retrieve secret content from vault"
+msgstr "ボールトからシークレットの内容を取得できませんでした"
+
+msgid "Failed to store secret in vault"
+msgstr "ボールトにシークレットを保存できませんでした"
+
+msgid "Failed to update secret in vault"
+msgstr "ボールトのシークレットを更新できませんでした"
+
+msgid "Deleted {count} secrets"
+msgstr "{count}件のシークレットを削除しました"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/secrets/rotation-schedules を使用してください"
+
+msgid "Use /api/v1/containers/create with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/containers/create を使用してください"
+
+msgid "Use /api/v1/containers/{id}/action with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/containers/{id}/action を使用してください"
+
+msgid "Use /api/v1/containers/{id}/network with Pro+ license"
+msgstr "Pro+ライセンスで /api/v1/containers/{id}/network を使用してください"
+
+# Child host lifecycle control messages
+msgid "Child host start requested: %s"
+msgstr "子ホストの起動がリクエストされました: %s"
+
+msgid "Child host start requested"
+msgstr "子ホストの起動がリクエストされました"
+
+msgid "Child host stop requested: %s"
+msgstr "子ホストの停止がリクエストされました: %s"
+
+msgid "Child host stop requested"
+msgstr "子ホストの停止がリクエストされました"
+
+msgid "Child host restart requested: %s"
+msgstr "子ホストの再起動がリクエストされました: %s"
+
+msgid "Child host restart requested"
+msgstr "子ホストの再起動がリクエストされました"
+
+msgid "Child host deletion requested: %s"
+msgstr "子ホストの削除がリクエストされました: %s"
+
+msgid "Child host deletion requested"
+msgstr "子ホストの削除がリクエストされました"
+
+msgid "Distribution '%s %s' already exists for type '%s'"
+msgstr "ディストリビューション '%s %s' はタイプ '%s' に既に存在します"
+
+msgid "Distribution deleted"
+msgstr "ディストリビューションが削除されました"
+
+msgid "Source %s failed: %s"
+msgstr "ソース %s が失敗しました: %s"
+
+# Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
+#, python-format
+msgid "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "オーケストレーション再起動にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
+
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgstr "実行中の子ホストが見つかりません。代わりに標準の再起動エンドポイントを使用してください。"
+
+#, python-format
+msgid "Orchestrated reboot initiated with %d running child host(s)"
+msgstr "実行中の子ホスト%d台でオーケストレーション再起動を開始しました"
+
+msgid "Reboot orchestration not found"
+msgstr "再起動オーケストレーションが見つかりません"
+
+#, python-format
+msgid "%d of %d child host(s) failed to restart"
+msgstr "%d/%d台の子ホストの再起動に失敗しました"

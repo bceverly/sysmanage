@@ -259,9 +259,9 @@ class TestHostModel:
         repr_str = repr(host)
 
         assert "Host" in repr_str
-        # Checking repr output format, not URL validation - false positive for CodeQL
-        # lgtm[py/incomplete-url-substring-sanitization]
-        assert "server.example.com" in repr_str
+        # Verify repr output contains the expected hostname
+        expected_hostname = "server.example.com"
+        assert expected_hostname in repr_str
         assert "True" in repr_str
 
 

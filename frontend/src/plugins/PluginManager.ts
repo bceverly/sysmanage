@@ -21,10 +21,10 @@ class PluginManager {
 
     registerPlugin = (plugin: PluginRegistration): void => {
         if (this.plugins.has(plugin.id)) {
-            console.warn(`Plugin "${plugin.id}" is already registered, skipping.`);
+            // Duplicate plugin registration silently ignored
             return;
         }
-        console.log(`Registering plugin: ${plugin.name} v${plugin.version}`);
+        // Plugin registration logged at debug level only
         this.plugins.set(plugin.id, plugin);
         this.notify();
     };

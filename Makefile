@@ -904,9 +904,9 @@ else
 	@find /tmp -name "tmp*.db" -type f -delete 2>/dev/null || true
 endif
 ifeq ($(OS),Windows_NT)
-	@set OTEL_ENABLED=false && $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html
+	@set OTEL_ENABLED=false && $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=term-missing --cov-report=html
 else
-	@OTEL_ENABLED=false $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html
+	@OTEL_ENABLED=false $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=term-missing --cov-report=html
 endif
 	@echo "[OK] Python tests completed"
 
@@ -1023,8 +1023,8 @@ else
 			lsof -ti:3000 | xargs kill -9 2>/dev/null || true; \
 			sleep 1; \
 		fi; \
-		echo "[INFO] Starting backend API server..."; \
-		. $(VENV_ACTIVATE) && nohup $(PYTHON) -m backend.main > logs/backend-e2e.log 2>&1 & \
+		echo "[INFO] Starting backend API server (email disabled for e2e)..."; \
+		. $(VENV_ACTIVATE) && SYSMANAGE_DISABLE_EMAIL=true nohup $(PYTHON) -m backend.main > logs/backend-e2e.log 2>&1 & \
 		BACKEND_PID=$$!; \
 		echo "[INFO] Backend PID: $$BACKEND_PID"; \
 		echo "$$BACKEND_PID" > logs/backend-e2e.pid; \

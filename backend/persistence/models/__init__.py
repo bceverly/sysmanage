@@ -88,7 +88,9 @@ __all__ = [
     "EnabledPackageManager",
     # Child host models
     "HostChild",
+    "ChildHost",
     "ChildHostDistribution",
+    "RebootOrchestration",
     # Pro+ models
     "ProPlusLicense",
     "ProPlusLicenseValidationLog",
@@ -110,4 +112,16 @@ __all__ = [
     "AlertRule",
     "AlertRuleNotificationChannel",
     "Alert",
+    # Scheduled report models
+    "ScheduledReport",
+    "ScheduledReportChannel",
+    # Audit retention models
+    "AuditRetentionPolicy",
+    "AuditLogArchive",
+    # Secret versioning and rotation models
+    "SecretVersion",
+    "RotationSchedule",
 ]
+
+# Alias for Cython modules that reference ChildHost instead of HostChild
+ChildHost = HostChild

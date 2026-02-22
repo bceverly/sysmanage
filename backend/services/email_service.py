@@ -4,6 +4,7 @@ Supports various SMTP configurations including Gmail app passwords.
 """
 
 import logging
+import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -22,7 +23,13 @@ class EmailService:
         self.smtp_config = config.get_smtp_config()
 
     def is_enabled(self) -> bool:
-        """Check if email service is enabled."""
+        """Check if email service is enabled.
+
+        Respects SYSMANAGE_DISABLE_EMAIL env var to allow disabling
+        email during e2e/integration tests without changing config.
+        """
+        if os.environ.get("SYSMANAGE_DISABLE_EMAIL"):
+            return False
         return config.is_email_enabled()
 
     def send_email(  # pylint: disable=too-many-positional-arguments

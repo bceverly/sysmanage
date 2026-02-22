@@ -708,6 +708,51 @@ msgstr "用户安全角色 (RBAC)"
 msgid "No security roles assigned"
 msgstr "未分配安全角色"
 
+msgid "IP Address"
+msgstr "IP 地址"
+
+msgid "OS Version"
+msgstr "操作系统版本"
+
+msgid "IPv4 Ports"
+msgstr "IPv4 端口"
+
+msgid "IPv6 Ports"
+msgstr "IPv6 端口"
+
+msgid "Audit Log"
+msgstr "审计日志"
+
+msgid "Total Entries"
+msgstr "总条目数"
+
+msgid "No audit log entries found."
+msgstr "未找到审计日志条目。"
+
+msgid "Timestamp"
+msgstr "时间戳"
+
+msgid "Entity Type"
+msgstr "实体类型"
+
+msgid "Entity Name"
+msgstr "实体名称"
+
+msgid "Result"
+msgstr "结果"
+
+msgid "Description"
+msgstr "描述"
+
+msgid "System"
+msgstr "系统"
+
+msgid "Action"
+msgstr "操作"
+
+msgid "User"
+msgstr "用户"
+
 msgid "User not found"
 msgstr "未找到用户"
 
@@ -836,22 +881,323 @@ msgstr "KVM/libvirt初始化成功"
 # KVM Networking Configuration strings
 
 msgid "KVM networking is only supported on Linux hosts"
-msgstr "KVM networking is only supported on Linux hosts"
+msgstr "KVM 网络仅在 Linux 主机上受支持"
 
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr "Agent must be running with root privileges to configure KVM networking"
+msgstr "代理必须以 root 权限运行才能配置 KVM 网络"
 
 msgid "Bridge interface name is required for bridged networking mode"
-msgstr "Bridge interface name is required for bridged networking mode"
+msgstr "桥接网络模式需要桥接接口名称"
 
 msgid "KVM networking configuration requested: %s mode"
-msgstr "KVM networking configuration requested: %s mode"
+msgstr "已请求 KVM 网络配置：%s 模式"
 
 msgid "KVM networking configuration requested. The agent will configure the %s network."
-msgstr "KVM networking configuration requested. The agent will configure the %s network."
+msgstr "已请求 KVM 网络配置。代理将配置 %s 网络。"
 
 msgid "KVM networks are only available on Linux hosts"
-msgstr "KVM networks are only available on Linux hosts"
+msgstr "KVM 网络仅在 Linux 主机上可用"
 
 msgid "KVM network list requested. Results will be returned shortly."
-msgstr "KVM network list requested. Results will be returned shortly."
+msgstr "已请求 KVM 网络列表。结果将很快显示。"
+
+# Pro+ feature gate messages
+msgid "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "容器/虚拟机管理需要 SysManage Professional+ 许可证。请升级以访问此功能。"
+
+msgid "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "容器生命周期管理需要 SysManage Professional+ 许可证。请升级以访问此功能。"
+
+msgid "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "密钥管理需要 SysManage Professional+ 许可证。请升级以访问此功能。"
+
+msgid "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "密钥部署需要 SysManage Professional+ 许可证。请升级以访问此功能。"
+
+msgid "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "报告生成需要 SysManage Professional+ 许可证。请升级以访问此功能。"
+
+msgid "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
+msgstr "审计日志导出需要 SysManage Professional+ 许可证。请升级以访问 CSV、JSON、CEF 和 LEEF 导出格式。"
+
+msgid "Use /api/v1/audit/export with Pro+ license"
+msgstr "使用 /api/v1/audit/export（需要 Pro+ 许可证）"
+
+msgid "Child host not found"
+msgstr "未找到子主机"
+
+msgid "Child host refresh requested"
+msgstr "已请求刷新子主机"
+
+msgid "Report"
+msgstr "报告"
+
+# Pro+ redirect messages
+msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/reports/view/{report_type}"
+
+msgid "Use /api/v1/reports/generate/{report_type} with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/reports/generate/{report_type}"
+
+msgid "Use /api/v1/secrets with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/secrets"
+
+msgid "Use /api/v1/secrets/{secret_id} with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/secrets/{secret_id}"
+
+msgid "Use /api/v1/secrets/{secret_id}/content with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/secrets/{secret_id}/content"
+
+msgid "Use /api/v1/secrets/ssh-keys with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/secrets/ssh-keys"
+
+msgid "Use /api/v1/secrets/types with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/secrets/types"
+
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/secrets/deploy-ssh-keys"
+
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/secrets/deploy-certificates"
+
+# Scheduled report delivery messages
+msgid "Scheduled report created successfully"
+msgstr "计划报告创建成功"
+
+msgid "Scheduled report updated successfully"
+msgstr "计划报告更新成功"
+
+msgid "Scheduled report deleted successfully"
+msgstr "计划报告删除成功"
+
+msgid "Scheduled report not found"
+msgstr "未找到计划报告"
+
+msgid "Scheduled report executed successfully"
+msgstr "计划报告执行成功"
+
+msgid "Invalid schedule type"
+msgstr "无效的计划类型"
+
+msgid "Invalid output format"
+msgstr "无效的输出格式"
+
+# Audit retention policy messages
+msgid "Retention policy created successfully"
+msgstr "保留策略创建成功"
+
+msgid "Retention policy updated successfully"
+msgstr "保留策略更新成功"
+
+msgid "Retention policy deleted successfully"
+msgstr "保留策略删除成功"
+
+msgid "Retention policy not found"
+msgstr "未找到保留策略"
+
+msgid "Retention policy executed successfully"
+msgstr "保留策略执行成功"
+
+msgid "Retention days must be between 1 and 3650"
+msgstr "保留天数必须在 1 到 3650 之间"
+
+msgid "Invalid retention action"
+msgstr "无效的保留操作"
+
+# Audit archival messages
+msgid "Audit entries archived successfully"
+msgstr "审计条目归档成功"
+
+msgid "Audit entries deleted by retention policy"
+msgstr "审计条目已按保留策略删除"
+
+msgid "No audit entries matched the retention criteria"
+msgstr "没有审计条目匹配保留条件"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/reports/schedules with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/reports/schedules"
+
+msgid "Use /api/v1/audit/retention-policies with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/audit/retention-policies"
+
+msgid "Use /api/v1/audit/archive with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/audit/archive"
+
+# Scheduled report delivery messages
+msgid "Scheduled report delivered successfully"
+msgstr "计划报告投递成功"
+
+msgid "Failed to deliver scheduled report"
+msgstr "计划报告投递失败"
+
+msgid "Report dispatch to channel failed"
+msgstr "报告分发到频道失败"
+
+# Secret deployment messages
+msgid "SSH keys deployed successfully"
+msgstr "SSH 密钥部署成功"
+
+msgid "Failed to deploy SSH keys"
+msgstr "SSH 密钥部署失败"
+
+msgid "Certificates deployed successfully"
+msgstr "证书部署成功"
+
+msgid "Failed to deploy certificates"
+msgstr "证书部署失败"
+
+msgid "Secret deployment queued"
+msgstr "密钥部署已排队"
+
+# Rotation schedule messages
+msgid "Rotation schedule created"
+msgstr "轮换计划已创建"
+
+msgid "Rotation schedule updated"
+msgstr "轮换计划已更新"
+
+msgid "Rotation schedule deleted"
+msgstr "轮换计划已删除"
+
+msgid "Rotation schedule not found"
+msgstr "未找到轮换计划"
+
+msgid "Rotation executed successfully"
+msgstr "轮换执行成功"
+
+msgid "Failed to execute rotation"
+msgstr "轮换执行失败"
+
+# Container action messages
+msgid "Container action queued"
+msgstr "容器操作已排队"
+
+msgid "Container not found"
+msgstr "未找到容器"
+
+msgid "Container creation queued"
+msgstr "容器创建已排队"
+
+msgid "Parent host not found"
+msgstr "未找到父主机"
+
+msgid "Network configuration queued"
+msgstr "网络配置已排队"
+
+msgid "Container started"
+msgstr "容器已启动"
+
+msgid "Container stopped"
+msgstr "容器已停止"
+
+msgid "Container restarted"
+msgstr "容器已重启"
+
+msgid "Container deleted"
+msgstr "容器已删除"
+
+# Integrity verification messages
+msgid "Integrity verification passed"
+msgstr "完整性验证通过"
+
+msgid "Integrity verification failed"
+msgstr "完整性验证失败"
+
+msgid "Integrity hash mismatch detected"
+msgstr "检测到完整性哈希不匹配"
+
+# Secret versioning messages
+msgid "Secret version created"
+msgstr "密钥版本已创建"
+
+msgid "Secret not found"
+msgstr "未找到密钥"
+
+msgid "Secret deleted successfully"
+msgstr "密钥删除成功"
+
+msgid "Failed to retrieve secret content from vault"
+msgstr "从保险库检索密钥内容失败"
+
+msgid "Failed to store secret in vault"
+msgstr "将密钥存储到保险库失败"
+
+msgid "Failed to update secret in vault"
+msgstr "更新保险库中的密钥失败"
+
+msgid "Deleted {count} secrets"
+msgstr "已删除 {count} 个密钥"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/secrets/deploy-ssh-keys"
+
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/secrets/deploy-certificates"
+
+msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/secrets/rotation-schedules"
+
+msgid "Use /api/v1/containers/create with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/containers/create"
+
+msgid "Use /api/v1/containers/{id}/action with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/containers/{id}/action"
+
+msgid "Use /api/v1/containers/{id}/network with Pro+ license"
+msgstr "使用 Pro+ 许可证访问 /api/v1/containers/{id}/network"
+
+# Child host lifecycle control messages
+msgid "Child host start requested: %s"
+msgstr "已请求启动子主机: %s"
+
+msgid "Child host start requested"
+msgstr "已请求启动子主机"
+
+msgid "Child host stop requested: %s"
+msgstr "已请求停止子主机: %s"
+
+msgid "Child host stop requested"
+msgstr "已请求停止子主机"
+
+msgid "Child host restart requested: %s"
+msgstr "已请求重启子主机: %s"
+
+msgid "Child host restart requested"
+msgstr "已请求重启子主机"
+
+msgid "Child host deletion requested: %s"
+msgstr "已请求删除子主机: %s"
+
+msgid "Child host deletion requested"
+msgstr "已请求删除子主机"
+
+msgid "Distribution '%s %s' already exists for type '%s'"
+msgstr "发行版 '%s %s' 已存在于类型 '%s' 中"
+
+msgid "Distribution deleted"
+msgstr "发行版已删除"
+
+msgid "Source %s failed: %s"
+msgstr "源 %s 失败：%s"
+
+# Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
+#, python-format
+msgid "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "编排重启需要 SysManage Professional+ 许可证。请升级以访问此功能。"
+
+#, python-format
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgstr "未找到正在运行的子主机。请改用标准重启端点。"
+
+#, python-format
+msgid "Orchestrated reboot initiated with %d running child host(s)"
+msgstr "已启动编排重启，包含 %d 个正在运行的子主机"
+
+msgid "Reboot orchestration not found"
+msgstr "未找到重启编排"
+
+#, python-format
+msgid "%d of %d child host(s) failed to restart"
+msgstr "%d/%d 个子主机重启失败"

@@ -601,6 +601,9 @@ def test_db():
         error_message = Column(Text, nullable=True)
         category = Column(String(50), nullable=True, index=True)
         entry_type = Column(String(50), nullable=True, index=True)
+        integrity_hash = Column(
+            String(64), nullable=True
+        )  # SHA-256 hash for tamper-evident logging
 
     # Create test version of EnabledPackageManager model for SQLite compatibility
     class EnabledPackageManager(TestBase):

@@ -402,6 +402,51 @@ msgstr "User Security Roles (RBAC)"
 msgid "No security roles assigned"
 msgstr "No security roles assigned"
 
+msgid "IP Address"
+msgstr "IP Address"
+
+msgid "OS Version"
+msgstr "OS Version"
+
+msgid "IPv4 Ports"
+msgstr "IPv4 Ports"
+
+msgid "IPv6 Ports"
+msgstr "IPv6 Ports"
+
+msgid "Audit Log"
+msgstr "Audit Log"
+
+msgid "Total Entries"
+msgstr "Total Entries"
+
+msgid "No audit log entries found."
+msgstr "No audit log entries found."
+
+msgid "Timestamp"
+msgstr "Timestamp"
+
+msgid "Entity Type"
+msgstr "Entity Type"
+
+msgid "Entity Name"
+msgstr "Entity Name"
+
+msgid "Result"
+msgstr "Result"
+
+msgid "Description"
+msgstr "Description"
+
+msgid "System"
+msgstr "System"
+
+msgid "Action"
+msgstr "Action"
+
+msgid "User"
+msgstr "User"
+
 msgid "User not found"
 msgstr "User not found"
 
@@ -555,3 +600,300 @@ msgstr "KVM networks are only available on Linux hosts"
 
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "KVM network list requested. Results will be returned shortly."
+
+# Pro+ feature gate messages
+msgid "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
+
+msgid "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
+
+msgid "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
+
+msgid "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
+
+msgid "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
+
+msgid "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
+msgstr "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
+
+msgid "Use /api/v1/audit/export with Pro+ license"
+msgstr "Use /api/v1/audit/export with Pro+ license"
+
+msgid "Child host not found"
+msgstr "Child host not found"
+
+msgid "Child host refresh requested"
+msgstr "Child host refresh requested"
+
+msgid "Report"
+msgstr "Report"
+
+# Pro+ redirect messages
+msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"
+msgstr "Use /api/v1/reports/view/{report_type} with Pro+ license"
+
+msgid "Use /api/v1/reports/generate/{report_type} with Pro+ license"
+msgstr "Use /api/v1/reports/generate/{report_type} with Pro+ license"
+
+msgid "Use /api/v1/secrets with Pro+ license"
+msgstr "Use /api/v1/secrets with Pro+ license"
+
+msgid "Use /api/v1/secrets/{secret_id} with Pro+ license"
+msgstr "Use /api/v1/secrets/{secret_id} with Pro+ license"
+
+msgid "Use /api/v1/secrets/{secret_id}/content with Pro+ license"
+msgstr "Use /api/v1/secrets/{secret_id}/content with Pro+ license"
+
+msgid "Use /api/v1/secrets/ssh-keys with Pro+ license"
+msgstr "Use /api/v1/secrets/ssh-keys with Pro+ license"
+
+msgid "Use /api/v1/secrets/types with Pro+ license"
+msgstr "Use /api/v1/secrets/types with Pro+ license"
+
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+
+# Scheduled report delivery messages
+msgid "Scheduled report created successfully"
+msgstr "Scheduled report created successfully"
+
+msgid "Scheduled report updated successfully"
+msgstr "Scheduled report updated successfully"
+
+msgid "Scheduled report deleted successfully"
+msgstr "Scheduled report deleted successfully"
+
+msgid "Scheduled report not found"
+msgstr "Scheduled report not found"
+
+msgid "Scheduled report executed successfully"
+msgstr "Scheduled report executed successfully"
+
+msgid "Invalid schedule type"
+msgstr "Invalid schedule type"
+
+msgid "Invalid output format"
+msgstr "Invalid output format"
+
+# Audit retention policy messages
+msgid "Retention policy created successfully"
+msgstr "Retention policy created successfully"
+
+msgid "Retention policy updated successfully"
+msgstr "Retention policy updated successfully"
+
+msgid "Retention policy deleted successfully"
+msgstr "Retention policy deleted successfully"
+
+msgid "Retention policy not found"
+msgstr "Retention policy not found"
+
+msgid "Retention policy executed successfully"
+msgstr "Retention policy executed successfully"
+
+msgid "Retention days must be between 1 and 3650"
+msgstr "Retention days must be between 1 and 3650"
+
+msgid "Invalid retention action"
+msgstr "Invalid retention action"
+
+# Audit archival messages
+msgid "Audit entries archived successfully"
+msgstr "Audit entries archived successfully"
+
+msgid "Audit entries deleted by retention policy"
+msgstr "Audit entries deleted by retention policy"
+
+msgid "No audit entries matched the retention criteria"
+msgstr "No audit entries matched the retention criteria"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/reports/schedules with Pro+ license"
+msgstr "Use /api/v1/reports/schedules with Pro+ license"
+
+msgid "Use /api/v1/audit/retention-policies with Pro+ license"
+msgstr "Use /api/v1/audit/retention-policies with Pro+ license"
+
+msgid "Use /api/v1/audit/archive with Pro+ license"
+msgstr "Use /api/v1/audit/archive with Pro+ license"
+
+# Scheduled report delivery messages
+msgid "Scheduled report delivered successfully"
+msgstr "Scheduled report delivered successfully"
+
+msgid "Failed to deliver scheduled report"
+msgstr "Failed to deliver scheduled report"
+
+msgid "Report dispatch to channel failed"
+msgstr "Report dispatch to channel failed"
+
+# Secret deployment messages
+msgid "SSH keys deployed successfully"
+msgstr "SSH keys deployed successfully"
+
+msgid "Failed to deploy SSH keys"
+msgstr "Failed to deploy SSH keys"
+
+msgid "Certificates deployed successfully"
+msgstr "Certificates deployed successfully"
+
+msgid "Failed to deploy certificates"
+msgstr "Failed to deploy certificates"
+
+msgid "Secret deployment queued"
+msgstr "Secret deployment queued"
+
+# Rotation schedule messages
+msgid "Rotation schedule created"
+msgstr "Rotation schedule created"
+
+msgid "Rotation schedule updated"
+msgstr "Rotation schedule updated"
+
+msgid "Rotation schedule deleted"
+msgstr "Rotation schedule deleted"
+
+msgid "Rotation schedule not found"
+msgstr "Rotation schedule not found"
+
+msgid "Rotation executed successfully"
+msgstr "Rotation executed successfully"
+
+msgid "Failed to execute rotation"
+msgstr "Failed to execute rotation"
+
+# Container action messages
+msgid "Container action queued"
+msgstr "Container action queued"
+
+msgid "Container not found"
+msgstr "Container not found"
+
+msgid "Container creation queued"
+msgstr "Container creation queued"
+
+msgid "Parent host not found"
+msgstr "Parent host not found"
+
+msgid "Network configuration queued"
+msgstr "Network configuration queued"
+
+msgid "Container started"
+msgstr "Container started"
+
+msgid "Container stopped"
+msgstr "Container stopped"
+
+msgid "Container restarted"
+msgstr "Container restarted"
+
+msgid "Container deleted"
+msgstr "Container deleted"
+
+# Integrity verification messages
+msgid "Integrity verification passed"
+msgstr "Integrity verification passed"
+
+msgid "Integrity verification failed"
+msgstr "Integrity verification failed"
+
+msgid "Integrity hash mismatch detected"
+msgstr "Integrity hash mismatch detected"
+
+# Secret versioning messages
+msgid "Secret version created"
+msgstr "Secret version created"
+
+msgid "Secret not found"
+msgstr "Secret not found"
+
+msgid "Secret deleted successfully"
+msgstr "Secret deleted successfully"
+
+msgid "Failed to retrieve secret content from vault"
+msgstr "Failed to retrieve secret content from vault"
+
+msgid "Failed to store secret in vault"
+msgstr "Failed to store secret in vault"
+
+msgid "Failed to update secret in vault"
+msgstr "Failed to update secret in vault"
+
+msgid "Deleted {count} secrets"
+msgstr "Deleted {count} secrets"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+
+msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
+msgstr "Use /api/v1/secrets/rotation-schedules with Pro+ license"
+
+msgid "Use /api/v1/containers/create with Pro+ license"
+msgstr "Use /api/v1/containers/create with Pro+ license"
+
+msgid "Use /api/v1/containers/{id}/action with Pro+ license"
+msgstr "Use /api/v1/containers/{id}/action with Pro+ license"
+
+msgid "Use /api/v1/containers/{id}/network with Pro+ license"
+msgstr "Use /api/v1/containers/{id}/network with Pro+ license"
+
+# Child host lifecycle control messages
+msgid "Child host start requested: %s"
+msgstr "Child host start requested: %s"
+
+msgid "Child host start requested"
+msgstr "Child host start requested"
+
+msgid "Child host stop requested: %s"
+msgstr "Child host stop requested: %s"
+
+msgid "Child host stop requested"
+msgstr "Child host stop requested"
+
+msgid "Child host restart requested: %s"
+msgstr "Child host restart requested: %s"
+
+msgid "Child host restart requested"
+msgstr "Child host restart requested"
+
+msgid "Child host deletion requested: %s"
+msgstr "Child host deletion requested: %s"
+
+msgid "Child host deletion requested"
+msgstr "Child host deletion requested"
+
+msgid "Distribution '%s %s' already exists for type '%s'"
+msgstr "Distribution '%s %s' already exists for type '%s'"
+
+msgid "Distribution deleted"
+msgstr "Distribution deleted"
+
+msgid "Source %s failed: %s"
+msgstr "Source %s failed: %s"
+
+# Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
+msgid "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
+
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgstr "No running child hosts found. Use the standard reboot endpoint instead."
+
+msgid "Orchestrated reboot initiated with %d running child host(s)"
+msgstr "Orchestrated reboot initiated with %d running child host(s)"
+
+msgid "Reboot orchestration not found"
+msgstr "Reboot orchestration not found"
+
+msgid "%d of %d child host(s) failed to restart"
+msgstr "%d of %d child host(s) failed to restart"

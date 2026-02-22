@@ -6,6 +6,7 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const authFile = join(__dirname, 'playwright', '.auth', 'user.json');
+const globalTeardownPath = join(__dirname, 'e2e', 'global-teardown.ts');
 
 /**
  * SysManage E2E Test Configuration
@@ -13,6 +14,8 @@ const authFile = join(__dirname, 'playwright', '.auth', 'user.json');
  */
 export default defineConfig({
   testDir: './e2e',
+  /* Global teardown to clean up test users created during E2E runs */
+  globalTeardown: globalTeardownPath,
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -57,7 +60,6 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
-    /* Uncomment for additional browser coverage
     {
       name: 'firefox',
       use: {
@@ -66,6 +68,7 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
+    /* Uncomment for WebKit/Safari coverage
     {
       name: 'webkit',
       use: {

@@ -27,7 +27,7 @@ from backend.api import (
     fleet,
     grafana_integration,
     graylog_integration,
-    health_analysis,
+    license_management,
     host,
     host_hostname,
     openbao,
@@ -37,6 +37,7 @@ from backend.api import (
     plugin_bundle,
     profile,
     queue,
+    reboot_orchestration,
     reports,
     scripts,
     secrets,
@@ -300,13 +301,21 @@ def register_routes(app: FastAPI):
     )  # /api/host/{host_id}/children/*, /api/child-host-distributions/* (with auth)
     logger.info("Child Host router added")
 
-    logger.info("Adding Health Analysis router with /api prefix")
+    logger.info("Adding Reboot Orchestration router with /api prefix")
     app.include_router(
-        health_analysis.router,
+        reboot_orchestration.router,
         prefix="/api",
-        tags=["health-analysis", "pro-plus"],
-    )  # /api/license/*, /api/host/{host_id}/health-analysis/* (with auth, Pro+)
-    logger.info("Health Analysis router added")
+        tags=["reboot-orchestration"],
+    )  # /api/host/{host_id}/reboot/* (with auth)
+    logger.info("Reboot Orchestration router added")
+
+    logger.info("Adding License Management router with /api prefix")
+    app.include_router(
+        license_management.router,
+        prefix="/api",
+        tags=["license-management", "pro-plus"],
+    )  # /api/license/* (with auth, Pro+)
+    logger.info("License Management router added")
 
     # Note: Pro+ module routes are mounted in lifecycle.py after modules are loaded
     # This ensures the compiled Cython modules are available before route mounting

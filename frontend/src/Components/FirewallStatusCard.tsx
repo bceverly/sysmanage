@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { formatUTCTimestamp } from '../utils/dateUtils';
 import {
   Card,
   CardContent,
@@ -317,8 +318,7 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
   }
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString();
+    return formatUTCTimestamp(dateString);
   };
 
   const parsePortsWithProtocols = (portsJson: string | null): PortWithProtocols[] => {

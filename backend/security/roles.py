@@ -79,9 +79,9 @@ class SecurityRoles(str, Enum):
 
     # Secrets Management Roles
     # - Secret Operations (alphabetical)
-    ADD_SECRET = "Add Secret"  # nosec B105 - RBAC role name, not a password
-    DELETE_SECRET = "Delete Secret"  # nosec B105 - RBAC role name, not a password
-    EDIT_SECRET = "Edit Secret"  # nosec B105 - RBAC role name, not a password
+    ADD_SECRET = "Add Secret"  # nosec B105  # RBAC role name, not a password
+    DELETE_SECRET = "Delete Secret"  # nosec B105  # RBAC role name, not a password
+    EDIT_SECRET = "Edit Secret"  # nosec B105  # RBAC role name, not a password
     # - Certificate Deployment (alphabetical)
     DEPLOY_CERTIFICATE = "Deploy Certificate"
     # - SSH Key Deployment (alphabetical)
@@ -121,7 +121,7 @@ class SecurityRoles(str, Enum):
     # - User Security Operations (alphabetical)
     LOCK_USER = "Lock User"
     RESET_USER_PASSWORD = (
-        "Reset User Password"  # nosec B105 - RBAC role name, not a password
+        "Reset User Password"  # nosec B105  # RBAC role name, not a password
     )
     UNLOCK_USER = "Unlock User"
 

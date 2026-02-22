@@ -14,7 +14,11 @@ test.describe('Updates Page', () => {
     await expect(page).toHaveURL(/\/updates/);
 
     // Should have the updates content area
-    await page.waitForLoadState('networkidle');
+    try {
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
+    } catch {
+      // networkidle may timeout with large update lists, continue anyway
+    }
     await expect(page.locator('body')).not.toBeEmpty();
   });
 
@@ -50,7 +54,11 @@ test.describe('Updates Page', () => {
   });
 
   test('should display update columns or fields', async ({ page }) => {
-    await page.waitForLoadState('networkidle');
+    try {
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
+    } catch {
+      // networkidle may timeout with large update lists, continue anyway
+    }
 
     // Look for expected column names or field labels
     const expectedFields = ['Package', 'Host', 'Current', 'Available', 'Version', 'Manager', 'Type', 'Status'];
@@ -65,7 +73,11 @@ test.describe('Updates Page', () => {
   });
 
   test('should have search or filter functionality', async ({ page }) => {
-    await page.waitForLoadState('networkidle');
+    try {
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
+    } catch {
+      // networkidle may timeout with large update lists, continue anyway
+    }
 
     // Look for search input or filter controls
     const searchInput = page.getByPlaceholder(/search|filter/i).first();

@@ -68,12 +68,11 @@ class TestGetCorsOrigins:
 
         result = get_cors_origins(8080, 6443)
 
-        # These assertions check list membership (result is a list of allowed origins)
-        # not URL substring validation - false positive for CodeQL url-substring check
-        # lgtm[py/incomplete-url-substring-sanitization]
-        assert "http://myserver.example.com:8080" in result
-        # lgtm[py/incomplete-url-substring-sanitization]
-        assert "http://myserver.example.com:6443" in result
+        # Verify FQDN origins are in the allowed list (exact list membership, not substring check)
+        expected_fqdn_web = "http://myserver.example.com:8080"
+        expected_fqdn_api = "http://myserver.example.com:6443"
+        assert expected_fqdn_web in result
+        assert expected_fqdn_api in result
 
     @patch.dict(os.environ, {"SYSMANAGE_CI_MODE": ""})
     @patch("backend.startup.cors_config.socket")
@@ -87,12 +86,11 @@ class TestGetCorsOrigins:
 
         result = get_cors_origins(8080, 6443)
 
-        # These assertions check list membership (result is a list of allowed origins)
-        # not URL substring validation - false positive for CodeQL url-substring check
-        # lgtm[py/incomplete-url-substring-sanitization]
-        assert "http://myserver.local:8080" in result
-        # lgtm[py/incomplete-url-substring-sanitization]
-        assert "http://myserver.lan:8080" in result
+        # Verify hostname variation origins are in the allowed list (exact list membership)
+        expected_local = "http://myserver.local:8080"
+        expected_lan = "http://myserver.lan:8080"
+        assert expected_local in result
+        assert expected_lan in result
 
     @patch.dict(os.environ, {"SYSMANAGE_CI_MODE": ""})
     @patch("backend.startup.cors_config.socket")

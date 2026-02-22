@@ -1,19 +1,17 @@
 """
-This module houses the API routes for audit log management in SysManage.
+This module houses the API routes for audit log viewing in SysManage.
 
-Provides endpoints for viewing and exporting audit log entries with filtering
-capabilities for compliance, security monitoring, and troubleshooting purposes.
+Provides endpoints for viewing audit log entries with filtering capabilities.
+Advanced audit features (CSV/JSON/CEF/LEEF export, retention policies, archival)
+are provided by the audit_engine Professional+ module.
 """
 
-import csv
-import io
 import logging
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, validator
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, sessionmaker
@@ -21,7 +19,8 @@ from sqlalchemy.orm import Session, sessionmaker
 from backend.api.error_constants import error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.licensing.module_loader import module_loader
+from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 
@@ -274,181 +273,28 @@ async def get_audit_log_entry(
         ) from e
 
 
-@router.get("/export", response_class=StreamingResponse)
-async def export_audit_logs_csv(  # NOSONAR
-    user_id: Optional[str] = Query(None, description=_("Filter by user ID")),
-    action_type: Optional[str] = Query(None, description=_("Filter by action type")),
-    entity_type: Optional[str] = Query(None, description=_("Filter by entity type")),
-    category: Optional[str] = Query(None, description=_("Filter by category")),
-    entry_type: Optional[str] = Query(None, description=_("Filter by entry type")),
-    search: Optional[str] = Query(
-        None, description=_("Search in description and entity name")
-    ),
-    start_date: Optional[datetime] = Query(
-        None,
-        description=_("Filter by start date (ISO format, defaults to 4 hours ago)"),
-    ),
-    end_date: Optional[datetime] = Query(
-        None, description=_("Filter by end date (ISO format, defaults to now)")
-    ),
-    db_session: Session = Depends(get_db),
+@router.get("/export")
+async def export_audit_logs(
     dependencies=Depends(JWTBearer()),
     current_user: str = Depends(get_current_user),
 ):
     """
-    Export audit log entries to CSV format.
+    Export audit log entries.
 
-    Applies the same filtering as the list endpoint.
-    Requires EXPORT_AUDIT_LOG role.
+    This is a Pro+ feature. Requires the audit_engine module for
+    CSV, JSON, CEF, and LEEF export formats.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        # Check if user has permission to export audit logs
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
-        )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-
-        if not auth_user.has_role(SecurityRoles.EXPORT_AUDIT_LOG):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: EXPORT_AUDIT_LOG role required"),
-            )
-
-    try:
-        # Default to last 4 hours if no date range specified
-        if start_date is None and end_date is None:
-            now = datetime.now(timezone.utc).replace(tzinfo=None)
-            start_date = now - timedelta(hours=4)
-            end_date = now
-        elif start_date is None and end_date is not None:
-            # If only end_date provided, use it
-            pass
-        elif start_date is not None and end_date is None:
-            # If only start_date provided, use current time as end
-            end_date = datetime.now(timezone.utc).replace(tzinfo=None)
-
-        # Build query with filters (same as list endpoint)
-        query = db_session.query(models.AuditLog)
-
-        if user_id:
-            try:
-                user_uuid = uuid.UUID(user_id)
-                query = query.filter(models.AuditLog.user_id == user_uuid)
-            except ValueError as exc:
-                raise HTTPException(
-                    status_code=400, detail=_("Invalid user ID format")
-                ) from exc
-
-        if action_type:
-            query = query.filter(models.AuditLog.action_type == action_type)
-
-        if entity_type:
-            query = query.filter(models.AuditLog.entity_type == entity_type)
-
-        if category:
-            query = query.filter(models.AuditLog.category == category)
-
-        if entry_type:
-            query = query.filter(models.AuditLog.entry_type == entry_type)
-
-        if search:
-            # Search in description and entity_name using case-insensitive LIKE
-            search_pattern = f"%{search}%"
-            query = query.filter(
-                or_(
-                    models.AuditLog.description.ilike(search_pattern),
-                    models.AuditLog.entity_name.ilike(search_pattern),
-                )
-            )
-
-        if start_date:
-            query = query.filter(models.AuditLog.timestamp >= start_date)
-
-        if end_date:
-            query = query.filter(models.AuditLog.timestamp <= end_date)
-
-        # Get all entries (no pagination for export)
-        entries = query.order_by(models.AuditLog.timestamp.desc()).all()
-
-        # Create CSV in memory
-        output = io.StringIO()
-        writer = csv.writer(output)
-
-        # Write header row
-        writer.writerow(
-            [
-                _("ID"),
-                _("Timestamp"),
-                _("User ID"),
-                _("Username"),
-                _("Action Type"),
-                _("Entity Type"),
-                _("Entity ID"),
-                _("Entity Name"),
-                _("Description"),
-                _("Category"),
-                _("Entry Type"),
-                _("IP Address"),
-                _("User Agent"),
-                _("Result"),
-                _("Error Message"),
-            ]
-        )
-
-        # Write data rows
-        for entry in entries:
-            writer.writerow(
-                [
-                    str(entry.id),
-                    entry.timestamp.isoformat() if entry.timestamp else "",
-                    str(entry.user_id) if entry.user_id else "",
-                    entry.username or "",
-                    entry.action_type or "",
-                    entry.entity_type or "",
-                    entry.entity_id or "",
-                    entry.entity_name or "",
-                    entry.description or "",
-                    entry.category or "",
-                    entry.entry_type or "",
-                    entry.ip_address or "",
-                    entry.user_agent or "",
-                    entry.result or "",
-                    entry.error_message or "",
-                ]
-            )
-
-        # Create filename with timestamp
-        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-        filename = f"audit_log_{timestamp}.csv"
-
-        logger.info(
-            "Audit log CSV export by user %s: %d entries exported",
-            current_user,
-            len(entries),
-        )
-
-        # Return CSV as streaming response
-        output.seek(0)
-        return StreamingResponse(
-            iter([output.getvalue()]),
-            media_type="text/csv",
-            headers={"Content-Disposition": f"attachment; filename={filename}"},
-        )
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error("Error exporting audit logs to CSV: %s", e)
+    audit_engine = module_loader.get_module("audit_engine")
+    if audit_engine is None:
         raise HTTPException(
-            status_code=500,
-            detail=_("Failed to export audit logs: %s") % str(e),
-        ) from e
+            status_code=402,
+            detail=_(
+                "Audit log export requires a SysManage Professional+ license. "
+                "Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
+            ),
+        )
+    raise HTTPException(
+        status_code=307,
+        detail=_("Use /api/v1/audit/export with Pro+ license"),
+        headers={"Location": "/api/v1/audit/export"},
+    )

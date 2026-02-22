@@ -558,6 +558,9 @@ class AuditLog(Base):
     entry_type = Column(
         String(50), nullable=True, index=True
     )  # 'Edit', 'Delete', 'Request Update', etc.
+    integrity_hash = Column(
+        String(64), nullable=True
+    )  # SHA-256 hash for tamper-evident logging
 
     def __repr__(self):
         return f"<AuditLog(id={self.id}, user='{self.username}', action='{self.action_type}', entity='{self.entity_type}')>"

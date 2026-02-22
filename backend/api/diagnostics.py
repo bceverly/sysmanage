@@ -112,7 +112,7 @@ async def collect_diagnostics(
             host_id=host_id,
             collection_id=collection_id,
             requested_by="system",
-            status="pending",
+            collection_status="pending",
             requested_at=datetime.now(timezone.utc),
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
@@ -166,7 +166,7 @@ async def collect_diagnostics(
         )
 
         # Update status to collecting
-        diagnostic_report.status = "collecting"
+        diagnostic_report.collection_status = "collecting"
         diagnostic_report.started_at = datetime.now(timezone.utc).replace(tzinfo=None)
         diagnostic_report.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
@@ -259,7 +259,7 @@ async def get_host_diagnostics(
                 {
                     "id": str(diag.id),
                     "collection_id": diag.collection_id,
-                    "status": diag.status,
+                    "status": diag.collection_status,
                     "requested_by": diag.requested_by,
                     "requested_at": diag.requested_at.replace(
                         tzinfo=timezone.utc
@@ -325,7 +325,7 @@ async def get_diagnostic_report(diagnostic_id: str):
             "id": str(diagnostic.id),
             "host_id": str(diagnostic.host_id),
             "collection_id": diagnostic.collection_id,
-            "status": diagnostic.status,
+            "status": diagnostic.collection_status,
             "requested_by": diagnostic.requested_by,
             "requested_at": diagnostic.requested_at.replace(
                 tzinfo=timezone.utc
@@ -346,14 +346,14 @@ async def get_diagnostic_report(diagnostic_id: str):
             "diagnostic_data": {
                 "system_logs": safe_json_parse(diagnostic.system_logs),
                 "configuration_files": safe_json_parse(diagnostic.configuration_files),
-                "network_info": safe_json_parse(diagnostic.network_info),
-                "process_info": safe_json_parse(diagnostic.process_info),
+                "network_info": safe_json_parse(diagnostic.network_information),
+                "process_info": safe_json_parse(diagnostic.process_list),
                 "disk_usage": safe_json_parse(diagnostic.disk_usage),
                 "environment_variables": safe_json_parse(
                     diagnostic.environment_variables
                 ),
                 "agent_logs": safe_json_parse(diagnostic.agent_logs),
-                "error_logs": safe_json_parse(diagnostic.error_logs),
+                "system_information": safe_json_parse(diagnostic.system_information),
             },
         }
 
@@ -390,7 +390,7 @@ async def get_diagnostic_status(diagnostic_id: str):
         return {
             "id": str(diagnostic.id),
             "collection_id": diagnostic.collection_id,
-            "status": diagnostic.status,
+            "status": diagnostic.collection_status,
             "requested_at": diagnostic.requested_at.replace(
                 tzinfo=timezone.utc
             ).isoformat(),
@@ -495,7 +495,7 @@ async def process_diagnostic_result(result_data: dict):  # NOSONAR
             raise HTTPException(status_code=404, detail=error_diagnostic_not_found())
 
         # Update diagnostic report with results
-        diagnostic.status = (
+        diagnostic.collection_status = (
             "completed" if result_data.get("success", False) else "failed"
         )
         diagnostic.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
@@ -520,9 +520,11 @@ async def process_diagnostic_result(result_data: dict):  # NOSONAR
                 result_data["configuration_files"]
             )
         if "network_info" in result_data:
-            diagnostic.network_info = safe_json_dumps(result_data["network_info"])
+            diagnostic.network_information = safe_json_dumps(
+                result_data["network_info"]
+            )
         if "process_info" in result_data:
-            diagnostic.process_info = safe_json_dumps(result_data["process_info"])
+            diagnostic.process_list = safe_json_dumps(result_data["process_info"])
         if "disk_usage" in result_data:
             diagnostic.disk_usage = safe_json_dumps(result_data["disk_usage"])
         if "environment_variables" in result_data:
@@ -531,8 +533,10 @@ async def process_diagnostic_result(result_data: dict):  # NOSONAR
             )
         if "agent_logs" in result_data:
             diagnostic.agent_logs = safe_json_dumps(result_data["agent_logs"])
-        if "error_logs" in result_data:
-            diagnostic.error_logs = safe_json_dumps(result_data["error_logs"])
+        if "system_information" in result_data:
+            diagnostic.system_information = safe_json_dumps(
+                result_data["system_information"]
+            )
 
         if "collection_size_bytes" in result_data:
             diagnostic.collection_size_bytes = result_data["collection_size_bytes"]

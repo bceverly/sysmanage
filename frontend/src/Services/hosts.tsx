@@ -656,6 +656,93 @@ const doDisableUbuntuProService = async (hostId: string, service: string) => {
     return result;
 };
 
+type RebootPreCheckResponse = {
+    has_running_children: boolean;
+    running_children: Array<{
+        id: string;
+        child_name: string;
+        child_type: string;
+        status: string;
+    }>;
+    running_count: number;
+    total_children: number;
+    has_container_engine: boolean;
+}
+
+type OrchestratedRebootResponse = {
+    orchestration_id: string;
+    status: string;
+    child_count: number;
+}
+
+type RebootOrchestrationStatus = {
+    orchestration_id: string;
+    parent_host_id: string;
+    status: string;
+    child_hosts_snapshot: Array<{
+        id: string;
+        child_name: string;
+        child_type: string;
+        pre_reboot_status: string;
+    }>;
+    child_hosts_restart_status: Array<{
+        id: string;
+        child_name: string;
+        restart_status: string;
+        error: string | null;
+    }> | null;
+    shutdown_timeout_seconds: number;
+    initiated_by: string;
+    initiated_at: string | null;
+    shutdown_completed_at: string | null;
+    reboot_issued_at: string | null;
+    agent_reconnected_at: string | null;
+    restart_completed_at: string | null;
+    error_message: string | null;
+}
+
+const doRebootPreCheck = async (hostId: string): Promise<RebootPreCheckResponse> => {
+    let result = {} as RebootPreCheckResponse;
+
+    await api.get<RebootPreCheckResponse>("/api/host/" + hostId + "/reboot/pre-check")
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        throw error;
+    });
+    return result;
+};
+
+const doOrchestratedReboot = async (hostId: string): Promise<OrchestratedRebootResponse> => {
+    let result = {} as OrchestratedRebootResponse;
+
+    await api.post<OrchestratedRebootResponse>("/api/host/" + hostId + "/reboot/orchestrated")
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        throw error;
+    });
+    return result;
+};
+
+const getRebootOrchestrationStatus = async (hostId: string, orchestrationId: string): Promise<RebootOrchestrationStatus> => {
+    let result = {} as RebootOrchestrationStatus;
+
+    await api.get<RebootOrchestrationStatus>("/api/host/" + hostId + "/reboot/orchestration/" + orchestrationId)
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        throw error;
+    });
+    return result;
+};
+
 const doChangeHostname = async (hostId: string, newHostname: string) => {
     let result = {} as SuccessResponse;
 
@@ -691,5 +778,5 @@ type UbuntuProInfo = {
     services: UbuntuProService[];
 }
 
-export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage, PaginatedSoftwareResponse, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, UbuntuProService };
-export { doDeleteHost, doGetHostByID, doGetHosts, doApproveHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doRequestSystemInfo, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doChangeHostname };
+export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage, PaginatedSoftwareResponse, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, UbuntuProService, RebootPreCheckResponse, OrchestratedRebootResponse, RebootOrchestrationStatus };
+export { doDeleteHost, doGetHostByID, doGetHosts, doApproveHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doRequestSystemInfo, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doChangeHostname, doRebootPreCheck, doOrchestratedReboot, getRebootOrchestrationStatus };

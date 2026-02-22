@@ -708,6 +708,51 @@ msgstr "使用者安全角色 (RBAC)"
 msgid "No security roles assigned"
 msgstr "未分配安全角色"
 
+msgid "IP Address"
+msgstr "IP 位址"
+
+msgid "OS Version"
+msgstr "作業系統版本"
+
+msgid "IPv4 Ports"
+msgstr "IPv4 連接埠"
+
+msgid "IPv6 Ports"
+msgstr "IPv6 連接埠"
+
+msgid "Audit Log"
+msgstr "稽核日誌"
+
+msgid "Total Entries"
+msgstr "總條目數"
+
+msgid "No audit log entries found."
+msgstr "未找到稽核日誌條目。"
+
+msgid "Timestamp"
+msgstr "時間戳記"
+
+msgid "Entity Type"
+msgstr "實體類型"
+
+msgid "Entity Name"
+msgstr "實體名稱"
+
+msgid "Result"
+msgstr "結果"
+
+msgid "Description"
+msgstr "描述"
+
+msgid "System"
+msgstr "系統"
+
+msgid "Action"
+msgstr "操作"
+
+msgid "User"
+msgstr "使用者"
+
 msgid "User not found"
 msgstr "未找到使用者"
 
@@ -836,22 +881,323 @@ msgstr "KVM/libvirt初始化成功"
 # KVM Networking Configuration strings
 
 msgid "KVM networking is only supported on Linux hosts"
-msgstr "KVM networking is only supported on Linux hosts"
+msgstr "KVM 網路僅在 Linux 主機上受支援"
 
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr "Agent must be running with root privileges to configure KVM networking"
+msgstr "代理程式必須以 root 權限執行才能設定 KVM 網路"
 
 msgid "Bridge interface name is required for bridged networking mode"
-msgstr "Bridge interface name is required for bridged networking mode"
+msgstr "橋接網路模式需要橋接介面名稱"
 
 msgid "KVM networking configuration requested: %s mode"
-msgstr "KVM networking configuration requested: %s mode"
+msgstr "已請求 KVM 網路設定：%s 模式"
 
 msgid "KVM networking configuration requested. The agent will configure the %s network."
-msgstr "KVM networking configuration requested. The agent will configure the %s network."
+msgstr "已請求 KVM 網路設定。代理程式將設定 %s 網路。"
 
 msgid "KVM networks are only available on Linux hosts"
-msgstr "KVM networks are only available on Linux hosts"
+msgstr "KVM 網路僅在 Linux 主機上可用"
 
 msgid "KVM network list requested. Results will be returned shortly."
-msgstr "KVM network list requested. Results will be returned shortly."
+msgstr "已請求 KVM 網路清單。結果將很快顯示。"
+
+# Pro+ feature gate messages
+msgid "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "容器/虛擬機管理需要 SysManage Professional+ 授權。請升級以存取此功能。"
+
+msgid "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "容器生命週期管理需要 SysManage Professional+ 授權。請升級以存取此功能。"
+
+msgid "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "密鑰管理需要 SysManage Professional+ 授權。請升級以存取此功能。"
+
+msgid "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "密鑰部署需要 SysManage Professional+ 授權。請升級以存取此功能。"
+
+msgid "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "報告產生需要 SysManage Professional+ 授權。請升級以存取此功能。"
+
+msgid "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
+msgstr "稽核日誌匯出需要 SysManage Professional+ 授權。請升級以存取 CSV、JSON、CEF 和 LEEF 匯出格式。"
+
+msgid "Use /api/v1/audit/export with Pro+ license"
+msgstr "使用 /api/v1/audit/export（需要 Pro+ 授權）"
+
+msgid "Child host not found"
+msgstr "找不到子主機"
+
+msgid "Child host refresh requested"
+msgstr "已請求重新整理子主機"
+
+msgid "Report"
+msgstr "報告"
+
+# Pro+ redirect messages
+msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/reports/view/{report_type}"
+
+msgid "Use /api/v1/reports/generate/{report_type} with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/reports/generate/{report_type}"
+
+msgid "Use /api/v1/secrets with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/secrets"
+
+msgid "Use /api/v1/secrets/{secret_id} with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/secrets/{secret_id}"
+
+msgid "Use /api/v1/secrets/{secret_id}/content with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/secrets/{secret_id}/content"
+
+msgid "Use /api/v1/secrets/ssh-keys with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/secrets/ssh-keys"
+
+msgid "Use /api/v1/secrets/types with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/secrets/types"
+
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/secrets/deploy-ssh-keys"
+
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/secrets/deploy-certificates"
+
+# Scheduled report delivery messages
+msgid "Scheduled report created successfully"
+msgstr "排程報告建立成功"
+
+msgid "Scheduled report updated successfully"
+msgstr "排程報告更新成功"
+
+msgid "Scheduled report deleted successfully"
+msgstr "排程報告刪除成功"
+
+msgid "Scheduled report not found"
+msgstr "找不到排程報告"
+
+msgid "Scheduled report executed successfully"
+msgstr "排程報告執行成功"
+
+msgid "Invalid schedule type"
+msgstr "無效的排程類型"
+
+msgid "Invalid output format"
+msgstr "無效的輸出格式"
+
+# Audit retention policy messages
+msgid "Retention policy created successfully"
+msgstr "保留原則建立成功"
+
+msgid "Retention policy updated successfully"
+msgstr "保留原則更新成功"
+
+msgid "Retention policy deleted successfully"
+msgstr "保留原則刪除成功"
+
+msgid "Retention policy not found"
+msgstr "找不到保留原則"
+
+msgid "Retention policy executed successfully"
+msgstr "保留原則執行成功"
+
+msgid "Retention days must be between 1 and 3650"
+msgstr "保留天數必須介於 1 到 3650 之間"
+
+msgid "Invalid retention action"
+msgstr "無效的保留動作"
+
+# Audit archival messages
+msgid "Audit entries archived successfully"
+msgstr "稽核條目歸檔成功"
+
+msgid "Audit entries deleted by retention policy"
+msgstr "稽核條目已按保留原則刪除"
+
+msgid "No audit entries matched the retention criteria"
+msgstr "沒有稽核條目符合保留條件"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/reports/schedules with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/reports/schedules"
+
+msgid "Use /api/v1/audit/retention-policies with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/audit/retention-policies"
+
+msgid "Use /api/v1/audit/archive with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/audit/archive"
+
+# Scheduled report delivery messages
+msgid "Scheduled report delivered successfully"
+msgstr "排程報告投遞成功"
+
+msgid "Failed to deliver scheduled report"
+msgstr "排程報告投遞失敗"
+
+msgid "Report dispatch to channel failed"
+msgstr "報告分派到頻道失敗"
+
+# Secret deployment messages
+msgid "SSH keys deployed successfully"
+msgstr "SSH 金鑰部署成功"
+
+msgid "Failed to deploy SSH keys"
+msgstr "SSH 金鑰部署失敗"
+
+msgid "Certificates deployed successfully"
+msgstr "憑證部署成功"
+
+msgid "Failed to deploy certificates"
+msgstr "憑證部署失敗"
+
+msgid "Secret deployment queued"
+msgstr "密鑰部署已排入佇列"
+
+# Rotation schedule messages
+msgid "Rotation schedule created"
+msgstr "輪換排程已建立"
+
+msgid "Rotation schedule updated"
+msgstr "輪換排程已更新"
+
+msgid "Rotation schedule deleted"
+msgstr "輪換排程已刪除"
+
+msgid "Rotation schedule not found"
+msgstr "找不到輪換排程"
+
+msgid "Rotation executed successfully"
+msgstr "輪換執行成功"
+
+msgid "Failed to execute rotation"
+msgstr "輪換執行失敗"
+
+# Container action messages
+msgid "Container action queued"
+msgstr "容器操作已排入佇列"
+
+msgid "Container not found"
+msgstr "找不到容器"
+
+msgid "Container creation queued"
+msgstr "容器建立已排入佇列"
+
+msgid "Parent host not found"
+msgstr "找不到父主機"
+
+msgid "Network configuration queued"
+msgstr "網路設定已排入佇列"
+
+msgid "Container started"
+msgstr "容器已啟動"
+
+msgid "Container stopped"
+msgstr "容器已停止"
+
+msgid "Container restarted"
+msgstr "容器已重新啟動"
+
+msgid "Container deleted"
+msgstr "容器已刪除"
+
+# Integrity verification messages
+msgid "Integrity verification passed"
+msgstr "完整性驗證通過"
+
+msgid "Integrity verification failed"
+msgstr "完整性驗證失敗"
+
+msgid "Integrity hash mismatch detected"
+msgstr "偵測到完整性雜湊不符"
+
+# Secret versioning messages
+msgid "Secret version created"
+msgstr "密鑰版本已建立"
+
+msgid "Secret not found"
+msgstr "找不到密鑰"
+
+msgid "Secret deleted successfully"
+msgstr "密鑰刪除成功"
+
+msgid "Failed to retrieve secret content from vault"
+msgstr "從保險庫檢索密鑰內容失敗"
+
+msgid "Failed to store secret in vault"
+msgstr "將密鑰存儲到保險庫失敗"
+
+msgid "Failed to update secret in vault"
+msgstr "更新保險庫中的密鑰失敗"
+
+msgid "Deleted {count} secrets"
+msgstr "已刪除 {count} 個密鑰"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/secrets/deploy-ssh-keys"
+
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/secrets/deploy-certificates"
+
+msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/secrets/rotation-schedules"
+
+msgid "Use /api/v1/containers/create with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/containers/create"
+
+msgid "Use /api/v1/containers/{id}/action with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/containers/{id}/action"
+
+msgid "Use /api/v1/containers/{id}/network with Pro+ license"
+msgstr "使用 Pro+ 授權存取 /api/v1/containers/{id}/network"
+
+# Child host lifecycle control messages
+msgid "Child host start requested: %s"
+msgstr "已請求啟動子主機: %s"
+
+msgid "Child host start requested"
+msgstr "已請求啟動子主機"
+
+msgid "Child host stop requested: %s"
+msgstr "已請求停止子主機: %s"
+
+msgid "Child host stop requested"
+msgstr "已請求停止子主機"
+
+msgid "Child host restart requested: %s"
+msgstr "已請求重新啟動子主機: %s"
+
+msgid "Child host restart requested"
+msgstr "已請求重新啟動子主機"
+
+msgid "Child host deletion requested: %s"
+msgstr "已請求刪除子主機: %s"
+
+msgid "Child host deletion requested"
+msgstr "已請求刪除子主機"
+
+msgid "Distribution '%s %s' already exists for type '%s'"
+msgstr "發行版 '%s %s' 已存在於類型 '%s' 中"
+
+msgid "Distribution deleted"
+msgstr "發行版已刪除"
+
+msgid "Source %s failed: %s"
+msgstr "來源 %s 失敗：%s"
+
+# Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
+#, python-format
+msgid "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "編排重新啟動需要 SysManage Professional+ 授權。請升級以存取此功能。"
+
+#, python-format
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgstr "未找到正在執行的子主機。請改用標準重新啟動端點。"
+
+#, python-format
+msgid "Orchestrated reboot initiated with %d running child host(s)"
+msgstr "已啟動編排重新啟動，包含 %d 個正在執行的子主機"
+
+msgid "Reboot orchestration not found"
+msgstr "未找到重新啟動編排"
+
+#, python-format
+msgid "%d of %d child host(s) failed to restart"
+msgstr "%d/%d 個子主機重新啟動失敗"

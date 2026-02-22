@@ -39,6 +39,10 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     graylog_health_task = None
     message_processor_task = None
     alerting_task = None
+    reporting_task = None
+    audit_retention_task = None
+    secrets_rotation_task = None
+    cve_refresh_task = None
 
     try:
         # Startup: Ensure server certificates are generated
@@ -104,11 +108,122 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                                 "Failed to start alerting background task: %s",
                                 alert_e,
                             )
+
+                # Start reporting engine background task if module is available
+                reporting_engine = module_loader.get_module("reporting_engine")
+                if reporting_engine:
+                    reporting_info = reporting_engine.get_module_info()
+                    if reporting_info.get("provides_background_task", False):
+                        logger.info("=== REPORTING ENGINE BACKGROUND TASK STARTUP ===")
+                        try:
+                            from backend.persistence import models
+
+                            reporting_task = asyncio.create_task(
+                                reporting_engine.start_report_scheduler(
+                                    db_maker=get_db,
+                                    models=models,
+                                    logger=logger,
+                                    email_service=email_service,
+                                )
+                            )
+                            logger.info("Reporting engine background task started")
+                        except Exception as rep_e:
+                            logger.warning(
+                                "Failed to start reporting background task: %s",
+                                rep_e,
+                            )
+
+                # Start audit engine background task if module is available
+                audit_engine = module_loader.get_module("audit_engine")
+                if audit_engine:
+                    audit_info = audit_engine.get_module_info()
+                    if audit_info.get("provides_background_task", False):
+                        logger.info("=== AUDIT ENGINE BACKGROUND TASK STARTUP ===")
+                        try:
+                            from backend.persistence import models
+
+                            audit_retention_task = asyncio.create_task(
+                                audit_engine.start_retention_scheduler(
+                                    db_maker=get_db,
+                                    models=models,
+                                    logger=logger,
+                                )
+                            )
+                            logger.info(
+                                "Audit engine retention background task started"
+                            )
+                        except Exception as aud_e:
+                            logger.warning(
+                                "Failed to start audit retention "
+                                "background task: %s",
+                                aud_e,
+                            )
+
+                # Start secrets engine rotation scheduler if module is available
+                secrets_engine = module_loader.get_module("secrets_engine")
+                if secrets_engine:
+                    secrets_info = secrets_engine.get_module_info()
+                    if secrets_info.get("provides_background_task", False):
+                        logger.info("=== SECRETS ENGINE BACKGROUND TASK STARTUP ===")
+                        try:
+                            from backend.persistence import models
+
+                            secrets_rotation_task = asyncio.create_task(
+                                secrets_engine.start_rotation_scheduler(
+                                    db_maker=get_db,
+                                    models=models,
+                                    logger=logger,
+                                )
+                            )
+                            logger.info(
+                                "Secrets engine rotation background task started"
+                            )
+                        except Exception as sec_e:
+                            logger.warning(
+                                "Failed to start secrets rotation "
+                                "background task: %s",
+                                sec_e,
+                            )
+
+                # Start vuln_engine CVE refresh scheduler and staleness check
+                vuln_engine = module_loader.get_module("vuln_engine")
+                if vuln_engine:
+                    vuln_info = vuln_engine.get_module_info()
+                    if vuln_info.get("provides_cve_refresh", False):
+                        logger.info("=== VULN ENGINE BACKGROUND TASK STARTUP ===")
+                        try:
+                            from backend.vulnerability.cve_refresh_service import (
+                                cve_refresh_service,
+                            )
+
+                            cve_refresh_service.start_scheduler()
+                            logger.info("CVE refresh scheduler started")
+
+                            cve_refresh_task = asyncio.create_task(
+                                cve_refresh_service.check_and_refresh_if_overdue(
+                                    db_maker=get_db,
+                                )
+                            )
+                            logger.info("CVE refresh staleness check task started")
+                        except Exception as vuln_e:
+                            logger.warning(
+                                "Failed to start CVE refresh background task: %s",
+                                vuln_e,
+                            )
             else:
                 logger.info("Running as Community Edition (no Pro+ license)")
         except Exception as lic_e:
             logger.warning("License service initialization failed: %s", lic_e)
             logger.info("Continuing as Community Edition")
+
+        # Always ensure Pro+ stub routes are mounted for plugin API compatibility.
+        # When Pro+ is active, mount_proplus_routes was already called above and
+        # only adds stubs for modules that failed to load. When running as
+        # Community Edition, this mounts stubs for ALL Pro+ endpoints so
+        # plugin pages show "license required" instead of 422/404 errors.
+        if not license_service.is_pro_plus_active:
+            logger.info("=== MOUNTING PRO+ STUB ROUTES FOR COMMUNITY EDITION ===")
+            mount_proplus_routes(_fastapi_app)
 
         # Startup: Start the heartbeat monitor service
         logger.info("=== HEARTBEAT MONITOR STARTUP ===")
@@ -247,6 +362,71 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
             logger.info("Alerting engine background task stopped")
         except Exception as e:
             logger.error("Error stopping alerting engine task: %s", e)
+
+    # Shutdown: Cancel the reporting engine background task
+    if reporting_task:
+        logger.info("Stopping reporting engine background task")
+        try:
+            reporting_task.cancel()
+            try:
+                await reporting_task
+            except asyncio.CancelledError:
+                logger.info("Reporting engine task cancelled successfully")
+                raise
+            logger.info("Reporting engine background task stopped")
+        except Exception as e:
+            logger.error("Error stopping reporting engine task: %s", e)
+
+    # Shutdown: Cancel the audit engine retention background task
+    if audit_retention_task:
+        logger.info("Stopping audit engine retention background task")
+        try:
+            audit_retention_task.cancel()
+            try:
+                await audit_retention_task
+            except asyncio.CancelledError:
+                logger.info("Audit engine retention task cancelled successfully")
+                raise
+            logger.info("Audit engine retention background task stopped")
+        except Exception as e:
+            logger.error("Error stopping audit engine retention task: %s", e)
+
+    # Shutdown: Cancel the secrets engine rotation background task
+    if secrets_rotation_task:
+        logger.info("Stopping secrets engine rotation background task")
+        try:
+            secrets_rotation_task.cancel()
+            try:
+                await secrets_rotation_task
+            except asyncio.CancelledError:
+                logger.info("Secrets engine rotation task cancelled successfully")
+                raise
+            logger.info("Secrets engine rotation background task stopped")
+        except Exception as e:
+            logger.error("Error stopping secrets engine rotation task: %s", e)
+
+    # Shutdown: Cancel the CVE refresh background task
+    if cve_refresh_task:
+        logger.info("Stopping CVE refresh background task")
+        try:
+            cve_refresh_task.cancel()
+            try:
+                await cve_refresh_task
+            except asyncio.CancelledError:
+                logger.info("CVE refresh task cancelled successfully")
+                raise
+            logger.info("CVE refresh background task stopped")
+        except Exception as e:
+            logger.error("Error stopping CVE refresh task: %s", e)
+
+    # Shutdown: Stop the CVE refresh scheduler
+    try:
+        from backend.vulnerability.cve_refresh_service import cve_refresh_service
+
+        await cve_refresh_service.stop_scheduler()
+        logger.info("CVE refresh scheduler stopped")
+    except Exception as e:
+        logger.error("Error stopping CVE refresh scheduler: %s", e)
 
     # Shutdown: Cancel the heartbeat monitor service
     logger.info("Stopping heartbeat monitor service")

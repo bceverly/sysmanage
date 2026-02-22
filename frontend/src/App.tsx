@@ -39,7 +39,7 @@ import Logout from './Pages/Logout';
 import { PluginProvider, usePlugins } from './plugins';
 
 function AppRoutes() {
-  const { routes } = usePlugins();
+  const { routes, pluginsLoaded } = usePlugins();
 
   return (
     <Routes>
@@ -67,6 +67,7 @@ function AppRoutes() {
           element={<route.component />}
         />
       ))}
+      {!pluginsLoaded && <Route path="*" element={null} />}
     </Routes>
   );
 }

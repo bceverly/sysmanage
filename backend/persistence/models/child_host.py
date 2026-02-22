@@ -19,10 +19,11 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
+    Integer,
     String,
     Text,
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, synonym
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
@@ -58,6 +59,9 @@ class HostChild(Base):
     child_type = Column(
         String(50), nullable=False
     )  # 'wsl', 'lxd', 'virtualbox', 'hyperv', 'vmm', 'bhyve', 'kvm'
+
+    # Alias for Cython modules that reference vm_type instead of child_type
+    vm_type = synonym("child_type")
 
     # Distribution/OS info
     distribution = Column(String(100), nullable=True)
@@ -167,4 +171,71 @@ class ChildHostDistribution(Base):
         return (
             f"<ChildHostDistribution(id={self.id}, type='{self.child_type}', "
             f"name='{self.distribution_name}', version='{self.distribution_version}')>"
+        )
+
+
+class RebootOrchestration(Base):
+    """
+    Tracks orchestrated reboot sequences for parent hosts with running child hosts.
+
+    When a parent host is rebooted via Pro+ orchestration, this record tracks the
+    full lifecycle: shutting down children → rebooting parent → restarting children.
+
+    Status flow:
+        pending_shutdown → shutting_down → rebooting → pending_restart → restarting → completed | failed
+    """
+
+    __tablename__ = "reboot_orchestration"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    parent_host_id = Column(
+        GUID(),
+        ForeignKey("host.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    # State machine status
+    status = Column(
+        String(50), nullable=False, default="pending_shutdown"
+    )  # pending_shutdown, shutting_down, rebooting, pending_restart, restarting, completed, failed
+
+    # Snapshot of running children at orchestration start (JSON array)
+    # Each entry: {id, child_name, child_type, pre_reboot_status}
+    child_hosts_snapshot = Column(Text, nullable=False)
+
+    # Restart progress tracking (JSON array)
+    # Each entry: {id, child_name, restart_status, error}
+    child_hosts_restart_status = Column(Text, nullable=True)
+
+    # Configuration
+    shutdown_timeout_seconds = Column(Integer, nullable=False, default=120)
+
+    # Who initiated the reboot
+    initiated_by = Column(String(255), nullable=False)
+
+    # Lifecycle timestamps
+    initiated_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    shutdown_completed_at = Column(DateTime, nullable=True)
+    reboot_issued_at = Column(DateTime, nullable=True)
+    agent_reconnected_at = Column(DateTime, nullable=True)
+    restart_completed_at = Column(DateTime, nullable=True)
+
+    # Error tracking
+    error_message = Column(Text, nullable=True)
+
+    # Relationships
+    parent_host = relationship(
+        "Host",
+        foreign_keys=[parent_host_id],
+    )
+
+    def __repr__(self):
+        return (
+            f"<RebootOrchestration(id={self.id}, parent_host_id={self.parent_host_id}, "
+            f"status='{self.status}')>"
         )

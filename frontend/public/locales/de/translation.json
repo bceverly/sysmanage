@@ -1,6 +1,9 @@
 {
   "Agent WebSocket authentication failed from %s": "WebSocket-Authentifizierung des Agenten von %s fehlgeschlagen",
   "Agent WebSocket connection attempted without token from %s": "WebSocket-Verbindungsversuch des Agenten ohne Token von %s",
+  "auditLog": {
+    "exportRequiresLicense": "Der Export des Audit-Protokolls erfordert eine SysManage Professional+-Lizenz."
+  },
   "antivirus": {
     "description": "Standard-Antivirus-Software für jedes Betriebssystem konfigurieren",
     "errors": {
@@ -53,7 +56,11 @@
     "title": "Verfügbare Pakete",
     "totalPackages": "Pakete Gesamt",
     "uninstall": "Deinstallieren",
-    "version": "Version"
+    "version": "Version",
+    "added": "Hinzugefügt",
+    "noPackagesSelected": "Keine Pakete zur Installation ausgewählt",
+    "operation": "Vorgang",
+    "packagesToInstall": "Zu installierende Pakete"
   },
   "common": {
     "actions": "Aktionen",
@@ -805,7 +812,42 @@
     "graylogNotConfigured": "Graylog-Integration nicht konfiguriert oder nicht gesund",
     "graylogRequiresPrivileged": "Erfordert Agent im privilegierten Modus",
     "graylogStatus": "Graylog-Status",
-    "graylogTarget": "Ziel"
+    "graylogTarget": "Ziel",
+    "added": "Hinzugefügt",
+    "confirmUninstallMessage": "Sind Sie sicher, dass Sie dieses Paket deinstallieren möchten? Diese Aktion entfernt das Paket vom System.",
+    "confirmUninstallPackage": "Paket deinstallieren",
+    "deployOpenTelemetry": "OpenTelemetry bereitstellen",
+    "install": "Installieren",
+    "loadingSoftware": "Softwarepakete werden geladen...",
+    "noPackagesSelected": "Keine Pakete zur Installation ausgewählt",
+    "noSoftwareFound": "Keine Softwarepakete gefunden",
+    "opentelemetryDeployFailed": "Bereitstellung von OpenTelemetry fehlgeschlagen",
+    "opentelemetryDeploySuccess": "OpenTelemetry-Bereitstellung erfolgreich in die Warteschlange eingereiht",
+    "operation": "Vorgang",
+    "packageUninstallError": "Fehler beim Einreihen der Paketdeinstallation in die Warteschlange",
+    "packageUninstallQueued": "Paketdeinstallation wurde in die Warteschlange eingereiht",
+    "packagesToInstall": "Zu installierende Pakete",
+    "searchSoftware": "Nach Paketname oder Beschreibung suchen...",
+    "showingPackages": "Anzeige {{start}}-{{end}} von {{total}} Paketen",
+    "softwareTab": "Software",
+    "thirdPartyReposTab": "Drittanbieter-Repositorys",
+    "ubuntuProAttach": "Anbinden",
+    "ubuntuProAttachConfirm": "Anbinden",
+    "ubuntuProAttachDescription": "Geben Sie Ihr Ubuntu Pro-Token ein, um dieses System an Ihr Abonnement anzubinden.",
+    "ubuntuProAttachError": "Anbindung von Ubuntu Pro fehlgeschlagen",
+    "ubuntuProAttachSuccess": "Ubuntu Pro erfolgreich angebunden",
+    "ubuntuProAttachTitle": "Ubuntu Pro anbinden",
+    "ubuntuProAttaching": "Wird angebunden...",
+    "ubuntuProDetach": "Trennen",
+    "ubuntuProDetachConfirm": "Trennen",
+    "ubuntuProDetachConfirmMessage": "Sind Sie sicher, dass Sie Ubuntu Pro von diesem System trennen möchten? Dadurch werden alle Ubuntu Pro-Vorteile und -Dienste für diesen Host entfernt.",
+    "ubuntuProDetachConfirmTitle": "Ubuntu Pro-Trennung bestätigen",
+    "ubuntuProDetachError": "Trennung von Ubuntu Pro fehlgeschlagen",
+    "ubuntuProDetachSuccess": "Ubuntu Pro erfolgreich getrennt",
+    "ubuntuProDetaching": "Wird getrennt...",
+    "ubuntuProMasterTokenPreFilled": "Master-Ubuntu Pro-Token wurde aus den Einstellungen vorausgefüllt.",
+    "ubuntuProToken": "Ubuntu Pro-Token",
+    "uninstall": "Deinstallieren"
   },
   "hosts": {
     "actions": "Aktionen",
@@ -881,7 +923,38 @@
     "childHostsOnly": "Nur Unterhosts",
     "childrenOnly": "Nur Kinder",
     "childHostOf": "Unterhost von {{parent}}",
-    "viewParent": "Übergeordneten Host anzeigen"
+    "viewParent": "Übergeordneten Host anzeigen",
+    "dataLastUpdated": "Daten zuletzt aktualisiert",
+    "deployOpenTelemetry": "OpenTelemetry bereitstellen",
+    "getDiagnostics": "Diagnose abrufen",
+    "noEligibleHostsForOpenTelemetry": "Keine berechtigten Hosts für die OpenTelemetry-Bereitstellung ausgewählt",
+    "opentelemetryDeployFailed": "Bereitstellung von OpenTelemetry fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "opentelemetryDeploySuccess": "OpenTelemetry-Bereitstellung für {{count}} Host(s) in die Warteschlange eingereiht",
+    "osUpdated": "Betriebssystem aktualisiert",
+    "rebootOrchestration": {
+      "childName": "Name",
+      "childType": "Typ",
+      "completed": "Orchestrierter Neustart erfolgreich abgeschlossen",
+      "completedWithErrors": "Orchestrierter Neustart abgeschlossen: {{error}}",
+      "failed": "Orchestrierter Neustart fehlgeschlagen: {{error}}",
+      "inProgress": "Orchestrierter Neustart wird ausgeführt",
+      "initiated": "Orchestrierter Neustart eingeleitet — {{count}} untergeordnete(r) Host(s) werden gestoppt",
+      "orchestratedInfo": "Dieser Host hat {{count}} laufende(n) untergeordnete(n) Host(s). SysManage stoppt diese sicher vor dem Neustart und startet sie danach automatisch wieder.",
+      "orchestratedRebootButton": "Orchestrierter Neustart",
+      "proceedAnyway": "Klicken Sie auf „Trotzdem neu starten“, um {{hostname}} ohne vorheriges Stoppen der untergeordneten Hosts neu zu starten.",
+      "proceedOrchestrated": "Klicken Sie auf „Orchestrierter Neustart“, um {{hostname}} sicher neu zu starten.",
+      "rebootAnywayButton": "Trotzdem neu starten",
+      "runningChildren": "Laufende untergeordnete Hosts:",
+      "statusPendingRestart": "Host wieder verbunden, Neustart der untergeordneten Hosts wird vorbereitet...",
+      "statusRebooting": "Host wird neu gestartet, warte auf Wiederverbindung...",
+      "statusRestarting": "Untergeordnete Hosts werden neu gestartet...",
+      "statusShuttingDown": "Untergeordnete Hosts werden gestoppt...",
+      "ungracefulWarning": "Dieser Host hat {{count}} laufende(n) untergeordnete(n) Host(s), die beim Neustart unkontrolliert beendet werden. Führen Sie ein Upgrade auf SysManage Professional+ durch, um einen orchestrierten sicheren Neustart zu erhalten."
+    },
+    "scriptsDisabledTooltip": "Skriptausführung ist auf diesem Host deaktiviert",
+    "scriptsEnabled": "Skripte aktiviert",
+    "scriptsEnabledTooltip": "Skriptausführung ist auf diesem Host aktiviert",
+    "softwareUpdated": "Software aktualisiert"
   },
   "login": {
     "error": "Ungültiger Benutzername oder Passwort",
@@ -950,7 +1023,8 @@
       "openbsd": "OpenBSD",
       "opensuse": "openSUSE",
       "ubuntu": "Ubuntu/Debian",
-      "windows": "Windows"
+      "windows": "Windows",
+      "netbsd": "NetBSD"
     },
     "loading": "Lade OS-Upgrades...",
     "noMatchingUpgrades": "Keine OS-Upgrades entsprechen dem aktuellen Filter",
@@ -977,7 +1051,8 @@
       "openbsd": "OpenBSD System-Upgrade",
       "opensuse": "openSUSE Distributions-Upgrade",
       "ubuntu": "Ubuntu Release-Upgrade",
-      "windows": "Windows Feature-Update"
+      "windows": "Windows Feature-Update",
+      "netbsd": "NetBSD-Systemupgrade"
     }
   },
   "reports": {
@@ -1155,7 +1230,10 @@
       "failed": "Fehlgeschlagen",
       "pending": "Wartend",
       "running": "Läuft",
-      "timeout": "Zeitüberschreitung"
+      "timeout": "Zeitüberschreitung",
+      "in_progress": "In Bearbeitung",
+      "installing": "Wird installiert",
+      "queued": "In Warteschlange"
     },
     "stderrOutput": "Standard-Fehler",
     "stdoutOutput": "Standard-Ausgabe",
@@ -1174,7 +1252,8 @@
       "unsupportedShellType": "Nicht unterstützter Shell-Typ: {type}"
     },
     "viewScript": "Skript Anzeigen",
-    "waitingForResults": "Warten auf Ergebnisse..."
+    "waitingForResults": "Warten auf Ergebnisse...",
+    "selectScriptAndHost": "Wählen Sie ein Skript und einen Host aus und klicken Sie dann auf Jetzt ausführen, um die Ausgabe hier zu sehen"
   },
   "search": {
     "search": "Suchen",
@@ -1399,6 +1478,35 @@
       "logging": "Protokollierung",
       "requests": "Anfragen",
       "sqlalchemy": "SQLAlchemy"
+    },
+    "opentelemetry": {
+      "collectorUrl": "Collector-URL",
+      "configuration": "Konfiguration",
+      "disabledMessage": "Die OpenTelemetry-Instrumentierung ist derzeit deaktiviert. Entfernen Sie OTEL_ENABLED=false oder setzen Sie OTEL_ENABLED=true, um verteiltes Tracing und Metrikerfassung zu aktivieren.",
+      "enableHint": "OpenTelemetry ist standardmäßig aktiviert. Zum Deaktivieren setzen Sie die Umgebungsvariable OTEL_ENABLED=false und starten Sie den Server neu.",
+      "instrumentation": "Instrumentierung",
+      "metricsCount": "Metriken",
+      "prometheusPort": "Prometheus-Port",
+      "statistics": "Statistiken",
+      "status": "Status",
+      "title": "OpenTelemetry-Status",
+      "tracesCount": "Traces"
+    },
+    "prometheus": {
+      "information": "Informationen",
+      "lastScrape": "Letzter Abruf",
+      "manageHint": "Prometheus wird vom Telemetrie-Stack verwaltet. Verwenden Sie „make start-telemetry“ zum Starten oder „make stop-telemetry“ zum Stoppen.",
+      "metricsCount": "Metriken",
+      "notRunningMessage": "Prometheus läuft nicht. Starten Sie den Telemetrie-Stack mit „make start-telemetry“ oder „make start“.",
+      "retentionTime": "Aufbewahrungszeit",
+      "scrapeInterval": "Abrufintervall",
+      "statistics": "Statistiken",
+      "status": "Status",
+      "storageSize": "Speichergröße",
+      "targets": "Ziele",
+      "title": "Prometheus-Status",
+      "url": "URL",
+      "version": "Version"
     }
   },
   "thirdPartyRepos": {
@@ -1542,7 +1650,12 @@
       "security": "Sicherheit",
       "system": "System"
     },
-    "unknown": "Unbekannt"
+    "unknown": "Unbekannt",
+    "status": {
+      "failed": "Aktualisierung fehlgeschlagen",
+      "pending": "Aktualisierung angefordert",
+      "success": "Erfolgreich aktualisiert"
+    }
   },
   "userDetail": {
     "active": "Aktiv",
@@ -1560,7 +1673,10 @@
     "resetPassword": "Passwort zurücksetzen",
     "resettingPassword": "Zurücksetzungs-E-Mail wird gesendet...",
     "securityInfo": "Sicherheitsinformationen",
-    "userId": "Benutzer-ID"
+    "userId": "Benutzer-ID",
+    "confirmResetMessage": "Sind Sie sicher, dass Sie eine E-Mail zum Zurücksetzen des Passworts an {{email}} senden möchten? Dadurch kann der Benutzer ein neues Passwort festlegen.",
+    "confirmResetTitle": "Passwortzurücksetzung bestätigen",
+    "sendResetEmail": "Zurücksetzungs-E-Mail senden"
   },
   "userProfile": {
     "accountInfo": "Kontoinformationen",
@@ -1712,5 +1828,145 @@
     "confirmDelete": "Sind Sie sicher, dass Sie die Gruppe \"{{groupName}}\" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "deleteSuccess": "Löschung der Gruppe angefordert. Die Gruppenliste wird automatisch aktualisiert.",
     "deleteFailed": "Fehler beim Löschen der Gruppe"
+  },
+  "queues": {
+    "created": "Erstellt am",
+    "description": "Abgelaufene/fehlgeschlagene Nachrichten der Nachrichtenwarteschlange anzeigen und verwalten.",
+    "direction": "Richtung",
+    "expired": "Abgelaufen am",
+    "hostId": "Host-ID",
+    "messageContent": "Nachrichteninhalt",
+    "messageDetails": "Nachrichtendetails",
+    "messageId": "Nachrichten-ID",
+    "messageType": "Nachrichtentyp",
+    "placeholder": "Die Warteschlangenverwaltungsoberfläche wird hier implementiert.",
+    "priority": "Priorität",
+    "title": "Warteschlangenverwaltung",
+    "viewDetails": "Details anzeigen"
+  },
+  "ui_testing": {
+    "bestPractices": {
+      "codeReview": "Test-Code-Review",
+      "debugging": "Debugging-Strategien",
+      "documentation": "Testdokumentation",
+      "maintainability": "Testwartbarkeit",
+      "performance": "Testleistung",
+      "reliability": "Testzuverlässigkeit",
+      "title": "Best Practices für Tests"
+    },
+    "cicd": {
+      "description": "Test-Workflows für kontinuierliche Integration und Bereitstellung",
+      "features": {
+        "artifactStorage": "Testartefakt-Speicherung",
+        "environmentManagement": "Umgebungsverwaltung",
+        "notificationIntegration": "Benachrichtigungsintegration",
+        "parallelJobs": "Parallele Auftragsausführung",
+        "testReports": "Testberichterstellung"
+      },
+      "platforms": {
+        "azure": "Azure DevOps",
+        "circleci": "CircleCI",
+        "githubActions": "GitHub Actions",
+        "gitlab": "GitLab CI",
+        "jenkins": "Jenkins",
+        "travis": "Travis CI"
+      },
+      "title": "CI/CD-Integration"
+    },
+    "configuration": {
+      "configFiles": "Konfigurationsdateien",
+      "environment": "Umgebungseinrichtung",
+      "pageObjects": "Page-Object-Muster",
+      "reporting": "Testberichterstattung",
+      "testData": "Testdatenverwaltung",
+      "title": "Testkonfiguration",
+      "utilities": "Testhilfsprogramme"
+    },
+    "makefile": {
+      "commands": {
+        "test": "make test",
+        "testAccessibility": "make test-a11y",
+        "testCoverage": "make test-coverage",
+        "testE2e": "make test-e2e",
+        "testVisual": "make test-visual",
+        "testWatch": "make test-watch"
+      },
+      "description": "Häufig verwendete Testbefehle über das Makefile",
+      "title": "Makefile-Befehle"
+    },
+    "overview": {
+      "automation": "Automatisierung & CI/CD",
+      "description": "Umfassendes UI-Test-Setup mit modernen plattformübergreifenden Testframeworks",
+      "frameworks": "Testframeworks",
+      "platforms": "Plattformübergreifende Unterstützung",
+      "title": "Übersicht über das Testframework"
+    },
+    "playwright": {
+      "browsers": {
+        "chromium": "Chromium",
+        "edge": "Microsoft Edge",
+        "firefox": "Firefox",
+        "safari": "Safari",
+        "webkit": "WebKit"
+      },
+      "commands": {
+        "codegen": "Code-Generierung",
+        "debug": "Tests debuggen",
+        "install": "Playwright installieren",
+        "report": "Testbericht",
+        "test": "Tests ausführen",
+        "trace": "Trace anzeigen"
+      },
+      "description": "Modernes plattformübergreifendes Testframework mit zuverlässigen Auto-Wait-Funktionen",
+      "features": {
+        "autoWait": "Automatisches Warten auf Elemente",
+        "crossBrowser": "Browserübergreifendes Testen",
+        "parallel": "Parallele Ausführung",
+        "screenshots": "Screenshot-Tests",
+        "tracing": "Test-Tracing",
+        "video": "Videoaufzeichnung"
+      },
+      "title": "Playwright-Tests"
+    },
+    "selenium": {
+      "description": "Branchenstandard-WebDriver-Automatisierung für ältere Browserunterstützung",
+      "drivers": {
+        "chrome": "ChromeDriver",
+        "edge": "EdgeDriver",
+        "firefox": "GeckoDriver",
+        "ie": "IEDriver",
+        "safari": "SafariDriver"
+      },
+      "features": {
+        "crossPlatform": "Plattformübergreifendes Testen",
+        "gridSupport": "Selenium Grid-Unterstützung",
+        "mobileTesting": "Mobiles Testen",
+        "multiLanguage": "Mehrsprachige Unterstützung",
+        "remoteExecution": "Remote-Ausführung",
+        "webdriver": "WebDriver-Protokoll"
+      },
+      "title": "Selenium-Tests"
+    },
+    "testTypes": {
+      "accessibility": "Barrierefreiheitstests",
+      "api": "API-Tests",
+      "e2e": "End-to-End-Tests",
+      "integration": "Integrationstests",
+      "mobile": "Mobile Tests",
+      "performance": "Leistungstests",
+      "title": "Testarten",
+      "unit": "Unit-Tests",
+      "visual": "Visuelle Regressionstests"
+    },
+    "title": "UI-Testdokumentation",
+    "tools": {
+      "accessibilityTools": "Barrierefreiheits-Testwerkzeuge",
+      "assertionLibraries": "Assertion-Bibliotheken",
+      "dataGenerators": "Testdaten-Generatoren",
+      "mockingFrameworks": "Mocking-Frameworks",
+      "testRunners": "Test-Runner",
+      "title": "Testwerkzeuge & Hilfsprogramme",
+      "visualTools": "Visuelle Testwerkzeuge"
+    }
   }
 }

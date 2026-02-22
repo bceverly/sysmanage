@@ -6,7 +6,7 @@ import json
 import logging
 import os
 import platform
-import subprocess  # nosec B404 - Required for OpenBAO process management
+import subprocess  # nosec B404  # required for OpenBAO process management
 from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -69,7 +69,7 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
     try:
         if platform.system() == "Windows":
             # Windows-specific process check using tasklist with full path
-            result = subprocess.run(  # nosec B607 B603
+            result = subprocess.run(  # nosec B603
                 [
                     "C:\\Windows\\System32\\tasklist.exe",
                     "/FI",
@@ -123,6 +123,7 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
             env["BAO_TOKEN"] = vault_config.get("token", "")
 
             # bao_cmd is validated by find_bao_binary, status is a safe fixed argument
+            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
             result = subprocess.run(  # nosec B603
                 [bao_cmd, "status"],
                 capture_output=True,
@@ -292,13 +293,13 @@ def start_openbao() -> Dict[str, Any]:  # NOSONAR
                     ]
 
                     # Create the task
-                    create_result = subprocess.run(  # nosec B607 B603
+                    create_result = subprocess.run(  # nosec B603
                         schtasks_cmd, capture_output=True, text=True, check=False
                     )
 
                     if create_result.returncode == 0:
                         # Run the task immediately
-                        _run_result = subprocess.run(  # nosec B607 B603
+                        _run_result = subprocess.run(  # nosec B603
                             [
                                 SCHTASKS_PATH,
                                 "/run",
@@ -314,7 +315,7 @@ def start_openbao() -> Dict[str, Any]:  # NOSONAR
                         time.sleep(3)
 
                         # Clean up the task
-                        subprocess.run(  # nosec B607 B603
+                        subprocess.run(  # nosec B603
                             [
                                 SCHTASKS_PATH,
                                 "/delete",
@@ -360,7 +361,7 @@ def start_openbao() -> Dict[str, Any]:  # NOSONAR
                     result = Result()
             else:
                 # CMD script fallback - avoid shell=True for security
-                result = subprocess.run(  # nosec B607 B603
+                result = subprocess.run(  # nosec B603
                     ["C:\\Windows\\System32\\cmd.exe", "/c", start_script],
                     capture_output=True,
                     text=True,
@@ -458,7 +459,7 @@ def stop_openbao() -> Dict[str, Any]:  # NOSONAR
         if platform.system() == "Windows":
             if stop_script.endswith(".ps1"):
                 # PowerShell script with full path
-                result = subprocess.run(  # nosec B607 B603
+                result = subprocess.run(  # nosec B603
                     [
                         "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
                         "-WindowStyle",
@@ -476,7 +477,7 @@ def stop_openbao() -> Dict[str, Any]:  # NOSONAR
                 )
             else:
                 # CMD script fallback - avoid shell=True for security
-                result = subprocess.run(  # nosec B607 B603
+                result = subprocess.run(  # nosec B603
                     ["C:\\Windows\\System32\\cmd.exe", "/c", stop_script],
                     capture_output=True,
                     text=True,
@@ -569,6 +570,7 @@ def seal_openbao() -> Dict[str, Any]:
         env["BAO_TOKEN"] = vault_config.get("token", "")
 
         # bao_cmd is validated by find_bao_binary, operator seal is a safe fixed argument
+        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
         result = subprocess.run(  # nosec B603
             [bao_cmd, "operator", "seal"],
             capture_output=True,
@@ -667,6 +669,7 @@ def unseal_openbao() -> Dict[str, Any]:
 
         # In dev mode, try to use the dev token to unseal
         # This works because dev mode typically uses a fixed unseal key
+        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
         result = subprocess.run(  # nosec B603
             [bao_cmd, "operator", "unseal", "-address", env["BAO_ADDR"]],
             capture_output=True,

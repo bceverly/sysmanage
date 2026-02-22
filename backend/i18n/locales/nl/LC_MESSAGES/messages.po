@@ -708,6 +708,51 @@ msgstr "Gebruikersbeveiligingsrollen (RBAC)"
 msgid "No security roles assigned"
 msgstr "Geen beveiligingsrollen toegewezen"
 
+msgid "IP Address"
+msgstr "IP-adres"
+
+msgid "OS Version"
+msgstr "OS-versie"
+
+msgid "IPv4 Ports"
+msgstr "IPv4-poorten"
+
+msgid "IPv6 Ports"
+msgstr "IPv6-poorten"
+
+msgid "Audit Log"
+msgstr "Auditlogboek"
+
+msgid "Total Entries"
+msgstr "Totaal aantal vermeldingen"
+
+msgid "No audit log entries found."
+msgstr "Geen auditlogboekvermeldingen gevonden."
+
+msgid "Timestamp"
+msgstr "Tijdstempel"
+
+msgid "Entity Type"
+msgstr "Entiteitstype"
+
+msgid "Entity Name"
+msgstr "Entiteitsnaam"
+
+msgid "Result"
+msgstr "Resultaat"
+
+msgid "Description"
+msgstr "Beschrijving"
+
+msgid "System"
+msgstr "Systeem"
+
+msgid "Action"
+msgstr "Actie"
+
+msgid "User"
+msgstr "Gebruiker"
+
 msgid "User not found"
 msgstr "Gebruiker niet gevonden"
 
@@ -836,22 +881,316 @@ msgstr "KVM/libvirt succesvol geïnitialiseerd"
 # KVM Networking Configuration strings
 
 msgid "KVM networking is only supported on Linux hosts"
-msgstr "KVM networking is only supported on Linux hosts"
+msgstr "KVM-netwerken worden alleen ondersteund op Linux-hosts"
 
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr "Agent must be running with root privileges to configure KVM networking"
+msgstr "De agent moet met root-rechten worden uitgevoerd om KVM-netwerken te configureren"
 
 msgid "Bridge interface name is required for bridged networking mode"
-msgstr "Bridge interface name is required for bridged networking mode"
+msgstr "De naam van de bridge-interface is vereist voor de bridge-netwerkmodus"
 
 msgid "KVM networking configuration requested: %s mode"
-msgstr "KVM networking configuration requested: %s mode"
+msgstr "KVM-netwerkconfiguratie aangevraagd: %s-modus"
 
 msgid "KVM networking configuration requested. The agent will configure the %s network."
-msgstr "KVM networking configuration requested. The agent will configure the %s network."
+msgstr "KVM-netwerkconfiguratie aangevraagd. De agent zal het %s-netwerk configureren."
 
 msgid "KVM networks are only available on Linux hosts"
-msgstr "KVM networks are only available on Linux hosts"
+msgstr "KVM-netwerken zijn alleen beschikbaar op Linux-hosts"
 
 msgid "KVM network list requested. Results will be returned shortly."
-msgstr "KVM network list requested. Results will be returned shortly."
+msgstr "KVM-netwerklijst aangevraagd. De resultaten worden binnenkort weergegeven."
+
+# Pro+ feature gate messages
+msgid "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Container/VM-beheer vereist een SysManage Professional+-licentie. Upgrade om toegang te krijgen tot deze functie."
+
+msgid "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Container-levenscyclusbeheer vereist een SysManage Professional+-licentie. Upgrade om toegang te krijgen tot deze functie."
+
+msgid "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Geheimenbeheer vereist een SysManage Professional+-licentie. Upgrade om toegang te krijgen tot deze functie."
+
+msgid "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Geheimenimplementatie vereist een SysManage Professional+-licentie. Upgrade om toegang te krijgen tot deze functie."
+
+msgid "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Rapportgeneratie vereist een SysManage Professional+-licentie. Upgrade om toegang te krijgen tot deze functie."
+
+msgid "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
+msgstr "Het exporteren van het auditlogboek vereist een SysManage Professional+-licentie. Upgrade om toegang te krijgen tot de exportformaten CSV, JSON, CEF en LEEF."
+
+msgid "Use /api/v1/audit/export with Pro+ license"
+msgstr "Gebruik /api/v1/audit/export met Pro+-licentie"
+
+msgid "Child host not found"
+msgstr "Kind-host niet gevonden"
+
+msgid "Child host refresh requested"
+msgstr "Vernieuwing van kind-host aangevraagd"
+
+msgid "Report"
+msgstr "Rapport"
+
+# Pro+ redirect messages
+msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"
+msgstr "Gebruik /api/v1/reports/view/{report_type} met Pro+-licentie"
+
+msgid "Use /api/v1/reports/generate/{report_type} with Pro+ license"
+msgstr "Gebruik /api/v1/reports/generate/{report_type} met Pro+-licentie"
+
+msgid "Use /api/v1/secrets with Pro+ license"
+msgstr "Gebruik /api/v1/secrets met Pro+-licentie"
+
+msgid "Use /api/v1/secrets/{secret_id} with Pro+ license"
+msgstr "Gebruik /api/v1/secrets/{secret_id} met Pro+-licentie"
+
+msgid "Use /api/v1/secrets/{secret_id}/content with Pro+ license"
+msgstr "Gebruik /api/v1/secrets/{secret_id}/content met Pro+-licentie"
+
+msgid "Use /api/v1/secrets/ssh-keys with Pro+ license"
+msgstr "Gebruik /api/v1/secrets/ssh-keys met Pro+-licentie"
+
+msgid "Use /api/v1/secrets/types with Pro+ license"
+msgstr "Gebruik /api/v1/secrets/types met Pro+-licentie"
+
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr "Gebruik /api/v1/secrets/deploy-ssh-keys met Pro+-licentie"
+
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr "Gebruik /api/v1/secrets/deploy-certificates met Pro+-licentie"
+
+# Scheduled report delivery messages
+msgid "Scheduled report created successfully"
+msgstr "Gepland rapport succesvol aangemaakt"
+
+msgid "Scheduled report updated successfully"
+msgstr "Gepland rapport succesvol bijgewerkt"
+
+msgid "Scheduled report deleted successfully"
+msgstr "Gepland rapport succesvol verwijderd"
+
+msgid "Scheduled report not found"
+msgstr "Gepland rapport niet gevonden"
+
+msgid "Scheduled report executed successfully"
+msgstr "Gepland rapport succesvol uitgevoerd"
+
+msgid "Invalid schedule type"
+msgstr "Ongeldig planningstype"
+
+msgid "Invalid output format"
+msgstr "Ongeldig uitvoerformaat"
+
+# Audit retention policy messages
+msgid "Retention policy created successfully"
+msgstr "Bewaarbeleid succesvol aangemaakt"
+
+msgid "Retention policy updated successfully"
+msgstr "Bewaarbeleid succesvol bijgewerkt"
+
+msgid "Retention policy deleted successfully"
+msgstr "Bewaarbeleid succesvol verwijderd"
+
+msgid "Retention policy not found"
+msgstr "Bewaarbeleid niet gevonden"
+
+msgid "Retention policy executed successfully"
+msgstr "Bewaarbeleid succesvol uitgevoerd"
+
+msgid "Retention days must be between 1 and 3650"
+msgstr "Bewaardagen moeten tussen 1 en 3650 liggen"
+
+msgid "Invalid retention action"
+msgstr "Ongeldige bewaaractie"
+
+# Audit archival messages
+msgid "Audit entries archived successfully"
+msgstr "Auditgegevens succesvol gearchiveerd"
+
+msgid "Audit entries deleted by retention policy"
+msgstr "Auditgegevens verwijderd door bewaarbeleid"
+
+msgid "No audit entries matched the retention criteria"
+msgstr "Geen auditgegevens kwamen overeen met de bewaarcriteria"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/reports/schedules with Pro+ license"
+msgstr "Gebruik /api/v1/reports/schedules met Pro+-licentie"
+
+msgid "Use /api/v1/audit/retention-policies with Pro+ license"
+msgstr "Gebruik /api/v1/audit/retention-policies met Pro+-licentie"
+
+msgid "Use /api/v1/audit/archive with Pro+ license"
+msgstr "Gebruik /api/v1/audit/archive met Pro+-licentie"
+
+# Scheduled report delivery messages (new)
+msgid "Scheduled report delivered successfully"
+msgstr "Gepland rapport succesvol afgeleverd"
+
+msgid "Failed to deliver scheduled report"
+msgstr "Aflevering van gepland rapport mislukt"
+
+msgid "Report dispatch to channel failed"
+msgstr "Verzending van rapport naar kanaal mislukt"
+
+# Secret deployment messages
+msgid "SSH keys deployed successfully"
+msgstr "SSH-sleutels succesvol geïmplementeerd"
+
+msgid "Failed to deploy SSH keys"
+msgstr "Implementatie van SSH-sleutels mislukt"
+
+msgid "Certificates deployed successfully"
+msgstr "Certificaten succesvol geïmplementeerd"
+
+msgid "Failed to deploy certificates"
+msgstr "Implementatie van certificaten mislukt"
+
+msgid "Secret deployment queued"
+msgstr "Geheimenimplementatie in wachtrij geplaatst"
+
+# Rotation schedule messages
+msgid "Rotation schedule created"
+msgstr "Rotatieschema aangemaakt"
+
+msgid "Rotation schedule updated"
+msgstr "Rotatieschema bijgewerkt"
+
+msgid "Rotation schedule deleted"
+msgstr "Rotatieschema verwijderd"
+
+msgid "Rotation schedule not found"
+msgstr "Rotatieschema niet gevonden"
+
+msgid "Rotation executed successfully"
+msgstr "Rotatie succesvol uitgevoerd"
+
+msgid "Failed to execute rotation"
+msgstr "Uitvoering van rotatie mislukt"
+
+# Container action messages
+msgid "Container action queued"
+msgstr "Containeractie in wachtrij geplaatst"
+
+msgid "Container not found"
+msgstr "Container niet gevonden"
+
+msgid "Container creation queued"
+msgstr "Containeraanmaak in wachtrij geplaatst"
+
+msgid "Parent host not found"
+msgstr "Bovenliggende host niet gevonden"
+
+msgid "Network configuration queued"
+msgstr "Netwerkconfiguratie in wachtrij geplaatst"
+
+msgid "Container started"
+msgstr "Container gestart"
+
+msgid "Container stopped"
+msgstr "Container gestopt"
+
+msgid "Container restarted"
+msgstr "Container herstart"
+
+msgid "Container deleted"
+msgstr "Container verwijderd"
+
+# Integrity verification messages
+msgid "Integrity verification passed"
+msgstr "Integriteitsverificatie geslaagd"
+
+msgid "Integrity verification failed"
+msgstr "Integriteitsverificatie mislukt"
+
+msgid "Integrity hash mismatch detected"
+msgstr "Integriteitshash komt niet overeen"
+
+# Secret versioning messages
+msgid "Secret version created"
+msgstr "Geheimversie aangemaakt"
+
+msgid "Secret not found"
+msgstr "Geheim niet gevonden"
+
+msgid "Secret deleted successfully"
+msgstr "Geheim succesvol verwijderd"
+
+msgid "Failed to retrieve secret content from vault"
+msgstr "Kan geheime inhoud niet ophalen uit de kluis"
+
+msgid "Failed to store secret in vault"
+msgstr "Kan geheim niet opslaan in de kluis"
+
+msgid "Failed to update secret in vault"
+msgstr "Kan geheim niet bijwerken in de kluis"
+
+msgid "Deleted {count} secrets"
+msgstr "{count} geheimen verwijderd"
+
+# Pro+ redirect messages for new features (additional)
+msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
+msgstr "Gebruik /api/v1/secrets/rotation-schedules met Pro+-licentie"
+
+msgid "Use /api/v1/containers/create with Pro+ license"
+msgstr "Gebruik /api/v1/containers/create met Pro+-licentie"
+
+msgid "Use /api/v1/containers/{id}/action with Pro+ license"
+msgstr "Gebruik /api/v1/containers/{id}/action met Pro+-licentie"
+
+msgid "Use /api/v1/containers/{id}/network with Pro+ license"
+msgstr "Gebruik /api/v1/containers/{id}/network met Pro+-licentie"
+
+# Child host lifecycle control messages
+msgid "Child host start requested: %s"
+msgstr "Start van kindhost aangevraagd: %s"
+
+msgid "Child host start requested"
+msgstr "Start van kindhost aangevraagd"
+
+msgid "Child host stop requested: %s"
+msgstr "Stop van kindhost aangevraagd: %s"
+
+msgid "Child host stop requested"
+msgstr "Stop van kindhost aangevraagd"
+
+msgid "Child host restart requested: %s"
+msgstr "Herstart van kindhost aangevraagd: %s"
+
+msgid "Child host restart requested"
+msgstr "Herstart van kindhost aangevraagd"
+
+msgid "Child host deletion requested: %s"
+msgstr "Verwijdering van kindhost aangevraagd: %s"
+
+msgid "Child host deletion requested"
+msgstr "Verwijdering van kindhost aangevraagd"
+
+msgid "Distribution '%s %s' already exists for type '%s'"
+msgstr "Distributie '%s %s' bestaat al voor type '%s'"
+
+msgid "Distribution deleted"
+msgstr "Distributie verwijderd"
+
+msgid "Source %s failed: %s"
+msgstr "Bron %s mislukt: %s"
+
+# Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
+#, python-format
+msgid "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "Georkestreerde herstart vereist een SysManage Professional+-licentie. Upgrade om toegang te krijgen tot deze functie."
+
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgstr "Geen draaiende kind-hosts gevonden. Gebruik in plaats daarvan het standaard herstart-eindpunt."
+
+#, python-format
+msgid "Orchestrated reboot initiated with %d running child host(s)"
+msgstr "Georkestreerde herstart gestart met %d draaiende kind-host(s)"
+
+msgid "Reboot orchestration not found"
+msgstr "Herstart-orkestratie niet gevonden"
+
+#, python-format
+msgid "%d of %d child host(s) failed to restart"
+msgstr "%d van %d kind-host(s) konden niet opnieuw worden gestart"

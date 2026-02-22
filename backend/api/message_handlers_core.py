@@ -412,6 +412,23 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                         json.dumps(enabled_shells) if enabled_shells else None
                     )
 
+                # Check for pending reboot orchestration (Pro+ safe reboot)
+                try:
+                    from backend.licensing.module_loader import module_loader
+
+                    if module_loader.get_module("container_engine") is not None:
+                        from backend.services.reboot_orchestration_service import (
+                            handle_agent_reconnect,
+                        )
+
+                        handle_agent_reconnect(db, host.id)
+                except Exception as orch_err:
+                    logger.warning(
+                        "Heartbeat: Error checking reboot orchestration for %s: %s",
+                        host.fqdn,
+                        orch_err,
+                    )
+
                 # Commit changes
                 db.commit()
                 logger.info(

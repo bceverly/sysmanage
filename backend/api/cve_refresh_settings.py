@@ -344,8 +344,38 @@ async def trigger_cve_refresh(
                 errors=[],
             )
         else:
-            result = await cve_refresh_service.refresh_all(db)
-            return RefreshResultResponse(**result)
+            # Refresh each enabled source individually so that one source
+            # failure does not prevent the remaining sources from running.
+            settings = cve_refresh_service.get_settings(db)
+            enabled_sources = settings.enabled_sources or list(CVE_SOURCES.keys())
+            started_at = datetime.now().isoformat()
+
+            all_sources: Dict[str, Any] = {}
+            all_errors: List[str] = []
+            total_vulns = 0
+            total_pkgs = 0
+
+            for src in enabled_sources:
+                try:
+                    src_result = await cve_refresh_service.refresh_from_source(
+                        db, src, settings.nvd_api_key
+                    )
+                    all_sources[src] = {"status": "success", **src_result}
+                    total_vulns += src_result.get("vulnerabilities_processed", 0)
+                    total_pkgs += src_result.get("packages_processed", 0)
+                except Exception as src_e:
+                    logger.error("CVE refresh failed for source %s: %s", src, src_e)
+                    all_sources[src] = {"status": "error", "error": str(src_e)}
+                    all_errors.append(_("Source %s failed: %s") % (src, str(src_e)))
+
+            return RefreshResultResponse(
+                started_at=started_at,
+                completed_at=datetime.now().isoformat(),
+                sources=all_sources,
+                total_vulnerabilities=total_vulns,
+                total_packages=total_pkgs,
+                errors=all_errors,
+            )
 
     except CveRefreshError as e:
         raise HTTPException(

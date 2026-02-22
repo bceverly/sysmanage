@@ -709,6 +709,51 @@ msgstr "사용자 보안 역할 (RBAC)"
 msgid "No security roles assigned"
 msgstr "보안 역할이 할당되지 않음"
 
+msgid "IP Address"
+msgstr "IP 주소"
+
+msgid "OS Version"
+msgstr "OS 버전"
+
+msgid "IPv4 Ports"
+msgstr "IPv4 포트"
+
+msgid "IPv6 Ports"
+msgstr "IPv6 포트"
+
+msgid "Audit Log"
+msgstr "감사 로그"
+
+msgid "Total Entries"
+msgstr "총 항목 수"
+
+msgid "No audit log entries found."
+msgstr "감사 로그 항목을 찾을 수 없습니다."
+
+msgid "Timestamp"
+msgstr "타임스탬프"
+
+msgid "Entity Type"
+msgstr "엔티티 유형"
+
+msgid "Entity Name"
+msgstr "엔티티 이름"
+
+msgid "Result"
+msgstr "결과"
+
+msgid "Description"
+msgstr "설명"
+
+msgid "System"
+msgstr "시스템"
+
+msgid "Action"
+msgstr "작업"
+
+msgid "User"
+msgstr "사용자"
+
 msgid "User not found"
 msgstr "사용자를 찾을 수 없음"
 
@@ -837,22 +882,316 @@ msgstr "KVM/libvirt가 성공적으로 초기화되었습니다"
 # KVM Networking Configuration strings
 
 msgid "KVM networking is only supported on Linux hosts"
-msgstr "KVM networking is only supported on Linux hosts"
+msgstr "KVM 네트워킹은 Linux 호스트에서만 지원됩니다"
 
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr "Agent must be running with root privileges to configure KVM networking"
+msgstr "KVM 네트워킹을 구성하려면 에이전트가 루트 권한으로 실행되어야 합니다"
 
 msgid "Bridge interface name is required for bridged networking mode"
-msgstr "Bridge interface name is required for bridged networking mode"
+msgstr "브리지 네트워킹 모드에는 브리지 인터페이스 이름이 필요합니다"
 
 msgid "KVM networking configuration requested: %s mode"
-msgstr "KVM networking configuration requested: %s mode"
+msgstr "KVM 네트워크 구성이 요청되었습니다: %s 모드"
 
 msgid "KVM networking configuration requested. The agent will configure the %s network."
-msgstr "KVM networking configuration requested. The agent will configure the %s network."
+msgstr "KVM 네트워크 구성이 요청되었습니다. 에이전트가 %s 네트워크를 구성합니다."
 
 msgid "KVM networks are only available on Linux hosts"
-msgstr "KVM networks are only available on Linux hosts"
+msgstr "KVM 네트워크는 Linux 호스트에서만 사용할 수 있습니다"
 
 msgid "KVM network list requested. Results will be returned shortly."
-msgstr "KVM network list requested. Results will be returned shortly."
+msgstr "KVM 네트워크 목록이 요청되었습니다. 결과가 곧 표시됩니다."
+
+# Pro+ feature gate messages
+msgid "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "컨테이너/VM 관리에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
+
+msgid "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "컨테이너 수명 주기 관리에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
+
+msgid "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "시크릿 관리에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
+
+msgid "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "시크릿 배포에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
+
+msgid "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "보고서 생성에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
+
+msgid "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
+msgstr "감사 로그 내보내기에는 SysManage Professional+ 라이선스가 필요합니다. CSV, JSON, CEF 및 LEEF 내보내기 형식에 액세스하려면 업그레이드하세요."
+
+msgid "Use /api/v1/audit/export with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/audit/export를 사용하세요"
+
+msgid "Child host not found"
+msgstr "하위 호스트를 찾을 수 없습니다"
+
+msgid "Child host refresh requested"
+msgstr "하위 호스트 새로고침이 요청되었습니다"
+
+msgid "Report"
+msgstr "보고서"
+
+# Pro+ redirect messages
+msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/reports/view/{report_type}를 사용하세요"
+
+msgid "Use /api/v1/reports/generate/{report_type} with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/reports/generate/{report_type}를 사용하세요"
+
+msgid "Use /api/v1/secrets with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/secrets를 사용하세요"
+
+msgid "Use /api/v1/secrets/{secret_id} with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/secrets/{secret_id}를 사용하세요"
+
+msgid "Use /api/v1/secrets/{secret_id}/content with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/secrets/{secret_id}/content를 사용하세요"
+
+msgid "Use /api/v1/secrets/ssh-keys with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/secrets/ssh-keys를 사용하세요"
+
+msgid "Use /api/v1/secrets/types with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/secrets/types를 사용하세요"
+
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/secrets/deploy-ssh-keys를 사용하세요"
+
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/secrets/deploy-certificates를 사용하세요"
+
+# Scheduled report delivery messages
+msgid "Scheduled report created successfully"
+msgstr "예약 보고서가 성공적으로 생성되었습니다"
+
+msgid "Scheduled report updated successfully"
+msgstr "예약 보고서가 성공적으로 업데이트되었습니다"
+
+msgid "Scheduled report deleted successfully"
+msgstr "예약 보고서가 성공적으로 삭제되었습니다"
+
+msgid "Scheduled report not found"
+msgstr "예약 보고서를 찾을 수 없습니다"
+
+msgid "Scheduled report executed successfully"
+msgstr "예약 보고서가 성공적으로 실행되었습니다"
+
+msgid "Invalid schedule type"
+msgstr "잘못된 일정 유형"
+
+msgid "Invalid output format"
+msgstr "잘못된 출력 형식"
+
+# Audit retention policy messages
+msgid "Retention policy created successfully"
+msgstr "보존 정책이 성공적으로 생성되었습니다"
+
+msgid "Retention policy updated successfully"
+msgstr "보존 정책이 성공적으로 업데이트되었습니다"
+
+msgid "Retention policy deleted successfully"
+msgstr "보존 정책이 성공적으로 삭제되었습니다"
+
+msgid "Retention policy not found"
+msgstr "보존 정책을 찾을 수 없습니다"
+
+msgid "Retention policy executed successfully"
+msgstr "보존 정책이 성공적으로 실행되었습니다"
+
+msgid "Retention days must be between 1 and 3650"
+msgstr "보존 일수는 1에서 3650 사이여야 합니다"
+
+msgid "Invalid retention action"
+msgstr "잘못된 보존 작업"
+
+# Audit archival messages
+msgid "Audit entries archived successfully"
+msgstr "감사 항목이 성공적으로 보관되었습니다"
+
+msgid "Audit entries deleted by retention policy"
+msgstr "보존 정책에 의해 감사 항목이 삭제되었습니다"
+
+msgid "No audit entries matched the retention criteria"
+msgstr "보존 기준에 일치하는 감사 항목이 없습니다"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/reports/schedules with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/reports/schedules를 사용하세요"
+
+msgid "Use /api/v1/audit/retention-policies with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/audit/retention-policies를 사용하세요"
+
+msgid "Use /api/v1/audit/archive with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/audit/archive를 사용하세요"
+
+# Scheduled report delivery messages
+msgid "Scheduled report delivered successfully"
+msgstr "예약 보고서가 성공적으로 전달되었습니다"
+
+msgid "Failed to deliver scheduled report"
+msgstr "예약 보고서 전달에 실패했습니다"
+
+msgid "Report dispatch to channel failed"
+msgstr "채널로의 보고서 전송에 실패했습니다"
+
+# Secret deployment messages
+msgid "SSH keys deployed successfully"
+msgstr "SSH 키가 성공적으로 배포되었습니다"
+
+msgid "Failed to deploy SSH keys"
+msgstr "SSH 키 배포에 실패했습니다"
+
+msgid "Certificates deployed successfully"
+msgstr "인증서가 성공적으로 배포되었습니다"
+
+msgid "Failed to deploy certificates"
+msgstr "인증서 배포에 실패했습니다"
+
+msgid "Secret deployment queued"
+msgstr "시크릿 배포가 대기열에 추가되었습니다"
+
+# Rotation schedule messages
+msgid "Rotation schedule created"
+msgstr "순환 일정이 생성되었습니다"
+
+msgid "Rotation schedule updated"
+msgstr "순환 일정이 업데이트되었습니다"
+
+msgid "Rotation schedule deleted"
+msgstr "순환 일정이 삭제되었습니다"
+
+msgid "Rotation schedule not found"
+msgstr "순환 일정을 찾을 수 없습니다"
+
+msgid "Rotation executed successfully"
+msgstr "순환이 성공적으로 실행되었습니다"
+
+msgid "Failed to execute rotation"
+msgstr "순환 실행에 실패했습니다"
+
+# Container action messages
+msgid "Container action queued"
+msgstr "컨테이너 작업이 대기열에 추가되었습니다"
+
+msgid "Container not found"
+msgstr "컨테이너를 찾을 수 없습니다"
+
+msgid "Container creation queued"
+msgstr "컨테이너 생성이 대기열에 추가되었습니다"
+
+msgid "Parent host not found"
+msgstr "부모 호스트를 찾을 수 없습니다"
+
+msgid "Network configuration queued"
+msgstr "네트워크 구성이 대기열에 추가되었습니다"
+
+msgid "Container started"
+msgstr "컨테이너가 시작되었습니다"
+
+msgid "Container stopped"
+msgstr "컨테이너가 중지되었습니다"
+
+msgid "Container restarted"
+msgstr "컨테이너가 재시작되었습니다"
+
+msgid "Container deleted"
+msgstr "컨테이너가 삭제되었습니다"
+
+# Integrity verification messages
+msgid "Integrity verification passed"
+msgstr "무결성 검증을 통과했습니다"
+
+msgid "Integrity verification failed"
+msgstr "무결성 검증에 실패했습니다"
+
+msgid "Integrity hash mismatch detected"
+msgstr "무결성 해시 불일치가 감지되었습니다"
+
+# Secret versioning messages
+msgid "Secret version created"
+msgstr "시크릿 버전이 생성되었습니다"
+
+msgid "Secret not found"
+msgstr "시크릿을 찾을 수 없습니다"
+
+msgid "Secret deleted successfully"
+msgstr "비밀이 성공적으로 삭제되었습니다"
+
+msgid "Failed to retrieve secret content from vault"
+msgstr "볼트에서 비밀 내용을 검색하지 못했습니다"
+
+msgid "Failed to store secret in vault"
+msgstr "볼트에 비밀을 저장하지 못했습니다"
+
+msgid "Failed to update secret in vault"
+msgstr "볼트에서 비밀을 업데이트하지 못했습니다"
+
+msgid "Deleted {count} secrets"
+msgstr "{count}개의 비밀이 삭제되었습니다"
+
+# Pro+ redirect messages for new features
+msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/secrets/rotation-schedules를 사용하세요"
+
+msgid "Use /api/v1/containers/create with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/containers/create를 사용하세요"
+
+msgid "Use /api/v1/containers/{id}/action with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/containers/{id}/action를 사용하세요"
+
+msgid "Use /api/v1/containers/{id}/network with Pro+ license"
+msgstr "Pro+ 라이선스로 /api/v1/containers/{id}/network를 사용하세요"
+
+# Child host lifecycle control messages
+msgid "Child host start requested: %s"
+msgstr "자식 호스트 시작이 요청되었습니다: %s"
+
+msgid "Child host start requested"
+msgstr "자식 호스트 시작이 요청되었습니다"
+
+msgid "Child host stop requested: %s"
+msgstr "자식 호스트 중지가 요청되었습니다: %s"
+
+msgid "Child host stop requested"
+msgstr "자식 호스트 중지가 요청되었습니다"
+
+msgid "Child host restart requested: %s"
+msgstr "자식 호스트 재시작이 요청되었습니다: %s"
+
+msgid "Child host restart requested"
+msgstr "자식 호스트 재시작이 요청되었습니다"
+
+msgid "Child host deletion requested: %s"
+msgstr "자식 호스트 삭제가 요청되었습니다: %s"
+
+msgid "Child host deletion requested"
+msgstr "자식 호스트 삭제가 요청되었습니다"
+
+msgid "Distribution '%s %s' already exists for type '%s'"
+msgstr "배포판 '%s %s'이(가) 유형 '%s'에 이미 존재합니다"
+
+msgid "Distribution deleted"
+msgstr "배포판이 삭제되었습니다"
+
+msgid "Source %s failed: %s"
+msgstr "소스 %s 실패: %s"
+
+# Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
+#, python-format
+msgid "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgstr "오케스트레이션 재부팅에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
+
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgstr "실행 중인 자식 호스트를 찾을 수 없습니다. 대신 표준 재부팅 엔드포인트를 사용하세요."
+
+#, python-format
+msgid "Orchestrated reboot initiated with %d running child host(s)"
+msgstr "실행 중인 자식 호스트 %d개로 오케스트레이션 재부팅이 시작되었습니다"
+
+msgid "Reboot orchestration not found"
+msgstr "재부팅 오케스트레이션을 찾을 수 없습니다"
+
+#, python-format
+msgid "%d of %d child host(s) failed to restart"
+msgstr "%d/%d개의 자식 호스트를 재시작하지 못했습니다"

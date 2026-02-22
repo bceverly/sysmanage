@@ -16,6 +16,7 @@ from backend.api.child_host_utils import (
 from backend.api.error_constants import error_kvm_linux_only
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
+from backend.licensing.module_loader import module_loader
 from backend.persistence import db
 from backend.security.roles import SecurityRoles
 from backend.websocket.messages import create_command_message
@@ -24,6 +25,19 @@ from backend.websocket.queue_operations import QueueOperations
 
 router = APIRouter()
 queue_ops = QueueOperations()
+
+
+def _check_container_module():
+    """Check if container_engine Pro+ module is available."""
+    container_engine = module_loader.get_module("container_engine")
+    if container_engine is None:
+        raise HTTPException(
+            status_code=402,
+            detail=_(
+                "Container/VM management requires a SysManage Professional+ license. "
+                "Please upgrade to access this feature."
+            ),
+        )
 
 
 @router.post(
@@ -38,6 +52,8 @@ async def enable_wsl(
     Enable WSL on a Windows host.
     Requires ENABLE_WSL permission.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -112,6 +128,8 @@ async def initialize_lxd(
     Installs LXD via snap if not installed, and runs lxd init --auto.
     Requires ENABLE_LXD permission.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -186,6 +204,8 @@ async def initialize_vmm(
     Enables and starts the vmd daemon for virtual machine management.
     Requires ENABLE_VMM permission.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -261,6 +281,8 @@ async def initialize_kvm(
     and configures the default network.
     Requires ENABLE_KVM permission.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -335,6 +357,8 @@ async def initialize_bhyve(
     Loads vmm.ko and configures /boot/loader.conf for persistence.
     Requires ENABLE_BHYVE permission.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -412,6 +436,8 @@ async def disable_bhyve(
     Note: This will fail if any VMs are running.
     Requires ENABLE_BHYVE permission.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -486,6 +512,8 @@ async def enable_kvm_modules(
     Loads the kvm and kvm_intel/kvm_amd kernel modules via modprobe.
     Requires ENABLE_KVM permission.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -561,6 +589,8 @@ async def disable_kvm_modules(
     Note: This will fail if any VMs are running.
     Requires ENABLE_KVM permission.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -636,6 +666,8 @@ async def configure_kvm_networking(
     Supports NAT (default) and bridged networking modes.
     Requires ENABLE_KVM permission.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -728,6 +760,8 @@ async def list_kvm_networks(
     Also returns available Linux bridges for bridged networking setup.
     Requires VIEW_CHILD_HOSTS permission.
     """
+    _check_container_module()
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )

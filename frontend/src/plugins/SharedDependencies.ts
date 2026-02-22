@@ -85,7 +85,10 @@ import StorageIcon from '@mui/icons-material/Storage';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import ViewInArIcon from '@mui/icons-material/ViewInAr';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import WarningIcon from '@mui/icons-material/Warning';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 // Application-specific shared utilities
 import axiosInstance from '../Services/api';
@@ -173,9 +176,12 @@ import { pluginManager } from './PluginManager';
         StarIcon,
         StorageIcon,
         VerifiedUserIcon,
+        ViewInArIcon,
         VisibilityIcon,
         VisibilityOffIcon,
+        VpnKeyIcon,
         WarningIcon,
+        AssessmentIcon,
     },
     axiosInstance,
     hooks: {

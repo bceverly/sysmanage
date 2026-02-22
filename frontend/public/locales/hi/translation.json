@@ -1,8 +1,26 @@
 {
   "Agent WebSocket authentication failed from %s": "एजेंट WebSocket प्रमाणीकरण %s से विफल रहा",
   "Agent WebSocket connection attempted without token from %s": "एजेंट WebSocket कनेक्शन का प्रयास %s से टोकन के बिना किया गया",
+  "auditLog": {
+    "exportRequiresLicense": "ऑडिट लॉग निर्यात के लिए SysManage Professional+ लाइसेंस आवश्यक है।"
+  },
+  "antivirus": {
+    "description": "प्रत्येक ऑपरेटिंग सिस्टम के लिए डिफ़ॉल्ट एंटीवायरस सॉफ़्टवेयर कॉन्फ़िगर करें",
+    "errors": {
+      "loadFailed": "एंटीवायरस डिफ़ॉल्ट लोड करने में विफल",
+      "permissionDenied": "आपको एंटीवायरस डिफ़ॉल्ट प्रबंधित करने की अनुमति नहीं है",
+      "saveFailed": "एंटीवायरस डिफ़ॉल्ट सहेजने में विफल"
+    },
+    "none": "कोई नहीं",
+    "permissionWarning": "आपको एंटीवायरस डिफ़ॉल्ट संशोधित करने की अनुमति नहीं है। MANAGE_ANTIVIRUS_DEFAULTS भूमिका प्राप्त करने के लिए अपने व्यवस्थापक से संपर्क करें।",
+    "save": "सहेजें",
+    "saveSuccess": "एंटीवायरस डिफ़ॉल्ट सफलतापूर्वक सहेजे गए",
+    "selectProgram": "एंटीवायरस प्रोग्राम चुनें",
+    "title": "एंटीवायरस"
+  },
   "availablePackages": {
     "addPackage": "पैकेज जोड़ें",
+    "added": "जोड़ा गया",
     "confirmUninstallMessage": "क्या आप वाकई इस पैकेज को अनइंस्टॉल करना चाहते हैं? यह क्रिया सिस्टम से पैकेज को हटा देगी।",
     "confirmUninstallPackage": "पैकेज अनइंस्टॉल करें",
     "description": "विवरण",
@@ -14,13 +32,16 @@
     "manager": "मैनेजर",
     "noData": "कोई पैकेज डेटा उपलब्ध नहीं है। पैकेज आपके प्रबंधित होस्ट्स से स्वचालित रूप से संग्रहित किए जाएंगे।",
     "noPackagesFound": "आपकी खोज से मेल खाने वाले कोई पैकेज नहीं मिले",
+    "noPackagesSelected": "इंस्टॉलेशन के लिए कोई पैकेज चयनित नहीं",
     "noResults": "आपके खोज मापदंडों से मेल खाने वाले कोई पैकेज नहीं मिले।",
+    "operation": "कार्रवाई",
     "package": "पैकेज",
     "packageName": "पैकेज नाम",
     "packageUninstallError": "पैकेज अनइंस्टॉलेशन को कतार में जोड़ने में त्रुटि",
     "packageUninstallQueued": "पैकेज अनइंस्टॉलेशन को कतार में जोड़ा गया है",
     "packagesInstallError": "पैकेज इंस्टॉलेशन को कतार में जोड़ने में त्रुटि",
     "packagesInstallQueued": "पैकेज इंस्टॉलेशन को कतार में जोड़ा गया है",
+    "packagesToInstall": "इंस्टॉल करने के लिए पैकेज",
     "refresh": "रीफ्रेश",
     "refreshAll": "सभी को रीफ्रेश करें",
     "refreshPackages": "एजेंटों से पैकेज रीफ्रेश करें",
@@ -343,6 +364,7 @@
     "addPackage": "पैकेज जोड़ें",
     "addSSHKey": "SSH की जोड़ें",
     "addSSHKeyToUser": "{user} में SSH की जोड़ें",
+    "added": "जोड़ा गया",
     "addTag": "टैग जोड़ें",
     "additionalHardware": "अतिरिक्त हार्डवेयर विवरण",
     "additionalOSDetails": "अतिरिक्त ओएस विवरण",
@@ -459,9 +481,9 @@
     "createLxdContainerTitle": "LXD कंटेनर बनाएं",
     "childHostImageLabel": "छवि",
     "childHostContainerNameLabel": "कंटेनर नाम",
-    "childHostContainerNameHelp": "Name for the LXD container (lowercase, alphanumeric, hyphens)",
-    "childHostVmNameLabel": "VM Name",
-    "childHostVmNameHelp": "Name for the VMM virtual machine (lowercase, alphanumeric, hyphens)",
+    "childHostContainerNameHelp": "LXD कंटेनर के लिए नाम (लोअरकेस, अल्फ़ान्यूमेरिक, हाइफ़न)",
+    "childHostVmNameLabel": "VM नाम",
+    "childHostVmNameHelp": "VMM वर्चुअल मशीन के लिए नाम (लोअरकेस, अल्फ़ान्यूमेरिक, हाइफ़न)",
     "childHostVmNameHelpReadonly": "VM नाम होस्टनाम से प्राप्त होता है",
     "childHostVmNameRequired": "कृपया VM नाम दर्ज करें",
     "childHostRootPassword": "रूट पासवर्ड",
@@ -574,17 +596,17 @@
       "biosVirtualizationMessage": "BIOS/UEFI सेटिंग्स में वर्चुअलाइज़ेशन सक्षम करें"
     },
     "createVmmVmTitle": "VMM वर्चुअल मशीन बनाएं",
-    "childHostFqdnHelpVmm": "This FQDN will be used for the VMM virtual machine",
-    "createKvmVmTitle": "Create KVM Virtual Machine",
-    "childHostFqdnHelpKvm": "This FQDN will be used for the KVM virtual machine",
+    "childHostFqdnHelpVmm": "यह FQDN VMM वर्चुअल मशीन के लिए उपयोग किया जाएगा",
+    "createKvmVmTitle": "KVM वर्चुअल मशीन बनाएं",
+    "childHostFqdnHelpKvm": "यह FQDN KVM वर्चुअल मशीन के लिए उपयोग किया जाएगा",
     "createBhyveVmTitle": "bhyve वर्चुअल मशीन बनाएं",
     "childHostFqdnHelpBhyve": "यह FQDN bhyve वर्चुअल मशीन के लिए उपयोग किया जाएगा",
-    "cancelChildHost": "Cancel",
-    "cancelChildHostConfirmTitle": "Cancel Child Host Creation",
-    "cancelChildHostWarning": "This will cancel the child host creation.",
-    "cancelChildHostMessage": "Are you sure you want to cancel the creation of \"{{name}}\"?",
-    "cancelChildHostNote": "The creation record will be removed from the database. If the agent is currently creating this child host, the partial installation may need to be cleaned up manually.",
-    "cancelChildHostConfirmButton": "Cancel Creation",
+    "cancelChildHost": "रद्द करें",
+    "cancelChildHostConfirmTitle": "चाइल्ड होस्ट निर्माण रद्द करें",
+    "cancelChildHostWarning": "यह चाइल्ड होस्ट निर्माण रद्द कर देगा।",
+    "cancelChildHostMessage": "क्या आप वाकई \"{{name}}\" का निर्माण रद्द करना चाहते हैं?",
+    "cancelChildHostNote": "निर्माण रिकॉर्ड डेटाबेस से हटा दिया जाएगा। यदि एजेंट वर्तमान में इस चाइल्ड होस्ट को बना रहा है, तो आंशिक इंस्टॉलेशन को मैन्युअल रूप से साफ़ करने की आवश्यकता हो सकती है।",
+    "cancelChildHostConfirmButton": "निर्माण रद्द करें",
     "clickRequestData": "एजेंट से निदान जानकारी इकट्ठा करने के लिए \"होस्ट डेटा की अनुरोध करें\" पर क्लिक करें।",
     "collectCertificates": "एकत्र करें",
     "collectRoles": "एकत्र करें",
@@ -787,7 +809,44 @@
     "graylogNotConfigured": "Graylog एकीकरण कॉन्फ़िगर नहीं या स्वस्थ नहीं",
     "graylogRequiresPrivileged": "विशेषाधिकार प्राप्त मोड में एजेंट की आवश्यकता",
     "graylogStatus": "Graylog स्थिति",
-    "graylogTarget": "लक्ष्य"
+    "graylogTarget": "लक्ष्य",
+    "antivirusDeployFailed": "एंटीवायरस तैनात करने में विफल",
+    "antivirusDeploySuccess": "एंटीवायरस तैनाती सफलतापूर्वक शुरू की गई",
+    "confirmUninstallMessage": "क्या आप वाकई इस पैकेज को अनइंस्टॉल करना चाहते हैं? यह कार्रवाई सिस्टम से पैकेज हटा देगी।",
+    "confirmUninstallPackage": "पैकेज अनइंस्टॉल करें",
+    "deployAntivirus": "एंटीवायरस तैनात करें",
+    "deployOpenTelemetry": "OpenTelemetry तैनात करें",
+    "install": "इंस्टॉल करें",
+    "loadingSoftware": "सॉफ़्टवेयर पैकेज लोड हो रहे हैं...",
+    "noPackagesSelected": "इंस्टॉलेशन के लिए कोई पैकेज चयनित नहीं",
+    "noSoftwareFound": "कोई सॉफ़्टवेयर पैकेज नहीं मिला",
+    "opentelemetryDeployFailed": "OpenTelemetry तैनात करने में विफल",
+    "opentelemetryDeploySuccess": "OpenTelemetry तैनाती सफलतापूर्वक कतार में जोड़ी गई",
+    "operation": "कार्रवाई",
+    "packageUninstallError": "पैकेज अनइंस्टॉलेशन कतार में जोड़ने में त्रुटि",
+    "packageUninstallQueued": "पैकेज अनइंस्टॉलेशन कतार में जोड़ दी गई है",
+    "packagesToInstall": "इंस्टॉल करने के लिए पैकेज",
+    "searchSoftware": "पैकेज नाम या विवरण से खोजें...",
+    "showingPackages": "{{total}} पैकेजों में से {{start}}-{{end}} दिखाए जा रहे हैं",
+    "softwareTab": "सॉफ़्टवेयर",
+    "thirdPartyReposTab": "तृतीय-पक्ष रिपॉजिटरी",
+    "ubuntuProAttach": "जोड़ें",
+    "ubuntuProAttachConfirm": "जोड़ें",
+    "ubuntuProAttachDescription": "इस सिस्टम को अपनी सदस्यता से जोड़ने के लिए अपना Ubuntu Pro टोकन दर्ज करें।",
+    "ubuntuProAttachError": "Ubuntu Pro जोड़ने में विफल",
+    "ubuntuProAttachSuccess": "Ubuntu Pro सफलतापूर्वक जोड़ा गया",
+    "ubuntuProAttachTitle": "Ubuntu Pro जोड़ें",
+    "ubuntuProAttaching": "जोड़ा जा रहा है...",
+    "ubuntuProDetach": "अलग करें",
+    "ubuntuProDetachConfirm": "अलग करें",
+    "ubuntuProDetachConfirmMessage": "क्या आप वाकई इस सिस्टम से Ubuntu Pro अलग करना चाहते हैं? इससे इस होस्ट के लिए सभी Ubuntu Pro लाभ और सेवाएँ हटा दी जाएँगी।",
+    "ubuntuProDetachConfirmTitle": "Ubuntu Pro अलग करने की पुष्टि करें",
+    "ubuntuProDetachError": "Ubuntu Pro अलग करने में विफल",
+    "ubuntuProDetachSuccess": "Ubuntu Pro सफलतापूर्वक अलग किया गया",
+    "ubuntuProDetaching": "अलग किया जा रहा है...",
+    "ubuntuProMasterTokenPreFilled": "मास्टर Ubuntu Pro टोकन सेटिंग्स से पहले से भरा गया है।",
+    "ubuntuProToken": "Ubuntu Pro टोकन",
+    "uninstall": "अनइंस्टॉल करें"
   },
   "hosts": {
     "actions": "क्रियाएं",
@@ -859,7 +918,42 @@
     "childHostsOnly": "केवल चाइल्ड होस्ट",
     "childrenOnly": "केवल चिल्ड्रन",
     "childHostOf": "{{parent}} का चाइल्ड होस्ट",
-    "viewParent": "पैरेंट होस्ट देखें"
+    "viewParent": "पैरेंट होस्ट देखें",
+    "antivirusDeployFailed": "एंटीवायरस तैनात करने में विफल। कृपया पुनः प्रयास करें।",
+    "antivirusDeploySuccess": "{{count}} होस्ट(ओं) के लिए एंटीवायरस तैनाती कतार में जोड़ी गई",
+    "dataLastUpdated": "डेटा अंतिम बार अपडेट किया गया",
+    "deployAntivirus": "एंटीवायरस तैनात करें",
+    "deployOpenTelemetry": "OpenTelemetry तैनात करें",
+    "getDiagnostics": "डायग्नोस्टिक्स प्राप्त करें",
+    "noEligibleHostsForAntivirus": "कोई योग्य होस्ट चयनित नहीं। एंटीवायरस तैनाती के लिए होस्ट सक्रिय और विशेषाधिकार प्राप्त मोड में होने चाहिए।",
+    "noEligibleHostsForOpenTelemetry": "OpenTelemetry तैनाती के लिए कोई योग्य होस्ट चयनित नहीं",
+    "opentelemetryDeployFailed": "OpenTelemetry तैनात करने में विफल। कृपया पुनः प्रयास करें।",
+    "opentelemetryDeploySuccess": "{{count}} होस्ट(ओं) के लिए OpenTelemetry तैनाती कतार में जोड़ी गई",
+    "osUpdated": "OS अपडेट किया गया",
+    "rebootOrchestration": {
+      "childName": "नाम",
+      "childType": "प्रकार",
+      "completed": "व्यवस्थित रीबूट सफलतापूर्वक पूर्ण हुआ",
+      "completedWithErrors": "व्यवस्थित रीबूट पूर्ण हुआ: {{error}}",
+      "failed": "व्यवस्थित रीबूट विफल: {{error}}",
+      "inProgress": "व्यवस्थित रीबूट प्रगति में है",
+      "initiated": "व्यवस्थित रीबूट शुरू किया गया — {{count}} चाइल्ड होस्ट(ओं) को रोका जा रहा है",
+      "orchestratedInfo": "इस होस्ट में {{count}} चल रहे चाइल्ड होस्ट हैं। SysManage रीबूट से पहले उन्हें सुरक्षित रूप से रोकेगा और बाद में स्वचालित रूप से पुनः शुरू करेगा।",
+      "orchestratedRebootButton": "व्यवस्थित रीबूट",
+      "proceedAnyway": "चाइल्ड होस्ट को पहले रोके बिना {{hostname}} को रीबूट करने के लिए \"वैसे भी रीबूट करें\" पर क्लिक करें।",
+      "proceedOrchestrated": "{{hostname}} को सुरक्षित रूप से रीबूट करने के लिए \"व्यवस्थित रीबूट\" पर क्लिक करें।",
+      "rebootAnywayButton": "वैसे भी रीबूट करें",
+      "runningChildren": "चल रहे चाइल्ड होस्ट:",
+      "statusPendingRestart": "होस्ट पुनः कनेक्ट हुआ, चाइल्ड होस्ट पुनः शुरू करने की तैयारी हो रही है...",
+      "statusRebooting": "होस्ट रीबूट हो रहा है, पुनः कनेक्ट होने की प्रतीक्षा में...",
+      "statusRestarting": "चाइल्ड होस्ट पुनः शुरू हो रहे हैं...",
+      "statusShuttingDown": "चाइल्ड होस्ट रोके जा रहे हैं...",
+      "ungracefulWarning": "इस होस्ट में {{count}} चल रहे चाइल्ड होस्ट हैं जो रीबूट के दौरान अचानक बंद कर दिए जाएँगे। व्यवस्थित सुरक्षित रीबूट के लिए SysManage Professional+ में अपग्रेड करें।"
+    },
+    "scriptsDisabledTooltip": "इस होस्ट पर स्क्रिप्ट निष्पादन अक्षम है",
+    "scriptsEnabled": "स्क्रिप्ट सक्षम",
+    "scriptsEnabledTooltip": "इस होस्ट पर स्क्रिप्ट निष्पादन सक्षम है",
+    "softwareUpdated": "सॉफ़्टवेयर अपडेट किया गया"
   },
   "login": {
     "error": "गलत उपयोगकर्ता नाम या पासवर्ड",
@@ -928,7 +1022,8 @@
       "openbsd": "OpenBSD",
       "opensuse": "openSUSE",
       "ubuntu": "Ubuntu/Debian",
-      "windows": "Windows"
+      "windows": "Windows",
+      "netbsd": "NetBSD"
     },
     "loading": "OS अपग्रेड लोड हो रहे हैं...",
     "noMatchingUpgrades": "वर्तमान फ़िल्टर से कोई OS अपग्रेड मेल नहीं खाते",
@@ -955,7 +1050,8 @@
       "openbsd": "OpenBSD सिस्टम अपग्रेड",
       "opensuse": "openSUSE वितरण अपग्रेड",
       "ubuntu": "Ubuntu रिलीज अपग्रेड",
-      "windows": "Windows फीचर अपडेट"
+      "windows": "Windows फीचर अपडेट",
+      "netbsd": "NetBSD सिस्टम अपग्रेड"
     }
   },
   "reports": {
@@ -1131,7 +1227,10 @@
       "failed": "असफल",
       "pending": "लंबित",
       "running": "चल रहा है",
-      "timeout": "समय समाप्त"
+      "timeout": "समय समाप्त",
+      "in_progress": "प्रगति में",
+      "installing": "इंस्टॉल हो रहा है",
+      "queued": "कतार में"
     },
     "stderrOutput": "स्टैंडर्ड एरर",
     "stdoutOutput": "स्टैंडर्ड आउटपुट",
@@ -1150,7 +1249,10 @@
       "unsupportedShellType": "असमर्थित शेल टाइप: {type}"
     },
     "viewScript": "स्क्रिप्ट देखें",
-    "waitingForResults": "परिणाम की प्रतीक्षा..."
+    "waitingForResults": "परिणाम की प्रतीक्षा...",
+    "runScript": "स्क्रिप्ट चलाएँ",
+    "scriptLibrary": "स्क्रिप्ट लाइब्रेरी",
+    "selectScriptAndHost": "एक स्क्रिप्ट और होस्ट चुनें, फिर आउटपुट यहाँ देखने के लिए अभी निष्पादित करें पर क्लिक करें"
   },
   "search": {
     "search": "खोजें",
@@ -1375,6 +1477,35 @@
       "logging": "लॉगिंग",
       "requests": "अनुरोध",
       "sqlalchemy": "SQLAlchemy"
+    },
+    "opentelemetry": {
+      "collectorUrl": "कलेक्टर URL",
+      "configuration": "कॉन्फ़िगरेशन",
+      "disabledMessage": "OpenTelemetry इंस्ट्रूमेंटेशन वर्तमान में अक्षम है। वितरित ट्रेसिंग और मेट्रिक्स संग्रह सक्षम करने के लिए OTEL_ENABLED=false हटाएँ या OTEL_ENABLED=true सेट करें।",
+      "enableHint": "OpenTelemetry डिफ़ॉल्ट रूप से सक्षम है। अक्षम करने के लिए, OTEL_ENABLED=false एनवायरनमेंट वेरिएबल सेट करें और सर्वर पुनः शुरू करें।",
+      "instrumentation": "इंस्ट्रूमेंटेशन",
+      "metricsCount": "मेट्रिक्स",
+      "prometheusPort": "Prometheus पोर्ट",
+      "statistics": "आँकड़े",
+      "status": "स्थिति",
+      "title": "OpenTelemetry स्थिति",
+      "tracesCount": "ट्रेसेस"
+    },
+    "prometheus": {
+      "information": "जानकारी",
+      "lastScrape": "अंतिम स्क्रैप",
+      "manageHint": "Prometheus टेलीमेट्री स्टैक द्वारा प्रबंधित किया जाता है। शुरू करने के लिए \"make start-telemetry\" या रोकने के लिए \"make stop-telemetry\" का उपयोग करें।",
+      "metricsCount": "मेट्रिक्स",
+      "notRunningMessage": "Prometheus नहीं चल रहा है। टेलीमेट्री स्टैक \"make start-telemetry\" या \"make start\" से शुरू करें।",
+      "retentionTime": "रिटेंशन समय",
+      "scrapeInterval": "स्क्रैप अंतराल",
+      "statistics": "आँकड़े",
+      "status": "स्थिति",
+      "storageSize": "स्टोरेज आकार",
+      "targets": "लक्ष्य",
+      "title": "Prometheus स्थिति",
+      "url": "URL",
+      "version": "संस्करण"
     }
   },
   "thirdPartyRepos": {
@@ -1642,7 +1773,13 @@
       "security": "सुरक्षा",
       "system": "सिस्टम"
     },
-    "unknown": "अज्ञात"
+    "unknown": "अज्ञात",
+    "autoRefreshIn": "स्वतः रिफ़्रेश",
+    "status": {
+      "failed": "अपडेट विफल",
+      "pending": "अपडेट अनुरोधित",
+      "success": "सफलतापूर्वक अपडेट किया गया"
+    }
   },
   "userDetail": {
     "active": "सक्रिय",
@@ -1660,7 +1797,10 @@
     "resetPassword": "पासवर्ड रीसेट करें",
     "resettingPassword": "रीसेट ईमेल भेजा जा रहा है...",
     "securityInfo": "सुरक्षा जानकारी",
-    "userId": "उपयोगकर्ता आईडी"
+    "userId": "उपयोगकर्ता आईडी",
+    "confirmResetMessage": "क्या आप वाकई {{email}} को पासवर्ड रीसेट ईमेल भेजना चाहते हैं? इससे उपयोगकर्ता को नया पासवर्ड सेट करने की अनुमति मिलेगी।",
+    "confirmResetTitle": "पासवर्ड रीसेट की पुष्टि करें",
+    "sendResetEmail": "रीसेट ईमेल भेजें"
   },
   "userProfile": {
     "accountInfo": "खाता जानकारी",
@@ -1812,5 +1952,20 @@
     "confirmDelete": "क्या आप वाकई समूह \"{{groupName}}\" हटाना चाहते हैं? इस क्रिया को पूर्ववत नहीं किया जा सकता।",
     "deleteSuccess": "समूह हटाने का अनुरोध किया गया। समूह सूची स्वचालित रूप से अपडेट होगी।",
     "deleteFailed": "समूह हटाने में विफल"
+  },
+  "queues": {
+    "created": "बनाया गया",
+    "description": "संदेश कतार से समय सीमा समाप्त/विफल संदेश देखें और प्रबंधित करें।",
+    "direction": "दिशा",
+    "expired": "समय सीमा समाप्त",
+    "hostId": "होस्ट ID",
+    "messageContent": "संदेश सामग्री",
+    "messageDetails": "संदेश विवरण",
+    "messageId": "संदेश ID",
+    "messageType": "संदेश प्रकार",
+    "placeholder": "कतार प्रबंधन इंटरफ़ेस यहाँ लागू किया जाएगा।",
+    "priority": "प्राथमिकता",
+    "title": "कतार प्रबंधन",
+    "viewDetails": "विवरण देखें"
   }
 }
