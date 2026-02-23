@@ -2492,8 +2492,10 @@ deploy-check-deps:
 		echo "  [OK] sha256sum"; \
 	elif command -v shasum >/dev/null 2>&1; then \
 		echo "  [OK] shasum (will use shasum -a 256)"; \
+	elif command -v sha256 >/dev/null 2>&1; then \
+		echo "  [OK] sha256 (OpenBSD)"; \
 	else \
-		echo "  [MISSING] sha256sum"; \
+		echo "  [MISSING] sha256sum / shasum / sha256"; \
 		MISSING=1; \
 	fi; \
 	echo ""; \
@@ -2757,8 +2759,10 @@ checksums:
 		SHA256CMD="sha256sum"; \
 	elif command -v shasum >/dev/null 2>&1; then \
 		SHA256CMD="shasum -a 256"; \
+	elif command -v sha256 >/dev/null 2>&1; then \
+		SHA256CMD="sha256 -r"; \
 	else \
-		echo "ERROR: Neither sha256sum nor shasum found"; \
+		echo "ERROR: No SHA256 tool found (sha256sum, shasum, or sha256)"; \
 		exit 1; \
 	fi; \
 	COUNT=0; \
