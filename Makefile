@@ -3487,6 +3487,42 @@ deploy-docs-repo:
 	fi; \
 	echo ""; \
 	\
+	echo "--- Staging OpenBSD packages ---"; \
+	OBSD_FILES=$$(ls installer/dist/*openbsd* 2>/dev/null || true); \
+	if [ -n "$$OBSD_FILES" ]; then \
+		OBSD_DIR="$$DOCS_REPO/repo/server/openbsd/$$VERSION"; \
+		mkdir -p "$$OBSD_DIR"; \
+		for f in $$OBSD_FILES; do \
+			[ -f "$$f" ] || continue; \
+			cp "$$f" "$$OBSD_DIR/"; \
+			if [ -f "$$f.sha256" ]; then cp "$$f.sha256" "$$OBSD_DIR/"; fi; \
+			echo "  Staged: $$(basename $$f) -> $$OBSD_DIR/"; \
+		done; \
+		STAGED="$$STAGED openbsd"; \
+	else \
+		echo "  No OpenBSD packages found"; \
+		MISSING="$$MISSING openbsd"; \
+	fi; \
+	echo ""; \
+	\
+	echo "--- Staging NetBSD packages ---"; \
+	NBSD_FILES=$$(ls installer/dist/*netbsd* 2>/dev/null || true); \
+	if [ -n "$$NBSD_FILES" ]; then \
+		NBSD_DIR="$$DOCS_REPO/repo/server/netbsd/$$VERSION"; \
+		mkdir -p "$$NBSD_DIR"; \
+		for f in $$NBSD_FILES; do \
+			[ -f "$$f" ] || continue; \
+			cp "$$f" "$$NBSD_DIR/"; \
+			if [ -f "$$f.sha256" ]; then cp "$$f.sha256" "$$NBSD_DIR/"; fi; \
+			echo "  Staged: $$(basename $$f) -> $$NBSD_DIR/"; \
+		done; \
+		STAGED="$$STAGED netbsd"; \
+	else \
+		echo "  No NetBSD packages found"; \
+		MISSING="$$MISSING netbsd"; \
+	fi; \
+	echo ""; \
+	\
 	echo "--- Staging Alpine packages ---"; \
 	APK_FILES=$$(ls installer/dist/*alpine*.apk 2>/dev/null || true); \
 	if [ -n "$$APK_FILES" ]; then \
