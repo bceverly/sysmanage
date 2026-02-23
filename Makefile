@@ -2751,12 +2751,21 @@ checksums:
 	fi
 	@set -e; \
 	cd installer/dist; \
+	if command -v sha256sum >/dev/null 2>&1; then \
+		SHA256CMD="sha256sum"; \
+	elif command -v shasum >/dev/null 2>&1; then \
+		SHA256CMD="shasum -a 256"; \
+	else \
+		echo "ERROR: Neither sha256sum nor shasum found"; \
+		exit 1; \
+	fi; \
 	COUNT=0; \
 	for f in *; do \
+		[ -f "$$f" ] || continue; \
 		case "$$f" in \
 			*.sha256) continue ;; \
 			*) \
-				sha256sum "$$f" > "$$f.sha256"; \
+				$$SHA256CMD "$$f" > "$$f.sha256"; \
 				echo "  $$f.sha256"; \
 				COUNT=$$((COUNT + 1)); \
 				;; \
