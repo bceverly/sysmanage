@@ -1195,3 +1195,51 @@ msgstr "रीबूट ऑर्केस्ट्रेशन नहीं म
 #, python-format
 msgid "%d of %d child host(s) failed to restart"
 msgstr "%d में से %d चाइल्ड होस्ट(ओं) को पुनः आरंभ करने में विफल"
+
+# Phase 2: Agent Code Migration - Step descriptions
+
+msgid "Launching LXD container"
+msgstr "LXD कंटेनर लॉन्च हो रहा है"
+
+msgid "Waiting for container network"
+msgstr "कंटेनर नेटवर्क की प्रतीक्षा हो रही है"
+
+msgid "Setting hostname"
+msgstr "होस्टनाम सेट किया जा रहा है"
+
+msgid "Creating user"
+msgstr "उपयोगकर्ता बनाया जा रहा है"
+
+msgid "Setting user password"
+msgstr "उपयोगकर्ता पासवर्ड सेट किया जा रहा है"
+
+msgid "Adding user to sudo group"
+msgstr "उपयोगकर्ता को sudo समूह में जोड़ा जा रहा है"
+
+msgid "Installing sysmanage-agent"
+msgstr "sysmanage-agent इंस्टॉल किया जा रहा है"
+
+msgid "Writing agent configuration"
+msgstr "एजेंट कॉन्फ़िगरेशन लिखा जा रहा है"
+
+msgid "Starting sysmanage-agent service"
+msgstr "sysmanage-agent सेवा शुरू की जा रही है"
+
+msgid "Installing WSL distribution"
+msgstr "WSL वितरण इंस्टॉल किया जा रहा है"
+
+msgid "Waiting for WSL to be ready"
+msgstr "WSL के तैयार होने की प्रतीक्षा हो रही है"
+
+msgid "Configuring WSL systemd"
+msgstr "WSL systemd कॉन्फ़िगर किया जा रहा है"
+
+msgid "Restarting WSL instance"
+msgstr "WSL इंस्टेंस पुनः आरंभ किया जा रहा है"
+
+msgid "Deploying files to host"
+msgstr "होस्ट पर फ़ाइलें तैनात की जा रही हैं"
+
+msgid "Executing command sequence"
+msgstr "कमांड अनुक्रम निष्पादित किया जा रहा है"
+

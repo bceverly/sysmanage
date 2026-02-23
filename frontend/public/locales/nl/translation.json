@@ -1968,5 +1968,24 @@
     "confirmDelete": "Weet u zeker dat u de groep \"{{groupName}}\" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
     "deleteSuccess": "Verwijdering van groep aangevraagd. De groepslijst wordt automatisch bijgewerkt.",
     "deleteFailed": "Kan groep niet verwijderen"
+  },
+  "virtualization": {
+    "stepDescriptions": {
+      "launchingLxdContainer": "LXD-container wordt gestart",
+      "waitingForContainerNetwork": "Wachten op containernetwerk",
+      "settingHostname": "Hostnaam wordt ingesteld",
+      "creatingUser": "Gebruiker wordt aangemaakt",
+      "settingUserPassword": "Gebruikerswachtwoord wordt ingesteld",
+      "addingUserToSudoGroup": "Gebruiker wordt toegevoegd aan sudo-groep",
+      "installingSysmanageAgent": "sysmanage-agent wordt geïnstalleerd",
+      "writingAgentConfiguration": "Agentconfiguratie wordt geschreven",
+      "startingSysmanageAgentService": "sysmanage-agent-service wordt gestart",
+      "installingWslDistribution": "WSL-distributie wordt geïnstalleerd",
+      "waitingForWslReady": "Wachten tot WSL gereed is",
+      "configuringWslSystemd": "WSL systemd wordt geconfigureerd",
+      "restartingWslInstance": "WSL-instantie wordt herstart",
+      "deployingFilesToHost": "Bestanden worden naar host overgebracht",
+      "executingCommandSequence": "Opdrachtenreeks wordt uitgevoerd"
+    }
   }
 }

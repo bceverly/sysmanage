@@ -1968,5 +1968,24 @@
     "confirmDelete": "您確定要刪除群組 \"{{groupName}}\" 嗎？此操作無法撤消。",
     "deleteSuccess": "已請求刪除群組。群組清單將自動更新。",
     "deleteFailed": "刪除群組失敗"
+  },
+  "virtualization": {
+    "stepDescriptions": {
+      "launchingLxdContainer": "正在啟動 LXD 容器",
+      "waitingForContainerNetwork": "正在等待容器網路",
+      "settingHostname": "正在設定主機名稱",
+      "creatingUser": "正在建立使用者",
+      "settingUserPassword": "正在設定使用者密碼",
+      "addingUserToSudoGroup": "正在將使用者新增至 sudo 群組",
+      "installingSysmanageAgent": "正在安裝 sysmanage-agent",
+      "writingAgentConfiguration": "正在寫入代理程式設定",
+      "startingSysmanageAgentService": "正在啟動 sysmanage-agent 服務",
+      "installingWslDistribution": "正在安裝 WSL 發行版",
+      "waitingForWslReady": "正在等待 WSL 就緒",
+      "configuringWslSystemd": "正在設定 WSL systemd",
+      "restartingWslInstance": "正在重新啟動 WSL 執行個體",
+      "deployingFilesToHost": "正在將檔案部署到主機",
+      "executingCommandSequence": "正在執行命令序列"
+    }
   }
 }

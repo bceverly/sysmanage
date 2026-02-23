@@ -179,6 +179,11 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
     }
 
 
+def _is_executable(path: str) -> bool:
+    """Check if a file exists and is executable."""
+    return os.path.isfile(path) and os.access(path, os.X_OK)
+
+
 def find_bao_binary() -> Optional[str]:
     """Find the OpenBAO binary in the system.
 
@@ -186,40 +191,30 @@ def find_bao_binary() -> Optional[str]:
     executable file, it is used unconditionally.  Otherwise the usual
     search locations are checked.
     """
+    import shutil
+
     # OPENBAO_BIN environment variable takes priority
     openbao_bin = os.environ.get("OPENBAO_BIN")
     if openbao_bin:
-        if os.path.isfile(openbao_bin) and os.access(openbao_bin, os.X_OK):
+        if _is_executable(openbao_bin):
             return openbao_bin
         logger.warning(
             "OPENBAO_BIN is set to '%s' but it is not an executable file",
             openbao_bin,
         )
 
-    # Check common locations
-    locations = [
-        "bao",  # In PATH
+    # Check if 'bao' is in PATH
+    if shutil.which("bao"):
+        return "bao"
+
+    # Check common filesystem locations
+    for location in [
         os.path.expanduser("~/.local/bin/bao"),
         "/usr/local/bin/bao",
         "/usr/bin/bao",
-    ]
-
-    for location in locations:
-        try:
-            if location == "bao":
-                # Check if it's in PATH
-                # Use shutil.which for safe path lookup instead of subprocess
-                import shutil
-
-                which_result = shutil.which("bao")
-                if which_result:
-                    return "bao"
-            else:
-                # Check if file exists and is executable
-                if os.path.isfile(location) and os.access(location, os.X_OK):
-                    return location
-        except OSError:  # Catches FileNotFoundError, PermissionError (both subclasses)
-            continue
+    ]:
+        if _is_executable(location):
+            return location
 
     return None
 

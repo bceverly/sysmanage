@@ -28,6 +28,9 @@ from .models import SecretCreate, SecretResponse, SecretUpdate, SecretWithConten
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+_SECRET_NOT_FOUND = _("Secret not found")
+_VAULT_UNAVAILABLE_SUFFIX = " - vault service may not be running"
+
 
 def _check_secrets_module():
     """Check if secrets_engine Pro+ module is available."""
@@ -67,7 +70,9 @@ async def list_ssh_keys(
     _check_secrets_module()
     secrets = (
         db.query(Secret)
-        .filter(Secret.secret_type == "ssh_key")  # nosec B105  # secret type filter, not a password
+        .filter(
+            Secret.secret_type == "ssh_key"
+        )  # nosec B105  # secret type filter, not a password
         .order_by(Secret.created_at.desc())
         .all()
     )
@@ -88,7 +93,7 @@ async def get_secret_metadata(
     _check_secrets_module()
     secret = db.query(Secret).filter(Secret.id == secret_id).first()
     if not secret:
-        raise HTTPException(status_code=404, detail=_("Secret not found"))
+        raise HTTPException(status_code=404, detail=_SECRET_NOT_FOUND)
     return secret.to_dict()
 
 
@@ -106,7 +111,7 @@ async def get_secret_content(
     _check_secrets_module()
     secret = db.query(Secret).filter(Secret.id == secret_id).first()
     if not secret:
-        raise HTTPException(status_code=404, detail=_("Secret not found"))
+        raise HTTPException(status_code=404, detail=_SECRET_NOT_FOUND)
 
     try:
         vault = VaultService()
@@ -117,7 +122,7 @@ async def get_secret_content(
         raise HTTPException(
             status_code=503,
             detail=_("Failed to retrieve secret content from vault")
-            + " - vault service may not be running",
+            + _VAULT_UNAVAILABLE_SUFFIX,
         ) from e
 
     result = secret.to_dict()
@@ -148,8 +153,7 @@ async def create_secret(
         logger.error("Failed to store secret in vault: %s", str(e))
         raise HTTPException(
             status_code=503,
-            detail=_("Failed to store secret in vault")
-            + " - vault service may not be running",
+            detail=_("Failed to store secret in vault") + _VAULT_UNAVAILABLE_SUFFIX,
         ) from e
 
     username = current_user
@@ -185,7 +189,7 @@ async def update_secret(
 
     secret = db.query(Secret).filter(Secret.id == secret_id).first()
     if not secret:
-        raise HTTPException(status_code=404, detail=_("Secret not found"))
+        raise HTTPException(status_code=404, detail=_SECRET_NOT_FOUND)
 
     # If new content is provided, store it in vault
     if secret_data.content:
@@ -211,7 +215,7 @@ async def update_secret(
             raise HTTPException(
                 status_code=503,
                 detail=_("Failed to update secret in vault")
-                + " - vault service may not be running",
+                + _VAULT_UNAVAILABLE_SUFFIX,
             ) from e
 
     # Update metadata fields
@@ -239,7 +243,7 @@ async def delete_secret(
 
     secret = db.query(Secret).filter(Secret.id == secret_id).first()
     if not secret:
-        raise HTTPException(status_code=404, detail=_("Secret not found"))
+        raise HTTPException(status_code=404, detail=_SECRET_NOT_FOUND)
 
     # Delete from vault
     try:

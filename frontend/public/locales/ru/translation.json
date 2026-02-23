@@ -1968,5 +1968,24 @@
       "title": "Инструменты и утилиты тестирования",
       "visualTools": "Инструменты визуального тестирования"
     }
+  },
+  "virtualization": {
+    "stepDescriptions": {
+      "launchingLxdContainer": "Запуск контейнера LXD",
+      "waitingForContainerNetwork": "Ожидание сети контейнера",
+      "settingHostname": "Установка имени хоста",
+      "creatingUser": "Создание пользователя",
+      "settingUserPassword": "Установка пароля пользователя",
+      "addingUserToSudoGroup": "Добавление пользователя в группу sudo",
+      "installingSysmanageAgent": "Установка sysmanage-agent",
+      "writingAgentConfiguration": "Запись конфигурации агента",
+      "startingSysmanageAgentService": "Запуск службы sysmanage-agent",
+      "installingWslDistribution": "Установка дистрибутива WSL",
+      "waitingForWslReady": "Ожидание готовности WSL",
+      "configuringWslSystemd": "Настройка systemd WSL",
+      "restartingWslInstance": "Перезапуск экземпляра WSL",
+      "deployingFilesToHost": "Развёртывание файлов на хосте",
+      "executingCommandSequence": "Выполнение последовательности команд"
+    }
   }
 }

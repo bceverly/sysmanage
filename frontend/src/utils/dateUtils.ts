@@ -18,10 +18,10 @@ export const parseUTCTimestamp = (timestamp: string | null | undefined): Date | 
   try {
     // If the timestamp already has timezone info (Z, +00:00, -05:00 etc.),
     // use it as-is.  Otherwise append "Z" so the browser treats it as UTC.
-    const hasTimezone = /Z|[+-]\d{2}:\d{2}$/.test(timestamp);
+    const hasTimezone = /(?:Z|[+-]\d{2}:\d{2})$/.test(timestamp);
     const utcString = hasTimezone ? timestamp : timestamp + 'Z';
     const date = new Date(utcString);
-    if (isNaN(date.getTime())) return null;
+    if (Number.isNaN(date.getTime())) return null;
     return date;
   } catch {
     return null;

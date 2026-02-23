@@ -1198,3 +1198,51 @@ msgstr "Оркестрация перезагрузки не найдена"
 #, python-format
 msgid "%d of %d child host(s) failed to restart"
 msgstr "%d из %d дочерних хостов не удалось перезапустить"
+
+# Phase 2: Agent Code Migration - Step descriptions
+
+msgid "Launching LXD container"
+msgstr "Запуск контейнера LXD"
+
+msgid "Waiting for container network"
+msgstr "Ожидание сети контейнера"
+
+msgid "Setting hostname"
+msgstr "Установка имени хоста"
+
+msgid "Creating user"
+msgstr "Создание пользователя"
+
+msgid "Setting user password"
+msgstr "Установка пароля пользователя"
+
+msgid "Adding user to sudo group"
+msgstr "Добавление пользователя в группу sudo"
+
+msgid "Installing sysmanage-agent"
+msgstr "Установка sysmanage-agent"
+
+msgid "Writing agent configuration"
+msgstr "Запись конфигурации агента"
+
+msgid "Starting sysmanage-agent service"
+msgstr "Запуск службы sysmanage-agent"
+
+msgid "Installing WSL distribution"
+msgstr "Установка дистрибутива WSL"
+
+msgid "Waiting for WSL to be ready"
+msgstr "Ожидание готовности WSL"
+
+msgid "Configuring WSL systemd"
+msgstr "Настройка systemd WSL"
+
+msgid "Restarting WSL instance"
+msgstr "Перезапуск экземпляра WSL"
+
+msgid "Deploying files to host"
+msgstr "Развёртывание файлов на хосте"
+
+msgid "Executing command sequence"
+msgstr "Выполнение последовательности команд"
+

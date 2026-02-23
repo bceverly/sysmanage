@@ -6670,11 +6670,12 @@ const HostDetail = () => { // NOSONAR
                     {t('hosts.confirmReboot', 'Confirm System Reboot')}
                 </DialogTitle>
                 <DialogContent>
-                    {rebootPreCheckLoading ? (
+                    {rebootPreCheckLoading && (
                         <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
                             <CircularProgress size={24} />
                         </Box>
-                    ) : rebootPreCheckData?.has_running_children ? (
+                    )}
+                    {!rebootPreCheckLoading && rebootPreCheckData?.has_running_children && (
                         <>
                             {rebootPreCheckData.has_container_engine ? (
                                 <Alert severity="info" sx={{ mb: 2 }}>
@@ -6713,7 +6714,8 @@ const HostDetail = () => { // NOSONAR
                                 }
                             </Typography>
                         </>
-                    ) : (
+                    )}
+                    {!rebootPreCheckLoading && !rebootPreCheckData?.has_running_children && (
                         <Typography id="reboot-dialog-description">
                             {t('hosts.confirmRebootMessage', 'Are you sure you want to reboot {{hostname}}? The system will be unavailable for a few minutes.', { hostname: host?.fqdn })}
                         </Typography>
@@ -6725,12 +6727,15 @@ const HostDetail = () => { // NOSONAR
                     </Button>
                     {!rebootPreCheckLoading && (
                         <Button onClick={handleRebootConfirm} color="warning" variant="contained">
-                            {rebootPreCheckData?.has_running_children
-                                ? (rebootPreCheckData.has_container_engine
-                                    ? t('hosts.rebootOrchestration.orchestratedRebootButton', 'Orchestrated Reboot')
-                                    : t('hosts.rebootOrchestration.rebootAnywayButton', 'Reboot Anyway'))
-                                : t('hosts.reboot', 'Reboot')
-                            }
+                            {(() => {
+                                if (!rebootPreCheckData?.has_running_children) {
+                                    return t('hosts.reboot', 'Reboot');
+                                }
+                                if (rebootPreCheckData.has_container_engine) {
+                                    return t('hosts.rebootOrchestration.orchestratedRebootButton', 'Orchestrated Reboot');
+                                }
+                                return t('hosts.rebootOrchestration.rebootAnywayButton', 'Reboot Anyway');
+                            })()}
                         </Button>
                     )}
                 </DialogActions>

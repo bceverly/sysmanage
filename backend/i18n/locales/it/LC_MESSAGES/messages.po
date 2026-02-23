@@ -1201,3 +1201,51 @@ msgstr "Orchestrazione di riavvio non trovata"
 #, python-format
 msgid "%d of %d child host(s) failed to restart"
 msgstr "%d di %d host figlio/i non sono riusciti a riavviarsi"
+
+# Phase 2: Agent Code Migration - Step descriptions
+
+msgid "Launching LXD container"
+msgstr "Avvio del contenitore LXD"
+
+msgid "Waiting for container network"
+msgstr "In attesa della rete del contenitore"
+
+msgid "Setting hostname"
+msgstr "Impostazione del nome host"
+
+msgid "Creating user"
+msgstr "Creazione dell'utente"
+
+msgid "Setting user password"
+msgstr "Impostazione della password utente"
+
+msgid "Adding user to sudo group"
+msgstr "Aggiunta dell'utente al gruppo sudo"
+
+msgid "Installing sysmanage-agent"
+msgstr "Installazione di sysmanage-agent"
+
+msgid "Writing agent configuration"
+msgstr "Scrittura della configurazione dell'agente"
+
+msgid "Starting sysmanage-agent service"
+msgstr "Avvio del servizio sysmanage-agent"
+
+msgid "Installing WSL distribution"
+msgstr "Installazione della distribuzione WSL"
+
+msgid "Waiting for WSL to be ready"
+msgstr "In attesa che WSL sia pronto"
+
+msgid "Configuring WSL systemd"
+msgstr "Configurazione di systemd WSL"
+
+msgid "Restarting WSL instance"
+msgstr "Riavvio dell'istanza WSL"
+
+msgid "Deploying files to host"
+msgstr "Distribuzione dei file sull'host"
+
+msgid "Executing command sequence"
+msgstr "Esecuzione della sequenza di comandi"
+

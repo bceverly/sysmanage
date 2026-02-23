@@ -1934,5 +1934,24 @@
     "confirmDelete": "Are you sure you want to delete the group \"{{groupName}}\"? This action cannot be undone.",
     "deleteSuccess": "Group deletion requested. The group list will update automatically.",
     "deleteFailed": "Failed to delete group"
+  },
+  "virtualization": {
+    "stepDescriptions": {
+      "launchingLxdContainer": "Launching LXD container",
+      "waitingForContainerNetwork": "Waiting for container network",
+      "settingHostname": "Setting hostname",
+      "creatingUser": "Creating user",
+      "settingUserPassword": "Setting user password",
+      "addingUserToSudoGroup": "Adding user to sudo group",
+      "installingSysmanageAgent": "Installing sysmanage-agent",
+      "writingAgentConfiguration": "Writing agent configuration",
+      "startingSysmanageAgentService": "Starting sysmanage-agent service",
+      "installingWslDistribution": "Installing WSL distribution",
+      "waitingForWslReady": "Waiting for WSL to be ready",
+      "configuringWslSystemd": "Configuring WSL systemd",
+      "restartingWslInstance": "Restarting WSL instance",
+      "deployingFilesToHost": "Deploying files to host",
+      "executingCommandSequence": "Executing command sequence"
+    }
   }
 }

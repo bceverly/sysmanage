@@ -20,6 +20,7 @@ from backend.persistence import db, models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import AuditService, EntityType
+from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
     Priority,
@@ -81,7 +82,7 @@ def apply_repository_to_host(
             "Queued %s repository command for host %s: %s",
             action,
             host.fqdn,
-            repository_url,
+            sanitize_log(repository_url),
         )
 
     except Exception as e:
@@ -446,9 +447,9 @@ async def create_default_repository(
 
         logger.info(
             "Default repository created: %s/%s - %s",
-            repo_data.os_name,
-            repo_data.package_manager,
-            repo_data.repository_url,
+            sanitize_log(repo_data.os_name),
+            sanitize_log(repo_data.package_manager),
+            sanitize_log(repo_data.repository_url),
         )
 
         # Log audit entry

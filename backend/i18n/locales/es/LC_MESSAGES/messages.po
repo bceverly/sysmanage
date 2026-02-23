@@ -1197,3 +1197,51 @@ msgstr "Orquestación de reinicio no encontrada"
 #, python-format
 msgid "%d of %d child host(s) failed to restart"
 msgstr "%d de %d host(s) secundario(s) no pudieron reiniciarse"
+
+# Phase 2: Agent Code Migration - Step descriptions
+
+msgid "Launching LXD container"
+msgstr "Iniciando contenedor LXD"
+
+msgid "Waiting for container network"
+msgstr "Esperando la red del contenedor"
+
+msgid "Setting hostname"
+msgstr "Configurando nombre de host"
+
+msgid "Creating user"
+msgstr "Creando usuario"
+
+msgid "Setting user password"
+msgstr "Configurando contraseña de usuario"
+
+msgid "Adding user to sudo group"
+msgstr "Añadiendo usuario al grupo sudo"
+
+msgid "Installing sysmanage-agent"
+msgstr "Instalando sysmanage-agent"
+
+msgid "Writing agent configuration"
+msgstr "Escribiendo configuración del agente"
+
+msgid "Starting sysmanage-agent service"
+msgstr "Iniciando servicio sysmanage-agent"
+
+msgid "Installing WSL distribution"
+msgstr "Instalando distribución WSL"
+
+msgid "Waiting for WSL to be ready"
+msgstr "Esperando a que WSL esté listo"
+
+msgid "Configuring WSL systemd"
+msgstr "Configurando systemd de WSL"
+
+msgid "Restarting WSL instance"
+msgstr "Reiniciando instancia WSL"
+
+msgid "Deploying files to host"
+msgstr "Desplegando archivos en el host"
+
+msgid "Executing command sequence"
+msgstr "Ejecutando secuencia de comandos"
+

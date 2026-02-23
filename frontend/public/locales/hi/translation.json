@@ -1967,5 +1967,24 @@
     "priority": "प्राथमिकता",
     "title": "कतार प्रबंधन",
     "viewDetails": "विवरण देखें"
+  },
+  "virtualization": {
+    "stepDescriptions": {
+      "launchingLxdContainer": "LXD कंटेनर लॉन्च हो रहा है",
+      "waitingForContainerNetwork": "कंटेनर नेटवर्क की प्रतीक्षा हो रही है",
+      "settingHostname": "होस्टनाम सेट किया जा रहा है",
+      "creatingUser": "उपयोगकर्ता बनाया जा रहा है",
+      "settingUserPassword": "उपयोगकर्ता पासवर्ड सेट किया जा रहा है",
+      "addingUserToSudoGroup": "उपयोगकर्ता को sudo समूह में जोड़ा जा रहा है",
+      "installingSysmanageAgent": "sysmanage-agent इंस्टॉल किया जा रहा है",
+      "writingAgentConfiguration": "एजेंट कॉन्फ़िगरेशन लिखा जा रहा है",
+      "startingSysmanageAgentService": "sysmanage-agent सेवा शुरू की जा रही है",
+      "installingWslDistribution": "WSL वितरण इंस्टॉल किया जा रहा है",
+      "waitingForWslReady": "WSL के तैयार होने की प्रतीक्षा हो रही है",
+      "configuringWslSystemd": "WSL systemd कॉन्फ़िगर किया जा रहा है",
+      "restartingWslInstance": "WSL इंस्टेंस पुनः आरंभ किया जा रहा है",
+      "deployingFilesToHost": "होस्ट पर फ़ाइलें तैनात की जा रही हैं",
+      "executingCommandSequence": "कमांड अनुक्रम निष्पादित किया जा रहा है"
+    }
   }
 }

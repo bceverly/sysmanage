@@ -17,6 +17,7 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.queue_manager import (
     Priority,
     QueueDirection,
@@ -383,7 +384,9 @@ async def delete_script_execution(
         raise
     except Exception as e:
         db_session.rollback()
-        logger.error("Error deleting script execution %s: %s", execution_id, e)
+        logger.error(
+            "Error deleting script execution %s: %s", sanitize_log(execution_id), e
+        )
         raise HTTPException(
             status_code=500, detail=_("Failed to delete script execution")
         ) from e
@@ -514,7 +517,9 @@ async def get_script_execution(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error fetching script execution %s: %s", execution_id, e)
+        logger.error(
+            "Error fetching script execution %s: %s", sanitize_log(execution_id), e
+        )
         raise HTTPException(
             status_code=500, detail=_("Failed to fetch script execution")
         ) from e

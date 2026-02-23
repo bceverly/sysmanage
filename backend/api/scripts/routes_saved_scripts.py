@@ -17,6 +17,7 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.utils.verbosity_logger import sanitize_log
 
 from .models import SavedScriptCreate, SavedScriptResponse, SavedScriptUpdate
 
@@ -225,7 +226,7 @@ async def get_saved_script(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error fetching saved script %d: %s", script_id, e)
+        logger.error("Error fetching saved script %s: %s", sanitize_log(script_id), e)
         raise HTTPException(
             status_code=500, detail=_("Failed to fetch saved script")
         ) from e
@@ -333,7 +334,7 @@ async def update_saved_script(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error updating saved script %d: %s", script_id, e)
+        logger.error("Error updating saved script %s: %s", sanitize_log(script_id), e)
         raise HTTPException(
             status_code=500, detail=_("Failed to update saved script")
         ) from e
@@ -419,7 +420,7 @@ async def delete_saved_script(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error deleting saved script %d: %s", script_id, e)
+        logger.error("Error deleting saved script %s: %s", sanitize_log(script_id), e)
         raise HTTPException(
             status_code=500, detail=_("Failed to delete saved script")
         ) from e

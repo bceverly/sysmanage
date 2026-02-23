@@ -23,6 +23,7 @@ from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -187,7 +188,7 @@ async def list_audit_logs(  # NOSONAR
 
         logger.info(
             "Audit log query by user %s: %d results (offset=%d, limit=%d)",
-            current_user,
+            sanitize_log(current_user),
             total,
             offset,
             limit,
@@ -259,7 +260,11 @@ async def get_audit_log_entry(
         if not entry:
             raise HTTPException(status_code=404, detail=_("Audit log entry not found"))
 
-        logger.info("Audit log entry %s retrieved by user %s", audit_id, current_user)
+        logger.info(
+            "Audit log entry %s retrieved by user %s",
+            sanitize_log(audit_id),
+            sanitize_log(current_user),
+        )
 
         return entry
 

@@ -1968,5 +1968,24 @@
     "priority": "우선순위",
     "title": "큐 관리",
     "viewDetails": "상세 보기"
+  },
+  "virtualization": {
+    "stepDescriptions": {
+      "launchingLxdContainer": "LXD 컨테이너 시작 중",
+      "waitingForContainerNetwork": "컨테이너 네트워크 대기 중",
+      "settingHostname": "호스트 이름 설정 중",
+      "creatingUser": "사용자 생성 중",
+      "settingUserPassword": "사용자 비밀번호 설정 중",
+      "addingUserToSudoGroup": "사용자를 sudo 그룹에 추가 중",
+      "installingSysmanageAgent": "sysmanage-agent 설치 중",
+      "writingAgentConfiguration": "에이전트 구성 작성 중",
+      "startingSysmanageAgentService": "sysmanage-agent 서비스 시작 중",
+      "installingWslDistribution": "WSL 배포판 설치 중",
+      "waitingForWslReady": "WSL 준비 대기 중",
+      "configuringWslSystemd": "WSL systemd 구성 중",
+      "restartingWslInstance": "WSL 인스턴스 재시작 중",
+      "deployingFilesToHost": "호스트에 파일 배포 중",
+      "executingCommandSequence": "명령 시퀀스 실행 중"
+    }
   }
 }

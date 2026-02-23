@@ -1805,3 +1805,344 @@ class TestDistributionCrudWithModule:
                 await delete_distribution(str(uuid.uuid4()), "admin@sysmanage.org")
 
             assert exc_info.value.status_code == 404
+
+
+# =============================================================================
+# PLAN-BASED CREATION PATH TESTS
+# =============================================================================
+
+
+class TestPlanBasedCreationPath:
+    """Tests for the plan-based creation path in create_child_host_request."""
+
+    def _make_request(self, child_type="lxd", **kwargs):
+        """Create a CreateWslChildHostRequest-compatible mock."""
+        from backend.api.child_host_models import CreateWslChildHostRequest
+
+        defaults = {
+            "child_type": child_type,
+            "distribution": "Ubuntu-24.04",
+            "hostname": "test-container",
+            "username": "testuser",
+            "password": "testpass123",
+            "auto_approve": False,
+            "container_name": "test-lxd" if child_type == "lxd" else None,
+            "vm_name": "test-vm" if child_type in ("vmm", "kvm", "bhyve") else None,
+            "iso_url": None,
+            "root_password": None,
+            "memory": "2G",
+            "disk_size": "20G",
+            "cpus": 2,
+        }
+        defaults.update(kwargs)
+        return CreateWslChildHostRequest(**defaults)
+
+    def _base_patches(self):
+        """Return the common set of patches for create_child_host_request tests."""
+        return {
+            "_check": patch(
+                "backend.api.child_host_virtualization._check_container_module"
+            ),
+            "sessionmaker": patch("backend.api.child_host_virtualization.sessionmaker"),
+            "db": patch("backend.api.child_host_virtualization.db"),
+            "get_user": patch(
+                "backend.api.child_host_virtualization.get_user_with_role_check"
+            ),
+            "get_host": patch("backend.api.child_host_virtualization.get_host_or_404"),
+            "verify_active": patch(
+                "backend.api.child_host_virtualization.verify_host_active"
+            ),
+            "queue_ops": patch("backend.api.child_host_virtualization.queue_ops"),
+            "create_msg": patch(
+                "backend.api.child_host_virtualization.create_command_message"
+            ),
+            "audit": patch("backend.api.child_host_virtualization.audit_log"),
+            "get_config": patch(
+                "backend.api.child_host_virtualization.get_config",
+                return_value={"api": {"host": "localhost", "port": 8443}},
+            ),
+            "bcrypt": patch("backend.api.child_host_virtualization.bcrypt"),
+            "module_loader": patch(
+                "backend.api.child_host_virtualization.module_loader"
+            ),
+        }
+
+    def _setup_mocks(self, patches, mock_host, mock_user, mock_db_session):
+        """Enter patches and configure common mocks. Returns dict of active mocks."""
+        mocks = {}
+        for name, p in patches.items():
+            mocks[name] = p.start()
+
+        mocks["sessionmaker"].return_value.return_value = mock_db_session
+        mocks["get_user"].return_value = mock_user
+        mocks["get_host"].return_value = mock_host
+        mocks["bcrypt"].hashpw.return_value = b"$2b$12$hashedpassword"
+        mocks["bcrypt"].gensalt.return_value = b"$2b$12$salt"
+
+        # No existing child with same name
+        mock_db_session.query.return_value.filter.return_value.first.return_value = None
+
+        # Mock the HostChild model creation
+        mock_child = MagicMock()
+        mock_child.id = uuid.uuid4()
+
+        return mocks, mock_child
+
+    @pytest.mark.asyncio
+    async def test_lxd_uses_plan_based_path_when_available(
+        self, mock_db_session, mock_user, mock_host
+    ):
+        """Test that LXD creation uses plan-based path when container_engine supports it."""
+        mock_host.platform = "Linux"
+        patches = self._base_patches()
+        mocks, mock_child = self._setup_mocks(
+            patches, mock_host, mock_user, mock_db_session
+        )
+
+        try:
+            # Set up module_loader to return a module with create_container_with_plan
+            mock_module = MagicMock()
+            mock_service_cls = MagicMock()
+            mock_service_instance = MagicMock()
+            mock_service_instance.create_container_with_plan.return_value = [
+                {"type": "shell", "command": "lxc launch Ubuntu-24.04 test-lxd"}
+            ]
+            mock_service_cls.return_value = mock_service_instance
+            mock_module.ContainerEngineServiceImpl = mock_service_cls
+            mocks["module_loader"].get_module.return_value = mock_module
+
+            from backend.api.child_host_virtualization import (
+                create_child_host_request,
+            )
+
+            request = self._make_request(child_type="lxd", container_name="test-lxd")
+            result = await create_child_host_request(
+                str(mock_host.id), request, "admin@sysmanage.org"
+            )
+
+            assert result["success"] is True
+            # Plan-based path was used, so legacy queue should NOT be called
+            mocks["queue_ops"].enqueue_message.assert_not_called()
+            mock_service_instance.create_container_with_plan.assert_called_once()
+        finally:
+            for p in patches.values():
+                p.stop()
+
+    @pytest.mark.asyncio
+    async def test_wsl_uses_plan_based_path_when_available(
+        self, mock_db_session, mock_user, mock_windows_host
+    ):
+        """Test that WSL creation uses plan-based path when container_engine supports it."""
+        patches = self._base_patches()
+        mocks, mock_child = self._setup_mocks(
+            patches, mock_windows_host, mock_user, mock_db_session
+        )
+
+        try:
+            mock_module = MagicMock()
+            mock_service_cls = MagicMock()
+            mock_service_instance = MagicMock()
+            mock_service_instance.create_container_with_plan.return_value = [
+                {"type": "shell", "command": "wsl --install -d Ubuntu-24.04"}
+            ]
+            mock_service_cls.return_value = mock_service_instance
+            mock_module.ContainerEngineServiceImpl = mock_service_cls
+            mocks["module_loader"].get_module.return_value = mock_module
+
+            from backend.api.child_host_virtualization import (
+                create_child_host_request,
+            )
+
+            request = self._make_request(child_type="wsl")
+            result = await create_child_host_request(
+                str(mock_windows_host.id), request, "admin@sysmanage.org"
+            )
+
+            assert result["success"] is True
+            mocks["queue_ops"].enqueue_message.assert_not_called()
+            mock_service_instance.create_container_with_plan.assert_called_once()
+        finally:
+            for p in patches.values():
+                p.stop()
+
+    @pytest.mark.asyncio
+    async def test_falls_back_to_legacy_when_module_unavailable(
+        self, mock_db_session, mock_user, mock_host
+    ):
+        """Test fallback to legacy create_child_host when container_engine module is None."""
+        mock_host.platform = "Linux"
+        patches = self._base_patches()
+        mocks, mock_child = self._setup_mocks(
+            patches, mock_host, mock_user, mock_db_session
+        )
+
+        try:
+            mocks["module_loader"].get_module.return_value = None
+
+            from backend.api.child_host_virtualization import (
+                create_child_host_request,
+            )
+
+            request = self._make_request(child_type="lxd", container_name="test-lxd")
+            result = await create_child_host_request(
+                str(mock_host.id), request, "admin@sysmanage.org"
+            )
+
+            assert result["success"] is True
+            # Legacy path should queue the message
+            mocks["queue_ops"].enqueue_message.assert_called_once()
+
+        finally:
+            for p in patches.values():
+                p.stop()
+
+    @pytest.mark.asyncio
+    async def test_falls_back_to_legacy_when_method_missing(
+        self, mock_db_session, mock_user, mock_host
+    ):
+        """Test fallback when ContainerEngineServiceImpl lacks create_container_with_plan."""
+        mock_host.platform = "Linux"
+        patches = self._base_patches()
+        mocks, mock_child = self._setup_mocks(
+            patches, mock_host, mock_user, mock_db_session
+        )
+
+        try:
+            mock_module = MagicMock()
+            mock_service_cls = MagicMock(spec=[])  # No methods at all
+            mock_module.ContainerEngineServiceImpl = mock_service_cls
+            mocks["module_loader"].get_module.return_value = mock_module
+
+            from backend.api.child_host_virtualization import (
+                create_child_host_request,
+            )
+
+            request = self._make_request(child_type="lxd", container_name="test-lxd")
+            result = await create_child_host_request(
+                str(mock_host.id), request, "admin@sysmanage.org"
+            )
+
+            assert result["success"] is True
+            mocks["queue_ops"].enqueue_message.assert_called_once()
+
+        finally:
+            for p in patches.values():
+                p.stop()
+
+    @pytest.mark.asyncio
+    async def test_falls_back_to_legacy_on_exception(
+        self, mock_db_session, mock_user, mock_host
+    ):
+        """Test fallback when plan-based creation throws an exception."""
+        mock_host.platform = "Linux"
+        patches = self._base_patches()
+        mocks, mock_child = self._setup_mocks(
+            patches, mock_host, mock_user, mock_db_session
+        )
+
+        try:
+            mock_module = MagicMock()
+            mock_service_cls = MagicMock()
+            mock_service_instance = MagicMock()
+            mock_service_instance.create_container_with_plan.side_effect = RuntimeError(
+                "plan generation failed"
+            )
+            mock_service_cls.return_value = mock_service_instance
+            mock_module.ContainerEngineServiceImpl = mock_service_cls
+            mocks["module_loader"].get_module.return_value = mock_module
+
+            from backend.api.child_host_virtualization import (
+                create_child_host_request,
+            )
+
+            request = self._make_request(child_type="lxd", container_name="test-lxd")
+            result = await create_child_host_request(
+                str(mock_host.id), request, "admin@sysmanage.org"
+            )
+
+            assert result["success"] is True
+            # Should have fallen back to legacy
+            mocks["queue_ops"].enqueue_message.assert_called_once()
+
+        finally:
+            for p in patches.values():
+                p.stop()
+
+    @pytest.mark.asyncio
+    async def test_kvm_uses_legacy_path_directly(
+        self, mock_db_session, mock_user, mock_host
+    ):
+        """Test that KVM creation always uses legacy path (not plan-based)."""
+        mock_host.platform = "Linux"
+        patches = self._base_patches()
+        patches["hash_pw"] = patch(
+            "backend.api.child_host_virtualization.hash_password_for_os",
+            return_value="$6$hashed",
+        )
+        mocks, mock_child = self._setup_mocks(
+            patches, mock_host, mock_user, mock_db_session
+        )
+
+        try:
+            mock_module = MagicMock()
+            mock_service_cls = MagicMock()
+            mock_service_instance = MagicMock()
+            mock_service_cls.return_value = mock_service_instance
+            mock_module.ContainerEngineServiceImpl = mock_service_cls
+            mocks["module_loader"].get_module.return_value = mock_module
+
+            from backend.api.child_host_virtualization import (
+                create_child_host_request,
+            )
+
+            request = self._make_request(child_type="kvm", vm_name="test-kvm")
+            result = await create_child_host_request(
+                str(mock_host.id), request, "admin@sysmanage.org"
+            )
+
+            assert result["success"] is True
+            # KVM always uses legacy path
+            mocks["queue_ops"].enqueue_message.assert_called_once()
+            # create_container_with_plan should NOT be called for KVM
+            mock_service_instance.create_container_with_plan.assert_not_called()
+
+        finally:
+            for p in patches.values():
+                p.stop()
+
+    @pytest.mark.asyncio
+    async def test_plan_based_returns_none_falls_back(
+        self, mock_db_session, mock_user, mock_host
+    ):
+        """Test fallback when create_container_with_plan returns None."""
+        mock_host.platform = "Linux"
+        patches = self._base_patches()
+        mocks, mock_child = self._setup_mocks(
+            patches, mock_host, mock_user, mock_db_session
+        )
+
+        try:
+            mock_module = MagicMock()
+            mock_service_cls = MagicMock()
+            mock_service_instance = MagicMock()
+            mock_service_instance.create_container_with_plan.return_value = None
+            mock_service_cls.return_value = mock_service_instance
+            mock_module.ContainerEngineServiceImpl = mock_service_cls
+            mocks["module_loader"].get_module.return_value = mock_module
+
+            from backend.api.child_host_virtualization import (
+                create_child_host_request,
+            )
+
+            request = self._make_request(child_type="lxd", container_name="test-lxd")
+            result = await create_child_host_request(
+                str(mock_host.id), request, "admin@sysmanage.org"
+            )
+
+            assert result["success"] is True
+            # Plan returned None, so legacy path should be used
+            mocks["queue_ops"].enqueue_message.assert_called_once()
+
+        finally:
+            for p in patches.values():
+                p.stop()

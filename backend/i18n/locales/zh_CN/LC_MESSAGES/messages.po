@@ -1201,3 +1201,51 @@ msgstr "未找到重启编排"
 #, python-format
 msgid "%d of %d child host(s) failed to restart"
 msgstr "%d/%d 个子主机重启失败"
+
+# Phase 2: Agent Code Migration - Step descriptions
+
+msgid "Launching LXD container"
+msgstr "正在启动 LXD 容器"
+
+msgid "Waiting for container network"
+msgstr "正在等待容器网络"
+
+msgid "Setting hostname"
+msgstr "正在设置主机名"
+
+msgid "Creating user"
+msgstr "正在创建用户"
+
+msgid "Setting user password"
+msgstr "正在设置用户密码"
+
+msgid "Adding user to sudo group"
+msgstr "正在将用户添加到 sudo 组"
+
+msgid "Installing sysmanage-agent"
+msgstr "正在安装 sysmanage-agent"
+
+msgid "Writing agent configuration"
+msgstr "正在写入代理配置"
+
+msgid "Starting sysmanage-agent service"
+msgstr "正在启动 sysmanage-agent 服务"
+
+msgid "Installing WSL distribution"
+msgstr "正在安装 WSL 发行版"
+
+msgid "Waiting for WSL to be ready"
+msgstr "正在等待 WSL 就绪"
+
+msgid "Configuring WSL systemd"
+msgstr "正在配置 WSL systemd"
+
+msgid "Restarting WSL instance"
+msgstr "正在重启 WSL 实例"
+
+msgid "Deploying files to host"
+msgstr "正在将文件部署到主机"
+
+msgid "Executing command sequence"
+msgstr "正在执行命令序列"
+

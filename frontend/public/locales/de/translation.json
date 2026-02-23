@@ -1968,5 +1968,24 @@
       "title": "Testwerkzeuge & Hilfsprogramme",
       "visualTools": "Visuelle Testwerkzeuge"
     }
+  },
+  "virtualization": {
+    "stepDescriptions": {
+      "launchingLxdContainer": "LXD-Container wird gestartet",
+      "waitingForContainerNetwork": "Warten auf Container-Netzwerk",
+      "settingHostname": "Hostname wird festgelegt",
+      "creatingUser": "Benutzer wird erstellt",
+      "settingUserPassword": "Benutzerpasswort wird festgelegt",
+      "addingUserToSudoGroup": "Benutzer wird zur sudo-Gruppe hinzugefügt",
+      "installingSysmanageAgent": "sysmanage-agent wird installiert",
+      "writingAgentConfiguration": "Agent-Konfiguration wird geschrieben",
+      "startingSysmanageAgentService": "sysmanage-agent-Dienst wird gestartet",
+      "installingWslDistribution": "WSL-Distribution wird installiert",
+      "waitingForWslReady": "Warten auf WSL-Bereitschaft",
+      "configuringWslSystemd": "WSL-systemd wird konfiguriert",
+      "restartingWslInstance": "WSL-Instanz wird neugestartet",
+      "deployingFilesToHost": "Dateien werden auf den Host übertragen",
+      "executingCommandSequence": "Befehlssequenz wird ausgeführt"
+    }
   }
 }

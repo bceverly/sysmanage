@@ -1194,3 +1194,51 @@ msgstr "Herstart-orkestratie niet gevonden"
 #, python-format
 msgid "%d of %d child host(s) failed to restart"
 msgstr "%d van %d kind-host(s) konden niet opnieuw worden gestart"
+
+# Phase 2: Agent Code Migration - Step descriptions
+
+msgid "Launching LXD container"
+msgstr "LXD-container wordt gestart"
+
+msgid "Waiting for container network"
+msgstr "Wachten op containernetwerk"
+
+msgid "Setting hostname"
+msgstr "Hostnaam wordt ingesteld"
+
+msgid "Creating user"
+msgstr "Gebruiker wordt aangemaakt"
+
+msgid "Setting user password"
+msgstr "Gebruikerswachtwoord wordt ingesteld"
+
+msgid "Adding user to sudo group"
+msgstr "Gebruiker wordt toegevoegd aan sudo-groep"
+
+msgid "Installing sysmanage-agent"
+msgstr "sysmanage-agent wordt geïnstalleerd"
+
+msgid "Writing agent configuration"
+msgstr "Agentconfiguratie wordt geschreven"
+
+msgid "Starting sysmanage-agent service"
+msgstr "sysmanage-agent-service wordt gestart"
+
+msgid "Installing WSL distribution"
+msgstr "WSL-distributie wordt geïnstalleerd"
+
+msgid "Waiting for WSL to be ready"
+msgstr "Wachten tot WSL gereed is"
+
+msgid "Configuring WSL systemd"
+msgstr "WSL systemd wordt geconfigureerd"
+
+msgid "Restarting WSL instance"
+msgstr "WSL-instantie wordt herstart"
+
+msgid "Deploying files to host"
+msgstr "Bestanden worden naar host overgebracht"
+
+msgid "Executing command sequence"
+msgstr "Opdrachtenreeks wordt uitgevoerd"
+

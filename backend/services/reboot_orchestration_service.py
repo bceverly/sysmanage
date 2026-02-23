@@ -195,7 +195,6 @@ def check_restart_progress(db, parent_host_id):
     if not orchestration:
         return
 
-    snapshot = json.loads(orchestration.child_hosts_snapshot)
     restart_status = json.loads(orchestration.child_hosts_restart_status or "[]")
 
     # Update restart status based on current child host states

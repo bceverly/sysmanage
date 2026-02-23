@@ -25,6 +25,7 @@ from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import CommandType, Message, MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
@@ -450,7 +451,9 @@ async def remove_antivirus(
     try:
         # Check permission
         logger.info(
-            "remove_antivirus called for host_id=%s by user=%s", host_id, current_user
+            "remove_antivirus called for host_id=%s by user=%s",
+            sanitize_log(host_id),
+            sanitize_log(current_user),
         )
         user = db.query(models.User).filter(models.User.userid == current_user).first()
         if not user:

@@ -18,6 +18,7 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
+from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
@@ -128,7 +129,9 @@ async def request_certificates_collection(host_id: str):
     Request an agent to collect SSL certificates from the system.
     This sends a message via WebSocket to the agent requesting certificate collection.
     """
-    logger.info("CERTIFICATE COLLECTION: Endpoint called for host_id: %s", host_id)
+    logger.info(
+        "CERTIFICATE COLLECTION: Endpoint called for host_id: %s", sanitize_log(host_id)
+    )
 
     # Get the SQLAlchemy session
     session_local = sessionmaker(  # pylint: disable=duplicate-code
@@ -256,7 +259,9 @@ async def request_roles_collection(host_id: str):
     Request an agent to collect server roles from the system.
     This sends a message via WebSocket to the agent requesting role collection.
     """
-    logger.info("ROLE COLLECTION: Endpoint called for host_id: %s", host_id)
+    logger.info(
+        "ROLE COLLECTION: Endpoint called for host_id: %s", sanitize_log(host_id)
+    )
 
     # Get the SQLAlchemy session
     session_local = sessionmaker(  # pylint: disable=duplicate-code
@@ -310,9 +315,9 @@ async def control_services(
     """
     logger.info(
         "SERVICE CONTROL: Endpoint called for host_id: %s, action: %s, services: %s",
-        host_id,
-        request.action,
-        request.services,
+        sanitize_log(host_id),
+        sanitize_log(request.action),
+        sanitize_log(request.services),
     )
 
     # Validate action
@@ -400,9 +405,9 @@ async def control_services(
 
         logger.info(
             "SERVICE CONTROL: Successfully requested %s for services %s on host: %s",
-            request.action,
-            request.services,
-            host_id,
+            sanitize_log(request.action),
+            sanitize_log(request.services),
+            sanitize_log(host_id),
         )
 
         return {

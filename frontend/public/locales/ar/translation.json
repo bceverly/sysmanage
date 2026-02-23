@@ -1967,5 +1967,24 @@
     "confirmDelete": "هل أنت متأكد من رغبتك في حذف المجموعة \"{{groupName}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
     "deleteSuccess": "تم طلب حذف المجموعة. سيتم تحديث قائمة المجموعات تلقائياً.",
     "deleteFailed": "فشل حذف المجموعة"
+  },
+  "virtualization": {
+    "stepDescriptions": {
+      "launchingLxdContainer": "تشغيل حاوية LXD",
+      "waitingForContainerNetwork": "في انتظار شبكة الحاوية",
+      "settingHostname": "تعيين اسم المضيف",
+      "creatingUser": "إنشاء المستخدم",
+      "settingUserPassword": "تعيين كلمة مرور المستخدم",
+      "addingUserToSudoGroup": "إضافة المستخدم إلى مجموعة sudo",
+      "installingSysmanageAgent": "تثبيت sysmanage-agent",
+      "writingAgentConfiguration": "كتابة تكوين الوكيل",
+      "startingSysmanageAgentService": "بدء خدمة sysmanage-agent",
+      "installingWslDistribution": "تثبيت توزيعة WSL",
+      "waitingForWslReady": "في انتظار جاهزية WSL",
+      "configuringWslSystemd": "تكوين systemd لـ WSL",
+      "restartingWslInstance": "إعادة تشغيل مثيل WSL",
+      "deployingFilesToHost": "نشر الملفات إلى المضيف",
+      "executingCommandSequence": "تنفيذ تسلسل الأوامر"
+    }
   }
 }

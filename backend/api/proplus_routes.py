@@ -53,10 +53,7 @@ def _feature_dependency(feature):
     import functools
     import inspect
 
-    if isinstance(feature, str):
-        feature_code = FeatureCode(feature)
-    else:
-        feature_code = feature
+    feature_code = FeatureCode(feature) if isinstance(feature, str) else feature
 
     def _raise():
         raise HTTPException(
@@ -71,30 +68,33 @@ def _feature_dependency(feature):
             },
         )
 
-    def gate(func=None):
-        if func is not None and callable(func):
-            # Decorator mode
-            if asyncio.iscoroutinefunction(func):
-
-                @functools.wraps(func)
-                async def wrapper(*args, **kwargs):
-                    if not license_service.has_feature(feature_code):
-                        _raise()
-                    return await func(*args, **kwargs)
-
-                return wrapper
-            else:
-
-                @functools.wraps(func)
-                def wrapper(*args, **kwargs):
-                    if not license_service.has_feature(feature_code):
-                        _raise()
-                    return func(*args, **kwargs)
-
-                return wrapper
-        # Dependency mode (called by FastAPI Depends with no args)
+    def _check():
         if not license_service.has_feature(feature_code):
             _raise()
+
+    def _wrap(func):
+        """Wrap a function (sync or async) with a license check."""
+        if asyncio.iscoroutinefunction(func):
+
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                _check()
+                return await func(*args, **kwargs)
+
+            return async_wrapper
+
+        @functools.wraps(func)
+        def sync_wrapper(*args, **kwargs):
+            _check()
+            return func(*args, **kwargs)
+
+        return sync_wrapper
+
+    def gate(func=None):
+        if func is not None and callable(func):
+            return _wrap(func)
+        # Dependency mode (called by FastAPI Depends with no args)
+        _check()
 
     # Hide the func parameter from FastAPI's signature inspection
     gate.__signature__ = inspect.Signature(parameters=[])
@@ -111,10 +111,7 @@ def _module_dependency(module):
     import functools
     import inspect
 
-    if isinstance(module, str):
-        module_code = ModuleCode(module)
-    else:
-        module_code = module
+    module_code = ModuleCode(module) if isinstance(module, str) else module
 
     def _raise_license():
         raise HTTPException(
@@ -135,7 +132,7 @@ def _module_dependency(module):
             detail={
                 "error": "module_not_available",
                 "message": (
-                    f"The '{module_code.value}' module " f"is not currently available"
+                    f"The '{module_code.value}' module is not currently available"
                 ),
                 "module": module_code.value,
             },
@@ -147,25 +144,27 @@ def _module_dependency(module):
         if not module_loader.is_module_loaded(module_code.value):
             _raise_unavailable()
 
+    def _wrap(func):
+        """Wrap a function (sync or async) with a module check."""
+        if asyncio.iscoroutinefunction(func):
+
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                _check()
+                return await func(*args, **kwargs)
+
+            return async_wrapper
+
+        @functools.wraps(func)
+        def sync_wrapper(*args, **kwargs):
+            _check()
+            return func(*args, **kwargs)
+
+        return sync_wrapper
+
     def gate(func=None):
         if func is not None and callable(func):
-            # Decorator mode
-            if asyncio.iscoroutinefunction(func):
-
-                @functools.wraps(func)
-                async def wrapper(*args, **kwargs):
-                    _check()
-                    return await func(*args, **kwargs)
-
-                return wrapper
-            else:
-
-                @functools.wraps(func)
-                def wrapper(*args, **kwargs):
-                    _check()
-                    return func(*args, **kwargs)
-
-                return wrapper
+            return _wrap(func)
         # Dependency mode
         _check()
 

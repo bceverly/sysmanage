@@ -897,3 +897,51 @@ msgstr "Reboot orchestration not found"
 
 msgid "%d of %d child host(s) failed to restart"
 msgstr "%d of %d child host(s) failed to restart"
+
+# Phase 2: Agent Code Migration - Step descriptions
+
+msgid "Launching LXD container"
+msgstr "Launching LXD container"
+
+msgid "Waiting for container network"
+msgstr "Waiting for container network"
+
+msgid "Setting hostname"
+msgstr "Setting hostname"
+
+msgid "Creating user"
+msgstr "Creating user"
+
+msgid "Setting user password"
+msgstr "Setting user password"
+
+msgid "Adding user to sudo group"
+msgstr "Adding user to sudo group"
+
+msgid "Installing sysmanage-agent"
+msgstr "Installing sysmanage-agent"
+
+msgid "Writing agent configuration"
+msgstr "Writing agent configuration"
+
+msgid "Starting sysmanage-agent service"
+msgstr "Starting sysmanage-agent service"
+
+msgid "Installing WSL distribution"
+msgstr "Installing WSL distribution"
+
+msgid "Waiting for WSL to be ready"
+msgstr "Waiting for WSL to be ready"
+
+msgid "Configuring WSL systemd"
+msgstr "Configuring WSL systemd"
+
+msgid "Restarting WSL instance"
+msgstr "Restarting WSL instance"
+
+msgid "Deploying files to host"
+msgstr "Deploying files to host"
+
+msgid "Executing command sequence"
+msgstr "Executing command sequence"
+

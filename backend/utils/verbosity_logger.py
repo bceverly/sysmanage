@@ -6,10 +6,19 @@ Supports custom formats and selective level filtering.
 """
 
 import logging
+import re
 from typing import Set
 
 from backend.config.config import get_log_format, get_log_levels
 from backend.utils.logging_formatter import UTCTimestampFormatter
+
+# Matches control characters that can cause log injection (CWE-117)
+_CONTROL_CHAR_RE = re.compile(r"[\r\n]")
+
+
+def sanitize_log(value) -> str:
+    """Sanitize a value for safe logging by removing newline characters (CWE-117)."""
+    return _CONTROL_CHAR_RE.sub("", str(value))
 
 
 class FlexibleLogger:

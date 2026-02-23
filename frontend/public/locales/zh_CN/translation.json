@@ -1968,5 +1968,24 @@
     "confirmDelete": "您确定要删除组 \"{{groupName}}\" 吗？此操作无法撤消。",
     "deleteSuccess": "已请求删除组。组列表将自动更新。",
     "deleteFailed": "删除组失败"
+  },
+  "virtualization": {
+    "stepDescriptions": {
+      "launchingLxdContainer": "正在启动 LXD 容器",
+      "waitingForContainerNetwork": "正在等待容器网络",
+      "settingHostname": "正在设置主机名",
+      "creatingUser": "正在创建用户",
+      "settingUserPassword": "正在设置用户密码",
+      "addingUserToSudoGroup": "正在将用户添加到 sudo 组",
+      "installingSysmanageAgent": "正在安装 sysmanage-agent",
+      "writingAgentConfiguration": "正在写入代理配置",
+      "startingSysmanageAgentService": "正在启动 sysmanage-agent 服务",
+      "installingWslDistribution": "正在安装 WSL 发行版",
+      "waitingForWslReady": "正在等待 WSL 就绪",
+      "configuringWslSystemd": "正在配置 WSL systemd",
+      "restartingWslInstance": "正在重启 WSL 实例",
+      "deployingFilesToHost": "正在将文件部署到主机",
+      "executingCommandSequence": "正在执行命令序列"
+    }
   }
 }

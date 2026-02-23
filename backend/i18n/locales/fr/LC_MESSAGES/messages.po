@@ -1195,3 +1195,51 @@ msgstr "Orchestration de redémarrage introuvable"
 #, python-format
 msgid "%d of %d child host(s) failed to restart"
 msgstr "%d sur %d hôte(s) enfant(s) n'ont pas réussi à redémarrer"
+
+# Phase 2: Agent Code Migration - Step descriptions
+
+msgid "Launching LXD container"
+msgstr "Lancement du conteneur LXD"
+
+msgid "Waiting for container network"
+msgstr "En attente du réseau du conteneur"
+
+msgid "Setting hostname"
+msgstr "Configuration du nom d'hôte"
+
+msgid "Creating user"
+msgstr "Création de l'utilisateur"
+
+msgid "Setting user password"
+msgstr "Configuration du mot de passe utilisateur"
+
+msgid "Adding user to sudo group"
+msgstr "Ajout de l'utilisateur au groupe sudo"
+
+msgid "Installing sysmanage-agent"
+msgstr "Installation de sysmanage-agent"
+
+msgid "Writing agent configuration"
+msgstr "Écriture de la configuration de l'agent"
+
+msgid "Starting sysmanage-agent service"
+msgstr "Démarrage du service sysmanage-agent"
+
+msgid "Installing WSL distribution"
+msgstr "Installation de la distribution WSL"
+
+msgid "Waiting for WSL to be ready"
+msgstr "En attente de la disponibilité de WSL"
+
+msgid "Configuring WSL systemd"
+msgstr "Configuration de systemd WSL"
+
+msgid "Restarting WSL instance"
+msgstr "Redémarrage de l'instance WSL"
+
+msgid "Deploying files to host"
+msgstr "Déploiement des fichiers sur l'hôte"
+
+msgid "Executing command sequence"
+msgstr "Exécution de la séquence de commandes"
+

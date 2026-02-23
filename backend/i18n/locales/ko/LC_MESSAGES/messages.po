@@ -1195,3 +1195,51 @@ msgstr "재부팅 오케스트레이션을 찾을 수 없습니다"
 #, python-format
 msgid "%d of %d child host(s) failed to restart"
 msgstr "%d/%d개의 자식 호스트를 재시작하지 못했습니다"
+
+# Phase 2: Agent Code Migration - Step descriptions
+
+msgid "Launching LXD container"
+msgstr "LXD 컨테이너 시작 중"
+
+msgid "Waiting for container network"
+msgstr "컨테이너 네트워크 대기 중"
+
+msgid "Setting hostname"
+msgstr "호스트 이름 설정 중"
+
+msgid "Creating user"
+msgstr "사용자 생성 중"
+
+msgid "Setting user password"
+msgstr "사용자 비밀번호 설정 중"
+
+msgid "Adding user to sudo group"
+msgstr "사용자를 sudo 그룹에 추가 중"
+
+msgid "Installing sysmanage-agent"
+msgstr "sysmanage-agent 설치 중"
+
+msgid "Writing agent configuration"
+msgstr "에이전트 구성 작성 중"
+
+msgid "Starting sysmanage-agent service"
+msgstr "sysmanage-agent 서비스 시작 중"
+
+msgid "Installing WSL distribution"
+msgstr "WSL 배포판 설치 중"
+
+msgid "Waiting for WSL to be ready"
+msgstr "WSL 준비 대기 중"
+
+msgid "Configuring WSL systemd"
+msgstr "WSL systemd 구성 중"
+
+msgid "Restarting WSL instance"
+msgstr "WSL 인스턴스 재시작 중"
+
+msgid "Deploying files to host"
+msgstr "호스트에 파일 배포 중"
+
+msgid "Executing command sequence"
+msgstr "명령 시퀀스 실행 중"
+

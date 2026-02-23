@@ -50,7 +50,7 @@ interface AuditLogEntry {
 }
 
 const AuditLogViewer: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
   // Filter states
@@ -408,6 +408,10 @@ const AuditLogViewer: React.FC = () => {
                 page={page}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
+                labelDisplayedRows={({ from, count: totalCount }) => {
+                  const to = Math.min((page + 1) * rowsPerPage, totalCount);
+                  return `${from.toLocaleString(i18n.language)}–${to.toLocaleString(i18n.language)} ${t('common.of', 'of')} ${totalCount.toLocaleString(i18n.language)}`;
+                }}
               />
             </>
           )}

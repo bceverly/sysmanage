@@ -13,6 +13,7 @@ from backend.api.host_utils import validate_host_approval_status
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import CommandMessage, CommandType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
@@ -41,7 +42,7 @@ async def get_host_graylog_attachment(
     try:
         from backend.persistence.models import GraylogAttachment
 
-        logger.info("Fetching Graylog attachment for host %s", host_id)
+        logger.info("Fetching Graylog attachment for host %s", sanitize_log(host_id))
 
         session_local = sessionmaker(
             bind=db.get_engine(),
@@ -80,12 +81,12 @@ async def get_host_graylog_attachment(
             }
 
     except ValueError as e:
-        logger.error("Invalid host ID format for %s: %s", host_id, e)
+        logger.error("Invalid host ID format for %s: %s", sanitize_log(host_id), e)
         raise HTTPException(status_code=400, detail="Invalid host ID format") from e
     except Exception as e:
         logger.error(
             "Error fetching Graylog attachment for host %s: %s",
-            host_id,
+            sanitize_log(host_id),
             e,
             exc_info=True,
         )

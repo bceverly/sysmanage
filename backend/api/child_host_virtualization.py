@@ -328,18 +328,48 @@ async def create_child_host_request(  # NOSONAR
         if auto_approve_token:
             command_params["auto_approve_token"] = auto_approve_token
 
-        command_message = create_command_message(
-            command_type="create_child_host",
-            parameters=command_params,
-        )
+        # Try plan-based creation for LXD/WSL if container_engine supports it
+        used_plan_based = False
+        if request.child_type in ("lxd", "wsl"):
+            try:
+                container_engine = module_loader.get_module("container_engine")
+                if container_engine is not None:
+                    service_cls = getattr(
+                        container_engine, "ContainerEngineServiceImpl", None
+                    )
+                    if service_cls and hasattr(
+                        service_cls, "create_container_with_plan"
+                    ):
+                        import logging as _logging
 
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+                        _ce_logger = _logging.getLogger("container_engine")
+                        service = service_cls(
+                            db=session, models=models, logger=_ce_logger
+                        )
+                        steps = service.create_container_with_plan(
+                            child_type=request.child_type,
+                            params=command_params,
+                            host_id=host_id,
+                            db_session=session,
+                        )
+                        if steps is not None:
+                            used_plan_based = True
+            except Exception:
+                pass  # Fall through to legacy path
+
+        if not used_plan_based:
+            command_message = create_command_message(
+                command_type="create_child_host",
+                parameters=command_params,
+            )
+
+            queue_ops.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                db=session,
+            )
 
         # Log the action with full details for debugging
         audit_log(

@@ -289,7 +289,7 @@ const Hosts = () => {
             width: 200,
             renderCell: (params) => {
                 // Backend stores naive UTC; parseUTCTimestamp appends "Z" if needed
-                const date = parseUTCTimestamp(params.value) || new Date(NaN);
+                const date = parseUTCTimestamp(params.value) || new Date(Number.NaN);
                 const now = new Date();
 
                 // Check if date is valid

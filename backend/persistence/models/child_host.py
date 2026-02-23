@@ -28,6 +28,8 @@ from sqlalchemy.orm import relationship, synonym
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
+_HOST_ID_FK = "host.id"
+
 
 class HostChild(Base):
     """
@@ -43,13 +45,13 @@ class HostChild(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     parent_host_id = Column(
         GUID(),
-        ForeignKey("host.id", ondelete="CASCADE"),
+        ForeignKey(_HOST_ID_FK, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
     child_host_id = Column(
         GUID(),
-        ForeignKey("host.id", ondelete="SET NULL"),
+        ForeignKey(_HOST_ID_FK, ondelete="SET NULL"),
         nullable=True,
         index=True,
     )
@@ -190,7 +192,7 @@ class RebootOrchestration(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     parent_host_id = Column(
         GUID(),
-        ForeignKey("host.id", ondelete="CASCADE"),
+        ForeignKey(_HOST_ID_FK, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )

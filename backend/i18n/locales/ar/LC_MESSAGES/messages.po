@@ -1188,3 +1188,51 @@ msgstr "لم يتم العثور على تنسيق إعادة التشغيل"
 #, python-format
 msgid "%d of %d child host(s) failed to restart"
 msgstr "فشل %d من %d مضيف(مضيفين) فرعي(ين) في إعادة التشغيل"
+
+# Phase 2: Agent Code Migration - Step descriptions
+
+msgid "Launching LXD container"
+msgstr "تشغيل حاوية LXD"
+
+msgid "Waiting for container network"
+msgstr "في انتظار شبكة الحاوية"
+
+msgid "Setting hostname"
+msgstr "تعيين اسم المضيف"
+
+msgid "Creating user"
+msgstr "إنشاء المستخدم"
+
+msgid "Setting user password"
+msgstr "تعيين كلمة مرور المستخدم"
+
+msgid "Adding user to sudo group"
+msgstr "إضافة المستخدم إلى مجموعة sudo"
+
+msgid "Installing sysmanage-agent"
+msgstr "تثبيت sysmanage-agent"
+
+msgid "Writing agent configuration"
+msgstr "كتابة تكوين الوكيل"
+
+msgid "Starting sysmanage-agent service"
+msgstr "بدء خدمة sysmanage-agent"
+
+msgid "Installing WSL distribution"
+msgstr "تثبيت توزيعة WSL"
+
+msgid "Waiting for WSL to be ready"
+msgstr "في انتظار جاهزية WSL"
+
+msgid "Configuring WSL systemd"
+msgstr "تكوين systemd لـ WSL"
+
+msgid "Restarting WSL instance"
+msgstr "إعادة تشغيل مثيل WSL"
+
+msgid "Deploying files to host"
+msgstr "نشر الملفات إلى المضيف"
+
+msgid "Executing command sequence"
+msgstr "تنفيذ تسلسل الأوامر"
+

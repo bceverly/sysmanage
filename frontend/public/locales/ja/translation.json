@@ -1953,5 +1953,24 @@
     "confirmDelete": "グループ \"{{groupName}}\" を削除してもよろしいですか？この操作は元に戻せません。",
     "deleteSuccess": "グループの削除がリクエストされました。グループリストは自動的に更新されます。",
     "deleteFailed": "グループの削除に失敗しました"
+  },
+  "virtualization": {
+    "stepDescriptions": {
+      "launchingLxdContainer": "LXDコンテナを起動中",
+      "waitingForContainerNetwork": "コンテナネットワークを待機中",
+      "settingHostname": "ホスト名を設定中",
+      "creatingUser": "ユーザーを作成中",
+      "settingUserPassword": "ユーザーパスワードを設定中",
+      "addingUserToSudoGroup": "ユーザーをsudoグループに追加中",
+      "installingSysmanageAgent": "sysmanage-agentをインストール中",
+      "writingAgentConfiguration": "エージェント設定を書き込み中",
+      "startingSysmanageAgentService": "sysmanage-agentサービスを開始中",
+      "installingWslDistribution": "WSLディストリビューションをインストール中",
+      "waitingForWslReady": "WSLの準備完了を待機中",
+      "configuringWslSystemd": "WSL systemdを設定中",
+      "restartingWslInstance": "WSLインスタンスを再起動中",
+      "deployingFilesToHost": "ホストにファイルをデプロイ中",
+      "executingCommandSequence": "コマンドシーケンスを実行中"
+    }
   }
 }

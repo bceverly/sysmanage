@@ -1968,5 +1968,24 @@
     "confirmDelete": "Tem certeza de que deseja excluir o grupo \"{{groupName}}\"? Esta ação não pode ser desfeita.",
     "deleteSuccess": "Exclusão de grupo solicitada. A lista de grupos será atualizada automaticamente.",
     "deleteFailed": "Falha ao excluir grupo"
+  },
+  "virtualization": {
+    "stepDescriptions": {
+      "launchingLxdContainer": "Iniciando contêiner LXD",
+      "waitingForContainerNetwork": "Aguardando rede do contêiner",
+      "settingHostname": "Configurando nome do host",
+      "creatingUser": "Criando usuário",
+      "settingUserPassword": "Configurando senha do usuário",
+      "addingUserToSudoGroup": "Adicionando usuário ao grupo sudo",
+      "installingSysmanageAgent": "Instalando sysmanage-agent",
+      "writingAgentConfiguration": "Escrevendo configuração do agente",
+      "startingSysmanageAgentService": "Iniciando serviço sysmanage-agent",
+      "installingWslDistribution": "Instalando distribuição WSL",
+      "waitingForWslReady": "Aguardando WSL ficar pronto",
+      "configuringWslSystemd": "Configurando systemd do WSL",
+      "restartingWslInstance": "Reiniciando instância WSL",
+      "deployingFilesToHost": "Implantando arquivos no host",
+      "executingCommandSequence": "Executando sequência de comandos"
+    }
   }
 }

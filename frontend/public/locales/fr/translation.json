@@ -1968,5 +1968,24 @@
       "title": "Outils et utilitaires de test",
       "visualTools": "Outils de test visuel"
     }
+  },
+  "virtualization": {
+    "stepDescriptions": {
+      "launchingLxdContainer": "Lancement du conteneur LXD",
+      "waitingForContainerNetwork": "En attente du réseau du conteneur",
+      "settingHostname": "Configuration du nom d'hôte",
+      "creatingUser": "Création de l'utilisateur",
+      "settingUserPassword": "Configuration du mot de passe utilisateur",
+      "addingUserToSudoGroup": "Ajout de l'utilisateur au groupe sudo",
+      "installingSysmanageAgent": "Installation de sysmanage-agent",
+      "writingAgentConfiguration": "Écriture de la configuration de l'agent",
+      "startingSysmanageAgentService": "Démarrage du service sysmanage-agent",
+      "installingWslDistribution": "Installation de la distribution WSL",
+      "waitingForWslReady": "En attente de la disponibilité de WSL",
+      "configuringWslSystemd": "Configuration de systemd WSL",
+      "restartingWslInstance": "Redémarrage de l'instance WSL",
+      "deployingFilesToHost": "Déploiement des fichiers sur l'hôte",
+      "executingCommandSequence": "Exécution de la séquence de commandes"
+    }
   }
 }

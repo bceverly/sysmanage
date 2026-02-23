@@ -1194,3 +1194,51 @@ msgstr "Neustart-Orchestrierung nicht gefunden"
 #, python-format
 msgid "%d of %d child host(s) failed to restart"
 msgstr "%d von %d Kind-Host(s) konnten nicht neu gestartet werden"
+
+# Phase 2: Agent Code Migration - Step descriptions
+
+msgid "Launching LXD container"
+msgstr "LXD-Container wird gestartet"
+
+msgid "Waiting for container network"
+msgstr "Warten auf Container-Netzwerk"
+
+msgid "Setting hostname"
+msgstr "Hostname wird festgelegt"
+
+msgid "Creating user"
+msgstr "Benutzer wird erstellt"
+
+msgid "Setting user password"
+msgstr "Benutzerpasswort wird festgelegt"
+
+msgid "Adding user to sudo group"
+msgstr "Benutzer wird zur sudo-Gruppe hinzugefügt"
+
+msgid "Installing sysmanage-agent"
+msgstr "sysmanage-agent wird installiert"
+
+msgid "Writing agent configuration"
+msgstr "Agent-Konfiguration wird geschrieben"
+
+msgid "Starting sysmanage-agent service"
+msgstr "sysmanage-agent-Dienst wird gestartet"
+
+msgid "Installing WSL distribution"
+msgstr "WSL-Distribution wird installiert"
+
+msgid "Waiting for WSL to be ready"
+msgstr "Warten auf WSL-Bereitschaft"
+
+msgid "Configuring WSL systemd"
+msgstr "WSL-systemd wird konfiguriert"
+
+msgid "Restarting WSL instance"
+msgstr "WSL-Instanz wird neugestartet"
+
+msgid "Deploying files to host"
+msgstr "Dateien werden auf den Host übertragen"
+
+msgid "Executing command sequence"
+msgstr "Befehlssequenz wird ausgeführt"
+

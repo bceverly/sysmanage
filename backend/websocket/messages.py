@@ -42,6 +42,11 @@ class MessageType(str, Enum):
     GRAYLOG_STATUS_UPDATE = "graylog_status_update"
     HOSTNAME_CHANGED = "hostname_changed"
 
+    # Generic deployment responses
+    FILE_DEPLOYMENT_RESULT = "file_deployment_result"
+    COMMAND_SEQUENCE_PROGRESS = "command_sequence_progress"
+    COMMAND_SEQUENCE_RESULT = "command_sequence_result"
+
     # Child Host / Virtualization responses
     VIRTUALIZATION_SUPPORT_UPDATE = "virtualization_support_update"
     CHILD_HOST_LIST_UPDATE = "child_host_list_update"
@@ -108,6 +113,10 @@ class CommandType(str, Enum):
     DELETE_HOST_GROUP = "delete_host_group"
     REFRESH_USER_ACCESS = "refresh_user_access"
     CHANGE_HOSTNAME = "change_hostname"
+
+    # Generic deployment commands
+    DEPLOY_FILES = "deploy_files"
+    EXECUTE_COMMAND_SEQUENCE = "execute_command_sequence"
 
     # Child Host / Virtualization Commands
     CHECK_VIRTUALIZATION_SUPPORT = "check_virtualization_support"

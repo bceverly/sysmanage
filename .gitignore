@@ -176,9 +176,6 @@ privkey.pem
 # Git commit fix script
 fix-commits.sh
 
-# Claude
-CLAUDE.md
-
 *.backup
 nul
 

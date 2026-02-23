@@ -1968,5 +1968,24 @@
     "confirmDelete": "¿Está seguro de que desea eliminar el grupo \"{{groupName}}\"? Esta acción no se puede deshacer.",
     "deleteSuccess": "Eliminación de grupo solicitada. La lista de grupos se actualizará automáticamente.",
     "deleteFailed": "Error al eliminar el grupo"
+  },
+  "virtualization": {
+    "stepDescriptions": {
+      "launchingLxdContainer": "Iniciando contenedor LXD",
+      "waitingForContainerNetwork": "Esperando la red del contenedor",
+      "settingHostname": "Configurando nombre de host",
+      "creatingUser": "Creando usuario",
+      "settingUserPassword": "Configurando contraseña de usuario",
+      "addingUserToSudoGroup": "Añadiendo usuario al grupo sudo",
+      "installingSysmanageAgent": "Instalando sysmanage-agent",
+      "writingAgentConfiguration": "Escribiendo configuración del agente",
+      "startingSysmanageAgentService": "Iniciando servicio sysmanage-agent",
+      "installingWslDistribution": "Instalando distribución WSL",
+      "waitingForWslReady": "Esperando a que WSL esté listo",
+      "configuringWslSystemd": "Configurando systemd de WSL",
+      "restartingWslInstance": "Reiniciando instancia WSL",
+      "deployingFilesToHost": "Desplegando archivos en el host",
+      "executingCommandSequence": "Ejecutando secuencia de comandos"
+    }
   }
 }

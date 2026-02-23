@@ -126,8 +126,7 @@
     "ast-v8-to-istanbul": "^0.3.8",
     "js-yaml": "^4.1.1",
     "lodash": "^4.17.23",
-    "minimatch": "^10.2.1",
-    "ajv": "^8.18.0"
+    "minimatch": "^10.2.1"
   },
   "msw": {
     "workerDirectory": [
