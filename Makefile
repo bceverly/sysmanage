@@ -3460,20 +3460,9 @@ deploy-docs-repo:
 	fi; \
 	echo ""; \
 	\
-	echo "--- Staging Snap packages ---"; \
-	SNAP_FILES=$$(ls installer/dist/*.snap *.snap 2>/dev/null || true); \
-	if [ -n "$$SNAP_FILES" ]; then \
-		SNAP_DIR="$$DOCS_REPO/repo/server/snap/$$VERSION"; \
-		mkdir -p "$$SNAP_DIR"; \
-		for f in $$SNAP_FILES; do \
-			cp "$$f" "$$SNAP_DIR/"; \
-			echo "  Staged: $$(basename $$f) -> $$SNAP_DIR/"; \
-		done; \
-		STAGED="$$STAGED snap"; \
-	else \
-		echo "  No .snap packages found"; \
-		MISSING="$$MISSING snap"; \
-	fi; \
+	echo "--- Snap packages ---"; \
+	echo "  Skipped: snaps are published directly to the Snap Store via 'make deploy-snap'"; \
+	echo "  (snap files exceed GitHub's 100MB file size limit)"; \
 	echo ""; \
 	\
 	echo "--- Staging FreeBSD packages ---"; \
