@@ -1105,6 +1105,8 @@ test: test-python test-typescript test-e2e test-performance
 # Build frontend for production
 build:
 	@echo "=== Building Frontend ==="
+	@echo "Installing Node.js dependencies..."
+	@cd frontend && npm ci --legacy-peer-deps
 	@echo "Building React frontend with Vite..."
 	@cd frontend && npm run build
 	@echo "[OK] Frontend build completed - output in frontend/dist/"
@@ -1510,7 +1512,7 @@ installer-deb:
 	echo "  4. Start: sudo systemctl start sysmanage"
 
 # Build OpenBSD port tarball
-installer-openbsd:
+installer-openbsd: build
 	@echo "=== Building OpenBSD Port Tarball ==="
 	@echo ""
 	@CURRENT_DIR=$$(pwd); \
@@ -1831,7 +1833,7 @@ installer-rpm-opensuse:
 	rm -rf "$$VENDOR_DIR"
 
 # FreeBSD .pkg package
-installer-freebsd:
+installer-freebsd: build
 	@echo "=== Building FreeBSD Package ==="
 	@echo ""
 	@echo "Creating FreeBSD .pkg package for sysmanage..."
@@ -2069,7 +2071,7 @@ installer-macos: build
 	ls -lh "$$OUTPUT_DIR/sysmanage-$$VERSION-macos.pkg"
 
 # NetBSD .tgz package
-installer-netbsd:
+installer-netbsd: build
 	@echo "=== Building NetBSD Package ==="
 	@echo ""
 	@echo "Creating NetBSD .tgz package for sysmanage..."
