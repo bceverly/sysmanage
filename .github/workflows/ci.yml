@@ -1601,6 +1601,7 @@ jobs:
         restore-keys: ${{ runner.os }}-sonar
 
     - name: SonarCloud Scan
+      # nosemgrep: generic.secrets.security.detected-sonarqube-docs-api-key - tokens are stored in GitHub Secrets, not hardcoded
       uses: SonarSource/sonarqube-scan-action@dcc5211de53084482f1c6779dda263459f5274f6 # master-2026-02-22
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information

@@ -1572,8 +1572,6 @@ jobs:
         include:
           - release: questing
             release_name: "25.10 Questing"
-          - release: plucky
-            release_name: "25.04 Plucky"
           - release: noble
             release_name: "24.04 Noble"
           - release: jammy

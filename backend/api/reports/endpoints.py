@@ -109,6 +109,8 @@ async def view_report_html(
     else:
         raise HTTPException(status_code=400, detail=_("Unknown report type"))
 
+    # nosemgrep: python.fastapi.web.tainted-direct-response-fastapi - html_content is generated
+    # by a trusted Pro+ reporting module from enum-validated report types and ORM-fetched data
     return HTMLResponse(content=html_content)
 
 

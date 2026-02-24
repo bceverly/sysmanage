@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 # pylint: disable=unused-import
 from backend.api.handlers import handle_os_version_update
 from backend.api.message_handlers import (
+    handle_command_acknowledgment,
     handle_command_result,
     handle_config_acknowledgment,
     handle_diagnostic_result,
@@ -235,9 +236,15 @@ async def _process_websocket_message(data, connection, db, connection_id):
             message_size,
         )
 
-        # Handle time-sensitive messages immediately (heartbeats, system_info)
-        # These should not be queued as they need immediate processing
-        if message.message_type in [MessageType.HEARTBEAT, MessageType.SYSTEM_INFO]:
+        # Handle time-sensitive messages immediately (heartbeats, system_info,
+        # command_acknowledgment). These should not be queued as they need
+        # immediate processing. Command acks are especially time-sensitive
+        # because the server has a 60-second ack timeout window.
+        if message.message_type in [
+            MessageType.HEARTBEAT,
+            MessageType.SYSTEM_INFO,
+            MessageType.COMMAND_ACKNOWLEDGMENT,
+        ]:
             await _handle_message_by_type(message, connection, db)
         else:
             # Queue all other messages for background processing
@@ -304,7 +311,7 @@ async def _handle_message_by_type(message, connection, db):
     """
     Handle time-sensitive messages that need immediate processing.
 
-    Note: This function is ONLY called for HEARTBEAT and SYSTEM_INFO messages.
+    Called for HEARTBEAT, SYSTEM_INFO, and COMMAND_ACKNOWLEDGMENT messages.
     All other message types are queued and processed by the inbound processor.
     """
     if message.message_type == MessageType.SYSTEM_INFO:
@@ -316,6 +323,18 @@ async def _handle_message_by_type(message, connection, db):
         heartbeat_data = message.data.copy()
         heartbeat_data["message_id"] = message.message_id
         await handle_heartbeat(db, connection, heartbeat_data)
+
+    elif message.message_type == MessageType.COMMAND_ACKNOWLEDGMENT:
+        # Process acks immediately - they are time-sensitive (60-second window)
+        # and the message_id (which references the outbound message to acknowledge)
+        # is at the top level, not inside message.data, so it would be lost
+        # if enqueued through the normal background processing pipeline.
+        ack_data = {"message_id": message.message_id}
+        await handle_command_acknowledgment(db, connection, ack_data)
+        # Commit the ack status change - mark_acknowledged() skips commit when
+        # a session is provided, and the WebSocket handler uses a long-lived
+        # session, so we must commit explicitly (same pattern as handle_heartbeat).
+        db.commit()
 
     else:
         # This should never happen - log a warning

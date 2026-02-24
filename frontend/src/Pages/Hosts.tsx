@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { parseUTCTimestamp } from '../utils/dateUtils';
-import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowSelectionModel, GridSortModel } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -71,12 +71,17 @@ const Hosts = () => {
     // Controlled pagination state for v7
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
 
+    // Controlled sort model - empty for "all" mode (custom sort), fqdn asc for other modes
+    const [sortModel, setSortModel] = useState<GridSortModel>(
+        getFilterFromHash() === 'all' ? [] : [{ field: 'fqdn', sort: 'asc' }]
+    );
+
     // Update pagination when pageSize from hook changes
     useEffect(() => {
         setPaginationModel(prev => ({ ...prev, pageSize }));
     }, [pageSize]);
 
-    // Sync child host filter with URL hash
+    // Sync child host filter with URL hash and sort model
     useEffect(() => {
         // Update URL hash when filter changes (without adding to browser history for 'all')
         const newHash = childHostFilter === 'all' ? '' : `#${childHostFilter}`;
@@ -84,6 +89,13 @@ const Hosts = () => {
         if (newHash !== currentHash) {
             // Use replaceState to avoid polluting browser history
             globalThis.history.replaceState(null, '', `${globalThis.location.pathname}${globalThis.location.search}${newHash}`);
+        }
+        // In "all" mode, clear DataGrid sort so our custom parent-child grouping is preserved.
+        // In other modes, sort by fqdn ascending.
+        if (childHostFilter === 'all') {
+            setSortModel([]);
+        } else {
+            setSortModel([{ field: 'fqdn', sort: 'asc' }]);
         }
     }, [childHostFilter]);
 
@@ -824,6 +836,50 @@ const Hosts = () => {
             });
         }
 
+        // Apply custom sorting based on filter mode
+        if (childHostFilter === 'all') {
+            // "All" mode: parents sorted by hostname, children grouped under their parent
+            const topLevelHosts = filtered
+                .filter(h => !h.parent_host_id)
+                .sort((a, b) => (a.fqdn || '').localeCompare(b.fqdn || ''));
+
+            // Group children by parent_host_id
+            const childrenByParent = new Map<string, SysManageHost[]>();
+            for (const child of filtered.filter(h => !!h.parent_host_id)) {
+                const parentId = child.parent_host_id!;
+                if (!childrenByParent.has(parentId)) {
+                    childrenByParent.set(parentId, []);
+                }
+                childrenByParent.get(parentId)!.push(child);
+            }
+
+            // Sort children within each parent group
+            childrenByParent.forEach(children => {
+                children.sort((a, b) => (a.fqdn || '').localeCompare(b.fqdn || ''));
+            });
+
+            // Build final sorted array: parent followed by its children
+            const sorted: SysManageHost[] = [];
+            for (const parent of topLevelHosts) {
+                sorted.push(parent);
+                const children = childrenByParent.get(parent.id);
+                if (children) {
+                    sorted.push(...children);
+                    childrenByParent.delete(parent.id);
+                }
+            }
+
+            // Append any orphaned children whose parent is not in the filtered list
+            childrenByParent.forEach(children => {
+                sorted.push(...children);
+            });
+
+            filtered = sorted;
+        } else {
+            // Parents and Children modes: simple sort by hostname
+            filtered.sort((a, b) => (a.fqdn || '').localeCompare(b.fqdn || ''));
+        }
+
         setFilteredData(filtered);
     }, [tableData, searchTerm, searchColumn, selectedTags, childHostFilter]);
 
@@ -947,11 +1003,8 @@ const Hosts = () => {
                     loading={loading}
                     paginationModel={paginationModel || { page: 0, pageSize: 10 }}
                     onPaginationModelChange={setPaginationModel}
-                    initialState={{
-                        sorting: {
-                            sortModel: [{ field: 'fqdn', sort: 'asc'}],
-                        },
-                    }}
+                    sortModel={sortModel}
+                    onSortModelChange={setSortModel}
                     columnVisibilityModel={columnVisibilityModel || { id: false }}
                     pageSizeOptions={safePageSizeOptions}
                     checkboxSelection

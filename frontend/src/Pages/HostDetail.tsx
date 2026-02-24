@@ -318,6 +318,7 @@ const HostDetail = () => { // NOSONAR
     const [kvmModulesLoading, setKvmModulesLoading] = useState<boolean>(false);
 
     // Create child host modal state
+    const explicitChildTypeRef = useRef<string | null>(null);
     const [createChildHostOpen, setCreateChildHostOpen] = useState<boolean>(false);
     const [createChildHostLoading, setCreateChildHostLoading] = useState<boolean>(false);
     const [childHostFormData, setChildHostFormData] = useState({
@@ -386,6 +387,12 @@ const HostDetail = () => { // NOSONAR
     // Set child type based on platform and fetch distributions when dialog opens
     useEffect(() => {
         if (createChildHostOpen && host) {
+            // If dialog was opened with an explicit type (e.g. from HypervisorStatusCard),
+            // respect that choice instead of auto-detecting from platform/virtualization
+            if (explicitChildTypeRef.current) {
+                explicitChildTypeRef.current = null;
+                return;
+            }
             const platform = host.platform || '';
             const isLinux = platform.toLowerCase().includes('linux');
             const isOpenBSD = platform.includes('OpenBSD');
@@ -1171,6 +1178,7 @@ const HostDetail = () => { // NOSONAR
 
     // Open create dialog with a specific child type (called from HypervisorStatusCard)
     const openCreateDialogWithType = useCallback((childType: string) => {
+        explicitChildTypeRef.current = childType;
         setChildHostFormData(prev => ({
             ...prev,
             childType,
@@ -3306,13 +3314,29 @@ const HostDetail = () => { // NOSONAR
             const response = await axiosInstance.get('/api/ubuntu-pro/');
             const masterKey = response.data.master_key;
             if (masterKey?.trim()) {
-                setUbuntuProToken(masterKey);
+                // Master key exists - attach directly without showing the token
+
+                setUbuntuProAttaching(true);
+                try {
+                    await doAttachUbuntuPro(hostId!, masterKey.trim());
+                    setSnackbarMessage(t('hostDetail.ubuntuProAttachSuccess', 'Ubuntu Pro attach requested'));
+                    setSnackbarSeverity('success');
+                    setSnackbarOpen(true);
+                    // Start polling - attaching state stays active until attached
+                    startUbuntuProPolling();
+                } catch {
+                    setSnackbarMessage(t('hostDetail.ubuntuProAttachError', 'Failed to attach Ubuntu Pro'));
+                    setSnackbarSeverity('error');
+                    setSnackbarOpen(true);
+                    setUbuntuProAttaching(false);
+                }
+                return;
             }
         } catch (error) {
             console.log('No master Ubuntu Pro token configured or error loading:', error);
-            // Don't show error to user - this is optional functionality
         }
 
+        // No master key - show dialog for manual token entry
         setUbuntuProTokenDialog(true);
     };
 
@@ -3327,30 +3351,60 @@ const HostDetail = () => { // NOSONAR
         setUbuntuProDetaching(true);
         try {
             await doDetachUbuntuPro(hostId);
-            setSnackbarMessage(t('hostDetail.ubuntuProDetachSuccess', 'Ubuntu Pro detached successfully'));
+            setSnackbarMessage(t('hostDetail.ubuntuProDetachSuccess', 'Ubuntu Pro detach requested'));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
-
-            // Refresh Ubuntu Pro info after a short delay to allow agent to process
-            setTimeout(async () => {
+            // Poll until detached
+            let pollCount = 0;
+            const maxPolls = 30;
+            const pollInterval = setInterval(async () => {
+                pollCount++;
                 try {
                     const ubuntuProData = await doGetHostUbuntuPro(hostId);
                     setUbuntuProInfo(ubuntuProData);
-                } catch (refreshError) {
-                    console.log('Failed to refresh Ubuntu Pro data:', refreshError);
+                    if (!ubuntuProData.attached || pollCount >= maxPolls) {
+                        clearInterval(pollInterval);
+                        setUbuntuProDetaching(false);
+                    }
+                } catch {
+                    if (pollCount >= maxPolls) {
+                        clearInterval(pollInterval);
+                        setUbuntuProDetaching(false);
+                    }
                 }
             }, 2000);
         } catch {
             setSnackbarMessage(t('hostDetail.ubuntuProDetachError', 'Failed to detach Ubuntu Pro'));
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
-        } finally {
             setUbuntuProDetaching(false);
         }
     };
 
     const handleCancelUbuntuProDetach = () => {
         setUbuntuProDetachConfirmOpen(false);
+    };
+
+    const startUbuntuProPolling = () => {
+        if (!hostId) return;
+        let pollCount = 0;
+        const maxPolls = 30; // Poll for up to ~60 seconds
+        const pollInterval = setInterval(async () => {
+            pollCount++;
+            try {
+                const ubuntuProData = await doGetHostUbuntuPro(hostId);
+                setUbuntuProInfo(ubuntuProData);
+                if (ubuntuProData.attached || pollCount >= maxPolls) {
+                    clearInterval(pollInterval);
+                    setUbuntuProAttaching(false);
+                }
+            } catch {
+                if (pollCount >= maxPolls) {
+                    clearInterval(pollInterval);
+                    setUbuntuProAttaching(false);
+                }
+            }
+        }, 2000);
     };
 
     const handleUbuntuProTokenSubmit = async () => {
@@ -3361,24 +3415,16 @@ const HostDetail = () => { // NOSONAR
 
         try {
             await doAttachUbuntuPro(hostId, ubuntuProToken.trim());
-            setSnackbarMessage(t('hostDetail.ubuntuProAttachSuccess', 'Ubuntu Pro attached successfully'));
+            setSnackbarMessage(t('hostDetail.ubuntuProAttachSuccess', 'Ubuntu Pro attach requested'));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
-
-            // Refresh Ubuntu Pro info after a short delay to allow agent to process
-            setTimeout(async () => {
-                try {
-                    const ubuntuProData = await doGetHostUbuntuPro(hostId);
-                    setUbuntuProInfo(ubuntuProData);
-                } catch (refreshError) {
-                    console.log('Failed to refresh Ubuntu Pro data:', refreshError);
-                }
-            }, 3000); // Longer delay for attach since it may take more time
+            setUbuntuProToken('');
+            // Start polling - attaching state stays active until attached
+            startUbuntuProPolling();
         } catch {
             setSnackbarMessage(t('hostDetail.ubuntuProAttachError', 'Failed to attach Ubuntu Pro'));
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
-        } finally {
             setUbuntuProAttaching(false);
             setUbuntuProToken('');
         }
@@ -6210,20 +6256,26 @@ const HostDetail = () => { // NOSONAR
                                     {host?.is_agent_privileged && (
                                         <Box>
                                             {ubuntuProAttaching && (
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    <CircularProgress size={16} />
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        {t('hostDetail.ubuntuProAttaching', 'Attaching...')}
-                                                    </Typography>
-                                                </Box>
+                                                <Button
+                                                    variant="outlined"
+                                                    color="primary"
+                                                    size="small"
+                                                    disabled
+                                                    startIcon={<CircularProgress size={16} />}
+                                                >
+                                                    {t('hostDetail.ubuntuProAttaching', 'Attaching...')}
+                                                </Button>
                                             )}
                                             {ubuntuProDetaching && (
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    <CircularProgress size={16} />
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        {t('hostDetail.ubuntuProDetaching', 'Detaching...')}
-                                                    </Typography>
-                                                </Box>
+                                                <Button
+                                                    variant="outlined"
+                                                    color="warning"
+                                                    size="small"
+                                                    disabled
+                                                    startIcon={<CircularProgress size={16} />}
+                                                >
+                                                    {t('hostDetail.ubuntuProDetaching', 'Detaching...')}
+                                                </Button>
                                             )}
                                             {!ubuntuProAttaching && !ubuntuProDetaching && (
                                                 <>
@@ -7047,7 +7099,7 @@ const HostDetail = () => { // NOSONAR
                 </DialogActions>
             </Dialog>
 
-            {/* Ubuntu Pro Token Dialog */}
+            {/* Ubuntu Pro Token Dialog - only shown when no master key is configured */}
             <Dialog
                 open={ubuntuProTokenDialog}
                 onClose={handleUbuntuProTokenCancel}
@@ -7061,11 +7113,6 @@ const HostDetail = () => { // NOSONAR
                     <Typography variant="body2" sx={{ mb: 2 }}>
                         {t('hostDetail.ubuntuProAttachDescription', 'Enter your Ubuntu Pro token to attach this system to your subscription.')}
                     </Typography>
-                    {ubuntuProToken && (
-                        <Alert severity="info" sx={{ mb: 2 }}>
-                            {t('hostDetail.ubuntuProMasterTokenPreFilled', 'Master Ubuntu Pro token has been pre-filled from settings.')}
-                        </Alert>
-                    )}
                     <TextField
                         fullWidth
                         label={t('hostDetail.ubuntuProToken', 'Ubuntu Pro Token')}

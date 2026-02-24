@@ -802,7 +802,7 @@ class TestUbuntuProIntegration:
 
         # Verify attach command data
         attach_call = mock_queue_manager.enqueue_message.call_args
-        attach_data = attach_call[1]["message_data"]
+        attach_data = attach_call[1]["message_data"]["data"]
         assert attach_data["command_type"] == "ubuntu_pro_attach"
         assert attach_data["parameters"]["token"] == "test-token"
 
@@ -815,6 +815,6 @@ class TestUbuntuProIntegration:
 
         # Verify enable command data
         enable_call = mock_queue_manager.enqueue_message.call_args
-        enable_data = enable_call[1]["message_data"]
+        enable_data = enable_call[1]["message_data"]["data"]
         assert enable_data["command_type"] == "ubuntu_pro_enable_service"
         assert enable_data["parameters"]["service"] == "esm-infra"

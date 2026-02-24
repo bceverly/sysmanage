@@ -6,7 +6,7 @@
  * dynamically created e2e-test-* users don't accumulate in the database.
  */
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -19,7 +19,7 @@ async function globalTeardown() {
   const scriptPath = join(__dirname, '..', '..', 'scripts', 'e2e_test_user.py');
 
   try {
-    const result = execSync(`python3 ${scriptPath} delete`, {
+    const result = execFileSync('python3', [scriptPath, 'delete'], {
       encoding: 'utf-8',
       timeout: 30000,
       cwd: join(__dirname, '..', '..'),

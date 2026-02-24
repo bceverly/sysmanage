@@ -216,7 +216,9 @@ async def create_child_host_request(  # NOSONAR
         cert_file = config["api"].get("certFile")
         use_https = bool(key_file and cert_file)
 
-        # Use the actual server FQDN for the agent to connect back
+        # Use the actual server IP for the agent to connect back.
+        # Child hosts (especially LXD containers) may not be able to resolve
+        # the parent's FQDN, so prefer a routable IP address.
         if api_host in (
             "0.0.0.0",
             "localhost",
@@ -224,10 +226,24 @@ async def create_child_host_request(  # NOSONAR
         ):  # nosec B104  # string comparison, not binding
             import socket
 
+            server_url = "localhost"
             try:
-                server_url = socket.getfqdn()
+                fqdn = socket.getfqdn()
+                # Resolve FQDN to check if it's routable (not loopback)
+                resolved_ip = socket.gethostbyname(fqdn)
+                if not resolved_ip.startswith("127."):
+                    server_url = resolved_ip
+                else:
+                    # FQDN resolves to loopback; get actual network IP
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                    try:
+                        # Connect to a public IP to determine our outbound IP
+                        sock.connect(("8.8.8.8", 80))  # nosec B104
+                        server_url = sock.getsockname()[0]
+                    finally:
+                        sock.close()
             except Exception:
-                server_url = "localhost"
+                pass
         else:
             server_url = api_host
 

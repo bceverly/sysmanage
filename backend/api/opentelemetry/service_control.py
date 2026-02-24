@@ -17,6 +17,7 @@ from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
+from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
     Priority,
     QueueDirection,
@@ -91,17 +92,17 @@ async def start_opentelemetry(
         validate_host_approval_status(host)
 
         # Queue the start service message
-        message_data = {
-            "command_type": "generic_command",
-            "parameters": {
+        command_message = create_command_message(
+            command_type="generic_command",
+            parameters={
                 "command_type": "start_opentelemetry_service",
                 "parameters": {},
             },
-        }
+        )
 
         server_queue_manager.enqueue_message(
             message_type="command",
-            message_data=message_data,
+            message_data=command_message,
             direction=QueueDirection.OUTBOUND,
             host_id=host_id,
             priority=Priority.NORMAL,
@@ -187,17 +188,17 @@ async def stop_opentelemetry(
         validate_host_approval_status(host)
 
         # Queue the stop service message
-        message_data = {
-            "command_type": "generic_command",
-            "parameters": {
+        command_message = create_command_message(
+            command_type="generic_command",
+            parameters={
                 "command_type": "stop_opentelemetry_service",
                 "parameters": {},
             },
-        }
+        )
 
         server_queue_manager.enqueue_message(
             message_type="command",
-            message_data=message_data,
+            message_data=command_message,
             direction=QueueDirection.OUTBOUND,
             host_id=host_id,
             priority=Priority.NORMAL,
@@ -285,17 +286,17 @@ async def restart_opentelemetry(
         validate_host_approval_status(host)
 
         # Queue the restart service message
-        message_data = {
-            "command_type": "generic_command",
-            "parameters": {
+        command_message = create_command_message(
+            command_type="generic_command",
+            parameters={
                 "command_type": "restart_opentelemetry_service",
                 "parameters": {},
             },
-        }
+        )
 
         server_queue_manager.enqueue_message(
             message_type="command",
-            message_data=message_data,
+            message_data=command_message,
             direction=QueueDirection.OUTBOUND,
             host_id=host_id,
             priority=Priority.NORMAL,

@@ -2867,7 +2867,7 @@ release-notes:
 
 # Deploy to Launchpad PPA
 # Usage: LAUNCHPAD_RELEASES="noble jammy" make deploy-launchpad
-# Default releases: questing plucky noble jammy
+# Default releases: questing noble jammy
 deploy-launchpad:
 	@echo "=================================================="
 	@echo "Deploy to Launchpad PPA"
@@ -2886,7 +2886,7 @@ deploy-launchpad:
 		fi; \
 	fi; \
 	\
-	RELEASES="$${LAUNCHPAD_RELEASES:-questing plucky noble jammy}"; \
+	RELEASES="$${LAUNCHPAD_RELEASES:-questing noble jammy}"; \
 	echo "Target releases: $$RELEASES"; \
 	echo "Version: $$VERSION"; \
 	echo ""; \
