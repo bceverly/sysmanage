@@ -134,14 +134,14 @@ class VaultService:
         secret_id = str(uuid.uuid4())
 
         # Create subpath based on secret type and visibility
-        if secret_type == "ssh_key":
+        if secret_type == "ssh_key":  # nosec B105
             # SSH keys: ssh/public, ssh/private, ssh/ca
             base_path = "ssh"
             if secret_subtype in ["public", "private", "ca"]:
                 subpath = secret_subtype
             else:
                 subpath = "private"  # Default fallback
-        elif secret_type == "ssl_certificate":
+        elif secret_type == "ssl_certificate":  # nosec B105
             # SSL certificates: pki/root, pki/intermediate, pki/chain, pki/key_file, pki/certificate
             base_path = "pki"
             if secret_subtype in [
@@ -154,7 +154,7 @@ class VaultService:
                 subpath = secret_subtype
             else:
                 subpath = "certificate"  # Default fallback
-        elif secret_type == "database_credentials":
+        elif secret_type == "database_credentials":  # nosec B105
             # Database credentials: db/postgresql, db/mysql, db/oracle, db/sqlserver, db/sqlite
             base_path = "db"
             if secret_subtype in [
@@ -167,14 +167,14 @@ class VaultService:
                 subpath = secret_subtype
             else:
                 subpath = "postgresql"  # Default fallback
-        elif secret_type == "api_keys":
+        elif secret_type == "api_keys":  # nosec B105
             # API keys: api/github, api/salesforce
             base_path = "api"
             if secret_subtype in ["github", "salesforce"]:
                 subpath = secret_subtype
             else:
                 subpath = "github"  # Default fallback
-        elif secret_type == "API Key":
+        elif secret_type == "API Key":  # nosec B105
             # API Keys: api/grafana, api/github, api/salesforce
             base_path = "api"
             if secret_subtype in ["grafana", "github", "salesforce"]:

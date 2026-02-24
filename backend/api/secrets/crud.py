@@ -70,9 +70,7 @@ async def list_ssh_keys(
     _check_secrets_module()
     secrets = (
         db.query(Secret)
-        .filter(
-            Secret.secret_type == "ssh_key"
-        )  # nosec B105  # secret type filter, not a password
+        .filter(Secret.secret_type == "ssh_key")  # nosec B105
         .order_by(Secret.created_at.desc())
         .all()
     )

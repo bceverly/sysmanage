@@ -242,7 +242,7 @@ async def create_child_host_request(  # NOSONAR
                         server_url = sock.getsockname()[0]
                     finally:
                         sock.close()
-            except Exception:
+            except Exception:  # nosec B110
                 pass
         else:
             server_url = api_host
@@ -370,7 +370,7 @@ async def create_child_host_request(  # NOSONAR
                         )
                         if steps is not None:
                             used_plan_based = True
-            except Exception:
+            except Exception:  # nosec B110
                 pass  # Fall through to legacy path
 
         if not used_plan_based:
