@@ -926,7 +926,7 @@ jobs:
 
     - name: Install Artillery for load testing
       run: |
-        npm install -g artillery@latest
+        npm install -g artillery@2.0.29
 
     - name: Install Playwright browsers
       working-directory: frontend

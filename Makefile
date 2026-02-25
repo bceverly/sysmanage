@@ -2431,7 +2431,7 @@ sbom:
 	@echo "✓ Python SBOM generated: sbom/backend-sbom.json"
 	@echo ""
 	@echo "Generating Node.js SBOM from frontend/package.json..."
-	@cd frontend && npx --yes @cyclonedx/cyclonedx-npm \
+	@cd frontend && npx cyclonedx-npm \
 		--output-format JSON \
 		--output-file ../sbom/frontend-sbom.json \
 		--ignore-npm-errors

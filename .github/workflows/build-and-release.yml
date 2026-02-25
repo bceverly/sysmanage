@@ -108,11 +108,11 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          sudo npm install -g @cyclonedx/cyclonedx-npm
+          sudo npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('✓ cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
         env:
           NODE_AUTH_TOKEN: ''
 
@@ -218,11 +218,11 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          sudo npm install -g @cyclonedx/cyclonedx-npm
+          sudo npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
         env:
           NODE_AUTH_TOKEN: ''
 
@@ -304,11 +304,11 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          sudo npm install -g @cyclonedx/cyclonedx-npm
+          sudo npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
         env:
           NODE_AUTH_TOKEN: ''
 
@@ -376,11 +376,11 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          sudo npm install -g @cyclonedx/cyclonedx-npm
+          sudo npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
         env:
           NODE_AUTH_TOKEN: ''
 
@@ -449,11 +449,11 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          sudo npm install -g @cyclonedx/cyclonedx-npm
+          sudo npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
         env:
           NODE_AUTH_TOKEN: ''
 
@@ -520,11 +520,11 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          npm install -g @cyclonedx/cyclonedx-npm
+          npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
         env:
           NODE_AUTH_TOKEN: ''
 
@@ -592,11 +592,11 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          npm install -g @cyclonedx/cyclonedx-npm
+          npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
         env:
           NODE_AUTH_TOKEN: ''
 
@@ -664,11 +664,11 @@ jobs:
           python -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          npm install -g @cyclonedx/cyclonedx-npm
+          npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
         env:
           NODE_AUTH_TOKEN: ''
 
@@ -736,11 +736,11 @@ jobs:
           python -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          npm install -g @cyclonedx/cyclonedx-npm
+          npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
         env:
           NODE_AUTH_TOKEN: ''
 
@@ -1689,11 +1689,11 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          sudo npm install -g @cyclonedx/cyclonedx-npm
+          sudo npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
         env:
           NODE_AUTH_TOKEN: ''
 
