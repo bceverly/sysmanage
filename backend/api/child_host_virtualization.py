@@ -89,11 +89,97 @@ def _get_cloud_image_url(distribution):
     return None
 
 
+def _validate_platform_for_child_type(host, child_type):
+    """Validate that the host platform supports the requested child type."""
+    if child_type == "wsl":
+        if not host.platform or "Windows" not in host.platform:
+            raise HTTPException(
+                status_code=400,
+                detail=_("WSL is only supported on Windows hosts"),
+            )
+    elif child_type == "kvm":
+        if not host.platform or "Linux" not in host.platform:
+            raise HTTPException(
+                status_code=400,
+                detail=_("KVM is only supported on Linux hosts"),
+            )
+
+
+def _determine_child_name(request):
+    """Determine the child host name based on child type and request fields."""
+    name_configs = {
+        "lxd": (
+            "container_name",
+            _("Container name is required for LXD containers"),
+        ),
+        "vmm": (
+            "vm_name",
+            _("VM name is required for VMM virtual machines"),
+        ),
+        "kvm": (
+            "vm_name",
+            _("VM name is required for KVM virtual machines"),
+        ),
+        "bhyve": (
+            "vm_name",
+            _("VM name is required for bhyve virtual machines"),
+        ),
+    }
+
+    config = name_configs.get(request.child_type)
+    if config:
+        field_name, error_message = config
+        child_name = getattr(request, field_name, None)
+        if not child_name:
+            raise HTTPException(status_code=400, detail=error_message)
+        return child_name
+
+    # WSL uses distribution as the name
+    return request.distribution
+
+
+def _resolve_server_url(api_host):
+    """Resolve a routable server URL for child host agent configuration.
+
+    If the API host is a listen-all or loopback address, determine the
+    actual routable IP so child hosts (e.g. LXD containers) can connect
+    back to the server.
+    """
+    if api_host not in (
+        "0.0.0.0",  # nosec B104  # string comparison, not binding
+        "localhost",
+        "127.0.0.1",
+    ):
+        return api_host
+
+    import socket
+
+    server_url = "localhost"
+    try:
+        fqdn = socket.getfqdn()
+        resolved_ip = socket.gethostbyname(fqdn)
+        if not resolved_ip.startswith("127."):
+            return resolved_ip
+        # FQDN resolves to loopback; detect actual outbound IP using a
+        # UDP socket.  connect() on SOCK_DGRAM merely selects the route
+        # — no packet is sent, so the destination address is irrelevant.
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            sock.connect(("8.8.8.8", 80))  # NOSONAR  # nosec B104
+            server_url = sock.getsockname()[0]
+        finally:
+            sock.close()
+    except Exception:  # nosec B110
+        pass
+
+    return server_url
+
+
 @router.post(
     "/host/{host_id}/virtualization/create-child",
     dependencies=[Depends(JWTBearer())],
 )
-async def create_child_host_request(  # NOSONAR
+async def create_child_host_request(
     host_id: str,
     request: CreateWslChildHostRequest,
     current_user: str = Depends(get_current_user),
@@ -117,18 +203,7 @@ async def create_child_host_request(  # NOSONAR
         verify_host_active(host)
 
         # Verify platform compatibility for child type
-        if request.child_type == "wsl":
-            if not host.platform or "Windows" not in host.platform:
-                raise HTTPException(
-                    status_code=400,
-                    detail=_("WSL is only supported on Windows hosts"),
-                )
-        elif request.child_type == "kvm":
-            if not host.platform or "Linux" not in host.platform:
-                raise HTTPException(
-                    status_code=400,
-                    detail=_("KVM is only supported on Linux hosts"),
-                )
+        _validate_platform_for_child_type(host, request.child_type)
 
         # Verify the agent is privileged
         if not host.is_agent_privileged:
@@ -141,38 +216,7 @@ async def create_child_host_request(  # NOSONAR
             )
 
         # Determine the child name based on type
-        # For LXD, use container_name; for VMM/KVM, use vm_name; for WSL, use distribution
-        if request.child_type == "lxd":
-            child_name = request.container_name
-            if not child_name:
-                raise HTTPException(
-                    status_code=400,
-                    detail=_("Container name is required for LXD containers"),
-                )
-        elif request.child_type == "vmm":
-            child_name = request.vm_name
-            if not child_name:
-                raise HTTPException(
-                    status_code=400,
-                    detail=_("VM name is required for VMM virtual machines"),
-                )
-        elif request.child_type == "kvm":
-            child_name = request.vm_name
-            if not child_name:
-                raise HTTPException(
-                    status_code=400,
-                    detail=_("VM name is required for KVM virtual machines"),
-                )
-        elif request.child_type == "bhyve":
-            child_name = request.vm_name
-            if not child_name:
-                raise HTTPException(
-                    status_code=400,
-                    detail=_("VM name is required for bhyve virtual machines"),
-                )
-        else:
-            # WSL uses distribution as the name
-            child_name = request.distribution
+        child_name = _determine_child_name(request)
 
         # Check for existing child host with same name
         existing = (
@@ -219,33 +263,7 @@ async def create_child_host_request(  # NOSONAR
         # Use the actual server IP for the agent to connect back.
         # Child hosts (especially LXD containers) may not be able to resolve
         # the parent's FQDN, so prefer a routable IP address.
-        if api_host in (
-            "0.0.0.0",
-            "localhost",
-            "127.0.0.1",
-        ):  # nosec B104  # string comparison, not binding
-            import socket
-
-            server_url = "localhost"
-            try:
-                fqdn = socket.getfqdn()
-                # Resolve FQDN to check if it's routable (not loopback)
-                resolved_ip = socket.gethostbyname(fqdn)
-                if not resolved_ip.startswith("127."):
-                    server_url = resolved_ip
-                else:
-                    # FQDN resolves to loopback; get actual network IP
-                    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                    try:
-                        # Connect to a public IP to determine our outbound IP
-                        sock.connect(("8.8.8.8", 80))  # nosec B104
-                        server_url = sock.getsockname()[0]
-                    finally:
-                        sock.close()
-            except Exception:  # nosec B110
-                pass
-        else:
-            server_url = api_host
+        server_url = _resolve_server_url(api_host)
 
         # Generate auto-approve token if requested
         auto_approve_token = None
