@@ -113,6 +113,8 @@ jobs:
           # Verify installations
           python3 -c "import cyclonedx_py; print('✓ cyclonedx-bom installed')"
           cyclonedx-npm --version
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -221,6 +223,8 @@ jobs:
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
           cyclonedx-npm --version
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -305,6 +309,8 @@ jobs:
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
           cyclonedx-npm --version
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -375,6 +381,8 @@ jobs:
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
           cyclonedx-npm --version
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -446,6 +454,8 @@ jobs:
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
           cyclonedx-npm --version
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -515,6 +525,8 @@ jobs:
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
           cyclonedx-npm --version
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -585,6 +597,8 @@ jobs:
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
           cyclonedx-npm --version
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -655,6 +669,8 @@ jobs:
           # Verify installations
           python -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
           cyclonedx-npm --version
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -725,6 +741,8 @@ jobs:
           # Verify installations
           python -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
           cyclonedx-npm --version
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -1676,6 +1694,8 @@ jobs:
           # Verify installations
           python3 -c "import cyclonedx_py; print('cyclonedx-bom installed')"
           cyclonedx-npm --version
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         working-directory: frontend

@@ -684,6 +684,8 @@ jobs:
           exit 1
         fi
         echo "✅ Frontend process is running"
+      env:
+        NODE_AUTH_TOKEN: ''
 
     - name: Wait for servers to be ready
       run: |
@@ -1012,6 +1014,8 @@ jobs:
           exit 1
         fi
         echo "✅ Frontend process is running"
+      env:
+        NODE_AUTH_TOKEN: ''
 
     - name: Wait for frontend to be ready
       run: |
@@ -1237,6 +1241,8 @@ jobs:
         npx serve -s dist -l 3001 &
         echo $! > /tmp/frontend-perf.pid
         sleep 5
+      env:
+        NODE_AUTH_TOKEN: ''
 
     - name: Wait for servers to be ready
       run: |
