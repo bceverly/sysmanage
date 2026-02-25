@@ -379,13 +379,14 @@ jobs:
         pip install pytest pytest-asyncio pytest-timeout
       shell: bash
 
-    - name: Install Playwright browsers
+    - name: Install frontend dependencies and Playwright browsers
       run: |
-        pip install playwright
-        playwright install chromium firefox
+        cd frontend
+        npm install --legacy-peer-deps
+        npx playwright install --with-deps chromium firefox
         # Install WebKit only on macOS
         if [ "${{ runner.os }}" == "macOS" ]; then
-          playwright install webkit
+          npx playwright install --with-deps webkit
         fi
       shell: bash
 

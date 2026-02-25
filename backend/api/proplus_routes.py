@@ -569,14 +569,16 @@ def mount_secrets_routes(app: FastAPI) -> bool:
                 logger=logger,
             )
             app.include_router(router, prefix="/api")
-        logger.info(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak
+        logger.info(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             "Mounted secrets routes from secrets_engine v%s",
             str(module_info.get("version", "unknown"))[:20],
         )
         return True
 
     except Exception as e:
-        logger.error("Failed to mount secrets routes (%s)", type(e).__name__)
+        logger.error(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+            "Failed to mount secrets routes (%s)", type(e).__name__
+        )
         return False
 
 

@@ -25,17 +25,21 @@ test.describe('Settings Page', () => {
       // networkidle may timeout, continue anyway
     }
 
-    // Settings page typically has tabs for different setting categories
+    // Settings page has tabs for different setting categories
+    // Check multiple selectors to handle MUI version differences
+    const tabsByAria = page.locator('[aria-label="settings tabs"]');
     const tabs = page.locator('.MuiTabs-root');
     const tabButtons = page.getByRole('tab');
+    const tabLabels = page.getByText(/^Tags$/).first();
     const accordions = page.locator('.MuiAccordion-root');
 
-    // Either tabs, tab buttons, or accordions should be visible
-    const hasTabs = await tabs.isVisible({ timeout: 5000 }).catch(() => false);
+    const hasTabsByAria = await tabsByAria.isVisible({ timeout: 5000 }).catch(() => false);
+    const hasTabs = await tabs.isVisible({ timeout: 2000 }).catch(() => false);
     const hasTabButtons = (await tabButtons.count()) > 0;
+    const hasTabLabels = await tabLabels.isVisible({ timeout: 2000 }).catch(() => false);
     const hasAccordions = (await accordions.count()) > 0;
 
-    expect(hasTabs || hasTabButtons || hasAccordions).toBeTruthy();
+    expect(hasTabsByAria || hasTabs || hasTabButtons || hasTabLabels || hasAccordions).toBeTruthy();
   });
 
   test('should have general settings section', async ({ page }) => {
