@@ -764,7 +764,7 @@ jobs:
           echo "🐧 Linux detected - testing Chrome and Firefox"
         fi
 
-        if npx playwright test --reporter=list; then
+        if npx playwright test --reporter=html,list; then
           echo "status=passing" >> $GITHUB_OUTPUT
           echo "color=brightgreen" >> $GITHUB_OUTPUT
           echo "✅ All E2E tests passed"
@@ -788,6 +788,14 @@ jobs:
         path: |
           /tmp/sysmanage-screenshots/login_failure_*.png
           tests/ui/test-results/
+        retention-days: 7
+
+    - name: Upload Playwright HTML report
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      if: always()
+      with:
+        name: playwright-e2e-report-${{ github.run_number }}
+        path: frontend/playwright-report/
         retention-days: 7
 
     - name: Save UI test status data
@@ -857,257 +865,13 @@ jobs:
         pkill -f "uvicorn" || true
         pkill -f "serve" || true
 
-  e2e-tests:
-    name: E2E Tests (Playwright)
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    needs: [build]  # Only run after build succeeds
-    if: success()
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: sysmanage
-          POSTGRES_USER: sysmanage
-          POSTGRES_PASSWORD: abc123
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-    steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-    - name: Set up Python 3.12
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
-      with:
-        python-version: '3.12'
-
-    - name: Set up Node.js
-      uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
-      with:
-        node-version: '20'
-        registry-url: 'https://registry.npmjs.org/'
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
-
-    - name: Cache pip packages
-      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Install frontend dependencies
-      working-directory: frontend
-      run: |
-        npm cache clean --force || true
-        npm install --legacy-peer-deps || npm ci --legacy-peer-deps
-
-    - name: Install Playwright browsers
-      working-directory: frontend
-      run: npx playwright install --with-deps chromium firefox
-
-    - name: Create test config
-      run: |
-        sudo mkdir -p /etc
-        sudo tee /etc/sysmanage.yaml > /dev/null <<EOF
-        api:
-          host: "0.0.0.0"
-          port: 8082
-          certFile: ""
-          chainFile: ""
-          keyFile: ""
-        database:
-          user: "sysmanage"
-          password: "abc123"
-          host: "localhost"
-          port: 5432
-          name: "sysmanage"
-        security:
-          password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
-          admin_userid: "admin@sysmanage.org"
-          admin_password: "TEST_AdminPass123!"
-          jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
-          jwt_algorithm: "HS256"
-          jwt_auth_timeout: 6000
-          jwt_refresh_timeout: 60000
-        webui:
-          host: "0.0.0.0"
-          port: 5173
-        vault:
-          enabled: false
-        EOF
-
-    - name: Run backend database migrations
-      run: |
-        python -c "from alembic.config import Config; from alembic import command; cfg = Config('alembic.ini'); command.upgrade(cfg, 'head')"
-      env:
-        PYTHONPATH: .
-        DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
-
-    - name: Start backend server
-      run: |
-        echo "🚀 Starting backend server on port 8082 for E2E testing..."
-        cd backend
-        PYTHONPATH=.. python -m uvicorn main:app --host 0.0.0.0 --port 8082 > /tmp/backend-e2e.log 2>&1 &
-        BACKEND_PID=$!
-        echo $BACKEND_PID > /tmp/backend-e2e.pid
-        echo "Backend started with PID: $BACKEND_PID"
-
-        # Give server time to start
-        sleep 15
-
-        # Check if process is still running
-        if ! kill -0 $BACKEND_PID 2>/dev/null; then
-          echo "❌ Backend process died! Log contents:"
-          cat /tmp/backend-e2e.log
-          exit 1
-        fi
-
-        echo "✅ Backend server started successfully for E2E testing"
-      env:
-        PYTHONPATH: .
-
-    - name: Build frontend
-      working-directory: frontend
-      run: npm run build
-      env:
-        VITE_BACKEND_PORT: 8082
-
-    - name: Wait for backend to be ready
-      run: |
-        echo "Waiting for backend health check..."
-        if ! timeout 60 bash -c 'until curl -f http://localhost:8082/api/health; do echo "Waiting for backend..."; sleep 2; done'; then
-          echo "❌ Backend health check failed!"
-          cat /tmp/backend-e2e.log || echo "No backend log file found"
-          exit 1
-        fi
-        echo "✅ Backend is ready"
-
-    - name: Start frontend server
-      working-directory: frontend
-      run: |
-        echo "🚀 Starting frontend server on port 5173..."
-        # Use nohup to prevent process from being killed when shell exits
-        nohup npx serve -s dist -l 5173 > /tmp/frontend-e2e.log 2>&1 &
-        FRONTEND_PID=$!
-        echo $FRONTEND_PID > /tmp/frontend-e2e.pid
-        echo "Frontend started with PID: $FRONTEND_PID"
-
-        # Wait and verify it's still running
-        sleep 5
-        if ! kill -0 $FRONTEND_PID 2>/dev/null; then
-          echo "❌ Frontend process died immediately! Log contents:"
-          cat /tmp/frontend-e2e.log
-          exit 1
-        fi
-        echo "✅ Frontend process is running"
-      env:
-        NODE_AUTH_TOKEN: ''
-
-    - name: Wait for frontend to be ready
-      run: |
-        echo "Waiting for frontend..."
-        if ! timeout 60 bash -c 'until curl -f http://localhost:5173/; do echo "Waiting for frontend..."; sleep 2; done'; then
-          echo "❌ Frontend health check failed!"
-          echo "Frontend logs:"
-          cat /tmp/frontend-e2e.log || echo "No frontend log file found"
-          echo "Port 5173 status:"
-          netstat -tulpn | grep :5173 || echo "Nothing listening on port 5173"
-          exit 1
-        fi
-        echo "✅ Frontend is ready"
-
-    - name: Verify servers before E2E tests
-      run: |
-        echo "🔍 Verifying servers are still running before E2E tests..."
-
-        # Check backend - FAIL if not responding
-        echo "Backend check:"
-        if ! curl -f http://localhost:8082/api/health; then
-          echo "❌ Backend not responding!"
-          cat /tmp/backend-e2e.log || echo "No backend log"
-          exit 1
-        fi
-        echo "✅ Backend OK"
-
-        # Check frontend - FAIL if not responding
-        echo "Frontend check:"
-        if ! curl -f http://localhost:5173/; then
-          echo "❌ Frontend not responding!"
-          cat /tmp/frontend-e2e.log || echo "No frontend log"
-          echo "Frontend process status:"
-          if [ -f /tmp/frontend-e2e.pid ]; then
-            PID=$(cat /tmp/frontend-e2e.pid)
-            if kill -0 $PID 2>/dev/null; then
-              echo "Process $PID is running but not responding"
-            else
-              echo "Process $PID is NOT running"
-            fi
-          fi
-          exit 1
-        fi
-        echo "✅ Frontend OK"
-
-    - name: Run Playwright E2E tests
-      working-directory: frontend
-      run: |
-        echo "🎭 Running Playwright E2E tests..."
-        npx playwright test --reporter=html,list
-      env:
-        CI: true
-        PLAYWRIGHT_BASE_URL: http://localhost:5173
-        TEST_USERNAME: admin@sysmanage.org
-        TEST_PASSWORD: TEST_AdminPass123!
-
-    - name: Upload Playwright report
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-      if: always()
-      with:
-        name: playwright-e2e-report-${{ github.run_number }}
-        path: frontend/playwright-report/
-        retention-days: 7
-
-    - name: Upload Playwright test results
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-      if: failure()
-      with:
-        name: playwright-e2e-results-${{ github.run_number }}
-        path: frontend/test-results/
-        retention-days: 7
-
-    - name: Stop servers
-      if: always()
-      run: |
-        echo "🛑 Stopping servers..."
-        if [ -f /tmp/backend-e2e.pid ]; then
-          kill $(cat /tmp/backend-e2e.pid) || true
-        fi
-        if [ -f /tmp/frontend-e2e.pid ]; then
-          kill $(cat /tmp/frontend-e2e.pid) || true
-        fi
-        pkill -f "uvicorn" || true
-        pkill -f "serve" || true
-
   performance-tests:
     name: Performance Tests
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Allow writing to update README badge
       pull-requests: write  # Allow creating pull requests
-    needs: [ui-tests, e2e-tests]  # Only run after UI and E2E tests pass
+    needs: [ui-tests]  # Only run after UI tests pass
     if: success()
 
     services:
