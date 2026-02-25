@@ -28,8 +28,12 @@ test.describe('User List Page', () => {
     await page.goto('/users');
     // Wait for the page to fully load - data grid and permissions
     try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
-    // Additional wait for auth redirect to complete if needed
-    await page.waitForTimeout(2000);
+    // Retry navigation if auth state wasn't ready (Firefox CI timing issue)
+    if (page.url().includes('/login')) {
+      await page.waitForTimeout(2000);
+      await page.goto('/users');
+      try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+    }
   });
 
   test('should display user list page', async ({ page }) => {

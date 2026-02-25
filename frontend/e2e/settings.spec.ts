@@ -8,8 +8,13 @@ import { test, expect } from '@playwright/test';
 test.describe('Settings Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/settings');
-    // Wait for page load — Firefox can be slow to apply saved auth state
     try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* timeout ok */ }
+    // Retry navigation if auth state wasn't ready (Firefox CI timing issue)
+    if (page.url().includes('/login')) {
+      await page.waitForTimeout(2000);
+      await page.goto('/settings');
+      try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* timeout ok */ }
+    }
   });
 
   test('should display settings page', async ({ page }) => {
