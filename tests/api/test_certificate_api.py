@@ -68,10 +68,12 @@ class TestCertificateEndpoints:
         from sqlalchemy import text
 
         session.execute(
-            text("""
+            text(
+                """
             INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access, reboot_required, script_execution_enabled)
             VALUES ('550e8400-e29b-41d4-a716-446655440001', 'success-test.example.com', 1, '192.168.1.100', 'approved', :timestamp, 0, 0)
-        """),
+        """
+            ),
             {"timestamp": datetime.now(timezone.utc)},
         )
         session.commit()
@@ -128,10 +130,12 @@ class TestCertificateEndpoints:
         from sqlalchemy import text
 
         session.execute(
-            text("""
+            text(
+                """
             INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access, reboot_required, script_execution_enabled)
             VALUES ('550e8400-e29b-41d4-a716-446655440002', 'pending-test.example.com', 1, '192.168.1.100', 'pending', :timestamp, 0, 0)
-        """),
+        """
+            ),
             {"timestamp": datetime.now(timezone.utc)},
         )
         session.commit()
@@ -159,10 +163,12 @@ class TestCertificateEndpoints:
 
         timestamp = datetime.now(timezone.utc)
         session.execute(
-            text("""
+            text(
+                """
             INSERT INTO host (id, fqdn, active, ipv4, approval_status, client_certificate, certificate_serial, certificate_issued_at, last_access, reboot_required, script_execution_enabled)
             VALUES ('550e8400-e29b-41d4-a716-446655440004', 'revoke-test.example.com', 1, '192.168.1.100', 'approved', 'existing cert', '12345', :timestamp, :timestamp, 0, 0)
-        """),
+        """
+            ),
             {"timestamp": timestamp},
         )
         session.commit()
@@ -217,10 +223,12 @@ class TestCertificateEndpointsIntegration:
         from sqlalchemy import text
 
         session.execute(
-            text("""
+            text(
+                """
             INSERT INTO host (id, fqdn, active, ipv4, approval_status, last_access, reboot_required, script_execution_enabled)
             VALUES ('550e8400-e29b-41d4-a716-446655440006', 'integration-test.example.com', 1, '192.168.1.100', 'approved', :timestamp, 0, 0)
-        """),
+        """
+            ),
             {"timestamp": datetime.now(timezone.utc)},
         )
         session.commit()

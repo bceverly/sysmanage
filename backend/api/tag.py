@@ -434,12 +434,14 @@ def _get_tag_hosts_sync(tag_id: str):
 
             # Get associated hosts using raw SQL to avoid ORM issues
             host_results = session.execute(
-                text("""
+                text(
+                    """
                 SELECT h.id, h.fqdn, h.ipv4, h.ipv6, h.active, h.status
                 FROM host h
                 JOIN host_tags ht ON h.id = ht.host_id
                 WHERE ht.tag_id = :tag_id
-            """),
+            """
+                ),
                 {"tag_id": tag_id},
             ).fetchall()
 
@@ -709,12 +711,14 @@ async def get_host_tags(
 
         # Get tags for this host using raw SQL to avoid ORM issues
         tag_results = db.execute(
-            text("""
+            text(
+                """
             SELECT t.id, t.name, t.description, t.created_at, t.updated_at
             FROM tags t
             JOIN host_tags ht ON t.id = ht.tag_id
             WHERE ht.host_id = :host_id
-        """),
+        """
+            ),
             {"host_id": host_id},
         ).fetchall()
 
