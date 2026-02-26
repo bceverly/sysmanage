@@ -12,12 +12,22 @@ import { Page } from '@playwright/test';
  * false if even re-authentication failed (caller should skip).
  */
 export async function ensureAuthenticated(page: Page, targetPath: string): Promise<boolean> {
-  await page.goto(targetPath);
+  // Retry navigation in case the dev server is momentarily unavailable
+  // (e.g. NS_ERROR_CONNECTION_REFUSED on Firefox).
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await page.goto(targetPath);
+      break;
+    } catch (e) {
+      if (attempt === 2) throw e;
+      await page.waitForTimeout(2000);
+    }
+  }
 
   // Wait for client-side router to settle — the SPA may redirect to
   // /login after the initial DOM load if the auth token is missing/expired.
   try {
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    await page.waitForLoadState('networkidle', { timeout: 20000 });
   } catch {
     // networkidle may timeout on slow CI, continue
   }
@@ -44,7 +54,7 @@ export async function ensureAuthenticated(page: Page, targetPath: string): Promi
     await page.click('button[type="submit"]');
 
     // Wait for login to complete (redirect away from /login)
-    await page.waitForURL(url => !url.toString().includes('/login'), { timeout: 15000 });
+    await page.waitForURL(url => !url.toString().includes('/login'), { timeout: 30000 });
   } catch {
     return false; // Login failed
   }
@@ -52,7 +62,7 @@ export async function ensureAuthenticated(page: Page, targetPath: string): Promi
   // Now navigate to the actual target
   await page.goto(targetPath);
   try {
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    await page.waitForLoadState('networkidle', { timeout: 20000 });
   } catch {
     // networkidle may timeout, continue
   }

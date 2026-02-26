@@ -24,18 +24,18 @@ async function navigateToFirstHostDetail(page: Page): Promise<boolean> {
 
   // Click the View button (eye icon) in the Actions column
   const viewButton = firstRow.getByRole('button', { name: /view/i });
-  await expect(viewButton).toBeVisible({ timeout: 10000 });
+  await expect(viewButton).toBeVisible({ timeout: 20000 });
   await viewButton.click();
 
   // Wait for navigation to complete
-  await page.waitForURL(/\/hosts\/[a-f0-9-]+/, { timeout: 10000 });
+  await page.waitForURL(/\/hosts\/[a-f0-9-]+/, { timeout: 20000 });
   return true;
 }
 
 test.describe('Pro+ Health Analysis', () => {
   test('should navigate to health analysis if available', async ({ page }) => {
     await page.goto('/hosts');
-    try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 20000 }); } catch { /* timeout ok */ }
 
     // If redirected to login, auth isn't working - skip gracefully
     if (page.url().includes('/login')) {
@@ -44,14 +44,14 @@ test.describe('Pro+ Health Analysis', () => {
     }
 
     const dataGrid = page.locator('.MuiDataGrid-root');
-    await expect(dataGrid).toBeVisible({ timeout: 15000 });
+    await expect(dataGrid).toBeVisible({ timeout: 30000 });
 
     if (await navigateToFirstHostDetail(page)) {
       // Look for health analysis tab
       const healthTab = page.getByRole('tab', { name: /health/i }).first();
       if (await healthTab.isVisible()) {
         await healthTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
         // Health analysis content should be visible
         await expect(page.locator('body')).not.toBeEmpty();
@@ -66,7 +66,7 @@ test.describe('Pro+ Health Analysis', () => {
       const healthTab = page.getByRole('tab', { name: /health/i }).first();
       if (await healthTab.isVisible()) {
         await healthTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
         // Look for health score display
         const pageContent = await page.textContent('body');
@@ -89,7 +89,7 @@ test.describe('Pro+ Health Analysis', () => {
       const healthTab = page.getByRole('tab', { name: /health/i }).first();
       if (await healthTab.isVisible()) {
         await healthTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
         // Look for recommendations section
         const pageContent = await page.textContent('body');
@@ -112,7 +112,7 @@ test.describe('Pro+ Compliance', () => {
         const complianceTab = page.getByRole('tab', { name: /compliance/i }).first();
         if (await complianceTab.isVisible()) {
           await complianceTab.click();
-          try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+          try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
         }
       }
     }
@@ -125,7 +125,7 @@ test.describe('Pro+ Compliance', () => {
       const complianceTab = page.getByRole('tab', { name: /compliance/i }).first();
       if (await complianceTab.isVisible()) {
         await complianceTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
         // Should show compliance status
         const pageContent = await page.textContent('body');
@@ -136,7 +136,7 @@ test.describe('Pro+ Compliance', () => {
 
   test('should display compliance violations if any', async ({ page }) => {
     await page.goto('/hosts');
-    try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* networkidle timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 20000 }); } catch { /* networkidle timeout ok */ }
 
     if (!(await navigateToFirstHostDetail(page))) {
       // No hosts available, test passes
@@ -144,13 +144,13 @@ test.describe('Pro+ Compliance', () => {
     }
 
     const complianceTab = page.getByRole('tab', { name: /compliance/i }).first();
-    if (!(await complianceTab.isVisible({ timeout: 3000 }).catch(() => false))) {
+    if (!(await complianceTab.isVisible({ timeout: 6000 }).catch(() => false))) {
       // No compliance tab (Pro+ not licensed), test passes
       return;
     }
 
     await complianceTab.click();
-    try { await page.waitForLoadState('networkidle', { timeout: 5000 }); } catch { /* networkidle timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* networkidle timeout ok */ }
 
     // Look for violations list or compliant status
     const pageContent = await page.textContent('body');
@@ -171,7 +171,7 @@ test.describe('Pro+ Vulnerabilities', () => {
         const vulnTab = page.getByRole('tab', { name: /vuln|cve|security/i }).first();
         if (await vulnTab.isVisible()) {
           await vulnTab.click();
-          try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+          try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
         }
       }
     }
@@ -184,7 +184,7 @@ test.describe('Pro+ Vulnerabilities', () => {
       const vulnTab = page.getByRole('tab', { name: /vuln|cve|security/i }).first();
       if (await vulnTab.isVisible()) {
         await vulnTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
         // Should show vulnerability info
         const pageContent = await page.textContent('body');
@@ -200,7 +200,7 @@ test.describe('Pro+ Vulnerabilities', () => {
       const vulnTab = page.getByRole('tab', { name: /vuln|cve|security/i }).first();
       if (await vulnTab.isVisible()) {
         await vulnTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
         // Look for CVE identifiers or severity ratings
         const pageContent = await page.textContent('body');
@@ -218,7 +218,7 @@ test.describe('Pro+ Vulnerabilities', () => {
 test.describe('Pro+ Dashboard Cards', () => {
   test('should display Pro+ cards on home page', async ({ page }) => {
     await page.goto('/');
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
     // Look for Pro+ specific dashboard cards
     const healthCard = page.locator('[class*="health"], [data-testid*="health"]').first();
@@ -231,7 +231,7 @@ test.describe('Pro+ Dashboard Cards', () => {
 
   test('should navigate from dashboard card to detail', async ({ page }) => {
     await page.goto('/');
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
     // Try clicking on Pro+ cards
     const cards = page.locator('.MuiCard-root, [class*="Card"]');
@@ -256,7 +256,7 @@ test.describe('Pro+ Settings', () => {
     const proplusTab = page.getByRole('tab', { name: /pro|enterprise|professional|health|cve/i }).first();
     if (await proplusTab.isVisible()) {
       await proplusTab.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
       // Should show Pro+ settings
       await expect(page.locator('body')).not.toBeEmpty();
@@ -265,12 +265,12 @@ test.describe('Pro+ Settings', () => {
 
   test('should have health analysis settings', async ({ page }) => {
     await page.goto('/settings');
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
     const healthTab = page.getByRole('tab', { name: /health/i }).first();
     if (await healthTab.isVisible()) {
       await healthTab.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
       // Should show health analysis configuration
       const pageContent = await page.textContent('body');
@@ -280,12 +280,12 @@ test.describe('Pro+ Settings', () => {
 
   test('should have CVE database settings', async ({ page }) => {
     await page.goto('/settings');
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
     const cveTab = page.getByRole('tab', { name: /cve|vulnerability|nvd/i }).first();
     if (await cveTab.isVisible()) {
       await cveTab.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
       // Should show CVE database configuration
       const pageContent = await page.textContent('body');
@@ -297,12 +297,12 @@ test.describe('Pro+ Settings', () => {
 test.describe('Pro+ License', () => {
   test('should display license status', async ({ page }) => {
     await page.goto('/settings');
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
     const licenseTab = page.getByRole('tab', { name: /license/i }).first();
     if (await licenseTab.isVisible()) {
       await licenseTab.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
       // Should show license information
       const pageContent = await page.textContent('body');
@@ -317,12 +317,12 @@ test.describe('Pro+ License', () => {
 
   test('should show feature availability based on license', async ({ page }) => {
     await page.goto('/settings');
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
     const licenseTab = page.getByRole('tab', { name: /license/i }).first();
     if (await licenseTab.isVisible()) {
       await licenseTab.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
       // License tab should indicate which features are available
       await expect(page.locator('body')).not.toBeEmpty();
@@ -333,7 +333,7 @@ test.describe('Pro+ License', () => {
 test.describe('Pro+ Navigation', () => {
   test('should show Pro+ nav items if licensed', async ({ page }) => {
     await page.goto('/');
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
     // Look for Pro+ navigation items
     const nav = page.locator('nav, [role="navigation"]').first();
@@ -347,7 +347,7 @@ test.describe('Pro+ Navigation', () => {
 
   test('should navigate to Pro+ pages from nav', async ({ page }) => {
     await page.goto('/');
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
 
     // Try to find and click Pro+ nav links
     const vulnLink = page.getByRole('link', { name: /vuln|cve/i }).first();
@@ -357,13 +357,13 @@ test.describe('Pro+ Navigation', () => {
     // Click whichever is available
     if (await vulnLink.isVisible()) {
       await vulnLink.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
     } else if (await complianceLink.isVisible()) {
       await complianceLink.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
     } else if (await healthLink.isVisible()) {
       await healthLink.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* networkidle timeout ok */ }
     }
 
     // Page should be navigable

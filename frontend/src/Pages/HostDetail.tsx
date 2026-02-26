@@ -87,7 +87,7 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
-import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axios from 'axios';

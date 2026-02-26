@@ -22,7 +22,7 @@ import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHos
 import { doDeployOpenTelemetry } from '../Services/opentelemetry'
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
-import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axiosInstance from '../Services/api';

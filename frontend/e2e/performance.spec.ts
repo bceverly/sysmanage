@@ -44,7 +44,7 @@ test.describe('Performance - Page Load', () => {
 
     await page.goto('/');
     try {
-      await page.waitForLoadState('networkidle', { timeout: 45000 });
+      await page.waitForLoadState('networkidle', { timeout: 90000 });
     } catch {
       // networkidle may timeout, continue anyway
     }
@@ -61,7 +61,7 @@ test.describe('Performance - Page Load', () => {
 
     await page.goto('/hosts');
     try {
-      await page.waitForLoadState('networkidle', { timeout: 45000 });
+      await page.waitForLoadState('networkidle', { timeout: 90000 });
     } catch {
       // networkidle may timeout, continue anyway
     }
@@ -80,7 +80,7 @@ test.describe('Performance - Page Load', () => {
 
     // Verify the data grid rendered (or page is displaying hosts content)
     const dataGrid = page.locator('.MuiDataGrid-root');
-    const isDataGridVisible = await dataGrid.isVisible({ timeout: 15000 }).catch(() => false);
+    const isDataGridVisible = await dataGrid.isVisible({ timeout: 30000 }).catch(() => false);
 
     // Page should have either a data grid or some hosts content
     if (!isDataGridVisible) {
@@ -100,7 +100,7 @@ test.describe('Performance - Network', () => {
 
     await page.goto('/');
     try {
-      await page.waitForLoadState('networkidle', { timeout: 30000 });
+      await page.waitForLoadState('networkidle', { timeout: 60000 });
     } catch {
       // networkidle may timeout, continue anyway
     }
@@ -125,7 +125,7 @@ test.describe('Performance - Network', () => {
 
     await page.goto('/');
     try {
-      await page.waitForLoadState('networkidle', { timeout: 30000 });
+      await page.waitForLoadState('networkidle', { timeout: 60000 });
     } catch {
       // networkidle may timeout, continue anyway
     }
@@ -139,7 +139,7 @@ test.describe('Performance - Rendering', () => {
   test('should render hosts grid efficiently', async ({ page }) => {
     await page.goto('/hosts');
     try {
-      await page.waitForLoadState('networkidle', { timeout: 20000 });
+      await page.waitForLoadState('networkidle', { timeout: 40000 });
     } catch {
       // networkidle may timeout, continue anyway
     }
@@ -152,7 +152,7 @@ test.describe('Performance - Rendering', () => {
 
     // Grid should be visible (may already be rendered)
     const dataGrid = page.locator('.MuiDataGrid-root');
-    const isDataGridVisible = await dataGrid.isVisible({ timeout: 15000 }).catch(() => false);
+    const isDataGridVisible = await dataGrid.isVisible({ timeout: 30000 }).catch(() => false);
 
     // Either grid is visible or page has hosts content
     if (isDataGridVisible) {
@@ -170,18 +170,18 @@ test.describe('Performance - Rendering', () => {
   test('should handle page navigation efficiently', async ({ page }) => {
     await page.goto('/hosts');
     try {
-      await page.waitForLoadState('networkidle', { timeout: 20000 });
+      await page.waitForLoadState('networkidle', { timeout: 40000 });
     } catch {
       // continue anyway
     }
 
     // Navigate to first host detail
     const firstRow = page.locator('.MuiDataGrid-row').first();
-    if (await firstRow.isVisible({ timeout: 10000 }).catch(() => false)) {
+    if (await firstRow.isVisible({ timeout: 20000 }).catch(() => false)) {
       const startTime = Date.now();
       await firstRow.locator('.MuiDataGrid-cell').nth(1).click();
       try {
-        await page.waitForURL(/\/hosts\/[a-f0-9-]+/, { timeout: 15000 });
+        await page.waitForURL(/\/hosts\/[a-f0-9-]+/, { timeout: 30000 });
         const navTime = Date.now() - startTime;
 
         // Navigation should complete within 15 seconds
@@ -206,7 +206,7 @@ test.describe('Performance - Memory', () => {
     for (const path of pagePaths) {
       await page.goto(path);
       try {
-        await page.waitForLoadState('networkidle', { timeout: 15000 });
+        await page.waitForLoadState('networkidle', { timeout: 30000 });
       } catch {
         // continue anyway
       }

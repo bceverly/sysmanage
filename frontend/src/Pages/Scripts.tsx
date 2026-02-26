@@ -47,7 +47,7 @@ import {
   ExecuteScriptRequest
 } from '../Services/scripts';
 import { useTablePageSize } from '../hooks/useTablePageSize';
-import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import { hasPermission, SecurityRoles } from '../Services/permissions';

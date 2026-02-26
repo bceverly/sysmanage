@@ -93,7 +93,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 // Application-specific shared utilities
 import axiosInstance from '../Services/api';
 import { useTablePageSize } from '../hooks/useTablePageSize';
-import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import { getLicenseInfo } from '../Services/license';

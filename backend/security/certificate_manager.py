@@ -57,7 +57,9 @@ class CertificateManager:
             project_dir = Path(__file__).parent.parent.parent  # Go up to sysmanage root
             fallback_dir = project_dir / ".sysmanage-certs"
 
-            print(f"⚠️  Cannot access {cert_path} ({e}), falling back to {fallback_dir}")
+            print(
+                f"⚠️  Cannot access {cert_path} ({e}), falling back to {fallback_dir}"
+            )
             self.cert_dir = fallback_dir
             self.cert_dir.mkdir(parents=True, exist_ok=True)
 

@@ -30,7 +30,7 @@ import {
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { useTablePageSize } from '../hooks/useTablePageSize';
-import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import { secretsService, SecretResponse, SecretWithContent, SecretType } from '../Services/secrets';
 import { hasPermission, SecurityRoles } from '../Services/permissions';

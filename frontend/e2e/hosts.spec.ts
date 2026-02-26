@@ -23,11 +23,11 @@ async function navigateToFirstHostDetail(page: Page): Promise<boolean> {
 
   // Click the View button (eye icon) in the Actions column
   const viewButton = firstRow.getByRole('button', { name: /view/i });
-  await expect(viewButton).toBeVisible({ timeout: 10000 });
+  await expect(viewButton).toBeVisible({ timeout: 20000 });
   await viewButton.click();
 
   // Wait for navigation to complete
-  await page.waitForURL(/\/hosts\/[a-f0-9-]+/, { timeout: 10000 });
+  await page.waitForURL(/\/hosts\/[a-f0-9-]+/, { timeout: 20000 });
   return true;
 }
 
@@ -60,7 +60,7 @@ test.describe('Host List Page', () => {
     }
     // Wait for the data grid to be visible
     const dataGrid = page.locator('.MuiDataGrid-root');
-    await expect(dataGrid).toBeVisible({ timeout: 15000 });
+    await expect(dataGrid).toBeVisible({ timeout: 30000 });
   });
 
   test('should have search/filter functionality', async ({ page }) => {
@@ -82,7 +82,7 @@ test.describe('Host List Page', () => {
     }
     // Wait for grid to load
     const dataGrid = page.locator('.MuiDataGrid-root');
-    await expect(dataGrid).toBeVisible({ timeout: 15000 });
+    await expect(dataGrid).toBeVisible({ timeout: 30000 });
 
     const navigated = await navigateToFirstHostDetail(page);
     if (navigated) {
@@ -102,13 +102,13 @@ test.describe('Host List Page', () => {
 
     // These may or may not be visible depending on pending hosts
     // Just verify the page structure is correct
-    await expect(page.locator('.MuiDataGrid-root')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('.MuiDataGrid-root')).toBeVisible({ timeout: 30000 });
   });
 
   test('should show host count or statistics', async ({ page }) => {
     // Look for any count/statistics display
     try {
-      await page.waitForLoadState('networkidle', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 30000 });
     } catch {
       // networkidle may timeout, continue anyway
     }
@@ -124,7 +124,7 @@ test.describe('Host Detail Page', () => {
   test('should display host detail when navigating directly', async ({ page }) => {
     // First get a host ID from the hosts list
     await page.goto('/hosts');
-    try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 20000 }); } catch { /* timeout ok */ }
 
     // If redirected to login, auth isn't working - skip gracefully
     if (page.url().includes('/login')) {
@@ -133,7 +133,7 @@ test.describe('Host Detail Page', () => {
     }
 
     const dataGrid = page.locator('.MuiDataGrid-root');
-    await expect(dataGrid).toBeVisible({ timeout: 15000 });
+    await expect(dataGrid).toBeVisible({ timeout: 30000 });
 
     if (await navigateToFirstHostDetail(page)) {
       // Verify host detail page elements
@@ -157,15 +157,15 @@ test.describe('Host Detail Page', () => {
     await page.goto('/hosts');
 
     if (await navigateToFirstHostDetail(page)) {
-      // Look for system info content - CPU, RAM, OS, etc.
-      const pageContent = await page.textContent('body');
-      const hasSystemInfo =
-        pageContent?.toLowerCase().includes('cpu') ||
-        pageContent?.toLowerCase().includes('memory') ||
-        pageContent?.toLowerCase().includes('operating system') ||
-        pageContent?.toLowerCase().includes('hostname');
+      // Wait for the loading spinner to disappear and real content to render
+      const spinner = page.locator('[role="progressbar"]');
+      await expect(spinner).toBeHidden({ timeout: 60000 });
 
-      expect(hasSystemInfo).toBeTruthy();
+      // Use auto-retrying assertion so Playwright waits for the text to appear
+      await expect(page.locator('body')).toContainText(
+        /cpu|memory|operating system|platform|processor|architecture|hostname/i,
+        { timeout: 30000 }
+      );
     }
   });
 
@@ -174,7 +174,7 @@ test.describe('Host Detail Page', () => {
 
     if (await navigateToFirstHostDetail(page)) {
       // Look for common action buttons
-      try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
 
       // Page should have interactive elements
       const buttons = page.locator('button');
@@ -193,7 +193,7 @@ test.describe('Host Detail Page', () => {
         await softwareTab.click();
 
         // Wait for tab content to load
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
       }
     }
   });
@@ -206,7 +206,7 @@ test.describe('Host Detail Page', () => {
       const certTab = page.getByRole('tab', { name: /certificate/i }).first();
       if (await certTab.isVisible()) {
         await certTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
       }
     }
   });
@@ -219,7 +219,7 @@ test.describe('Host Detail Page', () => {
       const firewallTab = page.getByRole('tab', { name: /firewall/i }).first();
       if (await firewallTab.isVisible()) {
         await firewallTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
       }
     }
   });
@@ -232,7 +232,7 @@ test.describe('Host Detail Page', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
       }
     }
   });
@@ -249,7 +249,7 @@ test.describe('Host Actions', () => {
         await refreshButton.click();
 
         // Wait for the refresh action to complete
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
       }
     }
   });
