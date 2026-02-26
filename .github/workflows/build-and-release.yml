@@ -1588,6 +1588,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - release: resolute
+            release_name: "26.04 Resolute"
           - release: questing
             release_name: "25.10 Questing"
           - release: noble
