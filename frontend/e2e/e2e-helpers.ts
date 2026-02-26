@@ -96,8 +96,22 @@ export async function ensureAuthenticated(page: Page, targetPath: string): Promi
     return false;
   }
 
-  // Navigate to the actual target after re-login
-  await page.goto(targetPath);
+  // After login the SPA redirects to its default route (usually "/").
+  // Wait for that post-login redirect to finish before we navigate again,
+  // otherwise our goto() gets interrupted by the in-flight SPA redirect.
+  await waitForUrlToStabilize(page);
+
+  // Navigate to the actual target after re-login.
+  // Wrap in retry because on slow CI the SPA redirect can still be settling.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await page.goto(targetPath);
+      break;
+    } catch (e) {
+      if (attempt === 2) throw e;
+      await page.waitForTimeout(1000);
+    }
+  }
   try {
     await page.waitForLoadState('networkidle', { timeout: 20000 });
   } catch {
