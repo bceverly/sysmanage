@@ -104,7 +104,7 @@
     "nth-check": "^2.1.1",
     "postcss": "^8.4.47",
     "svgo": "^3.3.2",
-    "rollup": "npm:@rollup/wasm-node@4.52.3",
+    "rollup": ">=4.52.3",
     "@babel/helper-member-expression-to-functions": "^7.28.5",
     "@babel/generator": "^7.28.6",
     "@monaco-editor/loader": "^1.7.0",
@@ -130,7 +130,9 @@
     "minimatch": "^10.2.1",
     "@oozcitak/dom": {
       "@oozcitak/url": "^4.0.0"
-    }
+    },
+    "tar": ">=7.5.9",
+    "libxmljs2": ">=0.37.0"
   },
   "msw": {
     "workerDirectory": [
