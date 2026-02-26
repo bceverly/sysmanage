@@ -29,6 +29,18 @@ import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 
+/** Check whether a host qualifies as a virtualization parent. */
+function isParentHost(host: SysManageHost): boolean {
+    if (host.parent_host_id) return false;
+    if (!host.virtualization_capabilities) return false;
+    try {
+        const caps = JSON.parse(host.virtualization_capabilities);
+        return !!(caps.lxd?.initialized || caps.wsl?.enabled || caps.vmm?.running);
+    } catch {
+        return false;
+    }
+}
+
 const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
     const [filteredData, setFilteredData] = useState<SysManageHost[]>([]);
@@ -778,27 +790,7 @@ const Hosts = () => {
 
         // Apply child host filter
         if (childHostFilter === 'parents') {
-            // Show only hosts that can be parents (have virtualization ready)
-            filtered = filtered.filter(host => {
-                // Must not be a child host itself
-                if (host.parent_host_id) return false;
-
-                // Check if virtualization is ready (LXD initialized, WSL enabled, or VMM running)
-                if (!host.virtualization_capabilities) return false;
-
-                try {
-                    const caps = JSON.parse(host.virtualization_capabilities);
-                    // Check LXD - must be initialized
-                    if (caps.lxd?.initialized) return true;
-                    // Check WSL - must be enabled (not just available)
-                    if (caps.wsl?.enabled) return true;
-                    // Check VMM (OpenBSD) - must be running
-                    if (caps.vmm?.running) return true;
-                    return false;
-                } catch {
-                    return false;
-                }
-            });
+            filtered = filtered.filter(isParentHost);
         } else if (childHostFilter === 'children') {
             // Show only child hosts - hosts that have a parent
             filtered = filtered.filter(host => !!host.parent_host_id);

@@ -93,7 +93,7 @@ jobs:
 
     - name: Run backend tests with PostgreSQL
       run: |
-        python -m pytest tests/ --ignore=tests/ui/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml
+        python -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
@@ -257,7 +257,7 @@ jobs:
 
     - name: Run backend tests
       run: |
-        python -m pytest tests/ --ignore=tests/ui/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml
+        python -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml
       env:
         PYTHONPATH: .
         DATABASE_URL: sqlite:///test_${{ runner.os }}.db

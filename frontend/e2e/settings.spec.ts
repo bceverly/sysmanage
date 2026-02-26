@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { ensureAuthenticated } from './e2e-helpers';
 
 /**
  * E2E Tests for Settings Page Flows
@@ -7,14 +8,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Settings Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/settings');
-    try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* timeout ok */ }
-    // Retry navigation if auth state wasn't ready (Firefox CI timing issue)
-    if (page.url().includes('/login')) {
-      await page.waitForTimeout(2000);
-      await page.goto('/settings');
-      try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* timeout ok */ }
-    }
+    await ensureAuthenticated(page, '/settings');
   });
 
   test('should display settings page', async ({ page }) => {

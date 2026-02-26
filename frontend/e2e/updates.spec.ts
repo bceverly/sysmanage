@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { ensureAuthenticated } from './e2e-helpers';
 
 /**
  * E2E Tests for Package Updates Page
@@ -7,14 +8,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Updates Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/updates');
-    try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* timeout ok */ }
-    // Retry navigation if auth state wasn't ready (Firefox CI timing issue)
-    if (page.url().includes('/login')) {
-      await page.waitForTimeout(2000);
-      await page.goto('/updates');
-      try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* timeout ok */ }
-    }
+    await ensureAuthenticated(page, '/updates');
   });
 
   test('should display updates page', async ({ page }) => {
@@ -139,14 +133,7 @@ test.describe('Updates Page', () => {
 
 test.describe('Updates Selection and Actions', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/updates');
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
-    // Retry navigation if auth state wasn't ready (Firefox CI timing issue)
-    if (page.url().includes('/login')) {
-      await page.waitForTimeout(2000);
-      await page.goto('/updates');
-      try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
-    }
+    await ensureAuthenticated(page, '/updates');
   });
 
   test('should have selection checkboxes if updates exist', async ({ page }) => {

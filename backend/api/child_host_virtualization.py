@@ -175,6 +175,111 @@ def _resolve_server_url(api_host):
     return server_url
 
 
+def _hash_child_password(request):
+    """Hash the password using the appropriate format for the child type."""
+    # VMM/KVM/bhyve use OS-specific hash format (SHA-512 crypt or bcrypt)
+    if request.child_type in ("vmm", "kvm", "bhyve"):
+        return hash_password_for_os(request.password, request.distribution or "")
+    # WSL and LXD use bcrypt
+    return bcrypt.hashpw(
+        request.password.encode("utf-8"), bcrypt.gensalt(rounds=12)
+    ).decode("utf-8")
+
+
+def _add_vmm_params(params, request):
+    """Add VMM-specific parameters (vm_name, iso_url, root_password_hash)."""
+    params["vm_name"] = request.vm_name
+    if request.iso_url:
+        params["iso_url"] = request.iso_url
+    root_pwd = request.root_password or request.password
+    params["root_password_hash"] = hash_password_for_os(
+        root_pwd, request.distribution or ""
+    )
+
+
+def _add_cloud_vm_params(params, request, distribution, mem, disk, cpus):
+    """Add cloud VM parameters for KVM/bhyve."""
+    params["vm_name"] = request.vm_name
+    params["memory"] = request.memory or mem
+    params["disk_size"] = request.disk_size or disk
+    params["cpus"] = request.cpus or cpus
+    cloud_image_url = _get_cloud_image_url(distribution)
+    if cloud_image_url:
+        params["cloud_image_url"] = cloud_image_url
+
+
+def _build_command_params(
+    request,
+    password_hash,
+    agent_install_commands,
+    server_url,
+    api_port,
+    use_https,
+    new_child_id,
+    auto_approve_token,
+    distribution,
+):
+    """Build the command parameters dict for child host creation."""
+    params = {
+        "child_type": request.child_type,
+        "distribution": request.distribution,
+        "hostname": request.hostname,
+        "username": request.username,
+        "password_hash": password_hash,
+        "agent_install_commands": agent_install_commands,
+        "server_url": server_url,
+        "server_port": api_port,
+        "use_https": use_https,
+        "child_host_id": str(new_child_id),
+    }
+
+    if request.child_type == "lxd":
+        params["container_name"] = request.container_name
+    elif request.child_type == "vmm":
+        _add_vmm_params(params, request)
+    elif request.child_type == "kvm":
+        _add_cloud_vm_params(params, request, distribution, "2G", "20G", 2)
+    elif request.child_type == "bhyve":
+        _add_cloud_vm_params(params, request, distribution, "1G", "20G", 1)
+
+    if auto_approve_token:
+        params["auto_approve_token"] = auto_approve_token
+
+    return params
+
+
+def _try_plan_based_creation(request, command_params, host_id, session):
+    """Attempt plan-based creation for LXD/WSL via container_engine module.
+
+    Returns True if plan-based creation was used, False otherwise.
+    """
+    if request.child_type not in ("lxd", "wsl"):
+        return False
+
+    try:
+        container_engine = module_loader.get_module("container_engine")
+        if container_engine is None:
+            return False
+
+        service_cls = getattr(container_engine, "ContainerEngineServiceImpl", None)
+        if not service_cls or not hasattr(service_cls, "create_container_with_plan"):
+            return False
+
+        import logging as _logging
+
+        _ce_logger = _logging.getLogger("container_engine")
+        service = service_cls(db=session, models=models, logger=_ce_logger)
+        steps = service.create_container_with_plan(
+            child_type=request.child_type,
+            params=command_params,
+            host_id=host_id,
+            db_session=session,
+        )
+        return steps is not None
+    except Exception:  # nosec B110
+        return False
+
+
 @router.post(
     "/host/{host_id}/virtualization/create-child",
     dependencies=[Depends(JWTBearer())],
@@ -237,7 +342,6 @@ async def create_child_host_request(
             )
 
         # Look up the distribution to get agent install commands
-        # Match by install_identifier which is like "Ubuntu-24.04"
         distribution = (
             session.query(ChildHostDistribution)
             .filter(
@@ -254,15 +358,9 @@ async def create_child_host_request(
         config = get_config()
         api_host = config["api"].get("host", "localhost")
         api_port = config["api"].get("port", 8443)
-
-        # Determine if server is using HTTPS (based on SSL certificate config)
         key_file = config["api"].get("keyFile")
         cert_file = config["api"].get("certFile")
         use_https = bool(key_file and cert_file)
-
-        # Use the actual server IP for the agent to connect back.
-        # Child hosts (especially LXD containers) may not be able to resolve
-        # the parent's FQDN, so prefer a routable IP address.
         server_url = _resolve_server_url(api_host)
 
         # Generate auto-approve token if requested
@@ -271,7 +369,6 @@ async def create_child_host_request(
             auto_approve_token = str(uuid.uuid4())
 
         # Create a placeholder HostChild record with "creating" status
-        # This provides immediate feedback in the UI while the agent works
         now = datetime.now(timezone.utc).replace(tzinfo=None)
         new_child = models.HostChild(
             parent_host_id=host_id,
@@ -289,114 +386,26 @@ async def create_child_host_request(
             updated_at=now,
         )
         session.add(new_child)
-        session.flush()  # Get the ID assigned
+        session.flush()
 
-        # Hash password before sending to agent (security: avoid clear text in transit)
-        # Use appropriate hash format based on target OS:
-        # - Debian/Ubuntu: SHA-512 crypt ($6$...) for preseed/cloud-init
-        # - Alpine/OpenBSD: bcrypt ($2b$...)
-        # - WSL: bcrypt (default)
-        if request.child_type in ("vmm", "kvm", "bhyve"):
-            # VMM/KVM/bhyve use OS-specific hash format
-            password_hash = hash_password_for_os(
-                request.password, request.distribution or ""
-            )
-        else:
-            # WSL and LXD use bcrypt
-            password_hash = bcrypt.hashpw(
-                request.password.encode("utf-8"), bcrypt.gensalt(rounds=12)
-            ).decode("utf-8")
+        password_hash = _hash_child_password(request)
+        command_params = _build_command_params(
+            request,
+            password_hash,
+            agent_install_commands,
+            server_url,
+            api_port,
+            use_https,
+            new_child.id,
+            auto_approve_token,
+            distribution,
+        )
 
-        # Queue a command to create the child host
-        command_params = {
-            "child_type": request.child_type,
-            "distribution": request.distribution,
-            "hostname": request.hostname,
-            "username": request.username,
-            "password_hash": password_hash,  # Send hashed, not clear text
-            "agent_install_commands": agent_install_commands,
-            "server_url": server_url,
-            "server_port": api_port,
-            "use_https": use_https,
-            "child_host_id": str(new_child.id),  # Pass ID for status updates
-        }
-        # For LXD, include container_name
-        if request.child_type == "lxd":
-            command_params["container_name"] = request.container_name
-
-        # For VMM, include vm_name, iso_url, and root_password_hash
-        if request.child_type == "vmm":
-            command_params["vm_name"] = request.vm_name
-            if request.iso_url:
-                command_params["iso_url"] = request.iso_url
-            # VMM needs separate root password - use OS-appropriate hash
-            root_pwd = (
-                request.root_password if request.root_password else request.password
-            )
-            root_password_hash = hash_password_for_os(
-                root_pwd, request.distribution or ""
-            )
-            command_params["root_password_hash"] = root_password_hash
-
-        # For KVM, include vm_name, cloud_image_url, memory, disk_size, cpus
-        if request.child_type == "kvm":
-            command_params["vm_name"] = request.vm_name
-            command_params["memory"] = request.memory or "2G"
-            command_params["disk_size"] = request.disk_size or "20G"
-            command_params["cpus"] = request.cpus or 2
-            cloud_image_url = _get_cloud_image_url(distribution)
-            if cloud_image_url:
-                command_params["cloud_image_url"] = cloud_image_url
-
-        # For bhyve, include vm_name, cloud_image_url, memory, disk_size, cpus
-        if request.child_type == "bhyve":
-            command_params["vm_name"] = request.vm_name
-            command_params["memory"] = request.memory or "1G"
-            command_params["disk_size"] = request.disk_size or "20G"
-            command_params["cpus"] = request.cpus or 1
-            cloud_image_url = _get_cloud_image_url(distribution)
-            if cloud_image_url:
-                command_params["cloud_image_url"] = cloud_image_url
-
-        # Include auto_approve_token if set
-        if auto_approve_token:
-            command_params["auto_approve_token"] = auto_approve_token
-
-        # Try plan-based creation for LXD/WSL if container_engine supports it
-        used_plan_based = False
-        if request.child_type in ("lxd", "wsl"):
-            try:
-                container_engine = module_loader.get_module("container_engine")
-                if container_engine is not None:
-                    service_cls = getattr(
-                        container_engine, "ContainerEngineServiceImpl", None
-                    )
-                    if service_cls and hasattr(
-                        service_cls, "create_container_with_plan"
-                    ):
-                        import logging as _logging
-
-                        _ce_logger = _logging.getLogger("container_engine")
-                        service = service_cls(
-                            db=session, models=models, logger=_ce_logger
-                        )
-                        steps = service.create_container_with_plan(
-                            child_type=request.child_type,
-                            params=command_params,
-                            host_id=host_id,
-                            db_session=session,
-                        )
-                        if steps is not None:
-                            used_plan_based = True
-            except Exception:  # nosec B110
-                pass  # Fall through to legacy path
-
-        if not used_plan_based:
+        if not _try_plan_based_creation(request, command_params, host_id, session):
             command_message = create_command_message(
                 command_type="create_child_host",
                 parameters=command_params,
             )
-
             queue_ops.enqueue_message(
                 message_type="command",
                 message_data=command_message,
@@ -405,7 +414,6 @@ async def create_child_host_request(
                 db=session,
             )
 
-        # Log the action with full details for debugging
         audit_log(
             session,
             user,
@@ -434,7 +442,6 @@ async def create_child_host_request(
 
         session.commit()
 
-        # Build response message based on auto-approve setting
         if auto_approve_token:
             response_message = _(
                 "Child host creation requested. This may take several minutes. "

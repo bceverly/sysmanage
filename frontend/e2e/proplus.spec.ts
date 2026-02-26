@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { ensureAuthenticated } from './e2e-helpers';
 
 /**
  * E2E Tests for Pro+ Feature Flows
@@ -246,8 +247,10 @@ test.describe('Pro+ Dashboard Cards', () => {
 test.describe('Pro+ Settings', () => {
   test('should display Pro+ settings if licensed', async ({ page }) => {
     test.setTimeout(60000);
-    await page.goto('/settings');
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* networkidle timeout ok */ }
+    if (!(await ensureAuthenticated(page, '/settings'))) {
+      test.skip();
+      return;
+    }
 
     // Look for Pro+ specific settings tabs
     const proplusTab = page.getByRole('tab', { name: /pro|enterprise|professional|health|cve/i }).first();

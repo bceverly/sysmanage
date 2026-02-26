@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { ensureAuthenticated } from './e2e-helpers';
 
 /**
  * E2E Tests for Host List and Detail Page Flows
@@ -32,14 +33,7 @@ async function navigateToFirstHostDetail(page: Page): Promise<boolean> {
 
 test.describe('Host List Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/hosts');
-    try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* timeout ok */ }
-    // Retry navigation if auth state wasn't ready (Firefox CI timing issue)
-    if (page.url().includes('/login')) {
-      await page.waitForTimeout(2000);
-      await page.goto('/hosts');
-      try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* timeout ok */ }
-    }
+    await ensureAuthenticated(page, '/hosts');
   });
 
   test('should display host list page', async ({ page }) => {
