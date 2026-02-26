@@ -22,6 +22,7 @@ from backend.persistence.db import get_db
 from backend.persistence.models import Host, InstallationPackage, InstallationRequest
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
     Priority,
     QueueDirection,
@@ -119,12 +120,12 @@ async def install_packages_operation(  # NOSONAR
         db.commit()
 
         # Create a single message for the entire package installation request
-        message_data = {
-            "command_type": "generic_command",
-            "parameters": {
-                "command_type": "install_packages",  # New command type for multiple packages
+        command_message = create_command_message(
+            command_type="generic_command",
+            parameters={
+                "command_type": "install_packages",
                 "parameters": {
-                    "request_id": request_id,  # The UUID that groups everything
+                    "request_id": request_id,
                     "packages": [
                         {"package_name": pkg_name, "package_manager": "auto"}
                         for pkg_name in request.package_names
@@ -133,12 +134,12 @@ async def install_packages_operation(  # NOSONAR
                     "requested_at": now.isoformat(),
                 },
             },
-        }
+        )
 
         # Queue the single message using the server queue manager
         server_queue_manager.enqueue_message(
             message_type="command",
-            message_data=message_data,
+            message_data=command_message,
             direction=QueueDirection.OUTBOUND,
             host_id=host_id,
             priority=Priority.NORMAL,
@@ -278,12 +279,12 @@ async def uninstall_packages_operation(  # NOSONAR
         db.commit()
 
         # Create a single message for the entire package uninstallation request
-        message_data = {
-            "command_type": "generic_command",
-            "parameters": {
-                "command_type": "uninstall_packages",  # New command type for multiple package uninstallation
+        command_message = create_command_message(
+            command_type="generic_command",
+            parameters={
+                "command_type": "uninstall_packages",
                 "parameters": {
-                    "request_id": request_id,  # The UUID that groups everything
+                    "request_id": request_id,
                     "packages": [
                         {"package_name": pkg_name, "package_manager": "auto"}
                         for pkg_name in request.package_names
@@ -292,12 +293,12 @@ async def uninstall_packages_operation(  # NOSONAR
                     "requested_at": now.isoformat(),
                 },
             },
-        }
+        )
 
         # Queue the single message using the server queue manager
         server_queue_manager.enqueue_message(
             message_type="command",
-            message_data=message_data,
+            message_data=command_message,
             direction=QueueDirection.OUTBOUND,
             host_id=host_id,
             priority=Priority.NORMAL,

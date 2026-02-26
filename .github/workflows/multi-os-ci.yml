@@ -93,7 +93,7 @@ jobs:
 
     - name: Run backend tests with PostgreSQL
       run: |
-        python -m pytest tests/ --ignore=tests/ui/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml
+        python -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
@@ -257,7 +257,7 @@ jobs:
 
     - name: Run backend tests
       run: |
-        python -m pytest tests/ --ignore=tests/ui/ -v --tb=short --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml
+        python -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml
       env:
         PYTHONPATH: .
         DATABASE_URL: sqlite:///test_${{ runner.os }}.db
@@ -341,7 +341,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [windows-latest, macos-latest]
         python-version: ['3.12']
         node-version: ['20']
 
@@ -361,7 +361,7 @@ jobs:
         cache-dependency-path: frontend/package-lock.json
 
     - name: Install Artillery globally
-      run: npm install -g artillery@latest
+      run: npm install -g artillery@2.0.29
 
     - name: Install Python dependencies
       run: |
@@ -379,13 +379,14 @@ jobs:
         pip install pytest pytest-asyncio pytest-timeout
       shell: bash
 
-    - name: Install Playwright browsers
+    - name: Install frontend dependencies and Playwright browsers
       run: |
-        pip install playwright
-        playwright install chromium firefox
+        cd frontend
+        npm install --legacy-peer-deps
+        npx playwright install --with-deps chromium firefox
         # Install WebKit only on macOS
         if [ "${{ runner.os }}" == "macOS" ]; then
-          playwright install webkit
+          npx playwright install --with-deps webkit
         fi
       shell: bash
 

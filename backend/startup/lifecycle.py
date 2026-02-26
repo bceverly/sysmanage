@@ -403,7 +403,9 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
             logger.info("Secrets engine rotation background task stopped")
         except Exception as e:
-            logger.error("Error stopping secrets engine rotation task: %s", e)
+            logger.error(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+                "Error stopping secrets engine rotation task (%s)", type(e).__name__
+            )
 
     # Shutdown: Cancel the CVE refresh background task
     if cve_refresh_task:

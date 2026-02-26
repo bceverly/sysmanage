@@ -14,6 +14,7 @@ from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
     Priority,
     QueueDirection,
@@ -122,9 +123,9 @@ async def deploy_opentelemetry(
             )
 
         # Prepare the deployment message
-        message_data = {
-            "command_type": "generic_command",
-            "parameters": {
+        command_message = create_command_message(
+            command_type="generic_command",
+            parameters={
                 "command_type": "deploy_opentelemetry",
                 "parameters": {
                     "grafana_url": grafana_url,
@@ -133,12 +134,12 @@ async def deploy_opentelemetry(
                     ),
                 },
             },
-        }
+        )
 
         # Queue the message using the server queue manager
         server_queue_manager.enqueue_message(
             message_type="command",
-            message_data=message_data,
+            message_data=command_message,
             direction=QueueDirection.OUTBOUND,
             host_id=host_id,
             priority=Priority.NORMAL,
@@ -243,18 +244,18 @@ async def remove_opentelemetry(
         validate_host_approval_status(host)
 
         # Prepare the removal message
-        message_data = {
-            "command_type": "generic_command",
-            "parameters": {
+        command_message = create_command_message(
+            command_type="generic_command",
+            parameters={
                 "command_type": "remove_opentelemetry",
                 "parameters": {},
             },
-        }
+        )
 
         # Queue the message
         server_queue_manager.enqueue_message(
             message_type="command",
-            message_data=message_data,
+            message_data=command_message,
             direction=QueueDirection.OUTBOUND,
             host_id=host_id,
             priority=Priority.NORMAL,

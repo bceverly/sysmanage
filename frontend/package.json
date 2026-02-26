@@ -93,7 +93,8 @@
     "stylelint-config-standard": "^39.0.1",
     "tldts": "^7.0.21",
     "vite": "^7.3.1",
-    "vitest": "^4.0.17"
+    "vitest": "^4.0.17",
+    "@cyclonedx/cyclonedx-npm": "^4.1.2"
   },
   "optionalDependencies": {
     "@esbuild/freebsd-x64": "^0.27.2",
@@ -126,7 +127,10 @@
     "ast-v8-to-istanbul": "^0.3.8",
     "js-yaml": "^4.1.1",
     "lodash": "^4.17.23",
-    "minimatch": "^10.2.1"
+    "minimatch": "^10.2.1",
+    "@oozcitak/dom": {
+      "@oozcitak/url": "^4.0.0"
+    }
   },
   "msw": {
     "workerDirectory": [

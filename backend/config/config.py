@@ -80,7 +80,7 @@ try:
         if "url" not in config["vault"]:
             config["vault"]["url"] = "http://localhost:8200"
         if "token" not in config["vault"]:
-            config["vault"]["token"] = ""
+            config["vault"]["token"] = ""  # nosec B105
         if "mount_path" not in config["vault"]:
             config["vault"]["mount_path"] = "secret"
         if "timeout" not in config["vault"]:
@@ -108,7 +108,7 @@ try:
         if "username" not in config["email"]["smtp"]:
             config["email"]["smtp"]["username"] = ""
         if "password" not in config["email"]["smtp"]:
-            config["email"]["smtp"]["password"] = ""
+            config["email"]["smtp"]["password"] = ""  # nosec B105
         if "timeout" not in config["email"]["smtp"]:
             config["email"]["smtp"]["timeout"] = 30
         if "from_address" not in config["email"]:

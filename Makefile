@@ -1105,6 +1105,8 @@ test: test-python test-typescript test-e2e test-performance
 # Build frontend for production
 build:
 	@echo "=== Building Frontend ==="
+	@echo "Installing Node.js dependencies..."
+	@cd frontend && npm ci --legacy-peer-deps
 	@echo "Building React frontend with Vite..."
 	@cd frontend && npm run build
 	@echo "[OK] Frontend build completed - output in frontend/dist/"
@@ -1510,7 +1512,7 @@ installer-deb:
 	echo "  4. Start: sudo systemctl start sysmanage"
 
 # Build OpenBSD port tarball
-installer-openbsd:
+installer-openbsd: build
 	@echo "=== Building OpenBSD Port Tarball ==="
 	@echo ""
 	@CURRENT_DIR=$$(pwd); \
@@ -1831,7 +1833,7 @@ installer-rpm-opensuse:
 	rm -rf "$$VENDOR_DIR"
 
 # FreeBSD .pkg package
-installer-freebsd:
+installer-freebsd: build
 	@echo "=== Building FreeBSD Package ==="
 	@echo ""
 	@echo "Creating FreeBSD .pkg package for sysmanage..."
@@ -2069,7 +2071,7 @@ installer-macos: build
 	ls -lh "$$OUTPUT_DIR/sysmanage-$$VERSION-macos.pkg"
 
 # NetBSD .tgz package
-installer-netbsd:
+installer-netbsd: build
 	@echo "=== Building NetBSD Package ==="
 	@echo ""
 	@echo "Creating NetBSD .tgz package for sysmanage..."
@@ -2429,7 +2431,7 @@ sbom:
 	@echo "✓ Python SBOM generated: sbom/backend-sbom.json"
 	@echo ""
 	@echo "Generating Node.js SBOM from frontend/package.json..."
-	@cd frontend && npx --yes @cyclonedx/cyclonedx-npm \
+	@cd frontend && npx cyclonedx-npm \
 		--output-format JSON \
 		--output-file ../sbom/frontend-sbom.json \
 		--ignore-npm-errors
@@ -2490,8 +2492,10 @@ deploy-check-deps:
 		echo "  [OK] sha256sum"; \
 	elif command -v shasum >/dev/null 2>&1; then \
 		echo "  [OK] shasum (will use shasum -a 256)"; \
+	elif command -v sha256 >/dev/null 2>&1; then \
+		echo "  [OK] sha256 (OpenBSD)"; \
 	else \
-		echo "  [MISSING] sha256sum"; \
+		echo "  [MISSING] sha256sum / shasum / sha256"; \
 		MISSING=1; \
 	fi; \
 	echo ""; \
@@ -2755,8 +2759,10 @@ checksums:
 		SHA256CMD="sha256sum"; \
 	elif command -v shasum >/dev/null 2>&1; then \
 		SHA256CMD="shasum -a 256"; \
+	elif command -v sha256 >/dev/null 2>&1; then \
+		SHA256CMD="sha256 -r"; \
 	else \
-		echo "ERROR: Neither sha256sum nor shasum found"; \
+		echo "ERROR: No SHA256 tool found (sha256sum, shasum, or sha256)"; \
 		exit 1; \
 	fi; \
 	COUNT=0; \
@@ -2861,7 +2867,7 @@ release-notes:
 
 # Deploy to Launchpad PPA
 # Usage: LAUNCHPAD_RELEASES="noble jammy" make deploy-launchpad
-# Default releases: questing plucky noble jammy
+# Default releases: questing noble jammy
 deploy-launchpad:
 	@echo "=================================================="
 	@echo "Deploy to Launchpad PPA"
@@ -2880,7 +2886,7 @@ deploy-launchpad:
 		fi; \
 	fi; \
 	\
-	RELEASES="$${LAUNCHPAD_RELEASES:-questing plucky noble jammy}"; \
+	RELEASES="$${LAUNCHPAD_RELEASES:-questing noble jammy}"; \
 	echo "Target releases: $$RELEASES"; \
 	echo "Version: $$VERSION"; \
 	echo ""; \
@@ -3460,20 +3466,9 @@ deploy-docs-repo:
 	fi; \
 	echo ""; \
 	\
-	echo "--- Staging Snap packages ---"; \
-	SNAP_FILES=$$(ls installer/dist/*.snap *.snap 2>/dev/null || true); \
-	if [ -n "$$SNAP_FILES" ]; then \
-		SNAP_DIR="$$DOCS_REPO/repo/server/snap/$$VERSION"; \
-		mkdir -p "$$SNAP_DIR"; \
-		for f in $$SNAP_FILES; do \
-			cp "$$f" "$$SNAP_DIR/"; \
-			echo "  Staged: $$(basename $$f) -> $$SNAP_DIR/"; \
-		done; \
-		STAGED="$$STAGED snap"; \
-	else \
-		echo "  No .snap packages found"; \
-		MISSING="$$MISSING snap"; \
-	fi; \
+	echo "--- Snap packages ---"; \
+	echo "  Skipped: snaps are published directly to the Snap Store via 'make deploy-snap'"; \
+	echo "  (snap files exceed GitHub's 100MB file size limit)"; \
 	echo ""; \
 	\
 	echo "--- Staging FreeBSD packages ---"; \
@@ -3489,6 +3484,42 @@ deploy-docs-repo:
 	else \
 		echo "  No FreeBSD packages found"; \
 		MISSING="$$MISSING freebsd"; \
+	fi; \
+	echo ""; \
+	\
+	echo "--- Staging OpenBSD packages ---"; \
+	OBSD_FILES=$$(ls installer/dist/*openbsd* 2>/dev/null || true); \
+	if [ -n "$$OBSD_FILES" ]; then \
+		OBSD_DIR="$$DOCS_REPO/repo/server/openbsd/$$VERSION"; \
+		mkdir -p "$$OBSD_DIR"; \
+		for f in $$OBSD_FILES; do \
+			[ -f "$$f" ] || continue; \
+			cp "$$f" "$$OBSD_DIR/"; \
+			if [ -f "$$f.sha256" ]; then cp "$$f.sha256" "$$OBSD_DIR/"; fi; \
+			echo "  Staged: $$(basename $$f) -> $$OBSD_DIR/"; \
+		done; \
+		STAGED="$$STAGED openbsd"; \
+	else \
+		echo "  No OpenBSD packages found"; \
+		MISSING="$$MISSING openbsd"; \
+	fi; \
+	echo ""; \
+	\
+	echo "--- Staging NetBSD packages ---"; \
+	NBSD_FILES=$$(ls installer/dist/*netbsd* 2>/dev/null || true); \
+	if [ -n "$$NBSD_FILES" ]; then \
+		NBSD_DIR="$$DOCS_REPO/repo/server/netbsd/$$VERSION"; \
+		mkdir -p "$$NBSD_DIR"; \
+		for f in $$NBSD_FILES; do \
+			[ -f "$$f" ] || continue; \
+			cp "$$f" "$$NBSD_DIR/"; \
+			if [ -f "$$f.sha256" ]; then cp "$$f.sha256" "$$NBSD_DIR/"; fi; \
+			echo "  Staged: $$(basename $$f) -> $$NBSD_DIR/"; \
+		done; \
+		STAGED="$$STAGED netbsd"; \
+	else \
+		echo "  No NetBSD packages found"; \
+		MISSING="$$MISSING netbsd"; \
 	fi; \
 	echo ""; \
 	\

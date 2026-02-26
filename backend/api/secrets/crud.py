@@ -70,9 +70,7 @@ async def list_ssh_keys(
     _check_secrets_module()
     secrets = (
         db.query(Secret)
-        .filter(
-            Secret.secret_type == "ssh_key"
-        )  # nosec B105  # secret type filter, not a password
+        .filter(Secret.secret_type == "ssh_key")  # nosec B105
         .order_by(Secret.created_at.desc())
         .all()
     )
@@ -118,7 +116,9 @@ async def get_secret_content(
         vault_data = vault.retrieve_secret(secret.vault_path, secret.vault_token)
         content = vault_data.get("content", "")
     except VaultError as e:
-        logger.error("Failed to retrieve secret content from vault: %s", str(e))
+        logger.error(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+            "Failed to retrieve secret content from vault (%s)", type(e).__name__
+        )
         raise HTTPException(
             status_code=503,
             detail=_("Failed to retrieve secret content from vault")
@@ -150,7 +150,9 @@ async def create_secret(
             secret_subtype=secret_data.secret_subtype,
         )
     except VaultError as e:
-        logger.error("Failed to store secret in vault: %s", str(e))
+        logger.error(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+            "Failed to store secret in vault (%s)", type(e).__name__
+        )
         raise HTTPException(
             status_code=503,
             detail=_("Failed to store secret in vault") + _VAULT_UNAVAILABLE_SUFFIX,
@@ -211,7 +213,9 @@ async def update_secret(
             secret.vault_path = vault_result["vault_path"]
             secret.vault_token = vault_result["vault_token"]
         except VaultError as e:
-            logger.error("Failed to update secret in vault: %s", str(e))
+            logger.error(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+                "Failed to update secret in vault (%s)", type(e).__name__
+            )
             raise HTTPException(
                 status_code=503,
                 detail=_("Failed to update secret in vault")
@@ -250,7 +254,9 @@ async def delete_secret(
         vault = VaultService()
         vault.delete_secret(secret.vault_path, secret.vault_token)
     except VaultError as e:
-        logger.warning("Failed to delete secret from vault: %s", str(e))
+        logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+            "Failed to delete secret from vault (%s)", type(e).__name__
+        )
         # Continue with DB deletion even if vault deletion fails
 
     db.delete(secret)
@@ -275,8 +281,10 @@ async def delete_multiple_secrets(
             try:
                 vault.delete_secret(secret.vault_path, secret.vault_token)
             except VaultError as e:
-                logger.warning(
-                    "Failed to delete secret %s from vault: %s", secret_id, str(e)
+                logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+                    "Failed to delete secret %s from vault (%s)",
+                    secret_id,
+                    type(e).__name__,
                 )
             db.delete(secret)
             deleted_count += 1

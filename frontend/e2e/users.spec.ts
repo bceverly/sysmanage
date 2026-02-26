@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { ensureAuthenticated } from './e2e-helpers';
 
 /**
  * E2E Tests for User Management Flows
@@ -25,11 +26,7 @@ async function navigateToFirstUserDetail(page: Page): Promise<boolean> {
 
 test.describe('User List Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/users');
-    // Wait for the page to fully load - data grid and permissions
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
-    // Additional wait for auth redirect to complete if needed
-    await page.waitForTimeout(2000);
+    await ensureAuthenticated(page, '/users');
   });
 
   test('should display user list page', async ({ page }) => {
@@ -58,16 +55,13 @@ test.describe('User List Page', () => {
   });
 
   test('should have add user button', async ({ page }) => {
-    // Wait for permissions API to complete - button appears after permissions are loaded
-    await page.waitForTimeout(2000);
-
     // The add user functionality may be accessed via a FAB, toolbar, or actions menu
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
     const fabButton = page.locator('.MuiFab-root').first();
 
-    // Check if either button type exists
-    const hasAddButton = await addButton.isVisible().catch(() => false);
-    const hasFabButton = await fabButton.isVisible().catch(() => false);
+    // Wait for permissions API to load (button appears after permissions are loaded)
+    const hasAddButton = await addButton.isVisible({ timeout: 10000 }).catch(() => false);
+    const hasFabButton = await fabButton.isVisible({ timeout: 2000 }).catch(() => false);
 
     // If no add button exists, this is a design choice - skip test
     if (!hasAddButton && !hasFabButton) {
@@ -76,13 +70,10 @@ test.describe('User List Page', () => {
   });
 
   test('should open add user dialog when clicking add button', async ({ page }) => {
-    // Wait for permissions API to complete
-    await page.waitForTimeout(2000);
-
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
 
-    // Skip if no add button exists
-    if (!(await addButton.isVisible().catch(() => false))) {
+    // Skip if no add button exists (wait for permissions API to load)
+    if (!(await addButton.isVisible({ timeout: 10000 }).catch(() => false))) {
       test.skip();
       return;
     }
@@ -99,13 +90,10 @@ test.describe('User List Page', () => {
   });
 
   test('should validate user form fields', async ({ page }) => {
-    // Wait for permissions API to complete
-    await page.waitForTimeout(2000);
-
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
 
-    // Skip if no add button exists
-    if (!(await addButton.isVisible().catch(() => false))) {
+    // Skip if no add button exists (wait for permissions API to load)
+    if (!(await addButton.isVisible({ timeout: 10000 }).catch(() => false))) {
       test.skip();
       return;
     }
@@ -125,13 +113,10 @@ test.describe('User List Page', () => {
   });
 
   test('should close dialog on cancel', async ({ page }) => {
-    // Wait for permissions API to complete
-    await page.waitForTimeout(2000);
-
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
 
-    // Skip if no add button exists
-    if (!(await addButton.isVisible().catch(() => false))) {
+    // Skip if no add button exists (wait for permissions API to load)
+    if (!(await addButton.isVisible({ timeout: 10000 }).catch(() => false))) {
       test.skip();
       return;
     }

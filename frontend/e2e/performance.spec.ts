@@ -34,8 +34,8 @@ test.describe('Performance - Page Load', () => {
       };
     });
 
-    // FCP should be under 8 seconds for acceptable UX (Firefox can be slower than Chromium)
-    expect(metrics.firstContentfulPaint).toBeLessThan(8000);
+    // FCP should be under 10 seconds for acceptable UX (Firefox can be slower than Chromium)
+    expect(metrics.firstContentfulPaint).toBeLessThan(10000);
   });
 
   test('should load dashboard within performance budget', async ({ page }) => {

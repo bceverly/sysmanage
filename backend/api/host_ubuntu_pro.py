@@ -11,6 +11,7 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
+from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
     Priority,
     QueueDirection,
@@ -78,16 +79,16 @@ async def attach_ubuntu_pro(
             # Get host to verify it exists
             host = get_host_by_id(host_id)
 
-            # Prepare command data for Ubuntu Pro attach
-            command_data = {
-                "command_type": "ubuntu_pro_attach",
-                "parameters": {"token": token},
-            }
+            # Prepare command message for Ubuntu Pro attach
+            command_message = create_command_message(
+                command_type="ubuntu_pro_attach",
+                parameters={"token": token},
+            )
 
             # Enqueue the message for processing by message processor
             queue_message_id = server_queue_manager.enqueue_message(
                 message_type="command",
-                message_data=command_data,
+                message_data=command_message,
                 direction=QueueDirection.OUTBOUND,
                 host_id=host.id,
                 priority=Priority.HIGH,
@@ -144,13 +145,16 @@ async def detach_ubuntu_pro(host_id: str, current_user=Depends(get_current_user)
             # Get host to verify it exists
             host = get_host_by_id(host_id)
 
-            # Prepare command data for Ubuntu Pro detach
-            command_data = {"command_type": "ubuntu_pro_detach", "parameters": {}}
+            # Prepare command message for Ubuntu Pro detach
+            command_message = create_command_message(
+                command_type="ubuntu_pro_detach",
+                parameters={},
+            )
 
             # Enqueue the message for processing by message processor
             queue_message_id = server_queue_manager.enqueue_message(
                 message_type="command",
-                message_data=command_data,
+                message_data=command_message,
                 direction=QueueDirection.OUTBOUND,
                 host_id=host.id,
                 priority=Priority.HIGH,
@@ -198,16 +202,16 @@ async def enable_ubuntu_pro_service(host_id: str, request: UbuntuProServiceReque
             # Get host to verify it exists
             host = get_host_by_id(host_id)
 
-            # Prepare command data for Ubuntu Pro service enable
-            command_data = {
-                "command_type": "ubuntu_pro_enable_service",
-                "parameters": {"service": service},
-            }
+            # Prepare command message for Ubuntu Pro service enable
+            command_message = create_command_message(
+                command_type="ubuntu_pro_enable_service",
+                parameters={"service": service},
+            )
 
             # Enqueue the message for processing by message processor
             queue_message_id = server_queue_manager.enqueue_message(
                 message_type="command",
-                message_data=command_data,
+                message_data=command_message,
                 direction=QueueDirection.OUTBOUND,
                 host_id=host.id,
                 priority=Priority.HIGH,
@@ -255,16 +259,16 @@ async def disable_ubuntu_pro_service(host_id: str, request: UbuntuProServiceRequ
             # Get host to verify it exists
             host = get_host_by_id(host_id)
 
-            # Prepare command data for Ubuntu Pro service disable
-            command_data = {
-                "command_type": "ubuntu_pro_disable_service",
-                "parameters": {"service": service},
-            }
+            # Prepare command message for Ubuntu Pro service disable
+            command_message = create_command_message(
+                command_type="ubuntu_pro_disable_service",
+                parameters={"service": service},
+            )
 
             # Enqueue the message for processing by message processor
             queue_message_id = server_queue_manager.enqueue_message(
                 message_type="command",
-                message_data=command_data,
+                message_data=command_message,
                 direction=QueueDirection.OUTBOUND,
                 host_id=host.id,
                 priority=Priority.HIGH,

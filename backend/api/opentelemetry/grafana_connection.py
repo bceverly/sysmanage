@@ -13,6 +13,7 @@ from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
+from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
     Priority,
     QueueDirection,
@@ -105,19 +106,19 @@ async def connect_opentelemetry_to_grafana(
             )
 
         # Queue the connect message
-        message_data = {
-            "command_type": "generic_command",
-            "parameters": {
+        command_message = create_command_message(
+            command_type="generic_command",
+            parameters={
                 "command_type": "connect_opentelemetry_grafana",
                 "parameters": {
                     "grafana_url": grafana_url,
                 },
             },
-        }
+        )
 
         server_queue_manager.enqueue_message(
             message_type="command",
-            message_data=message_data,
+            message_data=command_message,
             direction=QueueDirection.OUTBOUND,
             host_id=host_id,
             priority=Priority.NORMAL,
@@ -205,17 +206,17 @@ async def disconnect_opentelemetry_from_grafana(
         validate_host_approval_status(host)
 
         # Queue the disconnect message
-        message_data = {
-            "command_type": "generic_command",
-            "parameters": {
+        command_message = create_command_message(
+            command_type="generic_command",
+            parameters={
                 "command_type": "disconnect_opentelemetry_grafana",
                 "parameters": {},
             },
-        }
+        )
 
         server_queue_manager.enqueue_message(
             message_type="command",
-            message_data=message_data,
+            message_data=command_message,
             direction=QueueDirection.OUTBOUND,
             host_id=host_id,
             priority=Priority.NORMAL,

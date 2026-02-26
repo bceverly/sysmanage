@@ -244,3 +244,6 @@ requirements-prod.txt
 
 # SonarQube scanner working directory
 .scannerwork/
+
+# Node.js dependencies
+node_modules/
