@@ -108,9 +108,9 @@ port=$1
 wait_for_service() {
 port=$1
 service_name=$2
-max_attempts=30
+max_attempts=60
 attempt=0
-    
+
     echo "Waiting for $service_name to start on port $port..."
     while [ $attempt -lt $max_attempts ]; do
         # Try to check port
@@ -144,7 +144,7 @@ attempt=0
         fi
     done
     echo
-    echo "⚠️  WARNING: $service_name may not have started within 30 seconds"
+    echo "⚠️  WARNING: $service_name may not have started within 60 seconds"
     echo "   But it might actually be running. Check logs: tail -f logs/backend.log"
     return 1
 }

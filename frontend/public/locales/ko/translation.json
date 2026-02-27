@@ -852,6 +852,7 @@
   "hosts": {
     "actions": "작업",
     "active": "활성",
+    "agentVersion": "에이전트 버전",
     "addHost": "호스트 추가",
     "approvalNeeded": "승인 필요",
     "approveSelected": "선택된 항목 승인",
@@ -954,7 +955,11 @@
     "scriptsDisabledTooltip": "이 호스트에서 스크립트 실행이 비활성화되어 있습니다",
     "scriptsEnabled": "스크립트 활성화됨",
     "scriptsEnabledTooltip": "이 호스트에서 스크립트 실행이 활성화되어 있습니다",
-    "softwareUpdated": "소프트웨어 업데이트됨"
+    "softwareUpdated": "소프트웨어 업데이트됨",
+    "updateAgent": "에이전트 업데이트",
+    "updateAgentSelected": "선택한 호스트에서 에이전트 업데이트",
+    "updateAgentRequested": "에이전트 업데이트가 성공적으로 요청되었습니다",
+    "updateAgentFailed": "에이전트 업데이트 요청 실패"
   },
   "login": {
     "error": "잘못된 사용자 이름 또는 비밀번호",

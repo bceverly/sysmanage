@@ -1245,3 +1245,16 @@ msgstr "Desplegando archivos en el host"
 msgid "Executing command sequence"
 msgstr "Ejecutando secuencia de comandos"
 
+
+msgid "Agent update requested"
+msgstr "Actualización del agente solicitada"
+
+msgid "Permission denied: UPDATE_AGENT role required"
+msgstr "Permiso denegado: se requiere el rol UPDATE_AGENT"
+
+msgid "Child agent update requested: %s"
+msgstr "Actualización del agente hijo solicitada: %s"
+
+msgid "Child agent update requested"
+msgstr "Actualización del agente hijo solicitada"
+

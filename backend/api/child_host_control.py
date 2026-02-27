@@ -269,3 +269,78 @@ async def restart_child_host(
             "result": True,
             "message": _("Child host restart requested"),
         }
+
+
+@router.post(
+    "/host/{host_id}/children/{child_id}/update-agent",
+    dependencies=[Depends(JWTBearer())],
+)
+async def update_child_agent(
+    host_id: str,
+    child_id: str,
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Update the sysmanage-agent on a child host via its parent.
+    Requires UPDATE_AGENT permission.
+
+    No license check — agent update should work for community users too.
+    """
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        user = get_user_with_role_check(
+            session, current_user, SecurityRoles.UPDATE_AGENT
+        )
+
+        host = get_host_or_404(session, host_id)
+        verify_host_active(host)
+
+        child = (
+            session.query(HostChild)
+            .filter(
+                HostChild.id == child_id,
+                HostChild.parent_host_id == host.id,
+            )
+            .first()
+        )
+        if not child:
+            raise HTTPException(status_code=404, detail=_(MSG_CHILD_HOST_NOT_FOUND))
+
+        queue_ops = QueueOperations()
+
+        command_message = create_command_message(
+            command_type="update_child_agent",
+            parameters={
+                "child_name": child.child_name,
+                "child_type": child.child_type,
+                "distribution": child.distribution,
+            },
+        )
+
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+
+        audit_log(
+            session,
+            user,
+            current_user,
+            "UPDATE",
+            str(host.id),
+            host.fqdn,
+            _("Child agent update requested: %s") % child.child_name,
+        )
+
+        session.commit()
+
+        return {
+            "result": True,
+            "message": _("Child agent update requested"),
+        }

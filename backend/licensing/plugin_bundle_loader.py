@@ -5,6 +5,7 @@ Handles downloading, verification, and caching of Pro+ plugin
 bundles (IIFE JavaScript files served to the frontend).
 """
 
+import asyncio
 import hashlib
 import os
 from datetime import datetime, timezone
@@ -364,10 +365,25 @@ class PluginBundleLoader:
             logger.info("All plugin bundles are up to date")
             return {}
 
-        results = {}
+        # Remove cached plugins (fast, synchronous)
         for module_code in updates_needed:
             self._remove_cached_plugin(module_code)
-            success = await self._download_plugin_bundle(module_code)
+
+        # Download all plugin bundles in parallel
+        async def _download_one(mc: str):
+            return mc, await self._download_plugin_bundle(mc)
+
+        download_results = await asyncio.gather(
+            *[_download_one(mc) for mc in updates_needed],
+            return_exceptions=True,
+        )
+
+        results = {}
+        for item in download_results:
+            if isinstance(item, Exception):
+                logger.error("Plugin download raised exception: %s", item)
+                continue
+            module_code, success = item
             results[module_code] = success
 
             if success:

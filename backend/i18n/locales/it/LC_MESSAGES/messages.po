@@ -1249,3 +1249,16 @@ msgstr "Distribuzione dei file sull'host"
 msgid "Executing command sequence"
 msgstr "Esecuzione della sequenza di comandi"
 
+
+msgid "Agent update requested"
+msgstr "Aggiornamento agente richiesto"
+
+msgid "Permission denied: UPDATE_AGENT role required"
+msgstr "Permesso negato: ruolo UPDATE_AGENT richiesto"
+
+msgid "Child agent update requested: %s"
+msgstr "Aggiornamento agente figlio richiesto: %s"
+
+msgid "Child agent update requested"
+msgstr "Aggiornamento agente figlio richiesto"
+

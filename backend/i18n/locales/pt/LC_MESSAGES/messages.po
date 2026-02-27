@@ -1243,3 +1243,16 @@ msgstr "Implantando arquivos no host"
 msgid "Executing command sequence"
 msgstr "Executando sequência de comandos"
 
+
+msgid "Agent update requested"
+msgstr "Atualização do agente solicitada"
+
+msgid "Permission denied: UPDATE_AGENT role required"
+msgstr "Permissão negada: função UPDATE_AGENT necessária"
+
+msgid "Child agent update requested: %s"
+msgstr "Atualização do agente filho solicitada: %s"
+
+msgid "Child agent update requested"
+msgstr "Atualização do agente filho solicitada"
+

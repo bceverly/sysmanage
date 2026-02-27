@@ -1242,3 +1242,16 @@ msgstr "Bestanden worden naar host overgebracht"
 msgid "Executing command sequence"
 msgstr "Opdrachtenreeks wordt uitgevoerd"
 
+
+msgid "Agent update requested"
+msgstr "Agent-update aangevraagd"
+
+msgid "Permission denied: UPDATE_AGENT role required"
+msgstr "Toestemming geweigerd: UPDATE_AGENT rol vereist"
+
+msgid "Child agent update requested: %s"
+msgstr "Update kindagent aangevraagd: %s"
+
+msgid "Child agent update requested"
+msgstr "Update kindagent aangevraagd"
+

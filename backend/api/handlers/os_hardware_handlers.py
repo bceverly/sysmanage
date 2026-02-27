@@ -394,6 +394,9 @@ async def handle_hardware_update(  # NOSONAR
                     ipv4_address=ipv4_address or interface.get("ipv4_address"),
                     ipv6_address=ipv6_address or interface.get("ipv6_address"),
                     mac_address=interface.get("mac_address"),
+                    netmask=interface.get("subnet_mask"),
+                    mtu=interface.get("mtu"),
+                    speed_mbps=interface.get("speed_mbps"),
                     # Map agent's is_active field to database's is_up field
                     is_up=interface.get("is_active", False),
                     last_updated=now,

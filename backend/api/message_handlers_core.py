@@ -263,6 +263,11 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
                 json.dumps(enabled_shells) if enabled_shells else None
             )
 
+        # Update agent version if provided
+        agent_version = message_data.get("agent_version")
+        if agent_version:
+            update_values["agent_version"] = agent_version
+
         # Always update last_access (for both approved and unapproved hosts)
         if (
             not hasattr(connection, "is_mock_connection")
@@ -411,6 +416,11 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                     host.enabled_shells = (
                         json.dumps(enabled_shells) if enabled_shells else None
                     )
+
+                # Update agent version if provided in heartbeat
+                agent_version = message_data.get("agent_version")
+                if agent_version:
+                    host.agent_version = agent_version
 
                 # Check for pending reboot orchestration (Pro+ safe reboot)
                 try:

@@ -17,6 +17,7 @@ from backend.api.packages_helpers import (
     get_packages_summary_sync,
     search_packages_count_sync,
     search_packages_sync,
+    _parse_host_os,
 )
 from backend.api.packages_models import (
     InstallationCompletionRequest,
@@ -162,16 +163,35 @@ async def get_os_versions(db: Session = Depends(get_db)):
     Returns list of dictionaries with os_name and os_version fields.
     """
     try:
-        # Get unique OS/version combinations
+        # Get unique OS/version combinations from available packages
         os_versions = (
             db.query(AvailablePackage.os_name, AvailablePackage.os_version)
             .distinct()
             .all()
         )
 
+        result_set = {(r.os_name, r.os_version) for r in os_versions}
+
+        # Also include OS versions from active hosts that may not have packages yet
+        hosts = (
+            db.query(Host.platform, Host.platform_release)
+            .filter(
+                Host.active.is_(True),
+                Host.approval_status == "approved",
+                Host.platform.isnot(None),
+                Host.platform_release.isnot(None),
+            )
+            .distinct()
+            .all()
+        )
+        for host in hosts:
+            os_name, os_version = _parse_host_os(host.platform, host.platform_release)
+            if os_name and os_version:
+                result_set.add((os_name, os_version))
+
         return [
-            {"os_name": result.os_name, "os_version": result.os_version}
-            for result in os_versions
+            {"os_name": name, "os_version": version}
+            for name, version in sorted(result_set)
         ]
 
     except Exception as e:

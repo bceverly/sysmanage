@@ -852,6 +852,7 @@
   "hosts": {
     "actions": "Actions",
     "active": "Actif",
+    "agentVersion": "Version de l'agent",
     "addHost": "Ajouter un hôte",
     "antivirusDeployFailed": "Échec du déploiement de l'antivirus. Veuillez réessayer.",
     "antivirusDeploySuccess": "Déploiement d'antivirus mis en file d'attente pour {{count}} hôte(s)",
@@ -954,7 +955,11 @@
     "scriptsDisabledTooltip": "L'exécution de scripts est désactivée sur cet hôte",
     "scriptsEnabled": "Scripts activés",
     "scriptsEnabledTooltip": "L'exécution de scripts est activée sur cet hôte",
-    "softwareUpdated": "Logiciels mis à jour"
+    "softwareUpdated": "Logiciels mis à jour",
+    "updateAgent": "Mettre à jour l'agent",
+    "updateAgentSelected": "Mettre à jour l'agent sur les sélectionnés",
+    "updateAgentRequested": "Mise à jour de l'agent demandée avec succès",
+    "updateAgentFailed": "Échec de la demande de mise à jour de l'agent"
   },
   "login": {
     "error": "Nom d'utilisateur ou mot de passe invalide",

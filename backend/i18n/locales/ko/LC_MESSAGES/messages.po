@@ -1243,3 +1243,16 @@ msgstr "호스트에 파일 배포 중"
 msgid "Executing command sequence"
 msgstr "명령 시퀀스 실행 중"
 
+
+msgid "Agent update requested"
+msgstr "에이전트 업데이트가 요청되었습니다"
+
+msgid "Permission denied: UPDATE_AGENT role required"
+msgstr "권한 거부: UPDATE_AGENT 역할이 필요합니다"
+
+msgid "Child agent update requested: %s"
+msgstr "자식 에이전트 업데이트가 요청되었습니다: %s"
+
+msgid "Child agent update requested"
+msgstr "자식 에이전트 업데이트가 요청되었습니다"
+

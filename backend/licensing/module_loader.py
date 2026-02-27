@@ -5,6 +5,7 @@ Handles downloading, verification, caching, and dynamic loading
 of Pro+ Cython extension modules.
 """
 
+import asyncio
 import hashlib
 import importlib.util
 import os
@@ -637,30 +638,42 @@ class ModuleLoader:
         updates_needed = await self.check_for_updates()
         if not updates_needed:
             logger.info("All modules are up to date")
-        else:
-            pass  # Will process below
 
-        results = {}
+        # Phase 1: Unload and remove cached modules (fast, synchronous)
+        was_loaded_map = {}
         for module_code in updates_needed:
-            # Unload the module if it's currently loaded
-            was_loaded = self.unload_module(module_code)
-
-            # Remove the old cached file
+            was_loaded_map[module_code] = self.unload_module(module_code)
             self._remove_cached_module(module_code)
 
-            # Download the new version
-            success = await self._download_and_cache_module(module_code)
+        # Phase 2: Download all modules in parallel
+        async def _download_one(mc: str):
+            return mc, await self._download_and_cache_module(mc)
+
+        download_results = await asyncio.gather(
+            *[_download_one(mc) for mc in updates_needed],
+            return_exceptions=True,
+        )
+
+        # Phase 3: Process results
+        results = {}
+        for item in download_results:
+            if isinstance(item, Exception):
+                logger.error("Module download raised exception: %s", item)
+                continue
+            module_code, success = item
             results[module_code] = success
 
             if success:
                 logger.info("Module %s updated successfully", module_code)
             else:
                 logger.error("Failed to update module %s", module_code)
-                # If it was loaded before, try to reload the old version
-                if was_loaded:
-                    cached_path = self._get_cached_module_path(module_code)
-                    if cached_path and os.path.exists(cached_path):
-                        self._load_module_from_path(module_code, cached_path)
+                cached_path = self._get_cached_module_path(module_code)
+                if (
+                    was_loaded_map.get(module_code)
+                    and cached_path
+                    and os.path.exists(cached_path)
+                ):
+                    self._load_module_from_path(module_code, cached_path)
 
         # Also update plugin bundles
         server_versions = await self.query_server_versions()

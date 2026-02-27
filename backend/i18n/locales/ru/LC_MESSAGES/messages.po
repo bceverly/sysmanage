@@ -1246,3 +1246,16 @@ msgstr "Развёртывание файлов на хосте"
 msgid "Executing command sequence"
 msgstr "Выполнение последовательности команд"
 
+
+msgid "Agent update requested"
+msgstr "Запрошено обновление агента"
+
+msgid "Permission denied: UPDATE_AGENT role required"
+msgstr "Доступ запрещён: требуется роль UPDATE_AGENT"
+
+msgid "Child agent update requested: %s"
+msgstr "Запрошено обновление дочернего агента: %s"
+
+msgid "Child agent update requested"
+msgstr "Запрошено обновление дочернего агента"
+

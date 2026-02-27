@@ -852,6 +852,7 @@
   "hosts": {
     "actions": "Ações",
     "active": "Ativo",
+    "agentVersion": "Versão do Agente",
     "addHost": "Adicionar Host",
     "antivirusDeployFailed": "Falha ao implantar o antivirus. Por favor, tente novamente.",
     "antivirusDeploySuccess": "Implantação do antivirus enfileirada para {{count}} host(s)",
@@ -954,7 +955,11 @@
     "childHostsOnly": "Apenas hosts filhos",
     "childrenOnly": "Apenas filhos",
     "childHostOf": "Host filho de {{parent}}",
-    "viewParent": "Ver host pai"
+    "viewParent": "Ver host pai",
+    "updateAgent": "Atualizar agente",
+    "updateAgentSelected": "Atualizar agente nos selecionados",
+    "updateAgentRequested": "Atualização do agente solicitada com sucesso",
+    "updateAgentFailed": "Falha ao solicitar atualização do agente"
   },
   "login": {
     "error": "Nome de usuário ou senha inválidos",

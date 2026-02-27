@@ -852,6 +852,7 @@
   "hosts": {
     "actions": "Acties",
     "active": "Actief",
+    "agentVersion": "Agentversie",
     "addHost": "Host Toevoegen",
     "antivirusDeployFailed": "Kan antivirus niet implementeren. Probeer het opnieuw.",
     "antivirusDeploySuccess": "Antivirusimplementatie in de wachtrij geplaatst voor {{count}} host(s)",
@@ -954,7 +955,11 @@
     "childHostsOnly": "Alleen onderliggende hosts",
     "childrenOnly": "Alleen kinderen",
     "childHostOf": "Onderliggende host van {{parent}}",
-    "viewParent": "Bovenliggende host weergeven"
+    "viewParent": "Bovenliggende host weergeven",
+    "updateAgent": "Agent bijwerken",
+    "updateAgentSelected": "Agent op geselecteerden bijwerken",
+    "updateAgentRequested": "Agent-update succesvol aangevraagd",
+    "updateAgentFailed": "Kan agent-update niet aanvragen"
   },
   "login": {
     "error": "Ongeldige gebruikersnaam of wachtwoord",

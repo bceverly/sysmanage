@@ -945,3 +945,16 @@ msgstr "Deploying files to host"
 msgid "Executing command sequence"
 msgstr "Executing command sequence"
 
+
+msgid "Agent update requested"
+msgstr "Agent update requested"
+
+msgid "Permission denied: UPDATE_AGENT role required"
+msgstr "Permission denied: UPDATE_AGENT role required"
+
+msgid "Child agent update requested: %s"
+msgstr "Child agent update requested: %s"
+
+msgid "Child agent update requested"
+msgstr "Child agent update requested"
+

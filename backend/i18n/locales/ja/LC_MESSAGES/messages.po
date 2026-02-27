@@ -1246,3 +1246,16 @@ msgstr "ホストにファイルをデプロイ中"
 msgid "Executing command sequence"
 msgstr "コマンドシーケンスを実行中"
 
+
+msgid "Agent update requested"
+msgstr "エージェントの更新がリクエストされました"
+
+msgid "Permission denied: UPDATE_AGENT role required"
+msgstr "権限がありません：UPDATE_AGENTロールが必要です"
+
+msgid "Child agent update requested: %s"
+msgstr "子エージェントの更新がリクエストされました：%s"
+
+msgid "Child agent update requested"
+msgstr "子エージェントの更新がリクエストされました"
+

@@ -95,7 +95,7 @@ import axiosInstance from '../Services/api';
 import { distributionService } from '../Services/childHostDistributions';
 import { hasPermission, hasPermissionSync, SecurityRoles } from '../Services/permissions';
 
-import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, RebootPreCheckResponse, RebootOrchestrationStatus, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck, doRequestSystemInfo, doChangeHostname, doRebootPreCheck, doOrchestratedReboot, getRebootOrchestrationStatus } from '../Services/hosts';
+import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, RebootPreCheckResponse, RebootOrchestrationStatus, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doUpdateAgent, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck, doRequestSystemInfo, doChangeHostname, doRebootPreCheck, doOrchestratedReboot, getRebootOrchestrationStatus } from '../Services/hosts';
 import { SysManageUser, doGetMe } from '../Services/users';
 import { SecretResponse } from '../Services/secrets';
 import { parseUTCTimestamp, formatUTCTimestamp, formatUTCDate } from '../utils/dateUtils';
@@ -153,6 +153,8 @@ interface ChildHost {
     error_message: string | null;
     created_at: string | null;
     installed_at: string | null;
+    reboot_required?: boolean;
+    agent_version?: string | null;
 }
 
 // Large page component that coordinates host details, hardware info, software, virtualization, and multiple interactive features
@@ -915,6 +917,28 @@ const HostDetail = () => { // NOSONAR
         } catch (error) {
             console.error('Error restarting child host:', error);
             setSnackbarMessage(t('hostDetail.childHostRestartError', 'Error restarting child host'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setChildHostOperationLoading(prev => ({ ...prev, [child.id]: null }));
+        }
+    }, [hostId, fetchChildHosts, t]);
+
+    const handleChildHostUpdateAgent = useCallback(async (child: ChildHost) => {
+        if (!hostId) return;
+        try {
+            setChildHostOperationLoading(prev => ({ ...prev, [child.id]: 'update-agent' }));
+            await axiosInstance.post(`/api/host/${hostId}/children/${child.id}/update-agent`);
+            setSnackbarMessage(t('hosts.updateAgentRequested', 'Agent update requested successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            // Refresh after a short delay
+            setTimeout(() => {
+                fetchChildHosts(false);
+            }, 5000);
+        } catch (error) {
+            console.error('Error requesting child host agent update:', error);
+            setSnackbarMessage(t('hosts.updateAgentFailed', 'Failed to request agent update'));
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
         } finally {
@@ -2987,6 +3011,21 @@ const HostDetail = () => { // NOSONAR
         setShutdownConfirmOpen(true);
     };
 
+    const handleUpdateAgent = async () => {
+        if (!host?.id) return;
+        try {
+            await doUpdateAgent(host.id);
+            setSnackbarMessage(t('hosts.updateAgentRequested', 'Agent update requested successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+        } catch (error) {
+            console.error('Failed to request agent update:', error);
+            setSnackbarMessage(t('hosts.updateAgentFailed', 'Failed to request agent update'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        }
+    };
+
     const handleRebootConfirm = async () => {
         if (!host?.id) return;
 
@@ -4069,6 +4108,17 @@ const HostDetail = () => { // NOSONAR
                     >
                         {t('hosts.shutdown', 'Shutdown')}
                     </Button>
+                    {hasPermissionSync(SecurityRoles.UPDATE_AGENT) && (
+                    <Button
+                        variant="outlined"
+                        color="info"
+                        startIcon={<SystemUpdateAltIcon />}
+                        onClick={handleUpdateAgent}
+                        disabled={!host.active}
+                    >
+                        {t('hosts.updateAgent', 'Update Agent')}
+                    </Button>
+                    )}
                 </Box>
             </Box>
 
@@ -4210,6 +4260,12 @@ const HostDetail = () => { // NOSONAR
                                             </Typography>
                                         )}
                                     </Box>
+                                </Grid>
+                                <Grid size={{ xs: 12, sm: 6 }}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('hosts.agentVersion', 'Agent Version')}
+                                    </Typography>
+                                    <Typography variant="body1">{host.agent_version || t('common.notAvailable', 'N/A')}</Typography>
                                 </Grid>
                             </Grid>
                         </CardContent>
@@ -6089,6 +6145,7 @@ const HostDetail = () => { // NOSONAR
                                                     <TableCell>{t('hostDetail.childHostType', 'Type')}</TableCell>
                                                     <TableCell>{t('hostDetail.childHostDistribution', 'Distribution')}</TableCell>
                                                     <TableCell>{t('hostDetail.childHostHostname', 'Hostname')}</TableCell>
+                                                    <TableCell>{t('hosts.agentVersion', 'Agent Version')}</TableCell>
                                                     <TableCell>{t('hostDetail.childHostStatus', 'Status')}</TableCell>
                                                     <TableCell align="right">{t('hostDetail.childHostActions', 'Actions')}</TableCell>
                                                 </TableRow>
@@ -6118,6 +6175,9 @@ const HostDetail = () => { // NOSONAR
                                                         </TableCell>
                                                         <TableCell>
                                                             {child.hostname || (child.status === 'running' ? '-' : t('hostDetail.childHostNotRunning', 'Not running'))}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {child.agent_version || '-'}
                                                         </TableCell>
                                                         <TableCell>
                                                             <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
@@ -6173,6 +6233,14 @@ const HostDetail = () => { // NOSONAR
                                                                         variant="outlined"
                                                                     />
                                                                 )}
+                                                                {child.reboot_required && (
+                                                                    <Chip
+                                                                        label={t('hosts.rebootRequired')}
+                                                                        color="error"
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                    />
+                                                                )}
                                                             </Box>
                                                         </TableCell>
                                                         <TableCell align="right">
@@ -6211,6 +6279,18 @@ const HostDetail = () => { // NOSONAR
                                                                         title={t('hostDetail.restartChildHost', 'Restart')}
                                                                     >
                                                                         {currentOperation === 'restart' ? <CircularProgress size={16} /> : <RestartAltIcon fontSize="small" />}
+                                                                    </IconButton>
+                                                                )}
+                                                                {/* Update Agent button - show for children with linked agents and UPDATE_AGENT role */}
+                                                                {child.child_host_id && hasPermissionSync(SecurityRoles.UPDATE_AGENT) && (
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        color="info"
+                                                                        onClick={() => handleChildHostUpdateAgent(child)}
+                                                                        disabled={isOperationLoading}
+                                                                        title={t('hosts.updateAgent', 'Update Agent')}
+                                                                    >
+                                                                        {currentOperation === 'update-agent' ? <CircularProgress size={16} /> : <SystemUpdateAltIcon fontSize="small" />}
                                                                     </IconButton>
                                                                 )}
                                                                 {/* Delete/Cancel button - show for all statuses */}

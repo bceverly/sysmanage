@@ -852,6 +852,7 @@
   "hosts": {
     "actions": "操作",
     "active": "活跃",
+    "agentVersion": "代理版本",
     "addHost": "添加主机",
     "antivirusDeployFailed": "部署防病毒失败，请重试。",
     "antivirusDeploySuccess": "防病毒部署已为 {{count}} 台主机加入队列",
@@ -954,7 +955,11 @@
     "childHostsOnly": "仅子主机",
     "childrenOnly": "仅子级",
     "childHostOf": "{{parent}}的子主机",
-    "viewParent": "查看父主机"
+    "viewParent": "查看父主机",
+    "updateAgent": "更新代理",
+    "updateAgentSelected": "更新所选主机上的代理",
+    "updateAgentRequested": "代理更新请求成功",
+    "updateAgentFailed": "请求代理更新失败"
   },
   "login": {
     "error": "用户名或密码无效",

@@ -1249,3 +1249,16 @@ msgstr "正在將檔案部署到主機"
 msgid "Executing command sequence"
 msgstr "正在執行命令序列"
 
+
+msgid "Agent update requested"
+msgstr "已請求代理更新"
+
+msgid "Permission denied: UPDATE_AGENT role required"
+msgstr "權限被拒絕：需要 UPDATE_AGENT 角色"
+
+msgid "Child agent update requested: %s"
+msgstr "已請求子代理更新：%s"
+
+msgid "Child agent update requested"
+msgstr "已請求子代理更新"
+

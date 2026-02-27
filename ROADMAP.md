@@ -34,9 +34,10 @@ This document provides a detailed roadmap for realizing all features in both ope
 23. [Phase 9: Stabilization RC2](#phase-9-stabilization-rc2)
 24. [Phase 10: Pro+ Enterprise Tier - Part 3](#phase-10-pro-enterprise-tier---part-3)
 25. [Phase 11: Air-Gapped Environment Support (Enterprise)](#phase-11-air-gapped-environment-support-enterprise)
-26. [Phase 12: Enterprise GA (v3.0.0.0)](#phase-12-enterprise-ga-v3000)
-27. [Release Schedule Summary](#release-schedule-summary)
-28. [Module Migration Plan](#module-migration-plan)
+26. [Phase 12: Multi-Site Federation (Enterprise)](#phase-12-multi-site-federation-enterprise)
+27. [Phase 13: Enterprise GA (v3.0.0.0)](#phase-13-enterprise-ga-v3000)
+28. [Release Schedule Summary](#release-schedule-summary)
+29. [Module Migration Plan](#module-migration-plan)
 
 ---
 
@@ -325,6 +326,8 @@ This section documents the development history of SysManage from initial commit 
 
 - [x] **vuln_engine** - CVE vulnerability scanning
 - [x] **alerting_engine** - Email/Webhook/Slack/Teams notifications
+- [ ] **federation_controller_engine** - Multi-site coordinator with rollup reporting and command dispatch
+- [ ] **federation_site_engine** - Site server federation sync and command reception
 
 ### Licensing System
 
@@ -399,6 +402,8 @@ The following virtualization features are implemented and will be migrated to Pr
 | compliance_engine | Professional | ✅ Complete | CIS/DISA STIG auditing |
 | vuln_engine | Enterprise | ✅ Complete | CVE vulnerability scanning |
 | alerting_engine | Enterprise | ✅ Complete | Email/Webhook/Slack/Teams alerts |
+| federation_controller_engine | Enterprise | Planned (Phase 12) | Multi-site coordinator, rollup reporting, command dispatch |
+| federation_site_engine | Enterprise | Planned (Phase 12) | Site server sync, command reception, offline resilience |
 
 ### Licensing System
 - [x] License key validation (ECDSA P-521 signatures)
@@ -483,7 +488,10 @@ Each stabilization phase produces a release. Feature phases may produce one or m
 │  Phase 11: Air-Gapped Environment Support                           v2.3.0.0   │
 │     └── Dual-server architecture, optical media transfer, offline CVE sync     │
 │                                                                                 │
-│  Phase 12: Major Enterprise GA                                      v3.0.0.0   │
+│  Phase 12: Multi-Site Federation                                    v2.4.0.0   │
+│     └── Coordinator + site servers, rollup reporting, command dispatch          │
+│                                                                                 │
+│  Phase 13: Major Enterprise GA                                      v3.0.0.0   │
 │     └── Multi-tenancy, API completeness, platform-native logging, GA release   │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -1508,7 +1516,187 @@ Many enterprise and government environments operate air-gapped networks that hav
 
 ---
 
-## Phase 12: Enterprise GA (v3.0.0.0)
+## Phase 12: Multi-Site Federation (Enterprise)
+
+**Target Release:** v2.4.0.0
+**Focus:** Hierarchical multi-server architecture for geographically distributed enterprise deployments
+
+### Overview
+
+Large enterprises operate data centers, branch offices, and cloud regions across multiple geographic locations. Managing thousands of hosts from a single SysManage server creates scalability bottlenecks, network latency issues, and single-point-of-failure risk. This phase introduces a federation architecture where multiple subordinate SysManage servers operate independently at each site while a coordinating Federation Controller aggregates data and dispatches commands across the entire enterprise.
+
+### Architecture
+
+**Federation Controller ("Coordinator")**
+- Sits at the top of the hierarchy, providing a unified enterprise-wide view
+- Does NOT communicate directly with agents — all agent communication flows through subordinate site servers
+- Aggregates host inventory, health status, compliance posture, and vulnerability data from all subordinate servers
+- Provides rollup reporting and dashboards across all sites (total hosts, compliance scores, patch status, etc.)
+- Dispatches commands (reboot, update, deploy, etc.) to the appropriate subordinate server, which then forwards them to the target agent
+- Manages enterprise-wide policies (update profiles, firewall roles, compliance baselines) and pushes them to subordinates
+- Handles user authentication centrally — users log in to the coordinator and can view/manage any site they have permissions for
+- Maintains its own PostgreSQL database with federated metadata (site registry, rollup statistics, policy definitions)
+- Can itself be made highly available with standard PostgreSQL replication and a load balancer
+
+**Subordinate Site Server ("Site Server")**
+- A standard SysManage server instance running at each physical location
+- Manages agents at its site using the normal WebSocket communication
+- Operates autonomously if the coordinator is unreachable (agents continue reporting, commands continue working locally)
+- Periodically syncs summary data upstream to the coordinator (host counts, compliance scores, alert summaries)
+- Receives policy pushes and dispatched commands from the coordinator
+- Maintains its own full database — the coordinator does NOT need direct database access to subordinate servers
+- Registered with the coordinator via a secure enrollment process (mutual TLS + enrollment token)
+
+### Communication Model
+
+- **Coordinator ↔ Site Server:** REST API over mutual TLS, with periodic sync intervals (configurable, default 5 minutes)
+- **Site Server ↔ Agents:** Existing WebSocket protocol (unchanged)
+- **Coordinator → Agent:** Not direct — coordinator sends command to site server via REST, site server queues it for the agent
+- **Data flow upstream:** Site servers push summary/rollup data to coordinator on a schedule
+- **Data flow downstream:** Coordinator pushes policy changes and dispatched commands to site servers
+- **Offline resilience:** Site servers cache pending upstream syncs and replay them when connectivity is restored
+
+### Modules
+
+#### 12.1 federation_controller_engine (Enterprise)
+
+**Features:**
+- [ ] Site server registry (add, remove, suspend, monitor subordinate servers)
+- [ ] Secure site enrollment workflow (enrollment token + mutual TLS certificate exchange)
+- [ ] Site server health monitoring (last sync time, connectivity status, host count)
+- [ ] Enterprise-wide host inventory rollup (aggregated from all sites)
+- [ ] Enterprise-wide dashboard with per-site breakdown
+- [ ] Cross-site search (find a host by name, IP, or tag across all sites)
+- [ ] Rollup compliance reporting (aggregate CIS/STIG scores across sites)
+- [ ] Rollup vulnerability reporting (aggregate CVE exposure across sites)
+- [ ] Rollup alerting (enterprise-wide alert rules that trigger on cross-site conditions)
+- [ ] Enterprise-wide update policy management (define policies centrally, push to sites)
+- [ ] Enterprise-wide firewall role management (define roles centrally, push to sites)
+- [ ] Command dispatch to subordinate servers (reboot, update, deploy, script execution)
+- [ ] Batch command dispatch (target hosts across multiple sites in a single operation)
+- [ ] Conflict resolution for policy changes (coordinator wins, with audit trail)
+- [ ] Federation audit log (all cross-site operations logged centrally)
+- [ ] Site server version tracking (ensure all sites run compatible SysManage versions)
+- [ ] Configurable sync intervals per site (bandwidth-constrained sites can sync less frequently)
+- [ ] Data retention policies for rollup data
+- [ ] REST API for all federation operations (enabling automation and CI/CD integration)
+- [ ] i18n/l10n for all 14 languages
+
+**Estimated Size:** ~8,000 lines
+
+#### 12.2 federation_site_engine (Enterprise)
+
+**Features:**
+- [ ] Coordinator enrollment and registration (exchange TLS certificates, receive site ID)
+- [ ] Upstream data sync (push host summaries, compliance scores, alert summaries to coordinator)
+- [ ] Downstream policy sync (receive and apply update policies, firewall roles, compliance baselines)
+- [ ] Command reception from coordinator (receive dispatched commands and queue for local agents)
+- [ ] Command result reporting (send command outcomes back to coordinator)
+- [ ] Offline queue for upstream data (buffer syncs when coordinator is unreachable)
+- [ ] Offline queue replay with deduplication when connectivity is restored
+- [ ] Local autonomy mode (full local operation continues when coordinator is unavailable)
+- [ ] Sync status dashboard (show last sync time, pending items, connectivity health)
+- [ ] Coordinator connection health monitoring with automatic reconnection
+- [ ] Site metadata reporting (site name, location, host count, server version)
+- [ ] i18n/l10n for all 14 languages
+
+**Estimated Size:** ~5,000 lines
+
+#### 12.3 Federation Frontend
+
+**Features:**
+- [ ] Enterprise dashboard with site map/list view showing all subordinate sites
+- [ ] Per-site drill-down (click a site to see its hosts, compliance, alerts)
+- [ ] Cross-site host search and filtering
+- [ ] Enterprise-wide compliance and vulnerability rollup charts
+- [ ] Policy management UI (create/edit/push policies to sites)
+- [ ] Command dispatch UI (select hosts across sites, dispatch commands)
+- [ ] Site server management UI (add/remove/monitor sites)
+- [ ] Federation audit log viewer
+- [ ] Site connectivity status indicators
+- [ ] Sync status and history per site
+
+**Estimated Size:** ~4,000 lines (frontend plugin bundle)
+
+#### 12.4 Database Schema
+
+**Coordinator-side tables:**
+- [ ] `federation_sites` — registered subordinate servers (id, name, location, url, tls_cert, status, last_sync)
+- [ ] `federation_host_rollup` — aggregated host data from all sites (site_id, host_count, active_count, os_breakdown)
+- [ ] `federation_compliance_rollup` — aggregated compliance scores per site
+- [ ] `federation_vulnerability_rollup` — aggregated CVE exposure per site
+- [ ] `federation_policies` — centrally defined policies (update profiles, firewall roles)
+- [ ] `federation_policy_assignments` — which policies are pushed to which sites
+- [ ] `federation_dispatched_commands` — commands sent from coordinator to sites (tracking status)
+- [ ] `federation_audit_log` — all federation operations
+
+**Site-side tables:**
+- [ ] `federation_coordinator` — coordinator connection details (url, tls_cert, site_id, enrollment_status)
+- [ ] `federation_sync_queue` — pending upstream data pushes
+- [ ] `federation_received_policies` — policies received from coordinator
+- [ ] `federation_received_commands` — commands received from coordinator
+
+**Estimated Size:** ~1,000 lines (Alembic migrations, idempotent, sqlite + postgresql compatible)
+
+### Security Considerations
+
+- All coordinator ↔ site server communication uses mutual TLS (both sides present certificates)
+- Enrollment tokens are single-use and time-limited
+- Site servers authenticate to the coordinator using their enrolled TLS certificate
+- The coordinator never stores agent credentials — it cannot communicate with agents directly
+- Command dispatch is audited on both coordinator and site server
+- RBAC extends to federation: users can be granted access to specific sites or all sites
+- Site servers can be suspended from the coordinator without affecting local operations
+
+### Scalability Considerations
+
+- Each site server handles its own agent WebSocket connections (horizontal scaling by adding sites)
+- The coordinator only processes summary/rollup data, not raw agent telemetry
+- Sync intervals are configurable to manage bandwidth (remote offices with slow links can sync less often)
+- Rollup data is pre-aggregated at the site level before being sent to the coordinator
+- The coordinator database grows linearly with the number of sites, not the number of hosts
+- Target: support up to 100 subordinate sites, each managing up to 10,000 hosts (1M hosts enterprise-wide)
+
+### Migration Steps
+
+1. [ ] Create `module-source/federation_controller_engine/` structure
+2. [ ] Create `federation_controller_engine.pyx` Cython module
+3. [ ] Create `module-source/federation_site_engine/` structure
+4. [ ] Create `federation_site_engine.pyx` Cython module
+5. [ ] Create coordinator database migrations (idempotent, sqlite + postgresql)
+6. [ ] Create site-side database migrations (idempotent, sqlite + postgresql)
+7. [ ] Create frontend plugin bundle for federation UI
+8. [ ] Implement mutual TLS enrollment workflow
+9. [ ] Implement upstream/downstream sync protocol
+10. [ ] Implement command dispatch and result tracking
+11. [ ] Create federation deployment guide
+12. [ ] i18n/l10n for all 14 languages
+
+### Deliverables
+
+- [ ] 2 new Pro+ modules (federation_controller_engine, federation_site_engine)
+- [ ] Federation frontend plugin bundle
+- [ ] Database migrations for coordinator and site schemas
+- [ ] Federation deployment and operations guide
+- [ ] Mutual TLS enrollment procedures documentation
+- [ ] Integration tests for sync, dispatch, and offline resilience
+- [ ] Performance tests validating 100-site / 1M-host target
+
+### Exit Criteria
+
+- Coordinator can enroll and monitor multiple subordinate site servers
+- Host inventory, compliance, and vulnerability data rolls up correctly across all sites
+- Enterprise-wide dashboards and reports display accurate cross-site data
+- Commands dispatched from coordinator reach target agents via the correct site server
+- Site servers continue full local operation when coordinator is unreachable
+- Pending upstream syncs are replayed correctly when connectivity is restored
+- Policy changes pushed from coordinator are applied at subordinate sites
+- All federation operations are audited on both sides
+- RBAC correctly restricts per-site access for federated users
+
+---
+
+## Phase 13: Enterprise GA (v3.0.0.0)
 
 **Target Release:** v3.0.0.0
 **Focus:** Multi-tenancy, API completeness, GA release
@@ -1570,7 +1758,8 @@ Many enterprise and government environments operate air-gapped networks that hav
 | 9 | v2.1.0.0 | Stabilization RC2 | Final polish, docs complete |
 | 10 | v2.2.0.0 | Pro+ Enterprise 3 | virtualization, observability, MFA + ~24,489 lines agent migration |
 | 11 | v2.3.0.0 | Air-Gapped Support | Dual-server architecture, optical media transfer, offline CVE |
-| 12 | **v3.0.0.0** | Enterprise GA | Multi-tenancy, API complete, full feature set |
+| 12 | v2.4.0.0 | Multi-Site Federation | Coordinator + site servers, rollup reporting, command dispatch |
+| 13 | **v3.0.0.0** | Enterprise GA | Multi-tenancy, API complete, full feature set |
 
 ---
 
@@ -1618,6 +1807,8 @@ When migrating code from open source to Pro+:
 | observability_engine | Enterprise | 10 | ~4,000 | ~2,336 | ~6,300 | Medium |
 | airgap_collector_engine | Enterprise | 11 | ~4,000 | — | ~4,000 | Medium |
 | airgap_repository_engine | Enterprise | 11 | ~5,000 | — | ~5,000 | Medium |
+| federation_controller_engine | Enterprise | 12 | ~8,000 | — | ~8,000 | Medium |
+| federation_site_engine | Enterprise | 12 | ~5,000 | — | ~5,000 | Medium |
 | Agent generic handlers | Open Source | 8 | — | ~1,500 (new) | ~1,500 | High |
 
 ### Virtualization Tiering
@@ -1640,9 +1831,10 @@ When migrating code from open source to Pro+:
 - **Enterprise Tier - Part 2:** ~3,800 lines (Phase 5: automation + fleet, includes ~328 from agent)
 - **Enterprise Tier - Part 3:** ~30,300 lines (Phase 10: virtualization + observability, includes ~24,489 from agent)
 - **Air-Gapped Support:** ~9,000 lines (Phase 11: collector + repository)
+- **Multi-Site Federation:** ~17,000 lines (Phase 12: controller + site engine + frontend plugin + migrations)
 - **Open Source Agent Handlers:** ~1,500 lines (Phase 8: generic deployment infrastructure)
 
-**Grand Total:** ~69,100 lines of Pro+ code + ~1,500 lines open source agent infrastructure
+**Grand Total:** ~86,100 lines of Pro+ code + ~1,500 lines open source agent infrastructure
 
 **Agent Code Migration Summary:** ~42,121 lines of config construction, VM management,
 deployment, and provisioning code will be migrated from the agent to server-side Cython

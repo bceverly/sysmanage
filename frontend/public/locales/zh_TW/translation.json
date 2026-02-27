@@ -852,6 +852,7 @@
   "hosts": {
     "actions": "操作",
     "active": "活躍",
+    "agentVersion": "代理版本",
     "addHost": "新增主機",
     "antivirusDeployFailed": "部署防毒軟體失敗。請重試。",
     "antivirusDeploySuccess": "防毒軟體部署已為 {{count}} 台主機加入佇列",
@@ -954,7 +955,11 @@
     "childHostsOnly": "僅子主機",
     "childrenOnly": "僅子級",
     "childHostOf": "{{parent}}的子主機",
-    "viewParent": "查看父主機"
+    "viewParent": "查看父主機",
+    "updateAgent": "更新代理",
+    "updateAgentSelected": "更新所選主機上的代理",
+    "updateAgentRequested": "代理更新請求成功",
+    "updateAgentFailed": "請求代理更新失敗"
   },
   "login": {
     "error": "用戶名或密碼無效",

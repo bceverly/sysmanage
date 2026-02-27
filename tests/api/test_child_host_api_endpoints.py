@@ -347,7 +347,7 @@ class TestChildHostCrudEndpoints:
             mock_sessionmaker.return_value.return_value = mock_db_session
             mock_role_check.return_value = mock_user
             mock_get_host.return_value = mock_host
-            mock_db_session.query.return_value.filter.return_value.order_by.return_value.all.return_value = [
+            mock_db_session.query.return_value.options.return_value.filter.return_value.order_by.return_value.all.return_value = [
                 mock_child_host
             ]
 
@@ -372,7 +372,7 @@ class TestChildHostCrudEndpoints:
             mock_sessionmaker.return_value.return_value = mock_db_session
             mock_role_check.return_value = mock_user
             mock_get_host.return_value = mock_host
-            mock_db_session.query.return_value.filter.return_value.order_by.return_value.all.return_value = (
+            mock_db_session.query.return_value.options.return_value.filter.return_value.order_by.return_value.all.return_value = (
                 []
             )
 
@@ -400,7 +400,7 @@ class TestChildHostCrudEndpoints:
             mock_sessionmaker.return_value.return_value = mock_db_session
             mock_role_check.return_value = mock_user
             mock_get_host.return_value = mock_host
-            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+            mock_db_session.query.return_value.options.return_value.filter.return_value.first.return_value = (
                 mock_child_host
             )
 
@@ -431,7 +431,7 @@ class TestChildHostCrudEndpoints:
             mock_sessionmaker.return_value.return_value = mock_db_session
             mock_role_check.return_value = mock_user
             mock_get_host.return_value = mock_host
-            mock_db_session.query.return_value.filter.return_value.first.return_value = (
+            mock_db_session.query.return_value.options.return_value.filter.return_value.first.return_value = (
                 None
             )
 

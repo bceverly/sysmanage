@@ -842,6 +842,7 @@
   "hosts": {
     "actions": "Actions",
     "active": "Active",
+    "agentVersion": "Agent Version",
     "addHost": "Add Host",
     "antivirusDeployFailed": "Failed to deploy antivirus. Please try again.",
     "antivirusDeploySuccess": "Antivirus deployment queued for {{count}} host(s)",
@@ -944,7 +945,11 @@
     "childHostsOnly": "Child hosts only",
     "childrenOnly": "Children",
     "childHostOf": "Child host of {{parent}}",
-    "viewParent": "View Parent Host"
+    "viewParent": "View Parent Host",
+    "updateAgent": "Update Agent",
+    "updateAgentSelected": "Update Agent on Selected",
+    "updateAgentRequested": "Agent update requested successfully",
+    "updateAgentFailed": "Failed to request agent update"
   },
   "login": {
     "error": "Invalid username or password",

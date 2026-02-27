@@ -838,6 +838,7 @@
   "hosts": {
     "actions": "Действия",
     "active": "Активный",
+    "agentVersion": "Версия агента",
     "addHost": "Добавить хост",
     "approvalNeeded": "Требуется одобрение",
     "approveSelected": "Одобрить выбранные",
@@ -940,7 +941,11 @@
     "scriptsDisabledTooltip": "Выполнение скриптов отключено на этом хосте",
     "scriptsEnabled": "Скрипты включены",
     "scriptsEnabledTooltip": "Выполнение скриптов включено на этом хосте",
-    "softwareUpdated": "ПО обновлено"
+    "softwareUpdated": "ПО обновлено",
+    "updateAgent": "Обновить агент",
+    "updateAgentSelected": "Обновить агент на выбранных",
+    "updateAgentRequested": "Обновление агента успешно запрошено",
+    "updateAgentFailed": "Не удалось запросить обновление агента"
   },
   "login": {
     "error": "Неверное имя пользователя или пароль",

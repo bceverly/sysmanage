@@ -851,6 +851,7 @@
   "hosts": {
     "actions": "الإجراءات",
     "active": "نشط",
+    "agentVersion": "إصدار الوكيل",
     "addHost": "إضافة مضيف",
     "antivirusDeployFailed": "فشل نشر برنامج مكافحة الفيروسات. يرجى المحاولة مرة أخرى.",
     "antivirusDeploySuccess": "تم وضع نشر برنامج مكافحة الفيروسات في قائمة الانتظار لـ {{count}} من المضيفات",
@@ -953,7 +954,11 @@
     "childHostsOnly": "المضيفات الفرعية فقط",
     "childrenOnly": "الفرعية فقط",
     "childHostOf": "مضيف فرعي لـ {{parent}}",
-    "viewParent": "عرض المضيف الرئيسي"
+    "viewParent": "عرض المضيف الرئيسي",
+    "updateAgent": "تحديث الوكيل",
+    "updateAgentSelected": "تحديث الوكيل على المحدد",
+    "updateAgentRequested": "تم طلب تحديث الوكيل بنجاح",
+    "updateAgentFailed": "فشل في طلب تحديث الوكيل"
   },
   "login": {
     "error": "اسم المستخدم أو كلمة المرور غير صحيحة",

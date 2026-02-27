@@ -1242,3 +1242,16 @@ msgstr "Dateien werden auf den Host übertragen"
 msgid "Executing command sequence"
 msgstr "Befehlssequenz wird ausgeführt"
 
+
+msgid "Agent update requested"
+msgstr "Agent-Aktualisierung angefordert"
+
+msgid "Permission denied: UPDATE_AGENT role required"
+msgstr "Zugriff verweigert: Rolle UPDATE_AGENT erforderlich"
+
+msgid "Child agent update requested: %s"
+msgstr "Agent-Aktualisierung für untergeordneten Host angefordert: %s"
+
+msgid "Child agent update requested"
+msgstr "Agent-Aktualisierung für untergeordneten Host angefordert"
+

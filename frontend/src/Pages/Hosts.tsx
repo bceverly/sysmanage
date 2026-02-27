@@ -18,7 +18,7 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { Chip, IconButton, Autocomplete, TextField, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost, doRequestHostDiagnostics } from '../Services/hosts'
+import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost, doUpdateAgent, doRequestHostDiagnostics } from '../Services/hosts'
 import { doDeployOpenTelemetry } from '../Services/opentelemetry'
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
@@ -39,6 +39,42 @@ function isParentHost(host: SysManageHost): boolean {
     } catch {
         return false;
     }
+}
+
+/** Sort hosts so children are grouped directly below their parent. */
+function sortHostsGrouped(hosts: SysManageHost[]): SysManageHost[] {
+    const topLevelHosts = hosts
+        .filter(h => !h.parent_host_id)
+        .sort((a, b) => (a.fqdn || '').localeCompare(b.fqdn || ''));
+
+    const childrenByParent = new Map<string, SysManageHost[]>();
+    for (const child of hosts.filter(h => !!h.parent_host_id)) {
+        const parentId = child.parent_host_id!;
+        if (!childrenByParent.has(parentId)) {
+            childrenByParent.set(parentId, []);
+        }
+        childrenByParent.get(parentId)!.push(child);
+    }
+
+    childrenByParent.forEach(children => {
+        children.sort((a, b) => (a.fqdn || '').localeCompare(b.fqdn || ''));
+    });
+
+    const sorted: SysManageHost[] = [];
+    for (const parent of topLevelHosts) {
+        sorted.push(parent);
+        const children = childrenByParent.get(parent.id);
+        if (children) {
+            sorted.push(...children);
+            childrenByParent.delete(parent.id);
+        }
+    }
+
+    childrenByParent.forEach(children => {
+        sorted.push(...children);
+    });
+
+    return sorted;
 }
 
 const Hosts = () => {
@@ -69,6 +105,7 @@ const Hosts = () => {
     const [canViewHostDetails, setCanViewHostDetails] = useState<boolean>(false);
     const [canRebootHost, setCanRebootHost] = useState<boolean>(false);
     const [canShutdownHost, setCanShutdownHost] = useState<boolean>(false);
+    const [canUpdateAgent, setCanUpdateAgent] = useState<boolean>(false);
     const [canDeployAntivirus, setCanDeployAntivirus] = useState<boolean>(false);
     const [hasHealthData, setHasHealthData] = useState<boolean>(false);
     const { triggerRefresh } = useNotificationRefresh();
@@ -282,6 +319,11 @@ const Hosts = () => {
                     />
                 );
             }
+        },
+        {
+            field: 'agent_version',
+            headerName: t('hosts.agentVersion', 'Agent Version'),
+            width: 130,
         },
         {
             field: 'script_execution_enabled',
@@ -587,6 +629,36 @@ const Hosts = () => {
         }
     }
 
+    const handleUpdateAgentSelected = async () => {
+        try {
+            // Only update agents on hosts that are active and have privileged agents
+            const activePrivilegedSelections = selection.filter(id => {
+                const host = filteredData.find(h => h.id.toString() === id.toString());
+                return host && host.active && host.is_agent_privileged;
+            });
+
+            if (activePrivilegedSelections.length === 0) {
+                console.log('No active hosts with privileged agents selected');
+                return;
+            }
+
+            // Call the API to update agents on the selected active hosts with privileged agents
+            const updatePromises = activePrivilegedSelections.map(id => {
+                return doUpdateAgent(String(id));
+            });
+
+            await Promise.all(updatePromises);
+            console.log(`Agent update command sent to ${activePrivilegedSelections.length} hosts`);
+
+            // Clear selection
+            setSelection([]);
+        } catch (error) {
+            console.error('Error updating agents:', error);
+            // Still clear selection even if there was an error
+            setSelection([]);
+        }
+    }
+
     // Helper function to check if any selected hosts can be rebooted/shutdown - memoized
     const hasActivePrivilegedSelection = useMemo(() =>
         selection.some(id => {
@@ -738,12 +810,13 @@ const Hosts = () => {
     // Check permissions
     useEffect(() => {
         const checkPermissions = async () => {
-            const [approve, deleteHost, viewDetails, reboot, shutdown, deployAntivirus] = await Promise.all([
+            const [approve, deleteHost, viewDetails, reboot, shutdown, updateAgent, deployAntivirus] = await Promise.all([
                 hasPermission(SecurityRoles.APPROVE_HOST_REGISTRATION),
                 hasPermission(SecurityRoles.DELETE_HOST),
                 hasPermission(SecurityRoles.VIEW_HOST_DETAILS),
                 hasPermission(SecurityRoles.REBOOT_HOST),
                 hasPermission(SecurityRoles.SHUTDOWN_HOST),
+                hasPermission(SecurityRoles.UPDATE_AGENT),
                 hasPermission(SecurityRoles.DEPLOY_ANTIVIRUS)
             ]);
             setCanApproveHosts(approve);
@@ -751,6 +824,7 @@ const Hosts = () => {
             setCanViewHostDetails(viewDetails);
             setCanRebootHost(reboot);
             setCanShutdownHost(shutdown);
+            setCanUpdateAgent(updateAgent);
             setCanDeployAntivirus(deployAntivirus);
         };
         checkPermissions();
@@ -801,7 +875,7 @@ const Hosts = () => {
         if (searchTerm.trim()) {
             filtered = filtered.filter(host => {
                 const fieldValue = host[searchColumn as keyof SysManageHost];
-                if (fieldValue === null || fieldValue === undefined) {
+                if (fieldValue == null) {
                     return false;
                 }
                 // Handle object values by converting to JSON string, otherwise use String()
@@ -816,7 +890,7 @@ const Hosts = () => {
         if (selectedTags.length > 0) {
             filtered = filtered.filter(host => {
                 // Check if host has ALL of the selected tags (AND logic)
-                if (!host.tags || !Array.isArray(host.tags)) {
+                if (!Array.isArray(host.tags)) {
                     return false; // If host has no tags, it doesn't match
                 }
 
@@ -830,45 +904,8 @@ const Hosts = () => {
 
         // Apply custom sorting based on filter mode
         if (childHostFilter === 'all') {
-            // "All" mode: parents sorted by hostname, children grouped under their parent
-            const topLevelHosts = filtered
-                .filter(h => !h.parent_host_id)
-                .sort((a, b) => (a.fqdn || '').localeCompare(b.fqdn || ''));
-
-            // Group children by parent_host_id
-            const childrenByParent = new Map<string, SysManageHost[]>();
-            for (const child of filtered.filter(h => !!h.parent_host_id)) {
-                const parentId = child.parent_host_id!;
-                if (!childrenByParent.has(parentId)) {
-                    childrenByParent.set(parentId, []);
-                }
-                childrenByParent.get(parentId)!.push(child);
-            }
-
-            // Sort children within each parent group
-            childrenByParent.forEach(children => {
-                children.sort((a, b) => (a.fqdn || '').localeCompare(b.fqdn || ''));
-            });
-
-            // Build final sorted array: parent followed by its children
-            const sorted: SysManageHost[] = [];
-            for (const parent of topLevelHosts) {
-                sorted.push(parent);
-                const children = childrenByParent.get(parent.id);
-                if (children) {
-                    sorted.push(...children);
-                    childrenByParent.delete(parent.id);
-                }
-            }
-
-            // Append any orphaned children whose parent is not in the filtered list
-            childrenByParent.forEach(children => {
-                sorted.push(...children);
-            });
-
-            filtered = sorted;
+            filtered = sortHostsGrouped(filtered);
         } else {
-            // Parents and Children modes: simple sort by hostname
             filtered.sort((a, b) => (a.fqdn || '').localeCompare(b.fqdn || ''));
         }
 
@@ -1091,6 +1128,17 @@ const Hosts = () => {
                         color="error"
                     >
                         {t('hosts.shutdownSelected', 'Shutdown Selected')}
+                    </Button>
+                )}
+                {canUpdateAgent && (
+                    <Button
+                        variant="outlined"
+                        startIcon={<SystemUpdateAltIcon />}
+                        disabled={!hasActivePrivilegedSelection}
+                        onClick={handleUpdateAgentSelected}
+                        color="info"
+                    >
+                        {t('hosts.updateAgentSelected', 'Update Agent on Selected')}
                     </Button>
                 )}
                 {canDeleteHost && (

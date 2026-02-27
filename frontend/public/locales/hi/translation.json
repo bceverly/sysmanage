@@ -851,6 +851,7 @@
   "hosts": {
     "actions": "क्रियाएं",
     "active": "सक्रिय",
+    "agentVersion": "एजेंट संस्करण",
     "addHost": "होस्ट जोड़ें",
     "approvalNeeded": "अनुमोदन आवश्यक",
     "approveSelected": "चयनित को अनुमोदित करें",
@@ -953,7 +954,11 @@
     "scriptsDisabledTooltip": "इस होस्ट पर स्क्रिप्ट निष्पादन अक्षम है",
     "scriptsEnabled": "स्क्रिप्ट सक्षम",
     "scriptsEnabledTooltip": "इस होस्ट पर स्क्रिप्ट निष्पादन सक्षम है",
-    "softwareUpdated": "सॉफ़्टवेयर अपडेट किया गया"
+    "softwareUpdated": "सॉफ़्टवेयर अपडेट किया गया",
+    "updateAgent": "एजेंट अपडेट करें",
+    "updateAgentSelected": "चयनित पर एजेंट अपडेट करें",
+    "updateAgentRequested": "एजेंट अपडेट सफलतापूर्वक अनुरोधित",
+    "updateAgentFailed": "एजेंट अपडेट का अनुरोध विफल"
   },
   "login": {
     "error": "गलत उपयोगकर्ता नाम या पासवर्ड",

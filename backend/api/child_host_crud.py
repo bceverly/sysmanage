@@ -10,7 +10,7 @@ Read-only listing operations remain open source.
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import joinedload, sessionmaker
 
 from backend.api.child_host_models import (
     ChildHostResponse,
@@ -38,6 +38,22 @@ from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
 
 router = APIRouter()
+
+
+def _effective_child_status(child) -> str:
+    """Return the effective status for a child host.
+
+    When a child host has a linked Host record (its own agent registered),
+    use the linked Host's connectivity state so the child hosts screen is
+    consistent with the main Hosts screen.  A bhyve VM process can be alive
+    while the agent inside it is unreachable — in that case the status
+    should reflect the agent state, not the hypervisor state.
+    """
+    if child.child_host_id and child.child_host:
+        linked_host = child.child_host
+        if not linked_host.active or linked_host.status == "down":
+            return "stopped"
+    return child.status
 
 
 def _check_container_module():
@@ -78,6 +94,7 @@ async def list_child_hosts(
         # Query child hosts for this parent
         child_hosts = (
             session.query(HostChild)
+            .options(joinedload(HostChild.child_host))
             .filter(HostChild.parent_host_id == host.id)
             .order_by(HostChild.created_at.desc())
             .all()
@@ -93,12 +110,22 @@ async def list_child_hosts(
                 distribution=child.distribution,
                 distribution_version=child.distribution_version,
                 hostname=child.hostname,
-                status=child.status,
+                status=_effective_child_status(child),
                 installation_step=child.installation_step,
                 error_message=child.error_message,
                 created_at=child.created_at.isoformat() if child.created_at else None,
                 installed_at=(
                     child.installed_at.isoformat() if child.installed_at else None
+                ),
+                reboot_required=(
+                    child.child_host.reboot_required
+                    if child.child_host_id and child.child_host
+                    else False
+                ),
+                agent_version=(
+                    child.child_host.agent_version
+                    if child.child_host_id and child.child_host
+                    else None
                 ),
             )
             for child in child_hosts
@@ -148,6 +175,7 @@ async def get_child_host(
 
         child = (
             session.query(HostChild)
+            .options(joinedload(HostChild.child_host))
             .filter(
                 HostChild.id == child_id,
                 HostChild.parent_host_id == host.id,
@@ -166,11 +194,21 @@ async def get_child_host(
             distribution=child.distribution,
             distribution_version=child.distribution_version,
             hostname=child.hostname,
-            status=child.status,
+            status=_effective_child_status(child),
             installation_step=child.installation_step,
             error_message=child.error_message,
             created_at=child.created_at.isoformat() if child.created_at else None,
             installed_at=child.installed_at.isoformat() if child.installed_at else None,
+            reboot_required=(
+                child.child_host.reboot_required
+                if child.child_host_id and child.child_host
+                else False
+            ),
+            agent_version=(
+                child.child_host.agent_version
+                if child.child_host_id and child.child_host
+                else None
+            ),
         )
 
 

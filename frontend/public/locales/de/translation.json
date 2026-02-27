@@ -852,6 +852,7 @@
   "hosts": {
     "actions": "Aktionen",
     "active": "Aktiv",
+    "agentVersion": "Agent-Version",
     "addHost": "Host hinzufügen",
     "antivirusDeployFailed": "Fehler beim Bereitstellen von Antivirus. Bitte versuchen Sie es erneut.",
     "antivirusDeploySuccess": "Antivirus-Bereitstellung für {{count}} Host(s) in die Warteschlange gestellt",
@@ -954,7 +955,11 @@
     "scriptsDisabledTooltip": "Skriptausführung ist auf diesem Host deaktiviert",
     "scriptsEnabled": "Skripte aktiviert",
     "scriptsEnabledTooltip": "Skriptausführung ist auf diesem Host aktiviert",
-    "softwareUpdated": "Software aktualisiert"
+    "softwareUpdated": "Software aktualisiert",
+    "updateAgent": "Agent aktualisieren",
+    "updateAgentSelected": "Agent auf Ausgewählten aktualisieren",
+    "updateAgentRequested": "Agent-Aktualisierung erfolgreich angefordert",
+    "updateAgentFailed": "Agent-Aktualisierung konnte nicht angefordert werden"
   },
   "login": {
     "error": "Ungültiger Benutzername oder Passwort",

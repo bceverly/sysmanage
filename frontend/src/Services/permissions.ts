@@ -78,6 +78,7 @@ export const SecurityRoles = {
     // - Host Power Operations (alphabetical)
     REBOOT_HOST: 'Reboot Host',
     SHUTDOWN_HOST: 'Shutdown Host',
+    UPDATE_AGENT: 'Update Agent',
     // - Host Service Operations (alphabetical)
     RESTART_HOST_SERVICE: 'Restart Host Service',
     START_HOST_SERVICE: 'Start Host Service',

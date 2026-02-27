@@ -60,6 +60,8 @@ class ChildHostResponse(BaseModel):
     error_message: Optional[str] = None
     created_at: str
     installed_at: Optional[str] = None
+    reboot_required: bool = False
+    agent_version: Optional[str] = None
 
     class Config:
         from_attributes = True

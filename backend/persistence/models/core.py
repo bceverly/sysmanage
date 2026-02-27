@@ -155,6 +155,9 @@ class Host(Base):
     # Agent privilege status
     is_agent_privileged = Column(Boolean, nullable=True, default=False)
 
+    # Agent version (reported via heartbeat/registration)
+    agent_version = Column(String(50), nullable=True)
+
     # Script execution permission
     script_execution_enabled = Column(Boolean, nullable=False, default=False)
 

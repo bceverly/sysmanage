@@ -1,5 +1,4 @@
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 // Dynamically determine the backend URL based on current host
 const getBackendBaseURL = () => {
@@ -42,13 +41,19 @@ axiosInstance.interceptors.response.use(
       console.debug('Token expired? err.response = ' + err.response);
       console.debug('retry = ' + originalConfig._retry);
 
-      // This is an attempt to log in with an expired refresh token
-      // But don't redirect if it's a Pro+ license check (pro_plus_required error)
+      // Handle 403 Forbidden responses:
+      // - Role-based permission denials (e.g. "Permission denied: ... role required")
+      //   should NOT redirect — let the calling code show an error toast
+      // - Pro+ license checks should NOT redirect
+      // - Only redirect to login for auth-related 403s (expired refresh token)
       if (err.response.status === 403) {
         const errorData = err.response.data;
+        const detail = errorData?.detail || '';
         const isProPlusError = errorData?.error === 'pro_plus_required' ||
                                errorData?.detail?.error === 'pro_plus_required';
-        if (!isProPlusError) {
+        const isPermissionDenied = typeof detail === 'string' &&
+                                   detail.includes('Permission denied');
+        if (!isProPlusError && !isPermissionDenied) {
           globalThis.location.href = '/login';
         }
       }
@@ -60,26 +65,19 @@ axiosInstance.interceptors.response.use(
         originalConfig._retry = true;
 
         console.log("Calling /refresh to get a new auth token...");
-        await axiosInstance.post("/refresh", {
-        })
-        .then((response) => {
+        try {
+          const response = await axiosInstance.post("/refresh", {});
           console.log('Received response:', response);
           localStorage.setItem("bearer_token", response.data.Authorization);
           return axiosInstance(originalConfig);
-        })
-        .catch((error) => {
-          // Error situation - clear out storage
+        } catch (error) {
+          // Refresh failed — clear storage and redirect to login
           console.log(error);
           localStorage.removeItem("userid");
           localStorage.removeItem("bearer_token");
-
-          const navigate = useNavigate();
-
-          navigate("/login")
+          globalThis.location.href = '/login';
           throw error;
-        });
-
-        return axiosInstance(originalConfig);
+        }
       }
     }
 

@@ -72,6 +72,7 @@ class HostRegistration(BaseModel):
     script_execution_enabled: Optional[bool] = None
     is_privileged: Optional[bool] = None
     enabled_shells: Optional[List[str]] = None
+    agent_version: Optional[str] = None
     auto_approve_token: Optional[str] = None
 
 
@@ -247,6 +248,7 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
             "memory_total_mb": host.memory_total_mb,
             "reboot_required": host.reboot_required,
             "is_agent_privileged": host.is_agent_privileged,
+            "agent_version": host.agent_version,
             "script_execution_enabled": getattr(
                 host, "script_execution_enabled", False
             ),
@@ -329,6 +331,7 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
             "memory_total_mb": host.memory_total_mb,
             "reboot_required": host.reboot_required,
             "is_agent_privileged": host.is_agent_privileged,
+            "agent_version": host.agent_version,
             "script_execution_enabled": getattr(
                 host, "script_execution_enabled", False
             ),
@@ -404,6 +407,7 @@ def _get_all_hosts_sync():
                 "memory_total_mb": host.memory_total_mb,
                 "reboot_required": host.reboot_required,
                 "is_agent_privileged": host.is_agent_privileged,
+                "agent_version": host.agent_version,
                 "script_execution_enabled": getattr(
                     host, "script_execution_enabled", False
                 ),

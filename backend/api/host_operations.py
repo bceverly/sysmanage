@@ -237,6 +237,82 @@ async def shutdown_host(host_id: str, current_user: str = Depends(get_current_us
         return {"result": True, "message": _("System shutdown requested")}
 
 
+@router.post("/host/update-agent/{host_id}", dependencies=[Depends(JWTBearer())])
+async def update_agent(host_id: str, current_user: str = Depends(get_current_user)):
+    """
+    Request agent update for a specific host.
+    """
+    # Get the SQLAlchemy session
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+
+    with session_local() as session:
+        # Check if user has permission to update agents
+        user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=error_user_not_found())
+
+        # Load role cache if not already loaded
+        if user._role_cache is None:
+            user.load_role_cache(session)
+
+        # Check for UPDATE_AGENT role
+        if not user.has_role(SecurityRoles.UPDATE_AGENT):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: UPDATE_AGENT role required"),
+            )
+
+        # Find the host first to ensure it exists
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+        if not host:
+            raise HTTPException(status_code=404, detail=error_host_not_found())
+
+        # Create command message for agent update
+        command_message = create_command_message(
+            command_type="update_agent", parameters={}
+        )
+
+        # Send command to agent via message queue
+        queue_ops.enqueue_message(
+            message_type="command",
+            message_data=command_message,
+            direction=QueueDirection.OUTBOUND,
+            host_id=host_id,
+            db=session,
+        )
+
+        # Audit log the agent update request
+        from backend.services.audit_service import (
+            ActionType,
+            AuditService,
+            EntityType,
+            Result,
+        )
+
+        AuditService.log(
+            db=session,
+            user_id=user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            description=f"Requested agent update for host {host.fqdn}",
+            result=Result.SUCCESS,
+        )
+
+        # Commit the session to persist the queued message and audit log
+        session.commit()
+
+        return {"result": True, "message": _("Agent update requested")}
+
+
 @router.post("/host/{host_id}/request-packages", dependencies=[Depends(JWTBearer())])
 async def request_packages(host_id: str, current_user: str = Depends(get_current_user)):
     """

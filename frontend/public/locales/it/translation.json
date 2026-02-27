@@ -852,6 +852,7 @@
   "hosts": {
     "actions": "Azioni",
     "active": "Attivo",
+    "agentVersion": "Versione Agente",
     "addHost": "Aggiungi Host",
     "antivirusDeployFailed": "Impossibile distribuire l'antivirus. Riprova.",
     "antivirusDeploySuccess": "Distribuzione antivirus accodata per {{count}} host",
@@ -954,7 +955,11 @@
     "childHostsOnly": "Solo host figlio",
     "childrenOnly": "Solo figli",
     "childHostOf": "Host figlio di {{parent}}",
-    "viewParent": "Visualizza host genitore"
+    "viewParent": "Visualizza host genitore",
+    "updateAgent": "Aggiorna agente",
+    "updateAgentSelected": "Aggiorna agente sui selezionati",
+    "updateAgentRequested": "Aggiornamento agente richiesto con successo",
+    "updateAgentFailed": "Impossibile richiedere l'aggiornamento dell'agente"
   },
   "login": {
     "error": "Nome utente o password non validi",

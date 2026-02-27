@@ -113,6 +113,8 @@ class CommandType(str, Enum):
     DELETE_HOST_GROUP = "delete_host_group"
     REFRESH_USER_ACCESS = "refresh_user_access"
     CHANGE_HOSTNAME = "change_hostname"
+    UPDATE_AGENT = "update_agent"
+    UPDATE_CHILD_AGENT = "update_child_agent"
 
     # Generic deployment commands
     DEPLOY_FILES = "deploy_files"

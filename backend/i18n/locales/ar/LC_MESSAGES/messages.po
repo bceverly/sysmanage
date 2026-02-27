@@ -1236,3 +1236,16 @@ msgstr "نشر الملفات إلى المضيف"
 msgid "Executing command sequence"
 msgstr "تنفيذ تسلسل الأوامر"
 
+
+msgid "Agent update requested"
+msgstr "تم طلب تحديث الوكيل"
+
+msgid "Permission denied: UPDATE_AGENT role required"
+msgstr "تم رفض الإذن: دور UPDATE_AGENT مطلوب"
+
+msgid "Child agent update requested: %s"
+msgstr "تم طلب تحديث وكيل المضيف الفرعي: %s"
+
+msgid "Child agent update requested"
+msgstr "تم طلب تحديث وكيل المضيف الفرعي"
+

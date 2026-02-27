@@ -852,6 +852,7 @@
   "hosts": {
     "actions": "アクション",
     "active": "アクティブ",
+    "agentVersion": "エージェントバージョン",
     "addHost": "ホストを追加",
     "antivirusDeployFailed": "ウイルス対策のデプロイに失敗しました。再度お試しください。",
     "antivirusDeploySuccess": "{{count}}台のホストにウイルス対策のデプロイがキューに追加されました",
@@ -954,7 +955,11 @@
     "childHostsOnly": "子ホストのみ",
     "childrenOnly": "子のみ",
     "childHostOf": "{{parent}}の子ホスト",
-    "viewParent": "親ホストを表示"
+    "viewParent": "親ホストを表示",
+    "updateAgent": "エージェントを更新",
+    "updateAgentSelected": "選択したホストのエージェントを更新",
+    "updateAgentRequested": "エージェントの更新が正常にリクエストされました",
+    "updateAgentFailed": "エージェントの更新リクエストに失敗しました"
   },
   "login": {
     "error": "ユーザー名またはパスワードが無効です",
