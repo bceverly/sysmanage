@@ -2156,20 +2156,20 @@ jobs:
           tar czf sysmanage-$VERSION.tar.gz $TAR_NAME/
           echo "Created tarball: sysmanage-$VERSION.tar.gz ($(du -h sysmanage-$VERSION.tar.gz | cut -f1))"
 
-          # Create vendor tarball with wheels for Python 3.12 and 3.13
+          # Create vendor tarball with wheels for Python 3.12, 3.13, and 3.14
           echo ""
           echo "Creating vendor tarball with pip dependencies..."
           mkdir -p /tmp/vendor
 
-          # Download wheels for Python 3.12 (EPEL 10)
-          echo "Downloading wheels for Python 3.12 (EPEL 10)..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.12.11 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --only-binary=:all:
+          # Download wheels for Python 3.12 (EPEL 9 and EPEL 10)
+          echo "Downloading wheels for Python 3.12 (EPEL 9 and EPEL 10)..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.12.11 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --platform manylinux2014_aarch64 --platform manylinux_2_17_aarch64 --only-binary=:all:
           echo "Downloaded wheels for Python 3.12"
 
           # Download wheels for Python 3.13 (Fedora 41, 42)
           echo ""
           echo "Downloading wheels for Python 3.13 (Fedora 41, 42)..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.13.1 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --only-binary=:all:
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.13.1 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --platform manylinux2014_aarch64 --platform manylinux_2_17_aarch64 --only-binary=:all:
           echo "Downloaded wheels for Python 3.13"
 
           # Verify packages
@@ -2233,9 +2233,10 @@ jobs:
           echo "https://copr.fedorainfracloud.org/coprs/$COPR_USERNAME/sysmanage/builds/"
           echo ""
           echo "Copr will now build for all configured chroots:"
-          echo "  - Fedora 41 (Python 3.13)"
-          echo "  - Fedora 42 (Python 3.13)"
-          echo "  - EPEL 10 (RHEL 10, CentOS Stream 10 - Python 3.12)"
+          echo "  - Fedora 41 x86_64 and aarch64 (Python 3.13)"
+          echo "  - Fedora 42 x86_64 and aarch64 (Python 3.13)"
+          echo "  - EPEL 9 x86_64 and aarch64 (RHEL 9, Oracle Linux 9, Rocky 9, Alma 9 - Python 3.12)"
+          echo "  - EPEL 10 x86_64 and aarch64 (RHEL 10, CentOS Stream 10 - Python 3.12)"
           echo ""
           echo "Installation instructions:"
           echo "  sudo dnf copr enable $COPR_USERNAME/sysmanage"

@@ -18,13 +18,28 @@ Source1:        %{name}-vendor-%{version}.tar.gz
 %global __requires_exclude ^python\\(abi\\)
 %global __provides_exclude_from ^%{_libdir}/sysmanage/venv/.*$
 
-BuildRequires:  python3-devel >= 3.12
-BuildRequires:  python3-pip
-BuildRequires:  python3-setuptools
+# EL9 ships Python 3.9 as default; use the python3.12 AppStream packages instead
+%if 0%{?el9}
+%global python3_bin python3.12
+%global python3_pkg python3.12
+%global python3_devel python3.12-devel
+%global python3_pip python3.12-pip
+%global python3_setuptools python3.12-setuptools
+%else
+%global python3_bin python3
+%global python3_pkg python3 >= 3.12
+%global python3_devel python3-devel >= 3.12
+%global python3_pip python3-pip
+%global python3_setuptools python3-setuptools
+%endif
+
+BuildRequires:  %{python3_devel}
+BuildRequires:  %{python3_pip}
+BuildRequires:  %{python3_setuptools}
 BuildRequires:  systemd-rpm-macros
 
-Requires:       python3 >= 3.12
-Requires:       python3-pip
+Requires:       %{python3_pkg}
+Requires:       %{python3_pip}
 Requires:       systemd
 Requires:       nginx
 Requires:       postgresql-server >= 12
@@ -89,7 +104,7 @@ fi
 # Create virtualenv and install Python dependencies
 # If vendor directory exists (COPR/OBS builds), use offline installation
 # If not (local Makefile builds), skip pip install here - will happen in %post with network
-python3 -m venv %{buildroot}/opt/sysmanage/.venv
+%{python3_bin} -m venv %{buildroot}/opt/sysmanage/.venv
 if [ -d %{_builddir}/%{name}-%{version}/vendor ]; then
     %{buildroot}/opt/sysmanage/.venv/bin/pip install --upgrade pip --no-index --find-links=%{_builddir}/%{name}-%{version}/vendor
     %{buildroot}/opt/sysmanage/.venv/bin/pip install -r requirements-prod.txt --no-index --find-links=%{_builddir}/%{name}-%{version}/vendor
@@ -145,7 +160,7 @@ chmod 750 /etc/sysmanage
 # Recreate the venv using the system's Python to fix all symlinks and paths
 cd /opt/sysmanage
 rm -rf .venv
-python3 -m venv .venv
+%{python3_bin} -m venv .venv
 
 # Check if we have a vendor directory from the RPM (for COPR/OBS builds)
 if [ -d vendor ]; then
