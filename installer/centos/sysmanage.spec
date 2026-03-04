@@ -14,10 +14,18 @@ Source1:        %{name}-vendor-%{version}.tar.gz
 %global __os_install_post /usr/lib/rpm/brp-compress %{nil}
 
 # Disable automatic Python dependency generation
-# We manually specify python3 >= 3.12 in Requires
+# We manually specify python3 version in Requires (3.11 on EL8, 3.12 on EL9, 3.12+ elsewhere)
 %global __requires_exclude ^python\\(abi\\)
 %global __provides_exclude_from ^%{_libdir}/sysmanage/venv/.*$
 
+# EL8 ships Python 3.6 as default; use the python3.11 AppStream packages instead
+%if 0%{?el8}
+%global python3_bin python3.11
+%global python3_pkg python3.11
+%global python3_devel python3.11-devel
+%global python3_pip python3.11-pip
+%global python3_setuptools python3.11-setuptools
+%else
 # EL9 ships Python 3.9 as default; use the python3.12 AppStream packages instead
 %if 0%{?el9}
 %global python3_bin python3.12
@@ -31,6 +39,7 @@ Source1:        %{name}-vendor-%{version}.tar.gz
 %global python3_devel python3-devel >= 3.12
 %global python3_pip python3-pip
 %global python3_setuptools python3-setuptools
+%endif
 %endif
 
 BuildRequires:  %{python3_devel}

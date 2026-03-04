@@ -3227,10 +3227,16 @@ deploy-copr:
 	tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
 	echo "Created source tarball: sysmanage-$$VERSION.tar.gz"; \
 	\
-	echo "Creating vendor tarball (Python 3.12 + 3.13 wheels)..."; \
+	echo "Creating vendor tarball (Python 3.11 + 3.12 + 3.13 wheels)..."; \
 	rm -rf /tmp/vendor; \
 	mkdir -p /tmp/vendor; \
-	echo "Downloading wheels for Python 3.12 (EPEL 10)..."; \
+	echo "Downloading wheels for Python 3.11 (EPEL 8)..."; \
+	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
+		--python-version 3.11.11 \
+		--platform manylinux2014_x86_64 \
+		--platform manylinux_2_17_x86_64 \
+		--only-binary=:all:; \
+	echo "Downloading wheels for Python 3.12 (EPEL 9, EPEL 10)..."; \
 	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
 		--python-version 3.12.11 \
 		--platform manylinux2014_x86_64 \
