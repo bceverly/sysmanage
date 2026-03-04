@@ -3102,10 +3102,17 @@ deploy-obs:
 	echo "Creating vendor tarball (Python 3.11 wheels)..."; \
 	rm -rf /tmp/vendor; \
 	mkdir -p /tmp/vendor; \
+	echo "Downloading pip wheel (needed to upgrade old pip in build chroot)..."; \
+	pip3 download pip -d /tmp/vendor --only-binary=:all:; \
 	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
 		--python-version 311 \
 		--platform manylinux2014_x86_64 \
 		--platform manylinux_2_17_x86_64 \
+		--only-binary=:all:; \
+	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
+		--python-version 311 \
+		--platform manylinux2014_aarch64 \
+		--platform manylinux_2_17_aarch64 \
 		--only-binary=:all:; \
 	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
 		--python-version 311 \
@@ -3230,23 +3237,43 @@ deploy-copr:
 	echo "Creating vendor tarball (Python 3.11 + 3.12 + 3.13 wheels)..."; \
 	rm -rf /tmp/vendor; \
 	mkdir -p /tmp/vendor; \
-	echo "Downloading wheels for Python 3.11 (EPEL 8)..."; \
+	echo "Downloading pip wheel (needed to upgrade old pip in EPEL 8 build chroot)..."; \
+	pip3 download pip -d /tmp/vendor --only-binary=:all:; \
+	echo "Downloading wheels for Python 3.11 x86_64 (EPEL 8)..."; \
 	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
 		--python-version 3.11.11 \
 		--platform manylinux2014_x86_64 \
 		--platform manylinux_2_17_x86_64 \
 		--only-binary=:all:; \
-	echo "Downloading wheels for Python 3.12 (EPEL 9, EPEL 10)..."; \
+	echo "Downloading wheels for Python 3.11 aarch64 (EPEL 8)..."; \
+	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
+		--python-version 3.11.11 \
+		--platform manylinux2014_aarch64 \
+		--platform manylinux_2_17_aarch64 \
+		--only-binary=:all:; \
+	echo "Downloading wheels for Python 3.12 x86_64 (EPEL 9, EPEL 10)..."; \
 	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
 		--python-version 3.12.11 \
 		--platform manylinux2014_x86_64 \
 		--platform manylinux_2_17_x86_64 \
 		--only-binary=:all:; \
-	echo "Downloading wheels for Python 3.13 (Fedora 41, 42)..."; \
+	echo "Downloading wheels for Python 3.12 aarch64 (EPEL 9, EPEL 10)..."; \
+	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
+		--python-version 3.12.11 \
+		--platform manylinux2014_aarch64 \
+		--platform manylinux_2_17_aarch64 \
+		--only-binary=:all:; \
+	echo "Downloading wheels for Python 3.13 x86_64 (Fedora 41, 42)..."; \
 	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
 		--python-version 3.13.1 \
 		--platform manylinux2014_x86_64 \
 		--platform manylinux_2_17_x86_64 \
+		--only-binary=:all:; \
+	echo "Downloading wheels for Python 3.13 aarch64 (Fedora 41, 42)..."; \
+	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
+		--python-version 3.13.1 \
+		--platform manylinux2014_aarch64 \
+		--platform manylinux_2_17_aarch64 \
 		--only-binary=:all:; \
 	echo "Total wheels: $$(ls -1 /tmp/vendor/*.whl 2>/dev/null | wc -l)"; \
 	cd /tmp; \
