@@ -55,6 +55,8 @@ try:
             config["security"]["max_failed_logins"] = 5
         if "account_lockout_duration" not in config["security"]:
             config["security"]["account_lockout_duration"] = 15
+        if "jwt_algorithm" not in config["security"]:
+            config["security"]["jwt_algorithm"] = "HS256"
         # Logging settings
         if "logging" not in config:
             config["logging"] = {}
@@ -126,7 +128,7 @@ try:
         if "key" not in config["license"]:
             config["license"]["key"] = ""  # No license by default (Community Edition)
         if "phone_home_url" not in config["license"]:
-            config["license"]["phone_home_url"] = "https://license.sysmanage.io"
+            config["license"]["phone_home_url"] = "https://license.sysmanage.org"
         if "phone_home_interval_hours" not in config["license"]:
             config["license"]["phone_home_interval_hours"] = 24
         if "modules_path" not in config["license"]:

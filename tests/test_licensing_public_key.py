@@ -9,20 +9,17 @@ from unittest.mock import MagicMock, patch, AsyncMock
 
 
 class TestGetLicenseServerUrl:
-    """Tests for _get_license_server_url function."""
+    """Tests for _get_license_server_url function.
 
-    def test_returns_default_url(self):
-        """Test returns default URL when not configured."""
-        from backend.licensing.public_key import _get_license_server_url
-
-        mock_config = {"license": {}}
-        with patch("backend.licensing.public_key.get_config", return_value=mock_config):
-            result = _get_license_server_url()
-
-        assert result == "https://license.sysmanage.io"
+    The function performs a direct dict lookup; the default value for
+    ``license.phone_home_url`` is supplied by ``backend.config.config``
+    when the configuration is loaded, so callers can rely on the key
+    being present. Tests below cover both the normal pass-through and
+    the strict-contract error case.
+    """
 
     def test_returns_configured_url(self):
-        """Test returns configured URL."""
+        """Returns whatever phone_home_url the config layer has supplied."""
         from backend.licensing.public_key import _get_license_server_url
 
         mock_config = {"license": {"phone_home_url": "https://custom.example.com"}}
@@ -30,6 +27,30 @@ class TestGetLicenseServerUrl:
             result = _get_license_server_url()
 
         assert result == "https://custom.example.com"
+
+    def test_returns_default_when_config_layer_supplies_default(self):
+        """The config layer defaults phone_home_url to license.sysmanage.org."""
+        from backend.licensing.public_key import _get_license_server_url
+
+        # Mirror what backend.config.config builds when the YAML omits the key.
+        mock_config = {"license": {"phone_home_url": "https://license.sysmanage.org"}}
+        with patch("backend.licensing.public_key.get_config", return_value=mock_config):
+            result = _get_license_server_url()
+
+        assert result == "https://license.sysmanage.org"
+
+    def test_raises_when_phone_home_url_missing(self):
+        """Strict contract: KeyError if config layer didn't populate the default.
+
+        This guards against future regressions where the default in
+        backend.config.config might be removed and silently break callers.
+        """
+        from backend.licensing.public_key import _get_license_server_url
+
+        mock_config = {"license": {}}
+        with patch("backend.licensing.public_key.get_config", return_value=mock_config):
+            with pytest.raises(KeyError):
+                _get_license_server_url()
 
 
 class TestLoadCachedKey:

@@ -10,11 +10,16 @@ import pytest
 
 
 class TestGetLicenseServerUrl:
-    """Tests for _get_license_server_url function."""
+    """Tests for _get_license_server_url function.
+
+    The function does a direct dict lookup; the default value lives in
+    ``backend.config.config`` so callers can rely on the key being
+    present after config load.
+    """
 
     @patch("backend.licensing.public_key.get_config")
     def test_get_license_server_url_from_config(self, mock_get_config):
-        """Test URL from config."""
+        """Returns the URL the config layer has supplied."""
         from backend.licensing.public_key import _get_license_server_url
 
         mock_get_config.return_value = {
@@ -27,14 +32,31 @@ class TestGetLicenseServerUrl:
 
     @patch("backend.licensing.public_key.get_config")
     def test_get_license_server_url_default(self, mock_get_config):
-        """Test default URL when not in config."""
+        """The config layer defaults phone_home_url to license.sysmanage.org."""
+        from backend.licensing.public_key import _get_license_server_url
+
+        # Mirror what backend.config.config builds when the YAML omits the key.
+        mock_get_config.return_value = {
+            "license": {"phone_home_url": "https://license.sysmanage.org"}
+        }
+
+        result = _get_license_server_url()
+
+        assert result == "https://license.sysmanage.org"
+
+    @patch("backend.licensing.public_key.get_config")
+    def test_get_license_server_url_raises_when_missing(self, mock_get_config):
+        """Strict contract: KeyError if config layer didn't populate phone_home_url.
+
+        Guards against a future regression where the default in
+        backend.config.config might be removed and silently break callers.
+        """
         from backend.licensing.public_key import _get_license_server_url
 
         mock_get_config.return_value = {}
 
-        result = _get_license_server_url()
-
-        assert result == "https://license.sysmanage.io"
+        with pytest.raises(KeyError):
+            _get_license_server_url()
 
 
 class TestLoadCachedKey:

@@ -30,10 +30,14 @@ _cache: dict = {"public_key": None}
 
 
 def _get_license_server_url() -> str:
-    """Get the license server URL from config."""
+    """Get the license server URL from config.
+
+    The default value is supplied by backend.config.config when the
+    config dict is built; no fallback string is needed (or wanted) here,
+    since duplicating it risks drift between the two locations.
+    """
     config = get_config()
-    license_config = config.get("license", {})
-    return license_config.get("phone_home_url", "https://license.sysmanage.io")
+    return config["license"]["phone_home_url"]
 
 
 def _load_cached_key() -> Optional[str]:

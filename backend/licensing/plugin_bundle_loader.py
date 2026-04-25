@@ -139,6 +139,7 @@ class PluginBundleLoader:
         url = f"{download_url}/{module_code}/{version_str}"
 
         modules_path = self._get_modules_path()
+        Path(modules_path).mkdir(parents=True, exist_ok=True)
         temp_path = os.path.join(modules_path, f"{module_code}-plugin.tmp")
         final_path = os.path.join(modules_path, f"{module_code}-plugin.iife.js")
 

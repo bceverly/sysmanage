@@ -160,12 +160,21 @@ class TestUser(TestBase):
 
 @pytest.fixture
 def test_engine():
-    """Create an in-memory SQLite database for testing."""
+    """Create an in-memory SQLite database for testing.
+
+    Uses ``yield`` + ``engine.dispose()`` so each test cleanly closes its
+    connection pool. Without dispose, the underlying sqlite3.Connection
+    objects leak and surface as ResourceWarnings in unrelated tests when
+    the garbage collector eventually sweeps them.
+    """
     engine = create_engine(
         "sqlite:///:memory:", connect_args={"check_same_thread": False}
     )
     TestBase.metadata.create_all(bind=engine)
-    return engine
+    try:
+        yield engine
+    finally:
+        engine.dispose()
 
 
 @pytest.fixture

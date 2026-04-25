@@ -439,38 +439,41 @@ def install_from_binary():
         # OpenBAO download URL pattern - try different naming conventions
         base_url = f"https://github.com/openbao/openbao/releases/download/{version}"
 
-        # Try different filename patterns based on actual releases
+        # Build filename candidates matching OpenBAO's actual release naming.
+        # Tarballs use capitalized OS (Linux/Darwin/Freebsd/Windows) and x86_64/armv6;
+        # .deb/.rpm packages use lowercase os and amd64/arm64.
+        ver_clean = version.lstrip('v')
+        arch = platform_str.split('_', 1)[1]  # e.g. amd64, arm64, arm, ppc64le
+
+        def to_tar_arch(a):
+            return {'amd64': 'x86_64', 'arm': 'armv6'}.get(a, a)
+
         possible_filenames = []
 
-        # Windows-specific patterns (capital W and x86_64 instead of amd64)
         if platform_str.startswith('windows'):
-            arch = platform_str.split('_')[1]  # extract amd64 from windows_amd64
-            # Map Windows amd64 to x86_64 for GitHub release naming
-            if arch == 'amd64':
-                github_arch = 'x86_64'
-            elif arch == 'arm64':
-                github_arch = 'arm64'
-            elif arch == 'arm':
-                github_arch = 'armv6'
-            else:
-                github_arch = arch
-            possible_filenames.append(f"bao_{version.lstrip('v')}_Windows_{github_arch}.zip")
-
-        # FreeBSD-specific tar.gz patterns (FreeBSD has capital F in filename)
+            possible_filenames.append(
+                f"bao_{ver_clean}_Windows_{to_tar_arch(arch)}.zip"
+            )
         elif platform_str.startswith('freebsd'):
-            arch = platform_str.split('_')[1]  # extract amd64 from freebsd_amd64
-            # Map FreeBSD amd64 to x86_64 for GitHub release naming
-            github_arch = 'x86_64' if arch == 'amd64' else arch
-            possible_filenames.append(f"bao_{version.lstrip('v')}_Freebsd_{github_arch}.tar.gz")
-
-        # Generic patterns for other platforms
-        possible_filenames.extend([
-            f"bao-hsm_{version.lstrip('v')}_{platform_str}.deb",  # Debian package
-            f"bao-hsm_{version.lstrip('v')}_{platform_str}.pkg.tar.zst",  # Arch package
-            f"bao_{platform_str}.zip",  # Generic zip
-            f"openbao_{version.lstrip('v')}_{platform_str}.zip",  # Alternative naming
-            f"openbao_{platform_str}.zip",  # Alternative naming
-        ])
+            possible_filenames.append(
+                f"bao_{ver_clean}_Freebsd_{to_tar_arch(arch)}.tar.gz"
+            )
+        elif platform_str.startswith('darwin'):
+            possible_filenames.append(
+                f"bao_{ver_clean}_Darwin_{to_tar_arch(arch)}.tar.gz"
+            )
+        elif platform_str.startswith('linux'):
+            # Prefer the static tarball first — works without sudo and on any distro.
+            possible_filenames.append(
+                f"bao_{ver_clean}_Linux_{to_tar_arch(arch)}.tar.gz"
+            )
+            # Fall back to distro packages if the tarball install fails.
+            possible_filenames.append(
+                f"openbao_{ver_clean}_linux_{arch}.deb"
+            )
+            possible_filenames.append(
+                f"openbao_{ver_clean}_linux_{arch}.rpm"
+            )
 
         downloaded_file = None
 

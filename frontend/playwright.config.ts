@@ -31,6 +31,12 @@ export default defineConfig({
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
+    /* Use the system-installed Chrome instead of Playwright's bundled
+     * chromium-headless-shell. Required on distros that Playwright's
+     * official support matrix does not yet list (e.g. Ubuntu 26.04).
+     * Set at the top level so every project — including `setup` — inherits it. */
+    channel: 'chrome',
+
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
 
@@ -55,19 +61,32 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+        /* `channel: 'chrome'` is set at the top-level `use` so it is
+         * inherited here (and by the `setup` project that runs before us). */
         /* Use authenticated state from setup */
         storageState: authFile,
       },
       dependencies: ['setup'],
     },
-    {
-      name: 'firefox',
-      use: {
-        ...devices['Desktop Firefox'],
-        storageState: authFile,
-      },
-      dependencies: ['setup'],
-    },
+    /* Firefox project temporarily disabled.
+     *
+     * Re-enable once one of:
+     *   (a) Playwright's bundled Firefox supports the host OS, OR
+     *   (b) A non-snap Firefox is installed at a path Playwright can launch
+     *       (snap-confined Firefox does not work reliably with Playwright
+     *       because of the snap sandbox).
+     *
+     * To re-enable with a non-snap Firefox, restore the block below and add:
+     *     launchOptions: { executablePath: '/path/to/firefox' }
+     */
+    // {
+    //   name: 'firefox',
+    //   use: {
+    //     ...devices['Desktop Firefox'],
+    //     storageState: authFile,
+    //   },
+    //   dependencies: ['setup'],
+    // },
     /* Uncomment for WebKit/Safari coverage
     {
       name: 'webkit',

@@ -22,7 +22,7 @@
     "@types/react": "^19.1.15",
     "@types/react-dom": "^19.1.10",
     "axios": "^1.13.2",
-    "esbuild": "^0.27.3",
+    "esbuild": "^0.28.0",
     "i18next": "^25.8.9",
     "i18next-browser-languagedetector": "^8.2.1",
     "i18next-http-backend": "^3.0.2",
@@ -70,6 +70,7 @@
     "@asamuzakjp/css-color": "^4.0.5",
     "@asamuzakjp/dom-selector": "^6.8.1",
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@cyclonedx/cyclonedx-npm": "^4.1.2",
     "@eslint/js": "^9.39.2",
     "@mswjs/interceptors": "^0.41.3",
     "@playwright/test": "^1.58.2",
@@ -87,14 +88,13 @@
     "eslint-plugin-security": "^3.0.1",
     "identity-obj-proxy": "^3.0.0",
     "jsdom": "^27.4.0",
-    "msw": "^2.12.10",
+    "msw": "^2.13.6",
     "strip-literal": "^3.1.0",
     "stylelint": "^16.26.1",
     "stylelint-config-standard": "^39.0.1",
     "tldts": "^7.0.21",
     "vite": "^7.3.1",
-    "vitest": "^4.0.17",
-    "@cyclonedx/cyclonedx-npm": "^4.1.2"
+    "vitest": "^4.0.17"
   },
   "optionalDependencies": {
     "@esbuild/freebsd-x64": "^0.27.2",
