@@ -650,7 +650,13 @@ jobs:
 
       - name: Install WiX Toolset
         run: |
-          dotnet tool install --global wix
+          # Pinned to WiX 6.x. WiX 7 added an Open Source Maintenance Fee
+          # (OSMF) EULA that the CLI requires you to accept before running
+          # `wix build` (error WIX7015). WiX 6 has no such requirement and
+          # is API-compatible with our build script. To move to WiX 7 later,
+          # follow https://wixtoolset.org/osmf/ to add a non-interactive
+          # acceptance step before `wix build`.
+          dotnet tool install --global wix --version 6.0.1
           wix --version
 
       - name: Install frontend dependencies
@@ -722,7 +728,13 @@ jobs:
 
       - name: Install WiX Toolset
         run: |
-          dotnet tool install --global wix
+          # Pinned to WiX 6.x. WiX 7 added an Open Source Maintenance Fee
+          # (OSMF) EULA that the CLI requires you to accept before running
+          # `wix build` (error WIX7015). WiX 6 has no such requirement and
+          # is API-compatible with our build script. To move to WiX 7 later,
+          # follow https://wixtoolset.org/osmf/ to add a non-interactive
+          # acceptance step before `wix build`.
+          dotnet tool install --global wix --version 6.0.1
           wix --version
 
       - name: Install frontend dependencies
