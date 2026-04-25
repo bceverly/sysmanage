@@ -6,6 +6,7 @@ Analyzes performance test results and detects regressions with tolerance bands
 
 import json
 import os
+import platform
 import statistics
 import sys
 from datetime import datetime, timedelta
@@ -123,7 +124,16 @@ class PerformanceRegessionDetector:
         return metrics
 
     def analyze_artillery_results(self, results_file):
-        """Analyze Artillery load test results"""
+        """Analyze Artillery load test results.
+
+        Modern Artillery (>= 2.x) reports use this aggregate shape:
+            aggregate.summaries.http.response_time -> {min, max, mean, median,
+                                                      p50, p75, p90, p95, p99, p999}
+            aggregate.rates.http.request_rate     -> single number (rps)
+            aggregate.counters.http.codes.NNN     -> per-status counts
+            aggregate.counters.vusers.{created,failed,completed}
+            aggregate.counters.http.{requests,responses}
+        """
         try:
             with open(results_file, 'r') as f:
                 data = json.load(f)
@@ -132,27 +142,36 @@ class PerformanceRegessionDetector:
             return {}
 
         metrics = {}
+        agg = data.get('aggregate', {})
+        if not agg:
+            return metrics
 
-        # Extract Artillery metrics
-        if 'aggregate' in data:
-            agg = data['aggregate']
+        summaries = agg.get('summaries', {})
+        rates = agg.get('rates', {})
+        counters = agg.get('counters', {})
 
-            # Response times
-            if 'latency' in agg:
-                lat = agg['latency']
-                metrics['response_time_p95'] = lat.get('p95', 0)
-                metrics['response_time_p99'] = lat.get('p99', 0)
-                metrics['response_time_median'] = lat.get('median', 0)
+        # Response times
+        rt = summaries.get('http.response_time', {})
+        if rt:
+            metrics['response_time_p95'] = rt.get('p95', 0)
+            metrics['response_time_p99'] = rt.get('p99', 0)
+            metrics['response_time_median'] = rt.get('median', rt.get('p50', 0))
+            metrics['response_time_mean'] = rt.get('mean', 0)
 
-            # Request rates
-            if 'rps' in agg:
-                metrics['requests_per_second'] = agg['rps'].get('mean', 0)
+        # Request rate (modern artillery exposes a single number, not a dict)
+        if 'http.request_rate' in rates:
+            rps_value = rates['http.request_rate']
+            # Defensive: older artillery 1.x exposed this as {mean: N}
+            metrics['requests_per_second'] = (
+                rps_value if isinstance(rps_value, (int, float))
+                else rps_value.get('mean', 0)
+            )
 
-            # Error rates
-            if 'errors' in agg:
-                total_requests = agg.get('requestsCompleted', 0) + agg.get('errors', 0)
-                if total_requests > 0:
-                    metrics['error_rate'] = (agg['errors'] / total_requests) * 100
+        # Error rate (% of HTTP responses that were not 2xx)
+        responses = counters.get('http.responses', 0)
+        ok_2xx = sum(v for k, v in counters.items() if k.startswith('http.codes.2'))
+        if responses > 0:
+            metrics['error_rate'] = ((responses - ok_2xx) / responses) * 100
 
         return metrics
 
@@ -244,14 +263,23 @@ def main():
         playwright_metrics = detector.analyze_playwright_results(playwright_file)
         all_metrics.update(playwright_metrics)
 
-    # Analyze Artillery results for each OS
-    for os_name in ['Linux', 'macOS', 'Windows']:
-        artillery_file = f"artillery-report-{os_name}.json"
+    # Analyze Artillery results.
+    # CI may produce per-OS files (artillery-report-Linux.json, etc.) when
+    # aggregating runs across multiple OS runners. Local
+    # 'make test-performance' produces the canonical artillery-report.json.
+    # Check both, prefixing with the host OS for the canonical file so
+    # baselines stay comparable per platform.
+    artillery_candidates = [
+        ("artillery-report.json", platform.system().lower()),
+    ] + [
+        (f"artillery-report-{n}.json", n.lower())
+        for n in ("Linux", "macOS", "Windows")
+    ]
+    for artillery_file, os_label in artillery_candidates:
         if os.path.exists(artillery_file):
-            print(f"⚡ Analyzing Artillery results for {os_name}...")
+            print(f"⚡ Analyzing Artillery results from {artillery_file}...")
             artillery_metrics = detector.analyze_artillery_results(artillery_file)
-            # Prefix metrics with OS name to avoid conflicts
-            prefixed_metrics = {f"{os_name.lower()}_{k}": v for k, v in artillery_metrics.items()}
+            prefixed_metrics = {f"{os_label}_{k}": v for k, v in artillery_metrics.items()}
             all_metrics.update(prefixed_metrics)
 
     if not all_metrics:

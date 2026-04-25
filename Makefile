@@ -654,14 +654,12 @@ else
 	fi
 endif
 ifeq ($(OS),Windows_NT)
-	@echo "Installing Artillery for performance testing..."
-	@npm install -g artillery@latest || echo "[WARNING] Artillery installation failed - performance tests may not run"
+	@echo "[INFO] Artillery (performance testing) is fetched on demand via npx during 'make test-performance' (no global install needed)"
 else
-	@if [ "$$(uname -s)" != "OpenBSD" ] && [ "$$(uname -s)" != "FreeBSD" ] && [ "$$(uname -s)" != "NetBSD" ]; then \
-		echo "Installing Artillery for performance testing..."; \
-		npm install -g artillery@latest || echo "[WARNING] Artillery installation failed - performance tests may not run"; \
+	@if [ "$$(uname -s)" = "OpenBSD" ] || [ "$$(uname -s)" = "FreeBSD" ] || [ "$$(uname -s)" = "NetBSD" ]; then \
+		echo "[SKIP] Artillery not supported on $$(uname -s) - performance tests will be skipped"; \
 	else \
-		echo "[SKIP] Artillery installation skipped on BSD systems - performance tests not supported"; \
+		echo "[INFO] Artillery (performance testing) is fetched on demand via npx during 'make test-performance' (no global install needed)"; \
 	fi
 endif
 	@echo "[OK] Development dependencies installation completed"
@@ -958,8 +956,9 @@ ifeq ($(OS),Windows_NT)
 		echo "[ERROR] Artillery not found. Installing..." && \
 		npm install -g artillery@latest \
 	)
-	@echo "[INFO] Running Artillery load tests against http://localhost:8001..."
-	@echo "[NOTE] Ensure the SysManage server is running on port 8001"
+	@$(PYTHON) scripts/generate_artillery_config.py
+	@echo "[INFO] Running Artillery load tests (target read from artillery.yml)"
+	@echo "[NOTE] Ensure the SysManage backend is running and reachable on the configured port"
 	@artillery run artillery.yml --output artillery-report.json
 	@if exist artillery-report.json ( \
 		artillery report artillery-report.json --output artillery-report.html && \
@@ -968,31 +967,79 @@ ifeq ($(OS),Windows_NT)
 	@echo "[INFO] Running performance regression analysis..."
 	@$(PYTHON) scripts/performance_regression_check.py
 else
-	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ] || [ "$(shell uname -s)" = "NetBSD" ]; then \
+	@set -e; \
+	if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ] || [ "$(shell uname -s)" = "NetBSD" ]; then \
 		echo "[SKIP] Artillery not supported on $(shell uname -s) - performance tests skipped"; \
 	else \
-		echo "[INFO] Running Artillery load tests for backend API..."; \
-		command -v artillery >/dev/null 2>&1 || { \
-			echo "[ERROR] Artillery not found. Installing..."; \
-			if command -v npm >/dev/null 2>&1; then \
-				npm install -g artillery@latest; \
-			else \
-				echo "[ERROR] npm not found. Please install Node.js and npm first."; \
-				exit 1; \
-			fi; \
-		}; \
-		echo "[INFO] Running Artillery load tests against http://localhost:8001..."; \
-		echo "[NOTE] Ensure the SysManage server is running on port 8001"; \
-		artillery run artillery.yml --output artillery-report.json; \
-		if [ -f artillery-report.json ]; then \
-			artillery report artillery-report.json --output artillery-report.html; \
-			echo "[INFO] Artillery report generated: artillery-report.html"; \
+		if ! command -v npm >/dev/null 2>&1; then \
+			echo "[ERROR] npm not found. Please install Node.js and npm first."; \
+			exit 1; \
 		fi; \
+		echo "[INFO] Running Artillery load tests for backend API..."; \
+		echo "[INFO] (Artillery is fetched on demand via npx — first run downloads to ~/.npm/_npx cache, no global install or sudo required)"; \
+		echo "[INFO] Regenerating artillery.yml from sysmanage.yaml to pick up the current api.port..."; \
+		$(PYTHON) scripts/generate_artillery_config.py; \
+		TARGET_URL=$$($(PYTHON) -c "import yaml; print(yaml.safe_load(open('artillery.yml'))['config']['target'])"); \
+		echo "[INFO] Artillery target: $$TARGET_URL"; \
+		echo "[INFO] Pre-flight: checking that the SysManage backend is reachable at $$TARGET_URL/api/health..."; \
+		if ! curl --silent --fail --max-time 5 --output /dev/null "$$TARGET_URL/api/health"; then \
+			echo "[ERROR] Backend at $$TARGET_URL is not responding to /api/health."; \
+			echo "[ERROR] Start the server first: 'make start' (or in another shell), then re-run."; \
+			echo "[ERROR] Refusing to run load tests against a down server — every request would fail and the result would be meaningless."; \
+			exit 1; \
+		fi; \
+		echo "[INFO] Backend is reachable. Provisioning perf-test user (e2e-test@sysmanage.org)..."; \
+		. $(VENV_ACTIVATE) && $(PYTHON) scripts/e2e_test_user.py create; \
+		# Ensure the test user is deleted even if artillery or the report \
+		# checks fail. Without this trap, a failure between create and the \
+		# end of the recipe would leave the user in the database. \
+		trap '. $(VENV_ACTIVATE) && $(PYTHON) scripts/e2e_test_user.py delete >/dev/null 2>&1 || true' EXIT; \
+		echo "[INFO] Running Artillery load tests against $$TARGET_URL..."; \
+		npx --yes artillery@latest run artillery.yml --output artillery-report.json; \
+		if [ ! -f artillery-report.json ]; then \
+			echo "[ERROR] Artillery did not produce a report (run failed silently?)"; \
+			exit 1; \
+		fi; \
+		# Sanity-check the report. A "successful" run requires at least one 2xx HTTP \
+		# response — anything else means we sent traffic but got nothing useful back \
+		# (wrong endpoints, broken auth, server returning errors, etc.). \
+		REPORT_SUMMARY=$$($(PYTHON) -c "\
+import json, sys; \
+d = json.load(open('artillery-report.json')); \
+c = d.get('aggregate', {}).get('counters', {}); \
+created = c.get('vusers.created', 0); \
+failed = c.get('vusers.failed', 0); \
+responses = c.get('http.responses', 0); \
+ok_2xx = sum(v for k, v in c.items() if k.startswith('http.codes.2')); \
+err_4xx = sum(v for k, v in c.items() if k.startswith('http.codes.4')); \
+err_5xx = sum(v for k, v in c.items() if k.startswith('http.codes.5')); \
+print(f'{created}|{failed}|{responses}|{ok_2xx}|{err_4xx}|{err_5xx}')"); \
+		CREATED=$$(echo "$$REPORT_SUMMARY" | cut -d'|' -f1); \
+		FAILED=$$(echo "$$REPORT_SUMMARY"  | cut -d'|' -f2); \
+		RESPONSES=$$(echo "$$REPORT_SUMMARY" | cut -d'|' -f3); \
+		OK_2XX=$$(echo "$$REPORT_SUMMARY"   | cut -d'|' -f4); \
+		ERR_4XX=$$(echo "$$REPORT_SUMMARY"  | cut -d'|' -f5); \
+		ERR_5XX=$$(echo "$$REPORT_SUMMARY"  | cut -d'|' -f6); \
+		echo "[INFO] Result summary: created=$$CREATED failed=$$FAILED responses=$$RESPONSES 2xx=$$OK_2XX 4xx=$$ERR_4XX 5xx=$$ERR_5XX"; \
+		if [ "$$CREATED" -gt 0 ] && [ "$$FAILED" = "$$CREATED" ]; then \
+			echo "[ERROR] All $$CREATED virtual users failed (likely connection errors)."; \
+			exit 1; \
+		fi; \
+		if [ "$$RESPONSES" -gt 0 ] && [ "$$OK_2XX" = "0" ]; then \
+			echo "[ERROR] $$RESPONSES HTTP responses received, but ZERO were 2xx (4xx=$$ERR_4XX, 5xx=$$ERR_5XX)."; \
+			echo "[ERROR] The load test ran but every request was rejected by the server."; \
+			echo "[ERROR] Likely causes: artillery.yml scenarios hit endpoints that don't exist (404),"; \
+			echo "[ERROR] use auth credentials that don't work (401), or the server is misconfigured."; \
+			echo "[ERROR] Inspect artillery-report.json or artillery-report.html for detail."; \
+			exit 1; \
+		fi; \
+		npx --yes artillery@latest report artillery-report.json --output artillery-report.html; \
+		echo "[INFO] Artillery report generated: artillery-report.html"; \
 		echo "[INFO] Running performance regression analysis..."; \
 		$(PYTHON) scripts/performance_regression_check.py; \
+		echo "[OK] Performance tests completed successfully ($$CREATED virtual users, $$FAILED failed)"; \
 	fi
 endif
-	@echo "[OK] Performance testing completed"
 	@echo "[INFO] Browser performance tests are included in 'make test-e2e' (performance.spec.ts)"
 
 # Vite tests only (alias for test-typescript)

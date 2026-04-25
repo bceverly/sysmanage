@@ -30,13 +30,25 @@ def _is_secure_cookie_enabled(the_config):
 
 
 def _set_refresh_cookie(response, refresh_token, jwt_refresh_timeout, is_secure):
-    """Set the refresh token cookie on the response."""
+    """Set the refresh token cookie on the response.
+
+    The cookie's Domain attribute is taken from `security.cookie_domain` in
+    the YAML configuration. If that key is unset (the default), the Domain
+    attribute is omitted entirely and the cookie is scoped to the host that
+    served the response — RFC 6265's default behavior, and what most
+    deployments want. Setting an explicit domain that doesn't match the
+    request host (e.g. hard-coding 'sysmanage.org' on a localhost dev box)
+    causes RFC-compliant clients to reject the cookie outright; this used
+    to produce 'invalid cookie' errors in local load testing and against
+    any non-sysmanage.org deployment.
+    """
+    cookie_domain = config.get_config().get("security", {}).get("cookie_domain")
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         expires=datetime.now(timezone.utc) + timedelta(seconds=jwt_refresh_timeout),
         path="/",
-        domain="sysmanage.org",
+        domain=cookie_domain,
         secure=is_secure,
         httponly=True,
         samesite="strict" if is_secure else "lax",
