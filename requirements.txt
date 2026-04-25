@@ -71,11 +71,14 @@ reportlab==4.4.4
 safety==3.7.0
 safety-schemas==0.0.16
 semgrep>=1.95.0
-# pip-audit is the authoritative tool we run for `pip-audit -r requirements.txt --strict`
-# in the security workflow. Note: pip-audit requires tomli>=2.2.1 while semgrep pins
-# tomli~=2.0.1; pip will install the newer tomli and emit a resolver warning, but both
-# tools still work in practice. Remove once semgrep relaxes its tomli pin upstream.
-pip-audit>=2.10.0
+# pip-audit is intentionally NOT in this file. It requires tomli>=2.2.1
+# while semgrep (above) pins tomli~=2.0.1, making the combined resolver
+# graph unsolvable on a clean install. Instead, the security workflow
+# (.github/workflows/security.yml) and `make install-dev` install it in
+# a separate `pip install pip-audit` step, which uses an independent
+# resolver pass — pip then bumps tomli with a non-fatal warning rather
+# than failing. Remove this comment and add `pip-audit>=2.10.0` once
+# semgrep relaxes its tomli pin upstream.
 
 # Note: On OpenBSD 7.7, coverage.py C tracer requires gcc and py3-cffi
 # Install with: doas pkg_add gcc py3-cffi
