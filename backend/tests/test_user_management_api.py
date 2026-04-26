@@ -1069,6 +1069,19 @@ class TestUserPermissions:
 
                 assert exc_info.value.status_code == 401
 
+    @pytest.mark.asyncio
+    async def test_get_user_permissions_config_admin_shortcut(self, mock_config):
+        """Config-admin (no DB row) gets every permission instead of 401."""
+        # The fixture sets admin_userid = "admin@test.com" with no DB row.
+        # Without the shortcut this would raise 401; with it, the user
+        # gets is_admin=True and every SecurityRole granted.
+        result = await get_user_permissions("admin@test.com")
+        assert result["is_admin"] is True
+        # Every defined role should be True for the config-admin.
+        from backend.security.roles import SecurityRoles  # local import for clarity
+
+        assert all(result["permissions"][role.value] is True for role in SecurityRoles)
+
 
 # =============================================================================
 # PASSWORD RESET TESTS

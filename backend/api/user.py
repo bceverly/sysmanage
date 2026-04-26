@@ -113,6 +113,21 @@ async def get_user_permissions(current_user: str = Depends(get_current_user)):
     Get the current user's security role permissions.
     Returns a dictionary of role names to boolean values.
     """
+    # Config-admin shortcut.  The userid configured under
+    # `security.admin_userid` is the recovery account; it has no DB row
+    # but is implicitly granted every security role.  Without this
+    # shortcut, the frontend's permission lookups all reject and any
+    # role-gated UI control (e.g. the "Add User" button on /users)
+    # never renders for the config-admin.  Mirrors the equivalent
+    # special case in /user/me below.
+    the_config = config.get_config()
+    admin_userid = the_config.get("security", {}).get("admin_userid")
+    if admin_userid and current_user == admin_userid:
+        return {
+            "is_admin": True,
+            "permissions": {role.value: True for role in SecurityRoles},
+        }
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
