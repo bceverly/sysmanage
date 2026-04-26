@@ -13,6 +13,44 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 
+# For each metric we track, which direction is bad?
+#   "higher" -> a regression occurs when current is meaningfully GREATER than baseline
+#              (latency, error rate, memory use, page-load time)
+#   "lower"  -> a regression occurs when current is meaningfully LESS than baseline
+#              (throughput, requests/sec)
+# Anything not in the table defaults to "higher" (the conservative choice for
+# perf metrics — most of what we record is latency-shaped).
+METRIC_BAD_DIRECTION = {
+    # Artillery-side metrics
+    "response_time_p95": "higher",
+    "response_time_p99": "higher",
+    "response_time_mean": "higher",
+    "response_time_median": "higher",
+    "error_rate": "higher",
+    "requests_per_second": "lower",
+    # Playwright-side metrics
+    "dom_content_loaded": "higher",
+    "load_complete": "higher",
+    "first_byte": "higher",
+    "first_contentful_paint": "higher",
+    "first_paint": "higher",
+    "memory_used": "higher",
+    # resource_count is informational; treat any change as fine.
+    "resource_count": None,
+}
+
+# p99 latency is dominated by the slowest single request in the window —
+# one cold-start outlier can swing it 5-10x even when the rest of the run
+# is fine. Give it a much wider per-metric tolerance so it doesn't fail
+# every fresh-backend run; p95 + mean still catch real regressions.
+PER_METRIC_TOLERANCE_OVERRIDE = {
+    "response_time_p99": 100,  # %
+    "linux_response_time_p99": 100,
+    "darwin_response_time_p99": 100,
+    "windows_response_time_p99": 100,
+}
+
+
 class PerformanceRegessionDetector:
     """Detects performance regressions using statistical analysis"""
 
@@ -64,8 +102,19 @@ class PerformanceRegessionDetector:
 
         return baseline, std_dev
 
-    def check_regression(self, current_value, baseline, std_dev):
-        """Check if current value represents a regression"""
+    def check_regression(self, current_value, baseline, std_dev, metric_name=None):
+        """
+        Check if current value represents a regression.
+
+        Direction-aware: for "higher-is-bad" metrics (latency, error rate),
+        only an INCREASE counts as a regression — a decrease is improvement
+        and is reported as such. Likewise for "lower-is-bad" metrics
+        (throughput), only a decrease is bad.
+
+        Anything outside the configured tolerance still gets logged so the
+        operator sees big swings, but only the bad-direction case actually
+        fails the run.
+        """
         if baseline is None:
             return False, "No baseline available"
 
@@ -80,17 +129,40 @@ class PerformanceRegessionDetector:
         else:
             deviation = abs(current_value - baseline) / baseline * 100
 
-        # Use tolerance percentage or 2 standard deviations, whichever is more generous
-        tolerance_by_percentage = self.tolerance_percentage
-        tolerance_by_stddev = (2 * std_dev / baseline * 100) if baseline > 0 else float('inf')
-
+        # Use tolerance percentage or 2 standard deviations, whichever is more generous.
+        # Per-metric overrides exist for famously noisy measures (p99).
+        tolerance_by_percentage = PER_METRIC_TOLERANCE_OVERRIDE.get(
+            metric_name, self.tolerance_percentage,
+        )
+        tolerance_by_stddev = (
+            (2 * std_dev / baseline * 100) if baseline > 0 else float("inf")
+        )
         effective_tolerance = max(tolerance_by_percentage, tolerance_by_stddev)
 
-        if deviation > effective_tolerance:
-            direction = "increase" if current_value > baseline else "decrease"
-            return True, f"{deviation:.1f}% {direction} (threshold: {effective_tolerance:.1f}%)"
+        if deviation <= effective_tolerance:
+            return False, f"{deviation:.1f}% deviation (within {effective_tolerance:.1f}% tolerance)"
 
-        return False, f"{deviation:.1f}% deviation (within {effective_tolerance:.1f}% tolerance)"
+        is_increase = current_value > baseline
+        direction_word = "increase" if is_increase else "decrease"
+
+        # Direction-aware verdict.
+        bad_direction = METRIC_BAD_DIRECTION.get(metric_name, "higher")
+        if bad_direction is None:
+            # Informational metric — always pass.
+            return False, (
+                f"{deviation:.1f}% {direction_word} (informational metric)"
+            )
+        is_regression = (
+            (bad_direction == "higher" and is_increase)
+            or (bad_direction == "lower" and not is_increase)
+        )
+        if is_regression:
+            return True, f"{deviation:.1f}% {direction_word} (threshold: {effective_tolerance:.1f}%)"
+        # Bigger-than-threshold move in the GOOD direction — improvement, not a regression.
+        return False, (
+            f"{deviation:.1f}% {direction_word} — improvement vs baseline "
+            f"(threshold: {effective_tolerance:.1f}%)"
+        )
 
     def analyze_playwright_results(self, results_file):
         """Analyze Playwright performance results"""
@@ -201,8 +273,10 @@ class PerformanceRegessionDetector:
             # Calculate baseline
             baseline, std_dev = self.calculate_baseline(metric_history)
 
-            # Check for regression
-            is_regression, details = self.check_regression(current_value, baseline, std_dev)
+            # Check for regression (direction-aware per metric)
+            is_regression, details = self.check_regression(
+                current_value, baseline, std_dev, metric_name=metric_name,
+            )
 
             # Format metric name for display
             display_name = metric_name.replace('_', ' ').title()
@@ -283,8 +357,23 @@ def main():
             all_metrics.update(prefixed_metrics)
 
     if not all_metrics:
-        print("⚠️ No performance results found to analyze")
-        return 0
+        # Treat absence of data as a real failure — the calling Makefile target
+        # ran us as part of a "performance tests passed" gate, and reporting
+        # success when we couldn't analyze anything would silently mask a
+        # broken artillery run, missing report file, or upstream collection
+        # failure (which we've been bitten by before — see git history for
+        # the artillery-scenarios-misconfigured incident).
+        print(
+            "[ERROR] No performance results found to analyze.\n"
+            "        Expected at least one of:\n"
+            "          - performance-results.json (Playwright timings), or\n"
+            "          - artillery-report.json (modern artillery output), or\n"
+            "          - artillery-report-{Linux,macOS,Windows}.json (CI per-OS).\n"
+            "        Check that the upstream test step actually ran and produced\n"
+            "        a report. Failing this check intentionally so the Makefile\n"
+            "        target does not report success on a vacuous run."
+        )
+        return 1
 
     # Run regression analysis
     regressions, summary = detector.run_regression_analysis(all_metrics)

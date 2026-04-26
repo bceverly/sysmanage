@@ -117,9 +117,14 @@ jobs:
         safety scan --output screen || true
 
     - name: Run pip-audit (Python — authoritative CVE check against PyPI advisory DB)
+      # Ignored CVEs (review periodically — remove an --ignore-vuln line once a fix exists upstream):
+      #   CVE-2026-3219 — pip itself (concatenated tar/ZIP handled as ZIP).
+      #     Latest pip on PyPI is 26.0.1 (no fix released yet); we are already on
+      #     the latest. Suppressing here keeps the report actionable; pip-audit
+      #     will re-flag it the moment a patched pip ships.
       run: |
-        pip-audit -r requirements.txt --strict --format json --output pip-audit-report.json || true
-        pip-audit -r requirements.txt --strict || true
+        pip-audit -r requirements.txt --strict --ignore-vuln CVE-2026-3219 --format json --output pip-audit-report.json || true
+        pip-audit -r requirements.txt --strict --ignore-vuln CVE-2026-3219 || true
 
     - name: Upload pip-audit results
       uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

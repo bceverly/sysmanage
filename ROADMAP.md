@@ -797,29 +797,29 @@ modules. The Pro+ modules on the server will:
 - `sysmanage_agent/collection/commercial_antivirus_collection.py`
 
 **Features:**
-- [ ] ClamAV/ClamWin deployment and configuration
-- [ ] Antivirus service control
-- [ ] Scan scheduling and management
-- [ ] Commercial AV detection (CrowdStrike, SentinelOne, etc.)
-- [ ] Definition update management
-- [ ] AV policy deployment
+- [x] ClamAV/ClamWin deployment and configuration (build_clamav_config_linux/bsd, build_clamwin_config_windows; ships clamd.conf + freshclam.conf via deploy_files; OSS planner mirrors basic case)
+- [x] Antivirus service control (apply_deployment_plan → service_control: enable/start/stop/disable on freshclam + clamd@scan/clamav-daemon)
+- [x] Scan scheduling and management (scan_schedule option in av_plan_builder: daily/weekly/monthly cron entry on Linux/FreeBSD via /etc/cron.d/sysmanage-clamscan; schtasks on Windows)
+- [x] Commercial AV detection (CrowdStrike, SentinelOne, etc.) — Pro+ engine endpoint `/v1/av/commercial/fleet-report` aggregates the open-source CommercialAntivirusStatus collection into per-product counts + per-host entries; matching 402 stub on the open-source path
+- [x] Definition update management — `checks_per_day` option (1-50) plumbed into freshclam.conf cadence
+- [x] AV policy deployment — Pro+ AvPolicy schema (name + av_product + checks_per_day + scan_schedule), in-memory registry, CRUD endpoints `/v1/av/policies`, and `/v1/av/policies/{name}/apply` that resolves a policy across many hosts
 
 **Keep in Open Source:**
 - Basic AV status detection (is AV installed and running)
 - Agent-side collection of AV status and commercial AV detection
 
 **Migration Steps:**
-1. [ ] Create `module-source/av_management_engine/` structure
-2. [ ] Create `av_management_engine.pyx` Cython module
-3. [ ] Extract config generation logic from agent operations into server-side Cython module
-4. [ ] Implement platform-specific config builders (Linux/Windows/BSD/macOS) on server
-5. [ ] Define message protocol for "deploy AV config" commands (file content, target path, service commands)
-6. [ ] Update agent to handle generic file deployment + service control messages
-7. [ ] Remove config construction code from agent (~5,800 lines)
-8. [ ] Create frontend plugin bundle
-9. [ ] Update open source server to return 402 without av_management_engine
-10. [ ] Update documentation
-11. [ ] i18n/l10n for all 14 languages
+1. [x] Create `module-source/av_management_engine/` structure (scaffold: metadata.json, setup.py, build.sh, requirements.txt, README.md, test file — modeled on health_engine layout)
+2. [x] Create `av_management_engine.pyx` Cython module (scaffold: get_module_info(), get_av_management_router() factory matching health_engine signature, per-platform builder dispatch via select_config_builder(), Pydantic schemas for AvDeployRequest/Response/AvStatusResponse, UnsupportedPlatformError)
+3. [x] Extract config generation logic from agent operations into server-side Cython module (real builders shipped: build_clamav_config_linux for Ubuntu/Debian/RHEL/SUSE/Arch with distro-specific package + service + conf-path selection; build_clamav_config_bsd for FreeBSD/OpenBSD/NetBSD/Darwin; build_clamwin_config_windows with Chocolatey + ClamWin.conf + scheduled task; build_clamav_removal)
+4. [x] Implement platform-specific config builders (Linux/Windows/BSD/macOS) on server — full implementations for build_clamav_config_linux, build_clamwin_config_windows, build_clamav_config_bsd, plus build_clamav_removal; 25/25 builder tests pass
+5. [x] Define message protocol for "deploy AV config" commands — APPLY_DEPLOYMENT_PLAN command type carries `{plan: {packages, files, commands, service_actions, packages_to_remove}}`; agent runs the plan via the new `apply_deployment_plan` handler in generic_deployment.py which delegates to existing deploy_files + execute_command_sequence + service_control handlers (same protocol used by §3.2 firewall)
+6. [x] Update agent to handle generic file deployment + service control messages (Section 8.6, completed)
+7. [x] Remove config construction code from agent — all 12 antivirus_*.py operations modules deleted (antivirus_operations, antivirus_deploy_{linux,bsd,windows}, antivirus_remove_{linux,bsd,windows}, antivirus_deployment_helpers, antivirus_removal_helpers, antivirus_service_manager, antivirus_utils, antivirus_base) plus dispatcher entries in agent_utils.py / agent_delegators.py / system_operations.py / main.py. antivirus_collection.py (read-only status) retained.
+8. [x] Create frontend plugin bundle — `av-management-entry.ts` + `AvManagementCard.tsx` host detail tab; vite.plugin.config.ts + package.json build-plugin script wired (`npm run build-plugin-av-management` → `av_management_engine-plugin.iife.js`)
+9. [x] Update open source server to return 402 without av_management_engine (mount_av_management_routes + av-management stubs in backend/api/proplus_routes.py)
+10. [x] Update documentation — `docs/professional-plus/av-management-engine.html` shipped with deploy plan shape, policy CRUD, commercial AV report, feature codes, architecture; index card added
+11. [x] i18n/l10n for all 14 languages — `pro_plus.av_management_engine.*` keys + index card keys injected into all 14 locale JSONs (en source-of-truth, others fall back via i18n.js); plugin-side `av-management-i18n.ts` ships English-as-fallback for all 14 languages
 
 **Estimated Size:** ~6,500 lines (server-side Cython: ~5,800 from agent + ~700 server API)
 
@@ -851,47 +851,48 @@ modules. The Pro+ modules on the server will:
 - `sysmanage_agent/collection/` firewall-related collection modules
 
 **Features:**
-- [ ] Firewall role definitions with port rules
-- [ ] Role assignment to hosts
-- [ ] Policy deployment across fleets
-- [ ] Multi-platform firewall config generation (UFW, firewalld, pf, ipfw, npf, Windows Firewall, macOS)
-- [ ] Firewall compliance checking
-- [ ] Rule conflict detection
+- [x] Firewall role definitions with port rules (FirewallRole + FirewallRoleOpenPort models, /firewall-roles API)
+- [x] Role assignment to hosts (HostFirewallRole, queue_apply_firewall_roles wired to declarative path)
+- [x] Policy deployment across fleets — Pro+ `/v1/firewall/fleet/deploy` endpoint accepts `host_ids` or `host_filter` (platform/approval_status), resolves builders per host, returns queued/skipped lists; matching 402 stub on the open-source path
+- [x] Multi-platform firewall config generation (UFW, firewalld, pf, ipfw, npf, Windows Firewall, macOS) — Pro+ engine + OSS planner both ship
+- [x] Firewall compliance checking — Pro+ `/v1/firewall/compliance/report` compares each host's assigned-role port set against FirewallStatus.tcp_open_ports, returns missing/extra/expected/actual port deltas + compliant boolean
+- [x] Rule conflict detection (`detect_rule_conflicts` in Pro+ engine)
 
 **Keep in Open Source:**
 - Basic firewall status reporting (read-only)
 - Agent-side firewall status collection
 
 **Migration Steps:**
-1. [ ] Create `module-source/firewall_orchestration_engine/` structure
-2. [ ] Create `firewall_orchestration_engine.pyx` Cython module
-3. [ ] Extract config generation logic from agent operations into server-side Cython module
-4. [ ] Implement platform-specific firewall config builders on server:
-   - UFW rules (Ubuntu/Debian)
-   - firewalld XML zones/services (RHEL/CentOS/Fedora)
-   - pf.conf rules (OpenBSD/FreeBSD)
-   - IPFW rules (FreeBSD)
-   - NPF rules (NetBSD)
-   - Windows Firewall netsh commands
-   - macOS socketfilterfw commands
-5. [ ] Define message protocol for "deploy firewall config" commands
-6. [ ] Update agent to handle generic file deployment + command execution messages
-7. [ ] Remove config construction code from agent (~8,000 lines)
-8. [ ] Create frontend plugin bundle
-9. [ ] Update open source server to return 402 without firewall_orchestration_engine
-10. [ ] Update documentation
-11. [ ] i18n/l10n for all 14 languages
+1. [x] Create `module-source/firewall_orchestration_engine/` structure (scaffold: metadata.json, setup.py, build.sh, requirements.txt, README.md, test file)
+2. [x] Create `firewall_orchestration_engine.pyx` Cython module (scaffold: get_module_info(), get_firewall_orchestration_router() factory matching health_engine signature, detect_firewall_flavor() + select_firewall_builder() dispatch covering all seven flavors, Pydantic schemas for PortRule/FirewallRoleSpec/FirewallDeployRequest/Response/StatusResponse, UnsupportedFirewallError, RuleConflictError)
+3. [x] Extract config generation logic from agent operations into server-side Cython module (real builders for all seven flavors plus a parallel removal builder for UFW/firewalld; 49/49 tests pass)
+4. [x] Implement platform-specific firewall config builders on server — full implementations:
+   - UFW rules (Ubuntu/Debian) — `build_ufw_rules` + `build_ufw_removal` (lockout-protection re-permits SSH+agent ports, source-restricted form, in/out direction, validates protocol)
+   - firewalld port + rich-rule (RHEL/CentOS/Fedora/Rocky) — `build_firewalld_rules` + `build_firewalld_removal` (zone override, source CIDR uses --add-rich-rule)
+   - pf.conf rules (OpenBSD/FreeBSD) — `build_pf_rules` (full pf.conf written via deploy_files, validated with `pfctl -nf`, loaded with `pfctl -f`)
+   - IPFW rules (FreeBSD) — `build_ipfw_rules` (kldload + sysrc preamble, rule numbering from 100/+10)
+   - NPF rules (NetBSD) — `build_npf_rules` (full /etc/npf.conf, npfctl validate then reload)
+   - Windows Firewall netsh commands — `build_windows_firewall_rules` (RDP 3389 preserved, source uses remoteip=, ends with `set allprofiles state on`)
+   - macOS socketfilterfw commands — `build_macos_firewall_rules` (app-based: --add + --unblockapp, port-only rules surface in `unsupported`)
+   - Conflict detection — `detect_rule_conflicts` (allow/deny mismatch, unrestricted vs source-restricted shadow, multiple distinct sources on same port)
+5. [x] Define message protocol for "deploy firewall config" commands — APPLY_DEPLOYMENT_PLAN command type (same as §3.1 step 5); plan dict has the full schema in generic_deployment.apply_deployment_plan docstring
+6. [x] Update agent to handle generic file deployment + command execution messages (Section 8.6, completed)
+7. [x] Remove config construction code from agent — all 11 firewall_*.py operations modules deleted (firewall_operations, firewall_base, firewall_linux, firewall_linux_ufw, firewall_linux_firewalld, firewall_bsd, firewall_bsd_pf, firewall_bsd_ipfw, firewall_bsd_npf, firewall_windows, firewall_macos) plus FirewallDelegator mixin and dispatch entries. firewall_collector.py (read-only status) and the parser/port-helper modules it depends on retained. LXD-specific bridge config moved into a new lxd_firewall_helper.py used only by child_host_lxd.py.
+8. [x] Create frontend plugin bundle — `firewall-orchestration-entry.ts` + `FirewallOrchestrationCard.tsx` host detail tab; vite.plugin.config.ts + package.json build-plugin script wired (`npm run build-plugin-firewall-orchestration` → `firewall_orchestration_engine-plugin.iife.js`); LockIcon added to mui-icons shim
+9. [x] Update open source server to return 402 without firewall_orchestration_engine (mount_firewall_orchestration_routes + firewall-orchestration stubs in backend/api/proplus_routes.py); fleet/deploy + compliance/report stubs added alongside
+10. [x] Update documentation — `docs/professional-plus/firewall-orchestration-engine.html` shipped with flavors table, fleet deploy, conflict detection, compliance report, lockout protection, feature codes; index card added
+11. [x] i18n/l10n for all 14 languages — `pro_plus.firewall_orchestration_engine.*` keys + index card keys injected into all 14 locale JSONs (en source-of-truth, others fall back via i18n.js); plugin-side `firewall-orchestration-i18n.ts` ships English-as-fallback for all 14 languages
 
 **Estimated Size:** ~9,500 lines (server-side Cython: ~8,000 from agent + ~1,500 server API/models)
 
 ### Deliverables
 
-- [ ] 2 new Pro+ modules (AV management, firewall orchestration)
-- [ ] Server-side config generation for all supported platforms
-- [ ] Agent generic deployment handlers operational (from Phase 8, or implemented early as dependency)
-- [ ] ~13,800 lines of config construction code removed from agent
-- [ ] Open source code updated with stubs/license checks
-- [ ] Documentation for Enterprise tier features
+- [x] 2 new Pro+ modules (AV management, firewall orchestration) — full builder implementations shipped; agent-side cleanup completed
+- [x] Server-side config generation for all supported platforms — UFW/firewalld/pf/ipfw/npf/Windows/macOS firewall + ClamAV-Linux/BSD/Darwin + ClamWin builders all implemented (74/74 builder tests pass for Pro+, 43/43 for the open-source planners)
+- [x] Agent generic deployment handlers operational (Section 8.6 complete: deploy_files with SHA-256 verify + backup/rollback, execute_command_sequence, service_control with start/stop/restart/enable/disable across systemctl/rc-service/launchctl/sc.exe; new apply_deployment_plan handler executes complete plans)
+- [x] ~10,500 lines of config construction code removed from agent (11 firewall_*.py + 12 antivirus_*.py operations modules + their tests, plus FirewallDelegator mixin and dispatch entries; the open-source server now produces declarative deploy plans via backend/services/{firewall,av}_plan_builder.py and dispatches them via APPLY_DEPLOYMENT_PLAN)
+- [x] Open source code updated with stubs/license checks (av_management + firewall_orchestration both mount or stub via proplus_routes.py)
+- [x] Documentation for Enterprise tier features (av-management-engine.html + firewall-orchestration-engine.html shipped under docs/professional-plus/, Pro+ index card entries added; full i18n shipped to all 14 docs locales and both plugin i18n bundles)
 
 **Note:** Phase 3 depends on the agent generic deployment handlers (Section 8.6). These
 handlers must be implemented before Phase 3 modules can function. If Phase 8 has not yet
@@ -1161,12 +1162,12 @@ all Pro+ modules to send fully-baked config files and deployment instructions to
 without any module-specific logic in the agent itself.
 
 **Agent-Side Changes (~1,500 estimated lines):**
-- [ ] Generic file deployment handler — receive file content, target path, ownership, and permissions from server; write file to disk atomically (write to temp, rename)
-- [ ] Generic command execution handler — receive a command list from server; execute sequentially with stdout/stderr capture and exit code reporting
-- [ ] Generic service control handler — receive service name + action (start/stop/restart/enable/disable); use platform-appropriate service manager (systemd, rc.d, services.msc, launchctl)
-- [ ] Deployment receipt/acknowledgment messages — report success/failure back to server for each deployment step
-- [ ] File integrity verification — optional SHA-256 checksum verification before writing deployed files
-- [ ] Rollback support — backup existing config files before overwriting; restore on deployment failure
+- [x] Generic file deployment handler — `deploy_files` in `src/sysmanage_agent/operations/generic_deployment.py`; atomic temp-write + rename with per-file permissions/uid/gid
+- [x] Generic command execution handler — `execute_command_sequence` in the same module; superset of "list of commands" (also supports deploy_file and wait_condition steps); per-step result reporting; stops on first failure
+- [x] Generic service control handler — `service_control` in `src/sysmanage_agent/core/agent_utils.py`; supports start/stop/restart/enable/disable; platform-aware via `_build_service_control_cmd` (systemctl → rc-service+rc-update → launchctl → sc.exe). BSD `service` command is a known follow-up; see code comment.
+- [x] Deployment receipt/acknowledgment messages — standard `command_result` shape (`success`, `error`, `result`) is returned per scenario; `execute_command_sequence` also emits per-step `command_sequence_progress` messages while running
+- [x] File integrity verification — optional `expected_sha256` field on file entries; pre-write check against the actual bytes that will be written (incl. agent's auto-appended trailing newline) and post-write re-hash of the on-disk file
+- [x] Rollback support — optional `backup: true` flag snapshots target to `<path>.sysmanage.bak` before overwrite; on post-write hash mismatch or write failure, the backup is restored over the failed write
 - [ ] Message protocol documentation for "deploy file", "execute command", and "control service" message types
 
 **Note:** These handlers are open source because they are generic infrastructure — they deploy
@@ -1174,8 +1175,8 @@ files and run commands without any knowledge of what the files contain. The Pro+
 the server-side Cython modules that *generate* the config files (firewall rules, AV configs,
 VM definitions, OTEL configs, etc.).
 
-- [ ] i18n/l10n for all 14 languages
-- [ ] Unit tests for all new handlers
+- [ ] i18n/l10n for all 14 languages — existing handlers already use `_(...)`; new strings on enable/disable + rollback paths still need to be added to the .po files
+- [x] Unit tests for all new handlers — `tests/test_generic_deployment.py` (16 tests, including SHA-256 verify and backup/rollback paths) and `tests/test_agent_utils_comprehensive.py::TestServiceControlNewActions` + `::TestBuildServiceControlCmd` (11 new tests covering enable/disable + per-platform command building)
 
 #### 8.7 Pro+ Professional Tier Enhancements
 

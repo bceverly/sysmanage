@@ -76,6 +76,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import InfoIcon from '@mui/icons-material/Info';
 import KeyIcon from '@mui/icons-material/Key';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import LockIcon from '@mui/icons-material/Lock';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SaveIcon from '@mui/icons-material/Save';
 import ScheduleIcon from '@mui/icons-material/Schedule';
@@ -169,6 +170,7 @@ import { pluginManager } from './PluginManager';
         InfoIcon,
         KeyIcon,
         LightbulbIcon,
+        LockIcon,
         RefreshIcon,
         SaveIcon,
         ScheduleIcon,

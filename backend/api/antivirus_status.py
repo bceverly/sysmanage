@@ -24,9 +24,21 @@ from backend.persistence import db as persistence_db
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
+from backend.services import av_plan_builder
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import CommandType, Message, MessageType
+
+
+def _host_info_for_av_planner(host: models.Host) -> dict:
+    """Pack a Host's OS fields into the dict the AV plan builder expects."""
+    return {
+        "platform": host.platform,
+        "platform_release": host.platform_release,
+        "platform_version": host.platform_version,
+    }
+
+
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
 
@@ -243,14 +255,17 @@ async def deploy_antivirus(  # NOSONAR
                     )
                     continue
 
-                # Create command message for antivirus deployment
+                # Build a declarative deploy plan; agent runs it via
+                # apply_deployment_plan.
+                deploy_plan = av_plan_builder.build_deploy_plan(
+                    _host_info_for_av_planner(host),
+                    antivirus_default.antivirus_package,
+                )
                 command_message = Message(
                     message_type=MessageType.COMMAND,
                     data={
-                        "command_type": CommandType.DEPLOY_ANTIVIRUS,
-                        "parameters": {
-                            "antivirus_package": antivirus_default.antivirus_package
-                        },
+                        "command_type": CommandType.APPLY_DEPLOYMENT_PLAN,
+                        "parameters": {"plan": deploy_plan},
                     },
                 )
 
@@ -336,12 +351,12 @@ async def enable_antivirus(
     if not host:
         raise HTTPException(status_code=404, detail=error_host_not_found())
 
-    # Queue enable command for agent (will be delivered when agent is available)
+    plan = av_plan_builder.build_enable_plan(_host_info_for_av_planner(host))
     message = Message(
         message_type=MessageType.COMMAND,
         data={
-            "command_type": CommandType.ENABLE_ANTIVIRUS,
-            "parameters": {},
+            "command_type": CommandType.APPLY_DEPLOYMENT_PLAN,
+            "parameters": {"plan": plan},
             "timeout": 300,
         },
     )
@@ -400,12 +415,12 @@ async def disable_antivirus(
     if not host:
         raise HTTPException(status_code=404, detail=error_host_not_found())
 
-    # Queue disable command for agent (will be delivered when agent is available)
+    plan = av_plan_builder.build_disable_plan(_host_info_for_av_planner(host))
     message = Message(
         message_type=MessageType.COMMAND,
         data={
-            "command_type": CommandType.DISABLE_ANTIVIRUS,
-            "parameters": {},
+            "command_type": CommandType.APPLY_DEPLOYMENT_PLAN,
+            "parameters": {"plan": plan},
             "timeout": 300,
         },
     )
@@ -473,12 +488,12 @@ async def remove_antivirus(
             logger.error("Host not found: %s", host_id)
             raise HTTPException(status_code=404, detail=error_host_not_found())
 
-        # Queue remove command for agent (will be delivered when agent is available)
+        plan = av_plan_builder.build_remove_plan(_host_info_for_av_planner(host))
         message = Message(
             message_type=MessageType.COMMAND,
             data={
-                "command_type": CommandType.REMOVE_ANTIVIRUS,
-                "parameters": {},
+                "command_type": CommandType.APPLY_DEPLOYMENT_PLAN,
+                "parameters": {"plan": plan},
                 "timeout": 300,
             },
         )

@@ -95,16 +95,13 @@ class CommandType(str, Enum):
     CHECK_REBOOT_STATUS = "check_reboot_status"
     COLLECT_DIAGNOSTICS = "collect_diagnostics"
     COLLECT_CERTIFICATES = "collect_certificates"
-    DEPLOY_ANTIVIRUS = "deploy_antivirus"
-    ENABLE_ANTIVIRUS = "enable_antivirus"
-    DISABLE_ANTIVIRUS = "disable_antivirus"
-    REMOVE_ANTIVIRUS = "remove_antivirus"
-    DEPLOY_FIREWALL = "deploy_firewall"
-    ENABLE_FIREWALL = "enable_firewall"
-    DISABLE_FIREWALL = "disable_firewall"
-    RESTART_FIREWALL = "restart_firewall"
-    APPLY_FIREWALL_ROLES = "apply_firewall_roles"
-    REMOVE_FIREWALL_PORTS = "remove_firewall_ports"
+    # NOTE: The legacy DEPLOY_ANTIVIRUS / ENABLE_ANTIVIRUS / DISABLE_ANTIVIRUS /
+    # REMOVE_ANTIVIRUS / DEPLOY_FIREWALL / ENABLE_FIREWALL / DISABLE_FIREWALL /
+    # RESTART_FIREWALL / APPLY_FIREWALL_ROLES / REMOVE_FIREWALL_PORTS commands
+    # were removed when Phase 3 shipped — the open-source server now builds
+    # a declarative plan via backend/services/{firewall,av}_plan_builder.py
+    # and dispatches it via APPLY_DEPLOYMENT_PLAN. Pro+ licensees get the
+    # richer Cython engines but use the same handler on the agent.
     ATTACH_TO_GRAYLOG = "attach_to_graylog"
     ENABLE_PACKAGE_MANAGER = "enable_package_manager"
     CREATE_HOST_USER = "create_host_user"
@@ -119,6 +116,7 @@ class CommandType(str, Enum):
     # Generic deployment commands
     DEPLOY_FILES = "deploy_files"
     EXECUTE_COMMAND_SEQUENCE = "execute_command_sequence"
+    APPLY_DEPLOYMENT_PLAN = "apply_deployment_plan"
 
     # Child Host / Virtualization Commands
     CHECK_VIRTUALIZATION_SUPPORT = "check_virtualization_support"

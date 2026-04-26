@@ -14,9 +14,20 @@ from sqlalchemy.orm import Session
 
 from backend.i18n import _
 from backend.persistence import models
+from backend.services import firewall_plan_builder
 from backend.websocket.messages import CommandType, Message, MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
+
+
+def _host_info_for_planner(host: models.Host) -> dict:
+    """Pack a Host's OS fields into the dict the plan builder expects."""
+    return {
+        "platform": host.platform,
+        "platform_release": host.platform_release,
+        "platform_version": host.platform_version,
+    }
+
 
 logger = logging.getLogger(__name__)
 
@@ -259,15 +270,18 @@ def queue_apply_firewall_roles(db_session: Session, host: models.Host) -> None:
     # Get all ports from all assigned roles
     ports = get_host_firewall_ports(db_session, host.id)
 
-    # Create the command message
+    # Build a declarative plan that adds each port-permit; agent will run it
+    # via apply_deployment_plan.
+    plan = firewall_plan_builder.build_apply_role_ports_plan(
+        _host_info_for_planner(host),
+        ports["ipv4_ports"],
+        ports["ipv6_ports"],
+    )
     message = Message(
         message_type=MessageType.COMMAND,
         data={
-            "command_type": CommandType.APPLY_FIREWALL_ROLES,
-            "parameters": {
-                "ipv4_ports": ports["ipv4_ports"],
-                "ipv6_ports": ports["ipv6_ports"],
-            },
+            "command_type": CommandType.APPLY_DEPLOYMENT_PLAN,
+            "parameters": {"plan": plan},
             "timeout": 300,
         },
     )
@@ -326,15 +340,18 @@ def queue_remove_firewall_ports(
     This sends only the specific ports to be removed to the agent,
     rather than syncing to a desired state.
     """
-    # Create the command message
+    # Build a declarative removal plan; preserved ports are skipped
+    # automatically by the planner.
+    plan = firewall_plan_builder.build_remove_role_ports_plan(
+        _host_info_for_planner(host),
+        ports_to_remove["ipv4_ports"],
+        ports_to_remove["ipv6_ports"],
+    )
     message = Message(
         message_type=MessageType.COMMAND,
         data={
-            "command_type": CommandType.REMOVE_FIREWALL_PORTS,
-            "parameters": {
-                "ipv4_ports": ports_to_remove["ipv4_ports"],
-                "ipv6_ports": ports_to_remove["ipv6_ports"],
-            },
+            "command_type": CommandType.APPLY_DEPLOYMENT_PLAN,
+            "parameters": {"plan": plan},
             "timeout": 300,
         },
     )

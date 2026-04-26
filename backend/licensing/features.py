@@ -45,6 +45,20 @@ class FeatureCode(str, Enum):
     EXECUTIVE_DASHBOARD = "executive_dashboard"
     EXPORT_PDF = "export_pdf"
 
+    # AV Management Engine (Phase 3)
+    AV_INSTALL = "av_install"
+    AV_UNINSTALL = "av_uninstall"
+    AV_STATUS = "av_status"
+    AV_SCAN = "av_scan"
+    COMMERCIAL_AV_DETECT = "commercial_av_detect"
+
+    # Firewall Orchestration Engine (Phase 3)
+    FIREWALL_ROLE_DEFINE = "firewall_role_define"
+    FIREWALL_ROLE_ASSIGN = "firewall_role_assign"
+    FIREWALL_DEPLOY = "firewall_deploy"
+    FIREWALL_STATUS = "firewall_status"
+    FIREWALL_COMPLIANCE_CHECK = "firewall_compliance_check"
+
     @classmethod
     def from_string(cls, value: str) -> "FeatureCode":
         """Convert string to FeatureCode enum."""
@@ -88,6 +102,10 @@ class ModuleCode(str, Enum):
 
     # Container Modules
     CONTAINER_ENGINE = "container_engine"
+
+    # Phase 3 Enterprise modules
+    AV_MANAGEMENT_ENGINE = "av_management_engine"
+    FIREWALL_ORCHESTRATION_ENGINE = "firewall_orchestration_engine"
 
     # Data Processing Modules
     LOG_ANALYZER = "log_analyzer"
@@ -143,6 +161,17 @@ TIER_FEATURES = {
         FeatureCode.CUSTOM_REPORTS,
         FeatureCode.EXECUTIVE_DASHBOARD,
         FeatureCode.EXPORT_PDF,
+        # Phase 3
+        FeatureCode.AV_INSTALL,
+        FeatureCode.AV_UNINSTALL,
+        FeatureCode.AV_STATUS,
+        FeatureCode.AV_SCAN,
+        FeatureCode.COMMERCIAL_AV_DETECT,
+        FeatureCode.FIREWALL_ROLE_DEFINE,
+        FeatureCode.FIREWALL_ROLE_ASSIGN,
+        FeatureCode.FIREWALL_DEPLOY,
+        FeatureCode.FIREWALL_STATUS,
+        FeatureCode.FIREWALL_COMPLIANCE_CHECK,
     },
 }
 
@@ -177,5 +206,8 @@ TIER_MODULES = {
         ModuleCode.PREDICTION_ENGINE,
         ModuleCode.LOG_ANALYZER,
         ModuleCode.METRICS_AGGREGATOR,
+        # Phase 3
+        ModuleCode.AV_MANAGEMENT_ENGINE,
+        ModuleCode.FIREWALL_ORCHESTRATION_ENGINE,
     },
 }

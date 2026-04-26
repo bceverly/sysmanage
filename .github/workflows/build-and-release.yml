@@ -1955,14 +1955,23 @@ jobs:
           echo "Downloading pip wheel..."
           pip3 download pip -d /tmp/vendor --only-binary=:all:
 
-          # Pass 1: Download Python 3.11 wheels for manylinux (x86_64 + aarch64)
+          # Pass 1: Download Python 3.11 wheels for manylinux (x86_64 + aarch64).
+          # We list the full ladder of manylinux tags wheel publishers may
+          # use — packages built more recently (e.g. ujson >=5.12) tag with
+          # manylinux_2_24/_2_28 instead of the older _2_17/2014, so missing
+          # those tags here causes a "No matching distribution" failure
+          # against an otherwise-compatible wheel.
           echo "Pass 1: Downloading Python 3.11 wheels for manylinux..."
           pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
             --python-version 311 \
             --platform manylinux2014_x86_64 \
             --platform manylinux_2_17_x86_64 \
+            --platform manylinux_2_24_x86_64 \
+            --platform manylinux_2_28_x86_64 \
             --platform manylinux2014_aarch64 \
             --platform manylinux_2_17_aarch64 \
+            --platform manylinux_2_24_aarch64 \
+            --platform manylinux_2_28_aarch64 \
             --only-binary=:all:
 
           # Pass 2: Download source distributions for pure Python packages without wheels
@@ -2067,8 +2076,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3-pip rpm
 
-          # Install copr-cli via pip (not available in Ubuntu repos)
-          pip3 install copr-cli
+          # Install copr-cli via pip (not available in Ubuntu repos).
+          # `rich` is an undeclared runtime dep in copr-cli >= 1.115 — without
+          # it, `copr-cli whoami` (or any subcommand) crashes with
+          # `ModuleNotFoundError: No module named 'rich'` before sending a
+          # request. Install both to keep the workflow stable across releases.
+          pip3 install copr-cli rich
 
           # Add pip binaries to PATH
           echo "$HOME/.local/bin" >> $GITHUB_PATH
@@ -2188,24 +2201,24 @@ jobs:
 
           # Download wheels for Python 3.11 (EPEL 8)
           echo "Downloading wheels for Python 3.11 x86_64 (EPEL 8)..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.11.11 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --only-binary=:all:
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.11.11 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --platform manylinux_2_24_x86_64 --platform manylinux_2_28_x86_64 --only-binary=:all:
           echo "Downloading wheels for Python 3.11 aarch64..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.11.11 --platform manylinux2014_aarch64 --platform manylinux_2_17_aarch64 --only-binary=:all:
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.11.11 --platform manylinux2014_aarch64 --platform manylinux_2_17_aarch64 --platform manylinux_2_24_aarch64 --platform manylinux_2_28_aarch64 --only-binary=:all:
           echo "Downloaded wheels for Python 3.11"
 
           # Download wheels for Python 3.12 (EPEL 9 and EPEL 10)
           echo "Downloading wheels for Python 3.12 x86_64 (EPEL 9 and EPEL 10)..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.12.11 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --only-binary=:all:
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.12.11 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --platform manylinux_2_24_x86_64 --platform manylinux_2_28_x86_64 --only-binary=:all:
           echo "Downloading wheels for Python 3.12 aarch64..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.12.11 --platform manylinux2014_aarch64 --platform manylinux_2_17_aarch64 --only-binary=:all:
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.12.11 --platform manylinux2014_aarch64 --platform manylinux_2_17_aarch64 --platform manylinux_2_24_aarch64 --platform manylinux_2_28_aarch64 --only-binary=:all:
           echo "Downloaded wheels for Python 3.12"
 
           # Download wheels for Python 3.13 (Fedora 41, 42)
           echo ""
           echo "Downloading wheels for Python 3.13 x86_64 (Fedora 41, 42)..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.13.1 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --only-binary=:all:
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.13.1 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --platform manylinux_2_24_x86_64 --platform manylinux_2_28_x86_64 --only-binary=:all:
           echo "Downloading wheels for Python 3.13 aarch64..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.13.1 --platform manylinux2014_aarch64 --platform manylinux_2_17_aarch64 --only-binary=:all:
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.13.1 --platform manylinux2014_aarch64 --platform manylinux_2_17_aarch64 --platform manylinux_2_24_aarch64 --platform manylinux_2_28_aarch64 --only-binary=:all:
           echo "Downloaded wheels for Python 3.13"
 
           # Verify packages

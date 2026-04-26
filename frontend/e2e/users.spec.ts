@@ -355,7 +355,12 @@ test.describe('User Create Flow', () => {
 
 test.describe('User Permissions', () => {
   test('should display current user role', async ({ page }) => {
-    await page.goto('/profile');
+    // Use 'domcontentloaded' instead of the default 'load' so we don't
+    // block on plugin bundle fetches and other deferred network activity
+    // — the assertion below only needs the rendered DOM, not a fully
+    // idle network. This matches the intent expressed by the
+    // try/catch'd waitForLoadState('networkidle') below.
+    await page.goto('/profile', { waitUntil: 'domcontentloaded' });
 
     // Profile page should show user's role
     try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }

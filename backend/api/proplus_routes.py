@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 """
 Pro+ Route Mounting - Thin Wrappers for Cython Modules
 
@@ -627,6 +628,103 @@ def mount_container_routes(app: FastAPI) -> bool:
         return False
 
 
+def mount_av_management_routes(app: FastAPI) -> bool:
+    """
+    Mount AV management routes from the av_management_engine module if available.
+
+    Args:
+        app: The FastAPI application instance
+
+    Returns:
+        True if routes were mounted, False otherwise
+    """
+    av_management_engine = module_loader.get_module("av_management_engine")
+    if av_management_engine is None:
+        logger.debug(
+            "av_management_engine module not loaded, skipping AV management routes"
+        )
+        return False
+
+    module_info = av_management_engine.get_module_info()
+    if not module_info.get("provides_routes", False):
+        logger.debug("av_management_engine module does not provide routes")
+        return False
+
+    try:
+        with _cython_compat():
+            router = av_management_engine.get_av_management_router(
+                db_dependency=Depends(get_db),
+                auth_dependency=Depends(get_current_user),
+                feature_gate=_feature_dependency,
+                module_gate=_module_dependency,
+                models=models,
+                http_exception=HTTPException,
+                status_codes=status,
+                logger=logger,
+            )
+            app.include_router(router, prefix="/api")
+        logger.info(
+            "Mounted AV management routes from av_management_engine v%s",
+            module_info.get("version", "unknown"),
+        )
+        return True
+
+    except Exception as e:
+        logger.error("Failed to mount AV management routes: %s", e)
+        return False
+
+
+def mount_firewall_orchestration_routes(app: FastAPI) -> bool:
+    """
+    Mount firewall orchestration routes from the firewall_orchestration_engine
+    module if available.
+
+    Args:
+        app: The FastAPI application instance
+
+    Returns:
+        True if routes were mounted, False otherwise
+    """
+    firewall_orchestration_engine = module_loader.get_module(
+        "firewall_orchestration_engine"
+    )
+    if firewall_orchestration_engine is None:
+        logger.debug(
+            "firewall_orchestration_engine module not loaded, "
+            "skipping firewall orchestration routes"
+        )
+        return False
+
+    module_info = firewall_orchestration_engine.get_module_info()
+    if not module_info.get("provides_routes", False):
+        logger.debug("firewall_orchestration_engine module does not provide routes")
+        return False
+
+    try:
+        with _cython_compat():
+            router = firewall_orchestration_engine.get_firewall_orchestration_router(
+                db_dependency=Depends(get_db),
+                auth_dependency=Depends(get_current_user),
+                feature_gate=_feature_dependency,
+                module_gate=_module_dependency,
+                models=models,
+                http_exception=HTTPException,
+                status_codes=status,
+                logger=logger,
+            )
+            app.include_router(router, prefix="/api")
+        logger.info(
+            "Mounted firewall orchestration routes from "
+            "firewall_orchestration_engine v%s",
+            module_info.get("version", "unknown"),
+        )
+        return True
+
+    except Exception as e:
+        logger.error("Failed to mount firewall orchestration routes: %s", e)
+        return False
+
+
 def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
     """
     Mount stub routes for Pro+ modules that weren't loaded.
@@ -749,6 +847,141 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
         stubs_mounted += 1
         logger.debug("Mounted reporting engine stub routes")
 
+    if not results.get("av_management_engine"):
+        router = APIRouter(prefix="/v1/av", tags=["av-management-stubs"])
+
+        @router.get("/status/{host_id}")
+        async def av_status_stub(
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {
+                "licensed": False,
+                "host_id": host_id,
+                "av_installed": False,
+                "commercial_av_detected": [],
+            }
+
+        @router.post("/deploy")
+        async def av_deploy_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/uninstall")
+        async def av_uninstall_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/scan")
+        async def av_scan_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/commercial/fleet-report")
+        async def av_commercial_fleet_report_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {
+                "licensed": False,
+                "total_hosts": 0,
+                "hosts_with_commercial_av": 0,
+                "by_product": {},
+                "realtime_protection_off_count": 0,
+                "entries": [],
+            }
+
+        @router.get("/policies")
+        async def av_list_policies_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "policies": []}
+
+        @router.post("/policies")
+        async def av_create_policy_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/policies/{policy_id}/apply")
+        async def av_apply_policy_stub(
+            policy_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "policy_id": policy_id}
+
+        app.include_router(router, prefix="/api")
+        stubs_mounted += 1
+        logger.debug("Mounted av_management_engine stub routes")
+
+    if not results.get("firewall_orchestration_engine"):
+        router = APIRouter(prefix="/v1/firewall", tags=["firewall-orchestration-stubs"])
+
+        @router.get("/status/{host_id}")
+        async def fw_status_stub(
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {
+                "licensed": False,
+                "host_id": host_id,
+                "firewall_type": None,
+                "applied_roles": [],
+            }
+
+        @router.post("/deploy")
+        async def fw_deploy_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/roles")
+        async def fw_list_roles_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "roles": []}
+
+        @router.post("/roles")
+        async def fw_create_role_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/compliance-check")
+        async def fw_compliance_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/fleet/deploy")
+        async def fw_fleet_deploy_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {
+                "licensed": False,
+                "role_names": [],
+                "queued_hosts": [],
+                "skipped_hosts": [],
+            }
+
+        @router.get("/compliance/report")
+        async def fw_compliance_report_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {
+                "licensed": False,
+                "total_hosts": 0,
+                "compliant_hosts": 0,
+                "noncompliant_hosts": 0,
+                "entries": [],
+            }
+
+        app.include_router(router, prefix="/api")
+        stubs_mounted += 1
+        logger.debug("Mounted firewall_orchestration_engine stub routes")
+
     if stubs_mounted > 0:
         logger.info(
             "Mounted %d Pro+ stub route group(s) for unlicensed modules",
@@ -778,6 +1011,8 @@ def mount_proplus_routes(app: FastAPI) -> dict:
         "audit_engine": mount_audit_routes(app),
         "secrets_engine": mount_secrets_routes(app),
         "container_engine": mount_container_routes(app),
+        "av_management_engine": mount_av_management_routes(app),
+        "firewall_orchestration_engine": mount_firewall_orchestration_routes(app),
     }
 
     mounted_count = sum(1 for v in results.values() if v)

@@ -982,18 +982,52 @@ else
 		TARGET_URL=$$($(PYTHON) -c "import yaml; print(yaml.safe_load(open('artillery.yml'))['config']['target'])"); \
 		echo "[INFO] Artillery target: $$TARGET_URL"; \
 		echo "[INFO] Pre-flight: checking that the SysManage backend is reachable at $$TARGET_URL/api/health..."; \
+		BACKEND_STARTED_BY_US=0; \
 		if ! curl --silent --fail --max-time 5 --output /dev/null "$$TARGET_URL/api/health"; then \
-			echo "[ERROR] Backend at $$TARGET_URL is not responding to /api/health."; \
-			echo "[ERROR] Start the server first: 'make start' (or in another shell), then re-run."; \
-			echo "[ERROR] Refusing to run load tests against a down server — every request would fail and the result would be meaningless."; \
-			exit 1; \
+			echo "[INFO] Backend not running - starting one in the background for the load test."; \
+			mkdir -p logs; \
+			. $(VENV_ACTIVATE) && SYSMANAGE_DISABLE_EMAIL=true nohup $(PYTHON) -m backend.main > logs/backend-perf.log 2>&1 & \
+			PERF_BACKEND_PID=$$!; \
+			echo "$$PERF_BACKEND_PID" > logs/backend-perf.pid; \
+			BACKEND_STARTED_BY_US=1; \
+			echo "[INFO] Backend PID: $$PERF_BACKEND_PID - waiting up to 90s for /api/health..."; \
+			BACKEND_READY=0; \
+			for i in $$(seq 1 45); do \
+				if curl --silent --fail --max-time 2 --output /dev/null "$$TARGET_URL/api/health"; then \
+					BACKEND_READY=1; \
+					echo "[INFO] Backend is ready."; \
+					break; \
+				fi; \
+				sleep 2; \
+			done; \
+			if [ $$BACKEND_READY -eq 0 ]; then \
+				echo "[ERROR] Backend failed to become healthy within 90s. See logs/backend-perf.log."; \
+				kill $$PERF_BACKEND_PID 2>/dev/null || true; \
+				rm -f logs/backend-perf.pid; \
+				exit 1; \
+			fi; \
+		else \
+			echo "[INFO] Backend already running - using it."; \
 		fi; \
-		echo "[INFO] Backend is reachable. Provisioning perf-test user (e2e-test@sysmanage.org)..."; \
+		echo "[INFO] Pre-warming backend (10 health pings) so cold-start outliers do not skew p99..."; \
+		for i in 1 2 3 4 5 6 7 8 9 10; do \
+			curl --silent --fail --max-time 5 --output /dev/null "$$TARGET_URL/api/health" || true; \
+		done; \
+		echo "[INFO] Provisioning perf-test user (e2e-test@sysmanage.org)..."; \
 		. $(VENV_ACTIVATE) && $(PYTHON) scripts/e2e_test_user.py create; \
-		# Ensure the test user is deleted even if artillery or the report \
-		# checks fail. Without this trap, a failure between create and the \
-		# end of the recipe would leave the user in the database. \
-		trap '. $(VENV_ACTIVATE) && $(PYTHON) scripts/e2e_test_user.py delete >/dev/null 2>&1 || true' EXIT; \
+		# Ensure the test user is deleted AND any backend we started is \
+		# stopped, even if artillery or the report checks fail. Without \
+		# the trap, a failure between create and the end of the recipe \
+		# would leave the user in the database and the backend running. \
+		trap ' \
+			. $(VENV_ACTIVATE) && $(PYTHON) scripts/e2e_test_user.py delete >/dev/null 2>&1 || true; \
+			if [ "$$BACKEND_STARTED_BY_US" = "1" ] && [ -f logs/backend-perf.pid ]; then \
+				echo "[INFO] Stopping perf-test backend (PID $$(cat logs/backend-perf.pid))..."; \
+				kill $$(cat logs/backend-perf.pid) 2>/dev/null || true; \
+				lsof -ti:8080 | xargs kill -9 2>/dev/null || true; \
+				rm -f logs/backend-perf.pid; \
+			fi \
+		' EXIT; \
 		echo "[INFO] Running Artillery load tests against $$TARGET_URL..."; \
 		npx --yes artillery@latest run artillery.yml --output artillery-report.json; \
 		if [ ! -f artillery-report.json ]; then \

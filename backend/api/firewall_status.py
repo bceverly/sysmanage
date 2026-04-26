@@ -22,10 +22,42 @@ from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
+from backend.services import firewall_plan_builder
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import CommandType, Message, MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
+
+
+def _host_info_for_planner(host: models.Host) -> dict:
+    """Pack a Host's OS fields into the dict the plan builder expects."""
+    return {
+        "platform": host.platform,
+        "platform_release": host.platform_release,
+        "platform_version": host.platform_version,
+    }
+
+
+def _queue_apply_deployment_plan(
+    db: Session, host: models.Host, plan: dict, timeout: int = 300
+) -> None:
+    """Wrap a deployment plan in an APPLY_DEPLOYMENT_PLAN message and queue it."""
+    message = Message(
+        message_type=MessageType.COMMAND,
+        data={
+            "command_type": CommandType.APPLY_DEPLOYMENT_PLAN,
+            "parameters": {"plan": plan},
+            "timeout": timeout,
+        },
+    )
+    queue_ops.enqueue_message(
+        message_type="command",
+        message_data=message.to_dict(),
+        direction=QueueDirection.OUTBOUND,
+        host_id=str(host.id),
+        db=db,
+    )
+
 
 logger = logging.getLogger(__name__)
 
@@ -141,23 +173,9 @@ async def enable_firewall(
     if not host:
         raise HTTPException(status_code=404, detail=error_host_not_found())
 
-    # Queue enable command for agent (will be delivered when agent is available)
-    message = Message(
-        message_type=MessageType.COMMAND,
-        data={
-            "command_type": CommandType.ENABLE_FIREWALL,
-            "parameters": {},
-            "timeout": 300,
-        },
-    )
-
-    queue_ops.enqueue_message(
-        message_type="command",
-        message_data=message.to_dict(),
-        direction=QueueDirection.OUTBOUND,
-        host_id=str(host.id),
-        db=db,
-    )
+    # Build a declarative enable plan and queue it via apply_deployment_plan.
+    plan = firewall_plan_builder.build_enable_plan(_host_info_for_planner(host))
+    _queue_apply_deployment_plan(db, host, plan)
 
     # Audit log the firewall enable command
     AuditService.log(
@@ -205,23 +223,8 @@ async def disable_firewall(
     if not host:
         raise HTTPException(status_code=404, detail=error_host_not_found())
 
-    # Queue disable command for agent (will be delivered when agent is available)
-    message = Message(
-        message_type=MessageType.COMMAND,
-        data={
-            "command_type": CommandType.DISABLE_FIREWALL,
-            "parameters": {},
-            "timeout": 300,
-        },
-    )
-
-    queue_ops.enqueue_message(
-        message_type="command",
-        message_data=message.to_dict(),
-        direction=QueueDirection.OUTBOUND,
-        host_id=str(host.id),
-        db=db,
-    )
+    plan = firewall_plan_builder.build_disable_plan(_host_info_for_planner(host))
+    _queue_apply_deployment_plan(db, host, plan)
 
     # Audit log the firewall disable command
     AuditService.log(
@@ -268,23 +271,8 @@ async def restart_firewall(
     if not host:
         raise HTTPException(status_code=404, detail=error_host_not_found())
 
-    # Queue restart command for agent (will be delivered when agent is available)
-    message = Message(
-        message_type=MessageType.COMMAND,
-        data={
-            "command_type": CommandType.RESTART_FIREWALL,
-            "parameters": {},
-            "timeout": 300,
-        },
-    )
-
-    queue_ops.enqueue_message(
-        message_type="command",
-        message_data=message.to_dict(),
-        direction=QueueDirection.OUTBOUND,
-        host_id=str(host.id),
-        db=db,
-    )
+    plan = firewall_plan_builder.build_restart_plan(_host_info_for_planner(host))
+    _queue_apply_deployment_plan(db, host, plan)
 
     # Audit log the firewall restart command
     AuditService.log(
@@ -331,12 +319,12 @@ async def deploy_firewall(
     if not host:
         raise HTTPException(status_code=404, detail=error_host_not_found())
 
-    # Queue deploy command for agent (will be delivered when agent is available)
+    plan = firewall_plan_builder.build_deploy_plan(_host_info_for_planner(host))
     message = Message(
         message_type=MessageType.COMMAND,
         data={
-            "command_type": CommandType.DEPLOY_FIREWALL,
-            "parameters": {},
+            "command_type": CommandType.APPLY_DEPLOYMENT_PLAN,
+            "parameters": {"plan": plan},
             "timeout": 300,
         },
     )
