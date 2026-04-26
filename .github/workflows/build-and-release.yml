@@ -964,7 +964,12 @@ jobs:
         with:
           name: sysmanage-alpine-sbom-${{ matrix.alpine-version }}
           path: sbom/
-          if-no-files-found: warn
+          # `ignore` matches the already best-effort design of the
+          # generator step above (`cyclonedx-py ... || rm -f`, then a
+          # belt-and-braces `find -size -500c -delete`).  When that step
+          # legitimately produces nothing, this upload silently no-ops
+          # instead of emitting a workflow annotation.
+          if-no-files-found: ignore
 
   # Consolidated Release - Push to sysmanage-docs and create GitHub release
   release:

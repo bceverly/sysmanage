@@ -724,6 +724,16 @@ Rebooting a parent host without cleanly stopping its running child hosts (VMs, c
 - [x] Safe parent host reboot with child host orchestration (Section 2.5)
 - [x] Frontend i18n gap fill for all 13 non-English locales
 
+### Exit Criteria
+
+- All 4 Professional modules (reporting, audit, secrets, container) compile and load cleanly on all supported platforms (linux, macos, windows, freebsd, openbsd, netbsd) across Python 3.11–3.14
+- License gating verified for each module: Professional license enables full functionality; unlicensed instances run in read-only / no-op mode and return 402 from gated endpoints without crashing
+- Agent-side deployment logic fully migrated for secrets (ssh_key_operations.py, certificate_operations.py — ~509 lines) and containers (child_host_lxd*.py, child_host_wsl*.py — ~2,995 lines); agent retains only generic deploy handlers and read-only listing
+- Open-source endpoints for OSS-tier features (basic activity log, read-only container/instance listing) continue to function (no regression in free-tier paths)
+- Safe parent host reboot orchestration verified end-to-end on at least one LXD parent and one WSL parent (running children stopped cleanly, persisted, restarted on parent reconnect)
+- All 14 languages have complete i18n coverage for the new modules' user-facing strings (server keys + frontend plugin bundles)
+- No critical or high-severity bugs in any module
+
 ---
 
 ## Phase 3: Pro+ Enterprise Tier - Part 1
@@ -898,6 +908,17 @@ modules. The Pro+ modules on the server will:
 handlers must be implemented before Phase 3 modules can function. If Phase 8 has not yet
 shipped, the generic handlers should be implemented early as a Phase 3 prerequisite.
 
+### Exit Criteria
+
+- av_management_engine and firewall_orchestration_engine compile and load cleanly on all supported platforms (linux, macos, windows, freebsd, openbsd, netbsd) across Python 3.11–3.14
+- License gating verified for both engines: Enterprise license enables full functionality; unlicensed instances return 402 cleanly from all gated endpoints (av/policies, av/commercial, firewall/fleet/deploy, firewall/compliance/report)
+- Agent-side config-construction code fully removed: all 12 antivirus_*.py and 11 firewall_*.py operations modules deleted (~13,900 lines); agent retains only read-only collection (`antivirus_collection.py`, `firewall_collector.py`, parsers, port helpers)
+- All 7 firewall flavors generate valid configs and apply cleanly on a real host of that flavor (UFW, firewalld, pf, ipfw, npf, Windows Firewall, macOS socketfilterfw)
+- ClamAV/ClamWin deployment plan executes end-to-end on at least one host per platform family (Linux Debian + RHEL, FreeBSD, Windows, macOS) — install, config-deploy, service-enable, scan-schedule
+- Open-source declarative plan_builder shims (`backend/services/firewall_plan_builder.py`, `av_plan_builder.py`) continue to produce minimal-functional plans (free-tier basic AV install / firewall enable still works without Pro+)
+- All 14 languages have complete i18n coverage for the new modules' user-facing strings (server keys + frontend plugin bundles + docs)
+- No critical or high-severity bugs in either engine
+
 ---
 
 ## Phase 4: Stabilization
@@ -986,6 +1007,16 @@ shipped, the generic handlers should be implemented early as a Phase 3 prerequis
 
 - [ ] 2 new Pro+ modules (automation, fleet)
 - [ ] Documentation for Enterprise tier features
+
+### Exit Criteria
+
+- automation_engine and fleet_engine compile and load cleanly on all supported platforms (linux, macos, windows, freebsd, openbsd, netbsd) across Python 3.11–3.14
+- License gating verified for both engines: Enterprise license enables full functionality; unlicensed instances run in read-only / no-op mode without crashing
+- Agent's `script_operations.py` execution logic fully migrated to server-side orchestration; the agent retains only the thin execution shim that runs server-issued commands
+- Open-source scripting and fleet endpoints continue to work (no regression in free-tier behaviour after the migration)
+- All feature checkboxes under both modules pass smoke tests against a real multi-host fleet (≥3 hosts)
+- Multi-shell script execution verified end-to-end on at least one host per shell (bash, zsh, PowerShell, cmd, ksh)
+- No critical or high-severity bugs in either engine
 
 ---
 
@@ -1195,6 +1226,19 @@ VM definitions, OTEL configs, etc.).
 - [ ] Pro+ Professional tier enhancements implemented
 - [ ] API documentation updated
 - [ ] User documentation updated
+
+### Exit Criteria
+
+- All seven sub-features (8.1–8.7) implemented per their checklists, including the Pro+ Professional tier enhancements (8.7) for reporting and secrets engines
+- Agent generic deployment handlers (Section 8.6) operational with SHA-256 verification, backup/rollback, and platform-aware service control (systemctl/rc-service/launchctl/sc.exe) — verified by integration tests against the Phase 3 AV and firewall plan builders
+- Message-protocol documentation for "deploy file", "execute command", and "control service" published in the developer docs
+- Access groups + registration keys functional end-to-end: hierarchy enforcement, RBAC scoping, auto-approval workflow on registration
+- Scheduled update profiles execute on cron schedule via APScheduler with security-only and staggered-rollout options verified
+- Package compliance profiles produce per-host compliance reports stored in `HostComplianceStatus`
+- Audit log enhancements: EXECUTE action type captured for every script run with stdout/stderr in details; CSV/PDF export functional with date/entity/user/result filters
+- Broadcast messaging delivers to all connected agents in under 5 seconds for fleets up to 100 hosts
+- All 14 languages have complete i18n coverage for all new strings (server, frontend, agent)
+- No critical or high-severity bugs in any Foundation feature
 
 ---
 
@@ -1411,6 +1455,22 @@ VM definitions, OTEL configs, etc.).
 - [ ] MFA implementation
 - [ ] Repository mirroring
 - [ ] External IdP support
+
+### Exit Criteria
+
+- virtualization_engine and observability_engine compile and load cleanly on all supported platforms (linux, macos, windows, freebsd, openbsd, netbsd) across Python 3.11–3.14
+- License gating verified for both engines: Enterprise license enables full functionality; unlicensed instances retain only read-only listing (no VM creation, no observability deployment) and return 402 from gated endpoints
+- Agent-side VM management code fully removed: all KVM/QEMU (~4,500 lines), bhyve (~4,600 lines), VMM/vmd (~6,800 lines), and guest-provisioning (~6,253 lines) modules deleted; agent retains only `child_host_listing_*.py` for read-only inventory
+- Each hypervisor creates, lifecycles, and deletes a VM end-to-end on its native platform: KVM/QEMU on Linux, bhyve on FreeBSD, VMM/vmd on OpenBSD
+- Cloud-init / autoinstall provisioning verified for at least one Linux guest (Ubuntu or Debian) and one BSD guest (FreeBSD) per hypervisor
+- Safe parent host reboot orchestration (originally LXD/WSL in Phase 2.5) extended to and verified on KVM, bhyve, and VMM/vmd — running VMs cleanly stopped, persisted, restarted on parent reconnect
+- Graylog sidecar deploys and forwards GELF to a real Graylog instance from at least one Linux and one Windows host
+- OTEL collector deploys with valid configuration and exports metrics + traces to a real backend on at least one Linux host
+- MFA: TOTP enrollment + verification, backup codes, and email fallback all functional; per-user and admin-required enforcement modes both verified
+- Repository mirroring functional for both APT and DNF with snapshot/rollback support
+- External IdP: LDAP/AD authentication and at least one OIDC provider (Okta, Azure AD, or Keycloak) successfully authenticate users with external-group-to-role mapping
+- All 14 languages have complete i18n coverage for the new modules and features
+- No critical or high-severity bugs in any module or feature
 
 ---
 
