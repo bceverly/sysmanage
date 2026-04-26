@@ -41,6 +41,13 @@ def test_detect_firewall_flavor_unknown_platform_falls_back_to_ufw():
     assert detect_firewall_flavor("Plan9", "4ed") == "ufw"
 
 
+def test_detect_firewall_flavor_unknown_linux_distro_defaults_to_ufw():
+    """A Linux host whose release string isn't ubuntu/debian/rhel-family
+    should still get a runnable plan (ufw)."""
+    assert detect_firewall_flavor("Linux", "Gentoo 23") == "ufw"
+    assert detect_firewall_flavor("Linux", "") == "ufw"
+
+
 # ---------------------------------------------------------------------------
 # UFW
 # ---------------------------------------------------------------------------
@@ -241,3 +248,196 @@ def test_pf_role_ports_unsupported_in_oss():
 def test_npf_enable_uses_npfctl_start():
     plan = build_enable_plan({"platform": "NetBSD"})
     assert plan["commands"][0]["argv"] == ["npfctl", "start"]
+
+
+# ---------------------------------------------------------------------------
+# Phase 4: extra coverage on disable / restart / role-removal edge cases
+# ---------------------------------------------------------------------------
+
+
+def test_firewalld_disable_stops_and_disables_service():
+    plan = build_disable_plan({"platform": "Linux", "platform_release": "Rocky 9"})
+    assert plan["flavor"] == "firewalld"
+    actions = [(a["service"], a["action"]) for a in plan["service_actions"]]
+    assert ("firewalld", "stop") in actions
+    assert ("firewalld", "disable") in actions
+
+
+def test_firewalld_restart_emits_reload_then_service_restart():
+    plan = build_restart_plan({"platform": "Linux", "platform_release": "Fedora 41"})
+    assert plan["commands"][0]["argv"] == ["firewall-cmd", "--reload"]
+    assert {"service": "firewalld", "action": "restart"} in plan["service_actions"]
+
+
+def test_pf_disable_stops_and_disables():
+    plan = build_disable_plan({"platform": "OpenBSD"})
+    assert plan["flavor"] == "pf"
+    assert plan["commands"][0]["argv"] == ["pfctl", "-d"]
+    actions = [(a["service"], a["action"]) for a in plan["service_actions"]]
+    assert ("pf", "stop") in actions
+    assert ("pf", "disable") in actions
+
+
+def test_pf_restart_toggles_off_then_on():
+    plan = build_restart_plan({"platform": "FreeBSD"})
+    argvs = [c["argv"] for c in plan["commands"]]
+    assert ["pfctl", "-d"] in argvs
+    assert ["pfctl", "-e"] in argvs
+
+
+def test_npf_restart_uses_reload():
+    plan = build_restart_plan({"platform": "NetBSD"})
+    assert plan["commands"][0]["argv"] == ["npfctl", "reload"]
+
+
+def test_npf_disable_stops_and_disables():
+    plan = build_disable_plan({"platform": "NetBSD"})
+    actions = [(a["service"], a["action"]) for a in plan["service_actions"]]
+    assert ("npf", "stop") in actions
+    assert ("npf", "disable") in actions
+
+
+def test_macos_restart_toggles_global_state_off_then_on():
+    plan = build_restart_plan({"platform": "Darwin"})
+    cmds = [c["argv"] for c in plan["commands"]]
+    assert any(a[-2:] == ["--setglobalstate", "off"] for a in cmds)
+    assert any(a[-2:] == ["--setglobalstate", "on"] for a in cmds)
+
+
+def test_macos_disable_uses_socketfilterfw_off():
+    plan = build_disable_plan({"platform": "Darwin"})
+    assert plan["commands"][0]["argv"][-2:] == ["--setglobalstate", "off"]
+
+
+def test_windows_restart_only_uses_service_action():
+    # netsh has no atomic restart; we just bounce the MpsSvc service.
+    plan = build_restart_plan({"platform": "Windows"})
+    assert plan["commands"] == []
+    assert {"service": "MpsSvc", "action": "restart"} in plan["service_actions"]
+
+
+def test_ufw_apply_with_both_tcp_and_udp_emits_two_rules_per_port():
+    plan = build_apply_role_ports_plan(
+        {"platform": "Linux", "platform_release": "Ubuntu 24.04"},
+        ipv4_ports=[{"port": 53, "tcp": True, "udp": True}],
+        ipv6_ports=[],
+    )
+    argvs = [c["argv"] for c in plan["commands"]]
+    assert ["ufw", "allow", "53/tcp"] in argvs
+    assert ["ufw", "allow", "53/udp"] in argvs
+
+
+def test_ufw_remove_role_ports_skips_dns_dhcp_too():
+    # DEFAULT_PRESERVED_PORTS is (22, 53, 67); a request to remove 67 is a no-op.
+    plan = build_remove_role_ports_plan(
+        {"platform": "Linux", "platform_release": "Ubuntu 24.04"},
+        ipv4_ports=[{"port": 67, "tcp": True, "udp": True}],
+        ipv6_ports=[],
+    )
+    deletes = [c for c in plan["commands"] if "delete" in c["argv"]]
+    assert deletes == []
+    assert 67 in plan["skipped_preserved_ports"]
+
+
+def test_firewalld_apply_role_with_only_udp_does_not_emit_tcp():
+    plan = build_apply_role_ports_plan(
+        {"platform": "Linux", "platform_release": "Rocky 9"},
+        ipv4_ports=[{"port": 514, "tcp": False, "udp": True}],
+        ipv6_ports=[],
+    )
+    add_cmds = [
+        c for c in plan["commands"] if any("--add-port=" in a for a in c["argv"])
+    ]
+    assert len(add_cmds) == 1
+    assert "514/udp" in " ".join(add_cmds[0]["argv"])
+
+
+def test_pf_role_ports_returns_unsupported_note_for_apply_and_remove():
+    apply_plan = build_apply_role_ports_plan(
+        {"platform": "OpenBSD"},
+        ipv4_ports=[{"port": 80, "tcp": True}],
+        ipv6_ports=[],
+    )
+    remove_plan = build_remove_role_ports_plan(
+        {"platform": "OpenBSD"},
+        ipv4_ports=[{"port": 80, "tcp": True}],
+        ipv6_ports=[],
+    )
+    assert apply_plan["commands"] == [] and "Pro+" in apply_plan["note"]
+    assert remove_plan["commands"] == [] and "Pro+" in remove_plan["note"]
+
+
+def test_npf_role_ports_returns_unsupported_note():
+    plan = build_apply_role_ports_plan(
+        {"platform": "NetBSD"},
+        ipv4_ports=[{"port": 80, "tcp": True}],
+        ipv6_ports=[],
+    )
+    assert plan["commands"] == []
+    assert "Pro+" in plan["note"]
+
+
+def test_unknown_platform_falls_back_to_ufw_for_enable():
+    plan = build_enable_plan({"platform": "Plan9", "platform_release": "4ed"})
+    assert plan["flavor"] == "ufw"
+
+
+# Catch ports that are NOT in any preserved set — to make sure removal
+# actually emits delete commands when the port isn't preserved.
+def test_ufw_remove_role_ports_actually_emits_for_non_preserved():
+    plan = build_remove_role_ports_plan(
+        {"platform": "Linux", "platform_release": "Ubuntu 24.04"},
+        ipv4_ports=[
+            {"port": 8080, "tcp": True, "udp": False},
+            {"port": 8443, "tcp": True, "udp": True},
+        ],
+        ipv6_ports=[],
+    )
+    deletes = [c["argv"] for c in plan["commands"] if "delete" in c["argv"]]
+    # 8080/tcp + 8443/tcp + 8443/udp = 3 deletes
+    assert len(deletes) == 3
+
+
+# ---------------------------------------------------------------------------
+# Coverage of remaining edge branches
+# ---------------------------------------------------------------------------
+
+
+def test_firewalld_remove_role_with_only_udp_emits_one_remove_command():
+    """The firewalld remove path has separate tcp / udp branches; the udp arm
+    is otherwise only hit when a removal request specifies udp without tcp."""
+    plan = build_remove_role_ports_plan(
+        {"platform": "Linux", "platform_release": "Rocky 9"},
+        ipv4_ports=[{"port": 514, "tcp": False, "udp": True}],
+        ipv6_ports=[],
+    )
+    remove_cmds = [
+        c for c in plan["commands"] if any("--remove-port=" in a for a in c["argv"])
+    ]
+    assert len(remove_cmds) == 1
+    assert "514/udp" in " ".join(remove_cmds[0]["argv"])
+
+
+def test_windows_enable_includes_agent_ports_in_preserved_rules():
+    plan = build_enable_plan({"platform": "Windows", "agent_ports": [9443, 9444]})
+    # Each preserved port produces a "name=SysManage Preserve {port}/TCP" rule;
+    # check both agent ports are reflected.
+    rule_names = [
+        a for c in plan["commands"] for a in c["argv"] if a.startswith("name=")
+    ]
+    assert any("9443/TCP" in n for n in rule_names)
+    assert any("9444/TCP" in n for n in rule_names)
+
+
+def test_windows_enable_ignores_non_int_agent_port_entries():
+    """The enable plan filters out non-int agent_ports defensively (e.g. if
+    a future config schema lets them through as strings)."""
+    plan = build_enable_plan(
+        {"platform": "Windows", "agent_ports": [9443, "bogus", None]}
+    )
+    rule_names = [
+        a for c in plan["commands"] for a in c["argv"] if a.startswith("name=")
+    ]
+    # "bogus"/None must NOT appear as preserved ports.
+    assert all("bogus" not in n for n in rule_names)
+    assert any("9443/TCP" in n for n in rule_names)

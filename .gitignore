@@ -247,3 +247,6 @@ requirements-prod.txt
 
 # Node.js dependencies
 node_modules/
+
+# Claude Code workspace
+.claude/

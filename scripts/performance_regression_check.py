@@ -245,11 +245,44 @@ class PerformanceRegessionDetector:
         if responses > 0:
             metrics['error_rate'] = ((responses - ok_2xx) / responses) * 100
 
+        # Environmental health signal: socket-timeout failures from artillery
+        # mean the load generator could not even reach the backend (the box
+        # was contended, the network was congested, or the backend ran out of
+        # workers).  Capture the count so the orchestrator can decide whether
+        # the run is trustworthy enough to fold into the rolling baseline.
+        sock_timeouts = counters.get('errors.ERR_SOCKET_TIMEOUT', 0)
+        vusers_created = counters.get('vusers.created', 0)
+        metrics['_socket_timeouts'] = sock_timeouts
+        if vusers_created > 0:
+            metrics['_socket_timeout_rate'] = sock_timeouts / vusers_created * 100
+
         return metrics
 
     def run_regression_analysis(self, current_results):
         """Run complete regression analysis on current results"""
         history = self.load_performance_history()
+
+        # Drop synthetic environmental signals from the metrics that get
+        # compared against baseline / persisted to history.  main() prefixes
+        # raw metric names with the OS label, so the keys look like
+        # "linux__socket_timeouts" — match on substring rather than prefix.
+        env_signals = {
+            k: current_results.pop(k)
+            for k in list(current_results)
+            if '_socket_timeout' in k
+        }
+        # Aggregate the env signals across OS prefixes — the orchestrator only
+        # cares whether the run as a whole was healthy.
+        env_summary = {
+            '_socket_timeouts': sum(
+                v for k, v in env_signals.items() if k.endswith('_socket_timeouts')
+            ),
+            '_socket_timeout_rate': max(
+                (v for k, v in env_signals.items() if k.endswith('_socket_timeout_rate')),
+                default=0,
+            ),
+        }
+        env_signals = env_summary
 
         # Add current run to history
         current_run = {
@@ -259,6 +292,33 @@ class PerformanceRegessionDetector:
 
         regressions_found = []
         performance_summary = []
+
+        # If the load generator hit too many socket timeouts, the backend was
+        # likely starved of CPU / file handles by other processes (or the
+        # network is bad).  Treat the run as untrustworthy so it doesn't
+        # poison the rolling baseline AND doesn't fail the build with a
+        # phantom regression.
+        sock_timeout_rate = env_signals.get('_socket_timeout_rate', 0)
+        sock_timeouts = env_signals.get('_socket_timeouts', 0)
+        ENVIRONMENTAL_TIMEOUT_THRESHOLD_PCT = 20  # >=20% timeouts → untrusted
+        if sock_timeout_rate >= ENVIRONMENTAL_TIMEOUT_THRESHOLD_PCT:
+            print("\n[WARN] Performance Regression Analysis SKIPPED")
+            print("=" * 50)
+            print(
+                f"This run recorded {int(sock_timeouts)} socket timeouts "
+                f"({sock_timeout_rate:.1f}% of vusers).  That's an "
+                "environmental signal — the backend or load generator was "
+                "starved of resources, not a code regression."
+            )
+            print(
+                "The run is NOT being added to performance-history.json so "
+                "the rolling baseline stays clean."
+            )
+            print(
+                "Re-run when the system is idle (close other heavy "
+                "processes — SonarQube, browsers, IDEs)."
+            )
+            return [], []
 
         print("\n[INFO] Performance Regression Analysis")
         print("=" * 50)

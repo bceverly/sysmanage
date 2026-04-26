@@ -37,11 +37,8 @@ test.describe('Pro+ Health Analysis', () => {
     await page.goto('/hosts');
     try { await page.waitForLoadState('networkidle', { timeout: 20000 }); } catch { /* timeout ok */ }
 
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
 
     const dataGrid = page.locator('.MuiDataGrid-root');
     await expect(dataGrid).toBeVisible({ timeout: 30000 });
@@ -247,10 +244,9 @@ test.describe('Pro+ Dashboard Cards', () => {
 test.describe('Pro+ Settings', () => {
   test('should display Pro+ settings if licensed', async ({ page }) => {
     test.setTimeout(60000);
-    if (!(await ensureAuthenticated(page, '/settings'))) {
-      test.skip();
-      return;
-    }
+    // ensureAuthenticated returns false only if auth never succeeded, which
+    // is a real failure — surface it.
+    expect(await ensureAuthenticated(page, '/settings')).toBe(true);
 
     // Look for Pro+ specific settings tabs
     const proplusTab = page.getByRole('tab', { name: /pro|enterprise|professional|health|cve/i }).first();

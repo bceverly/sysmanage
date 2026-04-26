@@ -12,11 +12,8 @@ test.describe('Updates Page', () => {
   });
 
   test('should display updates page', async ({ page }) => {
-    // If still redirected to login after retry, skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
     await expect(page).toHaveURL(/\/updates/);
 
     // Should have the updates content area
@@ -35,11 +32,8 @@ test.describe('Updates Page', () => {
       // networkidle may timeout, continue anyway
     }
 
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
 
     // The Updates page shows summary cards with counts
     // Look for the stats cards showing Total Updates, Security Updates, Packages, etc.
@@ -105,11 +99,8 @@ test.describe('Updates Page', () => {
       // networkidle may timeout, continue anyway
     }
 
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
 
     // Either we have update rows or an empty state message
     const updateRows = page.locator('.MuiDataGrid-row, .updates__item, tbody tr');

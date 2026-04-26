@@ -30,6 +30,12 @@ from typing import Any, Dict, List, Optional
 # basic networking even after a firewall sync.
 DEFAULT_PRESERVED_PORTS = (22, 53, 67)
 
+# Repeated argv tokens / descriptions, deduped to satisfy Sonar's
+# duplicate-string-literal rule.
+ZONE_PUBLIC_FLAG = "--zone=public"
+DESC_RELOAD_UFW = "reload ufw"
+DESC_RELOAD_FIREWALLD = "reload firewalld"
+
 
 def detect_firewall_flavor(
     host_platform: Optional[str], host_release: Optional[str]
@@ -140,7 +146,7 @@ def _ufw_restart_plan() -> Dict[str, Any]:
                 "sudo": True,
                 "timeout": 10,
                 "ignore_errors": False,
-                "description": "reload ufw",
+                "description": DESC_RELOAD_UFW,
             },
         ],
         "service_actions": [],
@@ -180,7 +186,7 @@ def _ufw_apply_role_ports(
             "sudo": True,
             "timeout": 10,
             "ignore_errors": True,
-            "description": "reload ufw",
+            "description": DESC_RELOAD_UFW,
         }
     )
     return {
@@ -231,7 +237,7 @@ def _ufw_remove_role_ports(
             "sudo": True,
             "timeout": 10,
             "ignore_errors": True,
-            "description": "reload ufw",
+            "description": DESC_RELOAD_UFW,
         }
     )
     return {
@@ -257,7 +263,7 @@ def _firewalld_enable_plan(agent_ports: Optional[List[int]] = None) -> Dict[str,
                 "argv": [
                     "firewall-cmd",
                     "--permanent",
-                    "--zone=public",
+                    ZONE_PUBLIC_FLAG,
                     f"--add-port={port}/tcp",
                 ],
                 "sudo": True,
@@ -272,7 +278,7 @@ def _firewalld_enable_plan(agent_ports: Optional[List[int]] = None) -> Dict[str,
             "sudo": True,
             "timeout": 10,
             "ignore_errors": False,
-            "description": "reload firewalld",
+            "description": DESC_RELOAD_FIREWALLD,
         }
     )
     return {
@@ -309,7 +315,7 @@ def _firewalld_restart_plan() -> Dict[str, Any]:
                 "sudo": True,
                 "timeout": 10,
                 "ignore_errors": False,
-                "description": "reload firewalld",
+                "description": DESC_RELOAD_FIREWALLD,
             },
         ],
         "service_actions": [{"service": "firewalld", "action": "restart"}],
@@ -328,7 +334,7 @@ def _firewalld_apply_role_ports(
                     "argv": [
                         "firewall-cmd",
                         "--permanent",
-                        "--zone=public",
+                        ZONE_PUBLIC_FLAG,
                         f"--add-port={port}/tcp",
                     ],
                     "sudo": True,
@@ -343,7 +349,7 @@ def _firewalld_apply_role_ports(
                     "argv": [
                         "firewall-cmd",
                         "--permanent",
-                        "--zone=public",
+                        ZONE_PUBLIC_FLAG,
                         f"--add-port={port}/udp",
                     ],
                     "sudo": True,
@@ -358,7 +364,7 @@ def _firewalld_apply_role_ports(
             "sudo": True,
             "timeout": 10,
             "ignore_errors": False,
-            "description": "reload firewalld",
+            "description": DESC_RELOAD_FIREWALLD,
         }
     )
     return {
@@ -388,7 +394,7 @@ def _firewalld_remove_role_ports(
                     "argv": [
                         "firewall-cmd",
                         "--permanent",
-                        "--zone=public",
+                        ZONE_PUBLIC_FLAG,
                         f"--remove-port={port}/tcp",
                     ],
                     "sudo": True,
@@ -403,7 +409,7 @@ def _firewalld_remove_role_ports(
                     "argv": [
                         "firewall-cmd",
                         "--permanent",
-                        "--zone=public",
+                        ZONE_PUBLIC_FLAG,
                         f"--remove-port={port}/udp",
                     ],
                     "sudo": True,
@@ -418,7 +424,7 @@ def _firewalld_remove_role_ports(
             "sudo": True,
             "timeout": 10,
             "ignore_errors": False,
-            "description": "reload firewalld",
+            "description": DESC_RELOAD_FIREWALLD,
         }
     )
     return {

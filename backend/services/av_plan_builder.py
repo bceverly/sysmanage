@@ -16,6 +16,15 @@ commercial-AV detection.
 from typing import Any, Dict, List, Optional, Tuple
 
 # ---------------------------------------------------------------------------
+# Conf-file paths used by multiple distro layouts (deduped to satisfy
+# Sonar's duplicate-string-literal rule).
+# ---------------------------------------------------------------------------
+
+CLAMD_CONF_DEBIAN = "/etc/clamav/clamd.conf"
+FRESHCLAM_CONF_DEBIAN = "/etc/clamav/freshclam.conf"
+FRESHCLAM_CONF_RPM = "/etc/freshclam.conf"
+
+# ---------------------------------------------------------------------------
 # Distro / platform → packages, paths, services
 # ---------------------------------------------------------------------------
 
@@ -26,8 +35,8 @@ def _linux_clamav_layout(distro: str) -> Tuple[List[str], str, str, str, str]:
     if "ubuntu" in d or "debian" in d:
         return (
             ["clamav", "clamav-daemon", "clamav-freshclam"],
-            "/etc/clamav/clamd.conf",
-            "/etc/clamav/freshclam.conf",
+            CLAMD_CONF_DEBIAN,
+            FRESHCLAM_CONF_DEBIAN,
             "clamav-daemon",
             "clamav-freshclam",
         )
@@ -38,7 +47,7 @@ def _linux_clamav_layout(distro: str) -> Tuple[List[str], str, str, str, str]:
         return (
             ["epel-release", "clamav", "clamd", "clamav-update"],
             "/etc/clamd.d/scan.conf",
-            "/etc/freshclam.conf",
+            FRESHCLAM_CONF_RPM,
             "clamd@scan",
             "clamav-freshclam",
         )
@@ -46,23 +55,23 @@ def _linux_clamav_layout(distro: str) -> Tuple[List[str], str, str, str, str]:
         return (
             ["clamav", "clamav-freshclam", "clamav-daemon"],
             "/etc/clamd.conf",
-            "/etc/freshclam.conf",
+            FRESHCLAM_CONF_RPM,
             "clamd",
             "freshclam",
         )
     if "arch" in d or "manjaro" in d:
         return (
             ["clamav"],
-            "/etc/clamav/clamd.conf",
-            "/etc/clamav/freshclam.conf",
+            CLAMD_CONF_DEBIAN,
+            FRESHCLAM_CONF_DEBIAN,
             "clamav-daemon",
             "clamav-freshclam",
         )
     # Reasonable Debian-family default for unknown distros
     return (
         ["clamav", "clamav-daemon", "clamav-freshclam"],
-        "/etc/clamav/clamd.conf",
-        "/etc/clamav/freshclam.conf",
+        CLAMD_CONF_DEBIAN,
+        FRESHCLAM_CONF_DEBIAN,
         "clamav-daemon",
         "clamav-freshclam",
     )
@@ -479,7 +488,7 @@ def _bsd_remove(host_info: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _windows_deploy(
-    host_info: Dict[str, Any],
+    _host_info: Dict[str, Any],
     antivirus_package: str,
     options: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:

@@ -93,6 +93,7 @@ def test_db():
         )  # Using String instead of Text for SQLite
         machine_architecture = Column(String(50), nullable=True)
         processor = Column(String(100), nullable=True)
+        timezone = Column(String(100), nullable=True)
         os_details = Column(
             String, nullable=True
         )  # Using String instead of Text for SQLite
@@ -1049,6 +1050,13 @@ def test_db():
                 "View Firewall Roles",
                 "View firewall roles in the system",
                 "00000000-0000-0000-0000-000000000010",
+            ),
+            # Host group — host firewall role assignment
+            (
+                "10000000-0000-0000-0000-000000000074",
+                "Assign Host Firewall Roles",
+                "Assign firewall roles to hosts",
+                "00000000-0000-0000-0000-000000000001",
             ),
         ]
 

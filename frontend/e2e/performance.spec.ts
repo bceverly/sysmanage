@@ -144,11 +144,8 @@ test.describe('Performance - Rendering', () => {
       // networkidle may timeout, continue anyway
     }
 
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
 
     // Grid should be visible (may already be rendered)
     const dataGrid = page.locator('.MuiDataGrid-root');

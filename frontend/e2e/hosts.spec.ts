@@ -37,11 +37,8 @@ test.describe('Host List Page', () => {
   });
 
   test('should display host list page', async ({ page }) => {
-    // If still redirected to login after retry, skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
 
     // Page should load successfully
     await expect(page).toHaveURL(/\/hosts/);
@@ -53,11 +50,8 @@ test.describe('Host List Page', () => {
   });
 
   test('should display host data grid', async ({ page }) => {
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
     // Wait for the data grid to be visible
     const dataGrid = page.locator('.MuiDataGrid-root');
     await expect(dataGrid).toBeVisible({ timeout: 30000 });
@@ -75,11 +69,8 @@ test.describe('Host List Page', () => {
   });
 
   test('should navigate to host detail on row click', async ({ page }) => {
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
     // Wait for grid to load
     const dataGrid = page.locator('.MuiDataGrid-root');
     await expect(dataGrid).toBeVisible({ timeout: 30000 });
@@ -91,11 +82,8 @@ test.describe('Host List Page', () => {
   });
 
   test('should have approve/reject buttons for pending hosts', async ({ page }) => {
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
     // Check if there are any pending hosts that need approval
     const approveButton = page.getByRole('button', { name: /approve/i }).first();
     const rejectButton = page.getByRole('button', { name: /reject|delete/i }).first();
@@ -126,11 +114,8 @@ test.describe('Host Detail Page', () => {
     await page.goto('/hosts');
     try { await page.waitForLoadState('networkidle', { timeout: 20000 }); } catch { /* timeout ok */ }
 
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
 
     const dataGrid = page.locator('.MuiDataGrid-root');
     await expect(dataGrid).toBeVisible({ timeout: 30000 });

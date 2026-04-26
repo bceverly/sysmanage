@@ -30,12 +30,9 @@ test.describe('User List Page', () => {
   });
 
   test('should display user list page', async ({ page }) => {
-    // If redirected to login, auth isn't working - skip gracefully
-    const currentUrl = page.url();
-    if (currentUrl.includes('/login')) {
-      test.skip();
-      return;
-    }
+    // ensureAuthenticated in beforeEach should land us on /users — if we're
+    // back on /login, that's a real auth bug and the test must surface it.
+    expect(page.url()).not.toContain('/login');
     await expect(page).toHaveURL(/\/users/);
 
     // Should have the Users nav item highlighted or data grid visible
@@ -45,38 +42,28 @@ test.describe('User List Page', () => {
   });
 
   test('should display user data grid', async ({ page }) => {
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    expect(page.url()).not.toContain('/login');
     const dataGrid = page.locator('.MuiDataGrid-root');
     await expect(dataGrid).toBeVisible({ timeout: 30000 });
   });
 
   test('should have add user button', async ({ page }) => {
-    // The add user functionality may be accessed via a FAB, toolbar, or actions menu
+    // The test user has all 93 security roles, so the Add User control
+    // (button or FAB) MUST be present once permissions have loaded.
+    //
+    // Locator.isVisible() is a one-shot synchronous check — it ignores
+    // the {timeout} option, so the previous version of this test was
+    // racing the React render and would flake on slow runs even when
+    // the button was about to appear.  Locator.or() + expect.toBeVisible
+    // actually polls for either control.
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
     const fabButton = page.locator('.MuiFab-root').first();
-
-    // Wait for permissions API to load (button appears after permissions are loaded)
-    const hasAddButton = await addButton.isVisible({ timeout: 20000 }).catch(() => false);
-    const hasFabButton = await fabButton.isVisible({ timeout: 4000 }).catch(() => false);
-
-    // If no add button exists, this is a design choice - skip test
-    if (!hasAddButton && !hasFabButton) {
-      test.skip();
-    }
+    await expect(addButton.or(fabButton)).toBeVisible({ timeout: 20000 });
   });
 
   test('should open add user dialog when clicking add button', async ({ page }) => {
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
-
-    // Skip if no add button exists (wait for permissions API to load)
-    if (!(await addButton.isVisible({ timeout: 20000 }).catch(() => false))) {
-      test.skip();
-      return;
-    }
+    await expect(addButton).toBeVisible({ timeout: 20000 });
 
     await addButton.click();
 
@@ -91,13 +78,7 @@ test.describe('User List Page', () => {
 
   test('should validate user form fields', async ({ page }) => {
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
-
-    // Skip if no add button exists (wait for permissions API to load)
-    if (!(await addButton.isVisible({ timeout: 20000 }).catch(() => false))) {
-      test.skip();
-      return;
-    }
-
+    await expect(addButton).toBeVisible({ timeout: 20000 });
     await addButton.click();
 
     // Try to submit empty form
@@ -114,13 +95,7 @@ test.describe('User List Page', () => {
 
   test('should close dialog on cancel', async ({ page }) => {
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
-
-    // Skip if no add button exists (wait for permissions API to load)
-    if (!(await addButton.isVisible({ timeout: 20000 }).catch(() => false))) {
-      test.skip();
-      return;
-    }
-
+    await expect(addButton).toBeVisible({ timeout: 20000 });
     await addButton.click();
 
     const dialog = page.locator('.MuiDialog-root');
@@ -135,11 +110,7 @@ test.describe('User List Page', () => {
   });
 
   test('should navigate to user detail on row click', async ({ page }) => {
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    expect(page.url()).not.toContain('/login');
     const dataGrid = page.locator('.MuiDataGrid-root');
     await expect(dataGrid).toBeVisible({ timeout: 30000 });
 
@@ -295,12 +266,9 @@ test.describe('User Create Flow', () => {
     await page.waitForTimeout(2000);
 
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
-
-    // Skip if no add button exists on this page
-    if (!(await addButton.isVisible().catch(() => false))) {
-      test.skip();
-      return;
-    }
+    // The test user is provisioned with all 93 security roles, so the
+    // add-user control must be visible.  If it isn't, that's a real bug.
+    await expect(addButton).toBeVisible({ timeout: 20000 });
 
     await addButton.click();
 

@@ -12,11 +12,8 @@ test.describe('Settings Page', () => {
   });
 
   test('should display settings page', async ({ page }) => {
-    // If redirected to login, auth state wasn't applied yet — skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
 
     await expect(page).toHaveURL(/\/settings/);
 
@@ -102,11 +99,8 @@ test.describe('Settings - System Configuration', () => {
       // networkidle may timeout, continue anyway
     }
 
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
 
     // Settings page should have tabs and/or a heading
     // The heading might say "Settings", "System Configuration", "Configuration", etc.
