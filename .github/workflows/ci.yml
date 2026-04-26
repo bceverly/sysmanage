@@ -196,7 +196,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
 
     - name: Upload backend coverage to Codecov
-      uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
+      uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: ./coverage.xml
@@ -409,7 +409,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
 
     - name: Upload frontend coverage to Codecov
-      uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
+      uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         directory: ./frontend/coverage
