@@ -43,6 +43,8 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     audit_retention_task = None
     secrets_rotation_task = None
     cve_refresh_task = None
+    automation_sched_task = None
+    fleet_sched_task = None
 
     try:
         # Startup: Ensure server certificates are generated
@@ -183,6 +185,58 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                                 "Failed to start secrets rotation "
                                 "background task: %s",
                                 sec_e,
+                            )
+
+                # Start automation_engine schedule dispatcher (Phase 5)
+                automation_engine = module_loader.get_module("automation_engine")
+                if automation_engine:
+                    auto_info = automation_engine.get_module_info()
+                    if auto_info.get("provides_background_task", False):
+                        logger.info(
+                            "=== AUTOMATION ENGINE SCHEDULE DISPATCHER STARTUP ==="
+                        )
+                        try:
+                            from backend.services.proplus_dispatch import (
+                                queue_automation_execution,
+                            )
+
+                            automation_sched_task = asyncio.create_task(
+                                automation_engine.start_schedule_dispatcher(
+                                    dispatch_fn=queue_automation_execution,
+                                    logger=logger,
+                                )
+                            )
+                            logger.info("Automation engine schedule dispatcher started")
+                        except Exception as auto_e:
+                            logger.warning(
+                                "Failed to start automation schedule dispatcher: %s",
+                                auto_e,
+                            )
+
+                # Start fleet_engine schedule dispatcher (Phase 5)
+                fleet_engine = module_loader.get_module("fleet_engine")
+                if fleet_engine:
+                    fleet_info = fleet_engine.get_module_info()
+                    if fleet_info.get("provides_background_task", False):
+                        logger.info("=== FLEET ENGINE SCHEDULE DISPATCHER STARTUP ===")
+                        try:
+                            from backend.services.proplus_dispatch import (
+                                build_host_provider,
+                                queue_fleet_bulk_op,
+                            )
+
+                            fleet_sched_task = asyncio.create_task(
+                                fleet_engine.start_schedule_dispatcher(
+                                    dispatch_fn=queue_fleet_bulk_op,
+                                    host_provider=build_host_provider(get_db),
+                                    logger=logger,
+                                )
+                            )
+                            logger.info("Fleet engine schedule dispatcher started")
+                        except Exception as fleet_e:
+                            logger.warning(
+                                "Failed to start fleet schedule dispatcher: %s",
+                                fleet_e,
                             )
 
                 # Start vuln_engine CVE refresh scheduler and staleness check
@@ -420,6 +474,32 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
             logger.info("CVE refresh background task stopped")
         except Exception as e:
             logger.error("Error stopping CVE refresh task: %s", e)
+
+    # Shutdown: Cancel the automation engine schedule dispatcher (Phase 5)
+    if automation_sched_task:
+        logger.info("Stopping automation engine schedule dispatcher")
+        try:
+            automation_sched_task.cancel()
+            try:
+                await automation_sched_task
+            except asyncio.CancelledError:
+                logger.info("Automation schedule dispatcher cancelled successfully")
+                raise
+        except Exception as e:
+            logger.error("Error stopping automation schedule dispatcher: %s", e)
+
+    # Shutdown: Cancel the fleet engine schedule dispatcher (Phase 5)
+    if fleet_sched_task:
+        logger.info("Stopping fleet engine schedule dispatcher")
+        try:
+            fleet_sched_task.cancel()
+            try:
+                await fleet_sched_task
+            except asyncio.CancelledError:
+                logger.info("Fleet schedule dispatcher cancelled successfully")
+                raise
+        except Exception as e:
+            logger.error("Error stopping fleet schedule dispatcher: %s", e)
 
     # Shutdown: Stop the CVE refresh scheduler
     try:

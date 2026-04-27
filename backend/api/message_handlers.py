@@ -55,6 +55,21 @@ async def handle_command_result(connection, message_data: dict):  # NOSONAR
         },
     )
 
+    # Phase 5: route Pro+ scheduler-dispatched results back to their
+    # originating engine.  The dispatcher in proplus_dispatch.py registers
+    # a correlation by the queue's message_id; the agent echoes that ID
+    # back as command_id.  If we have a match, the engine handles it and
+    # we're done — otherwise fall through to legacy routing.
+    command_id = message_data.get("command_id")
+    if command_id:
+        try:
+            from backend.services.proplus_dispatch import route_proplus_command_result
+
+            if route_proplus_command_result(command_id, message_data):
+                return None
+        except Exception as exc:
+            logger.warning("Pro+ command_result routing failed: %s", exc)
+
     # Check if this is a script execution result
     if "execution_id" in message_data:
         logger.info("Detected script execution result, routing to script handler")

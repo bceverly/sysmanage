@@ -21,7 +21,7 @@ from backend.licensing.features import FeatureCode, ModuleCode
 from backend.licensing.license_service import license_service
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
-from backend.persistence.db import get_db
+from backend.persistence.db import get_db, get_session_local
 from backend.services.email_service import email_service
 from backend.utils.verbosity_logger import get_logger
 
@@ -725,6 +725,175 @@ def mount_firewall_orchestration_routes(app: FastAPI) -> bool:
         return False
 
 
+def mount_automation_routes(app: FastAPI) -> bool:
+    """
+    Mount automation routes from the automation_engine module if available.
+
+    Args:
+        app: The FastAPI application instance
+
+    Returns:
+        True if routes were mounted, False otherwise
+    """
+    automation_engine = module_loader.get_module("automation_engine")
+    if automation_engine is None:
+        logger.debug("automation_engine module not loaded, skipping automation routes")
+        return False
+
+    module_info = automation_engine.get_module_info()
+    if not module_info.get("provides_routes", False):
+        logger.debug("automation_engine module does not provide routes")
+        return False
+
+    try:
+        with _cython_compat():
+            router = automation_engine.get_automation_router(
+                db_dependency=Depends(get_db),
+                auth_dependency=Depends(get_current_user),
+                feature_gate=_feature_dependency,
+                module_gate=_module_dependency,
+                models=models,
+                http_exception=HTTPException,
+                status_codes=status,
+                logger=logger,
+                audit_log_fn=_make_automation_audit_log_fn(),
+            )
+            app.include_router(router, prefix="/api")
+        logger.info(
+            "Mounted automation routes from automation_engine v%s",
+            module_info.get("version", "unknown"),
+        )
+        return True
+
+    except Exception as e:
+        logger.error("Failed to mount automation routes: %s", e)
+        return False
+
+
+def _make_automation_audit_log_fn():
+    """Return a callable the automation engine invokes for each mutating endpoint."""
+    from backend.services.audit_service import (
+        ActionType,
+        AuditService,
+        EntityType,
+        Result,
+    )
+
+    _ACTION_MAP = {
+        "create": ActionType.CREATE,
+        "update": ActionType.UPDATE,
+        "delete": ActionType.DELETE,
+        "execute": ActionType.EXECUTE,
+        "approve": ActionType.PERMISSION_CHANGE,
+        "reject": ActionType.PERMISSION_CHANGE,
+    }
+
+    def _log(action, entity_id, entity_name, description, current_user):
+        # Pull a session lazily so the engine doesn't need to know about db.
+        session_local = get_session_local()
+        with session_local() as session:
+            try:
+                AuditService.log(
+                    db=session,
+                    action_type=_ACTION_MAP.get(action, ActionType.EXECUTE),
+                    entity_type=EntityType.SCRIPT,
+                    description=description,
+                    result=Result.SUCCESS,
+                    username=current_user,
+                    entity_id=entity_id,
+                    entity_name=entity_name,
+                )
+                session.commit()
+            except Exception as exc:
+                logger.warning("Automation audit log failed: %s", exc)
+                session.rollback()
+
+    return _log
+
+
+def _make_fleet_audit_log_fn():
+    """Return a callable the fleet engine invokes for each mutating endpoint."""
+    from backend.services.audit_service import (
+        ActionType,
+        AuditService,
+        EntityType,
+        Result,
+    )
+
+    _ACTION_MAP = {
+        "create": ActionType.CREATE,
+        "update": ActionType.UPDATE,
+        "delete": ActionType.DELETE,
+        "execute": ActionType.EXECUTE,
+    }
+
+    def _log(action, entity_id, entity_name, description, current_user):
+        session_local = get_session_local()
+        with session_local() as session:
+            try:
+                AuditService.log(
+                    db=session,
+                    action_type=_ACTION_MAP.get(action, ActionType.EXECUTE),
+                    entity_type=EntityType.HOST,
+                    description=description,
+                    result=Result.SUCCESS,
+                    username=current_user,
+                    entity_id=entity_id,
+                    entity_name=entity_name,
+                )
+                session.commit()
+            except Exception as exc:
+                logger.warning("Fleet audit log failed: %s", exc)
+                session.rollback()
+
+    return _log
+
+
+def mount_fleet_routes(app: FastAPI) -> bool:
+    """
+    Mount fleet routes from the fleet_engine module if available.
+
+    Args:
+        app: The FastAPI application instance
+
+    Returns:
+        True if routes were mounted, False otherwise
+    """
+    fleet_engine = module_loader.get_module("fleet_engine")
+    if fleet_engine is None:
+        logger.debug("fleet_engine module not loaded, skipping fleet routes")
+        return False
+
+    module_info = fleet_engine.get_module_info()
+    if not module_info.get("provides_routes", False):
+        logger.debug("fleet_engine module does not provide routes")
+        return False
+
+    try:
+        with _cython_compat():
+            router = fleet_engine.get_fleet_router(
+                db_dependency=Depends(get_db),
+                auth_dependency=Depends(get_current_user),
+                feature_gate=_feature_dependency,
+                module_gate=_module_dependency,
+                models=models,
+                http_exception=HTTPException,
+                status_codes=status,
+                logger=logger,
+                audit_log_fn=_make_fleet_audit_log_fn(),
+            )
+            app.include_router(router, prefix="/api")
+        logger.info(
+            "Mounted fleet routes from fleet_engine v%s",
+            module_info.get("version", "unknown"),
+        )
+        return True
+
+    except Exception as e:
+        logger.error("Failed to mount fleet routes: %s", e)
+        return False
+
+
 def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
     """
     Mount stub routes for Pro+ modules that weren't loaded.
@@ -982,6 +1151,98 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
         stubs_mounted += 1
         logger.debug("Mounted firewall_orchestration_engine stub routes")
 
+    if not results.get("automation_engine"):
+        router = APIRouter(prefix="/v1/automation", tags=["automation-stubs"])
+
+        @router.get("/scripts")
+        async def automation_list_scripts_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "scripts": []}
+
+        @router.post("/scripts")
+        async def automation_create_script_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/executions")
+        async def automation_list_executions_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "executions": []}
+
+        @router.get("/approvals")
+        async def automation_list_approvals_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "approvals": []}
+
+        @router.get("/schedules")
+        async def automation_list_schedules_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "schedules": []}
+
+        app.include_router(router, prefix="/api")
+        stubs_mounted += 1
+        logger.debug("Mounted automation_engine stub routes")
+
+    if not results.get("fleet_engine"):
+        router = APIRouter(prefix="/v1/fleet", tags=["fleet-stubs"])
+
+        @router.get("/groups")
+        async def fleet_list_groups_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "groups": []}
+
+        @router.post("/groups")
+        async def fleet_create_group_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/select")
+        async def fleet_select_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "host_ids": [], "count": 0}
+
+        @router.post("/bulk")
+        async def fleet_bulk_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/bulk")
+        async def fleet_list_bulk_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "operations": []}
+
+        @router.post("/rolling")
+        async def fleet_rolling_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/rolling")
+        async def fleet_list_rolling_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "deployments": []}
+
+        @router.get("/schedules")
+        async def fleet_list_schedules_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "schedules": []}
+
+        app.include_router(router, prefix="/api")
+        stubs_mounted += 1
+        logger.debug("Mounted fleet_engine stub routes")
+
     if stubs_mounted > 0:
         logger.info(
             "Mounted %d Pro+ stub route group(s) for unlicensed modules",
@@ -1013,6 +1274,8 @@ def mount_proplus_routes(app: FastAPI) -> dict:
         "container_engine": mount_container_routes(app),
         "av_management_engine": mount_av_management_routes(app),
         "firewall_orchestration_engine": mount_firewall_orchestration_routes(app),
+        "automation_engine": mount_automation_routes(app),
+        "fleet_engine": mount_fleet_routes(app),
     }
 
     mounted_count = sum(1 for v in results.values() if v)

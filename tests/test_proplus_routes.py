@@ -250,6 +250,8 @@ class TestMountProplusRoutes:
             "container_engine",
             "av_management_engine",
             "firewall_orchestration_engine",
+            "automation_engine",
+            "fleet_engine",
         }
         assert set(results.keys()) == expected_keys
         assert all(v is False for v in results.values())
@@ -371,6 +373,57 @@ class TestStubEndpoints:
             report = c.get("/api/v1/firewall/compliance/report").json()
             assert report["total_hosts"] == 0
 
+    def test_automation_stubs(self, stub_app):
+        from fastapi.testclient import TestClient
+
+        with TestClient(stub_app) as c:
+            assert c.get("/api/v1/automation/scripts").json() == {
+                "licensed": False,
+                "scripts": [],
+            }
+            assert c.post("/api/v1/automation/scripts").json() == {"licensed": False}
+            assert c.get("/api/v1/automation/executions").json() == {
+                "licensed": False,
+                "executions": [],
+            }
+            assert c.get("/api/v1/automation/approvals").json() == {
+                "licensed": False,
+                "approvals": [],
+            }
+            assert c.get("/api/v1/automation/schedules").json() == {
+                "licensed": False,
+                "schedules": [],
+            }
+
+    def test_fleet_stubs(self, stub_app):
+        from fastapi.testclient import TestClient
+
+        with TestClient(stub_app) as c:
+            assert c.get("/api/v1/fleet/groups").json() == {
+                "licensed": False,
+                "groups": [],
+            }
+            assert c.post("/api/v1/fleet/groups").json() == {"licensed": False}
+            assert c.post("/api/v1/fleet/select").json() == {
+                "licensed": False,
+                "host_ids": [],
+                "count": 0,
+            }
+            assert c.post("/api/v1/fleet/bulk").json() == {"licensed": False}
+            assert c.get("/api/v1/fleet/bulk").json() == {
+                "licensed": False,
+                "operations": [],
+            }
+            assert c.post("/api/v1/fleet/rolling").json() == {"licensed": False}
+            assert c.get("/api/v1/fleet/rolling").json() == {
+                "licensed": False,
+                "deployments": [],
+            }
+            assert c.get("/api/v1/fleet/schedules").json() == {
+                "licensed": False,
+                "schedules": [],
+            }
+
 
 class TestStubsSkippedWhenModuleLoaded:
     def test_no_stubs_when_all_loaded(self):
@@ -387,6 +440,8 @@ class TestStubsSkippedWhenModuleLoaded:
                 "reporting_engine": True,
                 "av_management_engine": True,
                 "firewall_orchestration_engine": True,
+                "automation_engine": True,
+                "fleet_engine": True,
             },
         )
         assert len(app.routes) == before

@@ -976,15 +976,15 @@ shipped, the generic handlers should be implemented early as a Phase 3 prerequis
 - `sysmanage_agent/operations/script_operations.py` (~328 lines) — script execution engine
 
 **Features:**
-- [ ] Saved script library with versioning
-- [ ] Script execution across multiple hosts
-- [ ] Execution logging with stdout/stderr capture
-- [ ] Multi-shell support (bash, zsh, PowerShell, cmd, ksh)
-- [ ] Scheduled script execution
-- [ ] Approval workflows for privileged scripts
-- [ ] Script parameterization
+- [x] Saved script library with versioning (`module-source/automation_engine/automation_engine.pyx::register_script` snapshots prior versions on every update; `list_script_versions` returns history newest-first)
+- [x] Script execution across multiple hosts (`request_execution` accepts a `host_ids` list; per-host result tuples tracked + rolled up via `update_execution_host_result`)
+- [x] Execution logging with stdout/stderr capture (`ScriptExecutionHostResult` carries `stdout`, `stderr`, `returncode` per host)
+- [x] Multi-shell support (bash, zsh, sh, ksh, PowerShell, cmd) — `host_supports_shell` validates against host inventory; `build_script_command_plan` emits the right interpreter argv per shell
+- [x] Scheduled script execution (`ScheduledExecution` model with cron validation; `register_schedule` / `mark_schedule_run` registry)
+- [x] Approval workflows for privileged scripts (`requires_approval` flag → `ApprovalRequest`; `approve_execution` / `reject_execution` promote or reject the linked execution)
+- [x] Script parameterization (`ScriptParameter` typed declarations; `validate_parameter_values` type-coerces + checks required; `render_script_content` substitutes `${name}` placeholders)
 
-**Estimated Size:** ~2,300 lines (server-side Cython: ~2,000 server + ~300 from agent orchestration logic)
+**Actual Size:** ~1,000 lines Cython engine + ~300 lines tests (69 tests pass) + 75 lines OSS plan-builder + 80-line agent shim (down from 328 lines)
 
 #### 5.2 fleet_engine (Enterprise)
 
@@ -993,20 +993,25 @@ shipped, the generic handlers should be implemented early as a Phase 3 prerequis
 - Bulk operation endpoints
 
 **Features:**
-- [ ] Bulk host operations
-- [ ] Advanced host grouping
-- [ ] Scheduled fleet-wide operations
-- [ ] Rolling deployments
-- [ ] Fleet-wide configuration deployment
-- [ ] Host selection queries
-- [ ] Operation progress tracking
+- [x] Bulk host operations (`request_bulk_operation` resolves a `HostSelector` → per-host `BulkOperationHostResult` with rollup status)
+- [x] Advanced host grouping (`HostGroup` with `parent_id` hierarchy + `criteria` for dynamic membership; `register_group` rejects cycles; `delete_group` reparents children to deleted group's parent)
+- [x] Scheduled fleet-wide operations (`ScheduledFleetOperation` with cron + selector; `register_scheduled_op` / `mark_scheduled_op_run`)
+- [x] Rolling deployments (`request_rolling_deployment` plans batches; `next_rolling_batch` / `advance_rolling_batch` iterate; failure-threshold gate halts on excess failures; `pause` / `resume` / `cancel` lifecycle controls)
+- [x] Fleet-wide configuration deployment (`apply_deployment_plan` op type queues the same plan across many hosts via the existing agent handler)
+- [x] Host selection queries (`HostSelector` + `HostFilterCriterion` DSL with `equals` / `not_equals` / `contains` / `in` / `matches` ops; convenience shortcuts for platforms / tags / groups / approval_status)
+- [x] Operation progress tracking (`compute_progress` returns `OperationProgress` with queued / running / succeeded / failed / skipped counts + percent_complete)
 
-**Estimated Size:** ~1,500 lines
+**Actual Size:** ~700 lines Cython engine + ~300 lines tests (69 tests pass) + 130 lines OSS bulk_op_planner
 
 ### Deliverables
 
-- [ ] 2 new Pro+ modules (automation, fleet)
-- [ ] Documentation for Enterprise tier features
+- [x] 2 new Pro+ modules (automation, fleet) — both ship at v0.1.0 with full router factories + 69 passing tests
+- [x] Open-source plan-builder shims for free-tier ad-hoc usage (`backend/services/script_plan_builder.py` + `backend/services/bulk_op_planner.py`); 19 OSS plan-builder tests pass
+- [x] Open-source 402 stubs in `backend/api/proplus_routes.py::mount_proplus_stub_routes` for both engines
+- [x] Agent migration: `script_operations.py` reduced from 328 lines to 80-line shim that delegates to `apply_deployment_plan`; legacy `execute_script` API preserved
+- [x] Frontend i18n: `automationEngine` + `fleetEngine` keysets injected into all 14 locale `translation.json` files with hand-written translations (en, es, fr, de, it, pt, nl, ru, ja, ko, zh_CN, zh_TW, ar, hi)
+- [x] Documentation for Enterprise tier features (`docs/professional-plus/automation-engine.html` + `fleet-engine.html` shipped; translation keys added to all 14 locale JSONs in `assets/locales/`)
+- [x] Frontend plugin bundles (entry .ts + Card components + vite plugin config) — `automation-entry.ts` / `fleet-entry.ts` + `AutomationCard.tsx` / `FleetCard.tsx` build to `plugin-dist/automation_engine-plugin.iife.js` and `fleet_engine-plugin.iife.js`
 
 ### Exit Criteria
 
