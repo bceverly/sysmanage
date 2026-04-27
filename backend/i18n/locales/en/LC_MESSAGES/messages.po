@@ -80,9 +80,6 @@ msgstr "Tag with this name already exists"
 msgid "Tag not found"
 msgstr "Tag not found"
 
-msgid "Host not found"
-msgstr "Host not found"
-
 msgid "Tag already associated with this host"
 msgstr "Tag already associated with this host"
 
@@ -346,9 +343,6 @@ msgstr "Failed to process available packages: %s"
 
 msgid "Host not registered"
 msgstr "Host not registered"
-
-msgid "Host not found"
-msgstr "Host not found"
 
 
 msgid "Host Firewall Status"
@@ -829,13 +823,6 @@ msgstr "Failed to update secret in vault"
 msgid "Deleted {count} secrets"
 msgstr "Deleted {count} secrets"
 
-# Pro+ redirect messages for new features
-msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
-msgstr "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
-
-msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
-msgstr "Use /api/v1/secrets/deploy-certificates with Pro+ license"
-
 msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
 msgstr "Use /api/v1/secrets/rotation-schedules with Pro+ license"
 
@@ -958,3 +945,51 @@ msgstr "Child agent update requested: %s"
 msgid "Child agent update requested"
 msgstr "Child agent update requested"
 
+
+msgid "Failed to get email configuration"
+msgstr "Failed to get email configuration"
+
+msgid "Email service is disabled. Enable it in the configuration file."
+msgstr "Email service is disabled. Enable it in the configuration file."
+
+msgid "Test email sent successfully to {address}"
+msgstr "Test email sent successfully to {address}"
+
+msgid "Failed to send test email. Please check your SMTP configuration."
+msgstr "Failed to send test email. Please check your SMTP configuration."
+
+msgid "Error sending test email: {error}"
+msgstr "Error sending test email: {error}"
+
+msgid "Email integration must be configured before creating new users"
+msgstr "Email integration must be configured before creating new users"
+
+msgid "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
+msgstr "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
+
+msgid "Default admin credentials are configured in your YAML file"
+msgstr "Default admin credentials are configured in your YAML file"
+
+msgid "Remove admin_userid and admin_password from your configuration file and restart the server"
+msgstr "Remove admin_userid and admin_password from your configuration file and restart the server"
+
+msgid "Default JWT secret is being used"
+msgstr "Default JWT secret is being used"
+
+msgid "Run: {command}"
+msgstr "Run: {command}"
+
+msgid "Default password salt is being used"
+msgstr "Default password salt is being used"
+
+msgid "Run: {command} ({count} users will be migrated)"
+msgstr "Run: {command} ({count} users will be migrated)"
+
+msgid "Inconsistent security configuration detected"
+msgstr "Inconsistent security configuration detected"
+
+msgid "JWT secret uses default value but password salt has been changed. Run: {command}"
+msgstr "JWT secret uses default value but password salt has been changed. Run: {command}"
+
+msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
+msgstr "Password salt uses default value but JWT secret has been changed. Run: {command}"

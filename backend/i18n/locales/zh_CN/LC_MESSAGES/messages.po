@@ -30,11 +30,6 @@ msgstr "加密数据过期"
 msgid "Invalid signature"
 msgstr "无效签名"
 
-#: backend/security/communication_security.py:346
-#, python-format
-msgid "Decryption failed: %s"
-msgstr "解密失败：%s"
-
 #: backend/auth/auth_bearer.py:33
 msgid "Invalid authentication scheme."
 msgstr "无效的身份验证方案。"
@@ -97,66 +92,30 @@ msgstr "用户已存在"
 msgid "Agent with hostname %s not found"
 msgstr "未找到主机名为 %s 的代理"
 
-#: backend/api/fleet.py:96 backend/api/fleet.py:126 backend/api/fleet.py:159
-#: backend/api/fleet.py:194 backend/api/fleet.py:224 backend/api/fleet.py:251
-#, python-format
-msgid "Agent %s is not connected"
-msgstr "代理 %s 未连接"
-
-#: backend/api/fleet.py:107
-#, python-format
-msgid "Failed to send command to %s"
-msgstr "向 %s 发送命令失败"
-
 #: backend/api/fleet.py:113
 #, python-brace-format
 msgid "Command {command_type} sent to {hostname}"
 msgstr "命令 {command_type} 已发送到 {hostname}"
-
-#: backend/api/fleet.py:141
-#, python-format
-msgid "Failed to send shell command to %s"
-msgstr "向 %s 发送 shell 命令失败"
 
 #: backend/api/fleet.py:148
 #, python-brace-format
 msgid "Shell command sent to {hostname}"
 msgstr "Shell 命令已发送到 {hostname}"
 
-#: backend/api/fleet.py:174
-#, python-format
-msgid "Failed to send install command to %s"
-msgstr "向 %s 发送安装命令失败"
-
 #: backend/api/fleet.py:181
 #, python-brace-format
 msgid "Package installation command sent to {hostname}"
 msgstr "软件包安装命令已发送到 {hostname}"
-
-#: backend/api/fleet.py:206
-#, python-format
-msgid "Failed to send restart command to %s"
-msgstr "向 %s 发送重启命令失败"
 
 #: backend/api/fleet.py:213
 #, python-brace-format
 msgid "Service restart command sent to {hostname}"
 msgstr "服务重启命令已发送到 {hostname}"
 
-#: backend/api/fleet.py:234
-#, python-format
-msgid "Failed to send update command to %s"
-msgstr "向 %s 发送更新命令失败"
-
 #: backend/api/fleet.py:240
 #, python-brace-format
 msgid "System update command sent to {hostname}"
 msgstr "系统更新命令已发送到 {hostname}"
-
-#: backend/api/fleet.py:261
-#, python-format
-msgid "Failed to send reboot command to %s"
-msgstr "向 %s 发送重启命令失败"
 
 #: backend/api/fleet.py:267
 #, python-brace-format
@@ -328,10 +287,6 @@ msgstr "主机未批准"
 msgid "Host {hostname} registered successfully"
 msgstr "主机 {hostname} 注册成功"
 
-#: backend/api/agent.py:166
-msgid "Hostname is required for registration"
-msgstr "注册需要主机名"
-
 #: backend/api/agent.py:345
 msgid "os_version_updated"
 msgstr "操作系统版本已更新"
@@ -374,9 +329,6 @@ msgstr "该名称的标签已存在"
 
 msgid "Tag not found"
 msgstr "标签未找到"
-
-msgid "Host not found"
-msgstr "主机未找到"
 
 msgid "Tag already associated with this host"
 msgstr "标签已与此主机关联"
@@ -642,9 +594,6 @@ msgstr "无法处理可用软件包：%s"
 msgid "Host not registered"
 msgstr "主机未注册"
 
-msgid "Host not found"
-msgstr "找不到主机"
-
 
 
 
@@ -752,9 +701,6 @@ msgstr "操作"
 
 msgid "User"
 msgstr "用户"
-
-msgid "User not found"
-msgstr "未找到用户"
 
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
 msgstr "权限被拒绝：需要 ENABLE_GRAYLOG_INTEGRATION 角色"
@@ -1129,13 +1075,6 @@ msgstr "更新保险库中的密钥失败"
 msgid "Deleted {count} secrets"
 msgstr "已删除 {count} 个密钥"
 
-# Pro+ redirect messages for new features
-msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
-msgstr "使用 Pro+ 许可证访问 /api/v1/secrets/deploy-ssh-keys"
-
-msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
-msgstr "使用 Pro+ 许可证访问 /api/v1/secrets/deploy-certificates"
-
 msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
 msgstr "使用 Pro+ 许可证访问 /api/v1/secrets/rotation-schedules"
 
@@ -1262,3 +1201,51 @@ msgstr "已请求子代理更新：%s"
 msgid "Child agent update requested"
 msgstr "已请求子代理更新"
 
+
+msgid "Failed to get email configuration"
+msgstr "无法获取电子邮件配置"
+
+msgid "Email service is disabled. Enable it in the configuration file."
+msgstr "电子邮件服务已禁用。请在配置文件中启用。"
+
+msgid "Test email sent successfully to {address}"
+msgstr "测试电子邮件已成功发送至 {address}"
+
+msgid "Failed to send test email. Please check your SMTP configuration."
+msgstr "无法发送测试电子邮件。请检查您的 SMTP 配置。"
+
+msgid "Error sending test email: {error}"
+msgstr "发送测试电子邮件时出错: {error}"
+
+msgid "Email integration must be configured before creating new users"
+msgstr "在创建新用户之前必须配置电子邮件集成"
+
+msgid "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
+msgstr "在 YAML 配置文件中启用电子邮件并配置 SMTP 设置。如果没有电子邮件集成，新用户将无法收到密码设置说明，也无法登录。"
+
+msgid "Default admin credentials are configured in your YAML file"
+msgstr "默认管理员凭据已在您的 YAML 文件中配置"
+
+msgid "Remove admin_userid and admin_password from your configuration file and restart the server"
+msgstr "从配置文件中删除 admin_userid 和 admin_password 并重新启动服务器"
+
+msgid "Default JWT secret is being used"
+msgstr "正在使用默认 JWT 密钥"
+
+msgid "Run: {command}"
+msgstr "运行: {command}"
+
+msgid "Default password salt is being used"
+msgstr "正在使用默认密码盐"
+
+msgid "Run: {command} ({count} users will be migrated)"
+msgstr "运行: {command}（将迁移 {count} 个用户）"
+
+msgid "Inconsistent security configuration detected"
+msgstr "检测到不一致的安全配置"
+
+msgid "JWT secret uses default value but password salt has been changed. Run: {command}"
+msgstr "JWT 密钥使用默认值，但密码盐已更改。运行: {command}"
+
+msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
+msgstr "密码盐使用默认值，但 JWT 密钥已更改。运行: {command}"

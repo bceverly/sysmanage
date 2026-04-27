@@ -30,11 +30,6 @@ msgstr "Versleutelde gegevens verlopen"
 msgid "Invalid signature"
 msgstr "Ongeldige handtekening"
 
-#: backend/security/communication_security.py:346
-#, python-format
-msgid "Decryption failed: %s"
-msgstr "Ontsleuteling mislukt: %s"
-
 #: backend/auth/auth_bearer.py:33
 msgid "Invalid authentication scheme."
 msgstr "Ongeldig authenticatieschema."
@@ -97,66 +92,30 @@ msgstr "Gebruiker bestaat al"
 msgid "Agent with hostname %s not found"
 msgstr "Agent met hostnaam %s niet gevonden"
 
-#: backend/api/fleet.py:96 backend/api/fleet.py:126 backend/api/fleet.py:159
-#: backend/api/fleet.py:194 backend/api/fleet.py:224 backend/api/fleet.py:251
-#, python-format
-msgid "Agent %s is not connected"
-msgstr "Agent %s is niet verbonden"
-
-#: backend/api/fleet.py:107
-#, python-format
-msgid "Failed to send command to %s"
-msgstr "Verzenden van commando naar %s mislukt"
-
 #: backend/api/fleet.py:113
 #, python-brace-format
 msgid "Command {command_type} sent to {hostname}"
 msgstr "Commando {command_type} verzonden naar {hostname}"
-
-#: backend/api/fleet.py:141
-#, python-format
-msgid "Failed to send shell command to %s"
-msgstr "Verzenden van shell-commando naar %s mislukt"
 
 #: backend/api/fleet.py:148
 #, python-brace-format
 msgid "Shell command sent to {hostname}"
 msgstr "Shell commando verzonden naar {hostname}"
 
-#: backend/api/fleet.py:174
-#, python-format
-msgid "Failed to send install command to %s"
-msgstr "Verzenden van installatie-commando naar %s mislukt"
-
 #: backend/api/fleet.py:181
 #, python-brace-format
 msgid "Package installation command sent to {hostname}"
 msgstr "Pakketinstallatie commando verzonden naar {hostname}"
-
-#: backend/api/fleet.py:206
-#, python-format
-msgid "Failed to send restart command to %s"
-msgstr "Verzenden van herstart-commando naar %s mislukt"
 
 #: backend/api/fleet.py:213
 #, python-brace-format
 msgid "Service restart command sent to {hostname}"
 msgstr "Service herstart commando verzonden naar {hostname}"
 
-#: backend/api/fleet.py:234
-#, python-format
-msgid "Failed to send update command to %s"
-msgstr "Verzenden van update-commando naar %s mislukt"
-
 #: backend/api/fleet.py:240
 #, python-brace-format
 msgid "System update command sent to {hostname}"
 msgstr "Systeem update commando verzonden naar {hostname}"
-
-#: backend/api/fleet.py:261
-#, python-format
-msgid "Failed to send reboot command to %s"
-msgstr "Verzenden van herstart-commando naar %s mislukt"
 
 #: backend/api/fleet.py:267
 #, python-brace-format
@@ -328,10 +287,6 @@ msgstr "Host is niet goedgekeurd"
 msgid "Host {hostname} registered successfully"
 msgstr "Host {hostname} succesvol geregistreerd"
 
-#: backend/api/agent.py:166
-msgid "Hostname is required for registration"
-msgstr "Hostnaam is vereist voor registratie"
-
 #: backend/api/agent.py:345
 msgid "os_version_updated"
 msgstr "OS versie bijgewerkt"
@@ -374,9 +329,6 @@ msgstr "Een tag met deze naam bestaat al"
 
 msgid "Tag not found"
 msgstr "Tag niet gevonden"
-
-msgid "Host not found"
-msgstr "Host niet gevonden"
 
 msgid "Tag already associated with this host"
 msgstr "Tag is al gekoppeld aan deze host"
@@ -642,9 +594,6 @@ msgstr "Beschikbare pakketten verwerken mislukt: %s"
 msgid "Host not registered"
 msgstr "Host niet geregistreerd"
 
-msgid "Host not found"
-msgstr "Host niet gevonden"
-
 
 
 
@@ -752,9 +701,6 @@ msgstr "Actie"
 
 msgid "User"
 msgstr "Gebruiker"
-
-msgid "User not found"
-msgstr "Gebruiker niet gevonden"
 
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
 msgstr "Toestemming geweigerd: ENABLE_GRAYLOG_INTEGRATION rol vereist"
@@ -1255,3 +1201,51 @@ msgstr "Update kindagent aangevraagd: %s"
 msgid "Child agent update requested"
 msgstr "Update kindagent aangevraagd"
 
+
+msgid "Failed to get email configuration"
+msgstr "Kan e-mailconfiguratie niet ophalen"
+
+msgid "Email service is disabled. Enable it in the configuration file."
+msgstr "E-mailservice is uitgeschakeld. Schakel deze in het configuratiebestand in."
+
+msgid "Test email sent successfully to {address}"
+msgstr "Test-e-mail succesvol verzonden naar {address}"
+
+msgid "Failed to send test email. Please check your SMTP configuration."
+msgstr "Kan test-e-mail niet verzenden. Controleer uw SMTP-configuratie."
+
+msgid "Error sending test email: {error}"
+msgstr "Fout bij het verzenden van test-e-mail: {error}"
+
+msgid "Email integration must be configured before creating new users"
+msgstr "E-mailintegratie moet worden geconfigureerd voordat u nieuwe gebruikers aanmaakt"
+
+msgid "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
+msgstr "Schakel e-mail in uw YAML-configuratiebestand in en configureer de SMTP-instellingen. Zonder e-mailintegratie kunnen nieuwe gebruikers geen wachtwoordinstellingsinstructies ontvangen en niet inloggen."
+
+msgid "Default admin credentials are configured in your YAML file"
+msgstr "Standaard beheerdersreferenties zijn geconfigureerd in uw YAML-bestand"
+
+msgid "Remove admin_userid and admin_password from your configuration file and restart the server"
+msgstr "Verwijder admin_userid en admin_password uit uw configuratiebestand en start de server opnieuw op"
+
+msgid "Default JWT secret is being used"
+msgstr "Standaard JWT-geheim wordt gebruikt"
+
+msgid "Run: {command}"
+msgstr "Uitvoeren: {command}"
+
+msgid "Default password salt is being used"
+msgstr "Standaard wachtwoord-salt wordt gebruikt"
+
+msgid "Run: {command} ({count} users will be migrated)"
+msgstr "Uitvoeren: {command} ({count} gebruikers worden gemigreerd)"
+
+msgid "Inconsistent security configuration detected"
+msgstr "Inconsistente beveiligingsconfiguratie gedetecteerd"
+
+msgid "JWT secret uses default value but password salt has been changed. Run: {command}"
+msgstr "JWT-geheim gebruikt standaardwaarde maar wachtwoord-salt is gewijzigd. Uitvoeren: {command}"
+
+msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
+msgstr "Wachtwoord-salt gebruikt standaardwaarde maar JWT-geheim is gewijzigd. Uitvoeren: {command}"

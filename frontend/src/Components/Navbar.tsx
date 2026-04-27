@@ -181,7 +181,7 @@ const Navbar = () => {
               className="nav__close"
               id="nav-close"
               onClick={toggleMenu}
-              aria-label="Close menu"
+              aria-label={t('nav.closeMenu', 'Close menu')}
               type="button"
           >
               <IoClose />
@@ -210,7 +210,7 @@ const Navbar = () => {
             className="nav__toggle"
             id="nav-toggle"
             onClick={toggleMenu}
-            aria-label="Toggle menu"
+            aria-label={t('nav.toggleMenu', 'Toggle menu')}
             type="button"
         >
           <IoMenu />

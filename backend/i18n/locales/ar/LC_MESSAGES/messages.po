@@ -29,11 +29,6 @@ msgstr "انتهت صلاحية البيانات المشفرة"
 msgid "Invalid signature"
 msgstr "توقيع غير صحيح"
 
-#: backend/security/communication_security.py:346
-#, python-format
-msgid "Decryption failed: %s"
-msgstr "فشل في فك التشفير: %s"
-
 #: backend/auth/auth_bearer.py:33
 msgid "Invalid authentication scheme."
 msgstr "مخطط مصادقة غير صحيح."
@@ -94,66 +89,30 @@ msgstr "المستخدم موجود بالفعل"
 msgid "Agent with hostname %s not found"
 msgstr "لم يتم العثور على الوكيل بعنوان المضيف %s"
 
-#: backend/api/fleet.py:96 backend/api/fleet.py:126 backend/api/fleet.py:159
-#: backend/api/fleet.py:194 backend/api/fleet.py:224 backend/api/fleet.py:251
-#, python-format
-msgid "Agent %s is not connected"
-msgstr "الوكيل %s غير متصل"
-
-#: backend/api/fleet.py:107
-#, python-format
-msgid "Failed to send command to %s"
-msgstr "فشل في إرسال الأمر إلى %s"
-
 #: backend/api/fleet.py:113
 #, python-brace-format
 msgid "Command {command_type} sent to {hostname}"
 msgstr "تم إرسال الأمر {command_type} إلى {hostname}"
-
-#: backend/api/fleet.py:141
-#, python-format
-msgid "Failed to send shell command to %s"
-msgstr "فشل في إرسال أمر الصدفة إلى %s"
 
 #: backend/api/fleet.py:148
 #, python-brace-format
 msgid "Shell command sent to {hostname}"
 msgstr "تم إرسال أمر الصدفة إلى {hostname}"
 
-#: backend/api/fleet.py:174
-#, python-format
-msgid "Failed to send install command to %s"
-msgstr "فشل في إرسال أمر التثبيت إلى %s"
-
 #: backend/api/fleet.py:181
 #, python-brace-format
 msgid "Package installation command sent to {hostname}"
 msgstr "تم إرسال أمر تثبيت الحزمة إلى {hostname}"
-
-#: backend/api/fleet.py:206
-#, python-format
-msgid "Failed to send restart command to %s"
-msgstr "فشل في إرسال أمر إعادة التشغيل إلى %s"
 
 #: backend/api/fleet.py:213
 #, python-brace-format
 msgid "Service restart command sent to {hostname}"
 msgstr "تم إرسال أمر إعادة تشغيل الخدمة إلى {hostname}"
 
-#: backend/api/fleet.py:234
-#, python-format
-msgid "Failed to send update command to %s"
-msgstr "فشل في إرسال أمر التحديث إلى %s"
-
 #: backend/api/fleet.py:240
 #, python-brace-format
 msgid "System update command sent to {hostname}"
 msgstr "تم إرسال أمر تحديث النظام إلى {hostname}"
-
-#: backend/api/fleet.py:261
-#, python-format
-msgid "Failed to send reboot command to %s"
-msgstr "فشل في إرسال أمر إعادة التشغيل إلى %s"
 
 #: backend/api/fleet.py:267
 #, python-brace-format
@@ -321,10 +280,6 @@ msgstr "المضيف غير معتمد"
 msgid "Host {hostname} registered successfully"
 msgstr "تم تسجيل المضيف {hostname} بنجاح"
 
-#: backend/api/agent.py:166
-msgid "Hostname is required for registration"
-msgstr "اسم المضيف مطلوب للتسجيل"
-
 #: backend/api/agent.py:345
 msgid "os_version_updated"
 msgstr "تم تحديث إصدار نظام التشغيل"
@@ -367,9 +322,6 @@ msgstr "علامة بهذا الاسم موجودة بالفعل"
 
 msgid "Tag not found"
 msgstr "العلامة غير موجودة"
-
-msgid "Host not found"
-msgstr "المضيف غير موجود"
 
 msgid "Tag already associated with this host"
 msgstr "العلامة مرتبطة بالفعل بهذا المضيف"
@@ -635,9 +587,6 @@ msgstr "فشل في معالجة الحزم المتاحة: %s"
 msgid "Host not registered"
 msgstr "المضيف غير مسجل"
 
-msgid "Host not found"
-msgstr "المضيف غير موجود"
-
 
 
 
@@ -745,9 +694,6 @@ msgstr "الإجراء"
 
 msgid "User"
 msgstr "المستخدم"
-
-msgid "User not found"
-msgstr "المستخدم غير موجود"
 
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
 msgstr "تم رفض الإذن: دور ENABLE_GRAYLOG_INTEGRATION مطلوب"
@@ -1249,3 +1195,51 @@ msgstr "تم طلب تحديث وكيل المضيف الفرعي: %s"
 msgid "Child agent update requested"
 msgstr "تم طلب تحديث وكيل المضيف الفرعي"
 
+
+msgid "Failed to get email configuration"
+msgstr "فشل الحصول على تكوين البريد الإلكتروني"
+
+msgid "Email service is disabled. Enable it in the configuration file."
+msgstr "خدمة البريد الإلكتروني معطلة. قم بتمكينها في ملف التكوين."
+
+msgid "Test email sent successfully to {address}"
+msgstr "تم إرسال بريد إلكتروني تجريبي بنجاح إلى {address}"
+
+msgid "Failed to send test email. Please check your SMTP configuration."
+msgstr "فشل إرسال البريد الإلكتروني التجريبي. يرجى التحقق من تكوين SMTP."
+
+msgid "Error sending test email: {error}"
+msgstr "خطأ في إرسال البريد الإلكتروني التجريبي: {error}"
+
+msgid "Email integration must be configured before creating new users"
+msgstr "يجب تكوين تكامل البريد الإلكتروني قبل إنشاء مستخدمين جدد"
+
+msgid "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
+msgstr "قم بتمكين البريد الإلكتروني في ملف تكوين YAML وقم بتكوين إعدادات SMTP. بدون تكامل البريد الإلكتروني، لن يتمكن المستخدمون الجدد من تلقي تعليمات إعداد كلمة المرور وسيكونون غير قادرين على تسجيل الدخول."
+
+msgid "Default admin credentials are configured in your YAML file"
+msgstr "بيانات اعتماد المسؤول الافتراضية تم تكوينها في ملف YAML الخاص بك"
+
+msgid "Remove admin_userid and admin_password from your configuration file and restart the server"
+msgstr "قم بإزالة admin_userid و admin_password من ملف التكوين الخاص بك وأعد تشغيل الخادم"
+
+msgid "Default JWT secret is being used"
+msgstr "يتم استخدام سر JWT الافتراضي"
+
+msgid "Run: {command}"
+msgstr "تشغيل: {command}"
+
+msgid "Default password salt is being used"
+msgstr "يتم استخدام ملح كلمة المرور الافتراضي"
+
+msgid "Run: {command} ({count} users will be migrated)"
+msgstr "تشغيل: {command} (سيتم ترحيل {count} مستخدمًا)"
+
+msgid "Inconsistent security configuration detected"
+msgstr "تم اكتشاف تكوين أمان غير متناسق"
+
+msgid "JWT secret uses default value but password salt has been changed. Run: {command}"
+msgstr "سر JWT يستخدم القيمة الافتراضية ولكن تم تغيير ملح كلمة المرور. تشغيل: {command}"
+
+msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
+msgstr "ملح كلمة المرور يستخدم القيمة الافتراضية ولكن تم تغيير سر JWT. تشغيل: {command}"

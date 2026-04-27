@@ -16,7 +16,36 @@
     "title": "바이러스 백신"
   },
   "auditLog": {
-    "exportRequiresLicense": "감사 로그 내보내기에는 SysManage Professional+ 라이선스가 필요합니다."
+    "exportRequiresLicense": "감사 로그 내보내기에는 SysManage Professional+ 라이선스가 필요합니다.",
+    "actionType": {
+      "create": "만들기",
+      "read": "읽기",
+      "update": "업데이트",
+      "delete": "삭제",
+      "execute": "실행"
+    },
+    "entityType": {
+      "host": "호스트",
+      "user": "사용자",
+      "package": "패키지",
+      "script": "스크립트",
+      "secret": "시크릿",
+      "certificate": "인증서",
+      "tag": "태그",
+      "userRole": "사용자 역할"
+    },
+    "category": {
+      "database": "데이터베이스",
+      "agent": "에이전트",
+      "authentication": "인증",
+      "system": "시스템"
+    },
+    "entryType": {
+      "userAction": "사용자 작업",
+      "systemEvent": "시스템 이벤트",
+      "securityEvent": "보안 이벤트",
+      "dataChange": "데이터 변경"
+    }
   },
   "automationEngine": {
     "approval": {
@@ -194,7 +223,8 @@
     "success": "작업이 성공적으로 완료되었습니다",
     "unassigned": "할당되지 않음",
     "view": "보기",
-    "yes": "예"
+    "yes": "예",
+    "none": "없음"
   },
   "connectionStatus": {
     "connected": "연결됨",
@@ -1070,7 +1100,8 @@
     "wslNotAvailable": "사용할 수 없음",
     "wslNotEnabled": "활성화되지 않음",
     "wslStatus": "WSL 상태",
-    "wslVersion": "WSL 버전"
+    "wslVersion": "WSL 버전",
+    "packageSearchPlaceholder": "검색할 패키지 이름을 입력하세요..."
   },
   "hostGroup": {
     "add": "추가",
@@ -1231,7 +1262,9 @@
     "secrets": "비밀",
     "settings": "설정",
     "updates": "업데이트",
-    "users": "사용자"
+    "users": "사용자",
+    "closeMenu": "메뉴 닫기",
+    "toggleMenu": "메뉴 전환"
   },
   "notifications": {
     "applicationUpdates": "애플리케이션 업데이트",
@@ -2178,5 +2211,37 @@
       "waitingForWslReady": "WSL 준비 대기 중",
       "writingAgentConfiguration": "에이전트 구성 작성 중"
     }
+  },
+  "emailConfig": {
+    "title": "이메일 구성",
+    "subheader": "알림 및 비밀번호 재설정을 위한 SMTP 설정",
+    "smtpServer": "SMTP 서버",
+    "fromAddress": "보낸 사람 주소",
+    "subjectPrefix": "제목 접두사",
+    "statusLabel": "상태",
+    "statusSuffix": {
+      "notConfigured": "(구성되지 않음)"
+    },
+    "testConfiguration": "구성 테스트",
+    "configureHint": "테스트를 활성화하려면 sysmanage.yaml에서 이메일 설정을 구성하세요",
+    "testDialogTitle": "이메일 구성 테스트",
+    "testDialogBody": "SMTP 구성이 올바르게 작동하는지 확인하기 위해 테스트 이메일을 보내세요.",
+    "emailAddressLabel": "이메일 주소",
+    "emailAddressPlaceholder": "테스트 메시지를 보낼 이메일 주소를 입력하세요",
+    "sending": "보내는 중...",
+    "sendTest": "테스트 이메일 보내기",
+    "loadFailed": "이메일 구성을 로드하지 못했습니다",
+    "enterEmail": "이메일 주소를 입력하세요",
+    "sendFailed": "테스트 이메일을 보내지 못했습니다. 구성을 확인하세요.",
+    "status": {
+      "unknown": "알 수 없음",
+      "disabled": "비활성화됨",
+      "enabled": "활성화됨",
+      "notConfigured": "구성되지 않음",
+      "configured": "구성됨"
+    }
+  },
+  "reportViewer": {
+    "iframeTitle": "보고서 내용"
   }
 }

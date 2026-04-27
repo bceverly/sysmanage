@@ -30,11 +30,6 @@ msgstr "暗号化データの有効期限切れ"
 msgid "Invalid signature"
 msgstr "無効な署名"
 
-#: backend/security/communication_security.py:346
-#, python-format
-msgid "Decryption failed: %s"
-msgstr "復号化に失敗しました: %s"
-
 #: backend/auth/auth_bearer.py:33
 msgid "Invalid authentication scheme."
 msgstr "無効な認証スキームです。"
@@ -97,66 +92,30 @@ msgstr "ユーザーは既に存在しています"
 msgid "Agent with hostname %s not found"
 msgstr "ホスト名 %s のエージェントが見つかりません"
 
-#: backend/api/fleet.py:96 backend/api/fleet.py:126 backend/api/fleet.py:159
-#: backend/api/fleet.py:194 backend/api/fleet.py:224 backend/api/fleet.py:251
-#, python-format
-msgid "Agent %s is not connected"
-msgstr "エージェント %s は接続されていません"
-
-#: backend/api/fleet.py:107
-#, python-format
-msgid "Failed to send command to %s"
-msgstr "%s へのコマンド送信に失敗しました"
-
 #: backend/api/fleet.py:113
 #, python-brace-format
 msgid "Command {command_type} sent to {hostname}"
 msgstr "コマンド {command_type} を {hostname} に送信しました"
-
-#: backend/api/fleet.py:141
-#, python-format
-msgid "Failed to send shell command to %s"
-msgstr "%s へのシェルコマンド送信に失敗しました"
 
 #: backend/api/fleet.py:148
 #, python-brace-format
 msgid "Shell command sent to {hostname}"
 msgstr "シェルコマンドを {hostname} に送信しました"
 
-#: backend/api/fleet.py:174
-#, python-format
-msgid "Failed to send install command to %s"
-msgstr "%s へのインストールコマンド送信に失敗しました"
-
 #: backend/api/fleet.py:181
 #, python-brace-format
 msgid "Package installation command sent to {hostname}"
 msgstr "パッケージインストールコマンドを {hostname} に送信しました"
-
-#: backend/api/fleet.py:206
-#, python-format
-msgid "Failed to send restart command to %s"
-msgstr "%s への再起動コマンド送信に失敗しました"
 
 #: backend/api/fleet.py:213
 #, python-brace-format
 msgid "Service restart command sent to {hostname}"
 msgstr "サービス再起動コマンドを {hostname} に送信しました"
 
-#: backend/api/fleet.py:234
-#, python-format
-msgid "Failed to send update command to %s"
-msgstr "%s への更新コマンド送信に失敗しました"
-
 #: backend/api/fleet.py:240
 #, python-brace-format
 msgid "System update command sent to {hostname}"
 msgstr "システム更新コマンドを {hostname} に送信しました"
-
-#: backend/api/fleet.py:261
-#, python-format
-msgid "Failed to send reboot command to %s"
-msgstr "%s への再起動コマンド送信に失敗しました"
 
 #: backend/api/fleet.py:267
 #, python-brace-format
@@ -332,10 +291,6 @@ msgstr "ホストは承認されていません"
 msgid "Host {hostname} registered successfully"
 msgstr "ホスト {hostname} が正常に登録されました"
 
-#: backend/api/agent.py:166
-msgid "Hostname is required for registration"
-msgstr "登録にはホスト名が必要です"
-
 #: backend/api/agent.py:345
 msgid "os_version_updated"
 msgstr "OSバージョンが更新されました"
@@ -378,9 +333,6 @@ msgstr "この名前のタグは既に存在します"
 
 msgid "Tag not found"
 msgstr "タグが見つかりません"
-
-msgid "Host not found"
-msgstr "ホストが見つかりません"
 
 msgid "Tag already associated with this host"
 msgstr "タグは既にこのホストに関連付けられています"
@@ -646,9 +598,6 @@ msgstr "利用可能なパッケージの処理に失敗しました: %s"
 msgid "Host not registered"
 msgstr "ホストが登録されていません"
 
-msgid "Host not found"
-msgstr "ホストが見つかりません"
-
 
 
 
@@ -756,9 +705,6 @@ msgstr "アクション"
 
 msgid "User"
 msgstr "ユーザー"
-
-msgid "User not found"
-msgstr "ユーザーが見つかりません"
 
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
 msgstr "アクセス拒否: ENABLE_GRAYLOG_INTEGRATION ロールが必要です"
@@ -1259,3 +1205,51 @@ msgstr "子エージェントの更新がリクエストされました：%s"
 msgid "Child agent update requested"
 msgstr "子エージェントの更新がリクエストされました"
 
+
+msgid "Failed to get email configuration"
+msgstr "メール設定の取得に失敗しました"
+
+msgid "Email service is disabled. Enable it in the configuration file."
+msgstr "メールサービスが無効です。設定ファイルで有効にしてください。"
+
+msgid "Test email sent successfully to {address}"
+msgstr "テストメールを {address} に正常に送信しました"
+
+msgid "Failed to send test email. Please check your SMTP configuration."
+msgstr "テストメールの送信に失敗しました。SMTP 設定を確認してください。"
+
+msgid "Error sending test email: {error}"
+msgstr "テストメール送信エラー: {error}"
+
+msgid "Email integration must be configured before creating new users"
+msgstr "新しいユーザーを作成する前にメール統合を設定する必要があります"
+
+msgid "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
+msgstr "YAML 設定ファイルでメールを有効にし、SMTP 設定を構成してください。メール統合がないと、新しいユーザーはパスワード設定の指示を受け取れず、ログインできなくなります。"
+
+msgid "Default admin credentials are configured in your YAML file"
+msgstr "デフォルトの管理者資格情報が YAML ファイルに設定されています"
+
+msgid "Remove admin_userid and admin_password from your configuration file and restart the server"
+msgstr "設定ファイルから admin_userid と admin_password を削除し、サーバーを再起動してください"
+
+msgid "Default JWT secret is being used"
+msgstr "デフォルトの JWT シークレットが使用されています"
+
+msgid "Run: {command}"
+msgstr "実行: {command}"
+
+msgid "Default password salt is being used"
+msgstr "デフォルトのパスワードソルトが使用されています"
+
+msgid "Run: {command} ({count} users will be migrated)"
+msgstr "実行: {command}（{count} 人のユーザーが移行されます）"
+
+msgid "Inconsistent security configuration detected"
+msgstr "一貫性のないセキュリティ設定が検出されました"
+
+msgid "JWT secret uses default value but password salt has been changed. Run: {command}"
+msgstr "JWT シークレットはデフォルト値を使用していますが、パスワードソルトは変更されています。実行: {command}"
+
+msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
+msgstr "パスワードソルトはデフォルト値を使用していますが、JWT シークレットは変更されています。実行: {command}"

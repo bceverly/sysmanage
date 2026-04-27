@@ -242,11 +242,11 @@ const AuditLogViewer: React.FC = () => {
                   onChange={(e) => setActionType(e.target.value)}
                 >
                   <MenuItem value="">{t('common.all', 'All')}</MenuItem>
-                  <MenuItem value="CREATE">Create</MenuItem>
-                  <MenuItem value="READ">Read</MenuItem>
-                  <MenuItem value="UPDATE">Update</MenuItem>
-                  <MenuItem value="DELETE">Delete</MenuItem>
-                  <MenuItem value="EXECUTE">Execute</MenuItem>
+                  <MenuItem value="CREATE">{t('auditLog.actionType.create', 'Create')}</MenuItem>
+                  <MenuItem value="READ">{t('auditLog.actionType.read', 'Read')}</MenuItem>
+                  <MenuItem value="UPDATE">{t('auditLog.actionType.update', 'Update')}</MenuItem>
+                  <MenuItem value="DELETE">{t('auditLog.actionType.delete', 'Delete')}</MenuItem>
+                  <MenuItem value="EXECUTE">{t('auditLog.actionType.execute', 'Execute')}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -259,14 +259,14 @@ const AuditLogViewer: React.FC = () => {
                   onChange={(e) => setEntityType(e.target.value)}
                 >
                   <MenuItem value="">{t('common.all', 'All')}</MenuItem>
-                  <MenuItem value="HOST">Host</MenuItem>
-                  <MenuItem value="USER">User</MenuItem>
-                  <MenuItem value="PACKAGE">Package</MenuItem>
-                  <MenuItem value="SCRIPT">Script</MenuItem>
-                  <MenuItem value="SECRET">Secret</MenuItem>
-                  <MenuItem value="CERTIFICATE">Certificate</MenuItem>
-                  <MenuItem value="TAG">Tag</MenuItem>
-                  <MenuItem value="USER_ROLE">User Role</MenuItem>
+                  <MenuItem value="HOST">{t('auditLog.entityType.host', 'Host')}</MenuItem>
+                  <MenuItem value="USER">{t('auditLog.entityType.user', 'User')}</MenuItem>
+                  <MenuItem value="PACKAGE">{t('auditLog.entityType.package', 'Package')}</MenuItem>
+                  <MenuItem value="SCRIPT">{t('auditLog.entityType.script', 'Script')}</MenuItem>
+                  <MenuItem value="SECRET">{t('auditLog.entityType.secret', 'Secret')}</MenuItem>
+                  <MenuItem value="CERTIFICATE">{t('auditLog.entityType.certificate', 'Certificate')}</MenuItem>
+                  <MenuItem value="TAG">{t('auditLog.entityType.tag', 'Tag')}</MenuItem>
+                  <MenuItem value="USER_ROLE">{t('auditLog.entityType.userRole', 'User Role')}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -279,10 +279,10 @@ const AuditLogViewer: React.FC = () => {
                   onChange={(e) => setCategory(e.target.value)}
                 >
                   <MenuItem value="">{t('common.all', 'All')}</MenuItem>
-                  <MenuItem value="database">Database</MenuItem>
-                  <MenuItem value="agent">Agent</MenuItem>
-                  <MenuItem value="authentication">Authentication</MenuItem>
-                  <MenuItem value="system">System</MenuItem>
+                  <MenuItem value="database">{t('auditLog.category.database', 'Database')}</MenuItem>
+                  <MenuItem value="agent">{t('auditLog.category.agent', 'Agent')}</MenuItem>
+                  <MenuItem value="authentication">{t('auditLog.category.authentication', 'Authentication')}</MenuItem>
+                  <MenuItem value="system">{t('auditLog.category.system', 'System')}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -295,10 +295,10 @@ const AuditLogViewer: React.FC = () => {
                   onChange={(e) => setEntryType(e.target.value)}
                 >
                   <MenuItem value="">{t('common.all', 'All')}</MenuItem>
-                  <MenuItem value="user_action">User Action</MenuItem>
-                  <MenuItem value="system_event">System Event</MenuItem>
-                  <MenuItem value="security_event">Security Event</MenuItem>
-                  <MenuItem value="data_change">Data Change</MenuItem>
+                  <MenuItem value="user_action">{t('auditLog.entryType.userAction', 'User Action')}</MenuItem>
+                  <MenuItem value="system_event">{t('auditLog.entryType.systemEvent', 'System Event')}</MenuItem>
+                  <MenuItem value="security_event">{t('auditLog.entryType.securityEvent', 'Security Event')}</MenuItem>
+                  <MenuItem value="data_change">{t('auditLog.entryType.dataChange', 'Data Change')}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

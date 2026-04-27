@@ -30,11 +30,6 @@ msgstr "Dati crittografati scaduti"
 msgid "Invalid signature"
 msgstr "Firma non valida"
 
-#: backend/security/communication_security.py:346
-#, python-format
-msgid "Decryption failed: %s"
-msgstr "Decrittografia fallita: %s"
-
 #: backend/auth/auth_bearer.py:33
 msgid "Invalid authentication scheme."
 msgstr "Schema di autenticazione non valido."
@@ -97,66 +92,30 @@ msgstr "L'utente esiste già"
 msgid "Agent with hostname %s not found"
 msgstr "Agente con hostname %s non trovato"
 
-#: backend/api/fleet.py:96 backend/api/fleet.py:126 backend/api/fleet.py:159
-#: backend/api/fleet.py:194 backend/api/fleet.py:224 backend/api/fleet.py:251
-#, python-format
-msgid "Agent %s is not connected"
-msgstr "L'agente %s non è connesso"
-
-#: backend/api/fleet.py:107
-#, python-format
-msgid "Failed to send command to %s"
-msgstr "Fallimento nell'invio comando a %s"
-
 #: backend/api/fleet.py:113
 #, python-brace-format
 msgid "Command {command_type} sent to {hostname}"
 msgstr "Comando {command_type} inviato a {hostname}"
-
-#: backend/api/fleet.py:141
-#, python-format
-msgid "Failed to send shell command to %s"
-msgstr "Fallimento nell'invio comando shell a %s"
 
 #: backend/api/fleet.py:148
 #, python-brace-format
 msgid "Shell command sent to {hostname}"
 msgstr "Comando shell inviato a {hostname}"
 
-#: backend/api/fleet.py:174
-#, python-format
-msgid "Failed to send install command to %s"
-msgstr "Fallimento nell'invio comando di installazione a %s"
-
 #: backend/api/fleet.py:181
 #, python-brace-format
 msgid "Package installation command sent to {hostname}"
 msgstr "Comando di installazione pacchetto inviato a {hostname}"
-
-#: backend/api/fleet.py:206
-#, python-format
-msgid "Failed to send restart command to %s"
-msgstr "Fallimento nell'invio comando di riavvio a %s"
 
 #: backend/api/fleet.py:213
 #, python-brace-format
 msgid "Service restart command sent to {hostname}"
 msgstr "Comando di riavvio servizio inviato a {hostname}"
 
-#: backend/api/fleet.py:234
-#, python-format
-msgid "Failed to send update command to %s"
-msgstr "Fallimento nell'invio comando di aggiornamento a %s"
-
 #: backend/api/fleet.py:240
 #, python-brace-format
 msgid "System update command sent to {hostname}"
 msgstr "Comando di aggiornamento sistema inviato a {hostname}"
-
-#: backend/api/fleet.py:261
-#, python-format
-msgid "Failed to send reboot command to %s"
-msgstr "Fallimento nell'invio comando di riavvio a %s"
 
 #: backend/api/fleet.py:267
 #, python-brace-format
@@ -329,10 +288,6 @@ msgstr "L'host non è approvato"
 msgid "Host {hostname} registered successfully"
 msgstr "Host {hostname} registrato con successo"
 
-#: backend/api/agent.py:166
-msgid "Hostname is required for registration"
-msgstr "L'hostname è richiesto per la registrazione"
-
 #: backend/api/agent.py:345
 msgid "os_version_updated"
 msgstr "Versione OS aggiornata"
@@ -375,9 +330,6 @@ msgstr "Esiste già un tag con questo nome"
 
 msgid "Tag not found"
 msgstr "Tag non trovato"
-
-msgid "Host not found"
-msgstr "Host non trovato"
 
 msgid "Tag already associated with this host"
 msgstr "Il tag è già associato a questo host"
@@ -643,9 +595,6 @@ msgstr "Impossibile elaborare i pacchetti disponibili: %s"
 msgid "Host not registered"
 msgstr "Host non registrato"
 
-msgid "Host not found"
-msgstr "Host non trovato"
-
 
 
 
@@ -753,9 +702,6 @@ msgstr "Azione"
 
 msgid "User"
 msgstr "Utente"
-
-msgid "User not found"
-msgstr "Utente non trovato"
 
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
 msgstr "Permesso negato: è richiesto il ruolo ENABLE_GRAYLOG_INTEGRATION"
@@ -1130,13 +1076,6 @@ msgstr "Impossibile aggiornare il segreto nel vault"
 msgid "Deleted {count} secrets"
 msgstr "{count} segreti eliminati"
 
-# Pro+ redirect messages for new features
-msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
-msgstr "Utilizzare /api/v1/secrets/deploy-ssh-keys con licenza Pro+"
-
-msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
-msgstr "Utilizzare /api/v1/secrets/deploy-certificates con licenza Pro+"
-
 msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
 msgstr "Utilizzare /api/v1/secrets/rotation-schedules con licenza Pro+"
 
@@ -1262,3 +1201,51 @@ msgstr "Aggiornamento agente figlio richiesto: %s"
 msgid "Child agent update requested"
 msgstr "Aggiornamento agente figlio richiesto"
 
+
+msgid "Failed to get email configuration"
+msgstr "Impossibile ottenere la configurazione email"
+
+msgid "Email service is disabled. Enable it in the configuration file."
+msgstr "Il servizio email è disabilitato. Abilitalo nel file di configurazione."
+
+msgid "Test email sent successfully to {address}"
+msgstr "Email di test inviata con successo a {address}"
+
+msgid "Failed to send test email. Please check your SMTP configuration."
+msgstr "Impossibile inviare l'email di test. Controlla la tua configurazione SMTP."
+
+msgid "Error sending test email: {error}"
+msgstr "Errore nell'invio dell'email di test: {error}"
+
+msgid "Email integration must be configured before creating new users"
+msgstr "L'integrazione email deve essere configurata prima di creare nuovi utenti"
+
+msgid "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
+msgstr "Abilita le email nel file di configurazione YAML e configura le impostazioni SMTP. Senza integrazione email, i nuovi utenti non possono ricevere le istruzioni per l'impostazione della password e non potranno accedere."
+
+msgid "Default admin credentials are configured in your YAML file"
+msgstr "Le credenziali amministratore predefinite sono configurate nel tuo file YAML"
+
+msgid "Remove admin_userid and admin_password from your configuration file and restart the server"
+msgstr "Rimuovi admin_userid e admin_password dal tuo file di configurazione e riavvia il server"
+
+msgid "Default JWT secret is being used"
+msgstr "Viene utilizzato il segreto JWT predefinito"
+
+msgid "Run: {command}"
+msgstr "Esegui: {command}"
+
+msgid "Default password salt is being used"
+msgstr "Viene utilizzato il salt della password predefinito"
+
+msgid "Run: {command} ({count} users will be migrated)"
+msgstr "Esegui: {command} ({count} utenti verranno migrati)"
+
+msgid "Inconsistent security configuration detected"
+msgstr "Rilevata configurazione di sicurezza incoerente"
+
+msgid "JWT secret uses default value but password salt has been changed. Run: {command}"
+msgstr "Il segreto JWT utilizza il valore predefinito ma il salt della password è stato modificato. Esegui: {command}"
+
+msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
+msgstr "Il salt della password utilizza il valore predefinito ma il segreto JWT è stato modificato. Esegui: {command}"

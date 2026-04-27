@@ -481,7 +481,7 @@ async def process_diagnostic_result(result_data: dict):  # NOSONAR
 
     collection_id = result_data.get("collection_id")
     if not collection_id:
-        raise HTTPException(status_code=400, detail="Missing collection_id")
+        raise HTTPException(status_code=400, detail=_("Missing collection_id"))
 
     with session_local() as session:
         # Find the diagnostic report

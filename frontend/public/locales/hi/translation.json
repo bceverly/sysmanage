@@ -16,7 +16,36 @@
     "title": "एंटीवायरस"
   },
   "auditLog": {
-    "exportRequiresLicense": "ऑडिट लॉग निर्यात के लिए SysManage Professional+ लाइसेंस आवश्यक है।"
+    "exportRequiresLicense": "ऑडिट लॉग निर्यात के लिए SysManage Professional+ लाइसेंस आवश्यक है।",
+    "actionType": {
+      "create": "बनाएँ",
+      "read": "पढ़ें",
+      "update": "अपडेट करें",
+      "delete": "हटाएँ",
+      "execute": "निष्पादित करें"
+    },
+    "entityType": {
+      "host": "होस्ट",
+      "user": "उपयोगकर्ता",
+      "package": "पैकेज",
+      "script": "स्क्रिप्ट",
+      "secret": "गुप्त",
+      "certificate": "प्रमाणपत्र",
+      "tag": "टैग",
+      "userRole": "उपयोगकर्ता भूमिका"
+    },
+    "category": {
+      "database": "डेटाबेस",
+      "agent": "एजेंट",
+      "authentication": "प्रमाणीकरण",
+      "system": "सिस्टम"
+    },
+    "entryType": {
+      "userAction": "उपयोगकर्ता क्रिया",
+      "systemEvent": "सिस्टम घटना",
+      "securityEvent": "सुरक्षा घटना",
+      "dataChange": "डेटा परिवर्तन"
+    }
   },
   "automationEngine": {
     "approval": {
@@ -193,7 +222,8 @@
     "success": "ऑपरेशन सफलतापूर्वक पूरा हुआ",
     "unassigned": "असाइन नहीं किया गया",
     "view": "देखें",
-    "yes": "हां"
+    "yes": "हां",
+    "none": "कोई नहीं"
   },
   "connectionStatus": {
     "connected": "कनेक्टेड",
@@ -1069,7 +1099,8 @@
     "wslNotAvailable": "उपलब्ध नहीं",
     "wslNotEnabled": "सक्षम नहीं",
     "wslStatus": "WSL स्थिति",
-    "wslVersion": "WSL संस्करण"
+    "wslVersion": "WSL संस्करण",
+    "packageSearchPlaceholder": "खोजने के लिए पैकेज का नाम दर्ज करें..."
   },
   "hostGroup": {
     "add": "जोड़ें",
@@ -1230,7 +1261,9 @@
     "secrets": "गुप्त",
     "settings": "सेटिंग्स",
     "updates": "अपडेट",
-    "users": "उपयोगकर्ता"
+    "users": "उपयोगकर्ता",
+    "closeMenu": "मेनू बंद करें",
+    "toggleMenu": "मेनू टॉगल करें"
   },
   "notifications": {
     "applicationUpdates": "एप्लिकेशन अपडेट",
@@ -2177,5 +2210,37 @@
       "waitingForWslReady": "WSL के तैयार होने की प्रतीक्षा हो रही है",
       "writingAgentConfiguration": "एजेंट कॉन्फ़िगरेशन लिखा जा रहा है"
     }
+  },
+  "emailConfig": {
+    "title": "ईमेल कॉन्फ़िगरेशन",
+    "subheader": "सूचनाओं और पासवर्ड रीसेट के लिए SMTP सेटिंग्स",
+    "smtpServer": "SMTP सर्वर",
+    "fromAddress": "प्रेषक का पता",
+    "subjectPrefix": "विषय उपसर्ग",
+    "statusLabel": "स्थिति",
+    "statusSuffix": {
+      "notConfigured": "(कॉन्फ़िगर नहीं किया गया)"
+    },
+    "testConfiguration": "कॉन्फ़िगरेशन का परीक्षण करें",
+    "configureHint": "परीक्षण सक्षम करने के लिए sysmanage.yaml में ईमेल सेटिंग्स कॉन्फ़िगर करें",
+    "testDialogTitle": "ईमेल कॉन्फ़िगरेशन का परीक्षण करें",
+    "testDialogBody": "यह सत्यापित करने के लिए कि आपका SMTP कॉन्फ़िगरेशन सही ढंग से काम कर रहा है, एक परीक्षण ईमेल भेजें।",
+    "emailAddressLabel": "ईमेल पता",
+    "emailAddressPlaceholder": "परीक्षण संदेश भेजने के लिए ईमेल पता दर्ज करें",
+    "sending": "भेज रहा है...",
+    "sendTest": "परीक्षण ईमेल भेजें",
+    "loadFailed": "ईमेल कॉन्फ़िगरेशन लोड करने में विफल",
+    "enterEmail": "कृपया एक ईमेल पता दर्ज करें",
+    "sendFailed": "परीक्षण ईमेल भेजने में विफल। कृपया अपना कॉन्फ़िगरेशन जांचें।",
+    "status": {
+      "unknown": "अज्ञात",
+      "disabled": "अक्षम",
+      "enabled": "सक्षम",
+      "notConfigured": "कॉन्फ़िगर नहीं किया गया",
+      "configured": "कॉन्फ़िगर किया गया"
+    }
+  },
+  "reportViewer": {
+    "iframeTitle": "रिपोर्ट सामग्री"
   }
 }

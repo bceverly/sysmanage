@@ -16,7 +16,36 @@
     "title": "防毒軟體"
   },
   "auditLog": {
-    "exportRequiresLicense": "稽核日誌匯出需要 SysManage Professional+ 授權。"
+    "exportRequiresLicense": "稽核日誌匯出需要 SysManage Professional+ 授權。",
+    "actionType": {
+      "create": "建立",
+      "read": "讀取",
+      "update": "更新",
+      "delete": "刪除",
+      "execute": "執行"
+    },
+    "entityType": {
+      "host": "主機",
+      "user": "使用者",
+      "package": "套件",
+      "script": "腳本",
+      "secret": "密鑰",
+      "certificate": "憑證",
+      "tag": "標籤",
+      "userRole": "使用者角色"
+    },
+    "category": {
+      "database": "資料庫",
+      "agent": "代理",
+      "authentication": "驗證",
+      "system": "系統"
+    },
+    "entryType": {
+      "userAction": "使用者動作",
+      "systemEvent": "系統事件",
+      "securityEvent": "安全事件",
+      "dataChange": "資料變更"
+    }
   },
   "automationEngine": {
     "approval": {
@@ -194,7 +223,8 @@
     "success": "操作成功完成",
     "unassigned": "未分配",
     "view": "檢視",
-    "yes": "是"
+    "yes": "是",
+    "none": "無"
   },
   "connectionStatus": {
     "connected": "已連線",
@@ -1070,7 +1100,8 @@
     "wslNotAvailable": "無法使用",
     "wslNotEnabled": "未啟用",
     "wslStatus": "WSL狀態",
-    "wslVersion": "WSL版本"
+    "wslVersion": "WSL版本",
+    "packageSearchPlaceholder": "輸入要搜尋的套件名稱..."
   },
   "hostGroup": {
     "add": "新增",
@@ -1231,7 +1262,9 @@
     "secrets": "機密",
     "settings": "設定",
     "updates": "更新",
-    "users": "用戶"
+    "users": "用戶",
+    "closeMenu": "關閉選單",
+    "toggleMenu": "切換選單"
   },
   "notifications": {
     "applicationUpdates": "應用程式更新",
@@ -2178,5 +2211,37 @@
       "waitingForWslReady": "正在等待 WSL 就緒",
       "writingAgentConfiguration": "正在寫入代理程式設定"
     }
+  },
+  "emailConfig": {
+    "title": "電子郵件設定",
+    "subheader": "用於通知和密碼重設的 SMTP 設定",
+    "smtpServer": "SMTP 伺服器",
+    "fromAddress": "寄件者地址",
+    "subjectPrefix": "主旨前綴",
+    "statusLabel": "狀態",
+    "statusSuffix": {
+      "notConfigured": "（未設定）"
+    },
+    "testConfiguration": "測試設定",
+    "configureHint": "在 sysmanage.yaml 中設定電子郵件以啟用測試",
+    "testDialogTitle": "測試電子郵件設定",
+    "testDialogBody": "傳送測試電子郵件以確認您的 SMTP 設定是否正常運作。",
+    "emailAddressLabel": "電子郵件地址",
+    "emailAddressPlaceholder": "輸入要傳送測試訊息的電子郵件地址",
+    "sending": "傳送中...",
+    "sendTest": "傳送測試電子郵件",
+    "loadFailed": "無法載入電子郵件設定",
+    "enterEmail": "請輸入電子郵件地址",
+    "sendFailed": "無法傳送測試電子郵件。請檢查您的設定。",
+    "status": {
+      "unknown": "未知",
+      "disabled": "已停用",
+      "enabled": "已啟用",
+      "notConfigured": "未設定",
+      "configured": "已設定"
+    }
+  },
+  "reportViewer": {
+    "iframeTitle": "報告內容"
   }
 }

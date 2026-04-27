@@ -292,7 +292,7 @@ async def refresh(request: Request):
             new_token = sign_jwt(the_userid)
             return {"Authorization": new_token}
 
-    raise HTTPException(status_code=403, detail="Invalid or missing refresh token")
+    raise HTTPException(status_code=403, detail=_("Invalid or missing refresh token"))
 
 
 @router.post("/logout", dependencies=[Depends(JWTBearer())])

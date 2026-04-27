@@ -169,7 +169,31 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: process.env.NODE_ENV === 'development' ? 'inline' : false,
     // Reduce console noise in production
-    minify: process.env.NODE_ENV === 'production'
+    minify: process.env.NODE_ENV === 'production',
+    // Code-split heavy vendor groups so the main app chunk stays cacheable
+    // and parses faster on first load.  Without this, everything lands in
+    // a single ~2 MB index-*.js bundle.
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-mui': [
+            '@mui/material',
+            '@mui/system',
+            '@mui/styled-engine',
+          ],
+          'vendor-mui-data-grid': ['@mui/x-data-grid'],
+          'vendor-mui-charts': ['@mui/x-charts'],
+          'vendor-i18n': [
+            'i18next',
+            'react-i18next',
+            'i18next-browser-languagedetector',
+            'i18next-http-backend',
+          ],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 700,
   },
   test: {
     globals: true,

@@ -9,6 +9,7 @@ from pydantic import BaseModel, EmailStr
 
 from backend.auth.auth_bearer import get_current_user
 from backend.config import config
+from backend.i18n import _
 from backend.services.email_service import email_service
 
 logger = logging.getLogger(__name__)
@@ -78,7 +79,7 @@ async def get_email_config(current_user=Depends(get_current_user)):
     except Exception as e:
         logger.error("Failed to get email configuration: %s", str(e))
         raise HTTPException(
-            status_code=500, detail="Failed to get email configuration"
+            status_code=500, detail=_("Failed to get email configuration")
         ) from e
 
 
@@ -93,7 +94,9 @@ async def test_email_config(
         if not email_service.is_enabled():
             return EmailTestResponse(
                 success=False,
-                message="Email service is disabled. Enable it in the configuration file.",
+                message=_(
+                    "Email service is disabled. Enable it in the configuration file."
+                ),
             )
 
         # Send test email
@@ -102,15 +105,20 @@ async def test_email_config(
         if success:
             return EmailTestResponse(
                 success=True,
-                message=f"Test email sent successfully to {request.to_address}",
+                message=_("Test email sent successfully to {address}").format(
+                    address=request.to_address
+                ),
             )
         return EmailTestResponse(
             success=False,
-            message="Failed to send test email. Please check your SMTP configuration.",
+            message=_(
+                "Failed to send test email. Please check your SMTP configuration."
+            ),
         )
 
     except Exception as e:
         logger.error("Failed to send test email: %s", e)
         return EmailTestResponse(
-            success=False, message=f"Error sending test email: {str(e)}"
+            success=False,
+            message=_("Error sending test email: {error}").format(error=str(e)),
         )

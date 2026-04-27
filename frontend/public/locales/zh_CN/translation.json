@@ -16,7 +16,36 @@
     "title": "防病毒"
   },
   "auditLog": {
-    "exportRequiresLicense": "审计日志导出需要 SysManage Professional+ 许可证。"
+    "exportRequiresLicense": "审计日志导出需要 SysManage Professional+ 许可证。",
+    "actionType": {
+      "create": "创建",
+      "read": "读取",
+      "update": "更新",
+      "delete": "删除",
+      "execute": "执行"
+    },
+    "entityType": {
+      "host": "主机",
+      "user": "用户",
+      "package": "软件包",
+      "script": "脚本",
+      "secret": "密钥",
+      "certificate": "证书",
+      "tag": "标签",
+      "userRole": "用户角色"
+    },
+    "category": {
+      "database": "数据库",
+      "agent": "代理",
+      "authentication": "身份验证",
+      "system": "系统"
+    },
+    "entryType": {
+      "userAction": "用户操作",
+      "systemEvent": "系统事件",
+      "securityEvent": "安全事件",
+      "dataChange": "数据更改"
+    }
   },
   "automationEngine": {
     "approval": {
@@ -194,7 +223,8 @@
     "success": "操作成功完成",
     "unassigned": "未分配",
     "view": "查看",
-    "yes": "是"
+    "yes": "是",
+    "none": "无"
   },
   "connectionStatus": {
     "connected": "已连接",
@@ -1070,7 +1100,8 @@
     "wslNotAvailable": "不可用",
     "wslNotEnabled": "未启用",
     "wslStatus": "WSL状态",
-    "wslVersion": "WSL版本"
+    "wslVersion": "WSL版本",
+    "packageSearchPlaceholder": "输入要搜索的软件包名称..."
   },
   "hostGroup": {
     "add": "添加",
@@ -1231,7 +1262,9 @@
     "secrets": "机密",
     "settings": "设置",
     "updates": "更新",
-    "users": "用户"
+    "users": "用户",
+    "closeMenu": "关闭菜单",
+    "toggleMenu": "切换菜单"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -2178,5 +2211,37 @@
       "waitingForWslReady": "正在等待 WSL 就绪",
       "writingAgentConfiguration": "正在写入代理配置"
     }
+  },
+  "emailConfig": {
+    "title": "电子邮件配置",
+    "subheader": "用于通知和密码重置的 SMTP 设置",
+    "smtpServer": "SMTP 服务器",
+    "fromAddress": "发件人地址",
+    "subjectPrefix": "主题前缀",
+    "statusLabel": "状态",
+    "statusSuffix": {
+      "notConfigured": "（未配置）"
+    },
+    "testConfiguration": "测试配置",
+    "configureHint": "在 sysmanage.yaml 中配置电子邮件设置以启用测试",
+    "testDialogTitle": "测试电子邮件配置",
+    "testDialogBody": "发送测试电子邮件以验证您的 SMTP 配置是否正常工作。",
+    "emailAddressLabel": "电子邮件地址",
+    "emailAddressPlaceholder": "输入要发送测试消息的电子邮件地址",
+    "sending": "正在发送...",
+    "sendTest": "发送测试电子邮件",
+    "loadFailed": "无法加载电子邮件配置",
+    "enterEmail": "请输入电子邮件地址",
+    "sendFailed": "无法发送测试电子邮件。请检查您的配置。",
+    "status": {
+      "unknown": "未知",
+      "disabled": "已禁用",
+      "enabled": "已启用",
+      "notConfigured": "未配置",
+      "configured": "已配置"
+    }
+  },
+  "reportViewer": {
+    "iframeTitle": "报告内容"
   }
 }

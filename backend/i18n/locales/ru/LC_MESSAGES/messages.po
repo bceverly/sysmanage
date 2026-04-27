@@ -30,11 +30,6 @@ msgstr "Зашифрованные данные истекли"
 msgid "Invalid signature"
 msgstr "Недействительная подпись"
 
-#: backend/security/communication_security.py:346
-#, python-format
-msgid "Decryption failed: %s"
-msgstr "Сбой расшифровки: %s"
-
 #: backend/auth/auth_bearer.py:33
 msgid "Invalid authentication scheme."
 msgstr "Недопустимая схема аутентификации."
@@ -101,66 +96,30 @@ msgstr "Пользователь уже существует"
 msgid "Agent with hostname %s not found"
 msgstr "Агент с именем хоста %s не найден"
 
-#: backend/api/fleet.py:96 backend/api/fleet.py:126 backend/api/fleet.py:159
-#: backend/api/fleet.py:194 backend/api/fleet.py:224 backend/api/fleet.py:251
-#, python-format
-msgid "Agent %s is not connected"
-msgstr "Агент %s не подключен"
-
-#: backend/api/fleet.py:107
-#, python-format
-msgid "Failed to send command to %s"
-msgstr "Не удалось отправить команду в %s"
-
 #: backend/api/fleet.py:113
 #, python-brace-format
 msgid "Command {command_type} sent to {hostname}"
 msgstr "Команда {command_type} отправлена на {hostname}"
-
-#: backend/api/fleet.py:141
-#, python-format
-msgid "Failed to send shell command to %s"
-msgstr "Не удалось отправить команду оболочки в %s"
 
 #: backend/api/fleet.py:148
 #, python-brace-format
 msgid "Shell command sent to {hostname}"
 msgstr "Команда оболочки отправлена на {hostname}"
 
-#: backend/api/fleet.py:174
-#, python-format
-msgid "Failed to send install command to %s"
-msgstr "Не удалось отправить команду установки в %s"
-
 #: backend/api/fleet.py:181
 #, python-brace-format
 msgid "Package installation command sent to {hostname}"
 msgstr "Команда установки пакета отправлена на {hostname}"
-
-#: backend/api/fleet.py:206
-#, python-format
-msgid "Failed to send restart command to %s"
-msgstr "Не удалось отправить команду перезапуска в %s"
 
 #: backend/api/fleet.py:213
 #, python-brace-format
 msgid "Service restart command sent to {hostname}"
 msgstr "Команда перезапуска службы отправлена на {hostname}"
 
-#: backend/api/fleet.py:234
-#, python-format
-msgid "Failed to send update command to %s"
-msgstr "Не удалось отправить команду обновления в %s"
-
 #: backend/api/fleet.py:240
 #, python-brace-format
 msgid "System update command sent to {hostname}"
 msgstr "Команда обновления системы отправлена на {hostname}"
-
-#: backend/api/fleet.py:261
-#, python-format
-msgid "Failed to send reboot command to %s"
-msgstr "Не удалось отправить команду перезагрузки в %s"
 
 #: backend/api/fleet.py:267
 #, python-brace-format
@@ -332,10 +291,6 @@ msgstr "Хост не утвержден"
 msgid "Host {hostname} registered successfully"
 msgstr "Хост {hostname} успешно зарегистрирован"
 
-#: backend/api/agent.py:166
-msgid "Hostname is required for registration"
-msgstr "Для регистрации требуется имя хоста"
-
 #: backend/api/agent.py:345
 msgid "os_version_updated"
 msgstr "Версия ОС обновлена"
@@ -378,9 +333,6 @@ msgstr "Тег с таким именем уже существует"
 
 msgid "Tag not found"
 msgstr "Тег не найден"
-
-msgid "Host not found"
-msgstr "Хост не найден"
 
 msgid "Tag already associated with this host"
 msgstr "Тег уже связан с этим хостом"
@@ -646,9 +598,6 @@ msgstr "Не удалось обработать доступные пакеты
 msgid "Host not registered"
 msgstr "Хост не зарегистрирован"
 
-msgid "Host not found"
-msgstr "Хост не найден"
-
 
 
 
@@ -756,9 +705,6 @@ msgstr "Действие"
 
 msgid "User"
 msgstr "Пользователь"
-
-msgid "User not found"
-msgstr "Пользователь не найден"
 
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
 msgstr "Доступ запрещен: требуется роль ENABLE_GRAYLOG_INTEGRATION"
@@ -1259,3 +1205,51 @@ msgstr "Запрошено обновление дочернего агента:
 msgid "Child agent update requested"
 msgstr "Запрошено обновление дочернего агента"
 
+
+msgid "Failed to get email configuration"
+msgstr "Не удалось получить конфигурацию электронной почты"
+
+msgid "Email service is disabled. Enable it in the configuration file."
+msgstr "Служба электронной почты отключена. Включите её в файле конфигурации."
+
+msgid "Test email sent successfully to {address}"
+msgstr "Тестовое письмо успешно отправлено на {address}"
+
+msgid "Failed to send test email. Please check your SMTP configuration."
+msgstr "Не удалось отправить тестовое письмо. Проверьте конфигурацию SMTP."
+
+msgid "Error sending test email: {error}"
+msgstr "Ошибка отправки тестового письма: {error}"
+
+msgid "Email integration must be configured before creating new users"
+msgstr "Интеграция электронной почты должна быть настроена перед созданием новых пользователей"
+
+msgid "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
+msgstr "Включите электронную почту в файле конфигурации YAML и настройте параметры SMTP. Без интеграции электронной почты новые пользователи не смогут получить инструкции по установке пароля и не смогут войти в систему."
+
+msgid "Default admin credentials are configured in your YAML file"
+msgstr "Учётные данные администратора по умолчанию настроены в вашем файле YAML"
+
+msgid "Remove admin_userid and admin_password from your configuration file and restart the server"
+msgstr "Удалите admin_userid и admin_password из файла конфигурации и перезапустите сервер"
+
+msgid "Default JWT secret is being used"
+msgstr "Используется JWT-секрет по умолчанию"
+
+msgid "Run: {command}"
+msgstr "Запуск: {command}"
+
+msgid "Default password salt is being used"
+msgstr "Используется соль пароля по умолчанию"
+
+msgid "Run: {command} ({count} users will be migrated)"
+msgstr "Запуск: {command} (будет перенесено пользователей: {count})"
+
+msgid "Inconsistent security configuration detected"
+msgstr "Обнаружена несогласованная конфигурация безопасности"
+
+msgid "JWT secret uses default value but password salt has been changed. Run: {command}"
+msgstr "JWT-секрет использует значение по умолчанию, но соль пароля была изменена. Запуск: {command}"
+
+msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
+msgstr "Соль пароля использует значение по умолчанию, но JWT-секрет был изменён. Запуск: {command}"

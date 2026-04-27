@@ -16,7 +16,36 @@
     "title": "Antivirus"
   },
   "auditLog": {
-    "exportRequiresLicense": "L'exportation du journal d'audit nécessite une licence SysManage Professional+."
+    "exportRequiresLicense": "L'exportation du journal d'audit nécessite une licence SysManage Professional+.",
+    "actionType": {
+      "create": "Créer",
+      "read": "Lire",
+      "update": "Mettre à jour",
+      "delete": "Supprimer",
+      "execute": "Exécuter"
+    },
+    "entityType": {
+      "host": "Hôte",
+      "user": "Utilisateur",
+      "package": "Paquet",
+      "script": "Script",
+      "secret": "Secret",
+      "certificate": "Certificat",
+      "tag": "Étiquette",
+      "userRole": "Rôle utilisateur"
+    },
+    "category": {
+      "database": "Base de données",
+      "agent": "Agent",
+      "authentication": "Authentification",
+      "system": "Système"
+    },
+    "entryType": {
+      "userAction": "Action utilisateur",
+      "systemEvent": "Événement système",
+      "securityEvent": "Événement de sécurité",
+      "dataChange": "Modification de données"
+    }
   },
   "automationEngine": {
     "approval": {
@@ -194,7 +223,8 @@
     "success": "Opération terminée avec succès",
     "unassigned": "Non assigné",
     "view": "Voir",
-    "yes": "Oui"
+    "yes": "Oui",
+    "none": "Aucun"
   },
   "connectionStatus": {
     "connected": "Connecté",
@@ -1070,7 +1100,8 @@
     "wslNotAvailable": "Non disponible",
     "wslNotEnabled": "Non activé",
     "wslStatus": "État de WSL",
-    "wslVersion": "Version de WSL"
+    "wslVersion": "Version de WSL",
+    "packageSearchPlaceholder": "Entrez le nom du paquet à rechercher..."
   },
   "hostGroup": {
     "add": "Ajouter",
@@ -1231,7 +1262,9 @@
     "secrets": "Secrets",
     "settings": "Paramètres",
     "updates": "Mises à jour",
-    "users": "Utilisateurs"
+    "users": "Utilisateurs",
+    "closeMenu": "Fermer le menu",
+    "toggleMenu": "Basculer le menu"
   },
   "notifications": {
     "applicationUpdates": "Mises à jour d'Applications",
@@ -2178,5 +2211,37 @@
       "waitingForWslReady": "En attente de la disponibilité de WSL",
       "writingAgentConfiguration": "Écriture de la configuration de l'agent"
     }
+  },
+  "emailConfig": {
+    "title": "Configuration de la messagerie",
+    "subheader": "Paramètres SMTP pour les notifications et la réinitialisation du mot de passe",
+    "smtpServer": "Serveur SMTP",
+    "fromAddress": "Adresse d'expéditeur",
+    "subjectPrefix": "Préfixe de l'objet",
+    "statusLabel": "Statut",
+    "statusSuffix": {
+      "notConfigured": "(Non configuré)"
+    },
+    "testConfiguration": "Tester la configuration",
+    "configureHint": "Configurez les paramètres de messagerie dans sysmanage.yaml pour activer les tests",
+    "testDialogTitle": "Tester la configuration de la messagerie",
+    "testDialogBody": "Envoyez un e-mail de test pour vérifier que votre configuration SMTP fonctionne correctement.",
+    "emailAddressLabel": "Adresse e-mail",
+    "emailAddressPlaceholder": "Entrez l'adresse e-mail pour envoyer le message de test",
+    "sending": "Envoi en cours...",
+    "sendTest": "Envoyer un e-mail de test",
+    "loadFailed": "Échec du chargement de la configuration de la messagerie",
+    "enterEmail": "Veuillez saisir une adresse e-mail",
+    "sendFailed": "Échec de l'envoi de l'e-mail de test. Veuillez vérifier votre configuration.",
+    "status": {
+      "unknown": "Inconnu",
+      "disabled": "Désactivé",
+      "enabled": "Activé",
+      "notConfigured": "Non configuré",
+      "configured": "Configuré"
+    }
+  },
+  "reportViewer": {
+    "iframeTitle": "Contenu du rapport"
   }
 }

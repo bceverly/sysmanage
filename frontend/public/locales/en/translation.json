@@ -16,7 +16,36 @@
     "title": "Antivirus"
   },
   "auditLog": {
-    "exportRequiresLicense": "Audit log export requires a SysManage Professional+ license."
+    "exportRequiresLicense": "Audit log export requires a SysManage Professional+ license.",
+    "actionType": {
+      "create": "Create",
+      "read": "Read",
+      "update": "Update",
+      "delete": "Delete",
+      "execute": "Execute"
+    },
+    "entityType": {
+      "host": "Host",
+      "user": "User",
+      "package": "Package",
+      "script": "Script",
+      "secret": "Secret",
+      "certificate": "Certificate",
+      "tag": "Tag",
+      "userRole": "User Role"
+    },
+    "category": {
+      "database": "Database",
+      "agent": "Agent",
+      "authentication": "Authentication",
+      "system": "System"
+    },
+    "entryType": {
+      "userAction": "User Action",
+      "systemEvent": "System Event",
+      "securityEvent": "Security Event",
+      "dataChange": "Data Change"
+    }
   },
   "automationEngine": {
     "approval": {
@@ -192,7 +221,8 @@
     "success": "Operation completed successfully",
     "unassigned": "Unassigned",
     "view": "View",
-    "yes": "Yes"
+    "yes": "Yes",
+    "none": "None"
   },
   "connectionStatus": {
     "connected": "Connected",
@@ -1060,7 +1090,8 @@
     "wslNotAvailable": "Not Available",
     "wslNotEnabled": "Not Enabled",
     "wslStatus": "WSL Status",
-    "wslVersion": "WSL Version"
+    "wslVersion": "WSL Version",
+    "packageSearchPlaceholder": "Enter package name to search..."
   },
   "hostGroup": {
     "add": "Add",
@@ -1221,7 +1252,9 @@
     "secrets": "Secrets",
     "settings": "Settings",
     "updates": "Updates",
-    "users": "Users"
+    "users": "Users",
+    "closeMenu": "Close menu",
+    "toggleMenu": "Toggle menu"
   },
   "notifications": {
     "applicationUpdates": "Application Updates",
@@ -2144,5 +2177,37 @@
       "waitingForWslReady": "Waiting for WSL to be ready",
       "writingAgentConfiguration": "Writing agent configuration"
     }
+  },
+  "emailConfig": {
+    "title": "Email Configuration",
+    "subheader": "SMTP settings for notifications and password reset",
+    "smtpServer": "SMTP Server",
+    "fromAddress": "From Address",
+    "subjectPrefix": "Subject Prefix",
+    "statusLabel": "Status",
+    "statusSuffix": {
+      "notConfigured": "(Not Configured)"
+    },
+    "testConfiguration": "Test Configuration",
+    "configureHint": "Configure email settings in sysmanage.yaml to enable testing",
+    "testDialogTitle": "Test Email Configuration",
+    "testDialogBody": "Send a test email to verify your SMTP configuration is working correctly.",
+    "emailAddressLabel": "Email Address",
+    "emailAddressPlaceholder": "Enter email address to send test message",
+    "sending": "Sending...",
+    "sendTest": "Send Test Email",
+    "loadFailed": "Failed to load email configuration",
+    "enterEmail": "Please enter an email address",
+    "sendFailed": "Failed to send test email. Please check your configuration.",
+    "status": {
+      "unknown": "Unknown",
+      "disabled": "Disabled",
+      "enabled": "Enabled",
+      "notConfigured": "Not Configured",
+      "configured": "Configured"
+    }
+  },
+  "reportViewer": {
+    "iframeTitle": "Report Content"
   }
 }

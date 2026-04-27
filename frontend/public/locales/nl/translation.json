@@ -16,7 +16,36 @@
     "title": "Antivirus"
   },
   "auditLog": {
-    "exportRequiresLicense": "Het exporteren van het auditlogboek vereist een SysManage Professional+-licentie."
+    "exportRequiresLicense": "Het exporteren van het auditlogboek vereist een SysManage Professional+-licentie.",
+    "actionType": {
+      "create": "Aanmaken",
+      "read": "Lezen",
+      "update": "Bijwerken",
+      "delete": "Verwijderen",
+      "execute": "Uitvoeren"
+    },
+    "entityType": {
+      "host": "Host",
+      "user": "Gebruiker",
+      "package": "Pakket",
+      "script": "Script",
+      "secret": "Geheim",
+      "certificate": "Certificaat",
+      "tag": "Tag",
+      "userRole": "Gebruikersrol"
+    },
+    "category": {
+      "database": "Database",
+      "agent": "Agent",
+      "authentication": "Authenticatie",
+      "system": "Systeem"
+    },
+    "entryType": {
+      "userAction": "Gebruikersactie",
+      "systemEvent": "Systeemgebeurtenis",
+      "securityEvent": "Beveiligingsgebeurtenis",
+      "dataChange": "Gegevenswijziging"
+    }
   },
   "automationEngine": {
     "approval": {
@@ -194,7 +223,8 @@
     "success": "Operatie succesvol voltooid",
     "unassigned": "Niet toegewezen",
     "view": "Bekijken",
-    "yes": "Ja"
+    "yes": "Ja",
+    "none": "Geen"
   },
   "connectionStatus": {
     "connected": "Verbonden",
@@ -1070,7 +1100,8 @@
     "wslNotAvailable": "Niet beschikbaar",
     "wslNotEnabled": "Niet ingeschakeld",
     "wslStatus": "WSL-status",
-    "wslVersion": "WSL-versie"
+    "wslVersion": "WSL-versie",
+    "packageSearchPlaceholder": "Voer pakketnaam in om te zoeken..."
   },
   "hostGroup": {
     "add": "Toevoegen",
@@ -1231,7 +1262,9 @@
     "secrets": "Geheimen",
     "settings": "Instellingen",
     "updates": "Updates",
-    "users": "Gebruikers"
+    "users": "Gebruikers",
+    "closeMenu": "Menu sluiten",
+    "toggleMenu": "Menu wisselen"
   },
   "notifications": {
     "applicationUpdates": "Applicatie Updates",
@@ -2178,5 +2211,37 @@
       "waitingForWslReady": "Wachten tot WSL gereed is",
       "writingAgentConfiguration": "Agentconfiguratie wordt geschreven"
     }
+  },
+  "emailConfig": {
+    "title": "E-mailconfiguratie",
+    "subheader": "SMTP-instellingen voor meldingen en wachtwoordherstel",
+    "smtpServer": "SMTP-server",
+    "fromAddress": "Afzenderadres",
+    "subjectPrefix": "Onderwerpvoorvoegsel",
+    "statusLabel": "Status",
+    "statusSuffix": {
+      "notConfigured": "(Niet geconfigureerd)"
+    },
+    "testConfiguration": "Configuratie testen",
+    "configureHint": "Configureer e-mailinstellingen in sysmanage.yaml om testen in te schakelen",
+    "testDialogTitle": "E-mailconfiguratie testen",
+    "testDialogBody": "Verzend een test-e-mail om te controleren of uw SMTP-configuratie correct werkt.",
+    "emailAddressLabel": "E-mailadres",
+    "emailAddressPlaceholder": "Voer e-mailadres in om testbericht te verzenden",
+    "sending": "Bezig met verzenden...",
+    "sendTest": "Test-e-mail verzenden",
+    "loadFailed": "Kan e-mailconfiguratie niet laden",
+    "enterEmail": "Voer een e-mailadres in",
+    "sendFailed": "Kan test-e-mail niet verzenden. Controleer uw configuratie.",
+    "status": {
+      "unknown": "Onbekend",
+      "disabled": "Uitgeschakeld",
+      "enabled": "Ingeschakeld",
+      "notConfigured": "Niet geconfigureerd",
+      "configured": "Geconfigureerd"
+    }
+  },
+  "reportViewer": {
+    "iframeTitle": "Rapportinhoud"
   }
 }

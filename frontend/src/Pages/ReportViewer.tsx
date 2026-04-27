@@ -176,7 +176,7 @@ const ReportViewer: React.FC = () => {
             border: 'none',
             minHeight: '600px'
           }}
-          title="Report Content"
+          title={t('reportViewer.iframeTitle', 'Report Content')}
         />
       </Box>
     </Box>

@@ -30,11 +30,6 @@ msgstr "加密資料過期"
 msgid "Invalid signature"
 msgstr "無效簽名"
 
-#: backend/security/communication_security.py:346
-#, python-format
-msgid "Decryption failed: %s"
-msgstr "解密失敗：%s"
-
 #: backend/auth/auth_bearer.py:33
 msgid "Invalid authentication scheme."
 msgstr "無效的身份驗證方案。"
@@ -97,66 +92,30 @@ msgstr "使用者已存在"
 msgid "Agent with hostname %s not found"
 msgstr "找不到主機名稱為 %s 的代理程式"
 
-#: backend/api/fleet.py:96 backend/api/fleet.py:126 backend/api/fleet.py:159
-#: backend/api/fleet.py:194 backend/api/fleet.py:224 backend/api/fleet.py:251
-#, python-format
-msgid "Agent %s is not connected"
-msgstr "代理程式 %s 未連線"
-
-#: backend/api/fleet.py:107
-#, python-format
-msgid "Failed to send command to %s"
-msgstr "向 %s 傳送指令失敗"
-
 #: backend/api/fleet.py:113
 #, python-brace-format
 msgid "Command {command_type} sent to {hostname}"
 msgstr "命令 {command_type} 已發送到 {hostname}"
-
-#: backend/api/fleet.py:141
-#, python-format
-msgid "Failed to send shell command to %s"
-msgstr "向 %s 傳送 shell 指令失敗"
 
 #: backend/api/fleet.py:148
 #, python-brace-format
 msgid "Shell command sent to {hostname}"
 msgstr "Shell 命令已發送到 {hostname}"
 
-#: backend/api/fleet.py:174
-#, python-format
-msgid "Failed to send install command to %s"
-msgstr "向 %s 傳送安裝指令失敗"
-
 #: backend/api/fleet.py:181
 #, python-brace-format
 msgid "Package installation command sent to {hostname}"
 msgstr "套件安裝命令已發送到 {hostname}"
-
-#: backend/api/fleet.py:206
-#, python-format
-msgid "Failed to send restart command to %s"
-msgstr "向 %s 傳送重新啟動指令失敗"
 
 #: backend/api/fleet.py:213
 #, python-brace-format
 msgid "Service restart command sent to {hostname}"
 msgstr "服務重啟命令已發送到 {hostname}"
 
-#: backend/api/fleet.py:234
-#, python-format
-msgid "Failed to send update command to %s"
-msgstr "向 %s 傳送更新指令失敗"
-
 #: backend/api/fleet.py:240
 #, python-brace-format
 msgid "System update command sent to {hostname}"
 msgstr "系統更新命令已發送到 {hostname}"
-
-#: backend/api/fleet.py:261
-#, python-format
-msgid "Failed to send reboot command to %s"
-msgstr "向 %s 傳送重新啟動指令失敗"
 
 #: backend/api/fleet.py:267
 #, python-brace-format
@@ -328,10 +287,6 @@ msgstr "主機未核准"
 msgid "Host {hostname} registered successfully"
 msgstr "主機 {hostname} 註冊成功"
 
-#: backend/api/agent.py:166
-msgid "Hostname is required for registration"
-msgstr "註冊需要主機名稱"
-
 #: backend/api/agent.py:345
 msgid "os_version_updated"
 msgstr "作業系統版本已更新"
@@ -374,9 +329,6 @@ msgstr "該名稱的標籤已存在"
 
 msgid "Tag not found"
 msgstr "標籤未找到"
-
-msgid "Host not found"
-msgstr "主機未找到"
 
 msgid "Tag already associated with this host"
 msgstr "標籤已與此主機關聯"
@@ -642,9 +594,6 @@ msgstr "無法處理可用套件：%s"
 msgid "Host not registered"
 msgstr "主機未註冊"
 
-msgid "Host not found"
-msgstr "找不到主機"
-
 
 
 
@@ -752,9 +701,6 @@ msgstr "操作"
 
 msgid "User"
 msgstr "使用者"
-
-msgid "User not found"
-msgstr "未找到使用者"
 
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
 msgstr "權限被拒絕：需要 ENABLE_GRAYLOG_INTEGRATION 角色"
@@ -1129,13 +1075,6 @@ msgstr "更新保險庫中的密鑰失敗"
 msgid "Deleted {count} secrets"
 msgstr "已刪除 {count} 個密鑰"
 
-# Pro+ redirect messages for new features
-msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
-msgstr "使用 Pro+ 授權存取 /api/v1/secrets/deploy-ssh-keys"
-
-msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
-msgstr "使用 Pro+ 授權存取 /api/v1/secrets/deploy-certificates"
-
 msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
 msgstr "使用 Pro+ 授權存取 /api/v1/secrets/rotation-schedules"
 
@@ -1262,3 +1201,51 @@ msgstr "已請求子代理更新：%s"
 msgid "Child agent update requested"
 msgstr "已請求子代理更新"
 
+
+msgid "Failed to get email configuration"
+msgstr "無法取得電子郵件設定"
+
+msgid "Email service is disabled. Enable it in the configuration file."
+msgstr "電子郵件服務已停用。請在設定檔中啟用。"
+
+msgid "Test email sent successfully to {address}"
+msgstr "測試電子郵件已成功傳送至 {address}"
+
+msgid "Failed to send test email. Please check your SMTP configuration."
+msgstr "無法傳送測試電子郵件。請檢查您的 SMTP 設定。"
+
+msgid "Error sending test email: {error}"
+msgstr "傳送測試電子郵件時發生錯誤：{error}"
+
+msgid "Email integration must be configured before creating new users"
+msgstr "建立新使用者之前必須設定電子郵件整合"
+
+msgid "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
+msgstr "在 YAML 設定檔中啟用電子郵件並設定 SMTP 設定。如果沒有電子郵件整合，新使用者將無法收到密碼設定說明，也無法登入。"
+
+msgid "Default admin credentials are configured in your YAML file"
+msgstr "預設管理員憑證已在您的 YAML 檔案中設定"
+
+msgid "Remove admin_userid and admin_password from your configuration file and restart the server"
+msgstr "從設定檔中移除 admin_userid 和 admin_password 並重新啟動伺服器"
+
+msgid "Default JWT secret is being used"
+msgstr "正在使用預設 JWT 密鑰"
+
+msgid "Run: {command}"
+msgstr "執行：{command}"
+
+msgid "Default password salt is being used"
+msgstr "正在使用預設密碼鹽"
+
+msgid "Run: {command} ({count} users will be migrated)"
+msgstr "執行：{command}（將遷移 {count} 位使用者）"
+
+msgid "Inconsistent security configuration detected"
+msgstr "偵測到不一致的安全設定"
+
+msgid "JWT secret uses default value but password salt has been changed. Run: {command}"
+msgstr "JWT 密鑰使用預設值，但密碼鹽已變更。執行：{command}"
+
+msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
+msgstr "密碼鹽使用預設值，但 JWT 密鑰已變更。執行：{command}"

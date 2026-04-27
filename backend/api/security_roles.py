@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from backend.api.error_constants import error_current_user_not_found
+from backend.i18n import _
 from backend.auth.auth_bearer import get_current_user
 from backend.persistence.db import get_db
 from backend.persistence.models import (
@@ -84,7 +85,7 @@ async def get_all_role_groups(
     ):
         raise HTTPException(
             status_code=403,
-            detail="You do not have permission to view user security roles",
+            detail=_("You do not have permission to view user security roles"),
         )
 
     groups = db.query(SecurityRoleGroup).order_by(SecurityRoleGroup.id).all()
@@ -141,13 +142,13 @@ async def get_user_roles(
     ):
         raise HTTPException(
             status_code=403,
-            detail="You do not have permission to view user security roles",
+            detail=_("You do not have permission to view user security roles"),
         )
 
     # Verify user exists
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail=_("User not found"))
 
     # Get user's role IDs
     user_roles = (
@@ -184,13 +185,13 @@ async def update_user_roles(
     ):
         raise HTTPException(
             status_code=403,
-            detail="You do not have permission to edit user security roles",
+            detail=_("You do not have permission to edit user security roles"),
         )
 
     # Verify user exists
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail=_("User not found"))
 
     # Convert string UUIDs to UUID objects and verify all role IDs exist
     role_uuids = []

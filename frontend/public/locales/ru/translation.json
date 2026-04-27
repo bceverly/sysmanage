@@ -16,7 +16,36 @@
     "title": "Антивирус"
   },
   "auditLog": {
-    "exportRequiresLicense": "Экспорт журнала аудита требует лицензии SysManage Professional+."
+    "exportRequiresLicense": "Экспорт журнала аудита требует лицензии SysManage Professional+.",
+    "actionType": {
+      "create": "Создать",
+      "read": "Прочитать",
+      "update": "Обновить",
+      "delete": "Удалить",
+      "execute": "Выполнить"
+    },
+    "entityType": {
+      "host": "Узел",
+      "user": "Пользователь",
+      "package": "Пакет",
+      "script": "Скрипт",
+      "secret": "Секрет",
+      "certificate": "Сертификат",
+      "tag": "Метка",
+      "userRole": "Роль пользователя"
+    },
+    "category": {
+      "database": "База данных",
+      "agent": "Агент",
+      "authentication": "Аутентификация",
+      "system": "Система"
+    },
+    "entryType": {
+      "userAction": "Действие пользователя",
+      "systemEvent": "Системное событие",
+      "securityEvent": "Событие безопасности",
+      "dataChange": "Изменение данных"
+    }
   },
   "automationEngine": {
     "approval": {
@@ -194,7 +223,8 @@
     "success": "Операция успешно завершена",
     "unassigned": "Не назначено",
     "view": "Просмотр",
-    "yes": "Да"
+    "yes": "Да",
+    "none": "Нет"
   },
   "connectionStatus": {
     "connected": "Подключен",
@@ -1070,7 +1100,8 @@
     "wslNotAvailable": "Недоступно",
     "wslNotEnabled": "Не включено",
     "wslStatus": "Статус WSL",
-    "wslVersion": "Версия WSL"
+    "wslVersion": "Версия WSL",
+    "packageSearchPlaceholder": "Введите название пакета для поиска..."
   },
   "hostGroup": {
     "add": "Добавить",
@@ -1231,7 +1262,9 @@
     "secrets": "Секреты",
     "settings": "Настройки",
     "updates": "Обновления",
-    "users": "Пользователи"
+    "users": "Пользователи",
+    "closeMenu": "Закрыть меню",
+    "toggleMenu": "Переключить меню"
   },
   "notifications": {
     "applicationUpdates": "Обновления Приложений",
@@ -2178,5 +2211,37 @@
       "waitingForWslReady": "Ожидание готовности WSL",
       "writingAgentConfiguration": "Запись конфигурации агента"
     }
+  },
+  "emailConfig": {
+    "title": "Настройка электронной почты",
+    "subheader": "Настройки SMTP для уведомлений и сброса пароля",
+    "smtpServer": "Сервер SMTP",
+    "fromAddress": "Адрес отправителя",
+    "subjectPrefix": "Префикс темы",
+    "statusLabel": "Статус",
+    "statusSuffix": {
+      "notConfigured": "(Не настроено)"
+    },
+    "testConfiguration": "Проверить настройку",
+    "configureHint": "Настройте параметры электронной почты в sysmanage.yaml, чтобы включить тестирование",
+    "testDialogTitle": "Проверка настройки электронной почты",
+    "testDialogBody": "Отправьте тестовое письмо, чтобы убедиться, что ваша настройка SMTP работает правильно.",
+    "emailAddressLabel": "Адрес электронной почты",
+    "emailAddressPlaceholder": "Введите адрес электронной почты для отправки тестового сообщения",
+    "sending": "Отправка...",
+    "sendTest": "Отправить тестовое письмо",
+    "loadFailed": "Не удалось загрузить настройку электронной почты",
+    "enterEmail": "Пожалуйста, введите адрес электронной почты",
+    "sendFailed": "Не удалось отправить тестовое письмо. Проверьте настройку.",
+    "status": {
+      "unknown": "Неизвестно",
+      "disabled": "Отключено",
+      "enabled": "Включено",
+      "notConfigured": "Не настроено",
+      "configured": "Настроено"
+    }
+  },
+  "reportViewer": {
+    "iframeTitle": "Содержание отчёта"
   }
 }

@@ -30,11 +30,6 @@ msgstr "암호화된 데이터 만료"
 msgid "Invalid signature"
 msgstr "잘못된 서명"
 
-#: backend/security/communication_security.py:346
-#, python-format
-msgid "Decryption failed: %s"
-msgstr "복호화 실패: %s"
-
 #: backend/auth/auth_bearer.py:33
 msgid "Invalid authentication scheme."
 msgstr "잘못된 인증 방식입니다."
@@ -97,66 +92,30 @@ msgstr "사용자가 이미 존재합니다"
 msgid "Agent with hostname %s not found"
 msgstr "호스트명 %s의 에이전트를 찾을 수 없습니다"
 
-#: backend/api/fleet.py:96 backend/api/fleet.py:126 backend/api/fleet.py:159
-#: backend/api/fleet.py:194 backend/api/fleet.py:224 backend/api/fleet.py:251
-#, python-format
-msgid "Agent %s is not connected"
-msgstr "에이전트 %s가 연결되지 않음"
-
-#: backend/api/fleet.py:107
-#, python-format
-msgid "Failed to send command to %s"
-msgstr "%s로 명령 전송 실패"
-
 #: backend/api/fleet.py:113
 #, python-brace-format
 msgid "Command {command_type} sent to {hostname}"
 msgstr "명령 {command_type}을 {hostname}에 전송했습니다"
-
-#: backend/api/fleet.py:141
-#, python-format
-msgid "Failed to send shell command to %s"
-msgstr "%s로 셸 명령 전송 실패"
 
 #: backend/api/fleet.py:148
 #, python-brace-format
 msgid "Shell command sent to {hostname}"
 msgstr "셸 명령을 {hostname}에 전송했습니다"
 
-#: backend/api/fleet.py:174
-#, python-format
-msgid "Failed to send install command to %s"
-msgstr "%s로 설치 명령 전송 실패"
-
 #: backend/api/fleet.py:181
 #, python-brace-format
 msgid "Package installation command sent to {hostname}"
 msgstr "패키지 설치 명령을 {hostname}에 전송했습니다"
-
-#: backend/api/fleet.py:206
-#, python-format
-msgid "Failed to send restart command to %s"
-msgstr "%s로 재시작 명령 전송 실패"
 
 #: backend/api/fleet.py:213
 #, python-brace-format
 msgid "Service restart command sent to {hostname}"
 msgstr "서비스 재시작 명령을 {hostname}에 전송했습니다"
 
-#: backend/api/fleet.py:234
-#, python-format
-msgid "Failed to send update command to %s"
-msgstr "%s로 업데이트 명령 전송 실패"
-
 #: backend/api/fleet.py:240
 #, python-brace-format
 msgid "System update command sent to {hostname}"
 msgstr "시스템 업데이트 명령을 {hostname}에 전송했습니다"
-
-#: backend/api/fleet.py:261
-#, python-format
-msgid "Failed to send reboot command to %s"
-msgstr "%s로 재부팅 명령 전송 실패"
 
 #: backend/api/fleet.py:267
 #, python-brace-format
@@ -329,10 +288,6 @@ msgstr "호스트가 승인되지 않았습니다"
 msgid "Host {hostname} registered successfully"
 msgstr "호스트 {hostname}가 성공적으로 등록되었습니다"
 
-#: backend/api/agent.py:166
-msgid "Hostname is required for registration"
-msgstr "등록에 호스트명이 필요합니다"
-
 #: backend/api/agent.py:345
 msgid "os_version_updated"
 msgstr "OS 버전이 업데이트되었습니다"
@@ -375,9 +330,6 @@ msgstr "이 이름의 태그가 이미 존재합니다"
 
 msgid "Tag not found"
 msgstr "태그를 찾을 수 없습니다"
-
-msgid "Host not found"
-msgstr "호스트를 찾을 수 없습니다"
 
 msgid "Tag already associated with this host"
 msgstr "태그가 이미 이 호스트와 연결되어 있습니다"
@@ -643,9 +595,6 @@ msgstr "사용 가능한 패키지 처리 실패: %s"
 msgid "Host not registered"
 msgstr "호스트가 등록되지 않음"
 
-msgid "Host not found"
-msgstr "호스트를 찾을 수 없음"
-
 
 
 
@@ -753,9 +702,6 @@ msgstr "작업"
 
 msgid "User"
 msgstr "사용자"
-
-msgid "User not found"
-msgstr "사용자를 찾을 수 없음"
 
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
 msgstr "권한 거부: ENABLE_GRAYLOG_INTEGRATION 역할이 필요합니다"
@@ -1256,3 +1202,51 @@ msgstr "자식 에이전트 업데이트가 요청되었습니다: %s"
 msgid "Child agent update requested"
 msgstr "자식 에이전트 업데이트가 요청되었습니다"
 
+
+msgid "Failed to get email configuration"
+msgstr "이메일 구성을 가져오지 못했습니다"
+
+msgid "Email service is disabled. Enable it in the configuration file."
+msgstr "이메일 서비스가 비활성화되어 있습니다. 구성 파일에서 활성화하세요."
+
+msgid "Test email sent successfully to {address}"
+msgstr "테스트 이메일이 {address}로 성공적으로 전송되었습니다"
+
+msgid "Failed to send test email. Please check your SMTP configuration."
+msgstr "테스트 이메일을 보내지 못했습니다. SMTP 구성을 확인하세요."
+
+msgid "Error sending test email: {error}"
+msgstr "테스트 이메일 전송 오류: {error}"
+
+msgid "Email integration must be configured before creating new users"
+msgstr "새 사용자를 만들기 전에 이메일 통합을 구성해야 합니다"
+
+msgid "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
+msgstr "YAML 구성 파일에서 이메일을 활성화하고 SMTP 설정을 구성하세요. 이메일 통합이 없으면 새 사용자가 비밀번호 설정 지침을 받을 수 없으며 로그인할 수 없습니다."
+
+msgid "Default admin credentials are configured in your YAML file"
+msgstr "기본 관리자 자격 증명이 YAML 파일에 구성되어 있습니다"
+
+msgid "Remove admin_userid and admin_password from your configuration file and restart the server"
+msgstr "구성 파일에서 admin_userid와 admin_password를 제거하고 서버를 다시 시작하세요"
+
+msgid "Default JWT secret is being used"
+msgstr "기본 JWT 시크릿이 사용되고 있습니다"
+
+msgid "Run: {command}"
+msgstr "실행: {command}"
+
+msgid "Default password salt is being used"
+msgstr "기본 비밀번호 솔트가 사용되고 있습니다"
+
+msgid "Run: {command} ({count} users will be migrated)"
+msgstr "실행: {command} ({count}명의 사용자가 마이그레이션됩니다)"
+
+msgid "Inconsistent security configuration detected"
+msgstr "일관되지 않은 보안 구성이 감지되었습니다"
+
+msgid "JWT secret uses default value but password salt has been changed. Run: {command}"
+msgstr "JWT 시크릿이 기본값을 사용하지만 비밀번호 솔트가 변경되었습니다. 실행: {command}"
+
+msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
+msgstr "비밀번호 솔트가 기본값을 사용하지만 JWT 시크릿이 변경되었습니다. 실행: {command}"

@@ -7239,7 +7239,7 @@ const HostDetail = () => { // NOSONAR
                         <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                             <TextField
                                 fullWidth
-                                placeholder="Enter package name to search..."
+                                placeholder={t('hostDetail.packageSearchPlaceholder', 'Enter package name to search...')}
                                 variant="outlined"
                                 inputRef={packageSearchInputRef}
                             />

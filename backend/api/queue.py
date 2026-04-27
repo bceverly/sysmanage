@@ -127,7 +127,7 @@ async def delete_failed_messages(
         if not message_ids:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No message IDs provided",
+                detail=_("No message IDs provided"),
             )
 
         # Delete the specified messages
@@ -179,7 +179,7 @@ def _get_message_details_sync(message_id: str) -> Dict[str, Any]:
             if not message:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Message not found or not expired",
+                    detail=_("Message not found or not expired"),
                 )
 
             # Deserialize and format message data for display
@@ -242,7 +242,7 @@ def _get_message_details_sync(message_id: str) -> Dict[str, Any]:
             )
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to fetch message details",
+                detail=_("Failed to fetch message details"),
             ) from e
 
 

@@ -16,7 +16,36 @@
     "title": "ウイルス対策"
   },
   "auditLog": {
-    "exportRequiresLicense": "監査ログのエクスポートにはSysManage Professional+ライセンスが必要です。"
+    "exportRequiresLicense": "監査ログのエクスポートにはSysManage Professional+ライセンスが必要です。",
+    "actionType": {
+      "create": "作成",
+      "read": "読み取り",
+      "update": "更新",
+      "delete": "削除",
+      "execute": "実行"
+    },
+    "entityType": {
+      "host": "ホスト",
+      "user": "ユーザー",
+      "package": "パッケージ",
+      "script": "スクリプト",
+      "secret": "シークレット",
+      "certificate": "証明書",
+      "tag": "タグ",
+      "userRole": "ユーザーロール"
+    },
+    "category": {
+      "database": "データベース",
+      "agent": "エージェント",
+      "authentication": "認証",
+      "system": "システム"
+    },
+    "entryType": {
+      "userAction": "ユーザーアクション",
+      "systemEvent": "システムイベント",
+      "securityEvent": "セキュリティイベント",
+      "dataChange": "データ変更"
+    }
   },
   "automationEngine": {
     "approval": {
@@ -194,7 +223,8 @@
     "success": "操作が正常に完了しました",
     "unassigned": "未割り当て",
     "view": "表示",
-    "yes": "はい"
+    "yes": "はい",
+    "none": "なし"
   },
   "connectionStatus": {
     "connected": "接続済み",
@@ -1070,7 +1100,8 @@
     "wslNotAvailable": "利用不可",
     "wslNotEnabled": "無効",
     "wslStatus": "WSLステータス",
-    "wslVersion": "WSLバージョン"
+    "wslVersion": "WSLバージョン",
+    "packageSearchPlaceholder": "検索するパッケージ名を入力してください..."
   },
   "hostGroup": {
     "add": "追加",
@@ -1231,7 +1262,9 @@
     "secrets": "シークレット",
     "settings": "設定",
     "updates": "アップデート",
-    "users": "ユーザー"
+    "users": "ユーザー",
+    "closeMenu": "メニューを閉じる",
+    "toggleMenu": "メニューを切り替え"
   },
   "notifications": {
     "applicationUpdates": "アプリケーションアップデート",
@@ -2163,5 +2196,37 @@
       "waitingForWslReady": "WSLの準備完了を待機中",
       "writingAgentConfiguration": "エージェント設定を書き込み中"
     }
+  },
+  "emailConfig": {
+    "title": "メール設定",
+    "subheader": "通知とパスワードリセットの SMTP 設定",
+    "smtpServer": "SMTP サーバー",
+    "fromAddress": "差出人アドレス",
+    "subjectPrefix": "件名プレフィックス",
+    "statusLabel": "ステータス",
+    "statusSuffix": {
+      "notConfigured": "(未構成)"
+    },
+    "testConfiguration": "構成をテスト",
+    "configureHint": "テストを有効にするには sysmanage.yaml でメール設定を構成してください",
+    "testDialogTitle": "メール設定のテスト",
+    "testDialogBody": "SMTP 設定が正しく機能していることを確認するためにテストメールを送信します。",
+    "emailAddressLabel": "メールアドレス",
+    "emailAddressPlaceholder": "テストメッセージを送信するメールアドレスを入力してください",
+    "sending": "送信中...",
+    "sendTest": "テストメールを送信",
+    "loadFailed": "メール設定の読み込みに失敗しました",
+    "enterEmail": "メールアドレスを入力してください",
+    "sendFailed": "テストメールの送信に失敗しました。設定を確認してください。",
+    "status": {
+      "unknown": "不明",
+      "disabled": "無効",
+      "enabled": "有効",
+      "notConfigured": "未構成",
+      "configured": "構成済み"
+    }
+  },
+  "reportViewer": {
+    "iframeTitle": "レポートの内容"
   }
 }

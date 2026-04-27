@@ -80,7 +80,7 @@ def build_adhoc_script_plan(
         # the rename — a pre-existing symlink at this exact path is
         # essentially impossible AND would cause the rename to fail rather
         # than overwrite, so symlink attacks don't apply.
-        script_path = f"/tmp/sysmanage_script_{uuid4().hex}.sh"  # nosec B108 NOSONAR S5443 - see comment above
+        script_path = f"/tmp/sysmanage_script_{uuid4().hex}.sh"  # nosec B108
         argv = [f"/bin/{shell}", script_path]
         cleanup = ["rm", "-f", script_path]
 

@@ -59,6 +59,19 @@ class FeatureCode(str, Enum):
     FIREWALL_STATUS = "firewall_status"
     FIREWALL_COMPLIANCE_CHECK = "firewall_compliance_check"
 
+    # Automation Engine (Phase 5)
+    AUTOMATION_SCRIPT_LIBRARY = "automation_script_library"
+    AUTOMATION_SCRIPT_EXEC = "automation_script_exec"
+    AUTOMATION_SCRIPT_SCHEDULE = "automation_script_schedule"
+    AUTOMATION_SCRIPT_APPROVAL = "automation_script_approval"
+
+    # Fleet Engine (Phase 5)
+    FLEET_GROUPS = "fleet_groups"
+    FLEET_BULK_OPERATIONS = "fleet_bulk_operations"
+    FLEET_ROLLING_DEPLOYMENTS = "fleet_rolling_deployments"
+    FLEET_SCHEDULED_OPERATIONS = "fleet_scheduled_operations"
+    FLEET_CONFIG_DEPLOYMENT = "fleet_config_deployment"
+
     @classmethod
     def from_string(cls, value: str) -> "FeatureCode":
         """Convert string to FeatureCode enum."""
@@ -106,6 +119,10 @@ class ModuleCode(str, Enum):
     # Phase 3 Enterprise modules
     AV_MANAGEMENT_ENGINE = "av_management_engine"
     FIREWALL_ORCHESTRATION_ENGINE = "firewall_orchestration_engine"
+
+    # Phase 5 Enterprise modules
+    AUTOMATION_ENGINE = "automation_engine"
+    FLEET_ENGINE = "fleet_engine"
 
     # Data Processing Modules
     LOG_ANALYZER = "log_analyzer"
@@ -172,6 +189,16 @@ TIER_FEATURES = {
         FeatureCode.FIREWALL_DEPLOY,
         FeatureCode.FIREWALL_STATUS,
         FeatureCode.FIREWALL_COMPLIANCE_CHECK,
+        # Phase 5
+        FeatureCode.AUTOMATION_SCRIPT_LIBRARY,
+        FeatureCode.AUTOMATION_SCRIPT_EXEC,
+        FeatureCode.AUTOMATION_SCRIPT_SCHEDULE,
+        FeatureCode.AUTOMATION_SCRIPT_APPROVAL,
+        FeatureCode.FLEET_GROUPS,
+        FeatureCode.FLEET_BULK_OPERATIONS,
+        FeatureCode.FLEET_ROLLING_DEPLOYMENTS,
+        FeatureCode.FLEET_SCHEDULED_OPERATIONS,
+        FeatureCode.FLEET_CONFIG_DEPLOYMENT,
     },
 }
 
@@ -209,5 +236,8 @@ TIER_MODULES = {
         # Phase 3
         ModuleCode.AV_MANAGEMENT_ENGINE,
         ModuleCode.FIREWALL_ORCHESTRATION_ENGINE,
+        # Phase 5
+        ModuleCode.AUTOMATION_ENGINE,
+        ModuleCode.FLEET_ENGINE,
     },
 }

@@ -16,7 +16,36 @@
     "title": "برنامج مكافحة الفيروسات"
   },
   "auditLog": {
-    "exportRequiresLicense": "يتطلب تصدير سجل التدقيق ترخيص SysManage Professional+."
+    "exportRequiresLicense": "يتطلب تصدير سجل التدقيق ترخيص SysManage Professional+.",
+    "actionType": {
+      "create": "إنشاء",
+      "read": "قراءة",
+      "update": "تحديث",
+      "delete": "حذف",
+      "execute": "تنفيذ"
+    },
+    "entityType": {
+      "host": "مضيف",
+      "user": "مستخدم",
+      "package": "حزمة",
+      "script": "نص برمجي",
+      "secret": "سر",
+      "certificate": "شهادة",
+      "tag": "علامة",
+      "userRole": "دور المستخدم"
+    },
+    "category": {
+      "database": "قاعدة البيانات",
+      "agent": "وكيل",
+      "authentication": "المصادقة",
+      "system": "النظام"
+    },
+    "entryType": {
+      "userAction": "إجراء المستخدم",
+      "systemEvent": "حدث النظام",
+      "securityEvent": "حدث أمني",
+      "dataChange": "تغيير البيانات"
+    }
   },
   "automationEngine": {
     "approval": {
@@ -193,7 +222,8 @@
     "success": "تمت العملية بنجاح",
     "unassigned": "غير مخصص",
     "view": "عرض",
-    "yes": "نعم"
+    "yes": "نعم",
+    "none": "لا شيء"
   },
   "connectionStatus": {
     "connected": "متصل",
@@ -1069,7 +1099,8 @@
     "wslNotAvailable": "غير متاح",
     "wslNotEnabled": "غير ممكّن",
     "wslStatus": "حالة WSL",
-    "wslVersion": "إصدار WSL"
+    "wslVersion": "إصدار WSL",
+    "packageSearchPlaceholder": "أدخل اسم الحزمة للبحث..."
   },
   "hostGroup": {
     "add": "إضافة",
@@ -1230,7 +1261,9 @@
     "secrets": "الأسرار",
     "settings": "الإعدادات",
     "updates": "التحديثات",
-    "users": "المستخدمون"
+    "users": "المستخدمون",
+    "closeMenu": "إغلاق القائمة",
+    "toggleMenu": "تبديل القائمة"
   },
   "notifications": {
     "applicationUpdates": "تحديثات التطبيقات",
@@ -2177,5 +2210,37 @@
       "waitingForWslReady": "في انتظار جاهزية WSL",
       "writingAgentConfiguration": "كتابة تكوين الوكيل"
     }
+  },
+  "emailConfig": {
+    "title": "تكوين البريد الإلكتروني",
+    "subheader": "إعدادات SMTP للإشعارات وإعادة تعيين كلمة المرور",
+    "smtpServer": "خادم SMTP",
+    "fromAddress": "عنوان المرسل",
+    "subjectPrefix": "بادئة الموضوع",
+    "statusLabel": "الحالة",
+    "statusSuffix": {
+      "notConfigured": "(غير مكوّن)"
+    },
+    "testConfiguration": "اختبار التكوين",
+    "configureHint": "قم بتكوين إعدادات البريد الإلكتروني في sysmanage.yaml لتمكين الاختبار",
+    "testDialogTitle": "اختبار تكوين البريد الإلكتروني",
+    "testDialogBody": "أرسل بريدًا إلكترونيًا تجريبيًا للتحقق من أن تكوين SMTP يعمل بشكل صحيح.",
+    "emailAddressLabel": "عنوان البريد الإلكتروني",
+    "emailAddressPlaceholder": "أدخل عنوان البريد الإلكتروني لإرسال رسالة اختبار",
+    "sending": "جارٍ الإرسال...",
+    "sendTest": "إرسال بريد إلكتروني تجريبي",
+    "loadFailed": "فشل تحميل تكوين البريد الإلكتروني",
+    "enterEmail": "يرجى إدخال عنوان بريد إلكتروني",
+    "sendFailed": "فشل إرسال البريد الإلكتروني التجريبي. يرجى التحقق من التكوين.",
+    "status": {
+      "unknown": "غير معروف",
+      "disabled": "معطل",
+      "enabled": "مفعل",
+      "notConfigured": "غير مكوّن",
+      "configured": "مكوّن"
+    }
+  },
+  "reportViewer": {
+    "iframeTitle": "محتوى التقرير"
   }
 }

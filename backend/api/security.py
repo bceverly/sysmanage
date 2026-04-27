@@ -12,6 +12,7 @@ from sqlalchemy.orm import sessionmaker
 
 from backend.auth.auth_bearer import get_current_user
 from backend.config import config
+from backend.i18n import _
 from backend.persistence import db, models
 
 # Known default values that should be changed in production
@@ -95,8 +96,12 @@ def _check_security_configuration():
             SecurityWarning(
                 type="email_integration_required",
                 severity="warning",
-                message="Email integration must be configured before creating new users",
-                details="Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in.",
+                message=_(
+                    "Email integration must be configured before creating new users"
+                ),
+                details=_(
+                    "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
+                ),
             )
         )
 
@@ -113,8 +118,10 @@ def _check_security_configuration():
             SecurityWarning(
                 type="default_credentials",
                 severity="critical",
-                message="Default admin credentials are configured in your YAML file",
-                details="Remove admin_userid and admin_password from your configuration file and restart the server",
+                message=_("Default admin credentials are configured in your YAML file"),
+                details=_(
+                    "Remove admin_userid and admin_password from your configuration file and restart the server"
+                ),
             )
         )
 
@@ -128,8 +135,10 @@ def _check_security_configuration():
             SecurityWarning(
                 type="default_jwt_secret",
                 severity="warning",
-                message="Default JWT secret is being used",
-                details=f"Run: {_get_platform_command('--jwt-only')}",
+                message=_("Default JWT secret is being used"),
+                details=_("Run: {command}").format(
+                    command=_get_platform_command("--jwt-only")
+                ),
             )
         )
 
@@ -145,8 +154,10 @@ def _check_security_configuration():
                 SecurityWarning(
                     type="default_password_salt",
                     severity="warning",
-                    message="Default password salt is being used",
-                    details=f"Run: {_get_platform_command()} ({user_count} users will be migrated)",
+                    message=_("Default password salt is being used"),
+                    details=_("Run: {command} ({count} users will be migrated)").format(
+                        command=_get_platform_command(), count=user_count
+                    ),
                 )
             )
         else:
@@ -154,8 +165,8 @@ def _check_security_configuration():
                 SecurityWarning(
                     type="default_password_salt",
                     severity="warning",
-                    message="Default password salt is being used",
-                    details=f"Run: {_get_platform_command()}",
+                    message=_("Default password salt is being used"),
+                    details=_("Run: {command}").format(command=_get_platform_command()),
                 )
             )
 
@@ -168,8 +179,10 @@ def _check_security_configuration():
             SecurityWarning(
                 type="mixed_security_config",
                 severity="warning",
-                message="Inconsistent security configuration detected",
-                details=f"JWT secret uses default value but password salt has been changed. Run: {_get_platform_command('--jwt-only')}",
+                message=_("Inconsistent security configuration detected"),
+                details=_(
+                    "JWT secret uses default value but password salt has been changed. Run: {command}"
+                ).format(command=_get_platform_command("--jwt-only")),
             )
         )
     elif not has_default_jwt and has_default_salt:
@@ -180,8 +193,10 @@ def _check_security_configuration():
             SecurityWarning(
                 type="mixed_security_config",
                 severity="warning",
-                message="Inconsistent security configuration detected",
-                details=f"Password salt uses default value but JWT secret has been changed. Run: {_get_platform_command('--salt-only')}",
+                message=_("Inconsistent security configuration detected"),
+                details=_(
+                    "Password salt uses default value but JWT secret has been changed. Run: {command}"
+                ).format(command=_get_platform_command("--salt-only")),
             )
         )
 

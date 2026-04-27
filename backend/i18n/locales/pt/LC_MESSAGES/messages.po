@@ -30,11 +30,6 @@ msgstr "Dados criptografados expirados"
 msgid "Invalid signature"
 msgstr "Assinatura inválida"
 
-#: backend/security/communication_security.py:346
-#, python-format
-msgid "Decryption failed: %s"
-msgstr "Falha na descriptografia: %s"
-
 #: backend/auth/auth_bearer.py:33
 msgid "Invalid authentication scheme."
 msgstr "Esquema de autenticação inválido."
@@ -97,66 +92,30 @@ msgstr "O usuário já existe"
 msgid "Agent with hostname %s not found"
 msgstr "Agente com hostname %s não encontrado"
 
-#: backend/api/fleet.py:96 backend/api/fleet.py:126 backend/api/fleet.py:159
-#: backend/api/fleet.py:194 backend/api/fleet.py:224 backend/api/fleet.py:251
-#, python-format
-msgid "Agent %s is not connected"
-msgstr "O agente %s não está conectado"
-
-#: backend/api/fleet.py:107
-#, python-format
-msgid "Failed to send command to %s"
-msgstr "Falha ao enviar comando para %s"
-
 #: backend/api/fleet.py:113
 #, python-brace-format
 msgid "Command {command_type} sent to {hostname}"
 msgstr "Comando {command_type} enviado para {hostname}"
-
-#: backend/api/fleet.py:141
-#, python-format
-msgid "Failed to send shell command to %s"
-msgstr "Falha ao enviar comando shell para %s"
 
 #: backend/api/fleet.py:148
 #, python-brace-format
 msgid "Shell command sent to {hostname}"
 msgstr "Comando shell enviado para {hostname}"
 
-#: backend/api/fleet.py:174
-#, python-format
-msgid "Failed to send install command to %s"
-msgstr "Falha ao enviar comando de instalação para %s"
-
 #: backend/api/fleet.py:181
 #, python-brace-format
 msgid "Package installation command sent to {hostname}"
 msgstr "Comando de instalação de pacote enviado para {hostname}"
-
-#: backend/api/fleet.py:206
-#, python-format
-msgid "Failed to send restart command to %s"
-msgstr "Falha ao enviar comando de reinício para %s"
 
 #: backend/api/fleet.py:213
 #, python-brace-format
 msgid "Service restart command sent to {hostname}"
 msgstr "Comando de reinicialização de serviço enviado para {hostname}"
 
-#: backend/api/fleet.py:234
-#, python-format
-msgid "Failed to send update command to %s"
-msgstr "Falha ao enviar comando de atualização para %s"
-
 #: backend/api/fleet.py:240
 #, python-brace-format
 msgid "System update command sent to {hostname}"
 msgstr "Comando de atualização do sistema enviado para {hostname}"
-
-#: backend/api/fleet.py:261
-#, python-format
-msgid "Failed to send reboot command to %s"
-msgstr "Falha ao enviar comando de reinicialização para %s"
 
 #: backend/api/fleet.py:267
 #, python-brace-format
@@ -329,10 +288,6 @@ msgstr "O host não está aprovado"
 msgid "Host {hostname} registered successfully"
 msgstr "Host {hostname} registrado com sucesso"
 
-#: backend/api/agent.py:166
-msgid "Hostname is required for registration"
-msgstr "O nome do host é necessário para o registro"
-
 #: backend/api/agent.py:345
 msgid "os_version_updated"
 msgstr "Versão do SO atualizada"
@@ -375,9 +330,6 @@ msgstr "Uma tag com este nome já existe"
 
 msgid "Tag not found"
 msgstr "Tag não encontrada"
-
-msgid "Host not found"
-msgstr "Host não encontrado"
 
 msgid "Tag already associated with this host"
 msgstr "A tag já está associada a este host"
@@ -643,9 +595,6 @@ msgstr "Falha ao processar pacotes disponíveis: %s"
 msgid "Host not registered"
 msgstr "Host não registrado"
 
-msgid "Host not found"
-msgstr "Host não encontrado"
-
 
 
 
@@ -753,9 +702,6 @@ msgstr "Ação"
 
 msgid "User"
 msgstr "Usuário"
-
-msgid "User not found"
-msgstr "Usuário não encontrado"
 
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
 msgstr "Permissão negada: função ENABLE_GRAYLOG_INTEGRATION necessária"
@@ -1256,3 +1202,51 @@ msgstr "Atualização do agente filho solicitada: %s"
 msgid "Child agent update requested"
 msgstr "Atualização do agente filho solicitada"
 
+
+msgid "Failed to get email configuration"
+msgstr "Falha ao obter configuração de e-mail"
+
+msgid "Email service is disabled. Enable it in the configuration file."
+msgstr "O serviço de e-mail está desabilitado. Habilite-o no arquivo de configuração."
+
+msgid "Test email sent successfully to {address}"
+msgstr "E-mail de teste enviado com sucesso para {address}"
+
+msgid "Failed to send test email. Please check your SMTP configuration."
+msgstr "Falha ao enviar e-mail de teste. Verifique sua configuração SMTP."
+
+msgid "Error sending test email: {error}"
+msgstr "Erro ao enviar e-mail de teste: {error}"
+
+msgid "Email integration must be configured before creating new users"
+msgstr "A integração de e-mail deve ser configurada antes de criar novos usuários"
+
+msgid "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
+msgstr "Habilite o e-mail em seu arquivo de configuração YAML e configure as configurações SMTP. Sem a integração de e-mail, novos usuários não podem receber instruções de configuração de senha e não poderão fazer login."
+
+msgid "Default admin credentials are configured in your YAML file"
+msgstr "As credenciais de administrador padrão estão configuradas em seu arquivo YAML"
+
+msgid "Remove admin_userid and admin_password from your configuration file and restart the server"
+msgstr "Remova admin_userid e admin_password do seu arquivo de configuração e reinicie o servidor"
+
+msgid "Default JWT secret is being used"
+msgstr "O segredo JWT padrão está sendo usado"
+
+msgid "Run: {command}"
+msgstr "Executar: {command}"
+
+msgid "Default password salt is being used"
+msgstr "O salt de senha padrão está sendo usado"
+
+msgid "Run: {command} ({count} users will be migrated)"
+msgstr "Executar: {command} ({count} usuários serão migrados)"
+
+msgid "Inconsistent security configuration detected"
+msgstr "Configuração de segurança inconsistente detectada"
+
+msgid "JWT secret uses default value but password salt has been changed. Run: {command}"
+msgstr "O segredo JWT usa o valor padrão mas o salt de senha foi alterado. Executar: {command}"
+
+msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
+msgstr "O salt de senha usa o valor padrão mas o segredo JWT foi alterado. Executar: {command}"
