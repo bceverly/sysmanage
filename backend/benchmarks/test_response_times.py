@@ -64,7 +64,7 @@ def client():
 def test_bench_health(client):
     p50, p95, mean = _bench(client, "GET", "/api/health")
     print(f"\nGET /api/health: p50={p50:.2f}ms p95={p95:.2f}ms mean={mean:.2f}ms")
-    assert p95 < 100, "p95 latency above 100ms suggests a regression"
+    assert p95 < 100, "p95 latency above 100ms suggests a regression"  # nosec B101
 
 
 def test_bench_automation_list(client):
@@ -75,7 +75,7 @@ def test_bench_automation_list(client):
     )
     # 402 (no license) or 200 (empty list) are both fine — we're measuring
     # router + auth + license-check overhead, not data.
-    assert p95 < 200
+    assert p95 < 200  # nosec B101
 
 
 def test_bench_fleet_list(client):
@@ -84,4 +84,4 @@ def test_bench_fleet_list(client):
         f"\nGET /api/v1/fleet/groups: "
         f"p50={p50:.2f}ms p95={p95:.2f}ms mean={mean:.2f}ms"
     )
-    assert p95 < 200
+    assert p95 < 200  # nosec B101
