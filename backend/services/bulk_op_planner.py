@@ -74,9 +74,12 @@ def _build_plan(op_type: str, params: Dict[str, Any]) -> Dict[str, Any]:
         # Defer to script_plan_builder for the heavy lifting
         from backend.services.script_plan_builder import build_adhoc_script_plan
 
+        # `shell` here is the script-interpreter selector (bash/zsh/ksh/...),
+        # not subprocess(shell=True).  Bandit can't disambiguate the kwarg
+        # name without context.
         return build_adhoc_script_plan(
             content=params.get("content", ""),
-            shell=params.get("shell", "bash"),
+            shell=params.get("shell", "bash"),  # nosec B604
             timeout_seconds=int(params.get("timeout_seconds", 300)),
             parameter_values=params.get("parameter_values"),
         )
