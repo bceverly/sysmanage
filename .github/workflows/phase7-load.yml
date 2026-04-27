@@ -1,0 +1,204 @@
+name: Phase 7 — Load Testing (Agent Fleet / DB / WebSocket)
+
+# Manual-only.  Load tests are slow (warm-up + measurement + cooldown);
+# don't run on every push.
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: "Which load scenario to run"
+        required: true
+        default: "agents-100"
+        type: choice
+        options:
+          - "agents-100"
+          - "agents-500"
+          - "agents-1000"
+          - "db-perf"
+          - "ws-throughput"
+          - "all"
+      duration_minutes:
+        description: "Steady-state duration after warm-up"
+        required: false
+        default: "10"
+        type: string
+      python_version:
+        description: "Python version for the harness"
+        required: false
+        default: "3.12"
+        type: choice
+        options: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+permissions:
+  contents: read
+
+# ---------------------------------------------------------------------------
+# Caveat documented in the audit:  free GitHub-hosted runners are 4 vCPU /
+# 16 GB.  All N "agents" run as asyncio tasks in a single Python process,
+# colocated with the FastAPI server on the same runner.  Numbers from this
+# workflow tell you "no regression vs last run on the same hardware shape"
+# — they are NOT representative of production hardware where server and
+# agents would run on separate hosts with a real network in between.
+#
+# Harness contract (so this workflow runs without modification once the
+# harness lands):
+#
+#   tests/load/run.py
+#       --scenario [agents-N|db-perf|ws-throughput]
+#       --agents N
+#       --duration-seconds N
+#       --server-url http://localhost:8443
+#       --output-json /path/to/results.json
+#
+#   On exit:
+#     - exit 0  : run completed, results.json written
+#     - exit 2  : SLA violation (e.g. p95 above documented threshold)
+#     - exit 5  : harness not yet implemented (workflow treats as soft skip)
+#
+# Until tests/load/run.py exists, every job below logs a clear scaffolding
+# message and exits 0.
+# ---------------------------------------------------------------------------
+
+jobs:
+  load:
+    name: "Load: ${{ inputs.scenario }} (${{ inputs.duration_minutes }} min)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: abc123
+          POSTGRES_USER: sysmanage
+          POSTGRES_DB: sysmanage
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: ${{ inputs.python_version }}
+          cache: pip
+
+      - name: Install backend deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Generate test config
+        run: |
+          cat > sysmanage-dev.yaml <<EOF
+          database:
+            user: "sysmanage"
+            password: "abc123"
+            host: "localhost"
+            port: 5432
+            name: "sysmanage"
+          security:
+            password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+            admin_userid: "admin@sysmanage.org"
+            admin_password: "TEST_AdminPass123!"
+            jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+            jwt_algorithm: "HS256"
+            jwt_auth_timeout: 6000
+            jwt_refresh_timeout: 60000
+          webui:
+            host: "localhost"
+            port: 7443
+          EOF
+
+      - name: Run database migrations
+        run: |
+          python -c "from alembic.config import Config; from alembic import command; cfg = Config('alembic.ini'); command.upgrade(cfg, 'head')"
+        env:
+          PYTHONPATH: .
+          DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+      - name: Start backend server
+        run: |
+          # Start the server in the background.  The harness will connect
+          # to localhost.  We tail the log to a file the harness uploads
+          # as an artifact on failure.
+          mkdir -p .runtime-logs
+          nohup python -m backend.main > .runtime-logs/server.log 2>&1 &
+          echo $! > .runtime-logs/server.pid
+          # Wait for /api/health to return 200 (max 60s)
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8443/api/health > /dev/null 2>&1; then
+              echo "Server up after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Server did not become healthy in 60s"
+          tail -100 .runtime-logs/server.log
+          exit 1
+        env:
+          PYTHONPATH: .
+          DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+          SYSMANAGE_CONFIG: sysmanage-dev.yaml
+
+      - name: Resolve scenario into harness args
+        id: scenario
+        run: |
+          case "${{ inputs.scenario }}" in
+            agents-100)     echo "args=--scenario agents --agents 100"   >> "$GITHUB_OUTPUT" ;;
+            agents-500)     echo "args=--scenario agents --agents 500"   >> "$GITHUB_OUTPUT" ;;
+            agents-1000)    echo "args=--scenario agents --agents 1000"  >> "$GITHUB_OUTPUT" ;;
+            db-perf)        echo "args=--scenario db-perf"               >> "$GITHUB_OUTPUT" ;;
+            ws-throughput)  echo "args=--scenario ws-throughput"         >> "$GITHUB_OUTPUT" ;;
+            all)            echo "args=--scenario all"                   >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Run load harness
+        run: |
+          if [ ! -f tests/load/run.py ]; then
+            echo "::warning::tests/load/run.py does not exist yet."
+            echo "::warning::Phase 7 load harness scaffolding TBD — see comment block at top of phase7-load.yml for the contract."
+            mkdir -p .runtime-logs
+            echo "{\"status\": \"harness-not-implemented\"}" > .runtime-logs/results.json
+            exit 0
+          fi
+          mkdir -p .runtime-logs
+          DURATION_SECONDS=$(( ${{ inputs.duration_minutes }} * 60 ))
+          set +e
+          python tests/load/run.py \
+            ${{ steps.scenario.outputs.args }} \
+            --duration-seconds "$DURATION_SECONDS" \
+            --server-url http://localhost:8443 \
+            --output-json .runtime-logs/results.json
+          rc=$?
+          set -e
+          if [ $rc -eq 5 ]; then
+            echo "::warning::Harness reported scenario not implemented (exit 5) — soft skip."
+            exit 0
+          fi
+          exit $rc
+        env:
+          PYTHONPATH: .
+
+      - name: Stop server
+        if: always()
+        run: |
+          if [ -f .runtime-logs/server.pid ]; then
+            kill "$(cat .runtime-logs/server.pid)" 2>/dev/null || true
+          fi
+
+      - name: Upload harness results + server log
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: load-${{ inputs.scenario }}-${{ inputs.duration_minutes }}min
+          path: |
+            .runtime-logs/results.json
+            .runtime-logs/server.log

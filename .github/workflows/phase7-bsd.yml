@@ -1,0 +1,182 @@
+name: Phase 7 — BSD Integration (FreeBSD/OpenBSD/NetBSD via QEMU)
+
+# Manual-only.  BSD jobs are slow (QEMU emulation, no KVM in GitHub-hosted
+# runners), so cron is intentionally avoided.  Run on demand from the
+# Actions UI.
+on:
+  workflow_dispatch:
+    inputs:
+      bsd:
+        description: "Which BSD to test"
+        required: false
+        default: "all"
+        type: choice
+        options: ["all", "freebsd", "openbsd", "netbsd"]
+      pytest_marker:
+        description: "Marker filter (default: 'integration')"
+        required: false
+        default: "integration"
+        type: string
+      release_freebsd:
+        description: "FreeBSD release tag"
+        required: false
+        default: "14.1"
+        type: string
+      release_openbsd:
+        description: "OpenBSD release tag"
+        required: false
+        default: "7.5"
+        type: string
+      release_netbsd:
+        description: "NetBSD release tag"
+        required: false
+        default: "10.0"
+        type: string
+
+permissions:
+  contents: read
+
+# ---------------------------------------------------------------------------
+# This workflow uses cross-platform-actions/action to spin up a BSD VM
+# inside QEMU on a Linux runner.  It's slow — boot + install takes 5-15 min
+# per OS — but it's free for public repos and gives real BSD coverage.
+#
+# Each job clones sysmanage-agent and runs the agent's integration test
+# subset.  Server-side BSD is not tested (the server only ships for Linux).
+# ---------------------------------------------------------------------------
+
+jobs:
+  freebsd:
+    name: "FreeBSD ${{ inputs.release_freebsd }} (QEMU)"
+    if: ${{ inputs.bsd == 'all' || inputs.bsd == 'freebsd' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Checkout sysmanage-agent
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          repository: bceverly/sysmanage-agent
+          path: sysmanage-agent
+
+      - name: Run agent integration tests in FreeBSD VM
+        # NOTE: pin to a SHA before merging.  The repo's convention is to
+        # pin every third-party action — see the `# v4` comments on
+        # actions/checkout etc.
+        uses: cross-platform-actions/action@v0.27.0
+        with:
+          operating_system: freebsd
+          version: ${{ inputs.release_freebsd }}
+          run: |
+            sudo pkg install -y python311 py311-pip py311-sqlite3 git
+            cd sysmanage-agent
+            python3.11 -m venv .venv
+            . .venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt || true
+            pip install -r requirements-dev.txt || true
+            set +e
+            python -m pytest tests/ -m "${{ inputs.pytest_marker }}" -v --tb=short --junit-xml=bsd-freebsd-junit.xml
+            rc=$?
+            set -e
+            if [ $rc -eq 5 ]; then
+              echo "No agent tests tagged @pytest.mark.${{ inputs.pytest_marker }} — exiting clean."
+              exit 0
+            fi
+            exit $rc
+
+      - name: Upload junit report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: bsd-freebsd-${{ inputs.release_freebsd }}-junit
+          path: sysmanage-agent/bsd-freebsd-junit.xml
+
+  openbsd:
+    name: "OpenBSD ${{ inputs.release_openbsd }} (QEMU)"
+    if: ${{ inputs.bsd == 'all' || inputs.bsd == 'openbsd' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Checkout sysmanage-agent
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          repository: bceverly/sysmanage-agent
+          path: sysmanage-agent
+
+      - name: Run agent integration tests in OpenBSD VM
+        uses: cross-platform-actions/action@v0.27.0
+        with:
+          operating_system: openbsd
+          version: ${{ inputs.release_openbsd }}
+          run: |
+            sudo pkg_add python-3.11 py3-pip git
+            cd sysmanage-agent
+            python3.11 -m venv .venv
+            . .venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt || true
+            pip install -r requirements-dev.txt || true
+            set +e
+            python -m pytest tests/ -m "${{ inputs.pytest_marker }}" -v --tb=short --junit-xml=bsd-openbsd-junit.xml
+            rc=$?
+            set -e
+            if [ $rc -eq 5 ]; then
+              echo "No agent tests tagged @pytest.mark.${{ inputs.pytest_marker }} — exiting clean."
+              exit 0
+            fi
+            exit $rc
+
+      - name: Upload junit report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: bsd-openbsd-${{ inputs.release_openbsd }}-junit
+          path: sysmanage-agent/bsd-openbsd-junit.xml
+
+  netbsd:
+    name: "NetBSD ${{ inputs.release_netbsd }} (QEMU)"
+    if: ${{ inputs.bsd == 'all' || inputs.bsd == 'netbsd' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Checkout sysmanage-agent
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          repository: bceverly/sysmanage-agent
+          path: sysmanage-agent
+
+      - name: Run agent integration tests in NetBSD VM
+        uses: cross-platform-actions/action@v0.27.0
+        with:
+          operating_system: netbsd
+          version: ${{ inputs.release_netbsd }}
+          run: |
+            sudo pkgin -y install python311 py311-pip git
+            cd sysmanage-agent
+            python3.11 -m venv .venv
+            . .venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt || true
+            pip install -r requirements-dev.txt || true
+            set +e
+            python -m pytest tests/ -m "${{ inputs.pytest_marker }}" -v --tb=short --junit-xml=bsd-netbsd-junit.xml
+            rc=$?
+            set -e
+            if [ $rc -eq 5 ]; then
+              echo "No agent tests tagged @pytest.mark.${{ inputs.pytest_marker }} — exiting clean."
+              exit 0
+            fi
+            exit $rc
+
+      - name: Upload junit report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: bsd-netbsd-${{ inputs.release_netbsd }}-junit
+          path: sysmanage-agent/bsd-netbsd-junit.xml

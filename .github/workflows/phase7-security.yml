@@ -1,0 +1,302 @@
+name: Phase 7 — Security Pen-Test (automated portion)
+
+# Manual-only.  This workflow runs the automated subset of the Phase 7
+# pen-test goals:  dynamic scanning (ZAP), filesystem CVE scan (Trivy),
+# secrets-in-history (gitleaks), and the auth/authz integration suite.
+#
+# The "external pen test by humans" item from the ROADMAP is unrelated to
+# CI infrastructure — that's a vendor engagement, not a workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "Which scans to run"
+        required: false
+        default: "all"
+        type: choice
+        options: ["all", "trivy", "gitleaks", "zap-baseline", "auth-tests"]
+
+permissions:
+  contents: read
+  security-events: write
+
+# ---------------------------------------------------------------------------
+# Coverage map vs Phase 7 Security Goals (ROADMAP §7.4):
+#
+#   ROADMAP item                              | Workflow job
+#   ------------------------------------------|------------------------
+#   External penetration test (if budget)     | Out of scope — vendor
+#   Internal security review                  | Composite (all jobs)
+#   Authentication bypass attempts            | auth-tests
+#   Privilege escalation attempts             | auth-tests
+#   WebSocket security review                 | auth-tests + zap-baseline
+#
+# Existing security.yml already covers:  semgrep, safety, pip-audit,
+# npm-audit, snyk, frontend security linting, secrets detection.  This
+# workflow ADDS the dynamic + filesystem scans those don't cover.
+# ---------------------------------------------------------------------------
+
+jobs:
+  trivy:
+    name: "Trivy filesystem CVE scan"
+    if: ${{ inputs.scope == 'all' || inputs.scope == 'trivy' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Run Trivy filesystem scan
+        # NOTE: pin to SHA before merging.
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-fs.sarif
+          severity: CRITICAL,HIGH
+          # Don't fail the job on findings — uploading SARIF surfaces them
+          # in the Security tab; the run itself is informational.
+          exit-code: "0"
+
+      - name: Upload SARIF to Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4
+        with:
+          sarif_file: trivy-fs.sarif
+          category: trivy-fs
+
+      - name: Upload SARIF artifact
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: trivy-fs-sarif
+          path: trivy-fs.sarif
+
+  gitleaks:
+    name: "gitleaks (secrets in history)"
+    if: ${{ inputs.scope == 'all' || inputs.scope == 'gitleaks' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          # gitleaks scans history; needs full clone.
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        # NOTE: pin to SHA before merging.
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          # gitleaks-action posts to GitHub by default; set GITHUB_TOKEN to
+          # the default token for SARIF upload.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Don't fail the job on findings; we want to inspect the report.
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
+          GITLEAKS_ENABLE_SUMMARY: "true"
+        continue-on-error: true
+
+  zap-baseline:
+    name: "OWASP ZAP baseline scan (running server)"
+    if: ${{ inputs.scope == 'all' || inputs.scope == 'zap-baseline' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: abc123
+          POSTGRES_USER: sysmanage
+          POSTGRES_DB: sysmanage
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install backend deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Generate test config
+        run: |
+          cat > sysmanage-dev.yaml <<EOF
+          database:
+            user: "sysmanage"
+            password: "abc123"
+            host: "localhost"
+            port: 5432
+            name: "sysmanage"
+          security:
+            password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+            admin_userid: "admin@sysmanage.org"
+            admin_password: "TEST_AdminPass123!"
+            jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+            jwt_algorithm: "HS256"
+            jwt_auth_timeout: 6000
+            jwt_refresh_timeout: 60000
+          webui:
+            host: "localhost"
+            port: 7443
+          EOF
+
+      - name: Run migrations
+        run: |
+          python -c "from alembic.config import Config; from alembic import command; cfg = Config('alembic.ini'); command.upgrade(cfg, 'head')"
+        env:
+          PYTHONPATH: .
+          DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+      - name: Start server
+        run: |
+          mkdir -p .runtime-logs
+          nohup python -m backend.main > .runtime-logs/server.log 2>&1 &
+          echo $! > .runtime-logs/server.pid
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8443/api/health > /dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          echo "::error::Server did not become healthy"
+          tail -100 .runtime-logs/server.log
+          exit 1
+        env:
+          PYTHONPATH: .
+          DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+          SYSMANAGE_CONFIG: sysmanage-dev.yaml
+
+      - name: ZAP baseline scan
+        # NOTE: pin to SHA before merging.
+        uses: zaproxy/action-baseline@v0.13.0
+        with:
+          target: "http://localhost:8443"
+          # Baseline = passive scan only, no aggressive payloads.  Safe to
+          # run against any environment.  Use action-full-scan for active.
+          fail_action: false
+          allow_issue_writing: false
+          artifact_name: zap-baseline-report
+
+      - name: Stop server
+        if: always()
+        run: |
+          if [ -f .runtime-logs/server.pid ]; then
+            kill "$(cat .runtime-logs/server.pid)" 2>/dev/null || true
+          fi
+
+      - name: Upload server log
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: zap-baseline-server-log
+          path: .runtime-logs/server.log
+
+  auth-tests:
+    name: "Auth/authz integration suite (@pytest.mark.security)"
+    if: ${{ inputs.scope == 'all' || inputs.scope == 'auth-tests' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: abc123
+          POSTGRES_USER: sysmanage
+          POSTGRES_DB: sysmanage
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install backend deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Generate test config
+        run: |
+          cat > sysmanage-dev.yaml <<EOF
+          database:
+            user: "sysmanage"
+            password: "abc123"
+            host: "localhost"
+            port: 5432
+            name: "sysmanage"
+          security:
+            password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+            admin_userid: "admin@sysmanage.org"
+            admin_password: "TEST_AdminPass123!"
+            jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+            jwt_algorithm: "HS256"
+            jwt_auth_timeout: 6000
+            jwt_refresh_timeout: 60000
+          webui:
+            host: "localhost"
+            port: 7443
+          EOF
+
+      - name: Run migrations
+        run: |
+          python -c "from alembic.config import Config; from alembic import command; cfg = Config('alembic.ini'); command.upgrade(cfg, 'head')"
+        env:
+          PYTHONPATH: .
+          DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+      - name: Run auth/authz security tests
+        run: |
+          # Tests should be marked @pytest.mark.security and live anywhere
+          # under tests/.  Suggested coverage:
+          #   - JWT replay / forgery / expiration boundary tests
+          #   - Refresh token reuse detection
+          #   - Privilege escalation across security_roles edge cases
+          #   - WebSocket connect without auth, with stale auth, with
+          #     wrong-host auth
+          #   - Password reset flow abuse (token reuse, timing)
+          set +e
+          python -m pytest tests/ \
+            -m security \
+            -v --tb=short \
+            --junit-xml=auth-tests-junit.xml
+          rc=$?
+          set -e
+          if [ $rc -eq 5 ]; then
+            echo "::warning::No tests tagged @pytest.mark.security yet."
+            echo "::warning::Tag auth/authz/WebSocket-security tests with @pytest.mark.security to populate this run."
+            exit 0
+          fi
+          exit $rc
+        env:
+          PYTHONPATH: .
+          DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+      - name: Upload junit report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: auth-tests-junit
+          path: auth-tests-junit.xml
