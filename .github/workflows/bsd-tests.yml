@@ -91,14 +91,19 @@ jobs:
             # Install Python + heavy native deps from FreeBSD pkg.  See
             # the comment block at the top of this workflow for why pip-
             # installing requirements.txt directly does not work on BSDs.
+            # `|| true` so a single missing package doesn't fail the whole
+            # install — pip will fill the gaps below.
             sudo pkg install -y \
               python311 py311-pip py311-sqlite3 git \
               py311-cryptography py311-pyyaml py311-aiohttp py311-websockets \
-              py311-pytest py311-pytest-asyncio
+              py311-sqlalchemy py311-psutil py311-bcrypt py311-aiofiles || true
             cd sysmanage-agent
             python3.11 -m venv --system-site-packages .venv
             . .venv/bin/activate
             python -m pip install --upgrade pip
+            # pytest/pytest-asyncio are pure Python — install via pip
+            # rather than pkg.  Idempotent if already present from pkg.
+            python -m pip install pytest pytest-asyncio
             set +e
             python -m pytest tests/ -m "${{ inputs.pytest_marker }}" \
               -v --tb=short --junit-xml=bsd-freebsd-junit.xml
@@ -137,18 +142,20 @@ jobs:
           operating_system: openbsd
           version: ${{ inputs.release_openbsd }}
           run: |
-            # OpenBSD packages use py3- prefix (single-Python-per-release
-            # convention).  As of OpenBSD 7.8 the default Python is 3.12;
-            # adjust the python-N.NN flavor below if you change the
-            # release_openbsd input.
+            # OpenBSD packages use py3- prefix.  Python is pulled in
+            # automatically as a dep of any py3-* package, so we don't
+            # name it explicitly (the `python%3.12` flavor syntax used
+            # by ports doesn't work in pkg_add).  pytest is not packaged
+            # for OpenBSD — install it via pip below.
             sudo pkg_add -I \
-              python%3.12 py3-pip git \
+              git py3-pip \
               py3-cryptography py3-yaml py3-aiohttp py3-websockets \
-              py3-pytest py3-pytest-asyncio
+              py3-sqlalchemy py3-bcrypt py3-psutil py3-aiofiles || true
             cd sysmanage-agent
-            python3.12 -m venv --system-site-packages .venv
+            python3 -m venv --system-site-packages .venv
             . .venv/bin/activate
             python -m pip install --upgrade pip
+            python -m pip install pytest pytest-asyncio
             set +e
             python -m pytest tests/ -m "${{ inputs.pytest_marker }}" \
               -v --tb=short --junit-xml=bsd-openbsd-junit.xml
@@ -187,14 +194,18 @@ jobs:
           operating_system: netbsd
           version: ${{ inputs.release_netbsd }}
           run: |
+            # py311-pytest / py311-pytest-asyncio are not in pkgsrc — pip
+            # them in below instead.  || true so missing pkg names don't
+            # fail the whole install.
             sudo pkgin -y install \
               python311 py311-pip git \
               py311-cryptography py311-yaml py311-aiohttp py311-websockets \
-              py311-pytest py311-pytest-asyncio
+              py311-sqlalchemy py311-bcrypt py311-psutil py311-aiofiles || true
             cd sysmanage-agent
             python3.11 -m venv --system-site-packages .venv
             . .venv/bin/activate
             python -m pip install --upgrade pip
+            python -m pip install pytest pytest-asyncio
             set +e
             python -m pytest tests/ -m "${{ inputs.pytest_marker }}" \
               -v --tb=short --junit-xml=bsd-netbsd-junit.xml

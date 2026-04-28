@@ -47,7 +47,7 @@ jobs:
 
       - name: Run Trivy filesystem scan
         # NOTE: pin to SHA before merging.
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
@@ -173,7 +173,7 @@ jobs:
           nohup python -m backend.main > .runtime-logs/server.log 2>&1 &
           echo $! > .runtime-logs/server.pid
           for i in $(seq 1 60); do
-            if curl -fsS http://localhost:8443/api/health > /dev/null 2>&1; then exit 0; fi
+            if curl -fsS http://localhost:8000/api/health > /dev/null 2>&1; then exit 0; fi
             sleep 1
           done
           echo "::error::Server did not become healthy"
@@ -187,7 +187,7 @@ jobs:
         # NOTE: pin to SHA before merging.
         uses: zaproxy/action-baseline@v0.13.0
         with:
-          target: "http://localhost:8443"
+          target: "http://localhost:8000"
           # Baseline = passive scan only, no aggressive payloads.  Safe to
           # run against any environment.  Use action-full-scan for active.
           fail_action: false

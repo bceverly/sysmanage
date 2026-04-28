@@ -47,7 +47,7 @@ permissions:
 #       --scenario [agents-N|db-perf|ws-throughput]
 #       --agents N
 #       --duration-seconds N
-#       --server-url http://localhost:8443
+#       --server-url http://localhost:8000
 #       --output-json /path/to/results.json
 #
 #   On exit:
@@ -141,7 +141,7 @@ jobs:
           echo $! > .runtime-logs/server.pid
           # Wait for /api/health to return 200 (max 60s)
           for i in $(seq 1 60); do
-            if curl -fsS http://localhost:8443/api/health > /dev/null 2>&1; then
+            if curl -fsS http://localhost:8000/api/health > /dev/null 2>&1; then
               echo "Server up after ${i}s"
               exit 0
             fi
@@ -181,7 +181,7 @@ jobs:
           python tests/load/run.py \
             ${{ steps.scenario.outputs.args }} \
             --duration-seconds "$DURATION_SECONDS" \
-            --server-url http://localhost:8443 \
+            --server-url http://localhost:8000 \
             --output-json .runtime-logs/results.json
           rc=$?
           set -e
