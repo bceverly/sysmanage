@@ -99,9 +99,16 @@ jobs:
           sudo apt-get install -y clamav clamav-daemon
           # Don't start clamd — tests should treat it as installable-but-not-running.
 
-      - name: Generate test config
+      - name: Create test config
         run: |
-          cat > sysmanage-dev.yaml <<EOF
+          sudo mkdir -p /etc
+          sudo tee /etc/sysmanage.yaml > /dev/null <<EOF
+          api:
+            host: "localhost"
+            port: 8000
+            certFile: ""
+            chainFile: ""
+            keyFile: ""
           database:
             user: "sysmanage"
             password: "abc123"

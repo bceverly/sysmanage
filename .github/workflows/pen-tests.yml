@@ -47,7 +47,7 @@ jobs:
 
       - name: Run Trivy filesystem scan
         # NOTE: pin to SHA before merging.
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.36.0
         with:
           scan-type: fs
           scan-ref: .
@@ -131,9 +131,16 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov pytest-asyncio
 
-      - name: Generate test config
+      - name: Create test config
         run: |
-          cat > sysmanage-dev.yaml <<EOF
+          sudo mkdir -p /etc
+          sudo tee /etc/sysmanage.yaml > /dev/null <<EOF
+          api:
+            host: "localhost"
+            port: 8000
+            certFile: ""
+            chainFile: ""
+            keyFile: ""
           database:
             user: "sysmanage"
             password: "abc123"
@@ -175,7 +182,6 @@ jobs:
         env:
           PYTHONPATH: .
           DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
-          SYSMANAGE_CONFIG: sysmanage-dev.yaml
 
       - name: ZAP baseline scan
         # NOTE: pin to SHA before merging.
@@ -238,9 +244,16 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov pytest-asyncio
 
-      - name: Generate test config
+      - name: Create test config
         run: |
-          cat > sysmanage-dev.yaml <<EOF
+          sudo mkdir -p /etc
+          sudo tee /etc/sysmanage.yaml > /dev/null <<EOF
+          api:
+            host: "localhost"
+            port: 8000
+            certFile: ""
+            chainFile: ""
+            keyFile: ""
           database:
             user: "sysmanage"
             password: "abc123"
