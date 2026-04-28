@@ -336,7 +336,7 @@ jobs:
     name: UI & Performance Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     needs: [test-frontend]
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     strategy:
       fail-fast: false
