@@ -1,7 +1,12 @@
 name: Load Testing (Agent Fleet / DB / WebSocket)
 
-# Manual-only.  Load tests are slow (warm-up + measurement + cooldown);
-# don't run on every push.
+# Two triggers:
+#   1. workflow_dispatch — run on demand from the Actions UI.  Inputs
+#      let you pick scenario / duration / Python version.
+#   2. push of a release tag (v*.*.* or v*.*.*.*) — automatic baseline
+#      capture per release, mirroring build-and-release.yml's trigger.
+#      Tag-push runs use the workflow's hard-coded defaults below since
+#      `workflow_dispatch.inputs.*` are empty on push events.
 on:
   workflow_dispatch:
     inputs:
@@ -28,6 +33,12 @@ on:
         default: "3.12"
         type: choice
         options: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+  push:
+    # Mirror build-and-release.yml's tag pattern so a release tag also
+    # captures a load-test baseline as part of the release record.
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*.*'
 
 permissions:
   contents: read
@@ -61,7 +72,7 @@ permissions:
 
 jobs:
   load:
-    name: "Load: ${{ inputs.scenario }} (${{ inputs.duration_minutes }} min)"
+    name: "Load: ${{ inputs.scenario || 'agents-100' }} (${{ inputs.duration_minutes || '10' }} min)"
     runs-on: ubuntu-latest
     timeout-minutes: 240
 
@@ -86,7 +97,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
-          python-version: ${{ inputs.python_version }}
+          python-version: ${{ inputs.python_version || '3.12' }}
           cache: pip
 
       - name: Install backend deps
@@ -157,7 +168,7 @@ jobs:
       - name: Resolve scenario into harness args
         id: scenario
         run: |
-          case "${{ inputs.scenario }}" in
+          case "${{ inputs.scenario || 'agents-100' }}" in
             agents-100)     echo "args=--scenario agents --agents 100"   >> "$GITHUB_OUTPUT" ;;
             agents-500)     echo "args=--scenario agents --agents 500"   >> "$GITHUB_OUTPUT" ;;
             agents-1000)    echo "args=--scenario agents --agents 1000"  >> "$GITHUB_OUTPUT" ;;
@@ -176,7 +187,7 @@ jobs:
             exit 0
           fi
           mkdir -p .runtime-logs
-          DURATION_SECONDS=$(( ${{ inputs.duration_minutes }} * 60 ))
+          DURATION_SECONDS=$(( ${{ inputs.duration_minutes || '10' }} * 60 ))
           set +e
           python tests/load/run.py \
             ${{ steps.scenario.outputs.args }} \
@@ -204,7 +215,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: load-${{ inputs.scenario }}-${{ inputs.duration_minutes }}min
+          name: load-${{ inputs.scenario || 'agents-100' }}-${{ inputs.duration_minutes || '10' }}min
           path: |
             .runtime-logs/results.json
             .runtime-logs/server.log
