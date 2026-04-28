@@ -170,7 +170,7 @@ jobs:
         run: |
           if [ ! -f tests/load/run.py ]; then
             echo "::warning::tests/load/run.py does not exist yet."
-            echo "::warning::Phase 7 load harness scaffolding TBD — see comment block at top of phase7-load.yml for the contract."
+            echo "::warning::Load harness scaffolding TBD — see comment block at top of load-tests.yml for the contract."
             mkdir -p .runtime-logs
             echo "{\"status\": \"harness-not-implemented\"}" > .runtime-logs/results.json
             exit 0

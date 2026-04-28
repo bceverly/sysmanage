@@ -21,7 +21,7 @@ permissions:
   security-events: write
 
 # ---------------------------------------------------------------------------
-# Coverage map vs Phase 7 Security Goals (ROADMAP §7.4):
+# Coverage map vs ROADMAP §7.4 (Security Pen-Test goals):
 #
 #   ROADMAP item                              | Workflow job
 #   ------------------------------------------|------------------------
@@ -84,8 +84,11 @@ jobs:
           fetch-depth: 0
 
       - name: Run gitleaks
-        # NOTE: pin to SHA before merging.
-        uses: gitleaks/gitleaks-action@v2
+        # NOTE: pin to SHA before merging.  v2.3.9 is the latest of the v2
+        # major; major v3 was not published as of v1.7.0.0.  The Node 20
+        # deprecation warning (Sep 2026 EOL) will need an upstream fix.
+        # The .gitleaks.toml at the repo root excludes test fixtures.
+        uses: gitleaks/gitleaks-action@v2.3.9
         env:
           # gitleaks-action posts to GitHub by default; set GITHUB_TOKEN to
           # the default token for SARIF upload.
@@ -184,15 +187,32 @@ jobs:
           DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
 
       - name: ZAP baseline scan
-        # NOTE: pin to SHA before merging.
-        uses: zaproxy/action-baseline@v0.13.0
+        # NOTE: pin to SHA before merging.  v0.13.0 used the now-defunct
+        # GitHub Actions v3 artifact API and failed with HTTP 400 on
+        # "Create Artifact Container".  v0.15.0 ships v4-compatible
+        # uploads.  We also disable the action's built-in upload and
+        # do our own actions/upload-artifact@v6 below for full control.
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: "http://localhost:8000"
           # Baseline = passive scan only, no aggressive payloads.  Safe to
           # run against any environment.  Use action-full-scan for active.
           fail_action: false
           allow_issue_writing: false
-          artifact_name: zap-baseline-report
+          # Empty artifact_name disables the action's own upload step;
+          # the next step uploads the report files itself.
+          artifact_name: ""
+
+      - name: Upload ZAP report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: zap-baseline-report
+          path: |
+            report_html.html
+            report_md.md
+            report_json.json
+          if-no-files-found: ignore
 
       - name: Stop server
         if: always()

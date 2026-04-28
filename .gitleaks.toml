@@ -1,0 +1,53 @@
+# Gitleaks configuration for sysmanage.
+#
+# All findings flagged as of the v1.7.0.0 audit are test fixtures or
+# old-config-file leaks already removed from the live tree.  We extend
+# Gitleaks' default ruleset rather than replace it (so any new, real
+# leak still gets caught) and add an allowlist for the false-positive
+# patterns and paths.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "sysmanage test fixtures and historical false positives"
+
+# --- Path allowlist ---------------------------------------------------------
+# Files containing intentionally-dummy credentials for testing.  These are
+# regexes matched against the (forward-slash-normalised) repo-relative path.
+paths = [
+  # Test fixtures — JWT secrets, password hashes, RSA keys for unit tests
+  '''(^|/)tests/.*test_security\.py$''',
+  '''(^|/)tests/.*test_api_security\.py$''',
+  '''(^|/)tests/.*test_communication_security\.py$''',
+  '''(^|/)tests/.*test_certificate_api\.py$''',
+  '''(^|/)tests/.*test_host_ubuntu_pro\.py$''',
+  '''(^|/)tests/.*test_ubuntu_pro_settings\.py$''',
+  '''(^|/)frontend/src/__tests__/.*''',
+
+  # Generated / development-only configs that hold dummy secrets.
+  # sysmanage-dev.yaml is gitignored at HEAD; old commits still trip rules.
+  '''(^|/)sysmanage-dev\.yaml$''',
+  '''(^|/)sysmanage\.yaml$''',
+  '''(^|/)\.sysmanage-certs/.*''',
+
+  # CI workflow files put TEST_-prefixed dummy secrets inline.
+  '''(^|/)\.github/workflows/(ci|multi-os-ci|full-ci|integration-tests|load-tests|pen-tests)\.yml$''',
+
+  # Vendored or generated docs.
+  '''(^|/)RELEASE-MANUAL\.md$''',
+
+  # Vault helper script with a placeholder token used in dev-only
+  # bootstrapping; production sites override at deploy time.
+  '''(^|/)scripts/update_vault_config\.py$''',
+]
+
+# --- Regex allowlist --------------------------------------------------------
+# Patterns we know are not real secrets, no matter where they appear.
+regexes = [
+  # All TEST_-prefixed values are explicit dev fixtures.
+  '''TEST_[A-Za-z0-9+/=_-]{8,}''',
+  # OpenBAO/Vault dev-mode root token literal — Vault docs use this exact
+  # string as the public placeholder for sandbox setups; not a real secret.
+  '''hvs\.[A-Za-z0-9_-]{16,}''',
+]

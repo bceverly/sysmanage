@@ -167,7 +167,7 @@ jobs:
 
   # -----------------------------------------------------------------------
   # Agent-side integration matrix: native OS coverage.  BSDs are handled by
-  # phase7-bsd.yml (QEMU) — they don't fit in this workflow because the
+  # bsd-tests.yml (QEMU) — they don't fit in this workflow because the
   # GitHub-hosted runner pool doesn't include them.
   # -----------------------------------------------------------------------
   integration-agent:

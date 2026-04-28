@@ -88,22 +88,25 @@ jobs:
           operating_system: freebsd
           version: ${{ inputs.release_freebsd }}
           run: |
-            # Install Python + heavy native deps from FreeBSD pkg.  See
-            # the comment block at the top of this workflow for why pip-
-            # installing requirements.txt directly does not work on BSDs.
-            # `|| true` so a single missing package doesn't fail the whole
-            # install — pip will fill the gaps below.
-            sudo pkg install -y \
+            # FreeBSD pkg aborts the WHOLE batch if any package name is
+            # unresolvable in the repo (unlike NetBSD pkgin and OpenBSD
+            # pkg_add, which warn and continue).  Install per-package so
+            # one missing name doesn't take down Python + everything.
+            for p in \
               python311 py311-pip py311-sqlite3 git \
               py311-cryptography py311-pyyaml py311-aiohttp py311-websockets \
-              py311-sqlalchemy py311-psutil py311-bcrypt py311-aiofiles || true
+              py311-psutil py311-bcrypt
+            do
+              sudo pkg install -y "$p" || true
+            done
             cd sysmanage-agent
             python3.11 -m venv --system-site-packages .venv
             . .venv/bin/activate
             python -m pip install --upgrade pip
-            # pytest/pytest-asyncio are pure Python — install via pip
-            # rather than pkg.  Idempotent if already present from pkg.
-            python -m pip install pytest pytest-asyncio
+            # SQLAlchemy + aiofiles are not consistently packaged for
+            # py311 on FreeBSD; install via pip (they have wheels or
+            # are pure Python).  pytest/pytest-asyncio always via pip.
+            python -m pip install pytest pytest-asyncio sqlalchemy aiofiles
             set +e
             python -m pytest tests/ -m "${{ inputs.pytest_marker }}" \
               -v --tb=short --junit-xml=bsd-freebsd-junit.xml
@@ -147,15 +150,18 @@ jobs:
             # name it explicitly (the `python%3.12` flavor syntax used
             # by ports doesn't work in pkg_add).  pytest is not packaged
             # for OpenBSD — install it via pip below.
+            # OpenBSD pkg_add tolerates missing names (warns and continues),
+            # so a single batch is fine.  Drop py3-aiofiles — not packaged
+            # — and pip install it (pure Python).
             sudo pkg_add -I \
               git py3-pip \
               py3-cryptography py3-yaml py3-aiohttp py3-websockets \
-              py3-sqlalchemy py3-bcrypt py3-psutil py3-aiofiles || true
+              py3-sqlalchemy py3-bcrypt py3-psutil || true
             cd sysmanage-agent
             python3 -m venv --system-site-packages .venv
             . .venv/bin/activate
             python -m pip install --upgrade pip
-            python -m pip install pytest pytest-asyncio
+            python -m pip install pytest pytest-asyncio aiofiles
             set +e
             python -m pytest tests/ -m "${{ inputs.pytest_marker }}" \
               -v --tb=short --junit-xml=bsd-openbsd-junit.xml
