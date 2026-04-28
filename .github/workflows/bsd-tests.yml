@@ -1,8 +1,13 @@
 name: BSD Integration Tests (FreeBSD/OpenBSD/NetBSD via QEMU)
 
-# Manual-only.  BSD jobs are slow (QEMU emulation, no KVM in GitHub-hosted
-# runners), so cron is intentionally avoided.  Run on demand from the
-# Actions UI.
+# Two triggers:
+#   1. workflow_dispatch — run on demand from the Actions UI.  BSD jobs
+#      are slow (QEMU emulation, no KVM in GitHub-hosted runners), so
+#      cron is intentionally avoided.
+#   2. push of a release tag (v*.*.* or v*.*.*.*) — automatic per-
+#      release BSD coverage capture, mirroring build-and-release.yml.
+#      Tag-push runs use the dispatch defaults below since
+#      `workflow_dispatch.inputs.*` are empty on push events.
 on:
   workflow_dispatch:
     inputs:
@@ -32,6 +37,11 @@ on:
         required: false
         default: "10.0"
         type: string
+  push:
+    # Mirror build-and-release.yml's tag pattern.
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*.*'
 
 permissions:
   contents: read
@@ -66,8 +76,8 @@ permissions:
 
 jobs:
   freebsd:
-    name: "FreeBSD ${{ inputs.release_freebsd }} (QEMU)"
-    if: ${{ inputs.bsd == 'all' || inputs.bsd == 'freebsd' }}
+    name: "FreeBSD ${{ inputs.release_freebsd || '14.1' }} (QEMU)"
+    if: ${{ (inputs.bsd || 'all') == 'all' || (inputs.bsd || 'all') == 'freebsd' }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -86,7 +96,7 @@ jobs:
         uses: cross-platform-actions/action@v1.0.0
         with:
           operating_system: freebsd
-          version: ${{ inputs.release_freebsd }}
+          version: ${{ inputs.release_freebsd || '14.1' }}
           run: |
             # FreeBSD pkg aborts the WHOLE batch if any package name is
             # unresolvable in the repo (unlike NetBSD pkgin and OpenBSD
@@ -108,12 +118,12 @@ jobs:
             # are pure Python).  pytest/pytest-asyncio always via pip.
             python -m pip install pytest pytest-asyncio sqlalchemy aiofiles
             set +e
-            python -m pytest tests/ -m "${{ inputs.pytest_marker }}" \
+            python -m pytest tests/ -m "${{ inputs.pytest_marker || 'integration' }}" \
               -v --tb=short --junit-xml=bsd-freebsd-junit.xml
             rc=$?
             set -e
             if [ $rc -eq 5 ]; then
-              echo "No agent tests tagged @pytest.mark.${{ inputs.pytest_marker }} — exiting clean."
+              echo "No agent tests tagged @pytest.mark.${{ inputs.pytest_marker || 'integration' }} — exiting clean."
               exit 0
             fi
             exit $rc
@@ -122,12 +132,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: bsd-freebsd-${{ inputs.release_freebsd }}-junit
+          name: bsd-freebsd-${{ inputs.release_freebsd || '14.1' }}-junit
           path: sysmanage-agent/bsd-freebsd-junit.xml
 
   openbsd:
-    name: "OpenBSD ${{ inputs.release_openbsd }} (QEMU)"
-    if: ${{ inputs.bsd == 'all' || inputs.bsd == 'openbsd' }}
+    name: "OpenBSD ${{ inputs.release_openbsd || '7.8' }} (QEMU)"
+    if: ${{ (inputs.bsd || 'all') == 'all' || (inputs.bsd || 'all') == 'openbsd' }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -143,7 +153,7 @@ jobs:
         uses: cross-platform-actions/action@v1.0.0
         with:
           operating_system: openbsd
-          version: ${{ inputs.release_openbsd }}
+          version: ${{ inputs.release_openbsd || '7.8' }}
           run: |
             # OpenBSD packages use py3- prefix.  Python is pulled in
             # automatically as a dep of any py3-* package, so we don't
@@ -163,12 +173,12 @@ jobs:
             python -m pip install --upgrade pip
             python -m pip install pytest pytest-asyncio aiofiles
             set +e
-            python -m pytest tests/ -m "${{ inputs.pytest_marker }}" \
+            python -m pytest tests/ -m "${{ inputs.pytest_marker || 'integration' }}" \
               -v --tb=short --junit-xml=bsd-openbsd-junit.xml
             rc=$?
             set -e
             if [ $rc -eq 5 ]; then
-              echo "No agent tests tagged @pytest.mark.${{ inputs.pytest_marker }} — exiting clean."
+              echo "No agent tests tagged @pytest.mark.${{ inputs.pytest_marker || 'integration' }} — exiting clean."
               exit 0
             fi
             exit $rc
@@ -177,12 +187,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: bsd-openbsd-${{ inputs.release_openbsd }}-junit
+          name: bsd-openbsd-${{ inputs.release_openbsd || '7.8' }}-junit
           path: sysmanage-agent/bsd-openbsd-junit.xml
 
   netbsd:
-    name: "NetBSD ${{ inputs.release_netbsd }} (QEMU)"
-    if: ${{ inputs.bsd == 'all' || inputs.bsd == 'netbsd' }}
+    name: "NetBSD ${{ inputs.release_netbsd || '10.0' }} (QEMU)"
+    if: ${{ (inputs.bsd || 'all') == 'all' || (inputs.bsd || 'all') == 'netbsd' }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -198,7 +208,7 @@ jobs:
         uses: cross-platform-actions/action@v1.0.0
         with:
           operating_system: netbsd
-          version: ${{ inputs.release_netbsd }}
+          version: ${{ inputs.release_netbsd || '10.0' }}
           run: |
             # py311-pytest / py311-pytest-asyncio are not in pkgsrc — pip
             # them in below instead.  || true so missing pkg names don't
@@ -213,12 +223,12 @@ jobs:
             python -m pip install --upgrade pip
             python -m pip install pytest pytest-asyncio
             set +e
-            python -m pytest tests/ -m "${{ inputs.pytest_marker }}" \
+            python -m pytest tests/ -m "${{ inputs.pytest_marker || 'integration' }}" \
               -v --tb=short --junit-xml=bsd-netbsd-junit.xml
             rc=$?
             set -e
             if [ $rc -eq 5 ]; then
-              echo "No agent tests tagged @pytest.mark.${{ inputs.pytest_marker }} — exiting clean."
+              echo "No agent tests tagged @pytest.mark.${{ inputs.pytest_marker || 'integration' }} — exiting clean."
               exit 0
             fi
             exit $rc
@@ -227,5 +237,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: bsd-netbsd-${{ inputs.release_netbsd }}-junit
+          name: bsd-netbsd-${{ inputs.release_netbsd || '10.0' }}-junit
           path: sysmanage-agent/bsd-netbsd-junit.xml

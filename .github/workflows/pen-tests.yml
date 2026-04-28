@@ -1,10 +1,17 @@
 name: Penetration Testing (automated portion)
 
-# Manual-only.  This workflow runs the automated subset of the
-# pen-test goals:  dynamic scanning (ZAP), filesystem CVE scan (Trivy),
-# secrets-in-history (gitleaks), and the auth/authz integration suite.
+# Two triggers:
+#   1. workflow_dispatch — run on demand from the Actions UI; the
+#      `scope` input picks which subset of scans to run.
+#   2. push of a release tag (v*.*.* or v*.*.*.*) — automatic per-
+#      release pen-test sweep, mirroring build-and-release.yml.  Tag-
+#      push runs use the dispatch defaults below since
+#      `workflow_dispatch.inputs.*` are empty on push events.
 #
-# The "external pen test by humans" item from the ROADMAP is unrelated to
+# This workflow runs the automated subset of the pen-test goals:
+# dynamic scanning (ZAP), filesystem CVE scan (Trivy), secrets-in-
+# history (gitleaks), and the auth/authz integration suite.  The
+# "external pen test by humans" item from the ROADMAP is unrelated to
 # CI infrastructure — that's a vendor engagement, not a workflow.
 on:
   workflow_dispatch:
@@ -15,6 +22,11 @@ on:
         default: "all"
         type: choice
         options: ["all", "trivy", "gitleaks", "zap-baseline", "auth-tests"]
+  push:
+    # Mirror build-and-release.yml's tag pattern.
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*.*'
 
 permissions:
   contents: read
@@ -39,7 +51,7 @@ permissions:
 jobs:
   trivy:
     name: "Trivy filesystem CVE scan"
-    if: ${{ inputs.scope == 'all' || inputs.scope == 'trivy' }}
+    if: ${{ (inputs.scope || 'all') == 'all' || (inputs.scope || 'all') == 'trivy' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -74,7 +86,7 @@ jobs:
 
   gitleaks:
     name: "gitleaks (secrets in history)"
-    if: ${{ inputs.scope == 'all' || inputs.scope == 'gitleaks' }}
+    if: ${{ (inputs.scope || 'all') == 'all' || (inputs.scope || 'all') == 'gitleaks' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -103,7 +115,7 @@ jobs:
 
   zap-baseline:
     name: "OWASP ZAP baseline scan (running server)"
-    if: ${{ inputs.scope == 'all' || inputs.scope == 'zap-baseline' }}
+    if: ${{ (inputs.scope || 'all') == 'all' || (inputs.scope || 'all') == 'zap-baseline' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -233,7 +245,7 @@ jobs:
 
   auth-tests:
     name: "Auth/authz integration suite (@pytest.mark.security)"
-    if: ${{ inputs.scope == 'all' || inputs.scope == 'auth-tests' }}
+    if: ${{ (inputs.scope || 'all') == 'all' || (inputs.scope || 'all') == 'auth-tests' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
