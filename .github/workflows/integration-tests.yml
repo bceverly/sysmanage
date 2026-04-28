@@ -1,4 +1,4 @@
-name: Phase 7 — Integration Tests (Linux/Windows/macOS)
+name: Integration Tests (Linux/Windows/macOS)
 
 # Manual-only for now. No push, no PR, no cron.
 on:
@@ -82,7 +82,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install -r requirements-dev.txt
+          # pytest, pytest-cov, pytest-asyncio are already in requirements.txt;
+          # the existing CI re-installs them here to be defensive.  Mirror that.
+          pip install pytest pytest-cov pytest-asyncio
 
       - name: Install LXD (for container_engine integration tests)
         run: |
@@ -209,15 +211,42 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
+          # Best-effort: agent's requirements.txt has heavy native deps
+          # (cryptography w/ Rust+maturin) that don't always wheel-install
+          # cleanly on every (OS, Python) combo.  Soft-fail so the rest of
+          # the job still runs against whatever did install.
           pip install -r requirements.txt || true
-          pip install -r requirements-dev.txt || true
+          pip install pytest pytest-asyncio || true
 
       - name: Run agent integration tests
         working-directory: sysmanage-agent
         shell: bash
         run: |
+          # Several agent test modules unconditionally import POSIX-only
+          # stdlib modules (pty/termios/pwd) or call os.getuid().  On
+          # Windows these crash at COLLECTION time, before pytest can
+          # apply --markers filtering.  Skip them on Windows; let macOS
+          # collect the full set (POSIX modules are present there).
+          IGNORES=()
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            for f in \
+              tests/test_child_host_alpine_console.py \
+              tests/test_child_host_alpine_vm_creator.py \
+              tests/test_child_host_debian_console.py \
+              tests/test_child_host_debian_vm_creator.py \
+              tests/test_child_host_kvm_creation.py \
+              tests/test_child_host_kvm_freebsd.py \
+              tests/test_child_host_vmm.py \
+              tests/test_generic_deployment.py \
+              tests/test_kvm_operations.py \
+              tests/test_lxd_operations.py
+            do
+              IGNORES+=( --ignore="$f" )
+            done
+          fi
           set +e
           python -m pytest tests/ \
+            "${IGNORES[@]}" \
             -m "${{ inputs.pytest_marker }}" \
             -v --tb=short \
             --junit-xml=integration-agent-junit.xml

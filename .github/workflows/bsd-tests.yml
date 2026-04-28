@@ -1,4 +1,4 @@
-name: Phase 7 — BSD Integration (FreeBSD/OpenBSD/NetBSD via QEMU)
+name: BSD Integration Tests (FreeBSD/OpenBSD/NetBSD via QEMU)
 
 # Manual-only.  BSD jobs are slow (QEMU emulation, no KVM in GitHub-hosted
 # runners), so cron is intentionally avoided.  Run on demand from the
@@ -23,9 +23,9 @@ on:
         default: "14.1"
         type: string
       release_openbsd:
-        description: "OpenBSD release tag"
+        description: "OpenBSD release tag (current is 7.8)"
         required: false
-        default: "7.5"
+        default: "7.8"
         type: string
       release_netbsd:
         description: "NetBSD release tag"
@@ -43,6 +43,25 @@ permissions:
 #
 # Each job clones sysmanage-agent and runs the agent's integration test
 # subset.  Server-side BSD is not tested (the server only ships for Linux).
+#
+# Native-build deps note:  the agent's requirements.txt pulls cryptography,
+# aiohttp, pyyaml, and other packages with C/Rust extensions.  On BSDs there
+# are no prebuilt wheels for these, and pip-building from source hits a
+# known maturin/SOABI bug (cryptography → maturin "Unsupported platform:
+# 311").  The workaround used here is:
+#
+#   1.  Install the heavy native packages from the BSD's own package
+#       manager (pkg / pkg_add / pkgin) where prebuilt binaries exist.
+#   2.  Create the venv with `--system-site-packages` so the venv inherits
+#       the OS-installed packages.
+#   3.  pip-install only the small pure-Python additions (pytest plugins).
+#   4.  Skip `pip install -r requirements.txt` entirely — too fragile.
+#
+# Result: the agent's MODULE imports work because cryptography etc. are
+# present from pkg, and pytest can collect tests.  If a particular test
+# needs a dep that's not in the OS package set, that test will fail to
+# collect and surface the gap clearly — at which point either pin a
+# wheel-having version or add the OS package.
 # ---------------------------------------------------------------------------
 
 jobs:
@@ -69,15 +88,20 @@ jobs:
           operating_system: freebsd
           version: ${{ inputs.release_freebsd }}
           run: |
-            sudo pkg install -y python311 py311-pip py311-sqlite3 git
+            # Install Python + heavy native deps from FreeBSD pkg.  See
+            # the comment block at the top of this workflow for why pip-
+            # installing requirements.txt directly does not work on BSDs.
+            sudo pkg install -y \
+              python311 py311-pip py311-sqlite3 git \
+              py311-cryptography py311-pyyaml py311-aiohttp py311-websockets \
+              py311-pytest py311-pytest-asyncio
             cd sysmanage-agent
-            python3.11 -m venv .venv
+            python3.11 -m venv --system-site-packages .venv
             . .venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements.txt || true
-            pip install -r requirements-dev.txt || true
+            python -m pip install --upgrade pip
             set +e
-            python -m pytest tests/ -m "${{ inputs.pytest_marker }}" -v --tb=short --junit-xml=bsd-freebsd-junit.xml
+            python -m pytest tests/ -m "${{ inputs.pytest_marker }}" \
+              -v --tb=short --junit-xml=bsd-freebsd-junit.xml
             rc=$?
             set -e
             if [ $rc -eq 5 ]; then
@@ -113,15 +137,21 @@ jobs:
           operating_system: openbsd
           version: ${{ inputs.release_openbsd }}
           run: |
-            sudo pkg_add python-3.11 py3-pip git
+            # OpenBSD packages use py3- prefix (single-Python-per-release
+            # convention).  As of OpenBSD 7.8 the default Python is 3.12;
+            # adjust the python-N.NN flavor below if you change the
+            # release_openbsd input.
+            sudo pkg_add -I \
+              python%3.12 py3-pip git \
+              py3-cryptography py3-yaml py3-aiohttp py3-websockets \
+              py3-pytest py3-pytest-asyncio
             cd sysmanage-agent
-            python3.11 -m venv .venv
+            python3.12 -m venv --system-site-packages .venv
             . .venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements.txt || true
-            pip install -r requirements-dev.txt || true
+            python -m pip install --upgrade pip
             set +e
-            python -m pytest tests/ -m "${{ inputs.pytest_marker }}" -v --tb=short --junit-xml=bsd-openbsd-junit.xml
+            python -m pytest tests/ -m "${{ inputs.pytest_marker }}" \
+              -v --tb=short --junit-xml=bsd-openbsd-junit.xml
             rc=$?
             set -e
             if [ $rc -eq 5 ]; then
@@ -157,15 +187,17 @@ jobs:
           operating_system: netbsd
           version: ${{ inputs.release_netbsd }}
           run: |
-            sudo pkgin -y install python311 py311-pip git
+            sudo pkgin -y install \
+              python311 py311-pip git \
+              py311-cryptography py311-yaml py311-aiohttp py311-websockets \
+              py311-pytest py311-pytest-asyncio
             cd sysmanage-agent
-            python3.11 -m venv .venv
+            python3.11 -m venv --system-site-packages .venv
             . .venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements.txt || true
-            pip install -r requirements-dev.txt || true
+            python -m pip install --upgrade pip
             set +e
-            python -m pytest tests/ -m "${{ inputs.pytest_marker }}" -v --tb=short --junit-xml=bsd-netbsd-junit.xml
+            python -m pytest tests/ -m "${{ inputs.pytest_marker }}" \
+              -v --tb=short --junit-xml=bsd-netbsd-junit.xml
             rc=$?
             set -e
             if [ $rc -eq 5 ]; then
