@@ -1,6 +1,12 @@
 name: Integration Tests (Linux/Windows/macOS)
 
-# Manual-only for now. No push, no PR, no cron.
+# Two triggers:
+#   1. workflow_dispatch — run on demand from the Actions UI; inputs
+#      let you pick Python version, marker, and OS subset.
+#   2. push of a release tag (v*.*.* or v*.*.*.*) — automatic per-
+#      release integration sweep, mirroring build-and-release.yml.
+#      Tag-push runs use the dispatch defaults below since
+#      `workflow_dispatch.inputs.*` are empty on push events.
 on:
   workflow_dispatch:
     inputs:
@@ -21,6 +27,11 @@ on:
         default: "all"
         type: choice
         options: ["all", "linux-only", "linux+macos", "linux+windows"]
+  push:
+    # Mirror build-and-release.yml's tag pattern.
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*.*'
 
 permissions:
   contents: read
@@ -50,7 +61,7 @@ jobs:
   # -----------------------------------------------------------------------
   integration-server:
     name: "Server integration (Linux + Postgres)"
-    if: ${{ inputs.platforms != 'linux+macos' && inputs.platforms != 'linux+windows' || inputs.platforms == 'all' || inputs.platforms == 'linux-only' }}
+    if: ${{ (inputs.platforms || 'all') != 'linux+macos' && (inputs.platforms || 'all') != 'linux+windows' || (inputs.platforms || 'all') == 'all' || (inputs.platforms || 'all') == 'linux-only' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -75,7 +86,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
-          python-version: ${{ inputs.python_version }}
+          python-version: ${{ inputs.python_version || '3.12' }}
           cache: pip
 
       - name: Install backend deps
@@ -143,13 +154,13 @@ jobs:
           set +e
           python -m pytest tests/ \
             --ignore=tests/ui/ \
-            -m "${{ inputs.pytest_marker }}" \
+            -m "${{ inputs.pytest_marker || 'integration' }}" \
             -v --tb=short \
             --junit-xml=integration-server-junit.xml
           rc=$?
           set -e
           if [ $rc -eq 5 ]; then
-            echo "::warning::No tests matched marker '${{ inputs.pytest_marker }}'. Tag tests with @pytest.mark.${{ inputs.pytest_marker }} to populate this run."
+            echo "::warning::No tests matched marker '${{ inputs.pytest_marker || 'integration' }}'. Tag tests with @pytest.mark.${{ inputs.pytest_marker || 'integration' }} to populate this run."
             exit 0
           fi
           exit $rc
@@ -161,7 +172,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: integration-server-junit-py${{ inputs.python_version }}
+          name: integration-server-junit-py${{ inputs.python_version || '3.12' }}
           path: integration-server-junit.xml
 
   # -----------------------------------------------------------------------
@@ -182,19 +193,19 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Skip non-Linux on linux-only runs
-        if: ${{ inputs.platforms == 'linux-only' && matrix.os != 'ubuntu-latest' }}
+        if: ${{ (inputs.platforms || 'all') == 'linux-only' && matrix.os != 'ubuntu-latest' }}
         run: |
           echo "Skipping ${{ matrix.os }} per platforms=linux-only input."
           exit 0
 
       - name: Skip macOS on linux+windows runs
-        if: ${{ inputs.platforms == 'linux+windows' && matrix.os == 'macos-latest' }}
+        if: ${{ (inputs.platforms || 'all') == 'linux+windows' && matrix.os == 'macos-latest' }}
         run: |
           echo "Skipping ${{ matrix.os }} per platforms=linux+windows input."
           exit 0
 
       - name: Skip Windows on linux+macos runs
-        if: ${{ inputs.platforms == 'linux+macos' && matrix.os == 'windows-latest' }}
+        if: ${{ (inputs.platforms || 'all') == 'linux+macos' && matrix.os == 'windows-latest' }}
         run: |
           echo "Skipping ${{ matrix.os }} per platforms=linux+macos input."
           exit 0
@@ -202,7 +213,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
-          python-version: ${{ inputs.python_version }}
+          python-version: ${{ inputs.python_version || '3.12' }}
           cache: pip
 
       - name: Checkout sysmanage-agent into a sibling directory
@@ -253,13 +264,13 @@ jobs:
           set +e
           python -m pytest tests/ \
             "${IGNORES[@]}" \
-            -m "${{ inputs.pytest_marker }}" \
+            -m "${{ inputs.pytest_marker || 'integration' }}" \
             -v --tb=short \
             --junit-xml=integration-agent-junit.xml
           rc=$?
           set -e
           if [ $rc -eq 5 ]; then
-            echo "::warning::No agent tests matched marker '${{ inputs.pytest_marker }}' on ${{ matrix.os }}."
+            echo "::warning::No agent tests matched marker '${{ inputs.pytest_marker || 'integration' }}' on ${{ matrix.os }}."
             exit 0
           fi
           exit $rc
@@ -268,5 +279,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: integration-agent-${{ matrix.os }}-py${{ inputs.python_version }}-junit
+          name: integration-agent-${{ matrix.os }}-py${{ inputs.python_version || '3.12' }}-junit
           path: sysmanage-agent/integration-agent-junit.xml
