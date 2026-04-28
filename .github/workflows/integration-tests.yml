@@ -149,8 +149,7 @@ jobs:
           rc=$?
           set -e
           if [ $rc -eq 5 ]; then
-            echo "::warning::No tests matched marker '${{ inputs.pytest_marker }}'."
-            echo "::warning::Tag tests with @pytest.mark.${{ inputs.pytest_marker }} to populate this run."
+            echo "::warning::No tests matched marker '${{ inputs.pytest_marker }}'. Tag tests with @pytest.mark.${{ inputs.pytest_marker }} to populate this run."
             exit 0
           fi
           exit $rc

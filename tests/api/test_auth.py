@@ -96,7 +96,12 @@ class TestAuthLogin:
     def test_login_inactive_user(
         self, client, session, test_user_data, mock_login_security, mock_config
     ):
-        """Test login with inactive user account."""
+        """Inactive users (active=False) must be rejected at login.
+
+        Returns 401 with the generic "Invalid username or password" message —
+        same response as wrong-password / unknown-user — so callers cannot
+        probe whether a userid exists-but-disabled vs. doesn't-exist.
+        """
         # Create an inactive test user
         hashed_password = argon2_hasher.hash(test_user_data["password"])
         user = models.User(
@@ -118,9 +123,10 @@ class TestAuthLogin:
             },
         )
 
-        assert response.status_code == 200
-        data = response.json()
-        assert "Authorization" in data
+        assert response.status_code == 401
+        assert "Invalid username or password" in response.json()["detail"]
+        # Failed-login security record is what surfaces this in the audit log.
+        mock_login_security.record_failed_login.assert_called_once()
 
     def test_login_rate_limited(self, client, mock_login_security):
         """Test login when rate limited by security system."""

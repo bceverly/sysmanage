@@ -85,17 +85,20 @@ jobs:
 
       - name: Run gitleaks
         # NOTE: pin to SHA before merging.  v2.3.9 is the latest of the v2
-        # major; major v3 was not published as of v1.7.0.0.  The Node 20
-        # deprecation warning (Sep 2026 EOL) will need an upstream fix.
-        # The .gitleaks.toml at the repo root excludes test fixtures.
+        # major; major v3 was not published as of v1.7.0.0.  The action
+        # ships a node20 runtime declaration which GitHub deprecates on
+        # 2026-06-02 (forced to node24) and removes 2026-09-16.  Until
+        # upstream publishes a node24 release, opt in early so the
+        # deprecation warning stops nagging us.
         uses: gitleaks/gitleaks-action@v2.3.9
         env:
-          # gitleaks-action posts to GitHub by default; set GITHUB_TOKEN to
-          # the default token for SARIF upload.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Don't fail the job on findings; we want to inspect the report.
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
           GITLEAKS_ENABLE_SUMMARY: "true"
+          # Opt in to node24 early to silence the deprecation warning.
+          # Safe to remove once gitleaks-action ships a node24-declared
+          # release.
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
         continue-on-error: true
 
   zap-baseline:
@@ -318,8 +321,7 @@ jobs:
           rc=$?
           set -e
           if [ $rc -eq 5 ]; then
-            echo "::warning::No tests tagged @pytest.mark.security yet."
-            echo "::warning::Tag auth/authz/WebSocket-security tests with @pytest.mark.security to populate this run."
+            echo "::warning::No tests tagged @pytest.mark.security yet. Tag auth/authz/WebSocket-security tests with @pytest.mark.security to populate this run."
             exit 0
           fi
           exit $rc

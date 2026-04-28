@@ -216,6 +216,27 @@ def _authenticate_db_user(  # NOSONAR
     is_secure,
 ):
     """Authenticate a user from the database."""
+    # Reject inactive accounts before any lockout / password work.  We
+    # respond with the same generic 401 + "Invalid username or password"
+    # message used for wrong-password and unknown-user paths so an
+    # attacker cannot probe whether a given userid exists-but-disabled
+    # vs. doesn't-exist.  The audit trail still records the disabled
+    # account login attempt for the operator.
+    if not user.active:
+        login_security.record_failed_login(
+            str(login_data.userid), client_ip, user_agent
+        )
+        _log_login_attempt(
+            session,
+            user.id,
+            str(login_data.userid),
+            False,
+            client_ip,
+            user_agent,
+            "Account is inactive",
+        )
+        raise HTTPException(status_code=401, detail=_("Invalid username or password"))
+
     # Check if user account is locked
     if login_security.is_user_account_locked(user):
         login_security.record_failed_login(
