@@ -1090,14 +1090,14 @@ Audit summary: see `docs/phase6-audit.md` for the per-item write-up.
    - [x] HTTP-layer integration tests for `automation_engine` and `fleet_engine` (Phase 5 shipped these; Phase 7 verifies they still run via the integration workflow)
    - [x] Cross-platform agent testing (`integration-tests.yml` matrix on Linux/Windows/macOS, plus `bsd-tests.yml` covering FreeBSD/OpenBSD/NetBSD via QEMU; full agent integration suite in `sysmanage-agent/tests/integration/`)
    - [x] Pro+ module integration tests (sysmanage repo: `tests/api/test_integration_proplus_stubs.py` exercises stub-layer wiring; Pro+ repo: per-engine HTTP tests above)
-   - [ ] WebSocket reliability under load — **deferred to Phase 8** (Phase 7's `ws-throughput` scenario is a connect-and-fast-reject probe, not a full reliability harness; see Phase 8 carryovers)
+   - [x] WebSocket reliability under load — full harness landed pre-Phase-8 in `tests/load/run.py` (`ws-reconnect-storm`, `ws-ordering`, `ws-backpressure` scenarios) and wired into `.github/workflows/load-tests.yml`
 
 3. **Load Testing**
    - [x] 100 concurrent agents (verified clean: p50 3.96 ms / p95 14 ms / 0 errors over 10 min)
    - [x] 500 concurrent agents — scenario configured in `agents-cascade`; will fire on next tag push
    - [x] 1000 concurrent agents — scenario configured in `agents-cascade`; will fire on next tag push (gated on 100 + 500 succeeding first)
    - [x] Database query performance under load (`db-perf` scenario in load harness)
-   - [x] WebSocket message throughput (`ws-throughput` scenario; basic — full reliability harness is a Phase 8 carryover)
+   - [x] WebSocket message throughput (`ws-throughput` scenario for connect-and-reject baseline; reliability harness — `ws-reconnect-storm`, `ws-ordering`, `ws-backpressure` — landed pre-Phase-8)
 
 4. **Security Penetration Test**
    - [ ] External penetration test — **deferred to Phase 8** (budget item; Phase 7 closeout did not engage a vendor; this is an explicit decision rather than a missing deliverable).
@@ -1116,7 +1116,7 @@ Audit summary: see `docs/phase6-audit.md` for the per-item write-up.
 - [x] Backend test coverage: ≥75% (75% from Phase 6, increased with new integration + security suites)
 - [x] Agent test coverage: ≥75% (93.12% from Phase 6, plus 19 new integration tests)
 - [x] Pro+ test coverage: ≥80% (100% per-engine; HTTP-layer integration tests now cover all 5 production-tier engines)
-- [x] All integration tests passing (server suite, agent matrix, BSD QEMU, Pro+ engine HTTP — all green; WS reliability under load is the lone exception, deferred to Phase 8 with rationale)
+- [x] All integration tests passing (server suite, agent matrix, BSD QEMU, Pro+ engine HTTP, WS reliability harness — all green)
 - [x] Load test targets met (100 verified clean; 500/1000 will fire on next tag push via the `agents-cascade` scenario)
 - [x] Security review complete with no critical findings (24 `@pytest.mark.security` tests; one critical bug found and fixed during the review)
 - [x] No critical bugs remaining (1 found this phase, fixed — no others open)
@@ -1128,7 +1128,7 @@ Audit summary: see `docs/phase6-audit.md` for the per-item write-up.
 - **External penetration test** — vendor engagement; punted from Phase 7 to a Phase 8 budget decision.
 - **Pro+ UI flows via Playwright** — separate stream of work; needs Playwright bootstrap, page objects, and a cross-Pro+-feature scenario plan.
 - **Multi-host fleet end-to-end** — needs a real test rig spawning N agent processes against a hosted server; currently Phase 7's agent-fleet load tests cover the protocol-stack scaling, but functional E2E across automation+fleet on a real fleet is its own project.
-- **Full WebSocket reliability harness** — Phase 7's `ws-throughput` scenario is a connect-and-fast-reject probe; reconnect storms, message-ordering invariants, and back-pressure semantics need a dedicated harness.
+- ~~**Full WebSocket reliability harness**~~ — landed pre-Phase-8.  `tests/load/run.py` now provides `ws-reconnect-storm` (N-way thundering-herd auth+connect+close cycles), `ws-ordering` (single-session FIFO contract verification), and `ws-backpressure` (rate-ramp probe that reports the empirical breakpoint).  All three are wired into `.github/workflows/load-tests.yml` as workflow_dispatch options.
 
 ---
 

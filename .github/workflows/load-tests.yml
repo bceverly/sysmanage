@@ -22,6 +22,9 @@ on:
           - "agents-1000"
           - "db-perf"
           - "ws-throughput"
+          - "ws-reconnect-storm"   # WS reliability harness — thundering herd
+          - "ws-ordering"          # WS reliability harness — FIFO contract
+          - "ws-backpressure"      # WS reliability harness — sustained-throughput probe
           - "all"
       duration_minutes:
         description: "Steady-state duration after warm-up"
@@ -56,11 +59,17 @@ permissions:
 # harness lands):
 #
 #   tests/load/run.py
-#       --scenario [agents-N|db-perf|ws-throughput]
+#       --scenario [agents|db-perf|ws-throughput|ws-reconnect-storm|
+#                   ws-ordering|ws-backpressure|all]
 #       --agents N
 #       --duration-seconds N
 #       --server-url http://localhost:8000
 #       --output-json /path/to/results.json
+#
+# WebSocket reliability harness (Phase 8 additions):
+#   ws-reconnect-storm  — N agents cycle full auth handshake under load
+#   ws-ordering         — single session, verify FIFO contract on receive loop
+#   ws-backpressure     — single session, ramp send-rate; report breakpoint
 #
 #   On exit:
 #     - exit 0  : run completed, results.json written
@@ -220,6 +229,11 @@ jobs:
             agents-1000)   run_one "agents-1000"   --scenario agents --agents 1000 ;;
             db-perf)       run_one "db-perf"       --scenario db-perf       ;;
             ws-throughput) run_one "ws-throughput" --scenario ws-throughput ;;
+            ws-reconnect-storm)
+                           run_one "ws-reconnect-storm" --scenario ws-reconnect-storm --agents 100 ;;
+            ws-ordering)   run_one "ws-ordering"   --scenario ws-ordering   ;;
+            ws-backpressure)
+                           run_one "ws-backpressure" --scenario ws-backpressure ;;
             all)           run_one "all"           --scenario all           ;;
             *)
               echo "::error::Unknown scenario: $SCENARIO"
