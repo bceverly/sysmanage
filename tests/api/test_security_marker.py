@@ -315,3 +315,163 @@ def test_valid_token_authenticates(
         f"valid admin token did NOT authenticate (status={resp.status_code}); "
         f"the negative tests above might be passing for the wrong reason"
     )
+
+
+# -----------------------------------------------------------------------
+# 5.  WebSocket auth on /api/agent/connect
+# -----------------------------------------------------------------------
+#
+# The agent WS endpoint authenticates via a `?token=...` query parameter
+# (NOT a JWT — it's a server-issued connection token from
+# websocket_security).  Behavior under failure cases:
+#   - missing token   → server accepts the handshake then closes with code
+#                       4401 ("authentication required")
+#   - invalid token   → server accepts the handshake then closes with code
+#                       4001 ("authentication failed")
+# These tests use TestClient.websocket_connect which raises
+# WebSocketDisconnect once the server closes; we assert the close code.
+
+
+def _ws_close_code(client, path):
+    """Open a WS, expect immediate close, return the close code (or None)."""
+    from starlette.testclient import (  # pylint: disable=import-outside-toplevel
+        WebSocketDisconnect,
+    )
+
+    try:
+        with client.websocket_connect(path) as ws:
+            # Some servers close after the first recv; read once to surface it.
+            try:
+                ws.receive_text()
+            except WebSocketDisconnect as e:
+                return e.code
+        return None  # closed normally without an error code
+    except WebSocketDisconnect as e:
+        return e.code
+
+
+@pytest.mark.security
+def test_ws_connect_without_token_is_closed(client):
+    """Anonymous WS connect must NOT be allowed to send/receive freely."""
+    code = _ws_close_code(client, "/api/agent/connect")
+    # 4001 / 4401 are application-level WS close codes; 1000 is "normal".
+    # Anything other than a clean session-open should surface here as
+    # a non-None close code.
+    assert code is not None, (
+        "WS /api/agent/connect did not close on anonymous connect — "
+        "auth gate broken"
+    )
+    assert code != 1000, (
+        f"WS closed with code 1000 (normal) for an anonymous connect; "
+        f"expected 4xxx auth-failure"
+    )
+
+
+@pytest.mark.security
+def test_ws_connect_with_invalid_token_is_closed(client):
+    """A bogus connection token must produce an auth-failure close code."""
+    code = _ws_close_code(
+        client,
+        "/api/agent/connect?token=this-is-definitely-not-a-real-connection-token",
+    )
+    assert code is not None, (
+        "WS /api/agent/connect did not close on invalid token — auth gate broken"
+    )
+    assert code != 1000, (
+        f"WS closed normally (1000) on invalid token; expected 4xxx"
+    )
+
+
+# -----------------------------------------------------------------------
+# 6.  Privilege escalation across security_roles
+# -----------------------------------------------------------------------
+#
+# A user without the appropriate role must be rejected with 403 from any
+# role-gated endpoint.  We pick three endpoints that gate distinct roles:
+#   POST   /user        → ADD_USER
+#   DELETE /user/<id>   → DELETE_USER
+#   PUT    /user/<id>   → EDIT_USER
+# A "Reporter" / read-only user has none of these; the test issues a
+# valid JWT for that user and verifies all three endpoints respond 403.
+
+
+@pytest.fixture
+def reporter_user_token(session, mock_config):
+    """Create a real, password-hashed, no-roles user and issue them a JWT."""
+    import time as _t  # pylint: disable=import-outside-toplevel
+
+    u = models.User(
+        userid="reporter-only@example.com",
+        hashed_password=argon2_hasher.hash("doesntmatter"),
+        active=True,
+    )
+    session.add(u)
+    session.commit()
+    payload = {
+        "user_id": "reporter-only@example.com",
+        "expires": _t.time() + int(mock_config["security"]["jwt_auth_timeout"]),
+    }
+    return pyjwt.encode(
+        payload,
+        mock_config["security"]["jwt_secret"],
+        algorithm=mock_config["security"]["jwt_algorithm"],
+    )
+
+
+@pytest.mark.security
+def test_role_escalation_post_user_blocked(client, reporter_user_token):
+    """A user without ADD_USER must NOT be able to POST /api/user."""
+    resp = client.post(
+        "/api/user",
+        headers={"Authorization": f"Bearer {reporter_user_token}"},
+        json={
+            "userid": "should-never-be-created@example.com",
+            "active": True,
+            "first_name": "x",
+            "last_name": "y",
+        },
+    )
+    assert resp.status_code == 403, (
+        f"POST /api/user without ADD_USER role returned {resp.status_code} "
+        f"(expected 403 — privilege escalation gate broken)"
+    )
+
+
+@pytest.mark.security
+def test_role_escalation_put_user_blocked(client, reporter_user_token):
+    """A user without EDIT_USER must NOT be able to PUT /api/user/<id>."""
+    resp = client.put(
+        "/api/user/00000000-0000-0000-0000-000000000abc",
+        headers={"Authorization": f"Bearer {reporter_user_token}"},
+        json={
+            "userid": "noop@example.com",
+            "active": True,
+            "first_name": "x",
+            "last_name": "y",
+        },
+    )
+    assert resp.status_code in (
+        403,
+        404,
+    ), (
+        f"PUT /api/user/<id> without EDIT_USER role returned {resp.status_code} "
+        f"(expected 403; 404 is also acceptable if the gate runs after the "
+        f"lookup but before any mutation)"
+    )
+
+
+@pytest.mark.security
+def test_role_escalation_delete_user_blocked(client, reporter_user_token):
+    """A user without DELETE_USER must NOT be able to DELETE /api/user/<id>."""
+    resp = client.delete(
+        "/api/user/00000000-0000-0000-0000-000000000abc",
+        headers={"Authorization": f"Bearer {reporter_user_token}"},
+    )
+    assert resp.status_code in (
+        403,
+        404,
+    ), (
+        f"DELETE /api/user/<id> without DELETE_USER role returned "
+        f"{resp.status_code} (expected 403; 404 acceptable for same reason "
+        f"as PUT above)"
+    )

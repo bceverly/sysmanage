@@ -13,9 +13,10 @@ on:
       scenario:
         description: "Which load scenario to run"
         required: true
-        default: "agents-100"
+        default: "agents-cascade"
         type: choice
         options:
+          - "agents-cascade"   # 100 → 500 → 1000, gated; default for tag pushes
           - "agents-100"
           - "agents-500"
           - "agents-1000"
@@ -72,7 +73,7 @@ permissions:
 
 jobs:
   load:
-    name: "Load: ${{ inputs.scenario || 'agents-100' }} (${{ inputs.duration_minutes || '10' }} min)"
+    name: "Load: ${{ inputs.scenario || 'agents-cascade' }} (${{ inputs.duration_minutes || '10' }} min)"
     runs-on: ubuntu-latest
     timeout-minutes: 240
 
@@ -165,19 +166,7 @@ jobs:
           PYTHONPATH: .
           DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
 
-      - name: Resolve scenario into harness args
-        id: scenario
-        run: |
-          case "${{ inputs.scenario || 'agents-100' }}" in
-            agents-100)     echo "args=--scenario agents --agents 100"   >> "$GITHUB_OUTPUT" ;;
-            agents-500)     echo "args=--scenario agents --agents 500"   >> "$GITHUB_OUTPUT" ;;
-            agents-1000)    echo "args=--scenario agents --agents 1000"  >> "$GITHUB_OUTPUT" ;;
-            db-perf)        echo "args=--scenario db-perf"               >> "$GITHUB_OUTPUT" ;;
-            ws-throughput)  echo "args=--scenario ws-throughput"         >> "$GITHUB_OUTPUT" ;;
-            all)            echo "args=--scenario all"                   >> "$GITHUB_OUTPUT" ;;
-          esac
-
-      - name: Run load harness
+      - name: Run load scenario(s)
         run: |
           if [ ! -f tests/load/run.py ]; then
             echo "::warning::tests/load/run.py does not exist yet."
@@ -188,19 +177,55 @@ jobs:
           fi
           mkdir -p .runtime-logs
           DURATION_SECONDS=$(( ${{ inputs.duration_minutes || '10' }} * 60 ))
-          set +e
-          python tests/load/run.py \
-            ${{ steps.scenario.outputs.args }} \
-            --duration-seconds "$DURATION_SECONDS" \
-            --server-url http://localhost:8000 \
-            --output-json .runtime-logs/results.json
-          rc=$?
-          set -e
-          if [ $rc -eq 5 ]; then
-            echo "::warning::Harness reported scenario not implemented (exit 5) — soft skip."
-            exit 0
-          fi
-          exit $rc
+
+          # Run a single (scenario, args, output-name) tuple through the
+          # harness.  Returns 0 on success / SLA-pass, 2 on SLA violation,
+          # >0 on unexpected error.  Exit-5 ("not implemented") is treated
+          # as soft success so the cascade continues.
+          run_one() {
+            local label="$1"; shift
+            local out=".runtime-logs/results-${label}.json"
+            echo ""
+            echo "=== Running ${label} ==="
+            set +e
+            python tests/load/run.py "$@" \
+              --duration-seconds "$DURATION_SECONDS" \
+              --server-url http://localhost:8000 \
+              --output-json "$out"
+            local rc=$?
+            set -e
+            if [ $rc -eq 5 ]; then
+              echo "::warning::Harness reported ${label} not implemented (exit 5) — treating as soft pass."
+              return 0
+            fi
+            return $rc
+          }
+
+          SCENARIO="${{ inputs.scenario || 'agents-cascade' }}"
+          case "$SCENARIO" in
+            agents-cascade)
+              # 100 → 500 → 1000.  Each gates the next:  if 100 fails (SLA
+              # violation or worse), 500 and 1000 do not run.
+              for n in 100 500 1000; do
+                if ! run_one "agents-${n}" --scenario agents --agents "$n"; then
+                  echo "::error::agents-${n} failed; not running larger scales."
+                  exit 1
+                fi
+              done
+              echo ""
+              echo "=== Cascade complete:  agents-100, agents-500, agents-1000 all passed ==="
+              ;;
+            agents-100)    run_one "agents-100"    --scenario agents --agents 100  ;;
+            agents-500)    run_one "agents-500"    --scenario agents --agents 500  ;;
+            agents-1000)   run_one "agents-1000"   --scenario agents --agents 1000 ;;
+            db-perf)       run_one "db-perf"       --scenario db-perf       ;;
+            ws-throughput) run_one "ws-throughput" --scenario ws-throughput ;;
+            all)           run_one "all"           --scenario all           ;;
+            *)
+              echo "::error::Unknown scenario: $SCENARIO"
+              exit 1
+              ;;
+          esac
         env:
           PYTHONPATH: .
 
@@ -215,7 +240,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: load-${{ inputs.scenario || 'agents-100' }}-${{ inputs.duration_minutes || '10' }}min
+          name: load-${{ inputs.scenario || 'agents-cascade' }}-${{ inputs.duration_minutes || '10' }}min
           path: |
-            .runtime-logs/results.json
+            .runtime-logs/results-*.json
             .runtime-logs/server.log
+          if-no-files-found: ignore

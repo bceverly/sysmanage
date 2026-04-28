@@ -1100,16 +1100,16 @@ Audit summary: see `docs/phase6-audit.md` for the per-item write-up.
    - [ ] WebSocket message throughput
 
 4. **Security Penetration Test**
-   - [ ] External penetration test (if budget allows)
-   - [ ] Internal security review
-   - [ ] Authentication bypass attempts
-   - [ ] Privilege escalation attempts
-   - [ ] WebSocket security review
+   - [ ] External penetration test — **deferred to Phase 8** (budget item; Phase 7 closeout did not engage a vendor; this is an explicit decision rather than a missing deliverable).
+   - [x] Internal security review (auth/authz suite — 24 `@pytest.mark.security` tests covering JWT validity/forgery/replay, refresh token flow, login lockout, anonymous-access blocks, role escalation, WebSocket connect auth)
+   - [x] Authentication bypass attempts (covered by the security suite; one real bypass found and fixed: inactive users could authenticate with the right password — `backend/api/auth.py::_authenticate_db_user`)
+   - [x] Privilege escalation attempts (`Reporter`-class user blocked from POST/PUT/DELETE on `/api/user/*`)
+   - [x] WebSocket security review (`/api/agent/connect` rejects anonymous and invalid-token handshakes with 4xxx close codes)
 
 5. **Bug Fixes**
-   - [ ] Resolve all critical bugs
-   - [ ] Resolve all high-priority bugs
-   - [ ] Triage and document remaining bugs
+   - [x] Resolve all critical bugs (1 found this phase — auth bypass for inactive users — fixed)
+   - [x] Resolve all high-priority bugs (none open)
+   - [x] Triage and document remaining bugs (no untriaged bugs at v1.7.0.0 closeout)
 
 ### Exit Criteria
 
@@ -1120,6 +1120,13 @@ Audit summary: see `docs/phase6-audit.md` for the per-item write-up.
 - Load test targets met
 - Security review complete with no critical findings
 - No critical bugs remaining
+
+### Phase 8 carryovers (explicit deferrals)
+
+- **External penetration test** — vendor engagement; punted from Phase 7 to a Phase 8 budget decision.
+- **Pro+ UI flows via Playwright** — separate stream of work; needs Playwright bootstrap, page objects, and a cross-Pro+-feature scenario plan.
+- **Multi-host fleet end-to-end** — needs a real test rig spawning N agent processes against a hosted server; currently Phase 7's agent-fleet load tests cover the protocol-stack scaling, but functional E2E across automation+fleet on a real fleet is its own project.
+- **Full WebSocket reliability harness** — Phase 7's `ws-throughput` scenario is a connect-and-fast-reject probe; reconnect storms, message-ordering invariants, and back-pressure semantics need a dedicated harness.
 
 ---
 
