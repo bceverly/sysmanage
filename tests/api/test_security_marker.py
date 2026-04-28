@@ -183,7 +183,13 @@ def test_refresh_with_forged_cookie_signature_is_rejected(
         "expires": time.time() + 3600,
         "type": "refresh",
     }
-    forged = pyjwt.encode(payload, "wrong-secret", algorithm="HS256")
+    # PyJWT >=2.10 warns on HMAC keys <32 bytes for HS256; pick a long
+    # but obviously-not-the-real-secret value so the warning stays clean.
+    forged = pyjwt.encode(
+        payload,
+        "an-attacker-controlled-secret-not-the-real-one-but-32+bytes",
+        algorithm="HS256",
+    )
     client.cookies.set("refresh_token", forged)
     resp = client.post("/refresh")
     assert resp.status_code in (
@@ -351,15 +357,19 @@ def _ws_close_code(client, path):
 
 
 @pytest.mark.security
-def test_ws_connect_without_token_is_closed(client):
+def test_ws_connect_without_token_is_closed(client, monkeypatch):
     """Anonymous WS connect must NOT be allowed to send/receive freely."""
+    # The WS handler grabs its own DB session via `next(get_db())`, bypassing
+    # FastAPI's dependency-override system, so the audit-log commit hits the
+    # real configured Postgres in CI.  The auth-failure close path is what
+    # we care about — stub the audit log to a no-op for these two tests.
+    monkeypatch.setattr("backend.api.agent.AuditService.log", lambda *a, **kw: None)
     code = _ws_close_code(client, "/api/agent/connect")
     # 4001 / 4401 are application-level WS close codes; 1000 is "normal".
     # Anything other than a clean session-open should surface here as
     # a non-None close code.
     assert code is not None, (
-        "WS /api/agent/connect did not close on anonymous connect — "
-        "auth gate broken"
+        "WS /api/agent/connect did not close on anonymous connect — " "auth gate broken"
     )
     assert code != 1000, (
         f"WS closed with code 1000 (normal) for an anonymous connect; "
@@ -368,18 +378,17 @@ def test_ws_connect_without_token_is_closed(client):
 
 
 @pytest.mark.security
-def test_ws_connect_with_invalid_token_is_closed(client):
+def test_ws_connect_with_invalid_token_is_closed(client, monkeypatch):
     """A bogus connection token must produce an auth-failure close code."""
+    monkeypatch.setattr("backend.api.agent.AuditService.log", lambda *a, **kw: None)
     code = _ws_close_code(
         client,
         "/api/agent/connect?token=this-is-definitely-not-a-real-connection-token",
     )
-    assert code is not None, (
-        "WS /api/agent/connect did not close on invalid token — auth gate broken"
-    )
-    assert code != 1000, (
-        f"WS closed normally (1000) on invalid token; expected 4xxx"
-    )
+    assert (
+        code is not None
+    ), "WS /api/agent/connect did not close on invalid token — auth gate broken"
+    assert code != 1000, f"WS closed normally (1000) on invalid token; expected 4xxx"
 
 
 # -----------------------------------------------------------------------
