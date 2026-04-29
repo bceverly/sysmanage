@@ -33,18 +33,18 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.create_table(
         "access_groups",
-        sa.Column("id", sa.String(length=36), primary_key=True),
+        sa.Column("id", sa.UUID(), primary_key=True),
         sa.Column("name", sa.String(length=120), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column(
             "parent_id",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("access_groups.id", ondelete="SET NULL"),
             nullable=True,
         ),
         sa.Column(
             "created_by",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("user.id", ondelete="SET NULL"),
             nullable=True,
         ),
@@ -58,12 +58,12 @@ def upgrade() -> None:
 
     op.create_table(
         "registration_keys",
-        sa.Column("id", sa.String(length=36), primary_key=True),
+        sa.Column("id", sa.UUID(), primary_key=True),
         sa.Column("name", sa.String(length=120), nullable=False),
         sa.Column("key", sa.String(length=128), nullable=False, unique=True),
         sa.Column(
             "access_group_id",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("access_groups.id", ondelete="SET NULL"),
             nullable=True,
         ),
@@ -74,7 +74,7 @@ def upgrade() -> None:
         sa.Column("expires_at", sa.DateTime(), nullable=True),
         sa.Column(
             "created_by",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("user.id", ondelete="SET NULL"),
             nullable=True,
         ),
@@ -99,16 +99,16 @@ def upgrade() -> None:
 
     op.create_table(
         "host_access_groups",
-        sa.Column("id", sa.String(length=36), primary_key=True),
+        sa.Column("id", sa.UUID(), primary_key=True),
         sa.Column(
             "host_id",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("host.id", ondelete="CASCADE"),
             nullable=False,
         ),
         sa.Column(
             "access_group_id",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("access_groups.id", ondelete="CASCADE"),
             nullable=False,
         ),
@@ -123,22 +123,22 @@ def upgrade() -> None:
 
     op.create_table(
         "user_access_groups",
-        sa.Column("id", sa.String(length=36), primary_key=True),
+        sa.Column("id", sa.UUID(), primary_key=True),
         sa.Column(
             "user_id",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("user.id", ondelete="CASCADE"),
             nullable=False,
         ),
         sa.Column(
             "access_group_id",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("access_groups.id", ondelete="CASCADE"),
             nullable=False,
         ),
         sa.Column(
             "granted_by",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("user.id", ondelete="SET NULL"),
             nullable=True,
         ),

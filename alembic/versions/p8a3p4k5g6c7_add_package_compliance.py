@@ -28,13 +28,13 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.create_table(
         "package_profiles",
-        sa.Column("id", sa.String(length=36), primary_key=True),
+        sa.Column("id", sa.UUID(), primary_key=True),
         sa.Column("name", sa.String(length=120), nullable=False, unique=True),
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column("enabled", sa.Boolean(), nullable=False, server_default=sa.true()),
         sa.Column(
             "created_by",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("user.id", ondelete="SET NULL"),
             nullable=True,
         ),
@@ -44,10 +44,10 @@ def upgrade() -> None:
 
     op.create_table(
         "package_profile_constraints",
-        sa.Column("id", sa.String(length=36), primary_key=True),
+        sa.Column("id", sa.UUID(), primary_key=True),
         sa.Column(
             "profile_id",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("package_profiles.id", ondelete="CASCADE"),
             nullable=False,
         ),
@@ -78,16 +78,16 @@ def upgrade() -> None:
 
     op.create_table(
         "host_package_compliance_status",
-        sa.Column("id", sa.String(length=36), primary_key=True),
+        sa.Column("id", sa.UUID(), primary_key=True),
         sa.Column(
             "host_id",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("host.id", ondelete="CASCADE"),
             nullable=False,
         ),
         sa.Column(
             "profile_id",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("package_profiles.id", ondelete="CASCADE"),
             nullable=False,
         ),

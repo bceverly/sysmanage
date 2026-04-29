@@ -30,7 +30,7 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.create_table(
         "upgrade_profiles",
-        sa.Column("id", sa.String(length=36), primary_key=True),
+        sa.Column("id", sa.UUID(), primary_key=True),
         sa.Column("name", sa.String(length=120), nullable=False, unique=True),
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column("cron", sa.String(length=200), nullable=False),
@@ -50,13 +50,13 @@ def upgrade() -> None:
         ),
         sa.Column(
             "tag_id",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("tags.id", ondelete="SET NULL"),
             nullable=True,
         ),
         sa.Column(
             "created_by",
-            sa.String(length=36),
+            sa.UUID(),
             sa.ForeignKey("user.id", ondelete="SET NULL"),
             nullable=True,
         ),
