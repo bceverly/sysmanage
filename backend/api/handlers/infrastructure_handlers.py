@@ -175,11 +175,27 @@ async def handle_script_execution_result(  # NOSONAR
             execution_id,
         )
 
-        # Log script execution result
+        # Log script execution result.  Uses ActionType.EXECUTE (Phase 8.4
+        # requirement) and includes stdout/stderr in the details JSON so
+        # the audit log carries the full execution record.  Output is
+        # truncated to 8 KiB per stream to keep entries readable in the
+        # UI; the full payload remains in ScriptExecutionLog.{stdout,stderr}_output.
         script_status = "completed" if message_data.get("success", False) else "failed"
+        _max_audit_output = 8 * 1024  # 8 KiB per stream
+
+        def _truncate(s):
+            if not s:
+                return s
+            if len(s) <= _max_audit_output:
+                return s
+            return (
+                s[:_max_audit_output]
+                + f"\n... (truncated; {len(s) - _max_audit_output} bytes elided)"
+            )
+
         AuditService.log(
             db=db,
-            action_type=ActionType.AGENT_MESSAGE,
+            action_type=ActionType.EXECUTE,
             entity_type=EntityType.SCRIPT,
             entity_id=str(execution_log.id),
             entity_name=message_data.get("script_name", "Unknown"),
@@ -198,6 +214,8 @@ async def handle_script_execution_result(  # NOSONAR
                 "host_id": str(host.id),
                 "hostname": host.fqdn,
                 "timed_out": message_data.get("timeout", False),
+                "stdout": _truncate(message_data.get("stdout", "")),
+                "stderr": _truncate(message_data.get("stderr", "")),
             },
             error_message=message_data.get("error"),
         )

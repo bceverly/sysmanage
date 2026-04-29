@@ -50,6 +50,57 @@ class TestAuditLogFilterEndpoint:
         assert response.status_code in [200, 403, 404]
 
 
+class TestAuditLogResultFilter:
+    """Phase 8.4 added a `result` query parameter to /list (SUCCESS,
+    FAILURE, PENDING).  Verify it's accepted without error."""
+
+    def test_filter_by_result_success(self, client, auth_headers):
+        response = client.get(
+            "/api/audit-log/list?result=SUCCESS", headers=auth_headers
+        )
+        assert response.status_code in [200, 403, 404]
+
+    def test_filter_by_result_failure(self, client, auth_headers):
+        response = client.get(
+            "/api/audit-log/list?result=FAILURE", headers=auth_headers
+        )
+        assert response.status_code in [200, 403, 404]
+
+
+class TestAuditLogCsvExport:
+    """Phase 8.4 added an OSS CSV export path to /export."""
+
+    def test_export_requires_auth(self, client):
+        response = client.get("/api/audit-log/export?fmt=csv")
+        assert response.status_code in [401, 403, 404]
+
+    def test_export_csv_authorized(self, client, auth_headers):
+        """Authorized CSV export must return text/csv (200) or 403 if the
+        test user lacks VIEW_AUDIT_LOG.  Either way: NEVER 500."""
+        response = client.get("/api/audit-log/export?fmt=csv", headers=auth_headers)
+        assert response.status_code in [200, 403]
+        if response.status_code == 200:
+            assert response.headers.get("content-type", "").startswith("text/csv")
+            # Header row must include the canonical columns.
+            body = response.text
+            assert "timestamp" in body.split("\n", 1)[0]
+
+    def test_export_unsupported_format_400(self, client, auth_headers):
+        """An unknown format string must produce a 400, not silently
+        fall through to the Pro+ redirect or to CSV."""
+        response = client.get("/api/audit-log/export?fmt=xml", headers=auth_headers)
+        # 400 if authorized; 401/403 if not authorized.
+        assert response.status_code in [400, 401, 403]
+
+    def test_export_json_without_proplus_returns_402(self, client, auth_headers):
+        """JSON/CEF/LEEF require Pro+; OSS-only deployments must get 402
+        (Payment Required) — NOT a CSV in disguise."""
+        response = client.get("/api/audit-log/export?fmt=json", headers=auth_headers)
+        # 402 if authorized + OSS-only; 307 if Pro+ engine is loaded;
+        # 401/403 if unauthorized.
+        assert response.status_code in [307, 402, 401, 403]
+
+
 class TestAuditLogHostEndpoint:
     """Test cases for host-specific audit log."""
 

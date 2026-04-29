@@ -696,6 +696,147 @@ def test_db():
         host = relationship("Host", back_populates="firewall_roles")
         firewall_role = relationship("FirewallRole", back_populates="host_assignments")
 
+    # Phase 8.1 — access groups + registration keys (test-side mirrors).
+    class AccessGroup(TestBase):
+        __tablename__ = "access_groups"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        name = Column(String(120), nullable=False)
+        description = Column(Text, nullable=True)
+        parent_id = Column(
+            GUID(),
+            ForeignKey("access_groups.id", ondelete="SET NULL"),
+            nullable=True,
+        )
+        created_by = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+        created_at = Column(DateTime, nullable=True)
+        updated_at = Column(DateTime, nullable=True)
+
+    class RegistrationKey(TestBase):
+        __tablename__ = "registration_keys"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        name = Column(String(120), nullable=False)
+        key = Column(String(128), nullable=False, unique=True)
+        access_group_id = Column(
+            GUID(),
+            ForeignKey("access_groups.id", ondelete="SET NULL"),
+            nullable=True,
+        )
+        auto_approve = Column(Boolean, nullable=False, default=False)
+        revoked = Column(Boolean, nullable=False, default=False)
+        max_uses = Column(Integer, nullable=True)
+        use_count = Column(Integer, nullable=False, default=0)
+        expires_at = Column(DateTime, nullable=True)
+        created_by = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+        created_at = Column(DateTime, nullable=True)
+        last_used_at = Column(DateTime, nullable=True)
+
+    class HostAccessGroup(TestBase):
+        __tablename__ = "host_access_groups"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        host_id = Column(
+            GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False
+        )
+        access_group_id = Column(
+            GUID(),
+            ForeignKey("access_groups.id", ondelete="CASCADE"),
+            nullable=False,
+        )
+        created_at = Column(DateTime, nullable=True)
+
+    class UserAccessGroup(TestBase):
+        __tablename__ = "user_access_groups"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        user_id = Column(
+            GUID(), ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+        )
+        access_group_id = Column(
+            GUID(),
+            ForeignKey("access_groups.id", ondelete="CASCADE"),
+            nullable=False,
+        )
+        granted_by = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+        created_at = Column(DateTime, nullable=True)
+
+    # Phase 8.2 — upgrade profiles (test-side mirror).
+    class UpgradeProfile(TestBase):
+        __tablename__ = "upgrade_profiles"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        name = Column(String(120), nullable=False, unique=True)
+        description = Column(Text, nullable=True)
+        cron = Column(String(200), nullable=False)
+        enabled = Column(Boolean, nullable=False, default=True)
+        last_run = Column(DateTime, nullable=True)
+        last_status = Column(String(40), nullable=True)
+        next_run = Column(DateTime, nullable=True)
+        security_only = Column(Boolean, nullable=False, default=False)
+        package_managers = Column(Text, nullable=True)
+        staggered_window_min = Column(Integer, nullable=False, default=0)
+        tag_id = Column(
+            GUID(), ForeignKey("tags.id", ondelete="SET NULL"), nullable=True
+        )
+        created_by = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+        created_at = Column(DateTime, nullable=True)
+        updated_at = Column(DateTime, nullable=True)
+
+    # Phase 8.3 — package compliance (test-side mirrors).
+    from sqlalchemy import JSON as _JSON  # local import — only needed here
+
+    class PackageProfile(TestBase):
+        __tablename__ = "package_profiles"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        name = Column(String(120), nullable=False, unique=True)
+        description = Column(Text, nullable=True)
+        enabled = Column(Boolean, nullable=False, default=True)
+        created_by = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+        created_at = Column(DateTime, nullable=True)
+        updated_at = Column(DateTime, nullable=True)
+        constraints = relationship(
+            "PackageProfileConstraint",
+            cascade="all, delete-orphan",
+        )
+
+    class PackageProfileConstraint(TestBase):
+        __tablename__ = "package_profile_constraints"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        profile_id = Column(
+            GUID(),
+            ForeignKey("package_profiles.id", ondelete="CASCADE"),
+            nullable=False,
+        )
+        package_name = Column(String(255), nullable=False)
+        package_manager = Column(String(60), nullable=True)
+        constraint_type = Column(String(20), nullable=False, default="REQUIRED")
+        version_op = Column(String(4), nullable=True)
+        version = Column(String(120), nullable=True)
+        created_at = Column(DateTime, nullable=True)
+
+    class HostPackageComplianceStatus(TestBase):
+        __tablename__ = "host_package_compliance_status"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        host_id = Column(
+            GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False
+        )
+        profile_id = Column(
+            GUID(),
+            ForeignKey("package_profiles.id", ondelete="CASCADE"),
+            nullable=False,
+        )
+        status = Column(String(20), nullable=False, default="PENDING")
+        violations = Column(_JSON, nullable=True)
+        last_scan_at = Column(DateTime, nullable=True)
+        created_at = Column(DateTime, nullable=True)
+        updated_at = Column(DateTime, nullable=True)
+
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)
 

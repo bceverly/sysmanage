@@ -74,6 +74,11 @@ class HostRegistration(BaseModel):
     enabled_shells: Optional[List[str]] = None
     agent_version: Optional[str] = None
     auto_approve_token: Optional[str] = None
+    # Phase 8.1: optional pre-shared registration key.  When supplied
+    # and valid, the server enrolls the host into the key's
+    # access_group and (if the key has auto_approve=True) skips the
+    # manual approval gate.
+    registration_key: Optional[str] = None
 
 
 class HostRegistrationLegacy(BaseModel):
@@ -594,6 +599,27 @@ async def register_host(registration_data: HostRegistration):
                 session.rollback()
                 raise
 
+        # Phase 8.1: validate optional registration_key BEFORE creating
+        # the host row, so a bad key never even creates a pending host.
+        # When present and valid, we enroll into the access_group AND
+        # apply auto_approve if the key allows it.
+        validated_key = None
+        if registration_data.registration_key:
+            validated_key = (
+                session.query(models.RegistrationKey)
+                .filter(
+                    models.RegistrationKey.key == registration_data.registration_key
+                )
+                .first()
+            )
+            if validated_key is None or not validated_key.is_usable():
+                # Don't leak which condition failed (revoked vs expired vs
+                # max-uses-exceeded) — generic 403 is the safe response.
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Invalid or expired registration key"),
+                )
+
         # Create new host with pending approval status and minimal data
         host = models.Host(
             fqdn=registration_data.fqdn,
@@ -602,14 +628,62 @@ async def register_host(registration_data: HostRegistration):
             ipv6=registration_data.ipv6,
             last_access=datetime.now(timezone.utc),
         )
-        host.approval_status = "pending"
+
+        # Auto-approve when the matched key allows it; otherwise pending.
+        if validated_key is not None and validated_key.auto_approve:
+            host.approval_status = "approved"
+        else:
+            host.approval_status = "pending"
 
         # NOTE: Script execution capability defaults to False for new hosts
         # This should only be enabled through explicit admin configuration after registration
         host.script_execution_enabled = False
         session.add(host)
+        session.flush()  # need host.id for join-table inserts below
+
+        # Phase 8.1: enroll into the key's access group + bump the
+        # key's use_count + last_used_at.  All in one commit so the
+        # invariant "use_count reflects successful enrollments" holds
+        # even on a crash mid-registration.
+        if validated_key is not None:
+            if validated_key.access_group_id is not None:
+                session.add(
+                    models.HostAccessGroup(
+                        host_id=host.id,
+                        access_group_id=validated_key.access_group_id,
+                    )
+                )
+            validated_key.use_count = (validated_key.use_count or 0) + 1
+            validated_key.last_used_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
         session.commit()
         session.refresh(host)
+
+        # Audit log: enrollment via registration key carries enough
+        # context that the operator can correlate to the matched key.
+        if validated_key is not None:
+            AuditService.log(
+                db=session,
+                action_type=ActionType.CREATE,
+                entity_type=EntityType.HOST,
+                entity_id=str(host.id),
+                entity_name=host.fqdn,
+                description=_(
+                    "Host '%s' enrolled via registration key '%s' (auto_approve=%s)"
+                )
+                % (host.fqdn, validated_key.name, validated_key.auto_approve),
+                result=Result.SUCCESS,
+                details={
+                    "registration_key_id": str(validated_key.id),
+                    "registration_key_name": validated_key.name,
+                    "access_group_id": (
+                        str(validated_key.access_group_id)
+                        if validated_key.access_group_id
+                        else None
+                    ),
+                    "auto_approved": validated_key.auto_approve,
+                },
+            )
 
         return host
 

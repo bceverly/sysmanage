@@ -8,6 +8,7 @@ authenticated and unauthenticated endpoints.
 from fastapi import FastAPI
 
 from backend.api import (
+    access_groups,
     agent,
     antivirus_defaults,
     antivirus_status,
@@ -32,6 +33,7 @@ from backend.api import (
     host_hostname,
     openbao,
     opentelemetry,
+    package_compliance,
     packages,
     password_reset,
     plugin_bundle,
@@ -48,6 +50,7 @@ from backend.api import (
     third_party_repos,
     ubuntu_pro_settings,
     updates,
+    upgrade_profiles,
     user,
     user_preferences,
 )
@@ -144,6 +147,16 @@ def register_routes(app: FastAPI):
     logger.info("Adding reports router")
     app.include_router(reports.router, tags=["reports"])
     logger.info("Reports router added")
+
+    logger.info("Adding access-groups + registration-keys routers (Phase 8.1)")
+    app.include_router(access_groups.groups_router)
+    app.include_router(access_groups.keys_router)
+
+    logger.info("Adding upgrade-profiles router (Phase 8.2)")
+    app.include_router(upgrade_profiles.router)
+
+    logger.info("Adding package-compliance router (Phase 8.3)")
+    app.include_router(package_compliance.router)
 
     logger.info("Adding tag router with /api prefix")
     app.include_router(tag.router, prefix="/api", tags=["tags"])

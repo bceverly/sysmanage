@@ -75,6 +75,9 @@ async def list_audit_logs(  # NOSONAR
     user_id: Optional[str] = Query(None, description=_("Filter by user ID")),
     action_type: Optional[str] = Query(None, description=_("Filter by action type")),
     entity_type: Optional[str] = Query(None, description=_("Filter by entity type")),
+    result: Optional[str] = Query(
+        None, description=_("Filter by result (SUCCESS, FAILURE, PENDING)")
+    ),
     category: Optional[str] = Query(None, description=_("Filter by category")),
     entry_type: Optional[str] = Query(None, description=_("Filter by entry type")),
     search: Optional[str] = Query(
@@ -152,6 +155,9 @@ async def list_audit_logs(  # NOSONAR
 
         if entity_type:
             query = query.filter(models.AuditLog.entity_type == entity_type)
+
+        if result:
+            query = query.filter(models.AuditLog.result == result)
 
         if category:
             query = query.filter(models.AuditLog.category == category)
@@ -279,27 +285,191 @@ async def get_audit_log_entry(
 
 
 @router.get("/export")
-async def export_audit_logs(
+async def export_audit_logs(  # NOSONAR
+    fmt: str = Query(
+        "csv", description=_("Export format: csv (OSS), json/cef/leef (Pro+)")
+    ),
+    user_id: Optional[str] = Query(None, description=_("Filter by user ID")),
+    action_type: Optional[str] = Query(None, description=_("Filter by action type")),
+    entity_type: Optional[str] = Query(None, description=_("Filter by entity type")),
+    result: Optional[str] = Query(None, description=_("Filter by result")),
+    category: Optional[str] = Query(None, description=_("Filter by category")),
+    entry_type: Optional[str] = Query(None, description=_("Filter by entry type")),
+    search: Optional[str] = Query(
+        None, description=_("Search in description / entity name")
+    ),
+    start_date: Optional[datetime] = Query(None, description=_("Filter by start date")),
+    end_date: Optional[datetime] = Query(None, description=_("Filter by end date")),
+    db_session: Session = Depends(get_db),
     dependencies=Depends(JWTBearer()),
     current_user: str = Depends(get_current_user),
 ):
     """
     Export audit log entries.
 
-    This is a Pro+ feature. Requires the audit_engine module for
-    CSV, JSON, CEF, and LEEF export formats.
+    OSS tier ships ``fmt=csv``.  Pro+ audit_engine adds ``json``, ``cef``,
+    and ``leef`` for SIEM integration.  CSV output uses the same filters as
+    the /list endpoint so operators can export exactly what they were
+    viewing.  Stream is unbounded (no /list limit/offset) — large filtered
+    ranges may take a few seconds to materialize.
+
+    Requires VIEW_AUDIT_LOG role.
     """
-    audit_engine = module_loader.get_module("audit_engine")
-    if audit_engine is None:
-        raise HTTPException(
-            status_code=402,
-            detail=_(
-                "Audit log export requires a SysManage Professional+ license. "
-                "Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
-            ),
+    # Authorize first.
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_session.get_bind()
+    )
+    with session_local() as session:
+        auth_user = (
+            session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
         )
-    raise HTTPException(
-        status_code=307,
-        detail=_("Use /api/v1/audit/export with Pro+ license"),
-        headers={"Location": "/api/v1/audit/export"},
+        if not auth_user:
+            raise HTTPException(status_code=401, detail=error_user_not_found())
+        if auth_user._role_cache is None:
+            auth_user.load_role_cache(session)
+        if not auth_user.has_role(SecurityRoles.VIEW_AUDIT_LOG):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: VIEW_AUDIT_LOG role required"),
+            )
+
+    fmt_lower = (fmt or "csv").lower()
+
+    # Pro+ formats route to the audit_engine module.  OSS ships csv only.
+    if fmt_lower in ("json", "cef", "leef"):
+        audit_engine = module_loader.get_module("audit_engine")
+        if audit_engine is None:
+            raise HTTPException(
+                status_code=402,
+                detail=_(
+                    "%s export requires a SysManage Professional+ license. "
+                    "OSS tier supports CSV export."
+                )
+                % fmt_lower.upper(),
+            )
+        # The Pro+ engine mounts its own export endpoint under /api/v1/audit;
+        # redirect there with the same query string so callers get a
+        # streaming response with the correct format.
+        raise HTTPException(
+            status_code=307,
+            detail=_("Use /api/v1/audit/export with Pro+ license"),
+            headers={"Location": "/api/v1/audit/export"},
+        )
+
+    if fmt_lower != "csv":
+        raise HTTPException(
+            status_code=400,
+            detail=_("Unsupported export format: %s") % fmt,
+        )
+
+    # Build query with the same filter shape as /list.  The filters are
+    # intentionally duplicated rather than factored out so the OSS export
+    # path stays self-contained — Pro+ engines have their own filter
+    # builder and the duplication is small.
+    query = db_session.query(models.AuditLog)
+    if user_id:
+        try:
+            query = query.filter(models.AuditLog.user_id == uuid.UUID(user_id))
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=400, detail=_("Invalid user ID format")
+            ) from exc
+    if action_type:
+        query = query.filter(models.AuditLog.action_type == action_type)
+    if entity_type:
+        query = query.filter(models.AuditLog.entity_type == entity_type)
+    if result:
+        query = query.filter(models.AuditLog.result == result)
+    if category:
+        query = query.filter(models.AuditLog.category == category)
+    if entry_type:
+        query = query.filter(models.AuditLog.entry_type == entry_type)
+    if search:
+        pattern = f"%{search}%"
+        query = query.filter(
+            or_(
+                models.AuditLog.description.ilike(pattern),
+                models.AuditLog.entity_name.ilike(pattern),
+            )
+        )
+    if start_date:
+        query = query.filter(models.AuditLog.timestamp >= start_date)
+    if end_date:
+        query = query.filter(models.AuditLog.timestamp <= end_date)
+
+    entries = query.order_by(models.AuditLog.timestamp.desc()).all()
+    logger.info(
+        "Audit log CSV export by %s: %d entries",
+        sanitize_log(current_user),
+        len(entries),
+    )
+    return _stream_audit_csv(entries)
+
+
+_CSV_COLUMNS = [
+    "timestamp",
+    "user_id",
+    "username",
+    "action_type",
+    "entity_type",
+    "entity_id",
+    "entity_name",
+    "result",
+    "description",
+    "ip_address",
+    "user_agent",
+    "category",
+    "entry_type",
+    "error_message",
+]
+
+
+def _stream_audit_csv(entries):
+    """Stream a CSV of audit-log entries — RFC 4180 compliant."""
+    import csv  # local import — only needed on this code path
+    import io
+    from fastapi.responses import StreamingResponse
+
+    def _row(e):
+        return [
+            e.timestamp.isoformat() if e.timestamp else "",
+            str(e.user_id) if e.user_id else "",
+            e.username or "",
+            e.action_type or "",
+            e.entity_type or "",
+            str(e.entity_id) if e.entity_id else "",
+            e.entity_name or "",
+            e.result or "",
+            e.description or "",
+            e.ip_address or "",
+            e.user_agent or "",
+            e.category or "",
+            e.entry_type or "",
+            e.error_message or "",
+        ]
+
+    def _generator():
+        buf = io.StringIO()
+        writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL, lineterminator="\n")
+        writer.writerow(_CSV_COLUMNS)
+        yield buf.getvalue()
+        buf.seek(0)
+        buf.truncate()
+        for entry in entries:
+            writer.writerow(_row(entry))
+            yield buf.getvalue()
+            buf.seek(0)
+            buf.truncate()
+
+    return StreamingResponse(
+        _generator(),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="audit-log-'
+                f'{datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")}.csv"'
+            ),
+        },
     )

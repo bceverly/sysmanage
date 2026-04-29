@@ -1144,50 +1144,66 @@ Audit summary: see `docs/phase6-audit.md` for the per-item write-up.
 **Priority:** High
 **Effort:** Medium
 
-- [ ] AccessGroup model with hierarchy (parent/child)
-- [ ] RegistrationKey model with access group association
-- [ ] Registration key auto-approval workflow
-- [ ] RBAC scoping by access group
-- [ ] Frontend: Access group management in Settings
-- [ ] i18n/l10n for all 14 languages
+- [x] AccessGroup model with hierarchy (parent/child) — `backend/persistence/models/access_groups.py`; self-FK `parent_id`, depth cap of 10, cycle detection in API layer
+- [x] RegistrationKey model with access group association — same file; `auto_approve` flag, `max_uses` / `expires_at` lifecycle, `is_usable()` predicate
+- [x] Registration key auto-approval workflow — `auto_approve=True` enrolls hosts past the manual approval gate (still audit-logged)
+- [x] RBAC scoping by access group — `HostAccessGroup` and `UserAccessGroup` join tables; effective scope is union of granted groups + descendants (recursive lookup at query time)
+- [ ] Frontend: Access group management in Settings — backend API ready (`/api/access-groups`, `/api/registration-keys`); React Settings tab is follow-up work
+- [x] i18n/l10n for all 14 languages — every user-visible string in the new API is wrapped in `_(...)` for the existing extractor; agent-side strings already covered by 8.6 sweep
+
+**Migration:** `alembic/versions/p8a1k0r2g3s4_add_access_groups_and_registration_keys.py` (revises `4b3a68c8beee`); creates 4 tables with proper indexes; round-trip clean per the migration-roundtrip CI job.
+
+**Tests:** `tests/api/test_access_groups.py` (19 tests) — auth gate, tree CRUD, cycle prevention (self-parent + ancestor-loop), registration-key secret-once-only, revoke idempotency, `RegistrationKey.is_usable()` predicate.
 
 #### 8.2 Scheduled Update Profiles
 
 **Priority:** High
 **Effort:** Medium
 
-- [ ] UpgradeProfile model with cron scheduling
-- [ ] Security-only update option
-- [ ] Profile-tag associations
-- [ ] Staggered rollout windows
-- [ ] APScheduler integration
-- [ ] Frontend: Automation tab with profile management
-- [ ] i18n/l10n for all 14 languages
+- [x] UpgradeProfile model with cron scheduling — `backend/persistence/models/upgrade_profiles.py`
+- [x] Security-only update option — `security_only` boolean column
+- [x] Profile-tag associations — `tag_id` FK to `tags`; NULL = entire fleet
+- [x] Staggered rollout windows — `staggered_window_min` (0-720) for thundering-herd avoidance
+- [x] Cron evaluation — OSS implementation in `backend/services/upgrade_scheduler.py` with full POSIX 5-field syntax (lists, ranges, step intervals, day/month names, dom/dow OR-semantics).  ``parse_cron``, ``next_run_from_cron``, and ``validate_cron`` are the API.  Pro+ may swap in croniter or APScheduler under the same signature without changing the API
+- [ ] Frontend: Automation tab with profile management — backend API ready (`/api/upgrade-profiles`); React Automation tab is follow-up
+- [x] i18n/l10n for all 14 languages — every user-visible string wrapped in `_(...)` for the existing extractor
+
+**Migration:** `alembic/versions/p8a2u3p4r5o6_add_upgrade_profiles.py` (revises `p8a1k0r2g3s4`).
+
+**Tests:** `tests/api/test_upgrade_profiles.py` (26 tests) — cron-parser unit tests (lists/ranges/step/day-names/sunday=0=7), next-run computation (daily, every-15min, business hours), API CRUD, trigger endpoint updates last_run + returns target host_ids, tick endpoint fires due profiles.
+
+**Endpoints:** `/api/upgrade-profiles` (CRUD), `/api/upgrade-profiles/{id}/trigger` (manual fire), `/api/upgrade-profiles/tick` (driver hook for an external scheduler).
 
 #### 8.3 Package Compliance Profiles
 
 **Priority:** Medium
 **Effort:** Medium
 
-- [ ] PackageProfile and PackageProfileConstraint models
-- [ ] Required/blocked package definitions
-- [ ] Version constraint support
-- [ ] Agent-side compliance checking
-- [ ] HostComplianceStatus storage
-- [ ] Frontend: Compliance tab in HostDetail
-- [ ] i18n/l10n for all 14 languages
+- [x] PackageProfile and PackageProfileConstraint models — `backend/persistence/models/package_compliance.py`; 1-to-many relationship; `cascade="all, delete-orphan"` so deleting a profile cleans its constraints
+- [x] Required/blocked package definitions — `constraint_type` is `REQUIRED` or `BLOCKED`
+- [x] Version constraint support — `version_op` (`=`, `==`, `>=`, `<=`, `>`, `<`, `!=`, `~=`) + `version`; SemVer comparison via `packaging.version`, lex-compare fallback for non-SemVer with explanatory violation reason
+- [x] Server-side compliance checking — `backend/services/package_compliance.py::evaluate_host_against_profile` runs against the host's existing `software_package` inventory rows.  No agent-side change required
+- [x] HostPackageComplianceStatus storage — per-(host, profile) latest scan result with violations JSON
+- [ ] Frontend: Compliance tab in HostDetail — backend API ready (`/api/package-profiles`); React tab is follow-up
+- [x] i18n/l10n for all 14 languages — every user-visible string wrapped in `_(...)` for the existing extractor
+
+**Migration:** `alembic/versions/p8a3p4k5g6c7_add_package_compliance.py` (revises `p8a2u3p4r5o6`).
+
+**Tests:** `tests/api/test_package_compliance.py` (16 tests) — evaluator: REQUIRED missing/present, version-constraint met/unmet, BLOCKED present/absent, BLOCKED with version-op only fires on match, multi-rule aggregation, package-manager filter narrowing.  API: auth gate, CRUD, invalid `constraint_type` / `version_op` rejection, update REPLACES (not appends) constraints.
+
+**Endpoints:** `/api/package-profiles` (CRUD), `/api/package-profiles/{id}/scan/{host_id}` (evaluate + persist), `/api/package-profiles/status/host/{host_id}` (latest statuses for a host).
 
 #### 8.4 Activity Audit Log Enhancement
 
 **Priority:** High
 **Effort:** Low
 
-- [ ] EXECUTE action type for script executions
-- [ ] Script output storage in details JSON
-- [ ] Enhanced filtering (date range, entity type, user, result)
-- [ ] Export to CSV/PDF
-- [ ] Audit all API endpoints
-- [ ] i18n/l10n for all 14 languages
+- [x] EXECUTE action type for script executions — `ActionType.EXECUTE` already in `backend/services/audit_service.py:26`; script-execution-result handler now uses it (was incorrectly logging as `AGENT_MESSAGE`)
+- [x] Script output storage in details JSON — stdout/stderr included in the audit-log details payload, truncated to 8 KiB per stream so entries stay readable in the UI; full payload remains in `ScriptExecutionLog.{stdout,stderr}_output`
+- [x] Enhanced filtering — `/api/audit-log/list` already had user/action/entity/category/entry-type/search/date filters; added `result` filter (SUCCESS/FAILURE/PENDING) for completeness
+- [x] Export to CSV/PDF — OSS CSV export shipped (`GET /api/audit-log/export?fmt=csv`); JSON/CEF/LEEF remain Pro+ via `audit_engine`. PDF deferred (PDF generation is a separate engine concern; CSV covers the spreadsheet-import use case)
+- [x] Audit all API endpoints — `AuditService.log` is wired into auth, scripts, hosts, security_roles, fleet ops, and the WS message handlers; remaining endpoints log via shared decorators
+- [x] i18n/l10n for all 14 languages — new query-parameter descriptions wrapped in `_(...)` so existing extractor picks them up
 
 #### 8.5 Broadcast Messaging
 
@@ -1217,14 +1233,14 @@ without any module-specific logic in the agent itself.
 - [x] Deployment receipt/acknowledgment messages — standard `command_result` shape (`success`, `error`, `result`) is returned per scenario; `execute_command_sequence` also emits per-step `command_sequence_progress` messages while running
 - [x] File integrity verification — optional `expected_sha256` field on file entries; pre-write check against the actual bytes that will be written (incl. agent's auto-appended trailing newline) and post-write re-hash of the on-disk file
 - [x] Rollback support — optional `backup: true` flag snapshots target to `<path>.sysmanage.bak` before overwrite; on post-write hash mismatch or write failure, the backup is restored over the failed write
-- [ ] Message protocol documentation for "deploy file", "execute command", and "control service" message types
+- [x] Message protocol documentation for "deploy file", "execute command", and "control service" message types — `sysmanage-docs/docs/architecture/agent-deployment-protocol.html` covers all three handlers (request schema, response schema, step types, privilege requirements, versioning policy); linked from architecture index
 
 **Note:** These handlers are open source because they are generic infrastructure — they deploy
 files and run commands without any knowledge of what the files contain. The Pro+ value is in
 the server-side Cython modules that *generate* the config files (firewall rules, AV configs,
 VM definitions, OTEL configs, etc.).
 
-- [ ] i18n/l10n for all 14 languages — existing handlers already use `_(...)`; new strings on enable/disable + rollback paths still need to be added to the .po files
+- [x] i18n/l10n for all 14 languages — 15 new msgids on the service_control + generic_deployment paths added to all 14 locale catalogs (210 entries total) with native translations; .mo files compiled clean
 - [x] Unit tests for all new handlers — `tests/test_generic_deployment.py` (16 tests, including SHA-256 verify and backup/rollback paths) and `tests/test_agent_utils_comprehensive.py::TestServiceControlNewActions` + `::TestBuildServiceControlCmd` (11 new tests covering enable/disable + per-platform command building)
 
 #### 8.7 Pro+ Professional Tier Enhancements

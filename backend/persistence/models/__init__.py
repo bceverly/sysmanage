@@ -6,8 +6,11 @@ All models are re-exported here for backward compatibility.
 """
 
 # Re-export all models for backward compatibility
+from .access_groups import *
 from .child_host import *
 from .core import *
+from .package_compliance import *
+from .upgrade_profiles import *
 from .grafana_integration import *
 from .graylog_attachment import *
 from .graylog_integration import *
@@ -121,6 +124,18 @@ __all__ = [
     # Secret versioning and rotation models
     "SecretVersion",
     "RotationSchedule",
+    # Access group / registration key models (Phase 8.1)
+    "AccessGroup",
+    "RegistrationKey",
+    "HostAccessGroup",
+    "UserAccessGroup",
+    "generate_registration_key",
+    # Upgrade-profile model (Phase 8.2)
+    "UpgradeProfile",
+    # Package-compliance models (Phase 8.3)
+    "PackageProfile",
+    "PackageProfileConstraint",
+    "HostPackageComplianceStatus",
 ]
 
 # Alias for Cython modules that reference ChildHost instead of HostChild
