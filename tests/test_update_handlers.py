@@ -36,6 +36,10 @@ class MockDB:
         mock_query.order_by.return_value = mock_query
         mock_query.first.return_value = None
         mock_query.delete.return_value = 1
+        # Phase 6 N+1 sweep replaced per-package ``.first()`` lookups
+        # with a single bulk ``.all()`` query — return an empty list so
+        # the outer ``for log in ... .all():`` loop is a no-op.
+        mock_query.all.return_value = []
         # Don't add query to executed_statements - only track execute() calls
         return mock_query
 

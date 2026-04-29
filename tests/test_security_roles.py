@@ -359,8 +359,14 @@ class TestUpdateUserRoles:
         mock_db.query.return_value.filter.return_value.first.side_effect = [
             mock_current_user,  # Current user lookup
             mock_target_user,  # Target user lookup
-            mock_role,  # Role lookup during validation
             mock_role,  # Role lookup for audit log
+        ]
+        # Role-existence verification was changed from per-id ``.first()``
+        # to a single bulk ``query(SecurityRole.id).filter(.in_()).all()``
+        # in the Phase 6 N+1 sweep.  Mock returns a list of one-tuple
+        # rows mirroring SQLAlchemy's scalar-column query shape.
+        mock_db.query.return_value.filter.return_value.all.return_value = [
+            (role_id,),
         ]
         mock_db.query.return_value.filter.return_value.delete.return_value = 0
 

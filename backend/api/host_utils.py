@@ -274,13 +274,15 @@ def get_host_users_with_groups(host_id: str) -> List[Dict[str, Any]]:
 
         # Bulk-fetch group memberships for all users in one query
         # rather than per-user (flagged in the Phase 6 N+1 audit).
+        # Keep the ORM-shape query (Membership, Group) — extracting the
+        # FK column directly via ``query(Membership.user_account_id, ...)``
+        # would change the row shape and break callers that mock the
+        # Membership object.
         user_ids = [u.id for u in user_accounts]
         groups_by_user: dict = {}
         if user_ids:
-            for membership_user_id, group in (
-                session.query(
-                    models.UserGroupMembership.user_account_id, models.UserGroup
-                )
+            for membership, group in (
+                session.query(models.UserGroupMembership, models.UserGroup)
                 .join(
                     models.UserGroup,
                     models.UserGroupMembership.user_group_id == models.UserGroup.id,
@@ -288,7 +290,7 @@ def get_host_users_with_groups(host_id: str) -> List[Dict[str, Any]]:
                 .filter(models.UserGroupMembership.user_account_id.in_(user_ids))
                 .all()
             ):
-                groups_by_user.setdefault(membership_user_id, []).append(
+                groups_by_user.setdefault(membership.user_account_id, []).append(
                     group.group_name
                 )
 
@@ -362,14 +364,14 @@ def get_host_user_groups(host_id: str) -> List[Dict[str, Any]]:
         )
 
         # Bulk-fetch member names for all groups in one query rather
-        # than per-group (flagged in the Phase 6 N+1 audit).
+        # than per-group (flagged in the Phase 6 N+1 audit).  Keep the
+        # ORM-shape query (Membership, UserAccount) for the same reason
+        # documented above on the get_host_users_with_groups variant.
         group_ids = [g.id for g in user_groups]
         users_by_group: dict = {}
         if group_ids:
-            for membership_group_id, user in (
-                session.query(
-                    models.UserGroupMembership.user_group_id, models.UserAccount
-                )
+            for membership, user in (
+                session.query(models.UserGroupMembership, models.UserAccount)
                 .join(
                     models.UserAccount,
                     models.UserGroupMembership.user_account_id == models.UserAccount.id,
@@ -377,7 +379,9 @@ def get_host_user_groups(host_id: str) -> List[Dict[str, Any]]:
                 .filter(models.UserGroupMembership.user_group_id.in_(group_ids))
                 .all()
             ):
-                users_by_group.setdefault(membership_group_id, []).append(user.username)
+                users_by_group.setdefault(membership.user_group_id, []).append(
+                    user.username
+                )
 
         groups = []
         for group in user_groups:
