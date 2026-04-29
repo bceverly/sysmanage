@@ -259,3 +259,66 @@ jobs:
             .runtime-logs/results-*.json
             .runtime-logs/server.log
           if-no-files-found: ignore
+
+      # ---------------------------------------------------------------------
+      # Regression check vs the previous tag's baseline.  Best-effort:  if no
+      # prior artifact exists (first run, deleted artifacts, mismatched
+      # scenario), the step warns and exits 0 — we don't want a missing
+      # baseline to block a release.  A genuine regression (>20 % p95,
+      # >+5 pp error rate, etc.) DOES fail the job.
+      # ---------------------------------------------------------------------
+      - name: Compare against previous baseline
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SCENARIO: ${{ inputs.scenario || 'agents-cascade' }}
+          DURATION: ${{ inputs.duration_minutes || '10' }}
+        run: |
+          set -e
+          ARTIFACT_NAME="load-${SCENARIO}-${DURATION}min"
+          mkdir -p .baseline
+          # Find the most recent successful prior run of THIS workflow on a
+          # tag, excluding the current run.  Empty result is OK — handled
+          # below.
+          PREV_RUN_ID=$(gh run list \
+              --workflow=load-tests.yml \
+              --status=success \
+              --event=push \
+              --limit=20 \
+              --json databaseId,headBranch \
+              --jq '[.[] | select(.headBranch | startswith("v"))] | .[1].databaseId // empty')
+          if [ -z "$PREV_RUN_ID" ]; then
+            echo "::notice::No prior tagged load-test run found; skipping regression check."
+            exit 0
+          fi
+          echo "Previous tagged run: $PREV_RUN_ID"
+          if ! gh run download "$PREV_RUN_ID" -n "$ARTIFACT_NAME" --dir .baseline 2>/dev/null; then
+            echo "::notice::Previous run $PREV_RUN_ID has no artifact named '${ARTIFACT_NAME}' (scenario changed?); skipping."
+            exit 0
+          fi
+          # The harness writes one results-<label>.json per scenario in the
+          # cascade.  Compare each candidate file against its baseline
+          # counterpart; any single regression fails the step.
+          fail=0
+          for cand in .runtime-logs/results-*.json; do
+            base=".baseline/$(basename "$cand")"
+            if [ ! -f "$base" ]; then
+              echo "::notice::No baseline for $(basename "$cand"); skipping."
+              continue
+            fi
+            echo ""
+            echo "=== Comparing $(basename "$cand") ==="
+            set +e
+            python tests/load/compare.py --baseline "$base" --candidate "$cand"
+            rc=$?
+            set -e
+            if [ $rc -eq 2 ]; then
+              fail=1
+            elif [ $rc -ne 0 ]; then
+              echo "::warning::compare.py exited $rc on $(basename "$cand")"
+            fi
+          done
+          if [ $fail -ne 0 ]; then
+            echo "::error::Load-test regression detected vs previous tag's baseline."
+            exit 1
+          fi

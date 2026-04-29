@@ -77,9 +77,11 @@ async def get_graylog_servers():
     )
 
     with session_local() as session:
-        # Find all hosts with Graylog role
-        graylog_hosts = (
-            session.query(models.Host)
+        # Single query gets both the Host and its matching HostRole;
+        # the previous code re-queried HostRole inside the loop (1+N
+        # queries — flagged in the Phase 6 N+1 audit).
+        rows = (
+            session.query(models.Host, models.HostRole)
             .join(models.HostRole)
             .filter(
                 models.HostRole.role == LOG_AGGREGATION_SERVER,
@@ -90,29 +92,15 @@ async def get_graylog_servers():
             .all()
         )
 
-        servers = []
-        for host in graylog_hosts:
-            # Get the Graylog role details
-            graylog_role = (
-                session.query(models.HostRole)
-                .filter(
-                    models.HostRole.host_id == host.id,
-                    models.HostRole.role == LOG_AGGREGATION_SERVER,
-                    models.HostRole.package_name == "graylog-server",
-                )
-                .first()
+        servers = [
+            GraylogServerInfo(
+                id=str(host.id),
+                fqdn=host.fqdn,
+                package_version=graylog_role.package_version,
+                is_active=graylog_role.is_active,
             )
-
-            servers.append(
-                GraylogServerInfo(
-                    id=str(host.id),
-                    fqdn=host.fqdn,
-                    package_version=(
-                        graylog_role.package_version if graylog_role else None
-                    ),
-                    is_active=graylog_role.is_active if graylog_role else False,
-                )
-            )
+            for host, graylog_role in rows
+        ]
 
         return {"graylog_servers": servers}
 

@@ -176,6 +176,59 @@ jobs:
           path: integration-server-junit.xml
 
   # -----------------------------------------------------------------------
+  # Migration round-trip job.  Catches non-reversible Alembic migrations
+  # before they can ship — the script `scripts/migration_roundtrip.py`
+  # captures the schema at head, runs `downgrade -1` then `upgrade head`,
+  # captures again, and fails on any schema drift.  Phase 8 ships several
+  # new tables; this job protects every one of them.
+  # -----------------------------------------------------------------------
+  migration-roundtrip:
+    name: "Migration round-trip (Postgres)"
+    if: ${{ (inputs.platforms || 'all') != 'linux+macos' && (inputs.platforms || 'all') != 'linux+windows' || (inputs.platforms || 'all') == 'all' || (inputs.platforms || 'all') == 'linux-only' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: abc123
+          POSTGRES_USER: sysmanage
+          POSTGRES_DB: sysmanage
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: ${{ inputs.python_version || '3.12' }}
+          cache: pip
+
+      - name: Install backend deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install postgres-client (for pg_dump)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Run migration round-trip
+        run: python scripts/migration_roundtrip.py
+        env:
+          PYTHONPATH: .
+          DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+  # -----------------------------------------------------------------------
   # Agent-side integration matrix: native OS coverage.  BSDs are handled by
   # bsd-tests.yml (QEMU) — they don't fit in this workflow because the
   # GitHub-hosted runner pool doesn't include them.

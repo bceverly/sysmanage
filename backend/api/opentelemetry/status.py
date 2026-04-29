@@ -124,9 +124,7 @@ async def get_opentelemetry_coverage(db: Session = Depends(get_db)):
         OpenTelemetryCoverageResponse with coverage statistics
     """
     try:
-        # Get all registered hosts
-        all_hosts = db.query(models.Host).all()
-        total_hosts = len(all_hosts)
+        total_hosts = db.query(models.Host).count()
 
         if total_hosts == 0:
             return OpenTelemetryCoverageResponse(
@@ -136,40 +134,35 @@ async def get_opentelemetry_coverage(db: Session = Depends(get_db)):
                 coverage_percentage=0.0,
             )
 
-        # Count hosts with OpenTelemetry deployed AND running
-        hosts_with_opentelemetry = 0
+        # Bulk-fetch instead of one query per host (the previous loop
+        # issued 2N queries and was the worst N+1 site flagged in the
+        # Phase 6 audit).  Two queries total now, regardless of fleet
+        # size.
+        host_ids_with_otel_pkg = {
+            row[0]
+            for row in db.query(models.SoftwarePackage.host_id)
+            .filter(
+                models.SoftwarePackage.package_name.ilike("%otel%")
+                | models.SoftwarePackage.package_name.ilike("%opentelemetry%")
+            )
+            .distinct()
+            .all()
+        }
+        host_ids_with_running_otelcol = {
+            row[0]
+            for row in db.query(models.HostRole.host_id)
+            .filter(
+                models.HostRole.package_name.ilike("%otelcol%"),
+                models.HostRole.service_status == "running",
+            )
+            .all()
+        }
 
-        for host in all_hosts:
-            # Check if OpenTelemetry is installed
-            opentelemetry_installed = (
-                db.query(models.SoftwarePackage)
-                .filter(
-                    models.SoftwarePackage.host_id == host.id,
-                    models.SoftwarePackage.package_name.ilike("%otel%")
-                    | models.SoftwarePackage.package_name.ilike("%opentelemetry%"),
-                )
-                .first()
-            ) is not None
-
-            if opentelemetry_installed:
-                # Check if service is running
-                otel_role = (
-                    db.query(models.HostRole)
-                    .filter(
-                        models.HostRole.host_id == host.id,
-                        models.HostRole.package_name.ilike("%otelcol%"),
-                    )
-                    .first()
-                )
-
-                # Count as deployed if installed and running
-                if otel_role and otel_role.service_status == "running":
-                    hosts_with_opentelemetry += 1
-
-        hosts_without_opentelemetry = total_hosts - hosts_with_opentelemetry
-        coverage_percentage = (
-            (hosts_with_opentelemetry / total_hosts * 100) if total_hosts > 0 else 0.0
+        hosts_with_opentelemetry = len(
+            host_ids_with_otel_pkg & host_ids_with_running_otelcol
         )
+        hosts_without_opentelemetry = total_hosts - hosts_with_opentelemetry
+        coverage_percentage = hosts_with_opentelemetry / total_hosts * 100
 
         return OpenTelemetryCoverageResponse(
             total_hosts=total_hosts,

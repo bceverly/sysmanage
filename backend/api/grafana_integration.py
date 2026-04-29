@@ -218,9 +218,11 @@ async def get_grafana_servers():
     )
 
     with session_local() as session:
-        # Find all hosts with Grafana role
-        grafana_hosts = (
-            session.query(models.Host)
+        # Single query gets both the Host and its matching HostRole;
+        # the previous code re-queried HostRole inside the loop (1+N
+        # queries — flagged in the Phase 6 N+1 audit).
+        rows = (
+            session.query(models.Host, models.HostRole)
             .join(models.HostRole)
             .filter(
                 models.HostRole.role == MONITORING_SERVER,
@@ -231,29 +233,15 @@ async def get_grafana_servers():
             .all()
         )
 
-        servers = []
-        for host in grafana_hosts:
-            # Get the Grafana role details
-            grafana_role = (
-                session.query(models.HostRole)
-                .filter(
-                    models.HostRole.host_id == host.id,
-                    models.HostRole.role == MONITORING_SERVER,
-                    models.HostRole.package_name == "grafana",
-                )
-                .first()
+        servers = [
+            GrafanaServerInfo(
+                id=str(host.id),
+                fqdn=host.fqdn,
+                package_version=grafana_role.package_version,
+                is_active=grafana_role.is_active,
             )
-
-            servers.append(
-                GrafanaServerInfo(
-                    id=str(host.id),
-                    fqdn=host.fqdn,
-                    package_version=(
-                        grafana_role.package_version if grafana_role else None
-                    ),
-                    is_active=grafana_role.is_active if grafana_role else False,
-                )
-            )
+            for host, grafana_role in rows
+        ]
 
         return {"grafana_servers": servers}
 

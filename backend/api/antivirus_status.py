@@ -550,9 +550,7 @@ class AntivirusCoverageResponse(BaseModel):
 async def get_antivirus_coverage(db: Session = Depends(get_db)):
     """Get antivirus coverage statistics across all registered hosts."""
     try:
-        # Get all registered hosts
-        all_hosts = db.query(models.Host).all()
-        total_hosts = len(all_hosts)
+        total_hosts = db.query(models.Host).count()
 
         if total_hosts == 0:
             return AntivirusCoverageResponse(
@@ -562,35 +560,22 @@ async def get_antivirus_coverage(db: Session = Depends(get_db)):
                 coverage_percentage=0.0,
             )
 
-        # Count hosts with antivirus (either open-source OR commercial)
-        hosts_with_antivirus = 0
-
-        for host in all_hosts:
-            has_opensource = False
-            has_commercial = False
-
-            # Check for open-source antivirus
-            opensource_status = (
-                db.query(models.AntivirusStatus)
-                .filter(models.AntivirusStatus.host_id == host.id)
-                .first()
-            )
-            if opensource_status and opensource_status.enabled:
-                has_opensource = True
-
-            # Check for commercial antivirus
-            commercial_status = (
-                db.query(models.CommercialAntivirusStatus)
-                .filter(models.CommercialAntivirusStatus.host_id == host.id)
-                .first()
-            )
-            if commercial_status and commercial_status.antivirus_enabled:
-                has_commercial = True
-
-            # Host has antivirus if either is installed and enabled
-            if has_opensource or has_commercial:
-                hosts_with_antivirus += 1
-
+        # Bulk-fetch instead of one query per host (the previous loop
+        # issued 2N queries — flagged in the Phase 6 audit).  Two
+        # queries total now, regardless of fleet size.
+        opensource_host_ids = {
+            row[0]
+            for row in db.query(models.AntivirusStatus.host_id)
+            .filter(models.AntivirusStatus.enabled.is_(True))
+            .all()
+        }
+        commercial_host_ids = {
+            row[0]
+            for row in db.query(models.CommercialAntivirusStatus.host_id)
+            .filter(models.CommercialAntivirusStatus.antivirus_enabled.is_(True))
+            .all()
+        }
+        hosts_with_antivirus = len(opensource_host_ids | commercial_host_ids)
         hosts_without_antivirus = total_hosts - hosts_with_antivirus
         coverage_percentage = (
             (hosts_with_antivirus / total_hosts * 100) if total_hosts > 0 else 0.0
