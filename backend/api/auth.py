@@ -23,6 +23,19 @@ argon2_hasher = PasswordHasher()
 router = APIRouter()
 
 
+def _invalid_credentials_error() -> HTTPException:
+    """The single source of truth for the generic-401 used on every
+    auth-failure path (unknown user, wrong password, inactive account,
+    rate-limit miss, etc.).  Returning the same wording from every
+    branch is a deliberate security choice — leaking which input was
+    wrong helps account enumeration.
+
+    Kept as a function rather than a module-level constant so the
+    ``_(...)`` call site sees a string literal at extraction time;
+    babel/gettext can't pull strings out of variable references."""
+    return HTTPException(status_code=401, detail=_("Invalid username or password"))
+
+
 def _is_secure_cookie_enabled(the_config):
     """Determine if secure cookies should be used based on config."""
     cert_file = the_config.get("api", {}).get("certFile")
@@ -154,7 +167,7 @@ async def login(login_data: UserLogin, request: Request, response: Response):  #
             str(login_data.userid), client_ip, user_agent
         )
 
-    raise HTTPException(status_code=401, detail=_("Invalid username or password"))
+    raise _invalid_credentials_error()
 
 
 def _try_admin_login(
@@ -235,7 +248,7 @@ def _authenticate_db_user(  # NOSONAR
             user_agent,
             "Account is inactive",
         )
-        raise HTTPException(status_code=401, detail=_("Invalid username or password"))
+        raise _invalid_credentials_error()
 
     # Check if user account is locked
     if login_security.is_user_account_locked(user):
@@ -293,7 +306,7 @@ def _handle_failed_password(user, login_data, session, client_ip, user_agent):
             detail=_("Account locked due to too many failed login attempts"),
         )
 
-    raise HTTPException(status_code=401, detail=_("Invalid username or password"))
+    raise _invalid_credentials_error()
 
 
 @router.post("/refresh")

@@ -253,6 +253,52 @@ def get_host_user_accounts(host_id: str) -> List[Dict[str, Any]]:
         ]
 
 
+def _is_windows_host(host) -> bool:
+    """True iff the host's platform string indicates Windows.  Encapsulated
+    so the SID back-compat path stays a one-liner in the formatter below."""
+    return bool(getattr(host, "platform", None) and "windows" in host.platform.lower())
+
+
+def _resolve_windows_sid(user, security_id_value):
+    """Pre-migration Windows agents stored the SID in ``user.shell``
+    (legacy schema).  When we see that pattern on a Windows host with a
+    null UID and an empty security_id, lift the SID out of ``shell``
+    and clear ``shell`` so the response shape matches modern agents.
+
+    Returns ``(security_id, shell)``.  Caller stores both."""
+    if (
+        user.uid is None
+        and user.shell
+        and user.shell.startswith("S-1-")
+        and not security_id_value
+    ):
+        return user.shell, None
+    return security_id_value, user.shell
+
+
+def _format_user_with_groups(user, host, group_names) -> Dict[str, Any]:
+    """JSON-shape one UserAccount row with its group memberships.
+    Pulled out of ``get_host_users_with_groups`` to keep that function's
+    cognitive complexity under SonarQube's 15-branch threshold."""
+    security_id_value = getattr(user, "security_id", None)
+    shell_value = user.shell
+    if _is_windows_host(host):
+        security_id_value, shell_value = _resolve_windows_sid(user, security_id_value)
+
+    return {
+        "id": str(user.id),
+        "username": user.username,
+        "uid": user.uid,  # Unix UID (integer) or None for Windows
+        "security_id": security_id_value,  # Windows SID (string) or None for Unix
+        "home_directory": user.home_directory,
+        "shell": shell_value,
+        "is_system_user": user.is_system_user,
+        "groups": group_names,
+        "created_at": user.created_at.isoformat() if user.created_at else None,
+        "updated_at": user.updated_at.isoformat() if user.updated_at else None,
+    }
+
+
 def get_host_users_with_groups(host_id: str) -> List[Dict[str, Any]]:
     """Get user accounts with group memberships for a host."""
     session_local = sessionmaker(
@@ -294,54 +340,10 @@ def get_host_users_with_groups(host_id: str) -> List[Dict[str, Any]]:
                     group.group_name
                 )
 
-        # Convert to JSON-compatible format with group memberships
-        users = []
-        for user in user_accounts:
-            group_names = groups_by_user.get(user.id, [])
-
-            # Handle both Unix UIDs and Windows SIDs
-            uid_value = user.uid  # Integer for Unix systems
-            security_id_value = getattr(
-                user, "security_id", None
-            )  # String for Windows SIDs
-            shell_value = user.shell
-
-            # For backwards compatibility: check if Windows SID was stored in shell field
-            if (
-                hasattr(host, "platform")
-                and host.platform
-                and "windows" in host.platform.lower()
-            ):
-                if (
-                    user.uid is None
-                    and user.shell
-                    and user.shell.startswith("S-1-")
-                    and not security_id_value
-                ):
-                    # Legacy: Windows SID stored in shell field
-                    security_id_value = user.shell
-                    shell_value = None
-
-            users.append(
-                {
-                    "id": str(user.id),
-                    "username": user.username,
-                    "uid": uid_value,  # Unix UID (integer) or None for Windows
-                    "security_id": security_id_value,  # Windows SID (string) or None for Unix
-                    "home_directory": user.home_directory,
-                    "shell": shell_value,
-                    "is_system_user": user.is_system_user,
-                    "groups": group_names,
-                    "created_at": (
-                        user.created_at.isoformat() if user.created_at else None
-                    ),
-                    "updated_at": (
-                        user.updated_at.isoformat() if user.updated_at else None
-                    ),
-                }
-            )
-
-        return users
+        return [
+            _format_user_with_groups(user, host, groups_by_user.get(user.id, []))
+            for user in user_accounts
+        ]
 
 
 def get_host_user_groups(host_id: str) -> List[Dict[str, Any]]:
