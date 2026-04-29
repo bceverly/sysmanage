@@ -160,13 +160,18 @@ async def update_antivirus_defaults(  # NOSONAR
     try:
         updated_defaults = []
 
+        # Bulk-fetch existing defaults in one query rather than one
+        # ``.first()`` per OS (flagged in the Phase 6 N+1 audit).
+        os_names = [u.os_name for u in bulk_update.defaults]
+        existing_by_os = {
+            d.os_name: d
+            for d in db_session.query(models.AntivirusDefault)
+            .filter(models.AntivirusDefault.os_name.in_(os_names))
+            .all()
+        }
+
         for update in bulk_update.defaults:
-            # Find existing default for this OS
-            default = (
-                db_session.query(models.AntivirusDefault)
-                .filter(models.AntivirusDefault.os_name == update.os_name)
-                .first()
-            )
+            default = existing_by_os.get(update.os_name)
 
             now = datetime.now(timezone.utc).replace(tzinfo=None)
 

@@ -272,21 +272,30 @@ def get_host_users_with_groups(host_id: str) -> List[Dict[str, Any]]:
             .all()
         )
 
-        # Convert to JSON-compatible format with group memberships
-        users = []
-        for user in user_accounts:
-            # Get group memberships for this user
-            group_memberships = (
-                session.query(models.UserGroupMembership, models.UserGroup)
+        # Bulk-fetch group memberships for all users in one query
+        # rather than per-user (flagged in the Phase 6 N+1 audit).
+        user_ids = [u.id for u in user_accounts]
+        groups_by_user: dict = {}
+        if user_ids:
+            for membership_user_id, group in (
+                session.query(
+                    models.UserGroupMembership.user_account_id, models.UserGroup
+                )
                 .join(
                     models.UserGroup,
                     models.UserGroupMembership.user_group_id == models.UserGroup.id,
                 )
-                .filter(models.UserGroupMembership.user_account_id == user.id)
+                .filter(models.UserGroupMembership.user_account_id.in_(user_ids))
                 .all()
-            )
+            ):
+                groups_by_user.setdefault(membership_user_id, []).append(
+                    group.group_name
+                )
 
-            group_names = [group.group_name for _, group in group_memberships]
+        # Convert to JSON-compatible format with group memberships
+        users = []
+        for user in user_accounts:
+            group_names = groups_by_user.get(user.id, [])
 
             # Handle both Unix UIDs and Windows SIDs
             uid_value = user.uid  # Integer for Unix systems
@@ -352,20 +361,27 @@ def get_host_user_groups(host_id: str) -> List[Dict[str, Any]]:
             .all()
         )
 
-        groups = []
-        for group in user_groups:
-            # Get user memberships for this group
-            user_memberships = (
-                session.query(models.UserGroupMembership, models.UserAccount)
+        # Bulk-fetch member names for all groups in one query rather
+        # than per-group (flagged in the Phase 6 N+1 audit).
+        group_ids = [g.id for g in user_groups]
+        users_by_group: dict = {}
+        if group_ids:
+            for membership_group_id, user in (
+                session.query(
+                    models.UserGroupMembership.user_group_id, models.UserAccount
+                )
                 .join(
                     models.UserAccount,
                     models.UserGroupMembership.user_account_id == models.UserAccount.id,
                 )
-                .filter(models.UserGroupMembership.user_group_id == group.id)
+                .filter(models.UserGroupMembership.user_group_id.in_(group_ids))
                 .all()
-            )
+            ):
+                users_by_group.setdefault(membership_group_id, []).append(user.username)
 
-            user_names = [user.username for _, user in user_memberships]
+        groups = []
+        for group in user_groups:
+            user_names = users_by_group.get(group.id, [])
 
             # Handle both Unix GIDs and Windows SIDs
             gid_value = group.gid  # Integer for Unix systems

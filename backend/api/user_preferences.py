@@ -334,25 +334,27 @@ async def update_dashboard_card_preferences(
 
         now = datetime.now(timezone.utc).replace(tzinfo=None)
 
-        # Process each preference
-        for pref in preference_request.preferences:
-            # Check if preference already exists
-            existing_pref = (
-                db.query(models.UserDashboardCardPreference)
-                .filter(
-                    models.UserDashboardCardPreference.user_id == user.id,
-                    models.UserDashboardCardPreference.card_identifier
-                    == pref.card_identifier,
-                )
-                .first()
+        # Bulk-fetch existing preferences for this user in one query
+        # rather than one ``.first()`` per card (flagged in the Phase 6
+        # N+1 audit).
+        card_ids = [p.card_identifier for p in preference_request.preferences]
+        existing_by_card = {
+            row.card_identifier: row
+            for row in db.query(models.UserDashboardCardPreference)
+            .filter(
+                models.UserDashboardCardPreference.user_id == user.id,
+                models.UserDashboardCardPreference.card_identifier.in_(card_ids),
             )
+            .all()
+        }
+
+        for pref in preference_request.preferences:
+            existing_pref = existing_by_card.get(pref.card_identifier)
 
             if existing_pref:
-                # Update existing preference
                 existing_pref.visible = pref.visible
                 existing_pref.updated_at = now
             else:
-                # Create new preference
                 new_pref = models.UserDashboardCardPreference(
                     user_id=user.id,
                     card_identifier=pref.card_identifier,

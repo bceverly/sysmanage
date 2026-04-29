@@ -9,7 +9,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from backend.i18n import _
@@ -299,58 +299,34 @@ async def handle_child_hosts_list_update(  # NOSONAR
                             )
                             db.delete(linked_host)
                     elif child.hostname:
-                        # Try to find host by fqdn (Host model uses fqdn, not hostname)
-                        # Extract short hostname (first part before any dot)
+                        # Single OR'd query covering all 5 hostname-match
+                        # patterns instead of up to 5 sequential ``.first()``
+                        # calls (flagged in the Phase 6 N+1 audit; was the
+                        # worst structural site).  Any match is acceptable
+                        # — this branch only runs to clean up stale
+                        # uninstalling records, so priority among matchers
+                        # doesn't matter.
                         child_short_hostname = child.hostname.split(".")[0]
-
                         matching_host = (
                             db.query(Host)
-                            .filter(func.lower(Host.fqdn) == func.lower(child.hostname))
-                            .first()
-                        )
-                        # Try prefix match (hostname without domain)
-                        if not matching_host:
-                            matching_host = (
-                                db.query(Host)
-                                .filter(
+                            .filter(
+                                or_(
+                                    func.lower(Host.fqdn) == func.lower(child.hostname),
                                     func.lower(Host.fqdn).like(
                                         func.lower(child.hostname + ".%")
-                                    )
-                                )
-                                .first()
-                            )
-                        # Try reverse prefix match (Host.fqdn is short, hostname is FQDN)
-                        if not matching_host:
-                            matching_host = (
-                                db.query(Host)
-                                .filter(
+                                    ),
                                     func.lower(child.hostname).like(
                                         func.lower(Host.fqdn) + ".%"
-                                    )
-                                )
-                                .first()
-                            )
-                        # Try matching just the short hostname
-                        if not matching_host:
-                            matching_host = (
-                                db.query(Host)
-                                .filter(
+                                    ),
                                     func.lower(Host.fqdn)
-                                    == func.lower(child_short_hostname)
-                                )
-                                .first()
-                            )
-                        # Try matching short hostname as prefix of Host.fqdn
-                        if not matching_host:
-                            matching_host = (
-                                db.query(Host)
-                                .filter(
+                                    == func.lower(child_short_hostname),
                                     func.lower(Host.fqdn).like(
                                         func.lower(child_short_hostname + ".%")
-                                    )
+                                    ),
                                 )
-                                .first()
                             )
+                            .first()
+                        )
                         if matching_host:
                             logger.info(
                                 "Deleting matching host record for stale uninstalling "

@@ -64,6 +64,38 @@ async def handle_update_apply_result(  # NOSONAR
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
+        # Bulk-fetch the most-recent pending UpdateExecutionLog for
+        # every (package_name, package_manager) we touch, instead of
+        # one ``.first()`` per package (flagged in the Phase 6 N+1
+        # audit).  Result is keyed (name, manager) → log row, with the
+        # most recent first per key.
+        all_pkgs = updated_packages + failed_packages
+        pkg_keys = [
+            (p.get("package_name"), p.get("package_manager"))
+            for p in all_pkgs
+            if p.get("package_name") and p.get("package_manager")
+        ]
+        latest_pending_log_by_pkg: dict = {}
+        if pkg_keys:
+            from sqlalchemy import tuple_  # local import — keep callers tidy
+
+            for log in (
+                db.query(UpdateExecutionLog)
+                .filter(
+                    UpdateExecutionLog.host_id == connection.host_id,
+                    tuple_(
+                        UpdateExecutionLog.package_name,
+                        UpdateExecutionLog.package_manager,
+                    ).in_(pkg_keys),
+                    UpdateExecutionLog.execution_status == "pending",
+                )
+                .order_by(UpdateExecutionLog.created_at.desc())
+                .all()
+            ):
+                key = (log.package_name, log.package_manager)
+                # Keep only the first (most recent) per key.
+                latest_pending_log_by_pkg.setdefault(key, log)
+
         # Update package statuses in database
         for package in updated_packages:
             package_name = package.get("package_name")
@@ -90,18 +122,8 @@ async def handle_update_apply_result(  # NOSONAR
                 )
 
                 # Update execution log to success
-                exec_result = (
-                    db.query(UpdateExecutionLog)
-                    .filter(
-                        and_(
-                            UpdateExecutionLog.host_id == connection.host_id,
-                            UpdateExecutionLog.package_name == package_name,
-                            UpdateExecutionLog.package_manager == package_manager,
-                            UpdateExecutionLog.execution_status == "pending",
-                        )
-                    )
-                    .order_by(UpdateExecutionLog.created_at.desc())
-                    .first()
+                exec_result = latest_pending_log_by_pkg.get(
+                    (package_name, package_manager)
                 )
 
                 if exec_result:
@@ -139,18 +161,8 @@ async def handle_update_apply_result(  # NOSONAR
                 )
 
                 # Update execution log to failed
-                exec_result = (
-                    db.query(UpdateExecutionLog)
-                    .filter(
-                        and_(
-                            UpdateExecutionLog.host_id == connection.host_id,
-                            UpdateExecutionLog.package_name == package_name,
-                            UpdateExecutionLog.package_manager == package_manager,
-                            UpdateExecutionLog.execution_status == "pending",
-                        )
-                    )
-                    .order_by(UpdateExecutionLog.created_at.desc())
-                    .first()
+                exec_result = latest_pending_log_by_pkg.get(
+                    (package_name, package_manager)
                 )
 
                 if exec_result:

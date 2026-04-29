@@ -416,26 +416,29 @@ async def delete_third_party_repositories(  # NOSONAR
             ThirdPartyRepository as ThirdPartyRepositoryModel,
         )
 
-        # Delete repositories from the database immediately for responsive UI
-        for repo in request.repositories:
-            repo_name = repo.get("name")
-            repo_file_path = repo.get("file_path")
+        # Bulk-delete with two queries (one per discriminator) rather
+        # than one DELETE per repo — the previous loop issued 1 query
+        # per repository (flagged in the Phase 6 N+1 audit).
+        file_paths = [
+            r["file_path"] for r in request.repositories if r.get("file_path")
+        ]
+        names_only = [
+            r["name"]
+            for r in request.repositories
+            if r.get("name") and not r.get("file_path")
+        ]
 
-            # Try to find and delete by file_path first (most specific), then by name
-            query = db.query(ThirdPartyRepositoryModel).filter(
-                ThirdPartyRepositoryModel.host_id == host_id
-            )
+        if file_paths:
+            db.query(ThirdPartyRepositoryModel).filter(
+                ThirdPartyRepositoryModel.host_id == host_id,
+                ThirdPartyRepositoryModel.file_path.in_(file_paths),
+            ).delete(synchronize_session=False)
 
-            if repo_file_path:
-                query = query.filter(
-                    ThirdPartyRepositoryModel.file_path == repo_file_path
-                )
-            elif repo_name:
-                query = query.filter(ThirdPartyRepositoryModel.name == repo_name)
-            else:
-                continue
-
-            query.delete(synchronize_session=False)
+        if names_only:
+            db.query(ThirdPartyRepositoryModel).filter(
+                ThirdPartyRepositoryModel.host_id == host_id,
+                ThirdPartyRepositoryModel.name.in_(names_only),
+            ).delete(synchronize_session=False)
 
         # Create command message to delete repositories on the agent
         command_message = create_command_message(

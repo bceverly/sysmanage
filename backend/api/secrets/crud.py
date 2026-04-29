@@ -274,20 +274,21 @@ async def delete_multiple_secrets(
     _check_secrets_module()
 
     vault = VaultService()
+    # Bulk-fetch all matching secrets in one query rather than one
+    # ``.first()`` per id (flagged in the Phase 6 N+1 audit).
+    secrets = db.query(Secret).filter(Secret.id.in_(secret_ids)).all()
     deleted_count = 0
-    for secret_id in secret_ids:
-        secret = db.query(Secret).filter(Secret.id == secret_id).first()
-        if secret:
-            try:
-                vault.delete_secret(secret.vault_path, secret.vault_token)
-            except VaultError as e:
-                logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
-                    "Failed to delete secret %s from vault (%s)",
-                    secret_id,
-                    type(e).__name__,
-                )
-            db.delete(secret)
-            deleted_count += 1
+    for secret in secrets:
+        try:
+            vault.delete_secret(secret.vault_path, secret.vault_token)
+        except VaultError as e:
+            logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+                "Failed to delete secret %s from vault (%s)",
+                secret.id,
+                type(e).__name__,
+            )
+        db.delete(secret)
+        deleted_count += 1
 
     db.commit()
     return {"message": _("Deleted {count} secrets").format(count=deleted_count)}

@@ -90,6 +90,11 @@ def _dump_schema(db_url: str, out_path: Path) -> None:
         re.compile(r"^-- Name: .* Type: COMMENT.*"),
         re.compile(r"^SET .*"),
         re.compile(r"^SELECT pg_catalog\.set_config.*"),
+        # \restrict / \unrestrict are per-dump random session-lock tokens
+        # added by pg_dump 17+ to prevent concurrent modifications during
+        # the dump.  They differ between every pg_dump invocation by
+        # design — strip them so they don't false-positive as drift.
+        re.compile(r"^\\(?:un)?restrict .*"),
         re.compile(r"^\s*$"),
     ]
     for line in text.splitlines():

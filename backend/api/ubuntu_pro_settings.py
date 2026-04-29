@@ -350,13 +350,22 @@ async def enroll_hosts_in_ubuntu_pro(
 
         results = []
 
-        for host_id in request.host_ids:
-            # Verify host exists and is active
-            host = (
-                db.query(models.Host)
-                .filter(models.Host.id == host_id, models.Host.active.is_(True))
-                .first()
+        # Bulk-fetch active hosts in one query rather than per-id
+        # ``.first()`` (flagged in the Phase 6 N+1 audit).  Key by
+        # str(id) so string host_ids from the request payload match
+        # the GUID column.
+        active_hosts_by_id = {
+            str(h.id): h
+            for h in db.query(models.Host)
+            .filter(
+                models.Host.id.in_(request.host_ids),
+                models.Host.active.is_(True),
             )
+            .all()
+        }
+
+        for host_id in request.host_ids:
+            host = active_hosts_by_id.get(str(host_id))
 
             if not host:
                 results.append(

@@ -154,27 +154,40 @@ Heuristic scan for query-inside-loop patterns in `backend/api`:
 - Index inventory: **134** `Index(...)` / `index=True` declarations across `backend/persistence/models`. No obviously missing covering indexes on the Phase 5 paths — `ScriptExecution.script_id`, `BulkOperation.id`, `HostGroup.id` are all indexed.
 - Eager-loading usage: **11** total `joinedload`/`selectinload`/`subqueryload` callsites. Low — opportunity to push more relationship pre-loading where N+1 risk is real.
 
-#### N+1 sweep (pre-Phase-8 hardening pass)
+#### N+1 sweep (pre-Phase-8 hardening pass — COMPLETE)
 
-A targeted sweep landed before Phase 8 to fix the highest-impact coverage-report endpoints.  Pattern in every fix:  replace per-host `.first()` queries with a single bulk-fetch + Python-side set/dict lookup.
+A full sweep landed before Phase 8.  All 31 N+1 sites flagged in the original heuristic scan have been refactored to bulk-fetch + Python-side O(1) lookup.  716 API tests pass on the post-sweep tree.
 
-| File | Endpoint | Before | After |
-|------|----------|--------|-------|
-| `backend/api/opentelemetry/status.py:142-167` | `GET /api/opentelemetry-coverage` | 2N + 1 | **3** queries |
+| File | Endpoint / Function | Before | After |
+|------|---------------------|--------|-------|
+| `backend/api/opentelemetry/status.py:128-178` | `GET /api/opentelemetry-coverage` | 2N + 1 | **3** queries |
 | `backend/api/antivirus_status.py:550-590` | `GET /api/antivirus-coverage` | 2N + 1 | **3** queries |
 | `backend/api/grafana_integration.py:220-256` | `GET /api/grafana-servers` | N + 1 | **1** query |
 | `backend/api/graylog_integration.py:79-117` | `GET /api/graylog-servers` | N + 1 | **1** query |
+| `backend/api/host.py:362-…` | `GET /api/hosts` (tags) | N + 1 | **2** queries |
+| `backend/api/host_data_updates.py:request_hardware_update_bulk` | bulk hardware update | N + 1 | **1** query |
+| `backend/api/antivirus_defaults.py:160-…` | bulk antivirus default upsert | N + 1 | **1** query |
+| `backend/api/security_roles.py:91-122` | `GET /security/roles` (groups) | N + 1 | **2** queries |
+| `backend/api/security_roles.py:202-220` | role-id verify in `PUT /user/<id>/roles` | N + 1 | **1** query |
+| `backend/api/ubuntu_pro_settings.py:bulk-attach` | per-host enrollment | N + 1 | **1** query |
+| `backend/api/user_preferences.py:325-…` | dashboard-card preferences upsert | N + 1 | **1** query |
+| `backend/api/host_utils.py:get_host_users_with_groups` | per-user group membership | N + 1 | **2** queries |
+| `backend/api/host_utils.py:get_host_user_groups` | per-group member lookup | N + 1 | **2** queries |
+| `backend/api/updates/execution_routes.py` | per-host update apply | 2N + 1 | **3** queries |
+| `backend/api/updates/os_upgrade_routes.py` | per-host OS upgrade | 2N + 1 | **3** queries |
+| `backend/api/secrets/crud.py:delete_multiple_secrets` | bulk delete | N + 1 | **1** query |
+| `backend/api/third_party_repos.py:bulk_delete` | bulk repo delete | N + 1 | **2** queries |
+| `backend/api/update_handlers.py:apply_updates_result` | per-package log update | 2N + 1 | **2** queries (uses `tuple_().in_(...)`) |
+| `backend/api/antivirus_status.py:175-…` | per-host AV deploy | 2N + 1 | **3** queries |
+| `backend/api/handlers/child_host/listing.py:285-…` | stale-uninstalling host match | up to 5N | **N** queries (one OR'd query per stale child) |
 
-**Remaining sites carried into Phase 8.0** (see `tests/api/` for coverage gaps before refactoring):
+**Pattern (use this for all future fixes):**
+1. Collect all relevant keys upfront from the loop input.
+2. Issue a single query with `.in_(...)` (or `tuple_(col1, col2).in_(...)` for composite keys) or a JOIN that returns every column the loop body needs.
+3. Build a Python dict keyed by the loop variable.  Key the dict by `str(id)` if the loop variable comes from an HTTP payload — request strings won't match raw `UUID` keys.
+4. Look up O(1) inside the loop; the loop body retains its existing semantics.
 
-- `backend/api/antivirus_status.py:198, 242, 244` — antivirus deploy loop (per-host plan builder; needs bulk Host + AntivirusDefault prefetch)
-- `backend/api/handlers/child_host/listing.py:289-352` — 5-deep hostname matching cascade (worst structural site; refactor to a single resolver)
-- `backend/api/update_handlers.py:75/94/143` — package-update apply loop (changes observable rowcount logging; needs care)
-- `backend/api/updates/{execution,os_upgrade}_routes.py` — host-by-host update history
-- `backend/api/host_utils.py:280, 286, 359, 365` — host enrichment helpers
-- `backend/api/security_roles.py:96/99/207`, `host_data_updates.py:204`, `ubuntu_pro_settings.py:356-358`, `user_preferences.py:341-347`, `secrets/crud.py:279`, `third_party_repos.py:425`, `host.py:368` — single- or double-call N+1s, one-at-a-time fixes
-
-Pattern to follow: collect all relevant keys upfront → single query with `IN (...)` or a JOIN that returns all needed columns → build a Python dict keyed by the loop variable → look up in O(1) inside the loop.
+Phase 8 starts on a clean N+1 slate.
 
 ### Response-time benchmark harness
 

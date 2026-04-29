@@ -178,12 +178,33 @@ async def deploy_antivirus(  # NOSONAR
 
     # Use a single session for all operations to ensure proper commit
     with session_local() as session:
+        # Bulk-fetch all hosts and all AntivirusDefaults upfront in two
+        # queries instead of 2 per host (flagged in the Phase 6 N+1
+        # audit).  AntivirusDefault is a tiny lookup table — load all
+        # rows; many hosts share an OS so per-host lookups duplicate
+        # work.
+        valid_uuids = []
+        invalid_ids = []
+        for hid in deploy_request.host_ids:
+            try:
+                valid_uuids.append(uuid.UUID(hid))
+            except ValueError:
+                invalid_ids.append(hid)
+        hosts_by_id = {
+            h.id: h
+            for h in (
+                session.query(models.Host).filter(models.Host.id.in_(valid_uuids)).all()
+                if valid_uuids
+                else []
+            )
+        }
+        defaults_by_os = {
+            d.os_name: d for d in session.query(models.AntivirusDefault).all()
+        }
+
         for host_id_str in deploy_request.host_ids:
             try:
-                # Convert host_id to UUID
-                try:
-                    host_id = uuid.UUID(host_id_str)
-                except ValueError:
+                if host_id_str in invalid_ids:
                     failed_hosts.append(
                         {
                             "host_id": host_id_str,
@@ -193,10 +214,8 @@ async def deploy_antivirus(  # NOSONAR
                     )
                     continue
 
-                # Get host details
-                host = (
-                    session.query(models.Host).filter(models.Host.id == host_id).first()
-                )
+                host_id = uuid.UUID(host_id_str)
+                host = hosts_by_id.get(host_id)
                 if not host:
                     failed_hosts.append(
                         {
@@ -237,12 +256,9 @@ async def deploy_antivirus(  # NOSONAR
                     match = re.match(r"^([A-Za-z]+)", os_name_raw)
                     os_name = match.group(1) if match else os_name_raw
 
-                # Get antivirus default for this OS
-                antivirus_default = (
-                    session.query(models.AntivirusDefault)
-                    .filter(models.AntivirusDefault.os_name == os_name)
-                    .first()
-                )
+                # Lookup antivirus default in the prefetched dict (built
+                # at the top of this with-block).
+                antivirus_default = defaults_by_os.get(os_name)
 
                 if not antivirus_default or not antivirus_default.antivirus_package:
                     failed_hosts.append(

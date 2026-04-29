@@ -361,11 +361,25 @@ def _get_all_hosts_sync():
     with session_local() as session:
         hosts = session.query(models.Host).all()
 
+        # Bulk-fetch the host→tag mapping in one query rather than
+        # ``host.tags.all()`` per host (the dynamic relationship issued
+        # 1+N queries — flagged in the Phase 6 N+1 audit).
+        host_ids = [h.id for h in hosts]
+        tags_by_host: dict = {}
+        if host_ids:
+            tag_rows = (
+                session.query(models.HostTag.host_id, models.Tag)
+                .join(models.Tag, models.Tag.id == models.HostTag.tag_id)
+                .filter(models.HostTag.host_id.in_(host_ids))
+                .all()
+            )
+            for hid, tag in tag_rows:
+                tags_by_host.setdefault(hid, []).append(tag)
+
         # Convert to dictionaries with tags included
         result = []
         for host in hosts:
-            # Get tags using the dynamic relationship (.all() method)
-            host_tags = host.tags.all()
+            host_tags = tags_by_host.get(host.id, [])
 
             # Calculate update counts from package_updates relationship
             package_updates = host.package_updates

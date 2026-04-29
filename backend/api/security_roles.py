@@ -90,14 +90,18 @@ async def get_all_role_groups(
 
     groups = db.query(SecurityRoleGroup).order_by(SecurityRoleGroup.id).all()
 
+    # Bulk-fetch all roles in one ordered query rather than one query
+    # per group (flagged in the Phase 6 N+1 audit).
+    all_roles = (
+        db.query(SecurityRole).order_by(SecurityRole.group_id, SecurityRole.id).all()
+    )
+    roles_by_group: dict = {}
+    for role in all_roles:
+        roles_by_group.setdefault(role.group_id, []).append(role)
+
     result = []
     for group in groups:
-        roles = (
-            db.query(SecurityRole)
-            .filter(SecurityRole.group_id == group.id)
-            .order_by(SecurityRole.id)
-            .all()
-        )
+        roles = roles_by_group.get(group.id, [])
 
         role_responses = [
             SecurityRoleResponse(
@@ -193,22 +197,31 @@ async def update_user_roles(
     if not user:
         raise HTTPException(status_code=404, detail=_("User not found"))
 
-    # Convert string UUIDs to UUID objects and verify all role IDs exist
+    # Convert string UUIDs to UUID objects, then verify all role IDs
+    # exist in a single query rather than per-id ``.first()`` (flagged
+    # in the Phase 6 N+1 audit).
     role_uuids = []
     for role_id_str in request.role_ids:
         try:
-            role_uuid = UUID(role_id_str)
-            role_uuids.append(role_uuid)
+            role_uuids.append(UUID(role_id_str))
         except ValueError as exc:
             raise HTTPException(
                 status_code=400, detail=f"Invalid UUID format: {role_id_str}"
             ) from exc
 
-        role = db.query(SecurityRole).filter(SecurityRole.id == role_uuid).first()
-        if not role:
-            raise HTTPException(
-                status_code=400, detail=f"Role with ID {role_id_str} does not exist"
-            )
+    if role_uuids:
+        existing_role_ids = {
+            row[0]
+            for row in db.query(SecurityRole.id)
+            .filter(SecurityRole.id.in_(role_uuids))
+            .all()
+        }
+        for role_uuid in role_uuids:
+            if role_uuid not in existing_role_ids:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Role with ID {role_uuid} does not exist",
+                )
 
     # Delete existing user roles
     db.query(UserSecurityRole).filter(UserSecurityRole.user_id == user_id).delete()

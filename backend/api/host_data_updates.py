@@ -199,9 +199,19 @@ async def request_hardware_update_bulk(host_ids: list[str]):
     results = []
 
     with session_local() as session:
+        # Bulk-fetch all hosts in one query rather than per-id ``.first()``
+        # (flagged in the Phase 6 N+1 audit).  Key the dict by str(id)
+        # because the request payload arrives as a list of UUID strings
+        # while the model column is a GUID — string-keyed lookup matches
+        # both forms.
+        hosts_by_id = {
+            str(h.id): h
+            for h in session.query(models.Host)
+            .filter(models.Host.id.in_(host_ids))
+            .all()
+        }
         for host_id in host_ids:
-            # Find the host
-            host = session.query(models.Host).filter(models.Host.id == host_id).first()
+            host = hosts_by_id.get(str(host_id))
 
             if not host:
                 results.append(

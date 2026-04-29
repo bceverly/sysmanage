@@ -61,15 +61,34 @@ async def execute_updates(  # NOSONAR
         with session_factory() as session:
             results = []
 
-            for host_id in request.host_ids:
-                # Verify host exists and is active
-                host = (
-                    session.query(models.Host)
-                    .filter(
-                        and_(models.Host.id == host_id, models.Host.active.is_(True))
-                    )
-                    .first()
+            # Bulk-fetch active hosts and their pending PackageUpdates
+            # in two queries rather than 2 per host (flagged in the
+            # Phase 6 N+1 audit).  Dicts are keyed by str(id) so they
+            # match the request payload's UUID strings.
+            active_hosts_by_id = {
+                str(h.id): h
+                for h in session.query(models.Host)
+                .filter(
+                    models.Host.id.in_(request.host_ids),
+                    models.Host.active.is_(True),
                 )
+                .all()
+            }
+            updates_filter = and_(
+                models.PackageUpdate.host_id.in_(request.host_ids),
+                models.PackageUpdate.package_name.in_(request.package_names),
+            )
+            if request.package_managers:
+                updates_filter = and_(
+                    updates_filter,
+                    models.PackageUpdate.package_manager.in_(request.package_managers),
+                )
+            updates_by_host: dict = {}
+            for upd in session.query(models.PackageUpdate).filter(updates_filter).all():
+                updates_by_host.setdefault(str(upd.host_id), []).append(upd)
+
+            for host_id in request.host_ids:
+                host = active_hosts_by_id.get(str(host_id))
 
                 if not host:
                     results.append(
@@ -81,22 +100,7 @@ async def execute_updates(  # NOSONAR
                     )
                     continue
 
-                # Get available updates for the packages
-                updates_query = session.query(models.PackageUpdate).filter(
-                    and_(
-                        models.PackageUpdate.host_id == host_id,
-                        models.PackageUpdate.package_name.in_(request.package_names),
-                    )
-                )
-
-                if request.package_managers:
-                    updates_query = updates_query.filter(
-                        models.PackageUpdate.package_manager.in_(
-                            request.package_managers
-                        )
-                    )
-
-                updates = updates_query.all()
+                updates = updates_by_host.get(str(host_id), [])
 
                 if not updates:
                     results.append(
