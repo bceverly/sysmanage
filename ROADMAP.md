@@ -932,11 +932,11 @@ shipped, the generic handlers should be implemented early as a Phase 3 prerequis
    - [x] Verify all Professional and Enterprise Part 1 modules work correctly
    - [x] License gating verification for each module
    - [x] Plugin loading and registration testing
-   - [ ] Cross-module integration tests
+   - [x] Cross-module integration tests — `module-source/integration/test_fleet_automation_handoff.py` (4 tests) mounts both fleet_engine and automation_engine in one FastAPI app and verifies the run_script handoff contract:  fleet bulk-op resolves a host set → automation executes the same script_id on the same host_ids without translation drift
 
 2. **Container Engine Testing**
-   - [ ] LXD container lifecycle testing on Ubuntu
-   - [ ] WSL instance lifecycle testing on Windows
+   - [x] LXD container lifecycle testing on Ubuntu — `sysmanage-agent/tests/integration/test_lxd_lifecycle.py` (7 tests) drives `LxdOperations` through stop → start → restart → delete against a real Alpine container created via `lxc launch` as test setup; observable state verified via `lxc list` between transitions; auto-skips when LXD daemon isn't available
+   - [ ] WSL instance lifecycle testing on Windows — pending; depends on whether GitHub-hosted Windows runners reliably support nested-virtualization WSL2
    - [x] Verify read-only mode for unlicensed users
 
 3. **Security Engine Testing**
@@ -1049,8 +1049,8 @@ Audit summary: see `docs/phase6-audit.md` for the per-item write-up.
 
 3. **Performance Baseline**
    - [x] Establish response time benchmarks (`backend/benchmarks/test_response_times.py` + documented baselines)
-   - [ ] WebSocket connection scalability test (100, 500, 1000 agents) — needs real load harness, deferred
-   - [x] Database query optimization review (31 N+1 candidates flagged; Phase 5 paths clean)
+   - [x] WebSocket connection scalability test (100, 500, 1000 agents) — shipped in Phase 7's `agents-cascade` scenario in `.github/workflows/load-tests.yml`; gates 100 → 500 → 1000 sequentially with SLA-pass required to advance
+   - [x] Database query optimization review (31 N+1 candidates flagged in Phase 6; **all 31 fixed** in pre-Phase-8 sweep — see `docs/phase6-audit.md` for the file:line table and the bulk-fetch+O(1)-lookup pattern)
    - [x] Frontend bundle size audit (main chunk split: 1985 KB → 791 KB / -60%; vendor chunks now cache separately)
 
 4. **Documentation**
