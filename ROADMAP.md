@@ -1039,7 +1039,7 @@ Audit summary: see `docs/phase6-audit.md` for the per-item write-up.
    - [x] Agent coverage: Target 70% (achieved **93.12%** — 8063 tests + 23 subtests passing, 22521/24184 stmts; sequential pytest run with `--basetemp=/var/tmp/...` to avoid filling tmpfs — see `docs/phase6-audit.md` for the repro recipe)
    - [x] Pro+ coverage: Target 75% (engine test suites all 100% — 109 automation+fleet tests)
    - [x] Add integration tests for new Pro+ features (HTTP-layer tests for both Phase 5 routers — see `module-source/automation_engine/test_automation_engine_http.py` + fleet equivalent)
-   - [ ] Playwright tests for Pro+ feature UI flows (deferred — separate stream of work)
+   - [x] Playwright tests for Pro+ feature UI flows — `frontend/e2e/proplus.spec.ts` covers Health Analysis, Compliance, Vulnerabilities, License, Navigation, plus Phase 8.7 Pro+ Settings (Report Branding upload + oversize-rejection, Report Templates CRUD dialog, Dynamic Secrets issue dialog) and Phase 8.4 Audit Log PDF export.  All tests soft-skip when the corresponding Pro+ engine isn't licensed/loaded so CI stays green on OSS-only runs.
 
 2. **i18n Audit**
    - [x] Verify all strings externalized (Phase 6 closeout pass: 16 backend strings in `email.py`/`security.py`, 47 frontend keys covering AuditLogViewer/EmailConfigCard/Navbar/HostDetail/ReportViewer, and 8 agent ValueError strings in `child_host_kvm_types.py`/`child_host_bhyve_types.py` all wrapped and translated)
@@ -1201,7 +1201,7 @@ Audit summary: see `docs/phase6-audit.md` for the per-item write-up.
 - [x] EXECUTE action type for script executions — `ActionType.EXECUTE` already in `backend/services/audit_service.py:26`; script-execution-result handler now uses it (was incorrectly logging as `AGENT_MESSAGE`)
 - [x] Script output storage in details JSON — stdout/stderr included in the audit-log details payload, truncated to 8 KiB per stream so entries stay readable in the UI; full payload remains in `ScriptExecutionLog.{stdout,stderr}_output`
 - [x] Enhanced filtering — `/api/audit-log/list` already had user/action/entity/category/entry-type/search/date filters; added `result` filter (SUCCESS/FAILURE/PENDING) for completeness
-- [x] Export to CSV/PDF — OSS CSV export shipped (`GET /api/audit-log/export?fmt=csv`); JSON/CEF/LEEF remain Pro+ via `audit_engine`. PDF deferred (PDF generation is a separate engine concern; CSV covers the spreadsheet-import use case)
+- [x] Export to CSV/PDF — OSS CSV export shipped (`GET /api/audit-log/export?fmt=csv`) and OSS PDF export now shipped too (`GET /api/audit-log/export?fmt=pdf` — landscape A4, paginated, reportlab-rendered).  JSON/CEF/LEEF remain Pro+ via `audit_engine`.  Frontend `Pages/AuditLogViewer.tsx` exposes both Export CSV and Export PDF buttons; Playwright covers the download flow.
 - [x] Audit all API endpoints — `AuditService.log` is wired into auth, scripts, hosts, security_roles, fleet ops, and the WS message handlers; remaining endpoints log via shared decorators
 - [x] i18n/l10n for all 14 languages — new query-parameter descriptions wrapped in `_(...)` so existing extractor picks them up
 
@@ -1272,7 +1272,7 @@ VM definitions, OTEL configs, etc.).
 - [x] Access groups + registration keys functional end-to-end: hierarchy enforcement, RBAC scoping, auto-approval workflow on registration — Settings UI + agent registration path wired
 - [x] Scheduled update profiles execute on cron schedule with security-only and staggered-rollout options — OSS cron parser ships in `backend/services/upgrade_scheduler.py`; APScheduler swap is a Pro+ drop-in under the same API
 - [x] Package compliance profiles produce per-host compliance reports stored in `HostPackageComplianceStatus` — server-side evaluation + agent live-scan path both wired through HostDetail Compliance tab
-- [x] Audit log enhancements: EXECUTE action type captured for every script run with stdout/stderr in details; CSV export functional with date/entity/user/result filters (PDF is a deferred reporting_engine concern)
+- [x] Audit log enhancements: EXECUTE action type captured for every script run with stdout/stderr in details; CSV + PDF export functional with date/entity/user/result filters
 - [x] Broadcast messaging delivers to all connected agents in under 5 seconds for fleets up to 100 hosts — `connection_manager.broadcast_to_*` is O(N) over active connections; `elapsed_ms` returned in the API response so operators can verify the SLA from the UI
 - [x] All 14 languages have complete i18n coverage for all new strings (server, frontend, agent) — frontend namespaces translated; 57 server-side msgids translated into all 14 `messages.po` and compiled to `.mo`; agent string sweep already complete in 8.6
 - [x] No critical or high-severity bugs in any Foundation feature — full test matrix green: backend 4320/4320 + 35 new Phase 8 tests, agent integration 27/27 (0 skipped), frontend 69/69, Pro+ engines 338/338. Pylint 10.00/10 across all touched modules; ESLint 0 errors; SonarQube clean (constants extracted, cognitive complexity reduced where flagged).

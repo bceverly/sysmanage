@@ -101,6 +101,46 @@ class TestAuditLogCsvExport:
         assert response.status_code in [307, 402, 401, 403]
 
 
+class TestAuditLogPdfExport:
+    """Phase 8.4 closeout — OSS PDF export sibling of the CSV path."""
+
+    def test_export_pdf_authorized(self, client, auth_headers):
+        """Authorized PDF export must return application/pdf (200) or 403
+        if the test user lacks VIEW_AUDIT_LOG.  Either way:  NEVER 500."""
+        response = client.get("/api/audit-log/export?fmt=pdf", headers=auth_headers)
+        assert response.status_code in [200, 403]
+        if response.status_code == 200:
+            assert response.headers.get("content-type", "").startswith(
+                "application/pdf"
+            )
+            # PDFs always start with a "%PDF-" header byte sequence —
+            # asserting it confirms reportlab actually produced a doc
+            # rather than e.g. an empty body or HTML error page.
+            assert response.content[:5] == b"%PDF-"
+
+    def test_export_pdf_with_filters(self, client, auth_headers):
+        """Filter passthrough:  PDF route consumes the same
+        ``AuditLogFilters`` shape as CSV, so a filtered range must
+        still produce a 200 + application/pdf response (even if zero
+        entries match — empty PDFs are still PDFs)."""
+        response = client.get(
+            "/api/audit-log/export?fmt=pdf&result=SUCCESS&entity_type=USER",
+            headers=auth_headers,
+        )
+        assert response.status_code in [200, 403]
+        if response.status_code == 200:
+            assert response.content[:5] == b"%PDF-"
+
+    def test_export_pdf_filename_header(self, client, auth_headers):
+        """Content-Disposition must point at a .pdf filename so the
+        browser saves with the right extension."""
+        response = client.get("/api/audit-log/export?fmt=pdf", headers=auth_headers)
+        if response.status_code == 200:
+            cd = response.headers.get("content-disposition", "")
+            assert ".pdf" in cd
+            assert "audit-log-" in cd
+
+
 class TestAuditLogHostEndpoint:
     """Test cases for host-specific audit log."""
 

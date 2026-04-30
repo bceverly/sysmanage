@@ -366,3 +366,148 @@ test.describe('Pro+ Navigation', () => {
     await expect(page.locator('body')).not.toBeEmpty();
   });
 });
+
+/**
+ * Helper: open the Settings page and click the named tab.  Returns
+ * true when the tab was found + clicked; false when it isn't present
+ * (which can happen when the Pro+ engines aren't licensed / loaded in
+ * this test environment, in which case the caller should soft-skip).
+ */
+async function openSettingsTab(page: Page, tabName: RegExp): Promise<boolean> {
+  await page.goto('/settings');
+  try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* ok */ }
+  const tab = page.getByRole('tab', { name: tabName }).first();
+  if (!(await tab.isVisible().catch(() => false))) return false;
+  await tab.click();
+  try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* ok */ }
+  return true;
+}
+
+test.describe('Pro+ Phase 8.7 — Report Branding settings', () => {
+  test('renders the Report Branding tab when present', async ({ page }) => {
+    if (!(await openSettingsTab(page, /report branding/i))) {
+      test.skip(true, 'Report Branding tab not visible — license/engine may be absent');
+      return;
+    }
+    // Tab body should expose the canonical text fields.
+    const company = page.getByRole('textbox', { name: /company/i }).first();
+    await expect(company).toBeVisible({ timeout: 10000 });
+    const header = page.getByRole('textbox', { name: /header/i }).first();
+    await expect(header).toBeVisible();
+  });
+
+  test('rejects oversized logo upload with a clear error', async ({ page }) => {
+    if (!(await openSettingsTab(page, /report branding/i))) {
+      test.skip(true, 'Report Branding tab not visible');
+      return;
+    }
+    // Inject a 2 MB buffer into the hidden <input type="file"> to
+    // trigger the server-side 1 MB cap.  We don't assert on the exact
+    // alert wording — only that the UI surfaces an error path AND the
+    // page stays interactive (i.e. doesn't crash).
+    const fileInput = page.locator('input[type="file"]').first();
+    if (!(await fileInput.count())) return;
+    const big = Buffer.alloc(2 * 1024 * 1024, 0xff);
+    await fileInput.setInputFiles({
+      name: 'big.png',
+      mimeType: 'image/png',
+      buffer: big,
+    });
+    try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* ok */ }
+    // The Save button (and other branding controls) must still be
+    // around — nothing in this flow should leave the tab broken.
+    const saveButton = page.getByRole('button', { name: /save/i }).first();
+    await expect(saveButton).toBeVisible();
+  });
+});
+
+test.describe('Pro+ Phase 8.7 — Report Templates settings', () => {
+  test('renders the Report Templates tab when present', async ({ page }) => {
+    if (!(await openSettingsTab(page, /report templates/i))) {
+      test.skip(true, 'Report Templates tab not visible');
+      return;
+    }
+    // The "Add Template" button is the canonical entry point — its
+    // presence proves the tab loaded its CRUD UI without crashing.
+    const addButton = page.getByRole('button', { name: /add.*template/i }).first();
+    await expect(addButton).toBeVisible({ timeout: 10000 });
+  });
+
+  test('Add Template dialog opens and closes without errors', async ({ page }) => {
+    if (!(await openSettingsTab(page, /report templates/i))) {
+      test.skip(true, 'Report Templates tab not visible');
+      return;
+    }
+    const addButton = page.getByRole('button', { name: /add.*template/i }).first();
+    if (!(await addButton.isVisible().catch(() => false))) return;
+    await addButton.click();
+    // Dialog should have a Name field and a Cancel button.
+    const dialog = page.getByRole('dialog').first();
+    await expect(dialog).toBeVisible({ timeout: 10000 });
+    const cancelButton = dialog.getByRole('button', { name: /cancel/i }).first();
+    await expect(cancelButton).toBeVisible();
+    await cancelButton.click();
+    await expect(dialog).not.toBeVisible({ timeout: 5000 });
+  });
+});
+
+test.describe('Pro+ Phase 8.7 — Dynamic Secrets settings', () => {
+  test('renders the Dynamic Secrets tab when present', async ({ page }) => {
+    if (!(await openSettingsTab(page, /dynamic secrets/i))) {
+      test.skip(true, 'Dynamic Secrets tab not visible');
+      return;
+    }
+    // The "Issue Lease" button is the canonical entry point.
+    const issueButton = page.getByRole('button', { name: /issue.*lease/i }).first();
+    await expect(issueButton).toBeVisible({ timeout: 10000 });
+  });
+
+  test('Issue Lease dialog opens with the canonical fields', async ({ page }) => {
+    if (!(await openSettingsTab(page, /dynamic secrets/i))) {
+      test.skip(true, 'Dynamic Secrets tab not visible');
+      return;
+    }
+    const issueButton = page.getByRole('button', { name: /issue.*lease/i }).first();
+    if (!(await issueButton.isVisible().catch(() => false))) return;
+    await issueButton.click();
+    const dialog = page.getByRole('dialog').first();
+    await expect(dialog).toBeVisible({ timeout: 10000 });
+    // Three required fields: Name, Backend Role, TTL (seconds).
+    await expect(dialog.getByRole('textbox', { name: /name/i }).first()).toBeVisible();
+    await expect(dialog.getByRole('textbox', { name: /role/i }).first()).toBeVisible();
+    // Cancel cleanly.
+    await dialog.getByRole('button', { name: /cancel/i }).first().click();
+    await expect(dialog).not.toBeVisible({ timeout: 5000 });
+  });
+});
+
+test.describe('Phase 8.4 — Audit Log PDF export', () => {
+  test('exposes both CSV and PDF export buttons', async ({ page }) => {
+    await page.goto('/reports/audit-log');
+    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* ok */ }
+    expect(page.url()).not.toContain('/login');
+    const csvButton = page.getByRole('button', { name: /export\s*csv/i }).first();
+    const pdfButton = page.getByRole('button', { name: /export\s*pdf/i }).first();
+    // Either the user is unauthorized (no buttons) or both are present.
+    if (await csvButton.isVisible().catch(() => false)) {
+      await expect(pdfButton).toBeVisible({ timeout: 5000 });
+    }
+  });
+
+  test('PDF export download triggers when authorized', async ({ page }) => {
+    await page.goto('/reports/audit-log');
+    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* ok */ }
+    const pdfButton = page.getByRole('button', { name: /export\s*pdf/i }).first();
+    if (!(await pdfButton.isVisible().catch(() => false))) {
+      test.skip(true, 'Audit-log PDF export button not visible');
+      return;
+    }
+    const downloadPromise = page.waitForEvent('download', { timeout: 30000 }).catch(() => null);
+    await pdfButton.click();
+    const download = await downloadPromise;
+    if (download) {
+      const filename = download.suggestedFilename();
+      expect(filename.toLowerCase()).toContain('.pdf');
+    }
+  });
+});

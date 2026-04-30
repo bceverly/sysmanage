@@ -302,7 +302,7 @@ def _route_pro_plus_export(fmt_lower: str):
 async def export_audit_logs(
     filters: AuditLogFilters = Depends(),
     fmt: str = Query(
-        "csv", description=_("Export format: csv (OSS), json/cef/leef (Pro+)")
+        "csv", description=_("Export format: csv, pdf (OSS); json/cef/leef (Pro+)")
     ),
     db_session: Session = Depends(get_db),
     dependencies=Depends(JWTBearer()),
@@ -310,18 +310,19 @@ async def export_audit_logs(
 ):
     """Export audit log entries.
 
-    OSS tier ships ``fmt=csv``.  Pro+ audit_engine adds ``json``, ``cef``,
-    and ``leef`` for SIEM integration.  CSV output uses the same filters as
-    the /list endpoint so operators can export exactly what they were
-    viewing.  Stream is unbounded (no /list limit/offset) — large filtered
-    ranges may take a few seconds to materialize.
+    OSS tier ships ``fmt=csv`` and ``fmt=pdf``.  Pro+ audit_engine adds
+    ``json``, ``cef``, and ``leef`` for SIEM integration.  Output uses
+    the same filters as the /list endpoint so operators can export
+    exactly what they were viewing.  Stream is unbounded (no /list
+    limit/offset) — large filtered ranges may take a few seconds to
+    materialize.
 
     Requires VIEW_AUDIT_LOG role."""
     _authorize_view_audit_log(db_session, current_user)
     fmt_lower = (fmt or "csv").lower()
     if fmt_lower in ("json", "cef", "leef"):
         _route_pro_plus_export(fmt_lower)
-    if fmt_lower != "csv":
+    if fmt_lower not in ("csv", "pdf"):
         raise HTTPException(
             status_code=400,
             detail=_("Unsupported export format: %s") % fmt,
@@ -330,10 +331,13 @@ async def export_audit_logs(
     query = _apply_audit_filters(db_session.query(models.AuditLog), filters)
     entries = query.order_by(models.AuditLog.timestamp.desc()).all()
     logger.info(
-        "Audit log CSV export by %s: %d entries",
+        "Audit log %s export by %s: %d entries",
+        fmt_lower.upper(),
         sanitize_log(current_user),
         len(entries),
     )
+    if fmt_lower == "pdf":
+        return _stream_audit_pdf(entries)
     return _stream_audit_csv(entries)
 
 
@@ -418,4 +422,123 @@ def _stream_audit_csv(entries):
                 f'{datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")}.csv"'
             ),
         },
+    )
+
+
+# Columns the PDF renderer emits.  Fewer than the CSV columns because
+# PDF page-width is the binding constraint and several CSV columns
+# (user_id, entity_id, user_agent, error_message) are too long or too
+# operator-irrelevant to fit alongside the description.  Operators who
+# need the wider set should still use CSV.
+_PDF_COLUMNS = [
+    ("Timestamp", _fmt_iso, "timestamp"),
+    ("User", lambda e: e.username or "", "username"),
+    ("Action", lambda e: e.action_type or "", "action_type"),
+    ("Entity", lambda e: e.entity_type or "", "entity_type"),
+    ("Name", lambda e: e.entity_name or "", "entity_name"),
+    ("Result", lambda e: e.result or "", "result"),
+    ("Description", lambda e: e.description or "", "description"),
+]
+
+
+def _stream_audit_pdf(entries):
+    """Render a PDF of audit-log entries via reportlab.
+
+    Single landscape document with one row per entry, repeating the
+    header on each page.  Used by the operator-facing CSV/PDF export
+    UI in Reports → Audit Log."""
+    import io
+    from fastapi.responses import Response
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import landscape, A4
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.platypus import (
+        Paragraph,
+        SimpleDocTemplate,
+        Spacer,
+        Table,
+        TableStyle,
+    )
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=landscape(A4),
+        title="Audit Log",
+        author="SysManage",
+        leftMargin=18,
+        rightMargin=18,
+        topMargin=18,
+        bottomMargin=18,
+    )
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        "AuditTitle",
+        parent=styles["Heading1"],
+        fontSize=16,
+        spaceAfter=10,
+        alignment=1,
+    )
+    cell_style = ParagraphStyle(
+        "AuditCell",
+        parent=styles["Normal"],
+        fontSize=7,
+        leading=9,
+    )
+
+    headers = [h[0] for h in _PDF_COLUMNS]
+    table_data = [headers]
+    for entry in entries:
+        # Wrap each cell in a Paragraph so long descriptions wrap to
+        # multiple lines instead of overflowing the column.
+        row = [
+            Paragraph(str(getter(entry)), cell_style) for _, getter, _ in _PDF_COLUMNS
+        ]
+        table_data.append(row)
+
+    flowables = [
+        Paragraph(_("Audit Log"), title_style),
+        Paragraph(
+            f"{_('Generated')}: "
+            f"{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}"
+            f"  —  {_('Total Entries')}: {len(entries)}",
+            styles["Normal"],
+        ),
+        Spacer(1, 12),
+    ]
+
+    if not entries:
+        flowables.append(Paragraph(_("No audit log entries found."), styles["Normal"]))
+    else:
+        # Column widths sized for landscape A4 (~770 pt usable width):
+        # short columns hold steady, Description gets the slack.
+        col_widths = [110, 70, 80, 80, 110, 50, 270]
+        table = Table(table_data, colWidths=col_widths, repeatRows=1)
+        table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("FONTSIZE", (0, 0), (-1, 0), 8),
+                    ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
+                    ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+                    ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+                    ("FONTSIZE", (0, 1), (-1, -1), 7),
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                ]
+            )
+        )
+        flowables.append(table)
+
+    doc.build(flowables)
+    buffer.seek(0)
+    pdf_bytes = buffer.getvalue()
+    filename = f'audit-log-{datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")}.pdf'
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )

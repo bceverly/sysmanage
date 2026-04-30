@@ -122,9 +122,9 @@ const AuditLogViewer: React.FC = () => {
     setPage(0);
   };
 
-  const handleExportCSV = async () => {
+  const handleExport = async (fmt: 'csv' | 'pdf') => {
     try {
-      const params: Record<string, string> = {};
+      const params: Record<string, string> = { fmt };
       if (search) params.search = search;
       if (userId) params.user_id = userId;
       if (actionType) params.action_type = actionType;
@@ -139,11 +139,12 @@ const AuditLogViewer: React.FC = () => {
         responseType: 'blob',
       });
 
-      const blob = new Blob([response.data], { type: 'text/csv' });
+      const mime = fmt === 'pdf' ? 'application/pdf' : 'text/csv';
+      const blob = new Blob([response.data], { type: mime });
       const url = globalThis.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `audit_log_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.download = `audit_log_${new Date().toISOString().slice(0, 10)}.${fmt}`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -157,6 +158,9 @@ const AuditLogViewer: React.FC = () => {
       }
     }
   };
+
+  const handleExportCSV = () => handleExport('csv');
+  const handleExportPDF = () => handleExport('pdf');
 
   const handleGoBack = () => {
     navigate('/reports#security');
@@ -205,6 +209,13 @@ const AuditLogViewer: React.FC = () => {
               onClick={handleExportCSV}
             >
               {t('common.exportCSV', 'Export CSV')}
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<DownloadIcon />}
+              onClick={handleExportPDF}
+            >
+              {t('common.exportPDF', 'Export PDF')}
             </Button>
           </Box>
         </Box>
