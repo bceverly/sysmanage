@@ -309,7 +309,8 @@ jobs:
               tests/test_child_host_vmm.py \
               tests/test_generic_deployment.py \
               tests/test_kvm_operations.py \
-              tests/test_lxd_operations.py
+              tests/test_lxd_operations.py \
+              tests/integration/test_lxd_lifecycle.py
             do
               IGNORES+=( --ignore="$f" )
             done
