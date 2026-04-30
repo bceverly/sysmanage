@@ -1,0 +1,59 @@
+# Advanced-setup CodeQL workflow for sysmanage.
+#
+# Replaces the default-setup CodeQL configured via the repo's
+# Settings → Code security UI.  Set CODEQL_ACTION_FILE_COVERAGE_ON_PRS
+# to "true" to keep per-file coverage data on PR runs after the
+# April 2026 default-setup behaviour change.
+#
+# To activate:
+#   1. Repo Settings → Code security → Code scanning → "Default" → switch off.
+#   2. Commit this file as ``.github/workflows/codeql.yml``.
+#   3. Push.
+
+name: CodeQL
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: "0 6 * * 1"   # Monday 06:00 UTC
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript-typescript', 'python' ]
+
+    env:
+      # Preserves per-file coverage on PR analyses past April 2026.
+      CODEQL_ACTION_FILE_COVERAGE_ON_PRS: 'true'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4
+        with:
+          category: "/language:${{ matrix.language }}"
