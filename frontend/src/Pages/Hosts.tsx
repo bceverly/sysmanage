@@ -28,6 +28,8 @@ import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import { broadcastService } from '../Services/broadcast';
 
 /** Check whether a host qualifies as a virtualization parent. */
 function isParentHost(host: SysManageHost): boolean {
@@ -683,6 +685,24 @@ const Hosts = () => {
         }
     }
 
+    const handleBroadcastRefresh = async () => {
+        if (!globalThis.confirm(t('broadcast.confirm', 'Send a refresh-inventory broadcast to all connected agents?'))) {
+            return;
+        }
+        try {
+            const r = await broadcastService.send({ broadcast_action: 'refresh_inventory' });
+            alert(
+                t('broadcast.success', 'Broadcast delivered to {{count}} host(s) in {{ms}}ms', {
+                    count: r.delivered_count,
+                    ms: Math.round(r.elapsed_ms),
+                }),
+            );
+        } catch (error) {
+            console.error('Broadcast failed:', error);
+            alert(t('broadcast.error', 'Broadcast failed'));
+        }
+    }
+
     const handleGetDiagnostics = async () => {
         try {
             if (selection.length === 0) return;
@@ -1070,15 +1090,25 @@ const Hosts = () => {
                         {t('hosts.approveSelected', { defaultValue: 'Approve Selected' })}
                     </Button>
                 )}
-                <Button 
-                    variant="outlined" 
-                    startIcon={<SyncIcon />} 
+                <Button
+                    variant="outlined"
+                    startIcon={<SyncIcon />}
                     disabled={selection.length === 0}
                     onClick={handleRefreshData}
                     color="info"
                 >
                     {t('hosts.refreshAllData', 'Refresh All Data')}
                 </Button>
+                <Tooltip title={t('broadcast.refreshTooltip', 'Send a refresh-inventory broadcast to every connected agent')}>
+                    <Button
+                        variant="outlined"
+                        startIcon={<CampaignIcon />}
+                        onClick={handleBroadcastRefresh}
+                        color="info"
+                    >
+                        {t('broadcast.refresh', 'Broadcast Refresh')}
+                    </Button>
+                </Tooltip>
                 <Button
                     variant="outlined"
                     startIcon={<MedicalServicesIcon />}

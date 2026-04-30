@@ -34,6 +34,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
+    LargeBinary,
     String,
     Text,
     create_engine,
@@ -836,6 +837,52 @@ def test_db():
         last_scan_at = Column(DateTime, nullable=True)
         created_at = Column(DateTime, nullable=True)
         updated_at = Column(DateTime, nullable=True)
+
+    # Phase 8.7 — report branding singleton, custom report templates,
+    # and dynamic-secret leases.
+    class ReportBranding(TestBase):
+        __tablename__ = "report_branding"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        company_name = Column(String(255), nullable=True)
+        header_text = Column(String(500), nullable=True)
+        logo_data = Column(LargeBinary, nullable=True)
+        logo_mime_type = Column(String(80), nullable=True)
+        updated_at = Column(DateTime, nullable=True)
+        updated_by = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+
+    class ReportTemplate(TestBase):
+        __tablename__ = "report_template"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        name = Column(String(255), nullable=False, unique=True)
+        description = Column(Text, nullable=True)
+        base_report_type = Column(String(50), nullable=False)
+        selected_fields = Column(_JSON, nullable=False)
+        enabled = Column(Boolean, nullable=False, default=True)
+        created_by = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+        created_at = Column(DateTime, nullable=True)
+        updated_at = Column(DateTime, nullable=True)
+
+    class DynamicSecretLease(TestBase):
+        __tablename__ = "dynamic_secret_lease"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        name = Column(String(255), nullable=False)
+        kind = Column(String(40), nullable=False)
+        backend_role = Column(String(255), nullable=False)
+        vault_lease_id = Column(String(500), nullable=True)
+        ttl_seconds = Column(Integer, nullable=True)
+        issued_at = Column(DateTime, nullable=False)
+        expires_at = Column(DateTime, nullable=True)
+        revoked_at = Column(DateTime, nullable=True)
+        status = Column(String(20), nullable=False, default="ACTIVE")
+        secret_metadata = Column(_JSON, nullable=True)
+        issued_by = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+        note = Column(Text, nullable=True)
 
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)

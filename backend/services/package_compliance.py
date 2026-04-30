@@ -104,6 +104,72 @@ def _packages_matching(
     return out
 
 
+def _violation(constraint, ctype: str, reason: str) -> Dict[str, Any]:
+    """Shape the violation dict the UI renders directly."""
+    return {
+        "constraint_id": str(constraint.id),
+        "package_name": constraint.package_name,
+        "constraint_type": ctype,
+        "reason": reason,
+    }
+
+
+def _check_version_satisfied(
+    matches: Iterable[Dict[str, Any]], op: str, target: str
+) -> Tuple[bool, str]:
+    """For REQUIRED + version-op: returns (any_match_passes, fail_reason).
+    Used to keep the per-constraint dispatcher flat."""
+    fail_reason = "no installed version satisfies the constraint"
+    for pkg in matches:
+        passes, reason = _compare_versions(pkg.get("version", ""), op, target)
+        if passes:
+            return True, ""
+        if reason:
+            fail_reason = reason
+    return False, fail_reason
+
+
+def _eval_required(constraint, matches: List[Dict[str, Any]]):
+    """Evaluate a single REQUIRED constraint;  returns a violation dict
+    or None when the host satisfies the rule."""
+    if not matches:
+        return _violation(constraint, CONSTRAINT_REQUIRED, "package not installed")
+    if constraint.version_op and constraint.version:
+        ok, fail_reason = _check_version_satisfied(
+            matches, constraint.version_op, constraint.version
+        )
+        if not ok:
+            return _violation(constraint, CONSTRAINT_REQUIRED, fail_reason)
+    return None
+
+
+def _eval_blocked(constraint, matches: List[Dict[str, Any]]):
+    """Evaluate a single BLOCKED constraint.
+
+    With a version op set the rule fires only when an installed version
+    satisfies the op (i.e. "block < 2.0").  Without a version op, any
+    install of the package is a violation."""
+    if not matches:
+        return None
+    if not (constraint.version_op and constraint.version):
+        return _violation(
+            constraint, CONSTRAINT_BLOCKED, "package is installed but blocked"
+        )
+    offending: List[str] = []
+    for pkg in matches:
+        iv = pkg.get("version", "")
+        passes, _ = _compare_versions(iv, constraint.version_op, constraint.version)
+        if passes:
+            offending.append(iv)
+    if not offending:
+        return None
+    return _violation(
+        constraint,
+        CONSTRAINT_BLOCKED,
+        f"installed version(s) match blocked constraint: {', '.join(offending)}",
+    )
+
+
 def evaluate_host_against_profile(
     installed_packages: Iterable[Dict[str, Any]], profile_constraints
 ) -> Tuple[str, List[Dict[str, Any]]]:
@@ -127,79 +193,14 @@ def evaluate_host_against_profile(
 
     for constraint in profile_constraints:
         matches = _packages_matching(constraint, installed)
-
         if constraint.constraint_type == CONSTRAINT_REQUIRED:
-            if not matches:
-                violations.append(
-                    {
-                        "constraint_id": str(constraint.id),
-                        "package_name": constraint.package_name,
-                        "constraint_type": CONSTRAINT_REQUIRED,
-                        "reason": "package not installed",
-                    }
-                )
-                continue
-            if constraint.version_op and constraint.version:
-                # At least one matching install must satisfy the version op.
-                ok = False
-                fail_reason = "no installed version satisfies the constraint"
-                for pkg in matches:
-                    iv = pkg.get("version", "")
-                    passes, reason = _compare_versions(
-                        iv, constraint.version_op, constraint.version
-                    )
-                    if passes:
-                        ok = True
-                        break
-                    if reason:
-                        fail_reason = reason
-                if not ok:
-                    violations.append(
-                        {
-                            "constraint_id": str(constraint.id),
-                            "package_name": constraint.package_name,
-                            "constraint_type": CONSTRAINT_REQUIRED,
-                            "reason": fail_reason,
-                        }
-                    )
-
+            v = _eval_required(constraint, matches)
         elif constraint.constraint_type == CONSTRAINT_BLOCKED:
-            if not matches:
-                continue
-            # If a version constraint is set, the BLOCKED rule fires
-            # only when an installed version satisfies the op (i.e.,
-            # "block versions less than 2.0").  If no version op is
-            # set, ANY install of the package is a violation.
-            if constraint.version_op and constraint.version:
-                offending = []
-                for pkg in matches:
-                    iv = pkg.get("version", "")
-                    passes, _ = _compare_versions(
-                        iv, constraint.version_op, constraint.version
-                    )
-                    if passes:
-                        offending.append(iv)
-                if offending:
-                    violations.append(
-                        {
-                            "constraint_id": str(constraint.id),
-                            "package_name": constraint.package_name,
-                            "constraint_type": CONSTRAINT_BLOCKED,
-                            "reason": (
-                                f"installed version(s) match blocked constraint: "
-                                f"{', '.join(offending)}"
-                            ),
-                        }
-                    )
-            else:
-                violations.append(
-                    {
-                        "constraint_id": str(constraint.id),
-                        "package_name": constraint.package_name,
-                        "constraint_type": CONSTRAINT_BLOCKED,
-                        "reason": "package is installed but blocked",
-                    }
-                )
+            v = _eval_blocked(constraint, matches)
+        else:
+            v = None
+        if v is not None:
+            violations.append(v)
 
     status = STATUS_COMPLIANT if not violations else STATUS_NON_COMPLIANT
     return status, violations

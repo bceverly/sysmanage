@@ -1243,3 +1243,174 @@ msgstr "Le secret JWT utilise la valeur par défaut mais le sel de mot de passe 
 
 msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
 msgstr "Le sel de mot de passe utilise la valeur par défaut mais le secret JWT a été modifié. Exécuter : {command}"
+
+msgid "A group cannot be its own parent"
+msgstr "Un groupe ne peut pas être son propre parent"
+
+msgid "Access group deleted"
+msgstr "Groupe d'accès supprimé"
+
+msgid "Access-group hierarchy too deep (max %d levels)"
+msgstr "Hiérarchie de groupe d'accès trop profonde (max. %d niveaux)"
+
+msgid "Audit log entry not found"
+msgstr "Entrée du journal d'audit introuvable"
+
+msgid "Broadcast '%s' delivered to %d host(s) (filter=%s, %.0fms)"
+msgstr "Diffusion « %s » délivrée à %d hôte(s) (filtre=%s, %.0fms)"
+
+msgid "Created access group '%s'"
+msgstr "Groupe d'accès « %s » créé"
+
+msgid "Created package profile '%s'"
+msgstr "Profil de paquet « %s » créé"
+
+msgid "Created registration key '%s'"
+msgstr "Clé d'enregistrement « %s » créée"
+
+msgid "Created report template '%s'"
+msgstr "Modèle de rapport « %s » créé"
+
+msgid "Created upgrade profile '%s'"
+msgstr "Profil de mise à jour « %s » créé"
+
+msgid "Cycle detected in access-group hierarchy"
+msgstr "Cycle détecté dans la hiérarchie de groupe d'accès"
+
+msgid "Deleted access group '%s'"
+msgstr "Groupe d'accès « %s » supprimé"
+
+msgid "Deleted package profile '%s'"
+msgstr "Profil de paquet « %s » supprimé"
+
+msgid "Deleted registration key '%s'"
+msgstr "Clé d'enregistrement « %s » supprimée"
+
+msgid "Deleted report template '%s'"
+msgstr "Modèle de rapport « %s » supprimé"
+
+msgid "Deleted upgrade profile '%s'"
+msgstr "Profil de mise à jour « %s » supprimé"
+
+msgid "Dispatched compliance check to agent '%s' for profile '%s'"
+msgstr "Vérification de conformité envoyée à l'agent « %s » pour le profil « %s »"
+
+msgid "Empty file"
+msgstr "Fichier vide"
+
+msgid "Export format: csv (OSS), json/cef/leef (Pro+)"
+msgstr "Format d'export : csv (OSS), json/cef/leef (Pro+)"
+
+msgid "Failed to retrieve audit log entry: %s"
+msgstr "Échec de la récupération de l'entrée du journal d'audit : %s"
+
+msgid "Failed to retrieve audit logs: %s"
+msgstr "Échec de la récupération des journaux d'audit : %s"
+
+msgid "Invalid audit log ID format"
+msgstr "Format d'ID de journal d'audit invalide"
+
+msgid "Invalid cron expression: %s"
+msgstr "Expression cron invalide : %s"
+
+msgid "Invalid tag_id: %s"
+msgstr "tag_id invalide : %s"
+
+msgid "Invalid user ID format"
+msgstr "Format d'ID utilisateur invalide"
+
+msgid "Invalid UUID for %s: %s"
+msgstr "UUID invalide pour %s : %s"
+
+msgid "Issued dynamic secret '%s' (kind=%s, role=%s, ttl=%ds)"
+msgstr "Secret dynamique « %s » émis (type=%s, rôle=%s, ttl=%ds)"
+
+msgid "Lease not found"
+msgstr "Bail introuvable"
+
+msgid "Logo too large; max 1 MB"
+msgstr "Logo trop grand ; max. 1 Mo"
+
+msgid "No file provided"
+msgstr "Aucun fichier fourni"
+
+msgid "No logo configured"
+msgstr "Aucun logo configuré"
+
+msgid "Number of entries to return"
+msgstr "Nombre d'entrées à retourner"
+
+msgid "Number of entries to skip"
+msgstr "Nombre d'entrées à ignorer"
+
+msgid "Package profile deleted"
+msgstr "Profil de paquet supprimé"
+
+msgid "Parent group not found"
+msgstr "Groupe parent introuvable"
+
+msgid "Registration key deleted"
+msgstr "Clé d'enregistrement supprimée"
+
+msgid "Registration key revoked"
+msgstr "Clé d'enregistrement révoquée"
+
+msgid "Removed report branding logo"
+msgstr "Logo de marquage des rapports supprimé"
+
+msgid "Report template deleted"
+msgstr "Modèle de rapport supprimé"
+
+msgid "Revoked dynamic secret lease '%s'"
+msgstr "Bail de secret dynamique « %s » révoqué"
+
+msgid "Revoked registration key '%s'"
+msgstr "Clé d'enregistrement « %s » révoquée"
+
+msgid "Scanned host '%s' against profile '%s': %s (%d violation(s))"
+msgstr "Hôte « %s » analysé contre le profil « %s » : %s (%d violation(s))"
+
+msgid "Setting parent_id would create a cycle"
+msgstr "Définir parent_id créerait un cycle"
+
+msgid "Triggered upgrade profile '%s' against %d host(s)"
+msgstr "Profil de mise à jour « %s » déclenché contre %d hôte(s)"
+
+msgid "Unknown base_report_type: %s"
+msgstr "base_report_type inconnu : %s"
+
+msgid "Unknown field code(s) for %s: %s"
+msgstr "Code(s) de champ inconnu(s) pour %s : %s"
+
+msgid "Unknown kind: %s (allowed: %s)"
+msgstr "Type inconnu : %s (autorisés : %s)"
+
+msgid "Unknown status: %s (allowed: %s)"
+msgstr "Statut inconnu : %s (autorisés : %s)"
+
+msgid "Unsupported export format: %s"
+msgstr "Format d'export non pris en charge : %s"
+
+msgid "Unsupported logo format (allowed: PNG, JPEG, SVG, WEBP)"
+msgstr "Format de logo non pris en charge (autorisés : PNG, JPEG, SVG, WEBP)"
+
+msgid "Updated access group '%s'"
+msgstr "Groupe d'accès « %s » mis à jour"
+
+msgid "Updated package profile '%s'"
+msgstr "Profil de paquet « %s » mis à jour"
+
+msgid "Updated report branding"
+msgstr "Marquage des rapports mis à jour"
+
+msgid "Updated report template '%s'"
+msgstr "Modèle de rapport « %s » mis à jour"
+
+msgid "Updated upgrade profile '%s'"
+msgstr "Profil de mise à jour « %s » mis à jour"
+
+msgid "Upgrade profile deleted"
+msgstr "Profil de mise à jour supprimé"
+
+msgid "Uploaded report branding logo (%d bytes, %s)"
+msgstr "Logo de marquage des rapports téléversé (%d octets, %s)"

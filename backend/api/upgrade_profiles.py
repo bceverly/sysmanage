@@ -47,6 +47,11 @@ router = APIRouter(
 )
 
 
+# Reused 404 detail string — extracted so the wording can't drift
+# between handlers and so SonarQube's duplication scanner is happy.
+_ERR_UPGRADE_PROFILE_NOT_FOUND = "Upgrade profile not found"
+
+
 class UpgradeProfileCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=120)
     description: Optional[str] = None
@@ -169,7 +174,7 @@ async def get_profile(profile_id: str, db: Session = Depends(get_db)):
         db.query(models.UpgradeProfile).filter(models.UpgradeProfile.id == pid).first()
     )
     if not profile:
-        raise HTTPException(status_code=404, detail=_("Upgrade profile not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_UPGRADE_PROFILE_NOT_FOUND))
     return UpgradeProfileResponse(**profile.to_dict())
 
 
@@ -186,7 +191,7 @@ async def update_profile(
         db.query(models.UpgradeProfile).filter(models.UpgradeProfile.id == pid).first()
     )
     if not profile:
-        raise HTTPException(status_code=404, detail=_("Upgrade profile not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_UPGRADE_PROFILE_NOT_FOUND))
 
     if request.name is not None:
         profile.name = request.name
@@ -238,7 +243,7 @@ async def delete_profile(
         db.query(models.UpgradeProfile).filter(models.UpgradeProfile.id == pid).first()
     )
     if not profile:
-        raise HTTPException(status_code=404, detail=_("Upgrade profile not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_UPGRADE_PROFILE_NOT_FOUND))
     name = profile.name
     db.delete(profile)
     db.commit()
@@ -331,7 +336,7 @@ async def trigger_profile(
         db.query(models.UpgradeProfile).filter(models.UpgradeProfile.id == pid).first()
     )
     if not profile:
-        raise HTTPException(status_code=404, detail=_("Upgrade profile not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_UPGRADE_PROFILE_NOT_FOUND))
 
     target_ids = upgrade_scheduler.selectors_for_profile(profile, db)
     enqueued = _dispatch_profile_to_hosts(profile, target_ids, db)

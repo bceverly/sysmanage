@@ -258,6 +258,54 @@ class ConnectionManager:
 
         return successful_sends
 
+    async def broadcast_to_tagged(self, tag_id, message: dict) -> int:
+        """Phase 8.5: broadcast to every connected agent whose host
+        carries the given tag.  Resolves the tag → host_ids set in ONE
+        DB query, then iterates active connections in memory; never
+        does per-host queries.
+
+        Returns the count of agents that successfully received the
+        message.  Agents that fail to receive are disconnected so the
+        next broadcast doesn't double-fail on them."""
+        from sqlalchemy.orm import sessionmaker  # local import — keeps the
+        from backend.persistence import db, models  # module import graph tidy
+
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db.get_engine()
+        )
+        with session_local() as session:
+            tagged_host_ids = {
+                row[0]
+                for row in session.query(models.HostTag.host_id)
+                .filter(models.HostTag.tag_id == tag_id)
+                .all()
+            }
+            # Map tagged host_ids → active hostnames so we can match
+            # against the in-memory connection table without another DB hit.
+            tagged_fqdns = {
+                str(host.fqdn).lower()
+                for host in session.query(models.Host)
+                .filter(models.Host.id.in_(tagged_host_ids))
+                .all()
+            }
+
+        if not tagged_fqdns:
+            return 0
+
+        successful_sends = 0
+        failed_agents = []
+        for agent_id, connection in self.active_connections.items():
+            if (connection.hostname or "").lower() in tagged_fqdns:
+                if await connection.send_message(message):
+                    successful_sends += 1
+                else:
+                    failed_agents.append(agent_id)
+
+        for agent_id in failed_agents:
+            self.disconnect(agent_id)
+
+        return successful_sends
+
     def get_active_agents(self) -> List[dict]:
         """Get list of all active agents with their details."""
         return [

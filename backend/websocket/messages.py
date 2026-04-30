@@ -77,6 +77,9 @@ class MessageType(str, Enum):
     PING = "ping"
     SHUTDOWN = "shutdown"
     HOST_APPROVED = "host_approved"
+    # Phase 8.5 — fleet-wide broadcast.  Server fans out one message
+    # to every connected agent (or every agent matching a tag).
+    BROADCAST = "broadcast"
 
 
 class CommandType(str, Enum):

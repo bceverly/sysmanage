@@ -34,6 +34,11 @@ logger = logging.getLogger(__name__)
 #  2. Prevents a deep-tree DoS via repeated parenting.
 _MAX_TREE_DEPTH = 10
 
+# Reused 404 detail strings — extracted so the wording can't drift
+# between handlers and so SonarQube's duplication scanner is happy.
+_ERR_ACCESS_GROUP_NOT_FOUND = "Access group not found"
+_ERR_REGISTRATION_KEY_NOT_FOUND = "Registration key not found"
+
 
 groups_router = APIRouter(
     prefix="/api/access-groups",
@@ -232,7 +237,7 @@ async def get_access_group(group_id: str, db: Session = Depends(get_db)):
         db.query(models.AccessGroup).filter(models.AccessGroup.id == group_uuid).first()
     )
     if not group:
-        raise HTTPException(status_code=404, detail=_("Access group not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_ACCESS_GROUP_NOT_FOUND))
     return AccessGroupResponse(**group.to_dict())
 
 
@@ -249,7 +254,7 @@ async def update_access_group(
         db.query(models.AccessGroup).filter(models.AccessGroup.id == group_uuid).first()
     )
     if not group:
-        raise HTTPException(status_code=404, detail=_("Access group not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_ACCESS_GROUP_NOT_FOUND))
 
     if request.name is not None:
         group.name = request.name
@@ -293,7 +298,7 @@ async def delete_access_group(
         db.query(models.AccessGroup).filter(models.AccessGroup.id == group_uuid).first()
     )
     if not group:
-        raise HTTPException(status_code=404, detail=_("Access group not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_ACCESS_GROUP_NOT_FOUND))
     name = group.name
     db.delete(group)
     db.commit()
@@ -340,13 +345,10 @@ async def create_registration_key(
     the operator loses it."""
     user = _get_user(db, current_user)
     ag_uuid = _parse_uuid_or_400(request.access_group_id, "access_group_id")
-    if ag_uuid is not None:
-        if (
-            not db.query(models.AccessGroup.id)
-            .filter(models.AccessGroup.id == ag_uuid)
-            .first()
-        ):
-            raise HTTPException(status_code=404, detail=_("Access group not found"))
+    if ag_uuid is not None and not (
+        db.query(models.AccessGroup.id).filter(models.AccessGroup.id == ag_uuid).first()
+    ):
+        raise HTTPException(status_code=404, detail=_(_ERR_ACCESS_GROUP_NOT_FOUND))
 
     expires = request.expires_at
     if expires is not None and expires.tzinfo is not None:
@@ -394,7 +396,7 @@ async def revoke_registration_key(
         .first()
     )
     if not key:
-        raise HTTPException(status_code=404, detail=_("Registration key not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_REGISTRATION_KEY_NOT_FOUND))
     if not key.revoked:
         key.revoked = True
         db.commit()
@@ -426,7 +428,7 @@ async def delete_registration_key(
         .first()
     )
     if not key:
-        raise HTTPException(status_code=404, detail=_("Registration key not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_REGISTRATION_KEY_NOT_FOUND))
     name = key.name
     db.delete(key)
     db.commit()

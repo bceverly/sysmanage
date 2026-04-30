@@ -542,6 +542,50 @@ async def add_host(new_host: Host, current_user: str = Depends(get_current_user)
         }
 
 
+def _refresh_existing_host(session, existing_host, registration_data) -> "models.Host":
+    """Update an already-registered host's network/active fields from a
+    re-registration payload.  Script-execution capability is intentionally
+    NOT touched — that's an admin-configured server-side setting."""
+    print("Updating existing host with minimal registration data...")
+    try:
+        existing_host.active = registration_data.active
+        existing_host.ipv4 = registration_data.ipv4
+        existing_host.ipv6 = registration_data.ipv6
+        existing_host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
+        print(
+            f"Before commit - FQDN: {existing_host.fqdn}, Active: {existing_host.active}"
+        )
+        session.commit()
+        print("Database commit successful")
+        session.refresh(existing_host)
+        print("After refresh - Host updated with minimal data")
+        return existing_host
+    except Exception as e:
+        print(f"Error updating existing host: {e}")
+        session.rollback()
+        raise
+
+
+def _validate_registration_key(session, raw_key):
+    """Resolve a registration key string to a usable ``RegistrationKey``
+    row.  Returns the row when valid, ``None`` when no key was supplied,
+    raises 403 otherwise.  We deliberately don't leak which condition
+    (revoked/expired/max-uses) failed."""
+    if not raw_key:
+        return None
+    validated_key = (
+        session.query(models.RegistrationKey)
+        .filter(models.RegistrationKey.key == raw_key)
+        .first()
+    )
+    if validated_key is None or not validated_key.is_usable():
+        raise HTTPException(
+            status_code=403,
+            detail=_("Invalid or expired registration key"),
+        )
+    return validated_key
+
+
 @public_router.post("/host/register")
 async def register_host(registration_data: HostRegistration):
     """
@@ -563,62 +607,19 @@ async def register_host(registration_data: HostRegistration):
     )
 
     with session_local() as session:
-        # Check if host already exists by FQDN
         existing_host = (
             session.query(models.Host)
             .filter(models.Host.fqdn == registration_data.fqdn)
             .first()
         )
-
         if existing_host:
-            # Update existing host with minimal registration information
-            print("Updating existing host with minimal registration data...")
-            try:
-                existing_host.active = registration_data.active
-                existing_host.ipv4 = registration_data.ipv4
-                existing_host.ipv6 = registration_data.ipv6
-                existing_host.last_access = datetime.now(timezone.utc).replace(
-                    tzinfo=None
-                )
-
-                # NOTE: Script execution capability should not be overwritten during re-registration
-                # This prevents agents from overwriting server-configured script execution settings
-                # Script execution should only be set through explicit admin configuration
-
-                print(
-                    f"Before commit - FQDN: {existing_host.fqdn}, Active: {existing_host.active}"
-                )
-                session.commit()
-                print("Database commit successful")
-                session.refresh(existing_host)
-                print("After refresh - Host updated with minimal data")
-
-                return existing_host
-            except Exception as e:
-                print(f"Error updating existing host: {e}")
-                session.rollback()
-                raise
+            return _refresh_existing_host(session, existing_host, registration_data)
 
         # Phase 8.1: validate optional registration_key BEFORE creating
         # the host row, so a bad key never even creates a pending host.
-        # When present and valid, we enroll into the access_group AND
-        # apply auto_approve if the key allows it.
-        validated_key = None
-        if registration_data.registration_key:
-            validated_key = (
-                session.query(models.RegistrationKey)
-                .filter(
-                    models.RegistrationKey.key == registration_data.registration_key
-                )
-                .first()
-            )
-            if validated_key is None or not validated_key.is_usable():
-                # Don't leak which condition failed (revoked vs expired vs
-                # max-uses-exceeded) — generic 403 is the safe response.
-                raise HTTPException(
-                    status_code=403,
-                    detail=_("Invalid or expired registration key"),
-                )
+        validated_key = _validate_registration_key(
+            session, registration_data.registration_key
+        )
 
         # Create new host with pending approval status and minimal data
         host = models.Host(

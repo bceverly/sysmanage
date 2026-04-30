@@ -1242,3 +1242,174 @@ msgstr "JWT-Geheimnis verwendet den Standardwert, aber Passwort-Salt wurde geän
 
 msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
 msgstr "Passwort-Salt verwendet den Standardwert, aber JWT-Geheimnis wurde geändert. Ausführen: {command}"
+
+msgid "A group cannot be its own parent"
+msgstr "Eine Gruppe kann nicht ihr eigener Übergeordneter sein"
+
+msgid "Access group deleted"
+msgstr "Zugriffsgruppe gelöscht"
+
+msgid "Access-group hierarchy too deep (max %d levels)"
+msgstr "Zugriffsgruppen-Hierarchie zu tief (max. %d Ebenen)"
+
+msgid "Audit log entry not found"
+msgstr "Audit-Log-Eintrag nicht gefunden"
+
+msgid "Broadcast '%s' delivered to %d host(s) (filter=%s, %.0fms)"
+msgstr "Broadcast '%s' an %d Host(s) zugestellt (Filter=%s, %.0fms)"
+
+msgid "Created access group '%s'"
+msgstr "Zugriffsgruppe '%s' erstellt"
+
+msgid "Created package profile '%s'"
+msgstr "Paketprofil '%s' erstellt"
+
+msgid "Created registration key '%s'"
+msgstr "Registrierungsschlüssel '%s' erstellt"
+
+msgid "Created report template '%s'"
+msgstr "Berichtsvorlage '%s' erstellt"
+
+msgid "Created upgrade profile '%s'"
+msgstr "Aktualisierungsprofil '%s' erstellt"
+
+msgid "Cycle detected in access-group hierarchy"
+msgstr "Zyklus in Zugriffsgruppen-Hierarchie erkannt"
+
+msgid "Deleted access group '%s'"
+msgstr "Zugriffsgruppe '%s' gelöscht"
+
+msgid "Deleted package profile '%s'"
+msgstr "Paketprofil '%s' gelöscht"
+
+msgid "Deleted registration key '%s'"
+msgstr "Registrierungsschlüssel '%s' gelöscht"
+
+msgid "Deleted report template '%s'"
+msgstr "Berichtsvorlage '%s' gelöscht"
+
+msgid "Deleted upgrade profile '%s'"
+msgstr "Aktualisierungsprofil '%s' gelöscht"
+
+msgid "Dispatched compliance check to agent '%s' for profile '%s'"
+msgstr "Compliance-Prüfung an Agent '%s' für Profil '%s' gesendet"
+
+msgid "Empty file"
+msgstr "Leere Datei"
+
+msgid "Export format: csv (OSS), json/cef/leef (Pro+)"
+msgstr "Exportformat: csv (OSS), json/cef/leef (Pro+)"
+
+msgid "Failed to retrieve audit log entry: %s"
+msgstr "Audit-Log-Eintrag konnte nicht abgerufen werden: %s"
+
+msgid "Failed to retrieve audit logs: %s"
+msgstr "Audit-Logs konnten nicht abgerufen werden: %s"
+
+msgid "Invalid audit log ID format"
+msgstr "Ungültiges Audit-Log-ID-Format"
+
+msgid "Invalid cron expression: %s"
+msgstr "Ungültiger Cron-Ausdruck: %s"
+
+msgid "Invalid tag_id: %s"
+msgstr "Ungültige tag_id: %s"
+
+msgid "Invalid user ID format"
+msgstr "Ungültiges Benutzer-ID-Format"
+
+msgid "Invalid UUID for %s: %s"
+msgstr "Ungültige UUID für %s: %s"
+
+msgid "Issued dynamic secret '%s' (kind=%s, role=%s, ttl=%ds)"
+msgstr "Dynamisches Geheimnis '%s' ausgestellt (Art=%s, Rolle=%s, TTL=%ds)"
+
+msgid "Lease not found"
+msgstr "Lease nicht gefunden"
+
+msgid "Logo too large; max 1 MB"
+msgstr "Logo zu groß; max. 1 MB"
+
+msgid "No file provided"
+msgstr "Keine Datei bereitgestellt"
+
+msgid "No logo configured"
+msgstr "Kein Logo konfiguriert"
+
+msgid "Number of entries to return"
+msgstr "Anzahl zurückzugebender Einträge"
+
+msgid "Number of entries to skip"
+msgstr "Anzahl zu überspringender Einträge"
+
+msgid "Package profile deleted"
+msgstr "Paketprofil gelöscht"
+
+msgid "Parent group not found"
+msgstr "Übergeordnete Gruppe nicht gefunden"
+
+msgid "Registration key deleted"
+msgstr "Registrierungsschlüssel gelöscht"
+
+msgid "Registration key revoked"
+msgstr "Registrierungsschlüssel widerrufen"
+
+msgid "Removed report branding logo"
+msgstr "Berichts-Branding-Logo entfernt"
+
+msgid "Report template deleted"
+msgstr "Berichtsvorlage gelöscht"
+
+msgid "Revoked dynamic secret lease '%s'"
+msgstr "Dynamisches Geheimnis-Lease '%s' widerrufen"
+
+msgid "Revoked registration key '%s'"
+msgstr "Registrierungsschlüssel '%s' widerrufen"
+
+msgid "Scanned host '%s' against profile '%s': %s (%d violation(s))"
+msgstr "Host '%s' gegen Profil '%s' gescannt: %s (%d Verstoß/Verstöße)"
+
+msgid "Setting parent_id would create a cycle"
+msgstr "Setzen von parent_id würde einen Zyklus erzeugen"
+
+msgid "Triggered upgrade profile '%s' against %d host(s)"
+msgstr "Aktualisierungsprofil '%s' für %d Host(s) ausgelöst"
+
+msgid "Unknown base_report_type: %s"
+msgstr "Unbekannter base_report_type: %s"
+
+msgid "Unknown field code(s) for %s: %s"
+msgstr "Unbekannte(r) Feldcode(s) für %s: %s"
+
+msgid "Unknown kind: %s (allowed: %s)"
+msgstr "Unbekannte Art: %s (erlaubt: %s)"
+
+msgid "Unknown status: %s (allowed: %s)"
+msgstr "Unbekannter Status: %s (erlaubt: %s)"
+
+msgid "Unsupported export format: %s"
+msgstr "Nicht unterstütztes Exportformat: %s"
+
+msgid "Unsupported logo format (allowed: PNG, JPEG, SVG, WEBP)"
+msgstr "Nicht unterstütztes Logo-Format (erlaubt: PNG, JPEG, SVG, WEBP)"
+
+msgid "Updated access group '%s'"
+msgstr "Zugriffsgruppe '%s' aktualisiert"
+
+msgid "Updated package profile '%s'"
+msgstr "Paketprofil '%s' aktualisiert"
+
+msgid "Updated report branding"
+msgstr "Berichts-Branding aktualisiert"
+
+msgid "Updated report template '%s'"
+msgstr "Berichtsvorlage '%s' aktualisiert"
+
+msgid "Updated upgrade profile '%s'"
+msgstr "Aktualisierungsprofil '%s' aktualisiert"
+
+msgid "Upgrade profile deleted"
+msgstr "Aktualisierungsprofil gelöscht"
+
+msgid "Uploaded report branding logo (%d bytes, %s)"
+msgstr "Berichts-Branding-Logo hochgeladen (%d Bytes, %s)"

@@ -1243,3 +1243,174 @@ msgstr "سر JWT يستخدم القيمة الافتراضية ولكن تم ت
 
 msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
 msgstr "ملح كلمة المرور يستخدم القيمة الافتراضية ولكن تم تغيير سر JWT. تشغيل: {command}"
+
+msgid "A group cannot be its own parent"
+msgstr "لا يمكن أن تكون المجموعة الأصل لنفسها"
+
+msgid "Access group deleted"
+msgstr "تم حذف مجموعة الوصول"
+
+msgid "Access-group hierarchy too deep (max %d levels)"
+msgstr "تسلسل مجموعة الوصول عميق جدًا (الحد %d مستويات)"
+
+msgid "Audit log entry not found"
+msgstr "إدخال سجل التدقيق غير موجود"
+
+msgid "Broadcast '%s' delivered to %d host(s) (filter=%s, %.0fms)"
+msgstr "تم تسليم البث '%s' إلى %d مضيف (تصفية=%s، %.0f مللي ثانية)"
+
+msgid "Created access group '%s'"
+msgstr "تم إنشاء مجموعة الوصول '%s'"
+
+msgid "Created package profile '%s'"
+msgstr "تم إنشاء ملف الحزمة '%s'"
+
+msgid "Created registration key '%s'"
+msgstr "تم إنشاء مفتاح التسجيل '%s'"
+
+msgid "Created report template '%s'"
+msgstr "تم إنشاء قالب التقرير '%s'"
+
+msgid "Created upgrade profile '%s'"
+msgstr "تم إنشاء ملف الترقية '%s'"
+
+msgid "Cycle detected in access-group hierarchy"
+msgstr "تم اكتشاف حلقة في تسلسل مجموعة الوصول"
+
+msgid "Deleted access group '%s'"
+msgstr "تم حذف مجموعة الوصول '%s'"
+
+msgid "Deleted package profile '%s'"
+msgstr "تم حذف ملف الحزمة '%s'"
+
+msgid "Deleted registration key '%s'"
+msgstr "تم حذف مفتاح التسجيل '%s'"
+
+msgid "Deleted report template '%s'"
+msgstr "تم حذف قالب التقرير '%s'"
+
+msgid "Deleted upgrade profile '%s'"
+msgstr "تم حذف ملف الترقية '%s'"
+
+msgid "Dispatched compliance check to agent '%s' for profile '%s'"
+msgstr "تم إرسال فحص الامتثال إلى الوكيل '%s' للملف '%s'"
+
+msgid "Empty file"
+msgstr "ملف فارغ"
+
+msgid "Export format: csv (OSS), json/cef/leef (Pro+)"
+msgstr "تنسيق التصدير: csv (مفتوح المصدر)، json/cef/leef (احترافي)"
+
+msgid "Failed to retrieve audit log entry: %s"
+msgstr "فشل استرداد إدخال سجل التدقيق: %s"
+
+msgid "Failed to retrieve audit logs: %s"
+msgstr "فشل استرداد سجلات التدقيق: %s"
+
+msgid "Invalid audit log ID format"
+msgstr "تنسيق معرف سجل التدقيق غير صالح"
+
+msgid "Invalid cron expression: %s"
+msgstr "تعبير cron غير صالح: %s"
+
+msgid "Invalid tag_id: %s"
+msgstr "tag_id غير صالح: %s"
+
+msgid "Invalid user ID format"
+msgstr "تنسيق معرف المستخدم غير صالح"
+
+msgid "Invalid UUID for %s: %s"
+msgstr "UUID غير صالح لـ %s: %s"
+
+msgid "Issued dynamic secret '%s' (kind=%s, role=%s, ttl=%ds)"
+msgstr "تم إصدار سر ديناميكي '%s' (نوع=%s، دور=%s، مدة=%d ثانية)"
+
+msgid "Lease not found"
+msgstr "عقد الإيجار غير موجود"
+
+msgid "Logo too large; max 1 MB"
+msgstr "الشعار كبير جدًا؛ الحد الأقصى 1 ميجابايت"
+
+msgid "No file provided"
+msgstr "لم يتم تقديم ملف"
+
+msgid "No logo configured"
+msgstr "لم يتم تكوين شعار"
+
+msgid "Number of entries to return"
+msgstr "عدد الإدخالات المراد إرجاعها"
+
+msgid "Number of entries to skip"
+msgstr "عدد الإدخالات المراد تخطيها"
+
+msgid "Package profile deleted"
+msgstr "تم حذف ملف الحزمة"
+
+msgid "Parent group not found"
+msgstr "المجموعة الأصل غير موجودة"
+
+msgid "Registration key deleted"
+msgstr "تم حذف مفتاح التسجيل"
+
+msgid "Registration key revoked"
+msgstr "تم إلغاء مفتاح التسجيل"
+
+msgid "Removed report branding logo"
+msgstr "تمت إزالة شعار علامة التقارير"
+
+msgid "Report template deleted"
+msgstr "تم حذف قالب التقرير"
+
+msgid "Revoked dynamic secret lease '%s'"
+msgstr "تم إلغاء عقد الإيجار الديناميكي '%s'"
+
+msgid "Revoked registration key '%s'"
+msgstr "تم إلغاء مفتاح التسجيل '%s'"
+
+msgid "Scanned host '%s' against profile '%s': %s (%d violation(s))"
+msgstr "تم فحص المضيف '%s' مقابل الملف '%s': %s (%d انتهاك)"
+
+msgid "Setting parent_id would create a cycle"
+msgstr "تعيين parent_id سيخلق حلقة"
+
+msgid "Triggered upgrade profile '%s' against %d host(s)"
+msgstr "تم تشغيل ملف الترقية '%s' ضد %d مضيف"
+
+msgid "Unknown base_report_type: %s"
+msgstr "base_report_type غير معروف: %s"
+
+msgid "Unknown field code(s) for %s: %s"
+msgstr "رمز/رموز حقل غير معروفة لـ %s: %s"
+
+msgid "Unknown kind: %s (allowed: %s)"
+msgstr "نوع غير معروف: %s (المسموح: %s)"
+
+msgid "Unknown status: %s (allowed: %s)"
+msgstr "حالة غير معروفة: %s (المسموح: %s)"
+
+msgid "Unsupported export format: %s"
+msgstr "تنسيق التصدير غير مدعوم: %s"
+
+msgid "Unsupported logo format (allowed: PNG, JPEG, SVG, WEBP)"
+msgstr "تنسيق شعار غير مدعوم (المسموح: PNG، JPEG، SVG، WEBP)"
+
+msgid "Updated access group '%s'"
+msgstr "تم تحديث مجموعة الوصول '%s'"
+
+msgid "Updated package profile '%s'"
+msgstr "تم تحديث ملف الحزمة '%s'"
+
+msgid "Updated report branding"
+msgstr "تم تحديث علامة التقارير"
+
+msgid "Updated report template '%s'"
+msgstr "تم تحديث قالب التقرير '%s'"
+
+msgid "Updated upgrade profile '%s'"
+msgstr "تم تحديث ملف الترقية '%s'"
+
+msgid "Upgrade profile deleted"
+msgstr "تم حذف ملف الترقية"
+
+msgid "Uploaded report branding logo (%d bytes, %s)"
+msgstr "تم تحميل شعار علامة التقارير (%d بايت، %s)"

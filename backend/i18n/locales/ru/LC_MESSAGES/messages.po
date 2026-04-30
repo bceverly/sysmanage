@@ -1253,3 +1253,174 @@ msgstr "JWT-секрет использует значение по умолча
 
 msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
 msgstr "Соль пароля использует значение по умолчанию, но JWT-секрет был изменён. Запуск: {command}"
+
+msgid "A group cannot be its own parent"
+msgstr "Группа не может быть своим родителем"
+
+msgid "Access group deleted"
+msgstr "Группа доступа удалена"
+
+msgid "Access-group hierarchy too deep (max %d levels)"
+msgstr "Иерархия группы доступа слишком глубокая (макс. %d уровней)"
+
+msgid "Audit log entry not found"
+msgstr "Запись журнала аудита не найдена"
+
+msgid "Broadcast '%s' delivered to %d host(s) (filter=%s, %.0fms)"
+msgstr "Трансляция '%s' доставлена %d хост(ам) (фильтр=%s, %.0fms)"
+
+msgid "Created access group '%s'"
+msgstr "Группа доступа '%s' создана"
+
+msgid "Created package profile '%s'"
+msgstr "Профиль пакета '%s' создан"
+
+msgid "Created registration key '%s'"
+msgstr "Ключ регистрации '%s' создан"
+
+msgid "Created report template '%s'"
+msgstr "Шаблон отчёта '%s' создан"
+
+msgid "Created upgrade profile '%s'"
+msgstr "Профиль обновлений '%s' создан"
+
+msgid "Cycle detected in access-group hierarchy"
+msgstr "Обнаружен цикл в иерархии группы доступа"
+
+msgid "Deleted access group '%s'"
+msgstr "Группа доступа '%s' удалена"
+
+msgid "Deleted package profile '%s'"
+msgstr "Профиль пакета '%s' удалён"
+
+msgid "Deleted registration key '%s'"
+msgstr "Ключ регистрации '%s' удалён"
+
+msgid "Deleted report template '%s'"
+msgstr "Шаблон отчёта '%s' удалён"
+
+msgid "Deleted upgrade profile '%s'"
+msgstr "Профиль обновлений '%s' удалён"
+
+msgid "Dispatched compliance check to agent '%s' for profile '%s'"
+msgstr "Проверка соответствия отправлена агенту '%s' для профиля '%s'"
+
+msgid "Empty file"
+msgstr "Пустой файл"
+
+msgid "Export format: csv (OSS), json/cef/leef (Pro+)"
+msgstr "Формат экспорта: csv (OSS), json/cef/leef (Pro+)"
+
+msgid "Failed to retrieve audit log entry: %s"
+msgstr "Не удалось получить запись журнала аудита: %s"
+
+msgid "Failed to retrieve audit logs: %s"
+msgstr "Не удалось получить журналы аудита: %s"
+
+msgid "Invalid audit log ID format"
+msgstr "Неверный формат ID записи аудита"
+
+msgid "Invalid cron expression: %s"
+msgstr "Неверное выражение cron: %s"
+
+msgid "Invalid tag_id: %s"
+msgstr "Неверный tag_id: %s"
+
+msgid "Invalid user ID format"
+msgstr "Неверный формат ID пользователя"
+
+msgid "Invalid UUID for %s: %s"
+msgstr "Неверный UUID для %s: %s"
+
+msgid "Issued dynamic secret '%s' (kind=%s, role=%s, ttl=%ds)"
+msgstr "Выдан динамический секрет '%s' (тип=%s, роль=%s, ttl=%dс)"
+
+msgid "Lease not found"
+msgstr "Аренда не найдена"
+
+msgid "Logo too large; max 1 MB"
+msgstr "Логотип слишком большой; макс. 1 МБ"
+
+msgid "No file provided"
+msgstr "Файл не предоставлен"
+
+msgid "No logo configured"
+msgstr "Логотип не настроен"
+
+msgid "Number of entries to return"
+msgstr "Количество записей для возврата"
+
+msgid "Number of entries to skip"
+msgstr "Количество записей для пропуска"
+
+msgid "Package profile deleted"
+msgstr "Профиль пакета удалён"
+
+msgid "Parent group not found"
+msgstr "Родительская группа не найдена"
+
+msgid "Registration key deleted"
+msgstr "Ключ регистрации удалён"
+
+msgid "Registration key revoked"
+msgstr "Ключ регистрации отозван"
+
+msgid "Removed report branding logo"
+msgstr "Логотип брендинга отчётов удалён"
+
+msgid "Report template deleted"
+msgstr "Шаблон отчёта удалён"
+
+msgid "Revoked dynamic secret lease '%s'"
+msgstr "Аренда динамического секрета '%s' отозвана"
+
+msgid "Revoked registration key '%s'"
+msgstr "Ключ регистрации '%s' отозван"
+
+msgid "Scanned host '%s' against profile '%s': %s (%d violation(s))"
+msgstr "Хост '%s' проверен по профилю '%s': %s (нарушений: %d)"
+
+msgid "Setting parent_id would create a cycle"
+msgstr "Установка parent_id создаст цикл"
+
+msgid "Triggered upgrade profile '%s' against %d host(s)"
+msgstr "Профиль обновлений '%s' запущен для %d хостов"
+
+msgid "Unknown base_report_type: %s"
+msgstr "Неизвестный base_report_type: %s"
+
+msgid "Unknown field code(s) for %s: %s"
+msgstr "Неизвестные коды полей для %s: %s"
+
+msgid "Unknown kind: %s (allowed: %s)"
+msgstr "Неизвестный тип: %s (разрешены: %s)"
+
+msgid "Unknown status: %s (allowed: %s)"
+msgstr "Неизвестный статус: %s (разрешены: %s)"
+
+msgid "Unsupported export format: %s"
+msgstr "Неподдерживаемый формат экспорта: %s"
+
+msgid "Unsupported logo format (allowed: PNG, JPEG, SVG, WEBP)"
+msgstr "Неподдерживаемый формат логотипа (разрешены: PNG, JPEG, SVG, WEBP)"
+
+msgid "Updated access group '%s'"
+msgstr "Группа доступа '%s' обновлена"
+
+msgid "Updated package profile '%s'"
+msgstr "Профиль пакета '%s' обновлён"
+
+msgid "Updated report branding"
+msgstr "Брендинг отчётов обновлён"
+
+msgid "Updated report template '%s'"
+msgstr "Шаблон отчёта '%s' обновлён"
+
+msgid "Updated upgrade profile '%s'"
+msgstr "Профиль обновлений '%s' обновлён"
+
+msgid "Upgrade profile deleted"
+msgstr "Профиль обновлений удалён"
+
+msgid "Uploaded report branding logo (%d bytes, %s)"
+msgstr "Логотип брендинга отчётов загружен (%d байт, %s)"

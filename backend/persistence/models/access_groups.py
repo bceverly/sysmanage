@@ -46,6 +46,13 @@ from sqlalchemy.orm import relationship
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
+# FK targets + ondelete clauses are referenced repeatedly across these
+# tables;  pulling them into module-level constants is what SonarQube
+# wants and also lets a future schema rename happen in one place.
+_FK_USER_ID = "user.id"
+_FK_ACCESS_GROUPS_ID = "access_groups.id"
+_ON_DELETE_SET_NULL = "SET NULL"
+
 
 class AccessGroup(Base):
     """A named, hierarchical scope for RBAC.
@@ -61,10 +68,10 @@ class AccessGroup(Base):
     description = Column(Text, nullable=True)
     parent_id = Column(
         GUID(),
-        ForeignKey("access_groups.id", ondelete="SET NULL"),
+        ForeignKey(_FK_ACCESS_GROUPS_ID, ondelete=_ON_DELETE_SET_NULL),
         nullable=True,
     )
-    created_by = Column(GUID(), ForeignKey("user.id", ondelete="SET NULL"))
+    created_by = Column(GUID(), ForeignKey(_FK_USER_ID, ondelete=_ON_DELETE_SET_NULL))
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
@@ -121,15 +128,17 @@ class RegistrationKey(Base):
     )
     access_group_id = Column(
         GUID(),
-        ForeignKey("access_groups.id", ondelete="SET NULL"),
+        ForeignKey(_FK_ACCESS_GROUPS_ID, ondelete=_ON_DELETE_SET_NULL),
         nullable=True,
     )
     auto_approve = Column(Boolean, nullable=False, default=False)
     revoked = Column(Boolean, nullable=False, default=False)
-    max_uses = Column(Integer, nullable=True)  # NULL = unlimited
+    # max_uses unset means the key is good for an unlimited number of uses.
+    max_uses = Column(Integer, nullable=True)
     use_count = Column(Integer, nullable=False, default=0)
-    expires_at = Column(DateTime, nullable=True)  # NULL = never
-    created_by = Column(GUID(), ForeignKey("user.id", ondelete="SET NULL"))
+    # expires_at unset means the key never expires.
+    expires_at = Column(DateTime, nullable=True)
+    created_by = Column(GUID(), ForeignKey(_FK_USER_ID, ondelete=_ON_DELETE_SET_NULL))
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     last_used_at = Column(DateTime, nullable=True)
 
@@ -199,7 +208,7 @@ class HostAccessGroup(Base):
     host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
     access_group_id = Column(
         GUID(),
-        ForeignKey("access_groups.id", ondelete="CASCADE"),
+        ForeignKey(_FK_ACCESS_GROUPS_ID, ondelete="CASCADE"),
         nullable=False,
     )
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
@@ -225,13 +234,15 @@ class UserAccessGroup(Base):
     __tablename__ = "user_access_groups"
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    user_id = Column(GUID(), ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(
+        GUID(), ForeignKey(_FK_USER_ID, ondelete="CASCADE"), nullable=False
+    )
     access_group_id = Column(
         GUID(),
-        ForeignKey("access_groups.id", ondelete="CASCADE"),
+        ForeignKey(_FK_ACCESS_GROUPS_ID, ondelete="CASCADE"),
         nullable=False,
     )
-    granted_by = Column(GUID(), ForeignKey("user.id", ondelete="SET NULL"))
+    granted_by = Column(GUID(), ForeignKey(_FK_USER_ID, ondelete=_ON_DELETE_SET_NULL))
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (

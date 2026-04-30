@@ -9,7 +9,9 @@ All models are re-exported here for backward compatibility.
 from .access_groups import *
 from .child_host import *
 from .core import *
+from .dynamic_secrets import *
 from .package_compliance import *
+from .report_branding import *
 from .upgrade_profiles import *
 from .grafana_integration import *
 from .graylog_attachment import *
@@ -136,6 +138,21 @@ __all__ = [
     "PackageProfile",
     "PackageProfileConstraint",
     "HostPackageComplianceStatus",
+    # Report templates + branding (Phase 8.7)
+    "ReportBranding",
+    "ReportTemplate",
+    "SINGLETON_BRANDING_ID",
+    # Dynamic secret leases (Phase 8.7)
+    "DynamicSecretLease",
+    "LEASE_ACTIVE",
+    "LEASE_REVOKED",
+    "LEASE_EXPIRED",
+    "LEASE_FAILED",
+    "LEASE_STATUSES",
+    "LEASE_KINDS",
+    "LEASE_KIND_DATABASE",
+    "LEASE_KIND_SSH",
+    "LEASE_KIND_TOKEN",
 ]
 
 # Alias for Cython modules that reference ChildHost instead of HostChild

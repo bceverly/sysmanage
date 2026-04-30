@@ -84,6 +84,8 @@ import SourceIcon from '@mui/icons-material/Source';
 import ShieldIcon from '@mui/icons-material/Shield';
 import WarningIcon from '@mui/icons-material/Warning';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import RuleIcon from '@mui/icons-material/Rule';
+import HostCompliancePanel from '../Components/HostCompliancePanel';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
@@ -655,6 +657,7 @@ const HostDetail = () => { // NOSONAR
             ...(supportsThirdPartyRepos() ? [{ id: 'third-party-repos', icon: <SourceIcon />, label: t('hostDetail.thirdPartyReposTab', 'Third-Party Repositories') }] : []),
             { id: 'access', icon: <SecurityIcon />, label: t('hostDetail.accessTab', 'Access') },
             { id: 'security', icon: <ShieldIcon />, label: t('hostDetail.securityTab', 'Security') },
+            { id: 'compliance', icon: <RuleIcon />, label: t('hostDetail.complianceTab', 'Compliance') },
             ...visiblePluginTabs.filter(p => p.position === 'after-security').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
             { id: 'certificates', icon: <CertificateIcon />, label: t('hostDetail.certificatesTab', 'Certificates') },
             { id: 'server-roles', icon: <AssignmentIcon />, label: t('hostDetail.serverRolesTab', 'Server Roles') },
@@ -5536,6 +5539,13 @@ const HostDetail = () => { // NOSONAR
                     </Box>
                 )
             ))}
+
+            {/* Compliance Tab (Phase 8.3) */}
+            {currentTabId === 'compliance' && hostId && (
+                <Box sx={{ p: 2 }}>
+                    <HostCompliancePanel hostId={hostId} />
+                </Box>
+            )}
 
             {/* Certificates Tab */}
             {currentTabId === 'certificates' && (

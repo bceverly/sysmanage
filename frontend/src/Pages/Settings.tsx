@@ -49,6 +49,12 @@ import AntivirusDefaultsSettings from '../Components/AntivirusDefaultsSettings';
 import HostDefaultsSettings from '../Components/HostDefaultsSettings';
 import FirewallRolesSettings from '../Components/FirewallRolesSettings';
 import DistributionsSettings from '../Components/DistributionsSettings';
+import AccessGroupsSettings from '../Components/AccessGroupsSettings';
+import UpgradeProfilesSettings from '../Components/UpgradeProfilesSettings';
+import PackageProfilesSettings from '../Components/PackageProfilesSettings';
+import ReportBrandingSettings from '../Components/ReportBrandingSettings';
+import ReportTemplatesSettings from '../Components/ReportTemplatesSettings';
+import DynamicSecretsSettings from '../Components/DynamicSecretsSettings';
 import axiosInstance from '../Services/api';
 import { formatUTCTimestamp, formatUTCDate } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
@@ -140,7 +146,7 @@ const Settings: React.FC = () => {
 
   // Tab names for URL hash (dynamic based on plugin tabs)
   const tabNames = useMemo(() => {
-    const baseTabs = ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages', 'host-defaults', 'firewall-roles', 'distributions'];
+    const baseTabs = ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages', 'host-defaults', 'firewall-roles', 'distributions', 'access-groups', 'update-profiles', 'compliance-profiles', 'report-branding', 'report-templates', 'dynamic-secrets'];
     const pluginTabIds = pluginSettingsTabs.map(pt => pt.id);
     return [...baseTabs, ...pluginTabIds];
   }, [pluginSettingsTabs]);
@@ -1105,6 +1111,12 @@ const Settings: React.FC = () => {
           <Tab label={t('hostDefaults.title', 'Host Defaults')} />
           <Tab label={t('firewallRoles.title', 'Firewall Roles')} />
           <Tab label={t('distributions.title', 'Distributions')} />
+          <Tab label={t('accessGroups.tabLabel', 'Access Groups')} />
+          <Tab label={t('upgradeProfiles.tabLabel', 'Update Profiles')} />
+          <Tab label={t('packageProfiles.tabLabel', 'Compliance Profiles')} />
+          <Tab label={t('reportBranding.tabLabel', 'Report Branding')} />
+          <Tab label={t('reportTemplates.tabLabel', 'Report Templates')} />
+          <Tab label={t('dynamicSecrets.tabLabel', 'Dynamic Secrets')} />
           {pluginSettingsTabs.map(pt => (
             <Tab key={pt.id} label={t(pt.labelKey)} />
           ))}
@@ -1122,8 +1134,14 @@ const Settings: React.FC = () => {
         {activeTab === 6 && <HostDefaultsSettings />}
         {activeTab === 7 && <FirewallRolesSettings />}
         {activeTab === 8 && <DistributionsSettings />}
+        {activeTab === 9 && <AccessGroupsSettings />}
+        {activeTab === 10 && <UpgradeProfilesSettings />}
+        {activeTab === 11 && <PackageProfilesSettings />}
+        {activeTab === 12 && <ReportBrandingSettings />}
+        {activeTab === 13 && <ReportTemplatesSettings />}
+        {activeTab === 14 && <DynamicSecretsSettings />}
         {pluginSettingsTabs.map((pt, index) => (
-          activeTab === 9 + index && (
+          activeTab === 15 + index && (
             <Box key={pt.id}>
               <pt.component />
             </Box>

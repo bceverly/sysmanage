@@ -1249,3 +1249,174 @@ msgstr "JWT 密鑰使用預設值，但密碼鹽已變更。執行：{command}"
 
 msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
 msgstr "密碼鹽使用預設值，但 JWT 密鑰已變更。執行：{command}"
+
+msgid "A group cannot be its own parent"
+msgstr "群組不能是其自身的上層"
+
+msgid "Access group deleted"
+msgstr "存取群組已刪除"
+
+msgid "Access-group hierarchy too deep (max %d levels)"
+msgstr "存取群組階層過深 (最多 %d 層)"
+
+msgid "Audit log entry not found"
+msgstr "找不到稽核記錄項目"
+
+msgid "Broadcast '%s' delivered to %d host(s) (filter=%s, %.0fms)"
+msgstr "廣播「%s」送達 %d 個主機 (篩選=%s, %.0fms)"
+
+msgid "Created access group '%s'"
+msgstr "已建立存取群組「%s」"
+
+msgid "Created package profile '%s'"
+msgstr "已建立套件設定檔「%s」"
+
+msgid "Created registration key '%s'"
+msgstr "已建立註冊金鑰「%s」"
+
+msgid "Created report template '%s'"
+msgstr "已建立報告範本「%s」"
+
+msgid "Created upgrade profile '%s'"
+msgstr "已建立升級設定檔「%s」"
+
+msgid "Cycle detected in access-group hierarchy"
+msgstr "在存取群組階層中偵測到循環"
+
+msgid "Deleted access group '%s'"
+msgstr "已刪除存取群組「%s」"
+
+msgid "Deleted package profile '%s'"
+msgstr "已刪除套件設定檔「%s」"
+
+msgid "Deleted registration key '%s'"
+msgstr "已刪除註冊金鑰「%s」"
+
+msgid "Deleted report template '%s'"
+msgstr "已刪除報告範本「%s」"
+
+msgid "Deleted upgrade profile '%s'"
+msgstr "已刪除升級設定檔「%s」"
+
+msgid "Dispatched compliance check to agent '%s' for profile '%s'"
+msgstr "已向代理「%s」派送設定檔「%s」的合規檢查"
+
+msgid "Empty file"
+msgstr "空檔案"
+
+msgid "Export format: csv (OSS), json/cef/leef (Pro+)"
+msgstr "匯出格式: csv (OSS)、json/cef/leef (Pro+)"
+
+msgid "Failed to retrieve audit log entry: %s"
+msgstr "擷取稽核記錄項目失敗: %s"
+
+msgid "Failed to retrieve audit logs: %s"
+msgstr "擷取稽核記錄失敗: %s"
+
+msgid "Invalid audit log ID format"
+msgstr "無效的稽核記錄 ID 格式"
+
+msgid "Invalid cron expression: %s"
+msgstr "無效的 cron 運算式: %s"
+
+msgid "Invalid tag_id: %s"
+msgstr "無效的 tag_id: %s"
+
+msgid "Invalid user ID format"
+msgstr "無效的使用者 ID 格式"
+
+msgid "Invalid UUID for %s: %s"
+msgstr "%s 的 UUID 無效: %s"
+
+msgid "Issued dynamic secret '%s' (kind=%s, role=%s, ttl=%ds)"
+msgstr "已簽發動態密鑰「%s」(種類=%s, 角色=%s, ttl=%d 秒)"
+
+msgid "Lease not found"
+msgstr "找不到租約"
+
+msgid "Logo too large; max 1 MB"
+msgstr "標誌過大；最大 1 MB"
+
+msgid "No file provided"
+msgstr "未提供檔案"
+
+msgid "No logo configured"
+msgstr "未設定標誌"
+
+msgid "Number of entries to return"
+msgstr "要傳回的項目數"
+
+msgid "Number of entries to skip"
+msgstr "要略過的項目數"
+
+msgid "Package profile deleted"
+msgstr "套件設定檔已刪除"
+
+msgid "Parent group not found"
+msgstr "找不到上層群組"
+
+msgid "Registration key deleted"
+msgstr "註冊金鑰已刪除"
+
+msgid "Registration key revoked"
+msgstr "註冊金鑰已撤銷"
+
+msgid "Removed report branding logo"
+msgstr "已移除報告品牌標誌"
+
+msgid "Report template deleted"
+msgstr "報告範本已刪除"
+
+msgid "Revoked dynamic secret lease '%s'"
+msgstr "已撤銷動態密鑰租約「%s」"
+
+msgid "Revoked registration key '%s'"
+msgstr "已撤銷註冊金鑰「%s」"
+
+msgid "Scanned host '%s' against profile '%s': %s (%d violation(s))"
+msgstr "主機「%s」針對設定檔「%s」掃描: %s (%d 項違規)"
+
+msgid "Setting parent_id would create a cycle"
+msgstr "設定 parent_id 將造成循環"
+
+msgid "Triggered upgrade profile '%s' against %d host(s)"
+msgstr "已對 %d 個主機觸發升級設定檔「%s」"
+
+msgid "Unknown base_report_type: %s"
+msgstr "未知的 base_report_type: %s"
+
+msgid "Unknown field code(s) for %s: %s"
+msgstr "%s 的未知欄位代碼: %s"
+
+msgid "Unknown kind: %s (allowed: %s)"
+msgstr "未知種類: %s (允許: %s)"
+
+msgid "Unknown status: %s (allowed: %s)"
+msgstr "未知狀態: %s (允許: %s)"
+
+msgid "Unsupported export format: %s"
+msgstr "不支援的匯出格式: %s"
+
+msgid "Unsupported logo format (allowed: PNG, JPEG, SVG, WEBP)"
+msgstr "不支援的標誌格式 (允許: PNG, JPEG, SVG, WEBP)"
+
+msgid "Updated access group '%s'"
+msgstr "已更新存取群組「%s」"
+
+msgid "Updated package profile '%s'"
+msgstr "已更新套件設定檔「%s」"
+
+msgid "Updated report branding"
+msgstr "已更新報告品牌"
+
+msgid "Updated report template '%s'"
+msgstr "已更新報告範本「%s」"
+
+msgid "Updated upgrade profile '%s'"
+msgstr "已更新升級設定檔「%s」"
+
+msgid "Upgrade profile deleted"
+msgstr "升級設定檔已刪除"
+
+msgid "Uploaded report branding logo (%d bytes, %s)"
+msgstr "已上傳報告品牌標誌 (%d 位元組, %s)"

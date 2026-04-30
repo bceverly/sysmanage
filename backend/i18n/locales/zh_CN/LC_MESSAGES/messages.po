@@ -1249,3 +1249,174 @@ msgstr "JWT 密钥使用默认值，但密码盐已更改。运行: {command}"
 
 msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
 msgstr "密码盐使用默认值，但 JWT 密钥已更改。运行: {command}"
+
+msgid "A group cannot be its own parent"
+msgstr "组不能是其自身的上级"
+
+msgid "Access group deleted"
+msgstr "访问组已删除"
+
+msgid "Access-group hierarchy too deep (max %d levels)"
+msgstr "访问组层级过深 (最多 %d 层)"
+
+msgid "Audit log entry not found"
+msgstr "未找到审计日志条目"
+
+msgid "Broadcast '%s' delivered to %d host(s) (filter=%s, %.0fms)"
+msgstr "广播 '%s' 送达 %d 个主机 (筛选=%s, %.0fms)"
+
+msgid "Created access group '%s'"
+msgstr "已创建访问组 '%s'"
+
+msgid "Created package profile '%s'"
+msgstr "已创建包配置文件 '%s'"
+
+msgid "Created registration key '%s'"
+msgstr "已创建注册密钥 '%s'"
+
+msgid "Created report template '%s'"
+msgstr "已创建报告模板 '%s'"
+
+msgid "Created upgrade profile '%s'"
+msgstr "已创建升级配置文件 '%s'"
+
+msgid "Cycle detected in access-group hierarchy"
+msgstr "在访问组层级中检测到循环"
+
+msgid "Deleted access group '%s'"
+msgstr "已删除访问组 '%s'"
+
+msgid "Deleted package profile '%s'"
+msgstr "已删除包配置文件 '%s'"
+
+msgid "Deleted registration key '%s'"
+msgstr "已删除注册密钥 '%s'"
+
+msgid "Deleted report template '%s'"
+msgstr "已删除报告模板 '%s'"
+
+msgid "Deleted upgrade profile '%s'"
+msgstr "已删除升级配置文件 '%s'"
+
+msgid "Dispatched compliance check to agent '%s' for profile '%s'"
+msgstr "已向代理 '%s' 派发配置文件 '%s' 的合规检查"
+
+msgid "Empty file"
+msgstr "空文件"
+
+msgid "Export format: csv (OSS), json/cef/leef (Pro+)"
+msgstr "导出格式: csv (OSS)、json/cef/leef (Pro+)"
+
+msgid "Failed to retrieve audit log entry: %s"
+msgstr "获取审计日志条目失败: %s"
+
+msgid "Failed to retrieve audit logs: %s"
+msgstr "获取审计日志失败: %s"
+
+msgid "Invalid audit log ID format"
+msgstr "无效的审计日志 ID 格式"
+
+msgid "Invalid cron expression: %s"
+msgstr "无效的 cron 表达式: %s"
+
+msgid "Invalid tag_id: %s"
+msgstr "无效的 tag_id: %s"
+
+msgid "Invalid user ID format"
+msgstr "无效的用户 ID 格式"
+
+msgid "Invalid UUID for %s: %s"
+msgstr "%s 的 UUID 无效: %s"
+
+msgid "Issued dynamic secret '%s' (kind=%s, role=%s, ttl=%ds)"
+msgstr "已签发动态密钥 '%s' (种类=%s, 角色=%s, ttl=%d 秒)"
+
+msgid "Lease not found"
+msgstr "未找到租约"
+
+msgid "Logo too large; max 1 MB"
+msgstr "徽标过大；最大 1 MB"
+
+msgid "No file provided"
+msgstr "未提供文件"
+
+msgid "No logo configured"
+msgstr "未配置徽标"
+
+msgid "Number of entries to return"
+msgstr "要返回的条目数"
+
+msgid "Number of entries to skip"
+msgstr "要跳过的条目数"
+
+msgid "Package profile deleted"
+msgstr "包配置文件已删除"
+
+msgid "Parent group not found"
+msgstr "未找到上级组"
+
+msgid "Registration key deleted"
+msgstr "注册密钥已删除"
+
+msgid "Registration key revoked"
+msgstr "注册密钥已撤销"
+
+msgid "Removed report branding logo"
+msgstr "已移除报告品牌徽标"
+
+msgid "Report template deleted"
+msgstr "报告模板已删除"
+
+msgid "Revoked dynamic secret lease '%s'"
+msgstr "已撤销动态密钥租约 '%s'"
+
+msgid "Revoked registration key '%s'"
+msgstr "已撤销注册密钥 '%s'"
+
+msgid "Scanned host '%s' against profile '%s': %s (%d violation(s))"
+msgstr "主机 '%s' 针对配置文件 '%s' 扫描: %s (%d 项违规)"
+
+msgid "Setting parent_id would create a cycle"
+msgstr "设置 parent_id 将创建循环"
+
+msgid "Triggered upgrade profile '%s' against %d host(s)"
+msgstr "已对 %d 个主机触发升级配置文件 '%s'"
+
+msgid "Unknown base_report_type: %s"
+msgstr "未知的 base_report_type: %s"
+
+msgid "Unknown field code(s) for %s: %s"
+msgstr "%s 的未知字段代码: %s"
+
+msgid "Unknown kind: %s (allowed: %s)"
+msgstr "未知种类: %s (允许: %s)"
+
+msgid "Unknown status: %s (allowed: %s)"
+msgstr "未知状态: %s (允许: %s)"
+
+msgid "Unsupported export format: %s"
+msgstr "不支持的导出格式: %s"
+
+msgid "Unsupported logo format (allowed: PNG, JPEG, SVG, WEBP)"
+msgstr "不支持的徽标格式 (允许: PNG, JPEG, SVG, WEBP)"
+
+msgid "Updated access group '%s'"
+msgstr "已更新访问组 '%s'"
+
+msgid "Updated package profile '%s'"
+msgstr "已更新包配置文件 '%s'"
+
+msgid "Updated report branding"
+msgstr "已更新报告品牌"
+
+msgid "Updated report template '%s'"
+msgstr "已更新报告模板 '%s'"
+
+msgid "Updated upgrade profile '%s'"
+msgstr "已更新升级配置文件 '%s'"
+
+msgid "Upgrade profile deleted"
+msgstr "升级配置文件已删除"
+
+msgid "Uploaded report branding logo (%d bytes, %s)"
+msgstr "已上传报告品牌徽标 (%d 字节, %s)"

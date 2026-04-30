@@ -41,6 +41,11 @@ router = APIRouter(
 )
 
 
+# Reused 404 detail string — extracted so the wording can't drift
+# between handlers and so SonarQube's duplication scanner is happy.
+_ERR_PACKAGE_PROFILE_NOT_FOUND = "Package profile not found"
+
+
 # ----------------------------------------------------------------------
 # Schemas
 # ----------------------------------------------------------------------
@@ -180,7 +185,7 @@ async def get_profile(profile_id: str, db: Session = Depends(get_db)):
         db.query(models.PackageProfile).filter(models.PackageProfile.id == pid).first()
     )
     if not profile:
-        raise HTTPException(status_code=404, detail=_("Package profile not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_PACKAGE_PROFILE_NOT_FOUND))
     return profile.to_dict(include_constraints=True)
 
 
@@ -197,7 +202,7 @@ async def update_profile(
         db.query(models.PackageProfile).filter(models.PackageProfile.id == pid).first()
     )
     if not profile:
-        raise HTTPException(status_code=404, detail=_("Package profile not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_PACKAGE_PROFILE_NOT_FOUND))
 
     if request.name is not None:
         profile.name = request.name
@@ -236,7 +241,7 @@ async def delete_profile(
         db.query(models.PackageProfile).filter(models.PackageProfile.id == pid).first()
     )
     if not profile:
-        raise HTTPException(status_code=404, detail=_("Package profile not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_PACKAGE_PROFILE_NOT_FOUND))
     name = profile.name
     db.delete(profile)
     db.commit()
@@ -276,7 +281,7 @@ async def scan_host_against_profile(
         db.query(models.PackageProfile).filter(models.PackageProfile.id == pid).first()
     )
     if not profile:
-        raise HTTPException(status_code=404, detail=_("Package profile not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_PACKAGE_PROFILE_NOT_FOUND))
 
     host = db.query(models.Host).filter(models.Host.id == hid).first()
     if not host:
@@ -382,7 +387,7 @@ async def dispatch_compliance_check_to_agent(
         db.query(models.PackageProfile).filter(models.PackageProfile.id == pid).first()
     )
     if not profile:
-        raise HTTPException(status_code=404, detail=_("Package profile not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_PACKAGE_PROFILE_NOT_FOUND))
 
     host = db.query(models.Host).filter(models.Host.id == hid).first()
     if not host:

@@ -993,3 +993,174 @@ msgstr "JWT secret uses default value but password salt has been changed. Run: {
 
 msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
 msgstr "Password salt uses default value but JWT secret has been changed. Run: {command}"
+
+msgid "A group cannot be its own parent"
+msgstr "A group cannot be its own parent"
+
+msgid "Access group deleted"
+msgstr "Access group deleted"
+
+msgid "Access-group hierarchy too deep (max %d levels)"
+msgstr "Access-group hierarchy too deep (max %d levels)"
+
+msgid "Audit log entry not found"
+msgstr "Audit log entry not found"
+
+msgid "Broadcast '%s' delivered to %d host(s) (filter=%s, %.0fms)"
+msgstr "Broadcast '%s' delivered to %d host(s) (filter=%s, %.0fms)"
+
+msgid "Created access group '%s'"
+msgstr "Created access group '%s'"
+
+msgid "Created package profile '%s'"
+msgstr "Created package profile '%s'"
+
+msgid "Created registration key '%s'"
+msgstr "Created registration key '%s'"
+
+msgid "Created report template '%s'"
+msgstr "Created report template '%s'"
+
+msgid "Created upgrade profile '%s'"
+msgstr "Created upgrade profile '%s'"
+
+msgid "Cycle detected in access-group hierarchy"
+msgstr "Cycle detected in access-group hierarchy"
+
+msgid "Deleted access group '%s'"
+msgstr "Deleted access group '%s'"
+
+msgid "Deleted package profile '%s'"
+msgstr "Deleted package profile '%s'"
+
+msgid "Deleted registration key '%s'"
+msgstr "Deleted registration key '%s'"
+
+msgid "Deleted report template '%s'"
+msgstr "Deleted report template '%s'"
+
+msgid "Deleted upgrade profile '%s'"
+msgstr "Deleted upgrade profile '%s'"
+
+msgid "Dispatched compliance check to agent '%s' for profile '%s'"
+msgstr "Dispatched compliance check to agent '%s' for profile '%s'"
+
+msgid "Empty file"
+msgstr "Empty file"
+
+msgid "Export format: csv (OSS), json/cef/leef (Pro+)"
+msgstr "Export format: csv (OSS), json/cef/leef (Pro+)"
+
+msgid "Failed to retrieve audit log entry: %s"
+msgstr "Failed to retrieve audit log entry: %s"
+
+msgid "Failed to retrieve audit logs: %s"
+msgstr "Failed to retrieve audit logs: %s"
+
+msgid "Invalid audit log ID format"
+msgstr "Invalid audit log ID format"
+
+msgid "Invalid cron expression: %s"
+msgstr "Invalid cron expression: %s"
+
+msgid "Invalid tag_id: %s"
+msgstr "Invalid tag_id: %s"
+
+msgid "Invalid user ID format"
+msgstr "Invalid user ID format"
+
+msgid "Invalid UUID for %s: %s"
+msgstr "Invalid UUID for %s: %s"
+
+msgid "Issued dynamic secret '%s' (kind=%s, role=%s, ttl=%ds)"
+msgstr "Issued dynamic secret '%s' (kind=%s, role=%s, ttl=%ds)"
+
+msgid "Lease not found"
+msgstr "Lease not found"
+
+msgid "Logo too large; max 1 MB"
+msgstr "Logo too large; max 1 MB"
+
+msgid "No file provided"
+msgstr "No file provided"
+
+msgid "No logo configured"
+msgstr "No logo configured"
+
+msgid "Number of entries to return"
+msgstr "Number of entries to return"
+
+msgid "Number of entries to skip"
+msgstr "Number of entries to skip"
+
+msgid "Package profile deleted"
+msgstr "Package profile deleted"
+
+msgid "Parent group not found"
+msgstr "Parent group not found"
+
+msgid "Registration key deleted"
+msgstr "Registration key deleted"
+
+msgid "Registration key revoked"
+msgstr "Registration key revoked"
+
+msgid "Removed report branding logo"
+msgstr "Removed report branding logo"
+
+msgid "Report template deleted"
+msgstr "Report template deleted"
+
+msgid "Revoked dynamic secret lease '%s'"
+msgstr "Revoked dynamic secret lease '%s'"
+
+msgid "Revoked registration key '%s'"
+msgstr "Revoked registration key '%s'"
+
+msgid "Scanned host '%s' against profile '%s': %s (%d violation(s))"
+msgstr "Scanned host '%s' against profile '%s': %s (%d violation(s))"
+
+msgid "Setting parent_id would create a cycle"
+msgstr "Setting parent_id would create a cycle"
+
+msgid "Triggered upgrade profile '%s' against %d host(s)"
+msgstr "Triggered upgrade profile '%s' against %d host(s)"
+
+msgid "Unknown base_report_type: %s"
+msgstr "Unknown base_report_type: %s"
+
+msgid "Unknown field code(s) for %s: %s"
+msgstr "Unknown field code(s) for %s: %s"
+
+msgid "Unknown kind: %s (allowed: %s)"
+msgstr "Unknown kind: %s (allowed: %s)"
+
+msgid "Unknown status: %s (allowed: %s)"
+msgstr "Unknown status: %s (allowed: %s)"
+
+msgid "Unsupported export format: %s"
+msgstr "Unsupported export format: %s"
+
+msgid "Unsupported logo format (allowed: PNG, JPEG, SVG, WEBP)"
+msgstr "Unsupported logo format (allowed: PNG, JPEG, SVG, WEBP)"
+
+msgid "Updated access group '%s'"
+msgstr "Updated access group '%s'"
+
+msgid "Updated package profile '%s'"
+msgstr "Updated package profile '%s'"
+
+msgid "Updated report branding"
+msgstr "Updated report branding"
+
+msgid "Updated report template '%s'"
+msgstr "Updated report template '%s'"
+
+msgid "Updated upgrade profile '%s'"
+msgstr "Updated upgrade profile '%s'"
+
+msgid "Upgrade profile deleted"
+msgstr "Upgrade profile deleted"
+
+msgid "Uploaded report branding logo (%d bytes, %s)"
+msgstr "Uploaded report branding logo (%d bytes, %s)"

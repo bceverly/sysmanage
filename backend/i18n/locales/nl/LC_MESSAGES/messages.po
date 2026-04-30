@@ -1249,3 +1249,174 @@ msgstr "JWT-geheim gebruikt standaardwaarde maar wachtwoord-salt is gewijzigd. U
 
 msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
 msgstr "Wachtwoord-salt gebruikt standaardwaarde maar JWT-geheim is gewijzigd. Uitvoeren: {command}"
+
+msgid "A group cannot be its own parent"
+msgstr "Een groep kan niet zijn eigen bovenliggende zijn"
+
+msgid "Access group deleted"
+msgstr "Toegangsgroep verwijderd"
+
+msgid "Access-group hierarchy too deep (max %d levels)"
+msgstr "Toegangsgroep-hiërarchie te diep (max. %d niveaus)"
+
+msgid "Audit log entry not found"
+msgstr "Audit-logvermelding niet gevonden"
+
+msgid "Broadcast '%s' delivered to %d host(s) (filter=%s, %.0fms)"
+msgstr "Broadcast '%s' afgeleverd aan %d host(s) (filter=%s, %.0fms)"
+
+msgid "Created access group '%s'"
+msgstr "Toegangsgroep '%s' aangemaakt"
+
+msgid "Created package profile '%s'"
+msgstr "Pakketprofiel '%s' aangemaakt"
+
+msgid "Created registration key '%s'"
+msgstr "Registratiesleutel '%s' aangemaakt"
+
+msgid "Created report template '%s'"
+msgstr "Rapportsjabloon '%s' aangemaakt"
+
+msgid "Created upgrade profile '%s'"
+msgstr "Upgradeprofiel '%s' aangemaakt"
+
+msgid "Cycle detected in access-group hierarchy"
+msgstr "Cyclus gedetecteerd in toegangsgroep-hiërarchie"
+
+msgid "Deleted access group '%s'"
+msgstr "Toegangsgroep '%s' verwijderd"
+
+msgid "Deleted package profile '%s'"
+msgstr "Pakketprofiel '%s' verwijderd"
+
+msgid "Deleted registration key '%s'"
+msgstr "Registratiesleutel '%s' verwijderd"
+
+msgid "Deleted report template '%s'"
+msgstr "Rapportsjabloon '%s' verwijderd"
+
+msgid "Deleted upgrade profile '%s'"
+msgstr "Upgradeprofiel '%s' verwijderd"
+
+msgid "Dispatched compliance check to agent '%s' for profile '%s'"
+msgstr "Nalevingscontrole naar agent '%s' voor profiel '%s' verzonden"
+
+msgid "Empty file"
+msgstr "Leeg bestand"
+
+msgid "Export format: csv (OSS), json/cef/leef (Pro+)"
+msgstr "Exportformaat: csv (OSS), json/cef/leef (Pro+)"
+
+msgid "Failed to retrieve audit log entry: %s"
+msgstr "Audit-logvermelding ophalen mislukt: %s"
+
+msgid "Failed to retrieve audit logs: %s"
+msgstr "Audit-logs ophalen mislukt: %s"
+
+msgid "Invalid audit log ID format"
+msgstr "Ongeldig audit-log-ID-formaat"
+
+msgid "Invalid cron expression: %s"
+msgstr "Ongeldige cron-expressie: %s"
+
+msgid "Invalid tag_id: %s"
+msgstr "Ongeldige tag_id: %s"
+
+msgid "Invalid user ID format"
+msgstr "Ongeldig gebruikers-ID-formaat"
+
+msgid "Invalid UUID for %s: %s"
+msgstr "Ongeldige UUID voor %s: %s"
+
+msgid "Issued dynamic secret '%s' (kind=%s, role=%s, ttl=%ds)"
+msgstr "Dynamisch geheim '%s' uitgegeven (soort=%s, rol=%s, ttl=%ds)"
+
+msgid "Lease not found"
+msgstr "Lease niet gevonden"
+
+msgid "Logo too large; max 1 MB"
+msgstr "Logo te groot; max 1 MB"
+
+msgid "No file provided"
+msgstr "Geen bestand opgegeven"
+
+msgid "No logo configured"
+msgstr "Geen logo geconfigureerd"
+
+msgid "Number of entries to return"
+msgstr "Aantal te retourneren vermeldingen"
+
+msgid "Number of entries to skip"
+msgstr "Aantal te overslaan vermeldingen"
+
+msgid "Package profile deleted"
+msgstr "Pakketprofiel verwijderd"
+
+msgid "Parent group not found"
+msgstr "Bovenliggende groep niet gevonden"
+
+msgid "Registration key deleted"
+msgstr "Registratiesleutel verwijderd"
+
+msgid "Registration key revoked"
+msgstr "Registratiesleutel ingetrokken"
+
+msgid "Removed report branding logo"
+msgstr "Rapport-brandinglogo verwijderd"
+
+msgid "Report template deleted"
+msgstr "Rapportsjabloon verwijderd"
+
+msgid "Revoked dynamic secret lease '%s'"
+msgstr "Dynamische geheim-lease '%s' ingetrokken"
+
+msgid "Revoked registration key '%s'"
+msgstr "Registratiesleutel '%s' ingetrokken"
+
+msgid "Scanned host '%s' against profile '%s': %s (%d violation(s))"
+msgstr "Host '%s' gescand tegen profiel '%s': %s (%d overtreding(en))"
+
+msgid "Setting parent_id would create a cycle"
+msgstr "Instellen van parent_id zou een cyclus creëren"
+
+msgid "Triggered upgrade profile '%s' against %d host(s)"
+msgstr "Upgradeprofiel '%s' geactiveerd voor %d host(s)"
+
+msgid "Unknown base_report_type: %s"
+msgstr "Onbekend base_report_type: %s"
+
+msgid "Unknown field code(s) for %s: %s"
+msgstr "Onbekende veldcode(s) voor %s: %s"
+
+msgid "Unknown kind: %s (allowed: %s)"
+msgstr "Onbekend soort: %s (toegestaan: %s)"
+
+msgid "Unknown status: %s (allowed: %s)"
+msgstr "Onbekende status: %s (toegestaan: %s)"
+
+msgid "Unsupported export format: %s"
+msgstr "Niet-ondersteund exportformaat: %s"
+
+msgid "Unsupported logo format (allowed: PNG, JPEG, SVG, WEBP)"
+msgstr "Niet-ondersteund logoformaat (toegestaan: PNG, JPEG, SVG, WEBP)"
+
+msgid "Updated access group '%s'"
+msgstr "Toegangsgroep '%s' bijgewerkt"
+
+msgid "Updated package profile '%s'"
+msgstr "Pakketprofiel '%s' bijgewerkt"
+
+msgid "Updated report branding"
+msgstr "Rapportbranding bijgewerkt"
+
+msgid "Updated report template '%s'"
+msgstr "Rapportsjabloon '%s' bijgewerkt"
+
+msgid "Updated upgrade profile '%s'"
+msgstr "Upgradeprofiel '%s' bijgewerkt"
+
+msgid "Upgrade profile deleted"
+msgstr "Upgradeprofiel verwijderd"
+
+msgid "Uploaded report branding logo (%d bytes, %s)"
+msgstr "Rapport-brandinglogo geüpload (%d bytes, %s)"

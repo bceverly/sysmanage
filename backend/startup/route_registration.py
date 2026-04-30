@@ -14,6 +14,7 @@ from backend.api import (
     antivirus_status,
     audit_log,
     auth,
+    broadcast,
     certificates,
     child_host,
     commercial_antivirus_status,
@@ -21,6 +22,7 @@ from backend.api import (
     cve_refresh_settings,
     default_repositories,
     diagnostics,
+    dynamic_secrets,
     email,
     enabled_package_managers,
     firewall_roles,
@@ -40,6 +42,8 @@ from backend.api import (
     profile,
     queue,
     reboot_orchestration,
+    report_branding,
+    report_templates,
     reports,
     scripts,
     secrets,
@@ -157,6 +161,16 @@ def register_routes(app: FastAPI):
 
     logger.info("Adding package-compliance router (Phase 8.3)")
     app.include_router(package_compliance.router)
+
+    logger.info("Adding broadcast router (Phase 8.5)")
+    app.include_router(broadcast.router)
+
+    logger.info(
+        "Adding report-branding + report-templates + dynamic-secrets routers (Phase 8.7)"
+    )
+    app.include_router(report_branding.router)
+    app.include_router(report_templates.router)
+    app.include_router(dynamic_secrets.router)
 
     logger.info("Adding tag router with /api prefix")
     app.include_router(tag.router, prefix="/api", tags=["tags"])

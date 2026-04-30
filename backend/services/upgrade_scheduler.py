@@ -67,44 +67,54 @@ class CronParseError(ValueError):
     """Raised when a cron expression is malformed."""
 
 
+def _parse_step(piece: str) -> Tuple[str, int]:
+    """Split a single comma piece into ``(base, step)``.
+
+    Steps must be integers ≥ 1; raises CronParseError otherwise.  ``piece``
+    without ``/`` returns step=1."""
+    if "/" not in piece:
+        return piece, 1
+    base, _, step_str = piece.partition("/")
+    try:
+        step = int(step_str)
+    except ValueError as exc:
+        raise CronParseError(f"invalid step value: {step_str}") from exc
+    if step < 1:
+        raise CronParseError(f"step must be >= 1: {piece}")
+    return base, step
+
+
+def _resolve_range(base: str, lo: int, hi: int, names: dict) -> Tuple[int, int]:
+    """Resolve the (low, high) of a single cron range token.
+
+    ``*`` and the empty string mean the field's full bounds; ``a-b``
+    is the inclusive range; a bare token is a single point."""
+    if base in ("*", ""):
+        return lo, hi
+    if "-" in base:
+        a, _, b = base.partition("-")
+        r_lo = _resolve_token(a, lo, hi, names)
+        r_hi = _resolve_token(b, lo, hi, names)
+        if r_lo > r_hi:
+            raise CronParseError(f"reversed range: {base}")
+        return r_lo, r_hi
+    point = _resolve_token(base, lo, hi, names)
+    return point, point
+
+
 def _expand_field(spec: str, bounds: Tuple[int, int], names: dict = None) -> Set[int]:
     """Expand ONE cron field (e.g., ``*/15`` or ``9-17``) into the set of
     matching integers.  Bounds are inclusive on both sides."""
     lo, hi = bounds
     spec = spec.strip().lower()
-    out: Set[int] = set()
-
     if not spec:
         raise CronParseError("empty cron field")
 
+    out: Set[int] = set()
     for piece in spec.split(","):
-        piece = piece.strip()
-        # Step component: "<range>/<step>" or "*/<step>"
-        if "/" in piece:
-            base, _, step_str = piece.partition("/")
-            try:
-                step = int(step_str)
-            except ValueError as exc:
-                raise CronParseError(f"invalid step value: {step_str}") from exc
-            if step < 1:
-                raise CronParseError(f"step must be >= 1: {piece}")
-        else:
-            base, step = piece, 1
-
-        if base in ("*", ""):
-            r_lo, r_hi = lo, hi
-        elif "-" in base:
-            a, _, b = base.partition("-")
-            r_lo = _resolve_token(a, lo, hi, names)
-            r_hi = _resolve_token(b, lo, hi, names)
-            if r_lo > r_hi:
-                raise CronParseError(f"reversed range: {base}")
-        else:
-            r_lo = r_hi = _resolve_token(base, lo, hi, names)
-
-        for v in range(r_lo, r_hi + 1, step):
-            out.add(v)
-
+        base, step = _parse_step(piece.strip())
+        r_lo, r_hi = _resolve_range(base, lo, hi, names)
+        out.update(range(r_lo, r_hi + 1, step))
     return out
 
 
@@ -143,6 +153,43 @@ def parse_cron(expr: str) -> Tuple[Set[int], Set[int], Set[int], Set[int], Set[i
     return minutes, hours, doms, months, dows
 
 
+def _normalize_anchor(anchor: datetime) -> datetime:
+    """Round the anchor up to the next whole minute, naive-UTC."""
+    if anchor.tzinfo is not None:
+        anchor = anchor.astimezone(timezone.utc).replace(tzinfo=None)
+    return anchor.replace(second=0, microsecond=0) + timedelta(minutes=1)
+
+
+def _day_matches(cursor: datetime, doms: Set[int], dows: Set[int]) -> bool:
+    """Apply POSIX dom/dow OR-semantics when both restricted."""
+    full_doms = set(range(1, 32))
+    full_dows = set(range(0, 7))
+    dom_restricted = doms != full_doms
+    dow_restricted = dows != full_dows
+    py_dow = (cursor.weekday() + 1) % 7  # cron Sun=0..Sat=6
+    dom_match = cursor.day in doms
+    dow_match = py_dow in dows
+    if dom_restricted and dow_restricted:
+        return dom_match or dow_match
+    return dom_match and dow_match
+
+
+def _advance_to_next_hour(cursor: datetime, hours: Set[int]) -> datetime:
+    """Jump cursor to the next valid hour today, or to tomorrow midnight."""
+    next_hours = [h for h in sorted(hours) if h > cursor.hour]
+    if next_hours:
+        return cursor.replace(hour=next_hours[0], minute=0)
+    return (cursor + timedelta(days=1)).replace(hour=0, minute=0)
+
+
+def _advance_to_next_minute(cursor: datetime, minutes: Set[int]) -> datetime:
+    """Jump cursor to the next valid minute this hour, or roll the hour."""
+    next_minutes = [m for m in sorted(minutes) if m > cursor.minute]
+    if next_minutes:
+        return cursor.replace(minute=next_minutes[0])
+    return (cursor + timedelta(hours=1)).replace(minute=0)
+
+
 def next_run_from_cron(
     expr: str, anchor: datetime, *, max_iterations: int = 525600
 ) -> datetime:
@@ -159,61 +206,21 @@ def next_run_from_cron(
     that never fire would otherwise loop forever.  Raises
     ``CronParseError`` if no match is found within the budget."""
     minutes, hours, doms, months, dows = parse_cron(expr)
-
-    # Determine whether dom/dow are "restricted" (not the full default set).
-    full_doms = set(range(1, 32))
-    full_dows = set(range(0, 7))
-    dom_restricted = doms != full_doms
-    dow_restricted = dows != full_dows
-
-    # Round the anchor up to the next whole minute.
-    if anchor.tzinfo is None:
-        cursor = anchor.replace(second=0, microsecond=0) + timedelta(minutes=1)
-    else:
-        cursor = anchor.astimezone(timezone.utc).replace(
-            tzinfo=None, second=0, microsecond=0
-        ) + timedelta(minutes=1)
+    cursor = _normalize_anchor(anchor)
 
     for _ in range(max_iterations):
-        # Day-level filtering first (cheap fail-fast).
         if cursor.month not in months:
-            # Skip to the 1st of the next valid month.
             cursor = _advance_to_next_month(cursor, months)
             continue
-
-        # POSIX dom/dow OR-semantics when both restricted.
-        py_dow = (cursor.weekday() + 1) % 7  # Python: Mon=0, Sun=6 → cron: Sun=0..Sat=6
-        dom_match = cursor.day in doms
-        dow_match = py_dow in dows
-        day_ok = (
-            (dom_match or dow_match)
-            if (dom_restricted and dow_restricted)
-            else (dom_match and dow_match)
-        )
-        if not day_ok:
-            # Advance to the next midnight.
+        if not _day_matches(cursor, doms, dows):
             cursor = (cursor + timedelta(days=1)).replace(hour=0, minute=0)
             continue
-
-        # Hour and minute filtering.
         if cursor.hour not in hours:
-            # Advance to the next valid hour boundary today, or wrap to tomorrow.
-            next_hours = [h for h in sorted(hours) if h > cursor.hour]
-            if next_hours:
-                cursor = cursor.replace(hour=next_hours[0], minute=0)
-            else:
-                cursor = (cursor + timedelta(days=1)).replace(hour=0, minute=0)
+            cursor = _advance_to_next_hour(cursor, hours)
             continue
-
         if cursor.minute not in minutes:
-            next_minutes = [m for m in sorted(minutes) if m > cursor.minute]
-            if next_minutes:
-                cursor = cursor.replace(minute=next_minutes[0])
-            else:
-                cursor = (cursor + timedelta(hours=1)).replace(minute=0)
+            cursor = _advance_to_next_minute(cursor, minutes)
             continue
-
-        # All five fields match.
         return cursor
 
     raise CronParseError(f"no match for cron expression '{expr}' within one year")
