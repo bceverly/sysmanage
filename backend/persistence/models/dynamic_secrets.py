@@ -36,7 +36,8 @@ from backend.persistence.models.core import GUID
 # Lease backend kinds — mirrors OpenBAO secret-engine families.
 LEASE_KIND_DATABASE = "database"
 LEASE_KIND_SSH = "ssh"
-LEASE_KIND_TOKEN = "token"
+# nosec B105 -- enum literal naming the lease kind, not a credential
+LEASE_KIND_TOKEN = "token"  # nosec B105
 LEASE_KINDS = (LEASE_KIND_DATABASE, LEASE_KIND_SSH, LEASE_KIND_TOKEN)
 
 # Lease lifecycle states.

@@ -38,10 +38,18 @@ export const reportBrandingService = {
     return r.data;
   },
 
-  // Returns a public URL the <img> tag can use directly (cookie auth) —
-  // adds a cache-buster so a freshly-uploaded logo refreshes immediately.
-  logoUrl(bust?: string | number): string {
-    const q = bust === undefined ? '' : `?t=${encodeURIComponent(String(bust))}`;
-    return `/api/report-branding/logo${q}`;
+  // Fetch the logo bytes through axios so the request carries the
+  // bearer token, then mint an object URL the <img> tag can render.
+  // Caller must revoke the URL when done (handled by the React
+  // component's effect-cleanup hook).
+  async fetchLogoObjectUrl(): Promise<string | null> {
+    try {
+      const r = await axiosInstance.get('/api/report-branding/logo', {
+        responseType: 'blob',
+      });
+      return globalThis.URL.createObjectURL(r.data as Blob);
+    } catch {
+      return null;
+    }
   },
 };

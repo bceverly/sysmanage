@@ -31,7 +31,11 @@ const ReportBrandingSettings: React.FC = () => {
   const [headerText, setHeaderText] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [logoBust, setLogoBust] = useState<number>(0);
+  // ``<img src>`` does a plain GET that doesn't carry our JWT, so we
+  // axios-fetch the bytes (auth header attached) and render via an
+  // object URL.  Tracked in state so React re-renders on update; the
+  // cleanup effect below revokes the URL to avoid leaks.
+  const [logoObjectUrl, setLogoObjectUrl] = useState<string | null>(null);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -50,6 +54,16 @@ const ReportBrandingSettings: React.FC = () => {
     setSnackbarOpen(true);
   };
 
+  const fetchLogo = useCallback(async (hasLogo: boolean) => {
+    setLogoObjectUrl((prev) => {
+      if (prev) globalThis.URL.revokeObjectURL(prev);
+      return null;
+    });
+    if (!hasLogo) return;
+    const url = await reportBrandingService.fetchLogoObjectUrl();
+    if (url) setLogoObjectUrl(url);
+  }, []);
+
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
@@ -57,18 +71,26 @@ const ReportBrandingSettings: React.FC = () => {
       setBranding(b);
       setCompanyName(b.company_name ?? '');
       setHeaderText(b.header_text ?? '');
-      setLogoBust(Date.now());
+      await fetchLogo(b.has_logo);
     } catch (e) {
       console.error(e);
       showError(t('reportBranding.loadError', 'Failed to load report branding'));
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, fetchLogo]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  // Revoke the object URL when the component unmounts so the blob is
+  // garbage-collected (otherwise it lingers for the page lifetime).
+  useEffect(() => {
+    return () => {
+      if (logoObjectUrl) globalThis.URL.revokeObjectURL(logoObjectUrl);
+    };
+  }, [logoObjectUrl]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -97,7 +119,7 @@ const ReportBrandingSettings: React.FC = () => {
     try {
       const updated = await reportBrandingService.uploadLogo(file);
       setBranding(updated);
-      setLogoBust(Date.now());
+      await fetchLogo(updated.has_logo);
       showSuccess(t('reportBranding.logoUploaded', 'Logo uploaded'));
     } catch (err: unknown) {
       const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
@@ -115,7 +137,7 @@ const ReportBrandingSettings: React.FC = () => {
     try {
       const updated = await reportBrandingService.deleteLogo();
       setBranding(updated);
-      setLogoBust(Date.now());
+      await fetchLogo(updated.has_logo);
       showSuccess(t('reportBranding.logoRemoved', 'Logo removed'));
     } catch (err: unknown) {
       const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
@@ -177,9 +199,9 @@ const ReportBrandingSettings: React.FC = () => {
                   borderRadius: 1,
                 }}
               >
-                {branding?.has_logo ? (
+                {branding?.has_logo && logoObjectUrl ? (
                   <img
-                    src={reportBrandingService.logoUrl(logoBust)}
+                    src={logoObjectUrl}
                     alt={t('reportBranding.logoAlt', 'Report logo')}
                     style={{
                       maxWidth: '100%',
