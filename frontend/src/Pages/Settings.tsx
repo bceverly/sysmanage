@@ -1099,9 +1099,17 @@ const Settings: React.FC = () => {
         {t('nav.settings', 'Settings')}
       </Typography>
 
-      {/* Tabs */}
+      {/* Tabs — scrollable so labels never wrap and a narrow viewport
+          gets the same prev/next arrows as MUI's HostDetail tabs. */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} aria-label="settings tabs">
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          aria-label="settings tabs"
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+        >
           <Tab label={t('tags.title', 'Tags')} />
           <Tab label={t('queues.title', 'Queues')} />
           <Tab label={t('integrations.title', 'Integrations')} />

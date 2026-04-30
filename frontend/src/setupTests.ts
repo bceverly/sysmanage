@@ -49,6 +49,25 @@ declare global {
 }
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
+// JSDom lacks ResizeObserver, which our scrollable nav/button components
+// instantiate inside useEffect.  Provide a no-op stub so tests don't crash.
+// The methods deliberately do nothing — JSDom never fires resize events
+// in unit tests, so observation/teardown are inert by design.
+Object.defineProperty(globalThis, 'ResizeObserver', {
+  writable: true,
+  value: class ResizeObserver {
+    observe() {
+      /* no-op: JSDom does not fire resize events in unit tests */
+    }
+    unobserve() {
+      /* no-op: nothing to detach since observe() is inert */
+    }
+    disconnect() {
+      /* no-op: no observers to release */
+    }
+  }
+});
+
 // Polyfill for React 19's scheduler in test environment
 Object.defineProperty(globalThis, 'MessageChannel', {
   writable: true,

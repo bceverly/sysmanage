@@ -175,21 +175,31 @@ export default defineConfig({
     // a single ~2 MB index-*.js bundle.
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-mui': [
-            '@mui/material',
-            '@mui/system',
-            '@mui/styled-engine',
-          ],
-          'vendor-mui-data-grid': ['@mui/x-data-grid'],
-          'vendor-mui-charts': ['@mui/x-charts'],
-          'vendor-i18n': [
-            'i18next',
-            'react-i18next',
-            'i18next-browser-languagedetector',
-            'i18next-http-backend',
-          ],
+        // Aggressive vendor split — the goal is to keep the main
+        // `index-*.js` chunk small (just the app shell + router +
+        // glue) so first-paint is fast and re-deploys don't bust
+        // the cache for unchanged vendor code.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          if (id.includes('react-router')) return 'vendor-react';
+          if (id.includes('node_modules/react/') ||
+              id.includes('node_modules/react-dom')) return 'vendor-react';
+          if (id.includes('@mui/x-data-grid')) return 'vendor-mui-data-grid';
+          if (id.includes('@mui/x-charts')) return 'vendor-mui-charts';
+          if (id.includes('@mui/icons-material')) return 'vendor-mui-icons';
+          if (id.includes('@mui/material') ||
+              id.includes('@mui/system') ||
+              id.includes('@mui/styled-engine') ||
+              id.includes('@mui/lab') ||
+              id.includes('@mui/utils') ||
+              id.includes('@mui/private-theming')) return 'vendor-mui';
+          if (id.includes('i18next') ||
+              id.includes('react-i18next')) return 'vendor-i18n';
+          if (id.includes('axios')) return 'vendor-axios';
+          if (id.includes('react-icons')) return 'vendor-icons';
+          if (id.includes('@emotion')) return 'vendor-emotion';
+          // Everything else from node_modules → generic vendor bucket.
+          return 'vendor';
         },
       },
     },

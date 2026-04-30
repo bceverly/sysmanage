@@ -185,9 +185,21 @@
     .nav__close {
       display: none;
     }
-  
+
+    /* Let the menu shrink so its scrollnav child can detect overflow.
+       Without min-width:0 + flex:1 1 auto here, .nav__menu grows to fit
+       every nav item and the scrollnav scroller is never narrower than
+       its content — meaning the prev/next arrows never appear. */
+    .nav__menu {
+      display: flex;
+      align-items: center;
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+    }
+
     .nav__list {
       flex-direction: row;
       column-gap: 2.5rem;
     }
-  }  
+  }

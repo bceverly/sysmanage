@@ -3,7 +3,6 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { parseUTCTimestamp } from '../utils/dateUtils';
 import { DataGrid, GridColDef, GridRowSelectionModel, GridSortModel } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
@@ -30,6 +29,7 @@ import { hasPermission, SecurityRoles } from '../Services/permissions';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import { broadcastService } from '../Services/broadcast';
+import ScrollableButtonBar from '../Components/ScrollableButtonBar';
 
 /** Check whether a host qualifies as a virtualization parent. */
 function isParentHost(host: SysManageHost): boolean {
@@ -1077,8 +1077,10 @@ const Hosts = () => {
                 />
             </Box>
 
-            {/* Action Buttons - flexShrink: 0 to stay at bottom */}
-            <Stack direction="row" spacing={2} sx={{ flexShrink: 0, pb: 2 }}>
+            {/* Action Buttons - scrollable so labels never wrap and
+                a narrow viewport gets prev/next arrows.  Container
+                still flexShrink: 0 so it stays pinned to the bottom. */}
+            <ScrollableButtonBar sx={{ flexShrink: 0, pb: 2 }}>
                 {canApproveHosts && (
                     <Button
                         variant="outlined"
@@ -1176,7 +1178,7 @@ const Hosts = () => {
                         {t('common.delete')} {t('common.selected', { defaultValue: 'Selected' })}
                     </Button>
                 )}
-            </Stack>
+            </ScrollableButtonBar>
         </Box>
     );
 }

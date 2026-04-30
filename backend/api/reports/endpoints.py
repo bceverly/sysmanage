@@ -8,8 +8,9 @@ to it directly. Otherwise, they return license-required errors.
 import html
 from datetime import datetime, timezone
 from enum import Enum
+from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from fastapi.responses import HTMLResponse
 
 from backend.auth.auth_bearer import get_current_user
@@ -48,22 +49,46 @@ def _check_reporting_module():
     return reporting_engine
 
 
+def _resolve_template_fields(reporting_engine, db, models, template_id):
+    """Resolve a Phase 8.7 ``ReportTemplate`` UUID to its
+    ``selected_fields`` list.  Returns ``None`` (= use defaults) when
+    no template_id was supplied or the row doesn't resolve."""
+    if not template_id:
+        return None
+    loader = getattr(reporting_engine, "_load_template", None)
+    if loader is None:
+        return None
+    try:
+        return loader(db, models, template_id)
+    except Exception:  # pragma: no cover  pylint: disable=broad-exception-caught
+        return None
+
+
 @router.get("/view/{report_type}")
 async def view_report_html(
     report_type: ReportType,
+    template_id: Optional[str] = Query(None),
     current_user=Depends(get_current_user),
     db=Depends(get_db),
 ):
     """
     Generate and return HTML version of a report.
 
-    Delegates to reporting_engine Pro+ module when available.
+    Delegates to reporting_engine Pro+ module when available.  Passing
+    ``models=`` to the generator constructor is what enables Phase 8.7
+    branding injection — the Pro+ engine looks up ``ReportBranding``
+    via the ORM at render time.  Without it, branding silently falls
+    back to no-op (which was the bug that landed branding "missing"
+    on every report after Phase 8.7 shipped).
     """
     reporting_engine = _check_reporting_module()
 
     from backend.persistence import models
 
-    html_gen = reporting_engine.HtmlReportGeneratorImpl(db, _)
+    html_gen = reporting_engine.HtmlReportGeneratorImpl(db, _, models=models)
+    selected_fields = _resolve_template_fields(
+        reporting_engine, db, models, template_id
+    )
 
     if report_type in (ReportType.REGISTERED_HOSTS, ReportType.HOSTS_WITH_TAGS):
         hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
@@ -73,23 +98,27 @@ async def view_report_html(
             else _("Hosts with Tags")
         )
         html_content = html_gen.generate_hosts_html(
-            hosts, report_type.value, report_title
+            hosts, report_type.value, report_title, selected_fields=selected_fields
         )
     elif report_type == ReportType.USERS_LIST:
         users = db.query(models.User).order_by(models.User.userid).all()
-        html_content = html_gen.generate_users_html(users, _("SysManage Users"))
+        html_content = html_gen.generate_users_html(
+            users, _("SysManage Users"), selected_fields=selected_fields
+        )
     elif report_type == ReportType.FIREWALL_STATUS:
         hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
-        html_content = html_gen.generate_firewall_html(hosts, _("Host Firewall Status"))
+        html_content = html_gen.generate_firewall_html(
+            hosts, _("Host Firewall Status"), selected_fields=selected_fields
+        )
     elif report_type == ReportType.ANTIVIRUS_OPENSOURCE:
         hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
         html_content = html_gen.generate_antivirus_opensource_html(
-            hosts, _("Open-Source Antivirus Status")
+            hosts, _("Open-Source Antivirus Status"), selected_fields=selected_fields
         )
     elif report_type == ReportType.ANTIVIRUS_COMMERCIAL:
         hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
         html_content = html_gen.generate_antivirus_commercial_html(
-            hosts, _("Commercial Antivirus Status")
+            hosts, _("Commercial Antivirus Status"), selected_fields=selected_fields
         )
     elif report_type == ReportType.USER_RBAC:
         users = db.query(models.User).order_by(models.User.userid).all()
@@ -99,13 +128,18 @@ async def view_report_html(
             .all()
         )
         html_content = html_gen.generate_user_rbac_html(
-            users, role_groups, _("User Security Roles (RBAC)")
+            users,
+            role_groups,
+            _("User Security Roles (RBAC)"),
+            selected_fields=selected_fields,
         )
     elif report_type == ReportType.AUDIT_LOG:
         audit_entries = (
             db.query(models.AuditLog).order_by(models.AuditLog.timestamp.desc()).all()
         )
-        html_content = html_gen.generate_audit_log_html(audit_entries, _("Audit Log"))
+        html_content = html_gen.generate_audit_log_html(
+            audit_entries, _("Audit Log"), selected_fields=selected_fields
+        )
     else:
         raise HTTPException(status_code=400, detail=_("Unknown report type"))
 
@@ -117,20 +151,30 @@ async def view_report_html(
 @router.get("/generate/{report_type}")
 async def generate_report(
     report_type: ReportType,
+    template_id: Optional[str] = Query(None),
     current_user=Depends(get_current_user),
     db=Depends(get_db),
 ):
     """
     Generate and download a PDF report.
 
-    Delegates to reporting_engine Pro+ module when available.
+    Delegates to reporting_engine Pro+ module when available.  Passing
+    ``models=`` enables Phase 8.7 branding injection (the Pro+ engine
+    looks up ``ReportBranding`` at render time).
     """
     reporting_engine = _check_reporting_module()
 
     from backend.persistence import models
 
-    hosts_gen = reporting_engine.HostsReportGeneratorImpl(db, i18n_func=_)
-    users_gen = reporting_engine.UsersReportGeneratorImpl(db, i18n_func=_)
+    hosts_gen = reporting_engine.HostsReportGeneratorImpl(
+        db, i18n_func=_, models=models
+    )
+    users_gen = reporting_engine.UsersReportGeneratorImpl(
+        db, i18n_func=_, models=models
+    )
+    selected_fields = _resolve_template_fields(
+        reporting_engine, db, models, template_id
+    )
 
     if not hosts_gen.reportlab_available:
         raise HTTPException(
@@ -143,28 +187,44 @@ async def generate_report(
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
     if report_type == ReportType.REGISTERED_HOSTS:
-        pdf_buffer = hosts_gen.generate_hosts_report(models)
+        pdf_buffer = hosts_gen.generate_hosts_report(
+            models, selected_fields=selected_fields
+        )
         filename = f"registered_hosts_{ts}.pdf"
     elif report_type == ReportType.HOSTS_WITH_TAGS:
-        pdf_buffer = hosts_gen.generate_hosts_with_tags_report(models)
+        pdf_buffer = hosts_gen.generate_hosts_with_tags_report(
+            models, selected_fields=selected_fields
+        )
         filename = f"hosts_with_tags_{ts}.pdf"
     elif report_type == ReportType.USERS_LIST:
-        pdf_buffer = users_gen.generate_users_list_report(models)
+        pdf_buffer = users_gen.generate_users_list_report(
+            models, selected_fields=selected_fields
+        )
         filename = f"users_list_{ts}.pdf"
     elif report_type == ReportType.FIREWALL_STATUS:
-        pdf_buffer = hosts_gen.generate_firewall_status_report(models)
+        pdf_buffer = hosts_gen.generate_firewall_status_report(
+            models, selected_fields=selected_fields
+        )
         filename = f"firewall_status_{ts}.pdf"
     elif report_type == ReportType.ANTIVIRUS_OPENSOURCE:
-        pdf_buffer = hosts_gen.generate_antivirus_opensource_report(models)
+        pdf_buffer = hosts_gen.generate_antivirus_opensource_report(
+            models, selected_fields=selected_fields
+        )
         filename = f"antivirus_opensource_{ts}.pdf"
     elif report_type == ReportType.ANTIVIRUS_COMMERCIAL:
-        pdf_buffer = hosts_gen.generate_antivirus_commercial_report(models)
+        pdf_buffer = hosts_gen.generate_antivirus_commercial_report(
+            models, selected_fields=selected_fields
+        )
         filename = f"antivirus_commercial_{ts}.pdf"
     elif report_type == ReportType.USER_RBAC:
-        pdf_buffer = users_gen.generate_user_rbac_report(models)
+        pdf_buffer = users_gen.generate_user_rbac_report(
+            models, selected_fields=selected_fields
+        )
         filename = f"user_rbac_{ts}.pdf"
     elif report_type == ReportType.AUDIT_LOG:
-        pdf_buffer = hosts_gen.generate_audit_log_report(models)
+        pdf_buffer = users_gen.generate_audit_log_report(
+            models, selected_fields=selected_fields
+        )
         filename = f"audit_log_{ts}.pdf"
     else:
         raise HTTPException(status_code=400, detail=_("Unknown report type"))

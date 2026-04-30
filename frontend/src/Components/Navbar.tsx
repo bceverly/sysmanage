@@ -9,6 +9,7 @@ import LanguageSelector from "./LanguageSelector";
 import ConnectionStatusIndicator from "./ConnectionStatusIndicator";
 import UserProfileDropdown from "./UserProfileDropdown";
 import NotificationBell from "./NotificationBell";
+import ScrollableNavList from "./ScrollableNavList";
 import { getLicenseInfo } from "../Services/license";
 import { usePlugins } from "../plugins";
 
@@ -91,7 +92,7 @@ const Navbar = () => {
           id="nav-menu"
           style={{visibility: menuVisible}}
         >
-          <ul className="nav__list">
+          <ScrollableNavList listClassName="nav__list">
             <li className="nav__item">
               <NavLink
                 to="/"
@@ -176,7 +177,7 @@ const Navbar = () => {
                 {t('nav.reports')}
               </NavLink>
             </li>
-          </ul>
+          </ScrollableNavList>
           <button
               className="nav__close"
               id="nav-close"
