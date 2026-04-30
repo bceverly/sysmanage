@@ -3,6 +3,13 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, develop ]
+    # Also fire on version tags so build-and-release.yml's
+    # wait-on-check step can resolve the Backend / Frontend Tests
+    # checks against the tag's commit SHA.  Without this, tag pushes
+    # never trigger CI and the release workflow times out.
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*.*'
   pull_request:
     branches: [ main, develop ]
 
