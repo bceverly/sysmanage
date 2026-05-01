@@ -173,37 +173,16 @@ export default defineConfig({
     // Code-split heavy vendor groups so the main app chunk stays cacheable
     // and parses faster on first load.  Without this, everything lands in
     // a single ~2 MB index-*.js bundle.
-    rollupOptions: {
-      output: {
-        // Aggressive vendor split — the goal is to keep the main
-        // `index-*.js` chunk small (just the app shell + router +
-        // glue) so first-paint is fast and re-deploys don't bust
-        // the cache for unchanged vendor code.
-        manualChunks(id) {
-          if (!id.includes('node_modules')) return undefined;
-          if (id.includes('react-router')) return 'vendor-react';
-          if (id.includes('node_modules/react/') ||
-              id.includes('node_modules/react-dom')) return 'vendor-react';
-          if (id.includes('@mui/x-data-grid')) return 'vendor-mui-data-grid';
-          if (id.includes('@mui/x-charts')) return 'vendor-mui-charts';
-          if (id.includes('@mui/icons-material')) return 'vendor-mui-icons';
-          if (id.includes('@mui/material') ||
-              id.includes('@mui/system') ||
-              id.includes('@mui/styled-engine') ||
-              id.includes('@mui/lab') ||
-              id.includes('@mui/utils') ||
-              id.includes('@mui/private-theming')) return 'vendor-mui';
-          if (id.includes('i18next') ||
-              id.includes('react-i18next')) return 'vendor-i18n';
-          if (id.includes('axios')) return 'vendor-axios';
-          if (id.includes('react-icons')) return 'vendor-icons';
-          if (id.includes('@emotion')) return 'vendor-emotion';
-          // Everything else from node_modules → generic vendor bucket.
-          return 'vendor';
-        },
-      },
-    },
-    chunkSizeWarningLimit: 700,
+    // No `manualChunks` — Vite/Rollup's automatic chunk splitting is
+    // safe.  Custom splits are tempting (smaller initial parse, better
+    // caching) but the React 19 + MUI 7 dependency graph has internal
+    // circular imports that produce TDZ errors at runtime when chunks
+    // are split manually (symptoms: blank page,
+    //   "Cannot access 'X' before initialization" or
+    //   "Cannot set properties of undefined (setting 'Activity')"
+    // on first load).  Leave this alone unless you have a verified
+    // playwright e2e run proving the new split works.
+    chunkSizeWarningLimit: 2500,
   },
   test: {
     globals: true,
