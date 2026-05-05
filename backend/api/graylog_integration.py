@@ -130,7 +130,7 @@ async def get_graylog_integration_settings():  # NOSONAR
                 "use_managed_server": True,
                 "host_id": None,
                 "manual_url": None,
-                "api_token": None,
+                "api_token": None,  # nosec B105
             }
 
         return settings.to_dict()

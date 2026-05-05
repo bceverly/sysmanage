@@ -79,7 +79,7 @@ def _build_plan(op_type: str, params: Dict[str, Any]) -> Dict[str, Any]:
         # name without context.
         return build_adhoc_script_plan(
             content=params.get("content", ""),
-            shell=params.get("shell", "bash"),
+            shell=params.get("shell", "bash"),  # nosec B604
             timeout_seconds=int(params.get("timeout_seconds", 300)),
             parameter_values=params.get("parameter_values"),
         )
