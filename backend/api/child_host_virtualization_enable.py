@@ -110,7 +110,7 @@ def _try_init_plan_dispatch(action: str, host_id: str) -> bool:
         )
         register_host_op_correlation(message_id, action, str(host_id))
         return True
-    except Exception as exc:  # nosec B110  pylint: disable=broad-exception-caught
+    except Exception as exc:  # pylint: disable=broad-exception-caught
         logging.getLogger(__name__).warning(
             "Init plan path failed for action=%s host=%s; falling back to "
             "legacy WS dispatch: %s",
@@ -774,7 +774,7 @@ def _try_kvm_network_plan_path(host_id, request) -> bool:
             timeout=_INIT_ENGINE_TIMEOUT,
         )
         return True
-    except Exception as exc:  # nosec B110
+    except Exception as exc:  # pylint: disable=broad-exception-caught
         logging.getLogger(__name__).warning(
             "KVM net plan path failed for host %s; legacy WS: %s",
             host_id,
@@ -935,7 +935,7 @@ async def list_kvm_networks(
 
                 enqueue_apply_plan(host_id=str(host_id), plan=plan, timeout=60)
                 used_plan_path = True
-            except Exception as exc:  # nosec B110
+            except Exception as exc:  # pylint: disable=broad-exception-caught
                 logging.getLogger(__name__).warning(
                     "KVM net list plan path failed for host %s; legacy WS: %s",
                     host_id,

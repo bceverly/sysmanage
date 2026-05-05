@@ -48,7 +48,7 @@ def _try_check_virtualization_support_plan(host_id: str) -> bool:
             message_id, "check_virtualization_support", str(host_id)
         )
         return True
-    except Exception as exc:  # nosec B110  pylint: disable=broad-exception-caught
+    except Exception as exc:  # pylint: disable=broad-exception-caught
         logging.getLogger(__name__).warning(
             "Capability probe plan path failed for host %s: %s", host_id, exc
         )

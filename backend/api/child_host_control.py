@@ -147,7 +147,7 @@ def _try_update_agent_plan_dispatch(
             message_id, str(child_id), "update_agent", str(host_id)
         )
         return True
-    except Exception as exc:  # nosec B110  pylint: disable=broad-exception-caught
+    except Exception as exc:  # pylint: disable=broad-exception-caught
         logging.getLogger(__name__).warning(
             "update_agent plan path failed for %s/%s on host %s: %s",
             child_type,
@@ -196,7 +196,7 @@ def _try_lifecycle_plan_dispatch(
                 message_id, str(child_id), action, str(host_id)
             )
         return True
-    except Exception as exc:  # nosec B110  pylint: disable=broad-exception-caught
+    except Exception as exc:  # pylint: disable=broad-exception-caught
         logging.getLogger(__name__).warning(
             "Lifecycle plan path failed for %s/%s on host %s; falling back to "
             "legacy WS dispatch: %s",

@@ -3,6 +3,7 @@ Fleet management REST API endpoints for sending commands to agents
 and managing the fleet of connected systems.
 """
 
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -19,6 +20,7 @@ from backend.websocket.messages import CommandMessage, CommandType, MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 queue_ops = QueueOperations()
 
@@ -333,9 +335,17 @@ def _enqueue_command_for_hosts(db: Session, host_ids: list, message_dict: dict) 
                 db=db,
             )
             enqueued += 1
-        except Exception:
-            # Per-host failure must not abort the rest of the fan-out;
-            # log and continue.  Caller commits if any rows succeeded.
+        except Exception:  # pylint: disable=broad-exception-caught
+            # Per-host failure must not abort the rest of the fan-out:
+            # one failed enqueue (e.g. row-level constraint violation,
+            # transient DB error) shouldn't drop messages for the other
+            # hosts in the same broadcast.  Caller commits if any rows
+            # succeeded.
+            logger.exception(
+                "Failed to enqueue broadcast command for host_id=%s; "
+                "skipping this host",
+                host_id,
+            )
             continue
     if enqueued:
         db.commit()
