@@ -179,25 +179,50 @@ class Host(Base):
     tags = relationship(
         "Tag", secondary="host_tags", back_populates="hosts", lazy="dynamic"
     )
-    package_updates = relationship("PackageUpdate", back_populates="host")
-    software_installation_logs = relationship(
-        "SoftwareInstallationLog", back_populates="host"
+    # All of these children have ``host_id`` declared ``nullable=False`` with
+    # ``ondelete=CASCADE`` at the FK level.  Without an ORM cascade, SQLAlchemy
+    # emits ``UPDATE ... SET host_id=NULL`` on the parent flush, which violates
+    # the NOT NULL constraint and rolls back the whole DELETE with a 500.
+    package_updates = relationship(
+        "PackageUpdate", back_populates="host", cascade=CASCADE_DELETE_ORPHAN
     )
-    software_packages = relationship("SoftwarePackage", back_populates="host")
+    software_installation_logs = relationship(
+        "SoftwareInstallationLog",
+        back_populates="host",
+        cascade=CASCADE_DELETE_ORPHAN,
+    )
+    software_packages = relationship(
+        "SoftwarePackage", back_populates="host", cascade=CASCADE_DELETE_ORPHAN
+    )
     third_party_repositories = relationship(
-        "ThirdPartyRepository", back_populates="host"
+        "ThirdPartyRepository",
+        back_populates="host",
+        cascade=CASCADE_DELETE_ORPHAN,
     )
     antivirus_status = relationship(
-        "AntivirusStatus", back_populates="host", uselist=False
+        "AntivirusStatus",
+        back_populates="host",
+        uselist=False,
+        cascade=CASCADE_DELETE_ORPHAN,
     )
     commercial_antivirus_status = relationship(
-        "CommercialAntivirusStatus", back_populates="host", uselist=False
+        "CommercialAntivirusStatus",
+        back_populates="host",
+        uselist=False,
+        cascade=CASCADE_DELETE_ORPHAN,
     )
     firewall_status = relationship(
-        "FirewallStatus", back_populates="host", uselist=False
+        "FirewallStatus",
+        back_populates="host",
+        uselist=False,
+        cascade=CASCADE_DELETE_ORPHAN,
     )
-    user_accounts = relationship("UserAccount", back_populates="host")
-    user_groups = relationship("UserGroup", back_populates="host")
+    user_accounts = relationship(
+        "UserAccount", back_populates="host", cascade=CASCADE_DELETE_ORPHAN
+    )
+    user_groups = relationship(
+        "UserGroup", back_populates="host", cascade=CASCADE_DELETE_ORPHAN
+    )
     certificates = relationship(
         "HostCertificate", back_populates="host", cascade=CASCADE_DELETE_ORPHAN
     )

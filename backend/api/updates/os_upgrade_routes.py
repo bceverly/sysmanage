@@ -14,8 +14,11 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
-from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
+from backend.websocket.queue_enums import QueueDirection
+from backend.websocket.queue_operations import QueueOperations
+
+queue_ops = QueueOperations()
 
 from .constants import OS_UPGRADE_PACKAGE_MANAGERS
 from .models import UpdateExecutionRequest
@@ -270,18 +273,10 @@ async def execute_os_upgrades(  # NOSONAR
                     )
                     continue
 
-                # Check if we can reach the host
-                if not connection_manager.get_agent_connection(host.fqdn):
-                    results.append(
-                        {
-                            "host_id": host_id,
-                            "status": "error",
-                            "message": _("Host is not connected"),
-                        }
-                    )
-                    continue
-
-                # Create the update command message
+                # Build the apply_updates command message and enqueue it on
+                # the OUTBOUND queue.  The websocket outbound processor is
+                # responsible for actually delivering it to the agent — this
+                # endpoint must never call send_message_to_agent directly.
                 packages_to_update = [
                     {
                         "package_name": update.package_name,
@@ -296,10 +291,22 @@ async def execute_os_upgrades(  # NOSONAR
                     "apply_updates", {"packages": packages_to_update}
                 )
 
-                # Send command to agent
-                success = await connection_manager.send_message_to_agent(
-                    host.fqdn, command_message
-                )
+                try:
+                    queue_ops.enqueue_message(
+                        message_type="command",
+                        message_data=command_message.to_dict(),
+                        direction=QueueDirection.OUTBOUND,
+                        host_id=str(host.id),
+                        db=session,
+                    )
+                    success = True
+                except Exception as enqueue_error:
+                    logger.error(
+                        "Failed to enqueue OS upgrade command for host %s: %s",
+                        host.fqdn,
+                        enqueue_error,
+                    )
+                    success = False
 
                 if success:
                     # Mark updates as in progress
@@ -311,7 +318,7 @@ async def execute_os_upgrades(  # NOSONAR
                     session.commit()
 
                     logger.info(
-                        "OS upgrade command sent successfully to host %s (%s): %d upgrades",
+                        "OS upgrade command queued for host %s (%s): %d upgrades",
                         host_id,
                         host.fqdn,
                         len(available_upgrades),
@@ -351,7 +358,7 @@ async def execute_os_upgrades(  # NOSONAR
                         {
                             "host_id": host_id,
                             "status": "success",
-                            "message": _("OS upgrade command sent successfully"),
+                            "message": _("OS upgrade command queued for host"),
                             "upgrades_count": len(available_upgrades),
                             "requires_reboot": True,  # OS upgrades always require reboot
                         }
@@ -361,7 +368,7 @@ async def execute_os_upgrades(  # NOSONAR
                         {
                             "host_id": host_id,
                             "status": "error",
-                            "message": _("Failed to send OS upgrade command to host"),
+                            "message": _("Failed to queue OS upgrade command"),
                         }
                     )
 

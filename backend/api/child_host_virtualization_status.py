@@ -4,6 +4,7 @@ Handles checking virtualization support and status for hosts.
 """
 
 import json
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import sessionmaker
@@ -15,6 +16,7 @@ from backend.api.child_host_utils import (
 )
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
+from backend.licensing.module_loader import module_loader
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
 from backend.websocket.messages import create_command_message
@@ -23,6 +25,34 @@ from backend.websocket.queue_operations import QueueOperations
 
 router = APIRouter()
 queue_ops = QueueOperations()
+
+
+def _try_check_virtualization_support_plan(host_id: str) -> bool:
+    """Dispatch the capabilities probe via the container_engine plan path."""
+    container_engine = module_loader.get_module("container_engine")
+    if container_engine is None:
+        return False
+    builder = getattr(container_engine, "build_check_virtualization_support_plan", None)
+    if builder is None:
+        return False
+    try:
+        plan = builder()
+        # pylint: disable=import-outside-toplevel
+        from backend.services.proplus_dispatch import (
+            enqueue_apply_plan,
+            register_host_op_correlation,
+        )
+
+        message_id = enqueue_apply_plan(host_id=str(host_id), plan=plan, timeout=60)
+        register_host_op_correlation(
+            message_id, "check_virtualization_support", str(host_id)
+        )
+        return True
+    except Exception as exc:  # nosec B110  pylint: disable=broad-exception-caught
+        logging.getLogger(__name__).warning(
+            "Capability probe plan path failed for host %s: %s", host_id, exc
+        )
+        return False
 
 
 @router.get(
@@ -47,18 +77,19 @@ async def get_virtualization_support(
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
-        # Queue a command to check virtualization support
-        command_message = create_command_message(
-            command_type="check_virtualization_support", parameters={}
-        )
+        if not _try_check_virtualization_support_plan(host_id):
+            # LEGACY: superseded by container_engine.build_check_virtualization_support_plan.
+            command_message = create_command_message(
+                command_type="check_virtualization_support", parameters={}
+            )
 
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+            queue_ops.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                db=session,
+            )
 
         session.commit()
 

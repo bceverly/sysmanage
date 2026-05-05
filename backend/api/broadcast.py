@@ -16,10 +16,14 @@ matching a tag).  Common payloads:
 The actual semantic of the broadcast is interpreted by the agent's
 broadcast handler.  This endpoint is the dispatcher.
 
-Performance contract:  for fleets up to 100 hosts the broadcast must
-complete inside 5 seconds (Phase 8 exit criterion).  Implementation
-fans out via ``connection_manager`` which iterates the in-memory
-connection table — no per-host DB queries on the hot path.
+Architecture: this endpoint enqueues one OUTBOUND queue row per
+matching host (via ``QueueOperations``) and returns the number of
+rows enqueued.  The websocket outbound processor is responsible for
+actually delivering each envelope to its agent — agents that are
+offline at enqueue time will receive the envelope when they next
+reconnect.  This endpoint must never call ``connection_manager``'s
+direct send/broadcast helpers; those bypass the queue and break
+ordering + offline resilience.
 """
 
 import logging
@@ -37,10 +41,12 @@ from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
-from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import MessageType
+from backend.websocket.queue_enums import QueueDirection
+from backend.websocket.queue_operations import QueueOperations
 
 logger = logging.getLogger(__name__)
+queue_ops = QueueOperations()
 
 
 router = APIRouter(
@@ -135,31 +141,26 @@ async def broadcast_to_fleet(
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
-    # Resolve target set + dispatch.  ``connection_manager`` is the
-    # single hot-path:  it iterates active_connections in-memory.
+    # Resolve target set + enqueue.  We pull the matching host_ids in
+    # a single DB query, then enqueue one OUTBOUND row per host.  The
+    # outbound processor delivers each row independently — offline
+    # agents pick theirs up on reconnect.
     started = time.monotonic()
+    target_host_ids = _resolve_broadcast_targets(db, tag_uuid, request.platform)
     if tag_uuid is not None and request.platform:
-        # Combined filter: tag first, then platform.  Two passes is fine —
-        # the typical fleet size means this is bounded by O(N) connections.
-        delivered = await _broadcast_tag_and_platform(
-            tag_uuid, request.platform, envelope
-        )
         target_filter = f"tag:{tag_uuid}+platform:{request.platform}"
     elif tag_uuid is not None:
-        delivered = await connection_manager.broadcast_to_tagged(tag_uuid, envelope)
         target_filter = f"tag:{tag_uuid}"
     elif request.platform:
-        delivered = await connection_manager.broadcast_to_platform(
-            request.platform, envelope
-        )
         target_filter = f"platform:{request.platform}"
     else:
-        delivered = await connection_manager.broadcast_to_all(envelope)
         target_filter = "all"
+
+    delivered = _enqueue_envelope_for_hosts(db, target_host_ids, envelope)
     elapsed_ms = (time.monotonic() - started) * 1000.0
 
     logger.info(
-        "Broadcast %s action=%s filter=%s delivered=%d elapsed=%.1fms",
+        "Broadcast %s action=%s filter=%s enqueued=%d elapsed=%.1fms",
         broadcast_id,
         request.broadcast_action,
         target_filter,
@@ -196,45 +197,51 @@ async def broadcast_to_fleet(
     )
 
 
-async def _broadcast_tag_and_platform(
-    tag_uuid: uuid.UUID, platform: str, envelope: dict
+def _resolve_broadcast_targets(
+    db: Session, tag_uuid: Optional[uuid.UUID], platform: Optional[str]
+) -> list:
+    """Return the list of active Host.id values matching the requested
+    tag/platform filters.  ``None`` for both filters means "all active
+    hosts".  All filtering is one DB query — no in-memory iteration over
+    websocket connections, since broadcasts must reach agents that are
+    currently offline too (they pick the queued envelope up on reconnect).
+    """
+    query = db.query(models.Host.id).filter(models.Host.active.is_(True))
+    if tag_uuid is not None:
+        query = query.join(
+            models.HostTag, models.HostTag.host_id == models.Host.id
+        ).filter(models.HostTag.tag_id == tag_uuid)
+    if platform:
+        query = query.filter(models.Host.platform == platform)
+    return [row[0] for row in query.all()]
+
+
+def _enqueue_envelope_for_hosts(
+    db: Session, host_ids: list, envelope: Dict[str, Any]
 ) -> int:
-    """Helper: deliver to agents that satisfy BOTH a tag filter AND a
-    platform filter.  Resolves the tag's hostnames once, then iterates
-    active connections in memory and checks both predicates."""
-    from sqlalchemy.orm import sessionmaker  # local import
-    from backend.persistence import db as persistence_db
-
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=persistence_db.get_engine()
-    )
-    with session_local() as session:
-        tagged_host_ids = {
-            row[0]
-            for row in session.query(models.HostTag.host_id)
-            .filter(models.HostTag.tag_id == tag_uuid)
-            .all()
-        }
-        tagged_fqdns = {
-            str(host.fqdn).lower()
-            for host in session.query(models.Host)
-            .filter(models.Host.id.in_(tagged_host_ids))
-            .all()
-        }
-    if not tagged_fqdns:
-        return 0
-
-    delivered = 0
-    failed_agents = []
-    for agent_id, connection in connection_manager.active_connections.items():
-        if (connection.hostname or "").lower() not in tagged_fqdns:
-            continue
-        if connection.platform != platform:
-            continue
-        if await connection.send_message(envelope):
-            delivered += 1
-        else:
-            failed_agents.append(agent_id)
-    for aid in failed_agents:
-        connection_manager.disconnect(aid)
-    return delivered
+    """Enqueue one OUTBOUND row of ``envelope`` per host_id.  Returns the
+    number of rows actually persisted (a single failure does not abort
+    the rest of the fan-out)."""
+    enqueued = 0
+    for host_id in host_ids:
+        try:
+            queue_ops.enqueue_message(
+                message_type=MessageType.BROADCAST.value,
+                message_data=envelope,
+                direction=QueueDirection.OUTBOUND,
+                host_id=str(host_id),
+                db=db,
+            )
+            enqueued += 1
+        except Exception as enqueue_error:
+            logger.error(
+                "Failed to enqueue broadcast for host %s: %s",
+                host_id,
+                enqueue_error,
+            )
+    if enqueued:
+        # ``enqueue_message`` only flushes when given a session; commit is
+        # the caller's responsibility — without it the rows roll back when
+        # FastAPI's get_db() finalizes the request.
+        db.commit()
+    return enqueued

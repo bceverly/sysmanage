@@ -388,31 +388,29 @@ const HostDetail = () => { // NOSONAR
         }
     }, []);
 
-    // Set child type based on platform and fetch distributions when dialog opens
+    // Auto-detect child type based on platform — ONLY when the dialog
+    // was opened without an explicit type via openCreateDialogWithType.
+    // We must NOT clear ``explicitChildTypeRef.current`` here: in React
+    // 18 dev StrictMode the effect fires twice on mount/open, and on the
+    // second fire a cleared ref would let the auto-detect block overwrite
+    // the explicit choice (e.g. clicking "Create Container" on the LXD
+    // card and ending up with childType='kvm').  Leave the ref alone;
+    // it gets overwritten on the next openCreateDialogWithType call.
     useEffect(() => {
         if (createChildHostOpen && host) {
-            // If dialog was opened with an explicit type (e.g. from HypervisorStatusCard),
-            // respect that choice instead of auto-detecting from platform/virtualization
             if (explicitChildTypeRef.current) {
-                explicitChildTypeRef.current = null;
                 return;
             }
             const platform = host.platform || '';
             const isLinux = platform.toLowerCase().includes('linux');
             const isOpenBSD = platform.includes('OpenBSD');
             const isFreeBSD = platform.includes('FreeBSD');
-            // Determine child type based on platform and available virtualization:
-            // - FreeBSD -> bhyve
-            // - OpenBSD -> vmm
-            // - Linux -> kvm (if initialized) or lxd (fallback)
-            // - Windows -> wsl
             let childType = 'wsl';
             if (isFreeBSD) {
                 childType = 'bhyve';
             } else if (isOpenBSD) {
                 childType = 'vmm';
             } else if (isLinux) {
-                // Prefer KVM if initialized, otherwise use LXD
                 if (virtualizationStatus?.capabilities?.kvm?.initialized) {
                     childType = 'kvm';
                 } else {
@@ -422,7 +420,7 @@ const HostDetail = () => { // NOSONAR
             setChildHostFormData(prev => ({
                 ...prev,
                 childType,
-                distribution: '',  // Reset distribution when type changes
+                distribution: '',
             }));
             fetchDistributions(childType);
         }
@@ -646,11 +644,24 @@ const HostDetail = () => { // NOSONAR
         });
     }, [pluginTabs, licenseModules]);
 
-    // Build ordered tab definitions array
+    // Build ordered tab definitions array.  Plugin-registered tabs whose
+    // ``id`` collides with a hardcoded OSS tab are dropped — otherwise
+    // React warns about duplicate keys and BOTH tabs render their panel
+    // content on click.  Pro+ plugins that want to provide a richer
+    // version of an OSS tab should pick a distinct id (e.g. ``compliance-pro``).
     const tabDefinitions = useMemo(() => {
+        const HARDCODED_IDS = new Set([
+            'info', 'hardware', 'software', 'software-changes',
+            'third-party-repos', 'access', 'security', 'compliance',
+            'certificates', 'server-roles', 'child-hosts', 'ubuntu-pro',
+            'diagnostics',
+        ]);
+        const safePluginTabs = visiblePluginTabs.filter(
+            p => !HARDCODED_IDS.has(p.id),
+        );
         const tabs: Array<{ id: string; icon: React.ReactElement; label: string }> = [
             { id: 'info', icon: <InfoIcon />, label: t('hostDetail.infoTab', 'Info') },
-            ...visiblePluginTabs.filter(p => p.position === 'after-info').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
+            ...safePluginTabs.filter(p => p.position === 'after-info').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
             { id: 'hardware', icon: <MemoryIcon />, label: t('hostDetail.hardwareTab', 'Hardware') },
             { id: 'software', icon: <AppsIcon />, label: t('hostDetail.softwareTab', 'Software') },
             { id: 'software-changes', icon: <HistoryIcon />, label: t('hostDetail.softwareChangesTab', 'Software Changes') },
@@ -658,10 +669,10 @@ const HostDetail = () => { // NOSONAR
             { id: 'access', icon: <SecurityIcon />, label: t('hostDetail.accessTab', 'Access') },
             { id: 'security', icon: <ShieldIcon />, label: t('hostDetail.securityTab', 'Security') },
             { id: 'compliance', icon: <RuleIcon />, label: t('hostDetail.complianceTab', 'Compliance') },
-            ...visiblePluginTabs.filter(p => p.position === 'after-security').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
+            ...safePluginTabs.filter(p => p.position === 'after-security').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
             { id: 'certificates', icon: <CertificateIcon />, label: t('hostDetail.certificatesTab', 'Certificates') },
             { id: 'server-roles', icon: <AssignmentIcon />, label: t('hostDetail.serverRolesTab', 'Server Roles') },
-            ...visiblePluginTabs.filter(p => p.position === 'before-diagnostics').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
+            ...safePluginTabs.filter(p => p.position === 'before-diagnostics').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
             ...(supportsChildHosts() ? [{ id: 'child-hosts', icon: <ComputerIcon />, label: t('hostDetail.childHostsTab', 'Child Hosts') }] : []),
             ...((isUbuntu() && ubuntuProInfo?.available) ? [{ id: 'ubuntu-pro', icon: <VerifiedUserIcon />, label: t('hostDetail.ubuntuProTab', 'Ubuntu Pro') }] : []),
             { id: 'diagnostics', icon: <MedicalServicesIcon />, label: t('hostDetail.diagnosticsTab', 'Diagnostics') },
@@ -5531,14 +5542,23 @@ const HostDetail = () => { // NOSONAR
                 </Grid>
             )}
 
-            {/* Plugin tabs content */}
-            {visiblePluginTabs.map(pt => (
-                currentTabId === pt.id && hostId && (
-                    <Box key={pt.id} sx={{ p: 2 }}>
-                        <pt.component hostId={hostId} />
-                    </Box>
-                )
-            ))}
+            {/* Plugin tabs content.  Drop any whose id collides with a
+                hardcoded OSS tab so the OSS panel stays authoritative — see
+                the matching filter in tabDefinitions above. */}
+            {visiblePluginTabs
+                .filter(pt => !new Set([
+                    'info', 'hardware', 'software', 'software-changes',
+                    'third-party-repos', 'access', 'security', 'compliance',
+                    'certificates', 'server-roles', 'child-hosts', 'ubuntu-pro',
+                    'diagnostics',
+                ]).has(pt.id))
+                .map(pt => (
+                    currentTabId === pt.id && hostId && (
+                        <Box key={pt.id} sx={{ p: 2 }}>
+                            <pt.component hostId={hostId} />
+                        </Box>
+                    )
+                ))}
 
             {/* Compliance Tab (Phase 8.3) */}
             {currentTabId === 'compliance' && hostId && (
@@ -7981,34 +8001,24 @@ const HostDetail = () => { // NOSONAR
                             )}
                         </FormControl>
 
-                        {/* Container name field for LXD */}
-                        {childHostFormData.childType === 'lxd' && (
-                            <TextField
-                                fullWidth
-                                label={t('hostDetail.childHostContainerNameLabel', 'Container Name')}
-                                value={childHostFormData.containerName}
-                                onChange={(e) => setChildHostFormData({
-                                    ...childHostFormData,
-                                    containerName: e.target.value.toLowerCase().replaceAll(/[^a-z0-9-]/g, '')
-                                })}
-                                disabled={createChildHostLoading}
-                                sx={{ mb: 2 }}
-                                helperText={t('hostDetail.childHostContainerNameHelp', 'Name for the LXD container (lowercase, alphanumeric, hyphens)')}
-                            />
-                        )}
-
                         <TextField
                             fullWidth
                             label={t('hostDetail.childHostHostnameLabel', 'Hostname')}
                             value={childHostFormData.hostname}
                             onChange={(e) => {
                                 const newHostname = e.target.value;
-                                // For VMM, KVM, and bhyve, auto-compute vmName from short hostname
+                                // Auto-compute the short identifier (vmName for KVM/bhyve/VMM,
+                                // containerName for LXD) from the hostname's left label.
                                 const shortName = newHostname.split('.')[0].toLowerCase().replaceAll(/[^a-z0-9-]/g, '');
+                                const isVm = childHostFormData.childType === 'vmm'
+                                    || childHostFormData.childType === 'kvm'
+                                    || childHostFormData.childType === 'bhyve';
+                                const isLxd = childHostFormData.childType === 'lxd';
                                 setChildHostFormData({
                                     ...childHostFormData,
                                     hostname: newHostname,
-                                    vmName: (childHostFormData.childType === 'vmm' || childHostFormData.childType === 'kvm' || childHostFormData.childType === 'bhyve') ? shortName : childHostFormData.vmName
+                                    vmName: isVm ? shortName : childHostFormData.vmName,
+                                    containerName: isLxd ? shortName : childHostFormData.containerName,
                                 });
                             }}
                             disabled={createChildHostLoading}
@@ -8058,6 +8068,23 @@ const HostDetail = () => { // NOSONAR
                                     },
                                 }}
                                 helperText={t('hostDetail.childHostVmNameHelpReadonly', 'VM name is derived from the hostname')}
+                            />
+                        )}
+
+                        {/* Container name field for LXD - read-only, derived from hostname */}
+                        {childHostFormData.childType === 'lxd' && (
+                            <TextField
+                                fullWidth
+                                label={t('hostDetail.childHostContainerNameLabel', 'Container Name')}
+                                value={childHostFormData.containerName}
+                                disabled
+                                sx={{ mb: 2 }}
+                                slotProps={{
+                                    input: {
+                                        readOnly: true,
+                                    },
+                                }}
+                                helperText={t('hostDetail.childHostContainerNameHelpReadonly', 'Container name is derived from the hostname')}
                             />
                         )}
 

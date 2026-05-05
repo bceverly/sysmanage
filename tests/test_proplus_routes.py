@@ -252,6 +252,8 @@ class TestMountProplusRoutes:
             "firewall_orchestration_engine",
             "automation_engine",
             "fleet_engine",
+            "virtualization_engine",
+            "observability_engine",
         }
         assert set(results.keys()) == expected_keys
         assert all(v is False for v in results.values())
@@ -442,6 +444,8 @@ class TestStubsSkippedWhenModuleLoaded:
                 "firewall_orchestration_engine": True,
                 "automation_engine": True,
                 "fleet_engine": True,
+                "virtualization_engine": True,
+                "observability_engine": True,
             },
         )
         assert len(app.routes) == before

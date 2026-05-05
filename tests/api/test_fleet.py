@@ -502,14 +502,21 @@ class TestSystemCommands:
 class TestBroadcastCommand:
     """Test cases for broadcast commands."""
 
-    @patch("backend.api.fleet.connection_manager")
+    @patch("backend.api.fleet.queue_ops")
     def test_broadcast_command_success(
-        self, mock_connection_manager, client, auth_headers
+        self, mock_queue_ops, client, auth_headers, session
     ):
-        """Test successfully broadcasting command to all agents."""
-        mock_connection_manager.broadcast_to_all = AsyncMock(
-            return_value=3
-        )  # 3 agents received
+        """Broadcast enqueues one OUTBOUND row per active host (no direct
+        websocket fan-out); ``sent_to`` is the count of rows enqueued."""
+        from backend.persistence.models import Host
+        import uuid
+
+        # Three active hosts → expect three enqueues.
+        for fqdn in ("a.example.com", "b.example.com", "c.example.com"):
+            session.add(Host(id=uuid.uuid4(), fqdn=fqdn, active=True, platform="Linux"))
+        session.commit()
+
+        mock_queue_ops.enqueue_message = Mock()
 
         broadcast_data = {
             "command_type": "get_system_info",
@@ -526,6 +533,7 @@ class TestBroadcastCommand:
         assert data["status"] == "broadcast"
         assert data["sent_to"] == 3
         assert "broadcast to 3 agents" in data["message"]
+        assert mock_queue_ops.enqueue_message.call_count == 3
 
     def test_broadcast_command_missing_message(self, client, auth_headers):
         """Test broadcasting without message."""

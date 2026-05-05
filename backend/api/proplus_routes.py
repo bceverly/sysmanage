@@ -894,6 +894,150 @@ def mount_fleet_routes(app: FastAPI) -> bool:
         return False
 
 
+def _make_virtualization_audit_log_fn():
+    """Audit-log adapter for the virtualization engine."""
+    from backend.services.audit_service import (
+        ActionType,
+        AuditService,
+        EntityType,
+        Result,
+    )
+
+    def _log(action, entity_id, entity_name, description, current_user):
+        session_local = get_session_local()
+        with session_local() as session:
+            try:
+                AuditService.log(
+                    db=session,
+                    action_type=ActionType.EXECUTE,
+                    entity_type=EntityType.HOST,
+                    description=description,
+                    result=Result.SUCCESS,
+                    username=current_user,
+                    entity_id=entity_id,
+                    entity_name=entity_name,
+                )
+                session.commit()
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                logger.warning("Virtualization audit log failed: %s", exc)
+                session.rollback()
+
+    return _log
+
+
+def mount_virtualization_routes(app: FastAPI) -> bool:
+    """Mount virtualization routes from virtualization_engine if available."""
+    virtualization_engine = module_loader.get_module("virtualization_engine")
+    if virtualization_engine is None:
+        logger.debug(
+            "virtualization_engine module not loaded, skipping virtualization routes"
+        )
+        return False
+
+    module_info = virtualization_engine.get_module_info()
+    if not module_info.get("provides_routes", False):
+        logger.debug("virtualization_engine module does not provide routes")
+        return False
+
+    from backend.services.proplus_dispatch import enqueue_apply_plan
+
+    try:
+        with _cython_compat():
+            router = virtualization_engine.get_virtualization_router(
+                db_dependency=Depends(get_db),
+                auth_dependency=Depends(get_current_user),
+                feature_gate=_feature_dependency,
+                module_gate=_module_dependency,
+                models=models,
+                http_exception=HTTPException,
+                status_codes=status,
+                logger=logger,
+                dispatch_plan_fn=enqueue_apply_plan,
+                audit_log_fn=_make_virtualization_audit_log_fn(),
+            )
+            app.include_router(router, prefix="/api")
+        logger.info(
+            "Mounted virtualization routes from virtualization_engine v%s",
+            module_info.get("version", "unknown"),
+        )
+        return True
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.error("Failed to mount virtualization routes: %s", exc)
+        return False
+
+
+def _make_observability_audit_log_fn():
+    """Audit-log adapter for the observability engine."""
+    from backend.services.audit_service import (
+        ActionType,
+        AuditService,
+        EntityType,
+        Result,
+    )
+
+    def _log(action, entity_id, entity_name, description, current_user):
+        session_local = get_session_local()
+        with session_local() as session:
+            try:
+                AuditService.log(
+                    db=session,
+                    action_type=ActionType.EXECUTE,
+                    entity_type=EntityType.HOST,
+                    description=description,
+                    result=Result.SUCCESS,
+                    username=current_user,
+                    entity_id=entity_id,
+                    entity_name=entity_name,
+                )
+                session.commit()
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                logger.warning("Observability audit log failed: %s", exc)
+                session.rollback()
+
+    return _log
+
+
+def mount_observability_routes(app: FastAPI) -> bool:
+    """Mount observability routes from observability_engine if available."""
+    observability_engine = module_loader.get_module("observability_engine")
+    if observability_engine is None:
+        logger.debug(
+            "observability_engine module not loaded, skipping observability routes"
+        )
+        return False
+
+    module_info = observability_engine.get_module_info()
+    if not module_info.get("provides_routes", False):
+        logger.debug("observability_engine module does not provide routes")
+        return False
+
+    from backend.services.proplus_dispatch import enqueue_apply_plan
+
+    try:
+        with _cython_compat():
+            router = observability_engine.get_observability_router(
+                db_dependency=Depends(get_db),
+                auth_dependency=Depends(get_current_user),
+                feature_gate=_feature_dependency,
+                module_gate=_module_dependency,
+                models=models,
+                http_exception=HTTPException,
+                status_codes=status,
+                logger=logger,
+                dispatch_plan_fn=enqueue_apply_plan,
+                audit_log_fn=_make_observability_audit_log_fn(),
+            )
+            app.include_router(router, prefix="/api")
+        logger.info(
+            "Mounted observability routes from observability_engine v%s",
+            module_info.get("version", "unknown"),
+        )
+        return True
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.error("Failed to mount observability routes: %s", exc)
+        return False
+
+
 def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
     """
     Mount stub routes for Pro+ modules that weren't loaded.
@@ -1243,6 +1387,219 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
         stubs_mounted += 1
         logger.debug("Mounted fleet_engine stub routes")
 
+    if not results.get("virtualization_engine"):
+        from fastapi import APIRouter
+
+        router = APIRouter(prefix="/v1/virt", tags=["virtualization-stubs"])
+
+        @router.post("/kvm/{host_id}/{vm_name}/{action}")
+        async def virt_kvm_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            vm_name: str,
+            action: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/kvm/{host_id}/create")
+        async def virt_kvm_create_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/kvm/{host_id}/{vm_name}/delete")
+        async def virt_kvm_delete_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            vm_name: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/kvm/{host_id}/storage/download")
+        async def virt_kvm_storage_download_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/kvm/{host_id}/network/create")
+        async def virt_kvm_network_create_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/kvm/{host_id}/network/{name}/delete")
+        async def virt_kvm_network_delete_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            name: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/kvm/{host_id}/network/list")
+        async def virt_kvm_network_list_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/bhyve/{host_id}/create")
+        async def virt_bhyve_create_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/bhyve/{host_id}/{vm_name}/delete")
+        async def virt_bhyve_delete_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            vm_name: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/bhyve/{host_id}/zvol/create")
+        async def virt_bhyve_zvol_create_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/vmm/{host_id}/create")
+        async def virt_vmm_create_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/vmm/{host_id}/{vm_name}/delete")
+        async def virt_vmm_delete_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            vm_name: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/provision/{host_id}/{distro}")
+        async def virt_provision_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            distro: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/safe-reboot/{host_id}/prepare")
+        async def virt_safe_reboot_prepare_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/safe-reboot/{host_id}/{hypervisor}/restore")
+        async def virt_safe_reboot_restore_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            hypervisor: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/bhyve/{host_id}/{vm_name}/{action}")
+        async def virt_bhyve_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            vm_name: str,
+            action: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/vmm/{host_id}/{vm_name}/{action}")
+        async def virt_vmm_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            vm_name: str,
+            action: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        app.include_router(router, prefix="/api")
+        stubs_mounted += 1
+        logger.debug("Mounted virtualization_engine stub routes")
+
+    if not results.get("observability_engine"):
+        from fastapi import APIRouter
+
+        router = APIRouter(prefix="/v1/observability", tags=["observability-stubs"])
+
+        @router.post("/otel/{host_id}/status")
+        async def obs_otel_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/otel/{host_id}/deploy")
+        async def obs_otel_deploy_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/otel/{host_id}/remove")
+        async def obs_otel_remove_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/graylog/{host_id}/status")
+        async def obs_graylog_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/graylog/{host_id}/deploy")
+        async def obs_graylog_deploy_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/graylog/{host_id}/{platform}/remove")
+        async def obs_graylog_remove_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            platform: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/grafana/{host_id}/status")
+        async def obs_grafana_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/grafana/{host_id}/provision")
+        async def obs_grafana_provision_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/routing/{host_id}/apply")
+        async def obs_routing_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        app.include_router(router, prefix="/api")
+        stubs_mounted += 1
+        logger.debug("Mounted observability_engine stub routes")
+
     if stubs_mounted > 0:
         logger.info(
             "Mounted %d Pro+ stub route group(s) for unlicensed modules",
@@ -1276,6 +1633,8 @@ def mount_proplus_routes(app: FastAPI) -> dict:
         "firewall_orchestration_engine": mount_firewall_orchestration_routes(app),
         "automation_engine": mount_automation_routes(app),
         "fleet_engine": mount_fleet_routes(app),
+        "virtualization_engine": mount_virtualization_routes(app),
+        "observability_engine": mount_observability_routes(app),
     }
 
     mounted_count = sum(1 for v in results.values() if v)

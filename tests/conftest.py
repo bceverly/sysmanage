@@ -648,7 +648,18 @@ def connection_manager():
 # Async test helper
 def pytest_configure(config):
     """Configure pytest for async testing."""
+    import logging
     import sys
+
+    # Silence the chatty startup/route-registration narration during tests.
+    # Operational INFO from `backend.startup.*` is useful only at first
+    # boot of a real server; in pytest it just floods stderr with hundreds
+    # of "Adding X router" lines per worker.  Bumping `backend` to WARNING
+    # keeps real warnings/errors visible while suppressing the noise.
+    # Crank back up locally with: `pytest -o log_cli=true --log-cli-level=DEBUG`
+    logging.getLogger("backend").setLevel(logging.WARNING)
+    # httpx logs every test request at INFO; same treatment.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
     if sys.version_info >= (3, 7):
         # For Python 3.7+, use the built-in asyncio support

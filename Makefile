@@ -483,6 +483,23 @@ else
 		else \
 			echo "✓ All packaging build tools already installed"; \
 		fi; \
+		echo "[INFO] Checking for KVM host tooling (only used when running an agent on this host that manages KVM child hosts)..."; \
+		MISSING_KVM=""; \
+		(command -v genisoimage >/dev/null 2>&1 || command -v mkisofs >/dev/null 2>&1 || command -v xorrisofs >/dev/null 2>&1) || MISSING_KVM="$$MISSING_KVM genisoimage"; \
+		command -v qemu-img >/dev/null 2>&1 || MISSING_KVM="$$MISSING_KVM qemu-utils"; \
+		command -v virt-install >/dev/null 2>&1 || MISSING_KVM="$$MISSING_KVM virtinst"; \
+		command -v virsh >/dev/null 2>&1 || MISSING_KVM="$$MISSING_KVM libvirt-clients"; \
+		if [ -n "$$MISSING_KVM" ]; then \
+			echo "Missing KVM host tools:$$MISSING_KVM"; \
+			echo "These are required on agent hosts that the server dispatches"; \
+			echo "Phase 10.1 virtualization_engine create plans to.  Single-box"; \
+			echo "dev setups need them locally; pure-server hosts don't."; \
+			echo "Running: sudo apt-get install -y$$MISSING_KVM"; \
+			sudo apt-get install -y $$MISSING_KVM || \
+			echo "[WARNING] Could not install KVM host tools. Run manually: sudo apt-get install -y$$MISSING_KVM"; \
+		else \
+			echo "✓ All KVM host tools already installed"; \
+		fi; \
 		echo "[INFO] Checking for Snap build tools..."; \
 		if ! command -v snap >/dev/null 2>&1; then \
 			echo "snapd not found - installing..."; \

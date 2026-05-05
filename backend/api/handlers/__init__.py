@@ -50,6 +50,7 @@ from backend.api.handlers.software_package_handlers import (
     handle_commercial_antivirus_status_update,
     handle_firewall_status_update,
     handle_graylog_status_update,
+    handle_installation_complete,
     handle_package_collection,
     handle_package_updates_update,
     handle_software_update,
@@ -85,6 +86,7 @@ __all__ = [
     "handle_commercial_antivirus_status_update",
     "handle_firewall_status_update",
     "handle_graylog_status_update",
+    "handle_installation_complete",
     # Infrastructure handlers
     "handle_script_execution_result",
     "handle_reboot_status_update",

@@ -13,12 +13,19 @@ generic-deployment handler can run them.
 
 from __future__ import annotations
 
+import json
 import logging
 import threading
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db, models
+
+# Re-exported here under the legacy private name so the sister test module
+# ``test_proplus_dispatch_parsers`` doesn't have to chase the rename.
+from backend.services.proplus_capability_parser import (
+    parse_capability_probe_stdout as _parse_capability_probe_stdout,
+)
 from backend.websocket.messages import CommandType, Message, MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
@@ -58,6 +65,14 @@ def correlation_count() -> int:
         return len(_CORRELATIONS)
 
 
+def enqueue_apply_plan(host_id: str, plan: dict, timeout: int = 300) -> str:
+    """Public alias of ``_enqueue_apply_plan`` for cross-module use
+    (e.g., the Pro+ router-factory dispatch_plan_fn parameter).  The
+    internal private name is retained for the existing callers and
+    their test fixtures."""
+    return _enqueue_apply_plan(host_id, plan, timeout)
+
+
 def _enqueue_apply_plan(host_id: str, plan: dict, timeout: int = 300) -> str:
     """
     Wrap a deploy plan in an APPLY_DEPLOYMENT_PLAN message and queue it.
@@ -76,13 +91,55 @@ def _enqueue_apply_plan(host_id: str, plan: dict, timeout: int = 300) -> str:
     )
     session_local = db.get_session_local()
     with session_local() as session:
-        return _queue_ops.enqueue_message(
+        message_id = _queue_ops.enqueue_message(
             message_type="command",
             message_data=message.to_dict(),
             direction=QueueDirection.OUTBOUND,
             host_id=str(host_id),
             db=session,
         )
+        # When a session is provided to ``enqueue_message`` it only
+        # flushes; commit is the caller's responsibility.  Without this
+        # commit the queued row is rolled back when ``with`` exits and
+        # the message silently disappears.
+        session.commit()
+        return message_id
+
+
+def register_child_host_correlation(
+    message_id: str, child_id: str, action: str, host_id: str
+) -> None:
+    """Register an engine-path child host operation for result-routing.
+
+    Stored as a regular correlation with engine_name="child_host_op" so the
+    routing in ``route_proplus_command_result`` can dispatch it to the
+    HostChild updater.  ``action`` is encoded into ``primary_id`` as
+    ``"<action>:<child_id>"`` so the result handler knows whether this
+    was create / start / stop / restart / delete / update_agent.
+    """
+    _register_correlation(
+        message_id,
+        "child_host_op",
+        f"{action}:{child_id}",
+        host_id,
+    )
+
+
+def register_host_op_correlation(message_id: str, action: str, host_id: str) -> None:
+    """Register an engine-path parent-host operation (init/disable/probe).
+
+    Used for actions where there's no HostChild row to update directly —
+    e.g. KVM/bhyve/VMM/LXD init, virtualization capability probes.  On
+    completion the result handler can refresh the host's
+    ``virtualization_capabilities`` cache and emit an audit-style log
+    entry.
+    """
+    _register_correlation(
+        message_id,
+        "host_op",
+        action,
+        host_id,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -309,6 +366,474 @@ def _apply_engine_result(
         )
 
 
+def _outcome_error_text(outcome: Dict[str, Any], default: str) -> str:
+    """Return the most informative error text from an outcome dict, or ``default``."""
+    return outcome["error"] or outcome["stderr"] or default
+
+
+def _apply_child_host_delete_result(session, child, outcome: Dict[str, Any]) -> None:
+    """Engine delete completed: drop the row + cascade linked Host on success,
+    mark the row in error on failure."""
+    # pylint: disable=import-outside-toplevel
+    from backend.persistence.models import Host
+
+    if outcome["status"] == "succeeded":
+        # Cascade to linked Host row, mirroring the legacy flow in
+        # handle_child_host_delete_result.
+        linked_host_id = child.child_host_id
+        session.delete(child)
+        if linked_host_id:
+            linked = session.query(Host).filter(Host.id == linked_host_id).first()
+            if linked:
+                session.delete(linked)
+    else:
+        child.status = "error"
+        child.error_message = _outcome_error_text(outcome, "delete failed")
+
+
+def _apply_child_host_create_result(child, outcome: Dict[str, Any]) -> None:
+    """Engine create completed: status=running on success (record installed_at
+    if first time), status=error on failure."""
+    if outcome["status"] == "succeeded":
+        child.status = "running"
+        child.error_message = None
+        if not child.installed_at:
+            # pylint: disable=import-outside-toplevel
+            from datetime import datetime, timezone
+
+            child.installed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    else:
+        child.status = "error"
+        child.error_message = _outcome_error_text(outcome, "create failed")
+
+
+def _apply_child_host_lifecycle_result(
+    action: str, child, outcome: Dict[str, Any]
+) -> None:
+    """Engine start/stop/restart completed: update status, clear or set error."""
+    if outcome["status"] == "succeeded":
+        child.status = "stopped" if action == "stop" else "running"
+        child.error_message = None
+    else:
+        child.error_message = _outcome_error_text(outcome, f"{action} failed")
+
+
+def _apply_child_host_update_agent_result(child, outcome: Dict[str, Any]) -> None:
+    """Engine update_agent completed: no status change, just error_message."""
+    if outcome["status"] == "succeeded":
+        child.error_message = None
+    else:
+        child.error_message = _outcome_error_text(outcome, "update_agent failed")
+
+
+def _apply_child_host_op_result(
+    primary_id: str, host_id: str, outcome: Dict[str, Any]
+) -> None:
+    """Update the HostChild row for a completed engine-path child host op.
+
+    ``primary_id`` is ``"<action>:<child_id>"`` (see register_child_host_correlation).
+    ``host_id`` is included in log lines so an operator can correlate the
+    HostChild update with the originating parent host in audit/diagnostics.
+    Action drives what happens on success/failure:
+
+      * ``create`` — succeeded → status="running", clear error_message.
+                     failed    → status="error", error_message=<stderr/error>.
+      * ``delete`` — succeeded → row deleted (cascades linked Host).
+                     failed    → status="error", error_message set.
+      * ``start`` / ``stop`` / ``restart`` — succeeded → status="running"
+                                              / "stopped" / "running",
+                                              error_message cleared.
+      * ``update_agent`` — succeeded → no status change, just
+                                       error_message cleared.
+    """
+    if ":" not in primary_id:
+        logger.warning(
+            "Malformed child_host_op primary_id %s for host %s",
+            primary_id,
+            host_id,
+        )
+        return
+    action, child_id = primary_id.split(":", 1)
+
+    # pylint: disable=import-outside-toplevel
+    from backend.persistence import db as _db
+    from backend.persistence.models import HostChild
+
+    session_local = _db.get_session_local()
+    with session_local() as session:
+        child = session.query(HostChild).filter(HostChild.id == child_id).first()
+        if child is None:
+            # Child may have been deleted by another path (e.g. listing
+            # reconciliation) before this result landed.  Nothing to do.
+            return
+
+        if action == "delete":
+            _apply_child_host_delete_result(session, child, outcome)
+        elif action == "create":
+            _apply_child_host_create_result(child, outcome)
+        elif action in ("start", "stop", "restart"):
+            _apply_child_host_lifecycle_result(action, child, outcome)
+        elif action == "update_agent":
+            _apply_child_host_update_agent_result(child, outcome)
+        else:
+            logger.warning(
+                "Unknown child_host_op action %s for host %s", action, host_id
+            )
+            return
+
+        session.commit()
+
+
+# Capability-probe parsing lives in ``proplus_capability_parser`` (imported
+# at the top of this module under the legacy ``_parse_capability_probe_stdout``
+# name).  Splitting it out keeps this file under pylint's max-module-lines.
+
+
+def _normalize_status(state: str) -> str:
+    """Map per-hypervisor state text to the canonical status the legacy
+    handler uses (running / stopped / paused / unknown)."""
+    s = state.lower().strip()
+    if "run" in s or s in ("locked", "active"):
+        return "running"
+    if "stop" in s or "shut off" in s or "off" in s or s == "exited":
+        return "stopped"
+    if "paus" in s or "frozen" in s:
+        return "paused"
+    if not s:
+        return "unknown"
+    return s
+
+
+def _split_section_blocks(stdout: str) -> Dict[str, str]:
+    """Split sectioned engine plan stdout into ``{section_name: block_text}``."""
+    blocks: Dict[str, str] = {}
+    current = None
+    buf: list = []
+    for raw in stdout.splitlines():
+        if raw.startswith("===") and raw.rstrip().endswith("==="):
+            if current is not None:
+                blocks[current] = "\n".join(buf)
+            current = raw.strip("=").strip().lower()
+            buf = []
+            continue
+        if current is not None:
+            buf.append(raw)
+    if current is not None:
+        blocks[current] = "\n".join(buf)
+    return blocks
+
+
+def _parse_lxd_section(text: str) -> list:
+    """LXD section is JSON from ``lxc list --format json``."""
+    text = text.strip()
+    if not text:
+        return []
+    try:
+        data = json.loads(text)
+    except (json.JSONDecodeError, TypeError):
+        return []
+    out = []
+    for item in data:
+        name = item.get("name") or ""
+        if not name:
+            continue
+        out.append(
+            {
+                "child_name": name,
+                "child_type": "lxd",
+                "status": _normalize_status(item.get("status") or ""),
+                "hostname": name,
+                "type": item.get("type") or "container",
+                "architecture": item.get("architecture"),
+            }
+        )
+    return out
+
+
+def _parse_kvm_section(text: str) -> list:
+    """``virsh list --all`` returns a table:
+
+     Id   Name      State
+    -----------------------
+     1    name1     running
+     -    name2     shut off
+    """
+    out = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("Id") or line.startswith("---"):
+            continue
+        # Split into at most 3 fields: Id (number or '-'), Name, State.
+        parts = line.split(None, 2)
+        if len(parts) < 3:
+            continue
+        out.append(
+            {
+                "child_name": parts[1],
+                "child_type": "kvm",
+                "status": _normalize_status(parts[2]),
+            }
+        )
+    return out
+
+
+def _parse_bhyve_section(text: str) -> list:
+    """``vm list`` table:
+
+    NAME  DATASTORE  LOADER  CPU  MEMORY  VNC  AUTO  STATE
+    myvm  default    uefi    2    2G      -    Yes   Running (12345)
+    """
+    out = []
+    seen_header = False
+    for line in text.splitlines():
+        s = line.rstrip()
+        if not s.strip():
+            continue
+        if not seen_header:
+            if s.lstrip().startswith("NAME"):
+                seen_header = True
+            continue
+        parts = s.split()
+        if not parts:
+            continue
+        # State is the trailing column(s); take the last 1–2 tokens that
+        # form a recognizable state word.
+        state = parts[-1] if parts else ""
+        # vm-bhyve emits "Running (PID)" — the (PID) is parts[-1] if present.
+        if state.startswith("(") and len(parts) >= 2:
+            state = parts[-2]
+        out.append(
+            {
+                "child_name": parts[0],
+                "child_type": "bhyve",
+                "status": _normalize_status(state),
+            }
+        )
+    return out
+
+
+def _parse_vmm_section(text: str) -> list:
+    """``vmctl status`` table:
+
+    ID   PID VCPUS  MAXMEM  CURMEM     TTY        OWNER NAME
+     1 12345     2   2.0G   1.0G    /dev/ttyp0     root  myvm
+    """
+    out = []
+    seen_header = False
+    for line in text.splitlines():
+        s = line.rstrip()
+        if not s.strip():
+            continue
+        if not seen_header:
+            if s.lstrip().startswith("ID"):
+                seen_header = True
+            continue
+        parts = s.split()
+        if len(parts) < 2:
+            continue
+        # NAME is the last column; presence in vmctl status implies running.
+        name = parts[-1]
+        out.append(
+            {
+                "child_name": name,
+                "child_type": "vmm",
+                "status": "running",
+            }
+        )
+    return out
+
+
+def _parse_wsl_section(text: str) -> list:
+    """``wsl --list --verbose`` output (UTF-16LE on Windows; agent decodes
+    before placing into stdout):
+
+          NAME            STATE           VERSION
+        * Ubuntu          Running         2
+          Ubuntu-22.04    Stopped         2
+    """
+    out = []
+    seen_header = False
+    for line in text.splitlines():
+        # WSL output may have BOM / leading whitespace; normalize.
+        s = line.strip("﻿").rstrip()
+        if not s.strip():
+            continue
+        if not seen_header:
+            if "NAME" in s and "STATE" in s:
+                seen_header = True
+            continue
+        # Strip a leading '*' marker for the default distro
+        if s.lstrip().startswith("*"):
+            s = s.lstrip().lstrip("*").lstrip()
+        parts = s.split()
+        if len(parts) < 2:
+            continue
+        out.append(
+            {
+                "child_name": parts[0],
+                "child_type": "wsl",
+                "status": _normalize_status(parts[1]),
+            }
+        )
+    return out
+
+
+def _parse_list_child_hosts_stdout(stdout: str) -> list:
+    """Parse the sectioned ``build_list_child_hosts_plan`` output into the
+    same ``child_hosts`` list shape ``handle_child_hosts_list_update``
+    consumes."""
+    blocks = _split_section_blocks(stdout)
+    children: list = []
+    children.extend(_parse_lxd_section(blocks.get("lxd", "")))
+    children.extend(_parse_kvm_section(blocks.get("kvm", "")))
+    children.extend(_parse_bhyve_section(blocks.get("bhyve", "")))
+    children.extend(_parse_vmm_section(blocks.get("vmm", "")))
+    children.extend(_parse_wsl_section(blocks.get("wsl", "")))
+    return children
+
+
+def _apply_list_child_hosts_result(host_id: str, outcome: Dict[str, Any]) -> None:
+    """Reuse the legacy ``handle_child_hosts_list_update`` reconciler.
+
+    Parses the sectioned engine plan stdout into the ``child_hosts``
+    array shape the legacy handler expects, then calls it with a stub
+    connection so the same row-by-row reconciliation runs (insert new,
+    update existing, mark missing as stopped, etc.).
+    """
+    children = _parse_list_child_hosts_stdout(outcome.get("stdout") or "")
+
+    # pylint: disable=import-outside-toplevel
+    import asyncio
+
+    from backend.api.handlers.child_host.listing import (
+        handle_child_hosts_list_update,
+    )
+    from backend.persistence import db as _db
+
+    # Synthesize what the legacy handler expects.
+    fake_message = {
+        "success": True,
+        "result": {
+            "success": True,
+            "child_hosts": children,
+            "count": len(children),
+        },
+    }
+
+    class _StubConnection:  # pylint: disable=too-few-public-methods
+        host_id = ""
+
+    stub = _StubConnection()
+    stub.host_id = host_id
+
+    session_local = _db.get_session_local()
+    with session_local() as session:
+        try:
+            asyncio.run(handle_child_hosts_list_update(session, stub, fake_message))
+        except RuntimeError:
+            # Already inside a running event loop — schedule on a new loop.
+            loop = asyncio.new_event_loop()
+            try:
+                loop.run_until_complete(
+                    handle_child_hosts_list_update(session, stub, fake_message)
+                )
+            finally:
+                loop.close()
+        except Exception as exc:
+            logger.warning(
+                "Failed to apply list_child_hosts result for host %s: %s",
+                host_id,
+                exc,
+            )
+
+
+def _apply_capability_probe_result(host_id: str, outcome: Dict[str, Any]) -> None:
+    """Persist the parsed capability probe result onto the Host row."""
+    parsed = _parse_capability_probe_stdout(outcome.get("stdout") or "")
+
+    # pylint: disable=import-outside-toplevel
+    from backend.persistence import db as _db
+    from backend.persistence.models import Host
+
+    session_local = _db.get_session_local()
+    with session_local() as session:
+        host = session.query(Host).filter(Host.id == host_id).first()
+        if host is None:
+            return
+        host.virtualization_capabilities = json.dumps(parsed["capabilities"])
+        host.virtualization_types = json.dumps(parsed["supported_types"])
+        session.commit()
+
+
+def _apply_host_op_result(action: str, host_id: str, outcome: Dict[str, Any]) -> None:
+    """Handle completion of a parent-host engine plan (init/disable/probe).
+
+    On capability probes, parse the sectioned stdout and persist
+    directly to ``host.virtualization_capabilities``.  On init/disable/
+    modules, fire a follow-up capability probe (which lands back here
+    on the probe branch).
+    """
+    if outcome["status"] != "succeeded":
+        logger.info(
+            "Host-op %s failed for host %s: %s",
+            action,
+            host_id,
+            outcome["error"] or outcome["stderr"],
+        )
+        return
+
+    # The capability probe's stdout IS the data — parse and persist directly.
+    if action == "check_virtualization_support":
+        try:
+            _apply_capability_probe_result(host_id, outcome)
+        except Exception as exc:
+            logger.warning(
+                "Failed to apply capability probe result for host %s: %s",
+                host_id,
+                exc,
+            )
+        return
+
+    # The list_child_hosts probe parses sectioned stdout into the same
+    # shape the legacy handler consumes, then runs the reconciler.
+    if action == "list_child_hosts":
+        try:
+            _apply_list_child_hosts_result(host_id, outcome)
+        except Exception as exc:
+            logger.warning(
+                "Failed to apply list_child_hosts result for host %s: %s",
+                host_id,
+                exc,
+            )
+        return
+
+    # For init / enable / disable / modules — fire a follow-up probe.
+    if action.startswith("init_") or action in (
+        "enable_kvm_modules",
+        "disable_kvm_modules",
+        "disable_bhyve",
+        "enable_wsl",
+    ):
+        # pylint: disable=import-outside-toplevel
+        from backend.api.handlers.child_host.virtualization_helpers import (
+            queue_virtualization_check,
+        )
+        from backend.persistence import db as _db
+
+        session_local = _db.get_session_local()
+        with session_local() as session:
+            try:
+                queue_virtualization_check(session, host_id)
+                session.commit()
+            except Exception as exc:
+                logger.warning(
+                    "Failed to queue follow-up capability check after %s on %s: %s",
+                    action,
+                    host_id,
+                    exc,
+                )
+
+
 def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
     """
     Route a command_result message to the right Pro+ engine, if it
@@ -329,6 +854,35 @@ def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
         return False
 
     engine_name, primary_id, host_id = correlation
+    outcome = _extract_command_outcome(result_data)
+
+    # Child-host engine-path operations: update the HostChild row directly.
+    if engine_name == "child_host_op":
+        try:
+            _apply_child_host_op_result(primary_id, host_id, outcome)
+        except Exception as exc:
+            logger.warning(
+                "Failed to apply child_host_op result for %s on host %s: %s",
+                primary_id,
+                host_id,
+                exc,
+            )
+        return True
+
+    # Parent-host engine-path operations (init/disable/etc.).
+    if engine_name == "host_op":
+        try:
+            _apply_host_op_result(primary_id, host_id, outcome)
+        except Exception as exc:
+            logger.warning(
+                "Failed to apply host_op result for %s on host %s: %s",
+                primary_id,
+                host_id,
+                exc,
+            )
+        return True
+
+    # Existing engines (automation_engine, fleet_engine).
     engine = module_loader.get_module(engine_name)
     if engine is None:
         logger.warning(
@@ -339,7 +893,6 @@ def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
         )
         return True
 
-    outcome = _extract_command_outcome(result_data)
     try:
         _apply_engine_result(engine, engine_name, primary_id, host_id, outcome)
     except Exception as exc:

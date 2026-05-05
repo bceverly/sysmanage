@@ -3,6 +3,8 @@ Virtualization enable/initialize API endpoints.
 Handles enabling and initializing virtualization platforms (WSL, LXD, VMM, KVM).
 """
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import sessionmaker
 
@@ -38,6 +40,85 @@ def _check_container_module():
                 "Please upgrade to access this feature."
             ),
         )
+
+
+# Per-action timeout (seconds) for the engine apply_deployment_plan envelope.
+# The plan itself carries per-command timeouts; this is the outer ceiling.
+# Some init plans (KVM apt-get + libvirt install) can take a couple of
+# minutes — give them headroom.
+_INIT_ENGINE_TIMEOUT = 1500
+
+
+def _try_init_plan_dispatch(action: str, host_id: str) -> bool:
+    """Dispatch an init/enable/disable action via a Pro+ engine plan.
+
+    Maps server actions to plan-builders:
+
+      virtualization_engine
+        ``init_kvm``             → build_kvm_init_plan
+        ``enable_kvm_modules``   → build_kvm_modules_enable_plan
+        ``disable_kvm_modules``  → build_kvm_modules_disable_plan
+        ``init_bhyve``           → build_bhyve_init_plan
+        ``disable_bhyve``        → build_bhyve_disable_plan
+        ``init_vmm``             → build_vmm_init_plan
+      container_engine
+        ``init_lxd``             → build_lxd_init_plan
+
+    Returns True when the plan is queued (caller skips legacy
+    fallback), False when the engine isn't loaded or the matching
+    builder isn't present (caller falls through).
+    """
+    # Action → (engine_name, builder_name) mapping
+    routing = {
+        "init_kvm": ("virtualization_engine", "build_kvm_init_plan"),
+        "enable_kvm_modules": (
+            "virtualization_engine",
+            "build_kvm_modules_enable_plan",
+        ),
+        "disable_kvm_modules": (
+            "virtualization_engine",
+            "build_kvm_modules_disable_plan",
+        ),
+        "init_bhyve": ("virtualization_engine", "build_bhyve_init_plan"),
+        "disable_bhyve": ("virtualization_engine", "build_bhyve_disable_plan"),
+        "init_vmm": ("virtualization_engine", "build_vmm_init_plan"),
+        "init_lxd": ("container_engine", "build_lxd_init_plan"),
+        "enable_wsl": ("container_engine", "build_wsl_enable_plan"),
+    }
+    target = routing.get(action)
+    if target is None:
+        return False
+    engine_name, builder_name = target
+    engine = module_loader.get_module(engine_name)
+    if engine is None:
+        return False
+    builder = getattr(engine, builder_name, None)
+    if builder is None:
+        return False
+
+    try:
+        plan = builder()
+
+        # pylint: disable=import-outside-toplevel
+        from backend.services.proplus_dispatch import (
+            enqueue_apply_plan,
+            register_host_op_correlation,
+        )
+
+        message_id = enqueue_apply_plan(
+            host_id=str(host_id), plan=plan, timeout=_INIT_ENGINE_TIMEOUT
+        )
+        register_host_op_correlation(message_id, action, str(host_id))
+        return True
+    except Exception as exc:  # nosec B110  pylint: disable=broad-exception-caught
+        logging.getLogger(__name__).warning(
+            "Init plan path failed for action=%s host=%s; falling back to "
+            "legacy WS dispatch: %s",
+            action,
+            host_id,
+            exc,
+        )
+        return False
 
 
 @router.post(
@@ -80,18 +161,19 @@ async def enable_wsl(
                 ),
             )
 
-        # Queue a command to enable WSL
-        command_message = create_command_message(
-            command_type="enable_wsl", parameters={}
-        )
+        if not _try_init_plan_dispatch("enable_wsl", host_id):
+            # LEGACY: superseded by container_engine.build_wsl_enable_plan.
+            command_message = create_command_message(
+                command_type="enable_wsl", parameters={}
+            )
 
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+            queue_ops.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                db=session,
+            )
 
         # Log the action
         audit_log(
@@ -156,18 +238,19 @@ async def initialize_lxd(
                 ),
             )
 
-        # Queue a command to initialize LXD
-        command_message = create_command_message(
-            command_type="initialize_lxd", parameters={}
-        )
+        if not _try_init_plan_dispatch("init_lxd", host_id):
+            # LEGACY: superseded by container_engine.build_lxd_init_plan.
+            command_message = create_command_message(
+                command_type="initialize_lxd", parameters={}
+            )
 
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+            queue_ops.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                db=session,
+            )
 
         # Log the action
         audit_log(
@@ -232,18 +315,19 @@ async def initialize_vmm(
                 ),
             )
 
-        # Queue a command to initialize VMM
-        command_message = create_command_message(
-            command_type="initialize_vmm", parameters={}
-        )
+        if not _try_init_plan_dispatch("init_vmm", host_id):
+            # LEGACY: superseded by virtualization_engine.build_vmm_init_plan.
+            command_message = create_command_message(
+                command_type="initialize_vmm", parameters={}
+            )
 
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+            queue_ops.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                db=session,
+            )
 
         # Log the action
         audit_log(
@@ -309,18 +393,20 @@ async def initialize_kvm(
                 ),
             )
 
-        # Queue a command to initialize KVM
-        command_message = create_command_message(
-            command_type="initialize_kvm", parameters={}
-        )
+        if not _try_init_plan_dispatch("init_kvm", host_id):
+            # LEGACY: superseded by virtualization_engine.build_kvm_init_plan.
+            # Kept as fallback when the engine module isn't loaded.
+            command_message = create_command_message(
+                command_type="initialize_kvm", parameters={}
+            )
 
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+            queue_ops.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                db=session,
+            )
 
         # Log the action
         audit_log(
@@ -387,18 +473,19 @@ async def initialize_bhyve(
                 ),
             )
 
-        # Queue a command to initialize bhyve
-        command_message = create_command_message(
-            command_type="initialize_bhyve", parameters={}
-        )
+        if not _try_init_plan_dispatch("init_bhyve", host_id):
+            # LEGACY: superseded by virtualization_engine.build_bhyve_init_plan.
+            command_message = create_command_message(
+                command_type="initialize_bhyve", parameters={}
+            )
 
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+            queue_ops.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                db=session,
+            )
 
         # Log the action
         audit_log(
@@ -464,18 +551,19 @@ async def disable_bhyve(
                 detail=_("Agent must be running with root privileges to disable bhyve"),
             )
 
-        # Queue a command to disable bhyve
-        command_message = create_command_message(
-            command_type="disable_bhyve", parameters={}
-        )
+        if not _try_init_plan_dispatch("disable_bhyve", host_id):
+            # LEGACY: superseded by virtualization_engine.build_bhyve_disable_plan.
+            command_message = create_command_message(
+                command_type="disable_bhyve", parameters={}
+            )
 
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+            queue_ops.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                db=session,
+            )
 
         # Log the action
         audit_log(
@@ -540,18 +628,19 @@ async def enable_kvm_modules(
                 ),
             )
 
-        # Queue a command to enable KVM modules
-        command_message = create_command_message(
-            command_type="enable_kvm_modules", parameters={}
-        )
+        if not _try_init_plan_dispatch("enable_kvm_modules", host_id):
+            # LEGACY: superseded by build_kvm_modules_enable_plan.
+            command_message = create_command_message(
+                command_type="enable_kvm_modules", parameters={}
+            )
 
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+            queue_ops.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                db=session,
+            )
 
         # Log the action
         audit_log(
@@ -617,18 +706,19 @@ async def disable_kvm_modules(
                 ),
             )
 
-        # Queue a command to disable KVM modules
-        command_message = create_command_message(
-            command_type="disable_kvm_modules", parameters={}
-        )
+        if not _try_init_plan_dispatch("disable_kvm_modules", host_id):
+            # LEGACY: superseded by build_kvm_modules_disable_plan.
+            command_message = create_command_message(
+                command_type="disable_kvm_modules", parameters={}
+            )
 
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+            queue_ops.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                db=session,
+            )
 
         # Log the action
         audit_log(
@@ -650,6 +740,47 @@ async def disable_kvm_modules(
                 "kernel modules via modprobe -r. This will fail if any VMs are running."
             ),
         }
+
+
+def _try_kvm_network_plan_path(host_id, request) -> bool:
+    """Build + enqueue a KVM network apply_deployment_plan, or return False
+    so the caller falls back to the legacy WS dispatch.  Caller has already
+    validated request.mode is one of ('nat', 'bridged', 'bridge') and that
+    bridged mode has request.bridge set."""
+    virt_engine = module_loader.get_module("virtualization_engine")
+    builder = (
+        getattr(virt_engine, "build_kvm_network_create_plan", None)
+        if virt_engine
+        else None
+    )
+    net_cfg_cls = getattr(virt_engine, "NetworkConfig", None) if virt_engine else None
+    if not (builder and net_cfg_cls and request.mode in ("nat", "bridged", "bridge")):
+        return False
+    try:
+        forward_mode = "bridge" if request.mode in ("bridged", "bridge") else "nat"
+        cfg_kwargs = {
+            "name": request.network_name or "default",
+            "forward_mode": forward_mode,
+        }
+        if forward_mode == "bridge":
+            cfg_kwargs["bridge_name"] = request.bridge or ""
+        plan = builder(net_cfg_cls(**cfg_kwargs))
+        # pylint: disable=import-outside-toplevel
+        from backend.services.proplus_dispatch import enqueue_apply_plan
+
+        enqueue_apply_plan(
+            host_id=str(host_id),
+            plan=plan,
+            timeout=_INIT_ENGINE_TIMEOUT,
+        )
+        return True
+    except Exception as exc:  # nosec B110
+        logging.getLogger(__name__).warning(
+            "KVM net plan path failed for host %s; legacy WS: %s",
+            host_id,
+            exc,
+        )
+        return False
 
 
 @router.post(
@@ -703,26 +834,36 @@ async def configure_kvm_networking(
                 ),
             )
 
-        # Queue a command to configure KVM networking
-        parameters = {
-            "mode": request.mode,
-        }
-        if request.network_name:
-            parameters["network_name"] = request.network_name
-        if request.bridge:
-            parameters["bridge"] = request.bridge
+        # Both NAT and bridged map onto build_kvm_network_create_plan.
+        # Bridged uses libvirt's bridge type, which requires the bridge
+        # interface to exist on the host (operator responsibility — host
+        # OS-level bridge persistence in NetworkManager / netplan /
+        # ifupdown is intentionally out of scope of the libvirt network
+        # definition).
+        used_plan_path = _try_kvm_network_plan_path(host_id, request)
 
-        command_message = create_command_message(
-            command_type="setup_kvm_networking", parameters=parameters
-        )
+        if not used_plan_path:
+            # LEGACY: superseded by build_kvm_network_create_plan for NAT
+            # mode; bridged mode still routes here pending engine support.
+            parameters = {
+                "mode": request.mode,
+            }
+            if request.network_name:
+                parameters["network_name"] = request.network_name
+            if request.bridge:
+                parameters["bridge"] = request.bridge
 
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+            command_message = create_command_message(
+                command_type="setup_kvm_networking", parameters=parameters
+            )
+
+            queue_ops.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                db=session,
+            )
 
         # Log the action
         audit_log(
@@ -779,18 +920,41 @@ async def list_kvm_networks(
                 detail=_("KVM networks are only available on Linux hosts"),
             )
 
-        # Queue a command to list KVM networks
-        command_message = create_command_message(
-            command_type="list_kvm_networks", parameters={}
+        used_plan_path = False
+        virt_engine = module_loader.get_module("virtualization_engine")
+        list_builder = (
+            getattr(virt_engine, "build_kvm_network_list_plan", None)
+            if virt_engine
+            else None
         )
+        if list_builder is not None:
+            try:
+                plan = list_builder()
+                # pylint: disable=import-outside-toplevel
+                from backend.services.proplus_dispatch import enqueue_apply_plan
 
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+                enqueue_apply_plan(host_id=str(host_id), plan=plan, timeout=60)
+                used_plan_path = True
+            except Exception as exc:  # nosec B110
+                logging.getLogger(__name__).warning(
+                    "KVM net list plan path failed for host %s; legacy WS: %s",
+                    host_id,
+                    exc,
+                )
+
+        if not used_plan_path:
+            # LEGACY: superseded by build_kvm_network_list_plan.
+            command_message = create_command_message(
+                command_type="list_kvm_networks", parameters={}
+            )
+
+            queue_ops.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                db=session,
+            )
 
         session.commit()
 

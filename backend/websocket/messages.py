@@ -41,6 +41,10 @@ class MessageType(str, Enum):
     FIREWALL_STATUS_UPDATE = "firewall_status_update"
     GRAYLOG_STATUS_UPDATE = "graylog_status_update"
     HOSTNAME_CHANGED = "hostname_changed"
+    # Agent reports completion of a server-initiated package install/uninstall.
+    # Replaces the legacy ``POST /agent/installation-complete`` HTTP path so the
+    # report is queued + delivered through the standard inbound pipeline.
+    INSTALLATION_COMPLETE = "installation_complete"
 
     # Generic deployment responses
     FILE_DEPLOYMENT_RESULT = "file_deployment_result"

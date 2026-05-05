@@ -87,7 +87,38 @@ def get_host_or_error(
 
 
 def queue_virtualization_check(db: Session, host_id: str) -> None:
-    """Queue a virtualization support check command for a host."""
+    """Queue a virtualization support check for a host.
+
+    Tries the container_engine apply_deployment_plan path first; falls
+    back to the legacy ``check_virtualization_support`` command_type if
+    the engine isn't loaded.
+    """
+    # Engine path
+    from backend.licensing.module_loader import module_loader
+
+    container_engine = module_loader.get_module("container_engine")
+    builder = (
+        getattr(container_engine, "build_check_virtualization_support_plan", None)
+        if container_engine
+        else None
+    )
+    if builder is not None:
+        try:
+            plan = builder()
+            from backend.services.proplus_dispatch import (
+                enqueue_apply_plan,
+                register_host_op_correlation,
+            )
+
+            msg_id = enqueue_apply_plan(host_id=str(host_id), plan=plan, timeout=60)
+            register_host_op_correlation(
+                msg_id, "check_virtualization_support", str(host_id)
+            )
+            return
+        except Exception:  # nosec B110
+            pass
+
+    # LEGACY fallback
     from backend.websocket.messages import create_command_message
     from backend.websocket.queue_enums import QueueDirection
     from backend.websocket.queue_operations import QueueOperations

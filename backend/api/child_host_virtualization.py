@@ -8,6 +8,8 @@ This module is the main router that includes sub-routers for:
 """
 
 import json
+import logging
+import secrets
 import uuid
 from datetime import datetime, timezone
 
@@ -15,6 +17,7 @@ import bcrypt
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import sessionmaker
 
+from backend.api.child_host_creation_dispatch import try_plan_based_creation
 from backend.api.child_host_models import CreateWslChildHostRequest
 from backend.api.child_host_utils import (
     audit_log,
@@ -197,6 +200,51 @@ def _add_vmm_params(params, request):
     )
 
 
+def _detect_autoinstall_mode(distribution):
+    """Determine which engine autoinstall mode applies to a distribution.
+
+    Heuristic: if the install_identifier is an .iso (vs .qcow2/.raw),
+    pick the per-distro autoinstall flow.  Otherwise leave empty to
+    fall through to the cloud-init runcmd path.
+    """
+    if not distribution or not distribution.install_identifier:
+        return ""
+    install_id = distribution.install_identifier.lower()
+    if not install_id.endswith(".iso"):
+        return ""
+    name = (distribution.distribution_name or "").lower()
+    if "debian" in name:
+        return "preseed"
+    if "ubuntu" in name:
+        return "ubuntu_autoinstall"
+    if "alpine" in name:
+        return "alpine_apkovl"
+    return ""
+
+
+def _request_attr(request, name: str) -> str:
+    """Safely read an optional string attr off the request, defaulting to ''."""
+    return getattr(request, name, "") or ""
+
+
+def _populate_autoinstall_params(params, request, distribution) -> None:
+    """Forward autoinstall-mode + ISO URL + network triple defaults.
+
+    Only fires when the distribution's ``install_identifier`` looks like an
+    .iso (Debian netinst / Ubuntu Server / Alpine).  Network triple
+    defaults are pulled off the request when present; the engine fills in
+    its own fallbacks otherwise.
+    """
+    autoinstall_mode = _detect_autoinstall_mode(distribution)
+    if not autoinstall_mode:
+        return
+    params["autoinstall_mode"] = autoinstall_mode
+    params["install_iso_url"] = distribution.install_identifier
+    params.setdefault("vm_ip", _request_attr(request, "vm_ip"))
+    params.setdefault("gateway_ip", _request_attr(request, "gateway_ip"))
+    params.setdefault("dns_server", _request_attr(request, "dns_server"))
+
+
 def _add_cloud_vm_params(params, request, distribution, mem, disk, cpus):
     """Add cloud VM parameters for KVM/bhyve."""
     params["vm_name"] = request.vm_name
@@ -206,6 +254,14 @@ def _add_cloud_vm_params(params, request, distribution, mem, disk, cpus):
     cloud_image_url = _get_cloud_image_url(distribution)
     if cloud_image_url:
         params["cloud_image_url"] = cloud_image_url
+    # The Pro+ virtualization_engine cloud-init renderer branches on the
+    # distribution string (FreeBSD vs Linux) to pick shell, package
+    # names, and service-control commands.  Forward the human-readable
+    # distribution name so it can detect FreeBSD/etc.
+    if distribution and distribution.distribution_name:
+        params["distribution_label"] = distribution.distribution_name
+
+    _populate_autoinstall_params(params, request, distribution)
 
 
 def _build_command_params(
@@ -246,38 +302,6 @@ def _build_command_params(
         params["auto_approve_token"] = auto_approve_token
 
     return params
-
-
-def _try_plan_based_creation(request, command_params, host_id, session):
-    """Attempt plan-based creation for LXD/WSL via container_engine module.
-
-    Returns True if plan-based creation was used, False otherwise.
-    """
-    if request.child_type not in ("lxd", "wsl"):
-        return False
-
-    try:
-        container_engine = module_loader.get_module("container_engine")
-        if container_engine is None:
-            return False
-
-        service_cls = getattr(container_engine, "ContainerEngineServiceImpl", None)
-        if not service_cls or not hasattr(service_cls, "create_container_with_plan"):
-            return False
-
-        import logging as _logging
-
-        _ce_logger = _logging.getLogger("container_engine")
-        service = service_cls(db=session, models=models, logger=_ce_logger)
-        steps = service.create_container_with_plan(
-            child_type=request.child_type,
-            params=command_params,
-            host_id=host_id,
-            db_session=session,
-        )
-        return steps is not None
-    except Exception:  # nosec B110
-        return False
 
 
 @router.post(
@@ -401,7 +425,7 @@ async def create_child_host_request(
             distribution,
         )
 
-        if not _try_plan_based_creation(request, command_params, host_id, session):
+        if not try_plan_based_creation(request, command_params, host_id, session):
             command_message = create_command_message(
                 command_type="create_child_host",
                 parameters=command_params,

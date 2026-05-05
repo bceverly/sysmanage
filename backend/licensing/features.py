@@ -72,6 +72,27 @@ class FeatureCode(str, Enum):
     FLEET_SCHEDULED_OPERATIONS = "fleet_scheduled_operations"
     FLEET_CONFIG_DEPLOYMENT = "fleet_config_deployment"
 
+    # Virtualization Engine (Phase 10.1)
+    VIRTUALIZATION_KVM_LIFECYCLE = "virtualization_kvm_lifecycle"
+    VIRTUALIZATION_KVM_CREATE = "virtualization_kvm_create"
+    VIRTUALIZATION_KVM_DELETE = "virtualization_kvm_delete"
+    VIRTUALIZATION_KVM_STORAGE = "virtualization_kvm_storage"
+    VIRTUALIZATION_KVM_NETWORKING = "virtualization_kvm_networking"
+    VIRTUALIZATION_BHYVE_LIFECYCLE = "virtualization_bhyve_lifecycle"
+    VIRTUALIZATION_BHYVE_CREATE = "virtualization_bhyve_create"
+    VIRTUALIZATION_BHYVE_STORAGE = "virtualization_bhyve_storage"
+    VIRTUALIZATION_VMM_LIFECYCLE = "virtualization_vmm_lifecycle"
+    VIRTUALIZATION_VMM_CREATE = "virtualization_vmm_create"
+    VIRTUALIZATION_GUEST_PROVISIONING = "virtualization_guest_provisioning"
+    VIRTUALIZATION_SAFE_REBOOT = "virtualization_safe_reboot"
+
+    # Observability Engine (Phase 10.2)
+    OBSERVABILITY_OTEL_DEPLOY = "observability_otel_deploy"
+    OBSERVABILITY_OTEL_REMOVE = "observability_otel_remove"
+    OBSERVABILITY_GRAYLOG_DEPLOY = "observability_graylog_deploy"
+    OBSERVABILITY_GRAFANA_PROVISION = "observability_grafana_provision"
+    OBSERVABILITY_TELEMETRY_ROUTING = "observability_telemetry_routing"
+
     @classmethod
     def from_string(cls, value: str) -> "FeatureCode":
         """Convert string to FeatureCode enum."""
@@ -123,6 +144,10 @@ class ModuleCode(str, Enum):
     # Phase 5 Enterprise modules
     AUTOMATION_ENGINE = "automation_engine"
     FLEET_ENGINE = "fleet_engine"
+
+    # Phase 10 Enterprise modules
+    VIRTUALIZATION_ENGINE = "virtualization_engine"
+    OBSERVABILITY_ENGINE = "observability_engine"
 
     # Data Processing Modules
     LOG_ANALYZER = "log_analyzer"
@@ -199,6 +224,25 @@ TIER_FEATURES = {
         FeatureCode.FLEET_ROLLING_DEPLOYMENTS,
         FeatureCode.FLEET_SCHEDULED_OPERATIONS,
         FeatureCode.FLEET_CONFIG_DEPLOYMENT,
+        # Phase 10.1 — virtualization
+        FeatureCode.VIRTUALIZATION_KVM_LIFECYCLE,
+        FeatureCode.VIRTUALIZATION_KVM_CREATE,
+        FeatureCode.VIRTUALIZATION_KVM_DELETE,
+        FeatureCode.VIRTUALIZATION_KVM_STORAGE,
+        FeatureCode.VIRTUALIZATION_KVM_NETWORKING,
+        FeatureCode.VIRTUALIZATION_BHYVE_LIFECYCLE,
+        FeatureCode.VIRTUALIZATION_BHYVE_CREATE,
+        FeatureCode.VIRTUALIZATION_BHYVE_STORAGE,
+        FeatureCode.VIRTUALIZATION_VMM_LIFECYCLE,
+        FeatureCode.VIRTUALIZATION_VMM_CREATE,
+        FeatureCode.VIRTUALIZATION_GUEST_PROVISIONING,
+        FeatureCode.VIRTUALIZATION_SAFE_REBOOT,
+        # Phase 10.2 — observability
+        FeatureCode.OBSERVABILITY_OTEL_DEPLOY,
+        FeatureCode.OBSERVABILITY_OTEL_REMOVE,
+        FeatureCode.OBSERVABILITY_GRAYLOG_DEPLOY,
+        FeatureCode.OBSERVABILITY_GRAFANA_PROVISION,
+        FeatureCode.OBSERVABILITY_TELEMETRY_ROUTING,
     },
 }
 
@@ -239,5 +283,8 @@ TIER_MODULES = {
         # Phase 5
         ModuleCode.AUTOMATION_ENGINE,
         ModuleCode.FLEET_ENGINE,
+        # Phase 10
+        ModuleCode.VIRTUALIZATION_ENGINE,
+        ModuleCode.OBSERVABILITY_ENGINE,
     },
 }

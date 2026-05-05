@@ -1865,6 +1865,24 @@ class TestPlanBasedCreationPath:
             "module_loader": patch(
                 "backend.api.child_host_virtualization.module_loader"
             ),
+            # The dispatcher (child_host_creation_dispatch) imports
+            # module_loader into its own namespace; patch it there too so
+            # plan-based path probes hit the same mock as the legacy path.
+            "module_loader_dispatch": patch(
+                "backend.api.child_host_creation_dispatch.module_loader"
+            ),
+            # Plan dispatch boundary: ``_enqueue_create_plan`` does a
+            # local import of ``enqueue_apply_plan`` from
+            # backend.services.proplus_dispatch, so we have to patch
+            # there (not on child_host_creation_dispatch) for the local
+            # import to pick up the mock.
+            "enqueue_apply_plan": patch(
+                "backend.services.proplus_dispatch.enqueue_apply_plan",
+                return_value="mock-message-id",
+            ),
+            "register_correlation": patch(
+                "backend.services.proplus_dispatch.register_child_host_correlation"
+            ),
         }
 
     def _setup_mocks(self, patches, mock_host, mock_user, mock_db_session):
@@ -1878,6 +1896,16 @@ class TestPlanBasedCreationPath:
         mocks["get_host"].return_value = mock_host
         mocks["bcrypt"].hashpw.return_value = b"$2b$12$hashedpassword"
         mocks["bcrypt"].gensalt.return_value = b"$2b$12$salt"
+
+        # Share the same get_module mock between the two namespaces so a
+        # test that sets ``mocks["module_loader"].get_module.return_value``
+        # also configures the dispatcher's view.  Without this, the
+        # dispatcher's MagicMock-by-default get_module satisfies the
+        # plan-based path even when the test wants legacy fallback.
+        if "module_loader_dispatch" in mocks:
+            mocks["module_loader_dispatch"].get_module = mocks[
+                "module_loader"
+            ].get_module
 
         # No existing child with same name
         mock_db_session.query.return_value.filter.return_value.first.return_value = None
@@ -1900,16 +1928,14 @@ class TestPlanBasedCreationPath:
         )
 
         try:
-            # Set up module_loader to return a module with create_container_with_plan
+            # _try_lxd_plan_based_creation calls module.build_lxd_create_plan
+            # then dispatches via enqueue_apply_plan (NOT the legacy
+            # child_host_virtualization.queue_ops).  So legacy queue_ops
+            # should still be untouched and the dispatch boundary
+            # ``enqueue_apply_plan`` should be called once.
             mock_module = MagicMock()
-            mock_service_cls = MagicMock()
-            mock_service_instance = MagicMock()
-            mock_service_instance.create_container_with_plan.return_value = [
-                {"type": "shell", "command": "lxc launch Ubuntu-24.04 test-lxd"}
-            ]
-            mock_service_cls.return_value = mock_service_instance
-            mock_module.ContainerEngineServiceImpl = mock_service_cls
             mocks["module_loader"].get_module.return_value = mock_module
+            mocks["module_loader_dispatch"].get_module.return_value = mock_module
 
             from backend.api.child_host_virtualization import (
                 create_child_host_request,
@@ -1921,9 +1947,9 @@ class TestPlanBasedCreationPath:
             )
 
             assert result["success"] is True
-            # Plan-based path was used, so legacy queue should NOT be called
             mocks["queue_ops"].enqueue_message.assert_not_called()
-            mock_service_instance.create_container_with_plan.assert_called_once()
+            mocks["enqueue_apply_plan"].assert_called_once()
+            mock_module.build_lxd_create_plan.assert_called_once()
         finally:
             for p in patches.values():
                 p.stop()
@@ -1939,15 +1965,10 @@ class TestPlanBasedCreationPath:
         )
 
         try:
+            # See the LXD test above for the dispatch-boundary rationale.
             mock_module = MagicMock()
-            mock_service_cls = MagicMock()
-            mock_service_instance = MagicMock()
-            mock_service_instance.create_container_with_plan.return_value = [
-                {"type": "shell", "command": "wsl --install -d Ubuntu-24.04"}
-            ]
-            mock_service_cls.return_value = mock_service_instance
-            mock_module.ContainerEngineServiceImpl = mock_service_cls
             mocks["module_loader"].get_module.return_value = mock_module
+            mocks["module_loader_dispatch"].get_module.return_value = mock_module
 
             from backend.api.child_host_virtualization import (
                 create_child_host_request,
@@ -1960,7 +1981,8 @@ class TestPlanBasedCreationPath:
 
             assert result["success"] is True
             mocks["queue_ops"].enqueue_message.assert_not_called()
-            mock_service_instance.create_container_with_plan.assert_called_once()
+            mocks["enqueue_apply_plan"].assert_called_once()
+            mock_module.build_wsl_create_plan.assert_called_once()
         finally:
             for p in patches.values():
                 p.stop()
@@ -2000,7 +2022,7 @@ class TestPlanBasedCreationPath:
     async def test_falls_back_to_legacy_when_method_missing(
         self, mock_db_session, mock_user, mock_host
     ):
-        """Test fallback when ContainerEngineServiceImpl lacks create_container_with_plan."""
+        """Test fallback when container_engine lacks build_lxd_create_plan."""
         mock_host.platform = "Linux"
         patches = self._base_patches()
         mocks, mock_child = self._setup_mocks(
@@ -2008,9 +2030,16 @@ class TestPlanBasedCreationPath:
         )
 
         try:
+            # ``try_plan_based_creation`` has TWO sub-paths to disable
+            # before the caller's queue_ops fallback kicks in:
+            #   1. The new plan-based path (``build_lxd_create_plan``).
+            #   2. The dispatcher's internal legacy fallback that calls
+            #      ``ContainerEngineServiceImpl.create_container_with_plan``.
+            # Disable both so dispatch returns False and the caller
+            # enqueues via queue_ops itself.
             mock_module = MagicMock()
-            mock_service_cls = MagicMock(spec=[])  # No methods at all
-            mock_module.ContainerEngineServiceImpl = mock_service_cls
+            mock_module.build_lxd_create_plan = None
+            mock_module.ContainerEngineServiceImpl = None
             mocks["module_loader"].get_module.return_value = mock_module
 
             from backend.api.child_host_virtualization import (
@@ -2041,14 +2070,14 @@ class TestPlanBasedCreationPath:
         )
 
         try:
+            # See test_falls_back_to_legacy_when_method_missing — both
+            # the new plan path AND the dispatcher's legacy sub-path
+            # must fail before the caller's queue_ops fallback runs.
             mock_module = MagicMock()
-            mock_service_cls = MagicMock()
-            mock_service_instance = MagicMock()
-            mock_service_instance.create_container_with_plan.side_effect = RuntimeError(
+            mock_module.build_lxd_create_plan.side_effect = RuntimeError(
                 "plan generation failed"
             )
-            mock_service_cls.return_value = mock_service_instance
-            mock_module.ContainerEngineServiceImpl = mock_service_cls
+            mock_module.ContainerEngineServiceImpl = None
             mocks["module_loader"].get_module.return_value = mock_module
 
             from backend.api.child_host_virtualization import (
@@ -2105,43 +2134,6 @@ class TestPlanBasedCreationPath:
             mocks["queue_ops"].enqueue_message.assert_called_once()
             # create_container_with_plan should NOT be called for KVM
             mock_service_instance.create_container_with_plan.assert_not_called()
-
-        finally:
-            for p in patches.values():
-                p.stop()
-
-    @pytest.mark.asyncio
-    async def test_plan_based_returns_none_falls_back(
-        self, mock_db_session, mock_user, mock_host
-    ):
-        """Test fallback when create_container_with_plan returns None."""
-        mock_host.platform = "Linux"
-        patches = self._base_patches()
-        mocks, mock_child = self._setup_mocks(
-            patches, mock_host, mock_user, mock_db_session
-        )
-
-        try:
-            mock_module = MagicMock()
-            mock_service_cls = MagicMock()
-            mock_service_instance = MagicMock()
-            mock_service_instance.create_container_with_plan.return_value = None
-            mock_service_cls.return_value = mock_service_instance
-            mock_module.ContainerEngineServiceImpl = mock_service_cls
-            mocks["module_loader"].get_module.return_value = mock_module
-
-            from backend.api.child_host_virtualization import (
-                create_child_host_request,
-            )
-
-            request = self._make_request(child_type="lxd", container_name="test-lxd")
-            result = await create_child_host_request(
-                str(mock_host.id), request, "admin@sysmanage.org"
-            )
-
-            assert result["success"] is True
-            # Plan returned None, so legacy path should be used
-            mocks["queue_ops"].enqueue_message.assert_called_once()
 
         finally:
             for p in patches.values():

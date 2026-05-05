@@ -1343,6 +1343,240 @@ VM definitions, OTEL configs, etc.).
 **Target Release:** v2.2.0.0
 **Focus:** Final Pro+ Enterprise-tier modules (largest/most complex)
 
+### Phase 10.1.0 / 10.2.0 — landed (skeleton + first vertical slices)
+
+The two largest Pro+ engines (virtualization_engine, observability_engine)
+are now skeletoned, license-gated, and wired into the Pro+ route loader.
+Each ships its first vertical slice end-to-end so the migration pattern
+is validated before scaling out:
+
+- `module-source/virtualization_engine/` — KVM start/stop/restart lifecycle
+  via `build_kvm_lifecycle_plan()` + `POST /api/v1/virt/kvm/{host_id}/{vm_name}/{action}`.
+  Plans are executed by the existing `APPLY_DEPLOYMENT_PLAN` agent
+  handler (no agent code changes needed for the slice).  bhyve and
+  VMM/vmd endpoints are present and return 501 until 10.1.C / 10.1.D.
+- `module-source/observability_engine/` — OTEL `is-active` + `--version`
+  status check via `build_otel_status_plan()` + `POST /api/v1/observability/otel/{host_id}/status`.
+  Graylog and Grafana endpoints return 501 until 10.2.B / 10.2.C.
+
+### Phase 10.1.B–F + 10.2.A–D — landed (overnight push)
+
+The remaining virtualization + observability slices all landed in a single
+session.  Every plan-builder, schema, endpoint, license code, and OSS
+stub is in place; tests + lint + sonarqube are clean across both repos.
+Agent-side dead-code cleanup is **deferred** to a follow-up session that
+can include a live agent integration test (deleting ~28K agent lines
+touches several import graphs and we don't want to ship that without
+verification).
+
+**virtualization_engine v0.4.0** now ships:
+
+- **10.1.B — KVM delete + storage + networking**
+  `build_kvm_delete_plan`, `build_kvm_image_download_plan` (curl + sha256
+  + xz/gz/bz2 decompress), `build_kvm_network_create_plan` with
+  ``_build_libvirt_network_xml`` (NAT/bridge/route/isolated),
+  `build_kvm_network_delete_plan`, `build_kvm_network_list_plan`.
+  New endpoints: `/kvm/{host_id}/{vm_name}/delete`,
+  `/kvm/{host_id}/storage/download`, `/kvm/{host_id}/network/create`,
+  `/kvm/{host_id}/network/{name}/delete`, `/kvm/{host_id}/network/list`.
+  New feature codes: `virtualization_kvm_delete`,
+  `virtualization_kvm_storage`, `virtualization_kvm_networking`.
+
+- **10.1.C — bhyve full lifecycle (FreeBSD)**
+  `build_bhyve_lifecycle_plan` (vm-bhyve start/stop/restart),
+  `build_bhyve_create_plan`, `build_bhyve_delete_plan`,
+  `build_bhyve_zvol_create_plan` / `_destroy_plan`,
+  `build_bhyve_pf_nat_plan` (writes /etc/pf.conf.d snippet + reloads pf).
+  New endpoints under `/bhyve/{host_id}/...`.  New feature codes:
+  `virtualization_bhyve_lifecycle`, `virtualization_bhyve_create`,
+  `virtualization_bhyve_storage`.
+
+- **10.1.D — VMM/vmd full lifecycle (OpenBSD)**
+  `_render_vm_conf_fragment` (writes per-VM /etc/vm.conf.d/<name>.conf
+  with memory, cpus, disk, cdrom, interface, enable),
+  `build_vmm_create_plan` (vmctl create + rcctl reload vmd),
+  `build_vmm_lifecycle_plan` (vmctl start/stop, restart = stop+start),
+  `build_vmm_delete_plan` (stops + removes fragment + reloads vmd +
+  removes disk).  New endpoints under `/vmm/{host_id}/...`.  New
+  feature codes: `virtualization_vmm_lifecycle`,
+  `virtualization_vmm_create`.
+
+- **10.1.E — Guest provisioning**
+  Four autoinstall renderers: `render_ubuntu_autoinstall` (subiquity
+  autoinstall.yaml), `render_debian_preseed` (d-i preseed.cfg),
+  `render_alpine_answers` (setup-alpine -f answers),
+  `render_freebsd_installerconfig` (bsdinstall scripted INSTALLERCONFIG).
+  Single dispatch endpoint `/provision/{host_id}/{distro}` with
+  `dest_path` + `request` body keys.  New feature code:
+  `virtualization_guest_provisioning`.
+
+- **10.1.F — Safe parent-host reboot extension**
+  `build_safe_parent_reboot_plan` (persists VM list, stops VMs per
+  hypervisor, optionally schedules `shutdown -r +1`),
+  `build_safe_parent_restore_plan` (per-hypervisor sh -c loop that
+  reads the persist file and restarts each VM).  Endpoints:
+  `/safe-reboot/{host_id}/prepare` and
+  `/safe-reboot/{host_id}/{hypervisor}/restore`.  New feature code:
+  `virtualization_safe_reboot`.
+
+**observability_engine v0.3.0** now ships:
+
+- **10.2.A — OTEL collector deploy**
+  `OtelDeployRequest` schema with receivers / exporters / pipelines,
+  `_render_otel_config` (writes a real otelcol config.yaml with
+  hostmetrics + otlp + filelog support), `build_otel_deploy_plan`
+  (file write + daemon-reload + enable + restart + verify),
+  `build_otel_remove_plan` (stop + disable + rm config).  Endpoints
+  `/otel/{host_id}/deploy` + `/otel/{host_id}/remove`.  New feature code:
+  `observability_otel_remove`.
+
+- **10.2.B — Graylog sidecar deploy (Linux + Windows)**
+  `GraylogSidecarRequest` with platform=linux|windows,
+  `_render_graylog_sidecar_yaml`, `build_graylog_sidecar_plan` (Linux
+  uses systemctl, Windows uses sc.exe; config written to per-platform
+  path with 0600 permissions because it carries the API token),
+  `build_graylog_sidecar_remove_plan`, `build_graylog_status_plan`
+  (replaces the previous NotImplementedError stub).  Endpoints
+  `/graylog/{host_id}/deploy` + `/graylog/{host_id}/{platform}/remove`.
+
+- **10.2.C — Grafana provisioning (agent-shimmed)**
+  `GrafanaProvisionRequest` + `GrafanaDatasource` schemas,
+  `build_grafana_provision_plan` (drops per-payload JSON files at 0600,
+  curls them via `curl -fsS -X POST` against /api/datasources and
+  /api/dashboards/db with `Authorization: Bearer <token>` header).
+  Endpoint `/grafana/{host_id}/provision`.
+
+- **10.2.D — Per-host telemetry routing**
+  `TelemetryRoutingRule` + `TelemetryRoutingRequest` schemas,
+  `build_telemetry_routing_plan` (merges rule pipelines into the base
+  OTEL config and produces a deploy plan).  Endpoint
+  `/routing/{host_id}/apply`.  New feature code:
+  `observability_telemetry_routing`.
+
+**Schema bug fix carried over from the previous session:** earlier
+slices emitted `{steps: [{command, timeout}]}` but the agent's
+`apply_deployment_plan` handler iterates over `commands:` with `argv:`
+keys.  All builders now use the agent-compatible schema and have
+regression tests that explicitly forbid the wrong shape.
+
+**Validation results:**
+- Pro+ engine tests: 117 (virtualization 90 + observability 27)
+- All 14 other Pro+ engines: unchanged, all green
+- sysmanage backend: 4,475 tests passed (was 4,456)
+- pylint 10.00/10, eslint 0, cython-lint 0
+- SonarQube `EXECUTION SUCCESS` on both repos
+
+### Phase 10.1 / 10.2 — agent-side cleanup landed
+
+The deferred agent-side dead-code purge from the previous session
+shipped: 60 deployment-only files removed from
+`sysmanage-agent/src/sysmanage_agent/operations/` (kvm, bhyve, vmm,
+ubuntu, debian, alpine, freebsd, distro provisioners, otel deploy
+helpers, graylog attachment, opentelemetry_operations) plus their 47
+matching test files.  The agent `operations/` directory dropped from
+63 child-host files to 9.
+
+What survived the purge:
+- `child_host_listing.py`, `child_host_listing_wsl.py` — read-only
+  inventory (every backend; required by the OSS server)
+- `child_host_virtualization_checks.py` — capability detection
+- `child_host_types.py` — shared dataclasses
+- `child_host_bhyve_metadata.py` — read-only metadata loader (consumed
+  by listing); `child_host_listing.py` now imports `load_bhyve_metadata`
+  directly instead of via the deleted `child_host_bhyve_creation`
+  re-export
+- `child_host_lxd.py`, `child_host_wsl.py`, `child_host_wsl_control.py` —
+  WSL/LXD lifecycle (Phase 10 doesn't cover those backends)
+
+Refactored:
+- `child_host_operations.py` rewritten — KVM/bhyve/VMM lifecycle, create,
+  delete, initialize, kernel-module enable/disable, networking branches
+  all return a standardized `{"proplus_required": True, "engine":
+  "virtualization_engine"}` error.  WSL + LXD branches preserved.
+- `agent_utils.py` WS handler-name → method dispatch table strips
+  `deploy_opentelemetry`, `remove_opentelemetry`, `attach_to_graylog`,
+  `initialize_vmm/kvm/bhyve`, `disable_bhyve`,
+  `enable/disable_kvm_modules`, `setup_kvm_networking`,
+  `list_kvm_networks`.  WSL/LXD lifecycle handlers retained.
+- `system_operations.py` — `OpenTelemetryOperations` import + delegator
+  methods removed.
+- `agent_delegators.py` — `attach_to_graylog` removed.
+
+Validation (agent repo):
+- `make lint` — pylint 10.00/10
+- 4,805 pytest cases pass
+- `make sonarqube-scan` — EXECUTION SUCCESS
+
+Phase 10.1 + 10.2 are now structurally complete: server-side Pro+
+engines own VM lifecycle + cloud-init + storage + networking + safe
+reboot for KVM/bhyve/VMM, plus OTEL + Graylog + Grafana provisioning,
+and the agent's deployment-side code is gone.  What remains for v2.2.0.0
+is feature-level work outside this migration: 10.3 MFA, 10.4 repository
+mirroring, 10.5 external IdP, 10.6 upgrade-profiles migration into
+`automation_engine`, and 10.7 frontend license-gating cleanup so OSS
+operators stop seeing menu items / tabs / buttons that 402 on click.
+
+### Phase 10.1.A — landed (KVM create + cloud-init)
+
+`virtualization_engine` v0.2.0 adds full VM provisioning for KVM via the
+agent's existing `apply_deployment_plan` handler — no KVM-specific
+Python code is required on the agent for create.
+
+- `VmCreateRequest` schema — Pydantic model with shell-injection-safe
+  validators on every field that gets interpolated into argv (vm_name,
+  hostname, distribution, username, network, base_image_path,
+  dns_servers); plus memory / disk-size / cpu-range validation.
+- `generate_kvm_meta_data(req)` and `generate_kvm_user_data(req)` —
+  cloud-init renderers split for Linux (systemd / apt-style packages /
+  /bin/bash) and FreeBSD (sysrc + service / pkg / /bin/sh / wheel
+  group).  Renders `bootcmd` (early DNS), `users:`, `packages:`,
+  `write_files:` (rendered agent config YAML at /etc/sysmanage-agent.yaml),
+  and `runcmd:` (agent install commands + service bring-up).
+- `build_kvm_create_plan(req)` — emits a deployment plan with two
+  `files:` entries (meta-data + user-data) and five `commands:` entries:
+  mkdir libvirt dirs, qemu-img convert (clone base image), qemu-img
+  resize, genisoimage (build cidata ISO), virt-install --import.
+- New endpoint `POST /api/v1/virt/kvm/{host_id}/create` taking the
+  `VmCreateRequest` body.  License-gated under
+  `virtualization_kvm_create` (new FeatureCode added to Enterprise
+  tier).  Audit-logged with VM name + distribution + size summary.
+- Schema-mismatch bug fix from the previous slice — `build_kvm_lifecycle_plan`
+  and `build_otel_status_plan` previously emitted `{steps: [{command, timeout}]}`,
+  but the agent's `apply_deployment_plan` handler iterates over
+  `commands:` with `argv:` keys; the old-shape plans silently no-op'd
+  on the agent side.  Both engines now emit the agent-compatible
+  `{commands: [{argv, timeout, ignore_errors, description}]}` shape,
+  with regression tests that explicitly forbid the `steps` key.
+- Tests — 37 virtualization_engine + 6 observability_engine pytest
+  cases (was 17 + 5).  4,456 sysmanage backend tests still pass.
+- Lint / scan — pylint 10.00/10, eslint 0, cython-lint 0,
+  SonarQube EXECUTION SUCCESS on both repos.
+
+
+- `backend/licensing/features.py` — six new `FeatureCode`s
+  (virtualization_kvm_lifecycle, virtualization_bhyve_lifecycle,
+  virtualization_vmm_lifecycle, observability_otel_deploy,
+  observability_graylog_deploy, observability_grafana_provision) and
+  two new `ModuleCode`s (virtualization_engine, observability_engine).
+  Both engines added to the Enterprise tier feature/module sets.
+- `backend/api/proplus_routes.py` — `mount_virtualization_routes()` +
+  `mount_observability_routes()` with Enterprise license gating, audit-log
+  adapters, and stub-route wrappers that return `{"licensed": False}` on
+  OSS deployments.
+- `backend/services/proplus_dispatch.py` — public `enqueue_apply_plan()`
+  alias added so engine routers can be handed the dispatch shim through
+  the existing factory pattern.
+- Tests — 17 Pro+ unit tests for virtualization_engine, 5 for
+  observability_engine, 13 OSS stub-route + feature-code tests.  All
+  4,454 sysmanage backend tests pass (4,441 → 4,454).
+- Lint / scan — pylint 10.00/10, eslint 0, cython-lint clean,
+  SonarQube EXECUTION SUCCESS on both repos.
+
+The remaining Phase 10.1 / 10.2 slices below are unchanged in scope; they
+will land incrementally on top of this skeleton.
+
+
+
 ### Modules to Migrate
 
 #### 10.1 virtualization_engine (Enterprise)
@@ -1495,6 +1729,107 @@ VM definitions, OTEL configs, etc.).
 - [ ] External group to role mapping
 - [ ] Local account fallback
 
+#### 10.6 Upgrade Profiles → automation_engine (Enterprise migration)
+
+**Priority:** High — surface this in Phase 10 so the OSS feature doesn't sit in the free tier long enough to grow user dependencies.
+
+The Phase 8.2 OSS upgrade-profile system (cron-scheduled patch rollouts, security-only filters, tag-scoped fleet selection, staggered rollout windows) is functionally orchestrated patch management. That is squarely in `automation_engine` (Enterprise) territory — homelab/free-tier deployments don't need staggered windows or scheduled fleet rollouts.  Migration mirrors the secrets_engine pattern from Phase 2.3.
+
+**Server-Side Source Files (to migrate to Cython):**
+- `backend/api/upgrade_profiles.py` (~417 lines)
+- `backend/services/upgrade_scheduler.py` (cron parser + next-run computation)
+- `backend/persistence/models/upgrade_profiles.py`
+
+**Migration Steps:**
+1. [ ] Extend `automation_engine.pyx` with an `upgrade_profile` plan-builder family that consumes the existing OSS `UpgradeProfile` schema — `build_upgrade_profile_run_plan(profile_id, host_ids)` emits one apply_deployment_plan per target host using the same staggered-window logic the OSS scheduler already implements
+2. [ ] Move the cron parser into the engine (or keep it OSS-side as a shared util — the engine already imports OSS helpers via the proplus_dispatch boundary)
+3. [ ] Wire the existing `/api/upgrade-profiles/tick` driver hook to enqueue per-host engine plans through `enqueue_apply_plan` + child_host_op-style correlation so per-host outcomes update the profile's `last_run` / failure log
+4. [ ] Gate the `/api/upgrade-profiles/*` CRUD endpoints behind `automation_engine` (return 402 when not loaded) — same pattern Phase 2.3 used for secrets
+5. [ ] Frontend: move `UpgradeProfilesSettings.tsx` into the automation_engine plugin bundle
+6. [ ] Migrate the `tick` hook caller (the external systemd timer / cron) — document the change for any deployments already running it
+7. [ ] i18n/l10n for all 14 languages
+
+**Keep in Open Source:** nothing — there's no simplified version that's useful.  Free-tier users hit "update now" on individual hosts via the existing Updates page, which already works without scheduled rollouts.
+
+**Estimated Size:** ~500 lines added to `automation_engine.pyx` + ~417 lines migrated from OSS.
+
+**Note on user impact:** the feature was just delivered in Phase 8.2; per the Phase 0 audit no production users have adopted it yet, so the move is low-risk if done before Phase 10 ships.
+
+#### 10.7 Frontend License-Gating for Pro+ UI Surfaces
+
+**Priority:** High — current OSS deployments show menu items, settings tabs, host-detail tabs, and action buttons that hit Pro+ endpoints which return 402.  Looks broken to free-tier operators; should render only when the relevant `featureFlag` / `moduleRequired` is in the active license.
+
+**Background:** the plugin nav items in `Components/Navbar.tsx` (line ~76) and the plugin host-detail tabs in `Pages/HostDetail.tsx` (line ~638) already gate on the active license — `Navbar.tsx` filters `navItems` against `activeLicenseFeatures`, and `HostDetail.tsx` filters `pluginTabs` against `licenseModules`.  The fix is hoisting that same pattern to the *hardcoded* entries: declare a per-entry `featureFlag` / `moduleRequired`, then filter the same way.  Source of truth for available flags / modules is `backend/licensing/features.py` (`FeatureCode` / `ModuleCode` enums); `Services/license.ts::getLicenseInfo()` already exposes both lists to the frontend.
+
+**Inventory — what to gate (verified surface):**
+
+*Navbar (`Components/Navbar.tsx`, hardcoded NavLinks lines ~153-179):*
+- [ ] `/secrets` — gate behind `secrets_engine` module.  All `/api/secrets/*` already 402 without it (Phase 2.3).
+- [ ] `/reports` — gate behind `reporting_engine` module.  OSS retains a 291-line stub but the rich workflow is Pro+.
+- [ ] `/scripts` — borderline; OSS retains ad-hoc one-shot run.  **Don't gate** — keep visible, but consider adding a "Pro+: scheduled / saved scripts" upsell row inside the page.
+
+*Settings tabs (`Pages/Settings.tsx`, hardcoded `<Tab>` lines ~1113-1127):*
+- [ ] **Integrations** (Grafana + Graylog + OTEL cards in `renderIntegrationsTab` line ~828) — gate behind `observability_engine`.
+- [ ] **Antivirus** — gate behind `av_management_engine`.
+- [ ] **Firewall Roles** — gate behind `firewall_orchestration_engine`.
+- [ ] **Access Groups** — gate behind `federation_controller_engine` (deferred to Phase 12.4 fold-in; currently no gating since it's an OSS feature today).  Land the gating once 12.4 lands; for now, leave it visible.
+- [ ] **Update Profiles** — gate behind `automation_engine` (lands together with 10.6 above).
+- [ ] **Compliance Profiles** — gate behind `compliance_engine` (deferred to Phase 11.5 fold-in).  Same staging strategy as Access Groups.
+- [ ] **Report Branding** — gate behind `reporting_engine`.
+- [ ] **Report Templates** — gate behind `reporting_engine`.
+- [ ] **Dynamic Secrets** — gate behind `secrets_engine` (full gating once 12.5 fold-in lands; for now, leave visible since it's OSS today).
+
+OSS-appropriate Settings tabs (no gating needed): Tags, Queues, Ubuntu Pro, Available Packages, Host Defaults, Distributions.
+
+*HostDetail hardcoded tabs (`Pages/HostDetail.tsx`, `HARDCODED_IDS` set line ~653):*
+- [ ] **Compliance** tab — gate behind `compliance_engine` module.
+- [ ] **Child Hosts** tab — gate the create/start/stop/restart/delete buttons inside the tab behind `container_engine` (LXD/WSL) and `virtualization_engine` (KVM/bhyve/VMM); the read-only listing should remain visible since OSS keeps it (per Phase 10.1 "Keep in Open Source: read-only VM/container listing").  Per-row action buttons need fine-grained gating, not the whole tab.
+- [ ] **Security** tab — partial gate.  Read-only firewall/AV state remains OSS; the per-host firewall-role assignment UI inside the tab should gate behind `firewall_orchestration_engine`.
+
+OSS-appropriate hardcoded HostDetail tabs (no gating): info, hardware, software, software-changes, third-party-repos, access (read-only listing only — the add/remove/edit user buttons already gate on `host_account_management` security roles), certificates, server-roles, ubuntu-pro, diagnostics.
+
+*HostDetail action menu / dropdown buttons:*
+- [ ] **Deploy SSH Key** — hits `/api/secrets/deploy-ssh-keys`; gate behind `secrets_engine`.
+- [ ] **Deploy Certificate** — hits `/api/secrets/deploy-certificates`; gate behind `secrets_engine`.
+- [ ] **Deploy OpenTelemetry** + **Start/Stop/Restart/Remove OTEL** + **Connect to Grafana** + **Disconnect from Grafana** (Services/opentelemetry.ts callers, line ~104); gate behind `observability_engine`.
+- [ ] **Connect to Graylog** + Graylog attach modal (Services/graylog.ts callers, line ~105); gate behind `observability_engine`.
+- [ ] **Enable/Disable KVM modules**, **Initialize KVM/bhyve/VMM/LXD**, **Configure KVM networking**; gate behind `virtualization_engine` (KVM/bhyve/VMM) and `container_engine` (LXD).
+- [ ] **Create Child Host** dialog — already conditional on hypervisor capability, but also needs to gate on the relevant engine module being licensed.
+
+Already-correctly-gated: **Orchestrated Reboot** falls back to plain reboot when `has_container_engine` is false (line ~3047) — model the rest on this pattern.
+
+**Mechanism:**
+
+1. [ ] Define a single source-of-truth helper in `frontend/src/Services/license.ts`:
+
+   ```ts
+   export function isFeatureLicensed(featureCode: string): boolean
+   export function isModuleLicensed(moduleCode: string): boolean
+   ```
+
+   Both read from a cached `licenseInfo` (the same one Navbar + HostDetail already fetch).  Cache invalidates on license change events.
+
+2. [ ] Convert the hardcoded Navbar entries to a list-of-objects shape mirroring plugin nav items: `{path, labelKey, featureFlag?}`.  Filter the same way plugins are filtered.
+
+3. [ ] Convert the hardcoded Settings tabs to the same shape and filter.
+
+4. [ ] Convert the hardcoded HostDetail tabs the same way.  HARDCODED_IDS set stays the same; just adds an optional `moduleRequired` per entry that gets filtered before render.
+
+5. [ ] HostDetail action buttons get inline `isModuleLicensed("…")` guards on each button, with the button hidden (not disabled-with-tooltip) when not licensed — consistent with how plugin nav items behave.
+
+6. [ ] Plugin Settings tabs at `Pages/Settings.tsx:1128` should also honor `moduleRequired` (currently they don't); reuse the same filter logic for consistency.
+
+7. [ ] i18n: no new strings — gating is a visibility change, not a copy change.
+
+**Testing:**
+
+- [ ] Unit tests for `isFeatureLicensed` / `isModuleLicensed` (cache hit/miss, license absent, license present-but-unrelated).
+- [ ] Playwright tests: an OSS-only login (no license) sees the OSS-appropriate set of nav items / Settings tabs / HostDetail tabs / action buttons; a Pro+ Professional license sees the Professional subset; a Pro+ Enterprise license sees everything.  Tests should be parametrized over license fixture.
+
+**Estimated Size:** ~150 lines of frontend gating logic + ~60 entry-shape conversions + ~80 lines of test fixtures.  No backend changes — the 402-on-unlicensed pattern already exists; this just stops surfacing the call sites that would hit it.
+
+**Note on staging:** items marked "deferred until phase X.Y fold-in lands" can be gated proactively (the `featureFlag` / `moduleRequired` codes already exist in `backend/licensing/features.py`) — gating before the backend migration is a no-op on OSS deployments today (those tabs simply remain visible until the relevant engine is loaded), and avoids a follow-up frontend pass after each fold-in.
+
 ### Deliverables
 
 - [ ] virtualization_engine module (~24,000 lines, largest single module)
@@ -1503,6 +1838,8 @@ VM definitions, OTEL configs, etc.).
 - [ ] MFA implementation
 - [ ] Repository mirroring
 - [ ] External IdP support
+- [ ] Upgrade profiles migrated from OSS to `automation_engine`
+- [ ] Hardcoded nav items, Settings tabs, HostDetail tabs, and action buttons gated by license to match the existing plugin-gating pattern
 
 ### Exit Criteria
 
@@ -1597,6 +1934,58 @@ Many enterprise and government environments operate air-gapped networks that hav
 - [ ] Risk assessment that accounts for the air-gap transfer cadence
 - [ ] Integration with existing compliance_engine and vuln_engine modules
 
+#### 11.4 CVE Refresh Settings → vuln_engine + airgap_collector_engine
+
+The OSS `backend/api/cve_refresh_settings.py` (~431 lines) and
+`backend/vulnerability/cve_refresh_service.py` are CVE feed-management
+plumbing that has no OSS consumer — vulnerability scanning is Pro+
+Enterprise (`vuln_engine`).  Air-gap is the right phase to relocate it
+because CVE feed mirroring is the central air-gap concern.
+
+**Migration Steps:**
+1. [ ] Move CVE source/refresh-settings CRUD into `vuln_engine.pyx` (the
+       existing engine that consumes the data) — operators on Pro+ get
+       a single coherent vuln workflow instead of two split UIs
+2. [ ] In Phase 11 specifically: extend `airgap_collector_engine` to
+       use the same CVE source registry — the public-side collector
+       reads from it to pick which feeds to snapshot, the private-side
+       repository imports the resulting media via the same schema
+3. [ ] Gate `/api/cve-refresh/*` behind `vuln_engine` loaded (402 stub
+       in OSS, mirroring secrets/openbao pattern)
+4. [ ] Frontend `CveRefreshSettings.tsx` moves into the vuln_engine
+       plugin bundle
+5. [ ] i18n/l10n for all 14 languages
+
+**Estimated Size:** ~431 lines migrated from OSS to vuln_engine.
+
+#### 11.5 Package Compliance → compliance_engine
+
+The Phase 8.3 OSS `backend/api/package_compliance.py` (~464 lines) plus
+the `package_compliance` evaluator are functionally CIS-style benchmark
+checking with REQUIRED/BLOCKED package rules.  That overlaps the
+existing `compliance_engine` (Professional, already shipped in Phase 2)
+scope; air-gap is the natural moment to consolidate because air-gapped
+deployments lean heaviest on strict allow/blocklists (limited package
+sets, locked-down baselines).
+
+**Migration Steps:**
+1. [ ] Extend `compliance_engine.pyx` to subsume PackageProfile +
+       PackageProfileConstraint as first-class compliance objects
+       (alongside the existing CIS/STIG benchmarks)
+2. [ ] `evaluate_host_against_profile` becomes a method on the engine;
+       `HostPackageComplianceStatus` continues to live OSS-side as
+       cached state but the evaluator and CRUD move
+3. [ ] The Phase 11.3 Air-Gapped Compliance Context already calls out
+       "integration with compliance_engine and vuln_engine" — this fold-in
+       is what makes that integration coherent (one engine, not two
+       split surfaces)
+4. [ ] Gate `/api/package-profiles/*` behind `compliance_engine`
+5. [ ] Frontend `PackageProfilesSettings.tsx` + `HostCompliancePanel.tsx`
+       move into the compliance_engine plugin bundle
+6. [ ] i18n/l10n for all 14 languages
+
+**Estimated Size:** ~464 lines migrated from OSS into `compliance_engine`.
+
 ### Migration Steps
 
 1. [ ] Create `module-source/airgap_collector_engine/` structure
@@ -1604,12 +1993,16 @@ Many enterprise and government environments operate air-gapped networks that hav
 3. [ ] Create `module-source/airgap_repository_engine/` structure
 4. [ ] Create `airgap_repository_engine.pyx` Cython module
 5. [ ] Create frontend plugin bundles for both modules
-6. [ ] Update documentation with air-gapped deployment guide
-7. [ ] i18n/l10n for all 14 languages
+6. [ ] Migrate OSS CVE refresh settings into `vuln_engine` (11.4)
+7. [ ] Migrate OSS package compliance into `compliance_engine` (11.5)
+8. [ ] Update documentation with air-gapped deployment guide
+9. [ ] i18n/l10n for all 14 languages
 
 ### Deliverables
 
 - [ ] 2 new Pro+ modules (airgap_collector_engine, airgap_repository_engine)
+- [ ] CVE refresh settings folded into `vuln_engine`
+- [ ] Package compliance folded into `compliance_engine`
 - [ ] Air-gapped deployment guide
 - [ ] Optical media transfer procedures documentation
 - [ ] Integration tests for collection and ingestion workflows
@@ -1727,7 +2120,64 @@ Large enterprises operate data centers, branch offices, and cloud regions across
 
 **Estimated Size:** ~4,000 lines (frontend plugin bundle)
 
-#### 12.4 Database Schema
+#### 12.4 Access Groups + Registration Keys → federation_controller_engine
+
+The Phase 8.1 OSS `backend/api/access_groups.py` (~446 lines) ships a
+hierarchical AccessGroup tree with depth-10 cap, cycle detection,
+recursive descendant lookup, RBAC scoping, and registration keys with
+expiry/max-uses.  That complexity profile (multi-tenant fleet
+segmentation, per-group enrollment scoping) is exactly what federation
+needs — it's MSP/Enterprise functionality that doesn't fit free-tier.
+
+**Migration Steps:**
+1. [ ] Move `AccessGroup`, `RegistrationKey`, `HostAccessGroup`, and
+       `UserAccessGroup` models into `federation_controller_engine` —
+       the coordinator becomes the authoritative source for tenant /
+       group definitions, sites pull them on policy sync
+2. [ ] Extend the federation enrollment flow (12.1) so registration
+       keys carry an optional `site_id` scope — keys generated at the
+       coordinator can be issued to enroll hosts at a specific site
+3. [ ] Recursive descendant lookup (the legacy hot path) becomes a
+       coordinator-side responsibility; sites cache the materialized
+       view they need locally to avoid round-trips on every enroll
+4. [ ] Gate `/api/access-groups/*` and `/api/registration-keys/*`
+       behind `federation_controller_engine` (402 stub OSS)
+5. [ ] Frontend `AccessGroupsSettings.tsx` moves into the federation
+       plugin bundle
+6. [ ] i18n/l10n for all 14 languages
+
+**Estimated Size:** ~446 lines + 4 model classes migrated from OSS.
+
+#### 12.5 Dynamic Secrets → federation-aware lease rotation in secrets_engine
+
+The Phase 8.7 OSS `backend/api/dynamic_secrets.py` (~253 lines) issues
+short-lived TTL'd Vault-backed credentials with leases, sweepers, and
+reconciliation.  Phase 2.3 already moved `secrets/`, `openbao.py`, and
+`VaultService` into `secrets_engine` (Professional); dynamic_secrets is
+the natural dependent that didn't get migrated at the time.  Cross-site
+short-lived credentials is a federation concern (rotate creds for hosts
+in restricted sites without those sites needing direct OpenBAO access),
+so the migration lands in Phase 12 where federation primitives exist.
+
+**Migration Steps:**
+1. [ ] Move `DynamicSecretLease` model + service into `secrets_engine.pyx`
+       alongside the existing static-secret CRUD
+2. [ ] Add a federation-aware lease-issue path: the coordinator owns
+       the master Vault; sites can request leases on behalf of their
+       hosts via the federation downstream channel (existing 12.2
+       command dispatch infrastructure)
+3. [ ] Sweeper/reconcile loop runs at the coordinator — no need for
+       per-site sweepers because all leases live in the master Vault
+4. [ ] Gate `/api/dynamic-secrets/*` behind `secrets_engine` loaded
+       (consistent with the existing static-secrets gate from Phase 2.3)
+5. [ ] Frontend `DynamicSecretsSettings.tsx` moves into the secrets_engine
+       plugin bundle
+6. [ ] i18n/l10n for all 14 languages
+
+**Estimated Size:** ~253 lines migrated from OSS, plus federation glue
+in `secrets_engine.pyx`.
+
+#### 12.6 Database Schema
 
 **Coordinator-side tables:**
 - [ ] `federation_sites` — registered subordinate servers (id, name, location, url, tls_cert, status, last_sync)
@@ -1778,14 +2228,18 @@ Large enterprises operate data centers, branch offices, and cloud regions across
 8. [ ] Implement mutual TLS enrollment workflow
 9. [ ] Implement upstream/downstream sync protocol
 10. [ ] Implement command dispatch and result tracking
-11. [ ] Create federation deployment guide
-12. [ ] i18n/l10n for all 14 languages
+11. [ ] Migrate access groups + registration keys from OSS into `federation_controller_engine` (12.4)
+12. [ ] Migrate dynamic-secret leases from OSS into `secrets_engine` with federation-aware lease issuance (12.5)
+13. [ ] Create federation deployment guide
+14. [ ] i18n/l10n for all 14 languages
 
 ### Deliverables
 
 - [ ] 2 new Pro+ modules (federation_controller_engine, federation_site_engine)
 - [ ] Federation frontend plugin bundle
 - [ ] Database migrations for coordinator and site schemas
+- [ ] Access groups + registration keys folded into `federation_controller_engine`
+- [ ] Dynamic-secret leases folded into `secrets_engine` with federation-aware rotation
 - [ ] Federation deployment and operations guide
 - [ ] Mutual TLS enrollment procedures documentation
 - [ ] Integration tests for sync, dispatch, and offline resilience
