@@ -269,7 +269,42 @@ def _enqueue_inbound_message(message, connection, db):
     """
     Enqueue an inbound message for background processing.
     WebSocket thread should ONLY queue messages, not process them.
+
+    If the WebSocket connection has not yet completed SYSTEM_INFO
+    registration (``connection.hostname`` still ``None``), non-handshake
+    messages are buffered on the connection instead of enqueued.
+    Without this, messages that race ahead of registration end up
+    persisted with ``_connection_info.hostname=null`` and the inbound
+    processor's NULL-host_id path discards them as "Missing hostname
+    and host_id" — losing data entirely (the OS section of theol9
+    surfaced this: every ``os_version_update`` was dropped because the
+    agent fired it ~340 ms before the SYSTEM_INFO handler set
+    ``connection.hostname``).  Buffered messages are flushed by
+    ``flush_pending_inbound_messages`` once registration completes.
+
+    SYSTEM_INFO messages are exempt from buffering — they ARE the
+    registration handshake, and buffering them would deadlock the
+    connection.  In production they take a separate immediate-handler
+    path (``_handle_message_by_type``) and never arrive here, but this
+    function is also exercised directly by unit tests, so the guard
+    keeps the behaviour correct in both call paths.
     """
+    if not connection.hostname and message.message_type != MessageType.SYSTEM_INFO:
+        existing = getattr(connection, "_pending_inbound_messages", None)
+        if not isinstance(existing, list):
+            existing = []
+            connection._pending_inbound_messages = (  # pylint: disable=protected-access
+                existing
+            )
+        existing.append(message)
+        logger.info(
+            "Buffered %s message from connection %s — registration not "
+            "yet complete (connection.hostname is None)",
+            message.message_type,
+            connection.agent_id,
+        )
+        return
+
     from backend.websocket.queue_enums import Priority, QueueDirection
     from backend.websocket.queue_operations import QueueOperations
 
@@ -305,6 +340,32 @@ def _enqueue_inbound_message(message, connection, db):
         message.message_type,
         connection.agent_id,
     )
+
+
+def flush_pending_inbound_messages(connection, db):
+    """Drain any pre-registration buffered messages on the connection.
+
+    Called from the SYSTEM_INFO handler once ``connection.hostname`` and
+    ``connection.host_id`` have been populated, so the messages can be
+    re-enqueued with a complete ``_connection_info`` snapshot.
+
+    Type-check the buffer with ``isinstance(..., list)`` instead of
+    relying on ``getattr(..., None)`` — Mock-based connection fixtures
+    in the unit tests auto-create attributes on access and would return
+    a Mock instead of None, which then fails ``len()``.
+    """
+    pending = getattr(connection, "_pending_inbound_messages", None)
+    if not isinstance(pending, list) or not pending:
+        return
+    connection._pending_inbound_messages = []  # pylint: disable=protected-access
+    logger.info(
+        "Flushing %d buffered inbound messages for connection %s (host=%s)",
+        len(pending),
+        connection.agent_id,
+        connection.hostname,
+    )
+    for buffered in pending:
+        _enqueue_inbound_message(buffered, connection, db)
 
 
 async def _handle_message_by_type(message, connection, db):

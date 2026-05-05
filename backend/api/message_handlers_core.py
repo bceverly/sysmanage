@@ -243,6 +243,17 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
         # Always set host_id so heartbeats work (even for unapproved hosts)
         connection.host_id = host.id
 
+        # Drain any inbound messages the agent fired before this SYSTEM_INFO
+        # handshake landed — they were buffered on the connection because
+        # ``connection.hostname`` was still None at receive time.  Now that
+        # registration is complete, replay them through the normal enqueue
+        # path so they're persisted with proper ``_connection_info``.
+        from backend.api.agent import (  # pylint: disable=import-outside-toplevel
+            flush_pending_inbound_messages,
+        )
+
+        flush_pending_inbound_messages(connection, db)
+
         # Always update last_access so we know the host is actively connecting
         # This prevents unapproved hosts from showing as "down" when they're actually up
         update_values = {
