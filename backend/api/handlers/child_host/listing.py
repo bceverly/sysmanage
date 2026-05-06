@@ -104,6 +104,30 @@ def _try_link_child_to_approved_host(
     return None
 
 
+def _delete_linked_host_by_id(db: Session, child: HostChild, reason: str) -> bool:
+    """
+    Delete the Host record linked to this child via child_host_id, if any.
+
+    Without this, removing a child host (VM destroyed outside sysmanage, or via
+    the normal delete flow) leaves an orphan Host row that drifts past the
+    heartbeat timeout and lingers as status=down forever.
+    """
+    if not child.child_host_id:
+        return False
+    linked_host = db.query(Host).filter(Host.id == child.child_host_id).first()
+    if not linked_host:
+        return False
+    logger.info(
+        "Deleting linked host record for child %s (%s): host_id=%s, reason=%s",
+        child.child_name,
+        child.child_type,
+        child.child_host_id,
+        reason,
+    )
+    db.delete(linked_host)
+    return True
+
+
 async def handle_child_hosts_list_update(  # NOSONAR
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
@@ -271,6 +295,11 @@ async def handle_child_hosts_list_update(  # NOSONAR
                     )
                     continue
 
+                # Track whether the linked host was already cleaned up below
+                # so the unconditional cleanup before db.delete(child) doesn't
+                # fire a duplicate.
+                linked_host_cleaned = False
+
                 # For "uninstalling" status, preserve briefly to allow delete handler
                 # to process, but clean up if stale (delete command failed/timed out)
                 if child.status == "uninstalling":
@@ -285,19 +314,9 @@ async def handle_child_hosts_list_update(  # NOSONAR
                     # Stale uninstalling record - the delete command likely failed
                     # Also delete any corresponding host record
                     if child.child_host_id:
-                        linked_host = (
-                            db.query(Host)
-                            .filter(Host.id == child.child_host_id)
-                            .first()
+                        linked_host_cleaned = _delete_linked_host_by_id(
+                            db, child, "stale uninstalling"
                         )
-                        if linked_host:
-                            logger.info(
-                                "Deleting linked host record for stale uninstalling "
-                                "child %s: host_id=%s",
-                                child.child_name,
-                                child.child_host_id,
-                            )
-                            db.delete(linked_host)
                     elif child.hostname:
                         # Single OR'd query covering all 5 hostname-match
                         # patterns instead of up to 5 sequential ``.first()``
@@ -335,6 +354,7 @@ async def handle_child_hosts_list_update(  # NOSONAR
                                 matching_host.fqdn,
                             )
                             db.delete(matching_host)
+                            linked_host_cleaned = True
 
                     logger.info(
                         "Deleting stale uninstalling child host %s (%s) - "
@@ -343,7 +363,12 @@ async def handle_child_hosts_list_update(  # NOSONAR
                         child.child_type,
                     )
 
-                # Child was not reported - it has been removed
+                # Child was not reported - it has been removed.
+                # Also drop the linked Host row so it doesn't drift into status=down
+                # and linger as an orphan (skipped if the uninstalling branch above
+                # already handled it).
+                if not linked_host_cleaned:
+                    _delete_linked_host_by_id(db, child, "no longer reported by agent")
                 db.delete(child)
                 missing_count += 1
                 logger.info(
