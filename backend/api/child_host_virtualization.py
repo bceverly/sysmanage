@@ -81,12 +81,42 @@ def _parse_agent_install_commands(distribution):
     return []
 
 
+def _distribution_to_dict(distribution):
+    """Convert a ``ChildHostDistribution`` row into a plain dict for the engine."""
+    if distribution is None:
+        return None
+    return {
+        "cloud_image_url": getattr(distribution, "cloud_image_url", None),
+        "install_identifier": getattr(distribution, "install_identifier", None),
+        "distribution_name": getattr(distribution, "distribution_name", None),
+        "distribution_version": getattr(distribution, "distribution_version", None),
+    }
+
+
 def _get_cloud_image_url(distribution):
-    """Get cloud image URL from a distribution record, with HTTPS fallback."""
-    if distribution and distribution.cloud_image_url:
+    """Resolve the cloud image URL for a distribution row.
+
+    Delegates to the Pro+ ``virtualization_engine.get_cloud_image_url`` so the
+    interpretation of distribution-row fields lives with the (proprietary)
+    seed data those rows hold.  Falls back to inline logic when the engine
+    isn't loaded — this branch only exists defensively; route-level guards
+    elsewhere already ensure Pro+ is loaded before reaching this code path.
+    """
+    if distribution is None:
+        return None
+    virt_engine = module_loader.get_module("virtualization_engine")
+    if virt_engine is not None:
+        try:
+            return (
+                virt_engine.get_cloud_image_url(_distribution_to_dict(distribution))
+                or None
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            # Engine raised — fall through to inline fallback below.
+            pass
+    if distribution.cloud_image_url:
         return distribution.cloud_image_url
-    if distribution and distribution.install_identifier:
-        # Fallback: use install_identifier if it's an HTTPS URL
+    if distribution.install_identifier:
         if distribution.install_identifier.startswith("https://"):
             return distribution.install_identifier
     return None
@@ -203,11 +233,21 @@ def _add_vmm_params(params, request):
 def _detect_autoinstall_mode(distribution):
     """Determine which engine autoinstall mode applies to a distribution.
 
-    Heuristic: if the install_identifier is an .iso (vs .qcow2/.raw),
-    pick the per-distro autoinstall flow.  Otherwise leave empty to
-    fall through to the cloud-init runcmd path.
+    Delegates to ``virtualization_engine.detect_autoinstall_mode`` (Pro+),
+    with an inline fallback for safety when Pro+ isn't loaded.
     """
-    if not distribution or not distribution.install_identifier:
+    if distribution is None:
+        return ""
+    virt_engine = module_loader.get_module("virtualization_engine")
+    if virt_engine is not None:
+        try:
+            return (
+                virt_engine.detect_autoinstall_mode(_distribution_to_dict(distribution))
+                or ""
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass
+    if not distribution.install_identifier:
         return ""
     install_id = distribution.install_identifier.lower()
     if not install_id.endswith(".iso"):

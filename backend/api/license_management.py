@@ -149,3 +149,53 @@ async def install_license(
             child_hosts=info.get("child_hosts"),
         ),
     )
+
+
+# =============================================================================
+# MODULE COMPATIBILITY (UI BANNER FALLBACK)
+# =============================================================================
+
+
+class ModuleCompatibilityEntry(BaseModel):
+    """One Pro+ module that failed the migration-compatibility check."""
+
+    module_code: str
+    required_revision: str
+    required_revision_human: Optional[str] = None
+    current_revision: Optional[str] = None
+
+
+class ModuleCompatibilityResponse(BaseModel):
+    """List of Pro+ modules that need a database migration before they will load."""
+
+    incompatibilities: List[ModuleCompatibilityEntry]
+
+
+@router.get("/license/module-compat", response_model=ModuleCompatibilityResponse)
+async def get_module_compatibility(
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Return any Pro+ modules whose declared minimum OSS alembic revision is
+    above the current ``alembic_version`` row.
+
+    The UI displays a banner when this list is non-empty, instructing the
+    operator to run ``alembic upgrade head``.  This is a fallback safety
+    net — the normal path is for migrations to be run as part of the
+    upgrade procedure.
+    """
+    # pylint: disable=import-outside-toplevel
+    from backend.licensing.migration_compat import get_incompatibilities
+
+    del current_user  # auth-only check; no per-user filtering
+
+    entries = [
+        ModuleCompatibilityEntry(
+            module_code=item.module_code,
+            required_revision=item.required_revision,
+            required_revision_human=item.required_revision_human,
+            current_revision=item.current_revision,
+        )
+        for item in get_incompatibilities()
+    ]
+    return ModuleCompatibilityResponse(incompatibilities=entries)

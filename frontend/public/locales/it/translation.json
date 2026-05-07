@@ -1252,6 +1252,14 @@
   "logout": {
     "loading": "Disconnessione in corso..."
   },
+  "migrationCompat": {
+    "title": "Migrazione del database richiesta",
+    "intro": "Uno o più moduli Pro+ non possono essere caricati perché lo schema del database è più vecchio del richiesto. Esegui",
+    "outro": "sul server, quindi riavvia sysmanage.",
+    "requires": "richiede",
+    "currently": "attualmente a",
+    "noVersion": "nessuna riga alembic_version trovata"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "distributions": "Distribuzioni",

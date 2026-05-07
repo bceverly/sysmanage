@@ -168,9 +168,24 @@ async def orchestrated_reboot(
         )
         session.add(orchestration)
 
-        # Enqueue stop commands for each running child
+        # Enqueue stop commands for each running child.  Mirror the
+        # ``_try_lifecycle_plan_dispatch`` pattern from child_host_control.py
+        # so the engine path runs first; fall back to the legacy WS
+        # command_type only when Pro+ isn't loaded.  Without this, after
+        # the agent's legacy ``child_host_operations.py`` is deleted the
+        # safe-parent-reboot's child-stop phase fails because the agent's
+        # stub returns ``feature_not_licensed`` for the legacy
+        # ``stop_child_host`` command_type.
+        # pylint: disable=import-outside-toplevel
+        from backend.api.child_host_control import _try_lifecycle_plan_dispatch
+
         queue_ops = QueueOperations()
         for child in running_children:
+            used_plan_path = _try_lifecycle_plan_dispatch(
+                child.child_type, "stop", child.child_name, str(host_id), str(child.id)
+            )
+            if used_plan_path:
+                continue
             command_message = create_command_message(
                 command_type="stop_child_host",
                 parameters={

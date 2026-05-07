@@ -2,7 +2,27 @@
 Pytest configuration and shared fixtures for SysManage server tests.
 """
 
+import logging
 import os
+
+# Silence FastAPI startup-phase logger chatter BEFORE we import backend.main.
+# That import builds the app (CORS generation, route registration,
+# exception-handler setup, websocket queue init, lifespan probe), and each
+# of those phases emits ~5–15 INFO lines.  Setting the floor to WARNING for
+# the relevant package roots keeps test output focused on actual test
+# results.  The pytest.ini ``log_level = WARNING`` covers test-time capture;
+# this block covers import-time logging.
+for _noisy_logger in (
+    "backend.startup",
+    "backend.websocket",
+    "backend.api",
+    "backend.api.proplus_routes",
+    "websocket.agent",
+    "uvicorn",
+    "uvicorn.access",
+    "uvicorn.error",
+):
+    logging.getLogger(_noisy_logger).setLevel(logging.WARNING)
 
 # Test database URL - using temporary SQLite file for tests
 import tempfile

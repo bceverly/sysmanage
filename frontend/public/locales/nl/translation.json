@@ -1252,6 +1252,14 @@
   "logout": {
     "loading": "Uitloggen..."
   },
+  "migrationCompat": {
+    "title": "Databasemigratie vereist",
+    "intro": "Een of meer Pro+-modules kunnen niet worden geladen omdat het databaseschema ouder is dan vereist. Voer",
+    "outro": "uit op de server en herstart vervolgens sysmanage.",
+    "requires": "vereist",
+    "currently": "momenteel op",
+    "noVersion": "geen alembic_version-rij gevonden"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "distributions": "Distributies",

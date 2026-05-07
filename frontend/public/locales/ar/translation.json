@@ -1251,6 +1251,14 @@
   "logout": {
     "loading": "جاري تسجيل الخروج..."
   },
+  "migrationCompat": {
+    "title": "يلزم ترحيل قاعدة البيانات",
+    "intro": "تعذر تحميل واحد أو أكثر من وحدات Pro+ لأن مخطط قاعدة البيانات أقدم مما يتطلبه. قم بتشغيل",
+    "outro": "على الخادم، ثم أعد تشغيل sysmanage.",
+    "requires": "يتطلب",
+    "currently": "حاليًا في",
+    "noVersion": "لم يتم العثور على صف alembic_version"
+  },
   "nav": {
     "dashboard": "لوحة التحكم",
     "distributions": "التوزيعات",

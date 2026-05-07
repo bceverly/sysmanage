@@ -1252,6 +1252,14 @@
   "logout": {
     "loading": "Cerrando sesión..."
   },
+  "migrationCompat": {
+    "title": "Migración de base de datos requerida",
+    "intro": "Uno o más módulos Pro+ no pueden cargarse porque el esquema de la base de datos es más antiguo del que requieren. Ejecute",
+    "outro": "en el servidor y luego reinicie sysmanage.",
+    "requires": "requiere",
+    "currently": "actualmente en",
+    "noVersion": "no se encontró la fila alembic_version"
+  },
   "nav": {
     "dashboard": "Tablero",
     "distributions": "Distribuciones",

@@ -612,6 +612,66 @@ def _parse_bhyve_section(text: str) -> list:
     return out
 
 
+def _find_top_level_brace_spans(text: str) -> List[Tuple[int, int]]:
+    """Inclusive ``(start, end)`` index pairs for each balanced top-level ``{...}``."""
+    spans: List[Tuple[int, int]] = []
+    depth = 0
+    start = -1
+    for idx, char in enumerate(text):
+        if char == "{":
+            if depth == 0:
+                start = idx
+            depth += 1
+        elif char == "}" and depth > 0:
+            depth -= 1
+            if depth == 0:
+                spans.append((start, idx))
+    return spans
+
+
+def _iter_top_level_json_chunks(text: str):
+    """Yield top-level ``{...}`` substrings; splits concatenated JSON documents."""
+    for start, end in _find_top_level_brace_spans(text):
+        chunk = text[start : end + 1].strip()
+        if chunk:
+            yield chunk
+
+
+def _try_load_json_object(chunk: str):
+    """Return the parsed dict for ``chunk`` or None on any failure."""
+    try:
+        obj = json.loads(chunk)
+    except (TypeError, ValueError):
+        return None
+    return obj if isinstance(obj, dict) else None
+
+
+def _parse_bhyve_meta_section(text: str) -> Dict[str, Dict[str, Any]]:
+    """Parse the ``===BHYVE_META===`` block.
+
+    Each /vm/metadata/<name>.json file is concatenated into the block,
+    one JSON document per file separated by newlines.  We split on the
+    document boundary (``}\\n{``-style) by attempting to load each
+    JSON object as we encounter ``{ ... }`` blocks.
+
+    Returns a dict keyed by ``vm_name`` with whatever metadata fields
+    were present (typically ``hostname``, ``distribution``, ``vm_ip``).
+    Malformed entries are silently skipped — listing enrichment is
+    best-effort.
+    """
+    if not text or not text.strip():
+        return {}
+    metas: Dict[str, Dict[str, Any]] = {}
+    for chunk in _iter_top_level_json_chunks(text):
+        obj = _try_load_json_object(chunk)
+        if obj is None:
+            continue
+        name = obj.get("vm_name") or ""
+        if name:
+            metas[name] = obj
+    return metas
+
+
 def _parse_vmm_section(text: str) -> list:
     """``vmctl status`` table:
 
@@ -678,15 +738,42 @@ def _parse_wsl_section(text: str) -> list:
     return out
 
 
+def _enrich_bhyve_child_with_meta(child: dict, meta: dict) -> None:
+    """Apply hostname / vm_ip / distribution from a metadata blob to a child row."""
+    if meta.get("hostname"):
+        child["hostname"] = meta["hostname"]
+    if meta.get("vm_ip"):
+        child["vm_ip"] = meta["vm_ip"]
+    distribution = meta.get("distribution")
+    if not distribution:
+        return
+    child.setdefault("distribution", {})
+    if isinstance(child["distribution"], dict):
+        child["distribution"]["distribution_name"] = distribution
+
+
 def _parse_list_child_hosts_stdout(stdout: str) -> list:
     """Parse the sectioned ``build_list_child_hosts_plan`` output into the
     same ``child_hosts`` list shape ``handle_child_hosts_list_update``
-    consumes."""
+    consumes.
+
+    Audit gap fix #2: the ``BHYVE_META`` section enriches bhyve listing
+    rows with hostname / distribution / vm_ip read from
+    ``/vm/metadata/<name>.json``.  vm-bhyve's ``vm list`` only reports
+    name + state; without this, the UI listing for bhyve VMs has no
+    hostname or IP columns.
+    """
     blocks = _split_section_blocks(stdout)
     children: list = []
     children.extend(_parse_lxd_section(blocks.get("lxd", "")))
     children.extend(_parse_kvm_section(blocks.get("kvm", "")))
-    children.extend(_parse_bhyve_section(blocks.get("bhyve", "")))
+    bhyve_children = _parse_bhyve_section(blocks.get("bhyve", ""))
+    bhyve_metas = _parse_bhyve_meta_section(blocks.get("bhyve_meta", ""))
+    for child in bhyve_children:
+        meta = bhyve_metas.get(child["child_name"])
+        if meta:
+            _enrich_bhyve_child_with_meta(child, meta)
+    children.extend(bhyve_children)
     children.extend(_parse_vmm_section(blocks.get("vmm", "")))
     children.extend(_parse_wsl_section(blocks.get("wsl", "")))
     return children

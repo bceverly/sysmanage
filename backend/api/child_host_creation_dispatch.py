@@ -15,11 +15,96 @@ directive to retain the historical implementation as architectural reference
 until the engine path is fully validated in production).
 """
 
+import json
 import logging
 import secrets
+from typing import List, Optional
 
 from backend.licensing.module_loader import module_loader
+from backend.persistence import db as db_module
 from backend.persistence import models
+
+
+def _load_network_details_payload(host_id: str):
+    """Load and parse ``host.network_details`` JSON for one host; None on miss."""
+    try:
+        # pylint: disable=import-outside-toplevel
+        from sqlalchemy.orm import sessionmaker
+
+        session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with session_local() as session:
+            host = session.query(models.Host).filter(models.Host.id == host_id).first()
+            if not host or not host.network_details:
+                return None
+            try:
+                return json.loads(host.network_details)
+            except (TypeError, ValueError):
+                return None
+    except Exception:  # pylint: disable=broad-exception-caught
+        return None
+
+
+def _extract_adapter_candidates(payload) -> List:
+    """Extract the list of adapter dicts from a ``network_details`` payload.
+
+    The payload shape varies by hardware collector — sometimes it's a flat
+    list of adapter dicts, sometimes a single dict with an ``adapters`` /
+    ``interfaces`` / ``network_adapters`` key, sometimes a single adapter
+    dict at the top level.
+    """
+    if isinstance(payload, list):
+        return payload
+    if not isinstance(payload, dict):
+        return []
+    for key in ("adapters", "interfaces", "network_adapters"):
+        if isinstance(payload.get(key), list):
+            return payload[key]
+    return [payload]
+
+
+def _adapter_dns_servers(adapter) -> List[str]:
+    """Return DNS server strings declared on a single adapter dict."""
+    if not isinstance(adapter, dict):
+        return []
+    out: List[str] = []
+    for key in ("dns_servers", "dns", "nameservers"):
+        value = adapter.get(key)
+        if isinstance(value, list):
+            for entry in value:
+                if isinstance(entry, str) and entry and entry not in out:
+                    out.append(entry)
+        elif isinstance(value, str) and value and value not in out:
+            out.append(value)
+    return out
+
+
+def _resolve_parent_dns(host_id: str) -> List[str]:
+    """Read DNS servers reported by the parent host's hardware inventory.
+
+    Audit gap fix #5: the legacy agent's ``get_host_dns_servers()`` read
+    /etc/resolv.conf on the parent at create time so VMs got the same
+    DNS as their host (often a corporate / split-horizon resolver).
+    The engine path defaults to Cloudflare when nothing's provided —
+    which works for public lookups but breaks corporate DNS records.
+
+    This helper reads ``host.network_details`` (JSON the agent uploads
+    via the hardware collector) and pulls DNS servers from the first
+    adapter that has any.  Returns an empty list if the host record
+    is unavailable or has no DNS info; the engine then falls back to
+    its default (1.1.1.1, 1.0.0.1).
+    """
+    if not host_id:
+        return []
+    payload = _load_network_details_payload(host_id)
+    if payload is None:
+        return []
+    for adapter in _extract_adapter_candidates(payload):
+        dns = _adapter_dns_servers(adapter)
+        if dns:
+            return dns
+    return []
 
 
 def _enqueue_create_plan(host_id: str, plan: dict, command_params: dict, timeout: int):
@@ -194,8 +279,17 @@ def _freebsd_bootstrap_material(distribution_label: str):
 # ---------------------------------------------------------------------------
 
 
-def _build_kvm_create_request(virt_engine, command_params, base_image_path):
-    """Construct a ``VmCreateRequest`` from the flat ``command_params`` dict."""
+def _build_kvm_create_request(
+    virt_engine, command_params, base_image_path, host_id: Optional[str] = None
+):
+    """Construct a ``VmCreateRequest`` from the flat ``command_params`` dict.
+
+    Audit gap fix #5: when ``command_params`` doesn't carry explicit
+    ``dns_server`` / ``dns_servers``, fall back to the parent host's
+    reported DNS (read from ``host.network_details``).  Without that, the
+    engine defaults to public Cloudflare resolvers — works for internet
+    DNS but won't resolve corporate/split-horizon records.
+    """
     distribution_label = _param_or(command_params, "distribution_label", "ubuntu")
     pub, priv, root_pw = _freebsd_bootstrap_material(distribution_label)
     agent_config_yaml = _param_or(
@@ -204,37 +298,57 @@ def _build_kvm_create_request(virt_engine, command_params, base_image_path):
         None,
     ) or _build_agent_config_yaml(command_params)
     vm_name = command_params["vm_name"]
-    return virt_engine.VmCreateRequest(
-        vm_name=vm_name,
-        hostname=_param_or(command_params, "hostname", vm_name),
-        distribution=distribution_label,
-        username=_param_or(command_params, "username", "admin"),
-        password_hash=_param_or(command_params, "password_hash", ""),
-        memory=_param_or(command_params, "memory", "2G"),
-        disk_size=_param_or(command_params, "disk_size", "20G"),
-        cpus=int(_param_or(command_params, "cpus", 2)),
-        base_image_path=base_image_path,
-        agent_install_commands=_param_or(command_params, "agent_install_commands", []),
-        agent_config_yaml=agent_config_yaml,
-        ssh_pubkey=pub,
-        ssh_privkey_pem=priv,
-        temp_root_password=root_pw,
-        server_url=_param_or(command_params, "server_url", ""),
-        server_port=int(_param_or(command_params, "server_port", 8080)),
-        use_https=bool(command_params.get("use_https")),
-        auto_approve_token=_param_or(command_params, "auto_approve_token", ""),
-        autoinstall_mode=_param_or(command_params, "autoinstall_mode", ""),
-        install_iso_url=_param_or(command_params, "install_iso_url", ""),
-        vm_ip=_param_or(command_params, "vm_ip", ""),
-        gateway_ip=_param_or(command_params, "gateway_ip", ""),
-        dns_server=_param_or(command_params, "dns_server", ""),
-        root_password_hash=_param_or(command_params, "root_password_hash", ""),
-        timezone=_param_or(command_params, "timezone", "UTC"),
-        debian_codename=_param_or(command_params, "debian_codename", "bookworm"),
-        debian_mirror=_param_or(command_params, "debian_mirror", "deb.debian.org"),
-        ubuntu_codename=_param_or(command_params, "ubuntu_codename", "noble"),
-        alpine_version=_param_or(command_params, "alpine_version", "3.20"),
-    )
+
+    # DNS resolution: explicit param wins; otherwise inherit from parent.
+    dns_server_param = _param_or(command_params, "dns_server", "")
+    dns_servers_param = command_params.get("dns_servers")
+    parent_dns: List[str] = []
+    if not dns_server_param and not dns_servers_param:
+        parent_dns = _resolve_parent_dns(host_id) if host_id else []
+    if not dns_server_param and parent_dns:
+        dns_server_param = parent_dns[0]
+
+    kwargs = {
+        "vm_name": vm_name,
+        "hostname": _param_or(command_params, "hostname", vm_name),
+        "distribution": distribution_label,
+        "username": _param_or(command_params, "username", "admin"),
+        "password_hash": _param_or(command_params, "password_hash", ""),
+        "memory": _param_or(command_params, "memory", "2G"),
+        "disk_size": _param_or(command_params, "disk_size", "20G"),
+        "cpus": int(_param_or(command_params, "cpus", 2)),
+        "base_image_path": base_image_path,
+        "agent_install_commands": _param_or(
+            command_params, "agent_install_commands", []
+        ),
+        "agent_config_yaml": agent_config_yaml,
+        "ssh_pubkey": pub,
+        "ssh_privkey_pem": priv,
+        "temp_root_password": root_pw,
+        "server_url": _param_or(command_params, "server_url", ""),
+        "server_port": int(_param_or(command_params, "server_port", 8080)),
+        "use_https": bool(command_params.get("use_https")),
+        "auto_approve_token": _param_or(command_params, "auto_approve_token", ""),
+        "autoinstall_mode": _param_or(command_params, "autoinstall_mode", ""),
+        "install_iso_url": _param_or(command_params, "install_iso_url", ""),
+        "vm_ip": _param_or(command_params, "vm_ip", ""),
+        "gateway_ip": _param_or(command_params, "gateway_ip", ""),
+        "dns_server": dns_server_param,
+        "root_password_hash": _param_or(command_params, "root_password_hash", ""),
+        "timezone": _param_or(command_params, "timezone", "UTC"),
+        "debian_codename": _param_or(command_params, "debian_codename", "bookworm"),
+        "debian_mirror": _param_or(command_params, "debian_mirror", "deb.debian.org"),
+        "ubuntu_codename": _param_or(command_params, "ubuntu_codename", "noble"),
+        "alpine_version": _param_or(command_params, "alpine_version", "3.20"),
+    }
+    # Forward dns_servers list if the engine schema accepts it (it does
+    # by default; pulled from parent inventory if not explicitly set).
+    if isinstance(dns_servers_param, list) and dns_servers_param:
+        kwargs["dns_servers"] = dns_servers_param
+    elif parent_dns:
+        kwargs["dns_servers"] = parent_dns
+
+    return virt_engine.VmCreateRequest(**kwargs)
 
 
 def _try_kvm_plan_based_creation(command_params, host_id):
@@ -277,7 +391,7 @@ def _try_kvm_plan_based_creation(command_params, host_id):
         )
         download_plan = virt_engine.build_kvm_image_download_plan(download_req)
         create_req = _build_kvm_create_request(
-            virt_engine, command_params, base_image_path
+            virt_engine, command_params, base_image_path, host_id=host_id
         )
         create_plan = virt_engine.build_kvm_create_plan(create_req)
 
@@ -310,14 +424,24 @@ def _try_kvm_plan_based_creation(command_params, host_id):
 
 
 def _build_bhyve_create_request(virt_engine, command_params, raw_image_path, iso_path):
-    """Construct a ``BhyveCreateRequest`` from the flat ``command_params`` dict."""
+    """Construct a ``BhyveCreateRequest`` from the flat ``command_params`` dict.
+
+    ``cloud_image_url`` is forwarded to the engine when raw_image_path is
+    empty (audit PR-13).  The engine internalizes the download + decompress
+    + qcow2->raw conversion and uses the resulting raw image as if the
+    caller had supplied ``raw_image_path`` directly.
+    """
     vm_name = command_params["vm_name"]
+    cloud_image_url = ""
+    if not raw_image_path and not iso_path:
+        cloud_image_url = command_params.get("cloud_image_url") or ""
     return virt_engine.BhyveCreateRequest(
         vm_name=vm_name,
         hostname=_param_or(command_params, "hostname", vm_name),
         template=_param_or(command_params, "template", "freebsd"),
         iso_path=iso_path,
         raw_image_path=raw_image_path,
+        cloud_image_url=cloud_image_url,
         memory=_param_or(command_params, "memory", "2G"),
         disk_size=_param_or(command_params, "disk_size", "20G"),
         cpus=int(_param_or(command_params, "cpus", 2)),
@@ -374,6 +498,36 @@ def _bhyve_merge_download_into_create_plan(create_plan, download_plan, vm_name):
     }
 
 
+def _bhyve_resolve_install_inputs(virt_engine, vm_name, command_params):
+    """Resolve the bhyve install-source inputs.
+
+    Returns ``(raw_image_path, iso_path, cloud_image_url, download_plan, ok)``
+    where ``ok`` is False when the inputs are insufficient (caller falls
+    back to legacy WS dispatch).  ``download_plan`` is non-None only when
+    the loaded engine doesn't accept ``cloud_image_url`` directly and we
+    had to synthesize a separate download step on the OSS side.
+    """
+    raw_image_path = command_params.get("raw_image_path") or ""
+    iso_path = command_params.get("iso_path") or ""
+    cloud_image_url = command_params.get("cloud_image_url") or ""
+    download_plan = None
+
+    if not raw_image_path and not iso_path and cloud_image_url:
+        engine_supports_cloud_image_url = "cloud_image_url" in (
+            getattr(virt_engine.BhyveCreateRequest, "model_fields", None) or {}
+        )
+        if not engine_supports_cloud_image_url:
+            download_plan, raw_image_path = _bhyve_synthesize_download_plan(
+                virt_engine, vm_name, cloud_image_url
+            )
+            if download_plan is None:
+                return raw_image_path, iso_path, cloud_image_url, None, False
+
+    if not raw_image_path and not iso_path and not cloud_image_url:
+        return raw_image_path, iso_path, cloud_image_url, None, False
+    return raw_image_path, iso_path, cloud_image_url, download_plan, True
+
+
 def _try_bhyve_plan_based_creation(command_params, host_id):
     """Build + dispatch a bhyve create plan via the virtualization_engine.
 
@@ -393,21 +547,11 @@ def _try_bhyve_plan_based_creation(command_params, host_id):
     vm_name = command_params.get("vm_name")
     if not vm_name:
         return False
-    raw_image_path = command_params.get("raw_image_path") or ""
-    iso_path = command_params.get("iso_path") or ""
-    cloud_image_url = command_params.get("cloud_image_url") or ""
 
-    download_plan = None
-    if not raw_image_path and not iso_path and cloud_image_url:
-        download_plan, raw_image_path = _bhyve_synthesize_download_plan(
-            virt_engine, vm_name, cloud_image_url
-        )
-        if download_plan is None:
-            return False
-
-    # If we still have neither, the engine plan would be "just vm create"
-    # with no install — fall back to legacy.
-    if not raw_image_path and not iso_path:
+    raw_image_path, iso_path, _cloud_url, download_plan, ok = (
+        _bhyve_resolve_install_inputs(virt_engine, vm_name, command_params)
+    )
+    if not ok:
         return False
 
     try:
@@ -445,39 +589,84 @@ _VMM_DEFAULT_GATEWAY_IP = "100.64.0.1"  # nosec B104  # NOSONAR
 _VMM_DEFAULT_VM_IP = "100.64.0.101"  # nosec B104  # NOSONAR
 
 
+def _resolve_vmm_linux_autoinstall(engine_fields, command_params):
+    """Resolve linux_autoinstall_{distro,version,iso_url} from params.
+
+    Returns a tuple of three strings (distro, version, iso_url).  The
+    distro is empty when the engine doesn't accept the field, when the
+    caller didn't request one, or when the requested value isn't in the
+    supported allowlist (alpine/debian/ubuntu).
+    """
+    if "linux_autoinstall_distro" not in engine_fields:
+        return "", "", ""
+    distro = (_param_or(command_params, "linux_autoinstall_distro", "") or "").lower()
+    if distro not in ("alpine", "debian", "ubuntu"):
+        return "", "", ""
+    version = _param_or(command_params, "linux_autoinstall_version", "")
+    iso_url = _param_or(command_params, "linux_autoinstall_iso_url", "")
+    return distro, version, iso_url
+
+
 def _build_vmm_create_request(virt_engine, command_params):
     """Construct a ``VmmCreateRequest`` + autoinstall flag.
 
     ``password_hash`` in command_params is the per-user password hash;
     map it to ``user_password_hash`` for the engine.  Autoinstall fires
     only when both user + root password hashes are present.
+
+    Audit PR-14: forward ``cloud_image_url`` so the engine's legacy
+    (non-autoinstall) path can download a Linux cloud image (Ubuntu /
+    Debian / Alpine / etc.) and use it as the VM's disk.  Only forwarded
+    when autoinstall is False — autoinstall builds its disk from the
+    OpenBSD installer.
     """
     vm_name = command_params["vm_name"]
     user_pw_hash = _first_param_or(
         command_params, ("user_password_hash", "password_hash"), ""
     )
     root_pw_hash = _param_or(command_params, "root_password_hash", "")
-    return virt_engine.VmmCreateRequest(
-        vm_name=vm_name,
-        hostname=_param_or(command_params, "hostname", vm_name),
-        memory=_param_or(command_params, "memory", "1G"),
-        disk_size=_param_or(command_params, "disk_size", "20G"),
-        cpus=int(_param_or(command_params, "cpus", 1)),
-        iso_path=_param_or(command_params, "iso_path", ""),
-        disk_path=_param_or(command_params, "disk_path", ""),
-        network_switch=_param_or(command_params, "network_switch", "default"),
-        autoinstall=bool(user_pw_hash and root_pw_hash),
-        openbsd_version=_param_or(command_params, "openbsd_version", "7.7"),
-        username=_param_or(command_params, "username", ""),
-        user_password_hash=user_pw_hash,
-        root_password_hash=root_pw_hash,
-        gateway_ip=_param_or(command_params, "gateway_ip", _VMM_DEFAULT_GATEWAY_IP),
-        vm_ip=_param_or(command_params, "vm_ip", _VMM_DEFAULT_VM_IP),
-        server_url=_param_or(command_params, "server_url", ""),
-        server_port=int(_param_or(command_params, "server_port", 8080)),
-        use_https=bool(command_params.get("use_https")),
-        auto_approve_token=_param_or(command_params, "auto_approve_token", ""),
+    engine_fields = getattr(virt_engine.VmmCreateRequest, "model_fields", None) or {}
+    linux_autoinstall_distro, linux_autoinstall_version, linux_autoinstall_iso_url = (
+        _resolve_vmm_linux_autoinstall(engine_fields, command_params)
     )
+    autoinstall = bool(user_pw_hash and root_pw_hash) and not linux_autoinstall_distro
+    cloud_image_url = ""
+    if (
+        not autoinstall
+        and not linux_autoinstall_distro
+        and "cloud_image_url" in engine_fields
+    ):
+        cloud_image_url = _param_or(command_params, "cloud_image_url", "")
+    kwargs = {
+        "vm_name": vm_name,
+        "hostname": _param_or(command_params, "hostname", vm_name),
+        "memory": _param_or(command_params, "memory", "1G"),
+        "disk_size": _param_or(command_params, "disk_size", "20G"),
+        "cpus": int(_param_or(command_params, "cpus", 1)),
+        "iso_path": _param_or(command_params, "iso_path", ""),
+        "disk_path": _param_or(command_params, "disk_path", ""),
+        "network_switch": _param_or(command_params, "network_switch", "default"),
+        "autoinstall": autoinstall,
+        "openbsd_version": _param_or(command_params, "openbsd_version", "7.7"),
+        "username": _param_or(command_params, "username", ""),
+        "user_password_hash": user_pw_hash,
+        "root_password_hash": root_pw_hash,
+        "gateway_ip": _param_or(command_params, "gateway_ip", _VMM_DEFAULT_GATEWAY_IP),
+        "vm_ip": _param_or(command_params, "vm_ip", _VMM_DEFAULT_VM_IP),
+        "server_url": _param_or(command_params, "server_url", ""),
+        "server_port": int(_param_or(command_params, "server_port", 8080)),
+        "use_https": bool(command_params.get("use_https")),
+        "auto_approve_token": _param_or(command_params, "auto_approve_token", ""),
+    }
+    if cloud_image_url:
+        kwargs["cloud_image_url"] = cloud_image_url
+    if linux_autoinstall_distro:
+        kwargs["linux_autoinstall_distro"] = linux_autoinstall_distro
+        if linux_autoinstall_version:
+            kwargs["linux_autoinstall_version"] = linux_autoinstall_version
+        if linux_autoinstall_iso_url:
+            kwargs["linux_autoinstall_iso_url"] = linux_autoinstall_iso_url
+    return virt_engine.VmmCreateRequest(**kwargs)
 
 
 def _try_vmm_plan_based_creation(command_params, host_id):

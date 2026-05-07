@@ -1252,6 +1252,14 @@
   "logout": {
     "loading": "退出中..."
   },
+  "migrationCompat": {
+    "title": "需要数据库迁移",
+    "intro": "由于数据库架构比所需版本旧,一个或多个 Pro+ 模块无法加载。请在服务器上运行",
+    "outro": "然后重启 sysmanage。",
+    "requires": "需要",
+    "currently": "当前为",
+    "noVersion": "未找到 alembic_version 行"
+  },
   "nav": {
     "dashboard": "仪表板",
     "distributions": "发行版",

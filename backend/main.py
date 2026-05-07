@@ -114,13 +114,6 @@ startup_logger.info("First 10 origins: %s", origins[:10] if origins else [])
 if len(origins) > 10:
     startup_logger.info("... and %d more origins", len(origins) - 10)
 
-print(f"CORS Debug - WebUI Port: {webui_port}")
-print(f"CORS Debug - API Port: {api_port}")
-print(
-    f"CORS Debug - Generated origins: {origins[:10]}..."
-)  # Show first 10 to avoid log spam
-print(f"CORS Debug - Total origins count: {len(origins)}")
-
 startup_logger.info("Adding CORS middleware to FastAPI app")
 app.add_middleware(
     CORSMiddleware,

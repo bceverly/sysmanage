@@ -297,6 +297,19 @@ jobs:
           # Windows these crash at COLLECTION time, before pytest can
           # apply --markers filtering.  Skip them on Windows; let macOS
           # collect the full set (POSIX modules are present there).
+          #
+          # CUTOVER-CLEANUP: most of the entries below are legacy
+          # child-host test files preserved verbatim under
+          # sysmanage-professional-plus/legacy_reference/agent/tests/.
+          # When the agent's legacy ``child_host_*`` cluster is removed
+          # from sysmanage-agent in the cutover commit, the
+          # corresponding tests/test_child_host_*.py entries (and the
+          # tests/test_kvm_operations.py, tests/test_lxd_operations.py,
+          # tests/integration/test_lxd_lifecycle.py entries) will
+          # reference non-existent files.  ``--ignore`` for missing
+          # paths is silent, so this won't break CI, but the list
+          # should be trimmed to just ``tests/test_generic_deployment.py``
+          # in the same commit that does the legacy ``rm``.
           IGNORES=()
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             for f in \

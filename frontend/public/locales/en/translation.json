@@ -1242,6 +1242,14 @@
   "logout": {
     "loading": "Logging out..."
   },
+  "migrationCompat": {
+    "title": "Database migration required",
+    "intro": "One or more Pro+ modules cannot load because the database schema is older than they require. Run",
+    "outro": "on the server, then restart sysmanage.",
+    "requires": "requires",
+    "currently": "currently at",
+    "noVersion": "no alembic_version row found"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "distributions": "Distributions",

@@ -1252,6 +1252,14 @@
   "logout": {
     "loading": "Déconnexion en cours..."
   },
+  "migrationCompat": {
+    "title": "Migration de base de données requise",
+    "intro": "Un ou plusieurs modules Pro+ ne peuvent pas être chargés car le schéma de base de données est plus ancien que requis. Exécutez",
+    "outro": "sur le serveur, puis redémarrez sysmanage.",
+    "requires": "nécessite",
+    "currently": "actuellement à",
+    "noVersion": "aucune ligne alembic_version trouvée"
+  },
   "nav": {
     "dashboard": "Tableau de bord",
     "distributions": "Distributions",

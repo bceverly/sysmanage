@@ -1252,6 +1252,14 @@
   "logout": {
     "loading": "Abmeldung läuft..."
   },
+  "migrationCompat": {
+    "title": "Datenbankmigration erforderlich",
+    "intro": "Ein oder mehrere Pro+-Module können nicht geladen werden, weil das Datenbankschema älter ist als erforderlich. Führen Sie",
+    "outro": "auf dem Server aus und starten Sie dann sysmanage neu.",
+    "requires": "erfordert",
+    "currently": "aktuell bei",
+    "noVersion": "keine alembic_version-Zeile gefunden"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "distributions": "Distributionen",

@@ -376,6 +376,17 @@ class ModuleLoader:
             sys.modules[module_code] = module
             spec.loader.exec_module(module)
 
+            # Migration compatibility gate: if the module declares a minimum
+            # OSS alembic revision and the current DB is below it, refuse to
+            # expose the module so its plan builders / injected rows don't
+            # run against a stale schema.  The incompatibility is recorded
+            # in the registry for the UI banner to surface.
+            if not self._check_migration_compatibility(module_code, module):
+                # Don't expose via _loaded_modules; leave sys.modules entry
+                # in place since unloading mid-import can be racy and the
+                # registry tells the UI what happened.
+                return False
+
             # Store in loaded modules
             self._loaded_modules[module_code] = module
 
@@ -385,6 +396,53 @@ class ModuleLoader:
         except Exception as e:
             logger.error("Failed to load module %s: %s", module_code, e)
             return False
+
+    def _check_migration_compatibility(self, module_code: str, module: Any) -> bool:
+        """Return True if module is compatible with current OSS schema, False otherwise.
+
+        On incompatibility, records the entry in the migration_compat registry
+        so the UI can show a banner.  On any internal error we fail-open
+        (return True) to avoid breaking deployments that don't have an
+        alembic config available — the schema mismatch will surface as a
+        runtime error instead.
+        """
+        try:
+            get_module_info = getattr(module, "get_module_info", None)
+            if not callable(get_module_info):
+                return True
+            module_info = get_module_info()
+            if not isinstance(module_info, dict):
+                return True
+            if "min_oss_alembic_revision" not in module_info:
+                return True
+
+            # pylint: disable=import-outside-toplevel
+            from backend.licensing.migration_compat import check_module_compatibility
+
+            session_local = sessionmaker(
+                autocommit=False, autoflush=False, bind=db_module.get_engine()
+            )
+            with session_local() as session:
+                incompat = check_module_compatibility(
+                    module_code=module_code,
+                    module_info=module_info,
+                    session=session,
+                    alembic_cfg_path=self._get_alembic_cfg_path(),
+                )
+                return incompat is None
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            logger.warning(
+                "Migration compatibility check failed for %s; assuming compatible: %s",
+                module_code,
+                exc,
+            )
+            return True
+
+    def _get_alembic_cfg_path(self) -> str:
+        """Locate alembic.ini relative to the repo root."""
+        # repo root = backend/licensing/module_loader.py -> ../../alembic.ini
+        here = os.path.dirname(os.path.abspath(__file__))
+        return os.path.normpath(os.path.join(here, "..", "..", "alembic.ini"))
 
     def is_module_loaded(self, module_code: str) -> bool:
         """Check if a module is currently loaded."""

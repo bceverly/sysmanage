@@ -1,8 +1,8 @@
 """
 Child host control handlers.
 
-This module handles child host control messages from agents,
-including start, stop, restart, and delete operations.
+Public handlers dispatch to the Pro+ ``child_host_handlers_engine`` when
+loaded, and fall back to the OSS implementations (``_oss_*``) otherwise.
 """
 
 import logging
@@ -13,28 +13,35 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from backend.i18n import _
+from backend.licensing.module_loader import module_loader
 from backend.persistence.models import Host, HostChild
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 logger = logging.getLogger(__name__)
 
 
+_ENGINE_CODE = "child_host_handlers_engine"
+_ENGINE_FALLBACK_MSG = "Engine handler failed; falling back to OSS implementation: %s"
+
+
+def _engine_handler(name: str):
+    """Return the engine's handler with this name, or None if engine not loaded."""
+    engine = module_loader.get_module(_ENGINE_CODE)
+    if engine is None:
+        return None
+    return getattr(engine, name, None)
+
+
 async def handle_child_host_start_result(
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
-    """
-    Handle child host start result from agent.
-
-    Updates the host_child status to 'running' on success.
-
-    Args:
-        db: Database session
-        connection: WebSocket connection object
-        message_data: Message data containing start result
-
-    Returns:
-        Acknowledgment message
-    """
+    """Dispatch to Pro+ engine when loaded; fall back to OSS implementation."""
+    engine_fn = _engine_handler("handle_child_host_start_result")
+    if engine_fn is not None:
+        try:
+            return await engine_fn(db, connection, message_data)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            logger.warning(_ENGINE_FALLBACK_MSG, exc)
     return await _handle_child_host_control_result(
         db, connection, message_data, "start", "running"
     )
@@ -43,19 +50,13 @@ async def handle_child_host_start_result(
 async def handle_child_host_stop_result(
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
-    """
-    Handle child host stop result from agent.
-
-    Updates the host_child status to 'stopped' on success.
-
-    Args:
-        db: Database session
-        connection: WebSocket connection object
-        message_data: Message data containing stop result
-
-    Returns:
-        Acknowledgment message
-    """
+    """Dispatch to Pro+ engine when loaded; fall back to OSS implementation."""
+    engine_fn = _engine_handler("handle_child_host_stop_result")
+    if engine_fn is not None:
+        try:
+            return await engine_fn(db, connection, message_data)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            logger.warning(_ENGINE_FALLBACK_MSG, exc)
     return await _handle_child_host_control_result(
         db, connection, message_data, "stop", "stopped"
     )
@@ -64,25 +65,32 @@ async def handle_child_host_stop_result(
 async def handle_child_host_restart_result(
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
-    """
-    Handle child host restart result from agent.
-
-    Updates the host_child status to 'running' on success.
-
-    Args:
-        db: Database session
-        connection: WebSocket connection object
-        message_data: Message data containing restart result
-
-    Returns:
-        Acknowledgment message
-    """
+    """Dispatch to Pro+ engine when loaded; fall back to OSS implementation."""
+    engine_fn = _engine_handler("handle_child_host_restart_result")
+    if engine_fn is not None:
+        try:
+            return await engine_fn(db, connection, message_data)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            logger.warning(_ENGINE_FALLBACK_MSG, exc)
     return await _handle_child_host_control_result(
         db, connection, message_data, "restart", "running"
     )
 
 
-async def handle_child_host_delete_result(  # NOSONAR
+async def handle_child_host_delete_result(
+    db: Session, connection: Any, message_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Dispatch to Pro+ engine when loaded; fall back to OSS implementation."""
+    engine_fn = _engine_handler("handle_child_host_delete_result")
+    if engine_fn is not None:
+        try:
+            return await engine_fn(db, connection, message_data)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            logger.warning(_ENGINE_FALLBACK_MSG, exc)
+    return await _oss_handle_child_host_delete_result(db, connection, message_data)
+
+
+async def _oss_handle_child_host_delete_result(  # NOSONAR
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
     """

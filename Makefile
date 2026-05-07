@@ -492,7 +492,7 @@ else
 		if [ -n "$$MISSING_KVM" ]; then \
 			echo "Missing KVM host tools:$$MISSING_KVM"; \
 			echo "These are required on agent hosts that the server dispatches"; \
-			echo "Phase 10.1 virtualization_engine create plans to.  Single-box"; \
+			echo "Pro+ virtualization_engine create plans to.  Single-box"; \
 			echo "dev setups need them locally; pure-server hosts don't."; \
 			echo "Running: sudo apt-get install -y$$MISSING_KVM"; \
 			sudo apt-get install -y $$MISSING_KVM || \

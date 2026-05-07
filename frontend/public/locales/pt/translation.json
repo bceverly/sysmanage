@@ -1252,6 +1252,14 @@
   "logout": {
     "loading": "Fazendo logout..."
   },
+  "migrationCompat": {
+    "title": "Migração de banco de dados necessária",
+    "intro": "Um ou mais módulos Pro+ não podem ser carregados porque o esquema do banco de dados é mais antigo do que requerem. Execute",
+    "outro": "no servidor e reinicie o sysmanage.",
+    "requires": "requer",
+    "currently": "atualmente em",
+    "noVersion": "nenhuma linha alembic_version encontrada"
+  },
   "nav": {
     "dashboard": "Painel",
     "distributions": "Distribuicoes",

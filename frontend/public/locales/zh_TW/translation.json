@@ -1252,6 +1252,14 @@
   "logout": {
     "loading": "正在登出..."
   },
+  "migrationCompat": {
+    "title": "需要資料庫遷移",
+    "intro": "由於資料庫結構比所需版本舊,一個或多個 Pro+ 模組無法載入。請在伺服器上執行",
+    "outro": "然後重新啟動 sysmanage。",
+    "requires": "需要",
+    "currently": "目前為",
+    "noVersion": "找不到 alembic_version 列"
+  },
   "nav": {
     "dashboard": "儀表板",
     "distributions": "發行版",

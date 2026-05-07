@@ -145,9 +145,26 @@ def handle_agent_reconnect(db, host_id):
     ]
     orchestration.child_hosts_restart_status = json.dumps(restart_status)
 
-    # Enqueue start commands for each child that was running before reboot
+    # Enqueue start commands for each child that was running before reboot.
+    # Audit gap (orchestrator preservation): mirror child_host_control.py's
+    # ``_try_lifecycle_plan_dispatch`` pattern — try the Pro+ engine path
+    # first, fall back to the legacy WS command_type only if the engine
+    # isn't loaded.  Without this, after the agent's legacy
+    # ``child_host_operations.py`` is deleted, the orchestrated reboot's
+    # child-restart phase fails because the agent's stub returns
+    # ``feature_not_licensed`` for the legacy ``start_child_host``
+    # command_type.
+    # pylint: disable=import-outside-toplevel
+    from backend.api.child_host_control import _try_lifecycle_plan_dispatch
+
     queue_ops = QueueOperations()
     for entry in snapshot:
+        used_plan_path = _try_lifecycle_plan_dispatch(
+            entry["child_type"], "start", entry["child_name"], str(host_id)
+        )
+        if used_plan_path:
+            continue
+        # Fall back to legacy WS dispatch when the engine isn't loaded.
         command_message = create_command_message(
             command_type="start_child_host",
             parameters={

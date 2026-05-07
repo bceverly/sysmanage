@@ -1252,6 +1252,14 @@
   "logout": {
     "loading": "ログアウト中..."
   },
+  "migrationCompat": {
+    "title": "データベースの移行が必要です",
+    "intro": "1つ以上のPro+モジュールが読み込めません。データベーススキーマが必要なバージョンより古いためです。サーバーで",
+    "outro": "を実行してから、sysmanageを再起動してください。",
+    "requires": "必要なバージョン:",
+    "currently": "現在のバージョン:",
+    "noVersion": "alembic_version 行が見つかりません"
+  },
   "nav": {
     "dashboard": "ダッシュボード",
     "distributions": "ディストリビューション",
